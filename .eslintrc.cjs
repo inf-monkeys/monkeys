@@ -40,7 +40,7 @@ module.exports = {
     'simple-import-sort/imports': [
       'error',
       {
-        groups: [['react'], ['^@?\\w'], ['@/(.*)'], ['^[./]'], ['(.*).module.scss']],
+        groups: [['react'], ['^@?\\w'], ['@/(.*)'], ['^[./]'], ['normalize.css', '(.*).scss']],
       },
     ],
     'simple-import-sort/exports': 'error',
