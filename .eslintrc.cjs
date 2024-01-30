@@ -8,7 +8,7 @@ module.exports = {
     'plugin:prettier/recommended',
     'plugin:react/recommended',
   ],
-  ignorePatterns: ['dist', '.eslintrc.cjs', 'node_modules'],
+  ignorePatterns: ['dist', '.eslintrc.cjs', 'node_modules', 'src/routeTree.gen.ts'],
   parser: '@typescript-eslint/parser',
   plugins: ['react-refresh', '@typescript-eslint', 'react-hooks', 'simple-import-sort', 'prettier'],
   rules: {
@@ -40,7 +40,7 @@ module.exports = {
     'simple-import-sort/imports': [
       'error',
       {
-        groups: [['react'], ['^@?\\w'], ['@/(.*)'], ['^[./]'], ['normalize.css', '(.*).scss']],
+        groups: [['react$', 'react-dom'], ['react-router', 'routeTree.gen'], ['^@?\\w'], ['@/(.*)'], ['^[./]'], ['normalize.css', '(.*).scss']],
       },
     ],
     'simple-import-sort/exports': 'error',
