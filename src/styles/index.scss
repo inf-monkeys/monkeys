@@ -14,3 +14,7 @@ body {
     background-color: var(--darkBackground);
   }
 }
+
+::selection {
+  background-color: theme('colors.vines.50/0.25');
+}
