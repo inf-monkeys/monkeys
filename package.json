@@ -10,7 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@douyinfe/semi-icons": "^2.51.3",
+    "@radix-ui/react-icons": "^1.3.0",
     "@tanstack/react-router": "^1.15.3",
+    "framer-motion": "^11.0.3",
     "million": "^2.6.4",
     "normalize.css": "^8.0.1",
     "react": "^18.2.0",
