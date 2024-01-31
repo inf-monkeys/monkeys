@@ -4,12 +4,15 @@ import ReactDOM from 'react-dom/client';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { routeTree } from './routeTree.gen';
 
+import { ErrorComponent } from './components/global/catch-boundary.tsx';
+
 import 'normalize.css';
 import '@/styles/index.scss';
 
 const router = createRouter({
   routeTree,
   defaultPreload: 'intent',
+  defaultErrorComponent: ({ error }) => <ErrorComponent error={error} />,
 });
 
 declare module '@tanstack/react-router' {

@@ -4,7 +4,7 @@ import { createRootRoute, Outlet, ScrollRestoration } from '@tanstack/react-rout
 
 const RootComponent: React.FC = () => {
   return (
-    <main className="flex h-screen w-screen items-center justify-center">
+    <main className="relative flex h-screen w-screen items-center justify-center">
       <ScrollRestoration />
       <Outlet />
     </main>
