@@ -8,7 +8,7 @@ module.exports = {
     'plugin:prettier/recommended',
     'plugin:react/recommended',
   ],
-  ignorePatterns: ['dist', '.eslintrc.cjs', 'node_modules', 'src/routeTree.gen.ts', 'vite.config.ts', 'tailwind.config.js'],
+  ignorePatterns: ['dist', '.eslintrc.cjs', 'node_modules', 'src/routeTree.gen.ts', 'vite.config.ts', 'tailwind.config.ts'],
   parser: '@typescript-eslint/parser',
   plugins: ['react-refresh', '@typescript-eslint', 'react-hooks', 'simple-import-sort', 'prettier'],
   rules: {
