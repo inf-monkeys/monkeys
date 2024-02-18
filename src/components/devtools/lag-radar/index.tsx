@@ -26,7 +26,7 @@ export const LagRadar: React.FC<ILagRadarProps> = ({ frames, speed, size, inset,
       });
     }
   }, []);
-  useEffect(() => void (!visible && (initialRef.current = false)), [visible]);
+  useEffect(() => void (!visible && setTimeout(() => (initialRef.current = false), 16)), [visible]);
 
   return (
     <HoverCard.Root open={visible} onOpenChange={(val) => val && setVisible(true)} {...props}>
@@ -40,7 +40,7 @@ export const LagRadar: React.FC<ILagRadarProps> = ({ frames, speed, size, inset,
       </HoverCard.Trigger>
       <HoverCard.Portal>
         <HoverCard.Content
-          className="fixed bottom-4 right-4 z-50 size-24 cursor-pointer rounded-md bg-white bg-opacity-5 p-2 shadow-md backdrop-blur-md transition-opacity hover:opacity-25"
+          className="fixed bottom-4 right-4 z-50 size-24 cursor-pointer rounded-md bg-white bg-opacity-5 p-2 shadow-md backdrop-blur-md transition-opacity animate-in fade-in-0 zoom-in-95 hover:opacity-25 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95"
           onClick={() => setVisible(false)}
           ref={nodeRef}
         />
