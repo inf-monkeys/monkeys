@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
-import path from 'path';
+import { resolve } from 'path';
 
+import svgr from 'vite-plugin-svgr';
 import million from 'million/compiler';
 import react from '@vitejs/plugin-react-swc';
 import tsconfigPaths from 'vite-tsconfig-paths';
@@ -12,13 +13,14 @@ export default defineConfig({
     million.vite({ auto: true }),
     tsconfigPaths(),
     react(),
+    svgr(),
     TanStackRouterVite({
-      routesDirectory: path.resolve(__dirname, './src/pages'),
+      routesDirectory: resolve(__dirname, './src/pages'),
     }),
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src/'),
+      '@': resolve(__dirname, './src'),
     },
   },
   server: {
