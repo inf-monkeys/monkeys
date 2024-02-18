@@ -7,7 +7,7 @@ import { routeTree } from '@/routeTree.gen';
 import 'normalize.css';
 import '@/styles/index.scss';
 
-import { ErrorComponent } from '@/components/global/catch-boundary.tsx';
+import { ErrorComponent } from '@/components/router/catch-boundary.tsx';
 
 const router = createRouter({
   routeTree,
