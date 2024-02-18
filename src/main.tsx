@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 
 import { createRouter, RouterProvider } from '@tanstack/react-router';
@@ -25,6 +25,8 @@ declare module '@tanstack/react-router' {
 ReactDOM.createRoot(document.getElementById('vines-ui')!).render(
   <React.StrictMode>
     <RouterProvider router={router} />
-    <LagRadar />
+    <Suspense>
+      <LagRadar />
+    </Suspense>
   </React.StrictMode>,
 );
