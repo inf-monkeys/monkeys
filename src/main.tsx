@@ -7,7 +7,8 @@ import { routeTree } from '@/routeTree.gen';
 import 'normalize.css';
 import '@/styles/index.scss';
 
-import { ErrorComponent } from '@/components/router/catch-boundary.tsx';
+import { LagRadar } from '@/components/devtools/lag-radar/dev';
+import { ErrorComponent } from '@/components/router/catch-boundary';
 
 const router = createRouter({
   routeTree,
@@ -24,5 +25,6 @@ declare module '@tanstack/react-router' {
 ReactDOM.createRoot(document.getElementById('vines-ui')!).render(
   <React.StrictMode>
     <RouterProvider router={router} />
+    <LagRadar />
   </React.StrictMode>,
 );
