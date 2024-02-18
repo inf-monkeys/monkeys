@@ -34,8 +34,9 @@ export const LagRadar: React.FC<ILagRadarProps> = ({ frames, speed, size, inset,
         <div
           className={cn(
             'fixed bottom-0 right-0 z-50 h-1/2 w-3 cursor-pointer bg-black opacity-0 transition-opacity hover:opacity-5',
-            visible && '!opacity-0',
+            visible && 'pointer-events-none !opacity-0',
           )}
+          onClick={() => setVisible(true)}
         />
       </HoverCard.Trigger>
       <HoverCard.Portal>
