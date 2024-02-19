@@ -40,7 +40,7 @@ module.exports = {
     'simple-import-sort/imports': [
       'error',
       {
-        groups: [['^react$', 'react-dom'], ['react-router', '@/routeTree.gen'], ['normalize.css', 'unfonts.css', '(.*).scss'], ['^@?\\w'], ['@/(.*)'], ['^[./]'], ['svg?react$']],
+        groups: [['^react$', 'react-dom'], ['swr','react-router', '@/routeTree.gen'], ['normalize.css', 'unfonts.css', '(.*).scss'], ['^@?\\w'], ['@/(.*)'], ['^[./]'], ['svg?react$']],
       },
     ],
     'simple-import-sort/exports': 'error',

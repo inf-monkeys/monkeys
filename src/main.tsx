@@ -1,12 +1,14 @@
-import React, { Suspense } from 'react';
+import { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 
+import { SWRConfig } from 'swr';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { routeTree } from '@/routeTree.gen';
 
 import 'normalize.css';
 import '@/styles/index.scss';
 
+import { swrMiddleware } from '@/apis/middleware.ts';
 import { LagRadar } from '@/components/devtools/lag-radar/dev';
 import { ErrorComponent } from '@/components/router/catch-boundary';
 
@@ -23,10 +25,12 @@ declare module '@tanstack/react-router' {
 }
 
 ReactDOM.createRoot(document.getElementById('vines-ui')!).render(
-  <React.StrictMode>
-    <RouterProvider router={router} />
+  <>
+    <SWRConfig value={{ use: [swrMiddleware] }}>
+      <RouterProvider router={router} />
+    </SWRConfig>
     <Suspense>
       <LagRadar />
     </Suspense>
-  </React.StrictMode>,
+  </>,
 );
