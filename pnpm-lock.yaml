@@ -70,6 +70,9 @@ devDependencies:
   autoprefixer:
     specifier: ^10.4.17
     version: 10.4.17(postcss@8.4.35)
+  dotenv:
+    specifier: ^16.4.4
+    version: 16.4.4
   eslint:
     specifier: ^8.56.0
     version: 8.56.0
@@ -2085,6 +2088,11 @@ packages:
     dependencies:
       no-case: 3.0.4
       tslib: 2.6.2
+    dev: true
+
+  /dotenv@16.4.4:
+    resolution: {integrity: sha512-XvPXc8XAQThSjAbY6cQ/9PcBXmFoWuw1sQ3b8HqUCR6ziGXjkTi//kB9SWa2UwqlgdAIuRqAa/9hVljzPehbYg==}
+    engines: {node: '>=12'}
     dev: true
 
   /eastasianwidth@0.2.0:
