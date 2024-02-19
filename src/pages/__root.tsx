@@ -19,7 +19,7 @@ const RootComponent: React.FC = () => {
     <main className="relative flex h-screen w-screen items-center justify-center">
       <ScrollRestoration />
       <Outlet />
-      <Toaster />
+      <Toaster richColors />
       {oem && (
         <SuperSEO title={siteName} description="懂业务的大模型流程引擎，零代码构建高价值 AI 应用。">
           <link rel="shortcut icon" type={siteIconType} href={siteIcon} />
