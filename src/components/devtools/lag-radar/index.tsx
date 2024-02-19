@@ -33,7 +33,7 @@ export const LagRadar: React.FC<ILagRadarProps> = ({ frames, speed, size, inset,
       <HoverCard.Trigger asChild>
         <div
           className={cn(
-            'fixed bottom-0 right-0 z-[1000] h-1/2 w-3 cursor-pointer bg-black opacity-0 transition-opacity hover:opacity-5',
+            'fixed bottom-0 right-0 z-[9999999999] h-1/2 w-3 cursor-pointer bg-black opacity-0 transition-opacity hover:opacity-5',
             visible && 'pointer-events-none !opacity-0',
           )}
           onClick={() => setVisible(true)}
@@ -41,7 +41,7 @@ export const LagRadar: React.FC<ILagRadarProps> = ({ frames, speed, size, inset,
       </HoverCard.Trigger>
       <HoverCard.Portal>
         <HoverCard.Content
-          className="fixed bottom-4 right-4 z-[1000] size-24 cursor-pointer rounded-md bg-white bg-opacity-5 p-2 shadow-md backdrop-blur-md transition-opacity animate-in fade-in-0 zoom-in-95 hover:opacity-25 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95"
+          className="fixed bottom-4 right-4 z-[9999999999] size-24 cursor-pointer rounded-md bg-white bg-opacity-5 p-2 shadow-md backdrop-blur-md transition-opacity animate-in fade-in-0 zoom-in-95 hover:opacity-25 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95"
           onClick={() => setVisible(false)}
           ref={nodeRef}
         />
