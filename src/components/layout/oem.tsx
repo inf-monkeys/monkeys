@@ -16,6 +16,17 @@ export const OEM: React.FC = () => {
     setValue(siteThemeColor);
   }, [siteThemeColor]);
 
+  useEffect(() => {
+    const handleToggleTheme = (event: MediaQueryListEvent) => {
+      document.documentElement.classList[event.matches ? 'add' : 'remove']('dark');
+    };
+    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    darkModeMediaQuery.addEventListener('change', handleToggleTheme);
+    return () => {
+      darkModeMediaQuery.removeEventListener('change', handleToggleTheme);
+    };
+  }, []);
+
   const siteName = get(oem, 'theme.name', '');
   const siteIcon = get(oem, 'theme.favicon.url', '');
   const siteIconType = get(oem, 'theme.favicon.type', '');
