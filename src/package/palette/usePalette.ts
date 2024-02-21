@@ -22,10 +22,10 @@ export const DEFAULT_PALETTE_CONFIG: Palette = {
   valueStop: DEFAULT_STOP,
   swatches: [],
   h: 0,
-  s: 5,
-  lMin: 20,
+  s: 0,
+  lMin: 0,
   lMax: 100,
-  useLightness: false,
+  useLightness: true,
 };
 
 export const createSwatches = (palette: Partial<Palette> & Pick<Palette, 'value'>) => {
