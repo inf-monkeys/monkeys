@@ -1,6 +1,7 @@
 import type { Config } from 'tailwindcss';
 
 import tailwindcss_animate from 'tailwindcss-animate';
+import createPlugin from 'windy-radix-palette';
 
 const config = {
   darkMode: ['class'],
@@ -55,6 +56,9 @@ const config = {
           DEFAULT: 'hsl(var(--secondary))',
           foreground: 'hsl(var(--secondary-foreground))',
         },
+        tertiary: {
+          DEFAULT: 'hsl()',
+        },
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
@@ -97,7 +101,7 @@ const config = {
       },
     },
   },
-  plugins: [tailwindcss_animate],
+  plugins: [tailwindcss_animate, createPlugin({ opacitySupport: true }).plugin],
 } satisfies Config;
 
 export default config;
