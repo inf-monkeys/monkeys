@@ -81,8 +81,8 @@ body {
 }
 
 ::selection {
-  background-color: theme('colors.vines.950/0.15');
+  background-color: theme('colors.vines.500/0.15');
   @media (prefers-color-scheme: dark) {
-    background-color: theme('colors.vines.50/0.25');
+    background-color: theme('colors.vines.500/0.25');
   }
 }
