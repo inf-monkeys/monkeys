@@ -4,12 +4,12 @@ import './index.scss';
 
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { Loader2 } from 'lucide-react';
 
 import { cn } from '@/utils';
+import { Spinner, SpinnerType } from '@/components/ui/spinner';
 
 const buttonVariants = cva(
-  'items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
@@ -48,11 +48,28 @@ export interface ButtonProps
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   loading?: boolean;
+  loadResult?: SpinnerType;
   icon?: React.ReactNode;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, loading, icon, disabled, theme, variant, size, block, asChild = false, children, ...props }, ref) => {
+  (
+    {
+      className,
+      loading,
+      loadResult,
+      icon,
+      disabled,
+      theme,
+      variant,
+      size,
+      block,
+      asChild = false,
+      children,
+      ...props
+    },
+    ref,
+  ) => {
     const Comp = asChild ? Slot : 'button';
     return (
       <Comp
@@ -61,9 +78,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || loading}
         {...props}
       >
-        {(loading || icon) && (
+        {(loading || loadResult) && (
           <div className={`${children ? 'mr-2 ' : ''}[&>*]:h-4 [&>*]:w-4`}>
-            {loading ? <Loader2 className="animate-spin" /> : icon ? icon : null}
+            {loading || loadResult ? <Spinner loading={loading} type={loadResult} /> : icon ? icon : null}
           </div>
         )}
         {children}

@@ -1,10 +1,9 @@
 import * as React from 'react';
 
-import styled from 'styled-components';
+import './index.scss';
 
-import { CheckmarkIcon } from '@/components/ui/spinner/icon/checkmark.tsx';
-import { ErrorIcon } from '@/components/ui/spinner/icon/error.tsx';
-import { LoaderIcon } from '@/components/ui/spinner/icon/loader.tsx';
+import classNames from 'classnames';
+import { Loader2 } from 'lucide-react';
 
 export type SpinnerType = undefined | 'success' | 'error';
 
@@ -13,19 +12,6 @@ interface SpinnerProps {
   type?: SpinnerType;
   className?: string;
 }
-
-const StatusWrapper = styled('div')`
-  position: absolute;
-`;
-
-const IndicatorWrapper = styled('div')`
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-width: 20px;
-  min-height: 20px;
-`;
 
 /**
  * Spinner
@@ -36,10 +22,14 @@ const IndicatorWrapper = styled('div')`
  */
 const Spinner: React.FC<SpinnerProps> = ({ loading = true, type, className }) => {
   return (
-    <IndicatorWrapper className={className}>
-      <LoaderIcon />
-      {!loading && <StatusWrapper>{type === 'error' ? <ErrorIcon /> : <CheckmarkIcon />}</StatusWrapper>}
-    </IndicatorWrapper>
+    <div className={classNames('flex min-h-[20px] min-w-[20px] items-center justify-center', className)}>
+      {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+      {!loading && (
+        <div className="absolute">
+          {type === 'error' ? <div className="icon-error" /> : <div className="icon-check" />}
+        </div>
+      )}
+    </div>
   );
 };
 
