@@ -1,24 +1,34 @@
 .button-theme-primary {
   --bg-color: oklch(var(--vines-500) / var(--tw-bg-opacity, 1));
+  --bg-hover-color: oklch(var(--vines-400) / var(--tw-bg-opacity, 0.9));
+  --bg-active-color: oklch(var(--vines-300) / var(--tw-bg-opacity, 0.85));
   --text-color: oklch(var(--vines-500) / var(--tw-text-opacity, 1))
 }
 
 .button-theme-secondary {
   --bg-color: oklch(var(--vines-900) / var(--tw-bg-opacity, 1));
+  --bg-hover-color: oklch(var(--vines-800) / var(--tw-bg-opacity, 0.9));
+  --bg-active-color: oklch(var(--vines-700) / var(--tw-bg-opacity, 0.85));
   --text-color: oklch(var(--vines-900) / var(--tw-text-opacity, 1))
 }
 
 .button-theme-tertiary {
   --bg-color: rgba(var(--gray9) / var(--tw-bg-opacity, 1));
+  --bg-hover-color: rgba(var(--gray8) / var(--tw-bg-opacity, 0.9));
+  --bg-active-color: rgba(var(--gray7) / var(--tw-bg-opacity, 0.85));
   --text-color: rgba(var(--gray9) / var(--tw-text-opacity, 1))
 }
 
 .button-theme-warning {
   --bg-color: rgba(var(--amber9) / var(--tw-bg-opacity, 1));
+  --bg-hover-color: rgba(var(--amber8) / var(--tw-bg-opacity, 0.9));
+  --bg-active-color: rgba(var(--amber7) / var(--tw-bg-opacity, 0.85));
   --text-color: rgba(var(--amber9) / var(--tw-text-opacity, 1))
 }
 
 .button-theme-danger {
   --bg-color: rgba(var(--tomato9) / var(--tw-bg-opacity, 1));
+  --bg-hover-color: rgba(var(--tomato8) / var(--tw-bg-opacity, 0.9));
+  --bg-active-color: rgba(var(--tomato7) / var(--tw-bg-opacity, 0.85));
   --text-color: rgba(var(--tomato9) / var(--tw-text-opacity, 1))
 }

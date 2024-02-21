@@ -14,7 +14,8 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: `bg-white bg-opacity-10 hover:bg-opacity-15 active:bg-opacity-20 text-[--text-color]`,
-        solid: 'bg-[--bg-color] text-primary-foreground hover:bg-opacity-80 active:bg-opacity-70 text-vines-50',
+        solid:
+          'bg-[--bg-color] text-primary-foreground hover:bg-[--bg-hover-color] active:bg-[--bg-active-color] text-vines-50',
       },
       theme: {
         primary: 'button-theme-primary',
