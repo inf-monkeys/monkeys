@@ -79,7 +79,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {(loading || loadResult) && (
-          <div className={`${children ? 'mr-2 ' : ''}[&>*]:h-4 [&>*]:w-4`}>
+          <div
+            className={cn('[&>*]:h-4 [&>*]:w-4', {
+              'mr-2': Boolean(children),
+            })}
+          >
             {loading || loadResult ? <Spinner loading={loading} type={loadResult} /> : icon ? icon : null}
           </div>
         )}
