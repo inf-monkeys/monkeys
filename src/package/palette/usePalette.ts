@@ -127,13 +127,15 @@ export const genTailwindTheme = ({ swatches }: Partial<Palette> & Pick<Palette, 
 
 export const setTailwindTheme = debounce((palette: Partial<Palette> & Pick<Palette, 'swatches'>) => {
   const twColors = genTailwindTheme(palette, 'oklch');
-  const styles: Map<string, string> = new Map();
 
+  let styles = ':root{';
   Object.entries(twColors).forEach(([colorName, colorValues]) => {
     Object.entries(colorValues).forEach(([stop, color]) => {
-      styles.set(`--${colorName}-${stop}`, color);
+      styles += `--${colorName}-${stop}:${color};`;
     });
   });
+  styles += '}';
 
-  styles.forEach((value, key) => document.body.style.setProperty(key, value));
+  const themeDOM = document.getElementById('vines-theme');
+  void (themeDOM && (themeDOM.innerHTML = styles));
 }, 64);
