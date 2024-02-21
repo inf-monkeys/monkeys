@@ -69,23 +69,15 @@
 @layer base {
   * {
     @apply border-border;
+    color: theme('colors.goldP3.12')
   }
   body {
     @apply bg-background text-foreground;
   }
 }
 
-:root {
-  --darkBackground: #111;
-  --lightBackground: #fdfdfd;
-}
-
 body {
-  background-color: var(--lightBackground);
-
-  @media (prefers-color-scheme: dark) {
-    background-color: var(--darkBackground);
-  }
+  background-color: theme('colors.grayP3.1');
 }
 
 ::selection {

@@ -12,12 +12,10 @@ import {
   unsignedModulo,
 } from '@/package/palette/helpers';
 import { createDistributionValues, createHueScale, createSaturationScale } from '@/package/palette/helpers/scales.ts';
-import { Mode, Palette, TwColors } from '@/package/palette/typings.ts';
+import { Palette, TwColors } from '@/package/palette/typings.ts';
 
 export const DEFAULT_STOP = 500;
 export const DEFAULT_STOPS = [0, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950, 1000];
-
-export const MODES: Mode[] = [`hex`, `p-3`, 'oklch'];
 
 export const DEFAULT_PALETTE_CONFIG: Palette = {
   value: '',
@@ -28,7 +26,6 @@ export const DEFAULT_PALETTE_CONFIG: Palette = {
   lMin: 20,
   lMax: 100,
   useLightness: false,
-  mode: MODES[2],
 };
 
 export const createSwatches = (palette: Partial<Palette> & Pick<Palette, 'value'>) => {
@@ -78,24 +75,13 @@ export const createSwatches = (palette: Partial<Palette> & Pick<Palette, 'value'
   });
 };
 
-export const createDisplayColor = (color: string, mode?: Mode): string | null => {
+export const createDisplayColor = (color: string): string | null => {
   if (!color || !isHex(color)) {
     return null;
   }
+  const [r, g, b] = chroma(color).rgb();
 
-  let display = null;
-
-  if (!mode || mode === `hex`) {
-    display = color.toUpperCase();
-  } else if (mode === `p-3`) {
-    const [r, g, b] = chroma(color).rgb();
-    display = [round(r / 255, 3), round(g / 255, 3), round(b / 255, 3)].join(` `);
-  } else if (mode === `oklch`) {
-    const [l, c, h] = chroma(color).oklch();
-    display = [round(l * 100, 2) + `%`, round(c, 3), round(h, 2)].join(` `);
-  }
-
-  return display;
+  return [round(r / 255, 3), round(g / 255, 3), round(b / 255, 3)].join(` `);
 };
 
 const genDarkColor = (color: string) => {
@@ -103,7 +89,7 @@ const genDarkColor = (color: string) => {
   const newDark = chroma(lightv[0], lightv[1] * 0.92, Math.min(lightv[2] + 0.01, 1), 'hsv');
   return newDark.hex();
 };
-export const genTailwindTheme = ({ swatches }: Partial<Palette> & Pick<Palette, 'swatches'>, mode: Mode) => {
+export const genTailwindTheme = ({ swatches }: Partial<Palette> & Pick<Palette, 'swatches'>) => {
   const twColors: TwColors = {};
   if (!swatches) {
     return twColors;
@@ -115,7 +101,7 @@ export const genTailwindTheme = ({ swatches }: Partial<Palette> & Pick<Palette, 
       .filter((swatch) => ![0, 1000].includes(swatch.stop))
       .forEach((swatch) =>
         Object.assign(colors, {
-          [swatch.stop]: createDisplayColor(!i ? swatch.hex : genDarkColor(swatch.hex), mode),
+          [swatch.stop]: createDisplayColor(!i ? swatch.hex : genDarkColor(swatch.hex)),
         }),
       );
 
@@ -126,13 +112,15 @@ export const genTailwindTheme = ({ swatches }: Partial<Palette> & Pick<Palette, 
 };
 
 export const setTailwindTheme = debounce((palette: Partial<Palette> & Pick<Palette, 'swatches'>) => {
-  const twColors = genTailwindTheme(palette, 'oklch');
+  const twColors = genTailwindTheme(palette);
 
-  let styles = ':root{';
+  let styles = '';
   Object.entries(twColors).forEach(([colorName, colorValues]) => {
+    styles += ':root,::selection' + (colorName === 'vines-dark' ? ',.dark' : '') + '{';
     Object.entries(colorValues).forEach(([stop, color]) => {
-      styles += `--${colorName}-${stop}:${color};`;
+      styles += `--vines-${stop}:${color};`;
     });
+    styles += '}';
   });
   styles += '}';
 

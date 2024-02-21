@@ -5,17 +5,16 @@ import './index.scss';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 
-import { cn } from '@/utils';
 import { Spinner, SpinnerType } from '@/components/ui/spinner';
+import { cn } from '@/utils';
 
 const buttonVariants = cva(
   'items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
-        default: `bg-white bg-opacity-10 hover:bg-opacity-15 active:bg-opacity-20 text-[--text-color]`,
-        solid:
-          'bg-[--bg-color] text-primary-foreground hover:bg-[--bg-hover-color] active:bg-[--bg-active-color] text-vines-50',
+        default: 'bg-grayP3-3 bg-opacity-60 hover:bg-opacity-15 active:bg-opacity-20 text-[--text-color]',
+        solid: 'bg-[--bg-color] text-primary-foreground hover:bg-[--bg-hover-color] active:bg-[--bg-active-color]',
       },
       theme: {
         primary: 'button-theme-primary',
@@ -78,7 +77,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || loading}
         {...props}
       >
-        {(loading || loadResult) && (
+        {(loading || loadResult || icon) && (
           <div
             className={cn('[&>*]:h-4 [&>*]:w-4', {
               'mr-2': Boolean(children),
@@ -94,4 +93,4 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = 'Button';
 
-export { Button, buttonVariants };
+export { Button };

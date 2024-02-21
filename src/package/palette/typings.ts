@@ -8,8 +8,6 @@ export interface SwatchValue {
   l: number;
 }
 
-export type Mode = `hex` | `p-3` | `oklch`;
-
 export interface Palette {
   value: string;
   valueStop: number;
@@ -19,7 +17,6 @@ export interface Palette {
   s: number;
   lMin: number;
   lMax: number;
-  mode: Mode;
 }
 
 export type TwColors = Record<string, string[]>;
