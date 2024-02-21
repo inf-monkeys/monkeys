@@ -2,8 +2,9 @@ import * as React from 'react';
 
 import './index.scss';
 
-import classNames from 'classnames';
 import { Loader2 } from 'lucide-react';
+
+import { cn } from '@/utils';
 
 export type SpinnerType = undefined | 'success' | 'error';
 
@@ -22,7 +23,7 @@ interface SpinnerProps {
  */
 const Spinner: React.FC<SpinnerProps> = ({ loading = true, type, className }) => {
   return (
-    <div className={classNames('flex min-h-[20px] min-w-[20px] items-center justify-center', className)}>
+    <div className={cn('flex min-h-[20px] min-w-[20px] items-center justify-center', className)}>
       {loading && <Loader2 className="h-4 w-4 animate-spin" />}
       {!loading && (
         <div className="absolute">
