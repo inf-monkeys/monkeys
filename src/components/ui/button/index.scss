@@ -1,0 +1,24 @@
+.button-theme-primary {
+  --bg-color: oklch(var(--vines-500) / var(--tw-bg-opacity, 1));
+  --text-color: oklch(var(--vines-500) / var(--tw-text-opacity, 1))
+}
+
+.button-theme-secondary {
+  --bg-color: oklch(var(--vines-900) / var(--tw-bg-opacity, 1));
+  --text-color: oklch(var(--vines-900) / var(--tw-text-opacity, 1))
+}
+
+.button-theme-tertiary {
+  --bg-color: rgba(var(--gray9) / var(--tw-bg-opacity, 1));
+  --text-color: rgba(var(--gray9) / var(--tw-text-opacity, 1))
+}
+
+.button-theme-warning {
+  --bg-color: rgba(var(--amber9) / var(--tw-bg-opacity, 1));
+  --text-color: rgba(var(--amber9) / var(--tw-text-opacity, 1))
+}
+
+.button-theme-danger {
+  --bg-color: rgba(var(--tomato9) / var(--tw-bg-opacity, 1));
+  --text-color: rgba(var(--tomato9) / var(--tw-text-opacity, 1))
+}
