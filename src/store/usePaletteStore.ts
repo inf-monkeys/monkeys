@@ -2,7 +2,7 @@ import { isEmpty, isObject, pick, set as _set } from 'lodash';
 import { create, StateCreator, StoreApi } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
-import { Mode, Palette, SwatchValue } from '@/package/palette/typings.ts';
+import { Palette, SwatchValue } from '@/package/palette/typings.ts';
 import { createSwatches, DEFAULT_PALETTE_CONFIG, setTailwindTheme } from '@/package/palette/usePalette.ts';
 
 const autoTogglePalette =
@@ -53,8 +53,6 @@ export interface PaletteStore {
   setLMin: (lMin: number) => void;
   lMax: number;
   setLMax: (lMax: number) => void;
-  mode: Mode;
-  setMode: (mode: Mode) => void;
 }
 
 const usePaletteStore = create<PaletteStore>()(
@@ -76,8 +74,6 @@ const usePaletteStore = create<PaletteStore>()(
       setLMin: (lMin: number) => set({ lMin }),
       lMax: DEFAULT_PALETTE_CONFIG.lMax,
       setLMax: (lMax: number) => set({ lMax }),
-      mode: DEFAULT_PALETTE_CONFIG.mode,
-      setMode: (mode: Mode) => set({ mode }),
     })),
   ),
 );
