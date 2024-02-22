@@ -1,6 +1,6 @@
 import { Cache } from 'swr/_internal';
 
-import stringify from 'fast-json-stable-stringify';
+import { parse, stringify } from 'superjson';
 
 export function localStorageProvider(): Cache<Map<unknown, unknown>> {
   const whitelist = ['/api/configs'];
@@ -11,7 +11,7 @@ export function localStorageProvider(): Cache<Map<unknown, unknown>> {
   let timestamp: number = 0;
 
   try {
-    const localData = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+    const localData = parse(localStorage.getItem(cacheKey) || 'null');
     if (Array.isArray(localData) && localData.length === 2) {
       [timestamp, initialMap] = localData as [number, never[]];
     }

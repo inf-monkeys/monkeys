@@ -13,7 +13,7 @@ export const SmoothTransition: React.FC<ISmoothTransitionProps> = ({ children })
 
   return (
     <motion.div
-      className="overflow-clip"
+      className="overflow-clip px-2"
       initial={{ height: 0, opacity: 0 }}
       animate={{
         height,
@@ -28,7 +28,9 @@ export const SmoothTransition: React.FC<ISmoothTransitionProps> = ({ children })
       <motion.div
         ref={ref}
         animate={{
-          maskImage: `linear-gradient(to bottom,transparent 0, 0, black calc(100% - ${maskHeight}px),transparent 100%)`,
+          maskImage: maskHeight
+            ? `linear-gradient(to bottom,transparent 0, 0, black calc(100% - ${maskHeight}px),transparent 100%)`
+            : 'none',
         }}
       >
         {children}
