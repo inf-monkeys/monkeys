@@ -1,0 +1,34 @@
+.vines-tag {
+  svg {
+    stroke: var(--text-color);
+  }
+
+  span {
+    color: var(--text-color);
+  }
+}
+
+.tag-color-primary {
+  --bg-color: color(display-p3 var(--vines-500) / var(--tw-bg-opacity, 1));
+  --text-color: rgba(var(--gray12) / var(--tw-text-opacity, 1))
+}
+
+.tag-color-secondary {
+  --bg-color: color(display-p3 var(--vines-900) / var(--tw-bg-opacity, 1));
+  --text-color: rgba(var(--gray12) / var(--tw-text-opacity, 1))
+}
+
+.tag-color-tertiary {
+  --bg-color: rgba(var(--gray8) / var(--tw-bg-opacity, 1));
+  --text-color: rgba(var(--gray12) / var(--tw-text-opacity, 1))
+}
+
+.tag-color-warning {
+  --bg-color: rgba(var(--amber9) / var(--tw-bg-opacity, 1));
+  --text-color: rgba(var(--amber12) / var(--tw-text-opacity, 1))
+}
+
+.tag-color-danger {
+  --bg-color: rgba(var(--tomato9) / var(--tw-bg-opacity, 1));
+  --text-color: rgba(var(--tomato12) / var(--tw-text-opacity, 1))
+}
