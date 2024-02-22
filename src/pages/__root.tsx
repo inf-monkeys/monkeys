@@ -8,7 +8,7 @@ import { OEM } from '@/components/layout/oem';
 
 const RootComponent: React.FC = () => {
   return (
-    <main className="relative flex h-screen w-screen items-center justify-center">
+    <main className="relative flex h-screen w-screen flex-col items-center justify-center">
       <ScrollRestoration />
       <Outlet />
       <Toaster richColors />

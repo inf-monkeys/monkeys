@@ -11,24 +11,18 @@
 // Import Routes
 
 import { Route as rootRoute } from './pages/__root'
+import { Route as LoginImport } from './pages/login'
 import { Route as IndexImport } from './pages/index'
-import { Route as ComponentsTagImport } from './pages/components/tag'
-import { Route as ComponentsButtonImport } from './pages/components/button'
 
 // Create/Update Routes
 
+const LoginRoute = LoginImport.update({
+  path: '/login',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const IndexRoute = IndexImport.update({
   path: '/',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const ComponentsTagRoute = ComponentsTagImport.update({
-  path: '/components/tag',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const ComponentsButtonRoute = ComponentsButtonImport.update({
-  path: '/components/button',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -40,12 +34,8 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/components/button': {
-      preLoaderRoute: typeof ComponentsButtonImport
-      parentRoute: typeof rootRoute
-    }
-    '/components/tag': {
-      preLoaderRoute: typeof ComponentsTagImport
+    '/login': {
+      preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
   }
@@ -53,10 +43,6 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren([
-  IndexRoute,
-  ComponentsButtonRoute,
-  ComponentsTagRoute,
-])
+export const routeTree = rootRoute.addChildren([IndexRoute, LoginRoute])
 
 /* prettier-ignore-end */
