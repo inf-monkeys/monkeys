@@ -11,8 +11,8 @@ export interface DarkModeSlice {
   darkMode: boolean;
   setDarkMode: (darkMode: boolean) => void;
   toggleDarkMode: (darkMode: boolean) => void;
-  darkModeSchemeTrigger: EDarkModeTrigger;
-  setDarkModeSchemeTrigger: (colorSchemeTrigger: EDarkModeTrigger) => void;
+  darkModeTrigger: EDarkModeTrigger;
+  setDarkModeTrigger: (colorSchemeTrigger: EDarkModeTrigger) => void;
 }
 
 export const createDarkModeSlice: ImmerStateCreator<DarkModeSlice> = (set, get) => ({
@@ -22,20 +22,20 @@ export const createDarkModeSlice: ImmerStateCreator<DarkModeSlice> = (set, get) 
     set({ darkMode });
   },
   toggleDarkMode: (darkMode) => {
-    const { darkModeSchemeTrigger } = get();
-    if (darkModeSchemeTrigger === EDarkModeTrigger.Auto) {
+    const { darkModeTrigger } = get();
+    if (darkModeTrigger === EDarkModeTrigger.Auto) {
       toggleDarkMode(darkMode);
       return set({ darkMode });
     }
   },
-  darkModeSchemeTrigger: EDarkModeTrigger.Auto,
-  setDarkModeSchemeTrigger: (colorSchemeTrigger) =>
+  darkModeTrigger: EDarkModeTrigger.Auto,
+  setDarkModeTrigger: (colorSchemeTrigger) =>
     set(() => {
       if (colorSchemeTrigger === EDarkModeTrigger.Auto) {
         const darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
         toggleDarkMode(darkMode);
-        return { darkModeSchemeTrigger: colorSchemeTrigger, darkMode };
+        return { darkModeTrigger: colorSchemeTrigger, darkMode };
       }
-      return { darkModeSchemeTrigger: colorSchemeTrigger };
+      return { darkModeTrigger: colorSchemeTrigger };
     }),
 });
