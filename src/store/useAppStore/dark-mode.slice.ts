@@ -1,0 +1,41 @@
+import { ImmerStateCreator } from '@/store/typings.ts';
+
+export enum EDarkModeTrigger {
+  Auto = 'auto',
+  Manual = 'manual',
+}
+
+const toggleDarkMode = (dark: boolean) => document.documentElement.classList[dark ? 'add' : 'remove']('dark');
+
+export interface DarkModeSlice {
+  darkMode: boolean;
+  setDarkMode: (darkMode: boolean) => void;
+  toggleDarkMode: (darkMode: boolean) => void;
+  darkModeSchemeTrigger: EDarkModeTrigger;
+  setDarkModeSchemeTrigger: (colorSchemeTrigger: EDarkModeTrigger) => void;
+}
+
+export const createDarkModeSlice: ImmerStateCreator<DarkModeSlice> = (set, get) => ({
+  darkMode: false,
+  setDarkMode: (darkMode) => {
+    toggleDarkMode(darkMode);
+    set({ darkMode });
+  },
+  toggleDarkMode: (darkMode) => {
+    const { darkModeSchemeTrigger } = get();
+    if (darkModeSchemeTrigger === EDarkModeTrigger.Auto) {
+      toggleDarkMode(darkMode);
+      return set({ darkMode });
+    }
+  },
+  darkModeSchemeTrigger: EDarkModeTrigger.Auto,
+  setDarkModeSchemeTrigger: (colorSchemeTrigger) =>
+    set(() => {
+      if (colorSchemeTrigger === EDarkModeTrigger.Auto) {
+        const darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        toggleDarkMode(darkMode);
+        return { darkModeSchemeTrigger: colorSchemeTrigger, darkMode };
+      }
+      return { darkModeSchemeTrigger: colorSchemeTrigger };
+    }),
+});
