@@ -14,6 +14,7 @@ import { Route as rootRoute } from './pages/__root'
 import { Route as LoginImport } from './pages/login'
 import { Route as IndexImport } from './pages/index'
 import { Route as ComponentsTagImport } from './pages/components/tag'
+import { Route as ComponentsSwitchImport } from './pages/components/switch'
 import { Route as ComponentsButtonImport } from './pages/components/button'
 
 // Create/Update Routes
@@ -30,6 +31,11 @@ const IndexRoute = IndexImport.update({
 
 const ComponentsTagRoute = ComponentsTagImport.update({
   path: '/components/tag',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ComponentsSwitchRoute = ComponentsSwitchImport.update({
+  path: '/components/switch',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -54,6 +60,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComponentsButtonImport
       parentRoute: typeof rootRoute
     }
+    '/components/switch': {
+      preLoaderRoute: typeof ComponentsSwitchImport
+      parentRoute: typeof rootRoute
+    }
     '/components/tag': {
       preLoaderRoute: typeof ComponentsTagImport
       parentRoute: typeof rootRoute
@@ -67,6 +77,7 @@ export const routeTree = rootRoute.addChildren([
   IndexRoute,
   LoginRoute,
   ComponentsButtonRoute,
+  ComponentsSwitchRoute,
   ComponentsTagRoute,
 ])
 
