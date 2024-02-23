@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
+import { useNavigate } from '@tanstack/react-router';
+
 import { IconInfoCircle } from '@douyinfe/semi-icons';
-import { useLocalStorage } from '@mantine/hooks';
 import { UseFormReturn } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -9,12 +10,16 @@ import { useLogin } from '@/apis/authz';
 import { saveAuthToken } from '@/components/router/auth-guard.ts';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form.tsx';
+import { Route } from '@/pages/login.tsx';
 
 interface IAuthWrapperProps extends React.ComponentPropsWithoutRef<'div'> {
   form: UseFormReturn<never>;
 }
 
 export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, children }) => {
+  const navigate = useNavigate({ from: Route.fullPath });
+  const { redirect_url } = Route.useSearch();
+
   const { trigger, data } = useLogin();
 
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -29,12 +34,18 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, children }) => 
   });
 
   useEffect(() => {
-    data && saveAuthToken(data);
+    if (!data) return;
+    if (saveAuthToken(data) === 1 && redirect_url) {
+      console.log('redirect_url', redirect_url);
+      void navigate({
+        to: redirect_url,
+      });
+    }
   }, [data]);
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit} className="mt-2 flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
         {children}
 
         <div className="my-1 flex justify-between text-xs">

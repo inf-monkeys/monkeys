@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react';
 
-import useSWRMutation from 'swr/mutation';
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useInterval, useTimeout } from '@mantine/hooks';
 import { useForm, UseFormReturn } from 'react-hook-form';
 import { toast } from 'sonner';
 
 import { useSmsVerifyCode } from '@/apis/authz';
-import { usePostFetcher } from '@/apis/fetcher.ts';
 import { AuthWrapper } from '@/components/layout/login/authz/auth-wrapper.tsx';
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form.tsx';
