@@ -13,10 +13,10 @@ export const SmoothTransition: React.FC<ISmoothTransitionProps> = ({ children })
 
   return (
     <motion.div
-      className="overflow-clip px-2"
+      className="overflow-clip p-2"
       initial={{ height: 0, opacity: 0 }}
       animate={{
-        height,
+        height: height + 16,
         opacity: 1,
       }}
       onAnimationStart={() => {
@@ -27,11 +27,18 @@ export const SmoothTransition: React.FC<ISmoothTransitionProps> = ({ children })
     >
       <motion.div
         ref={ref}
-        animate={{
-          maskImage: maskHeight
-            ? `linear-gradient(to bottom,transparent 0, 0, black calc(100% - ${maskHeight}px),transparent 100%)`
-            : 'none',
+        variants={{
+          visible: {
+            maskImage: `linear-gradient(to bottom,transparent 0, 0, black calc(100% - ${maskHeight}px),transparent 100%)`,
+          },
+          hidden: {
+            maskImage: `linear-gradient(to bottom,transparent 0, 0, black calc(100%),transparent 100%)`,
+            transitionEnd: {
+              maskImage: 'none',
+            },
+          },
         }}
+        animate={maskHeight > 0 ? 'visible' : 'hidden'}
       >
         {children}
       </motion.div>
