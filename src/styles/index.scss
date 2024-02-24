@@ -67,7 +67,7 @@
 }
 
 @layer base {
-  * {
+  .vines-ui * {
     @apply border-border;
     color: theme('colors.gold.12');
   }
