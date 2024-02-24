@@ -71,6 +71,7 @@
     @apply border-border;
     color: theme('colors.gold.12');
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -98,4 +99,28 @@ body {
   @media (prefers-color-scheme: dark) {
     background-color: theme('colors.vines.500/0.25');
   }
+}
+
+::-webkit-scrollbar,
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-corner,
+::-webkit-scrollbar-corner {
+  background-color: theme('colors.grayA.8');
+}
+
+::-webkit-scrollbar-thumb,
+::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+  background: theme('colors.grayA.8');
+  opacity: 0.1;
+  transition: all 1s;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-track {
+  background: transparent;
 }
