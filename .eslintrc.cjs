@@ -8,19 +8,17 @@ module.exports = {
     'plugin:prettier/recommended',
     'plugin:react/recommended',
   ],
-  ignorePatterns: ['dist', '.eslintrc.cjs', 'node_modules', 'src/routeTree.gen.ts', 'vite.config.ts', 'tailwind.config.ts'],
+  ignorePatterns: ['dist', 'node_modules', 'src/routeTree.gen.ts', 'vite.config.ts', 'tailwind.config.ts'],
   parser: '@typescript-eslint/parser',
-  plugins: ['react-refresh', '@typescript-eslint', 'react-hooks', 'simple-import-sort', 'prettier'],
+  plugins: ['react-refresh', '@typescript-eslint', 'react-hooks', 'simple-import-sort', 'prettier', 'unused-imports'],
   rules: {
-    'react-refresh/only-export-components': [
-      'warn',
-      { allowConstantExport: true },
-    ],
+    'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     'func-names': 0,
     'no-shadow': 0,
     'linebreak-style': 'off',
     '@typescript-eslint/no-shadow': 0,
-    '@typescript-eslint/no-unused-vars': [0, { argsIgnorePattern: '^_' }],
+    '@typescript-eslint/no-unused-vars': [1, { argsIgnorePattern: '^_' }],
+    'unused-imports/no-unused-imports': 'error',
     '@typescript-eslint/no-use-before-define': 0,
     '@typescript-eslint/ban-ts-ignore': 0,
     '@typescript-eslint/no-empty-function': 0,
@@ -40,7 +38,15 @@ module.exports = {
     'simple-import-sort/imports': [
       'error',
       {
-        groups: [['^react$', 'react-dom'], ['swr','react-router', '@/routeTree.gen'], ['normalize.css', 'unfonts.css', '(.*).scss'], ['^@?\\w'], ['@/(.*)'], ['^[./]'], ['svg?react$']],
+        groups: [
+          ['^react$', 'react-dom'],
+          ['swr', 'react-router', '@/routeTree.gen'],
+          ['normalize.css', 'unfonts.css', '(.*).scss'],
+          ['^@?\\w'],
+          ['@/(.*)'],
+          ['^[./]'],
+          ['svg?react$'],
+        ],
       },
     ],
     'simple-import-sort/exports': 'error',
@@ -66,4 +72,4 @@ module.exports = {
       },
     },
   },
-}
+};

@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 
 import { SWRConfig } from 'swr';
@@ -7,6 +7,8 @@ import { routeTree } from '@/routeTree.gen';
 
 import 'normalize.css';
 import '@/styles/index.scss';
+
+import { Toaster } from 'sonner';
 
 import { swrMiddleware } from '@/apis/middleware.ts';
 import { localStorageProvider } from '@/apis/provider.ts';
@@ -29,6 +31,7 @@ ReactDOM.createRoot(document.getElementById('vines-ui')!).render(
   <>
     <SWRConfig value={{ use: [swrMiddleware], provider: localStorageProvider }}>
       <RouterProvider router={router} />
+      <Toaster richColors />
     </SWRConfig>
     <Suspense>
       <LagRadar />
