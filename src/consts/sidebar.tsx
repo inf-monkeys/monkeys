@@ -1,16 +1,20 @@
 import React from 'react';
 
+import { LinkOptions } from '@tanstack/react-router';
+
 import { Calculator, FileBox, GalleryVerticalEnd, Rocket, Server, ShoppingCart } from 'lucide-react';
 
 export interface NavItem {
   name: string;
   label: string;
+  path?: LinkOptions['to'];
   icon?: React.ReactNode;
   items?: NavItem[];
 }
 
 export const SIDEBAR_MAP: NavItem[] = [
   {
+    path: '/',
     name: 'workspace',
     label: '工作台',
     icon: <Rocket />,

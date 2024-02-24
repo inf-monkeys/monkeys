@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 
 import { ScrollShadow } from '@nextui-org/scroll-shadow';
 import { ChevronDownIcon } from 'lucide-react';
@@ -9,7 +9,7 @@ import { SIDEBAR_MAP } from '@/consts/sidebar.tsx';
 
 interface INavListProps extends React.ComponentPropsWithoutRef<'div'> {}
 
-export const NavList: React.FC<INavListProps> = () => {
+export const NavList: React.FC<INavListProps> = memo(() => {
   const [activeIndex, setActiveIndex] = useState<string[]>(SIDEBAR_MAP.map(({ name }) => name));
 
   return (
@@ -20,13 +20,13 @@ export const NavList: React.FC<INavListProps> = () => {
         value={activeIndex}
         onValueChange={setActiveIndex}
       >
-        {SIDEBAR_MAP.map(({ items, name, icon, label }, index) => (
-          <AccordionItem key={index} value={name}>
+        {SIDEBAR_MAP.map(({ items, name, icon, label, path }, i) => (
+          <AccordionItem key={i} value={name}>
             {items ? (
               <>
                 <AccordionTrigger>
                   <NavButton
-                    key={name + index}
+                    key={name + i}
                     icon={icon}
                     postfix={
                       <div className="flex flex-1 justify-end">
@@ -38,13 +38,15 @@ export const NavList: React.FC<INavListProps> = () => {
                   </NavButton>
                 </AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-1 first:mt-1">
-                  {items.map((subItem, index) => (
-                    <NavButton key={index}>{subItem.label}</NavButton>
+                  {items.map(({ label: subLabel, path: subPath }, index) => (
+                    <NavButton key={index} to={subPath}>
+                      {subLabel}
+                    </NavButton>
                   ))}
                 </AccordionContent>
               </>
             ) : (
-              <NavButton key={index} icon={icon}>
+              <NavButton key={i} icon={icon} to={path}>
                 {label}
               </NavButton>
             )}
@@ -53,4 +55,5 @@ export const NavList: React.FC<INavListProps> = () => {
       </Accordion>
     </ScrollShadow>
   );
-};
+});
+NavList.displayName = 'NavList';
