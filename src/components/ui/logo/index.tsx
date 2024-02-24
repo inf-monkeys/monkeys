@@ -12,12 +12,14 @@ interface ILogoProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const AppLogo: React.FC<ILogoProps> = memo(({ url, alt, className, width, height }) => (
-  <SmoothTransition>
+  <>
     {url ? (
-      <Avatar className={cn('w-auto select-none rounded', className)} style={{ width, height }}>
-        <AvatarImage className="aspect-auto" src={url} alt={alt} />
-        <AvatarFallback className="rounded-none p-2 text-xs">{alt}</AvatarFallback>
-      </Avatar>
+      <SmoothTransition>
+        <Avatar className={cn('w-auto select-none rounded', className)} style={{ width, height }}>
+          <AvatarImage className="aspect-auto" src={url} alt={alt} />
+          <AvatarFallback className="rounded-none p-2 text-xs">{alt}</AvatarFallback>
+        </Avatar>
+      </SmoothTransition>
     ) : (
       <div className={cn('select-none', className)} style={{ width, height }}>
         <svg xmlns="http://www.w3.org/2000/svg" width={173.043} height={40.199} fill="none">
@@ -32,10 +34,11 @@ export const AppLogo: React.FC<ILogoProps> = memo(({ url, alt, className, width,
         </svg>
       </div>
     )}
+
     <p className="mt-2 w-full select-none rounded bg-vines-500 px-2 py-1 text-center text-xs text-white">
       构建流程为中心的 AI 应用
     </p>
-  </SmoothTransition>
+  </>
 ));
 
 AppLogo.displayName = 'AppLogo';
