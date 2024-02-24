@@ -2,10 +2,17 @@ import type { Config } from 'tailwindcss';
 
 import tailwindcss_animate from 'tailwindcss-animate';
 import createPlugin from 'windy-radix-palette';
+import { nextui } from '@nextui-org/theme';
 
 const config = {
   darkMode: ['class'],
-  content: ['./pages/**/*.{ts,tsx}', './components/**/*.{ts,tsx}', './app/**/*.{ts,tsx}', './src/**/*.{ts,tsx}'],
+  content: [
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
+    './node_modules/@nextui-org/theme/dist/components/scroll-shadow.js',
+  ],
   prefix: '',
   theme: {
     container: {
@@ -101,7 +108,7 @@ const config = {
       },
     },
   },
-  plugins: [tailwindcss_animate, createPlugin({ opacitySupport: true }).plugin],
+  plugins: [tailwindcss_animate, createPlugin({ opacitySupport: true }).plugin, nextui()],
 } satisfies Config;
 
 export default config;
