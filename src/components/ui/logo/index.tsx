@@ -12,7 +12,7 @@ interface ILogoProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const AppLogo: React.FC<ILogoProps> = memo(({ url, alt, className, width, height }) => (
-  <>
+  <div>
     {url ? (
       <SmoothTransition>
         <Avatar className={cn('w-auto select-none rounded', className)} style={{ width, height }}>
@@ -38,7 +38,7 @@ export const AppLogo: React.FC<ILogoProps> = memo(({ url, alt, className, width,
     <p className="mt-2 w-full select-none rounded bg-vines-500 px-2 py-1 text-center text-xs text-white">
       构建流程为中心的 AI 应用
     </p>
-  </>
+  </div>
 ));
 
 AppLogo.displayName = 'AppLogo';

@@ -19,9 +19,10 @@ export const OEM: React.FC = () => {
   }, [siteThemeColor]);
 
   useLayoutEffect(() => {
-    const handleToggleTheme = (event: MediaQueryListEvent) => toggleDarkMode(event.matches);
+    const handleToggleTheme = (event: Pick<MediaQueryListEvent, 'matches'>) => toggleDarkMode(event.matches);
 
     const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    handleToggleTheme({ matches: darkModeMediaQuery.matches });
     darkModeMediaQuery.addEventListener('change', handleToggleTheme);
     return () => {
       darkModeMediaQuery.removeEventListener('change', handleToggleTheme);

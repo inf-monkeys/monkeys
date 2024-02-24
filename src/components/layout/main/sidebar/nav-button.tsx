@@ -20,8 +20,8 @@ export const NavButton: React.FC<INavButtonProps> = ({ to, children, icon, postf
   return (
     <div
       className={cn(
-        'flex w-full cursor-pointer select-none items-center gap-2 rounded-lg p-2 text-xs hover:bg-whiteA-10 hover:bg-opacity-10',
-        to && link['data-status'] === 'active' ? 'bg-whiteA-10 bg-opacity-10 font-bold' : '',
+        'flex w-full cursor-pointer select-none items-center gap-2 rounded-lg p-2 text-xs hover:bg-mauve-2 hover:bg-opacity-70',
+        to && link['data-status'] === 'active' ? 'bg-mauve-2 font-bold' : '',
       )}
       {...(to &&
         ({
