@@ -1,13 +1,38 @@
 import React from 'react';
 
+import { LinkOptions, useLinkProps } from '@tanstack/react-router';
+
+import { cn } from '@/utils';
+
 interface INavButtonProps extends React.ComponentPropsWithoutRef<'div'> {
   icon?: React.ReactNode;
   postfix?: React.ReactNode;
+  to?: LinkOptions['to'];
+  children: React.ReactNode;
 }
 
-export const NavButton: React.FC<INavButtonProps> = ({ children, icon, postfix }) => {
+export const NavButton: React.FC<INavButtonProps> = ({ to, children, icon, postfix, ...props }) => {
+  const { onClick, onFocus, onMouseEnter, onMouseLeave, onTouchStart, ...link } = useLinkProps({
+    to,
+    activeOptions: { exact: true },
+  });
+
   return (
-    <div className="flex w-full cursor-pointer items-center gap-2 rounded-lg p-2 text-xs hover:bg-whiteA-10 hover:bg-opacity-10">
+    <div
+      className={cn(
+        'flex w-full cursor-pointer select-none items-center gap-2 rounded-lg p-2 text-xs hover:bg-whiteA-10 hover:bg-opacity-10',
+        to && link['data-status'] === 'active' ? 'bg-whiteA-10 bg-opacity-10 font-bold' : '',
+      )}
+      {...(to &&
+        ({
+          onClick,
+          onFocus,
+          onMouseEnter,
+          onMouseLeave,
+          onTouchStart,
+        } as React.ComponentPropsWithoutRef<'div'>))}
+      {...props}
+    >
       <div className="w-[20px] [&>*]:h-[16px] [&>*]:w-[16px]">{icon}</div>
       <span>{children}</span>
       {postfix}
