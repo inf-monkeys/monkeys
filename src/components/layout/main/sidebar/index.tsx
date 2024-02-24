@@ -8,11 +8,9 @@ interface ISidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 export const Sidebar: React.FC<ISidebarProps> = () => {
   return (
     <div className="flex h-screen w-56 flex-col justify-between gap-4 overflow-y-hidden p-5">
-      <div>
-        <AppLogo />
-      </div>
+      <AppLogo />
       <NavList />
-      <div className="h-40 rounded-xl bg-white p-2">user info placeholder</div>
+      <div className="h-40 rounded-xl bg-mauve-2 p-2">user info placeholder</div>
     </div>
   );
 };
