@@ -11,7 +11,7 @@ export function localStorageProvider(): Cache<Map<unknown, unknown>> {
   let timestamp: number = 0;
 
   try {
-    const localData = parse(localStorage.getItem(cacheKey) || 'null');
+    const localData = parse(localStorage.getItem(cacheKey) || '{}');
     if (Array.isArray(localData) && localData.length === 2) {
       [timestamp, initialMap] = localData as [number, never[]];
     }

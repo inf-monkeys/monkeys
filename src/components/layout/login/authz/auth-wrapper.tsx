@@ -35,12 +35,12 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, children }) => 
 
   useEffect(() => {
     if (!data) return;
-    if (saveAuthToken(data) === 1 && redirect_url) {
-      console.log('redirect_url', redirect_url);
+    if (saveAuthToken(data) === 1) {
       void navigate({
-        to: redirect_url,
+        to: redirect_url ?? '/',
       });
     }
+    toast.success('登录成功');
   }, [data]);
 
   return (
