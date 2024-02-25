@@ -13,9 +13,11 @@ import { Input } from '@/components/ui/input.tsx';
 import { PHONE_REGEX } from '@/consts/authz';
 import { ILoginViaSms, loginViaSmsSchema } from '@/shema/authz';
 
-interface IPhoneAuthProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface IPhoneAuthProps extends React.ComponentPropsWithoutRef<'div'> {
+  onFinished?: () => void;
+}
 
-export const PhoneAuth: React.FC<IPhoneAuthProps> = () => {
+export const PhoneAuth: React.FC<IPhoneAuthProps> = ({ onFinished }) => {
   const { trigger } = useSmsVerifyCode();
 
   const form = useForm<ILoginViaSms>({
@@ -53,7 +55,7 @@ export const PhoneAuth: React.FC<IPhoneAuthProps> = () => {
   };
 
   return (
-    <AuthWrapper form={form as unknown as UseFormReturn<never>}>
+    <AuthWrapper form={form as unknown as UseFormReturn<never>} onFinished={onFinished}>
       <FormField
         name="phoneNumber"
         control={form.control}

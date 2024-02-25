@@ -14,9 +14,10 @@ import { Route } from '@/pages/login.tsx';
 
 interface IAuthWrapperProps extends React.ComponentPropsWithoutRef<'div'> {
   form: UseFormReturn<never>;
+  onFinished?: () => void;
 }
 
-export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, children }) => {
+export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, children }) => {
   const navigate = useNavigate({ from: Route.fullPath });
   const { redirect_url } = Route.useSearch();
 
@@ -40,6 +41,7 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, children }) => 
         to: redirect_url ?? '/',
       });
     }
+    onFinished?.();
     toast.success('登录成功');
   }, [data]);
 
@@ -49,7 +51,7 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, children }) => 
         {children}
 
         <div className="my-1 flex justify-between text-xs">
-          <span className="flex items-center gap-1 opacity-70">
+          <span className="flex items-center gap-2 opacity-70">
             <IconInfoCircle size="small" />
             <span>未注册用户将自动注册</span>
           </span>

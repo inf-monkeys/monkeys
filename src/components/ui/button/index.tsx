@@ -70,9 +70,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref,
   ) => {
     const Comp = asChild ? Slot : 'button';
+    const hasChildren = Boolean(children);
     return (
       <Comp
-        className={cn(buttonVariants({ variant, theme, size, className, block }))}
+        className={cn(buttonVariants({ variant, theme, size, className, block }), !hasChildren && 'h-auto p-2')}
         ref={ref}
         disabled={disabled || loading}
         data-variant={variant}
@@ -81,7 +82,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {(loading || loadResult || icon) && (
           <div
             className={cn('[&>*]:h-4 [&>*]:w-4', {
-              'mr-2': Boolean(children),
+              'mr-2': hasChildren,
             })}
           >
             {loading || loadResult ? <Spinner loading={loading} type={loadResult} /> : icon ? icon : null}

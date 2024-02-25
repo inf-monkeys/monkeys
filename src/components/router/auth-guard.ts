@@ -1,18 +1,29 @@
 import { ParsedLocation, redirect } from '@tanstack/react-router';
 
-import { readLocalStorageValue } from '@mantine/hooks';
-import { set } from 'lodash';
+import { has, set } from 'lodash';
 import { decodeToken as jwtDecodeToken, isExpired as jwtIsExpired } from 'react-jwt';
 import { toast } from 'sonner';
-import { parse, stringify } from 'superjson';
+import { stringify } from 'superjson';
+
+import { readLocalStorageValue } from '@/utils';
+
+export interface IUserToken {
+  data: {
+    id: string;
+    name: string;
+    phone: number | null;
+    email: string | null;
+    photo: string;
+  };
+  token: string;
+}
+
+export type IUserTokens = Record<string, IUserToken>;
 
 const TOKEN_KEY = 'vines-tokens';
 
 export const isAuthed = () => {
-  const token = readLocalStorageValue({
-    key: 'vines-token',
-    defaultValue: '',
-  });
+  const token = readLocalStorageValue('vines-token', '', false);
 
   return token && jwtDecodeToken(token) && !jwtIsExpired(token);
 };
@@ -35,11 +46,7 @@ export const saveAuthToken = (token: string): number => {
     return 0;
   }
 
-  const localData = readLocalStorageValue({
-    key: TOKEN_KEY,
-    defaultValue: {},
-    deserialize: (str) => (str === undefined ? {} : parse(str)),
-  });
+  const localData = readLocalStorageValue<IUserTokens>(TOKEN_KEY, {});
 
   const userId = decodeToken.id;
   set(localData, `[${userId}].data`, decodeToken);
@@ -56,11 +63,40 @@ export const saveAuthToken = (token: string): number => {
       new CustomEvent('mantine-local-storage', {
         detail: {
           key: TOKEN_KEY,
-          value: stringifyData,
+          value: localData,
         },
       }),
     );
   }
 
   return userCount;
+};
+
+export const logout = (id: string) => {
+  const users = readLocalStorageValue<IUserTokens>(TOKEN_KEY, {});
+  if (has(users, id)) {
+    const {
+      data: { name },
+    } = users[id];
+    toast(`确定要登出「${name}」吗`, {
+      action: {
+        label: '登出',
+        onClick: () => {
+          delete users[id];
+          localStorage.setItem(TOKEN_KEY, stringify(users));
+          window.dispatchEvent(
+            new CustomEvent('mantine-local-storage', {
+              detail: {
+                key: TOKEN_KEY,
+                value: users,
+              },
+            }),
+          );
+          toast.success(`已登出成功登出「${name}」`);
+        },
+      },
+    });
+  } else {
+    toast.error('用户已登出');
+  }
 };
