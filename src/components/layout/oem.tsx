@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect } from 'react';
 
+import { useDocumentTitle, useFavicon } from '@mantine/hooks';
 import { get } from 'lodash';
-import { SuperSEO } from 'react-super-seo';
 
 import { useOemConfig } from '@/apis/common';
 import { useAppStore } from '@/store/useAppStore';
@@ -29,15 +29,8 @@ export const OEM: React.FC = () => {
     };
   }, []);
 
-  const siteName = get(oem, 'theme.name', '');
-  const siteIcon = get(oem, 'theme.favicon.url', '');
-  const siteIconType = get(oem, 'theme.favicon.type', '');
+  useDocumentTitle(get(oem, 'theme.name', ''));
+  useFavicon(get(oem, 'theme.favicon.url', ''));
 
-  return (
-    oem && (
-      <SuperSEO title={siteName} description="懂业务的大模型流程引擎，零代码构建高价值 AI 应用。">
-        <link rel="shortcut icon" type={siteIconType} href={siteIcon} />
-      </SuperSEO>
-    )
-  );
+  return null;
 };
