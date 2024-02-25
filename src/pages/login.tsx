@@ -8,6 +8,7 @@ import { AuthContainer } from 'src/components/layout/login/authz';
 
 import { useOemConfig } from '@/apis/common';
 import { AuthzUsers } from '@/components/layout/login/users';
+import { IUserTokens } from '@/components/router/auth-guard.ts';
 import { AppLogo } from '@/components/ui/logo';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
 import { pageSearchSchema } from '@/shema/common.ts';
@@ -16,7 +17,7 @@ import { useLocalStorage } from '@/utils';
 const Login: React.FC = () => {
   const { data: oem } = useOemConfig();
 
-  const [tokens] = useLocalStorage('vines-tokens', {});
+  const [tokens] = useLocalStorage<IUserTokens>('vines-tokens', {});
   const [swap, setSwap] = useLocalStorage('vines-authz-swap', 'users');
 
   const logoUrl = get(oem, 'theme.logoUrl', '');
