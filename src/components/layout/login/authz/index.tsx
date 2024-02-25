@@ -1,18 +1,25 @@
 import React, { useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
+import { Users } from 'lucide-react';
 
 import { EmailAuth } from '@/components/layout/login/authz/email-auth.tsx';
 import { PhoneAuth } from '@/components/layout/login/authz/phone-auth.tsx';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 
 interface IAuthContainerProps extends React.ComponentPropsWithoutRef<'div'> {
   enablePhone: boolean;
   enableEmail: boolean;
+  setSwap: (value: string) => void;
+  hasTokens: boolean;
 }
 
-export const AuthContainer: React.FC<IAuthContainerProps> = ({ enablePhone, enableEmail }) => {
+export const AuthContainer: React.FC<IAuthContainerProps> = ({ enablePhone, enableEmail, setSwap, hasTokens }) => {
   const [activeTab, setActiveTab] = useState('phone');
+
+  const handleSwapUsers = () => setSwap('users');
 
   return (
     <motion.main
@@ -44,17 +51,25 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({ enablePhone, enab
           >
             {enablePhone && activeTab === 'phone' && (
               <TabsContent value="phone" className="w-full" forceMount>
-                <PhoneAuth />
+                <PhoneAuth onFinished={handleSwapUsers} />
               </TabsContent>
             )}
             {enableEmail && activeTab === 'email' && (
               <TabsContent value="email" className="w-full" forceMount>
-                <EmailAuth />
+                <EmailAuth onFinished={handleSwapUsers} />
               </TabsContent>
             )}
           </motion.div>
         </AnimatePresence>
       </Tabs>
+      {hasTokens && (
+        <div className="-mt-2 flex w-full flex-col gap-6">
+          <Separator />
+          <Button icon={<Users />} onClick={handleSwapUsers}>
+            选择已登录的账号
+          </Button>
+        </div>
+      )}
     </motion.main>
   );
 };

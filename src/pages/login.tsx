@@ -2,27 +2,22 @@ import React from 'react';
 
 import { createFileRoute } from '@tanstack/react-router';
 
-import { useLocalStorage } from '@mantine/hooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { get } from 'lodash';
 import { AuthContainer } from 'src/components/layout/login/authz';
-import { parse, stringify } from 'superjson';
 
 import { useOemConfig } from '@/apis/common';
-import { AuthzUsers } from '@/components/layout/login/users/AuthzUsers.tsx';
+import { AuthzUsers } from '@/components/layout/login/users';
 import { AppLogo } from '@/components/ui/logo';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
 import { pageSearchSchema } from '@/shema/common.ts';
+import { useLocalStorage } from '@/utils';
 
 const Login: React.FC = () => {
   const { data: oem } = useOemConfig();
 
-  const [tokens] = useLocalStorage({
-    key: 'vines-tokens',
-    defaultValue: {},
-    serialize: stringify,
-    deserialize: (str) => (str === undefined ? {} : parse(str)),
-  });
+  const [tokens] = useLocalStorage('vines-tokens', {});
+  const [swap, setSwap] = useLocalStorage('vines-authz-swap', 'users');
 
   const logoUrl = get(oem, 'theme.logoUrl', '');
   const appName = get(oem, 'theme.name', '');
@@ -48,13 +43,18 @@ const Login: React.FC = () => {
             >
               <h1 className="animate-pulse text-lg font-bold text-vines-500">系统维护中</h1>
             </motion.div>
-          ) : hasTokens ? (
+          ) : swap !== 'login' && hasTokens ? (
             <SmoothTransition>
-              <AuthzUsers tokens={tokens} />
+              <AuthzUsers tokens={tokens} setSwap={setSwap} />
             </SmoothTransition>
           ) : (
             <SmoothTransition>
-              <AuthContainer enableEmail={isEmailEnable} enablePhone={isPhoneEnable} />
+              <AuthContainer
+                enableEmail={isEmailEnable}
+                enablePhone={isPhoneEnable}
+                setSwap={setSwap}
+                hasTokens={hasTokens}
+              />
             </SmoothTransition>
           )}
         </AnimatePresence>

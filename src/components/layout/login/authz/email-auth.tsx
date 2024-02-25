@@ -8,9 +8,11 @@ import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/f
 import { Input } from '@/components/ui/input.tsx';
 import { ILoginViaMail, loginViaMailSchema } from '@/shema/authz';
 
-interface IEmailAuthProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface IEmailAuthProps extends React.ComponentPropsWithoutRef<'div'> {
+  onFinished?: () => void;
+}
 
-export const EmailAuth: React.FC<IEmailAuthProps> = () => {
+export const EmailAuth: React.FC<IEmailAuthProps> = ({ onFinished }) => {
   const form = useForm<ILoginViaMail>({
     resolver: zodResolver(loginViaMailSchema),
     defaultValues: {
@@ -20,7 +22,7 @@ export const EmailAuth: React.FC<IEmailAuthProps> = () => {
   });
 
   return (
-    <AuthWrapper form={form as unknown as UseFormReturn<never>}>
+    <AuthWrapper form={form as unknown as UseFormReturn<never>} onFinished={onFinished}>
       <FormField
         name="email"
         control={form.control}
