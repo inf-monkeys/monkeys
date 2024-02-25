@@ -13,12 +13,12 @@ export const useLocalStorage = <T>(key: string, defaultValue: T, useJSON = true)
     key,
     defaultValue,
     serialize: stringify,
-    deserialize: (str) => (str === undefined ? defaultValue : useJSON ? parse(str) : str),
-  }) as T;
+    deserialize: (str) => (str === undefined ? defaultValue : useJSON ? parse(str) : str) as T,
+  });
 
 export const readLocalStorageValue = <T>(key: string, defaultValue: T, useJSON = true) =>
   mantineReadLocalStorageValue({
     key,
     defaultValue,
-    deserialize: (str) => (str === undefined ? defaultValue : useJSON ? parse(str) : str),
-  }) as T;
+    deserialize: (str) => (str === undefined ? defaultValue : useJSON ? parse(str) : str) as T,
+  });
