@@ -18,15 +18,14 @@ export const AuthzUsers: React.FC<IAuthzUsersProps> = ({ tokens, setSwap }) => {
   const users: IUser[] = useMemo(
     () =>
       Object.entries(tokens).map(([id, data]) => {
-        const isPhone = get(data, 'data.phone', null) !== null;
+        const usePhone = get(data, 'data.phone', null) !== null;
         const name = get(data, 'data.name', '');
         return {
           id,
           token: get(data, 'token', ''),
           name,
           shortName: name.substring(0, 2),
-          user: get(data, 'data.' + (isPhone ? 'phone' : 'email'), ''),
-          isPhone,
+          user: get(data, 'data.' + (usePhone ? 'phone' : 'email'), ''),
           photo: get(data, 'data.photo', ''),
         };
       }),

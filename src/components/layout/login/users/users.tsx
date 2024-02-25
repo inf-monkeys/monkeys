@@ -16,7 +16,6 @@ export interface IUser {
   name: string;
   shortName: string;
   user: string;
-  isPhone: boolean;
   photo: string;
 }
 
@@ -51,7 +50,7 @@ export const UserList: React.FC<IUserListProps> = ({ users }) => {
 
   const handleLogout = (id: string) => logout(id);
 
-  return users.map(({ id, name, shortName, user, photo, isPhone, token }) => (
+  return users.map(({ id, name, shortName, user, photo, token }) => (
     <div
       key={id}
       className="relative flex w-full cursor-pointer items-center gap-4 rounded-md bg-white p-4 shadow-md transition-opacity hover:opacity-80 dark:bg-gray-3 dark:bg-opacity-90"
@@ -67,8 +66,8 @@ export const UserList: React.FC<IUserListProps> = ({ users }) => {
         </span>
       </div>
       <div className="absolute z-0 size-full" onClick={() => handleToggleUser(token, name)} />
-      <div className="z-10 flex flex-1 justify-end">
-        <Button icon={<LogOut />} onClick={() => handleLogout(id)} />
+      <div className="flex flex-1 justify-end">
+        <Button className="z-10" icon={<LogOut />} onClick={() => handleLogout(id)} />
       </div>
     </div>
   ));

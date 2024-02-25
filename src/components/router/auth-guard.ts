@@ -7,14 +7,16 @@ import { stringify } from 'superjson';
 
 import { readLocalStorageValue } from '@/utils';
 
+export interface IUser {
+  id: string;
+  name: string;
+  phone: number | null;
+  email: string | null;
+  photo: string;
+}
+
 export interface IUserToken {
-  data: {
-    id: string;
-    name: string;
-    phone: number | null;
-    email: string | null;
-    photo: string;
-  };
+  data: IUser;
   token: string;
 }
 
