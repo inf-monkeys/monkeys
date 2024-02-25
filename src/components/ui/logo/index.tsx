@@ -14,7 +14,7 @@ interface ILogoProps extends React.ComponentPropsWithoutRef<'div'> {
 export const AppLogo: React.FC<ILogoProps> = memo(({ url, alt, className, width, height }) => (
   <div>
     {url ? (
-      <SmoothTransition>
+      <SmoothTransition initialHeight={height}>
         <Avatar className={cn('w-auto select-none rounded', className)} style={{ width, height }}>
           <AvatarImage className="aspect-auto" src={url} alt={alt} />
           <AvatarFallback className="rounded-none p-2 text-xs">{alt}</AvatarFallback>

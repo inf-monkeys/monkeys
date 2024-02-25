@@ -45,11 +45,11 @@ const Login: React.FC = () => {
               <h1 className="animate-pulse text-lg font-bold text-vines-500">系统维护中</h1>
             </motion.div>
           ) : swap !== 'login' && hasTokens ? (
-            <SmoothTransition>
+            <SmoothTransition initialHeight={201}>
               <AuthzUsers tokens={tokens} setSwap={setSwap} />
             </SmoothTransition>
           ) : (
-            <SmoothTransition>
+            <SmoothTransition initialHeight={264}>
               <AuthContainer
                 enableEmail={isEmailEnable}
                 enablePhone={isPhoneEnable}
