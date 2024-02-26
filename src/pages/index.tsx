@@ -1,24 +1,34 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
-import { Sidebar } from '@/components/layout/main/sidebar';
+import { useTeams } from '@/apis/authz/team';
+import { ITeam } from '@/apis/authz/team/typings.ts';
 import { authGuard } from '@/components/router/guard/auth.ts';
+import { useLocalStorage } from '@/utils';
 
-const App: React.FC = () => {
-  return (
-    <div className="flex w-screen bg-slate-3">
-      <Sidebar />
-      <div className="flex flex-1">
-        <div className="m-4 ml-0 w-full rounded-xl bg-slate-1 p-4">
-          <h1 className="font-bold text-vines-500">Hello World!</h1>
-        </div>
-      </div>
-    </div>
-  );
+const TeamsIdPage: React.FC = () => {
+  const navigate = useNavigate();
+
+  const { data: teams } = useTeams();
+  const [teamId] = useLocalStorage<string>('vines-team-id', '', false);
+  const [, setLocalTeams] = useLocalStorage<ITeam[]>('vines-teams', []);
+
+  useEffect(() => {
+    if (!teams) return;
+    setLocalTeams(teams);
+    void navigate({
+      to: '/$teamId',
+      params: {
+        teamId: teamId ? teamId : teams[0].id,
+      },
+    });
+  }, [teamId, teams]);
+
+  return null;
 };
 
 export const Route = createFileRoute('/')({
-  component: App,
+  component: TeamsIdPage,
   beforeLoad: authGuard,
 });

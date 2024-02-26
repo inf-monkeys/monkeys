@@ -1,11 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 
+import { useNavigate } from '@tanstack/react-router';
+
 import { useTeamBalance, useTeams } from '@/apis/authz/team';
+import { ITeam } from '@/apis/authz/team/typings.ts';
 import { useLocalStorage } from '@/utils';
 
 export const TeamsGuard: React.FC = () => {
+  const navigate = useNavigate();
+
   const [token] = useLocalStorage<string>('vines-token', '', false);
   const [teamId, setTeamId] = useLocalStorage<string>('vines-team-id', '', false);
+  const [, setLocalTeams] = useLocalStorage<ITeam[]>('vines-teams', []);
   const { data: teams, mutate: teamsMutate } = useTeams(!!token);
   const { mutate: teamBalanceMutate } = useTeamBalance();
 
@@ -21,8 +27,16 @@ export const TeamsGuard: React.FC = () => {
 
   useEffect(() => {
     if (!teams) return;
+    setLocalTeams(teams);
     if (!teams.find(({ id }) => id === teamId)) {
-      setTeamId(teams[0].id);
+      const latestTeamId = teams[0].id;
+      setTeamId(latestTeamId);
+      void navigate({
+        to: '/$teamId',
+        params: {
+          teamId: latestTeamId,
+        },
+      });
       void teamBalanceMutate();
     }
   }, [teamId, teams]);

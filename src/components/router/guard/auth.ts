@@ -87,6 +87,7 @@ export const logout = (id: string) =>
               localStorage.removeItem('vines-token');
               localStorage.removeItem('vines-account');
               localStorage.removeItem('vines-team-id');
+              localStorage.removeItem('vines-teams');
             }
             setLocalStorage(TOKEN_KEY, users);
             resolve(true);

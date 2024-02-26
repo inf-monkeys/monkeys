@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { createFileRoute } from '@tanstack/react-router';
 
-import { TempComponentDemoWrapper } from '@/components/devtools/temp-component-demo-wrapper';
+import { TempComponentDemoWrapper } from '@/components/layout-wrapper/demo';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
