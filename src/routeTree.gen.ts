@@ -13,8 +13,10 @@
 import { Route as rootRoute } from './pages/__root'
 import { Route as LoginImport } from './pages/login'
 import { Route as IndexImport } from './pages/index'
+import { Route as ComponentsTooltipImport } from './pages/components/tooltip'
 import { Route as ComponentsTagImport } from './pages/components/tag'
 import { Route as ComponentsSwitchImport } from './pages/components/switch'
+import { Route as ComponentsPopoverImport } from './pages/components/popover'
 import { Route as ComponentsButtonImport } from './pages/components/button'
 
 // Create/Update Routes
@@ -29,6 +31,11 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const ComponentsTooltipRoute = ComponentsTooltipImport.update({
+  path: '/components/tooltip',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const ComponentsTagRoute = ComponentsTagImport.update({
   path: '/components/tag',
   getParentRoute: () => rootRoute,
@@ -36,6 +43,11 @@ const ComponentsTagRoute = ComponentsTagImport.update({
 
 const ComponentsSwitchRoute = ComponentsSwitchImport.update({
   path: '/components/switch',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ComponentsPopoverRoute = ComponentsPopoverImport.update({
+  path: '/components/popover',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -60,12 +72,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComponentsButtonImport
       parentRoute: typeof rootRoute
     }
+    '/components/popover': {
+      preLoaderRoute: typeof ComponentsPopoverImport
+      parentRoute: typeof rootRoute
+    }
     '/components/switch': {
       preLoaderRoute: typeof ComponentsSwitchImport
       parentRoute: typeof rootRoute
     }
     '/components/tag': {
       preLoaderRoute: typeof ComponentsTagImport
+      parentRoute: typeof rootRoute
+    }
+    '/components/tooltip': {
+      preLoaderRoute: typeof ComponentsTooltipImport
       parentRoute: typeof rootRoute
     }
   }
@@ -77,8 +97,10 @@ export const routeTree = rootRoute.addChildren([
   IndexRoute,
   LoginRoute,
   ComponentsButtonRoute,
+  ComponentsPopoverRoute,
   ComponentsSwitchRoute,
   ComponentsTagRoute,
+  ComponentsTooltipRoute,
 ])
 
 /* prettier-ignore-end */
