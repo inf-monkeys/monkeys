@@ -102,3 +102,23 @@ export const logout = (id: string) => {
     toast.error('用户已登出');
   }
 };
+
+export const swapAccount = (id: string) => {
+  const users = readLocalStorageValue<IUserTokens>(TOKEN_KEY, {});
+  const targetUser = users[id];
+  if (targetUser) {
+    localStorage.setItem('vines-token', targetUser.token);
+    localStorage.setItem('vines-account', stringify(targetUser.data));
+    toast.success(`已切换到「${targetUser.data.name}」`);
+    window.dispatchEvent(
+      new CustomEvent('mantine-local-storage', {
+        detail: {
+          key: 'vines-account',
+          value: targetUser.data,
+        },
+      }),
+    );
+  } else {
+    toast.error('切换失败，用户不存在');
+  }
+};
