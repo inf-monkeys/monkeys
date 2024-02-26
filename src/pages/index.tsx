@@ -3,7 +3,7 @@ import React from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 
 import { Sidebar } from '@/components/layout/main/sidebar';
-import { authGuard } from '@/components/router/auth-guard';
+import { authGuard } from '@/components/router/guard/auth.ts';
 
 const App: React.FC = () => {
   return (

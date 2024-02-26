@@ -8,7 +8,7 @@ import { AuthContainer } from 'src/components/layout/login/authz';
 
 import { useOemConfig } from '@/apis/common';
 import { AuthzUsers } from '@/components/layout/login/users';
-import { IUserTokens } from '@/components/router/auth-guard.ts';
+import { IUserTokens } from '@/components/router/guard/auth.ts';
 import { AppLogo } from '@/components/ui/logo';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
 import { pageSearchSchema } from '@/shema/common.ts';

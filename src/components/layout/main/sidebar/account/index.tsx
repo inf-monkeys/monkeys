@@ -6,7 +6,7 @@ import { get } from 'lodash';
 import { UserRoundPlus } from 'lucide-react';
 
 import { IUserProps, User } from '@/components/layout/main/sidebar/account/user.tsx';
-import { IUser, swapAccount } from '@/components/router/auth-guard.ts';
+import { IUser, swapAccount } from '@/components/router/guard/auth.ts';
 import {
   Select,
   SelectContent,

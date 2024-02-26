@@ -5,7 +5,7 @@ import { get } from 'lodash';
 import { UserRoundPlus, Users } from 'lucide-react';
 
 import { IUser, UserList } from '@/components/layout/login/users/users.tsx';
-import { IUserTokens } from '@/components/router/auth-guard.ts';
+import { IUserTokens } from '@/components/router/guard/auth.ts';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 
