@@ -54,7 +54,7 @@ export const saveAuthToken = (token: string): number => {
   set(localData, `[${userId}].data`, decodeToken);
   set(localData, `[${userId}].token`, token);
   localStorage.setItem('vines-token', token);
-  localStorage.setItem('vines-user', stringify(decodeToken));
+  localStorage.setItem('vines-account', stringify(decodeToken));
 
   const stringifyData = stringify(localData);
   localStorage.setItem(TOKEN_KEY, stringifyData);
