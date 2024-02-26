@@ -7,7 +7,7 @@ import { UseFormReturn } from 'react-hook-form';
 import { toast } from 'sonner';
 
 import { useLogin } from '@/apis/authz';
-import { saveAuthToken } from '@/components/router/auth-guard.ts';
+import { saveAuthToken } from '@/components/router/guard/auth.ts';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form.tsx';
 import { Route } from '@/pages/login.tsx';

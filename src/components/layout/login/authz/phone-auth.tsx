@@ -72,23 +72,21 @@ export const PhoneAuth: React.FC<IPhoneAuthProps> = ({ onFinished }) => {
       <FormField
         name="verifyCode"
         control={form.control}
-        render={({ field }) => {
-          return (
-            <FormItem>
-              <div className="flex w-full items-center gap-4">
-                <FormControl>
-                  <Input placeholder="请输入短信验证码" inputMode="numeric" maxLength={6} {...field} className="grow" />
-                </FormControl>
+        render={({ field }) => (
+          <FormItem>
+            <div className="flex w-full items-center gap-4">
+              <FormControl>
+                <Input placeholder="请输入短信验证码" inputMode="numeric" maxLength={6} {...field} className="grow" />
+              </FormControl>
 
-                <Button disabled={disabledCodeInput || interval.active} onClick={handleSandSmsCode}>
-                  {interval.active ? `${countDownSeconds} s` : '发送验证码'}
-                </Button>
-              </div>
+              <Button disabled={disabledCodeInput || interval.active} onClick={handleSandSmsCode}>
+                {interval.active ? `${countDownSeconds} s` : '发送验证码'}
+              </Button>
+            </div>
 
-              <FormMessage />
-            </FormItem>
-          );
-        }}
+            <FormMessage />
+          </FormItem>
+        )}
       />
     </AuthWrapper>
   );

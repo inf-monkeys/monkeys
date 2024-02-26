@@ -5,7 +5,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { logout, saveAuthToken } from '@/components/router/auth-guard.ts';
+import { logout, saveAuthToken } from '@/components/router/guard/auth.ts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Button } from '@/components/ui/button';
 import { Route } from '@/pages/login.tsx';

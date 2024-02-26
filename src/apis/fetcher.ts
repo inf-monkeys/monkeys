@@ -1,4 +1,7 @@
+import stringify from 'fast-json-stable-stringify';
 import { nanoid } from 'nanoid';
+
+import { readLocalStorageValue } from '@/utils';
 
 import 'unfetch/polyfill';
 
@@ -19,6 +22,20 @@ export const usePostFetcher = async <T, U>(url: string, { arg }: { arg: U }) => 
     headers: {
       'Content-Type': 'application/json;charset=utf-8',
     },
-    body: JSON.stringify(arg),
+    body: stringify(arg),
+  }).then(async (r) => wrapper<T>(await r.json()))) as T;
+};
+
+export const useAuthzGetFetcher = async <T>(url: string) => {
+  const token = readLocalStorageValue('vines-token', '', false);
+  if (!token) {
+    throw new Error('需要登录');
+  }
+
+  return (await fetch(url, {
+    headers: {
+      'Content-Type': 'application/json;charset=utf-8',
+      Authentication: 'Bearer ' + token,
+    },
   }).then(async (r) => wrapper<T>(await r.json()))) as T;
 };

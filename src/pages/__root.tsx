@@ -5,6 +5,7 @@ import { createRootRoute, Outlet, ScrollRestoration } from '@tanstack/react-rout
 import { NextUIProvider } from '@nextui-org/system';
 
 import { OEM } from '@/components/layout/oem';
+import { TeamsGuard } from '@/components/router/guard/team.tsx';
 
 const RootComponent: React.FC = () => {
   return (
@@ -14,6 +15,7 @@ const RootComponent: React.FC = () => {
         <Outlet />
       </NextUIProvider>
       <OEM />
+      <TeamsGuard />
     </main>
   );
 };
