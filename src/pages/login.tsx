@@ -18,7 +18,7 @@ const Login: React.FC = () => {
   const { data: oem } = useOemConfig();
 
   const [tokens] = useLocalStorage<IUserTokens>('vines-tokens', {});
-  const [swap, setSwap] = useLocalStorage('vines-authz-swap', 'users');
+  const [swap, setSwap] = useLocalStorage('vines-authz-swap', 'users', false);
 
   const logoUrl = get(oem, 'theme.logoUrl', '');
   const appName = get(oem, 'theme.name', '');

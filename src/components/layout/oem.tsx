@@ -1,16 +1,20 @@
-import React, { useEffect, useLayoutEffect } from 'react';
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 import { useDocumentTitle, useFavicon } from '@mantine/hooks';
 import { get } from 'lodash';
 
 import { useOemConfig } from '@/apis/common';
 import { useAppStore } from '@/store/useAppStore';
+import { EDarkModeTrigger } from '@/store/useAppStore/dark-mode.slice.ts';
 import usePaletteStore from '@/store/usePaletteStore.ts';
+import { useLocalStorage } from '@/utils';
 
 export const OEM: React.FC = () => {
+  const [localDarkMode] = useLocalStorage<string>('vines-dark-mode', '', false);
+
   const { data: oem } = useOemConfig();
 
-  const { toggleDarkMode } = useAppStore();
+  const { toggleDarkMode, setDarkMode, setDarkModeTrigger } = useAppStore();
 
   const { setValue } = usePaletteStore();
 
@@ -29,6 +33,24 @@ export const OEM: React.FC = () => {
       darkModeMediaQuery.removeEventListener('change', handleToggleTheme);
     };
   }, []);
+
+  const initialRef = useRef(false);
+  useEffect(() => {
+    if (initialRef.current) return;
+
+    // ↓ 此处要放所有在 useEffect 中的依赖项
+    if (localDarkMode) {
+      if (localDarkMode === 'auto') {
+        setDarkModeTrigger(EDarkModeTrigger.Auto);
+      } else {
+        const isDarkMode = localDarkMode === 'dark';
+        setDarkModeTrigger(EDarkModeTrigger.Manual);
+        setDarkMode(isDarkMode);
+        toggleDarkMode(isDarkMode);
+      }
+      initialRef.current = true;
+    }
+  }, [localDarkMode]);
 
   useDocumentTitle(get(oem, 'theme.name', ''));
   useFavicon(get(oem, 'theme.favicon.url', ''));
