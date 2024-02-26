@@ -4,7 +4,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
 import { Skeleton } from '@/components/ui/skeleton.tsx';
 import { cn } from '@/utils';
 
-interface IUserProps {
+export interface IUserProps {
+  id?: string;
   name?: string;
   account?: string;
   photo?: string;

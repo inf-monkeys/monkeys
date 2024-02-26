@@ -1,25 +1,36 @@
 import React, { useMemo } from 'react';
 
-import { get } from 'lodash';
-import { toast } from 'sonner';
+import { useNavigate } from '@tanstack/react-router';
 
-import { User } from '@/components/layout/main/sidebar/account/users/user.tsx';
-import { IUser, saveAuthToken } from '@/components/router/auth-guard.ts';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
+import { get } from 'lodash';
+import { UserRoundPlus } from 'lucide-react';
+
+import { IUserProps, User } from '@/components/layout/main/sidebar/account/users/user.tsx';
+import { IUser, swapAccount } from '@/components/router/auth-guard.ts';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select.tsx';
+import { Route } from '@/pages/login.tsx';
 import { useLocalStorage } from '@/utils';
 import { maskEmail, maskPhone } from '@/utils/maskdata.ts';
 
-interface IUsersProps {}
+export const Users: React.FC = () => {
+  const navigate = useNavigate({ from: Route.fullPath });
 
-export const Users: React.FC<IUsersProps> = () => {
   const [tokens] = useLocalStorage<Partial<IUser>[]>('vines-tokens', []);
-  const [user] = useLocalStorage<Partial<IUser>>('vines-user', {});
+  const [user] = useLocalStorage<Partial<IUser>>('vines-account', {});
+  const [, setSwap] = useLocalStorage('vines-authz-swap', 'users');
 
   const currentUserName = user.name;
   const currentAccount = user.phone ? maskPhone(user.phone.toString()) : user.email ? maskEmail(user.email) : '';
   const currentUserPhoto = user.photo;
 
-  const users = useMemo(
+  const users: (IUserProps & { id: string })[] = useMemo(
     () =>
       Object.entries(tokens).map(([id, data]) => {
         const usePhone = get(data, 'data.phone', null) !== null;
@@ -27,7 +38,6 @@ export const Users: React.FC<IUsersProps> = () => {
         const _user = get(data, 'data.' + (usePhone ? 'phone' : 'email'), '');
         return {
           id,
-          token: get(data, 'token', ''),
           name,
           account: usePhone ? maskPhone(_user) : maskEmail(_user),
           photo: get(data, 'data.photo', ''),
@@ -36,27 +46,35 @@ export const Users: React.FC<IUsersProps> = () => {
     [tokens],
   );
 
-  const handleSwapUser = (token: string) => {
-    if (!token) {
-      return toast.error('切换失败！');
+  const handleValueChange = (id: string) => {
+    if (id === 'login') {
+      setSwap('login');
+      void navigate({ to: '/login' });
+    } else {
+      swapAccount(id);
     }
-    saveAuthToken(token);
-    toast.success('身份已切换');
   };
 
   return (
-    <Select value={user.id} onValueChange={(id) => handleSwapUser(users?.find((it) => it.id === id)?.token ?? '')}>
+    <Select value={user.id} onValueChange={handleValueChange}>
       <SelectTrigger className="flex h-auto cursor-pointer items-center gap-2 bg-mauve-2">
         <SelectValue>
           <User name={currentUserName} account={currentAccount} photo={currentUserPhoto} />
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
-        {users.map(({ id, token, ...it }) => (
+        {users.map(({ id, ...it }) => (
           <SelectItem className="cursor-pointer" key={id} value={id}>
             <User {...it} isCollapsed />
           </SelectItem>
         ))}
+        <SelectSeparator />
+        <SelectItem className="cursor-pointer" value="login">
+          <div className="flex items-center justify-center gap-2">
+            <UserRoundPlus strokeWidth={1.5} size={16} />
+            <p>登录其他账号</p>
+          </div>
+        </SelectItem>
       </SelectContent>
     </Select>
   );
