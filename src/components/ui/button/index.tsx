@@ -85,7 +85,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {(loading || loadResult || icon) && (
           <div
-            className={cn('[&>*]:h-4 [&>*]:w-4', {
+            className={cn('[&_svg]:h-4 [&_svg]:w-4', {
               'mr-2': hasChildren,
             })}
           >
