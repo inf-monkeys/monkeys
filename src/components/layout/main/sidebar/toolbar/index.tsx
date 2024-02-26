@@ -4,6 +4,7 @@ import { Moon, Sun, SunMoon, UserCog } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group.tsx';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppStore } from '@/store/useAppStore';
 import { EDarkModeTrigger } from '@/store/useAppStore/dark-mode.slice.ts';
 
@@ -23,22 +24,49 @@ export const Toolbar: React.FC = () => {
 
   return (
     <div className="flex justify-between">
-      <ToggleGroup size="sm" type="single" value={darkModeValue} onValueChange={handleDarkModeChange}>
-        <ToggleGroupItem value="dark" aria-label="深色模式">
-          <Moon size={16} />
-        </ToggleGroupItem>
-        <ToggleGroupItem value="light" aria-label="浅色模式">
-          <Sun size={16} />
-        </ToggleGroupItem>
-        <ToggleGroupItem value="auto" aria-label="跟随系统">
-          <SunMoon size={16} />
-        </ToggleGroupItem>
+      <ToggleGroup
+        className="rounded-md bg-mauve-2 shadow-sm [&_[aria-checked='true']]:bg-mauve-4"
+        size="sm"
+        type="single"
+        value={darkModeValue}
+        onValueChange={handleDarkModeChange}
+      >
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <ToggleGroupItem value="dark" aria-label="深色模式">
+              <Moon size={16} />
+            </ToggleGroupItem>
+          </TooltipTrigger>
+          <TooltipContent>深色模式</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <ToggleGroupItem value="light" aria-label="浅色模式">
+              <Sun size={16} />
+            </ToggleGroupItem>
+          </TooltipTrigger>
+          <TooltipContent>浅色模式</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <ToggleGroupItem value="auto" aria-label="跟随系统">
+              <SunMoon size={16} />
+            </ToggleGroupItem>
+          </TooltipTrigger>
+          <TooltipContent>跟随系统</TooltipContent>
+        </Tooltip>
       </ToggleGroup>
-      <Button
-        className="!size-8 bg-mauve-2 shadow-sm [&_svg]:stroke-black dark:[&_svg]:stroke-gold-12"
-        icon={<UserCog />}
-        size="small"
-      />
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            className="!size-8 bg-mauve-2 shadow-sm [&_svg]:stroke-black dark:[&_svg]:stroke-gold-12"
+            icon={<UserCog />}
+            size="small"
+          />
+        </TooltipTrigger>
+        <TooltipContent>用户与团队配置</TooltipContent>
+      </Tooltip>
     </div>
   );
 };
