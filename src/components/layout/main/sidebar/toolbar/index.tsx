@@ -10,8 +10,8 @@ import { EDarkModeTrigger } from '@/store/useAppStore/dark-mode.slice.ts';
 import { useLocalStorage } from '@/utils';
 
 export const Toolbar: React.FC = () => {
-  const [, setLocalDarkMode] = useLocalStorage<string>('vines-dark-mode', 'auto', false);
-  const { darkMode, darkModeTrigger, setDarkMode, setDarkModeTrigger } = useAppStore();
+  const { setDarkMode, setDarkModeTrigger } = useAppStore();
+  const [mode, setLocalDarkMode] = useLocalStorage<string>('vines-dark-mode', 'auto', false);
 
   const handleDarkModeChange = (mode: string) => {
     setLocalDarkMode(mode);
@@ -23,15 +23,13 @@ export const Toolbar: React.FC = () => {
     }
   };
 
-  const darkModeValue = darkModeTrigger === EDarkModeTrigger.Auto ? 'auto' : darkMode ? 'dark' : 'light';
-
   return (
     <div className="flex justify-between">
       <ToggleGroup
         className="rounded-md bg-mauve-2 shadow-sm [&_[aria-checked='true']]:bg-mauve-4"
         size="sm"
         type="single"
-        value={darkModeValue}
+        value={mode}
         onValueChange={handleDarkModeChange}
       >
         <Tooltip>

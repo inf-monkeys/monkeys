@@ -24,7 +24,7 @@ export const Account: React.FC = () => {
 
   const [tokens] = useLocalStorage<Partial<IUser>[]>('vines-tokens', []);
   const [user] = useLocalStorage<Partial<IUser>>('vines-account', {});
-  const [, setSwap] = useLocalStorage('vines-authz-swap', 'users');
+  const [, setSwap] = useLocalStorage('vines-authz-swap', 'users', false);
 
   const currentUserName = user.name;
   const currentAccount = user.phone ? maskPhone(user.phone.toString()) : user.email ? maskEmail(user.email) : '';
