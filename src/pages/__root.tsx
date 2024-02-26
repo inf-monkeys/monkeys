@@ -5,17 +5,18 @@ import { createRootRoute, Outlet, ScrollRestoration } from '@tanstack/react-rout
 import { NextUIProvider } from '@nextui-org/system';
 
 import { OEM } from '@/components/layout/oem';
-import { TeamsGuard } from '@/components/router/guard/team.tsx';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 const RootComponent: React.FC = () => {
   return (
     <main className="vines-ui relative flex h-screen w-screen flex-col items-center justify-center">
       <ScrollRestoration />
       <NextUIProvider>
-        <Outlet />
+        <TooltipProvider delayDuration={100}>
+          <Outlet />
+        </TooltipProvider>
       </NextUIProvider>
       <OEM />
-      <TeamsGuard />
     </main>
   );
 };
