@@ -11,7 +11,7 @@ import { useLocalStorage } from '@/utils';
 
 export const Toolbar: React.FC = () => {
   const { setDarkMode, setDarkModeTrigger } = useAppStore();
-  const [mode, setLocalDarkMode] = useLocalStorage<string>('vines-dark-mode', 'auto', false);
+  const [mode, setLocalDarkMode] = useLocalStorage<string>('vines-ui-dark-mode', 'auto', false);
 
   const handleDarkModeChange = (mode: string) => {
     setLocalDarkMode(mode);
