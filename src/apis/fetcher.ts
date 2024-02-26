@@ -32,10 +32,13 @@ export const useAuthzGetFetcher = async <T>(url: string) => {
     throw new Error('需要登录');
   }
 
+  const teamId = readLocalStorageValue('vines-team-id', '', false);
+
   return (await fetch(url, {
     headers: {
       'Content-Type': 'application/json;charset=utf-8',
       Authentication: 'Bearer ' + token,
+      Team: teamId,
     },
   }).then(async (r) => wrapper<T>(await r.json()))) as T;
 };
