@@ -3,10 +3,11 @@ import React, { useMemo } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 
 import { get } from 'lodash';
-import { UserRoundPlus } from 'lucide-react';
+import { LogOut, UserRoundPlus } from 'lucide-react';
 
+import { useTeams } from '@/apis/authz/team';
 import { IUserProps, User } from '@/components/layout/main/sidebar/account/user.tsx';
-import { IUser, swapAccount } from '@/components/router/guard/auth.ts';
+import { IUser, logout, swapAccount } from '@/components/router/guard/auth.ts';
 import {
   Select,
   SelectContent,
@@ -25,6 +26,8 @@ export const Account: React.FC = () => {
   const [tokens] = useLocalStorage<Partial<IUser>[]>('vines-tokens', []);
   const [user] = useLocalStorage<Partial<IUser>>('vines-account', {});
   const [, setSwap] = useLocalStorage('vines-authz-swap', 'users', false);
+
+  const { mutate: teamsMutate } = useTeams();
 
   const currentUserName = user.name;
   const currentAccount = user.phone ? maskPhone(user.phone.toString()) : user.email ? maskEmail(user.email) : '';
@@ -46,10 +49,21 @@ export const Account: React.FC = () => {
     [tokens],
   );
 
-  const handleValueChange = (id: string) => {
+  const handleValueChange = async (id: string) => {
     if (id === 'login') {
       setSwap('login');
       void navigate({ to: '/login' });
+    } else if (id === 'logout') {
+      const userId = user.id ?? '';
+      if (await logout(userId)) {
+        const filtered = users.filter((it) => it.id !== userId);
+        if (!filtered.length) {
+          await navigate({ to: '/login' });
+        } else {
+          swapAccount(filtered[0].id);
+          setTimeout(() => teamsMutate());
+        }
+      }
     } else {
       swapAccount(id);
     }
@@ -73,6 +87,12 @@ export const Account: React.FC = () => {
           <div className="flex items-center justify-center gap-2">
             <UserRoundPlus strokeWidth={1.5} size={16} />
             <p>登录其他账号</p>
+          </div>
+        </SelectItem>
+        <SelectItem className="cursor-pointer" value="logout">
+          <div className="flex items-center justify-center gap-2 text-red-10">
+            <LogOut strokeWidth={1.5} size={16} />
+            <p>退出登录</p>
           </div>
         </SelectItem>
       </SelectContent>

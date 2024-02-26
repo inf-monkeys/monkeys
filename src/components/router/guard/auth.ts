@@ -3,7 +3,6 @@ import { ParsedLocation, redirect } from '@tanstack/react-router';
 import { has, set } from 'lodash';
 import { decodeToken as jwtDecodeToken, isExpired as jwtIsExpired } from 'react-jwt';
 import { toast } from 'sonner';
-import { stringify } from 'superjson';
 
 import { readLocalStorageValue, setLocalStorage } from '@/utils';
 
@@ -53,11 +52,9 @@ export const saveAuthToken = (token: string): number => {
   const userId = decodeToken.id;
   set(localData, `[${userId}].data`, decodeToken);
   set(localData, `[${userId}].token`, token);
-  localStorage.setItem('vines-token', token);
-  localStorage.setItem('vines-account', stringify(decodeToken));
-
-  const stringifyData = stringify(localData);
-  localStorage.setItem(TOKEN_KEY, stringifyData);
+  setLocalStorage('vines-token', token);
+  setLocalStorage('vines-account', decodeToken);
+  setLocalStorage(TOKEN_KEY, localData);
 
   const userCount = Object.keys(localData).length;
   if (userCount > 1) {
@@ -74,26 +71,35 @@ export const saveAuthToken = (token: string): number => {
   return userCount;
 };
 
-export const logout = (id: string) => {
-  const users = readLocalStorageValue<IUserTokens>(TOKEN_KEY, {});
-  if (has(users, id)) {
-    const {
-      data: { name },
-    } = users[id];
-    toast(`确定要登出「${name}」吗`, {
-      action: {
-        label: '登出',
-        onClick: () => {
-          delete users[id];
-          setLocalStorage(TOKEN_KEY, users);
-          toast.success(`已登出成功登出「${name}」`);
+export const logout = (id: string) =>
+  new Promise((resolve) => {
+    const users = readLocalStorageValue<IUserTokens>(TOKEN_KEY, {});
+    if (has(users, id)) {
+      const {
+        data: { name },
+      } = users[id];
+      toast(`确定要登出「${name}」吗`, {
+        action: {
+          label: '登出',
+          onClick: () => {
+            delete users[id];
+            if (Object.keys(users).length === 0) {
+              localStorage.removeItem('vines-token');
+              localStorage.removeItem('vines-account');
+              localStorage.removeItem('vines-team-id');
+            }
+            setLocalStorage(TOKEN_KEY, users);
+            resolve(true);
+            toast.success(`已登出成功登出「${name}」`);
+          },
         },
-      },
-    });
-  } else {
-    toast.error('用户已登出');
-  }
-};
+        onDismiss: () => resolve(false),
+      });
+    } else {
+      toast.error('用户已登出');
+      resolve(false);
+    }
+  });
 
 export const swapAccount = (id: string) => {
   const users = readLocalStorageValue<IUserTokens>(TOKEN_KEY, {});

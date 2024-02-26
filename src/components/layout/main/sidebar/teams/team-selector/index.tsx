@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useTeamBalance, useTeams } from '@/apis/authz/team';
 import { Team } from '@/components/layout/main/sidebar/teams/team-selector/team.tsx';
@@ -6,9 +6,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useLocalStorage } from '@/utils';
 
 export const TeamSelector: React.FC = () => {
-  const [teamId, setTeamId] = useLocalStorage<string>('vines-team-id', '', false);
   const { mutate: teamBalanceMutate } = useTeamBalance();
   const { data: teams } = useTeams();
+  const [teamId, setTeamId] = useLocalStorage<string>('vines-team-id', (teams ?? [])[0]?.id ?? '', false);
+
+  useEffect(() => {
+    if (!teams || teamId) return;
+    teams.length && setTeamId(teams[0].id);
+  }, [teams]);
 
   const currentTeam = (teams ?? []).find((team) => team.id === teamId);
 
