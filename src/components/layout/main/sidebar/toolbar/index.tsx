@@ -61,7 +61,7 @@ export const Toolbar: React.FC = () => {
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            className="!size-8 bg-mauve-2 shadow-sm [&_svg]:stroke-black dark:[&_svg]:stroke-gold-12"
+            className="!size-9 bg-mauve-2 shadow-sm [&_svg]:stroke-black dark:[&_svg]:stroke-gold-12"
             icon={<UserCog />}
             size="small"
           />
