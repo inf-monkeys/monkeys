@@ -7,11 +7,14 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppStore } from '@/store/useAppStore';
 import { EDarkModeTrigger } from '@/store/useAppStore/dark-mode.slice.ts';
+import { useLocalStorage } from '@/utils';
 
 export const Toolbar: React.FC = () => {
+  const [, setLocalDarkMode] = useLocalStorage<string>('vines-dark-mode', 'auto', false);
   const { darkMode, darkModeTrigger, setDarkMode, setDarkModeTrigger } = useAppStore();
 
   const handleDarkModeChange = (mode: string) => {
+    setLocalDarkMode(mode);
     if (mode === 'auto') {
       setDarkModeTrigger(EDarkModeTrigger.Auto);
     } else {

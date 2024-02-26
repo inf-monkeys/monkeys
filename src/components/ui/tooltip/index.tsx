@@ -6,13 +6,12 @@ import { cn } from '@/utils';
 
 const TooltipProvider = TooltipPrimitive.Provider;
 
-const Tooltip = React.forwardRef<
-  React.ElementRef<typeof TooltipPrimitive.Root>,
+const Tooltip: React.FC<
   React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Root> & {
     content?: React.ReactNode;
     contentProps?: React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>;
   }
->(({ content, contentProps, children, ...props }) =>
+> = ({ content, contentProps, children, ...props }) =>
   content ? (
     <TooltipPrimitive.Tooltip {...props}>
       <TooltipTrigger asChild>{children}</TooltipTrigger>
@@ -20,8 +19,7 @@ const Tooltip = React.forwardRef<
     </TooltipPrimitive.Tooltip>
   ) : (
     <TooltipPrimitive.Tooltip {...props}>{children}</TooltipPrimitive.Tooltip>
-  ),
-);
+  );
 Tooltip.displayName = TooltipPrimitive.Root.displayName;
 
 const TooltipTrigger = TooltipPrimitive.Trigger;
