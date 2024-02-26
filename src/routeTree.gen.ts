@@ -17,6 +17,7 @@ import { Route as ComponentsTooltipImport } from './pages/components/tooltip'
 import { Route as ComponentsTagImport } from './pages/components/tag'
 import { Route as ComponentsSwitchImport } from './pages/components/switch'
 import { Route as ComponentsPopoverImport } from './pages/components/popover'
+import { Route as ComponentsModalImport } from './pages/components/modal'
 import { Route as ComponentsButtonImport } from './pages/components/button'
 
 // Create/Update Routes
@@ -51,6 +52,11 @@ const ComponentsPopoverRoute = ComponentsPopoverImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const ComponentsModalRoute = ComponentsModalImport.update({
+  path: '/components/modal',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const ComponentsButtonRoute = ComponentsButtonImport.update({
   path: '/components/button',
   getParentRoute: () => rootRoute,
@@ -70,6 +76,10 @@ declare module '@tanstack/react-router' {
     }
     '/components/button': {
       preLoaderRoute: typeof ComponentsButtonImport
+      parentRoute: typeof rootRoute
+    }
+    '/components/modal': {
+      preLoaderRoute: typeof ComponentsModalImport
       parentRoute: typeof rootRoute
     }
     '/components/popover': {
@@ -97,6 +107,7 @@ export const routeTree = rootRoute.addChildren([
   IndexRoute,
   LoginRoute,
   ComponentsButtonRoute,
+  ComponentsModalRoute,
   ComponentsPopoverRoute,
   ComponentsSwitchRoute,
   ComponentsTagRoute,

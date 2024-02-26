@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 
 type side = 'top' | 'right' | 'bottom' | 'left';
 
-export const TagPage: React.FC = () => {
+export const PopoverPage: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isOpen2, setIsOpen2] = useState(false);
   return (
@@ -55,5 +55,5 @@ export const TagPage: React.FC = () => {
 };
 
 export const Route = createFileRoute('/components/popover')({
-  component: TagPage,
+  component: PopoverPage,
 });

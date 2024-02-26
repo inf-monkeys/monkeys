@@ -8,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 type side = 'top' | 'right' | 'bottom' | 'left';
 
-export const TagPage: React.FC = () => {
+export const TooltipPage: React.FC = () => {
   return (
     <div className="flex flex-col gap-4">
       <a href="https://www.radix-ui.com/primitives/docs/components/tooltip#api-reference">API</a>
@@ -39,5 +39,5 @@ export const TagPage: React.FC = () => {
 };
 
 export const Route = createFileRoute('/components/tooltip')({
-  component: TagPage,
+  component: TooltipPage,
 });
