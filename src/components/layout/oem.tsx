@@ -9,6 +9,7 @@ import usePaletteStore from '@/store/usePaletteStore.ts';
 
 export const OEM: React.FC = () => {
   const { data: oem } = useOemConfig();
+
   const { toggleDarkMode } = useAppStore();
 
   const { setValue } = usePaletteStore();

@@ -5,12 +5,11 @@ import { X } from 'lucide-react';
 
 import { cn } from '@/utils';
 
-const Dialog = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Root>,
+const Dialog: React.FC<
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Root> & {
     onClose?: () => void | Promise<void>;
   }
->(({ onOpenChange, onClose, ...props }) =>
+> = ({ onOpenChange, onClose, ...props }) =>
   onClose ? (
     <DialogPrimitive.Root
       onOpenChange={(v) => {
@@ -21,8 +20,7 @@ const Dialog = React.forwardRef<
     />
   ) : (
     <DialogPrimitive.Root onOpenChange={onOpenChange} {...props} />
-  ),
-);
+  );
 Dialog.displayName = DialogPrimitive.Root.displayName;
 
 const DialogTrigger = DialogPrimitive.Trigger;
