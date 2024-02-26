@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { memo } from 'react';
 
 import { ScrollShadow } from '@nextui-org/scroll-shadow';
 import { ChevronDownIcon } from 'lucide-react';
@@ -6,11 +6,15 @@ import { ChevronDownIcon } from 'lucide-react';
 import { NavButton } from '@/components/layout/main/sidebar/nav-button.tsx';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx';
 import { SIDEBAR_MAP } from '@/consts/sidebar.tsx';
+import { useLocalStorage } from '@/utils';
 
 interface INavListProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const NavList: React.FC<INavListProps> = memo(() => {
-  const [activeIndex, setActiveIndex] = useState<string[]>(SIDEBAR_MAP.map(({ name }) => name));
+  const [activeIndex, setActiveIndex] = useLocalStorage<string[]>(
+    'vines-ui-sidebar',
+    SIDEBAR_MAP.map(({ name }) => name),
+  );
 
   return (
     <ScrollShadow hideScrollBar className="h-full flex-1 overflow-y-scroll pb-8" visibility="bottom">

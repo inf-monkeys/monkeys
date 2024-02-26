@@ -10,7 +10,7 @@ import usePaletteStore from '@/store/usePaletteStore.ts';
 import { useLocalStorage } from '@/utils';
 
 export const OEM: React.FC = () => {
-  const [localDarkMode] = useLocalStorage<string>('vines-dark-mode', '', false);
+  const [localDarkMode, setLocalDarkMode] = useLocalStorage<string>('vines-ui-dark-mode', '', false);
 
   const { data: oem } = useOemConfig();
 
@@ -41,6 +41,7 @@ export const OEM: React.FC = () => {
     // ↓ 此处要放所有在 useEffect 中的依赖项
     if (localDarkMode) {
       if (localDarkMode === 'auto') {
+        setTimeout(() => setLocalDarkMode('auto'));
         setDarkModeTrigger(EDarkModeTrigger.Auto);
       } else {
         const isDarkMode = localDarkMode === 'dark';
