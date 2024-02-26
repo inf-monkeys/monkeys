@@ -49,8 +49,8 @@ const IconWrapper: React.FC<IconWrapperProps> = ({ children, size = 'small' }) =
   return (
     <div
       className={cn('mx-[2px]', {
-        '[&>*]:w-[18px]': size === 'small',
-        '[&>*]:w-[22px]': size === 'large',
+        '[&_svg]:w-[18px]': size === 'small',
+        '[&_svg]:w-[22px]': size === 'large',
       })}
     >
       {children}

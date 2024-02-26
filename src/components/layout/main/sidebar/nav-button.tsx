@@ -33,7 +33,7 @@ export const NavButton: React.FC<INavButtonProps> = ({ to, children, icon, postf
         } as React.ComponentPropsWithoutRef<'div'>))}
       {...props}
     >
-      <div className="w-[20px] [&>*]:h-[16px] [&>*]:w-[16px]">{icon}</div>
+      <div className="w-[20px] [&_svg]:h-[16px] [&_svg]:w-[16px]">{icon}</div>
       <span>{children}</span>
       {postfix}
     </div>
