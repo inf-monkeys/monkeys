@@ -87,11 +87,20 @@ html {
 
 body {
   background: linear-gradient(theme('colors.vines.50/0.35') 0%, theme('colors.gray.1') 50%);
-  @apply overflow-clip
+  @apply overflow-clip;
 }
 
 #vines-ui {
-  @apply backdrop-blur
+  @apply backdrop-blur;
+}
+
+.text-adjust {
+  -webkit-text-size-adjust: none;
+}
+
+.text-xxs {
+  font-size: 0.625rem;
+  @apply text-adjust leading-none;
 }
 
 ::selection {

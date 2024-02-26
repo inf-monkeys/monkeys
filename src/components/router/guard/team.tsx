@@ -1,18 +1,19 @@
 import React, { useEffect, useRef } from 'react';
 
-import { useTeams } from '@/apis/authz/team';
+import { useTeamBalance, useTeams } from '@/apis/authz/team';
 import { useLocalStorage } from '@/utils';
 
 export const TeamsGuard: React.FC = () => {
   const [token] = useLocalStorage<string>('vines-token', '', false);
   const [teamId, setTeamId] = useLocalStorage<string>('vines-team-id', '', false);
-  const { data: teams, mutate } = useTeams(!!token);
+  const { data: teams, mutate: teamsMutate } = useTeams(!!token);
+  const { mutate: teamBalanceMutate } = useTeamBalance();
 
   const lastTokenRef = useRef('');
   useEffect(() => {
     if (lastTokenRef.current !== token && token) {
       if (lastTokenRef.current) {
-        void mutate();
+        void teamsMutate();
       }
       lastTokenRef.current = token;
     }
@@ -22,6 +23,7 @@ export const TeamsGuard: React.FC = () => {
     if (!teams) return;
     if (!teams.find(({ id }) => id === teamId)) {
       setTeamId(teams[0].id);
+      void teamBalanceMutate();
     }
   }, [teamId, teams]);
 

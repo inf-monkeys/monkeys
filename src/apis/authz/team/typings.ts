@@ -11,3 +11,9 @@ export interface ITeam {
     secondaryBackgroundColor?: string;
   };
 }
+
+export interface ITeamBalance {
+  amount: number;
+  totalConsume: number;
+  totalReCharge: number;
+}

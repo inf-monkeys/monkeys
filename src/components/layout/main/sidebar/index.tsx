@@ -13,8 +13,10 @@ export const Sidebar: React.FC<ISidebarProps> = () => {
     <div className="flex h-screen w-56 flex-col justify-between gap-4 overflow-y-hidden p-5">
       <AppLogo />
       <NavList />
-      <Account />
-      <Teams />
+      <div className="flex flex-col gap-2">
+        <Account />
+        <Teams />
+      </div>
     </div>
   );
 };
