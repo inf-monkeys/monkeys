@@ -4,7 +4,7 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { Accessibility, Cat, Dog } from 'lucide-react';
 
-import { TempComponentDemoWrapper } from '@/components/devtools/temp-component-demo-wrapper';
+import { TempComponentDemoWrapper } from '@/components/layout-wrapper/demo';
 import { Tag } from '@/components/ui/tag';
 import { TagGroup } from '@/components/ui/tag/tag-group.tsx';
 

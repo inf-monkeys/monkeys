@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from 'src/components/ui/dialog';
 
-import { TempComponentDemoWrapper } from '@/components/devtools/temp-component-demo-wrapper';
+import { TempComponentDemoWrapper } from '@/components/layout-wrapper/demo';
 import { Button } from '@/components/ui/button';
 
 export const ModalPage: React.FC = () => {

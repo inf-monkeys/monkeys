@@ -53,6 +53,7 @@
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
     "unfetch": "^5.0.0",
+    "validator": "^13.11.0",
     "windy-radix-palette": "2.0.0-beta.7",
     "zod": "^3.22.4",
     "zustand": "^4.5.1"
@@ -63,6 +64,7 @@
     "@types/node": "^20.11.19",
     "@types/react": "^18.2.56",
     "@types/react-dom": "^18.2.19",
+    "@types/validator": "^13.11.9",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "@vitejs/plugin-react-swc": "^3.6.0",

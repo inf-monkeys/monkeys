@@ -14,7 +14,7 @@ export interface NavItem {
 
 export const SIDEBAR_MAP: NavItem[] = [
   {
-    path: '/',
+    path: '/$teamId',
     name: 'workspace',
     label: '工作台',
     icon: <Rocket />,

@@ -1,11 +1,15 @@
 import React, { useEffect } from 'react';
 
+import { useNavigate } from '@tanstack/react-router';
+
 import { useTeamBalance, useTeams } from '@/apis/authz/team';
 import { Team } from '@/components/layout/main/sidebar/teams/team-selector/team.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { useLocalStorage } from '@/utils';
 
 export const TeamSelector: React.FC = () => {
+  const navigate = useNavigate({ from: location.pathname });
+
   const { mutate: teamBalanceMutate } = useTeamBalance();
   const { data: teams } = useTeams();
   const [teamId, setTeamId] = useLocalStorage<string>('vines-team-id', (teams ?? [])[0]?.id ?? '', false);
@@ -19,6 +23,12 @@ export const TeamSelector: React.FC = () => {
 
   const handleSwapTeam = (id: string) => {
     setTeamId(id);
+    void navigate({
+      to: '/$teamId',
+      params: {
+        teamId: id,
+      },
+    });
     void teamBalanceMutate();
   };
 

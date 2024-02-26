@@ -4,7 +4,7 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { AlarmClock } from 'lucide-react';
 
-import { TempComponentDemoWrapper } from '@/components/devtools/temp-component-demo-wrapper';
+import { TempComponentDemoWrapper } from '@/components/layout-wrapper/demo';
 import { Button } from '@/components/ui/button';
 import { SpinnerType } from '@/components/ui/spinner';
 

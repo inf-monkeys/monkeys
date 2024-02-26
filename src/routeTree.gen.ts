@@ -13,12 +13,14 @@
 import { Route as rootRoute } from './pages/__root'
 import { Route as LoginImport } from './pages/login'
 import { Route as IndexImport } from './pages/index'
+import { Route as TeamIdIndexImport } from './pages/$teamId/index'
 import { Route as ComponentsTooltipImport } from './pages/components/tooltip'
 import { Route as ComponentsTagImport } from './pages/components/tag'
 import { Route as ComponentsSwitchImport } from './pages/components/switch'
 import { Route as ComponentsPopoverImport } from './pages/components/popover'
 import { Route as ComponentsModalImport } from './pages/components/modal'
 import { Route as ComponentsButtonImport } from './pages/components/button'
+import { Route as TeamIdWorkbenchIndexImport } from './pages/$teamId/workbench/index'
 
 // Create/Update Routes
 
@@ -29,6 +31,11 @@ const LoginRoute = LoginImport.update({
 
 const IndexRoute = IndexImport.update({
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TeamIdIndexRoute = TeamIdIndexImport.update({
+  path: '/$teamId/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -59,6 +66,11 @@ const ComponentsModalRoute = ComponentsModalImport.update({
 
 const ComponentsButtonRoute = ComponentsButtonImport.update({
   path: '/components/button',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TeamIdWorkbenchIndexRoute = TeamIdWorkbenchIndexImport.update({
+  path: '/$teamId/workbench/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -98,6 +110,14 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComponentsTooltipImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/workbench/': {
+      preLoaderRoute: typeof TeamIdWorkbenchIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/': {
+      preLoaderRoute: typeof TeamIdIndexImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -112,6 +132,8 @@ export const routeTree = rootRoute.addChildren([
   ComponentsSwitchRoute,
   ComponentsTagRoute,
   ComponentsTooltipRoute,
+  TeamIdWorkbenchIndexRoute,
+  TeamIdIndexRoute,
 ])
 
 /* prettier-ignore-end */
