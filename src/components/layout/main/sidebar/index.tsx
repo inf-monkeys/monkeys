@@ -4,6 +4,7 @@ import { Account } from 'src/components/layout/main/sidebar/account';
 
 import { NavList } from '@/components/layout/main/sidebar/nav-list';
 import { Teams } from '@/components/layout/main/sidebar/teams';
+import { Toolbar } from '@/components/layout/main/sidebar/toolbar';
 import { AppLogo } from '@/components/ui/logo';
 
 interface ISidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -16,6 +17,7 @@ export const Sidebar: React.FC<ISidebarProps> = () => {
       <div className="flex flex-col gap-2">
         <Account />
         <Teams />
+        <Toolbar />
       </div>
     </div>
   );
