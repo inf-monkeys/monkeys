@@ -2,13 +2,13 @@ import React from 'react';
 
 import { createFileRoute } from '@tanstack/react-router';
 
-import { authGuard } from '@/components/router/guard/auth.ts';
+import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 
-const Workbench: React.FC = () => {
+export const Workbench: React.FC = () => {
   return <>Workbench</>;
 };
 
 export const Route = createFileRoute('/$teamId/workbench/')({
   component: Workbench,
-  beforeLoad: authGuard,
+  beforeLoad: teamIdGuard,
 });
