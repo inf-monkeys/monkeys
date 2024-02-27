@@ -25,30 +25,16 @@ const config = {
     extend: {
       colors: {
         vines: {
-          50: 'color(display-p3 var(--vines-50, 0.929 0.98 0.898) / <alpha-value>)',
-          100: 'color(display-p3 var(--vines-100, 0.859 0.965 0.796) / <alpha-value>)',
-          200: 'color(display-p3 var(--vines-200, 0.714 0.925 0.592) / <alpha-value>)',
-          300: 'color(display-p3 var(--vines-300, 0.573 0.89 0.388) / <alpha-value>)',
-          400: 'color(display-p3 var(--vines-400, 0.431 0.855 0.184) / <alpha-value>)',
-          500: 'color(display-p3 var(--vines-500, 0.322 0.678 0.122) / <alpha-value>)', // primary
-          600: 'color(display-p3 var(--vines-600, 0.259 0.541 0.098) / <alpha-value>)',
-          700: 'color(display-p3 var(--vines-700, 0.196 0.408 0.075) / <alpha-value>)',
-          800: 'color(display-p3 var(--vines-800, 0.129 0.271 0.047) / <alpha-value>)',
-          900: 'color(display-p3 var(--vines-900, 0.067 0.137 0.024) / <alpha-value>)',
-          950: 'color(display-p3 var(--vines-950, 0.031 0.067 0.012) / <alpha-value>)',
-          dark: {
-            50: 'color(display-p3 var(--vines-dark-50, 0.941 0.992 0.914) / <alpha-value>)',
-            100: 'color(display-p3 var(--vines-dark-100, 0.875 0.976 0.82) / <alpha-value>)',
-            200: 'color(display-p3 var(--vines-dark-200, 0.737 0.937 0.627) / <alpha-value>)',
-            300: 'color(display-p3 var(--vines-dark-300, 0.604 0.902 0.431) / <alpha-value>)',
-            400: 'color(display-p3 var(--vines-dark-400, 0.471 0.867 0.239) / <alpha-value>)',
-            500: 'color(display-p3 var(--vines-dark-500, 0.357 0.69 0.169) / <alpha-value>)', // primary
-            600: 'color(display-p3 var(--vines-dark-600, 0.286 0.553 0.137) / <alpha-value>)',
-            700: 'color(display-p3 var(--vines-dark-700, 0.22 0.42 0.102) / <alpha-value>)',
-            800: 'color(display-p3 var(--vines-dark-800, 0.145 0.282 0.067) / <alpha-value>)',
-            900: 'color(display-p3 var(--vines-dark-900, 0.078 0.149 0.035) / <alpha-value>)',
-            950: 'color(display-p3 var(--vines-dark-950, 0.039 0.078 0.02) / <alpha-value>)',
-          },
+          50: 'rgb(var(--vines-50, 238 247 231) / <alpha-value>)',
+          100: 'rgb(var(--vines-100, 216 239 199) / <alpha-value>)',
+          200: 'rgb(var(--vines-200, 179 222 149) / <alpha-value>)',
+          300: 'rgb(var(--vines-300, 144 206 104) / <alpha-value>)',
+          400: 'rgb(var(--vines-400, 112 189 65) / <alpha-value>)',
+          500: 'rgb(var(--vines-500, 82 173 31) / <alpha-value>)', // primary
+          600: 'rgb(var(--vines-600, 65 144 24) / <alpha-value>)',
+          700: 'rgb(var(--vines-700, 50 115 18) / <alpha-value>)',
+          800: 'rgb(var(--vines-800, 36 87 13) / <alpha-value>)',
+          900: 'rgb(var(--vines-900, 23 58 8) / <alpha-value>)',
         },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
