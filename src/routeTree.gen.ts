@@ -110,12 +110,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComponentsTooltipImport
       parentRoute: typeof rootRoute
     }
-    '/$teamId/workbench/': {
-      preLoaderRoute: typeof TeamIdWorkbenchIndexImport
-      parentRoute: typeof rootRoute
-    }
     '/$teamId/': {
       preLoaderRoute: typeof TeamIdIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/workbench/': {
+      preLoaderRoute: typeof TeamIdWorkbenchIndexImport
       parentRoute: typeof rootRoute
     }
   }
@@ -132,8 +132,8 @@ export const routeTree = rootRoute.addChildren([
   ComponentsSwitchRoute,
   ComponentsTagRoute,
   ComponentsTooltipRoute,
-  TeamIdWorkbenchIndexRoute,
   TeamIdIndexRoute,
+  TeamIdWorkbenchIndexRoute,
 ])
 
 /* prettier-ignore-end */
