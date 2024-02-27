@@ -20,7 +20,20 @@ import { Route as ComponentsSwitchImport } from './pages/components/switch'
 import { Route as ComponentsPopoverImport } from './pages/components/popover'
 import { Route as ComponentsModalImport } from './pages/components/modal'
 import { Route as ComponentsButtonImport } from './pages/components/button'
+import { Route as TeamIdDataStoreIndexImport } from './pages/$teamId/data-store/index'
+import { Route as TeamIdWorkflowsIndexImport } from './pages/$teamId/workflows/index'
 import { Route as TeamIdWorkbenchIndexImport } from './pages/$teamId/workbench/index'
+import { Route as TeamIdToolStoreIndexImport } from './pages/$teamId/tool-store/index'
+import { Route as TeamIdTextModelsIndexImport } from './pages/$teamId/text-models/index'
+import { Route as TeamIdTextDataIndexImport } from './pages/$teamId/text-data/index'
+import { Route as TeamIdTableDataIndexImport } from './pages/$teamId/table-data/index'
+import { Route as TeamIdRenderToolsIndexImport } from './pages/$teamId/render-tools/index'
+import { Route as TeamIdModelStoreIndexImport } from './pages/$teamId/model-store/index'
+import { Route as TeamIdMediaDataIndexImport } from './pages/$teamId/media-data/index'
+import { Route as TeamIdImageModelsIndexImport } from './pages/$teamId/image-models/index'
+import { Route as TeamIdCanvasIndexImport } from './pages/$teamId/canvas/index'
+import { Route as TeamIdApplicationStoreIndexImport } from './pages/$teamId/application-store/index'
+import { Route as TeamIdActionToolsIndexImport } from './pages/$teamId/action-tools/index'
 
 // Create/Update Routes
 
@@ -69,8 +82,74 @@ const ComponentsButtonRoute = ComponentsButtonImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const TeamIdDataStoreIndexRoute = TeamIdDataStoreIndexImport.update({
+  path: '/$teamId/data-store/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TeamIdWorkflowsIndexRoute = TeamIdWorkflowsIndexImport.update({
+  path: '/$teamId/workflows/',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const TeamIdWorkbenchIndexRoute = TeamIdWorkbenchIndexImport.update({
   path: '/$teamId/workbench/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TeamIdToolStoreIndexRoute = TeamIdToolStoreIndexImport.update({
+  path: '/$teamId/tool-store/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TeamIdTextModelsIndexRoute = TeamIdTextModelsIndexImport.update({
+  path: '/$teamId/text-models/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TeamIdTextDataIndexRoute = TeamIdTextDataIndexImport.update({
+  path: '/$teamId/text-data/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TeamIdTableDataIndexRoute = TeamIdTableDataIndexImport.update({
+  path: '/$teamId/table-data/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TeamIdRenderToolsIndexRoute = TeamIdRenderToolsIndexImport.update({
+  path: '/$teamId/render-tools/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TeamIdModelStoreIndexRoute = TeamIdModelStoreIndexImport.update({
+  path: '/$teamId/model-store/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TeamIdMediaDataIndexRoute = TeamIdMediaDataIndexImport.update({
+  path: '/$teamId/media-data/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TeamIdImageModelsIndexRoute = TeamIdImageModelsIndexImport.update({
+  path: '/$teamId/image-models/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TeamIdCanvasIndexRoute = TeamIdCanvasIndexImport.update({
+  path: '/$teamId/canvas/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TeamIdApplicationStoreIndexRoute =
+  TeamIdApplicationStoreIndexImport.update({
+    path: '/$teamId/application-store/',
+    getParentRoute: () => rootRoute,
+  } as any)
+
+const TeamIdActionToolsIndexRoute = TeamIdActionToolsIndexImport.update({
+  path: '/$teamId/action-tools/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -114,8 +193,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdIndexImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/action-tools/': {
+      preLoaderRoute: typeof TeamIdActionToolsIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/application-store/': {
+      preLoaderRoute: typeof TeamIdApplicationStoreIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/canvas/': {
+      preLoaderRoute: typeof TeamIdCanvasIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/image-models/': {
+      preLoaderRoute: typeof TeamIdImageModelsIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/media-data/': {
+      preLoaderRoute: typeof TeamIdMediaDataIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/model-store/': {
+      preLoaderRoute: typeof TeamIdModelStoreIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/render-tools/': {
+      preLoaderRoute: typeof TeamIdRenderToolsIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/table-data/': {
+      preLoaderRoute: typeof TeamIdTableDataIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/text-data/': {
+      preLoaderRoute: typeof TeamIdTextDataIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/text-models/': {
+      preLoaderRoute: typeof TeamIdTextModelsIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/tool-store/': {
+      preLoaderRoute: typeof TeamIdToolStoreIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/workbench/': {
       preLoaderRoute: typeof TeamIdWorkbenchIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/workflows/': {
+      preLoaderRoute: typeof TeamIdWorkflowsIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/data-store/': {
+      preLoaderRoute: typeof TeamIdDataStoreIndexImport
       parentRoute: typeof rootRoute
     }
   }
@@ -133,7 +264,20 @@ export const routeTree = rootRoute.addChildren([
   ComponentsTagRoute,
   ComponentsTooltipRoute,
   TeamIdIndexRoute,
+  TeamIdActionToolsIndexRoute,
+  TeamIdApplicationStoreIndexRoute,
+  TeamIdCanvasIndexRoute,
+  TeamIdImageModelsIndexRoute,
+  TeamIdMediaDataIndexRoute,
+  TeamIdModelStoreIndexRoute,
+  TeamIdRenderToolsIndexRoute,
+  TeamIdTableDataIndexRoute,
+  TeamIdTextDataIndexRoute,
+  TeamIdTextModelsIndexRoute,
+  TeamIdToolStoreIndexRoute,
   TeamIdWorkbenchIndexRoute,
+  TeamIdWorkflowsIndexRoute,
+  TeamIdDataStoreIndexRoute,
 ])
 
 /* prettier-ignore-end */
