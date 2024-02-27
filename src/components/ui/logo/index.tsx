@@ -35,7 +35,7 @@ export const AppLogo: React.FC<ILogoProps> = memo(({ url, alt, className, width,
       </div>
     )}
 
-    <p className="mt-2 w-full select-none rounded bg-vines-500 px-2 py-1 text-center text-xs text-white">
+    <p className="mt-2 w-full select-none rounded bg-vines-500 px-2 py-1 text-center text-xs text-white dark:bg-white dark:text-slate-3">
       构建流程为中心的 AI 应用
     </p>
   </div>

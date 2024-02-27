@@ -20,7 +20,6 @@ import { Route as ComponentsSwitchImport } from './pages/components/switch'
 import { Route as ComponentsPopoverImport } from './pages/components/popover'
 import { Route as ComponentsModalImport } from './pages/components/modal'
 import { Route as ComponentsButtonImport } from './pages/components/button'
-import { Route as TeamIdDataStoreIndexImport } from './pages/$teamId/data-store/index'
 import { Route as TeamIdWorkflowsIndexImport } from './pages/$teamId/workflows/index'
 import { Route as TeamIdWorkbenchIndexImport } from './pages/$teamId/workbench/index'
 import { Route as TeamIdToolStoreIndexImport } from './pages/$teamId/tool-store/index'
@@ -31,6 +30,7 @@ import { Route as TeamIdRenderToolsIndexImport } from './pages/$teamId/render-to
 import { Route as TeamIdModelStoreIndexImport } from './pages/$teamId/model-store/index'
 import { Route as TeamIdMediaDataIndexImport } from './pages/$teamId/media-data/index'
 import { Route as TeamIdImageModelsIndexImport } from './pages/$teamId/image-models/index'
+import { Route as TeamIdDataStoreIndexImport } from './pages/$teamId/data-store/index'
 import { Route as TeamIdCanvasIndexImport } from './pages/$teamId/canvas/index'
 import { Route as TeamIdApplicationStoreIndexImport } from './pages/$teamId/application-store/index'
 import { Route as TeamIdActionToolsIndexImport } from './pages/$teamId/action-tools/index'
@@ -82,11 +82,6 @@ const ComponentsButtonRoute = ComponentsButtonImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const TeamIdDataStoreIndexRoute = TeamIdDataStoreIndexImport.update({
-  path: '/$teamId/data-store/',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const TeamIdWorkflowsIndexRoute = TeamIdWorkflowsIndexImport.update({
   path: '/$teamId/workflows/',
   getParentRoute: () => rootRoute,
@@ -134,6 +129,11 @@ const TeamIdMediaDataIndexRoute = TeamIdMediaDataIndexImport.update({
 
 const TeamIdImageModelsIndexRoute = TeamIdImageModelsIndexImport.update({
   path: '/$teamId/image-models/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TeamIdDataStoreIndexRoute = TeamIdDataStoreIndexImport.update({
+  path: '/$teamId/data-store/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -205,6 +205,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdCanvasIndexImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/data-store/': {
+      preLoaderRoute: typeof TeamIdDataStoreIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/image-models/': {
       preLoaderRoute: typeof TeamIdImageModelsIndexImport
       parentRoute: typeof rootRoute
@@ -245,10 +249,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdWorkflowsIndexImport
       parentRoute: typeof rootRoute
     }
-    '/$teamId/data-store/': {
-      preLoaderRoute: typeof TeamIdDataStoreIndexImport
-      parentRoute: typeof rootRoute
-    }
   }
 }
 
@@ -267,6 +267,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdActionToolsIndexRoute,
   TeamIdApplicationStoreIndexRoute,
   TeamIdCanvasIndexRoute,
+  TeamIdDataStoreIndexRoute,
   TeamIdImageModelsIndexRoute,
   TeamIdMediaDataIndexRoute,
   TeamIdModelStoreIndexRoute,
@@ -277,7 +278,6 @@ export const routeTree = rootRoute.addChildren([
   TeamIdToolStoreIndexRoute,
   TeamIdWorkbenchIndexRoute,
   TeamIdWorkflowsIndexRoute,
-  TeamIdDataStoreIndexRoute,
 ])
 
 /* prettier-ignore-end */
