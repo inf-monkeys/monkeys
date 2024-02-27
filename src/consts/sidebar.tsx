@@ -25,10 +25,12 @@ export const SIDEBAR_MAP: NavItem[] = [
     icon: <Server />,
     items: [
       {
-        name: 'workflow-app',
+        path: '/$teamId/workflows',
+        name: 'workflows-app',
         label: '工作流',
       },
       {
+        path: '/$teamId/canvas',
         name: 'canvas-app',
         label: '无限画板',
       },
@@ -40,11 +42,13 @@ export const SIDEBAR_MAP: NavItem[] = [
     icon: <Calculator />,
     items: [
       {
-        name: 'execute-tool',
+        path: '/$teamId/action-tools',
+        name: 'action-tools',
         label: '执行类工具',
       },
       {
-        name: 'interpret-tool',
+        path: '/$teamId/render-tools',
+        name: 'render-tools',
         label: '渲染类工具',
       },
     ],
@@ -55,53 +59,62 @@ export const SIDEBAR_MAP: NavItem[] = [
     icon: <FileBox />,
     items: [
       {
-        name: 'language-model',
+        path: '/$teamId/text-models',
+        name: 'text-models',
         label: '语言模型',
       },
       {
-        name: 'image-model',
+        path: '/$teamId/image-models',
+        name: 'image-models',
         label: '图像模型',
       },
     ],
   },
   {
-    name: 'data',
+    name: 'media',
     label: '数据',
     icon: <GalleryVerticalEnd />,
     items: [
       {
+        path: '/$teamId/text-data',
         name: 'text-data',
         label: '文本数据',
       },
       {
-        name: 'sheet-data',
+        path: '/$teamId/table-data',
+        name: 'table-data',
         label: '表格数据',
       },
       {
+        path: '/$teamId/media-data',
         name: 'media-data',
         label: '富媒体数据',
       },
     ],
   },
   {
-    name: 'market',
+    name: 'application',
     label: '市场',
     icon: <ShoppingCart />,
     items: [
       {
-        name: 'app-market',
+        path: '/$teamId/application-store',
+        name: 'application-store',
         label: '应用市场',
       },
       {
-        name: 'tool-market',
+        path: '/$teamId/tool-store',
+        name: 'tool-store',
         label: '工具市场',
       },
       {
-        name: 'model-market',
+        path: '/$teamId/model-store',
+        name: 'model-store',
         label: '模型市场',
       },
       {
-        name: 'data-market',
+        path: '/$teamId/data-store',
+        name: 'data-store',
         label: '数据市场',
       },
     ],
