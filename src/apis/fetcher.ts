@@ -42,3 +42,22 @@ export const useAuthzGetFetcher = async <T>(url: string) => {
     },
   }).then(async (r) => wrapper<T>(await r.json()))) as T;
 };
+
+export const useAuthzPostFetcher = async <T, U>(url: string, { arg }: { arg: U }) => {
+  const token = readLocalStorageValue('vines-token', '', false);
+  if (!token) {
+    throw new Error('需要登录');
+  }
+
+  const teamId = readLocalStorageValue('vines-team-id', '', false);
+
+  return (await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json;charset=utf-8',
+      Authentication: 'Bearer ' + token,
+      Team: teamId,
+    },
+    body: stringify(arg),
+  }).then(async (r) => wrapper<T>(await r.json()))) as T;
+};

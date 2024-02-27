@@ -1,10 +1,13 @@
 import React from 'react';
 
+import { useNavigate } from '@tanstack/react-router';
+
 import { Moon, Sun, SunMoon, UserCog } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Route } from '@/pages/login.tsx';
 import { useAppStore } from '@/store/useAppStore';
 import { EDarkModeTrigger } from '@/store/useAppStore/dark-mode.slice.ts';
 import { useLocalStorage } from '@/utils';
@@ -12,6 +15,7 @@ import { useLocalStorage } from '@/utils';
 export const Toolbar: React.FC = () => {
   const { setDarkMode, setDarkModeTrigger } = useAppStore();
   const [mode, setLocalDarkMode] = useLocalStorage<string>('vines-ui-dark-mode', 'auto', false);
+  const navigate = useNavigate({ from: Route.fullPath });
 
   const handleDarkModeChange = (mode: string) => {
     setLocalDarkMode(mode);
@@ -64,6 +68,11 @@ export const Toolbar: React.FC = () => {
             className="!size-9 bg-mauve-2 shadow-sm [&_svg]:stroke-black dark:[&_svg]:stroke-gold-12"
             icon={<UserCog />}
             size="small"
+            onClick={() => {
+              void navigate({
+                to: '/$teamId/settings',
+              });
+            }}
           />
         </TooltipTrigger>
         <TooltipContent>用户与团队配置</TooltipContent>
