@@ -16,7 +16,7 @@ export const AppLogo: React.FC<ILogoProps> = memo(({ url, alt, className, width,
     {url ? (
       <SmoothTransition initialHeight={height}>
         <Avatar className={cn('w-auto select-none rounded', className)} style={{ width, height }}>
-          <AvatarImage className="aspect-auto" src={url} alt={alt} />
+          <AvatarImage className="aspect-auto w-auto rounded" src={url} alt={alt} />
           <AvatarFallback className="rounded-none p-2 text-xs">{alt}</AvatarFallback>
         </Avatar>
       </SmoothTransition>
