@@ -14,11 +14,11 @@ import { useLocalStorage } from '@/utils';
 import { maskPhone } from '@/utils/maskdata.ts';
 
 interface Props {
-  visible: boolean;
+  open: boolean;
   onClose: () => void;
 }
 
-export const ToggleUserPhoneModal: React.FC<Props> = ({ visible, onClose }) => {
+export const ToggleUserPhoneDialog: React.FC<Props> = ({ open, onClose }) => {
   const [user, setUser] = useLocalStorage<Partial<IUser>>('vines-account', {});
 
   const { trigger, data } = useUpdateUserInfo();
@@ -92,24 +92,24 @@ export const ToggleUserPhoneModal: React.FC<Props> = ({ visible, onClose }) => {
   }, [data]);
 
   return (
-    <Dialog open={visible} onClose={onClose}>
+    <Dialog open={open} onClose={onClose}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>更改手机号</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4">
-          <div className="bg-bg2 flex w-full items-center gap-2 rounded-sm p-2 shadow-sm">
+          <div className="bg-bg2 flex w-full items-center gap-2 rounded-sm p-2 ">
             <Info className="text-danger" />
-            <p className="text-danger">为了您的账号安全，进行敏感操作前须先验证身份</p>
+            <p className="text-sm text-danger">为了您的账号安全，进行敏感操作前须先验证身份</p>
           </div>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-4 px-2 pb-4">
+            <div className="grid grid-cols-5 items-center gap-4">
               <Label htmlFor="old-phone-number" className="text-right">
                 原始手机
               </Label>
-              <Input id="old-phone-number" className="col-span-3" value={maskPhone(oldPhoneNumber)} readOnly />
+              <Input id="old-phone-number" className="col-span-4" value={maskPhone(oldPhoneNumber)} readOnly />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-5 items-center gap-4">
               <Label htmlFor="old-phone-verify-code" className="text-right">
                 短信验证码
               </Label>
@@ -124,18 +124,18 @@ export const ToggleUserPhoneModal: React.FC<Props> = ({ visible, onClose }) => {
                 }}
                 value={oldPhoneVerifyCode}
               />
-              <Button className="col-span-1 flex-shrink" disabled={countdown > 0} onClick={() => handleSendSms('old')}>
+              <Button className="col-span-2 flex-shrink" disabled={countdown > 0} onClick={() => handleSendSms('old')}>
                 {countdown > 0 ? `${countdown} S` : '获取验证码'}
               </Button>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-5 items-center gap-4">
               <Label htmlFor="new-phone-number" className="text-right">
                 新手机号
               </Label>
               <Input
                 id="new-phone-number"
                 placeholder="请输入新的手机号"
-                className="col-span-3"
+                className="col-span-4"
                 onChange={(v) => {
                   setNewPhoneNumber(v.target.value);
                   setNewPhoneNumberVerify(!isNaN(Number(v.target.value)) && /^1[3456789]\d{9}$/.test(v.target.value));
@@ -143,7 +143,7 @@ export const ToggleUserPhoneModal: React.FC<Props> = ({ visible, onClose }) => {
                 value={newPhoneNumber}
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-5 items-center gap-4">
               <Label htmlFor="new-phone-verify-code" className="text-right">
                 短信验证码
               </Label>
@@ -160,7 +160,7 @@ export const ToggleUserPhoneModal: React.FC<Props> = ({ visible, onClose }) => {
                 value={newPhoneVerifyCode}
               />
               <Button
-                className="col-span-1 flex-shrink"
+                className="col-span-2 flex-shrink"
                 disabled={newCountdown > 0 || !newPhoneNumberVerify}
                 onClick={() => handleSendSms('new')}
               >
