@@ -71,7 +71,7 @@ export const ApiKeySettings: React.FC = () => {
           <>
             {apiKeyList && apiKeyList.length > 0 ? (
               apiKeyList.map((apiKey, index) => (
-                <div key={index} className="justify-between">
+                <div key={index} className="w-full justify-between">
                   <div className="flex items-center">
                     <div className="mr-1 flex-shrink-0">
                       {apiKey.status === ApiKeyStatus.Revoked ? <XCircle /> : <Key />}
@@ -84,6 +84,7 @@ export const ApiKeySettings: React.FC = () => {
                         <div>，创建于 {formatTimeDiffPrevious(apiKey.createdTimestamp)}</div>
                       </div>
                     </div>
+                    <div className="flex-1"></div>
                     <div className="flex gap-2">
                       <Button
                         className="!text-text1"
