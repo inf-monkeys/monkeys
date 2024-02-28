@@ -5,7 +5,11 @@ export enum EDarkModeTrigger {
   Manual = 'manual',
 }
 
-const toggleDarkMode = (dark: boolean) => document.documentElement.classList[dark ? 'add' : 'remove']('dark');
+const toggleDarkMode = (dark: boolean) => {
+  const root = document.documentElement;
+  root.classList[dark ? 'add' : 'remove']('dark');
+  root.setAttribute('data-mantine-color-scheme', dark ? 'dark' : 'light');
+};
 
 export interface DarkModeSlice {
   darkMode: boolean;
