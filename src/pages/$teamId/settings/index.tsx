@@ -4,7 +4,8 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
-import { UserSettings } from '@/pages/$teamId/settings/user/index.component.tsx';
+import { ApiKeySettings } from '@/pages/$teamId/settings/api-key/index.lazy.tsx';
+import { UserSettings } from '@/pages/$teamId/settings/user/index.lazy.tsx';
 
 const SIDEBAR_LIST = [
   {
@@ -35,9 +36,10 @@ const SIDEBAR_LIST = [
 
 export const Settings: React.FC = () => {
   return (
-    <>
-      <Tabs defaultValue="user" className="flex w-full items-start gap-3" orientation="vertical">
-        <TabsList className="w-32">
+    <div className="flex flex-col gap-2">
+      <h2 className="text-lg font-bold">用户与团队配置</h2>
+      <Tabs defaultValue="user" className="">
+        <TabsList>
           {SIDEBAR_LIST.map((item) => (
             <TabsTrigger key={item.key} value={item.key} className="text-xs">
               {item.label}
@@ -47,8 +49,11 @@ export const Settings: React.FC = () => {
         <TabsContent value="user">
           <UserSettings />
         </TabsContent>
+        <TabsContent value="api-key">
+          <ApiKeySettings />
+        </TabsContent>
       </Tabs>
-    </>
+    </div>
   );
 };
 
