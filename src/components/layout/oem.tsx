@@ -4,12 +4,14 @@ import { useDocumentTitle, useFavicon } from '@mantine/hooks';
 import { get } from 'lodash';
 
 import { useOemConfig } from '@/apis/common';
+import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { useAppStore } from '@/store/useAppStore';
 import { EDarkModeTrigger } from '@/store/useAppStore/dark-mode.slice.ts';
 import usePaletteStore from '@/store/usePaletteStore.ts';
 import { useLocalStorage } from '@/utils';
 
 export const OEM: React.FC = () => {
+  const { team } = useVinesTeam();
   const [localDarkMode, setLocalDarkMode] = useLocalStorage<string>('vines-ui-dark-mode', '', false);
 
   const { data: oem } = useOemConfig();
@@ -19,9 +21,10 @@ export const OEM: React.FC = () => {
   const { setValue } = usePaletteStore();
 
   const siteThemeColor = get(oem, 'theme.colors.primaryColor', '');
+  const teamThemeColor = get(team, 'customTheme.primaryColor', '');
   useEffect(() => {
-    setValue(siteThemeColor);
-  }, [siteThemeColor]);
+    setValue(teamThemeColor || siteThemeColor);
+  }, [siteThemeColor, teamThemeColor]);
 
   useLayoutEffect(() => {
     const handleToggleTheme = (event: Pick<MediaQueryListEvent, 'matches'>) => toggleDarkMode(event.matches);
