@@ -8,6 +8,7 @@ import { routeTree } from '@/routeTree.gen';
 import 'normalize.css';
 import '@/styles/index.scss';
 
+import { MantineProvider } from '@mantine/core';
 import { Toaster } from 'sonner';
 
 import { swrMiddleware } from '@/apis/middleware.ts';
@@ -30,7 +31,9 @@ declare module '@tanstack/react-router' {
 ReactDOM.createRoot(document.getElementById('vines-ui')!).render(
   <>
     <SWRConfig value={{ use: [swrMiddleware], provider: localStorageProvider }}>
-      <RouterProvider router={router} />
+      <MantineProvider>
+        <RouterProvider router={router} />
+      </MantineProvider>
       <Toaster richColors />
     </SWRConfig>
     <Suspense>
