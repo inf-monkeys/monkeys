@@ -56,7 +56,12 @@ export const TeamSelector: React.FC = () => {
           aria-expanded={open}
           aria-label="Select a team"
         >
-          <Team logo={currentTeam?.logoUrl} name={currentTeam?.name} description={currentTeam?.description} />
+          <Team
+            className="w-32"
+            logo={currentTeam?.logoUrl}
+            name={currentTeam?.name}
+            description={currentTeam?.description}
+          />
           <ChevronsUpDown className="h-4 w-4 opacity-50" />
         </Button>
       </PopoverTrigger>
