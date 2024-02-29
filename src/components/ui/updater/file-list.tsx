@@ -5,16 +5,26 @@ import { set } from 'lodash';
 import { CheckCircle2, FileCheck, FileClock, FileSearch, FileX2, Loader2, UploadCloud, XCircle } from 'lucide-react';
 import { nanoid } from 'nanoid';
 
+import { getResourceByMd5 } from '@/apis/resources';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { calculateMD5, coverFileSize } from '@/components/ui/updater/utils.ts';
+import {
+  calculateMD5,
+  coverFileSize,
+  escapeFileName,
+  generateUploadFilePrefix,
+  uploadFile,
+} from '@/components/ui/updater/utils.ts';
+import { cn } from '@/utils';
 
 interface IFilesProps extends React.ComponentPropsWithoutRef<'div'> {
   files: FileWithPath[];
   setFiles: React.Dispatch<React.SetStateAction<FileWithPath[]>>;
+  isUploading: boolean;
+  setIsUploading: React.Dispatch<React.SetStateAction<boolean>>;
   limit?: number;
 }
 
@@ -30,7 +40,7 @@ interface IFile {
   progress: string;
 }
 
-export const FileList: React.FC<IFilesProps> = ({ files, setFiles, limit }) => {
+export const FileList: React.FC<IFilesProps> = ({ files, setFiles, limit, isUploading, setIsUploading }) => {
   const [list, setList] = useState<IFile[]>([]);
   const [hiddenList, setHiddenList] = useState<string[]>([]);
 
@@ -97,6 +107,49 @@ export const FileList: React.FC<IFilesProps> = ({ files, setFiles, limit }) => {
   }, [md5Queue]);
 
   const finalLists = list.filter((it) => !hiddenList.includes(it.id));
+  const hasFile = finalLists.length > 0;
+  const isWaitToUpload = hasFile && finalLists.every((it) => it.status === 'wait-to-update');
+
+  const [uploadQueue, setUploadQueue] = useState<string[]>([]);
+  const handleOnClickUpload = async () => {
+    if (!isWaitToUpload) return;
+    setIsUploading(true);
+    setUploadQueue(finalLists.map((it) => it.id));
+  };
+
+  const isUploadBusyRef = useRef(false);
+  const handleUpload = async () => {
+    const fileId = uploadQueue[0];
+    const it = list.find((it) => it.id === fileId);
+
+    if (!fileId || !it) return;
+    isUploadBusyRef.current = true;
+    it.status = 'uploading';
+    updateListById(fileId, it);
+
+    const existingFileUrl = (await getResourceByMd5(it.md5 as string))?.url;
+    if (existingFileUrl) {
+      console.log(existingFileUrl);
+    }
+
+    const file = it.file;
+    const fileNameArray = file.name.split('.');
+    const fileNameWithoutSuffix = fileNameArray.length > 1 ? fileNameArray.slice(0, -1).join('.') : fileNameArray[0];
+    const suffix = fileNameArray.length > 1 ? fileNameArray.pop() : null;
+    const filename = `futi-test/${generateUploadFilePrefix()}_${escapeFileName(fileNameWithoutSuffix)}${suffix ? '.'.concat(suffix) : ''}`;
+
+    await uploadFile(file, filename, (progress) => console.log(filename, progress));
+
+    it.status = 'success';
+    updateListById(fileId, it);
+    isUploadBusyRef.current = false;
+    setUploadQueue((prev) => prev.filter((it) => it !== fileId));
+  };
+
+  useEffect(() => {
+    void handleUpload();
+  }, [uploadQueue]);
+
   const remaining = limit ? limit - files.length : 0;
 
   return (
@@ -126,13 +179,14 @@ export const FileList: React.FC<IFilesProps> = ({ files, setFiles, limit }) => {
                     <TableCell className="[&_svg]:m-auto">
                       {status === 'wait' && <FileSearch size={16} />}
                       {status === 'busy' ? `${progress}%` : ''}
+                      {status === 'uploading' && <Loader2 size={16} className="animate-spin" />}
                       {status === 'wait-to-update' && <FileClock size={16} />}
                       {status === 'success' && <CheckCircle2 size={16} />}
                       {status === 'error' && <FileX2 size={16} />}
                     </TableCell>
                     <TableCell className="p-0 text-center">
                       <Button
-                        disabled={status === 'uploading' || status === 'busy'}
+                        disabled={status === 'uploading' || status === 'busy' || isUploading}
                         className="scale-90 [&_svg]:stroke-black dark:[&_svg]:stroke-gold-12"
                         icon={<XCircle />}
                         variant="borderless"
@@ -158,8 +212,14 @@ export const FileList: React.FC<IFilesProps> = ({ files, setFiles, limit }) => {
       <div className="flex items-center pr-4">
         <Separator orientation="vertical" />
       </div>
-      <div className="vines-center w-40 flex-none flex-col gap-2 py-6">
-        {!finalLists.length ? (
+      <div
+        className={cn(
+          'vines-center w-40 flex-none select-none flex-col gap-2 rounded py-6 transition-colors',
+          isWaitToUpload && !isUploading && 'cursor-pointer hover:bg-black hover:bg-opacity-5 active:bg-opacity-10',
+        )}
+        onClick={handleOnClickUpload}
+      >
+        {!hasFile ? (
           <>
             <FileClock size={32} />
             <p className="text-xs">等待文件中</p>
@@ -169,7 +229,7 @@ export const FileList: React.FC<IFilesProps> = ({ files, setFiles, limit }) => {
             <FileCheck size={32} />
             <p className="text-xs">上传成功</p>
           </>
-        ) : finalLists.every((it) => it.status === 'wait-to-update') ? (
+        ) : isWaitToUpload && !isUploading ? (
           <>
             <UploadCloud size={32} />
             <p className="text-xs">等待操作上传</p>
@@ -178,7 +238,9 @@ export const FileList: React.FC<IFilesProps> = ({ files, setFiles, limit }) => {
         ) : (
           <>
             <Loader2 size={32} className="animate-spin" />
-            <p className="text-xs">正在{finalLists.some((it) => it.status === 'uploading') ? '上传' : '计算'}文件</p>
+            <p className="text-xs">
+              正在{finalLists.some((it) => it.status === 'uploading') || isUploading ? '上传' : '计算'}文件
+            </p>
           </>
         )}
       </div>

@@ -34,10 +34,10 @@ ReactDOM.createRoot(document.getElementById('vines-ui')!).render(
       <MantineProvider>
         <RouterProvider router={router} />
       </MantineProvider>
-      <Toaster richColors />
     </SWRConfig>
     <Suspense>
       <LagRadar />
     </Suspense>
+    <Toaster richColors />
   </>,
 );
