@@ -10,7 +10,7 @@ import { SettingsWrapper } from '@/components/layout/main/settings/wrapper.tsx';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
 import { ApiKeySettingsCreateApiKeyDialog } from '@/pages/$teamId/settings/api-key/create-api-key-dialog.lazy.tsx';
-import { SettingsTeamHeader } from '@/pages/$teamId/settings/team-header.lazy.tsx';
+import { SettingsTeamHeader } from '@/pages/$teamId/settings/team-header/index.lazy.tsx';
 import { useTimeDiff } from '@/utils';
 
 export const ApiKeySettings: React.FC = () => {

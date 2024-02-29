@@ -7,11 +7,17 @@ import { toast } from 'sonner';
 import { readLocalStorageValue, setLocalStorage } from '@/utils';
 
 export interface IUser {
-  id: string;
+  _id: string;
+  id?: string;
   name: string;
-  phone: number | null;
-  email: string | null;
+  phone?: string;
   photo: string;
+  email?: string;
+  isDeleted: boolean;
+  loginsCount: number;
+  lastLoginAt: number;
+  createdTimestamp: number;
+  updatedTimestamp: number;
 }
 
 export interface IUserToken {

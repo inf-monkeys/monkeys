@@ -1,12 +1,12 @@
 import React from 'react';
 
 import { SettingsWrapper } from '@/components/layout/main/settings/wrapper.tsx';
-import { SettingsUserHeader } from '@/pages/$teamId/settings/user-header/index.lazy.tsx';
+import { SettingsTeamHeader } from '@/pages/$teamId/settings/team-header/index.lazy.tsx';
 
-export const UserSettings: React.FC = () => {
+export const TeamMembersSettings: React.FC = () => {
   return (
     <SettingsWrapper>
-      <SettingsUserHeader />
+      <SettingsTeamHeader />
     </SettingsWrapper>
   );
 };

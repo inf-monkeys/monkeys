@@ -1,5 +1,6 @@
 export interface ITeam {
   id: string;
+  _id: string;
   name: string;
   logoUrl?: string;
   description?: string;
@@ -16,4 +17,15 @@ export interface ITeamBalance {
   amount: number;
   totalConsume: number;
   totalReCharge: number;
+}
+
+export enum TeamInviteLinkOutdateType {
+  SEVEN_DAYS = 1,
+  NEVER = 2,
+}
+
+export interface ITeamAppyUpdate {
+  disabled?: boolean;
+  applyUserId?: string;
+  apply?: boolean;
 }
