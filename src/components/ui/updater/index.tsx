@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import { Dropzone, FileWithPath } from '@mantine/dropzone';
 import { FileUp } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
@@ -29,6 +30,7 @@ export const Updater: React.FC<IUpdaterProps> = ({ files: initialFiles = [], acc
         accept={accept}
         maxSize={maxSize * 1024 ** 2}
         maxFiles={limit}
+        onReject={(file) => file.forEach((it) => toast.error(`文件 ${it.file.name} 超出限制`))}
       >
         <div className="vines-center h-40 gap-4">
           <FileUp size={50} className="stroke-gold-12" />
