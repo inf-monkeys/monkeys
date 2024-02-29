@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { FileWithPath } from '@mantine/dropzone';
 import { set } from 'lodash';
-import { CheckCircle2, FileCheck, FileClock, FileX2, Loader2, XCircle } from 'lucide-react';
+import { CheckCircle2, FileCheck, FileClock, FileSearch, FileX2, Loader2, UploadCloud, XCircle } from 'lucide-react';
 import { nanoid } from 'nanoid';
 
 import { Button } from '@/components/ui/button';
@@ -26,28 +26,33 @@ interface IFile {
   type: string;
   size: number;
   md5?: string;
-  status: 'wait' | 'busy' | 'uploading' | 'error' | 'success';
-  progress: number;
+  status: 'wait' | 'busy' | 'wait-to-update' | 'uploading' | 'error' | 'success';
+  progress: string;
 }
 
 export const FileList: React.FC<IFilesProps> = ({ files, setFiles, limit }) => {
   const [list, setList] = useState<IFile[]>([]);
   const [hiddenList, setHiddenList] = useState<string[]>([]);
 
+  const fileMd5 = useRef(new Map<string, string>());
+  const [md5Queue, setMd5Queue] = useState<string[]>([]);
+
   useEffect(() => {
     const newList: IFile[] = files
       .map((it) => {
         const path = it.path;
         if (!path || list.some((item) => item.path === path)) return null;
+        const fileId = nanoid(10);
+        !fileMd5.current.has(path) && setMd5Queue((prev) => [...prev, fileId]);
         return {
-          id: nanoid(10),
+          id: fileId,
           file: it,
           path: path,
           name: it.name,
           type: it.type,
           size: it.size,
           status: 'wait',
-          progress: 0,
+          progress: '0',
         };
       })
       .filter((it) => it !== null) as IFile[];
@@ -55,29 +60,41 @@ export const FileList: React.FC<IFilesProps> = ({ files, setFiles, limit }) => {
     setHiddenList(list.filter((it) => !files.some((file) => file.path === it.path)).map((it) => it.id));
   }, [files]);
 
-  const fileMd5 = useRef(new Map<string, string>());
+  const updateListById = (id: string, data: Partial<IFile>) => {
+    setList((prev) => prev.map((it) => (it.id === id ? { ...it, ...data } : it)));
+  };
+
+  const isBusyRef = useRef(false);
+  const handleCalcMd5 = async () => {
+    const fileId = md5Queue[0];
+    const it = list.find((it) => it.id === fileId);
+
+    if (!fileId || !it || isBusyRef.current) return;
+    isBusyRef.current = true;
+
+    it.status = 'busy';
+    const md5 = (await calculateMD5(it.file, (process) => {
+      it.progress = process.toFixed(2);
+      updateListById(fileId, it);
+    })) as string;
+    if (!md5) {
+      it.status = 'error';
+      updateListById(fileId, it);
+      isBusyRef.current = false;
+      return;
+    }
+    set(it, 'md5', md5);
+    it.status = 'wait-to-update';
+    updateListById(fileId, it);
+    fileMd5.current.set(it.path, md5);
+
+    isBusyRef.current = false;
+    setMd5Queue((prev) => prev.filter((it) => it !== fileId));
+  };
+
   useEffect(() => {
-    list
-      .filter((it) => it.status === 'wait')
-      .forEach((it) => {
-        it.status = 'busy';
-        setList((prev) => prev.map((item) => (item.id === it.id ? it : item)));
-        calculateMD5(it.file, (process) => {
-          it.progress = process;
-          setList((prev) => prev.map((item) => (item.id === it.id ? it : item)));
-        }).then((md5) => {
-          if (!md5) {
-            it.status = 'error';
-            setList((prev) => prev.map((item) => (item.id === it.id ? it : item)));
-            return;
-          }
-          set(it, 'md5', md5);
-          it.status = 'success';
-          setList((prev) => prev.map((item) => (item.id === it.id ? it : item)));
-          fileMd5.current.set(it.path, typeof md5 === 'string' ? md5 : '');
-        });
-      });
-  }, [list]);
+    void handleCalcMd5();
+  }, [md5Queue]);
 
   const finalLists = list.filter((it) => !hiddenList.includes(it.id));
   const remaining = limit ? limit - files.length : 0;
@@ -107,13 +124,15 @@ export const FileList: React.FC<IFilesProps> = ({ files, setFiles, limit }) => {
                     <TableCell className="text-center">{type.split('/')?.[1] || type}</TableCell>
                     <TableCell className="text-center">{coverFileSize(size)}</TableCell>
                     <TableCell className="[&_svg]:m-auto">
-                      {status === 'wait' && <FileClock size={16} />}
-                      {status === 'busy' && <Loader2 size={16} className="animate-spin" />}
+                      {status === 'wait' && <FileSearch size={16} />}
+                      {status === 'busy' ? `${progress}%` : ''}
+                      {status === 'wait-to-update' && <FileClock size={16} />}
                       {status === 'success' && <CheckCircle2 size={16} />}
                       {status === 'error' && <FileX2 size={16} />}
                     </TableCell>
                     <TableCell className="p-0 text-center">
                       <Button
+                        disabled={status === 'uploading' || status === 'busy'}
                         className="scale-90 [&_svg]:stroke-black dark:[&_svg]:stroke-gold-12"
                         icon={<XCircle />}
                         variant="borderless"
@@ -122,11 +141,15 @@ export const FileList: React.FC<IFilesProps> = ({ files, setFiles, limit }) => {
                     </TableCell>
                   </TableRow>
                 </TooltipTrigger>
-                <TooltipContent align="start">
-                  文件名：{name}
-                  <br />
-                  MD5: {!progress ? '正在等待计算中' : md5 ?? `正在计算中（${progress}%）`}
-                </TooltipContent>
+                <tr>
+                  <td>
+                    <TooltipContent align="start">
+                      文件名：{name}
+                      <br />
+                      MD5: {!progress ? '正在等待计算中' : md5 ?? `正在计算中（${progress}%）`}
+                    </TooltipContent>
+                  </td>
+                </tr>
               </Tooltip>
             ))}
           </TableBody>
@@ -146,10 +169,16 @@ export const FileList: React.FC<IFilesProps> = ({ files, setFiles, limit }) => {
             <FileCheck size={32} />
             <p className="text-xs">上传成功</p>
           </>
+        ) : finalLists.every((it) => it.status === 'wait-to-update') ? (
+          <>
+            <UploadCloud size={32} />
+            <p className="text-xs">等待操作上传</p>
+            <p className="text-xxs -mt-1.5 opacity-50">（点此上传）</p>
+          </>
         ) : (
           <>
             <Loader2 size={32} className="animate-spin" />
-            <p className="text-xs">正在{finalLists.some((it) => it.status === 'uploading') ? '上传' : '处理'}文件</p>
+            <p className="text-xs">正在{finalLists.some((it) => it.status === 'uploading') ? '上传' : '计算'}文件</p>
           </>
         )}
       </div>

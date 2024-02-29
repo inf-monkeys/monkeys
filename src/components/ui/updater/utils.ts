@@ -33,7 +33,7 @@ export const calculateMD5 = (file: Blob, callback: (process: number) => void) =>
       spark.append(e.target.result);
       loadedChunks++;
 
-      callback(loadedChunks / Math.ceil(file.size / chunkSize));
+      callback((loadedChunks / chunks) * 100);
 
       loadedChunks < chunks ? loadFileNext() : resolve(spark.end());
     };
