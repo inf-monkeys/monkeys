@@ -1,4 +1,7 @@
+import { customAlphabet } from 'nanoid';
 import SparkMD5 from 'spark-md5';
+
+import { simpleFilePut, simpleGet } from '@/apis/non-fetcher.ts';
 
 export const coverFileSize = (size: number) => {
   if (size < 1024) {
@@ -44,3 +47,21 @@ export const calculateMD5 = (file: Blob, callback: (process: number) => void) =>
 
     loadFileNext();
   });
+
+export const generateUploadFilePrefix = (length = 6) =>
+  'R' + customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', length - 1)();
+
+export const escapeFileName = (filename: string) =>
+  filename.replace(/[&\\#,+()$~%.'":*?<>{}]/g, (match) => '%' + match.charCodeAt(0).toString(16));
+
+export const uploadFile = async (file: File, filename: string, onProgress: (progress: number) => void) => {
+  const filesize = file.size;
+
+  const { baseUrl } = await simpleGet<{ baseUrl: string }>('/api/medias/s3/configs');
+
+  if (filesize < 4 * 1024 * 1024 * 102) {
+    const url = await simpleGet<string>(`/api/medias/s3/presign?key=${filename}`);
+    await simpleFilePut(url, file, onProgress);
+    return baseUrl + url;
+  }
+};

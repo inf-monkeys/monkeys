@@ -9,7 +9,7 @@ import { VinesUpdater } from '@/components/ui/updater';
 export const Workbench: React.FC = () => {
   return (
     <>
-      <VinesUpdater maxSize={10000}>
+      <VinesUpdater>
         <Button>上传文件</Button>
       </VinesUpdater>
     </>

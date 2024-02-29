@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
 import { FileList } from '@/components/ui/updater/file-list.tsx';
+import { cn } from '@/utils';
 
 interface IUpdaterProps {
   files?: FileWithPath[]; // 文件列表
@@ -19,17 +20,20 @@ export const Updater: React.FC<IUpdaterProps> = ({ files: initialFiles = [], acc
   const [files, setFiles] = useState<FileWithPath[]>(initialFiles);
 
   const [isInteracted, setIsInteracted] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   return (
     <div className="flex w-full flex-col gap-4">
       <Dropzone
+        className={cn(isUploading && 'pointer-events-none cursor-not-allowed opacity-60')}
         onDrop={(_files) => {
-          setFiles(_files);
+          setFiles((prev) => [...prev, ..._files]);
           !isInteracted && setIsInteracted(true);
         }}
         accept={accept}
         maxSize={maxSize * 1024 ** 2}
         maxFiles={limit}
+        disabled={isUploading}
         onReject={(file) => file.forEach((it) => toast.error(`文件 ${it.file.name} 超出限制`))}
       >
         <div className="vines-center h-40 gap-4">
@@ -48,7 +52,13 @@ export const Updater: React.FC<IUpdaterProps> = ({ files: initialFiles = [], acc
 
       {isInteracted && (
         <SmoothTransition className="overflow-hidden">
-          <FileList files={files} setFiles={setFiles} limit={limit} />
+          <FileList
+            files={files}
+            setFiles={setFiles}
+            limit={limit}
+            isUploading={isUploading}
+            setIsUploading={setIsUploading}
+          />
         </SmoothTransition>
       )}
     </div>
