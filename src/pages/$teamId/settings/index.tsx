@@ -5,6 +5,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { ApiKeySettings } from '@/pages/$teamId/settings/api-key/index.lazy.tsx';
+import { TeamMembersSettings } from '@/pages/$teamId/settings/team-members/index.lazy.tsx';
 import { UserSettings } from '@/pages/$teamId/settings/user/index.lazy.tsx';
 
 const SIDEBAR_LIST = [
@@ -48,6 +49,9 @@ export const Settings: React.FC = () => {
         </TabsList>
         <TabsContent value="user">
           <UserSettings />
+        </TabsContent>
+        <TabsContent value="team-members">
+          <TeamMembersSettings />
         </TabsContent>
         <TabsContent value="api-key">
           <ApiKeySettings />

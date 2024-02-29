@@ -28,7 +28,7 @@ export const SettingsUserHeader: React.FC<ISettingsUserHeaderProps> = ({ readonl
     value: string;
   } | null>(null);
 
-  const [toggleUserPhoneDialogVisible, setToggleUserPhoneDialogVisible] = useState(false);
+  const [toggleUserPhoneDialogOpen, setToggleUserPhoneDialogOpen] = useState(false);
 
   const handleNameClick = useMemo(() => {
     return readonly
@@ -42,7 +42,7 @@ export const SettingsUserHeader: React.FC<ISettingsUserHeaderProps> = ({ readonl
   }, [readonly]);
 
   const handleDescClick = useMemo(() => {
-    return readonly ? undefined : () => setToggleUserPhoneDialogVisible(true);
+    return readonly ? undefined : () => setToggleUserPhoneDialogOpen(true);
   }, [readonly]);
 
   const handleAvatarClick = useMemo(() => {
@@ -126,10 +126,7 @@ export const SettingsUserHeader: React.FC<ISettingsUserHeaderProps> = ({ readonl
           </DialogContent>
         </Dialog>
       ) : null}
-      <ToggleUserPhoneDialog
-        visible={toggleUserPhoneDialogVisible}
-        onClose={() => setToggleUserPhoneDialogVisible(false)}
-      />
+      <ToggleUserPhoneDialog open={toggleUserPhoneDialogOpen} onClose={() => setToggleUserPhoneDialogOpen(false)} />
     </>
   );
 };
