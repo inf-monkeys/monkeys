@@ -3,6 +3,7 @@ import React from 'react';
 import { createRootRoute, Outlet, ScrollRestoration, useRouterState } from '@tanstack/react-router';
 
 import { NextUIProvider } from '@nextui-org/system';
+import { motion } from 'framer-motion';
 
 import { OEM } from '@/components/layout/oem';
 import { MainWrapper } from '@/components/layout-wrapper/main';
@@ -23,16 +24,33 @@ const RootComponent: React.FC = () => {
   const isUseWorkSpace = routeIds?.at(1) === 'workspace';
 
   return (
-    <main className="vines-ui relative flex h-screen w-screen flex-col items-center justify-center">
+    <>
       <ScrollRestoration />
       <NextUIProvider>
         <TooltipProvider delayDuration={100}>
-          {isUseOutside ? <Outlet /> : isUseWorkSpace ? <WorkspaceWrapper /> : <MainWrapper />}
+          <main className="vines-ui h-screen w-screen">
+            <motion.div
+              key={isUseOutside ? 'vines-outside' : isUseWorkSpace ? 'vines-workspace' : 'vines-main'}
+              className="vines-center relative size-full flex-col"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {isUseOutside ? (
+                <Outlet />
+              ) : isUseWorkSpace ? (
+                <WorkspaceWrapper />
+              ) : (
+                <MainWrapper layoutId={'vines-' + routeIds?.join('-')} />
+              )}
+            </motion.div>
+          </main>
         </TooltipProvider>
       </NextUIProvider>
       <OEM />
       <TeamsGuard />
-    </main>
+    </>
   );
 };
 export const Route = createRootRoute({

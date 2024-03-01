@@ -10,6 +10,7 @@ import '@/styles/index.scss';
 
 import { MantineProvider } from '@mantine/core';
 import * as Portal from '@radix-ui/react-portal';
+import { AnimatePresence } from 'framer-motion';
 import { Toaster } from 'sonner';
 
 import { swrMiddleware } from '@/apis/middleware.ts';
@@ -33,7 +34,9 @@ ReactDOM.createRoot(document.getElementById('vines-ui')!).render(
   <>
     <SWRConfig value={{ use: [swrMiddleware], provider: localStorageProvider }}>
       <MantineProvider>
-        <RouterProvider router={router} />
+        <AnimatePresence mode="wait">
+          <RouterProvider router={router} />
+        </AnimatePresence>
       </MantineProvider>
     </SWRConfig>
     <Suspense>
