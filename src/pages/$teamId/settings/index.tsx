@@ -47,13 +47,16 @@ export const Settings: React.FC = () => {
             </TabsTrigger>
           ))}
         </TabsList>
-        <TabsContent value="user">
+        <TabsContent value="user" className="max-h-[calc(100vh-0.75rem-150px)] overflow-y-auto overflow-x-hidden">
           <UserSettings />
         </TabsContent>
-        <TabsContent value="team-members">
+        <TabsContent
+          value="team-members"
+          className="max-h-[calc(100vh-0.75rem-150px)] overflow-y-auto overflow-x-hidden"
+        >
           <TeamMembersSettings />
         </TabsContent>
-        <TabsContent value="api-key">
+        <TabsContent value="api-key" className="max-h-[calc(100vh-0.75rem-150px)] overflow-y-auto overflow-x-hidden">
           <ApiKeySettings />
         </TabsContent>
       </Tabs>
