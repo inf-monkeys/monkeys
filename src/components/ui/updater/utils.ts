@@ -86,7 +86,7 @@ export const uploadFile = async (file: File, filename: string, onProgress: (prog
   };
 
   for (let i = 0; i < chunks; i++) {
-    const { data, size } = await load(i);
+    const { data } = await load(i);
     const currentProcess = ((i + 1) / chunks) * 100;
 
     const signedUrl = await simplePost<string, Record<string, string | number>>('/api/medias/s3/multipart/part', {
@@ -94,7 +94,7 @@ export const uploadFile = async (file: File, filename: string, onProgress: (prog
       uploadId: UploadId,
       partNumber: i + 1,
     });
-    const res = await simpleFilePut(signedUrl, <File>data, (process) => {
+    const res = await simpleFilePut(signedUrl, <File>data, () => {
       // TODO: 进度条
     });
     parts.push({
