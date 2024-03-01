@@ -50,7 +50,7 @@ export const SettingsTeamHeader: React.FC<ISettingsUserHeaderProps> = ({ readonl
             value: currentTeam?.name || '',
             placeholder: '团队名称',
           });
-  }, [readonly]);
+  }, [readonly, currentTeam]);
 
   const handleDescClick = useMemo(() => {
     return readonly
@@ -61,7 +61,7 @@ export const SettingsTeamHeader: React.FC<ISettingsUserHeaderProps> = ({ readonl
             value: currentTeam?.description || '',
             placeholder: '团队描述',
           });
-  }, [readonly]);
+  }, [readonly, currentTeam]);
 
   const handleAvatarClick = useMemo(() => {
     return readonly ? undefined : () => {};

@@ -39,7 +39,7 @@ export const SettingsUserHeader: React.FC<ISettingsUserHeaderProps> = ({ readonl
             value: user.name || '',
             placeholder: '昵称',
           });
-  }, [readonly]);
+  }, [readonly, user.name]);
 
   const handleDescClick = useMemo(() => {
     return readonly ? undefined : () => setToggleUserPhoneDialogOpen(true);
