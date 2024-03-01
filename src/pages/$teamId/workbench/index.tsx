@@ -3,9 +3,17 @@ import React from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
+import { Button } from '@/components/ui/button';
+import { VinesUpdater } from '@/components/ui/updater';
 
 export const Workbench: React.FC = () => {
-  return <>Workbench</>;
+  return (
+    <>
+      <VinesUpdater>
+        <Button>Update</Button>
+      </VinesUpdater>
+    </>
+  );
 };
 
 export const Route = createFileRoute('/$teamId/workbench/')({
