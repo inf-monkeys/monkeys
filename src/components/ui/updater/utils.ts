@@ -62,7 +62,7 @@ export const uploadFile = async (file: File, filename: string, onProgress: (prog
   if (filesize < 4 * 1024 * 1024 * 102) {
     const url = await simpleGet<string>(`/api/medias/s3/presign?key=${filename}`);
     await simpleFilePut(url, file, onProgress);
-    return baseUrl + url;
+    return baseUrl + filename;
   }
 
   const { UploadId } = await simplePost<{ UploadId: string }, Record<string, string>>(

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Dropzone, FileWithPath } from '@mantine/dropzone';
 import { FileUp } from 'lucide-react';
@@ -14,13 +14,28 @@ interface IUpdaterProps {
   limit?: number; // 文件数量限制
   maxSize?: number; // 文件大小限制 (MB)
   accept?: string[]; // 文件类型限制
+  onBeforeUpload?: () => void; // 上传前回调
+  onFinished?: (urls: string[]) => void; // 上传完成回调
 }
 
-export const Updater: React.FC<IUpdaterProps> = ({ files: initialFiles = [], accept, maxSize = 30, limit }) => {
+export const Updater: React.FC<IUpdaterProps> = ({
+  files: initialFiles = [],
+  accept,
+  maxSize = 30,
+  limit,
+  onFinished,
+  onBeforeUpload,
+}) => {
   const [files, setFiles] = useState<FileWithPath[]>(initialFiles);
 
   const [isInteracted, setIsInteracted] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    if (isInteracted && isUploading) {
+      onBeforeUpload?.();
+    }
+  }, [isUploading]);
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -58,6 +73,7 @@ export const Updater: React.FC<IUpdaterProps> = ({ files: initialFiles = [], acc
             limit={limit}
             isUploading={isUploading}
             setIsUploading={setIsUploading}
+            onFinished={onFinished}
           />
         </SmoothTransition>
       )}
@@ -69,14 +85,30 @@ export const VinesUpdater: React.FC<
   IUpdaterProps & {
     children: React.ReactNode;
   }
-> = ({ children, ...props }) => (
-  <Dialog>
-    <DialogTrigger asChild>{children}</DialogTrigger>
-    <DialogContent className="sm:max-w-[625px]">
-      <DialogHeader>
-        <DialogTitle>上传文件</DialogTitle>
-      </DialogHeader>
-      <Updater {...props} />
-    </DialogContent>
-  </Dialog>
-);
+> = ({ children, onBeforeUpload, onFinished, ...props }) => {
+  const [isUploading, setIsUploading] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Dialog open={open} onOpenChange={(val) => !isUploading && setOpen(val)}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="sm:max-w-[625px]">
+        <DialogHeader>
+          <DialogTitle>上传文件</DialogTitle>
+        </DialogHeader>
+        <Updater
+          onBeforeUpload={() => {
+            setIsUploading(true);
+            onBeforeUpload?.();
+          }}
+          onFinished={(urls) => {
+            setOpen(false);
+            onFinished?.(urls);
+            setIsUploading(false);
+          }}
+          {...props}
+        />
+      </DialogContent>
+    </Dialog>
+  );
+};
