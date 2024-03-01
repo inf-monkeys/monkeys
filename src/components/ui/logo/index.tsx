@@ -1,7 +1,8 @@
 import React, { memo } from 'react';
 
+import { motion } from 'framer-motion';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
-import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
 import { cn } from '@/utils';
 
 interface ILogoProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -12,14 +13,12 @@ interface ILogoProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const AppLogo: React.FC<ILogoProps> = memo(({ url, alt, className, width, height }) => (
-  <div>
+  <motion.div key="vines-logo" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
     {url ? (
-      <SmoothTransition initialHeight={height}>
-        <Avatar className={cn('w-auto select-none rounded', className)} style={{ width, height }}>
-          <AvatarImage className="aspect-auto w-auto rounded" src={url} alt={alt} />
-          <AvatarFallback className="rounded-none p-2 text-xs">{alt}</AvatarFallback>
-        </Avatar>
-      </SmoothTransition>
+      <Avatar className={cn('w-auto select-none rounded', className)} style={{ width, height }}>
+        <AvatarImage className="aspect-auto w-auto rounded" src={url} alt={alt} />
+        <AvatarFallback className="rounded-none p-2 text-xs">{alt}</AvatarFallback>
+      </Avatar>
     ) : (
       <div className={cn('select-none', className)} style={{ width, height }}>
         <svg xmlns="http://www.w3.org/2000/svg" width={173.043} height={40.199} fill="none">
@@ -38,7 +37,7 @@ export const AppLogo: React.FC<ILogoProps> = memo(({ url, alt, className, width,
     <p className="mt-2 w-full select-none rounded bg-vines-500 px-2 py-1 text-center text-xs text-white dark:bg-white dark:text-slate-3">
       构建流程为中心的 AI 应用
     </p>
-  </div>
+  </motion.div>
 ));
 
 AppLogo.displayName = 'AppLogo';

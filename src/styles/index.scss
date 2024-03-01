@@ -11,7 +11,7 @@
 
 @layer base {
   .vines-ui * {
-    @apply border-border;
+    @apply border-border transition-colors;
     color: theme('colors.gold.12');
   }
 
