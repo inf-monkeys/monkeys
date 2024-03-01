@@ -2,6 +2,7 @@ import { customAlphabet } from 'nanoid';
 import SparkMD5 from 'spark-md5';
 
 import { simpleFilePut, simpleGet, simplePost } from '@/apis/non-fetcher.ts';
+import { PartUploadResponse } from '@/components/ui/updater/typings.ts';
 
 export const coverFileSize = (size: number) => {
   if (size < 1024) {
@@ -59,7 +60,7 @@ export const uploadFile = async (file: File, filename: string, onProgress: (prog
 
   const { baseUrl } = await simpleGet<{ baseUrl: string }>('/api/medias/s3/configs');
 
-  if (filesize < 4 * 1024 * 1024 * 102) {
+  if (filesize < 1 << 30) {
     const url = await simpleGet<string>(`/api/medias/s3/presign?key=${filename}`);
     await simpleFilePut(url, file, onProgress);
     return baseUrl + filename;
@@ -74,41 +75,45 @@ export const uploadFile = async (file: File, filename: string, onProgress: (prog
   );
   const chunkSize = 1024 * 1024 * 16;
   const chunks = Math.ceil(filesize / chunkSize);
-  const parts: { ETag: string; PartNumber: number }[] = [];
 
-  const load = async (current: number) => {
-    const start = current * chunkSize;
-    const end = start + chunkSize >= file.size ? file.size : start + chunkSize;
-    return {
-      data: file.slice(start, end),
-      size: end - start,
-    };
-  };
+  const tasks: Promise<PartUploadResponse>[] = [];
+  const progressArray: number[] = new Array(chunks).fill(0);
 
+  let uploadedSize = 0;
   for (let i = 0; i < chunks; i++) {
-    const { data } = await load(i);
-    const currentProcess = ((i + 1) / chunks) * 100;
+    const start = i * chunkSize;
+    const end = start + chunkSize >= file.size ? file.size : start + chunkSize;
+    const part = file.slice(start, end);
 
-    const signedUrl = await simplePost<string, Record<string, string | number>>('/api/medias/s3/multipart/part', {
-      key: filename,
-      uploadId: UploadId,
-      partNumber: i + 1,
+    const task = new Promise<PartUploadResponse>((resolve) => {
+      simplePost<string, Record<string, string | number>>('/api/medias/s3/multipart/part', {
+        key: filename,
+        uploadId: UploadId,
+        partNumber: i + 1,
+      }).then((signedUrl) => {
+        simpleFilePut(signedUrl, <File>part, (_, e) => {
+          uploadedSize += e.loaded - progressArray[i];
+          progressArray[i] = e.loaded;
+          onProgress(Math.round((uploadedSize / filesize) * 10000) / 100 - 1);
+        }).then((res) => {
+          resolve({
+            PartNumber: i + 1,
+            ETag: res.getResponseHeader('ETag') as string,
+          });
+        });
+      });
     });
-    const res = await simpleFilePut(signedUrl, <File>data, () => {
-      // TODO: 进度条
-    });
-    parts.push({
-      PartNumber: i + 1,
-      ETag: res.getResponseHeader('ETag'),
-    });
-    onProgress?.(currentProcess);
+    tasks.push(task);
   }
+  const parts = await Promise.all(tasks);
 
   await simplePost<string, Record<string, unknown>>('/api/medias/s3/multipart/complete', {
     key: filename,
     uploadId: UploadId,
     parts,
   });
+
+  onProgress(100);
 
   return baseUrl + filename;
 };

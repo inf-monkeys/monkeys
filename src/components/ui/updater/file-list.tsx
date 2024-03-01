@@ -155,7 +155,7 @@ export const FileList: React.FC<IFilesProps> = ({
       it.status = 'busy';
       updateListById(fileId, it);
       ossUrl = await uploadFile(file, filename, (progress) => {
-        it.progress = progress.toString();
+        it.progress = progress.toFixed(2);
         updateListById(fileId, it);
       });
     }
