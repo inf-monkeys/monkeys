@@ -65,22 +65,35 @@ export const simplePost = async <T, U>(url: string, arg: U) =>
     body: stringify(arg),
   }).then(async (r) => (await r.json())?.data)) as T;
 
-export const simpleFilePut = async (url: string, file: File, process: (value: number) => void) => {
-  const form = new FormData();
-  form.set('file', file);
+export const simpleFilePut = (
+  url: string,
+  file: File,
+  process: (value: number, event: ProgressEvent<XMLHttpRequestEventTarget>) => void,
+): any =>
+  new Promise((resolve, reject) => {
+    const form = new FormData();
+    form.set('file', file);
 
-  const req = new XMLHttpRequest();
-  req.open('PUT', url);
+    const req = new XMLHttpRequest();
+    req.open('PUT', url);
 
-  req.upload.addEventListener('progress', function (e) {
-    const percentComplete = (e.loaded / e.total) * 100;
-    process(percentComplete);
+    req.upload.addEventListener('progress', (e) => {
+      if (e.lengthComputable) {
+        process(Math.round((e.loaded / e.total) * 100), e);
+      }
+    });
+
+    req.onload = () => {
+      if (req.status === 200) {
+        resolve(req);
+      } else {
+        reject(new Error(`Request failed with status ${req.status}`));
+      }
+    };
+
+    req.onerror = () => {
+      reject(new Error('Request error'));
+    };
+
+    req.send(form);
   });
-
-  req.addEventListener('load', function () {
-    console.log(req.status);
-    console.log(req.response);
-  });
-
-  req.send(form);
-};
