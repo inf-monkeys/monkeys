@@ -4,6 +4,10 @@ import { ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useTeams } from '@/apis/authz/team';
+import { SettingsHeader } from '@/components/layout/main/settings/header.lazy.tsx';
+import { InviteLinkManageDialog } from '@/components/layout/main/settings/team-header/invite-link-manage-dialog.lazy.tsx';
+import { InviteUserDialog } from '@/components/layout/main/settings/team-header/invite-user-dialog.lazy.tsx';
+import { JoinApplyMangeTeamDialog } from '@/components/layout/main/settings/team-header/join-apply-manage-team-dialog.lazy.tsx';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
 import {
@@ -13,9 +17,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { Input } from '@/components/ui/input.tsx';
-import { SettingsHeader } from '@/pages/$teamId/settings/header.lazy.tsx';
-import { InviteUserDialog } from '@/pages/$teamId/settings/team-header/invite-user-dialog.lazy.tsx';
-import { JoinApplyMangeTeamDialog } from '@/pages/$teamId/settings/team-header/join-apply-manage-team-dialog.lazy.tsx';
 import { useLocalStorage } from '@/utils';
 
 interface ISettingsUserHeaderProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -36,8 +37,6 @@ export const SettingsTeamHeader: React.FC<ISettingsUserHeaderProps> = ({ readonl
   const [inviteUserDialogOpen, toggleInviteUserDialogOpen] = useState(false);
   const [inviteLinkManageDialogOpen, toggleInviteLinkManageDialogOpen] = useState(false);
   const [applyManageModelOpen, toggleApplyManageModelOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [updateLoading, toggleUploadLoading] = useState(false);
 
   const currentTeam = (teams ?? []).find((team) => team.id === teamId);
 
@@ -75,7 +74,6 @@ export const SettingsTeamHeader: React.FC<ISettingsUserHeaderProps> = ({ readonl
       return;
     }
     setDialogInputOptions(null);
-    setLoading(false);
   }, [dialogInputOptions]);
 
   return (
@@ -160,10 +158,11 @@ export const SettingsTeamHeader: React.FC<ISettingsUserHeaderProps> = ({ readonl
             open={inviteUserDialogOpen}
             onClose={() => toggleInviteUserDialogOpen(false)}
           />
-          {/*<InviteLinkManageModal*/}
-          {/*  visible={inviteLinkManageModalVisible}*/}
-          {/*  onClose={() => toggleInviteLinkManageModalVisible(false)}*/}
-          {/*/>*/}
+          <InviteLinkManageDialog
+            team={currentTeam}
+            open={inviteLinkManageDialogOpen}
+            onClose={() => toggleInviteLinkManageDialogOpen(false)}
+          />
         </>
       )}
     </>

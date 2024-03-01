@@ -40,36 +40,14 @@ import { Route as TeamIdActionToolsIndexImport } from './pages/$teamId/action-to
 
 // Create Virtual Routes
 
-const TeamIdSettingsHeaderLazyImport = createFileRoute(
-  '/$teamId/settings/header',
-)()
 const TeamIdSettingsUserIndexLazyImport = createFileRoute(
   '/$teamId/settings/user/',
-)()
-const TeamIdSettingsUserHeaderIndexLazyImport = createFileRoute(
-  '/$teamId/settings/user-header/',
 )()
 const TeamIdSettingsTeamMembersIndexLazyImport = createFileRoute(
   '/$teamId/settings/team-members/',
 )()
-const TeamIdSettingsTeamHeaderIndexLazyImport = createFileRoute(
-  '/$teamId/settings/team-header/',
-)()
 const TeamIdSettingsApiKeyIndexLazyImport = createFileRoute(
   '/$teamId/settings/api-key/',
-)()
-const TeamIdSettingsUserToggleUserPhoneDialogLazyImport = createFileRoute(
-  '/$teamId/settings/user/toggle-user-phone-dialog',
-)()
-const TeamIdSettingsTeamHeaderJoinApplyManageTeamDialogLazyImport =
-  createFileRoute(
-    '/$teamId/settings/team-header/join-apply-manage-team-dialog',
-  )()
-const TeamIdSettingsTeamHeaderInviteUserDialogLazyImport = createFileRoute(
-  '/$teamId/settings/team-header/invite-user-dialog',
-)()
-const TeamIdSettingsApiKeyCreateApiKeyDialogLazyImport = createFileRoute(
-  '/$teamId/settings/api-key/create-api-key-dialog',
 )()
 
 // Create/Update Routes
@@ -195,29 +173,12 @@ const TeamIdActionToolsIndexRoute = TeamIdActionToolsIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const TeamIdSettingsHeaderLazyRoute = TeamIdSettingsHeaderLazyImport.update({
-  path: '/$teamId/settings/header',
-  getParentRoute: () => rootRoute,
-} as any).lazy(() =>
-  import('./pages/$teamId/settings/header.lazy').then((d) => d.Route),
-)
-
 const TeamIdSettingsUserIndexLazyRoute =
   TeamIdSettingsUserIndexLazyImport.update({
     path: '/$teamId/settings/user/',
     getParentRoute: () => rootRoute,
   } as any).lazy(() =>
     import('./pages/$teamId/settings/user/index.lazy').then((d) => d.Route),
-  )
-
-const TeamIdSettingsUserHeaderIndexLazyRoute =
-  TeamIdSettingsUserHeaderIndexLazyImport.update({
-    path: '/$teamId/settings/user-header/',
-    getParentRoute: () => rootRoute,
-  } as any).lazy(() =>
-    import('./pages/$teamId/settings/user-header/index.lazy').then(
-      (d) => d.Route,
-    ),
   )
 
 const TeamIdSettingsTeamMembersIndexLazyRoute =
@@ -230,62 +191,12 @@ const TeamIdSettingsTeamMembersIndexLazyRoute =
     ),
   )
 
-const TeamIdSettingsTeamHeaderIndexLazyRoute =
-  TeamIdSettingsTeamHeaderIndexLazyImport.update({
-    path: '/$teamId/settings/team-header/',
-    getParentRoute: () => rootRoute,
-  } as any).lazy(() =>
-    import('./pages/$teamId/settings/team-header/index.lazy').then(
-      (d) => d.Route,
-    ),
-  )
-
 const TeamIdSettingsApiKeyIndexLazyRoute =
   TeamIdSettingsApiKeyIndexLazyImport.update({
     path: '/$teamId/settings/api-key/',
     getParentRoute: () => rootRoute,
   } as any).lazy(() =>
     import('./pages/$teamId/settings/api-key/index.lazy').then((d) => d.Route),
-  )
-
-const TeamIdSettingsUserToggleUserPhoneDialogLazyRoute =
-  TeamIdSettingsUserToggleUserPhoneDialogLazyImport.update({
-    path: '/$teamId/settings/user/toggle-user-phone-dialog',
-    getParentRoute: () => rootRoute,
-  } as any).lazy(() =>
-    import('./pages/$teamId/settings/user/toggle-user-phone-dialog.lazy').then(
-      (d) => d.Route,
-    ),
-  )
-
-const TeamIdSettingsTeamHeaderJoinApplyManageTeamDialogLazyRoute =
-  TeamIdSettingsTeamHeaderJoinApplyManageTeamDialogLazyImport.update({
-    path: '/$teamId/settings/team-header/join-apply-manage-team-dialog',
-    getParentRoute: () => rootRoute,
-  } as any).lazy(() =>
-    import(
-      './pages/$teamId/settings/team-header/join-apply-manage-team-dialog.lazy'
-    ).then((d) => d.Route),
-  )
-
-const TeamIdSettingsTeamHeaderInviteUserDialogLazyRoute =
-  TeamIdSettingsTeamHeaderInviteUserDialogLazyImport.update({
-    path: '/$teamId/settings/team-header/invite-user-dialog',
-    getParentRoute: () => rootRoute,
-  } as any).lazy(() =>
-    import('./pages/$teamId/settings/team-header/invite-user-dialog.lazy').then(
-      (d) => d.Route,
-    ),
-  )
-
-const TeamIdSettingsApiKeyCreateApiKeyDialogLazyRoute =
-  TeamIdSettingsApiKeyCreateApiKeyDialogLazyImport.update({
-    path: '/$teamId/settings/api-key/create-api-key-dialog',
-    getParentRoute: () => rootRoute,
-  } as any).lazy(() =>
-    import('./pages/$teamId/settings/api-key/create-api-key-dialog.lazy').then(
-      (d) => d.Route,
-    ),
   )
 
 // Populate the FileRoutesByPath interface
@@ -326,10 +237,6 @@ declare module '@tanstack/react-router' {
     }
     '/$teamId/': {
       preLoaderRoute: typeof TeamIdIndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/$teamId/settings/header': {
-      preLoaderRoute: typeof TeamIdSettingsHeaderLazyImport
       parentRoute: typeof rootRoute
     }
     '/$teamId/action-tools/': {
@@ -392,36 +299,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdWorkflowsIndexImport
       parentRoute: typeof rootRoute
     }
-    '/$teamId/settings/api-key/create-api-key-dialog': {
-      preLoaderRoute: typeof TeamIdSettingsApiKeyCreateApiKeyDialogLazyImport
-      parentRoute: typeof rootRoute
-    }
-    '/$teamId/settings/team-header/invite-user-dialog': {
-      preLoaderRoute: typeof TeamIdSettingsTeamHeaderInviteUserDialogLazyImport
-      parentRoute: typeof rootRoute
-    }
-    '/$teamId/settings/team-header/join-apply-manage-team-dialog': {
-      preLoaderRoute: typeof TeamIdSettingsTeamHeaderJoinApplyManageTeamDialogLazyImport
-      parentRoute: typeof rootRoute
-    }
-    '/$teamId/settings/user/toggle-user-phone-dialog': {
-      preLoaderRoute: typeof TeamIdSettingsUserToggleUserPhoneDialogLazyImport
-      parentRoute: typeof rootRoute
-    }
     '/$teamId/settings/api-key/': {
       preLoaderRoute: typeof TeamIdSettingsApiKeyIndexLazyImport
       parentRoute: typeof rootRoute
     }
-    '/$teamId/settings/team-header/': {
-      preLoaderRoute: typeof TeamIdSettingsTeamHeaderIndexLazyImport
-      parentRoute: typeof rootRoute
-    }
     '/$teamId/settings/team-members/': {
       preLoaderRoute: typeof TeamIdSettingsTeamMembersIndexLazyImport
-      parentRoute: typeof rootRoute
-    }
-    '/$teamId/settings/user-header/': {
-      preLoaderRoute: typeof TeamIdSettingsUserHeaderIndexLazyImport
       parentRoute: typeof rootRoute
     }
     '/$teamId/settings/user/': {
@@ -443,7 +326,6 @@ export const routeTree = rootRoute.addChildren([
   ComponentsTagRoute,
   ComponentsTooltipRoute,
   TeamIdIndexRoute,
-  TeamIdSettingsHeaderLazyRoute,
   TeamIdActionToolsIndexRoute,
   TeamIdApplicationStoreIndexRoute,
   TeamIdCanvasIndexRoute,
@@ -459,14 +341,8 @@ export const routeTree = rootRoute.addChildren([
   TeamIdToolStoreIndexRoute,
   TeamIdWorkbenchIndexRoute,
   TeamIdWorkflowsIndexRoute,
-  TeamIdSettingsApiKeyCreateApiKeyDialogLazyRoute,
-  TeamIdSettingsTeamHeaderInviteUserDialogLazyRoute,
-  TeamIdSettingsTeamHeaderJoinApplyManageTeamDialogLazyRoute,
-  TeamIdSettingsUserToggleUserPhoneDialogLazyRoute,
   TeamIdSettingsApiKeyIndexLazyRoute,
-  TeamIdSettingsTeamHeaderIndexLazyRoute,
   TeamIdSettingsTeamMembersIndexLazyRoute,
-  TeamIdSettingsUserHeaderIndexLazyRoute,
   TeamIdSettingsUserIndexLazyRoute,
 ])
 

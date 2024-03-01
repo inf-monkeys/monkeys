@@ -1,3 +1,5 @@
+import { IUser } from '@/components/router/guard/auth.ts';
+
 export interface ITeam {
   id: string;
   _id: string;
@@ -29,3 +31,38 @@ export interface ITeamAppyUpdate {
   applyUserId?: string;
   apply?: boolean;
 }
+
+export enum TeamInviteType {
+  INDIVIDUAL = 1,
+  PUBLIC = 2,
+}
+
+export enum TeamInviteStatus {
+  EFFECTIVE = 1,
+  ACCEPTED = 2,
+  DISABLED = 3,
+}
+
+export type TeamMemberResponse = {
+  list: Array<IUser & { _id: string }>;
+  listTotal: number;
+};
+
+export type TeamInvite = {
+  _id: string;
+  inviterUserId: string;
+  targetUserId?: string;
+  teamId: string;
+  type: TeamInviteType;
+  status: TeamInviteStatus;
+  outdateTimestamp: number;
+  acceptedUserIds: string[];
+  remark?: string;
+  createdTimestamp: number;
+};
+
+export type TeamInviteWithUserProfile = TeamInvite & {
+  acceptedUsers?: Partial<IUser>[];
+  inviterUser?: Partial<IUser>;
+  targetUser?: Partial<IUser>;
+};

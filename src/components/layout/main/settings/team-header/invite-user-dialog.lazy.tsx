@@ -6,8 +6,8 @@ import { toast } from 'sonner';
 
 import { useSearchUsers } from '@/apis/authz';
 import { useCreateTeamInviteLink } from '@/apis/authz/team';
-import { ITeam, TeamInviteLinkOutdateType } from '@/apis/authz/team/typings';
-import { IUser } from '@/components/router/guard/auth';
+import { ITeam, TeamInviteLinkOutdateType } from '@/apis/authz/team/typings.ts';
+import { IUser } from '@/components/router/guard/auth.ts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';

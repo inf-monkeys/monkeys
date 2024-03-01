@@ -1,7 +1,7 @@
 import React from 'react';
 
+import { SettingsUserHeader } from '@/components/layout/main/settings/user-header/index.lazy.tsx';
 import { SettingsWrapper } from '@/components/layout/main/settings/wrapper.tsx';
-import { SettingsUserHeader } from '@/pages/$teamId/settings/user-header/index.lazy.tsx';
 
 export const UserSettings: React.FC = () => {
   return (
