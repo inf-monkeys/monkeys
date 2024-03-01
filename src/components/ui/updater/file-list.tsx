@@ -25,6 +25,7 @@ interface IFilesProps extends React.ComponentPropsWithoutRef<'div'> {
   setFiles: React.Dispatch<React.SetStateAction<FileWithPath[]>>;
   isUploading: boolean;
   setIsUploading: React.Dispatch<React.SetStateAction<boolean>>;
+  onFinished?: (urls: string[]) => void;
   limit?: number;
 }
 
@@ -36,11 +37,19 @@ interface IFile {
   type: string;
   size: number;
   md5?: string;
+  url?: string;
   status: 'wait' | 'busy' | 'wait-to-update' | 'uploading' | 'error' | 'success';
   progress: string;
 }
 
-export const FileList: React.FC<IFilesProps> = ({ files, setFiles, limit, isUploading, setIsUploading }) => {
+export const FileList: React.FC<IFilesProps> = ({
+  files,
+  setFiles,
+  limit,
+  isUploading,
+  setIsUploading,
+  onFinished,
+}) => {
   const [list, setList] = useState<IFile[]>([]);
   const [hiddenList, setHiddenList] = useState<string[]>([]);
 
@@ -130,23 +139,28 @@ export const FileList: React.FC<IFilesProps> = ({ files, setFiles, limit, isUplo
     updateListById(fileId, it);
 
     const existingFileUrl = (await getResourceByMd5(it.md5 as string))?.url;
+    let ossUrl: string = '';
     if (existingFileUrl) {
-      console.log(existingFileUrl);
+      ossUrl = existingFileUrl;
+      it.progress = '100';
     }
 
-    const file = it.file;
-    const fileNameArray = file.name.split('.');
-    const fileNameWithoutSuffix = fileNameArray.length > 1 ? fileNameArray.slice(0, -1).join('.') : fileNameArray[0];
-    const suffix = fileNameArray.length > 1 ? fileNameArray.pop() : null;
-    const filename = `futi-test/${it.id}_${escapeFileName(fileNameWithoutSuffix)}${suffix ? '.'.concat(suffix) : ''}`;
+    if (!ossUrl) {
+      const file = it.file;
+      const fileNameArray = file.name.split('.');
+      const fileNameWithoutSuffix = fileNameArray.length > 1 ? fileNameArray.slice(0, -1).join('.') : fileNameArray[0];
+      const suffix = fileNameArray.length > 1 ? fileNameArray.pop() : null;
+      const filename = `futi-test/${it.id}_${escapeFileName(fileNameWithoutSuffix)}${suffix ? '.'.concat(suffix) : ''}`;
 
-    it.status = 'busy';
-    updateListById(fileId, it);
-    await uploadFile(file, filename, (progress) => {
-      it.progress = progress.toString();
+      it.status = 'busy';
       updateListById(fileId, it);
-    });
+      ossUrl = await uploadFile(file, filename, (progress) => {
+        it.progress = progress.toString();
+        updateListById(fileId, it);
+      });
+    }
 
+    it.url = ossUrl;
     it.status = 'success';
     updateListById(fileId, it);
     isUploadBusyRef.current = false;
@@ -154,7 +168,12 @@ export const FileList: React.FC<IFilesProps> = ({ files, setFiles, limit, isUplo
   };
 
   useEffect(() => {
-    void handleUpload();
+    if (isUploadBusyRef.current) return;
+    if (uploadQueue.length) {
+      void handleUpload();
+    } else if (isUploading) {
+      setTimeout(() => onFinished?.(finalLists.map((it) => it?.url ?? '').filter((it) => it)), 1000);
+    }
   }, [uploadQueue]);
 
   const remaining = limit ? limit - files.length : 0;
