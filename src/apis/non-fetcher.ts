@@ -69,7 +69,7 @@ export const simpleFilePut = (
   url: string,
   file: File,
   process: (value: number, event: ProgressEvent<XMLHttpRequestEventTarget>) => void,
-): any =>
+): Promise<XMLHttpRequest> =>
   new Promise((resolve, reject) => {
     const form = new FormData();
     form.set('file', file);
