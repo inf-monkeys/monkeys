@@ -3,12 +3,12 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import { useUpdateUserInfo } from '@/apis/settings/user.ts';
+import { SettingsHeader } from '@/components/layout/main/settings/header.lazy.tsx';
+import { ToggleUserPhoneDialog } from '@/components/layout/main/settings/user/toggle-user-phone-dialog.lazy.tsx';
 import { IUser } from '@/components/router/guard/auth.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input.tsx';
-import { SettingsHeader } from '@/pages/$teamId/settings/header.lazy.tsx';
-import { ToggleUserPhoneDialog } from '@/pages/$teamId/settings/user/toggle-user-phone-dialog.lazy.tsx';
 import { useLocalStorage } from '@/utils';
 import { maskPhone } from '@/utils/maskdata.ts';
 
@@ -101,7 +101,7 @@ export const SettingsUserHeader: React.FC<ISettingsUserHeaderProps> = ({ readonl
           ))
         }
       >
-        {children}
+        <>{children}</>
       </SettingsHeader>
       {dialogInputOptions ? (
         <Dialog open onClose={() => setDialogInputOptions(null)}>
