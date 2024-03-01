@@ -9,6 +9,7 @@ import 'normalize.css';
 import '@/styles/index.scss';
 
 import { MantineProvider } from '@mantine/core';
+import * as Portal from '@radix-ui/react-portal';
 import { Toaster } from 'sonner';
 
 import { swrMiddleware } from '@/apis/middleware.ts';
@@ -38,6 +39,8 @@ ReactDOM.createRoot(document.getElementById('vines-ui')!).render(
     <Suspense>
       <LagRadar />
     </Suspense>
-    <Toaster richColors />
+    <Portal.Root>
+      <Toaster richColors />
+    </Portal.Root>
   </>,
 );
