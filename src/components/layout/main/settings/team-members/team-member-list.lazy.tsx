@@ -3,7 +3,7 @@ import React, { useCallback, useMemo } from 'react';
 import { Trash } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { useGetTeamUsers, useRemoveTeamMember } from '@/apis/authz/team';
+import { useRemoveTeamMember, useTeamUsers } from '@/apis/authz/team';
 import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
@@ -15,7 +15,7 @@ interface ITeamMemberListProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const TeamMemberList: React.FC<ITeamMemberListProps> = ({ user, currentTeam }) => {
-  const { data: teamMembersResp, mutate } = useGetTeamUsers(currentTeam?._id ?? '');
+  const { data: teamMembersResp, mutate } = useTeamUsers(currentTeam?._id ?? '');
   const teamMembers = useMemo(() => teamMembersResp?.list ?? [], [teamMembersResp]);
   const { trigger } = useRemoveTeamMember(currentTeam?._id ?? '');
   const handleRemoveTeamMember = useCallback(
