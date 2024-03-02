@@ -11,8 +11,7 @@
 
 @layer base {
   .vines-ui * {
-    @apply border-border transition-colors;
-    color: theme('colors.gold.12');
+    @apply border-border transition-colors text-gold-12;
   }
 
   body {
@@ -23,7 +22,7 @@
 html {
   &.dark {
     body {
-      background: theme('colors.slate.4');
+      @apply bg-slate-4;
     }
   }
 }
@@ -61,13 +60,13 @@ body {
 
 ::-webkit-scrollbar-corner,
 ::-webkit-scrollbar-corner {
-  background-color: theme('colors.grayA.8');
+  background-color: theme('colors.gray.8');
 }
 
 ::-webkit-scrollbar-thumb,
 ::-webkit-scrollbar-thumb {
   border-radius: 6px;
-  background: theme('colors.grayA.8');
+  background: theme('colors.gray.8');
   opacity: 0.1;
   transition: all 1s;
 }
