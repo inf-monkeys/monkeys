@@ -2,21 +2,29 @@ import React from 'react';
 
 import { useSWRConfig } from 'swr';
 
-import { Pencil } from 'lucide-react';
+import { Pencil, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { updateTeam } from '@/apis/authz/team';
 import { ITeamUpdate } from '@/apis/authz/team/typings.ts';
+import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { InfoEditor } from '@/components/layout/settings/account/info-editor.tsx';
+import { CreateTeam } from '@/components/layout/settings/account/team/create';
+import { DeleteTeam } from '@/components/layout/settings/account/team/delete/DeleteTeam.tsx';
+import { ImportExportTeam } from '@/components/layout/settings/account/team/import-export';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn, useLocalStorage } from '@/utils';
 
 interface ITeamProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const Team: React.FC<ITeamProps> = () => {
   const { mutate } = useSWRConfig();
   const { team } = useVinesTeam();
+  const [user] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
 
   const handleUpdateTeam = (key: string, val: string) => {
     toast.promise(
@@ -35,22 +43,36 @@ export const Team: React.FC<ITeamProps> = () => {
     );
   };
 
+  const isOwner = user?.id === team?.ownerUserId;
   const teamName = team?.name || '团队';
   const teamDescription = team?.description || '暂无描述';
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="relative">
         <CardTitle>我的团队</CardTitle>
-        <CardDescription>管理您的团队数据</CardDescription>
+        {isOwner && <CardDescription>管理您的团队数据</CardDescription>}
+        <div className="absolute left-0 top-0 !mt-0 flex size-full items-center justify-end p-6">
+          <div>
+            <Tooltip>
+              <CreateTeam>
+                <TooltipTrigger asChild>
+                  <Button icon={<Plus />} size="small" />
+                </TooltipTrigger>
+              </CreateTeam>
+              <TooltipContent>新建团队</TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent className="flex gap-4">
+      <CardContent className={cn('flex gap-4', !isOwner && 'pointer-events-none')}>
         <Avatar className="size-10">
           <AvatarImage className="aspect-auto" src={team?.logoUrl} alt={teamName} />
           <AvatarFallback className="rounded-none p-2 text-xs">{teamName.substring(0, 2)}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col justify-center">
           <InfoEditor
+            disabled={!isOwner}
             title="编辑团队名称"
             placeholder="输入昵称，16 字以内"
             initialValue={teamName}
@@ -62,6 +84,7 @@ export const Team: React.FC<ITeamProps> = () => {
             </div>
           </InfoEditor>
           <InfoEditor
+            disabled={!isOwner}
             title="编辑团队描述"
             placeholder="输入描述，16 字以内"
             initialValue={teamDescription}
@@ -74,6 +97,12 @@ export const Team: React.FC<ITeamProps> = () => {
           </InfoEditor>
         </div>
       </CardContent>
+      {isOwner && (
+        <CardFooter className="justify-end gap-2">
+          <ImportExportTeam />
+          <DeleteTeam />
+        </CardFooter>
+      )}
     </Card>
   );
 };

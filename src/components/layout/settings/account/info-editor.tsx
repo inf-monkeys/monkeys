@@ -21,6 +21,7 @@ interface IInfoEditorProps extends React.ComponentPropsWithoutRef<'div'> {
   placeholder?: string;
   initialValue?: string;
   onFinished?: (value: string) => void;
+  disabled?: boolean;
 }
 
 export const InfoEditor: React.FC<IInfoEditorProps> = ({
@@ -30,6 +31,7 @@ export const InfoEditor: React.FC<IInfoEditorProps> = ({
   initialValue,
   placeholder,
   onFinished,
+  disabled,
 }) => {
   const [visible, setVisible] = useState(false);
   const [value, setValue] = useState(initialValue || '');
@@ -39,7 +41,7 @@ export const InfoEditor: React.FC<IInfoEditorProps> = ({
   }, [initialValue]);
 
   return (
-    <Dialog open={visible} onOpenChange={setVisible}>
+    <Dialog open={visible} onOpenChange={(val) => !disabled && setVisible(val)}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

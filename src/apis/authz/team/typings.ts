@@ -23,6 +23,11 @@ export interface ITeamBalance {
 
 export type ITeamUpdate = Partial<Pick<IVinesTeam, 'name' | 'description' | 'logoUrl' | 'customTheme'>>;
 
+export type ITeamMember = {
+  list: Array<IVinesUser & { _id: string }>;
+  listTotal: number;
+};
+
 export enum TeamInviteLinkOutdateType {
   SEVEN_DAYS = 1,
   NEVER = 2,
@@ -44,11 +49,6 @@ export enum TeamInviteStatus {
   ACCEPTED = 2,
   DISABLED = 3,
 }
-
-export type TeamMemberResponse = {
-  list: Array<IVinesUser & { _id: string }>;
-  listTotal: number;
-};
 
 export type TeamInvite = {
   _id: string;
