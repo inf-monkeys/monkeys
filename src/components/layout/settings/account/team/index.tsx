@@ -28,12 +28,13 @@ export const Team: React.FC<ITeamProps> = () => {
 
   const handleUpdateTeam = (key: string, val: string) => {
     toast.promise(
-      new Promise(async (resolve) => {
-        await updateTeam({
+      new Promise((resolve) => {
+        updateTeam({
           [key]: val,
-        } as unknown as ITeamUpdate);
-        await mutate('/api/teams');
-        resolve('');
+        } as unknown as ITeamUpdate).then(async () => {
+          await mutate('/api/teams');
+          resolve('');
+        });
       }),
       {
         loading: '更新中...',

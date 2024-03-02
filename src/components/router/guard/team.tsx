@@ -49,9 +49,12 @@ export const useVinesTeam = () => {
 
   const team = useMemo(() => (teams ?? []).find((team) => team.id === teamId), [teamId, teams]);
 
+  const isTeamOwner = (userId: string) => team?.ownerUserId === userId;
+
   return {
     team,
     teamId,
     teams,
+    isTeamOwner,
   };
 };
