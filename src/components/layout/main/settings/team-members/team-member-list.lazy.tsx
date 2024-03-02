@@ -4,14 +4,14 @@ import { Trash } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useGetTeamUsers, useRemoveTeamMember } from '@/apis/authz/team';
-import { ITeam } from '@/apis/authz/team/typings.ts';
+import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Button } from '@/components/ui/button';
 
 interface ITeamMemberListProps extends React.ComponentPropsWithoutRef<'div'> {
   user?: Partial<IVinesUser>;
-  currentTeam?: ITeam;
+  currentTeam?: IVinesTeam;
 }
 
 export const TeamMemberList: React.FC<ITeamMemberListProps> = ({ user, currentTeam }) => {

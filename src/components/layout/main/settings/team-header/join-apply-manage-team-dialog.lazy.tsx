@@ -4,7 +4,7 @@ import { HelpCircle, Inbox } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useTeams, useUpdateApplyTeam } from '@/apis/authz/team';
-import { ITeam } from '@/apis/authz/team/typings.ts';
+import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
@@ -13,7 +13,7 @@ import { Tooltip } from '@/components/ui/tooltip';
 interface Props {
   open: boolean;
   onClose: () => void;
-  team?: ITeam | null;
+  team?: IVinesTeam | null;
 }
 
 export const JoinApplyMangeTeamDialog: React.FC<Props> = ({ open, onClose, team }) => {

@@ -1,6 +1,6 @@
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 
-export interface ITeam {
+export interface IVinesTeam {
   id: string;
   _id: string;
   name: string;
@@ -20,6 +20,8 @@ export interface ITeamBalance {
   totalConsume: number;
   totalReCharge: number;
 }
+
+export type ITeamUpdate = Partial<Pick<IVinesTeam, 'name' | 'description' | 'logoUrl' | 'customTheme'>>;
 
 export enum TeamInviteLinkOutdateType {
   SEVEN_DAYS = 1,

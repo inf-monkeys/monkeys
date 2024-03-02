@@ -4,7 +4,7 @@ import { MoreHorizontal, Pause, Pencil, Play } from 'lucide-react';
 import moment from 'moment';
 
 import { useGetTeamInvites } from '@/apis/authz/team';
-import { ITeam, TeamInviteStatus, TeamInviteWithUserProfile } from '@/apis/authz/team/typings.ts';
+import { IVinesTeam, TeamInviteStatus, TeamInviteWithUserProfile } from '@/apis/authz/team/typings.ts';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,7 @@ import { Tooltip } from '@/components/ui/tooltip';
 interface Props {
   open: boolean;
   onClose: () => void;
-  team?: ITeam;
+  team?: IVinesTeam;
 }
 
 const AvatarWithProfile: React.FC<{ user: Partial<IVinesUser> }> = ({ user }) => {
