@@ -1,15 +1,7 @@
 import useSWR from 'swr';
-import useSWRMutation from 'swr/mutation';
 
-import {
-  ITeamAppyUpdate,
-  ITeamBalance,
-  ITeamMember,
-  ITeamUpdate,
-  IVinesTeam,
-  TeamInviteWithUserProfile,
-} from '@/apis/authz/team/typings.ts';
-import { useAuthzGetFetcher, useAuthzPostFetcher } from '@/apis/fetcher.ts';
+import { ITeamBalance, ITeamMember, ITeamUpdate, IVinesTeam } from '@/apis/authz/team/typings.ts';
+import { useAuthzGetFetcher } from '@/apis/fetcher.ts';
 import { authzPostFetcher } from '@/apis/non-fetcher.ts';
 
 export const useTeams = (enable = true) =>
@@ -31,30 +23,3 @@ export const useTeamUsers = (teamId: string | null) =>
 
 export const removeTeamMember = (teamId: string, userId: string) =>
   authzPostFetcher<IVinesTeam, { userId: string }>(`/api/teams/${teamId}/members/remove`, { userId });
-
-export const useCreateTeamInviteLink = (teamId: string) =>
-  useSWRMutation(`/api/teams/invites/${teamId}`, useAuthzPostFetcher);
-
-export const useUpdateApplyTeam = (teamId: string) =>
-  useSWRMutation<boolean, unknown, string, ITeamAppyUpdate>(`/api/teams/apply/${teamId}/update`, useAuthzPostFetcher);
-
-export const useGetTeamInvites = (teamId: string) =>
-  useSWR<TeamInviteWithUserProfile[]>(`/api/teams/invites/manage/${teamId}`, useAuthzGetFetcher);
-
-// export const toggleTeamInviteStatus = (teamId: string, teamInviteId: string) =>
-//   authzPostFetcher<boolean, undefined>(`/api/teams/invites/manage/${teamId}/toggle/${teamInviteId}`, {
-//     arg: undefined,
-//   });
-//
-// export const updateTeamInviteRemark = (teamId: string, teamInviteId: string, remark: string) =>
-//   authzPostFetcher<
-//     boolean,
-//     {
-//       remark: string;
-//     }
-//   >(`/api/teams/invites/manage/${teamId}/remark/${teamInviteId}`, { arg: { remark } });
-//
-// export const deleteTeamInvite = (teamId: string, teamInviteId: string) =>
-//   authzPostFetcher<boolean, undefined>(`/api/teams/invites/manage/${teamId}/delete/${teamInviteId}`, {
-//     arg: undefined,
-//   });
