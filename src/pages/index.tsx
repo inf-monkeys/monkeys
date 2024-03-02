@@ -25,7 +25,7 @@ const TeamsIdPage: React.FC = () => {
     });
   }, [teamId, teams]);
 
-  return null;
+  return <h1 className="animate-pulse font-bold text-vines-500">正在载入中</h1>;
 };
 
 export const Route = createFileRoute('/')({
