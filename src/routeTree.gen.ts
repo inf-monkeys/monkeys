@@ -14,12 +14,6 @@ import { Route as rootRoute } from './pages/__root'
 import { Route as LoginImport } from './pages/login'
 import { Route as IndexImport } from './pages/index'
 import { Route as TeamIdIndexImport } from './pages/$teamId/index'
-import { Route as ComponentsTooltipImport } from './pages/components/tooltip'
-import { Route as ComponentsTagImport } from './pages/components/tag'
-import { Route as ComponentsSwitchImport } from './pages/components/switch'
-import { Route as ComponentsPopoverImport } from './pages/components/popover'
-import { Route as ComponentsModalImport } from './pages/components/modal'
-import { Route as ComponentsButtonImport } from './pages/components/button'
 import { Route as TeamIdWorkflowsIndexImport } from './pages/$teamId/workflows/index'
 import { Route as TeamIdWorkbenchIndexImport } from './pages/$teamId/workbench/index'
 import { Route as TeamIdToolStoreIndexImport } from './pages/$teamId/tool-store/index'
@@ -50,36 +44,6 @@ const IndexRoute = IndexImport.update({
 
 const TeamIdIndexRoute = TeamIdIndexImport.update({
   path: '/$teamId/',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const ComponentsTooltipRoute = ComponentsTooltipImport.update({
-  path: '/components/tooltip',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const ComponentsTagRoute = ComponentsTagImport.update({
-  path: '/components/tag',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const ComponentsSwitchRoute = ComponentsSwitchImport.update({
-  path: '/components/switch',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const ComponentsPopoverRoute = ComponentsPopoverImport.update({
-  path: '/components/popover',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const ComponentsModalRoute = ComponentsModalImport.update({
-  path: '/components/modal',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const ComponentsButtonRoute = ComponentsButtonImport.update({
-  path: '/components/button',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -171,30 +135,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
-    '/components/button': {
-      preLoaderRoute: typeof ComponentsButtonImport
-      parentRoute: typeof rootRoute
-    }
-    '/components/modal': {
-      preLoaderRoute: typeof ComponentsModalImport
-      parentRoute: typeof rootRoute
-    }
-    '/components/popover': {
-      preLoaderRoute: typeof ComponentsPopoverImport
-      parentRoute: typeof rootRoute
-    }
-    '/components/switch': {
-      preLoaderRoute: typeof ComponentsSwitchImport
-      parentRoute: typeof rootRoute
-    }
-    '/components/tag': {
-      preLoaderRoute: typeof ComponentsTagImport
-      parentRoute: typeof rootRoute
-    }
-    '/components/tooltip': {
-      preLoaderRoute: typeof ComponentsTooltipImport
-      parentRoute: typeof rootRoute
-    }
     '/$teamId/': {
       preLoaderRoute: typeof TeamIdIndexImport
       parentRoute: typeof rootRoute
@@ -267,12 +207,6 @@ declare module '@tanstack/react-router' {
 export const routeTree = rootRoute.addChildren([
   IndexRoute,
   LoginRoute,
-  ComponentsButtonRoute,
-  ComponentsModalRoute,
-  ComponentsPopoverRoute,
-  ComponentsSwitchRoute,
-  ComponentsTagRoute,
-  ComponentsTooltipRoute,
   TeamIdIndexRoute,
   TeamIdActionToolsIndexRoute,
   TeamIdApplicationStoreIndexRoute,
