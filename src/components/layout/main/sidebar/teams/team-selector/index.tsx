@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
 
-import { CheckIcon, ChevronsUpDown, PlusCircle } from 'lucide-react';
+import { CheckIcon, ChevronsUpDown } from 'lucide-react';
 
 import { useTeamBalance, useTeams } from '@/apis/authz/team';
 import { Team } from '@/components/layout/main/sidebar/teams/team-selector/team.tsx';
@@ -78,7 +78,7 @@ export const TeamSelector: React.FC = () => {
                   key={id}
                   className="cursor-pointer"
                   onSelect={() => {
-                    handleSwapTeam(id);
+                    void handleSwapTeam(id);
                     setOpen(false);
                   }}
                 >
@@ -86,13 +86,6 @@ export const TeamSelector: React.FC = () => {
                   <CheckIcon className={cn('ml-auto', teamId === id ? 'opacity-100' : 'opacity-0')} size={18} />
                 </CommandItem>
               ))}
-            </CommandGroup>
-            <CommandSeparator />
-            <CommandGroup>
-              <CommandItem className="cursor-pointer" onSelect={() => setOpen(false)}>
-                <PlusCircle className="mr-2" size={18} />
-                加入公开团队
-              </CommandItem>
             </CommandGroup>
           </CommandList>
         </Command>
