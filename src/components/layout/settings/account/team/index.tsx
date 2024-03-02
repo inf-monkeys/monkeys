@@ -55,16 +55,14 @@ export const Team: React.FC<ITeamProps> = () => {
         <CardTitle>我的团队</CardTitle>
         {isOwner && <CardDescription>管理您的团队数据</CardDescription>}
         <div className="absolute left-0 top-0 !mt-0 flex size-full items-center justify-end p-6">
-          <div>
-            <Tooltip>
-              <CreateTeam>
-                <TooltipTrigger asChild>
-                  <Button icon={<Plus />} size="small" />
-                </TooltipTrigger>
-              </CreateTeam>
-              <TooltipContent>新建团队</TooltipContent>
-            </Tooltip>
-          </div>
+          <Tooltip>
+            <CreateTeam>
+              <TooltipTrigger asChild>
+                <Button icon={<Plus />} size="small" />
+              </TooltipTrigger>
+            </CreateTeam>
+            <TooltipContent>新建团队</TooltipContent>
+          </Tooltip>
         </div>
       </CardHeader>
       <CardContent className={cn('flex gap-4', !isOwner && 'pointer-events-none')}>
