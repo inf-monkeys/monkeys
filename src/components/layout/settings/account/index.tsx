@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Team } from '@/components/layout/settings/account/team';
-import { TeamMember } from '@/components/layout/settings/account/team-member/TeamMember.tsx';
+import { TeamMember } from '@/components/layout/settings/account/team-member';
 import { User } from '@/components/layout/settings/account/user';
 
 interface IAccountProps extends React.ComponentPropsWithoutRef<'div'> {}

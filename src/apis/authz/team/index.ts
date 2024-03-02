@@ -29,14 +29,14 @@ export const updateTeam = (team: ITeamUpdate) => authzPostFetcher<IVinesTeam, IT
 export const useTeamUsers = (teamId: string | null) =>
   useSWR<ITeamMember>(teamId ? `/api/teams/${teamId}/members` : null, useAuthzGetFetcher);
 
+export const removeTeamMember = (teamId: string, userId: string) =>
+  authzPostFetcher<IVinesTeam, { userId: string }>(`/api/teams/${teamId}/members/remove`, { userId });
+
 export const useCreateTeamInviteLink = (teamId: string) =>
   useSWRMutation(`/api/teams/invites/${teamId}`, useAuthzPostFetcher);
 
 export const useUpdateApplyTeam = (teamId: string) =>
   useSWRMutation<boolean, unknown, string, ITeamAppyUpdate>(`/api/teams/apply/${teamId}/update`, useAuthzPostFetcher);
-
-export const useRemoveTeamMember = (teamId: string) =>
-  useSWRMutation(`/api/teams/${teamId}/members/remove`, useAuthzPostFetcher);
 
 export const useGetTeamInvites = (teamId: string) =>
   useSWR<TeamInviteWithUserProfile[]>(`/api/teams/invites/manage/${teamId}`, useAuthzGetFetcher);
