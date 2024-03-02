@@ -5,7 +5,6 @@ import { createFileRoute } from '@tanstack/react-router';
 import { Account } from '@/components/layout/settings/account';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
-import { ApiKeySettings } from '@/pages/$teamId/settings/api-key/index.lazy.tsx';
 
 const SIDEBAR_LIST = [
   {
@@ -36,9 +35,7 @@ export const Settings: React.FC = () => {
         <TabsContent value="account">
           <Account />
         </TabsContent>
-        <TabsContent value="api-key">
-          <ApiKeySettings />
-        </TabsContent>
+        <TabsContent value="api-key"></TabsContent>
       </Tabs>
     </div>
   );

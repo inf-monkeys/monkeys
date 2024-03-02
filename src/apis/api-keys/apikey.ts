@@ -1,12 +1,12 @@
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
+import { IApiKey } from '@/apis/apikeys/typings.ts';
 import { useAuthzGetFetcher, useAuthzPostFetcher } from '@/apis/fetcher.ts';
-import { IApiKey } from '@/apis/settings/typings.ts';
+import { authzPostFetcher } from '@/apis/non-fetcher.ts';
 
 export const useApiKeyList = () => useSWR<IApiKey[]>('/api/apiKeys', useAuthzGetFetcher);
 
 export const useCreateApiKey = () => useSWRMutation('/api/apiKeys', useAuthzPostFetcher);
 
-export const useRevokeApiKey = (id: string) =>
-  useSWRMutation<boolean>(`/api/apiKeys/${id}/revoke`, useAuthzPostFetcher);
+export const revokeApiKey = (id: string) => authzPostFetcher<boolean, {}>(`/api/apiKeys/${id}/revoke`, {});
