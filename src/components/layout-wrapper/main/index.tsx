@@ -15,7 +15,7 @@ export const MainWrapper: React.FC<IProps> = ({ layoutId }) => {
     <div className="flex w-screen bg-slate-3">
       <Sidebar />
       <AnimatePresence mode="wait">
-        <div className="m-4 ml-0 flex w-full flex-1 rounded-xl bg-slate-1 p-4">
+        <div className="m-4 ml-0 flex w-full flex-1 rounded-xl bg-slate-1 p-6">
           <motion.div
             key={layoutId}
             className="relative size-full"

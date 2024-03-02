@@ -5,7 +5,7 @@ import { useInterval, useTimeout } from '@mantine/hooks';
 import { useForm, UseFormReturn } from 'react-hook-form';
 import { toast } from 'sonner';
 
-import { useSmsVerifyCode } from '@/apis/authz';
+import { sendSmsVerifyCode } from '@/apis/authz';
 import { AuthWrapper } from '@/components/layout/login/authz/auth-wrapper.tsx';
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form.tsx';
@@ -18,8 +18,6 @@ interface IPhoneAuthProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const PhoneAuth: React.FC<IPhoneAuthProps> = ({ onFinished }) => {
-  const { trigger } = useSmsVerifyCode();
-
   const form = useForm<ILoginViaSms>({
     resolver: zodResolver(loginViaSmsSchema),
     defaultValues: {
@@ -47,7 +45,7 @@ export const PhoneAuth: React.FC<IPhoneAuthProps> = ({ onFinished }) => {
     setCountDownSeconds(30);
     start();
     interval.start();
-    toast.promise(trigger({ phoneNumber: phone }), {
+    toast.promise(sendSmsVerifyCode(phone), {
       loading: '发送中...',
       success: '已发送短信验证码',
       error: '发送失败！请稍后再重试',

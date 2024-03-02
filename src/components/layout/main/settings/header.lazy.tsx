@@ -51,9 +51,7 @@ export const SettingsHeader: React.FC<ISettingsHeaderProps> = ({
                 'group flex items-center gap-2 transition-all ',
                 onNameClick && 'cursor-pointer hover:opacity-75',
               )}
-              onClick={async () => {
-                onNameClick?.();
-              }}
+              onClick={onNameClick}
             >
               <h3 className="line-clamp-1 text-sm font-bold">{name}</h3>
               {onNameClick && <Pencil size={10} className="opacity-0 transition-all group-hover:opacity-100" />}

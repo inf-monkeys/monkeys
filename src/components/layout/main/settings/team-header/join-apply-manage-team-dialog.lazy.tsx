@@ -5,9 +5,7 @@ import { toast } from 'sonner';
 
 import { useTeams, useUpdateApplyTeam } from '@/apis/authz/team';
 import { ITeam } from '@/apis/authz/team/typings.ts';
-import { IUser } from '@/components/router/guard/auth.ts';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
-import { Button } from '@/components/ui/button';
+import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip } from '@/components/ui/tooltip';
@@ -19,7 +17,7 @@ interface Props {
 }
 
 export const JoinApplyMangeTeamDialog: React.FC<Props> = ({ open, onClose, team }) => {
-  const [applyList, setApplyList] = useState<IUser[]>([]);
+  const [applyList, setApplyList] = useState<IVinesUser[]>([]);
   const [publicTeam, togglePublicTeam] = useState<boolean>();
   const [isHandleAccept, setIsHandleAccept] = useState<boolean>(false);
 
@@ -63,29 +61,29 @@ export const JoinApplyMangeTeamDialog: React.FC<Props> = ({ open, onClose, team 
                 <p>暂无加入申请</p>
               </div>
             )}
-            {applyList.map(({ _id, name, photo }: IUser) => (
-              <div key={_id} className="bg-bg2 mb-4 flex items-center justify-between gap-4 rounded-md p-3">
-                <div className="flex items-center gap-4">
-                  <Avatar className="size-9">
-                    <AvatarImage className="aspect-auto" src={photo} alt={name} />
-                    <AvatarFallback className="rounded-none p-2 text-xs">
-                      {(name ?? 'AI').substring(0, 2)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h1 className="text-sm">{name}</h1>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button disabled={isHandleAccept} theme="danger" onClick={() => handleAccept(_id, false)}>
-                    拒绝
-                  </Button>
-                  <Button disabled={isHandleAccept} onClick={() => handleAccept(_id, true)}>
-                    同意
-                  </Button>
-                </div>
-              </div>
-            ))}
+            {/*{applyList.map(({ _id, name, photo }: IUser) => (*/}
+            {/*  <div key={_id} className="bg-bg2 mb-4 flex items-center justify-between gap-4 rounded-md p-3">*/}
+            {/*    <div className="flex items-center gap-4">*/}
+            {/*      <Avatar className="size-9">*/}
+            {/*        <AvatarImage className="aspect-auto" src={photo} alt={name} />*/}
+            {/*        <AvatarFallback className="rounded-none p-2 text-xs">*/}
+            {/*          {(name ?? 'AI').substring(0, 2)}*/}
+            {/*        </AvatarFallback>*/}
+            {/*      </Avatar>*/}
+            {/*      <div>*/}
+            {/*        <h1 className="text-sm">{name}</h1>*/}
+            {/*      </div>*/}
+            {/*    </div>*/}
+            {/*    <div className="flex gap-2">*/}
+            {/*      <Button disabled={isHandleAccept} theme="danger" onClick={() => handleAccept(_id, false)}>*/}
+            {/*        拒绝*/}
+            {/*      </Button>*/}
+            {/*      <Button disabled={isHandleAccept} onClick={() => handleAccept(_id, true)}>*/}
+            {/*        同意*/}
+            {/*      </Button>*/}
+            {/*    </div>*/}
+            {/*  </div>*/}
+            {/*))}*/}
           </div>
           <div className="flex justify-between">
             <div className="flex items-center gap-2">

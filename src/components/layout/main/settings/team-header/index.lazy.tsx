@@ -131,7 +131,7 @@ export const SettingsTeamHeader: React.FC<ISettingsUserHeaderProps> = ({ readonl
                 placeholder="16 字内，仅内部可见"
                 maxLength={16}
                 value={dialogInputOptions.value}
-                onChange={(v) => setDialogInputOptions({ ...dialogInputOptions, value: v.target.value })}
+                onChange={(v) => setDialogInputOptions({ ...dialogInputOptions, value: v })}
               />
             </div>
             <DialogFooter>

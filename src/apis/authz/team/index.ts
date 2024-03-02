@@ -8,7 +8,7 @@ import {
   TeamInviteWithUserProfile,
   TeamMemberResponse,
 } from '@/apis/authz/team/typings.ts';
-import { authzPostFetcher, useAuthzGetFetcher, useAuthzPostFetcher } from '@/apis/fetcher.ts';
+import { useAuthzGetFetcher, useAuthzPostFetcher } from '@/apis/fetcher.ts';
 
 export const useTeams = (enable = true) =>
   useSWR<ITeam[]>(enable ? '/api/teams' : null, useAuthzGetFetcher, {
@@ -37,20 +37,20 @@ export const useRemoveTeamMember = (teamId: string) =>
 export const useGetTeamInvites = (teamId: string) =>
   useSWR<TeamInviteWithUserProfile[]>(`/api/teams/invites/manage/${teamId}`, useAuthzGetFetcher);
 
-export const toggleTeamInviteStatus = (teamId: string, teamInviteId: string) =>
-  authzPostFetcher<boolean, undefined>(`/api/teams/invites/manage/${teamId}/toggle/${teamInviteId}`, {
-    arg: undefined,
-  });
-
-export const updateTeamInviteRemark = (teamId: string, teamInviteId: string, remark: string) =>
-  authzPostFetcher<
-    boolean,
-    {
-      remark: string;
-    }
-  >(`/api/teams/invites/manage/${teamId}/remark/${teamInviteId}`, { arg: { remark } });
-
-export const deleteTeamInvite = (teamId: string, teamInviteId: string) =>
-  authzPostFetcher<boolean, undefined>(`/api/teams/invites/manage/${teamId}/delete/${teamInviteId}`, {
-    arg: undefined,
-  });
+// export const toggleTeamInviteStatus = (teamId: string, teamInviteId: string) =>
+//   authzPostFetcher<boolean, undefined>(`/api/teams/invites/manage/${teamId}/toggle/${teamInviteId}`, {
+//     arg: undefined,
+//   });
+//
+// export const updateTeamInviteRemark = (teamId: string, teamInviteId: string, remark: string) =>
+//   authzPostFetcher<
+//     boolean,
+//     {
+//       remark: string;
+//     }
+//   >(`/api/teams/invites/manage/${teamId}/remark/${teamInviteId}`, { arg: { remark } });
+//
+// export const deleteTeamInvite = (teamId: string, teamInviteId: string) =>
+//   authzPostFetcher<boolean, undefined>(`/api/teams/invites/manage/${teamId}/delete/${teamInviteId}`, {
+//     arg: undefined,
+//   });

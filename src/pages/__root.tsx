@@ -9,6 +9,7 @@ import { OEM } from '@/components/layout/oem';
 import { MainWrapper } from '@/components/layout-wrapper/main';
 import { WorkspaceWrapper } from '@/components/layout-wrapper/workspace/Workspace.tsx';
 import { TeamsGuard } from '@/components/router/guard/team.tsx';
+import { UserGuard } from '@/components/router/guard/user.tsx';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 const RootComponent: React.FC = () => {
@@ -50,6 +51,7 @@ const RootComponent: React.FC = () => {
       </NextUIProvider>
       <OEM />
       <TeamsGuard />
+      <UserGuard />
     </>
   );
 };

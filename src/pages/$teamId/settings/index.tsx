@@ -2,32 +2,15 @@ import React from 'react';
 
 import { createFileRoute } from '@tanstack/react-router';
 
+import { Account } from '@/components/layout/settings/account';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { ApiKeySettings } from '@/pages/$teamId/settings/api-key/index.lazy.tsx';
-import { TeamMembersSettings } from '@/pages/$teamId/settings/team-members/index.lazy.tsx';
-import { UserSettings } from '@/pages/$teamId/settings/user/index.lazy.tsx';
 
 const SIDEBAR_LIST = [
   {
-    label: '个人中心',
-    key: 'user',
-  },
-  {
-    label: '团队成员',
-    key: 'team-members',
-  },
-  {
-    label: '团队账户',
-    key: 'team-payment',
-  },
-  {
-    label: '团队主题',
-    key: 'team-theme',
-  },
-  {
-    label: '团队数据',
-    key: 'team-data',
+    label: '账号中心',
+    key: 'account',
   },
   {
     label: 'API 密钥管理',
@@ -37,26 +20,23 @@ const SIDEBAR_LIST = [
 
 export const Settings: React.FC = () => {
   return (
-    <div className="flex flex-col gap-2">
-      <h2 className="text-lg font-bold">用户与团队配置</h2>
-      <Tabs defaultValue="user" className="">
+    <div className="flex flex-col gap-4">
+      <h2 className="text-2xl font-bold">配置中心</h2>
+      <Tabs
+        defaultValue="account"
+        className="[&_[role='tabpanel']]:mt-4 [&_[role='tabpanel']]:h-[calc(100vh-11.5rem)] [&_[role='tabpanel']]:overflow-y-auto [&_[role='tabpanel']]:overflow-x-hidden"
+      >
         <TabsList>
-          {SIDEBAR_LIST.map((item) => (
-            <TabsTrigger key={item.key} value={item.key} className="text-xs">
-              {item.label}
+          {SIDEBAR_LIST.map(({ label, key }) => (
+            <TabsTrigger key={key} value={key} className="text-xs">
+              {label}
             </TabsTrigger>
           ))}
         </TabsList>
-        <TabsContent value="user" className="max-h-[calc(100vh-0.75rem-150px)] overflow-y-auto overflow-x-hidden">
-          <UserSettings />
+        <TabsContent value="account" className="">
+          <Account />
         </TabsContent>
-        <TabsContent
-          value="team-members"
-          className="max-h-[calc(100vh-0.75rem-150px)] overflow-y-auto overflow-x-hidden"
-        >
-          <TeamMembersSettings />
-        </TabsContent>
-        <TabsContent value="api-key" className="max-h-[calc(100vh-0.75rem-150px)] overflow-y-auto overflow-x-hidden">
+        <TabsContent value="api-key">
           <ApiKeySettings />
         </TabsContent>
       </Tabs>

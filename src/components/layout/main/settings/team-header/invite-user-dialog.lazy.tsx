@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { useSearchUsers } from '@/apis/authz';
 import { useCreateTeamInviteLink } from '@/apis/authz/team';
 import { ITeam, TeamInviteLinkOutdateType } from '@/apis/authz/team/typings.ts';
-import { IUser } from '@/components/router/guard/auth.ts';
+import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -27,7 +27,7 @@ interface Props {
 }
 
 export const InviteUserDialog: React.FC<Props> = ({ team, open, onClose }) => {
-  const [user] = useLocalStorage<Partial<IUser>>('vines-account', {});
+  const [user] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
   const [keywords, setKeywords] = useState('');
   const [inviteLinkTime, setInviteLinkTime] = useState<'7days' | 'longtimes'>('7days');
   const { trigger: createInvitelLinkTrigger } = useCreateTeamInviteLink(team?.id ?? '');
@@ -88,7 +88,7 @@ export const InviteUserDialog: React.FC<Props> = ({ team, open, onClose }) => {
       <DialogContent>
         <DialogTitle>邀请成员</DialogTitle>
         <div className="flex gap-2">
-          <Input placeholder="请输入用户名或手机号" value={keywords} onChange={(v) => setKeywords(v.target.value)} />
+          <Input placeholder="请输入用户名或手机号" value={keywords} onChange={setKeywords} />
           <Button onClick={handleSearchUsers}>搜索</Button>
         </div>
 

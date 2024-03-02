@@ -2,11 +2,10 @@ import React, { useState } from 'react';
 
 import { MoreHorizontal, Pause, Pencil, Play } from 'lucide-react';
 import moment from 'moment';
-import { toast } from 'sonner';
 
-import { deleteTeamInvite, toggleTeamInviteStatus, updateTeamInviteRemark, useGetTeamInvites } from '@/apis/authz/team';
+import { useGetTeamInvites } from '@/apis/authz/team';
 import { ITeam, TeamInviteStatus, TeamInviteWithUserProfile } from '@/apis/authz/team/typings.ts';
-import { IUser } from '@/components/router/guard/auth.ts';
+import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
@@ -26,7 +25,7 @@ interface Props {
   team?: ITeam;
 }
 
-const AvatarWithProfile: React.FC<{ user: Partial<IUser> }> = ({ user }) => {
+const AvatarWithProfile: React.FC<{ user: Partial<IVinesUser> }> = ({ user }) => {
   return (
     <Tooltip content={user?.name ?? 'AI'}>
       <Avatar className="size-7">
@@ -46,50 +45,50 @@ export const InviteLinkManageDialog: React.FC<Props> = ({ open, onClose, team })
 
   async function handlePauseLink(link: TeamInviteWithUserProfile) {
     if (team) {
-      toast.promise(
-        toggleTeamInviteStatus(team._id, link._id).then((v) => {
-          mutate();
-          return v;
-        }),
-        {
-          success: '操作成功',
-          loading: '操作中......',
-          error: '操作失败',
-        },
-      );
+      // toast.promise(
+      //   toggleTeamInviteStatus(team._id, link._id).then((v) => {
+      //     mutate();
+      //     return v;
+      //   }),
+      //   {
+      //     success: '操作成功',
+      //     loading: '操作中......',
+      //     error: '操作失败',
+      //   },
+      // );
     }
   }
 
   async function handleEditRemark(link: TeamInviteWithUserProfile) {
     if (team) {
-      toast.promise(
-        updateTeamInviteRemark(team._id, link._id, remark).then((v) => {
-          mutate();
-          return v;
-        }),
-        {
-          success: '操作成功',
-          loading: '操作中......',
-          error: '操作失败',
-        },
-      );
+      // toast.promise(
+      //   updateTeamInviteRemark(team._id, link._id, remark).then((v) => {
+      //     mutate();
+      //     return v;
+      //   }),
+      //   {
+      //     success: '操作成功',
+      //     loading: '操作中......',
+      //     error: '操作失败',
+      //   },
+      // );
     }
     toggleRemarkModalVisible(false);
   }
 
   async function handleDeleteLink(link: TeamInviteWithUserProfile) {
     if (team) {
-      toast.promise(
-        deleteTeamInvite(team._id, link._id).then((v) => {
-          mutate();
-          return v;
-        }),
-        {
-          success: '操作成功',
-          loading: '操作中......',
-          error: '操作失败',
-        },
-      );
+      // toast.promise(
+      //   deleteTeamInvite(team._id, link._id).then((v) => {
+      //     mutate();
+      //     return v;
+      //   }),
+      //   {
+      //     success: '操作成功',
+      //     loading: '操作中......',
+      //     error: '操作失败',
+      //   },
+      // );
     }
   }
 
@@ -98,12 +97,7 @@ export const InviteLinkManageDialog: React.FC<Props> = ({ open, onClose, team })
       <Dialog open={remarkModalVisible} onClose={() => toggleRemarkModalVisible(false)}>
         <DialogContent>
           <DialogTitle>请输入备注</DialogTitle>
-          <Input
-            placeholder="16 字内，仅内部可见"
-            maxLength={16}
-            value={remark}
-            onChange={(v) => setRemark(v.target.value)}
-          />
+          <Input placeholder="16 字内，仅内部可见" maxLength={16} value={remark} onChange={setRemark} />
           <DialogFooter>
             <Button onClick={() => toggleRemarkModalVisible(false)}>取消</Button>
             <Button variant="solid" onClick={() => handleEditRemark(currentLink!)}>

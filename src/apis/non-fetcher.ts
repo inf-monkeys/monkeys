@@ -28,7 +28,7 @@ const fetchData = async <T, U = undefined>(url: string, method: string, arg?: U)
     body,
   }).then(async (r) => await r.json())) as CommonFetcherResponse<T>;
 
-  const code = result?.code;
+  const code = result?.code || result?.status;
   const data = result?.data || void 0;
 
   if (code && code !== 200) {
@@ -37,14 +37,14 @@ const fetchData = async <T, U = undefined>(url: string, method: string, arg?: U)
     if (code === 403) {
       if (errorMessage) {
         toast.warning(errorMessage);
-        return null;
+      } else {
+        toast.warning('需要登录');
       }
-      toast.warning('需要登录');
     } else {
       toast.warning(errorMessage || '网络错误');
     }
 
-    return null;
+    throw new Error(errorMessage || '网络错误');
   }
 
   return data as T;
@@ -52,7 +52,7 @@ const fetchData = async <T, U = undefined>(url: string, method: string, arg?: U)
 
 export const authzFetcher = <T>(url: string) => fetchData<T>(url, 'GET');
 
-export const useAuthzPostFetcher = <T, U>(url: string, arg: U) => fetchData<T, U>(url, 'POST', arg);
+export const authzPostFetcher = <T, U>(url: string, arg: U) => fetchData<T, U>(url, 'POST', arg);
 
 export const simpleGet = async <T>(url: string) => (await fetch(url).then(async (r) => (await r.json())?.data)) as T;
 

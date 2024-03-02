@@ -1,4 +1,4 @@
-import { IUser } from '@/components/router/guard/auth.ts';
+import { IVinesUser } from '@/apis/authz/user/typings.ts';
 
 export interface ITeam {
   id: string;
@@ -44,7 +44,7 @@ export enum TeamInviteStatus {
 }
 
 export type TeamMemberResponse = {
-  list: Array<IUser & { _id: string }>;
+  list: Array<IVinesUser & { _id: string }>;
   listTotal: number;
 };
 
@@ -62,7 +62,7 @@ export type TeamInvite = {
 };
 
 export type TeamInviteWithUserProfile = TeamInvite & {
-  acceptedUsers?: Partial<IUser>[];
-  inviterUser?: Partial<IUser>;
-  targetUser?: Partial<IUser>;
+  acceptedUsers?: Partial<IVinesUser>[];
+  inviterUser?: Partial<IVinesUser>;
+  targetUser?: Partial<IVinesUser>;
 };
