@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useSWRConfig } from 'swr';
 
-import { Pencil, Plus } from 'lucide-react';
+import { Pencil, Plus, PlusCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { updateTeam } from '@/apis/authz/team';
@@ -12,6 +12,7 @@ import { InfoEditor } from '@/components/layout/settings/account/info-editor.tsx
 import { CreateTeam } from '@/components/layout/settings/account/team/create';
 import { DeleteTeam } from '@/components/layout/settings/account/team/delete/DeleteTeam.tsx';
 import { ImportExportTeam } from '@/components/layout/settings/account/team/import-export';
+import { JoinPublicTeam } from '@/components/layout/settings/account/team/join-public-team';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Button } from '@/components/ui/button';
@@ -98,12 +99,18 @@ export const Team: React.FC<ITeamProps> = () => {
           </InfoEditor>
         </div>
       </CardContent>
-      {isOwner && (
-        <CardFooter className="justify-end gap-2">
-          <ImportExportTeam />
-          <DeleteTeam />
-        </CardFooter>
-      )}
+      <CardFooter className="justify-end gap-2">
+        {isOwner && <ImportExportTeam />}
+        <Tooltip>
+          <JoinPublicTeam>
+            <TooltipTrigger asChild>
+              <Button icon={<PlusCircle size={18} />} size="small" />
+            </TooltipTrigger>
+          </JoinPublicTeam>
+          <TooltipContent>加入公开团队</TooltipContent>
+        </Tooltip>
+        {isOwner && <DeleteTeam />}
+      </CardFooter>
     </Card>
   );
 };
