@@ -35,10 +35,9 @@ export const TeamSelector: React.FC = () => {
 
   const currentTeam = (teams ?? []).find((team) => team.id === teamId);
 
-  const handleSwapTeam = (id: string) => {
+  const handleSwapTeam = async (id: string) => {
     setTeamId(id);
-    void navigate({
-      to: '/$teamId',
+    await navigate({
       params: {
         teamId: id,
       },

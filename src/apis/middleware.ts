@@ -28,7 +28,7 @@ export const swrMiddleware: Middleware = (useSWRNext: SWRHook) => (key, fetcher,
   if (!swr?.data) return swr;
 
   const { r: swrResult, _: fetchId } = swr?.data as unknown as { r: CommonFetcherResponse<unknown>; _: string };
-  const code = swrResult?.code;
+  const code = swrResult?.code || swrResult?.status;
   const data = swrResult?.data || void 0;
 
   if (code) {

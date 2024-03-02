@@ -1,15 +1,17 @@
 import useSWRMutation from 'swr/mutation';
 
+import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { useAuthzPostFetcher, usePostFetcher } from '@/apis/fetcher.ts';
-import { IUser } from '@/components/router/guard/auth.ts';
+import { authzPostFetcher } from '@/apis/non-fetcher.ts';
 
-export const useSmsVerifyCode = () => useSWRMutation('/api/users/verify/phone', usePostFetcher);
+export const sendSmsVerifyCode = (phone: string | number) =>
+  authzPostFetcher('/api/users/verify/phone', { phoneNumber: phone });
 
 export const useLogin = () => useSWRMutation<string>('/api/users/login', usePostFetcher);
 
 export const useSearchUsers = () =>
   useSWRMutation<
-    IUser[],
+    IVinesUser[],
     unknown,
     string,
     {

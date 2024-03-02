@@ -4,24 +4,11 @@ import { has, set } from 'lodash';
 import { decodeToken as jwtDecodeToken, isExpired as jwtIsExpired } from 'react-jwt';
 import { toast } from 'sonner';
 
+import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { readLocalStorageValue, setLocalStorage } from '@/utils';
 
-export interface IUser {
-  _id: string;
-  id?: string;
-  name: string;
-  phone?: string;
-  photo: string;
-  email?: string;
-  isDeleted: boolean;
-  loginsCount: number;
-  lastLoginAt: number;
-  createdTimestamp: number;
-  updatedTimestamp: number;
-}
-
 export interface IUserToken {
-  data: IUser;
+  data: IVinesUser;
   token: string;
 }
 

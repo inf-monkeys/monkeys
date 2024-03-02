@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { useEffect, useMemo, useRef } from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
@@ -31,13 +32,11 @@ export const TeamsGuard: React.FC = () => {
     if (!teams.find(({ id }) => id === teamId)) {
       const latestTeamId = teams[0].id;
       setTeamId(latestTeamId);
-      void navigate({
-        to: '/$teamId',
+      navigate({
         params: {
           teamId: latestTeamId,
         },
-      });
-      void teamBalanceMutate();
+      }).then(() => teamBalanceMutate());
     }
   }, [teamId, teams]);
 
@@ -48,12 +47,9 @@ export const useVinesTeam = () => {
   const { data: teams } = useTeams();
   const [teamId] = useLocalStorage<string>('vines-team-id', (teams ?? [])[0]?.id ?? '', false);
 
-  const getTeamId = () => useMemo(() => teamId, [teamId]);
-
   const team = useMemo(() => (teams ?? []).find((team) => team.id === teamId), [teamId, teams]);
 
   return {
-    getTeamId,
     team,
     teamId,
     teams,

@@ -5,9 +5,8 @@ import { useNavigate } from '@tanstack/react-router';
 import { get } from 'lodash';
 import { LogOut, UserRoundPlus } from 'lucide-react';
 
-import { useTeams } from '@/apis/authz/team';
 import { IUserProps, User } from '@/components/layout/main/sidebar/account/user.tsx';
-import { IUser, logout, swapAccount } from '@/components/router/guard/auth.ts';
+import { IUser, swapAccount } from '@/components/router/guard/auth.ts';
 import {
   Select,
   SelectContent,
@@ -18,6 +17,7 @@ import {
 } from '@/components/ui/select.tsx';
 import { Route } from '@/pages/login.tsx';
 import { useLocalStorage } from '@/utils';
+import VinesEvent from '@/utils/events.ts';
 import { maskEmail, maskPhone } from '@/utils/maskdata.ts';
 
 export const Account: React.FC = () => {
@@ -26,8 +26,6 @@ export const Account: React.FC = () => {
   const [tokens] = useLocalStorage<Partial<IUser>[]>('vines-tokens', []);
   const [user] = useLocalStorage<Partial<IUser>>('vines-account', {});
   const [, setSwap] = useLocalStorage('vines-authz-swap', 'users', false);
-
-  const { mutate: teamsMutate } = useTeams();
 
   const currentUserName = user.name;
   const currentAccount = user.phone ? maskPhone(user.phone.toString()) : user.email ? maskEmail(user.email) : '';
@@ -54,16 +52,7 @@ export const Account: React.FC = () => {
       setSwap('login');
       void navigate({ to: '/login' });
     } else if (id === 'logout') {
-      const userId = user.id ?? '';
-      if (await logout(userId)) {
-        const filtered = users.filter((it) => it.id !== userId);
-        if (!filtered.length) {
-          await navigate({ to: '/login' });
-        } else {
-          swapAccount(filtered[0].id);
-          setTimeout(() => teamsMutate());
-        }
-      }
+      VinesEvent.emit('vines-logout', user.id);
     } else {
       swapAccount(id);
     }

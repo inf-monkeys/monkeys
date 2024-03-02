@@ -4,8 +4,8 @@ import { Info } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useTeams } from '@/apis/authz/team';
+import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { useCreateApiKey } from '@/apis/settings/apikey.ts';
-import { IUser } from '@/components/router/guard/auth.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input.tsx';
@@ -20,7 +20,7 @@ export const ApiKeySettingsCreateApiKeyDialog: React.FC<IApiKeySettingsCreateApi
   open,
   onClose,
 }) => {
-  const [user] = useLocalStorage<Partial<IUser>>('vines-account', {});
+  const [user] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
   const [desc, setDesc] = useState('');
   const { data: teams } = useTeams();
   const [teamId] = useLocalStorage<string>('vines-team-id', (teams ?? [])[0]?.id ?? '', false);
@@ -70,7 +70,7 @@ export const ApiKeySettingsCreateApiKeyDialog: React.FC<IApiKeySettingsCreateApi
                 placeholder="请输入用途描述，16 字内"
                 maxLength={16}
                 value={desc}
-                onChange={(e) => setDesc(e.target.value)}
+                onChange={setDesc}
                 className="col-span-4"
               />
             </div>
