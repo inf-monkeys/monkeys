@@ -9,10 +9,10 @@ import { InfoEditor } from '@/components/layout/settings/account/info-editor.tsx
 
 interface IUserNameProps extends React.ComponentPropsWithoutRef<'div'> {
   user: Partial<IVinesUser>;
-  setUser: React.Dispatch<React.SetStateAction<Partial<IVinesUser>>>;
+  updateUser: (key: string, val: string) => void;
 }
 
-export const UserName: React.FC<IUserNameProps> = ({ user, setUser }) => {
+export const UserName: React.FC<IUserNameProps> = ({ user, updateUser }) => {
   const handleUpdateUser = (key: string, val: string) => {
     toast.promise(
       updateUserInfo({
@@ -21,7 +21,7 @@ export const UserName: React.FC<IUserNameProps> = ({ user, setUser }) => {
       {
         loading: '更新中...',
         success: () => {
-          setUser({ ...user, [key]: val });
+          updateUser(key, val);
           return '更新成功！';
         },
         error: '更新失败！请稍后再重试',

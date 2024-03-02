@@ -3,7 +3,7 @@ import { ParsedLocation, redirect } from '@tanstack/react-router';
 import isMongoId from 'validator/es/lib/isMongoId';
 import z from 'zod';
 
-import { ITeam } from '@/apis/authz/team/typings.ts';
+import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { authGuard } from '@/components/router/guard/auth.ts';
 import { Route } from '@/pages/$teamId';
 import { readLocalStorageValue } from '@/utils';
@@ -15,7 +15,7 @@ export const teamIdGuard = async ({
   location: ParsedLocation;
   params: (typeof Route)['params'];
 }) => {
-  const teams = readLocalStorageValue<ITeam[]>('vines-teams', []);
+  const teams = readLocalStorageValue<IVinesTeam[]>('vines-teams', []);
   if (!teams.length)
     throw redirect({
       to: '/',

@@ -1,12 +1,14 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
 
 import { get } from 'lodash';
 import { LogOut, UserRoundPlus } from 'lucide-react';
 
+import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { IUserProps, User } from '@/components/layout/main/sidebar/account/user.tsx';
-import { IUser, swapAccount } from '@/components/router/guard/auth.ts';
+import { swapAccount } from '@/components/router/guard/auth.ts';
+import { IUserTokens } from '@/components/router/guard/auth.ts';
 import {
   Select,
   SelectContent,
@@ -23,29 +25,25 @@ import { maskEmail, maskPhone } from '@/utils/maskdata.ts';
 export const Account: React.FC = () => {
   const navigate = useNavigate({ from: Route.fullPath });
 
-  const [tokens] = useLocalStorage<Partial<IUser>[]>('vines-tokens', []);
-  const [user] = useLocalStorage<Partial<IUser>>('vines-account', {});
+  const [tokens] = useLocalStorage<IUserTokens>('vines-tokens', {});
+  const [user] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
   const [, setSwap] = useLocalStorage('vines-authz-swap', 'users', false);
 
   const currentUserName = user.name;
   const currentAccount = user.phone ? maskPhone(user.phone.toString()) : user.email ? maskEmail(user.email) : '';
   const currentUserPhoto = user.photo;
 
-  const users: (IUserProps & { id: string })[] = useMemo(
-    () =>
-      Object.entries(tokens).map(([id, data]) => {
-        const usePhone = get(data, 'data.phone', null) !== null;
-        const name = get(data, 'data.name', '');
-        const _user = get(data, 'data.' + (usePhone ? 'phone' : 'email'), '');
-        return {
-          id,
-          name,
-          account: usePhone ? maskPhone(_user) : maskEmail(_user),
-          photo: get(data, 'data.photo', ''),
-        };
-      }),
-    [tokens],
-  );
+  const users: (IUserProps & { id: string })[] = Object.entries(tokens).map(([id, data]) => {
+    const usePhone = get(data, 'data.phone', null) !== null;
+    const name = get(data, 'data.name', '');
+    const _user = get(data, 'data.' + (usePhone ? 'phone' : 'email'), '');
+    return {
+      id,
+      name,
+      account: usePhone ? maskPhone(_user) : maskEmail(_user),
+      photo: get(data, 'data.photo', ''),
+    };
+  });
 
   const handleValueChange = async (id: string) => {
     if (id === 'login') {

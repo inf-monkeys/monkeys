@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 import { useSearchUsers } from '@/apis/authz';
 import { useCreateTeamInviteLink } from '@/apis/authz/team';
-import { ITeam, TeamInviteLinkOutdateType } from '@/apis/authz/team/typings.ts';
+import { IVinesTeam, TeamInviteLinkOutdateType } from '@/apis/authz/team/typings.ts';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Button } from '@/components/ui/button';
@@ -23,7 +23,7 @@ import { useLocalStorage } from '@/utils';
 interface Props {
   open: boolean;
   onClose: () => void;
-  team?: ITeam | null;
+  team?: IVinesTeam | null;
 }
 
 export const InviteUserDialog: React.FC<Props> = ({ team, open, onClose }) => {

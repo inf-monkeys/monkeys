@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 
 import { useTeamBalance, useTeams } from '@/apis/authz/team';
-import { ITeam } from '@/apis/authz/team/typings.ts';
+import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { useLocalStorage } from '@/utils';
 
 export const TeamsGuard: React.FC = () => {
@@ -12,7 +12,7 @@ export const TeamsGuard: React.FC = () => {
 
   const [token] = useLocalStorage<string>('vines-token', '', false);
   const [teamId, setTeamId] = useLocalStorage<string>('vines-team-id', '', false);
-  const [, setLocalTeams] = useLocalStorage<ITeam[]>('vines-teams', []);
+  const [, setLocalTeams] = useLocalStorage<IVinesTeam[]>('vines-teams', []);
   const { data: teams, mutate: teamsMutate } = useTeams(!!token);
   const { mutate: teamBalanceMutate } = useTeamBalance();
 

@@ -33,7 +33,7 @@ export const Settings: React.FC = () => {
             </TabsTrigger>
           ))}
         </TabsList>
-        <TabsContent value="account" className="">
+        <TabsContent value="account">
           <Account />
         </TabsContent>
         <TabsContent value="api-key">

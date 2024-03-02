@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { useTeams } from '@/apis/authz/team';
-import { ITeam } from '@/apis/authz/team/typings.ts';
+import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { authGuard } from '@/components/router/guard/auth.ts';
 import { useLocalStorage } from '@/utils';
 
@@ -12,7 +12,7 @@ const TeamsIdPage: React.FC = () => {
 
   const { data: teams } = useTeams();
   const [teamId] = useLocalStorage<string>('vines-team-id', '', false);
-  const [, setLocalTeams] = useLocalStorage<ITeam[]>('vines-teams', []);
+  const [, setLocalTeams] = useLocalStorage<IVinesTeam[]>('vines-teams', []);
 
   useEffect(() => {
     if (!teams) return;

@@ -2,16 +2,18 @@ import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
 import {
-  ITeam,
   ITeamAppyUpdate,
   ITeamBalance,
+  ITeamUpdate,
+  IVinesTeam,
   TeamInviteWithUserProfile,
   TeamMemberResponse,
 } from '@/apis/authz/team/typings.ts';
 import { useAuthzGetFetcher, useAuthzPostFetcher } from '@/apis/fetcher.ts';
+import { authzPostFetcher } from '@/apis/non-fetcher.ts';
 
 export const useTeams = (enable = true) =>
-  useSWR<ITeam[]>(enable ? '/api/teams' : null, useAuthzGetFetcher, {
+  useSWR<IVinesTeam[]>(enable ? '/api/teams' : null, useAuthzGetFetcher, {
     refreshInterval: 600000,
     revalidateOnFocus: false,
   });
@@ -21,6 +23,8 @@ export const useTeamBalance = () =>
     refreshInterval: 600000,
     revalidateOnFocus: false,
   });
+
+export const updateTeam = (team: ITeamUpdate) => authzPostFetcher<IVinesTeam, ITeamUpdate>(`/api/teams/update`, team);
 
 export const useCreateTeamInviteLink = (teamId: string) =>
   useSWRMutation(`/api/teams/invites/${teamId}`, useAuthzPostFetcher);

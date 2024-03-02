@@ -19,10 +19,10 @@ import { maskEmail, maskPhone } from '@/utils/maskdata.ts';
 
 interface IUserAccountProps extends React.ComponentPropsWithoutRef<'div'> {
   user: Partial<IVinesUser>;
-  setUser: React.Dispatch<React.SetStateAction<Partial<IVinesUser>>>;
+  updateUser: (key: string, val: string) => void;
 }
 
-export const UserAccount: React.FC<IUserAccountProps> = ({ user, setUser }) => {
+export const UserAccount: React.FC<IUserAccountProps> = ({ user, updateUser }) => {
   const [visible, setVisible] = useState(false);
 
   const form = useForm<IToggleAccountViaSms>({
@@ -98,7 +98,7 @@ export const UserAccount: React.FC<IUserAccountProps> = ({ user, setUser }) => {
       {
         loading: '正在修改中...',
         success: (data) => {
-          data && setUser(data);
+          data && updateUser('phone', phoneNumber);
           setIsLoading(false);
           setVisible(false);
           return '修改成功！';

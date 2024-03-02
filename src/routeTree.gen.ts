@@ -40,12 +40,6 @@ import { Route as TeamIdActionToolsIndexImport } from './pages/$teamId/action-to
 
 // Create Virtual Routes
 
-const TeamIdSettingsUserIndexLazyImport = createFileRoute(
-  '/$teamId/settings/user/',
-)()
-const TeamIdSettingsTeamMembersIndexLazyImport = createFileRoute(
-  '/$teamId/settings/team-members/',
-)()
 const TeamIdSettingsApiKeyIndexLazyImport = createFileRoute(
   '/$teamId/settings/api-key/',
 )()
@@ -173,24 +167,6 @@ const TeamIdActionToolsIndexRoute = TeamIdActionToolsIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const TeamIdSettingsUserIndexLazyRoute =
-  TeamIdSettingsUserIndexLazyImport.update({
-    path: '/$teamId/settings/user/',
-    getParentRoute: () => rootRoute,
-  } as any).lazy(() =>
-    import('./pages/$teamId/settings/user/index.lazy').then((d) => d.Route),
-  )
-
-const TeamIdSettingsTeamMembersIndexLazyRoute =
-  TeamIdSettingsTeamMembersIndexLazyImport.update({
-    path: '/$teamId/settings/team-members/',
-    getParentRoute: () => rootRoute,
-  } as any).lazy(() =>
-    import('./pages/$teamId/settings/team-members/index.lazy').then(
-      (d) => d.Route,
-    ),
-  )
-
 const TeamIdSettingsApiKeyIndexLazyRoute =
   TeamIdSettingsApiKeyIndexLazyImport.update({
     path: '/$teamId/settings/api-key/',
@@ -303,14 +279,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdSettingsApiKeyIndexLazyImport
       parentRoute: typeof rootRoute
     }
-    '/$teamId/settings/team-members/': {
-      preLoaderRoute: typeof TeamIdSettingsTeamMembersIndexLazyImport
-      parentRoute: typeof rootRoute
-    }
-    '/$teamId/settings/user/': {
-      preLoaderRoute: typeof TeamIdSettingsUserIndexLazyImport
-      parentRoute: typeof rootRoute
-    }
   }
 }
 
@@ -342,8 +310,6 @@ export const routeTree = rootRoute.addChildren([
   TeamIdWorkbenchIndexRoute,
   TeamIdWorkflowsIndexRoute,
   TeamIdSettingsApiKeyIndexLazyRoute,
-  TeamIdSettingsTeamMembersIndexLazyRoute,
-  TeamIdSettingsUserIndexLazyRoute,
 ])
 
 /* prettier-ignore-end */
