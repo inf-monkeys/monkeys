@@ -1,0 +1,34 @@
+{
+  "editor.tabSize": 2,
+  "editor.formatOnSave": true,
+  "prettier.printWidth": 120,
+  "editor.snippetSuggestions": "top",
+  "emmet.showSuggestionsAsSnippets": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  // "editor.codeActionsOnSave": {
+  //   "source.fixAll": true
+  // },
+  "eslint.validate": [
+    "javascript",
+    "typescript"
+  ],
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "cSpell.words": [
+    "varchar"
+  ],
+  "i18n-ally.localesPaths": [
+    "src/locales",
+    "src/modules/i18n",
+    "src/modules/messages"
+  ],
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  }
+}
