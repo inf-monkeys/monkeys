@@ -1,64 +1,56 @@
 import stringify from 'fast-json-stable-stringify';
-import { nanoid } from 'nanoid';
+import { toast } from 'sonner';
 
-import { readLocalStorageValue } from '@/utils';
+import { IVinesHeaderOptions, vinesHeader } from '@/apis/utils.ts';
 
 import 'unfetch/polyfill';
 
-export interface CommonFetcherResponse<T> {
-  code?: number;
-  status?: number;
-  message: string;
-  data: T;
+// region SWR Fetcher
+
+interface IFetcherOptions<U = unknown> extends IVinesHeaderOptions {
+  method?: 'GET' | 'POST';
+  auth?: boolean;
+  simple?: boolean;
+  wrapper?: (data: U) => any;
 }
 
-// TIPS: 每个接口的返回值都必须被包装一层，以便于在请求时区分不同的请求
-const wrapper = <T>(data: T) => ({ r: data, _: nanoid(10) }) as T;
-
-export const useGetFetcher = (url: string) => fetch(url).then(async (r) => wrapper(await r.json()));
-
-export const usePostFetcher = async <T, U>(url: string, { arg }: { arg: U }) => {
-  return (await fetch(url, {
-    method: 'POST',
-    headers: {
+export const vinesFetcher = <U, T = {}>({
+  method = 'GET',
+  auth = true,
+  simple = false,
+  apiKey,
+  wrapper = (data: U) => data,
+}: IFetcherOptions<U> = {}) => {
+  return async (url: string, params?: T) => {
+    const headers = {
       'Content-Type': 'application/json;charset=utf-8',
-    },
-    body: stringify(arg),
-  }).then(async (r) => wrapper<T>(await r.json()))) as T;
-};
+      ...(auth && vinesHeader({ apiKey, useToast: simple })),
+    };
 
-export const useAuthzGetFetcher = async <T>(url: string) => {
-  const token = readLocalStorageValue('vines-token', '', false);
-  if (!token) {
-    throw new Error('需要登录');
-  }
+    const body = params ? stringify(simple ? params : params['arg']) : undefined;
 
-  const teamId = readLocalStorageValue('vines-team-id', '', false);
+    return await fetch(url, {
+      method,
+      headers,
+      body,
+    }).then(async (r) => {
+      const raw = await r.json();
 
-  return (await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json;charset=utf-8',
-      Authentication: 'Bearer ' + token,
-      Team: teamId,
-    },
-  }).then(async (r) => wrapper<T>(await r.json()))) as T;
-};
+      const code = raw?.code || raw?.status;
+      const data = raw?.data || void 0;
 
-export const useAuthzPostFetcher = async <T, U>(url: string, { arg }: { arg: U }) => {
-  const token = readLocalStorageValue('vines-token', '', false);
-  if (!token) {
-    throw new Error('需要登录');
-  }
+      if (code && code !== 200) {
+        const errorMessage = raw?.message || null;
 
-  const teamId = readLocalStorageValue('vines-team-id', '', false);
+        if (simple) {
+          toast.warning(errorMessage ? errorMessage : code === 403 ? '需要登录' : '网络错误');
+          return null;
+        } else {
+          throw new Error(errorMessage || '网络错误');
+        }
+      }
 
-  return (await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json;charset=utf-8',
-      Authentication: 'Bearer ' + token,
-      Team: teamId,
-    },
-    body: stringify(arg),
-  }).then(async (r) => wrapper<T>(await r.json()))) as T;
+      return wrapper(data);
+    });
+  };
 };

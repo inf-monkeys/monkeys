@@ -1,20 +1,8 @@
 import useSWRMutation from 'swr/mutation';
 
-import { IVinesUser } from '@/apis/authz/user/typings.ts';
-import { useAuthzPostFetcher, usePostFetcher } from '@/apis/fetcher.ts';
-import { simplePost } from '@/apis/non-fetcher.ts';
+import { vinesFetcher } from '@/apis/fetcher.ts';
+
+export const useLogin = () => useSWRMutation<string>('/api/users/login', vinesFetcher({ method: 'POST', auth: false }));
 
 export const sendSmsVerifyCode = (phone: string | number) =>
-  simplePost('/api/users/verify/phone', { phoneNumber: phone });
-
-export const useLogin = () => useSWRMutation<string>('/api/users/login', usePostFetcher);
-
-export const useSearchUsers = () =>
-  useSWRMutation<
-    IVinesUser[],
-    unknown,
-    string,
-    {
-      keyword: string;
-    }
-  >('/api/users/search', useAuthzPostFetcher);
+  vinesFetcher({ method: 'POST', simple: true, auth: false })(`/api/users/verify/phone`, { phoneNumber: phone });

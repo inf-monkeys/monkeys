@@ -7,7 +7,7 @@ import { CircularProgress } from '@nextui-org/progress';
 import isMongoId from 'validator/es/lib/isMongoId';
 import z from 'zod';
 
-import { useAuthzGetFetcher } from '@/apis/fetcher.ts';
+import { vinesFetcher } from '@/apis/fetcher.ts';
 import { useListWorkspacePages } from '@/apis/pages';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 
@@ -17,7 +17,7 @@ export const WorkspaceIndex: React.FC = () => {
   const { data: pages } = useListWorkspacePages(workflowId);
   const navigate = useNavigate();
 
-  workflowId && preload(`/api/workflow/${workflowId}`, useAuthzGetFetcher);
+  workflowId && preload(`/api/workflow/${workflowId}`, vinesFetcher());
 
   useEffect(() => {
     if (pages) {

@@ -1,40 +1,25 @@
 import useSWR from 'swr';
 
-import { ITeamBalance, ITeamCreate, ITeamMember, ITeamUpdate, IVinesTeam } from '@/apis/authz/team/typings.ts';
-import { useAuthzGetFetcher } from '@/apis/fetcher.ts';
-import { authzDeleteFetcher, authzPostFetcher } from '@/apis/non-fetcher.ts';
+import { ITeamBalance, ITeamMember, ITeamUpdate, IVinesTeam } from '@/apis/authz/team/typings.ts';
+import { vinesFetcher } from '@/apis/fetcher.ts';
 
 export const useTeams = (enable = true) =>
-  useSWR<IVinesTeam[]>(enable ? '/api/teams' : null, useAuthzGetFetcher, {
+  useSWR<IVinesTeam[]>(enable ? '/api/teams' : null, vinesFetcher(), {
     refreshInterval: 600000,
     revalidateOnFocus: false,
   });
 
 export const useTeamBalance = () =>
-  useSWR<ITeamBalance>('/api/payment/balances', useAuthzGetFetcher, {
+  useSWR<ITeamBalance>('/api/payment/balances', vinesFetcher(), {
     refreshInterval: 600000,
     revalidateOnFocus: false,
   });
 
-export const updateTeam = (team: ITeamUpdate) => authzPostFetcher<IVinesTeam, ITeamUpdate>(`/api/teams/update`, team);
+export const updateTeam = (team: ITeamUpdate) =>
+  vinesFetcher<IVinesTeam, ITeamUpdate>({ method: 'POST' })('/api/teams/update', team);
 
 export const useTeamUsers = (teamId: string | null) =>
-  useSWR<ITeamMember>(teamId ? `/api/teams/${teamId}/members` : null, useAuthzGetFetcher);
+  useSWR<ITeamMember>(teamId ? `/api/teams/${teamId}/members` : null, vinesFetcher());
 
 export const removeTeamMember = (teamId: string, userId: string) =>
-  authzPostFetcher<IVinesTeam, { userId: string }>(`/api/teams/${teamId}/members/remove`, { userId });
-
-export const createTeam = (teamData: ITeamCreate) =>
-  authzPostFetcher<boolean, ITeamCreate>(`/api/teams/create`, teamData);
-
-export const deleteTeam = (teamId: string) => authzDeleteFetcher(`/api/teams/${teamId}`, {});
-
-export const searchTeams = (keyword: string) =>
-  authzPostFetcher<
-    IVinesTeam[],
-    {
-      keyword: string;
-    }
-  >(`/api/teams/search`, { keyword });
-
-export const applyTeam = (teamId: string) => authzPostFetcher<boolean, {}>(`/api/teams/apply/${teamId}`, {});
+  vinesFetcher<IVinesTeam>({ method: 'POST' })(`/api/teams/${teamId}/members/remove`, { userId });
