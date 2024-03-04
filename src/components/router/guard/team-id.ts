@@ -6,7 +6,7 @@ import z from 'zod';
 import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { authGuard } from '@/components/router/guard/auth.ts';
 import { Route } from '@/pages/$teamId';
-import { readLocalStorageValue } from '@/utils';
+import { readLocalStorageValue, setLocalStorage } from '@/utils';
 
 export const teamIdGuard = async ({
   location,
@@ -32,6 +32,8 @@ export const teamIdGuard = async ({
       },
     });
   }
+
+  setLocalStorage('vines-team-id', teamId);
 
   return authGuard({ location });
 };
