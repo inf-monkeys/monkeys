@@ -26,12 +26,12 @@ export const SIDEBAR_MAP: NavItem[] = [
     items: [
       {
         path: '/$teamId/workflows',
-        name: 'workflows-app',
+        name: 'workflows',
         label: '工作流',
       },
       {
         path: '/$teamId/canvas',
-        name: 'canvas-app',
+        name: 'canvas',
         label: '无限画板',
       },
     ],
