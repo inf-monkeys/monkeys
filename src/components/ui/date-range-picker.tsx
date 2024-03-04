@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { addDays, format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
@@ -26,10 +26,6 @@ export const DatePickerWithRange: React.FC<IDatePickerWithRangeProps> = ({ class
           to: addDays(new Date(2024, 0, 20), 20),
         },
   );
-
-  useEffect(() => {
-    date && onChange?.(date);
-  }, [date]);
 
   return (
     <div className={cn('grid gap-2', className)}>
@@ -61,7 +57,10 @@ export const DatePickerWithRange: React.FC<IDatePickerWithRangeProps> = ({ class
             mode="range"
             defaultMonth={date?.from}
             selected={date}
-            onSelect={setDate}
+            onSelect={(newDate) => {
+              setDate(newDate);
+              newDate && onChange?.(newDate);
+            }}
             numberOfMonths={2}
           />
         </PopoverContent>
