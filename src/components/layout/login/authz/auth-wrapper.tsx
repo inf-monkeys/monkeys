@@ -37,6 +37,7 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
   useEffect(() => {
     if (!data) return;
     if (saveAuthToken(data) === 1) {
+      // TODO: 似乎无法正常跳转
       void navigate({
         to: redirect_url ?? '/',
       });

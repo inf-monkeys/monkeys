@@ -27,7 +27,7 @@ export const authGuard = ({ location }: { location: ParsedLocation }) => {
     throw redirect({
       to: '/login',
       search: {
-        redirect_url: location.pathname,
+        redirect_url: (location.search as { redirect_url?: string })?.redirect_url || location.pathname,
       },
     });
   }
