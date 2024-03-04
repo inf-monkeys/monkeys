@@ -11,7 +11,7 @@ import { AuthzUsers } from '@/components/layout/login/users';
 import { IUserTokens } from '@/components/router/guard/auth.ts';
 import { AppLogo } from '@/components/ui/logo';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
-import { pageSearchSchema } from '@/shema/common.ts';
+import { pageSearchSchema } from '@/schema/common.ts';
 import { useLocalStorage } from '@/utils';
 
 const Login: React.FC = () => {

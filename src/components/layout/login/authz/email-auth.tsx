@@ -2,11 +2,11 @@ import React from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, UseFormReturn } from 'react-hook-form';
+import { ILoginViaMail, loginViaMailSchema } from 'src/schema/authz';
 
 import { AuthWrapper } from '@/components/layout/login/authz/auth-wrapper.tsx';
 import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input.tsx';
-import { ILoginViaMail, loginViaMailSchema } from '@/shema/authz';
 
 interface IEmailAuthProps extends React.ComponentPropsWithoutRef<'div'> {
   onFinished?: () => void;

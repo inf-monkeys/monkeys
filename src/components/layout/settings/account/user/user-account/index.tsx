@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input.tsx';
 import { PHONE_REGEX, VERIFY_CODE_REGEX } from '@/consts/authz';
-import { IToggleAccountViaSms, toggleAccountViaSmsSchema } from '@/shema/authz/toggle-account.ts';
+import { IToggleAccountViaSms, toggleAccountViaSmsSchema } from '@/schema/authz/toggle-account.ts';
 import { maskEmail, maskPhone } from '@/utils/maskdata.ts';
 
 interface IUserAccountProps extends React.ComponentPropsWithoutRef<'div'> {
