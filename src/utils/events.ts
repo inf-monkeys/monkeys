@@ -4,6 +4,6 @@ export type AppEventType = 'vines-logout';
 
 export type EventType = AppEventType;
 
-const eventBus = new EventEmitter<EventType>();
+const VinesEvent = new EventEmitter<EventType>();
 
-export default eventBus;
+export default VinesEvent;

@@ -11,7 +11,7 @@ const config = {
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
-    './node_modules/@nextui-org/theme/dist/components/scroll-shadow.js',
+    './node_modules/@nextui-org/theme/dist/components/(circular-progress|scroll-shadow).{js,ts,jsx,tsx}',
   ],
   prefix: '',
   theme: {

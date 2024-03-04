@@ -1,0 +1,55 @@
+import React, { useEffect } from 'react';
+
+import { createFileRoute, redirect, useNavigate, useParams } from '@tanstack/react-router';
+
+import { CircularProgress } from '@nextui-org/progress';
+import isMongoId from 'validator/es/lib/isMongoId';
+import z from 'zod';
+
+import { useListWorkspacePages } from '@/apis/pages';
+import { teamIdGuard } from '@/components/router/guard/team-id.ts';
+
+export const WorkspaceIndex: React.FC = () => {
+  const { to } = Route.useSearch();
+  const { workflowId } = useParams({ from: '/$teamId/workspace/$workflowId' });
+  const { data: pages } = useListWorkspacePages(workflowId);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (pages) {
+      const page = pages.find(({ type }) => type === to) ?? pages[0];
+      void navigate({
+        to: '/$teamId/workspace/$workflowId/$pageId',
+        params: {
+          pageId: page._id,
+        },
+        search: {
+          to,
+        },
+      });
+    }
+  }, [pages]);
+
+  return <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />;
+};
+
+export const Route = createFileRoute('/$teamId/workspace/$workflowId/')({
+  component: WorkspaceIndex,
+  beforeLoad: async (opts) => {
+    const workflowId = opts.params.workflowId;
+
+    if (!z.string().refine(isMongoId).safeParse(workflowId).success) {
+      throw redirect({
+        to: '/$teamId/workflows',
+        params: {
+          teamId: opts.params.teamId,
+        },
+      });
+    }
+
+    return teamIdGuard(opts);
+  },
+  validateSearch: z.object({
+    to: z.string().optional(),
+  }),
+});

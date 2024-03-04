@@ -14,6 +14,7 @@ import { Route as rootRoute } from './pages/__root'
 import { Route as LoginImport } from './pages/login'
 import { Route as IndexImport } from './pages/index'
 import { Route as TeamIdIndexImport } from './pages/$teamId/index'
+import { Route as TeamIdWorkspaceIndexImport } from './pages/$teamId/workspace/index'
 import { Route as TeamIdWorkflowsIndexImport } from './pages/$teamId/workflows/index'
 import { Route as TeamIdWorkbenchIndexImport } from './pages/$teamId/workbench/index'
 import { Route as TeamIdToolStoreIndexImport } from './pages/$teamId/tool-store/index'
@@ -29,6 +30,8 @@ import { Route as TeamIdDataStoreIndexImport } from './pages/$teamId/data-store/
 import { Route as TeamIdCanvasIndexImport } from './pages/$teamId/canvas/index'
 import { Route as TeamIdApplicationStoreIndexImport } from './pages/$teamId/application-store/index'
 import { Route as TeamIdActionToolsIndexImport } from './pages/$teamId/action-tools/index'
+import { Route as TeamIdWorkspaceWorkflowIdIndexImport } from './pages/$teamId/workspace/$workflowId/index'
+import { Route as TeamIdWorkspaceWorkflowIdPageIdIndexImport } from './pages/$teamId/workspace/$workflowId/$pageId/index'
 
 // Create/Update Routes
 
@@ -44,6 +47,11 @@ const IndexRoute = IndexImport.update({
 
 const TeamIdIndexRoute = TeamIdIndexImport.update({
   path: '/$teamId/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TeamIdWorkspaceIndexRoute = TeamIdWorkspaceIndexImport.update({
+  path: '/$teamId/workspace/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -123,6 +131,18 @@ const TeamIdActionToolsIndexRoute = TeamIdActionToolsIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const TeamIdWorkspaceWorkflowIdIndexRoute =
+  TeamIdWorkspaceWorkflowIdIndexImport.update({
+    path: '/$teamId/workspace/$workflowId/',
+    getParentRoute: () => rootRoute,
+  } as any)
+
+const TeamIdWorkspaceWorkflowIdPageIdIndexRoute =
+  TeamIdWorkspaceWorkflowIdPageIdIndexImport.update({
+    path: '/$teamId/workspace/$workflowId/$pageId/',
+    getParentRoute: () => rootRoute,
+  } as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -199,6 +219,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdWorkflowsIndexImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/workspace/': {
+      preLoaderRoute: typeof TeamIdWorkspaceIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/workspace/$workflowId/': {
+      preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/workspace/$workflowId/$pageId/': {
+      preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdPageIdIndexImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -223,6 +255,9 @@ export const routeTree = rootRoute.addChildren([
   TeamIdToolStoreIndexRoute,
   TeamIdWorkbenchIndexRoute,
   TeamIdWorkflowsIndexRoute,
+  TeamIdWorkspaceIndexRoute,
+  TeamIdWorkspaceWorkflowIdIndexRoute,
+  TeamIdWorkspaceWorkflowIdPageIdIndexRoute,
 ])
 
 /* prettier-ignore-end */
