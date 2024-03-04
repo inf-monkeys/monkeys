@@ -10,7 +10,7 @@ import { ITeamUpdate } from '@/apis/authz/team/typings.ts';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { InfoEditor } from '@/components/layout/settings/account/info-editor.tsx';
 import { CreateTeam } from '@/components/layout/settings/account/team/create';
-import { DeleteTeam } from '@/components/layout/settings/account/team/delete/DeleteTeam.tsx';
+import { DeleteTeam } from '@/components/layout/settings/account/team/delete';
 import { ImportExportTeam } from '@/components/layout/settings/account/team/import-export';
 import { JoinPublicTeam } from '@/components/layout/settings/account/team/join-public-team';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
@@ -54,7 +54,7 @@ export const Team: React.FC<ITeamProps> = () => {
       <CardHeader className="relative">
         <CardTitle>我的团队</CardTitle>
         {isOwner && <CardDescription>管理您的团队数据</CardDescription>}
-        <div className="absolute left-0 top-0 !mt-0 flex size-full items-center justify-end p-6">
+        <div className="absolute left-0 top-0 !mt-0 flex size-full items-center justify-end gap-2 p-6">
           <Tooltip>
             <CreateTeam>
               <TooltipTrigger asChild>
@@ -62,6 +62,14 @@ export const Team: React.FC<ITeamProps> = () => {
               </TooltipTrigger>
             </CreateTeam>
             <TooltipContent>新建团队</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <JoinPublicTeam>
+              <TooltipTrigger asChild>
+                <Button icon={<PlusCircle size={18} />} size="small" />
+              </TooltipTrigger>
+            </JoinPublicTeam>
+            <TooltipContent>加入公开团队</TooltipContent>
           </Tooltip>
         </div>
       </CardHeader>
@@ -99,15 +107,7 @@ export const Team: React.FC<ITeamProps> = () => {
       </CardContent>
       <CardFooter className="justify-end gap-2">
         {isOwner && <ImportExportTeam />}
-        <Tooltip>
-          <JoinPublicTeam>
-            <TooltipTrigger asChild>
-              <Button icon={<PlusCircle size={18} />} size="small" />
-            </TooltipTrigger>
-          </JoinPublicTeam>
-          <TooltipContent>加入公开团队</TooltipContent>
-        </Tooltip>
-        {isOwner && <DeleteTeam />}
+        {isOwner && <DeleteTeam teamId={team?.id} />}
       </CardFooter>
     </Card>
   );

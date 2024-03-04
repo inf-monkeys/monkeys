@@ -27,3 +27,5 @@ export type ITeamMember = {
   list: Array<IVinesUser & { _id: string }>;
   listTotal: number;
 };
+
+export type ITeamCreate = Pick<IVinesTeam, 'name' | 'description' | 'logoUrl'>;
