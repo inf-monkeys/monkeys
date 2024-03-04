@@ -25,16 +25,16 @@ const config = {
     extend: {
       colors: {
         vines: {
-          50: 'rgb(var(--vines-50, 238 247 231) / <alpha-value>)',
-          100: 'rgb(var(--vines-100, 216 239 199) / <alpha-value>)',
-          200: 'rgb(var(--vines-200, 179 222 149) / <alpha-value>)',
-          300: 'rgb(var(--vines-300, 144 206 104) / <alpha-value>)',
-          400: 'rgb(var(--vines-400, 112 189 65) / <alpha-value>)',
-          500: 'rgb(var(--vines-500, 82 173 31) / <alpha-value>)', // primary
-          600: 'rgb(var(--vines-600, 65 144 24) / <alpha-value>)',
-          700: 'rgb(var(--vines-700, 50 115 18) / <alpha-value>)',
-          800: 'rgb(var(--vines-800, 36 87 13) / <alpha-value>)',
-          900: 'rgb(var(--vines-900, 23 58 8) / <alpha-value>)',
+          50: 'rgb(var(--vines-50, 245 245 245) / <alpha-value>)',
+          100: 'rgb(var(--vines-100, 220 220 220) / <alpha-value>)',
+          200: 'rgb(var(--vines-200, 172 172 172) / <alpha-value>)',
+          300: 'rgb(var(--vines-300, 124 124 124) / <alpha-value>)',
+          400: 'rgb(var(--vines-400, 76 76 76) / <alpha-value>)',
+          500: 'rgb(var(--vines-500, 28 28 28) / <alpha-value>)', // primary
+          600: 'rgb(var(--vines-600, 23 23 23) / <alpha-value>)',
+          700: 'rgb(var(--vines-700, 19 19 19) / <alpha-value>)',
+          800: 'rgb(var(--vines-800, 14 14 14) / <alpha-value>)',
+          900: 'rgb(var(--vines-900, 9 9 9) / <alpha-value>)',
         },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
