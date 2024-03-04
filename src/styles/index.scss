@@ -22,7 +22,7 @@
 html {
   &.dark {
     body {
-      @apply bg-slate-4;
+      background: linear-gradient(theme('colors.vines.500/0.15') 5%, theme('colors.gray.2') 50%);
     }
   }
 }
