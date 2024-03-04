@@ -14,6 +14,7 @@ export const teamIdGuard = async ({
 }: {
   location: ParsedLocation;
   params: (typeof Route)['params'];
+  skip?: boolean;
 }) => {
   const teams = readLocalStorageValue<IVinesTeam[]>('vines-teams', []);
   if (!teams.length)
