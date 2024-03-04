@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { createRootRoute, Outlet, ScrollRestoration, useRouterState } from '@tanstack/react-router';
+import { createRootRoute, Outlet, ScrollRestoration, useMatches } from '@tanstack/react-router';
 
 import { NextUIProvider } from '@nextui-org/system';
 import { motion } from 'framer-motion';
@@ -13,13 +13,13 @@ import { UserGuard } from '@/components/router/guard/user.tsx';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 const RootComponent: React.FC = () => {
-  const { matches } = useRouterState();
+  const matches = useMatches();
 
   const routeMatch = matches.find((it) => it.routeId.includes('/$teamId'));
   const routeIds = routeMatch?.routeId
     ?.substring(1)
     ?.split('/')
-    ?.filter((it) => it);
+    ?.filter((it: string) => it);
 
   const isUseOutside = !routeIds;
   const isUseWorkSpace = routeIds?.at(1) === 'workspace';
