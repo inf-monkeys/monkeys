@@ -1,11 +1,13 @@
 import React, { useEffect } from 'react';
 
+import { preload } from 'swr';
 import { createFileRoute, redirect, useNavigate, useParams } from '@tanstack/react-router';
 
 import { CircularProgress } from '@nextui-org/progress';
 import isMongoId from 'validator/es/lib/isMongoId';
 import z from 'zod';
 
+import { useAuthzGetFetcher } from '@/apis/fetcher.ts';
 import { useListWorkspacePages } from '@/apis/pages';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 
@@ -14,6 +16,8 @@ export const WorkspaceIndex: React.FC = () => {
   const { workflowId } = useParams({ from: '/$teamId/workspace/$workflowId' });
   const { data: pages } = useListWorkspacePages(workflowId);
   const navigate = useNavigate();
+
+  workflowId && preload(`/api/workflow/${workflowId}`, useAuthzGetFetcher);
 
   useEffect(() => {
     if (pages) {
@@ -35,7 +39,7 @@ export const WorkspaceIndex: React.FC = () => {
 
 export const Route = createFileRoute('/$teamId/workspace/$workflowId/')({
   component: WorkspaceIndex,
-  beforeLoad: async (opts) => {
+  beforeLoad: (opts) => {
     const workflowId = opts.params.workflowId;
 
     if (!z.string().refine(isMongoId).safeParse(workflowId).success) {
