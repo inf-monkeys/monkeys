@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { useNavigate } from '@tanstack/react-router';
+import { useMatches, useNavigate } from '@tanstack/react-router';
 
 import { CheckIcon, ChevronsUpDown } from 'lucide-react';
 
@@ -20,6 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn, useLocalStorage } from '@/utils';
 
 export const TeamSelector: React.FC = () => {
+  const matches = useMatches();
   const navigate = useNavigate({ from: location.pathname });
 
   const { mutate: teamBalanceMutate } = useTeamBalance();
@@ -38,6 +39,7 @@ export const TeamSelector: React.FC = () => {
   const handleSwapTeam = async (id: string) => {
     setTeamId(id);
     await navigate({
+      to: matches.find((it) => it.routeId.includes('/$teamId'))?.routeId?.replace(/.$/, ''),
       params: {
         teamId: id,
       },

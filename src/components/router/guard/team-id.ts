@@ -25,7 +25,12 @@ export const teamIdGuard = async ({
     });
 
   if (!z.string().refine(isMongoId).safeParse(teamId).success || !teams.find((it) => it.id === teamId)) {
-    throw redirect({ to: '/' + teams[0].id });
+    throw redirect({
+      to: '/$teamId',
+      params: {
+        teamId: teams[0].id,
+      },
+    });
   }
 
   return authGuard({ location });
