@@ -54,6 +54,8 @@ export const authzFetcher = <T>(url: string) => fetchData<T>(url, 'GET');
 
 export const authzPostFetcher = <T, U>(url: string, arg: U) => fetchData<T, U>(url, 'POST', arg);
 
+export const authzDeleteFetcher = <T, U>(url: string, arg: U) => fetchData<T, U>(url, 'DELETE', arg);
+
 export const simpleGet = async <T>(url: string) => (await fetch(url).then(async (r) => (await r.json())?.data)) as T;
 
 export const simplePost = async <T, U>(url: string, arg: U) =>
