@@ -37,13 +37,14 @@ export const SpaceTab: React.FC<ISpaceTabProps> = memo(
     const isActive = activeIndex === index;
 
     const handleChangePage = () => {
-      !isActive &&
-        navigate({
+      if (!isActive && !loading) {
+        void navigate({
           to: '/$teamId/workspace/$workflowId/$pageId',
           params: {
             pageId: id,
           },
         });
+      }
 
       const nextPageIsIdentical = pages?.find((page) => page._id === id)?.type === page?.type;
       reTimer(setTimeout(() => setLoading(false), nextPageIsIdentical ? 200 : 5000) as unknown as number);

@@ -8,7 +8,7 @@ import 'unfetch/polyfill';
 // region SWR Fetcher
 
 interface IFetcherOptions<U = unknown> extends IVinesHeaderOptions {
-  method?: 'GET' | 'POST';
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   auth?: boolean;
   simple?: boolean;
   wrapper?: (data: U) => any;
