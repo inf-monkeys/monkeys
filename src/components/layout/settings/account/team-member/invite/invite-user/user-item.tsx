@@ -60,8 +60,8 @@ export const UserItem: React.FC<IUserItemProps> = ({ user, teamId, outdateType }
             <AvatarFallback className="rounded-none p-2 text-xs">{user.name.substring(0, 2)}</AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="text-sm">{user.name}</h1>
-            <span className="text-xs opacity-70">{user.phone && maskPhone(user.phone)}</span>
+            <h1 className="line-clamp-1 font-semibold leading-tight">{user.name}</h1>
+            <span className="line-clamp-1 text-xs text-opacity-70">{user.phone && maskPhone(user.phone)}</span>
           </div>
         </div>
         <div className="flex gap-2">

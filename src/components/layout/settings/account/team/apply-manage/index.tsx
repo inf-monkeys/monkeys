@@ -86,20 +86,20 @@ export const ApplyManage: React.FC<IApplyManageProps> = ({ teamId }) => {
           )}
         </ScrollArea>
         <div className="flex justify-between">
-          <div className="flex items-center gap-2">
-            <span>设为公开团队</span>
-            <Tooltip
-              content={
-                <div className="max-w-48">
-                  开启时，当前团队会在平台公开，任何用户都可以搜索到并申请加入。
-                  <br />
-                  关闭时，未加入团队的用户无法搜索到当前团队，也无法主动申请加入团队，但仍可通过邀请链接加入。
-                </div>
-              }
-            >
-              <Info size={15} className="cursor-pointer" />
-            </Tooltip>
-          </div>
+          <Tooltip
+            content={
+              <div className="max-w-48">
+                开启时，当前团队会在平台公开，任何用户都可以搜索到并申请加入。
+                <br />
+                关闭时，未加入团队的用户无法搜索到当前团队，也无法主动申请加入团队，但仍可通过邀请链接加入。
+              </div>
+            }
+          >
+            <div className="flex cursor-pointer items-center gap-2">
+              <span>设为公开团队</span>
+              <Info size={15} />
+            </div>
+          </Tooltip>
           <Switch
             loading={isHandleTeamPublicChange}
             checked={!applyListData?.disable ?? false}

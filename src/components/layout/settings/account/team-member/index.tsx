@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 
 import { removeTeamMember, useTeamUsers } from '@/apis/authz/team';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
+import { Invite } from '@/components/layout/settings/account/team-member/invite';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Button } from '@/components/ui/button';
@@ -48,9 +49,12 @@ export const TeamMember: React.FC<ITeamMemberProps> = () => {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="relative">
         <CardTitle>团队成员</CardTitle>
         <CardDescription>{isOwner ? '邀请您的团队成员进行协作' : '与团队成员进行协作'}</CardDescription>
+        <div className="absolute left-0 top-0 !mt-0 flex size-full items-center justify-end gap-2 p-6">
+          <Invite />
+        </div>
       </CardHeader>
       <ScrollShadow className="max-h-64">
         <CardContent className="grid gap-4">

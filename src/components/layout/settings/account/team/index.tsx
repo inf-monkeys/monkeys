@@ -13,7 +13,6 @@ import { ApplyManage } from '@/components/layout/settings/account/team/apply-man
 import { CreateTeam } from '@/components/layout/settings/account/team/create';
 import { DeleteTeam } from '@/components/layout/settings/account/team/delete';
 import { ImportExportTeam } from '@/components/layout/settings/account/team/import-export';
-import { Invite } from '@/components/layout/settings/account/team/invite';
 import { JoinPublicTeam } from '@/components/layout/settings/account/team/join-public-team';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
@@ -92,7 +91,6 @@ export const Team: React.FC<ITeamProps> = () => {
         </div>
       </CardContent>
       <CardFooter className="justify-end gap-2">
-        <Invite />
         {isOwner && (
           <>
             <ApplyManage teamId={team?.id} />
