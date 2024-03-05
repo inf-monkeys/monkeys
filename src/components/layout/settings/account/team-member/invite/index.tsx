@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 
 import { Link, Settings, Share } from 'lucide-react';
 
-import { InviteManage } from '@/components/layout/settings/account/team/invite/invite-manage';
-import { InviteUser } from '@/components/layout/settings/account/team/invite/invite-user';
+import { InviteManage } from '@/components/layout/settings/account/team-member/invite/invite-manage';
+import { InviteUser } from '@/components/layout/settings/account/team-member/invite/invite-user';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -15,6 +15,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
+import { Tooltip } from '@/components/ui/tooltip';
 
 interface IInviteProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -25,11 +26,11 @@ export const Invite: React.FC<IInviteProps> = ({}) => {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button icon={<Share />} size="small">
-            邀请用户
-          </Button>
-        </DropdownMenuTrigger>
+        <Tooltip content="邀请用户">
+          <DropdownMenuTrigger asChild>
+            <Button icon={<Share />} size="small" />
+          </DropdownMenuTrigger>
+        </Tooltip>
         <DropdownMenuContent>
           <DropdownMenuLabel>邀请用户</DropdownMenuLabel>
           <DropdownMenuSeparator />

@@ -21,8 +21,8 @@ export const JoinPublicTeamItem: React.FC<IJoinPublicTeamItemProps> = ({ team, i
             <AvatarFallback className="rounded-none p-2 text-xs">{team.name.substring(0, 2)}</AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="text-sm">{team.name}</h1>
-            <span className="text-xs opacity-70">{team.description}</span>
+            <h1 className="line-clamp-1 font-semibold leading-tight">{team.name}</h1>
+            <span className="line-clamp-1 text-xs text-opacity-70">{team.description}</span>
           </div>
         </div>
         <div className="flex gap-2">

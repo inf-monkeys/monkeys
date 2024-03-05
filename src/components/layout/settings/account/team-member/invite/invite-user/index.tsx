@@ -8,7 +8,7 @@ import { createTeamInviteLink, useTeamInvites } from '@/apis/authz/team';
 import { ITeamInviteLinkOutdateType } from '@/apis/authz/team/typings.ts';
 import { searchUsers } from '@/apis/authz/user';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
-import { UserItem } from '@/components/layout/settings/account/team/invite/invite-user/user-item.tsx';
+import { UserItem } from '@/components/layout/settings/account/team-member/invite/invite-user/user-item.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
