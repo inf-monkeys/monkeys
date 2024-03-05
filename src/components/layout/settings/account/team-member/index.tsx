@@ -19,7 +19,7 @@ interface ITeamMemberProps extends React.ComponentPropsWithoutRef<'div'> {}
 export const TeamMember: React.FC<ITeamMemberProps> = () => {
   const [user] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
   const { team, isTeamOwner } = useVinesTeam();
-  const { data, mutate } = useTeamUsers(team?._id ?? null);
+  const { data, mutate } = useTeamUsers(team?._id);
 
   const handleRemoveTeamMember = (userId: string) => {
     if (team) {

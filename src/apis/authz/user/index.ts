@@ -11,3 +11,11 @@ export const useUser = () =>
 
 export const updateUserInfo = (data: IUpdateUserInfo) =>
   vinesFetcher<IVinesUser, IUpdateUserInfo>({ method: 'POST', simple: true })('/api/users/profile', data);
+
+export const searchUsers = (keyword: string) =>
+  vinesFetcher<
+    IVinesUser[],
+    {
+      keyword: string;
+    }
+  >({ method: 'POST', simple: true })('/api/users/search', { keyword });

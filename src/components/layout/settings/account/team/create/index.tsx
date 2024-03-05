@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Plus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -10,11 +11,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input.tsx';
 import { Textarea } from '@/components/ui/textarea.tsx';
+import { Tooltip } from '@/components/ui/tooltip';
 import { createTeamSchema, ICreateTeam } from '@/schema/settings/team.ts';
 
 interface ICreateTeamProps extends React.ComponentPropsWithoutRef<'div'> {}
 
-export const CreateTeam: React.FC<ICreateTeamProps> = ({ children }) => {
+export const CreateTeam: React.FC<ICreateTeamProps> = () => {
   const [visible, setVisible] = useState(false);
 
   const { mutate: mutateTeams } = useTeams();
@@ -55,7 +57,11 @@ export const CreateTeam: React.FC<ICreateTeamProps> = ({ children }) => {
 
   return (
     <Dialog open={visible} onOpenChange={setVisible}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <Tooltip content="新建团队">
+        <DialogTrigger asChild>
+          <Button icon={<Plus />} size="small" />
+        </DialogTrigger>
+      </Tooltip>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>新建团队</DialogTitle>

@@ -29,3 +29,65 @@ export type ITeamMember = {
 };
 
 export type ITeamCreate = Pick<IVinesTeam, 'name' | 'description' | 'logoUrl'>;
+
+export interface ITeamApplyListData {
+  _id: string;
+  teamId: string;
+  applyList: string[];
+  applyUserList?: IVinesUser[];
+  disable: boolean;
+  createdTimestamp: number;
+  updatedTimestamp: number;
+}
+
+export interface ITeamApplyUpdateInfoData {
+  disabled: boolean;
+}
+
+export interface ITeamApplyUpdateApplyData {
+  applyUserId: string;
+  apply: boolean;
+}
+
+export type ITeamApplyUpdateData = ITeamApplyUpdateInfoData | ITeamApplyUpdateApplyData;
+
+export enum ITeamInviteLinkOutdateType {
+  SEVEN_DAYS = 1,
+  NEVER = 2,
+}
+
+export interface ITeamInviteLinkData {
+  inviterUserId: string;
+  outdateType: ITeamInviteLinkOutdateType;
+  targetUserId?: string;
+}
+
+export enum ITeamInviteType {
+  INDIVIDUAL = 1,
+  PUBLIC = 2,
+}
+
+export enum ITeamInviteStatus {
+  EFFECTIVE = 1,
+  ACCEPTED = 2,
+  DISABLED = 3,
+}
+
+export type ITeamInvite = {
+  _id: string;
+  inviterUserId: string;
+  targetUserId?: string;
+  teamId: string;
+  type: ITeamInviteType;
+  status: ITeamInviteStatus;
+  outdateTimestamp: number;
+  acceptedUserIds: string[];
+  remark?: string;
+  createdTimestamp: number;
+};
+
+export type ITeamInviteWithUserProfile = ITeamInvite & {
+  acceptedUsers?: Partial<IVinesUser>[];
+  inviterUser?: Partial<IVinesUser>;
+  targetUser?: Partial<IVinesUser>;
+};

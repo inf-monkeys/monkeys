@@ -21,7 +21,7 @@ export const ImportExportTeam: React.FC<IImportExportTeamProps> = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button icon={<Database />} size="small">
-          数据
+          数据管理
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>

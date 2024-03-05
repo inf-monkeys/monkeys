@@ -1,6 +1,18 @@
 import useSWR from 'swr';
 
-import { ITeamBalance, ITeamMember, ITeamUpdate, IVinesTeam } from '@/apis/authz/team/typings.ts';
+import _ from 'lodash';
+
+import {
+  ITeamApplyListData,
+  ITeamApplyUpdateData,
+  ITeamBalance,
+  ITeamCreate,
+  ITeamInviteLinkData,
+  ITeamInviteWithUserProfile,
+  ITeamMember,
+  ITeamUpdate,
+  IVinesTeam,
+} from '@/apis/authz/team/typings.ts';
 import { vinesFetcher } from '@/apis/fetcher.ts';
 
 export const useTeams = (enable = true) =>
@@ -16,10 +28,57 @@ export const useTeamBalance = () =>
   });
 
 export const updateTeam = (team: ITeamUpdate) =>
-  vinesFetcher<IVinesTeam, ITeamUpdate>({ method: 'POST' })('/api/teams/update', team);
+  vinesFetcher<IVinesTeam, ITeamUpdate>({ method: 'POST', simple: true })('/api/teams/update', team);
 
-export const useTeamUsers = (teamId: string | null) =>
+export const useTeamUsers = (teamId?: string) =>
   useSWR<ITeamMember>(teamId ? `/api/teams/${teamId}/members` : null, vinesFetcher());
 
 export const removeTeamMember = (teamId: string, userId: string) =>
-  vinesFetcher<IVinesTeam>({ method: 'POST' })(`/api/teams/${teamId}/members/remove`, { userId });
+  vinesFetcher<IVinesTeam>({ method: 'POST', simple: true })(`/api/teams/${teamId}/members/remove`, { userId });
+
+export const createTeam = (teamData: ITeamCreate) =>
+  vinesFetcher<boolean, ITeamCreate>({ method: 'POST', simple: true })(`/api/teams/create`, teamData);
+
+export const deleteTeam = (teamId: string) => vinesFetcher({ method: 'DELETE' })(`/api/teams/${teamId}`);
+
+export const searchTeams = (keyword: string) =>
+  vinesFetcher<
+    IVinesTeam[],
+    {
+      keyword: string;
+    }
+  >({ method: 'POST', simple: true })(`/api/teams/search`, { keyword });
+
+export const applyTeam = (teamId: string) =>
+  vinesFetcher<boolean>({ method: 'POST', simple: true })(`/api/teams/apply/${teamId}`);
+
+export const useTeamApplyList = (teamId?: string) =>
+  useSWR<ITeamApplyListData>(teamId ? `/api/teams/apply/${teamId}` : null, vinesFetcher());
+// export const getTeamApplyList = (teamId: string) => vinesFetcher<ITeamApplyListData>()(`/api/teams/apply/${teamId}`);
+
+export const updateTeamApply = (data: ITeamApplyUpdateData & { teamId: string }) =>
+  vinesFetcher<boolean, ITeamApplyUpdateData>({ method: 'POST', simple: true })(
+    `/api/teams/apply/${data.teamId}/update`,
+    _.omit(data, ['teamId']) as ITeamApplyUpdateData,
+  );
+
+export const createTeamInviteLink = (data: ITeamInviteLinkData & { teamId: string }) =>
+  vinesFetcher<string, ITeamInviteLinkData>({
+    method: 'POST',
+    simple: true,
+  })(`/api/teams/invites/${data.teamId}`, _.omit(data, ['teamId']) as ITeamInviteLinkData);
+
+export const useTeamInvites = (teamId?: string) =>
+  useSWR<ITeamInviteWithUserProfile[]>(teamId ? `/api/teams/invites/manage/${teamId}` : null, vinesFetcher());
+
+export const updateTeamInviteRemark = (teamId: string, teamInviteId: string, remark: string) =>
+  vinesFetcher<boolean, { remark: string }>({
+    method: 'POST',
+    simple: true,
+  })(`/api/teams/invites/manage/${teamId}/remark/${teamInviteId}`, { remark });
+
+export const toggleTeamInviteStatus = (teamId: string, teamInviteId: string) =>
+  vinesFetcher<boolean>({ method: 'POST' })(`/api/teams/invites/manage/${teamId}/toggle/${teamInviteId}`);
+
+export const deleteTeamInvite = (teamId: string, teamInviteId: string) =>
+  vinesFetcher<boolean>({ method: 'POST' })(`/api/teams/invites/manage/${teamId}/delete/${teamInviteId}`);

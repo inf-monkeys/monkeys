@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { Inbox } from 'lucide-react';
+import { Inbox, PlusCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { applyTeam, searchTeams, useTeams } from '@/apis/authz/team';
@@ -11,10 +11,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Spinner } from '@/components/ui/spinner';
+import { Tooltip } from '@/components/ui/tooltip';
 
 interface IJoinPublicTeamProps extends React.ComponentPropsWithoutRef<'div'> {}
 
-export const JoinPublicTeam: React.FC<IJoinPublicTeamProps> = ({ children }) => {
+export const JoinPublicTeam: React.FC<IJoinPublicTeamProps> = () => {
   const [visible, setVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isHandleAccept, setIsHandleAccept] = useState<boolean>(false);
@@ -63,7 +64,11 @@ export const JoinPublicTeam: React.FC<IJoinPublicTeamProps> = ({ children }) => 
         setVisible(v);
       }}
     >
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <Tooltip content="加入公开团队">
+        <DialogTrigger asChild>
+          <Button icon={<PlusCircle size={18} />} size="small" />
+        </DialogTrigger>
+      </Tooltip>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>加入公开团队</DialogTitle>
@@ -77,7 +82,9 @@ export const JoinPublicTeam: React.FC<IJoinPublicTeamProps> = ({ children }) => 
               void handleSearchTeams();
             }}
           />
-          <Button onClick={() => handleSearchTeams()}>搜索</Button>
+          <Button loading={isLoading} onClick={() => handleSearchTeams()}>
+            搜索
+          </Button>
         </div>
         <ScrollArea className="h-72">
           {!searchResult.length && (
