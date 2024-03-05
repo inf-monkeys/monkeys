@@ -1,4 +1,4 @@
-import { PORT } from '@/common/config';
+import { config } from '@/common/config';
 import { BlockDefinition, BlockType } from '@inf-monkeys/vines';
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiExtension, ApiOperation } from '@nestjs/swagger';
@@ -19,7 +19,7 @@ export class ExampleController {
       },
       api: {
         type: 'openapi',
-        url: `http://127.0.0.1:${PORT}${EXAMPLE_WORKER_OPENAPI_PATH}-json`,
+        url: `http://127.0.0.1:${config.server.port}${EXAMPLE_WORKER_OPENAPI_PATH}-json`,
       },
       logo: '',
       contact_email: 'dev@inf-monkeys.com',

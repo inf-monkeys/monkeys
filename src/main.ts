@@ -3,7 +3,7 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import { rateLimit } from 'express-rate-limit';
 import { AppModule } from './app.module';
-import { PORT } from './common/config';
+import { config } from './common/config';
 import { ExceptionsFilter } from './common/filters/exception.filter';
 import { logger } from './common/logger';
 import { setupExampleWorkerSwagger } from './modules/worker/example/example.swagger';
@@ -43,6 +43,6 @@ async function bootstrap() {
   const workerService = await app.resolve<WorkerService>(WorkerService);
   workerService.startPolling();
 
-  await app.listen(PORT);
+  await app.listen(config.server.port);
 }
 bootstrap();

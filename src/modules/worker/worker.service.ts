@@ -1,4 +1,4 @@
-import { CONDUCTOR_BASE_URL, CONDUCTOR_CLIENT_POLLING_CONCURRENCY, CONDUCTOR_CLIENT_POLLING_INTERVAL } from '@/common/config';
+import { config } from '@/common/config';
 import { ConductorClient, TaskDef, TaskManager } from '@io-orkes/conductor-javascript';
 import { Injectable } from '@nestjs/common';
 import os from 'os';
@@ -9,7 +9,7 @@ export class WorkerService {
   private conductorClient: ConductorClient;
   constructor() {
     this.conductorClient = new ConductorClient({
-      serverUrl: CONDUCTOR_BASE_URL,
+      serverUrl: config.conductor.baseUrl,
     });
   }
 
@@ -29,7 +29,7 @@ export class WorkerService {
       },
     ] as Array<TaskDef>);
     const manager = new TaskManager(this.conductorClient, [WORKER], {
-      options: { pollInterval: parseInt(CONDUCTOR_CLIENT_POLLING_INTERVAL), workerID: this.getWorkerId(), concurrency: parseInt(CONDUCTOR_CLIENT_POLLING_CONCURRENCY) },
+      options: { pollInterval: config.conductor.polling.interval, workerID: this.getWorkerId(), concurrency: config.conductor.polling.concurrency },
     });
     manager.startPolling();
   }
