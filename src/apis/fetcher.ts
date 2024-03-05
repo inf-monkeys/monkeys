@@ -14,7 +14,7 @@ interface IFetcherOptions<U = unknown, R = any> extends IVinesHeaderOptions {
   simple?: boolean;
   wrapper?: (data: U) => any;
   fetchOptions?: RequestInit;
-  responseResolver?: (response: Response) => R;
+  responseResolver?: (response: Response) => any;
 }
 
 export const vinesFetcher = <U, T = {}, R = any>({
@@ -25,7 +25,7 @@ export const vinesFetcher = <U, T = {}, R = any>({
   wrapper = (data: U) => data,
   fetchOptions,
   responseResolver,
-}: IFetcherOptions<U, R> = {}) => {
+}: IFetcherOptions<U> = {}) => {
   return async (url: string, params?: T) => {
     const headers = {
       'Content-Type': 'application/json;charset=utf-8',
