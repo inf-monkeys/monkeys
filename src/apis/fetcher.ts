@@ -8,7 +8,7 @@ import 'unfetch/polyfill';
 
 // region SWR Fetcher
 
-interface IFetcherOptions<U = unknown, R = any> extends IVinesHeaderOptions {
+interface IFetcherOptions<U = unknown> extends IVinesHeaderOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   auth?: boolean;
   simple?: boolean;
@@ -17,7 +17,7 @@ interface IFetcherOptions<U = unknown, R = any> extends IVinesHeaderOptions {
   responseResolver?: (response: Response) => any;
 }
 
-export const vinesFetcher = <U, T = {}, R = any>({
+export const vinesFetcher = <U, T = {}>({
   method = 'GET',
   auth = true,
   simple = false,
@@ -29,7 +29,7 @@ export const vinesFetcher = <U, T = {}, R = any>({
   return async (url: string, params?: T) => {
     const headers = {
       'Content-Type': 'application/json;charset=utf-8',
-      ...(auth && vinesHeader({ apikey, useToast: simple })),
+      ...(auth && vinesHeader({ apiKey, useToast: simple })),
       ...(fetchOptions && fetchOptions.headers),
     };
 
