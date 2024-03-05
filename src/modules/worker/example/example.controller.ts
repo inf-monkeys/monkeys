@@ -1,7 +1,8 @@
 import { config } from '@/common/config';
 import { BlockDefinition, BlockType } from '@inf-monkeys/vines';
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { ApiExtension, ApiOperation } from '@nestjs/swagger';
+import { ApiExcludeEndpoint, ApiExtension, ApiOperation } from '@nestjs/swagger';
+import { ApiType, AuthType, MenifestJson, SchemaVersion } from '../interfaces';
 import { AddTwoNumberDto } from './dto/req/add-two-number.dto';
 import { NthPowerOfDto } from './dto/req/nth-power-of.dto';
 import { EXAMPLE_WORKER_OPENAPI_PATH } from './example.swagger';
@@ -9,19 +10,18 @@ import { EXAMPLE_WORKER_OPENAPI_PATH } from './example.swagger';
 @Controller('/worker/example')
 export class ExampleController {
   @Get('/.well-known/monkey-plugin.json')
-  public async getMetadata() {
+  @ApiExcludeEndpoint()
+  public getMetadata(): MenifestJson {
     return {
-      schema_version: 'v1',
-      displayName: 'Simple Calc',
-      description: 'A list of some simple calculation functions.',
+      schema_version: SchemaVersion.v1,
+      namespace: 'monkeys_example_worker',
       auth: {
-        type: 'none',
+        type: AuthType.none,
       },
       api: {
-        type: 'openapi',
+        type: ApiType.openapi,
         url: `http://127.0.0.1:${config.server.port}${EXAMPLE_WORKER_OPENAPI_PATH}-json`,
       },
-      logo: '',
       contact_email: 'dev@inf-monkeys.com',
     };
   }
@@ -31,6 +31,7 @@ export class ExampleController {
     summary: 'Add Two Numbers',
     description: 'Simply add tow numbers.',
   })
+  @ApiExtension('x-monkey-block-categories', ['math'])
   public async addTwoNumberExample(@Body() body: AddTwoNumberDto) {
     const { numA, numB } = body;
     return numA + numB;
@@ -41,6 +42,7 @@ export class ExampleController {
     summary: 'Calc Nth Power',
     description: 'Calc Nth Power, assumes may take a while ...',
   })
+  @ApiExtension('x-monkey-block-categories', ['math'])
   @ApiExtension('x-monkey-block-def', {
     type: BlockType.SIMPLE,
     name: 'Calc Nth Power',
