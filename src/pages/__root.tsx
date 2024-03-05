@@ -1,23 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { createRootRoute, Outlet, ScrollRestoration, useMatches } from '@tanstack/react-router';
 
-import { useDocumentTitle } from '@mantine/hooks';
 import { NextUIProvider } from '@nextui-org/system';
 import { motion } from 'framer-motion';
-import { get } from 'lodash';
 
-import { useOemConfig } from '@/apis/common';
 import { OEM } from '@/components/layout/oem';
 import { MainWrapper } from '@/components/layout-wrapper/main';
-import { WorkspaceWrapper } from '@/components/layout-wrapper/workspace/Workspace.tsx';
+import { WorkspaceWrapper } from '@/components/layout-wrapper/workspace';
 import { TeamsGuard } from '@/components/router/guard/team.tsx';
 import { UserGuard } from '@/components/router/guard/user.tsx';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { SIDEBAR_MAP } from '@/consts/sidebar.tsx';
+import VinesEvent from '@/utils/events.ts';
 
 const RootComponent: React.FC = () => {
-  const { data: oem } = useOemConfig();
   const matches = useMatches();
 
   const routeMatch = matches.find((it) => it.routeId.includes('/$teamId'));
@@ -27,11 +24,13 @@ const RootComponent: React.FC = () => {
     ?.filter((it: string) => it);
 
   const routeAppId = routeIds?.at(1);
-  const oemSiteName = get(oem, 'theme.name', 'AI');
   const routeSiteName =
     SIDEBAR_MAP.flatMap((it) => it.items || []).find((it) => it.name === routeAppId)?.label ??
     (routeIds?.length ? '工作台' : '');
-  useDocumentTitle(routeSiteName ? `${routeSiteName} - ${oemSiteName}` : oemSiteName);
+
+  useEffect(() => {
+    VinesEvent.emit('vines-update-site-title', routeSiteName);
+  }, [routeSiteName]);
 
   const isUseOutside = !routeIds;
   const isUseWorkSpace = routeAppId === 'workspace';

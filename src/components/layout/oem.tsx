@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { useDocumentTitle, useFavicon } from '@mantine/hooks';
 import { get } from 'lodash';
@@ -9,6 +9,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { EDarkModeTrigger } from '@/store/useAppStore/dark-mode.slice.ts';
 import usePaletteStore from '@/store/usePaletteStore.ts';
 import { useLocalStorage } from '@/utils';
+import VinesEvent from '@/utils/events.ts';
 
 export const OEM: React.FC = () => {
   const { team } = useVinesTeam();
@@ -56,7 +57,17 @@ export const OEM: React.FC = () => {
     }
   }, [localDarkMode]);
 
-  useDocumentTitle(get(oem, 'theme.name', ''));
+  const [title, setTitle] = useState('');
+
+  useEffect(() => {
+    const handleUpdateSiteTitle = (text: string) => setTitle(text ? text + ' - ' : '');
+    VinesEvent.on('vines-update-site-title', handleUpdateSiteTitle);
+    return () => {
+      VinesEvent.off('vines-update-site-title', handleUpdateSiteTitle);
+    };
+  }, []);
+
+  useDocumentTitle(title + get(oem, 'theme.name', ''));
   useFavicon(get(oem, 'theme.favicon.url', ''));
 
   return null;
