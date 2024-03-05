@@ -6,8 +6,8 @@ import { AppModule } from './app.module';
 import { PORT } from './common/config';
 import { ExceptionsFilter } from './common/filters/exception.filter';
 import { logger } from './common/logger';
+import { setupExampleWorkerSwagger } from './modules/worker/example/example.swagger';
 import { WorkerService } from './modules/worker/worker.service';
-import { setupExampleWorkerSwagger } from './modules/worker/worker.swagger';
 
 process.on('unhandledRejection', (err: Error) => {
   logger.error('unhandledRejection: ', err);
