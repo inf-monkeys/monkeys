@@ -2,22 +2,22 @@ import React from 'react';
 
 import { useSWRConfig } from 'swr';
 
-import { Pencil, Plus, PlusCircle } from 'lucide-react';
+import { Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { updateTeam } from '@/apis/authz/team';
 import { ITeamUpdate } from '@/apis/authz/team/typings.ts';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { InfoEditor } from '@/components/layout/settings/account/info-editor.tsx';
+import { ApplyManage } from '@/components/layout/settings/account/team/apply-manage';
 import { CreateTeam } from '@/components/layout/settings/account/team/create';
 import { DeleteTeam } from '@/components/layout/settings/account/team/delete';
 import { ImportExportTeam } from '@/components/layout/settings/account/team/import-export';
+import { Invite } from '@/components/layout/settings/account/team/invite';
 import { JoinPublicTeam } from '@/components/layout/settings/account/team/join-public-team';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn, useLocalStorage } from '@/utils';
 
 interface ITeamProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -55,22 +55,8 @@ export const Team: React.FC<ITeamProps> = () => {
         <CardTitle>我的团队</CardTitle>
         {isOwner && <CardDescription>管理您的团队数据</CardDescription>}
         <div className="absolute left-0 top-0 !mt-0 flex size-full items-center justify-end gap-2 p-6">
-          <Tooltip>
-            <CreateTeam>
-              <TooltipTrigger asChild>
-                <Button icon={<Plus />} size="small" />
-              </TooltipTrigger>
-            </CreateTeam>
-            <TooltipContent>新建团队</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <JoinPublicTeam>
-              <TooltipTrigger asChild>
-                <Button icon={<PlusCircle size={18} />} size="small" />
-              </TooltipTrigger>
-            </JoinPublicTeam>
-            <TooltipContent>加入公开团队</TooltipContent>
-          </Tooltip>
+          <CreateTeam />
+          <JoinPublicTeam />
         </div>
       </CardHeader>
       <CardContent className={cn('flex gap-4', !isOwner && 'pointer-events-none')}>
@@ -106,8 +92,14 @@ export const Team: React.FC<ITeamProps> = () => {
         </div>
       </CardContent>
       <CardFooter className="justify-end gap-2">
-        {isOwner && <ImportExportTeam />}
-        {isOwner && <DeleteTeam teamId={team?.id} />}
+        <Invite />
+        {isOwner && (
+          <>
+            <ApplyManage teamId={team?.id} />
+            <ImportExportTeam />
+            <DeleteTeam teamId={team?.id} />
+          </>
+        )}
       </CardFooter>
     </Card>
   );

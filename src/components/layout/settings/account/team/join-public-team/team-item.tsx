@@ -15,7 +15,6 @@ export const JoinPublicTeamItem: React.FC<IJoinPublicTeamItemProps> = ({ team, i
   return (
     <Card>
       <CardContent className="flex items-center justify-between gap-4 p-3">
-        {/*<div className="flex items-center justify-between gap-4 rounded-md p-3">*/}
         <div className="flex items-center gap-4">
           <Avatar className="size-10">
             <AvatarImage className="aspect-auto" src={team.logoUrl} alt={team.name} />
@@ -31,7 +30,6 @@ export const JoinPublicTeamItem: React.FC<IJoinPublicTeamItemProps> = ({ team, i
             申请加入
           </Button>
         </div>
-        {/*</div>*/}
       </CardContent>
     </Card>
   );

@@ -21,7 +21,7 @@ export const vinesFetcher = <U, T = {}>({
   apiKey,
   wrapper = (data: U) => data,
 }: IFetcherOptions<U> = {}) => {
-  return async (url: string, params?: T) => {
+  return async (url: string, params?: T): Promise<U> => {
     const headers = {
       'Content-Type': 'application/json;charset=utf-8',
       ...(auth && vinesHeader({ apiKey, useToast: simple })),
