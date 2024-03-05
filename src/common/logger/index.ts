@@ -27,7 +27,7 @@ configure({
       ...dateFileRollingOptions,
     },
   },
-  categories: { default: { appenders: ['stdout', 'file'], level: 'info' } },
+  categories: { default: { appenders: ['stdout'], level: 'ALL' } },
 });
 
 export const logger: Logger = getLogger('default');

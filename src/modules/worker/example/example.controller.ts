@@ -1,5 +1,4 @@
 import { config } from '@/common/config';
-import { BlockDefinition, BlockType } from '@inf-monkeys/vines';
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiExtension, ApiOperation } from '@nestjs/swagger';
 import { ApiType, AuthType, MenifestJson, SchemaVersion } from '../interfaces';
@@ -34,7 +33,9 @@ export class ExampleController {
   @ApiExtension('x-monkey-block-categories', ['math'])
   public async addTwoNumberExample(@Body() body: AddTwoNumberDto) {
     const { numA, numB } = body;
-    return numA + numB;
+    return {
+      result: numA + numB,
+    };
   }
 
   @Post('/nth-power-of')
@@ -43,27 +44,35 @@ export class ExampleController {
     description: 'Calc Nth Power, assumes may take a while ...',
   })
   @ApiExtension('x-monkey-block-categories', ['math'])
-  @ApiExtension('x-monkey-block-def', {
-    type: BlockType.SIMPLE,
-    name: 'Calc Nth Power',
-    description: 'Calc Nth Power, assumes may take a while ...',
-    input: [
-      {
-        name: 'num',
-        displayName: 'Number',
-        required: true,
-        type: 'number',
-      },
-      {
-        name: 'n',
-        displayName: 'N',
-        required: true,
-        type: 'number',
-      },
-    ],
-  } as BlockDefinition)
+  @ApiExtension('x-monkey-block-displayName', 'Calc Nth Power')
+  @ApiExtension('x-monkey-block-description', 'Calc Nth Power, assumes may take a while ...')
+  @ApiExtension('x-monkey-block-icon', 'emoji:👧:#ceefc5')
+  @ApiExtension('x-monkey-block-input', [
+    {
+      name: 'num',
+      displayName: 'Number',
+      required: true,
+      type: 'number',
+    },
+    {
+      name: 'n',
+      displayName: 'N',
+      required: true,
+      type: 'number',
+    },
+  ])
+  @ApiExtension('x-monkey-block-output', [
+    {
+      name: 'result',
+      displayName: 'Result',
+      required: true,
+      type: 'number',
+    },
+  ])
   public async longTimeCalcExample(@Body() body: NthPowerOfDto) {
     const { num, n } = body;
-    return Math.pow(num, n);
+    return {
+      result: Math.pow(num, n),
+    };
   }
 }

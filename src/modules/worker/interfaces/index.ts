@@ -26,3 +26,9 @@ export interface MenifestJson {
 export interface RegisterWorkerParams {
   menifestJsonUrl: string;
 }
+
+export interface WorkerInputData {
+  __blockName: string;
+
+  [x: string]: any;
+}

@@ -10,17 +10,18 @@ export const parseOpenApiSpecAsBlocks = (namespace: string, specData: OpenAPIObj
         const apiContent = pathItemObject[method] as OperationObject;
         const block: BlockDefinition = {
           type: BlockType.SIMPLE,
-          name: `${namespace}__${method}__${path.replaceAll('/', '_')}`,
-          displayName: apiContent.summary,
-          description: apiContent.description,
+          name: `${namespace}__${method}__${path}`,
+          displayName: apiContent['x-monkey-block-displayName'] || apiContent.summary,
+          description: apiContent['x-monkey-block-description'] || apiContent.description,
+          categories: apiContent['x-monkey-block-categories'] || [],
+          icon: apiContent['x-monkey-block-icon'] || '',
           input: [],
           output: [],
-          categories: apiContent['x-monkey-block-categories'] || [],
         };
 
-        const blockDefInSpec = apiContent['x-monkey-block-def'];
-        if (blockDefInSpec) {
-          Object.assign(block, blockDefInSpec);
+        const inputInSpec = apiContent['x-monkey-block-input'];
+        if (inputInSpec) {
+          block.input = inputInSpec;
         } else {
           const parameters = apiContent.parameters;
           const requestBody = apiContent.requestBody as RequestBodyObject;
@@ -163,6 +164,10 @@ export const parseOpenApiSpecAsBlocks = (namespace: string, specData: OpenAPIObj
           }
         }
 
+        const outputInSpec = apiContent['x-monkey-block-output'];
+        if (outputInSpec) {
+          block.output = outputInSpec;
+        }
         blocks.push(block);
       }
     }
