@@ -18,13 +18,13 @@ export const vinesFetcher = <U, T = {}>({
   method = 'GET',
   auth = true,
   simple = false,
-  apiKey,
+  apikey,
   wrapper = (data: U) => data,
 }: IFetcherOptions<U> = {}) => {
   return async (url: string, params?: T): Promise<U> => {
     const headers = {
       'Content-Type': 'application/json;charset=utf-8',
-      ...(auth && vinesHeader({ apiKey, useToast: simple })),
+      ...(auth && vinesHeader({ apikey, useToast: simple })),
     };
 
     const body = params ? stringify(simple ? params : params['arg']) : undefined;

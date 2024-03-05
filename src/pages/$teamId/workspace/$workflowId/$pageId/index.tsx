@@ -1,25 +1,37 @@
 import React, { useEffect } from 'react';
 
-import { createFileRoute, redirect, useNavigate, useParams } from '@tanstack/react-router';
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 
 import { toast } from 'sonner';
 import isMongoId from 'validator/es/lib/isMongoId';
 import z from 'zod';
 
-import { useListWorkspacePages } from '@/apis/pages';
+import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
-import { setLocalStorage } from '@/utils';
+import { usePageStore } from '@/store/usePageStore';
+import VinesEvent from '@/utils/events.ts';
 
 export const WorkspacePage: React.FC = () => {
-  const { workflowId, pageId, teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
-  const { data: pages } = useListWorkspacePages(workflowId);
   const navigate = useNavigate();
+
+  const { workflow, pages, pageId, teamId, setApikey, setPage } = useVinesPage();
+
+  const { pageTitle } = usePageStore();
 
   useEffect(() => {
     if (pages && pageId && teamId) {
       // 二次检查 pageId
       const page = pages.find(({ _id }) => _id === pageId);
-      if (!page) {
+      if (page) {
+        setPage(page);
+        const pageApiKey = page.apiKey;
+        if (!pageApiKey) {
+          toast.error('页面 API-KEY 获取失败！');
+        } else {
+          setApikey(pageApiKey);
+        }
+      } else {
+        toast.warning('页面不存在！');
         void navigate({
           to: '/$teamId/workflows',
           params: {
@@ -27,14 +39,14 @@ export const WorkspacePage: React.FC = () => {
           },
         });
       }
-      const pageApiKey = page?.apiKey;
-      if (!pageApiKey) {
-        toast.error('页面 API-KEY 获取失败！');
-      } else {
-        setLocalStorage('vines-apikey', pageApiKey);
-      }
     }
   }, [pageId, pages]);
+
+  useEffect(() => {
+    if (!workflow) return;
+    const workflowName = workflow.name;
+    workflowName && VinesEvent.emit('vines-update-site-title', (pageTitle ? `${pageTitle} - ` : '') + workflowName);
+  }, [workflow, pageTitle]);
 
   return null;
 };

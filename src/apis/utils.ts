@@ -1,14 +1,14 @@
 import { toast } from 'sonner';
 
 export interface IVinesHeaderOptions {
-  apiKey?: string;
+  apikey?: string;
   useToast?: boolean;
 }
 
-export const vinesHeader = ({ apiKey, useToast = false }: IVinesHeaderOptions) => {
+export const vinesHeader = ({ apikey, useToast = false }: IVinesHeaderOptions) => {
   const teamId = localStorage.getItem('vines-team-id');
-  if (apiKey) {
-    return { 'X-Vines-Apikey': apiKey, ...(teamId && { Team: teamId }) };
+  if (apikey) {
+    return { 'X-Vines-Apikey': apikey, ...(teamId && { Team: teamId }) };
   }
 
   const token = localStorage.getItem('vines-token');
