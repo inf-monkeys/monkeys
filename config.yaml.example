@@ -1,6 +1,7 @@
 server:
   # defaults to run on port 3000
   port: 3000
+  loadExample: true
 
 conductor:
   baseUrl: http://localhost:8080/api

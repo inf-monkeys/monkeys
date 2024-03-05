@@ -8,7 +8,7 @@ import { EXAMPLE_WORKER_OPENAPI_PATH } from './example.swagger';
 
 @Controller('/worker/example')
 export class ExampleController {
-  @Get('/.well-known/monkey-plugin.json')
+  @Get('/menifest.json')
   @ApiExcludeEndpoint()
   public getMetadata(): MenifestJson {
     return {

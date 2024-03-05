@@ -8,5 +8,6 @@ import { WorkerRegistryService } from './worker.registry.service';
   controllers: [WorkerController],
   providers: [WorkerPollingService, WorkerRegistryService],
   imports: [ExampleModule],
+  exports: [WorkerRegistryService],
 })
 export class WorkerModule {}

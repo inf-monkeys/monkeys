@@ -17,6 +17,7 @@ export interface ServerConfig {
   port: number;
   appId: string;
   appUrl: string;
+  loadExample: boolean;
 }
 
 export interface DatabaseConfig {
@@ -43,6 +44,7 @@ export const config: Config = {
     port,
     appId: readConfig('server.appId', 'monkeys'),
     appUrl: readConfig('server.appUrl', `http://localhost:${port}`),
+    loadExample: readConfig('server.loadExample', true),
   },
   conductor: {
     baseUrl: readConfig('conductor.baseUrl', 'http://localhost:8080/api'),
