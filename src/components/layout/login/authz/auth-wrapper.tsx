@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
+import { useSWRConfig } from 'swr';
 import { useNavigate } from '@tanstack/react-router';
 
 import { IconInfoCircle } from '@douyinfe/semi-icons';
@@ -20,7 +21,7 @@ interface IAuthWrapperProps extends React.ComponentPropsWithoutRef<'div'> {
 export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, children }) => {
   const navigate = useNavigate({ from: Route.fullPath });
   const { redirect_url } = Route.useSearch();
-
+  const { mutate } = useSWRConfig();
   const { trigger, data } = useLogin();
 
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -37,10 +38,9 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
   useEffect(() => {
     if (!data) return;
     if (saveAuthToken(data) === 1) {
+      void mutate('/api/teams');
       // TODO: 似乎无法正常跳转
-      void navigate({
-        to: redirect_url ?? '/',
-      });
+      void navigate({ to: redirect_url ?? '/' });
     }
     onFinished?.();
     toast.success('登录成功');
