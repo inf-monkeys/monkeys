@@ -2,11 +2,13 @@ import React, { useEffect } from 'react';
 
 import { createFileRoute, redirect, useNavigate, useParams } from '@tanstack/react-router';
 
+import { toast } from 'sonner';
 import isMongoId from 'validator/es/lib/isMongoId';
 import z from 'zod';
 
 import { useListWorkspacePages } from '@/apis/pages';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
+import { setLocalStorage } from '@/utils';
 
 export const WorkspacePage: React.FC = () => {
   const { workflowId, pageId, teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
@@ -24,6 +26,12 @@ export const WorkspacePage: React.FC = () => {
             teamId,
           },
         });
+      }
+      const pageApiKey = page?.apiKey;
+      if (!pageApiKey) {
+        toast.error('页面 API-KEY 获取失败！');
+      } else {
+        setLocalStorage('vines-apikey', pageApiKey);
       }
     }
   }, [pageId, pages]);
