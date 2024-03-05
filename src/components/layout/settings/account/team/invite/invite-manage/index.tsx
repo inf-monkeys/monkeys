@@ -196,7 +196,7 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
               <DropdownMenuGroup>
                 <DropdownMenuItem
                   onSelect={() => handleToggleLinkPause(row.original._id)}
-                  disabled={row.original.outdateTimestamp}
+                  disabled={Boolean(row.original.outdateTimestamp)}
                 >
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     {row.original.status === ITeamInviteStatus.DISABLED ? <Play size={15} /> : <Pause size={15} />}
