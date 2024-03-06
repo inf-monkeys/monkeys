@@ -81,12 +81,7 @@ export const SpaceTab: React.FC<ISpaceTabProps> = memo(
                 exit={{ width: 0, paddingLeft: 0 }}
                 className="overflow-clip"
               >
-                <Button
-                  className="!scale-90 [&_svg]:stroke-gold-12"
-                  icon={<MoreVertical />}
-                  variant="borderless"
-                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {}}
-                />
+                <Button className="!scale-90 [&_svg]:stroke-gold-12" icon={<MoreVertical />} variant="borderless" />
               </motion.div>
             )}
             {!isActive && isLastItem && activeIndex - 1 !== index ? (

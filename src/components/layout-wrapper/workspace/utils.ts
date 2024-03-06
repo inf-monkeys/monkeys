@@ -82,6 +82,7 @@ export const useVinesPage = () => {
     workflowId,
     pages,
     setPages,
+    pagesMutate,
     page,
     setPage,
     pageId,
