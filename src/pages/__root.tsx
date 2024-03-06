@@ -32,7 +32,9 @@ const RootComponent: React.FC = () => {
     VinesEvent.emit('vines-update-site-title', routeSiteName);
   }, [routeSiteName]);
 
-  const isUseOutside = !routeIds;
+  // 之后再考虑是否改为开头匹配 vines-
+  const isUseOutside =
+    !routeIds || ['vines-process', 'vines-log', 'vines-chat', 'vines-preview'].includes(routeIds?.[3]);
   const isUseWorkSpace = routeAppId === 'workspace';
 
   return (

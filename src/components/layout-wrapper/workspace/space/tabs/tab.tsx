@@ -10,9 +10,7 @@ import { IPageType } from '@/apis/pages/typings.ts';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId';
-import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
-import { useRetimer } from '@/utils/use-retimer.ts';
 
 interface ISpaceTabProps extends React.ComponentPropsWithoutRef<'div'> {
   id: string;
@@ -28,16 +26,13 @@ interface ISpaceTabProps extends React.ComponentPropsWithoutRef<'div'> {
 export const SpaceTab: React.FC<ISpaceTabProps> = memo(
   ({ id, displayName, icon, activeIndex, index, isLastItem, pages, page }) => {
     const navigate = useNavigate({ from: Route.fullPath });
-    const reTimer = useRetimer();
-
-    const { loading, setLoading } = usePageStore();
 
     const { setNodeRef, listeners, attributes, transform, isDragging } = useSortable({ id });
 
     const isActive = activeIndex === index;
 
     const handleChangePage = () => {
-      if (!isActive && !loading) {
+      if (!isActive) {
         void navigate({
           to: '/$teamId/workspace/$workflowId/$pageId',
           params: {
@@ -45,9 +40,6 @@ export const SpaceTab: React.FC<ISpaceTabProps> = memo(
           },
         });
       }
-
-      const nextPageIsIdentical = pages?.find((page) => page._id === id)?.type === page?.type;
-      reTimer(setTimeout(() => setLoading(false), nextPageIsIdentical ? 200 : 5000) as unknown as number);
     };
 
     const handleContextMenu = (event: React.MouseEvent) => {
