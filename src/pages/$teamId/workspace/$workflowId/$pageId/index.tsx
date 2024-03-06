@@ -1,20 +1,26 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 
+import { CircularProgress } from '@nextui-org/progress';
+import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 import isMongoId from 'validator/es/lib/isMongoId';
 import z from 'zod';
 
+import { IPageType } from '@/apis/pages/typings.ts';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { usePageStore } from '@/store/usePageStore';
+import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
+import { useRetimer } from '@/utils/use-retimer.ts';
 
 export const WorkspacePage: React.FC = () => {
   const navigate = useNavigate();
+  const reTimer = useRetimer();
 
-  const { workflow, pages, pageId, teamId, setApikey, setPage } = useVinesPage();
+  const { workflow, pages, page, pageId, teamId, setApikey, setPage } = useVinesPage();
 
   const { pageTitle } = usePageStore();
 
@@ -48,7 +54,75 @@ export const WorkspacePage: React.FC = () => {
     workflowName && VinesEvent.emit('vines-update-site-title', (pageTitle ? `${pageTitle} - ` : '') + workflowName);
   }, [workflow, pageTitle]);
 
-  return null;
+  const [loading, setLoading] = useState(true);
+  const [renderPages, setRenderPages] = useState<IPageType[]>([]);
+  useEffect(() => {
+    if (page) {
+      setRenderPages((prev) => {
+        const index = prev.findIndex(({ _id }) => _id === page._id);
+        if (index !== -1) {
+          return prev;
+        }
+        setLoading(true);
+        return [...prev, page];
+      });
+    }
+  }, [page]);
+
+  useEffect(() => {
+    setRenderPages((prev) => {
+      if (!pages) return prev;
+      return prev.filter((it) => pages.find(({ _id }) => _id === it._id));
+    });
+  }, [pages]);
+
+  const handleToggleLoading = useCallback(
+    (status?: boolean, wait = 1000) => {
+      reTimer(setTimeout(() => setLoading(status ?? !loading), wait) as unknown as number);
+    },
+    [reTimer],
+  );
+
+  return (
+    <AnimatePresence>
+      {renderPages.map((it) => (
+        <motion.iframe
+          key={it._id}
+          src={`/${it.teamId}/workspace/${it.workflowId}/vines-${it.type}`}
+          variants={{
+            enter: {
+              opacity: 1,
+              display: 'block',
+            },
+            exit: {
+              opacity: 0,
+              transitionEnd: {
+                display: 'none',
+              },
+            },
+          }}
+          animate={it._id === page?._id ? 'enter' : 'exit'}
+          className={cn('absolute left-0 top-0 h-full w-full', { hidden: loading })}
+          onLoadStart={() => setLoading(true)}
+          onLoad={() => handleToggleLoading(false)}
+        />
+      ))}
+      {loading && (
+        <motion.div
+          key="vines-page-waiting"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: { duration: 0.2 } }}
+          exit={{ opacity: 0, transition: { duration: 0.2 } }}
+          transition={{ type: 'linear' }}
+          className="vines-center absolute left-0 top-0 size-full bg-slate-1"
+        >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { delay: 0.38 } }}>
+            <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 };
 
 export const Route = createFileRoute('/$teamId/workspace/$workflowId/$pageId/')({
