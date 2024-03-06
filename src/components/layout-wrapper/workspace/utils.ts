@@ -24,8 +24,8 @@ export const useVinesPage = () => {
 
   const originPagesRef = useRef<IPageType[] | null>(null);
   const isUpdatePageLocker = useRef(false);
-  const setPages = (pages: IPageType[]) => {
-    void pagesMutate(pages, {
+  const setPages = async (pages: IPageType[]) => {
+    await pagesMutate(pages, {
       revalidate: false,
     });
 
@@ -62,11 +62,10 @@ export const useVinesPage = () => {
       return;
     }
 
-    updateWorkspacePages(apikey, workflowId, finalPages).then((it) => {
-      setTimeout(() => (isUpdatePageLocker.current = false), 100);
-      void pagesMutate(it, {
-        revalidate: false,
-      });
+    const newPages = await updateWorkspacePages(apikey, workflowId, finalPages);
+    setTimeout(() => (isUpdatePageLocker.current = false), 100);
+    await pagesMutate(newPages, {
+      revalidate: false,
     });
 
     setTimeout(() => (isUpdatePageLocker.current = false), 100);
