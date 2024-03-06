@@ -1,8 +1,8 @@
 import useSWR from 'swr';
-import useSWRInfinite from 'swr/infinite';
 
-import { IOrderTag, ITeamBalance } from '@/apis/authz/team/payment/typings.ts';
+import { IOrder, IOrderTag, ITeamBalance } from '@/apis/authz/team/payment/typings.ts';
 import { vinesFetcher } from '@/apis/fetcher.ts';
+import { IPaginationListData } from '@/apis/typings.ts';
 
 export const useTeamBalance = () =>
   useSWR<ITeamBalance>('/api/payment/balances', vinesFetcher(), {
@@ -10,10 +10,8 @@ export const useTeamBalance = () =>
     revalidateOnFocus: false,
   });
 
-export const useTeamOrderList = (types: IOrderTag[], limit = 24) => {
-  const getKey = (page, previousPageData) => {
-    if (previousPageData && !previousPageData.length) return null;
-    return `/api/payment/orders?page=${page}&limit=${limit}&types=${types.join(',')}`;
-  };
-  return useSWRInfinite(getKey, vinesFetcher({ pagination: true }));
-};
+export const useTeamOrderList = (types: IOrderTag[], page = 1, limit = 24) =>
+  useSWR<IPaginationListData<IOrder>>(
+    `/api/payment/orders?page=${page}&limit=${limit}&types=${types.join(',')}`,
+    vinesFetcher({ pagination: true }),
+  );
