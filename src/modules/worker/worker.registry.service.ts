@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { OpenAPIObject } from '@nestjs/swagger';
 import { ServerObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 import axios from 'axios';
+import url from 'url';
 import { ApiType, AuthType, MenifestJson, RegisterWorkerParams, SchemaVersion } from './interfaces';
 import { parseOpenApiSpecAsBlocks } from './utils/openapi-parser';
 
@@ -47,12 +48,6 @@ export class WorkerRegistryService {
     }
   }
 
-  private async validateSpecData(specData: OpenAPIObject) {
-    if (!specData.servers) {
-      throw new Error('Error when parse openapi spec: servers is missing');
-    }
-  }
-
   private async parseOpenapiAsBlocks(
     namespace: string,
     specUrl: string,
@@ -61,7 +56,6 @@ export class WorkerRegistryService {
     blocks: BlockDefinition[];
   }> {
     const { data: specData } = await axios.get<OpenAPIObject>(specUrl);
-    await this.validateSpecData(specData);
     const blocks = parseOpenApiSpecAsBlocks(namespace, specData);
     return {
       servers: specData.servers,
@@ -75,15 +69,22 @@ export class WorkerRegistryService {
     await this.validateMenifestJson(menifestData);
 
     const {
-      api: { url: apiUrl, type: apiType },
+      api: { url: specUrl, type: apiType },
       namespace,
     } = menifestData;
+
+    let realSpecUrl = specUrl;
+    if (!realSpecUrl.startsWith('http://') && !realSpecUrl.startsWith('https://')) {
+      const parsedUrl = url.parse(menifestJsonUrl);
+      const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
+      realSpecUrl = url.resolve(baseUrl, realSpecUrl);
+    }
 
     let blocks: BlockDefinition[] = [];
     let servers: ServerObject[] = [];
     switch (apiType) {
       case ApiType.openapi:
-        const res = await this.parseOpenapiAsBlocks(namespace, apiUrl);
+        const res = await this.parseOpenapiAsBlocks(namespace, realSpecUrl);
         blocks = res.blocks;
         servers = res.servers;
         break;

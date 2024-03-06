@@ -1,4 +1,3 @@
-import { config } from '@/common/config';
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiExtension, ApiOperation } from '@nestjs/swagger';
 import { ApiType, AuthType, MenifestJson, SchemaVersion } from '../interfaces';
@@ -19,7 +18,7 @@ export class ExampleController {
       },
       api: {
         type: ApiType.openapi,
-        url: `http://127.0.0.1:${config.server.port}${EXAMPLE_WORKER_OPENAPI_PATH}-json`,
+        url: `${EXAMPLE_WORKER_OPENAPI_PATH}-json`,
       },
       contact_email: 'dev@inf-monkeys.com',
     };

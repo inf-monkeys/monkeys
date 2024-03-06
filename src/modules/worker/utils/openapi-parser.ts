@@ -129,6 +129,9 @@ export const parseOpenApiSpecAsBlocks = (namespace: string, specData: OpenAPIObj
           if (parameters?.length) {
             for (const parameter of parameters) {
               const { name, schema, description, example, required, in: placeIn = 'query' } = parameter as ParameterObject;
+              if (!schema) {
+                continue;
+              }
               const placeholder = typeof example === 'object' ? JSON.stringify(example) : example;
               const { type, enum: enumValue, default: defaultValue } = schema as any;
               let formType = undefined;

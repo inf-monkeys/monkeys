@@ -12,7 +12,7 @@ export class AppService implements OnApplicationBootstrap {
     if (config.server.loadExample) {
       logger.info(`Load example blocks of ${EXAMPLE_WORKER_OPENAPI_MENIFEST_URL}`);
       this.workerRegistryService.registerBlocks({
-        menifestJsonUrl: EXAMPLE_WORKER_OPENAPI_MENIFEST_URL,
+        manifestJsonUrl: EXAMPLE_WORKER_OPENAPI_MENIFEST_URL,
       });
     }
   }
