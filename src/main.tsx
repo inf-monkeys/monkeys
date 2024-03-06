@@ -13,7 +13,6 @@ import * as Portal from '@radix-ui/react-portal';
 import { AnimatePresence } from 'framer-motion';
 import { Toaster } from 'sonner';
 
-import { localStorageProvider } from '@/apis/provider.ts';
 import { LagRadar } from '@/components/devtools/lag-radar/dev';
 import { ErrorComponent } from '@/components/router/catch-boundary';
 
@@ -31,7 +30,7 @@ declare module '@tanstack/react-router' {
 
 ReactDOM.createRoot(document.getElementById('vines-ui')!).render(
   <>
-    <SWRConfig value={{ provider: localStorageProvider }}>
+    <SWRConfig>
       <MantineProvider>
         <AnimatePresence mode="wait">
           <RouterProvider router={router} />

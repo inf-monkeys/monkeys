@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 
 import { createFileRoute } from '@tanstack/react-router';
 
 import { Account } from '@/components/layout/settings/account';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import VinesEvent from '@/utils/events.ts';
 
 const SIDEBAR_LIST = [
   {
@@ -18,6 +19,10 @@ const SIDEBAR_LIST = [
 ];
 
 export const Settings: React.FC = () => {
+  useLayoutEffect(() => {
+    VinesEvent.emit('vines-update-site-title', '配置中心');
+  }, []);
+
   return (
     <div className="flex flex-col gap-4">
       <h2 className="text-2xl font-bold">配置中心</h2>
