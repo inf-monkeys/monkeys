@@ -3,21 +3,21 @@ import { BaseEntity } from '../base/base';
 
 @Entity({ name: 'themes' })
 export class Theme extends BaseEntity {
-  @Column()
+  @Column({ nullable: true })
   teamId?: string;
 
   @Column()
   name: string; // 主题名称
 
-  @Column()
+  @Column({ nullable: true })
   primaryColor?: string;
 
-  @Column()
+  @Column({ nullable: true })
   backgroundColor?: string;
 
-  @Column()
+  @Column({ nullable: true })
   secondaryBackgroundColor?: string;
 
-  @Column()
+  @Column({ nullable: true })
   isPublic?: boolean;
 }
