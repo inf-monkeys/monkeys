@@ -20,7 +20,7 @@ import {
 import { debounce } from 'lodash';
 
 import { IPageType } from '@/apis/pages/typings.ts';
-import { ScrollTool } from '@/components/layout-wrapper/workspace/space/tabs/scroll-tool';
+import { Expand } from '@/components/layout-wrapper/workspace/space/tabs/expand';
 import { SpaceTab } from '@/components/layout-wrapper/workspace/space/tabs/tab.tsx';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { cn } from '@/utils';
@@ -118,7 +118,7 @@ export const SpaceTabs: React.FC<ITabsProps> = () => {
             ))}
           </SortableContext>
         </div>
-        <ScrollTool visible={scrollToolVisible} />
+        <Expand visible={scrollToolVisible} tabsNode={tabsNode} />
       </header>
     </DndContext>
   );

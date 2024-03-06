@@ -18,10 +18,11 @@ import {
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { cn } from '@/utils';
 
 interface IAddSpaceTabProps extends React.ComponentPropsWithoutRef<'div'> {}
 
-export const AddSpaceTab: React.FC<IAddSpaceTabProps> = () => {
+export const AddSpaceTab: React.FC<IAddSpaceTabProps> = ({ className }) => {
   const { workflowId, pagesMutate, navigateTo } = useVinesPage();
   const { data } = useWorkspacePageInstances();
 
@@ -47,7 +48,7 @@ export const AddSpaceTab: React.FC<IAddSpaceTabProps> = () => {
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      className="ml-2 flex h-full"
+      className={cn('ml-2 flex h-full', className)}
     >
       <DropdownMenu>
         <Tooltip>
