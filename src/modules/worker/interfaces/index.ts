@@ -10,7 +10,7 @@ export enum SchemaVersion {
   v1 = 'v1',
 }
 
-export interface MenifestJson {
+export interface ManifestJson {
   schema_version: SchemaVersion;
   namespace: string;
   auth: {
@@ -24,7 +24,7 @@ export interface MenifestJson {
 }
 
 export interface RegisterWorkerParams {
-  menifestJsonUrl: string;
+  manifestJsonUrl: string;
 }
 
 export interface WorkerInputData {

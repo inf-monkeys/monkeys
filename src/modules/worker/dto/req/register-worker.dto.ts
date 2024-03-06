@@ -5,8 +5,8 @@ export class RegisterWorkerDto {
   @ApiProperty({
     required: true,
     type: String,
-    description: 'Menifest json url',
+    description: 'Manifest json url',
   })
   @Joiful.string().required()
-  menifestJsonUrl: string;
+  manifestJsonUrl: string;
 }

@@ -4,7 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ExampleModule } from './example.module';
 
 export const EXAMPLE_WORKER_OPENAPI_PATH = '/api/worker/example/openapi';
-export const EXAMPLE_WORKER_OPENAPI_MENIFEST_URL = `http://localhost:${config.server.port}/api/worker/example/menifest.json`;
+export const EXAMPLE_WORKER_OPENAPI_MENIFEST_URL = `http://localhost:${config.server.port}/api/worker/example/manifest.json`;
 
 export const setupExampleWorkerSwagger = (app: INestApplication) => {
   const builder = new DocumentBuilder()

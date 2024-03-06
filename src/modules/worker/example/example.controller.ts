@@ -1,15 +1,15 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiExtension, ApiOperation } from '@nestjs/swagger';
-import { ApiType, AuthType, MenifestJson, SchemaVersion } from '../interfaces';
+import { ApiType, AuthType, ManifestJson, SchemaVersion } from '../interfaces';
 import { AddTwoNumberDto } from './dto/req/add-two-number.dto';
 import { NthPowerOfDto } from './dto/req/nth-power-of.dto';
 import { EXAMPLE_WORKER_OPENAPI_PATH } from './example.swagger';
 
 @Controller('/worker/example')
 export class ExampleController {
-  @Get('/menifest.json')
+  @Get('/manifest.json')
   @ApiExcludeEndpoint()
-  public getMetadata(): MenifestJson {
+  public getMetadata(): ManifestJson {
     return {
       schema_version: SchemaVersion.v1,
       namespace: 'monkeys_example_worker',

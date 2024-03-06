@@ -8,9 +8,9 @@ export class WorkerController {
 
   @Post('/register')
   public async registerWorker(@Body() body: RegisterWorkerDto) {
-    const { menifestJsonUrl } = body;
+    const { manifestJsonUrl } = body;
     return await this.workerRegistryService.registerBlocks({
-      menifestJsonUrl,
+      manifestJsonUrl,
     });
   }
 }

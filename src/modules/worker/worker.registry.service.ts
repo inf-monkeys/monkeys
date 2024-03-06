@@ -5,46 +5,46 @@ import { OpenAPIObject } from '@nestjs/swagger';
 import { ServerObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 import axios from 'axios';
 import url from 'url';
-import { ApiType, AuthType, MenifestJson, RegisterWorkerParams, SchemaVersion } from './interfaces';
+import { ApiType, AuthType, ManifestJson, RegisterWorkerParams, SchemaVersion } from './interfaces';
 import { parseOpenApiSpecAsBlocks } from './utils/openapi-parser';
 
 @Injectable()
 export class WorkerRegistryService {
-  private regitries: MenifestJson[] = [];
+  private regitries: ManifestJson[] = [];
   private blocks: BlockDefinition[] = [];
   private registeyToServers: { [x: string]: ServerObject[] } = {};
   constructor() {}
 
-  private async validateMenifestJson(data: MenifestJson) {
+  private async validateManifestJson(data: ManifestJson) {
     if (!data) {
-      throw new Error('Error when parse menifest json: menifest data is empty');
+      throw new Error('Error when parse manifest json: manifest data is empty');
     }
     if (!data.schema_version) {
-      throw new Error('Error when parse menifest json: schema_version is missing');
+      throw new Error('Error when parse manifest json: schema_version is missing');
     }
     if (!enumToList(SchemaVersion).includes(data.schema_version)) {
-      throw new Error(`Error when parse menifest json: invalid schema_version "${data.schema_version}", must in any one of ${enumToList(SchemaVersion).join(',')}`);
+      throw new Error(`Error when parse manifest json: invalid schema_version "${data.schema_version}", must in any one of ${enumToList(SchemaVersion).join(',')}`);
     }
     if (!data.namespace) {
-      throw new Error('Error when parse menifest json: namespace is missing');
+      throw new Error('Error when parse manifest json: namespace is missing');
     }
     if (!data.auth) {
-      throw new Error('Error when parse menifest json: auth is missing');
+      throw new Error('Error when parse manifest json: auth is missing');
     }
     if (!enumToList(AuthType).includes(data.auth.type)) {
-      throw new Error(`Error when parse menifest json: invalid auth.type "${data.auth.type}", must in any one of ${enumToList(AuthType).join(',')}`);
+      throw new Error(`Error when parse manifest json: invalid auth.type "${data.auth.type}", must in any one of ${enumToList(AuthType).join(',')}`);
     }
     if (!data.api) {
-      throw new Error('Error when parse menifest json: api is missing');
+      throw new Error('Error when parse manifest json: api is missing');
     }
     if (!enumToList(ApiType).includes(data.api.type)) {
-      throw new Error(`Error when parse menifest json: invalid api.type "${data.api.type}", must in any one of ${enumToList(ApiType).join(',')}`);
+      throw new Error(`Error when parse manifest json: invalid api.type "${data.api.type}", must in any one of ${enumToList(ApiType).join(',')}`);
     }
     if (!data.api.url) {
-      throw new Error('Error when parse menifest json: api.url is missing');
+      throw new Error('Error when parse manifest json: api.url is missing');
     }
     if (!data.contact_email) {
-      throw new Error('Error when parse menifest json: contact_email is missing');
+      throw new Error('Error when parse manifest json: contact_email is missing');
     }
   }
 
@@ -64,18 +64,18 @@ export class WorkerRegistryService {
   }
 
   public async registerBlocks(params: RegisterWorkerParams) {
-    const { menifestJsonUrl } = params;
-    const { data: menifestData } = await axios.get<MenifestJson>(menifestJsonUrl);
-    await this.validateMenifestJson(menifestData);
+    const { manifestJsonUrl } = params;
+    const { data: manifestData } = await axios.get<ManifestJson>(manifestJsonUrl);
+    await this.validateManifestJson(manifestData);
 
     const {
       api: { url: specUrl, type: apiType },
       namespace,
-    } = menifestData;
+    } = manifestData;
 
     let realSpecUrl = specUrl;
     if (!realSpecUrl.startsWith('http://') && !realSpecUrl.startsWith('https://')) {
-      const parsedUrl = url.parse(menifestJsonUrl);
+      const parsedUrl = url.parse(manifestJsonUrl);
       const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
       realSpecUrl = url.resolve(baseUrl, realSpecUrl);
     }
@@ -93,7 +93,7 @@ export class WorkerRegistryService {
     }
 
     this.blocks = this.blocks.concat(blocks);
-    this.regitries = this.regitries.concat([menifestData]);
+    this.regitries = this.regitries.concat([manifestData]);
     this.registeyToServers[namespace] = servers;
     return blocks;
   }
