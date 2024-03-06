@@ -1,4 +1,7 @@
+import { DataSourceOptions } from 'typeorm';
 import { readConfig } from './readYaml';
+
+export type DatabaseConfig = DataSourceOptions;
 
 export interface ConductorConfig {
   baseUrl: string;
@@ -18,11 +21,6 @@ export interface ServerConfig {
   appId: string;
   appUrl: string;
   loadExample: boolean;
-}
-
-export interface DatabaseConfig {
-  type: 'mongodb';
-  url: string;
 }
 
 export interface RedisConfig {
@@ -55,10 +53,10 @@ export const config: Config = {
     },
     workerPrefix: readConfig('conductor.workerPrefix'),
   },
-  database: {
-    type: 'mongodb',
-    url: readConfig('database.url', 'mongodb://localhost:27017'),
-  },
+  database: readConfig('database', {
+    type: 'better-sqlite3',
+    database: 'data/db.sqlite',
+  }),
   redis: {
     enabled: readConfig('redis.enabled', false),
     url: readConfig('redis.url', 'redis://localhost:6379'),
