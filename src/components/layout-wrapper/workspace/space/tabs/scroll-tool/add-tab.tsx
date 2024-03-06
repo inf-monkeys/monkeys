@@ -1,7 +1,5 @@
 import React from 'react';
 
-import { useNavigate } from '@tanstack/react-router';
-
 import { CreatePageDto } from '@inf-monkeys/vines/lib/models/CreatePageDto';
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
@@ -20,13 +18,11 @@ import {
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
-import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId';
 
 interface IAddSpaceTabProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const AddSpaceTab: React.FC<IAddSpaceTabProps> = () => {
-  const navigate = useNavigate({ from: Route.fullPath });
-  const { workflowId, pagesMutate } = useVinesPage();
+  const { workflowId, pagesMutate, navigateTo } = useVinesPage();
   const { data } = useWorkspacePageInstances();
 
   const handleAddPage = async (pageType: string) => {
@@ -42,14 +38,7 @@ export const AddSpaceTab: React.FC<IAddSpaceTabProps> = () => {
 
     await pagesMutate(newPages, { revalidate: false });
     const newPageId = newPages.at(-1)?._id;
-    if (newPageId) {
-      await navigate({
-        to: '/$teamId/workspace/$workflowId/$pageId',
-        params: {
-          pageId: newPageId,
-        },
-      });
-    }
+    newPageId && (await navigateTo(newPageId));
   };
 
   return (
@@ -73,12 +62,14 @@ export const AddSpaceTab: React.FC<IAddSpaceTabProps> = () => {
           <DropdownMenuLabel>新建视图</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            {data?.map(({ type, icon, name }) => (
-              <DropdownMenuItem key={type} className="flex items-center gap-2" onClick={() => handleAddPage(type)}>
-                <VinesIcon size="xs">{icon}</VinesIcon>
-                <p>{name}</p>
-              </DropdownMenuItem>
-            ))}
+            {data
+              ?.filter(({ type }) => type !== 'process')
+              ?.map(({ type, icon, name }) => (
+                <DropdownMenuItem key={type} className="flex items-center gap-2" onClick={() => handleAddPage(type)}>
+                  <VinesIcon size="xs">{icon}</VinesIcon>
+                  <p>{name}</p>
+                </DropdownMenuItem>
+              ))}
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>

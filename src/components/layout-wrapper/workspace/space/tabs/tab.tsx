@@ -4,10 +4,9 @@ import { useNavigate } from '@tanstack/react-router';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { AnimatePresence, motion } from 'framer-motion';
-import { MoreVertical } from 'lucide-react';
 
 import { IPageType } from '@/apis/pages/typings.ts';
-import { Button } from '@/components/ui/button';
+import { TabMenu } from '@/components/layout-wrapper/workspace/space/tabs/menu.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId';
 import { cn } from '@/utils';
@@ -81,7 +80,7 @@ export const SpaceTab: React.FC<ISpaceTabProps> = memo(
                 exit={{ width: 0, paddingLeft: 0 }}
                 className="overflow-clip"
               >
-                <Button className="!scale-90 [&_svg]:stroke-gold-12" icon={<MoreVertical />} variant="borderless" />
+                <TabMenu />
               </motion.div>
             )}
             {!isActive && isLastItem && activeIndex - 1 !== index ? (

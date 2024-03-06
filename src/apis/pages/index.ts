@@ -21,3 +21,6 @@ export const createWorkspacePage = (workflowId: string, page: Partial<CreatePage
     `/api/workflow/${workflowId}/pages`,
     page,
   );
+
+export const deleteWorkspacePage = (workflowId: string, pageId: string) =>
+  vinesFetcher<IPageType[], string>({ method: 'DELETE', simple: true })(`/api/workflow/${workflowId}/pages/${pageId}`);
