@@ -20,6 +20,7 @@ import {
 import { debounce } from 'lodash';
 
 import { IPageType } from '@/apis/pages/typings.ts';
+import { ScrollTool } from '@/components/layout-wrapper/workspace/space/tabs/scroll-tool';
 import { SpaceTab } from '@/components/layout-wrapper/workspace/space/tabs/tab.tsx';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { cn } from '@/utils';
@@ -102,12 +103,12 @@ export const SpaceTabs: React.FC<ITabsProps> = () => {
       <header ref={headerNode} className="relative mx-3 mt-2 flex h-10 overflow-x-clip scroll-smooth">
         <div ref={tabsNode} className={cn('flex overflow-hidden', scrollToolVisible && 'pr-32')}>
           <SortableContext items={pageIds} strategy={horizontalListSortingStrategy} disabled={disableDND}>
-            {pages?.map(({ _id, displayName, instance: { icon } }, index) => (
+            {pages?.map(({ _id, displayName, instance }, index) => (
               <SpaceTab
                 key={_id}
                 id={_id}
-                icon={icon}
-                displayName={displayName}
+                icon={instance?.icon ?? '⚠️'}
+                displayName={displayName ?? '未知视图'}
                 activeIndex={activeIndex}
                 isLastItem={pageNavLastIndex !== index}
                 index={index}
@@ -117,6 +118,7 @@ export const SpaceTabs: React.FC<ITabsProps> = () => {
             ))}
           </SortableContext>
         </div>
+        <ScrollTool visible={scrollToolVisible} />
       </header>
     </DndContext>
   );
