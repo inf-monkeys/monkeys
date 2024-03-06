@@ -2,6 +2,7 @@ import stringify from 'fast-json-stable-stringify';
 import _ from 'lodash';
 import { toast } from 'sonner';
 
+import { IPaginationListData } from '@/apis/typings.ts';
 import { IVinesHeaderOptions, vinesHeader } from '@/apis/utils.ts';
 
 import 'unfetch/polyfill';
@@ -15,6 +16,7 @@ interface IFetcherOptions<U = unknown> extends IVinesHeaderOptions {
   wrapper?: (data: U) => any;
   fetchOptions?: RequestInit;
   responseResolver?: (response: Response) => any;
+  pagination?: boolean;
 }
 
 export const vinesFetcher = <U, T = {}>({
@@ -25,11 +27,12 @@ export const vinesFetcher = <U, T = {}>({
   wrapper = (data: U) => data,
   fetchOptions,
   responseResolver,
+  pagination = false,
 }: IFetcherOptions<U> = {}) => {
   return async (url: string, params?: T) => {
     const headers = {
       'Content-Type': 'application/json;charset=utf-8',
-      ...(auth && vinesHeader({ apiKey, useToast: simple })),
+      ...(auth && vinesHeader({ apikey, useToast: simple })),
       ...(fetchOptions && fetchOptions.headers),
     };
 
@@ -60,7 +63,9 @@ export const vinesFetcher = <U, T = {}>({
               }
             }
 
-            return wrapper(data);
+            return wrapper(
+              pagination ? (_.pick(raw, ['data', 'page', 'limit', 'total']) as IPaginationListData<U>) : data,
+            );
           })(),
     );
   };

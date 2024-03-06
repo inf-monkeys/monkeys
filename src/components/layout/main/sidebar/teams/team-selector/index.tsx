@@ -4,7 +4,8 @@ import { useMatches, useNavigate } from '@tanstack/react-router';
 
 import { CheckIcon, ChevronsUpDown } from 'lucide-react';
 
-import { useTeamBalance, useTeams } from '@/apis/authz/team';
+import { useTeams } from '@/apis/authz/team';
+import { useTeamBalance } from '@/apis/authz/team/payment';
 import { Team } from '@/components/layout/main/sidebar/teams/team-selector/team.tsx';
 import { Button } from '@/components/ui/button';
 import {
