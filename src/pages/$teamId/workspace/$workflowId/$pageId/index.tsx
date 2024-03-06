@@ -37,7 +37,6 @@ export const WorkspacePage: React.FC = () => {
           setApikey(pageApiKey);
         }
       } else {
-        toast.warning('页面不存在！');
         void navigate({
           to: '/$teamId/workflows',
           params: {
