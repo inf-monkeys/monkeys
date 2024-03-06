@@ -43,7 +43,7 @@ export const vinesFetcher = <U, T = {}>({
     }).then(async (r) =>
       responseResolver
         ? responseResolver(r)
-        : async () => {
+        : (async () => {
             const raw = await r.json();
 
             const code = raw?.code || raw?.status;
@@ -61,7 +61,7 @@ export const vinesFetcher = <U, T = {}>({
             }
 
             return wrapper(data);
-          },
+          })(),
     );
   };
 };
