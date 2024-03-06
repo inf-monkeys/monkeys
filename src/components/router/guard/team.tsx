@@ -3,7 +3,8 @@ import React, { useEffect, useMemo, useRef } from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
 
-import { useTeamBalance, useTeams } from '@/apis/authz/team';
+import { useTeams } from '@/apis/authz/team';
+import { useTeamBalance } from '@/apis/authz/team/payment';
 import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { useLocalStorage } from '@/utils';
 

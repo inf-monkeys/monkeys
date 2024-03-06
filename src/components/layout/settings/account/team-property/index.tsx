@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 
 import { CreditCard } from 'lucide-react';
 
-import { useTeamBalance } from '@/apis/authz/team';
+import { useTeamBalance } from '@/apis/authz/team/payment';
 import { Pay } from '@/components/layout/settings/account/team-property/pay.tsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';

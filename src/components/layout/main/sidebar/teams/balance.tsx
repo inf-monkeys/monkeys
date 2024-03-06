@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useTeamBalance } from '@/apis/authz/team';
+import { useTeamBalance } from '@/apis/authz/team/payment';
 import { Progress } from '@/components/ui/progress.tsx';
 import { cn } from '@/utils';
 

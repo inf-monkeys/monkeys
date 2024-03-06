@@ -1,11 +1,12 @@
 import useSWR from 'swr';
 
+import FileSaver from 'file-saver';
 import _ from 'lodash';
 
 import {
+  IExportTeamOptions,
   ITeamApplyListData,
   ITeamApplyUpdateData,
-  ITeamBalance,
   ITeamCreate,
   ITeamInviteLinkData,
   ITeamInviteWithUserProfile,
@@ -17,12 +18,6 @@ import { vinesFetcher } from '@/apis/fetcher.ts';
 
 export const useTeams = (enable = true) =>
   useSWR<IVinesTeam[]>(enable ? '/api/teams' : null, vinesFetcher(), {
-    refreshInterval: 600000,
-    revalidateOnFocus: false,
-  });
-
-export const useTeamBalance = () =>
-  useSWR<ITeamBalance>('/api/payment/balances', vinesFetcher(), {
     refreshInterval: 600000,
     revalidateOnFocus: false,
   });
@@ -82,3 +77,13 @@ export const toggleTeamInviteStatus = (teamId: string, teamInviteId: string) =>
 
 export const deleteTeamInvite = (teamId: string, teamInviteId: string) =>
   vinesFetcher<boolean>({ method: 'POST' })(`/api/teams/invites/manage/${teamId}/delete/${teamInviteId}`);
+
+export const exportTeam = async (teamId: string, teamName: string, options: IExportTeamOptions) => {
+  await vinesFetcher({
+    method: 'POST',
+    simple: true,
+    responseResolver: async (r) => {
+      FileSaver.saveAs(await r.blob(), `${teamName}.zip`);
+    },
+  })(`/api/export-tenant-assets/${teamId}`, options);
+};

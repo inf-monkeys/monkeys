@@ -15,12 +15,6 @@ export interface IVinesTeam {
   };
 }
 
-export interface ITeamBalance {
-  amount: number;
-  totalConsume: number;
-  totalReCharge: number;
-}
-
 export type ITeamUpdate = Partial<Pick<IVinesTeam, 'name' | 'description' | 'logoUrl' | 'customTheme'>>;
 
 export type ITeamMember = {
@@ -91,3 +85,10 @@ export type ITeamInviteWithUserProfile = ITeamInvite & {
   inviterUser?: Partial<IVinesUser>;
   targetUser?: Partial<IVinesUser>;
 };
+
+export interface IExportTeamOptions {
+  exportWorkflows: boolean;
+  exportSqlTables: boolean;
+  exportVectorDatabases: boolean;
+  exportRichMedias: boolean;
+}
