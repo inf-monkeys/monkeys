@@ -56,16 +56,13 @@ export const WorkspacePage: React.FC = () => {
 
   const [loading, setLoading] = useState(true);
   const [renderPages, setRenderPages] = useState<IPageType[]>([]);
+
   useEffect(() => {
-    if (page) {
-      setRenderPages((prev) => {
-        const index = prev.findIndex(({ _id }) => _id === page._id);
-        if (index !== -1) {
-          return prev;
-        }
-        setLoading(true);
-        return [...prev, page];
-      });
+    if (!page) return;
+    const index = renderPages.findIndex(({ _id }) => _id === page._id);
+    if (index === -1) {
+      setLoading(true);
+      setTimeout(() => setRenderPages((prev) => [...prev, page]), 192);
     }
   }, [page]);
 
