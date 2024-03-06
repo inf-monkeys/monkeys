@@ -12,6 +12,7 @@ export const VinesLogo: React.FC<Omit<ILogoProps, 'url'>> = ({
   description = '构建流程为中心的 AI 应用',
   className,
   height = 40,
+  onClick,
   ...props
 }) => {
   const { team } = useVinesTeam();
@@ -20,7 +21,7 @@ export const VinesLogo: React.FC<Omit<ILogoProps, 'url'>> = ({
   const initialHeight = description ? height + 32 : height;
 
   return (
-    <SmoothTransition initialHeight={initialHeight}>
+    <SmoothTransition initialHeight={initialHeight} onClick={onClick}>
       {team ? (
         <AppLogo
           className={cn('w-auto', className)}
