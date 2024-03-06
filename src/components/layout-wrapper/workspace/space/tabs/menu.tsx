@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 
 import { DialogTrigger } from '@radix-ui/react-dialog';
-import { isEmpty } from 'lodash';
-import { MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { get, isEmpty } from 'lodash';
+import { MoreVertical, Pencil, Star, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { deleteWorkspacePage } from '@/apis/pages';
+import { deleteWorkspacePage, toggleWorkspacePagePin } from '@/apis/pages';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { Input } from '@/components/ui/input.tsx';
+import { cn } from '@/utils';
 
 interface ITabMenuProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -51,7 +52,37 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
 
     const newPages = [...pages];
     newPages[currentPage].displayName = pageDisplayName;
-    setPages(newPages);
+    toast.promise(setPages(newPages), {
+      loading: '正在保存...',
+      success: '保存成功',
+      error: '保存失败',
+    });
+  };
+
+  const isPin = get(page, 'pinned', false);
+
+  const handlePinPage = async (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (!pages) return;
+    const currentPage = pages.findIndex(({ _id }) => _id === pageId);
+    if (currentPage === -1) return;
+
+    toast.promise(toggleWorkspacePagePin(pageId, !isPin), {
+      loading: '正在标星中...',
+      success: (newPage) => {
+        if (newPage) {
+          const newPages = [...pages];
+          newPages[currentPage].pinned = newPage.pinned;
+          toast.promise(setPages(newPages), {
+            loading: '正在保存...',
+            success: '保存成功',
+            error: '保存失败',
+          });
+        }
+        return '已标星';
+      },
+      error: '标星失败',
+    });
   };
 
   return (
@@ -71,6 +102,17 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
                 <p>重命名</p>
               </DropdownMenuItem>
             </DialogTrigger>
+            <DropdownMenuItem
+              className={cn('flex items-center gap-2', isPin && 'text-yellow-5')}
+              onClick={handlePinPage}
+            >
+              <Star
+                className={cn(isPin && '[&_polygon]:fill-yellow-5 [&_polygon]:stroke-yellow-5')}
+                strokeWidth={1.5}
+                size={16}
+              />
+              <p>{isPin ? '取消' : ''}标星</p>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="flex items-center gap-2 text-red-10"

@@ -24,3 +24,11 @@ export const createWorkspacePage = (workflowId: string, page: Partial<CreatePage
 
 export const deleteWorkspacePage = (workflowId: string, pageId: string) =>
   vinesFetcher<IPageType[], string>({ method: 'DELETE', simple: true })(`/api/workflow/${workflowId}/pages/${pageId}`);
+
+export const toggleWorkspacePagePin = (pageId: string, pin: boolean) =>
+  vinesFetcher<Omit<IPageType, 'instance'>, { pin: boolean }>({ method: 'POST', simple: true })(
+    `/api/pages/${pageId}/pin`,
+    {
+      pin,
+    },
+  );
