@@ -4,6 +4,7 @@ import { CreditCard } from 'lucide-react';
 
 import { useTeamBalance } from '@/apis/authz/team/payment';
 import { Pay } from '@/components/layout/settings/account/team-property/pay.tsx';
+import { balanceFormat } from '@/components/layout/settings/account/utils.ts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 
@@ -14,8 +15,7 @@ export const TeamProperty: React.FC<ITeamPropertyProps> = () => {
 
   const balanceAmount = useMemo<[string, string]>(() => {
     const { amount } = balance || {};
-    if (!amount) return ['0', '00'];
-    return (amount / 100).toFixed(2).split('.') as [string, string];
+    return balanceFormat(amount);
   }, [balance]);
 
   return (
