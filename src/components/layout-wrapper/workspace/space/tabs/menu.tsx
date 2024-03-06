@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { DialogTrigger } from '@radix-ui/react-dialog';
 import { get, isEmpty } from 'lodash';
-import { MoreVertical, Pencil, Star, Trash2 } from 'lucide-react';
+import { MoreVertical, Pencil, Settings2, Star, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { deleteWorkspacePage, toggleWorkspacePagePin } from '@/apis/pages';
@@ -18,12 +18,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { Input } from '@/components/ui/input.tsx';
+import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
 interface ITabMenuProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const TabMenu: React.FC<ITabMenuProps> = () => {
   const { workflowId, page, pages, pageId, navigateTo, pagesMutate, setPages } = useVinesPage();
+
+  const { visibleCustomSetting, setVisibleCustomSetting } = usePageStore();
 
   const [toggleNameDialogVisible, setToggleNameDialogVisible] = useState(false);
   const [pageDisplayName, setPageDisplayName] = useState(page?.displayName ?? '');
@@ -103,15 +106,22 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
               </DropdownMenuItem>
             </DialogTrigger>
             <DropdownMenuItem
-              className={cn('flex items-center gap-2', isPin && 'text-yellow-5')}
+              className={cn('flex items-center gap-2', isPin && 'text-yellow-9')}
               onClick={handlePinPage}
             >
               <Star
-                className={cn(isPin && '[&_polygon]:fill-yellow-5 [&_polygon]:stroke-yellow-5')}
+                className={cn(isPin && '[&_polygon]:fill-yellow-9 [&_polygon]:stroke-yellow-9')}
                 strokeWidth={1.5}
                 size={16}
               />
               <p>{isPin ? '取消' : ''}标星</p>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="flex items-center gap-2"
+              onClick={() => setVisibleCustomSetting(!visibleCustomSetting)}
+            >
+              <Settings2 strokeWidth={1.5} size={16} />
+              <p>{visibleCustomSetting ? '关闭' : ''}偏好设置</p>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
