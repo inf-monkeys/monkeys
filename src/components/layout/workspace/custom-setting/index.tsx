@@ -15,6 +15,7 @@ export const WorkspaceCustomSetting: React.FC<IWorkspaceCustomSettingProps> = ()
   return (
     <motion.div
       key="vines-pages-custom-setting"
+      initial={{ opacity: 0 }}
       variants={{
         visible: { opacity: 1, transition: { duration: 0.2 } },
         hidden: { opacity: 0, transition: { duration: 0.2 } },
