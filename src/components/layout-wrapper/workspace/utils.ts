@@ -20,7 +20,7 @@ export const useVinesPage = () => {
 
   const { page, setPage } = usePageStore();
 
-  const { data: workflow } = useGetWorkflow(apikey, workflowId);
+  const { data: workflow, mutate: mutateWorkflow } = useGetWorkflow(apikey, workflowId);
 
   const originPagesRef = useRef<IPageType[] | null>(null);
   const isUpdatePageLocker = useRef(false);
@@ -90,6 +90,7 @@ export const useVinesPage = () => {
 
   return {
     workflow,
+    mutateWorkflow,
     workflowId,
     pages,
     setPages,
