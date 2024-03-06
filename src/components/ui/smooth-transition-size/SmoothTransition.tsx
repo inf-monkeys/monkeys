@@ -6,7 +6,12 @@ interface ISmoothTransitionProps extends React.ComponentPropsWithoutRef<'div'> {
   initialHeight?: number;
 }
 
-export const SmoothTransition: React.FC<ISmoothTransitionProps> = ({ className, initialHeight = 0, children }) => {
+export const SmoothTransition: React.FC<ISmoothTransitionProps> = ({
+  className,
+  initialHeight = 0,
+  children,
+  ...props
+}) => {
   const { ref, height } = useElementSize();
 
   return (
@@ -18,7 +23,9 @@ export const SmoothTransition: React.FC<ISmoothTransitionProps> = ({ className, 
         opacity: 1,
       }}
     >
-      <div ref={ref}>{children}</div>
+      <div ref={ref} {...props}>
+        {children}
+      </div>
     </motion.div>
   );
 };
