@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { ColumnDef } from '@tanstack/react-table';
 import { ArrowUpDown, Download, MinusSquare, PlusSquareIcon } from 'lucide-react';
@@ -11,12 +11,16 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { DataTable } from '@/components/ui/data-table';
+import { Spinner } from '@/components/ui/spinner';
 
 interface IRechargeDetailsProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const RechargeDetails: React.FC<IRechargeDetailsProps> = () => {
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(5);
+
   const { data: balance } = useTeamBalance();
-  const { data: orderListData } = useTeamOrderList(['recharge', 'admin-recharge']);
+  const { data: orderListData } = useTeamOrderList(['recharge', 'admin-recharge'], page, limit);
 
   const balanceTotalReCharge = useMemo<[string, string]>(() => {
     const { totalReCharge } = balance || {};
@@ -44,12 +48,12 @@ export const RechargeDetails: React.FC<IRechargeDetailsProps> = () => {
       ),
     },
     {
-      accessorKey: 'tag',
+      accessorKey: 'payment',
       header: '支付类型',
-      cell: ({ cell }) => (
+      cell: ({ row }) => (
         <span>
-          {(cell.getValue() === 'recharge' && '微信支付') ||
-            (cell.getValue() === 'admin-recharge' && '管理员后台充值') ||
+          {(row.original.tag === 'recharge' && '微信支付') ||
+            (row.original.tag === 'admin-recharge' && '管理员后台充值') ||
             '其他'}
         </span>
       ),
@@ -119,7 +123,21 @@ export const RechargeDetails: React.FC<IRechargeDetailsProps> = () => {
         </div>
       </CardHeader>
       <CardContent>
-        <DataTable columns={columns} data={orderListData?.data ?? []} pagination />
+        {orderListData ? (
+          <DataTable
+            columns={columns}
+            data={orderListData.data ?? []}
+            enablePagination
+            state={{
+              onPaginationChange: (updater) => {},
+              onPageSizeChange: setLimit,
+              total: orderListData.total,
+              page,
+            }}
+          />
+        ) : (
+          <Spinner loading className="h-10" />
+        )}
       </CardContent>
     </Card>
   );
