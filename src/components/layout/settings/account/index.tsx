@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { ConsumerDetails } from '@/components/layout/settings/account/consumer-details';
-import { ConsumptionTrendChart } from '@/components/layout/settings/account/consumption-trend-chart/ConsumptionTrendChart.tsx';
+import { ConsumptionTrendChart } from '@/components/layout/settings/account/consumption-trend-chart';
 import { RechargeDetails } from '@/components/layout/settings/account/recharge-details';
 import { Team } from '@/components/layout/settings/account/team';
 import { TeamMember } from '@/components/layout/settings/account/team-member';

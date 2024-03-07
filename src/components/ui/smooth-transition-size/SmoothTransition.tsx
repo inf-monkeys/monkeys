@@ -21,6 +21,9 @@ export const SmoothTransition: React.FC<ISmoothTransitionProps> = ({
       animate={{
         height: height ? height : initialHeight,
         opacity: 1,
+        transition: {
+          delay: 0.08,
+        },
       }}
     >
       <div ref={ref} {...props}>
