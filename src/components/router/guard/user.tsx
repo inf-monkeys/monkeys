@@ -12,6 +12,7 @@ import { logout, swapAccount } from '@/components/router/guard/auth.ts';
 import { Route } from '@/pages/login.tsx';
 import { useLocalStorage } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
+import { maskEmail, maskPhone } from '@/utils/maskdata.ts';
 
 export const UserGuard: React.FC = () => {
   const navigate = useNavigate({ from: Route.fullPath });
@@ -62,4 +63,28 @@ export const UserGuard: React.FC = () => {
   }, [userIds, localUser.id]);
 
   return null;
+};
+
+export const useVinesUser = () => {
+  const [user, setUser] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
+
+  const userEmail = user.email ?? '';
+  const userPhone = user.phone ?? '';
+  const userEmailMask = maskEmail(userEmail);
+  const userPhoneMask = maskPhone(userPhone);
+
+  return {
+    user,
+    setUser,
+
+    userPhoto: user.photo ?? 'https://static.aside.fun/upload/frame/0XMWE1.jpg',
+    userName: user.name ?? 'AI',
+    userEmail,
+    userEmailMask,
+    userPhone,
+    userPhoneMask,
+    userAccount: userPhone || userEmail,
+    userAccountMask: userPhone ? userPhoneMask : userEmailMask,
+    userId: user.id ?? 'anonymous',
+  };
 };
