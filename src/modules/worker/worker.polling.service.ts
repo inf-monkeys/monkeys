@@ -4,14 +4,14 @@ import { ConductorClient, Task, TaskDef, TaskManager } from '@io-orkes/conductor
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import os from 'os';
+import { ToolsRepository } from '../infra/database/repositories/tools.repository';
 import { WorkerInputData } from './interfaces';
-import { WorkerRegistryService } from './worker.registry.service';
 
 @Injectable()
 export class WorkerPollingService {
   private conductorClient: ConductorClient;
   private taskDefName: string = 'monkeys';
-  constructor(private readonly workerRegistrySerice: WorkerRegistryService) {
+  constructor(private readonly toolsRepository: ToolsRepository) {
     this.conductorClient = new ConductorClient({
       serverUrl: config.conductor.baseUrl,
     });
@@ -24,8 +24,7 @@ export class WorkerPollingService {
   private async requestExternalApi(task: Task) {
     const inpuData = task.inputData as WorkerInputData;
     const { __blockName, ...rest } = inpuData;
-    const block = this.workerRegistrySerice.listBlocks().find((x) => x.name === __blockName);
-    const registries = this.workerRegistrySerice.listRegistries();
+    const block = await this.toolsRepository.getToolByName(__blockName);
     logger.info(`Start to execute worker: ${__blockName}`);
     if (!block) {
       throw new Error(`Failed to execute worker "${__blockName}", may not exists or not functioning now.`);
@@ -34,12 +33,11 @@ export class WorkerPollingService {
     const body: { [x: string]: any } = {};
     const path: { [x: string]: any } = {};
     const namespace = __blockName.split('__')[0];
-    const registry = registries.find((x) => x.namespace === namespace);
-    if (!registry) {
+    const server = await this.toolsRepository.getServerByNamespace(namespace);
+    if (!server) {
       throw new Error(`Failed to execute worker "${__blockName}", may not exists or not functioning now.`);
     }
-    const servers = this.workerRegistrySerice.listServers()[namespace];
-    const baseURL = servers[0].url;
+    const baseURL = server.api.url;
     const method = __blockName.split('__')[1];
     let url = __blockName.split('__')[2];
     for (const key in rest) {

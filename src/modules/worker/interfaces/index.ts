@@ -1,3 +1,5 @@
+import { BlockDefProperties } from '@inf-monkeys/vines';
+
 export enum AuthType {
   none = 'none',
 }
@@ -8,6 +10,20 @@ export enum ApiType {
 
 export enum SchemaVersion {
   v1 = 'v1',
+}
+
+export enum CredentialAuthType {
+  AKSK = 'AKSK',
+  OAUTH2 = 'OAUTH2',
+}
+
+export interface CredentialDefinition {
+  name: string;
+  displayName: string;
+  description?: string;
+  input: BlockDefProperties[];
+  icon: string;
+  type: CredentialAuthType;
 }
 
 export interface ManifestJson {
@@ -21,6 +37,8 @@ export interface ManifestJson {
     url: string;
   };
   contact_email: string;
+  credentials?: CredentialDefinition[];
+  credentialEncryptKey?: string;
 }
 
 export interface RegisterWorkerParams {

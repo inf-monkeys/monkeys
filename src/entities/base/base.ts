@@ -9,7 +9,7 @@ const IdColumn = isMongo
       PrimaryColumn({
         type: 'varchar',
         transformer: {
-          to: (value: ObjectId) => value.toHexString(),
+          to: (value: ObjectId) => value?.toHexString(),
           from: (value: string) => new ObjectId(value),
         },
       });
@@ -18,10 +18,14 @@ export class BaseEntity {
   @IdColumn()
   id: ObjectId;
 
-  @Column()
+  @Column({
+    default: () => +new Date(),
+  })
   createdTimestamp: number;
 
-  @Column()
+  @Column({
+    default: () => +new Date(),
+  })
   updatedTimestamp: number;
 
   @Column({ default: false })

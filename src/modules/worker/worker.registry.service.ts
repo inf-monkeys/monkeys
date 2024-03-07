@@ -5,15 +5,13 @@ import { OpenAPIObject } from '@nestjs/swagger';
 import { ServerObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 import axios from 'axios';
 import url from 'url';
+import { ToolsRepository } from '../infra/database/repositories/tools.repository';
 import { ApiType, AuthType, ManifestJson, RegisterWorkerParams, SchemaVersion } from './interfaces';
 import { parseOpenApiSpecAsBlocks } from './utils/openapi-parser';
 
 @Injectable()
-export class WorkerRegistryService {
-  private regitries: ManifestJson[] = [];
-  private blocks: BlockDefinition[] = [];
-  private registeyToServers: { [x: string]: ServerObject[] } = {};
-  constructor() {}
+export class ToolsRegistryService {
+  constructor(private readonly toolsRepository: ToolsRepository) {}
 
   private async validateManifestJson(data: ManifestJson) {
     if (!data) {
@@ -28,6 +26,7 @@ export class WorkerRegistryService {
     if (!data.namespace) {
       throw new Error('Error when parse manifest json: namespace is missing');
     }
+
     if (!data.auth) {
       throw new Error('Error when parse manifest json: auth is missing');
     }
@@ -63,7 +62,7 @@ export class WorkerRegistryService {
     };
   }
 
-  public async registerBlocks(params: RegisterWorkerParams) {
+  public async registerToolsServer(params: RegisterWorkerParams) {
     const { manifestJsonUrl } = params;
     const { data: manifestData } = await axios.get<ManifestJson>(manifestJsonUrl);
     await this.validateManifestJson(manifestData);
@@ -80,33 +79,20 @@ export class WorkerRegistryService {
       realSpecUrl = url.resolve(baseUrl, realSpecUrl);
     }
 
-    let blocks: BlockDefinition[] = [];
-    let servers: ServerObject[] = [];
+    let tools: BlockDefinition[] = [];
     switch (apiType) {
       case ApiType.openapi:
         const res = await this.parseOpenapiAsBlocks(namespace, realSpecUrl);
-        blocks = res.blocks;
-        servers = res.servers;
+        tools = res.blocks;
         break;
       default:
         throw new Error(`Error when import block: invalid api.type "${apiType}", must in any one of ${enumToList(ApiType).join(',')}`);
     }
 
-    this.blocks = this.blocks.concat(blocks);
-    this.regitries = this.regitries.concat([manifestData]);
-    this.registeyToServers[namespace] = servers;
-    return blocks;
-  }
+    // Save server info and credentials
+    await this.toolsRepository.saveServer(manifestData);
 
-  public listBlocks() {
-    return this.blocks;
-  }
-
-  public listRegistries() {
-    return this.regitries;
-  }
-
-  public listServers() {
-    return this.registeyToServers;
+    // TODO: Save Tools
+    return tools;
   }
 }

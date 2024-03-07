@@ -1,9 +1,15 @@
 import { config } from '@/common/config';
-import { Theme } from '@/entities/config/theme';
+import { ThemeEntity } from '@/entities/config/theme';
+import { ToolsCredentialEntity } from '@/entities/tools/tools-credential.entity';
+import { ToolsServerEntity } from '@/entities/tools/tools-server.entity';
+import { ToolsEntity } from '@/entities/tools/tools.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
+
+export const entities: EntityClassOrSchema[] = [ThemeEntity, ToolsEntity, ToolsCredentialEntity, ToolsServerEntity];
 
 export const DatabaseModule = TypeOrmModule.forRoot({
   ...config.database,
-  entityPrefix: config.server.appId.concat('-'),
-  entities: [Theme],
+  entityPrefix: config.server.appId.concat('_'),
+  entities: entities,
 });

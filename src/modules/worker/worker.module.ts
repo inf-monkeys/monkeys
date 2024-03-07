@@ -2,12 +2,12 @@ import { Module } from '@nestjs/common';
 import { ExampleModule } from './example/example.module';
 import { WorkerController } from './worker.controller';
 import { WorkerPollingService } from './worker.polling.service';
-import { WorkerRegistryService } from './worker.registry.service';
+import { ToolsRegistryService } from './worker.registry.service';
 
 @Module({
   controllers: [WorkerController],
-  providers: [WorkerPollingService, WorkerRegistryService],
+  providers: [WorkerPollingService, ToolsRegistryService],
   imports: [ExampleModule],
-  exports: [WorkerRegistryService],
+  exports: [ToolsRegistryService],
 })
 export class WorkerModule {}
