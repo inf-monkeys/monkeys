@@ -40,7 +40,15 @@ export const OEM: React.FC = () => {
 
   const initialRef = useRef(false);
   useEffect(() => {
-    if (initialRef.current) return;
+    if (initialRef.current) {
+      if (localDarkMode === 'auto') {
+        setDarkModeTrigger(EDarkModeTrigger.Auto);
+      } else {
+        setDarkModeTrigger(EDarkModeTrigger.Manual);
+        setDarkMode(localDarkMode === 'dark');
+      }
+      return;
+    }
 
     // ↓ 此处要放所有在 useEffect 中的依赖项
     if (localDarkMode) {
