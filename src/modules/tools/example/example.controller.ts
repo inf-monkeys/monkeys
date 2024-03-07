@@ -5,8 +5,8 @@ import { AddTwoNumberDto } from './dto/req/add-two-number.dto';
 import { NthPowerOfDto } from './dto/req/nth-power-of.dto';
 import { EXAMPLE_WORKER_OPENAPI_PATH } from './example.swagger';
 
-@Controller('/worker/example')
-export class ExampleController {
+@Controller('/tools/example')
+export class ExampleToolsController {
   @Get('/manifest.json')
   @ApiExcludeEndpoint()
   public getMetadata(): ManifestJson {

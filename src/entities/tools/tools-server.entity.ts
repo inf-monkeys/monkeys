@@ -1,4 +1,4 @@
-import { ApiType, AuthType, SchemaVersion } from '@/modules/worker/interfaces';
+import { ApiType, AuthType, SchemaVersion } from '@/modules/tools/interfaces';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 

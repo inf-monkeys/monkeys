@@ -1,7 +1,7 @@
 import { ToolsCredentialEntity } from '@/entities/tools/tools-credential.entity';
 import { ToolsServerEntity } from '@/entities/tools/tools-server.entity';
 import { ToolsEntity } from '@/entities/tools/tools.entity';
-import { ManifestJson } from '@/modules/worker/interfaces';
+import { ManifestJson } from '@/modules/tools/interfaces';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId } from 'mongodb';

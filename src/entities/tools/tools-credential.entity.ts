@@ -1,4 +1,4 @@
-import { CredentialAuthType } from '@/modules/worker/interfaces';
+import { CredentialAuthType } from '@/modules/tools/interfaces';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 

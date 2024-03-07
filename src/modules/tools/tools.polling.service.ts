@@ -8,7 +8,7 @@ import { ToolsRepository } from '../infra/database/repositories/tools.repository
 import { WorkerInputData } from './interfaces';
 
 @Injectable()
-export class WorkerPollingService {
+export class ToolsPollingService {
   private conductorClient: ConductorClient;
   private taskDefName: string = 'monkeys';
   constructor(private readonly toolsRepository: ToolsRepository) {
@@ -23,23 +23,23 @@ export class WorkerPollingService {
 
   private async requestExternalApi(task: Task) {
     const inpuData = task.inputData as WorkerInputData;
-    const { __blockName, ...rest } = inpuData;
-    const block = await this.toolsRepository.getToolByName(__blockName);
-    logger.info(`Start to execute worker: ${__blockName}`);
+    const { __toolName, ...rest } = inpuData;
+    const block = await this.toolsRepository.getToolByName(__toolName);
+    logger.info(`Start to execute tool: ${__toolName}`);
     if (!block) {
-      throw new Error(`Failed to execute worker "${__blockName}", may not exists or not functioning now.`);
+      throw new Error(`Failed to execute tool "${__toolName}", may not exists or not functioning now.`);
     }
     const query: { [x: string]: any } = {};
     const body: { [x: string]: any } = {};
     const path: { [x: string]: any } = {};
-    const namespace = __blockName.split('__')[0];
+    const namespace = __toolName.split('__')[0];
     const server = await this.toolsRepository.getServerByNamespace(namespace);
     if (!server) {
-      throw new Error(`Failed to execute worker "${__blockName}", may not exists or not functioning now.`);
+      throw new Error(`Failed to execute worker "${__toolName}", may not exists or not functioning now.`);
     }
     const baseURL = server.api.url;
-    const method = __blockName.split('__')[1];
-    let url = __blockName.split('__')[2];
+    const method = __toolName.split('__')[1];
+    let url = __toolName.split('__')[2];
     for (const key in rest) {
       const value = rest[key];
       if (value === undefined || value === '') {
@@ -68,7 +68,7 @@ export class WorkerPollingService {
       data: body,
       params: query,
     });
-    logger.info(`Execute worker success: ${__blockName}`);
+    logger.info(`Execute worker success: ${__toolName}`);
 
     return data;
   }

@@ -6,8 +6,8 @@ import { AppModule } from './app.module';
 import { config } from './common/config';
 import { ExceptionsFilter } from './common/filters/exception.filter';
 import { logger } from './common/logger';
-import { setupExampleWorkerSwagger } from './modules/worker/example/example.swagger';
-import { WorkerPollingService } from './modules/worker/worker.polling.service';
+import { setupExampleWorkerSwagger } from './modules/tools/example/example.swagger';
+import { ToolsPollingService } from './modules/tools/tools.polling.service';
 
 process.on('unhandledRejection', (err: Error) => {
   logger.error('unhandledRejection: ', err);
@@ -40,7 +40,7 @@ async function bootstrap() {
   setupExampleWorkerSwagger(app);
 
   // String polling for tasks
-  const workerPollingService = await app.resolve<WorkerPollingService>(WorkerPollingService);
+  const workerPollingService = await app.resolve<ToolsPollingService>(ToolsPollingService);
   workerPollingService.startPolling();
 
   await app.listen(config.server.port);

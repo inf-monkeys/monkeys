@@ -4,10 +4,10 @@ import { AppService } from './app.service';
 import { BlockModule } from './modules/block/block.module';
 import { DatabaseModule } from './modules/infra/database/database.module';
 import { RepositoryMoule } from './modules/infra/database/repositories/repositories.module';
-import { WorkerModule } from './modules/worker/worker.module';
+import { ToolsModule } from './modules/tools/tools.module';
 
 @Module({
-  imports: [DatabaseModule, WorkerModule, BlockModule, RepositoryMoule],
+  imports: [DatabaseModule, ToolsModule, BlockModule, RepositoryMoule],
   controllers: [AppController],
   providers: [AppService],
 })

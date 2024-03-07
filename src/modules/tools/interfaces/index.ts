@@ -46,7 +46,7 @@ export interface RegisterWorkerParams {
 }
 
 export interface WorkerInputData {
-  __blockName: string;
+  __toolName: string;
 
   [x: string]: any;
 }

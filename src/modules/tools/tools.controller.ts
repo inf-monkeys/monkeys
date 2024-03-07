@@ -1,9 +1,9 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { RegisterWorkerDto } from './dto/req/register-worker.dto';
-import { ToolsRegistryService } from './worker.registry.service';
+import { ToolsRegistryService } from './tools.registry.service';
 
-@Controller('worker')
-export class WorkerController {
+@Controller('tools')
+export class ToolsController {
   constructor(private readonly workerRegistryService: ToolsRegistryService) {}
 
   @Post('/register')
