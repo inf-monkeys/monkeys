@@ -2,6 +2,8 @@ import React, { useLayoutEffect } from 'react';
 
 import { createFileRoute } from '@tanstack/react-router';
 
+import { WorkbenchSidebar } from '@/components/layout/workbench/sidebar';
+import { WorkbenchView } from '@/components/layout/workbench/view';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import VinesEvent from '@/utils/events.ts';
 
@@ -11,7 +13,12 @@ export const Workbench: React.FC = () => {
     VinesEvent.emit('vines-update-site-title', '工作台');
   }, []);
 
-  return <>Workbench</>;
+  return (
+    <main className="flex size-full">
+      <WorkbenchSidebar />
+      <WorkbenchView />
+    </main>
+  );
 };
 
 export const Route = createFileRoute('/$teamId/workbench/')({
