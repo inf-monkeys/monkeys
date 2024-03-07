@@ -38,10 +38,12 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
         onClick: async () => {
           const newPages = await deleteWorkspacePage(workflowId, pageId);
 
-          await pagesMutate(newPages, { revalidate: false });
-          const newPageId = newPages.at(-1)?._id;
-          if (newPageId) {
-            await navigateTo(newPageId);
+          if (newPages) {
+            await pagesMutate(newPages, { revalidate: false });
+            const newPageId = newPages.at(-1)?._id;
+            if (newPageId) {
+              await navigateTo(newPageId);
+            }
           }
         },
       },

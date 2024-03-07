@@ -52,8 +52,10 @@ export const InviteUser: React.FC<IInviteUserProps> = ({ visible, setVisible }) 
     setIsLoading(true);
 
     const users = await searchUsers(keywords);
-    setSearchResult(users);
-    setIsLoading(false);
+    if (users) {
+      setSearchResult(users);
+      setIsLoading(false);
+    }
   };
 
   const handleCopyInviteLink = async () => {

@@ -4,7 +4,7 @@ import { IUpdateUserInfo, IVinesUser } from '@/apis/authz/user/typings.ts';
 import { vinesFetcher } from '@/apis/fetcher.ts';
 
 export const useUser = () =>
-  useSWR<IVinesUser>('/api/users', vinesFetcher(), {
+  useSWR<IVinesUser | undefined>('/api/users', vinesFetcher(), {
     refreshInterval: 600000,
     revalidateOnFocus: false,
   });

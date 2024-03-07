@@ -5,7 +5,7 @@ import { vinesFetcher } from '@/apis/fetcher.ts';
 import { IPaginationListData } from '@/apis/typings.ts';
 
 export const useTeamBalance = () =>
-  useSWR<ITeamBalance>('/api/payment/balances', vinesFetcher(), {
+  useSWR<ITeamBalance | undefined>('/api/payment/balances', vinesFetcher(), {
     refreshInterval: 600000,
     revalidateOnFocus: false,
   });

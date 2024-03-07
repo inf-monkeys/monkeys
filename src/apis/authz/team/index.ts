@@ -17,7 +17,7 @@ import {
 import { vinesFetcher } from '@/apis/fetcher.ts';
 
 export const useTeams = (enable = true) =>
-  useSWR<IVinesTeam[]>(enable ? '/api/teams' : null, vinesFetcher(), {
+  useSWR<IVinesTeam[] | undefined>(enable ? '/api/teams' : null, vinesFetcher(), {
     refreshInterval: 600000,
     revalidateOnFocus: false,
   });
@@ -26,7 +26,7 @@ export const updateTeam = (team: ITeamUpdate) =>
   vinesFetcher<IVinesTeam, ITeamUpdate>({ method: 'POST', simple: true })('/api/teams/update', team);
 
 export const useTeamUsers = (teamId?: string) =>
-  useSWR<ITeamMember>(teamId ? `/api/teams/${teamId}/members` : null, vinesFetcher());
+  useSWR<ITeamMember | undefined>(teamId ? `/api/teams/${teamId}/members` : null, vinesFetcher());
 
 export const removeTeamMember = (teamId: string, userId: string) =>
   vinesFetcher<IVinesTeam>({ method: 'POST', simple: true })(`/api/teams/${teamId}/members/remove`, { userId });
@@ -48,7 +48,7 @@ export const applyTeam = (teamId: string) =>
   vinesFetcher<boolean>({ method: 'POST', simple: true })(`/api/teams/apply/${teamId}`);
 
 export const useTeamApplyList = (teamId?: string) =>
-  useSWR<ITeamApplyListData>(teamId ? `/api/teams/apply/${teamId}` : null, vinesFetcher());
+  useSWR<ITeamApplyListData | undefined>(teamId ? `/api/teams/apply/${teamId}` : null, vinesFetcher());
 // export const getTeamApplyList = (teamId: string) => vinesFetcher<ITeamApplyListData>()(`/api/teams/apply/${teamId}`);
 
 export const updateTeamApply = (data: ITeamApplyUpdateData & { teamId: string }) =>
@@ -64,7 +64,10 @@ export const createTeamInviteLink = (data: ITeamInviteLinkData & { teamId: strin
   })(`/api/teams/invites/${data.teamId}`, _.omit(data, ['teamId']) as ITeamInviteLinkData);
 
 export const useTeamInvites = (teamId?: string) =>
-  useSWR<ITeamInviteWithUserProfile[]>(teamId ? `/api/teams/invites/manage/${teamId}` : null, vinesFetcher());
+  useSWR<ITeamInviteWithUserProfile[] | undefined>(
+    teamId ? `/api/teams/invites/manage/${teamId}` : null,
+    vinesFetcher(),
+  );
 
 export const updateTeamInviteRemark = (teamId: string, teamInviteId: string, remark: string) =>
   vinesFetcher<boolean, { remark: string }>({
