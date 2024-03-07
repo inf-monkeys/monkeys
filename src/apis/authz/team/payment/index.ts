@@ -1,9 +1,9 @@
 import useSWR from 'swr';
 
-import { pick } from 'lodash';
-
 import { IOrder, IOrderTag, ITeamBalance } from '@/apis/authz/team/payment/typings.ts';
 import { vinesFetcher } from '@/apis/fetcher.ts';
+import { IPaginationListData } from '@/apis/typings.ts';
+import { paginationWrapper } from '@/apis/wrapper.ts';
 
 export const useTeamBalance = () =>
   useSWR<ITeamBalance | undefined>('/api/payment/balances', vinesFetcher(), {
@@ -13,13 +13,13 @@ export const useTeamBalance = () =>
 
 export const useTeamOrderList = (types: IOrderTag[], page = 1, limit = 24) => {
   // 预加载
-  useSWR<IOrder | undefined>(
+  useSWR<IPaginationListData<IOrder> | undefined>(
     `/api/payment/orders?page=${page + 1}&limit=${limit}&types=${types.join(',')}`,
-    vinesFetcher({ wrapper: (_, data) => pick(data, ['data', 'page', 'limit', 'total']) as unknown as IOrder }),
+    vinesFetcher({ wrapper: paginationWrapper }),
   );
 
-  return useSWR<IOrder | undefined>(
+  return useSWR<IPaginationListData<IOrder> | undefined>(
     `/api/payment/orders?page=${page}&limit=${limit}&types=${types.join(',')}`,
-    vinesFetcher({ wrapper: (_, data) => pick(data, ['data', 'page', 'limit', 'total']) as unknown as IOrder }),
+    vinesFetcher({ wrapper: paginationWrapper }),
   );
 };
