@@ -6,6 +6,8 @@ import {
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  OnChangeFn,
+  PaginationState,
   SortingState,
   useReactTable,
 } from '@tanstack/react-table';
@@ -25,15 +27,22 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  pagination?: boolean;
+  enablePagination?: boolean;
   defaultPageSize?: number;
+  state?: {
+    total: number;
+    page: number;
+    onPaginationChange: OnChangeFn<PaginationState>;
+    onPageSizeChange: (pageSize: number) => void;
+  };
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  pagination = false,
+  enablePagination = false,
   defaultPageSize = 5,
+  state,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -47,6 +56,8 @@ export function DataTable<TData, TValue>({
     state: {
       sorting,
     },
+    manualPagination: !!state,
+    ...(state && state.onPaginationChange),
   });
 
   return (
@@ -85,11 +96,14 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      {pagination && (
+      {enablePagination && (
         <div className="flex items-center justify-between py-4">
           <div className="flex items-center gap-2 text-nowrap">
-            每页
-            <Select defaultValue={defaultPageSize.toString()} onValueChange={(v) => table.setPageSize(parseInt(v))}>
+            {state && `共 ${state.total} 条，第 ${state.page} 页，`}每页
+            <Select
+              defaultValue={defaultPageSize.toString()}
+              onValueChange={(v) => (state ? state.onPageSizeChange(parseInt(v)) : table.setPageSize(parseInt(v)))}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="选择" />
               </SelectTrigger>

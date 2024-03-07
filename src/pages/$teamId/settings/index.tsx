@@ -31,8 +31,8 @@ export const Settings: React.FC = () => {
         className="[&_[role='tabpanel']]:mt-4 [&_[role='tabpanel']]:h-[calc(100vh-11.5rem)] [&_[role='tabpanel']]:overflow-y-auto [&_[role='tabpanel']]:overflow-x-hidden"
       >
         <TabsList>
-          {SIDEBAR_LIST.map(({ label, key }) => (
-            <TabsTrigger key={key} value={key} className="text-xs">
+          {SIDEBAR_LIST.map(({ label, key }, index) => (
+            <TabsTrigger key={index} value={key} className="text-xs">
               {label}
             </TabsTrigger>
           ))}
