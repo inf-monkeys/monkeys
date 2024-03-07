@@ -1,21 +1,21 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { useEffect, useMemo, useRef } from 'react';
 
+import { useSWRConfig } from 'swr';
 import { useNavigate } from '@tanstack/react-router';
 
 import { useTeams } from '@/apis/authz/team';
-import { useTeamBalance } from '@/apis/authz/team/payment';
 import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { useLocalStorage } from '@/utils';
 
 export const TeamsGuard: React.FC = () => {
+  const { mutate } = useSWRConfig();
   const navigate = useNavigate();
 
   const [token] = useLocalStorage<string>('vines-token', '', false);
   const [teamId, setTeamId] = useLocalStorage<string>('vines-team-id', '', false);
   const [, setLocalTeams] = useLocalStorage<IVinesTeam[]>('vines-teams', []);
   const { data: teams, mutate: teamsMutate } = useTeams(!!token);
-  const { mutate: teamBalanceMutate } = useTeamBalance();
 
   const lastTokenRef = useRef('');
   useEffect(() => {
@@ -37,7 +37,7 @@ export const TeamsGuard: React.FC = () => {
         params: {
           teamId: latestTeamId,
         },
-      }).then(() => teamBalanceMutate());
+      }).then(() => mutate('/api/payment/balances'));
     }
   }, [teamId, teams]);
 
