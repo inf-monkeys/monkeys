@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 
-import { ColumnDef } from '@tanstack/react-table';
+import { ColumnDef, PaginationState } from '@tanstack/react-table';
 import { ArrowUpDown, Download, MinusSquare, PlusSquareIcon } from 'lucide-react';
 import moment from 'moment';
 
@@ -10,17 +10,23 @@ import { balanceFormat } from '@/components/layout/settings/account/utils.ts';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
-import { DataTable } from '@/components/ui/data-table';
+import { RemoteDataTable } from '@/components/ui/data-table/remote.tsx';
 import { Spinner } from '@/components/ui/spinner';
 
 interface IRechargeDetailsProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const RechargeDetails: React.FC<IRechargeDetailsProps> = () => {
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(5);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageSize: 5,
+    pageIndex: 0,
+  });
 
   const { data: balance } = useTeamBalance();
-  const { data: orderListData } = useTeamOrderList(['recharge', 'admin-recharge'], page, limit);
+  const { data: orderListData } = useTeamOrderList(
+    ['recharge', 'admin-recharge'],
+    pagination.pageIndex + 1,
+    pagination.pageSize,
+  );
 
   const balanceTotalReCharge = useMemo<[string, string]>(() => {
     const { totalReCharge } = balance || {};
@@ -124,16 +130,12 @@ export const RechargeDetails: React.FC<IRechargeDetailsProps> = () => {
       </CardHeader>
       <CardContent>
         {orderListData ? (
-          <DataTable
+          <RemoteDataTable
             columns={columns}
             data={orderListData.data ?? []}
-            enablePagination
-            state={{
-              onPaginationChange: (updater) => {},
-              onPageSizeChange: setLimit,
-              total: orderListData.total,
-              page,
-            }}
+            state={{ pagination }}
+            rowCount={orderListData.total ?? 0}
+            onPaginationChange={setPagination}
           />
         ) : (
           <Spinner loading className="h-10" />

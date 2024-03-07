@@ -6,6 +6,8 @@ import {
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  OnChangeFn,
+  PaginationState,
   SortingState,
   useReactTable,
 } from '@tanstack/react-table';
@@ -22,19 +24,23 @@ import {
 } from '@/components/ui/select.tsx';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
-interface IDataTableProps<TData, TValue> {
+interface IRemoteDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  enablePagination?: boolean;
-  defaultPageSize?: number;
+  rowCount: number;
+  state: {
+    pagination: PaginationState;
+  };
+  onPaginationChange: OnChangeFn<PaginationState>;
 }
 
-export function DataTable<TData, TValue>({
+export function RemoteDataTable<TData, TValue>({
   columns,
   data,
-  enablePagination = false,
-  defaultPageSize = 5,
-}: IDataTableProps<TData, TValue>) {
+  state,
+  onPaginationChange,
+  rowCount,
+}: IRemoteDataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
@@ -44,8 +50,12 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    manualPagination: true,
+    onPaginationChange,
+    rowCount,
     state: {
       sorting,
+      ...state,
     },
   });
 
@@ -85,42 +95,43 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      {enablePagination && (
-        <div className="flex items-center justify-between py-4">
-          <div className="flex items-center gap-2 text-nowrap">
-            {`共 ${data.length} 条，第 ${(table.options.state.pagination?.pageIndex ?? 0) + 1} 页，`}每页
-            <Select defaultValue={defaultPageSize.toString()} onValueChange={(v) => table.setPageSize(parseInt(v))}>
-              <SelectTrigger>
-                <SelectValue placeholder="选择" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>每页最大条目数</SelectLabel>
-                  <SelectItem value="1">1</SelectItem>
-                  <SelectItem value="5">5</SelectItem>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            条
-          </div>
-          <div className="flex space-x-2">
-            <Button
-              theme="tertiary"
-              size="small"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              上一页
-            </Button>
-            <Button theme="tertiary" size="small" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-              下一页
-            </Button>
-          </div>
+      <div className="flex items-center justify-between py-4">
+        <div className="flex items-center gap-2 text-nowrap">
+          {`共 ${table.getRowCount()} 条，第 ${(table.options.state.pagination?.pageIndex ?? 0) + 1} 页，`}每页
+          <Select
+            defaultValue={state.pagination.pageSize.toString()}
+            onValueChange={(v) => table.setPageSize(parseInt(v))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="选择" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>每页最大条目数</SelectLabel>
+                <SelectItem value="1">1</SelectItem>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          条
         </div>
-      )}
+        <div className="flex space-x-2">
+          <Button
+            theme="tertiary"
+            size="small"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            上一页
+          </Button>
+          <Button theme="tertiary" size="small" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+            下一页
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
