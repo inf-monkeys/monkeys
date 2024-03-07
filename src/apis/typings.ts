@@ -1,11 +1,8 @@
-export interface IOriginData<T> {
+export interface IOriginData<T> extends Omit<IPaginationListData<T>, 'data'> {
   code?: number;
   status?: number;
   message?: string;
   data: T;
-  page?: number;
-  limit?: number;
-  total?: number;
 }
 
 export interface IBaseEntity {
@@ -13,4 +10,11 @@ export interface IBaseEntity {
   createdTimestamp: number;
   updatedTimestamp: number;
   isDeleted: boolean;
+}
+
+export interface IPaginationListData<T> {
+  data: T[];
+  page?: number;
+  limit?: number;
+  total?: number;
 }

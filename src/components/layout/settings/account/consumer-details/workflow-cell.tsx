@@ -12,9 +12,7 @@ interface IWorkflowCellProps {
 
 export const WorkflowCell: React.FC<IWorkflowCellProps> = ({ workflowId }) => {
   const navigate = useNavigate({ from: Route.fullPath });
-  const { data: workflow, isLoading } = useGetWorkflow(workflowId);
-
-  console.log(workflowId, workflow);
+  const { data: workflow, isLoading } = useGetWorkflow('', workflowId);
 
   return isLoading ? (
     <span>加载中</span>
