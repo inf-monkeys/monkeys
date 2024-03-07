@@ -33,8 +33,6 @@ export const RechargeDetails: React.FC<IRechargeDetailsProps> = () => {
     return balanceFormat(totalReCharge);
   }, [balance]);
 
-  console.log(orderListData);
-
   const columns: ColumnDef<IOrder>[] = [
     {
       id: 'type-column',
