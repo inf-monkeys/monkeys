@@ -42,7 +42,7 @@ export const ConsumerDetails: React.FC<IConsumerDetailsProps> = () => {
         </div>
       </CardHeader>
       <CardContent>
-        <SmoothTransition>
+        <SmoothTransition className="overflow-clip">
           {orderListData ? (
             <RemoteDataTable
               columns={columns}
