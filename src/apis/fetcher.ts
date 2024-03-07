@@ -8,26 +8,29 @@ import { IVinesHeaderOptions, vinesHeader } from '@/apis/utils.ts';
 import 'unfetch/polyfill';
 
 // region SWR Fetcher
-interface IFetcherOptions<U = unknown> extends IVinesHeaderOptions {
+
+type VinesResult<P extends boolean, U> = P extends true ? IPaginationListData<U> : U;
+
+interface IFetcherOptions<U = unknown, P extends boolean = false> extends IVinesHeaderOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   auth?: boolean;
   simple?: boolean;
-  wrapper?: (data: U) => any;
+  pagination?: P;
+  wrapper?: (data: U) => VinesResult<P, U>; // 修复此处
   fetchOptions?: RequestInit;
-  responseResolver?: (response: Response) => any;
-  pagination?: boolean;
+  responseResolver?: (response: Response) => U;
 }
 
-export const vinesFetcher = <U, T = {}>({
+export const vinesFetcher = <U, T = {}, P extends boolean = false>({
   method = 'GET',
   auth = true,
   simple = false,
-  apiKey,
-  wrapper = (data: U) => data,
+  apikey,
+  wrapper = (data: U) => data as VinesResult<P, U>,
   fetchOptions,
   responseResolver,
-  pagination = false,
-}: IFetcherOptions<U> = {}) => {
+  pagination,
+}: IFetcherOptions<U, P> = {}) => {
   return async (url: string, params?: T) => {
     const headers = {
       'Content-Type': 'application/json;charset=utf-8',
@@ -42,30 +45,32 @@ export const vinesFetcher = <U, T = {}>({
       headers,
       body,
       ...(fetchOptions && _.omit(fetchOptions, 'headers')),
-    }).then(async (r) =>
-      responseResolver
-        ? responseResolver(r)
-        : (async () => {
-            const raw = await r.json();
+    }).then(async (r) => {
+      if (responseResolver) {
+        return responseResolver(r) as U;
+      }
 
-            const code = raw?.code || raw?.status;
-            const data = raw?.data || void 0;
+      const raw = await r.json();
 
-            if (code && code !== 200) {
-              const errorMessage = raw?.message || null;
+      const code = raw?.code || raw?.status;
+      const data = raw?.data || void 0;
 
-              if (simple) {
-                toast.warning(errorMessage ? errorMessage : code === 403 ? '需要登录' : '网络错误');
-                return null;
-              } else {
-                throw new Error(errorMessage || '网络错误');
-              }
-            }
+      if (code && code !== 200) {
+        const errorMessage = raw?.message || null;
 
-            return wrapper(
-              pagination ? (_.pick(raw, ['data', 'page', 'limit', 'total']) as IPaginationListData<U>) : data,
-            );
-          })(),
-    );
+        if (simple) {
+          toast.warning(errorMessage ? errorMessage : code === 403 ? '需要登录' : '网络错误');
+          return void 0;
+        } else {
+          throw new Error(errorMessage || '网络错误');
+        }
+      }
+
+      if (pagination) {
+        return wrapper(_.pick(raw, ['data', 'page', 'limit', 'total']) as U);
+      } else {
+        return wrapper(data);
+      }
+    });
   };
 };

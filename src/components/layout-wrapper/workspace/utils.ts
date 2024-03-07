@@ -64,9 +64,11 @@ export const useVinesPage = () => {
 
     const newPages = await updateWorkspacePages(apikey, workflowId, finalPages);
     setTimeout(() => (isUpdatePageLocker.current = false), 100);
-    await pagesMutate(newPages, {
-      revalidate: false,
-    });
+    if (newPages) {
+      await pagesMutate(newPages, {
+        revalidate: false,
+      });
+    }
 
     setTimeout(() => (isUpdatePageLocker.current = false), 100);
   };

@@ -102,7 +102,7 @@ export const ApplyManage: React.FC<IApplyManageProps> = ({ teamId }) => {
           </Tooltip>
           <Switch
             loading={isHandleTeamPublicChange}
-            checked={!applyListData?.disable ?? false}
+            checked={!applyListData?.disable}
             onCheckedChange={handleTeamPublicChange}
           />
         </div>
