@@ -10,8 +10,15 @@ export const useTeamBalance = () =>
     revalidateOnFocus: false,
   });
 
-export const useTeamOrderList = (types: IOrderTag[], page = 1, limit = 24) =>
+export const useTeamOrderList = (types: IOrderTag[], page = 1, limit = 24) => {
+  // 预加载
   useSWR<IPaginationListData<IOrder>>(
+    `/api/payment/orders?page=${page + 1}&limit=${limit}&types=${types.join(',')}`,
+    vinesFetcher({ pagination: true }),
+  );
+
+  return useSWR<IPaginationListData<IOrder>>(
     `/api/payment/orders?page=${page}&limit=${limit}&types=${types.join(',')}`,
     vinesFetcher({ pagination: true }),
   );
+};
