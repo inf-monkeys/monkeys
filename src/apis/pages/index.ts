@@ -17,7 +17,11 @@ export const updateWorkspacePages = (
     pages,
   });
 
-export const useWorkspacePageInstances = () => useSWR<IPageInstance[] | undefined>('/api/page-types', vinesFetcher());
+export const useWorkspacePageInstances = () =>
+  useSWR<IPageInstance[] | undefined>('/api/page-types', vinesFetcher(), {
+    refreshInterval: 600000,
+    revalidateOnFocus: false,
+  });
 
 export const createWorkspacePage = (workflowId: string, page: Partial<CreatePageDto>) =>
   vinesFetcher<IPageType[], Partial<CreatePageDto>>({ method: 'POST', simple: true })(
