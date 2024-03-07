@@ -8,7 +8,6 @@ import { IVinesHeaderOptions, vinesHeader } from '@/apis/utils.ts';
 import 'unfetch/polyfill';
 
 // region SWR Fetcher
-
 interface IFetcherOptions<U = unknown> extends IVinesHeaderOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   auth?: boolean;
