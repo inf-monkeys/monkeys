@@ -3,9 +3,11 @@ import useSWR from 'swr';
 import { CreatePageDto } from '@inf-monkeys/vines';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
-import { IPageInstance, IPageType } from '@/apis/pages/typings.ts';
+import { IPageInstance, IPageType, IPinPage } from '@/apis/pages/typings.ts';
 
-export const useListWorkspacePages = (workflowId: string) =>
+export const useWorkspacePages = () => useSWR<IPinPage[] | undefined>('/api/pages', vinesFetcher());
+
+export const useWorkspacePagesWithWorkflowId = (workflowId: string) =>
   useSWR<IPageType[] | undefined>(workflowId ? `/api/workflow/${workflowId}/pages` : null, vinesFetcher());
 
 export const updateWorkspacePages = (

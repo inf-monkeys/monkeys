@@ -1,3 +1,5 @@
+import { MonkeyWorkflow } from '@inf-monkeys/vines';
+
 export type IPagePermission = 'read' | 'write' | 'exec' | 'permission';
 
 export type IPageInstanceType = 'process' | 'log' | 'chat' | 'preview' | 'api';
@@ -45,3 +47,8 @@ export interface IPageType {
   };
   instance: IPageInstance;
 }
+
+export type IPinPage = IPageType & {
+  workflowId: string;
+  workflow: MonkeyWorkflow;
+};

@@ -8,13 +8,13 @@ import isMongoId from 'validator/es/lib/isMongoId';
 import z from 'zod';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
-import { useListWorkspacePages } from '@/apis/pages';
+import { useWorkspacePagesWithWorkflowId } from '@/apis/pages';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 
 export const WorkspaceIndex: React.FC = () => {
   const { to } = Route.useSearch();
   const { workflowId } = useParams({ from: '/$teamId/workspace/$workflowId' });
-  const { data: pages } = useListWorkspacePages(workflowId);
+  const { data: pages } = useWorkspacePagesWithWorkflowId(workflowId);
   const navigate = useNavigate();
 
   workflowId && preload(`/api/workflow/${workflowId}`, vinesFetcher());
