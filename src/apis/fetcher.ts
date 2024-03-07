@@ -2,21 +2,19 @@ import stringify from 'fast-json-stable-stringify';
 import _ from 'lodash';
 import { toast } from 'sonner';
 
-import { IPaginationListData } from '@/apis/typings.ts';
+import { IOriginData } from '@/apis/typings.ts';
 import { IVinesHeaderOptions, vinesHeader } from '@/apis/utils.ts';
 
 import 'unfetch/polyfill';
 
 // region SWR Fetcher
 
-type VinesResult<P extends boolean, U> = P extends true ? IPaginationListData<U> : U;
-
 interface IFetcherOptions<U = unknown, P extends boolean = false> extends IVinesHeaderOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   auth?: boolean;
   simple?: boolean;
   pagination?: P;
-  wrapper?: (data: U) => VinesResult<P, U>; // 修复此处
+  wrapper?: (data: U | undefined, originData: IOriginData<U>) => U | undefined;
   fetchOptions?: RequestInit;
   responseResolver?: (response: Response) => U;
 }
@@ -26,10 +24,9 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
   auth = true,
   simple = false,
   apikey,
-  wrapper = (data: U) => data as VinesResult<P, U>,
+  wrapper = (data) => data,
   fetchOptions,
   responseResolver,
-  pagination,
 }: IFetcherOptions<U, P> = {}) => {
   return async (url: string, params?: T) => {
     const headers = {
@@ -50,7 +47,7 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
         return responseResolver(r) as U;
       }
 
-      const raw = await r.json();
+      const raw = (await r.json()) as IOriginData<U>;
 
       const code = raw?.code || raw?.status;
       const data = raw?.data || void 0;
@@ -66,11 +63,7 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
         }
       }
 
-      if (pagination) {
-        return wrapper(_.pick(raw, ['data', 'page', 'limit', 'total']) as U);
-      } else {
-        return wrapper(data);
-      }
+      return wrapper(data, raw);
     });
   };
 };

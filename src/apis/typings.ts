@@ -1,8 +1,11 @@
-export interface IPaginationListData<T> {
-  data: T[];
-  page: number;
-  limit: number;
-  total: number;
+export interface IOriginData<T> {
+  code?: number;
+  status?: number;
+  message?: string;
+  data: T;
+  page?: number;
+  limit?: number;
+  total?: number;
 }
 
 export interface IBaseEntity {
