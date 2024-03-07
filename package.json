@@ -37,6 +37,7 @@
     "log4js": "^6.9.1",
     "mongodb": "^6.4.0",
     "reflect-metadata": "^0.1.13",
+    "retry-as-promised": "^7.0.4",
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.20",
     "yaml": "^2.4.0"

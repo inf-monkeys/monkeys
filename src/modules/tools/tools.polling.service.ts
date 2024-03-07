@@ -1,6 +1,7 @@
+import { conductorClient } from '@/common/conductor';
 import { config } from '@/common/config';
 import { logger } from '@/common/logger';
-import { ConductorClient, Task, TaskDef, TaskManager } from '@io-orkes/conductor-javascript';
+import { Task, TaskDef, TaskManager } from '@io-orkes/conductor-javascript';
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import os from 'os';
@@ -9,13 +10,8 @@ import { WorkerInputData } from './interfaces';
 
 @Injectable()
 export class ToolsPollingService {
-  private conductorClient: ConductorClient;
   private taskDefName: string = 'monkeys';
-  constructor(private readonly toolsRepository: ToolsRepository) {
-    this.conductorClient = new ConductorClient({
-      serverUrl: config.conductor.baseUrl,
-    });
-  }
+  constructor(private readonly toolsRepository: ToolsRepository) {}
 
   private getWorkerId() {
     return os.hostname();
@@ -93,7 +89,7 @@ export class ToolsPollingService {
   }
 
   public async startPolling() {
-    await this.conductorClient.metadataResource.registerTaskDef([
+    await conductorClient.metadataResource.registerTaskDef([
       {
         name: this.taskDefName,
         inputKeys: [],
@@ -104,7 +100,7 @@ export class ToolsPollingService {
       },
     ] as Array<TaskDef>);
     const manager = new TaskManager(
-      this.conductorClient,
+      conductorClient,
       [
         {
           taskDefName: this.taskDefName,
