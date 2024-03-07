@@ -43,7 +43,7 @@ export const RechargeDetails: React.FC<IRechargeDetailsProps> = () => {
         </div>
       </CardHeader>
       <CardContent>
-        <SmoothTransition>
+        <SmoothTransition className="overflow-clip">
           {orderListData ? (
             <RemoteDataTable
               columns={columns}
