@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 
 import { CircularProgress } from '@nextui-org/progress';
 import { PaginationState } from '@tanstack/react-table';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Download } from 'lucide-react';
 
 import { useTeamBalance, useTeamOrderList } from '@/apis/authz/team/payment';
@@ -42,18 +43,31 @@ export const ConsumerDetails: React.FC<IConsumerDetailsProps> = () => {
         </div>
       </CardHeader>
       <CardContent>
-        <SmoothTransition className="overflow-clip">
-          {orderListData ? (
-            <RemoteDataTable
-              columns={columns}
-              data={orderListData.data ?? []}
-              state={{ pagination }}
-              rowCount={orderListData.total ?? 0}
-              onPaginationChange={setPagination}
-            />
-          ) : (
-            <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
-          )}
+        <SmoothTransition className="relative overflow-clip">
+          <AnimatePresence>
+            {!orderListData && (
+              <motion.div
+                className="vines-center absolute size-full backdrop-blur"
+                key="vines-consumer-details-loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1, transition: { duration: 0.2 } }}
+                exit={{ opacity: 0, transition: { duration: 0.2 } }}
+              >
+                <CircularProgress
+                  className="[&_circle:last-child]:stroke-vines-500"
+                  size="lg"
+                  aria-label="Loading..."
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <RemoteDataTable
+            columns={columns}
+            data={orderListData?.data ?? []}
+            state={{ pagination }}
+            rowCount={orderListData?.total ?? 0}
+            onPaginationChange={setPagination}
+          />
         </SmoothTransition>
       </CardContent>
     </Card>
