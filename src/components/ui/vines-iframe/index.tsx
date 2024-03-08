@@ -15,7 +15,7 @@ interface IVinesIFramePropsRequired {
 
 interface IVinesIFrameProps<P extends IVinesIFramePropsRequired> extends React.ComponentPropsWithoutRef<'div'> {
   pages: P[];
-  page: P;
+  page?: P | null;
 }
 
 export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }: IVinesIFrameProps<P>) => {
