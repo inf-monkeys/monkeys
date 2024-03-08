@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-import { createRootRoute, Outlet, ScrollRestoration, useMatches } from '@tanstack/react-router';
+import { createRootRoute, Outlet, ScrollRestoration } from '@tanstack/react-router';
 
 import { NextUIProvider } from '@nextui-org/system';
 import { motion } from 'framer-motion';
@@ -10,20 +10,14 @@ import { MainWrapper } from '@/components/layout-wrapper/main';
 import { WorkspaceWrapper } from '@/components/layout-wrapper/workspace';
 import { TeamsGuard } from '@/components/router/guard/team.tsx';
 import { UserGuard } from '@/components/router/guard/user.tsx';
+import { useVinesRoute } from '@/components/router/useVinesRoute.ts';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { SIDEBAR_MAP } from '@/consts/sidebar.tsx';
 import VinesEvent from '@/utils/events.ts';
 
 const RootComponent: React.FC = () => {
-  const matches = useMatches();
+  const { routeIds, routeAppId, isUseOutside, isUseWorkSpace } = useVinesRoute();
 
-  const routeMatch = matches.find((it) => it.routeId.includes('/$teamId'));
-  const routeIds = routeMatch?.routeId
-    ?.substring(1)
-    ?.split('/')
-    ?.filter((it: string) => it);
-
-  const routeAppId = routeIds?.at(1);
   const routeSiteName =
     SIDEBAR_MAP.flatMap((it) => it.items || []).find((it) => it.name === routeAppId)?.label ??
     (routeIds?.length ? '工作台' : '');
@@ -31,11 +25,6 @@ const RootComponent: React.FC = () => {
   useEffect(() => {
     VinesEvent.emit('vines-update-site-title', routeSiteName);
   }, [routeSiteName]);
-
-  // 之后再考虑是否改为开头匹配 vines-
-  const isUseOutside =
-    !routeIds || ['vines-process', 'vines-log', 'vines-chat', 'vines-preview'].includes(routeIds?.[3]);
-  const isUseWorkSpace = routeAppId === 'workspace';
 
   return (
     <>
