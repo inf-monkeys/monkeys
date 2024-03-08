@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 
 import { pick, setWith } from 'lodash';
+import { toast } from 'sonner';
 
 import { useTeams } from '@/apis/authz/team';
 import { useUser } from '@/apis/authz/user';
@@ -64,6 +65,7 @@ export const UserGuard: React.FC = () => {
 
   useEffect(() => {
     if (error?.message === '请先登录') {
+      toast.error('登录已过期，请重新登录');
       void navigate({ to: '/login' });
     }
   }, [error]);
