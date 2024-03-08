@@ -34,7 +34,11 @@ export const WorkspaceIndex: React.FC = () => {
     }
   }, [pages]);
 
-  return <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />;
+  return (
+    <div className="vines-center size-full">
+      <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+    </div>
+  );
 };
 
 export const Route = createFileRoute('/$teamId/workspace/$workflowId/')({
