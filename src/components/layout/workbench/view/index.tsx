@@ -1,22 +1,34 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { GitBranchPlus } from 'lucide-react';
 
 import { useWorkspacePages } from '@/apis/pages';
+import { IPinPage } from '@/apis/pages/typings.ts';
 import { WorkbenchViewHeader } from '@/components/layout/workbench/view/header.tsx';
+import { VinesIFrame } from '@/components/ui/vines-iframe';
+import { useLocalStorage } from '@/utils';
 
 interface IWorkbenchViewProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const WorkbenchView: React.FC<IWorkbenchViewProps> = () => {
   const { data: pages } = useWorkspacePages();
 
+  const [page, setPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
+
   const hasPages = (pages?.length ?? 0) > 0;
+  const hasPage = !!(page?._id && page?.teamId && page?.workflowId && page?.type);
+
+  useEffect(() => {
+    if (!hasPage && pages?.length) {
+      setPage(pages[0]);
+    }
+  }, [hasPage]);
 
   return (
     <div className="relative w-full flex-1 overflow-x-clip">
       <AnimatePresence>
-        {hasPages ? (
+        {hasPages && hasPage ? (
           <motion.div
             key="vines-workbench-view"
             className="absolute top-0 size-full"
@@ -24,7 +36,10 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <WorkbenchViewHeader />
+            <WorkbenchViewHeader page={page} />
+            <div className="relative h-[calc(100%-3.2rem)] w-full overflow-hidden rounded-r-lg">
+              <VinesIFrame pages={pages ?? []} page={page} />
+            </div>
           </motion.div>
         ) : (
           <motion.div

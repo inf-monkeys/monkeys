@@ -42,7 +42,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
           transition: { duration: 0.2 },
         }}
       >
-        <h1 className="text-2xl font-bold">探索</h1>
+        <h1 className="text-2xl font-bold">工作台</h1>
         <div className="grid gap-2">
           {data?.map((page) => (
             <div

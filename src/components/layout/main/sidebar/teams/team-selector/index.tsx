@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 
-import { useMatches, useNavigate } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 
 import { CheckIcon, ChevronsUpDown } from 'lucide-react';
 
 import { useTeams } from '@/apis/authz/team';
-import { useTeamBalance } from '@/apis/authz/team/payment';
 import { Team } from '@/components/layout/main/sidebar/teams/team-selector/team.tsx';
+import { useVinesRoute } from '@/components/router/useVinesRoute.ts';
 import { Button } from '@/components/ui/button';
 import {
   Command,
@@ -21,10 +21,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn, useLocalStorage } from '@/utils';
 
 export const TeamSelector: React.FC = () => {
-  const matches = useMatches();
+  const { routeId } = useVinesRoute();
   const navigate = useNavigate({ from: location.pathname });
 
-  const { mutate: teamBalanceMutate } = useTeamBalance();
   const { data: teams } = useTeams();
   const [teamId, setTeamId] = useLocalStorage<string>('vines-team-id', (teams ?? [])[0]?.id ?? '', false);
 
@@ -40,12 +39,11 @@ export const TeamSelector: React.FC = () => {
   const handleSwapTeam = async (id: string) => {
     setTeamId(id);
     await navigate({
-      to: matches.find((it) => it.routeId.includes('/$teamId'))?.routeId?.replace(/.$/, ''),
+      to: routeId?.replace(/.$/, ''),
       params: {
         teamId: id,
       },
     });
-    void teamBalanceMutate();
   };
 
   return (
