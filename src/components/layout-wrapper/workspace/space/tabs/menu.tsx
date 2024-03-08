@@ -73,20 +73,16 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
     if (currentPage === -1) return;
 
     toast.promise(toggleWorkspacePagePin(pageId, !isPin), {
-      loading: '正在标星中...',
+      loading: `正在${isPin ? '取消' : ''}标星中...`,
       success: (newPage) => {
         if (newPage) {
           const newPages = [...pages];
           newPages[currentPage].pinned = newPage.pinned;
-          toast.promise(setPages(newPages), {
-            loading: '正在保存...',
-            success: '保存成功',
-            error: '保存失败',
-          });
+          void setPages(newPages);
         }
-        return '已标星';
+        return `${isPin ? '取消' : ''}标星成功`;
       },
-      error: '标星失败',
+      error: `${isPin ? '取消' : ''}标星失败`,
     });
   };
 

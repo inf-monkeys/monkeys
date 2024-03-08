@@ -10,7 +10,7 @@ import { useVinesRoute } from '@/components/router/useVinesRoute.ts';
 import { useLocalStorage } from '@/utils';
 
 export const TeamsGuard: React.FC = () => {
-  const { routeIds, routeAppId } = useVinesRoute();
+  const { routeAppId } = useVinesRoute();
   const { mutate } = useSWRConfig();
   const navigate = useNavigate();
 

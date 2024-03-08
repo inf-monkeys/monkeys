@@ -1,28 +1,43 @@
 import React from 'react';
 
+import { useSWRConfig } from 'swr';
 import { Link } from '@tanstack/react-router';
 
 import { Star } from 'lucide-react';
+import { toast } from 'sonner';
 
+import { toggleWorkspacePagePin } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
-import { useLocalStorage } from '@/utils';
 
-interface IWorkbenchViewHeaderProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface IWorkbenchViewHeaderProps extends React.ComponentPropsWithoutRef<'div'> {
+  page?: Partial<IPinPage>;
+}
 
-export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = () => {
-  const [currentPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
+export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page }) => {
+  const { mutate } = useSWRConfig();
+  const workflow = page?.workflow;
 
-  const workflow = currentPage?.workflow;
+  const handleUnPin = () => {
+    if (!page?._id) return;
+    toast.promise(toggleWorkspacePagePin(page._id, false), {
+      loading: `正在取消标星中...`,
+      success: () => {
+        void mutate('/api/pages');
+        return `取消标星成功`;
+      },
+      error: `取消标星失败`,
+    });
+  };
 
   return (
-    <header className="sticky top-0 z-50 flex w-full items-center justify-between px-4 pb-4">
+    <header className="z-50 flex w-full items-center justify-between px-4 pb-4">
       <div className="flex gap-2">
         <VinesIcon size="sm">{workflow?.iconUrl}</VinesIcon>
         <div className="flex flex-col gap-0.5">
-          <h1 className="font-bold leading-tight">{currentPage?.displayName}</h1>
+          <h1 className="font-bold leading-tight">{page?.displayName}</h1>
           <span className="text-xxs">{workflow?.name ?? '未命名应用'}</span>
         </div>
       </div>
@@ -34,13 +49,14 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = () => {
                 <Star className="[&_polygon]:fill-yellow-9 [&_polygon]:stroke-yellow-9" strokeWidth={1.5} size={16} />
               }
               variant="outline"
+              onClick={handleUnPin}
             />
           </TooltipTrigger>
           <TooltipContent>取消标星</TooltipContent>
         </Tooltip>
         <Link
           to="/$teamId/workspace/$workflowId/$pageId"
-          params={{ workflowId: workflow?.workflowId, pageId: currentPage?._id }}
+          params={{ workflowId: workflow?.workflowId, pageId: page?._id }}
         >
           <Button variant="outline">进入视图</Button>
         </Link>
