@@ -49,7 +49,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
               key={page._id}
               className={cn(
                 'flex cursor-pointer items-start space-x-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
-                currentPage?._id === page._id && 'pointer-events-none bg-accent text-accent-foreground',
+                currentPage?._id === page._id && 'bg-accent text-accent-foreground',
               )}
               onClick={() => setCurrentPage(page)}
             >
