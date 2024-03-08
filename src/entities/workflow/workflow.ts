@@ -1,3 +1,4 @@
+import { BlockDefProperties, MonkeyWorkflowDef } from '@inf-monkeys/vines';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 import { WorkflowTriggerType } from './workflow-trigger';
@@ -54,20 +55,28 @@ export class WorkflowMetadataEntity extends BaseEntity {
   @Column()
   name: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   desc?: string;
 
-  @Column()
-  logo?: string;
+  @Column({
+    nullable: true,
+  })
+  iconUrl?: string;
 
   /**
    * 工作流是否成功激活，非激活状态的工作流不允许执行
    *
    */
-  @Column()
+  @Column({
+    default: true,
+  })
   activated: boolean;
 
-  @Column()
+  @Column({
+    default: true,
+  })
   validated: boolean;
 
   @Column()
@@ -76,49 +85,41 @@ export class WorkflowMetadataEntity extends BaseEntity {
   @Column()
   teamId: string;
 
-  // @Column({
-  //   nullable: true,
-  //   comment: 'conductor workflow json 定义',
-  // })
-  // workflowDef: Partial<MonkeyWorkflowDef>;
+  @Column({
+    nullable: true,
+    comment: 'conductor workflow json 定义',
+    type: 'simple-json',
+    name: 'workflow_def',
+  })
+  workflowDef: Partial<MonkeyWorkflowDef>;
 
-  // @Column({
-  //   comment: 'workflow 变量',
-  // })
-  // variables?: BlockDefProperties[];
+  @Column({
+    comment: 'workflow 变量',
+    type: 'simple-json',
+  })
+  variables?: BlockDefProperties[];
 
-  // @Column({
-  //   comment: 'workflow output 配置',
-  // })
-  // output: WorkflowOutputValue[];
+  @Column({
+    comment: 'workflow output 配置',
+    type: 'simple-json',
+  })
+  output: WorkflowOutputValue[];
 
   @Column({
     nullable: true,
     comment: 'fork from',
+    name: 'fork_from_id',
   })
   @Column()
   forkFromId?: string;
 
   @Column({
     nullable: true,
+    comment: '工作流校验错误/警告',
+    type: 'simple-json',
+    name: 'validation_issues',
   })
-  hidden?: boolean;
-
-  @Column({
-    nullable: true,
-  })
-  masterWorkflowId?: string;
-
-  @Column({
-    nullable: true,
-  })
-  masterWorkflowVersion?: number;
-
-  // @Column({
-  //   nullable: true,
-  //   comment: '工作流校验错误/警告',
-  // })
-  // validationIssues?: WorkflowValidationIssue[];
+  validationIssues?: WorkflowValidationIssue[];
 
   @Column()
   md5?: string;

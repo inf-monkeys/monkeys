@@ -1,4 +1,4 @@
-import { BlockType } from '@inf-monkeys/vines';
+import { BlockDefProperties, BlockExtraInfo, BlockRuleItem, BlockType } from '@inf-monkeys/vines';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
@@ -35,10 +35,11 @@ export class ToolsEntity extends BaseEntity {
   @Column()
   name: string;
 
-  // @Column({
-  //   nullable: true,
-  // })
-  // credentials?: INodeCredentialDescription[];
+  @Column({
+    nullable: true,
+    type: 'text',
+  })
+  credentials?: INodeCredentialDescription[];
 
   @Column()
   displayName: string;
@@ -48,31 +49,40 @@ export class ToolsEntity extends BaseEntity {
   })
   description?: string;
 
-  // @Column({
-  //   nullable: true,
-  // })
-  // categories?: string[];
+  @Column({
+    nullable: true,
+    type: 'text',
+  })
+  categories?: string[];
 
   @Column({
     nullable: true,
   })
   icon?: string;
 
-  // @Column({
-  //   nullable: true,
-  //   comment: '表单配置',
-  // })
-  // input: BlockDefProperties[];
+  @Column({
+    nullable: true,
+    comment: '表单配置',
+    type: 'simple-json',
+  })
+  input: BlockDefProperties[];
 
-  // @Column({
-  //   nullable: true,
-  //   comment: '输出数据',
-  // })
-  // output: BlockDefProperties[];
+  @Column({
+    nullable: true,
+    comment: '输出数据',
+    type: 'simple-json',
+  })
+  output: BlockDefProperties[];
 
-  // @Column()
-  // rules?: BlockRuleItem[];
+  @Column({
+    type: 'simple-json',
+    nullable: true,
+  })
+  rules?: BlockRuleItem[];
 
-  // @Column()
-  // extra?: BlockExtraInfo;
+  @Column({
+    type: 'simple-json',
+    nullable: true,
+  })
+  extra?: BlockExtraInfo;
 }

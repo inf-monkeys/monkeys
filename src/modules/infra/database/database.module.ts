@@ -6,10 +6,20 @@ import { ToolsEntity } from '@/entities/tools/tools.entity';
 import { WorkflowMetadataEntity } from '@/entities/workflow/workflow';
 import { WorkflowChatSessionEntity } from '@/entities/workflow/workflow-chat-session';
 import { WorkflowExecutionEntity } from '@/entities/workflow/workflow-execution';
+import { WorkflowTriggersEntity } from '@/entities/workflow/workflow-trigger';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
 
-export const entities: EntityClassOrSchema[] = [ThemeEntity, ToolsEntity, ToolsCredentialEntity, ToolsServerEntity, WorkflowExecutionEntity, WorkflowMetadataEntity, WorkflowChatSessionEntity];
+export const entities: EntityClassOrSchema[] = [
+  ThemeEntity,
+  ToolsEntity,
+  ToolsCredentialEntity,
+  ToolsServerEntity,
+  WorkflowExecutionEntity,
+  WorkflowMetadataEntity,
+  WorkflowChatSessionEntity,
+  WorkflowTriggersEntity,
+];
 
 export const DatabaseModule = TypeOrmModule.forRoot({
   ...config.database,

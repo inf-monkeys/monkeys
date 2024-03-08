@@ -1,6 +1,7 @@
 import { conductorClient } from '@/common/conductor';
 import { OrderBy } from '@/common/dto/order.enum';
 import { PaginationDto } from '@/common/dto/pagination.dto';
+import { sleep } from '@/common/utils/utils';
 import { WorkflowMetadataEntity } from '@/entities/workflow/workflow';
 import { WorkflowTriggerType } from '@/entities/workflow/workflow-trigger';
 import { Workflow } from '@io-orkes/conductor-javascript';
@@ -8,7 +9,10 @@ import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
 import retry from 'retry-as-promised';
 import { WorkflowRepository } from '../infra/database/repositories/workflow.repository';
+import { ConductorService } from './conductor/conductor.service';
 import { SearchWorkflowExecutionsDto, SearchWorkflowExecutionsOrderDto, WorkflowExecutionSearchableField } from './dto/req/search-workflow-execution.dto';
+import { UpdateTaskStatusDto } from './dto/req/update-task-status.dto';
+import { StartWorkflowRequest } from './interfaces';
 
 export interface WorkflowWithMetadata extends Workflow {
   startBy: string;
@@ -17,7 +21,10 @@ export interface WorkflowWithMetadata extends Workflow {
 
 @Injectable()
 export class WorkflowExecutionService {
-  constructor(private readonly workflowRepository: WorkflowRepository) {}
+  constructor(
+    private readonly workflowRepository: WorkflowRepository,
+    private readonly conductorService: ConductorService,
+  ) {}
 
   private async populateMetadataByForExecutions(executions: Workflow[]): Promise<WorkflowWithMetadata[]> {
     const workflowInstanceIds = executions.map((x) => x.workflowId);
@@ -194,5 +201,84 @@ export class WorkflowExecutionService {
       total: data?.totalHits ?? 0,
       data: executionsWithMetadata,
     };
+  }
+
+  public async getWorkflowExecutionDetail(teamId: string, workflowInstanceId: string) {
+    const data = await this.conductorService.getWorkflowExecutionStatus(teamId, workflowInstanceId);
+    await this.populateMetadataByForExecutions([data]);
+    return data;
+  }
+
+  public async startWorkflow(request: StartWorkflowRequest) {
+    const { teamId, userId, workflowId, triggerType, chatSessionId } = request;
+    let { version } = request;
+    if (!version) {
+      version = await this.workflowRepository.getMaxVersion(teamId, workflowId);
+    }
+    const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
+    if (!workflow) {
+      throw new Error('Workflow not exists');
+    }
+    let { inputData = {} } = request;
+    if (inputData?.__context) {
+      throw new Error('inputData 不能包含内置参数 __context');
+    }
+    inputData = {
+      ...inputData,
+      __context: {
+        userId,
+        teamId,
+        chatSessionId,
+      },
+    };
+    const workflowInstanceId = await conductorClient.workflowResource.startWorkflow({
+      name: workflowId,
+      version: version,
+      input: inputData,
+    });
+    await this.workflowRepository.saveWorkflowExecution(workflowId, version, workflowInstanceId, userId, triggerType, chatSessionId);
+    return workflowInstanceId;
+  }
+
+  public async waitForWorkflowResult(teamId: string, workflowInstanceId: string, interval: number = 200, maxWiat: number = 600 * 1000) {
+    let finished = false;
+    let output;
+    const start = +new Date();
+    while (!finished) {
+      const workflow = await this.getWorkflowExecutionDetail(teamId, workflowInstanceId);
+      const status = workflow.status;
+      finished = status === 'COMPLETED' || status === 'FAILED' || status === 'TERMINATED' || status === 'TIMED_OUT';
+      output = workflow.output;
+      await sleep(interval);
+      if (+new Date() - start >= maxWiat) {
+        break;
+      }
+    }
+    return output;
+  }
+
+  public async pauseWorkflow(workflowInstanceId: string) {
+    return await conductorClient.workflowResource.pauseWorkflow(workflowInstanceId);
+  }
+
+  public async resumeWorkflow(workflowInstanceId: string) {
+    return await conductorClient.workflowResource.resumeWorkflow(workflowInstanceId);
+  }
+
+  public async terminateWorkflow(workflowInstanceId: string) {
+    return await conductorClient.workflowResource.terminate1(workflowInstanceId);
+  }
+
+  public async retryWorkflow(workflowInstanceId: string) {
+    return conductorClient.workflowResource.retry1(workflowInstanceId);
+  }
+
+  public async updateTaskStatus(workflowInstanceId: string, taskId: string, updates: UpdateTaskStatusDto) {
+    return await conductorClient.taskResource.updateTask1({
+      workflowInstanceId,
+      taskId,
+      outputData: updates.outputData,
+      status: updates.status as 'IN_PROGRESS' | 'FAILED' | 'FAILED_WITH_TERMINAL_ERROR' | 'COMPLETED',
+    });
   }
 }

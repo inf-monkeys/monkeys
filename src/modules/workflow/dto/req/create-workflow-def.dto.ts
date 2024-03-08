@@ -2,6 +2,7 @@ import { WorkflowOutputValue } from '@/entities/workflow/workflow';
 import { BlockDefProperties, MonkeyWorkflowDef } from '@inf-monkeys/vines';
 import { ApiProperty } from '@nestjs/swagger';
 import * as Joiful from 'joiful';
+import { WorkflowTriggerJson } from '../../interfaces';
 
 export class CreateWorkflowDefDto {
   @ApiProperty({
@@ -15,12 +16,12 @@ export class CreateWorkflowDefDto {
 
   @ApiProperty({
     description: '工作流描述',
-    name: 'desc',
+    name: 'description',
     type: String,
     required: false,
   })
   @Joiful.string()
-  desc?: string;
+  description?: string;
 
   @ApiProperty({
     description: '工作流 LOGO',
@@ -29,31 +30,7 @@ export class CreateWorkflowDefDto {
     required: false,
   })
   @Joiful.string()
-  logo?: string;
-
-  @ApiProperty({
-    required: false,
-    type: Boolean,
-    default: false,
-  })
-  @Joiful.boolean()
-  hidden?: boolean;
-
-  @ApiProperty({
-    description: '主工作流 ID',
-    required: false,
-    type: String,
-  })
-  @Joiful.string()
-  masterWorkflowId?: string;
-
-  @ApiProperty({
-    description: '主工作流 ID',
-    required: false,
-    type: String,
-  })
-  @Joiful.number()
-  masterWorkflowVersion?: number;
+  iconUrl?: string;
 
   @ApiProperty({
     description: 'conductor workflow json 定义',
@@ -77,4 +54,11 @@ export class CreateWorkflowDefDto {
 
   @Joiful.array()
   tagIds: string[];
+
+  @ApiProperty({
+    description: 'Triggers',
+    required: false,
+    name: 'triggers',
+  })
+  triggers: WorkflowTriggerJson[];
 }

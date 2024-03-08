@@ -1,6 +1,6 @@
 import { WorkflowMetadataEntity } from '@/entities/workflow/workflow';
 import { WorkflowExecutionEntity } from '@/entities/workflow/workflow-execution';
-import { WorkflowTriggerType } from '@/entities/workflow/workflow-trigger';
+import { WorkflowTriggerType, WorkflowTriggersEntity } from '@/entities/workflow/workflow-trigger';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, ObjectId, Repository } from 'typeorm';
@@ -12,6 +12,8 @@ export class WorkflowRepository {
     private readonly workflowExecutionRepository: Repository<WorkflowExecutionEntity>,
     @InjectRepository(WorkflowMetadataEntity)
     private readonly workflowMetadataRepository: Repository<WorkflowMetadataEntity>,
+    @InjectRepository(WorkflowTriggersEntity)
+    private readonly workflowTriggerRepository: Repository<WorkflowTriggersEntity>,
   ) {}
 
   public async findByCondition(condition: Partial<WorkflowMetadataEntity>) {
@@ -95,5 +97,129 @@ export class WorkflowRepository {
         userId: In(userIds),
       },
     });
+  }
+
+  public async deleteWorkflow(teamId: string, workflowId: string) {
+    await this.workflowMetadataRepository.update(
+      {
+        teamId,
+        workflowId,
+      },
+      {
+        isDeleted: true,
+      },
+    );
+    await this.workflowTriggerRepository.update(
+      {
+        workflowId,
+      },
+      {
+        isDeleted: true,
+      },
+    );
+  }
+
+  public async getWorklfowVersions(workflowId: string) {
+    const versions = await this.workflowMetadataRepository.find({
+      where: {
+        workflowId,
+        isDeleted: false,
+      },
+    });
+    return versions;
+  }
+
+  public async getMaxVersion(teamId: string, workflowId: string) {
+    const versions = await this.workflowMetadataRepository.find({
+      where: {
+        teamId,
+        workflowId,
+      },
+    });
+    if (versions?.length === 0) {
+      return 1;
+    }
+    const maxVersion = Math.max(...versions.map((x) => x.version));
+    return maxVersion;
+  }
+
+  public async findWebhookTrigger(webhookPath: string) {
+    return await this.workflowTriggerRepository.findOne({
+      where: {
+        type: WorkflowTriggerType.WEBHOOK,
+        webhookPath,
+      },
+    });
+  }
+
+  public async saveWorkflowExecution(workflowId: string, version: number, workflowInstanceId: string, userId: string, triggerType: WorkflowTriggerType, chatSessionId: string) {
+    await this.workflowExecutionRepository.save({
+      createdTimestamp: Date.now(),
+      updatedTimestamp: Date.now(),
+      isDeleted: false,
+      workflowId,
+      workflowVersion: version,
+      workflowInstanceId,
+      userId,
+      triggerType,
+      chatSessionId,
+    });
+  }
+
+  public async deleteTrigger(workflowId: string, triggerId: string) {
+    return await this.workflowTriggerRepository.update(
+      {
+        id: new ObjectId(triggerId),
+        workflowId,
+      },
+      {
+        isDeleted: true,
+      },
+    );
+  }
+
+  public async listWorkflowTriggers(workflowId: string, version: number) {
+    return await this.workflowTriggerRepository.find({
+      where: {
+        workflowId,
+        isDeleted: false,
+        workflowVersion: version,
+      },
+    });
+  }
+
+  public async createWorkflowTrigger(data: Partial<WorkflowTriggersEntity>) {
+    const entity: Partial<WorkflowTriggersEntity> = {
+      ...data,
+      createdTimestamp: Date.now(),
+      updatedTimestamp: Date.now(),
+      isDeleted: false,
+    };
+    await this.workflowTriggerRepository.save(entity);
+  }
+
+  public async getWorkflowTrigger(workflowId: string, triggerId: string) {
+    const trigger = await this.workflowTriggerRepository.findOne({
+      where: {
+        workflowId,
+        id: new ObjectId(triggerId),
+      },
+    });
+    return trigger;
+  }
+
+  public async saveWorkflowTrigger(entity: WorkflowTriggersEntity) {
+    return await this.workflowTriggerRepository.save(entity);
+  }
+
+  public async disableAllTriggers(workflowId: string) {
+    await this.workflowTriggerRepository.update(
+      {
+        workflowId,
+      },
+      {
+        enabled: false,
+      },
+    );
   }
 }

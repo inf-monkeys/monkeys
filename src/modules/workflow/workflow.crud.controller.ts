@@ -1,11 +1,14 @@
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { Body, Controller, Get, Post, Req } from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, Post, Put, Req } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateWorkflowDefDto } from './dto/req/create-workflow-def.dto';
+import { ImportWorkflowDto } from './dto/req/import-workflow.dto';
+import { UpdateWorkflowDefDto } from './dto/req/update-workflow-def.dto';
 import { WorkflowCrudService } from './workflow.curd.service';
 
 @Controller('/workflow/metadata')
+@ApiTags('Workflows/CRUD')
 export class WorkflowCrudController {
   constructor(private readonly service: WorkflowCrudService) {}
 
@@ -14,7 +17,7 @@ export class WorkflowCrudController {
     summary: '获取近期使用的 workflows',
     description: '获取 7 天内更新过的 workflows',
   })
-  public async getRecentlyUsedWorkflows(@Req() req: IRequest) {
+  public async getRecentlyUsedWorkflows() {
     const data = await this.service.getRecentlyUsedWorkflows();
     return new SuccessResponse({
       data,
@@ -28,7 +31,80 @@ export class WorkflowCrudController {
   })
   public async createWorkflowDef(@Req() req: IRequest, @Body() body: CreateWorkflowDefDto) {
     const { teamId, userId } = req;
-    const result = await this.service.createWorkflowDef();
+    const { name, description, workflowDef, variables, output, iconUrl, triggers } = body;
+    const workflowId = await this.service.createWorkflowDef(teamId, userId, {
+      name,
+      description,
+      iconUrl,
+      workflowDef,
+      variables,
+      output,
+      triggers,
+    });
+    return new SuccessResponse({
+      data: {
+        workflowId,
+      },
+    });
+  }
+
+  @Put('/:workflowId')
+  @ApiOperation({
+    summary: '更新 workflow 定义',
+    description: '更新 workflow 定义',
+  })
+  public async updateWorkflowDef(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Body() body: UpdateWorkflowDefDto) {
+    // const { teamId } = req;
+    // const { version = 1 } = body;
+    // const { validationIssues, validated } = await this.service.updateWorkflowDef(teamId, workflowId, version, body);
+    // return new SuccessResponse({
+    //   data: {
+    //     success: true,
+    //     validationIssues,
+    //     validated,
+    //   },
+    // });
+  }
+
+  @Post('/import-from-zip')
+  @ApiOperation({
+    summary: '使用 zip 导入 workflow',
+    description: '使用 zip 导入 workflow',
+  })
+  public async importWorkflowByZip(@Req() req: IRequest, @Body() body: ImportWorkflowDto) {
+    const { teamId, userId } = req;
+    const { zipUrl } = body;
+    const { newWorkflowId } = await this.service.importWorkflowByZip(teamId, userId, zipUrl);
+    return new SuccessResponse({
+      data: {
+        workflowId: newWorkflowId,
+      },
+    });
+  }
+
+  @Post('/:workflowId/clone')
+  @ApiOperation({
+    summary: 'Clone workflow',
+    description: 'Clone worfklow',
+  })
+  public async cloneWorkflow(@Req() req: IRequest, @Param('workflowId') workflowId: string) {
+    const { teamId, userId } = req;
+    const newWorkflowId = await this.service.cloneWorkflow(teamId, userId, workflowId);
+    return new SuccessResponse({
+      data: {
+        workflowId: newWorkflowId,
+      },
+    });
+  }
+
+  @Delete('/:workflowId')
+  @ApiOperation({
+    summary: '删除 workflow 定义',
+    description: '删除 workflow 定义',
+  })
+  public async deleteWorkflowDef(@Req() req: IRequest, @Param('workflowId') workflowId: string) {
+    const { teamId } = req;
+    const result = await this.service.deleteWorkflowDef(teamId, workflowId);
     return new SuccessResponse({
       data: result,
     });

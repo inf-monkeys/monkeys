@@ -8,9 +8,10 @@ import os from 'os';
 import { ToolsRepository } from '../infra/database/repositories/tools.repository';
 import { WorkerInputData } from './interfaces';
 
+export const CONDUCTOR_TASK_DEF_NAME = 'monkeys';
+
 @Injectable()
 export class ToolsPollingService {
-  private taskDefName: string = 'monkeys';
   constructor(private readonly toolsRepository: ToolsRepository) {}
 
   private getWorkerId() {
@@ -91,7 +92,7 @@ export class ToolsPollingService {
   public async startPolling() {
     await conductorClient.metadataResource.registerTaskDef([
       {
-        name: this.taskDefName,
+        name: CONDUCTOR_TASK_DEF_NAME,
         inputKeys: [],
         outputKeys: [],
         retryCount: 0,
@@ -103,8 +104,8 @@ export class ToolsPollingService {
       conductorClient,
       [
         {
-          taskDefName: this.taskDefName,
-          concurrency: 1,
+          taskDefName: CONDUCTOR_TASK_DEF_NAME,
+          concurrency: config.conductor.polling.concurrency,
           pollInterval: config.conductor.polling.interval,
           execute: this.workerHandler.bind(this),
         },

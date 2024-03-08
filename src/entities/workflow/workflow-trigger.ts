@@ -51,10 +51,14 @@ export interface WebhookTriggerConfig {
 
 @Entity({ name: 'workflow-triggers' })
 export class WorkflowTriggersEntity extends BaseEntity {
-  @Column()
+  @Column({
+    name: 'workflow_id',
+  })
   workflowId: string;
 
-  @Column()
+  @Column({
+    name: 'workflow_version',
+  })
   workflowVersion: number;
 
   @Column()
@@ -69,18 +73,27 @@ export class WorkflowTriggersEntity extends BaseEntity {
   @Column()
   cron?: string;
 
-  @Column()
+  @Column({
+    name: 'next_trigger_time',
+  })
   nextTriggerTime?: number;
 
-  @Column()
+  @Column({
+    name: 'last_trigger_time',
+  })
   lastTriggerTime?: number;
 
   /**
    * Webhook 触发器具备的参数
    */
-  @Column()
+  @Column({
+    name: 'webhook_path',
+  })
   webhookPath?: string;
 
-  @Column()
+  @Column({
+    name: 'workflow_config',
+    type: 'simple-json',
+  })
   webhookConfig?: WebhookTriggerConfig;
 }
