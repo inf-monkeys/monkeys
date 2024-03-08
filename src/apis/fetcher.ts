@@ -55,8 +55,12 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
       if (code && code !== 200) {
         const errorMessage = raw?.message || null;
 
+        if (code === 403) {
+          throw new Error('请先登录');
+        }
+
         if (simple) {
-          toast.warning(errorMessage ? errorMessage : code === 403 ? '需要登录' : '网络错误');
+          toast.warning(errorMessage ? errorMessage : code === 403 ? '请先登录' : '网络错误');
           return void 0;
         } else {
           throw new Error(errorMessage || '网络错误');

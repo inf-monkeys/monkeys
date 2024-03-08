@@ -17,7 +17,7 @@ import { maskEmail, maskPhone } from '@/utils/maskdata.ts';
 export const UserGuard: React.FC = () => {
   const navigate = useNavigate({ from: Route.fullPath });
 
-  const { data: user, mutate } = useUser();
+  const { data: user, mutate, error } = useUser();
 
   const [localUser, setUser] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
   const [users, setUsers] = useLocalStorage<Partial<IVinesUser>[]>('vines-tokens', []);
@@ -61,6 +61,12 @@ export const UserGuard: React.FC = () => {
       VinesEvent.off('vines-logout', handleLogout);
     };
   }, [userIds, localUser.id]);
+
+  useEffect(() => {
+    if (error?.message === '请先登录') {
+      void navigate({ to: '/login' });
+    }
+  }, [error]);
 
   return null;
 };
