@@ -15,6 +15,7 @@ import { Toaster } from 'sonner';
 
 import { LagRadar } from '@/components/devtools/lag-radar/dev';
 import { ErrorComponent } from '@/components/router/catch-boundary';
+import { VinesProvider } from '@/package/vines-core';
 
 const router = createRouter({
   routeTree,
@@ -32,9 +33,11 @@ ReactDOM.createRoot(document.getElementById('vines-ui')!).render(
   <>
     <SWRConfig>
       <MantineProvider>
-        <AnimatePresence mode="wait">
-          <RouterProvider router={router} />
-        </AnimatePresence>
+        <VinesProvider>
+          <AnimatePresence mode="wait">
+            <RouterProvider router={router} />
+          </AnimatePresence>
+        </VinesProvider>
       </MantineProvider>
     </SWRConfig>
     <Suspense>
