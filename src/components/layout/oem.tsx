@@ -75,7 +75,7 @@ export const OEM: React.FC = () => {
     };
   }, []);
 
-  useDocumentTitle(title + get(oem, 'theme.name', ''));
+  useDocumentTitle(title + get(oem, 'theme.name', 'AI'));
   useFavicon(get(oem, 'theme.favicon.url', ''));
 
   return null;
