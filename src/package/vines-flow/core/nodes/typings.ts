@@ -66,4 +66,3 @@ export interface IVinesEdge {
 }
 
 export type VinesEdgePath = IVinesEdge[];
-export type VinesEdgePaths = [string, VinesEdgePath];
