@@ -228,8 +228,7 @@ export const GridView: React.FC<IGridViewProps> = ({ toggleMoveState, children }
         {children}
 
         <DotsBackground
-          className="z-0 bg-[bg-[var(--semi-color-bg-0)]] opacity-50"
-          color={'var(--semi-color-text-3)'}
+          className="z-0 opacity-50"
           size={3}
           gap={50}
           onContextMenu={(e: React.MouseEvent<SVGSVGElement, MouseEvent>) => e.preventDefault()}
