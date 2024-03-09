@@ -1,5 +1,5 @@
-import { VinesCore } from '@/package/vines-core/core';
-import { createVinesCore } from '@/package/vines-core/create';
+import { VinesCore } from '@/package/vines-flow/core';
+import { createVinesCore } from '@/package/vines-flow/create.ts';
 
 const _vines = new VinesCore();
 

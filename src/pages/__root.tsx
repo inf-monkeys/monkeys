@@ -13,7 +13,7 @@ import { UserGuard } from '@/components/router/guard/user.tsx';
 import { useVinesRoute } from '@/components/router/useVinesRoute.ts';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { SIDEBAR_MAP } from '@/consts/sidebar.tsx';
-import { VinesProvider } from '@/package/vines-core';
+import { VinesProvider } from '@/package/vines-flow';
 import VinesEvent from '@/utils/events.ts';
 
 const RootComponent: React.FC = () => {

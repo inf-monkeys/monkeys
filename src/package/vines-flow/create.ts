@@ -2,7 +2,7 @@ import React, { createContext, createElement, useContext, useEffect, useReducer 
 
 import { useToolLists } from '@/apis/tools';
 import { useWorkflowList } from '@/apis/workflow';
-import { _vines } from '@/package/vines-core';
+import { _vines } from '@/package/vines-flow/index.ts';
 
 interface VinesContext {
   _refresher?: number;

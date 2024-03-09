@@ -1,6 +1,6 @@
 import { BlockType } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
 
-import { VinesBlockDefProperties, VinesToolDef } from '@/package/vines-core/core/tools/typings.ts';
+import { VinesBlockDefProperties, VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
 
 export const BUILT_IN_TOOLS: VinesToolDef[] = [
   {

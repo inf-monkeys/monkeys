@@ -1,6 +1,6 @@
-import { _vines, useVinesRefresher } from '@/package/vines-core';
+import { _vines, useVinesRefresher } from '@/package/vines-flow/index.ts';
 
-export const useVinesCore = () => {
+export const useVinesFlow = () => {
   const { _refresher } = useVinesRefresher();
 
   return {
