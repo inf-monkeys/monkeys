@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import keyboardJS from 'keyboardjs';
 import { TransformWrapper } from 'react-zoom-pan-pinch';
+import { useFlowStore } from 'src/store/useFlowStore';
 
 import { GridView } from '@/components/layout/vines-flow/wrapper/grid-view.tsx';
-import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 
 interface IVinesFlowWrapperProps extends React.ComponentPropsWithoutRef<'div'> {}
