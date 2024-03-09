@@ -48,7 +48,10 @@ export const VinesFlowWrapper: React.FC<IVinesFlowWrapperProps> = ({ children })
   return (
     <TransformWrapper
       centerOnInit
-      panning={{ disabled: !isCanvasMoving && canvasMode === 'edit', excluded: ['input', 'span', 'p', 'textarea'] }}
+      panning={{
+        disabled: !isCanvasMoving && canvasMode === CanvasStatus.EDIT,
+        excluded: ['input', 'span', 'p', 'textarea'],
+      }}
       wheel={{ disabled: !isToggleScale, excluded: ['input', 'span', 'p', 'textarea'] }}
       minScale={0.3}
       maxScale={2}

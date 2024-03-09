@@ -5,3 +5,14 @@ export enum VINES_STATUS {
   READY = 'ready',
   BUSY = 'busy',
 }
+
+export enum IVinesFlowRenderType {
+  COMPLICATE = 'complicate',
+  SIMPLIFY = 'simplify',
+  MINI = 'mini',
+}
+
+export interface IVinesFlowRenderOptions {
+  direction: 'horizontal' | 'vertical';
+  type: IVinesFlowRenderType;
+}
