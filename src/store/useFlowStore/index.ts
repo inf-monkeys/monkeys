@@ -22,6 +22,11 @@ export interface FlowStore {
 
   zoomToNodeId: string;
   setZoomToNodeId: (zoomToNodeId: string) => void;
+
+  activeDraggableNodeId: string;
+  setActiveDraggableNodeId: (activeDraggableNodeId: string) => void;
+  overNodeId: string;
+  setOverNodeId: (overNodeId: string) => void;
 }
 
 const createFlowStore = () =>
@@ -44,6 +49,11 @@ const createFlowStore = () =>
 
       zoomToNodeId: '',
       setZoomToNodeId: (zoomToNodeId) => set({ zoomToNodeId }),
+
+      activeDraggableNodeId: '',
+      setActiveDraggableNodeId: (activeDraggableNodeId) => set({ activeDraggableNodeId }),
+      overNodeId: '',
+      setOverNodeId: (overNodeId) => set({ overNodeId }),
     })),
   );
 
