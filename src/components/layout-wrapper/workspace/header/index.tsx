@@ -16,7 +16,7 @@ export const WorkspaceHeader: React.FC<IWorkspaceHeaderProps> = () => {
   const navigate = useNavigate({ from: Route.fullPath });
 
   return (
-    <header className="flex h-14 w-full items-center justify-between bg-slate-1 px-6 shadow">
+    <header className="flex h-14 w-full items-center justify-between bg-slate-1 px-6 shadow-sm">
       <div className="flex h-full items-center gap-5">
         <VinesLogo
           description=""

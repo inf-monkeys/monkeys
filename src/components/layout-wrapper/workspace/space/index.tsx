@@ -28,7 +28,7 @@ export const Space: React.FC<ISpaceProps> = ({ children }) => {
       <motion.div
         ref={ref}
         animate={{ borderTopLeftRadius: isFirstNavActive ? 0 : 16 }}
-        className="relative mx-3 mb-2 mt-0 h-[calc(100%-7.5rem)] w-[calc(100%-1.5rem)] overflow-clip overflow-x-clip rounded-b-2xl rounded-r-2xl bg-slate-1 shadow-md"
+        className="relative mx-3 mb-2 mt-0 h-[calc(100%-7.5rem)] w-[calc(100%-1.5rem)] overflow-clip overflow-x-clip rounded-b-2xl rounded-r-2xl bg-slate-1 shadow-sm"
       >
         <WorkspaceCustomSetting />
         {children}
