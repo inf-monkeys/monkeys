@@ -11,11 +11,9 @@ import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { VinesIFrame } from '@/components/ui/vines-iframe';
 import { usePageStore } from '@/store/usePageStore';
 import VinesEvent from '@/utils/events.ts';
-import { useRetimer } from '@/utils/use-retimer.ts';
 
 export const WorkspacePage: React.FC = () => {
   const navigate = useNavigate();
-  const reTimer = useRetimer();
 
   const { workflow, pages, page, pageId, teamId, setApikey, setPage } = useVinesPage();
 

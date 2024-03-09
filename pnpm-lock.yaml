@@ -149,6 +149,9 @@ dependencies:
   immer:
     specifier: ^10.0.3
     version: 10.0.3
+  keyboardjs:
+    specifier: ^2.7.0
+    version: 2.7.0
   lodash:
     specifier: ^4.17.21
     version: 4.17.21
@@ -191,6 +194,9 @@ dependencies:
   react-jwt:
     specifier: ^1.2.0
     version: 1.2.0(react@18.2.0)
+  react-zoom-pan-pinch:
+    specifier: ^3.4.3
+    version: 3.4.3(react-dom@18.2.0)(react@18.2.0)
   recharts:
     specifier: ^2.12.2
     version: 2.12.2(react-dom@18.2.0)(react@18.2.0)
@@ -241,6 +247,9 @@ devDependencies:
   '@types/file-saver':
     specifier: ^2.0.7
     version: 2.0.7
+  '@types/keyboardjs':
+    specifier: ^2.5.3
+    version: 2.5.3
   '@types/lodash':
     specifier: ^4.14.202
     version: 4.14.202
@@ -3159,6 +3168,10 @@ packages:
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
     dev: true
 
+  /@types/keyboardjs@2.5.3:
+    resolution: {integrity: sha512-mYU/8h0CuZ+/25805vFqZk/2IxyTKoDlGF7BTLUQ6igewlBH6XoArgS2/kR5JKXrdA1hoF68aZoJ/rlaEMVQbg==}
+    dev: true
+
   /@types/lodash@4.14.202:
     resolution: {integrity: sha512-OvlIYQK9tNneDlS0VN54LLd5uiPCBOp7gS5Z0f1mjoJYBrtStzgmJBxONW3U6OZqdtNzZPmn9BS/7WI7BFFcFQ==}
     dev: true
@@ -5089,6 +5102,10 @@ packages:
       object.values: 1.1.7
     dev: true
 
+  /keyboardjs@2.7.0:
+    resolution: {integrity: sha512-3tiQuAoLM1M5Xyo/eQVaqsq9joByTRkB0Byga+0S7BYJvY4HIlfW0SofOj4a20YSAFjv0SIFU/lw+Qjp6KYHPA==}
+    dev: false
+
   /keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
     dependencies:
@@ -5849,6 +5866,17 @@ packages:
       dom-helpers: 5.2.1
       loose-envify: 1.4.0
       prop-types: 15.8.1
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /react-zoom-pan-pinch@3.4.3(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-x5MFlfAx2D6NTpZu8OISqc2nYn4p+YEaM1p21w7S/VE1wbVzK8vRzTo9Bj1ydufa649MuP7JBRM3vvj1RftFZw==}
+    engines: {node: '>=8', npm: '>=5'}
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+    dependencies:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false

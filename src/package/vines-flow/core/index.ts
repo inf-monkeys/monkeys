@@ -20,11 +20,11 @@ export class VinesCore extends VinesTools(VinesBase) {
 
   public update({ workflow, workflowId, tasks }: IVinesWorkflowUpdate) {
     if (workflow) {
-      workflow?.workflowDef?.tasks && (this.tasks = workflow.workflowDef.tasks);
+      workflow?.workflowDef?.tasks && (this.tasks = workflow.workflowDef.tasks.filter((task) => task));
       workflow?.workflowId && (this.workflowId = workflow.workflowId);
     }
     workflowId && (this.workflowId = workflowId);
-    tasks && (this.tasks = tasks);
+    tasks && (this.tasks = tasks.filter((task) => task));
 
     this.init();
   }
