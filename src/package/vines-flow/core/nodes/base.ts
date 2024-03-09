@@ -246,6 +246,13 @@ export class VinesNode<T extends VinesTask = VinesTask> {
   private clearSvg() {
     this._svgPath = [];
   }
+
+  /**
+   * 获取节点连接线
+   * */
+  svgPath(): [string, VinesEdgePath][] {
+    return [[this.id, this._svgPath]];
+  }
   // endregion
 
   // region 节点控制器

@@ -2,7 +2,7 @@ import { MonkeyTaskDefTypes } from '@inf-monkeys/vines';
 
 import { VinesBase } from '@/package/vines-flow/core/base';
 import { EndPointNode, VinesNode } from '@/package/vines-flow/core/nodes';
-import { IVinesNodePosition, IVinesWorkflowUpdate } from '@/package/vines-flow/core/nodes/typings.ts';
+import { IVinesNodePosition, IVinesWorkflowUpdate, VinesEdgePath } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesTools } from '@/package/vines-flow/core/tools';
 import { IVinesFlowRenderOptions, IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import VinesEvent from '@/utils/events';
@@ -102,6 +102,17 @@ export class VinesCore extends VinesTools(VinesBase) {
     });
 
     setTimeout(() => VinesEvent.emit('canvas-auto-zoom'), 80);
+  }
+
+  svg(): [string, VinesEdgePath][] {
+    const allNodes = this.getAllNodes().slice(0, -1);
+    const result: [string, VinesEdgePath][][] = [];
+    for (const node of allNodes) {
+      const svg = node.svgPath();
+      result.push(svg);
+    }
+
+    return result.flat();
   }
 
   /**
