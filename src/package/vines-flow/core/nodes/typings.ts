@@ -52,6 +52,12 @@ export interface IVinesNodeController {
   onClick: () => void;
 }
 
+export interface IVinesNodeCustomData {
+  icon?: string | null;
+  title?: string | null;
+  description?: string | null;
+}
+
 export type VinesEdgeSchemaType = 'M' | 'L' | 'Q' | 'C';
 
 export interface IVinesEdge {

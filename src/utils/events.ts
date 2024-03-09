@@ -10,7 +10,7 @@ export type FlowCanvasEventType =
   | 'canvas-zoom-to'
   | 'canvas-context-menu';
 
-export type FlowEventType = 'flow-select-nodes';
+export type FlowEventType = 'flow-select-nodes' | 'flow-open-node-editor';
 
 export type EventType = AppEventType | FlowCanvasEventType | FlowEventType;
 

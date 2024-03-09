@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useWindowEvent } from '@mantine/hooks';
 import { motion } from 'framer-motion';
 
+import { VinesNodes } from '@/components/layout/vines-flow/nodes';
 import { VinesFlowWrapper } from '@/components/layout/vines-flow/wrapper';
 import { useVinesFlowWithPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
@@ -50,7 +51,9 @@ export const VinesFlow: React.FC<IVinesFlowProps> = () => {
           className="relative opacity-0"
           id="vines-canvas"
           style={{ width, height }}
-        ></motion.div>
+        >
+          {visible && <VinesNodes />}
+        </motion.div>
       </VinesFlowWrapper>
     </main>
   );

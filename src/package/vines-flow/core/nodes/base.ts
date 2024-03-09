@@ -1,11 +1,12 @@
 import { MonkeyTaskDefTypes } from '@inf-monkeys/vines';
-import { TaskType } from '@io-orkes/conductor-javascript';
+import { TaskDefTypes, TaskType } from '@io-orkes/conductor-javascript';
 import { max, min } from 'lodash';
 
 import { VinesCore } from '@/package/vines-flow/core';
 import {
   IVinesNodeBoundary,
   IVinesNodeController,
+  IVinesNodeCustomData,
   IVinesNodeEntryPoint,
   IVinesNodePosition,
   IVinesNodeSize,
@@ -89,6 +90,16 @@ export class VinesNode<T extends VinesTask = VinesTask> {
    * */
   get needRenderChildren(): boolean {
     return true;
+  }
+
+  get customData(): IVinesNodeCustomData {
+    const alias = ((this._task as TaskDefTypes & { __alias?: IVinesNodeCustomData })?.__alias ??
+      {}) as IVinesNodeCustomData;
+    return {
+      icon: alias?.icon ?? null,
+      title: alias?.title ?? null,
+      description: alias?.description ?? null,
+    };
   }
   // endregion
 
@@ -238,6 +249,9 @@ export class VinesNode<T extends VinesTask = VinesTask> {
   // endregion
 
   // region 节点控制器
+  /**
+   * 渲染节点控制器
+   * */
   renderController() {
     const useHorizontal = this._vinesCore.renderDirection === 'horizontal';
     const direction = useHorizontal ? -1 : 1;
@@ -259,6 +273,13 @@ export class VinesNode<T extends VinesTask = VinesTask> {
           }),
       },
     ];
+  }
+
+  /**
+   *  获取节点控制器结构
+   * */
+  getController(): IVinesNodeController[] {
+    return this.controller;
   }
   // endregion
 }
