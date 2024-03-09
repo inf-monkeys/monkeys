@@ -1,11 +1,18 @@
 import useSWR from 'swr';
 
 import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import queryString from 'query-string';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
+import { WorkflowListQuery } from '@/apis/workflow/typings.ts';
 
 export const useGetWorkflow = (apikey: string, workflowId: string) =>
   useSWR<MonkeyWorkflow | undefined>(workflowId ? `/api/workflow/${workflowId}` : null, vinesFetcher({ apikey }));
+
+export const getWorkflow = (workflowId: string) => vinesFetcher<MonkeyWorkflow | null>()(`/api/workflow/${workflowId}`);
+
+export const useWorkflowList = (query: WorkflowListQuery = {}) =>
+  useSWR<MonkeyWorkflow[] | undefined>(`/api/workflow/list?${queryString.stringify(query)}`, vinesFetcher());
 
 export const updateWorkflow = (
   apikey: string,

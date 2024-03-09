@@ -1,7 +1,4 @@
-import EventEmitter from 'eventemitter3';
+import { VinesBase } from '@/package/vines-core/core/base';
+import { VinesTools } from '@/package/vines-core/core/tools';
 
-export class VinesCore extends EventEmitter {
-  constructor() {
-    super();
-  }
-}
+export class VinesCore extends VinesTools(VinesBase) {}

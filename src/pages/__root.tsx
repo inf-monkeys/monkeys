@@ -13,10 +13,11 @@ import { UserGuard } from '@/components/router/guard/user.tsx';
 import { useVinesRoute } from '@/components/router/useVinesRoute.ts';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { SIDEBAR_MAP } from '@/consts/sidebar.tsx';
+import { VinesProvider } from '@/package/vines-core';
 import VinesEvent from '@/utils/events.ts';
 
 const RootComponent: React.FC = () => {
-  const { routeIds, routeAppId, isUseOutside, isUseWorkSpace } = useVinesRoute();
+  const { routeIds, routeAppId, isUseOutside, isUseWorkSpace, isUseVinesCore } = useVinesRoute();
 
   const routeSiteName =
     SIDEBAR_MAP.flatMap((it) => it.items || []).find((it) => it.name === routeAppId)?.label ??
@@ -42,6 +43,10 @@ const RootComponent: React.FC = () => {
             >
               {isUseOutside ? (
                 <Outlet />
+              ) : isUseVinesCore ? (
+                <VinesProvider>
+                  <Outlet />
+                </VinesProvider>
               ) : isUseWorkSpace ? (
                 <WorkspaceWrapper />
               ) : (
