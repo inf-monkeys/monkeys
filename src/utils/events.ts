@@ -10,7 +10,9 @@ export type FlowCanvasEventType =
   | 'canvas-zoom-to'
   | 'canvas-context-menu';
 
-export type EventType = AppEventType | FlowCanvasEventType;
+export type FlowEventType = 'flow-select-nodes';
+
+export type EventType = AppEventType | FlowCanvasEventType | FlowEventType;
 
 const VinesEvent = new EventEmitter<EventType>();
 

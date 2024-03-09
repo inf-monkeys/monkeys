@@ -21,3 +21,43 @@ export interface IVinesWorkflowUpdate {
   workflowId?: string;
   tasks?: MonkeyTaskDefTypes[];
 }
+
+export interface IVinesNodeSize {
+  width: number;
+  height: number;
+}
+
+export interface IVinesNodePosition {
+  x: number;
+  y: number;
+}
+
+export interface IVinesNodeEntryPoint {
+  in: IVinesNodePosition;
+  out: IVinesNodePosition;
+}
+
+export interface IVinesNodeBoundary {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}
+
+export interface IVinesNodeController {
+  disabled?: boolean;
+  needConfirmation?: string;
+  position: IVinesNodePosition;
+  icon: '+' | '-';
+  onClick: () => void;
+}
+
+export type VinesEdgeSchemaType = 'M' | 'L' | 'Q' | 'C';
+
+export interface IVinesEdge {
+  type: VinesEdgeSchemaType;
+  axis: number[][];
+}
+
+export type VinesEdgePath = IVinesEdge[];
+export type VinesEdgePaths = [string, VinesEdgePath];
