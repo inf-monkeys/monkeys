@@ -1,5 +1,7 @@
 import React, { createContext, createElement, useContext, useEffect, useReducer } from 'react';
 
+import { useToolLists } from '@/apis/tools';
+import { useWorkflowList } from '@/apis/workflow';
 import { _vines } from '@/package/vines-core';
 
 interface VinesContext {
@@ -21,6 +23,17 @@ export const createVinesCore = () => {
         _vines.off('update', forceUpdate);
       };
     }, []);
+
+    const { data: tools } = useToolLists();
+    const { data: workflows } = useWorkflowList({ page: 1, limit: 9999 });
+
+    useEffect(() => {
+      tools?.length && _vines.updateTools(tools);
+    }, [tools]);
+
+    useEffect(() => {
+      workflows?.length && _vines.updateWorkflows(workflows);
+    }, [workflows]);
 
     return createElement(VinesContext.Provider, { value: { _refresher, forceUpdate } }, children);
   };
