@@ -17,8 +17,6 @@ export const WorkspaceIndex: React.FC = () => {
   const { data: pages } = useWorkspacePagesWithWorkflowId(workflowId);
   const navigate = useNavigate();
 
-  workflowId && preload(`/api/workflow/${workflowId}`, vinesFetcher());
-
   useEffect(() => {
     if (pages) {
       const page = pages.find(({ type }) => type === to) ?? pages[0];
@@ -33,6 +31,10 @@ export const WorkspaceIndex: React.FC = () => {
       });
     }
   }, [pages]);
+
+  useEffect(() => {
+    void preload(`/api/workflow/${workflowId}`, vinesFetcher());
+  }, [workflowId]);
 
   return (
     <div className="vines-center size-full">

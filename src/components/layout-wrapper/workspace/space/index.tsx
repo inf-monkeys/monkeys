@@ -1,17 +1,24 @@
-import React, { useRef } from 'react';
+import React, { useEffect } from 'react';
 
+import { useElementSize } from '@mantine/hooks';
 import { motion } from 'framer-motion';
 
 import { WorkspaceCustomSetting } from '@/components/layout/workspace/custom-setting';
 import { SpaceTabs } from '@/components/layout-wrapper/workspace/space/tabs';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
+import { usePageStore } from '@/store/usePageStore';
 
 interface ISpaceProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const Space: React.FC<ISpaceProps> = ({ children }) => {
+  const { ref, width, height } = useElementSize();
   const { pages, pageId } = useVinesPage();
 
-  const node = useRef<HTMLDivElement>(null);
+  const { setContainerWidth, setContainerHeight } = usePageStore();
+  useEffect(() => {
+    setContainerWidth(width);
+    setContainerHeight(height);
+  }, [width, height]);
 
   const isFirstNavActive = pageId === pages?.[0]._id;
 
@@ -19,7 +26,7 @@ export const Space: React.FC<ISpaceProps> = ({ children }) => {
     <>
       <SpaceTabs />
       <motion.div
-        ref={node}
+        ref={ref}
         animate={{ borderTopLeftRadius: isFirstNavActive ? 0 : 16 }}
         className="relative mx-3 mb-2 mt-0 h-[calc(100%-7.5rem)] w-[calc(100%-1.5rem)] overflow-clip overflow-x-clip rounded-b-2xl rounded-r-2xl bg-slate-1 shadow-md"
       >
