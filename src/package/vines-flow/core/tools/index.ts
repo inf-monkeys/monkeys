@@ -1,14 +1,14 @@
 import { BlockType, MonkeyWorkflow } from '@inf-monkeys/vines';
 import { get, isArray, isBoolean, isNumber } from 'lodash';
 
-import { VinesBase } from '@/package/vines-core/core/base';
+import { VinesBase } from '@/package/vines-flow/core/base';
 import {
   BUILT_IN_TOOLS,
   SUB_WORKFLOW_TOOL_CHOOSE_VERSION_PROP,
   TOOL_CATEGORY_SORT_INDEX_LIST,
-} from '@/package/vines-core/core/tools/consts.ts';
-import { VinesBlockDefProperties, VinesToolDef } from '@/package/vines-core/core/tools/typings.ts';
-import { Constructor, VINES_STATUS } from '@/package/vines-core/core/typings.ts';
+} from '@/package/vines-flow/core/tools/consts.ts';
+import { VinesBlockDefProperties, VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
+import { Constructor, VINES_STATUS } from '@/package/vines-flow/core/typings.ts';
 
 export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
   return class extends Base {
