@@ -58,8 +58,8 @@ export const ContextMenu: React.FC<IContextMenuProps> = () => {
     <DropdownMenu open={finalOpen} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <div
-          className="absolute z-20 opacity-0"
-          style={{ transform: `translate(calc(${x}px - 230%), calc(${y}px - 500%))` }}
+          className="fixed left-0 top-0 z-20 opacity-0"
+          style={{ transform: `translate(calc(${x}px - 4px), calc(${y}px - 10px))` }}
         >
           _
         </div>
