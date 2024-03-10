@@ -81,7 +81,7 @@ export const SimplifyNode: React.FC<ISimplifyNodeProps> = ({ node }) => {
       <div
         className={cn(
           'pointer-events-none absolute flex min-h-[80px] min-w-60 items-center pl-5',
-          isMiniNode && 'rounded-r-xl bg-[#f2f2f2] !pl-1 text-[#292b2e]',
+          isMiniNode && 'rounded-r-xl border border-l-0 border-input bg-white !pl-1',
           isSimplifyHorizontal && '!min-w-52 scale-75 justify-center !pl-0 text-center',
         )}
         style={{ left: nodeX + (isSimplifyHorizontal ? -64 : 80), top: nodeY + (isSimplifyHorizontal ? -70 : 0) }}

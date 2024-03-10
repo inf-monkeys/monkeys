@@ -48,6 +48,17 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
     setVisible(false);
     setTimeout(() => vines.update({ renderDirection: isHorizontal ? 'vertical' : 'horizontal' }), 80);
   };
+  const handleRenderTypeChange = () => {
+    setVisible(false);
+    setTimeout(() => {
+      const map = Object.values(IVinesFlowRenderType);
+      const currentIndex = map.indexOf(vines.renderOptions.type);
+      const nextIndex = (currentIndex + 1) % map.length;
+      const nextRenderType = map[nextIndex];
+      vines.update({ renderType: nextRenderType });
+      setTimeout(() => setVisible(true), 80);
+    }, 80);
+  };
 
   useHotkeys([
     ['ctrl+l', handleToggleMode, { preventDefault: true }],
@@ -89,6 +100,7 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
           <ToolButton
             icon={<Workflow />}
             tip={`节点显示：${isRenderMini ? '极简' : isRenderComplicate ? '全参数' : '普通'}模式`}
+            onClick={handleRenderTypeChange}
           />
           <ToolButton icon={<Code />} tip="开发者模式" />
         </Card>
