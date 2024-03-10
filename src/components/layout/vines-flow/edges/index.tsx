@@ -72,7 +72,7 @@ export const VinesEdges: React.FC = () => {
                   },
                 }}
               >
-                <path d={path} className="stroke-gray-6 dark:stroke-gold-12" />
+                <path d={path} className="stroke-border dark:stroke-gray-10" />
 
                 <motion.path
                   key={index + '-vines-edge-path'}
