@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
 import { useWindowEvent } from '@mantine/hooks';
-import { motion } from 'framer-motion';
+import { CircularProgress } from '@nextui-org/progress';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import { VinesEdges } from '@/components/layout/vines-flow/edges';
 import { VinesHeadlessModal } from '@/components/layout/vines-flow/headless-modal';
@@ -46,22 +47,38 @@ export const VinesFlow: React.FC<IVinesFlowProps> = () => {
 
   return (
     <main className="vines-center relative size-full">
-      <VinesFlowWrapper>
-        <motion.div
-          variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
-          animate={visible ? 'visible' : 'hidden'}
-          className="relative opacity-0"
-          id="vines-canvas"
-          style={{ width, height }}
-        >
-          {visible && (
-            <>
-              <VinesEdges />
-              <VinesNodes />
-            </>
-          )}
-        </motion.div>
-      </VinesFlowWrapper>
+      <AnimatePresence>
+        <VinesFlowWrapper>
+          <motion.div
+            variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
+            animate={visible ? 'visible' : 'hidden'}
+            className="relative opacity-0"
+            id="vines-canvas"
+            style={{ width, height }}
+          >
+            {visible && (
+              <>
+                <VinesEdges />
+                <VinesNodes />
+              </>
+            )}
+          </motion.div>
+        </VinesFlowWrapper>
+        {!visible && (
+          <motion.div
+            key="vines-canvas-waiting"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.2 } }}
+            exit={{ opacity: 0, transition: { duration: 0.2 } }}
+            transition={{ type: 'linear' }}
+            className="vines-center absolute left-0 top-0 z-20 size-full"
+          >
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { delay: 0.1 } }}>
+              <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <VinesHeadlessModal />
     </main>
   );
