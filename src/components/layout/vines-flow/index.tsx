@@ -4,6 +4,7 @@ import { useWindowEvent } from '@mantine/hooks';
 import { motion } from 'framer-motion';
 
 import { VinesEdges } from '@/components/layout/vines-flow/edges';
+import { VinesHeadlessModal } from '@/components/layout/vines-flow/headless-modal';
 import { VinesNodes } from '@/components/layout/vines-flow/nodes';
 import { VinesFlowWrapper } from '@/components/layout/vines-flow/wrapper';
 import { useVinesFlowWithPage } from '@/components/layout-wrapper/workspace/utils.ts';
@@ -44,7 +45,7 @@ export const VinesFlow: React.FC<IVinesFlowProps> = () => {
   });
 
   return (
-    <main className="vines-center size-full">
+    <main className="vines-center relative size-full">
       <VinesFlowWrapper>
         <motion.div
           variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
@@ -61,6 +62,7 @@ export const VinesFlow: React.FC<IVinesFlowProps> = () => {
           )}
         </motion.div>
       </VinesFlowWrapper>
+      <VinesHeadlessModal />
     </main>
   );
 };
