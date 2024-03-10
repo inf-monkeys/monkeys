@@ -39,6 +39,8 @@ export const VinesFlow: React.FC<IVinesFlowProps> = () => {
     if (initialScale) {
       !visible && setVisible(true);
       setInitialScale(initialScale);
+    } else if (!containerWidth && !containerHeight) {
+      vines.getAllNodes().length && setVisible(true);
     }
   }, [containerWidth, containerHeight, width, height]);
   useWindowEvent('resize', () => {
