@@ -31,7 +31,6 @@ export const ContextMenu: React.FC<IContextMenuProps> = () => {
       (e: React.MouseEvent<MouseEvent>, _type: 'NODE' | 'CANVAS', nodeId: string) => {
         if (nodeId?.startsWith('fake_node')) {
           VinesEvent.emit('flow-select-nodes', {
-            selectMode: true,
             targetNodeId: nodeId,
           });
           return;
@@ -72,7 +71,6 @@ export const ContextMenu: React.FC<IContextMenuProps> = () => {
               className="flex gap-2"
               onClick={() =>
                 VinesEvent.emit('flow-select-nodes', {
-                  selectMode: true,
                   targetNodeId: '',
                 })
               }
@@ -86,7 +84,6 @@ export const ContextMenu: React.FC<IContextMenuProps> = () => {
                 className="flex gap-2"
                 onClick={() =>
                   VinesEvent.emit('flow-select-nodes', {
-                    selectMode: true,
                     targetNodeId: currentNodeId,
                     insertBefore: true,
                   })
@@ -106,7 +103,6 @@ export const ContextMenu: React.FC<IContextMenuProps> = () => {
                 className="flex gap-2"
                 onClick={() =>
                   VinesEvent.emit('flow-select-nodes', {
-                    selectMode: true,
                     targetNodeId: currentNodeId,
                   })
                 }

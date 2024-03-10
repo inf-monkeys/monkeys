@@ -1,10 +1,13 @@
 import { BlockType, MonkeyWorkflow } from '@inf-monkeys/vines';
+import { BlockDefCategory } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
 import { get, isArray, isBoolean, isNumber } from 'lodash';
 
 import { VinesBase } from '@/package/vines-flow/core/base';
 import {
   BUILT_IN_TOOLS,
+  IGNORE_TOOLS,
   SUB_WORKFLOW_TOOL_CHOOSE_VERSION_PROP,
+  TOOL_CATEGORY,
   TOOL_CATEGORY_SORT_INDEX_LIST,
 } from '@/package/vines-flow/core/tools/consts.ts';
 import { VinesBlockDefProperties, VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
@@ -86,6 +89,35 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
         }
         return output;
       }
+    }
+
+    public getToolsByCategory(search?: string) {
+      // 当前分类下的工具、数量、分类 ID、分类名称
+      const tools: [VinesToolDef[], number, string, string][] = [];
+      for (const [category, categoryDisplayName] of Object.entries(TOOL_CATEGORY)) {
+        if (category === 'all') {
+          const allApp = this.tools.filter(({ displayName, name, description }) => {
+            if (IGNORE_TOOLS.some((n) => name.startsWith(n))) return false;
+            return !search ? true : [displayName, name, description].some((s) => s?.includes(search));
+          });
+          tools.push([allApp, allApp.length, category, categoryDisplayName]);
+          tools.push([[], 0, 'block', '调用工作流']);
+        } else {
+          const appList = this.tools
+            .filter(({ categories }) => categories?.includes(category as BlockDefCategory))
+            .filter(({ displayName, name, description }) => {
+              if (IGNORE_TOOLS.some((n) => name.startsWith(n))) return false;
+              return !search ? true : [displayName, name, description].some((s) => s?.includes(search));
+            });
+          const listLength = appList.length;
+          if (listLength) {
+            tools.push([appList, listLength, category, categoryDisplayName]);
+          }
+        }
+      }
+      return tools.sort(
+        (a, b) => TOOL_CATEGORY_SORT_INDEX_LIST.indexOf(a[2]) - TOOL_CATEGORY_SORT_INDEX_LIST.indexOf(b[2]),
+      );
     }
   };
 }
