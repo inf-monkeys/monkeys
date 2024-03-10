@@ -51,11 +51,11 @@ export const ContextMenu: React.FC<IContextMenuProps> = () => {
     return () => {
       VinesEvent.off('canvas-context-menu');
     };
-  }, []);
+  }, [canvasMode]);
 
   const finalOpen = open && !canvasDisabled;
   return (
-    <DropdownMenu open={finalOpen} onOpenChange={setOpen}>
+    <DropdownMenu open={finalOpen} onOpenChange={(val) => canvasMode !== CanvasStatus.READONLY && setOpen(val)}>
       <DropdownMenuTrigger asChild>
         <div
           className="fixed left-0 top-0 z-20 opacity-0"
