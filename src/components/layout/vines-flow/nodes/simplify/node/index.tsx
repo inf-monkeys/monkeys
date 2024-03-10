@@ -28,7 +28,6 @@ export const SimplifyNode: React.FC<ISimplifyNodeProps> = ({ node }) => {
     if (![CanvasStatus.EDIT, CanvasStatus.READONLY].includes(canvasMode)) return;
     if (nodeId.startsWith('fake_node') && canvasMode === CanvasStatus.EDIT) {
       VinesEvent.emit('flow-select-nodes', {
-        selectMode: true,
         targetNodeId: nodeId,
       });
       return;

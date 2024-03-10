@@ -275,7 +275,6 @@ export class VinesNode<T extends VinesTask = VinesTask> {
         icon: '+',
         onClick: () =>
           VinesEvent.emit('flow-select-nodes', {
-            selectMode: true,
             targetNodeId: this.id,
           }),
       },
