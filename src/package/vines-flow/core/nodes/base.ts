@@ -3,8 +3,9 @@ import { TaskDefTypes, TaskType } from '@io-orkes/conductor-javascript';
 import { isArray, max, min } from 'lodash';
 
 import { VinesCore } from '@/package/vines-flow/core';
-import { drawLine } from '@/package/vines-flow/core/nodes/svg-utils.ts';
+import { drawLine, drawSmoothLine, VinesSVGPosition } from '@/package/vines-flow/core/nodes/svg-utils.ts';
 import {
+  IVinesEdge,
   IVinesMoveAfterTargetType,
   IVinesNodeBoundary,
   IVinesNodeController,
@@ -35,11 +36,11 @@ export class VinesNode<T extends VinesTask = VinesTask> {
 
   public controller: IVinesNodeController[] = [];
 
-  private _svgPath: VinesEdgePath = [];
+  public _svgPath: VinesEdgePath = [];
 
-  private children: VinesNode[];
+  public children: VinesNode[];
 
-  private _vinesCore: VinesCore;
+  protected readonly _vinesCore: VinesCore;
 
   constructor(task: T, vinesCore: VinesCore) {
     this.type = task.type;
@@ -114,6 +115,21 @@ export class VinesNode<T extends VinesTask = VinesTask> {
    * */
   getRaw(): TaskDefTypes {
     return this._task;
+  }
+
+  updateRaw(nodeId: string, task: T): boolean {
+    if (this.id === nodeId) {
+      this._task = task;
+      return true;
+    } else {
+      for (const child of this.children) {
+        const result = child.updateRaw(nodeId, task);
+        if (result) {
+          return true;
+        }
+      }
+      return false;
+    }
   }
   // endregion
 
@@ -257,7 +273,7 @@ export class VinesNode<T extends VinesTask = VinesTask> {
   /**
    *  清理 SVG
    * */
-  private clearSvg() {
+  public clearSvg() {
     this._svgPath = [];
   }
 
@@ -371,13 +387,16 @@ export class VinesNode<T extends VinesTask = VinesTask> {
     return false;
   }
 
-  private destroy() {
+  public destroy() {
     return this.children.map((childNode) => childNode.destroy());
   }
 
-  async check(): Promise<boolean> {
-    await Promise.all(this.children.map((childNode) => childNode.check()));
-    return true;
+  check(): boolean {
+    return this.children.some((childNode) => childNode.check());
+  }
+
+  afterCreate(): VinesNode | VinesNode[] {
+    return this;
   }
 
   async insertAfter(): Promise<void> {
@@ -390,6 +409,10 @@ export class VinesNode<T extends VinesTask = VinesTask> {
 
   async deleteAfter(): Promise<void> {
     return void 0;
+  }
+
+  get isFake() {
+    return this.id.startsWith('fake_node_');
   }
   // endregion
 
@@ -406,4 +429,54 @@ export class VinesNode<T extends VinesTask = VinesTask> {
 }
 
 // 「控制流程节点」公用逻辑
-export class ControlFlowVinesNode<T extends MonkeyTaskDefTypes = MonkeyTaskDefTypes> extends VinesNode<T> {}
+export class ControlFlowVinesNode<T extends MonkeyTaskDefTypes = MonkeyTaskDefTypes> extends VinesNode<T> {
+  extraSvgPath: [string, VinesEdgePath][] = [];
+
+  override svgPath() {
+    return ([...this.extraSvgPath, [this.id, this._svgPath]] as [string, VinesEdgePath][]).reverse();
+  }
+
+  async renderChildren(
+    position: IVinesNodePosition,
+    path: VinesNode[] = [],
+    children = this.children.filter((node) => node.needRender),
+  ) {
+    void path;
+    for (const it of children.slice(0, -1)) {
+      it.clearSvg();
+      it.render(position);
+    }
+    const lastChild = Array.from(children).pop();
+    lastChild?.clearSvg();
+    lastChild?.render(position);
+  }
+
+  clearSvg() {
+    super.clearSvg();
+    this.extraSvgPath = [];
+  }
+
+  renderHead(children: VinesNode[] = this.children, centerYOffset = 0): IVinesEdge[] {
+    // draw start
+    const entryPointIn = children?.[0]?.entryPoint.in ?? { x: 0, y: 0 };
+    if (this._vinesCore.renderDirection === 'vertical') {
+      return drawSmoothLine({
+        sourceX: this.position.x + this.size.width / 2,
+        sourceY: this.position.y + this.size.height,
+        targetX: entryPointIn.x,
+        targetY: entryPointIn.y,
+        centerY: centerYOffset ? entryPointIn.y - centerYOffset : void 0,
+      });
+    } else {
+      return drawSmoothLine({
+        sourceX: this.position.x + this.size.width,
+        sourceY: this.position.y + this.size.height / 2,
+        targetX: entryPointIn.x,
+        targetY: entryPointIn.y,
+        sourcePosition: VinesSVGPosition.Right,
+        targetPosition: VinesSVGPosition.Left,
+        centerX: entryPointIn.x - centerYOffset,
+      });
+    }
+  }
+}

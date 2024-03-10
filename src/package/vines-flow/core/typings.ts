@@ -23,7 +23,5 @@ export interface IVinesInsertChildParams {
   targetId: string;
   node: VinesNode | VinesNode[];
   path: VinesNode[];
-  masterWorkflowId?: string;
-  masterWorkflowVersion?: number;
   insertBefore?: boolean;
 }
