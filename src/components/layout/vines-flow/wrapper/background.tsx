@@ -10,15 +10,20 @@ type DotsProps = {
 };
 
 // million-ignore
-export const DotsBackground: React.FC<SVGProps<SVGSVGElement> & DotsProps> = (props) => {
-  const { className, gap, size, scale, ...attr } = props;
+export const DotsBackground: React.FC<SVGProps<SVGSVGElement> & DotsProps> = ({
+  className,
+  gap,
+  size,
+  scale,
+  onContextMenu,
+}) => {
   const gapScale = scale || 1;
   const [gapX, gapY] = Array.isArray(gap) ? gap : [gap, gap];
   const [dotWidth, dotHeight] = [gapX * gapScale || 1, gapY * gapScale || 1];
   const radius = (size || 1) / 2;
 
   return (
-    <svg className={cn('absolute left-0 top-0 h-full w-full', className)} {...attr}>
+    <svg className={cn('absolute left-0 top-0 h-full w-full', className)} onContextMenu={onContextMenu}>
       <pattern id="vines-pattern" width={dotWidth} height={dotHeight} patternUnits="userSpaceOnUse">
         <circle className="fill-gold-12" cx={radius} cy={radius} r={radius} />
       </pattern>
