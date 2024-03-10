@@ -18,9 +18,9 @@ export const createVinesCore = () => {
     const [_refresher, forceUpdate] = useReducer(forceUpdateReducer, 0);
 
     useEffect(() => {
-      _vines.on('update', forceUpdate);
+      _vines.on('refresh', forceUpdate);
       return () => {
-        _vines.off('update', forceUpdate);
+        _vines.off('refresh', forceUpdate);
       };
     }, []);
 

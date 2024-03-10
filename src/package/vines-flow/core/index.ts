@@ -58,13 +58,14 @@ export class VinesCore extends VinesTools(VinesBase) {
     }
 
     render && this.render();
-    this.emit('update');
+    this.sendEvent('refresh');
   }
 
   public setAllNodeSize(width: number, height: number) {
     this.getAllNodes().forEach((it) => (it.size = { width, height }));
   }
 
+  // region Render
   public render() {
     this.position = { x: 0, y: 0 };
 
@@ -138,6 +139,8 @@ export class VinesCore extends VinesTools(VinesBase) {
     return result.flat();
   }
 
+  // endregion
+
   /**
    *  获取所有节点
    *  @param filterRenderChildren 是否过滤不需要渲染的子节点
@@ -149,6 +152,60 @@ export class VinesCore extends VinesTools(VinesBase) {
       .flat()
       .filter((it) => it.needRender);
   }
+
+  // region CURD
+  /**
+   * 通过 ID 获取 VinesNode
+   * @param id 节点 ID
+   * */
+  public getNodeById(id?: string): VinesNode | undefined {
+    if (!id) {
+      return void null;
+    }
+
+    for (const node of this.nodes) {
+      const result = node.findChildById(id);
+      if (result) return result;
+    }
+
+    return void null;
+  }
+
+  /**
+   * 警告：在 insertAfter 内调用此方法会导致死循环，请将 callAfter 设置为 false
+   * */
+  public insertNode(targetId: string, node: VinesNode | VinesNode[], insertBefore = false, callAfter = true): boolean {
+    const index = this.nodes.findIndex((childNode) => childNode.id === targetId);
+    const targetNode = this.getNodeById(targetId);
+    if (index !== -1) {
+      const isFakeNode = +/fake_node/.test(targetId);
+      const insertIndex = insertBefore ? index : index + 1 - isFakeNode;
+      this.nodes.splice(insertIndex, isFakeNode, ...(Array.isArray(node) ? node : [node]));
+
+      callAfter && targetNode && targetNode.insertAfter();
+
+      this.sendEvent('update');
+      return true;
+    }
+    for (const childNode of this.nodes) {
+      if (
+        childNode.insertChild({
+          targetId,
+          node,
+          path: [childNode],
+          masterWorkflowId: this.workflowId,
+          insertBefore,
+        })
+      ) {
+        callAfter && targetNode && targetNode.insertAfter();
+
+        this.sendEvent('update');
+        return true;
+      }
+    }
+    return false;
+  }
+  // endregion
 
   // region Tools
   get renderDirection() {

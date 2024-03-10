@@ -1,3 +1,5 @@
+import { VinesNode } from '@/package/vines-flow/core/nodes';
+
 export type Constructor<T = {}> = new (...args: any[]) => T;
 
 export enum VINES_STATUS {
@@ -15,4 +17,13 @@ export enum IVinesFlowRenderType {
 export interface IVinesFlowRenderOptions {
   direction: 'horizontal' | 'vertical';
   type: IVinesFlowRenderType;
+}
+
+export interface IVinesInsertChildParams {
+  targetId: string;
+  node: VinesNode | VinesNode[];
+  path: VinesNode[];
+  masterWorkflowId?: string;
+  masterWorkflowVersion?: number;
+  insertBefore?: boolean;
 }
