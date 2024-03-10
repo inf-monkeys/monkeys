@@ -1,4 +1,3 @@
-import { IconAlertTriangle } from '@douyinfe/semi-icons';
 import { motion } from 'framer-motion';
 
 interface ErrorBoundaryProps {
@@ -15,7 +14,6 @@ export function ErrorComponent({ error }: ErrorBoundaryProps) {
       exit={{ opacity: 0, scale: 0.92 }}
     >
       <div className="flex items-center gap-2 font-bold text-red-500">
-        <IconAlertTriangle />
         <h1 className="leading-tight">出现了一些问题</h1>
       </div>
       <p className="max-w-md overflow-hidden rounded bg-white bg-opacity-10 p-2 text-xs text-red-500 shadow-inner backdrop-blur-sm">
