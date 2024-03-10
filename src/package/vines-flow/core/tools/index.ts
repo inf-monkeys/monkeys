@@ -35,7 +35,7 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
       if (this.vinesTools.length && this.vinesSubWorkflowTools.length) {
         this.tools = this.vinesTools.concat(this.vinesSubWorkflowTools);
         this.status = VINES_STATUS.READY;
-        this.emit('update');
+        this.sendEvent('refresh');
       }
     }
 

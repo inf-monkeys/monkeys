@@ -69,3 +69,5 @@ export interface IVinesEdge {
 }
 
 export type VinesEdgePath = IVinesEdge[];
+
+export type IVinesMoveAfterTargetType = 'target' | 'source';

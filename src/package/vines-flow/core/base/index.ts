@@ -8,4 +8,8 @@ export class VinesBase extends EventEmitter {
   constructor() {
     super();
   }
+
+  protected sendEvent(event: 'update' | 'refresh') {
+    this.emit(event);
+  }
 }

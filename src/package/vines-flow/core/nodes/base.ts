@@ -1,9 +1,11 @@
 import { MonkeyTaskDefTypes } from '@inf-monkeys/vines';
 import { TaskDefTypes, TaskType } from '@io-orkes/conductor-javascript';
-import { max, min } from 'lodash';
+import { isArray, max, min } from 'lodash';
 
 import { VinesCore } from '@/package/vines-flow/core';
+import { drawLine } from '@/package/vines-flow/core/nodes/svg-utils.ts';
 import {
+  IVinesMoveAfterTargetType,
   IVinesNodeBoundary,
   IVinesNodeController,
   IVinesNodeCustomData,
@@ -13,7 +15,9 @@ import {
   VinesEdgePath,
   VinesTask,
 } from '@/package/vines-flow/core/nodes/typings.ts';
-import { drawLine } from '@/package/vines-flow/core/nodes/utils.ts';
+import { createNewSubWorkflow } from '@/package/vines-flow/core/nodes/utils.ts';
+import { IVinesInsertChildParams } from '@/package/vines-flow/core/typings.ts';
+import { createNanoId } from '@/package/vines-flow/core/utils.ts';
 import VinesEvent from '@/utils/events.ts';
 
 export type NodeClass = new (task: any, vinesCore: VinesCore) => VinesNode;
@@ -92,6 +96,9 @@ export class VinesNode<T extends VinesTask = VinesTask> {
     return true;
   }
 
+  /**
+   * 获取节点用户自定义数据
+   * */
   get customData(): IVinesNodeCustomData {
     const alias = ((this._task as TaskDefTypes & { __alias?: IVinesNodeCustomData })?.__alias ??
       {}) as IVinesNodeCustomData;
@@ -100,6 +107,13 @@ export class VinesNode<T extends VinesTask = VinesTask> {
       title: alias?.title ?? null,
       description: alias?.description ?? null,
     };
+  }
+
+  /**
+   * 获取节点原始 TaskDef
+   * */
+  getRaw(): TaskDefTypes {
+    return this._task;
   }
   // endregion
 
@@ -284,10 +298,111 @@ export class VinesNode<T extends VinesTask = VinesTask> {
   /**
    *  获取节点控制器结构
    * */
-  getController(): IVinesNodeController[] {
+  public getController(): IVinesNodeController[] {
     return this.controller;
   }
   // endregion
+
+  // region CURD
+  public findChildById(id: string): VinesNode | undefined {
+    if (this.id === id) return this;
+    if (isArray(this.children)) {
+      for (const child of this.children) {
+        const result = child.findChildById(id);
+        if (result) return result;
+      }
+    }
+    return void null;
+  }
+
+  public insertChild(params: IVinesInsertChildParams): VinesNode | VinesNode[] | null {
+    const { targetId, path = [], insertBefore = false } = params;
+    let { node } = params;
+    const index = this.children.findIndex((childNode) => childNode.id === targetId);
+    if (index !== -1) {
+      // 嵌套的循环 no
+      const isDoWhileNode = Array.isArray(node)
+        ? node.some((it) => it.type === TaskType.DO_WHILE)
+        : node.type === TaskType.DO_WHILE;
+      if (
+        path.some((nodeChild) => nodeChild.type === TaskType.DO_WHILE) &&
+        isDoWhileNode &&
+        this.type !== TaskType.SUB_WORKFLOW
+      ) {
+        node = createNewSubWorkflow(
+          [...(Array.isArray(node) ? node.map((it) => it.getRaw()) : [node.getRaw()])],
+          this._vinesCore,
+        );
+      }
+      const isFakeNode = +/fake_node/.test(targetId);
+      if (insertBefore) {
+        this.children.splice(index, isFakeNode, ...(Array.isArray(node) ? node : [node]));
+      } else {
+        this.children.splice(index + 1 - isFakeNode, isFakeNode, ...(Array.isArray(node) ? node : [node]));
+      }
+      return node;
+    }
+    for (const childNode of this.children) {
+      if (childNode.insertChild({ targetId, node, path: [childNode, ...path], insertBefore })) {
+        return node;
+      }
+    }
+    return null;
+  }
+
+  public deleteChild(targetId: string, path: VinesNode[] = []) {
+    const index = this.children.findIndex((childNode) => childNode.id === targetId);
+
+    if (index !== -1) {
+      this.children[index].destroy();
+      this.children.splice(index, 1);
+      if (!this.children.length) {
+        this.children.splice(index, 0, VinesNode.createFakeNode(this._vinesCore));
+      }
+      return true;
+    }
+
+    for (const childNode of this.children) {
+      if (childNode.deleteChild(targetId, path.splice(0, 0, this))) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private destroy() {
+    return this.children.map((childNode) => childNode.destroy());
+  }
+
+  async check(): Promise<boolean> {
+    await Promise.all(this.children.map((childNode) => childNode.check()));
+    return true;
+  }
+
+  async insertAfter(): Promise<void> {
+    return void 0;
+  }
+
+  async moveAfter(targetType?: IVinesMoveAfterTargetType): Promise<void> {
+    return void targetType;
+  }
+
+  async deleteAfter(): Promise<void> {
+    return void 0;
+  }
+  // endregion
+
+  static createFakeNode(vinesCore: VinesCore): VinesNode {
+    return VinesNode.create(
+      {
+        name: 'fake_node',
+        taskReferenceName: 'fake_node_' + createNanoId(),
+        type: TaskType.SIMPLE,
+      },
+      vinesCore,
+    );
+  }
 }
 
 // 「控制流程节点」公用逻辑
