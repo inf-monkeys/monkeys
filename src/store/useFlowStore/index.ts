@@ -5,6 +5,9 @@ import { createContext } from 'zustand-utils';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 
 export interface FlowStore {
+  visible: boolean;
+  setVisible: (visible: boolean) => void;
+
   scale: number;
   setScale: (scale: number) => void;
   initialScale: number;
@@ -32,6 +35,9 @@ export interface FlowStore {
 const createFlowStore = () =>
   create<FlowStore>()(
     immer((set) => ({
+      visible: false,
+      setVisible: (visible) => set({ visible }),
+
       initialScale: 1.2,
       setInitialScale: (initialScale) => set({ initialScale }),
       scale: 1.2,

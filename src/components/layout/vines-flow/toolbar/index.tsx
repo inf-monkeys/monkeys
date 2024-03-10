@@ -27,8 +27,13 @@ interface IVinesToolbarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
   const { vines } = useVinesFlow();
-  const { canvasMode, canvasDisabled, isCanvasMoving, setCanvasMode, setCanvasDisabled, setCanvasMoving } =
+  const { canvasMode, canvasDisabled, isCanvasMoving, setCanvasMode, setCanvasDisabled, setCanvasMoving, setVisible } =
     useFlowStore();
+
+  const isEditMode = canvasMode === CanvasStatus.EDIT;
+  const isHorizontal = vines.renderDirection === 'horizontal';
+  const isRenderMini = vines.renderOptions.type === IVinesFlowRenderType.MINI;
+  const isRenderComplicate = vines.renderOptions.type === IVinesFlowRenderType.COMPLICATE;
 
   const handleZoomIn = () => VinesEvent.emit('canvas-zoom-in');
   const handleZoomOut = () => VinesEvent.emit('canvas-zoom-out');
@@ -39,13 +44,15 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
   };
   const handleToggleMode = () =>
     setCanvasMode(canvasMode === CanvasStatus.EDIT ? CanvasStatus.READONLY : CanvasStatus.EDIT);
+  const handleDirectionChange = () => {
+    setVisible(false);
+    setTimeout(() => vines.update({ renderDirection: isHorizontal ? 'vertical' : 'horizontal' }), 80);
+  };
 
-  useHotkeys([['ctrl+l', handleToggleMode, { preventDefault: true }]]);
-
-  const isEditMode = canvasMode === CanvasStatus.EDIT;
-  const isHorizontal = vines.renderDirection === 'horizontal';
-  const isRenderMini = vines.renderOptions.type === IVinesFlowRenderType.MINI;
-  const isRenderComplicate = vines.renderOptions.type === IVinesFlowRenderType.COMPLICATE;
+  useHotkeys([
+    ['ctrl+l', handleToggleMode, { preventDefault: true }],
+    ['ctrl+d', handleDirectionChange, { preventDefault: true }],
+  ]);
 
   return (
     <AnimatePresence>
@@ -77,6 +84,7 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
             icon={isHorizontal ? <BetweenHorizontalStart /> : <BetweenVerticalStart />}
             tip={`排版方向：${isHorizontal ? '横向' : '纵向'}`}
             keys={['ctrl', 'D']}
+            onClick={handleDirectionChange}
           />
           <ToolButton
             icon={<Workflow />}
