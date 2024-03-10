@@ -5,16 +5,16 @@
 │  ├─ui         // 公共组件
 │  │  └─button  // 节点名称
 │  │     ├─auth.tsx // 组件入口
-│  │     └─consts.ts  // 组件工具函数
+│  │     └─typings.ts  // 组件工具函数
 │  ├─layout     // 布局组件
 │  │  ├─example-page1 // 页面
 │  │  │  └─comp1      // 页面组件
 │  │  │  │  ├─auth.tsx // 组件入口
-│  │  │  │  └─consts.ts  // 组件工具函数
+│  │  │  │  └─typings.ts  // 组件工具函数
 │  │  └─home      // 页面
 │  │     └─comp1  // 页面组件
 │  │        ├─auth.tsx // 组件入口
-│  │        └─consts.ts  // 组件工具函数
+│  │        └─typings.ts  // 组件工具函数
 │  └─router     // 路由相关组件     
 ```
 
@@ -23,7 +23,7 @@
 为保证组件统一和美观性，组件及目录命名规范如下：
 
 - 组件目录名称使用小写字母，多个单词使用中划线连接，如：`button`、`date-picker`。
-- 组件由 `auth.tsx` 作为入口文件，`consts.ts` 作为工具函数文件（非必须）。
+- 组件由 `auth.tsx` 作为入口文件，`typings.ts` 作为工具函数文件（非必须）。
 - 组件名称使用大驼峰命名法，如：`Button`、`DatePicker`。
 
 导入示范：

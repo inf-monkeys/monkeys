@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { VinesEdges } from '@/components/layout/vines-flow/edges';
 import { VinesHeadlessModal } from '@/components/layout/vines-flow/headless-modal';
 import { VinesNodes } from '@/components/layout/vines-flow/nodes';
+import { VinesToolbar } from '@/components/layout/vines-flow/toolbar';
 import { VinesFlowWrapper } from '@/components/layout/vines-flow/wrapper';
 import { useVinesFlowWithPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
@@ -82,6 +83,7 @@ export const VinesFlow: React.FC<IVinesFlowProps> = () => {
         )}
       </AnimatePresence>
       <VinesHeadlessModal />
+      <VinesToolbar />
     </main>
   );
 };
