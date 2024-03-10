@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import { useWindowEvent } from '@mantine/hooks';
 import { CircularProgress } from '@nextui-org/progress';
@@ -21,7 +21,7 @@ interface IVinesFlowProps extends React.ComponentPropsWithoutRef<'div'> {}
 export const VinesFlow: React.FC<IVinesFlowProps> = () => {
   const { workflow } = useVinesFlowWithPage();
   const { containerWidth, containerHeight } = usePageStore();
-  const { setInitialScale, canvasMode } = useFlowStore();
+  const { visible, setVisible, setInitialScale, canvasMode } = useFlowStore();
   const {
     vines,
     vinesCanvasSize: { width, height },
@@ -31,8 +31,6 @@ export const VinesFlow: React.FC<IVinesFlowProps> = () => {
   useEffect(() => {
     workflow && vines.update({ workflow });
   }, [workflow]);
-
-  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const initialScale = calculateAdaptiveZoom(containerWidth, containerHeight);
@@ -50,23 +48,24 @@ export const VinesFlow: React.FC<IVinesFlowProps> = () => {
 
   return (
     <main className="vines-center relative size-full">
+      <VinesFlowWrapper>
+        <AnimatePresence>
+          {visible && (
+            <motion.div
+              className="relative"
+              key="vines-canvas"
+              style={{ width, height }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { duration: 0.2 } }}
+              exit={{ opacity: 0, transition: { duration: 0.2 } }}
+            >
+              <VinesEdges />
+              <VinesNodes />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </VinesFlowWrapper>
       <AnimatePresence>
-        <VinesFlowWrapper>
-          <motion.div
-            variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
-            animate={visible ? 'visible' : 'hidden'}
-            className="relative opacity-0"
-            id="vines-canvas"
-            style={{ width, height }}
-          >
-            {visible && (
-              <>
-                <VinesEdges />
-                <VinesNodes />
-              </>
-            )}
-          </motion.div>
-        </VinesFlowWrapper>
         {!visible && (
           <motion.div
             key="vines-canvas-waiting"

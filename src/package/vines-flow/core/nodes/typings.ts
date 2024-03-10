@@ -3,6 +3,7 @@ import type { ForkJoinTaskDef, JoinTaskDef } from '@io-orkes/conductor-javascrip
 
 import { VinesForkJoinTaskDef } from '@/package/vines-flow/core/nodes/node/fork-join.ts';
 import { VinesJoinTaskDef } from '@/package/vines-flow/core/nodes/node/join.ts';
+import { IVinesFlowRenderOptions } from '@/package/vines-flow/core/typings.ts';
 
 export interface NodeCustomData {
   icon?: string | null;
@@ -20,6 +21,8 @@ export interface IVinesWorkflowUpdate {
   workflow?: MonkeyWorkflow;
   workflowId?: string;
   tasks?: MonkeyTaskDefTypes[];
+  renderDirection?: IVinesFlowRenderOptions['direction'];
+  renderType?: IVinesFlowRenderOptions['type'];
 }
 
 export interface IVinesNodeSize {

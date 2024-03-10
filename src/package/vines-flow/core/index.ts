@@ -29,13 +29,16 @@ export class VinesCore extends VinesTools(VinesBase) {
     this.nodes.push(EndPointNode.createEnd(this));
   }
 
-  public update({ workflow, workflowId, tasks }: IVinesWorkflowUpdate, render = true) {
+  public update({ workflow, workflowId, tasks, renderType, renderDirection }: IVinesWorkflowUpdate, render = true) {
     if (workflow) {
       workflow?.workflowDef?.tasks && (this.tasks = workflow.workflowDef.tasks.filter((task) => task));
       workflow?.workflowId && (this.workflowId = workflow.workflowId);
     }
     workflowId && (this.workflowId = workflowId);
     tasks && (this.tasks = tasks.filter((task) => task));
+
+    renderDirection && (this.renderOptions.direction = renderDirection);
+    renderType && (this.renderOptions.type = renderType);
 
     this.init();
     render && this.render();
