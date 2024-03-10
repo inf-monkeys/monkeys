@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { SimplifyNodeExpand } from '@/components/layout/vines-flow/nodes/simplify/expand';
 import { NodeDnd } from '@/components/layout/vines-flow/nodes/simplify/node/dnd.tsx';
 import { VinesEndNode } from '@/components/layout/vines-flow/nodes/simplify/node/endpoint/end.tsx';
 import { VinesStartNode } from '@/components/layout/vines-flow/nodes/simplify/node/endpoint/start.tsx';
@@ -9,6 +10,7 @@ import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
+import { cn } from '@/utils';
 import VinesEvent from '@/utils/events';
 
 interface ISimplifyNodeProps {
@@ -19,7 +21,10 @@ export const SimplifyNode: React.FC<ISimplifyNodeProps> = ({ node }) => {
   const {
     id: nodeId,
     position: { x: nodeX, y: nodeY },
+    customData,
+    _task,
   } = node;
+  const { name: toolName } = _task;
 
   const { vines } = useVinesFlow();
   const { canvasMode, canvasDisabled } = useFlowStore();
@@ -73,6 +78,16 @@ export const SimplifyNode: React.FC<ISimplifyNodeProps> = ({ node }) => {
           )
         }
       </NodeDnd>
+      <div
+        className={cn(
+          'pointer-events-none absolute flex min-h-[80px] min-w-60 items-center pl-5',
+          isMiniNode && 'rounded-r-xl bg-[#f2f2f2] !pl-1 text-[#292b2e]',
+          isSimplifyHorizontal && '!min-w-52 scale-75 justify-center !pl-0 text-center',
+        )}
+        style={{ left: nodeX + (isSimplifyHorizontal ? -64 : 80), top: nodeY + (isSimplifyHorizontal ? -70 : 0) }}
+      >
+        <SimplifyNodeExpand nodeId={nodeId} customData={customData} toolName={toolName} />
+      </div>
     </>
   );
 };
