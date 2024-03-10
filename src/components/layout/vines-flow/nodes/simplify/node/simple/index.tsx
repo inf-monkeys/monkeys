@@ -16,12 +16,10 @@ interface IVinesSimpleNodeProps {
   isMiniNode?: boolean;
   isDragging?: boolean;
   isOverlay?: boolean;
-  isOver?: boolean;
 }
 
 export const VinesSimpleNode: React.FC<IVinesSimpleNodeProps> = ({
   node,
-  isOver,
   isMiniNode,
   canvasMode,
   canvasDisabled,
@@ -74,7 +72,7 @@ export const VinesSimpleNode: React.FC<IVinesSimpleNodeProps> = ({
           ) : (
             <motion.div
               key={nodeId + '_node_icon'}
-              className={cn('rounded-lg', isOver && 'outline outline-4 outline-vines-500')}
+              className="rounded-lg"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}

@@ -12,12 +12,7 @@ import VinesEvent from '@/utils/events';
 
 interface INodeDndProps {
   node: VinesNode;
-  children: (
-    node: VinesNode,
-    isOver: boolean,
-    isDragging: boolean,
-    listeners: DraggableSyntheticListeners,
-  ) => React.ReactNode;
+  children: (node: VinesNode, isDragging: boolean, listeners: DraggableSyntheticListeners) => React.ReactNode;
   onOver?: () => void;
   onClick: () => void;
 }
@@ -60,7 +55,7 @@ export const NodeDnd: React.FC<INodeDndProps> = ({ node, children, onOver, onCli
     }
   }, [isOver]);
 
-  const child = children(node, isOver, isDragging, listeners);
+  const child = children(node, isDragging, listeners);
 
   return (
     <div
@@ -82,16 +77,16 @@ export const NodeDnd: React.FC<INodeDndProps> = ({ node, children, onOver, onCli
         <motion.div
           className={cn(
             isDragging
-              ? 'border-offset-0 rounded-xl bg-white text-black outline outline-4 outline-[var(--semi-color-primary)]'
+              ? 'border-offset-0 rounded-xl bg-white text-black outline outline-4 outline-vines-500'
               : '!scale-100 !opacity-100',
           )}
           variants={{
             default: {
-              transform: 'scale(1)',
+              scale: 1,
               opacity: 1,
             },
             dragging: {
-              transform: 'scale(0.85)',
+              scale: 0.55,
               opacity: 0.8,
             },
           }}
