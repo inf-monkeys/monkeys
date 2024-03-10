@@ -193,11 +193,36 @@ export class VinesCore extends VinesTools(VinesBase) {
           targetId,
           node,
           path: [childNode],
-          masterWorkflowId: this.workflowId,
           insertBefore,
         })
       ) {
         callAfter && targetNode && targetNode.insertAfter();
+
+        this.sendEvent('update');
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * 警告：在 deleteAfter 内调用此方法会导致死循环，请将 callAfter 设置为 false
+   * */
+  public deleteNode(targetId: string, callAfter = true) {
+    const index = this.nodes.findIndex((childNode) => childNode.id === targetId);
+    if (index !== -1) {
+      this.nodes[index].destroy();
+      this.nodes.splice(index, 1);
+      void (this.nodes.length === 2 && this.nodes.splice(1, 0, VinesNode.createFakeNode(this)));
+
+      callAfter && this.getNodeById(targetId)?.deleteAfter();
+
+      this.sendEvent('update');
+      return true;
+    }
+    for (const childNode of this.nodes) {
+      if (childNode.deleteChild(targetId, [childNode])) {
+        callAfter && this.getNodeById(targetId)?.deleteAfter();
 
         this.sendEvent('update');
         return true;

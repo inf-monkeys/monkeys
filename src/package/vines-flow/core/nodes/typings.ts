@@ -1,5 +1,5 @@
 import { MonkeyTaskDefTypes, MonkeyWorkflow } from '@inf-monkeys/vines';
-import type { ForkJoinTaskDef, JoinTaskDef } from '@io-orkes/conductor-javascript';
+import type { ForkJoinTaskDef, JoinTaskDef, SimpleTaskDef } from '@io-orkes/conductor-javascript';
 
 import { VinesForkJoinTaskDef } from '@/package/vines-flow/core/nodes/node/fork-join.ts';
 import { VinesJoinTaskDef } from '@/package/vines-flow/core/nodes/node/join.ts';
@@ -71,3 +71,10 @@ export interface IVinesEdge {
 export type VinesEdgePath = IVinesEdge[];
 
 export type IVinesMoveAfterTargetType = 'target' | 'source';
+
+export interface IVinesCollectDoWhileOutputTaskDef extends SimpleTaskDef {
+  inputParameters: {
+    doWhileTaskReferenceName: string | null;
+    jsonPathExpression: string | null;
+  };
+}
