@@ -3,7 +3,6 @@ import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { IVinesNodeCustomData } from '@/package/vines-flow/core/nodes/typings.ts';
-import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { cn } from '@/utils';
 
@@ -15,8 +14,6 @@ interface ISimplifyNodeExpandProps {
 
 export const SimplifyNodeExpand: React.FC<ISimplifyNodeExpandProps> = ({ nodeId, customData, toolName }) => {
   const { vines } = useVinesFlow();
-
-  const CanvasRenderType = vines.renderOptions.type;
 
   const toolDef = vines.getTool(toolName);
 
@@ -84,11 +81,7 @@ export const SimplifyNodeExpand: React.FC<ISimplifyNodeExpandProps> = ({ nodeId,
                   opacity: 0,
                   marginTop: -24,
                 }}
-                className={cn(
-                  'leading-2 text-xs text-opacity-70',
-                  isErrorNode && '!text-red-10',
-                  CanvasRenderType === IVinesFlowRenderType.MINI && '!text-[#a1a1a3]',
-                )}
+                className={cn('leading-2 text-xs text-opacity-70', isErrorNode && '!text-red-10')}
               >
                 {displayDesc}
               </motion.div>

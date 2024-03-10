@@ -1,6 +1,7 @@
 import { MonkeyTaskDefTypes } from '@inf-monkeys/vines';
 
 import { VinesBase } from '@/package/vines-flow/core/base';
+import { VINES_DEF_NODE } from '@/package/vines-flow/core/consts.ts';
 import { EndPointNode, VinesNode } from '@/package/vines-flow/core/nodes';
 import { IVinesNodePosition, IVinesWorkflowUpdate, VinesEdgePath } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesTools } from '@/package/vines-flow/core/tools';
@@ -23,26 +24,45 @@ export class VinesCore extends VinesTools(VinesBase) {
 
   private position: IVinesNodePosition = { x: 0, y: 0 };
 
+  private nodeInitSize = { width: 80, height: 80 };
+
   private init() {
+    if (this.nodeInitSize.width !== 80 || this.nodeInitSize.height !== 80) {
+      this.setAllNodeSize(this.nodeInitSize.width, this.nodeInitSize.height);
+    }
+
     this.nodes = this.tasks.map((it) => VinesNode.create(it, this));
     this.nodes.splice(0, 0, EndPointNode.createStart(this));
     this.nodes.push(EndPointNode.createEnd(this));
   }
 
   public update({ workflow, workflowId, tasks, renderType, renderDirection }: IVinesWorkflowUpdate, render = true) {
+    let needToInit = false;
     if (workflow) {
-      workflow?.workflowDef?.tasks && (this.tasks = workflow.workflowDef.tasks.filter((task) => task));
+      workflow?.workflowDef?.tasks &&
+        (this.tasks = workflow.workflowDef.tasks.filter((task) => task)) &&
+        (needToInit = true);
       workflow?.workflowId && (this.workflowId = workflow.workflowId);
     }
     workflowId && (this.workflowId = workflowId);
-    tasks && (this.tasks = tasks.filter((task) => task));
+    tasks && (this.tasks = tasks.filter((task) => task)) && (needToInit = true);
+
+    needToInit && this.init();
 
     renderDirection && (this.renderOptions.direction = renderDirection);
-    renderType && (this.renderOptions.type = renderType);
+    if (renderType) {
+      this.renderOptions.type = renderType;
+      const { width, height } = VINES_DEF_NODE[renderType];
+      this.setAllNodeSize(width, height);
+      this.nodeInitSize = { width, height };
+    }
 
-    this.init();
     render && this.render();
     this.emit('update');
+  }
+
+  public setAllNodeSize(width: number, height: number) {
+    this.getAllNodes().forEach((it) => (it.size = { width, height }));
   }
 
   public render() {
