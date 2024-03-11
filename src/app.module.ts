@@ -6,9 +6,10 @@ import { RepositoryMoule } from './modules/infra/database/repositories/repositor
 import { OpenapiModule } from './modules/openapi/openapi.module';
 import { ToolsModule } from './modules/tools/tools.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
+import { GatewaysModule } from './modules/gateways/gateways.module';
 
 @Module({
-  imports: [DatabaseModule, ToolsModule, RepositoryMoule, WorkflowModule, OpenapiModule],
+  imports: [DatabaseModule, ToolsModule, RepositoryMoule, WorkflowModule, OpenapiModule, GatewaysModule],
   controllers: [AppController],
   providers: [AppService],
 })

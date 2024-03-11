@@ -28,11 +28,17 @@ export interface RedisConfig {
   url: string;
 }
 
+export interface VectorGatewayService {
+  enabled: boolean;
+  baseUrl: string;
+}
+
 export interface Config {
   server: ServerConfig;
   conductor: ConductorConfig;
   database: DatabaseConfig;
   redis: RedisConfig;
+  vector: VectorGatewayService;
 }
 
 const port = readConfig('server.port', 3000);
@@ -61,5 +67,9 @@ export const config: Config = {
   redis: {
     enabled: readConfig('redis.enabled', false),
     url: readConfig('redis.url', 'redis://localhost:6379'),
+  },
+  vector: {
+    enabled: readConfig('vector.enabled', false),
+    baseUrl: readConfig('vector.baseUrl', 'http://localhost:8899'),
   },
 };
