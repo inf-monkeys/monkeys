@@ -1,7 +1,7 @@
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { All, Body, Controller, Param, Post, Req } from '@nestjs/common';
-import { RegisterWorkerDto } from './dto/req/register-worker.dto';
+import { RegisterToolDto } from './dto/req/register-tool.dto';
 import { ToolsForwardService } from './tools.forward.service';
 import { ToolsRegistryService } from './tools.registry.service';
 
@@ -13,7 +13,7 @@ export class ToolsController {
   ) {}
 
   @Post('/register')
-  public async registerWorker(@Body() body: RegisterWorkerDto) {
+  public async registerWorker(@Body() body: RegisterToolDto) {
     const { manifestJsonUrl } = body;
     return await this.toolRegistryService.registerToolsServer({
       manifestJsonUrl,

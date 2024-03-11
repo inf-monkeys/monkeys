@@ -1,12 +1,11 @@
 import { flatTasks } from '@/common/utils/conductor';
 import { extractAssetFromZip } from '@/common/utils/zip-asset';
-import { WorkflowMetadataEntity } from '@/entities/workflow/workflow';
 import { AssetType, BlockType } from '@inf-monkeys/vines';
 import { WorkflowTask } from '@io-orkes/conductor-javascript';
 import { Injectable } from '@nestjs/common';
 import fs from 'fs';
 import _ from 'lodash';
-import { ObjectId } from 'typeorm';
+import { ObjectId } from 'mongodb';
 import { ToolsRepository } from '../infra/database/repositories/tools.repository';
 import { WorkflowRepository } from '../infra/database/repositories/workflow.repository';
 import { ConductorService } from './conductor/conductor.service';
@@ -29,30 +28,13 @@ export class WorkflowCrudService {
 
   public async createWorkflowDef(teamId: string, userId: string, data: CreateWorkflowData, options?: CreateWorkflowOptions) {
     const { assetsPolicy, isTheSameTeam = false, replaceSqlDatabaseMap, replaceVectorDatabaseMap, replaceLlmModelMap, replaceSdModelMap } = options || {};
-    const { name, iconUrl, description, workflowDef, variables, triggers, output, version = 1 } = data;
+    const { name, iconUrl, description, tasks, variables, triggers, output, version = 1 } = data;
     const workflowId = options?.useExistId || new ObjectId().toHexString();
-    const workflowToSave: WorkflowMetadataEntity = {
-      id: new ObjectId(),
-      name: name,
-      teamId,
-      creatorUserId: userId,
-      iconUrl,
-      desc: description,
-      workflowId,
-      version,
-      workflowDef,
-      output,
-      variables,
-      activated: true,
-      validated: true,
-      createdTimestamp: +new Date(),
-      updatedTimestamp: +new Date(),
-    };
 
     // 从应用市场 clone 的时候，资产的授权策略
     const tools = await this.toolsRepository.listTools();
     if (assetsPolicy && !isTheSameTeam) {
-      const flattedTasks: WorkflowTask[] = flatTasks(workflowToSave.workflowDef.tasks);
+      const flattedTasks: WorkflowTask[] = flatTasks(tasks);
       for (const task of flattedTasks.filter((x) => x.type === BlockType.SIMPLE)) {
         const block = tools.find((x) => x.name === task.name);
         if (block?.input?.length) {
@@ -141,7 +123,7 @@ export class WorkflowCrudService {
 
     // 导入工作流的时候替换想了数据库和表格数据
     if (replaceSqlDatabaseMap || replaceVectorDatabaseMap || replaceSdModelMap || replaceLlmModelMap) {
-      const flattedTasks: WorkflowTask[] = flatTasks(workflowToSave.workflowDef.tasks);
+      const flattedTasks: WorkflowTask[] = flatTasks(tasks);
       for (const task of flattedTasks.filter((x) => x.type === BlockType.SIMPLE)) {
         const tool = tools.find((x) => x.name === task.name);
         if (tool?.input?.length) {
@@ -185,7 +167,6 @@ export class WorkflowCrudService {
     }
 
     // 处理密钥
-    const { tasks } = workflowToSave.workflowDef;
     const flattedTasks: WorkflowTask[] = flatTasks(tasks);
     for (const task of flattedTasks) {
       if (task.inputParameters) {
@@ -201,10 +182,15 @@ export class WorkflowCrudService {
       }
     }
 
-    // await this.workflowAssetService.assetRepository.insert(workflow);
-    // await this.createWorkflowDefByWorkflowId(teamId, workflow.workflowId, workflow.version, originalWorkflowIdToNewWorkflowIdMap);
-
-    await this.conductorService.saveWorkflowInConductor(workflowToSave);
+    const workflowEntity = await this.workflowRepository.createWorkflow(teamId, userId, workflowId, version, {
+      name,
+      description,
+      iconUrl,
+      tasks,
+      output,
+      variables,
+    });
+    await this.conductorService.saveWorkflowInConductor(workflowEntity);
 
     // const chain = await this.getSubWorkflowChain(masterWorkflowId, 1);
     // if (chain.length > 1) {
@@ -212,15 +198,16 @@ export class WorkflowCrudService {
     // }
 
     if (triggers?.length) {
-      // for (const trigger of triggers) {
-      //   await this.createWorkflowTrigger(masterWorkflowId, {
-      //     triggerType: trigger.type,
-      //     cron: trigger.cron,
-      //     enabled: trigger.enabled,
-      //     version: 1,
-      //     webhookConfig: trigger.webhookConfig,
-      //   });
-      // }
+      for (const trigger of triggers) {
+        await this.workflowRepository.createWorkflowTrigger({
+          workflowId: workflowId,
+          type: trigger.type,
+          cron: trigger.cron,
+          enabled: trigger.enabled,
+          workflowVersion: 1,
+          webhookConfig: trigger.webhookConfig,
+        });
+      }
     }
 
     return workflowId;
@@ -344,7 +331,7 @@ export class WorkflowCrudService {
     const workflowId = await this.createWorkflowDef(teamId, userId, {
       name: originalWorkflow.name + ' - 副本',
       version: originalWorkflowVersion,
-      workflowDef: originalWorkflow.workflowDef,
+      tasks: originalWorkflow.tasks,
     });
     return workflowId;
   }
@@ -360,7 +347,7 @@ export class WorkflowCrudService {
         {
           name: originalWorkflow.name + ' - 副本',
           version: version,
-          workflowDef: originalWorkflow.workflowDef,
+          tasks: originalWorkflow.tasks,
         },
         {
           useExistId: newWorkflowId,

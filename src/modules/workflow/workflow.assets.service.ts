@@ -20,9 +20,8 @@ export class WorkflowAssetsService {
     // 当前流程
     const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
     // 子流程
-    const subWorkflows = await this.workflowCommonService.getAllSubWorkflowsRecursive(workflow.workflowDef);
-    const workflowDef = workflow.workflowDef;
-    let allTasks = workflowDef.tasks;
+    const subWorkflows = await this.workflowCommonService.getAllSubWorkflowsRecursive(workflow.tasks);
+    let allTasks = workflow.tasks;
     for (const subWorkflow of subWorkflows) {
       allTasks = allTasks.concat(subWorkflow.tasks);
     }

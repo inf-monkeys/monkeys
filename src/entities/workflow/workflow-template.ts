@@ -1,7 +1,7 @@
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
-@Entity({ name: 'workflow-templates' })
+@Entity({ name: 'workflow_templates' })
 export class WorkflowTemplateEntity extends BaseEntity {
   @Column()
   name: string;

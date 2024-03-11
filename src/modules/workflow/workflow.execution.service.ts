@@ -8,7 +8,7 @@ import { Workflow } from '@io-orkes/conductor-javascript';
 import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
 import retry from 'retry-as-promised';
-import { WorkflowRepository } from '../infra/database/repositories/workflow.repository';
+import { FindWorkflowCondition, WorkflowRepository } from '../infra/database/repositories/workflow.repository';
 import { ConductorService } from './conductor/conductor.service';
 import { SearchWorkflowExecutionsDto, SearchWorkflowExecutionsOrderDto, WorkflowExecutionSearchableField } from './dto/req/search-workflow-execution.dto';
 import { UpdateTaskStatusDto } from './dto/req/update-task-status.dto';
@@ -74,7 +74,7 @@ export class WorkflowExecutionService {
     const [page, limit] = [+p, +l];
     const start = (page - 1) * limit;
 
-    const workflowCondition: Partial<WorkflowMetadataEntity> = {
+    const workflowCondition: FindWorkflowCondition = {
       teamId,
     };
 
@@ -85,7 +85,7 @@ export class WorkflowExecutionService {
       workflowCondition.creatorUserId = creatorUserId;
     }
 
-    const workflowsToSearch = await this.workflowRepository.findByCondition(workflowCondition);
+    const workflowsToSearch = await this.workflowRepository.findWorkflowByCondition(workflowCondition);
 
     if (workflowsToSearch.length === 0) {
       return {

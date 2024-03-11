@@ -1,9 +1,12 @@
+import { logger } from '@/common/logger';
 import { enumToList } from '@/common/utils';
 import { BlockDefinition } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 import { OpenAPIObject } from '@nestjs/swagger';
 import { ServerObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 import axios from 'axios';
+import * as fs from 'fs';
+import * as path from 'path';
 import url from 'url';
 import { ToolsRepository } from '../infra/database/repositories/tools.repository';
 import { ApiType, AuthType, ManifestJson, RegisterWorkerParams, SchemaVersion } from './interfaces';
@@ -92,7 +95,29 @@ export class ToolsRegistryService {
     // Save server info and credentials
     await this.toolsRepository.saveServer(manifestData);
 
-    // TODO: Save Tools
+    await this.toolsRepository.createOrUpdateTools(namespace, tools);
     return tools;
+  }
+
+  public async initBuiltInTools() {
+    const folder = path.resolve(__dirname, `./built-in-tools/`);
+    if (!fs.existsSync(folder)) {
+      logger.warn('Bulit in tools folder not found');
+    }
+    const builtInBlocks: BlockDefinition[] = (
+      await Promise.all(
+        fs.readdirSync(folder, { withFileTypes: true }).reduce(
+          (result, file) => {
+            if (file.isDirectory()) return result;
+            if (!file.name.endsWith('.js')) return result;
+            result.push(import(path.resolve(folder, file.name)));
+            return result;
+          },
+          [] as Promise<{ default: any }>[],
+        ),
+      )
+    ).map((x) => x.default);
+
+    await this.toolsRepository.createOrUpdateTools('system', builtInBlocks);
   }
 }

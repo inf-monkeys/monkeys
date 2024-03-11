@@ -31,6 +31,7 @@ export class ExampleToolsController {
     description: 'Simply add tow numbers.',
   })
   @MonkeyToolCategories(['math'])
+  @MonkeyToolIcon('emoji:👧:#ceefc5')
   public async addTwoNumberExample(@Body() body: AddTwoNumberDto) {
     const { numA, numB } = body;
     return {

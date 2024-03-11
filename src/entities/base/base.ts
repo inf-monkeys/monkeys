@@ -19,15 +19,17 @@ export class BaseEntity {
   id: ObjectId;
 
   @Column({
-    default: () => +new Date(),
+    name: 'created_timestamp',
+    default: () => Date.now(),
   })
   createdTimestamp: number;
 
   @Column({
-    default: () => +new Date(),
+    name: 'updated_timestamp',
+    default: () => Date.now(),
   })
   updatedTimestamp: number;
 
-  @Column({ default: false })
+  @Column({ default: false, name: 'is_deleted' })
   isDeleted?: boolean;
 }

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import * as Joiful from 'joiful';
 
-export class RegisterWorkerDto {
+export class RegisterToolDto {
   @ApiProperty({
     required: true,
     type: String,

@@ -31,12 +31,12 @@ export class WorkflowCrudController {
   })
   public async createWorkflowDef(@Req() req: IRequest, @Body() body: CreateWorkflowDefDto) {
     const { teamId, userId } = req;
-    const { name, description, workflowDef, variables, output, iconUrl, triggers } = body;
+    const { name, description, tasks, variables, output, iconUrl, triggers } = body;
     const workflowId = await this.service.createWorkflowDef(teamId, userId, {
       name,
       description,
       iconUrl,
-      workflowDef,
+      tasks,
       variables,
       output,
       triggers,

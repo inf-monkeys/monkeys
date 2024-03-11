@@ -6,8 +6,10 @@ import { AppModule } from './app.module';
 import { config } from './common/config';
 import { ExceptionsFilter } from './common/filters/exception.filter';
 import { logger } from './common/logger';
+import { ValidationPipe } from './common/pipes/validator.pipe';
 import { setupExampleWorkerSwagger } from './modules/tools/example/example.swagger';
 import { ToolsPollingService } from './modules/tools/tools.polling.service';
+import { ToolsRegistryService } from './modules/tools/tools.registry.service';
 import { setupSwagger } from './setupSwagger';
 
 process.on('unhandledRejection', (err: Error) => {
@@ -22,6 +24,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.setGlobalPrefix('/api/');
+  app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new ExceptionsFilter());
   app.use(bodyParser.json({ limit: '100mb' }));
   app.use(bodyParser.urlencoded({ limit: '100mb', extended: true }));
@@ -42,8 +45,12 @@ async function bootstrap() {
   setupSwagger(app);
 
   // String polling for tasks
-  const workerPollingService = await app.resolve<ToolsPollingService>(ToolsPollingService);
-  workerPollingService.startPolling();
+  const toolsPollingService = await app.resolve<ToolsPollingService>(ToolsPollingService);
+  toolsPollingService.startPolling();
+
+  // Register built in tools
+  const toolsRegistryService = await app.resolve<ToolsRegistryService>(ToolsRegistryService);
+  toolsRegistryService.initBuiltInTools();
 
   await app.listen(config.server.port);
 }

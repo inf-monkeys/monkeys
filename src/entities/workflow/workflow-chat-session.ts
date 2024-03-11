@@ -1,7 +1,7 @@
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
-@Entity({ name: 'workflow-chat-sessions' })
+@Entity({ name: 'workflow_chat_sessions' })
 export class WorkflowChatSessionEntity extends BaseEntity {
   @Column({
     name: 'display_name',

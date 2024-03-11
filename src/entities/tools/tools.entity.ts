@@ -11,6 +11,7 @@ export interface INodeCredentialDescription {
 export class ToolsEntity extends BaseEntity {
   @Column({
     nullable: true,
+    name: 'creator_user_id',
   })
   creatorUserId?: string;
 
@@ -22,7 +23,7 @@ export class ToolsEntity extends BaseEntity {
   @Column({
     nullable: true,
   })
-  public: boolean;
+  public?: boolean;
 
   @Column({
     default: BlockType.SIMPLE,
@@ -41,7 +42,9 @@ export class ToolsEntity extends BaseEntity {
   })
   credentials?: INodeCredentialDescription[];
 
-  @Column()
+  @Column({
+    name: 'display_name',
+  })
   displayName: string;
 
   @Column({
@@ -51,7 +54,7 @@ export class ToolsEntity extends BaseEntity {
 
   @Column({
     nullable: true,
-    type: 'text',
+    type: 'simple-json',
   })
   categories?: string[];
 

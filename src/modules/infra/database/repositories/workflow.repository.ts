@@ -1,9 +1,17 @@
-import { WorkflowMetadataEntity } from '@/entities/workflow/workflow';
+import { WorkflowMetadataEntity, WorkflowOutputValue } from '@/entities/workflow/workflow';
 import { WorkflowExecutionEntity } from '@/entities/workflow/workflow-execution';
 import { WorkflowTriggerType, WorkflowTriggersEntity } from '@/entities/workflow/workflow-trigger';
+import { BlockDefProperties, MonkeyTaskDefTypes } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, ObjectId, Repository } from 'typeorm';
+import { ObjectId } from 'mongodb';
+import { In, Repository } from 'typeorm';
+
+export interface FindWorkflowCondition {
+  teamId: string;
+  workflowId?: string;
+  creatorUserId?: string;
+}
 
 @Injectable()
 export class WorkflowRepository {
@@ -16,13 +24,48 @@ export class WorkflowRepository {
     private readonly workflowTriggerRepository: Repository<WorkflowTriggersEntity>,
   ) {}
 
-  public async findByCondition(condition: Partial<WorkflowMetadataEntity>) {
+  public async findWorkflowByCondition(condition: FindWorkflowCondition) {
     return await this.workflowMetadataRepository.find({
       where: {
         ...condition,
         isDeleted: false,
       },
     });
+  }
+
+  public async createWorkflow(
+    teamId: string,
+    userId: string,
+    workflowId: string,
+    version: number,
+    data: {
+      name: string;
+      description?: string;
+      iconUrl?: string;
+      tasks: MonkeyTaskDefTypes[];
+      variables?: BlockDefProperties[];
+      output: WorkflowOutputValue[];
+    },
+  ) {
+    const { name, description, iconUrl, tasks, variables, output } = data;
+    const entity: WorkflowMetadataEntity = {
+      id: new ObjectId(),
+      createdTimestamp: Date.now(),
+      updatedTimestamp: Date.now(),
+      isDeleted: false,
+      workflowId,
+      version,
+      teamId: teamId,
+      creatorUserId: userId,
+      name,
+      description,
+      iconUrl,
+      tasks,
+      variables,
+      output,
+    };
+    await this.workflowMetadataRepository.save(entity);
+    return entity;
   }
 
   public async getWorkflowById(id: string, version: number) {

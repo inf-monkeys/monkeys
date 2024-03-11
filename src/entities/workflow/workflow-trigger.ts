@@ -49,7 +49,7 @@ export interface WebhookTriggerConfig {
   responseUntil: WebhookTriggerResponseUntil;
 }
 
-@Entity({ name: 'workflow-triggers' })
+@Entity({ name: 'workflow_triggers' })
 export class WorkflowTriggersEntity extends BaseEntity {
   @Column({
     name: 'workflow_id',

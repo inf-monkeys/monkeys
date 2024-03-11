@@ -1,4 +1,4 @@
-import { BlockDefProperties, MonkeyWorkflowDef } from '@inf-monkeys/vines';
+import { BlockDefProperties, MonkeyTaskDefTypes } from '@inf-monkeys/vines';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 import { WorkflowTriggerType } from './workflow-trigger';
@@ -44,7 +44,7 @@ export interface WorkflowOutputValue {
   value: string;
 }
 
-@Entity({ name: 'workflows' })
+@Entity({ name: 'workflow_metadatas' })
 export class WorkflowMetadataEntity extends BaseEntity {
   @Column()
   workflowId: string;
@@ -58,10 +58,11 @@ export class WorkflowMetadataEntity extends BaseEntity {
   @Column({
     nullable: true,
   })
-  desc?: string;
+  description?: string;
 
   @Column({
     nullable: true,
+    name: 'icon_url',
   })
   iconUrl?: string;
 
@@ -72,36 +73,42 @@ export class WorkflowMetadataEntity extends BaseEntity {
   @Column({
     default: true,
   })
-  activated: boolean;
+  activated?: boolean;
 
   @Column({
     default: true,
   })
-  validated: boolean;
+  validated?: boolean;
 
-  @Column()
+  @Column({
+    name: 'creator_user_id',
+  })
   creatorUserId: string;
 
-  @Column()
+  @Column({
+    name: 'team_id',
+  })
   teamId: string;
 
   @Column({
     nullable: true,
     comment: 'conductor workflow json 定义',
     type: 'simple-json',
-    name: 'workflow_def',
+    name: 'tasks',
   })
-  workflowDef: Partial<MonkeyWorkflowDef>;
+  tasks: MonkeyTaskDefTypes[];
 
   @Column({
     comment: 'workflow 变量',
     type: 'simple-json',
+    nullable: true,
   })
   variables?: BlockDefProperties[];
 
   @Column({
     comment: 'workflow output 配置',
     type: 'simple-json',
+    nullable: true,
   })
   output: WorkflowOutputValue[];
 
@@ -110,7 +117,6 @@ export class WorkflowMetadataEntity extends BaseEntity {
     comment: 'fork from',
     name: 'fork_from_id',
   })
-  @Column()
   forkFromId?: string;
 
   @Column({
@@ -121,6 +127,8 @@ export class WorkflowMetadataEntity extends BaseEntity {
   })
   validationIssues?: WorkflowValidationIssue[];
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   md5?: string;
 }

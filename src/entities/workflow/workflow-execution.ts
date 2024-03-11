@@ -2,7 +2,7 @@ import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 import { WorkflowTriggerType } from './workflow-trigger';
 
-@Entity({ name: 'workflow-execution' })
+@Entity({ name: 'workflow_execution' })
 export class WorkflowExecutionEntity extends BaseEntity {
   @Column({
     name: 'workflow_id',

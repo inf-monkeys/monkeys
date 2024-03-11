@@ -8,18 +8,25 @@ export const parseOpenApiSpecAsBlocks = (namespace: string, specData: OpenAPIObj
     for (const method in pathItemObject) {
       if (['get', 'post', 'delete', 'put', 'patch', 'options', 'head', 'trace'].includes(method)) {
         const apiContent = pathItemObject[method] as OperationObject;
+        const name = apiContent['x-monkey-tool-name'] || apiContent.operationId;
+        const extra = apiContent['x-monkey-tool-extra'] || {};
+        extra.apiInfo = {
+          method,
+          path,
+        };
         const block: BlockDefinition = {
           type: BlockType.SIMPLE,
-          name: `${namespace}__${method}__${path}`,
-          displayName: apiContent['x-monkey-block-displayName'] || apiContent.summary,
-          description: apiContent['x-monkey-block-description'] || apiContent.description,
-          categories: apiContent['x-monkey-block-categories'] || [],
-          icon: apiContent['x-monkey-block-icon'] || '',
+          name: `${namespace}__${name}`,
+          displayName: apiContent['x-monkey-tool-display-name'] || apiContent.summary,
+          description: apiContent['x-monkey-tool-description'] || apiContent.description,
+          categories: apiContent['x-monkey-tool-categories'] || [],
+          icon: apiContent['x-monkey-tool-icon'] || '',
           input: [],
           output: [],
+          extra: extra,
         };
 
-        const inputInSpec = apiContent['x-monkey-block-input'];
+        const inputInSpec = apiContent['x-monkey-tool-input'];
         if (inputInSpec) {
           block.input = inputInSpec;
         } else {
@@ -167,7 +174,7 @@ export const parseOpenApiSpecAsBlocks = (namespace: string, specData: OpenAPIObj
           }
         }
 
-        const outputInSpec = apiContent['x-monkey-block-output'];
+        const outputInSpec = apiContent['x-monkey-tool-output'];
         if (outputInSpec) {
           block.output = outputInSpec;
         }

@@ -14,7 +14,7 @@ export interface PageInstance {
   customOptionsProperties?: BlockDefProperties[];
 }
 
-@Entity({ name: 'workflow-pages' })
+@Entity({ name: 'workflow_pages' })
 export class WorkflowPageEntity extends BaseEntity {
   @Column()
   displayName: string;

@@ -1,4 +1,4 @@
-import { AssetType, MonkeyWorkflowDef } from '@inf-monkeys/vines';
+import { AssetType, MonkeyTaskDefTypes, MonkeyWorkflowDef } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 import { WorkflowRepository } from '../infra/database/repositories/workflow.repository';
 
@@ -11,7 +11,7 @@ export class WorkflowCommonService {
   ASSET_TYPE_TEXT_COLLECTION: AssetType = 'text-collection';
   ASSET_TYPE_TABLE_COLLECTION: AssetType = 'table-collection';
 
-  public async getAllSubWorkflowsRecursive(workflowDef: Partial<MonkeyWorkflowDef>): Promise<MonkeyWorkflowDef[]> {
+  public async getAllSubWorkflowsRecursive(tasks: MonkeyTaskDefTypes[]): Promise<MonkeyWorkflowDef[]> {
     // let subWorkflows: WorkflowMetadataEntity[] = [];
     // const { tasks } = workflowDef;
     // const flattedTasks: WorkflowTask[] = flatTasks(tasks);
