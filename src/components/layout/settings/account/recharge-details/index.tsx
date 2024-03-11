@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 
 import { PaginationState } from '@tanstack/react-table';
+import { AnimatePresence } from 'framer-motion';
 import { Download } from 'lucide-react';
 
 import { useTeamBalance, useTeamOrderList } from '@/apis/authz/team/payment';
@@ -9,8 +10,8 @@ import { balanceFormat } from '@/components/layout/settings/account/utils.ts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { RemoteDataTable } from '@/components/ui/data-table/remote.tsx';
+import { Loading } from '@/components/ui/loading';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
-import { Spinner } from '@/components/ui/spinner';
 
 interface IRechargeDetailsProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -44,17 +45,14 @@ export const RechargeDetails: React.FC<IRechargeDetailsProps> = () => {
       </CardHeader>
       <CardContent>
         <SmoothTransition className="overflow-clip">
-          {orderListData ? (
-            <RemoteDataTable
-              columns={columns}
-              data={orderListData.data ?? []}
-              state={{ pagination }}
-              rowCount={orderListData.total ?? 0}
-              onPaginationChange={setPagination}
-            />
-          ) : (
-            <Spinner loading className="h-10" />
-          )}
+          <AnimatePresence>{!orderListData && <Loading motionKey="vines-recharge-details-loading" />}</AnimatePresence>
+          <RemoteDataTable
+            columns={columns}
+            data={orderListData?.data ?? []}
+            state={{ pagination }}
+            rowCount={orderListData?.total ?? 0}
+            onPaginationChange={setPagination}
+          />
         </SmoothTransition>
       </CardContent>
     </Card>

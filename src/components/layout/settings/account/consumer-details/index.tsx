@@ -1,8 +1,7 @@
 import React, { useMemo, useState } from 'react';
 
-import { CircularProgress } from '@nextui-org/progress';
 import { PaginationState } from '@tanstack/react-table';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { Download } from 'lucide-react';
 
 import { useTeamBalance, useTeamOrderList } from '@/apis/authz/team/payment';
@@ -11,6 +10,7 @@ import { balanceFormat } from '@/components/layout/settings/account/utils.ts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { RemoteDataTable } from '@/components/ui/data-table/remote.tsx';
+import { Loading } from '@/components/ui/loading';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
 
 interface IConsumerDetailsProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -44,23 +44,7 @@ export const ConsumerDetails: React.FC<IConsumerDetailsProps> = () => {
       </CardHeader>
       <CardContent>
         <SmoothTransition className="relative overflow-clip">
-          <AnimatePresence>
-            {!orderListData && (
-              <motion.div
-                className="vines-center absolute size-full backdrop-blur"
-                key="vines-consumer-details-loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1, transition: { duration: 0.2 } }}
-                exit={{ opacity: 0, transition: { duration: 0.2 } }}
-              >
-                <CircularProgress
-                  className="[&_circle:last-child]:stroke-vines-500"
-                  size="lg"
-                  aria-label="Loading..."
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <AnimatePresence>{!orderListData && <Loading motionKey="vines-consumer-details-loading" />}</AnimatePresence>
           <RemoteDataTable
             columns={columns}
             data={orderListData?.data ?? []}
