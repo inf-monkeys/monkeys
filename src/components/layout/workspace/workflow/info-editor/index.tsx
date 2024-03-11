@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { RotateCcw } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -10,11 +9,9 @@ import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
-import { VinesIconSelector } from '@/components/ui/icon-selector';
 import { Input } from '@/components/ui/input.tsx';
 import { Textarea } from '@/components/ui/textarea.tsx';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { VinesIcon } from '@/components/ui/vines-icon';
+import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
 import { IWorkflowInfo, workflowInfoSchema } from '@/schema/workspace/workflow-info.ts';
 
 interface IWorkflowInfoEditorProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -110,27 +107,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({ childre
                 <FormItem>
                   <FormLabel>工作流图标</FormLabel>
                   <FormControl>
-                    <div className="flex">
-                      <VinesIconSelector emojiLink={field.value} onChange={field.onChange}>
-                        <div className="relative cursor-pointer">
-                          <VinesIcon size="lg">{field.value}</VinesIcon>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div
-                                className="absolute bottom-0 right-0 cursor-pointer rounded-br-md rounded-tl-md bg-white bg-opacity-45 p-1 shadow hover:bg-opacity-60 [&_svg]:stroke-vines-500"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  field.onChange(workflow?.iconUrl || 'emoji:🍀:#ceefc5');
-                                }}
-                              >
-                                <RotateCcw size={8} />
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent>点击重置</TooltipContent>
-                          </Tooltip>
-                        </div>
-                      </VinesIconSelector>
-                    </div>
+                    <VinesIconEditor value={field.value} defaultValue={workflow?.iconUrl} onChange={field.onChange} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

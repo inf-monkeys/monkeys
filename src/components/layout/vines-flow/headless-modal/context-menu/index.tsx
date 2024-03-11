@@ -94,7 +94,7 @@ export const ContextMenu: React.FC<IContextMenuProps> = () => {
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="flex gap-2"
-                onClick={() => VinesEvent.emit('flow-open-node-editor', currentNodeId)}
+                onClick={() => VinesEvent.emit('flow-tool-editor', currentNodeId)}
               >
                 <PencilRuler strokeWidth={1.5} size={16} />
                 <span>编辑工具</span>

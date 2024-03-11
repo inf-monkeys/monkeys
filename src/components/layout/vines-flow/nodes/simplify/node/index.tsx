@@ -39,7 +39,7 @@ export const SimplifyNode: React.FC<ISimplifyNodeProps> = ({ node }) => {
     }
     if (['workflow_start', 'workflow_end'].includes(nodeId)) return;
 
-    VinesEvent.emit('flow-open-node-editor', nodeId);
+    VinesEvent.emit('flow-tool-editor', nodeId);
   };
 
   const isStartNode = nodeId === 'workflow_start';
