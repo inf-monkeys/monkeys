@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 
+import { toast } from 'sonner';
+
 import { ToolConfig } from '@/components/layout/vines-flow/headless-modal/tool-editor/config';
 import { Header } from '@/components/layout/vines-flow/headless-modal/tool-editor/header';
 import { Button } from '@/components/ui/button';
+import { CodeEditor, JSONValue } from '@/components/ui/code-editor';
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
@@ -28,6 +31,19 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
     };
   }, []);
 
+  const handleRawUpdate = (data: string) => {
+    try {
+      const task = JSON.parse(data);
+      if (node) {
+        vines.updateRaw(node?.id ?? '', task, false);
+      } else {
+        toast.error('工具不存在');
+      }
+    } catch {}
+  };
+
+  const task = (node?.getRaw() || {}) as JSONValue;
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-[50rem]">
@@ -43,11 +59,15 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
           <TabsContent className="mt-4 h-[25em]" value="config">
             <ToolConfig node={node} />
           </TabsContent>
-          <TabsContent className="mt-4 h-[25em]" value="dev"></TabsContent>
+          <TabsContent className="mt-4 h-[25em]" value="dev">
+            <CodeEditor data={task} lineNumbers={4} onUpdate={handleRawUpdate} />
+          </TabsContent>
           <TabsContent className="mt-4 h-[25em]" value="more-config"></TabsContent>
         </Tabs>
         <DialogFooter>
-          <Button variant="outline">保存</Button>
+          <Button variant="outline" onClick={() => vines.emit('update', vines.getRaw())}>
+            保存
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
