@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 
+import { ToolConfig } from '@/components/layout/vines-flow/headless-modal/tool-editor/config';
 import { Header } from '@/components/layout/vines-flow/headless-modal/tool-editor/header';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import VinesEvent from '@/utils/events';
@@ -31,6 +34,21 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
         <DialogTitle asChild>
           <Header node={node} />
         </DialogTitle>
+        <Tabs defaultValue="config">
+          <TabsList>
+            <TabsTrigger value="config">配置参数</TabsTrigger>
+            <TabsTrigger value="dev">开发模式</TabsTrigger>
+            <TabsTrigger value="more-config">高级配置</TabsTrigger>
+          </TabsList>
+          <TabsContent className="mt-4 h-[25em]" value="config">
+            <ToolConfig node={node} />
+          </TabsContent>
+          <TabsContent className="mt-4 h-[25em]" value="dev"></TabsContent>
+          <TabsContent className="mt-4 h-[25em]" value="more-config"></TabsContent>
+        </Tabs>
+        <DialogFooter>
+          <Button variant="outline">保存</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
