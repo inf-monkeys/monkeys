@@ -107,7 +107,7 @@ export class ToolsRegistryService {
   }
 
   public async initBuiltInTools() {
-    const folder = path.resolve(__dirname, `./built-in-tools/`);
+    const folder = path.resolve(__dirname, `./conductor-system-tools/`);
     if (!fs.existsSync(folder)) {
       logger.warn('Bulit in tools folder not found');
     }

@@ -7,6 +7,7 @@ import { config } from './common/config';
 import { ExceptionsFilter } from './common/filters/exception.filter';
 import { logger } from './common/logger';
 import { ValidationPipe } from './common/pipes/validator.pipe';
+import { setupBuiltInWorkerSwagger } from './modules/tools/builtin/builtin.swagger';
 import { setupExampleWorkerSwagger } from './modules/tools/example/example.swagger';
 import { ToolsPollingService } from './modules/tools/tools.polling.service';
 import { ToolsRegistryService } from './modules/tools/tools.registry.service';
@@ -42,6 +43,7 @@ async function bootstrap() {
   );
 
   setupExampleWorkerSwagger(app);
+  setupBuiltInWorkerSwagger(app);
   setupSwagger(app);
 
   // String polling for tasks

@@ -18,3 +18,14 @@ export interface IAdminRequest extends express.Request {
   adminUserId: string;
   isAdmin: boolean;
 }
+
+export interface ToolsReqContext {
+  appId: string;
+  userId: string;
+  teamId: string;
+  workflowInstanceId: string;
+}
+
+export interface IToolsRequest extends express.Request {
+  context: ToolsReqContext;
+}
