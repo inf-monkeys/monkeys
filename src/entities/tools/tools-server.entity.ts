@@ -40,13 +40,13 @@ export class ToolsServerEntity extends BaseEntity {
   })
   namespace: string;
 
-  @Column(() => AuthConfig, {
-    prefix: false,
+  @Column({
+    type: 'simple-json',
   })
-  auth: AuthConfig = new AuthConfig();
+  auth: AuthConfig;
 
-  @Column(() => ApiConfig, {
-    prefix: false,
+  @Column({
+    type: 'simple-json',
   })
-  api: ApiConfig = new ApiConfig();
+  api: ApiConfig;
 }

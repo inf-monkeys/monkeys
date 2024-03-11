@@ -94,6 +94,9 @@ export class ToolsRegistryService {
 
     // Save server info and credentials
     await this.toolsRepository.saveServer(manifestData);
+    if (manifestData.credentials) {
+      await this.toolsRepository.createOrUpdateCredentials(namespace, manifestData.credentials);
+    }
 
     await this.toolsRepository.createOrUpdateTools(namespace, tools);
     return tools;

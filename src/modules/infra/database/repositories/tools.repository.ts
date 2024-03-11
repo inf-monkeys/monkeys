@@ -1,7 +1,7 @@
 import { ToolsCredentialEntity } from '@/entities/tools/tools-credential.entity';
 import { ToolsServerEntity } from '@/entities/tools/tools-server.entity';
 import { ToolsEntity } from '@/entities/tools/tools.entity';
-import { ManifestJson } from '@/modules/tools/interfaces';
+import { CredentialDefinition, ManifestJson } from '@/modules/tools/interfaces';
 import { BlockDefinition, BlockType } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -52,16 +52,67 @@ export class ToolsRepository {
     entity.auth = data.auth;
     entity.namespace = data.namespace;
     await this.toolsServerRepository.save(entity);
+  }
 
-    // save credentials
-    if (data.credentials) {
-      for (const credential of data.credentials) {
-        const credentialEntity = new ToolsCredentialEntity();
-        credentialEntity.description = credential.description;
-        credentialEntity.displayName = credential.displayName;
-        credentialEntity.name = credential.name;
-        await this.toolsCredentialRepository.save(credential);
-      }
+  public async createOrUpdateCredentials(namespace: string, latestCredentials: CredentialDefinition[]) {
+    const latestCredentialNames = latestCredentials.map((x) => x.name);
+    const originalCredentials = await this.toolsCredentialRepository.find({
+      where: {
+        namespace,
+        isDeleted: false,
+      },
+    });
+    const originalCredentialNames = originalCredentials.map((x) => x.name);
+    const credentialsToDelete = originalCredentials.filter((x) => !latestCredentialNames.includes(x.name));
+    const credentialsToCreate = latestCredentials.filter((x) => !originalCredentialNames.includes(x.name));
+    const credentialsToUpdate = originalCredentials.filter((x) => latestCredentialNames.includes(x.name));
+
+    if (credentialsToCreate.length) {
+      const entitiesToCreate: ToolsCredentialEntity[] = credentialsToCreate.map(
+        (x): ToolsCredentialEntity => ({
+          id: new ObjectId(),
+          isDeleted: false,
+          createdTimestamp: +new Date(),
+          updatedTimestamp: +new Date(),
+          type: x.type,
+          namespace: namespace,
+          name: x.name,
+          displayName: x.displayName,
+          description: x.description,
+          icon: x.icon,
+          properties: x.properties,
+        }),
+      );
+      await this.toolsCredentialRepository.save(entitiesToCreate);
+    }
+
+    if (credentialsToDelete.length) {
+      await this.toolsCredentialRepository.update(
+        {
+          namespace,
+          name: In(credentialsToDelete.map((x) => x.name)),
+        },
+        {
+          isDeleted: true,
+        },
+      );
+    }
+
+    if (credentialsToUpdate.length) {
+      const entitiesToUpdate = credentialsToUpdate.map((x): ToolsCredentialEntity => {
+        const latestDef = latestCredentials.find((t) => x.name === t.name);
+        return {
+          ...x,
+          id: x.id,
+          updatedTimestamp: +new Date(),
+          displayName: latestDef.displayName,
+          description: latestDef.description,
+          icon: latestDef.icon,
+          properties: latestDef.properties,
+          type: latestDef.type,
+        };
+      });
+      await this.toolsCredentialRepository.save(entitiesToUpdate);
     }
   }
 
