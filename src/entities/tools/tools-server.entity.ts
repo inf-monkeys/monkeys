@@ -29,6 +29,12 @@ export class ApiConfig {
 @Entity({ name: 'tools_server' })
 export class ToolsServerEntity extends BaseEntity {
   @Column({
+    name: 'manifest_url',
+    default: SchemaVersion.v1,
+  })
+  manifestUrl: string;
+
+  @Column({
     name: 'schema_version',
     default: SchemaVersion.v1,
   })

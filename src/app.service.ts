@@ -12,14 +12,14 @@ export class AppService implements OnApplicationBootstrap {
     if (config.server.loadExample) {
       logger.info(`Load example blocks of ${EXAMPLE_WORKER_OPENAPI_MENIFEST_URL}`);
       this.workerRegistryService.registerToolsServer({
-        manifestJsonUrl: EXAMPLE_WORKER_OPENAPI_MENIFEST_URL,
+        manifestUrl: EXAMPLE_WORKER_OPENAPI_MENIFEST_URL,
       });
     }
 
     for (const { name, manifestUrl } of config.tools) {
       logger.info(`Load ${name} blocks of ${EXAMPLE_WORKER_OPENAPI_MENIFEST_URL}`);
       this.workerRegistryService.registerToolsServer({
-        manifestJsonUrl: manifestUrl,
+        manifestUrl: manifestUrl,
       });
     }
   }

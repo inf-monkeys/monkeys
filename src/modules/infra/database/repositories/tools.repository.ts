@@ -37,7 +37,7 @@ export class ToolsRepository {
     });
   }
 
-  public async saveServer(data: ManifestJson) {
+  public async saveServer(url: string, data: ManifestJson) {
     // save server info
     const originalEntity = await this.toolsServerRepository.findOne({
       where: {
@@ -51,6 +51,7 @@ export class ToolsRepository {
     entity.api = data.api;
     entity.auth = data.auth;
     entity.namespace = data.namespace;
+    entity.manifestUrl = url;
     await this.toolsServerRepository.save(entity);
   }
 
@@ -199,6 +200,14 @@ export class ToolsRepository {
       where: {
         name,
         isDeleted: true,
+      },
+    });
+  }
+
+  public async listRegistries() {
+    return await this.toolsServerRepository.find({
+      where: {
+        isDeleted: false,
       },
     });
   }

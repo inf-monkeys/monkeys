@@ -16,7 +16,7 @@ export class ToolsController {
   public async registerWorker(@Body() body: RegisterToolDto) {
     const { manifestJsonUrl } = body;
     return await this.toolRegistryService.registerToolsServer({
-      manifestJsonUrl,
+      manifestUrl: manifestJsonUrl,
     });
   }
 

@@ -42,7 +42,7 @@ export interface ManifestJson {
 }
 
 export interface RegisterWorkerParams {
-  manifestJsonUrl: string;
+  manifestUrl: string;
 }
 
 export interface WorkerInputData {

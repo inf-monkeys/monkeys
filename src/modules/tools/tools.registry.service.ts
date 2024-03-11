@@ -66,8 +66,8 @@ export class ToolsRegistryService {
   }
 
   public async registerToolsServer(params: RegisterWorkerParams) {
-    const { manifestJsonUrl } = params;
-    const { data: manifestData } = await axios.get<ManifestJson>(manifestJsonUrl);
+    const { manifestUrl } = params;
+    const { data: manifestData } = await axios.get<ManifestJson>(manifestUrl);
     await this.validateManifestJson(manifestData);
 
     const {
@@ -77,7 +77,7 @@ export class ToolsRegistryService {
 
     let realSpecUrl = specUrl;
     if (!realSpecUrl.startsWith('http://') && !realSpecUrl.startsWith('https://')) {
-      const parsedUrl = url.parse(manifestJsonUrl);
+      const parsedUrl = url.parse(manifestUrl);
       const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
       realSpecUrl = url.resolve(baseUrl, realSpecUrl);
     }
@@ -93,7 +93,7 @@ export class ToolsRegistryService {
     }
 
     // Save server info and credentials
-    await this.toolsRepository.saveServer(manifestData);
+    await this.toolsRepository.saveServer(manifestUrl, manifestData);
     if (manifestData.credentials) {
       await this.toolsRepository.createOrUpdateCredentials(namespace, manifestData.credentials);
     }

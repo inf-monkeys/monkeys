@@ -39,6 +39,10 @@ export interface ToolServiceConfig {
   baseUrl?: string;
 }
 
+export interface CronConfig {
+  enabled: boolean;
+}
+
 export interface Config {
   server: ServerConfig;
   conductor: ConductorConfig;
@@ -46,6 +50,7 @@ export interface Config {
   redis: RedisConfig;
   vector: VectorGatewayService;
   tools: ToolServiceConfig[];
+  cron: CronConfig;
 }
 
 const port = readConfig('server.port', 3000);
@@ -80,4 +85,7 @@ export const config: Config = {
     baseUrl: readConfig('vector.baseUrl', 'http://localhost:8899'),
   },
   tools: readConfig('tools', []),
+  cron: {
+    enabled: readConfig('cron.enabled', true),
+  },
 };
