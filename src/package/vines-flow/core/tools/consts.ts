@@ -62,4 +62,4 @@ export enum TOOL_CATEGORY {
   human = '用户交互',
 }
 
-export const IGNORE_TOOLS = ['fake_node', 'sub_workflow', 'notification_join'];
+export const IGNORE_TOOLS = ['fake_node', 'notification_join'];
