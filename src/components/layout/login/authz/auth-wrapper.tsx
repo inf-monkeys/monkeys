@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useSWRConfig } from 'swr';
 import { useNavigate } from '@tanstack/react-router';
 
-import { IconInfoCircle } from '@douyinfe/semi-icons';
+import { Info } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -53,7 +53,7 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
 
         <div className="my-1 flex justify-between text-xs">
           <span className="flex items-center gap-2 opacity-70">
-            <IconInfoCircle size="small" />
+            <Info size={14} />
             <span>未注册用户将自动注册</span>
           </span>
         </div>
