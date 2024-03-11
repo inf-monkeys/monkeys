@@ -16,9 +16,8 @@ import {
   VinesEdgePath,
   VinesTask,
 } from '@/package/vines-flow/core/nodes/typings.ts';
-import { createNewSubWorkflow } from '@/package/vines-flow/core/nodes/utils';
 import { IVinesInsertChildParams } from '@/package/vines-flow/core/typings.ts';
-import { createNanoId } from '@/package/vines-flow/core/utils.ts';
+import { createNanoId, createSubWorkflowDef } from '@/package/vines-flow/core/utils.ts';
 import VinesEvent from '@/utils/events.ts';
 
 export type NodeClass = new (task: any, vinesCore: VinesCore) => VinesNode;
@@ -356,10 +355,9 @@ export class VinesNode<T extends VinesTask = VinesTask> {
         isDoWhileNode &&
         this.type !== TaskType.SUB_WORKFLOW
       ) {
-        node = createNewSubWorkflow(
-          [...(Array.isArray(node) ? node.map((it) => it.getRaw()) : [node.getRaw()])],
-          this._vinesCore,
-        );
+        // 构造嵌套循环的子流程
+        const tasks = [...(Array.isArray(node) ? node.map((it) => it.getRaw()) : [node.getRaw()])];
+        node = VinesNode.create(createSubWorkflowDef(tasks), this._vinesCore);
       }
       const isFakeNode = +/fake_node/.test(targetId);
       if (insertBefore) {

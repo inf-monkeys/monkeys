@@ -4,14 +4,16 @@ import { VinesBase } from '@/package/vines-flow/core/base';
 import { VINES_DEF_NODE } from '@/package/vines-flow/core/consts.ts';
 import { EndPointNode, VinesNode } from '@/package/vines-flow/core/nodes';
 import { IVinesNodePosition, IVinesWorkflowUpdate, VinesEdgePath } from '@/package/vines-flow/core/nodes/typings.ts';
-import { createTask } from '@/package/vines-flow/core/nodes/utils.ts';
 import { VinesTools } from '@/package/vines-flow/core/tools';
 import { VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
 import { IVinesFlowRenderOptions, IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
+import { createTask } from '@/package/vines-flow/core/utils.ts';
 import VinesEvent from '@/utils/events';
 
 export class VinesCore extends VinesTools(VinesBase) {
   public workflowId: string | undefined;
+
+  public version = 1;
 
   public nodes: VinesNode[] = [];
 
@@ -38,15 +40,20 @@ export class VinesCore extends VinesTools(VinesBase) {
     this.nodes.push(EndPointNode.createEnd(this));
   }
 
-  public update({ workflow, workflowId, tasks, renderType, renderDirection }: IVinesWorkflowUpdate, render = true) {
+  public update(
+    { workflow, workflowId, verison, tasks, renderType, renderDirection }: IVinesWorkflowUpdate,
+    render = true,
+  ) {
     let needToInit = false;
     if (workflow) {
       workflow?.workflowDef?.tasks &&
         (this.tasks = workflow.workflowDef.tasks.filter((task) => task)) &&
         (needToInit = true);
       workflow?.workflowId && (this.workflowId = workflow.workflowId);
+      workflow?.version && (this.version = workflow.version);
     }
     workflowId && (this.workflowId = workflowId);
+    verison && (this.version = verison);
     tasks && (this.tasks = tasks.filter((task) => task)) && (needToInit = true);
 
     needToInit && this.init();

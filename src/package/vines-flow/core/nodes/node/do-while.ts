@@ -11,8 +11,8 @@ import {
   VinesSVGPosition,
 } from '@/package/vines-flow/core/nodes/svg-utils.ts';
 import { IVinesCollectDoWhileOutputTaskDef, IVinesNodePosition } from '@/package/vines-flow/core/nodes/typings.ts';
-import { createTask } from '@/package/vines-flow/core/nodes/utils.ts';
 import { IVinesInsertChildParams } from '@/package/vines-flow/core/typings.ts';
+import { createTask } from '@/package/vines-flow/core/utils.ts';
 import VinesEvent from '@/utils/events';
 
 export class DoWhileNode extends ControlFlowVinesNode<DoWhileTaskDef> {
