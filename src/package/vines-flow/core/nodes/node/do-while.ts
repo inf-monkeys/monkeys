@@ -121,7 +121,7 @@ export class DoWhileNode extends ControlFlowVinesNode<DoWhileTaskDef> {
 
     position.x += this.size.width + 82;
     position.y += childOffset;
-    await this.renderChildren(position, path);
+    this.renderChildren(position, path);
     const { bottom } = this.getBoundary();
     const offset = bottom - this.position.y;
     if (offset > childOffset) {

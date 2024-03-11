@@ -6,7 +6,7 @@ import { EndPointNode, VinesNode } from '@/package/vines-flow/core/nodes';
 import { IVinesNodePosition, IVinesWorkflowUpdate, VinesEdgePath } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesTools } from '@/package/vines-flow/core/tools';
 import { VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
-import { IVinesFlowRenderOptions, IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
+import { IVinesFlowRenderOptions, IVinesFlowRenderType, IVinesMode } from '@/package/vines-flow/core/typings.ts';
 import { createTask } from '@/package/vines-flow/core/utils.ts';
 import VinesEvent from '@/utils/events';
 
@@ -18,6 +18,8 @@ export class VinesCore extends VinesTools(VinesBase) {
   public nodes: VinesNode[] = [];
 
   public tasks: MonkeyTaskDefTypes[] = [];
+
+  public mode: IVinesMode = IVinesMode.EDIT;
 
   public renderOptions: IVinesFlowRenderOptions = {
     direction: 'vertical',
@@ -41,7 +43,7 @@ export class VinesCore extends VinesTools(VinesBase) {
   }
 
   public update(
-    { workflow, workflowId, verison, tasks, renderType, renderDirection }: IVinesWorkflowUpdate,
+    { workflow, workflowId, version, tasks, renderType, renderDirection }: IVinesWorkflowUpdate,
     render = true,
   ) {
     let needToInit = false;
@@ -53,7 +55,7 @@ export class VinesCore extends VinesTools(VinesBase) {
       workflow?.version && (this.version = workflow.version);
     }
     workflowId && (this.workflowId = workflowId);
-    verison && (this.version = verison);
+    version && (this.version = version);
     tasks && (this.tasks = tasks.filter((task) => task)) && (needToInit = true);
 
     needToInit && this.init();

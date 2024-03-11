@@ -20,7 +20,7 @@ export type VinesTask = (
 export interface IVinesWorkflowUpdate {
   workflow?: MonkeyWorkflow;
   workflowId?: string;
-  verison?: number;
+  version?: number;
   tasks?: MonkeyTaskDefTypes[];
   renderDirection?: IVinesFlowRenderOptions['direction'];
   renderType?: IVinesFlowRenderOptions['type'];

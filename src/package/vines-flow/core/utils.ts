@@ -2,11 +2,28 @@ import { DoWhileTaskDef, ForkJoinTaskDef, SwitchTaskDef, TaskType, WorkflowTask 
 import { get, merge, setWith } from 'lodash';
 import { customAlphabet } from 'nanoid';
 
-import { VinesSubWorkflowTaskDef } from '@/package/vines-flow/core/nodes';
-import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
+import { VinesNode, VinesSubWorkflowTaskDef } from '@/package/vines-flow/core/nodes';
+import { IVinesNodeBoundary, VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesBlockDefProperties, VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
 
 export const createNanoId = customAlphabet('6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz', 8);
+
+export const getBoundary = (children: VinesNode[]): IVinesNodeBoundary => {
+  return children
+    .filter((node) => node.needRender)
+    .map((it) => it.getBoundary())
+    .reduce(
+      (prev, cur) => {
+        return {
+          left: Math.min(prev.left, cur.left),
+          right: Math.max(prev.right, cur.right),
+          top: Math.min(prev.top, cur.top),
+          bottom: Math.max(prev.bottom, cur.bottom),
+        };
+      },
+      { left: 99999999, right: -99999999, top: 99999999, bottom: -99999999 },
+    );
+};
 
 export function createSubWorkflowDef(tasks: VinesTask[]) {
   const nodeId = 'sub_workflow_nested_' + createNanoId();
