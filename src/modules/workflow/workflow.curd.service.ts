@@ -1,5 +1,8 @@
+import { config } from '@/common/config';
 import { flatTasks } from '@/common/utils/conductor';
 import { extractAssetFromZip } from '@/common/utils/zip-asset';
+import { WorkflowMetadataEntity } from '@/entities/workflow/workflow';
+import { WorkflowTriggersEntity } from '@/entities/workflow/workflow-trigger';
 import { AssetType, BlockType } from '@inf-monkeys/vines';
 import { WorkflowTask } from '@io-orkes/conductor-javascript';
 import { Injectable } from '@nestjs/common';
@@ -9,7 +12,7 @@ import { ObjectId } from 'mongodb';
 import { ToolsRepository } from '../infra/database/repositories/tools.repository';
 import { WorkflowRepository } from '../infra/database/repositories/workflow.repository';
 import { ConductorService } from './conductor/conductor.service';
-import { CreateWorkflowData, CreateWorkflowOptions } from './interfaces';
+import { CreateWorkflowData, CreateWorkflowOptions, WorkflowExportJson, WorkflowWithAssetsJson } from './interfaces';
 
 @Injectable()
 export class WorkflowCrudService {
@@ -355,5 +358,54 @@ export class WorkflowCrudService {
       );
     }
     return newWorkflowId;
+  }
+
+  private convertWorkflowToJson(workflow: WorkflowMetadataEntity, triggers?: WorkflowTriggersEntity[]): WorkflowExportJson {
+    const json: WorkflowExportJson = {
+      name: workflow.name,
+      iconUrl: workflow.iconUrl,
+      description: workflow.description,
+      version: workflow.version,
+      tasks: workflow.tasks,
+      triggers: triggers?.map((trigger) => ({
+        type: trigger.type,
+        cron: trigger.cron,
+        enabled: trigger.enabled,
+        webhookConfig: trigger.webhookConfig,
+      })),
+      variables: workflow.variables,
+      output: workflow.output,
+      originalId: workflow.workflowId,
+      originalSite: config.server.appId,
+      assetType: 'workflow',
+    };
+    return json;
+  }
+
+  private async exportWorkflowOfVersion(workflowId: string, version: number) {
+    const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
+    const triggers = await this.workflowRepository.listWorkflowTriggers(workflowId, version);
+    const json: WorkflowExportJson = this.convertWorkflowToJson(workflow, triggers);
+    return {
+      workflow: json,
+    };
+  }
+
+  /**
+   * 导出工作流
+   */
+  public async exportWorkflow(workflowId: string): Promise<WorkflowWithAssetsJson> {
+    const versions = await this.workflowRepository.getWorklfowVersions(workflowId);
+    versions.sort((a, b) => b.version - a.version);
+    const workflows = [];
+    for (const version of versions) {
+      const { workflow } = await this.exportWorkflowOfVersion(workflowId, version.version);
+      workflows.push(workflow);
+    }
+    // const pages = await this.pageService.listWorkflowPagesBrief(workflowId, teamId, userId);
+    return {
+      workflows: workflows,
+      pages: [],
+    };
   }
 }

@@ -10,9 +10,10 @@ import { RepositoryMoule } from './modules/infra/database/repositories/repositor
 import { OpenapiModule } from './modules/openapi/openapi.module';
 import { ToolsModule } from './modules/tools/tools.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
+import { ExportModule } from './modules/export/export.module';
 
 @Module({
-  imports: [DatabaseModule, ToolsModule, RepositoryMoule, WorkflowModule, OpenapiModule, GatewaysModule, ScheduleModule.forRoot(), CronJobModule],
+  imports: [DatabaseModule, ToolsModule, RepositoryMoule, WorkflowModule, OpenapiModule, GatewaysModule, ScheduleModule.forRoot(), CronJobModule, ExportModule],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -90,6 +90,15 @@ export class WorkflowRepository {
     });
   }
 
+  public async listWorkflows(teamId: string) {
+    return await this.workflowMetadataRepository.find({
+      where: {
+        teamId,
+        isDeleted: true,
+      },
+    });
+  }
+
   public async findExecutionsByWorkflowInstanceIds(workflowInstanceIds: string[]) {
     if (!workflowInstanceIds?.length) {
       return [];

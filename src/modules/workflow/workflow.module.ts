@@ -18,5 +18,6 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
   controllers: [WorkflowCrudController, WorkflowValidateController, WorkflowExecutionController, WorkflowWebhookController, WorkflowTriggerController, WorkflowAssetsController],
   providers: [WorkflowCrudService, WorkflowValidateService, WorkflowExecutionService, WorkflowWebhookService, WorkflowCommonService, WorkflowTriggerService, WorkflowAssetsService],
   imports: [ConductorModule],
+  exports: [WorkflowCrudService],
 })
 export class WorkflowModule {}
