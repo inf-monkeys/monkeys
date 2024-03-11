@@ -1,5 +1,6 @@
 import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import { type SubWorkflowTaskDef, TaskType } from '@io-orkes/conductor-javascript';
+import { set } from 'lodash';
 
 import { VinesCore } from '@/package/vines-flow/core';
 import { ControlFlowVinesNode, VinesNode } from '@/package/vines-flow/core/nodes/base.ts';
@@ -29,6 +30,15 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
 
   private parseChildren(tasks: VinesTask[]) {
     this.children = tasks.map((it) => VinesNode.create(it, this._vinesCore));
+  }
+
+  override getRaw() {
+    set(
+      this._task,
+      'subWorkflow.workflowDef.tasks',
+      this.children.map((it) => it.getRaw()),
+    );
+    return this._task;
   }
 
   override check(): boolean {
@@ -86,7 +96,7 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
 
       position.x += childOffset;
       position.y += nodeHeight + 82;
-      await this.renderChildren(position, path);
+      this.renderChildren(position, path);
       const { left } = this.getBoundary();
       const offset = left - this.position.x;
       if (offset < childOffset) {
@@ -99,7 +109,7 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
         position.y = this.entryPoint.out.y;
       }
     } else {
-      await this.renderChildren(position, path);
+      this.renderChildren(position, path);
     }
   }
 
@@ -200,7 +210,7 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
 
   // region CRUD
   override insertChild(params: IVinesInsertChildParams): VinesNode | VinesNode[] | null {
-    const { node, path, targetId, insertBefore } = params;
+    const { node } = params;
 
     // 不能插自己 & 不能交叉插入
     if (node instanceof SubWorkflowNode) {
@@ -213,16 +223,7 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
       }
     }
 
-    const insertedNode = super.insertChild({
-      targetId,
-      node,
-      path,
-      insertBefore,
-    });
-    if (insertedNode) {
-      return insertedNode;
-    }
-    return null;
+    return super.insertChild(params);
   }
   // endregion
 }

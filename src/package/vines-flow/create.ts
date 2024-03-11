@@ -42,7 +42,9 @@ export const createVinesCore = () => {
         error: '更新失败',
       });
 
-      void mutate(`/api/workflow/${workflowId}`, { workflowDef: { tasks } }, { revalidate: false });
+      void mutate(`/api/workflow/${workflowId}`, (prev) => ({ ...prev, workflowDef: { tasks } }), {
+        revalidate: false,
+      });
     };
 
     useEffect(() => {
