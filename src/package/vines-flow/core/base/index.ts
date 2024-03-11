@@ -9,7 +9,7 @@ export class VinesBase extends EventEmitter {
     super();
   }
 
-  protected sendEvent(event: 'update' | 'refresh') {
-    this.emit(event);
+  protected sendEvent(event: 'update' | 'refresh', ...args: unknown[]) {
+    this.emit(event, ...args);
   }
 }

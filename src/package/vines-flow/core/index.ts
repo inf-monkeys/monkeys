@@ -4,7 +4,9 @@ import { VinesBase } from '@/package/vines-flow/core/base';
 import { VINES_DEF_NODE } from '@/package/vines-flow/core/consts.ts';
 import { EndPointNode, VinesNode } from '@/package/vines-flow/core/nodes';
 import { IVinesNodePosition, IVinesWorkflowUpdate, VinesEdgePath } from '@/package/vines-flow/core/nodes/typings.ts';
+import { createTask } from '@/package/vines-flow/core/nodes/utils.ts';
 import { VinesTools } from '@/package/vines-flow/core/tools';
+import { VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
 import { IVinesFlowRenderOptions, IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import VinesEvent from '@/utils/events';
 
@@ -171,6 +173,18 @@ export class VinesCore extends VinesTools(VinesBase) {
     return void null;
   }
 
+  public createNode(
+    toolOrName: VinesToolDef | string,
+    extendObject: Record<string, string> = {},
+  ): VinesNode | undefined {
+    const tool = typeof toolOrName === 'string' ? this.getTool(toolOrName) : toolOrName;
+    if (!tool) {
+      console.warn(`[VinesFlow] 未找到工具 ${toolOrName}`);
+      return;
+    }
+    return VinesNode.create(createTask(tool, extendObject), this);
+  }
+
   /**
    * 警告：在 insertAfter 内调用此方法会导致死循环，请将 callAfter 设置为 false
    * */
@@ -184,7 +198,7 @@ export class VinesCore extends VinesTools(VinesBase) {
 
       callAfter && targetNode && targetNode.insertAfter();
 
-      this.sendEvent('update');
+      this.sendUpdateEvent();
       return true;
     }
     for (const childNode of this.nodes) {
@@ -198,7 +212,7 @@ export class VinesCore extends VinesTools(VinesBase) {
       ) {
         callAfter && targetNode && targetNode.insertAfter();
 
-        this.sendEvent('update');
+        this.sendUpdateEvent();
         return true;
       }
     }
@@ -217,24 +231,32 @@ export class VinesCore extends VinesTools(VinesBase) {
 
       callAfter && this.getNodeById(targetId)?.deleteAfter();
 
-      this.sendEvent('update');
+      this.sendUpdateEvent();
       return true;
     }
     for (const childNode of this.nodes) {
       if (childNode.deleteChild(targetId, [childNode])) {
         callAfter && this.getNodeById(targetId)?.deleteAfter();
 
-        this.sendEvent('update');
+        this.sendUpdateEvent();
         return true;
       }
     }
     return false;
+  }
+
+  public getRaw() {
+    return this.nodes.slice(1, this.nodes.length - 1).map((it) => it.getRaw());
   }
   // endregion
 
   // region Tools
   get renderDirection() {
     return this.renderOptions.direction;
+  }
+
+  private sendUpdateEvent() {
+    this.sendEvent('update', this.getRaw());
   }
   // endregion
 }

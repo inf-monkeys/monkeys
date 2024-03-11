@@ -68,6 +68,17 @@ export class VinesNode<T extends VinesTask = VinesTask> {
     return new VinesNode.classMap[type](task, vinesCore);
   }
 
+  static createFakeNode(vinesCore: VinesCore): VinesNode {
+    return VinesNode.create(
+      {
+        name: 'fake_node',
+        taskReferenceName: 'fake_node_' + createNanoId(),
+        type: TaskType.SIMPLE,
+      },
+      vinesCore,
+    );
+  }
+
   // region Tools
   /**
    * 获取所有子节点（包括子节点的子节点）
@@ -415,17 +426,6 @@ export class VinesNode<T extends VinesTask = VinesTask> {
     return this.id.startsWith('fake_node_');
   }
   // endregion
-
-  static createFakeNode(vinesCore: VinesCore): VinesNode {
-    return VinesNode.create(
-      {
-        name: 'fake_node',
-        taskReferenceName: 'fake_node_' + createNanoId(),
-        type: TaskType.SIMPLE,
-      },
-      vinesCore,
-    );
-  }
 }
 
 // 「控制流程节点」公用逻辑

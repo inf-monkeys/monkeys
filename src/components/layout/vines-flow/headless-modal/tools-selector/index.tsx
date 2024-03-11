@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { Search } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { ToolLists } from '@/components/layout/vines-flow/headless-modal/tools-selector/list.tsx';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -8,11 +9,13 @@ import { Input } from '@/components/ui/input.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
+import { useFlowStore } from '@/store/useFlowStore';
 import VinesEvent from '@/utils/events';
 
 interface IToolsSelectorProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
+  const { setZoomToNodeId } = useFlowStore();
   const { vines } = useVinesFlow();
 
   const [open, setOpen] = useState(false);
@@ -39,7 +42,16 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
     if (disabledSelector) return;
     setOpen(false);
 
-    console.log(tool);
+    const node = vines.createNode(tool);
+    if (!node) {
+      toast.error('创建节点失败');
+      return;
+    }
+
+    const finalTargetNodeId = targetNodeId || (vines.getAllNodes()?.at(-1)?.id ?? '');
+    vines.insertNode(finalTargetNodeId, node, isInsertBefore ?? false);
+
+    setZoomToNodeId(Array.isArray(node) ? node[0].id : node.id);
   };
 
   const list = vines.getToolsByCategory(searchValue);
