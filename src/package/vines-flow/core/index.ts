@@ -3,7 +3,12 @@ import { MonkeyTaskDefTypes } from '@inf-monkeys/vines';
 import { VinesBase } from '@/package/vines-flow/core/base';
 import { VINES_DEF_NODE } from '@/package/vines-flow/core/consts.ts';
 import { EndPointNode, VinesNode } from '@/package/vines-flow/core/nodes';
-import { IVinesNodePosition, IVinesWorkflowUpdate, VinesEdgePath } from '@/package/vines-flow/core/nodes/typings.ts';
+import {
+  IVinesNodePosition,
+  IVinesWorkflowUpdate,
+  VinesEdgePath,
+  VinesTask,
+} from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesTools } from '@/package/vines-flow/core/tools';
 import { VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
 import { IVinesFlowRenderOptions, IVinesFlowRenderType, IVinesMode } from '@/package/vines-flow/core/typings.ts';
@@ -252,6 +257,16 @@ export class VinesCore extends VinesTools(VinesBase) {
       }
     }
     return false;
+  }
+
+  public updateRaw(nodeId: string, task: VinesTask) {
+    for (const node of this.nodes) {
+      if (node.updateRaw(nodeId, task)) {
+        this.tasks = this.getRaw();
+        this.sendUpdateEvent();
+        return this.tasks;
+      }
+    }
   }
 
   public getRaw() {
