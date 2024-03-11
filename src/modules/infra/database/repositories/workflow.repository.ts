@@ -1,9 +1,11 @@
-import { WorkflowMetadataEntity, WorkflowOutputValue } from '@/entities/workflow/workflow';
+import { calcMd5 } from '@/common/utils/utils';
+import { WorkflowMetadataEntity, WorkflowOutputValue, WorkflowValidationIssue } from '@/entities/workflow/workflow';
 import { WorkflowExecutionEntity } from '@/entities/workflow/workflow-execution';
 import { WorkflowTriggerType, WorkflowTriggersEntity } from '@/entities/workflow/workflow-trigger';
 import { BlockDefProperties, MonkeyTaskDefTypes } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import _ from 'lodash';
 import { ObjectId } from 'mongodb';
 import { In, Repository } from 'typeorm';
 
@@ -97,6 +99,60 @@ export class WorkflowRepository {
         isDeleted: true,
       },
     });
+  }
+
+  private calcWorkflowMd5(workflow: Partial<WorkflowMetadataEntity>) {
+    const str = JSON.stringify(_.pick(workflow, ['tasks', 'variables', 'output'] as (keyof WorkflowMetadataEntity)[]));
+    return calcMd5(str);
+  }
+
+  async updateWorkflowDef(
+    teamId: string,
+    workflowId: string,
+    version: number,
+    updates: {
+      name?: string;
+      description?: string;
+      iconUrl?: string;
+      tasks?: MonkeyTaskDefTypes[];
+      variables?: BlockDefProperties[];
+      activated?: boolean;
+      validated?: boolean;
+      validationIssues?: WorkflowValidationIssue[];
+      output?: WorkflowOutputValue[];
+      tagIds?: string[];
+    },
+  ) {
+    const { name, description, iconUrl, tasks, variables, activated, validationIssues, validated, output, tagIds } = updates;
+
+    // 字段都为空，则跳过更新
+    if ([name, description, iconUrl, tasks, variables, activated, validated, validationIssues, output, tagIds].every((item) => typeof item === 'undefined')) return;
+    if (variables && !Array.isArray(variables)) {
+      throw new Error('variables 字段必须为数组');
+    }
+    if (output && !Array.isArray(output)) {
+      throw new Error('output 字段必须为数组');
+    }
+    await this.workflowMetadataRepository.findOneOrFail({ where: { workflowId: workflowId, version, teamId, isDeleted: false } });
+    await this.workflowMetadataRepository.update(
+      { workflowId, isDeleted: false, teamId, version },
+      {
+        ..._.pickBy({ name, iconUrl, description, tasks, variables, activated, validationIssues, validated, output, tagIds }, (v) => typeof v !== 'undefined'),
+        updatedTimestamp: Date.now(),
+      },
+    );
+    const workflow = await this.workflowMetadataRepository.findOne({
+      where: {
+        teamId,
+        workflowId,
+        version,
+        isDeleted: false,
+      },
+    });
+    const md5 = this.calcWorkflowMd5(workflow);
+    workflow.md5 = md5;
+    await this.workflowMetadataRepository.save(workflow);
+    return workflow;
   }
 
   public async findExecutionsByWorkflowInstanceIds(workflowInstanceIds: string[]) {

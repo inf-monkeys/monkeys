@@ -54,16 +54,16 @@ export class WorkflowCrudController {
     description: '更新 workflow 定义',
   })
   public async updateWorkflowDef(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Body() body: UpdateWorkflowDefDto) {
-    // const { teamId } = req;
-    // const { version = 1 } = body;
-    // const { validationIssues, validated } = await this.service.updateWorkflowDef(teamId, workflowId, version, body);
-    // return new SuccessResponse({
-    //   data: {
-    //     success: true,
-    //     validationIssues,
-    //     validated,
-    //   },
-    // });
+    const { teamId } = req;
+    const { version = 1 } = body;
+    const { validationIssues, validated } = await this.service.updateWorkflowDef(teamId, workflowId, version, body);
+    return new SuccessResponse({
+      data: {
+        success: true,
+        validationIssues,
+        validated,
+      },
+    });
   }
 
   @Post('/import-from-zip')

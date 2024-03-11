@@ -1,11 +1,11 @@
 import { config } from '@/common/config';
 import { flatTasks } from '@/common/utils/conductor';
 import { extractAssetFromZip } from '@/common/utils/zip-asset';
-import { WorkflowMetadataEntity } from '@/entities/workflow/workflow';
+import { ValidationIssueType, WorkflowMetadataEntity, WorkflowOutputValue, WorkflowValidationIssue } from '@/entities/workflow/workflow';
 import { WorkflowTriggersEntity } from '@/entities/workflow/workflow-trigger';
-import { AssetType, BlockType } from '@inf-monkeys/vines';
+import { AssetType, BlockDefProperties, BlockType, MonkeyTaskDefTypes } from '@inf-monkeys/vines';
 import { WorkflowTask } from '@io-orkes/conductor-javascript';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import fs from 'fs';
 import _ from 'lodash';
 import { ObjectId } from 'mongodb';
@@ -13,6 +13,7 @@ import { ToolsRepository } from '../infra/database/repositories/tools.repository
 import { WorkflowRepository } from '../infra/database/repositories/workflow.repository';
 import { ConductorService } from './conductor/conductor.service';
 import { CreateWorkflowData, CreateWorkflowOptions, WorkflowExportJson, WorkflowWithAssetsJson } from './interfaces';
+import { WorkflowValidateService } from './workflow.validate.service';
 
 @Injectable()
 export class WorkflowCrudService {
@@ -25,6 +26,7 @@ export class WorkflowCrudService {
     private readonly toolsRepository: ToolsRepository,
     private readonly conductorService: ConductorService,
     private readonly workflowRepository: WorkflowRepository,
+    private readonly workflowValidateService: WorkflowValidateService,
   ) {}
 
   public async getRecentlyUsedWorkflows() {}
@@ -406,6 +408,44 @@ export class WorkflowCrudService {
     return {
       workflows: workflows,
       pages: [],
+    };
+  }
+
+  public async updateWorkflowDef(
+    teamId: string,
+    workflowId: string,
+    version: number,
+    updates: {
+      name?: string;
+      description?: string;
+      iconUrl?: string;
+      tasks?: MonkeyTaskDefTypes[];
+      variables?: BlockDefProperties[];
+      validationIssues?: WorkflowValidationIssue[];
+      output?: WorkflowOutputValue[];
+    },
+  ) {
+    const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
+    if (!workflow) {
+      throw new NotFoundException(`工作流 (${workflowId}) 不存在！`);
+    }
+    const workflowEntity = await this.workflowRepository.updateWorkflowDef(teamId, workflowId, version, updates);
+    let validated = workflow.validated;
+    let validationIssues: WorkflowValidationIssue[] = [];
+    if (updates.tasks || updates.output) {
+      validationIssues = await this.workflowValidateService.validateWorkflow(updates.tasks, updates.output || workflow.output || []);
+      const errors = validationIssues.filter((i) => i.issueType === ValidationIssueType.ERROR);
+      validated = errors.length === 0;
+      await this.workflowRepository.updateWorkflowDef(teamId, workflowId, version, {
+        validationIssues,
+        validated,
+      });
+      await this.conductorService.saveWorkflowInConductor(workflowEntity);
+    }
+
+    return {
+      validated,
+      validationIssues,
     };
   }
 }
