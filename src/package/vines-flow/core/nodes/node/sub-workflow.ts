@@ -4,8 +4,14 @@ import { type SubWorkflowTaskDef, TaskType } from '@io-orkes/conductor-javascrip
 import { VinesCore } from '@/package/vines-flow/core';
 import { ControlFlowVinesNode, VinesNode } from '@/package/vines-flow/core/nodes/base.ts';
 import { drawSmoothLine } from '@/package/vines-flow/core/nodes/svg-utils.ts';
-import { IVinesNodePosition, VinesEdgePath, VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
-import { IVinesFlowRenderType, IVinesInsertChildParams } from '@/package/vines-flow/core/typings.ts';
+import {
+  IVinesNodeBoundary,
+  IVinesNodePosition,
+  VinesEdgePath,
+  VinesTask,
+} from '@/package/vines-flow/core/nodes/typings.ts';
+import { IVinesInsertChildParams, IVinesMode } from '@/package/vines-flow/core/typings.ts';
+import { getBoundary } from '@/package/vines-flow/core/utils.ts';
 
 export type VinesSubWorkflowTaskDef = SubWorkflowTaskDef & {
   subWorkflow: Pick<MonkeyWorkflow, 'name' | 'iconUrl' | 'description'> & { workflowDef: { tasks: VinesTask[] } };
@@ -22,7 +28,7 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
   }
 
   private parseChildren(tasks: VinesTask[]) {
-    this.children.push(...tasks.map((it) => VinesNode.create(it, this._vinesCore)));
+    this.children = tasks.map((it) => VinesNode.create(it, this._vinesCore));
   }
 
   override check(): boolean {
@@ -51,14 +57,11 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
   }
 
   override get needRenderChildren() {
-    return (
-      !this.isNested ||
-      [IVinesFlowRenderType.COMPLICATE, IVinesFlowRenderType.SIMPLIFY].includes(this._vinesCore.renderOptions.type)
-    );
+    return !this.isNested || this._vinesCore.mode === IVinesMode.EXEC;
   }
 
   override get childNodes(): VinesNode[] {
-    if (this._vinesCore.renderOptions.type !== IVinesFlowRenderType.MINI) {
+    if (this._vinesCore.mode !== IVinesMode.EDIT) {
       return super.childNodes;
     }
     return [];
@@ -185,6 +188,13 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
       in: inPoint,
       out: outPoint,
     };
+  }
+
+  override getBoundary(children = this.children): IVinesNodeBoundary {
+    if (!this.isNested) {
+      return super.getBoundary(children);
+    }
+    return getBoundary(children);
   }
   // endregion
 

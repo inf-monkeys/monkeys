@@ -434,7 +434,7 @@ export class ControlFlowVinesNode<T extends MonkeyTaskDefTypes = MonkeyTaskDefTy
     return ([...this.extraSvgPath, [this.id, this._svgPath]] as [string, VinesEdgePath][]).reverse();
   }
 
-  async renderChildren(
+  renderChildren(
     position: IVinesNodePosition,
     path: VinesNode[] = [],
     children = this.children.filter((node) => node.needRender),

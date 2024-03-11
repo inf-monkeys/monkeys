@@ -14,6 +14,11 @@ export enum IVinesFlowRenderType {
   MINI = 'mini',
 }
 
+export enum IVinesMode {
+  EXEC = 'exec',
+  EDIT = 'edit',
+}
+
 export interface IVinesFlowRenderOptions {
   direction: 'horizontal' | 'vertical';
   type: IVinesFlowRenderType;
