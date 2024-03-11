@@ -31,6 +31,7 @@ export class WorkflowExecutionEntity extends BaseEntity {
 
   @Column({
     name: 'chat_session_id',
+    nullable: true,
   })
   chatSessionId?: string;
 }

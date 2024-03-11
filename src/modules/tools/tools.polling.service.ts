@@ -20,53 +20,28 @@ export class ToolsPollingService {
 
   private async requestExternalApi(task: Task) {
     const inpuData = task.inputData as WorkerInputData;
-    const { __toolName, ...rest } = inpuData;
-    const block = await this.toolsRepository.getToolByName(__toolName);
+    const { __toolName, __apiInfo, ...rest } = inpuData;
+    const tool = await this.toolsRepository.getToolByName(__toolName);
     logger.info(`Start to execute tool: ${__toolName}`);
-    if (!block) {
+    if (!tool) {
       throw new Error(`Failed to execute tool "${__toolName}", may not exists or not functioning now.`);
     }
-    const query: { [x: string]: any } = {};
-    const body: { [x: string]: any } = {};
-    const path: { [x: string]: any } = {};
+    if (!__apiInfo) {
+      throw new Error(`Failed to execute tool "${__toolName}", __apiInfo is missing`);
+    }
+    const { method, path } = __apiInfo;
     const namespace = __toolName.split('__')[0];
     const server = await this.toolsRepository.getServerByNamespace(namespace);
     if (!server) {
       throw new Error(`Failed to execute worker "${__toolName}", may not exists or not functioning now.`);
     }
-    const baseURL = server.api.url;
-    const method = __toolName.split('__')[1];
-    let url = __toolName.split('__')[2];
-    for (const key in rest) {
-      const value = rest[key];
-      if (value === undefined || value === '') {
-        continue;
-      }
-      const [where, name] = key.split('#');
-      if (where === 'QUERY') {
-        query[name] = value;
-      } else if (where === 'BODY') {
-        body[name] = value;
-      } else if (where === 'PATH') {
-        path[name] = value;
-      }
-    }
-
-    if (Object.keys(path).length > 0) {
-      for (const pathKey in path) {
-        url = url.replace(`{${pathKey}}`, path[pathKey]).replace(pathKey, path[pathKey]);
-      }
-    }
-
     const { data } = await axios({
       method,
-      baseURL,
-      url,
-      data: body,
-      params: query,
+      baseURL: server.baseUrl,
+      url: path,
+      data: rest,
     });
     logger.info(`Execute worker success: ${__toolName}`);
-
     return data;
   }
 

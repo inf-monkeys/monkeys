@@ -1,5 +1,6 @@
 import { MonkeyToolCategories, MonkeyToolDescription, MonkeyToolDisplayName, MonkeyToolIcon, MonkeyToolInput, MonkeyToolOutput } from '@/common/decorators/monkey-block-api-extensions.decorator';
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { IRequest } from '@/common/typings/request';
+import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiOperation } from '@nestjs/swagger';
 import { ApiType, AuthType, ManifestJson, SchemaVersion } from '../interfaces';
 import { AddTwoNumberDto } from './dto/req/add-two-number.dto';
@@ -32,7 +33,7 @@ export class ExampleToolsController {
   })
   @MonkeyToolCategories(['math'])
   @MonkeyToolIcon('emoji:👧:#ceefc5')
-  public async addTwoNumberExample(@Body() body: AddTwoNumberDto) {
+  public async addTwoNumberExample(@Req() req: IRequest, @Body() body: AddTwoNumberDto) {
     const { numA, numB } = body;
     return {
       result: numA + numB,

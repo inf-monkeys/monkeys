@@ -32,12 +32,12 @@ export class ToolsRepository {
     return await this.toolsServerRepository.findOne({
       where: {
         namespace: namespace,
-        isDeleted: true,
+        isDeleted: false,
       },
     });
   }
 
-  public async saveServer(url: string, data: ManifestJson) {
+  public async saveServer(manifestUrl: string, baseUrl: string, data: ManifestJson) {
     // save server info
     const originalEntity = await this.toolsServerRepository.findOne({
       where: {
@@ -51,7 +51,8 @@ export class ToolsRepository {
     entity.api = data.api;
     entity.auth = data.auth;
     entity.namespace = data.namespace;
-    entity.manifestUrl = url;
+    entity.manifestUrl = manifestUrl;
+    entity.baseUrl = baseUrl;
     await this.toolsServerRepository.save(entity);
   }
 
@@ -199,7 +200,7 @@ export class ToolsRepository {
     return await this.toolsRepository.findOne({
       where: {
         name,
-        isDeleted: true,
+        isDeleted: false,
       },
     });
   }

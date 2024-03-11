@@ -11,8 +11,8 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class ConductorService {
-  CUSTOM_BLOCK_NAME_KEY = '__customBlockName';
-  EXTRA_KEY = '__extra';
+  TOOL_NAME_KEY = '__toolName';
+  APIINFO_KEY = '__apiInfo';
 
   constructor(private readonly toolsRepository: ToolsRepository) {}
 
@@ -32,8 +32,8 @@ export class ConductorService {
       //   }
       // }
       // 将 conductor 里面的 api 转换成真实的 name
-      if (task.inputData && task.inputData[this.CUSTOM_BLOCK_NAME_KEY]) {
-        const realBlockName = task.inputData[this.CUSTOM_BLOCK_NAME_KEY];
+      if (task.inputData && task.inputData[this.TOOL_NAME_KEY]) {
+        const realBlockName = task.inputData[this.TOOL_NAME_KEY];
         task.taskDefName = realBlockName;
         task.taskType = realBlockName;
         if (task.workflowTask) {
@@ -82,8 +82,8 @@ export class ConductorService {
 
       const tool = tools.find((x) => x.name === task.name);
       // use CUSTOM_BLOCK_NAME_KEY to store real task_name
-      task.inputParameters[this.CUSTOM_BLOCK_NAME_KEY] = task.name;
-      task.inputParameters[this.EXTRA_KEY] = tool.extra;
+      task.inputParameters[this.TOOL_NAME_KEY] = task.name;
+      task.inputParameters[this.APIINFO_KEY] = tool.extra.apiInfo;
       task.name = CONDUCTOR_TASK_DEF_NAME;
 
       // 特殊类型的 block：SUB_WORKFLOW

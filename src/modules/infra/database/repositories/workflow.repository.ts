@@ -70,10 +70,10 @@ export class WorkflowRepository {
     return entity;
   }
 
-  public async getWorkflowById(id: string, version: number) {
+  public async getWorkflowById(workflowId: string, version: number) {
     return await this.workflowMetadataRepository.findOne({
       where: {
-        id: new ObjectId(id),
+        workflowId,
         version,
         isDeleted: false,
       },
@@ -262,6 +262,7 @@ export class WorkflowRepository {
 
   public async saveWorkflowExecution(workflowId: string, version: number, workflowInstanceId: string, userId: string, triggerType: WorkflowTriggerType, chatSessionId: string) {
     await this.workflowExecutionRepository.save({
+      id: new ObjectId(),
       createdTimestamp: Date.now(),
       updatedTimestamp: Date.now(),
       isDeleted: false,

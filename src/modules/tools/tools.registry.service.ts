@@ -76,10 +76,14 @@ export class ToolsRegistryService {
     } = manifestData;
 
     let realSpecUrl = specUrl;
+    let baseUrl: string;
     if (!realSpecUrl.startsWith('http://') && !realSpecUrl.startsWith('https://')) {
       const parsedUrl = url.parse(manifestUrl);
-      const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
+      baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
       realSpecUrl = url.resolve(baseUrl, realSpecUrl);
+    } else {
+      const parsedUrl = url.parse(realSpecUrl);
+      baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
     }
 
     let tools: BlockDefinition[] = [];
@@ -93,7 +97,7 @@ export class ToolsRegistryService {
     }
 
     // Save server info and credentials
-    await this.toolsRepository.saveServer(manifestUrl, manifestData);
+    await this.toolsRepository.saveServer(manifestUrl, baseUrl, manifestData);
     if (manifestData.credentials) {
       await this.toolsRepository.createOrUpdateCredentials(namespace, manifestData.credentials);
     }

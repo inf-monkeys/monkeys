@@ -69,9 +69,8 @@ export class WorkflowWebhookService {
     const workflowContext: WorkflowExecutionContext = {
       userId,
       teamId: teamId,
-      userToken: '',
-      APP_ID: config.server.appId,
-      APP_URL: config.server.appUrl,
+      appId: config.server.appId,
+      appUrl: config.server.appUrl,
     };
 
     let inputData = {};

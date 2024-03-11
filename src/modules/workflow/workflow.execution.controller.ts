@@ -1,8 +1,12 @@
+import { config } from '@/common/config';
+import { WorkflowExecutionContext } from '@/common/dto/workflow-execution-context.dto';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
+import { WorkflowTriggerType } from '@/entities/workflow/workflow-trigger';
 import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SearchWorkflowExecutionsDto } from './dto/req/search-workflow-execution.dto';
+import { StartWorkflowDto } from './dto/req/start-workflow.dto';
 import { WorkflowExecutionService } from './workflow.execution.service';
 
 @Controller('/workflow')
@@ -34,6 +38,45 @@ export class WorkflowExecutionController {
     return new SuccessResponse({
       data: result,
     });
+  }
+
+  @Post('/executions/:workflowId/start')
+  @ApiOperation({
+    summary: '运行 workflow',
+    description: '运行 workflow',
+  })
+  public async startWorkflow(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Body() body: StartWorkflowDto) {
+    const { teamId, userId } = req;
+    const workflowContext: WorkflowExecutionContext = {
+      userId,
+      teamId: teamId,
+      appId: config.server.appId,
+      appUrl: config.server.appUrl,
+    };
+    const { inputData, version, chatSessionId, waitForWorkflowFinished = false } = body;
+    const workflowInstanceId = await this.service.startWorkflow({
+      teamId,
+      userId,
+      workflowId,
+      inputData,
+      version,
+      workflowContext,
+      triggerType: WorkflowTriggerType.MANUALLY,
+      chatSessionId,
+    });
+
+    if (waitForWorkflowFinished) {
+      const result = await this.service.waitForWorkflowResult(teamId, workflowInstanceId);
+      return new SuccessResponse({
+        data: result,
+      });
+    } else {
+      return new SuccessResponse({
+        data: {
+          workflowInstanceId,
+        },
+      });
+    }
   }
 
   @Post('/executions/:workflowInstanceId/pause')
