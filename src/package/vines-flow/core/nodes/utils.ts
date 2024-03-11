@@ -36,7 +36,7 @@ export function createNewSubWorkflow(tasks: VinesTask[], vinesCore: VinesCore) {
 export function createTask(tool: VinesToolDef, extendObject = {}) {
   const { name, type, input: properties } = tool;
   const inputParameters = autoTypeTransform(properties, {});
-  const newTaskRefName = `${name}_${Math.random().toString(36).slice(-8)}`;
+  const newTaskRefName = `${name}_${createNanoId()}`;
   const newTask: VinesTask = {
     name,
     type: type as never,
@@ -64,7 +64,7 @@ export function createTask(tool: VinesToolDef, extendObject = {}) {
     (newTask as unknown as DoWhileTaskDef).loopOver = [
       {
         name: 'fake_node',
-        taskReferenceName: `fake_node_${Math.random().toString(36).slice(-8)}`,
+        taskReferenceName: `fake_node_${createNanoId()}`,
         type: 'SIMPLE' as TaskType.SIMPLE,
       },
     ];
@@ -74,14 +74,14 @@ export function createTask(tool: VinesToolDef, extendObject = {}) {
       switchTrue: [
         {
           name: 'fake_node',
-          taskReferenceName: `fake_node_${Math.random().toString(36).slice(-8)}`,
+          taskReferenceName: `fake_node_${createNanoId()}`,
           type: 'SIMPLE' as TaskType.SIMPLE,
         },
       ],
       switchFalse: [
         {
           name: 'fake_node',
-          taskReferenceName: `fake_node_${Math.random().toString(36).slice(-8)}`,
+          taskReferenceName: `fake_node_${createNanoId()}`,
           type: 'SIMPLE' as TaskType.SIMPLE,
         },
       ],
@@ -92,14 +92,14 @@ export function createTask(tool: VinesToolDef, extendObject = {}) {
       [
         {
           name: 'fake_node',
-          taskReferenceName: `fake_node_${Math.random().toString(36).slice(-8)}`,
+          taskReferenceName: `fake_node_${createNanoId()}`,
           type: 'SIMPLE' as TaskType.SIMPLE,
         },
       ],
       [
         {
           name: 'fake_node',
-          taskReferenceName: `fake_node_${Math.random().toString(36).slice(-8)}`,
+          taskReferenceName: `fake_node_${createNanoId()}`,
           type: 'SIMPLE' as TaskType.SIMPLE,
         },
       ],
@@ -118,7 +118,6 @@ export const autoTypeTransform = (
   properties: VinesBlockDefProperties[] | undefined,
   obj: Record<string, unknown>,
 ): Record<string, unknown> => {
-  console.log(properties);
   properties?.forEach(({ name, type, default: defaultValue, typeOptions }) => {
     const value = get(obj, name);
 

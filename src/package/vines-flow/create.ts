@@ -1,7 +1,10 @@
 import React, { createContext, createElement, useContext, useEffect, useReducer } from 'react';
 
+import { useSWRConfig } from 'swr';
+
 import { useToolLists } from '@/apis/tools';
 import { useWorkflowList } from '@/apis/workflow';
+import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { _vines } from '@/package/vines-flow/index.ts';
 
 interface VinesContext {
@@ -15,12 +18,23 @@ export const createVinesCore = () => {
   const VinesContext = createContext<VinesContext | undefined>(void 0);
 
   const VinesProvider = ({ children }: { children: React.ReactNode }) => {
+    const { mutate } = useSWRConfig();
     const [_refresher, forceUpdate] = useReducer(forceUpdateReducer, 0);
+
+    const handleUpdate = async (tasks: VinesTask[]) => {
+      forceUpdate();
+
+      await mutate(`/api/workflow/${_vines.workflowId}`, { workflowDef: { tasks } }, { revalidate: false });
+      // TODO: 更新到接口
+      // console.log('tasks:', JSON.stringify(tasks));
+    };
 
     useEffect(() => {
       _vines.on('refresh', forceUpdate);
+      _vines.on('update', handleUpdate);
       return () => {
         _vines.off('refresh', forceUpdate);
+        _vines.off('update', handleUpdate);
       };
     }, []);
 
