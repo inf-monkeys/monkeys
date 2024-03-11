@@ -259,11 +259,11 @@ export class VinesCore extends VinesTools(VinesBase) {
     return false;
   }
 
-  public updateRaw(nodeId: string, task: VinesTask) {
+  public updateRaw(nodeId: string, task: VinesTask, update = true) {
     for (const node of this.nodes) {
       if (node.updateRaw(nodeId, task)) {
         this.tasks = this.getRaw();
-        this.sendUpdateEvent();
+        update && this.sendUpdateEvent();
         return this.tasks;
       }
     }
