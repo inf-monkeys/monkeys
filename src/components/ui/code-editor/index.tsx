@@ -3,6 +3,7 @@ import React, { useCallback, useMemo } from 'react';
 import MonacoEditor, { EditorProps, OnMount } from '@monaco-editor/react';
 import _ from 'lodash';
 
+import { useAppStore } from '@/store/useAppStore';
 import { cn } from '@/utils';
 
 interface ICodeEditorProps {
@@ -17,7 +18,6 @@ interface ICodeEditorProps {
   minimap?: boolean;
   hideBorder?: boolean;
   saveWait?: number;
-  theme?: 'vs-dark' | 'light';
 }
 
 const DEFAULT_OPTIONS: EditorProps['options'] = {
@@ -44,8 +44,9 @@ export const CodeEditor: React.FC<ICodeEditorProps> = ({
   className,
   options,
   saveWait = 200,
-  theme,
 }) => {
+  const { darkMode } = useAppStore();
+
   const saveInput = useCallback(
     _.debounce((input: string) => onUpdate && onUpdate(input), saveWait),
     [onUpdate, saveWait],
@@ -94,13 +95,7 @@ export const CodeEditor: React.FC<ICodeEditorProps> = ({
         className,
       )}
       options={finalOptions}
-      theme={
-        theme
-          ? theme
-          : document.documentElement.getAttribute('data-mantine-color-scheme') === 'dark'
-            ? 'vs-dark'
-            : 'light'
-      }
+      theme={darkMode ? 'vs-dark' : 'light'}
       onMount={handleEditorDidMount}
     />
   );
