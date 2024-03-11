@@ -16,10 +16,12 @@ import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { usePageStore } from '@/store/usePageStore';
 import VinesEvent from '@/utils/events';
 
-interface IVinesFlowProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface IVinesFlowProps extends React.ComponentPropsWithoutRef<'div'> {
+  workflowId?: string;
+}
 
-export const VinesFlow: React.FC<IVinesFlowProps> = () => {
-  const { workflow } = useVinesFlowWithPage();
+export const VinesFlow: React.FC<IVinesFlowProps> = ({ workflowId }) => {
+  const { workflow } = useVinesFlowWithPage(workflowId);
   const { containerWidth, containerHeight } = usePageStore();
   const { visible, setVisible, setInitialScale, canvasMode } = useFlowStore();
   const {

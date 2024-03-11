@@ -107,11 +107,11 @@ export const useVinesPage = () => {
   };
 };
 
-export const useVinesFlowWithPage = () => {
+export const useVinesFlowWithPage = (_workflowId?: string) => {
   const { workflowId, pageId, teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
 
   const [apikey] = useLocalStorage('vines-apikey', '', false);
-  const { data: workflow, mutate: mutateWorkflow } = useGetWorkflow(apikey, workflowId);
+  const { data: workflow, mutate: mutateWorkflow } = useGetWorkflow(apikey, _workflowId ?? workflowId);
 
   return {
     workflowId,
