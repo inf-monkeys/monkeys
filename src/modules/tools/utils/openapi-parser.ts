@@ -8,6 +8,9 @@ export const parseOpenApiSpecAsBlocks = (namespace: string, specData: OpenAPIObj
     for (const method in pathItemObject) {
       if (['get', 'post', 'delete', 'put', 'patch', 'options', 'head', 'trace'].includes(method)) {
         const apiContent = pathItemObject[method] as OperationObject;
+        if (apiContent['x-monkey-tool-ignore']) {
+          continue;
+        }
         const name = apiContent['x-monkey-tool-name'] || apiContent.operationId;
         const extra = apiContent['x-monkey-tool-extra'] || {};
         extra.apiInfo = {

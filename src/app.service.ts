@@ -22,7 +22,7 @@ export class AppService implements OnApplicationBootstrap {
     }
 
     for (const { name, manifestUrl } of config.tools) {
-      logger.info(`Load ${name} tools of ${EXAMPLE_WORKER_OPENAPI_MENIFEST_URL}`);
+      logger.info(`Load ${name} tools of ${manifestUrl}`);
       this.workerRegistryService.registerToolsServer({
         manifestUrl: manifestUrl,
       });
