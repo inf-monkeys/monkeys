@@ -44,7 +44,7 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }
         {hasPages &&
           renderer
             .filter(({ teamId, workflowId, type }) => teamId && workflowId && type)
-            .map(({ _id, type }) => {
+            .map(({ _id, workflowId, type }) => {
               const View = IFRAME_MAP[type ?? ''];
               return (
                 <motion.div
@@ -64,7 +64,7 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }
                   animate={_id === page?._id ? 'enter' : 'exit'}
                   className="absolute left-0 top-0 size-full"
                 >
-                  {page ? <View /> : <Page404 />}
+                  {page ? <View workflowId={workflowId} /> : <Page404 />}
                 </motion.div>
               );
             })}
