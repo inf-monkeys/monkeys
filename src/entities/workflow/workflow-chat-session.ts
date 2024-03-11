@@ -3,15 +3,23 @@ import { BaseEntity } from '../base/base';
 
 @Entity({ name: 'workflow-chat-sessions' })
 export class WorkflowChatSessionEntity extends BaseEntity {
-  @Column()
+  @Column({
+    name: 'display_name',
+  })
   displayName: string;
 
-  @Column()
+  @Column({
+    name: 'team_id',
+  })
   teamId: string;
 
-  @Column()
+  @Column({
+    name: 'creator_user_id',
+  })
   creatorUserId: string;
 
-  @Column()
+  @Column({
+    name: 'workflow_id',
+  })
   workflowId: string;
 }

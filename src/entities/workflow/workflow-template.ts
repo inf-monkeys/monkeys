@@ -12,24 +12,34 @@ export class WorkflowTemplateEntity extends BaseEntity {
   @Column()
   logo?: string;
 
-  @Column()
+  @Column({
+    name: 'team_id',
+  })
   teamId: string;
 
-  @Column()
+  @Column({
+    name: 'workflow_id',
+  })
   workflowId: string;
 
-  @Column()
+  @Column({
+    name: 'workflow_version',
+  })
   workflowVersion: number;
 
-  @Column()
+  @Column({
+    name: 'creator_user_id',
+  })
   creatorUserId: string;
 
-  @Column()
-  categoryIds: string[];
-
-  @Column()
+  @Column({
+    name: 'fetch_count',
+  })
   fetchCount: number;
 
-  @Column()
+  @Column({
+    type: 'simple-json',
+    name: 'assets_policy',
+  })
   assetsPolicy: { [x: string]: any };
 }

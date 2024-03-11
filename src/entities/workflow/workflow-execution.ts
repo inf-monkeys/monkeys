@@ -4,24 +4,33 @@ import { WorkflowTriggerType } from './workflow-trigger';
 
 @Entity({ name: 'workflow-execution' })
 export class WorkflowExecutionEntity extends BaseEntity {
-  @Column()
+  @Column({
+    name: 'workflow_id',
+  })
   workflowId: string;
 
-  @Column()
+  @Column({
+    name: 'workflow_version',
+  })
   workflowVersion: number;
 
-  @Column()
+  @Column({
+    name: 'workflow_instance_id',
+  })
   workflowInstanceId: string;
 
-  /**
-   * 执行的用户 ID
-   */
-  @Column()
+  @Column({
+    name: 'user_id',
+  })
   userId: string;
 
-  @Column()
+  @Column({
+    name: 'trigger_type',
+  })
   triggerType: WorkflowTriggerType;
 
-  @Column()
+  @Column({
+    name: 'chat_session_id',
+  })
   chatSessionId?: string;
 }
