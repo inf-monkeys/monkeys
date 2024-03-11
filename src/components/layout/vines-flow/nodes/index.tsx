@@ -28,12 +28,12 @@ export const VinesNodes: React.FC<IVinesNodesProps> = () => {
 
   return (
     <>
+      {visible && <NodeController nodes={vinesNodes} nodeStagger={nodeStagger} />}
       {vines.renderOptions.type === IVinesFlowRenderType.COMPLICATE ? (
         <></>
       ) : (
         <SimplifyNodes nodes={vinesNodes} nodeStagger={nodeStagger} visible={visible} />
       )}
-      {visible && <NodeController nodes={vinesNodes} nodeStagger={nodeStagger} />}
     </>
   );
 };
