@@ -51,7 +51,7 @@ export const SimplifyNode: React.FC<ISimplifyNodeProps> = ({ node }) => {
   return (
     <>
       <NodeDnd node={node} onClick={handleNodeClick}>
-        {(_vinesNode, isDragging, listeners) =>
+        {(_vinesNode, listeners) =>
           isStartNode ? (
             <VinesStartNode
               key="vines-trigger-node"
@@ -69,7 +69,6 @@ export const SimplifyNode: React.FC<ISimplifyNodeProps> = ({ node }) => {
           ) : (
             <VinesSimpleNode
               node={_vinesNode}
-              isDragging={isDragging}
               canvasMode={canvasMode}
               canvasDisabled={canvasDisabled}
               isMiniNode={isMiniNode}

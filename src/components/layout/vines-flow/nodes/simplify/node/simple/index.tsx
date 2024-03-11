@@ -14,7 +14,6 @@ interface IVinesSimpleNodeProps {
   canvasMode?: CanvasStatus;
   canvasDisabled?: boolean;
   isMiniNode?: boolean;
-  isDragging?: boolean;
   isOverlay?: boolean;
 }
 

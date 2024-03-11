@@ -12,7 +12,7 @@ import VinesEvent from '@/utils/events';
 
 interface INodeDndProps {
   node: VinesNode;
-  children: (node: VinesNode, isDragging: boolean, listeners: DraggableSyntheticListeners) => React.ReactNode;
+  children: (node: VinesNode, listeners: DraggableSyntheticListeners) => React.ReactNode;
   onOver?: () => void;
   onClick: () => void;
 }
@@ -55,7 +55,7 @@ export const NodeDnd: React.FC<INodeDndProps> = ({ node, children, onOver, onCli
     }
   }, [isOver]);
 
-  const child = children(node, isDragging, listeners);
+  const child = children(node, listeners);
 
   return (
     <div
