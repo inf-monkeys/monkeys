@@ -1,13 +1,15 @@
 import React, { useCallback, useMemo } from 'react';
 
 import MonacoEditor, { EditorProps, OnMount } from '@monaco-editor/react';
-import _ from 'lodash';
+import { debounce, merge } from 'lodash';
 
 import { useAppStore } from '@/store/useAppStore';
 import { cn } from '@/utils';
 
+export type JSONValue = null | string | number | boolean | { [x: string]: JSONValue } | Array<JSONValue>;
+
 interface ICodeEditorProps {
-  data: string | Record<string, unknown> | Array<unknown>;
+  data: JSONValue;
   onUpdate?: (rawData: string) => void;
   className?: string;
   options?: EditorProps['options'];
@@ -48,7 +50,7 @@ export const CodeEditor: React.FC<ICodeEditorProps> = ({
   const { darkMode } = useAppStore();
 
   const saveInput = useCallback(
-    _.debounce((input: string) => onUpdate && onUpdate(input), saveWait),
+    debounce((input: string) => onUpdate && onUpdate(input), saveWait),
     [onUpdate, saveWait],
   );
 
@@ -57,19 +59,18 @@ export const CodeEditor: React.FC<ICodeEditorProps> = ({
       editor.onDidChangeModelContent(() => {
         saveInput(editor.getValue());
       });
-      void (
-        readonly &&
+
+      readonly &&
         editor.updateOptions({
           readOnly: true,
-        })
-      );
+        });
     },
     [readonly],
   );
 
   const finalOptions = useMemo(
     () =>
-      _.merge(
+      merge(
         {},
         DEFAULT_OPTIONS,
         readonly ? READONLY_OPTIONS : {},
@@ -89,9 +90,7 @@ export const CodeEditor: React.FC<ICodeEditorProps> = ({
       height={height}
       className={cn(
         'h-full w-full',
-        {
-          'overflow-clip rounded border border-solid border-white border-opacity-20 shadow': !hideBorder,
-        },
+        !hideBorder && 'overflow-clip rounded border border-solid border-white border-opacity-20 shadow',
         className,
       )}
       options={finalOptions}
