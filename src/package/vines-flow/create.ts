@@ -2,10 +2,14 @@ import React, { createContext, createElement, useContext, useEffect, useReducer 
 
 import { useSWRConfig } from 'swr';
 
+import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { toast } from 'sonner';
+
 import { useToolLists } from '@/apis/tools';
-import { useWorkflowList } from '@/apis/workflow';
+import { updateWorkflow, useWorkflowList } from '@/apis/workflow';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { _vines } from '@/package/vines-flow/index.ts';
+import { readLocalStorageValue } from '@/utils';
 
 interface VinesContext {
   _refresher?: number;
@@ -21,12 +25,26 @@ export const createVinesCore = () => {
     const { mutate } = useSWRConfig();
     const [_refresher, forceUpdate] = useReducer(forceUpdateReducer, 0);
 
-    const handleUpdate = async (tasks: VinesTask[]) => {
+    const handleUpdate = (tasks: VinesTask[]) => {
       forceUpdate();
 
-      await mutate(`/api/workflow/${_vines.workflowId}`, { workflowDef: { tasks } }, { revalidate: false });
-      // TODO: 更新到接口
-      // console.log('tasks:', JSON.stringify(tasks));
+      const apikey = readLocalStorageValue('vines-apikey', '', false);
+      const workflowId = _vines.workflowId;
+      if (!workflowId) {
+        toast.error('工作流 ID 不存在！');
+        return;
+      }
+
+      toast.promise(
+        updateWorkflow(apikey, workflowId, _vines.version, { workflowDef: { tasks } } as Partial<MonkeyWorkflow>),
+        {
+          loading: '更新中...',
+          success: '更新成功',
+          error: '更新失败',
+        },
+      );
+
+      void mutate(`/api/workflow/${workflowId}`, { workflowDef: { tasks } }, { revalidate: false });
     };
 
     useEffect(() => {
