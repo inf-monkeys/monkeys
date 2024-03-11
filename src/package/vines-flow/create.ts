@@ -6,7 +6,7 @@ import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import { toast } from 'sonner';
 
 import { useToolLists } from '@/apis/tools';
-import { updateWorkflow, useWorkflowList } from '@/apis/workflow';
+import { useUpdateWorkflow, useWorkflowList } from '@/apis/workflow';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { _vines } from '@/package/vines-flow/index.ts';
 import { readLocalStorageValue } from '@/utils';
@@ -25,24 +25,22 @@ export const createVinesCore = () => {
     const { mutate } = useSWRConfig();
     const [_refresher, forceUpdate] = useReducer(forceUpdateReducer, 0);
 
+    const { trigger } = useUpdateWorkflow(readLocalStorageValue('vines-apikey', '', false), _vines.workflowId ?? '');
+
     const handleUpdate = (tasks: VinesTask[]) => {
       forceUpdate();
 
-      const apikey = readLocalStorageValue('vines-apikey', '', false);
       const workflowId = _vines.workflowId;
       if (!workflowId) {
         toast.error('工作流 ID 不存在！');
         return;
       }
 
-      toast.promise(
-        updateWorkflow(apikey, workflowId, _vines.version, { workflowDef: { tasks } } as Partial<MonkeyWorkflow>),
-        {
-          loading: '更新中...',
-          success: '更新成功',
-          error: '更新失败',
-        },
-      );
+      toast.promise(trigger({ version: _vines.version, workflowDef: { tasks } } as Partial<MonkeyWorkflow>), {
+        loading: '更新中...',
+        success: '更新成功',
+        error: '更新失败',
+      });
 
       void mutate(`/api/workflow/${workflowId}`, { workflowDef: { tasks } }, { revalidate: false });
     };

@@ -1,4 +1,5 @@
 import useSWR from 'swr';
+import useSWRMutation from 'swr/mutation';
 
 import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import queryString from 'query-string';
@@ -26,4 +27,10 @@ export const updateWorkflow = (
       ...workflow,
       version: workflowVersion,
     },
+  );
+
+export const useUpdateWorkflow = (apikey: string, workflowId: string) =>
+  useSWRMutation<MonkeyWorkflow | undefined, unknown, string | null, Partial<MonkeyWorkflow>>(
+    workflowId ? `/api/workflow/${workflowId}` : null,
+    vinesFetcher<MonkeyWorkflow>({ method: 'PUT', apikey }),
   );
