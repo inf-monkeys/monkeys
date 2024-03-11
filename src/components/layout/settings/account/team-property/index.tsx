@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { CreditCard } from 'lucide-react';
 
 import { useTeamBalance } from '@/apis/authz/team/payment';
-import { Pay } from '@/components/layout/settings/account/team-property/pay.tsx';
+import { Recharge } from '@/components/layout/settings/account/team-property/recharge';
 import { balanceFormat } from '@/components/layout/settings/account/utils.ts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
@@ -31,11 +31,11 @@ export const TeamProperty: React.FC<ITeamPropertyProps> = () => {
           <div className="text-sm font-bold">.{balanceAmount[1]}</div>
         </div>
         <div className="flex flex-1 justify-end">
-          <Pay>
+          <Recharge>
             <Button size="small" icon={<CreditCard />}>
               充值
             </Button>
-          </Pay>
+          </Recharge>
         </div>
       </CardContent>
     </Card>
