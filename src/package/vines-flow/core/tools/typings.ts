@@ -11,3 +11,5 @@ export type VinesToolDef = Omit<BlockDefinition, 'input' | 'output'> & {
   input: VinesBlockDefProperties[];
   output: VinesBlockDefProperties[];
 };
+
+export type VinesToolWithCategory = [VinesToolDef[], number, string, string];

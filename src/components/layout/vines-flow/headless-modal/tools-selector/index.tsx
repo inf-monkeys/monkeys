@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import { useParams } from '@tanstack/react-router';
+
 import { Search } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -7,7 +9,7 @@ import { ToolLists } from '@/components/layout/vines-flow/headless-modal/tools-s
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
-import { VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
+import { VinesToolDef, VinesToolWithCategory } from '@/package/vines-flow/core/tools/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import VinesEvent from '@/utils/events';
@@ -15,6 +17,7 @@ import VinesEvent from '@/utils/events';
 interface IToolsSelectorProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
+  const { workflowId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
   const { setZoomToNodeId } = useFlowStore();
   const { vines } = useVinesFlow();
 
@@ -54,7 +57,12 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
     setZoomToNodeId(Array.isArray(node) ? node[0].id : node.id);
   };
 
-  const list = vines.getToolsByCategory(searchValue);
+  const list = vines
+    .getToolsByCategory(searchValue)
+    .map(([tools, ...it]) => [
+      tools.filter(({ name }) => !name.endsWith(workflowId)),
+      ...it,
+    ]) as VinesToolWithCategory[];
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
