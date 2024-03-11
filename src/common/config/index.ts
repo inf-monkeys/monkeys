@@ -33,12 +33,19 @@ export interface VectorGatewayService {
   baseUrl: string;
 }
 
+export interface ToolServiceConfig {
+  name: string;
+  manifestUrl?: string;
+  baseUrl?: string;
+}
+
 export interface Config {
   server: ServerConfig;
   conductor: ConductorConfig;
   database: DatabaseConfig;
   redis: RedisConfig;
   vector: VectorGatewayService;
+  tools: ToolServiceConfig[];
 }
 
 const port = readConfig('server.port', 3000);
@@ -72,4 +79,5 @@ export const config: Config = {
     enabled: readConfig('vector.enabled', false),
     baseUrl: readConfig('vector.baseUrl', 'http://localhost:8899'),
   },
+  tools: readConfig('tools', []),
 };

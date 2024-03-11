@@ -15,5 +15,12 @@ export class AppService implements OnApplicationBootstrap {
         manifestJsonUrl: EXAMPLE_WORKER_OPENAPI_MENIFEST_URL,
       });
     }
+
+    for (const { name, manifestUrl } of config.tools) {
+      logger.info(`Load ${name} blocks of ${EXAMPLE_WORKER_OPENAPI_MENIFEST_URL}`);
+      this.workerRegistryService.registerToolsServer({
+        manifestJsonUrl: manifestUrl,
+      });
+    }
   }
 }

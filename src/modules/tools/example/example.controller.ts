@@ -1,11 +1,12 @@
+import { MonkeyToolCategories, MonkeyToolDescription, MonkeyToolDisplayName, MonkeyToolIcon, MonkeyToolInput, MonkeyToolOutput } from '@/common/decorators/monkey-block-api-extensions.decorator';
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { ApiExcludeEndpoint, ApiExtension, ApiOperation } from '@nestjs/swagger';
+import { ApiExcludeEndpoint, ApiOperation } from '@nestjs/swagger';
 import { ApiType, AuthType, ManifestJson, SchemaVersion } from '../interfaces';
 import { AddTwoNumberDto } from './dto/req/add-two-number.dto';
 import { NthPowerOfDto } from './dto/req/nth-power-of.dto';
 import { EXAMPLE_WORKER_OPENAPI_PATH } from './example.swagger';
 
-@Controller('/tools/example')
+@Controller('/example-tool')
 export class ExampleToolsController {
   @Get('/manifest.json')
   @ApiExcludeEndpoint()
@@ -29,7 +30,7 @@ export class ExampleToolsController {
     summary: 'Add Two Numbers',
     description: 'Simply add tow numbers.',
   })
-  @ApiExtension('x-monkey-block-categories', ['math'])
+  @MonkeyToolCategories(['math'])
   public async addTwoNumberExample(@Body() body: AddTwoNumberDto) {
     const { numA, numB } = body;
     return {
@@ -42,11 +43,11 @@ export class ExampleToolsController {
     summary: 'Calc Nth Power',
     description: 'Calc Nth Power, assumes may take a while ...',
   })
-  @ApiExtension('x-monkey-block-categories', ['math'])
-  @ApiExtension('x-monkey-block-displayName', 'Calc Nth Power')
-  @ApiExtension('x-monkey-block-description', 'Calc Nth Power, assumes may take a while ...')
-  @ApiExtension('x-monkey-block-icon', 'emoji:👧:#ceefc5')
-  @ApiExtension('x-monkey-block-input', [
+  @MonkeyToolCategories(['math'])
+  @MonkeyToolDisplayName('Calc Nth Power')
+  @MonkeyToolDescription('Calc Nth Power, assumes may take a while ...')
+  @MonkeyToolIcon('emoji:👧:#ceefc5')
+  @MonkeyToolInput([
     {
       name: 'num',
       displayName: 'Number',
@@ -60,7 +61,7 @@ export class ExampleToolsController {
       type: 'number',
     },
   ])
-  @ApiExtension('x-monkey-block-output', [
+  @MonkeyToolOutput([
     {
       name: 'result',
       displayName: 'Result',
