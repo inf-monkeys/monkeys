@@ -5,6 +5,7 @@ import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { VinesEdges } from '@/components/layout/vines-flow/edges';
+import { VinesFlowEvents } from '@/components/layout/vines-flow/events.tsx';
 import { VinesHeadlessModal } from '@/components/layout/vines-flow/headless-modal';
 import { VinesNodes } from '@/components/layout/vines-flow/nodes';
 import { VinesToolbar } from '@/components/layout/vines-flow/toolbar';
@@ -88,6 +89,7 @@ export const VinesFlow: React.FC<IVinesFlowProps> = ({ workflowId }) => {
       </AnimatePresence>
       <VinesHeadlessModal />
       <VinesToolbar />
+      <VinesFlowEvents />
     </main>
   );
 };
