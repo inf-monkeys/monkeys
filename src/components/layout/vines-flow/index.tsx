@@ -30,6 +30,9 @@ export const VinesFlow: React.FC<IVinesFlowProps> = () => {
 
   useEffect(() => {
     workflow && vines.update({ workflow });
+    if (!workflow?.workflowDef?.tasks?.length) {
+      setVisible(false);
+    }
   }, [workflow]);
 
   useEffect(() => {
