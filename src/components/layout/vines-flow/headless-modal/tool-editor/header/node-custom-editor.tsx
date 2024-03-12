@@ -63,7 +63,7 @@ export const NodeCustomEditor: React.FC<INodeCustomEditorProps> = ({ node }) => 
                 <div className="flex items-center gap-2">
                   <div className="flex items-end gap-2">
                     <p className="text-base font-bold leading-none">
-                      {data?.title ?? tool?.displayName ?? toolName ?? '不受支持的节点'}
+                      {data?.title ?? tool?.displayName ?? toolName ?? '不受支持的工具'}
                     </p>
                     {data?.title && <span className="text-text2 text-xs font-light">{tool?.displayName}</span>}
                   </div>

@@ -5,7 +5,7 @@ import { VinesBlockDefProperties, VinesToolDef } from '@/package/vines-flow/core
 export const BUILT_IN_TOOLS: VinesToolDef[] = [
   {
     name: 'fake_node',
-    displayName: '点击添加节点',
+    displayName: '点击添加工具',
     icon: 'emoji:⛔:#35363b',
     type: 'SIMPLE' as BlockType.SIMPLE,
     categories: ['process'],

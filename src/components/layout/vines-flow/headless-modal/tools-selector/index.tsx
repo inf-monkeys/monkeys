@@ -49,7 +49,7 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
 
     const node = vines.createNode(tool);
     if (!node) {
-      toast.error('创建节点失败');
+      toast.error('创建工具失败');
       return;
     }
 
