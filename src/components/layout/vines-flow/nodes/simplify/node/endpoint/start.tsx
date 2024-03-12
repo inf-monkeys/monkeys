@@ -3,7 +3,10 @@ import React from 'react';
 import { CircularProgress } from '@nextui-org/progress';
 import { motion } from 'framer-motion';
 
+import { useTriggers, useTriggerTypes } from '@/apis/workflow/trigger';
+import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
@@ -15,7 +18,16 @@ interface IVinesStartNodeProps {
 }
 
 export const VinesStartNode: React.FC<IVinesStartNodeProps> = ({ isMiniNode, canvasMode, canvasDisabled }) => {
-  const loading = false;
+  const { vines } = useVinesFlow();
+  const { apikey } = useVinesPage();
+
+  const { data: triggerTypes, isLoading: triggerTypeLoading } = useTriggerTypes(apikey);
+  const { data: triggers, isLoading: triggersLoading } = useTriggers(vines.workflowId, vines.version, apikey);
+
+  const trigger = triggers?.find(({ enabled }) => enabled);
+  const triggerType = triggerTypes?.find(({ type }) => type === trigger?.type);
+
+  const loading = triggerTypeLoading || triggersLoading;
   const icon = '🚀';
 
   return (
@@ -53,7 +65,7 @@ export const VinesStartNode: React.FC<IVinesStartNodeProps> = ({ isMiniNode, can
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <VinesIcon src={icon} size="2xl" backgroundColor="#fff" />
+            <VinesIcon src={triggerType?.icon ?? icon} size="2xl" backgroundColor="#fff" />
           </motion.div>
         )}
       </div>
