@@ -77,7 +77,7 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
         </div>
         <Tabs defaultValue="all">
           <div className="flex justify-between">
-            <div ref={tabsNode} className="max-w-[690px] overflow-x-hidden overflow-y-clip">
+            <div ref={tabsNode} className="max-w-[690px] overflow-x-hidden overflow-y-clip pr-2">
               <TabsList>
                 {list.map(([, , categoryKey, category], index) => (
                   <TabsTrigger value={categoryKey} key={index}>
