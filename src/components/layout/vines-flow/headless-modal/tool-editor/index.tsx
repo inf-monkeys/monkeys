@@ -10,11 +10,13 @@ import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
+import { useFlowStore } from '@/store/useFlowStore';
 import VinesEvent from '@/utils/events';
 
 interface IToolEditorProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ToolEditor: React.FC<IToolEditorProps> = () => {
+  const { workflowId } = useFlowStore();
   const { vines } = useVinesFlow();
 
   const [node, setNode] = useState<VinesNode>();
@@ -22,7 +24,9 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
 
   const nodeIdRef = useRef<string>('');
   useEffect(() => {
-    const handleOpen = (nodeId: string) => {
+    const handleOpen = (_wid: string, nodeId: string) => {
+      if (workflowId !== _wid) return;
+
       setOpen(true);
       nodeIdRef.current = nodeId;
       setNode(vines.getNodeById(nodeId));
@@ -31,7 +35,7 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
     return () => {
       VinesEvent.off('flow-tool-editor', handleOpen);
     };
-  }, []);
+  }, [workflowId]);
 
   const handleRawUpdate = (data: string) => {
     try {

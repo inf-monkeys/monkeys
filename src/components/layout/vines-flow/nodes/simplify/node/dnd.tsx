@@ -45,7 +45,7 @@ export const NodeDnd: React.FC<INodeDndProps> = ({ node, children, onOver, onCli
   const handleContextMenu = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     e.preventDefault();
     if (canvasMode !== CanvasStatus.EDIT) return;
-    VinesEvent.emit('canvas-context-menu', e, 'NODE', nodeId);
+    VinesEvent.emit('canvas-context-menu', vines.workflowId, e, 'NODE', nodeId);
   };
 
   useEffect(() => {

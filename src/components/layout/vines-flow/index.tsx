@@ -24,7 +24,7 @@ interface IVinesFlowProps extends React.ComponentPropsWithoutRef<'div'> {
 export const VinesFlow: React.FC<IVinesFlowProps> = ({ workflowId }) => {
   const { workflow } = useVinesFlowWithPage(workflowId);
   const { containerWidth, containerHeight } = usePageStore();
-  const { visible, setVisible, setInitialScale, canvasMode } = useFlowStore();
+  const { setWorkflowId, visible, setVisible, setInitialScale, canvasMode } = useFlowStore();
   const {
     vines,
     vinesCanvasSize: { width, height },
@@ -32,6 +32,7 @@ export const VinesFlow: React.FC<IVinesFlowProps> = ({ workflowId }) => {
   } = useVinesFlow();
 
   useEffect(() => {
+    workflowId && setWorkflowId(workflowId ?? workflow?.workflowId ?? '');
     workflow && vines.update({ workflow });
     if (!workflow?.workflowDef?.tasks?.length) {
       setVisible(false);

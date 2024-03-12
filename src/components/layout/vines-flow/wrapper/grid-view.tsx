@@ -21,6 +21,7 @@ interface IGridViewProps extends React.ComponentPropsWithoutRef<'div'> {
 
 export const GridView: React.FC<IGridViewProps> = ({ toggleMoveState, children }) => {
   const {
+    workflowId,
     initialScale,
     isCanvasMoving,
     canvasMode,
@@ -219,7 +220,7 @@ export const GridView: React.FC<IGridViewProps> = ({ toggleMoveState, children }
             setStartY(null);
             movedRef.current = false;
           } else if ((e.target as SVGSVGElement).getAttribute('data-id') === 'vines-drag' && button === 2) {
-            setTimeout(() => VinesEvent.emit('canvas-context-menu', e));
+            setTimeout(() => VinesEvent.emit('canvas-context-menu', workflowId, e));
           }
         }}
         onMouseMove={handleMouseMove}

@@ -36,13 +36,14 @@ export const SimplifyNode: React.FC<ISimplifyNodeProps> = ({ node }) => {
     if (![CanvasStatus.EDIT, CanvasStatus.READONLY].includes(canvasMode)) return;
     if (nodeId.startsWith('fake_node') && canvasMode === CanvasStatus.EDIT) {
       VinesEvent.emit('flow-select-nodes', {
+        _wid: vines.workflowId,
         targetNodeId: nodeId,
       });
       return;
     }
     if (['workflow_start', 'workflow_end'].includes(nodeId)) return;
 
-    VinesEvent.emit('flow-tool-editor', nodeId);
+    VinesEvent.emit('flow-tool-editor', vines.workflowId, nodeId);
   };
 
   const isStartNode = nodeId === 'workflow_start';

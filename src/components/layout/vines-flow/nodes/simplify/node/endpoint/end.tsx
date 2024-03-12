@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
@@ -12,6 +13,8 @@ interface IVinesEndNodeProps {
 }
 
 export const VinesEndNode: React.FC<IVinesEndNodeProps> = ({ isMiniNode, canvasMode, canvasDisabled }) => {
+  const { workflowId } = useFlowStore();
+
   return (
     <div
       key="vines-workflow-end-node"
@@ -21,8 +24,8 @@ export const VinesEndNode: React.FC<IVinesEndNodeProps> = ({ isMiniNode, canvasM
           '!pointer-events-none',
         isMiniNode ? 'rounded-l-xl border-r-0 !bg-white' : 'rounded-2xl shadow-lg',
       )}
-      onClick={() => VinesEvent.emit('flow-end-tool')}
-      onContextMenu={() => VinesEvent.emit('flow-end-tool')}
+      onClick={() => VinesEvent.emit('flow-end-tool', workflowId)}
+      onContextMenu={() => VinesEvent.emit('flow-end-tool', workflowId)}
     >
       <VinesIcon src="🏁" size="2xl" backgroundColor="#fff" />
     </div>

@@ -18,7 +18,7 @@ import VinesEvent from '@/utils/events';
 interface IContextMenuProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ContextMenu: React.FC<IContextMenuProps> = () => {
-  const { canvasMode, canvasDisabled } = useFlowStore();
+  const { workflowId, canvasMode, canvasDisabled } = useFlowStore();
 
   const [{ x, y }, setPosition] = useSetState({ x: 0, y: 0 });
   const [open, setOpen] = useState(false);
@@ -28,9 +28,12 @@ export const ContextMenu: React.FC<IContextMenuProps> = () => {
   useEffect(() => {
     VinesEvent.on(
       'canvas-context-menu',
-      (e: React.MouseEvent<MouseEvent>, _type: 'NODE' | 'CANVAS', nodeId: string) => {
+      (_wid: string, e: React.MouseEvent<MouseEvent>, _type: 'NODE' | 'CANVAS', nodeId: string) => {
+        if (_wid !== workflowId) return;
+
         if (nodeId?.startsWith('fake_node')) {
           VinesEvent.emit('flow-select-nodes', {
+            _wid: workflowId,
             targetNodeId: nodeId,
           });
           return;
@@ -51,7 +54,7 @@ export const ContextMenu: React.FC<IContextMenuProps> = () => {
     return () => {
       VinesEvent.off('canvas-context-menu');
     };
-  }, [canvasMode]);
+  }, [canvasMode, workflowId]);
 
   const finalOpen = open && !canvasDisabled;
   return (
@@ -71,6 +74,7 @@ export const ContextMenu: React.FC<IContextMenuProps> = () => {
               className="flex gap-2"
               onClick={() =>
                 VinesEvent.emit('flow-select-nodes', {
+                  _wid: workflowId,
                   targetNodeId: '',
                 })
               }
@@ -84,6 +88,7 @@ export const ContextMenu: React.FC<IContextMenuProps> = () => {
                 className="flex gap-2"
                 onClick={() =>
                   VinesEvent.emit('flow-select-nodes', {
+                    _wid: workflowId,
                     targetNodeId: currentNodeId,
                     insertBefore: true,
                   })
@@ -94,7 +99,7 @@ export const ContextMenu: React.FC<IContextMenuProps> = () => {
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="flex gap-2"
-                onClick={() => VinesEvent.emit('flow-tool-editor', currentNodeId)}
+                onClick={() => VinesEvent.emit('flow-tool-editor', workflowId, currentNodeId)}
               >
                 <PencilRuler strokeWidth={1.5} size={16} />
                 <span>编辑工具</span>
@@ -103,6 +108,7 @@ export const ContextMenu: React.FC<IContextMenuProps> = () => {
                 className="flex gap-2"
                 onClick={() =>
                   VinesEvent.emit('flow-select-nodes', {
+                    _wid: workflowId,
                     targetNodeId: currentNodeId,
                   })
                 }
@@ -113,7 +119,7 @@ export const ContextMenu: React.FC<IContextMenuProps> = () => {
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="flex gap-2 text-red-10"
-                onClick={() => VinesEvent.emit('flow-delete-node', currentNodeId)}
+                onClick={() => VinesEvent.emit('flow-delete-node', workflowId, currentNodeId)}
               >
                 <XSquare strokeWidth={1.5} size={16} />
                 <span>删除工具</span>

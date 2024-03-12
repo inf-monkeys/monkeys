@@ -23,7 +23,7 @@ export const QuickOptions: React.FC<IQuickOptionsProps> = ({ nodeId }) => {
   const lastNodeId = nodes?.[currentNodeIndex - 1]?.id;
   const nextNodeId = nodes?.[currentNodeIndex + 1]?.id;
 
-  const handleToggle = (id: string) => VinesEvent.emit('flow-tool-editor', id);
+  const handleToggle = (id: string) => VinesEvent.emit('flow-tool-editor', vines.workflowId, id);
 
   const handleDelete = () => {
     if (!nodeId) {
