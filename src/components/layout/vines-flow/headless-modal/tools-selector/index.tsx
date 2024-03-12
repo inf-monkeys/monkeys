@@ -1,7 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { useParams } from '@tanstack/react-router';
-
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -18,8 +16,7 @@ import VinesEvent from '@/utils/events';
 interface IToolsSelectorProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
-  const { workflowId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
-  const { setZoomToNodeId } = useFlowStore();
+  const { workflowId, setZoomToNodeId } = useFlowStore();
   const { vines } = useVinesFlow();
 
   const [open, setOpen] = useState(false);
@@ -30,7 +27,9 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
   const [isInsertBefore, setIsInsertBefore] = useState(false);
 
   useEffect(() => {
-    const handleOpen = ({ targetNodeId: targetId, disabled = false, insertBefore = false }) => {
+    const handleOpen = ({ _wid, targetNodeId: targetId, disabled = false, insertBefore = false }) => {
+      if (workflowId !== _wid) return;
+
       setOpen(true);
       setSearchValue('');
       setTargetNodeId(targetId);
@@ -41,7 +40,7 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
     return () => {
       VinesEvent.off('flow-select-nodes', handleOpen);
     };
-  }, []);
+  }, [workflowId]);
 
   const handleOnClick = (tool: VinesToolDef) => {
     if (disabledSelector) return;

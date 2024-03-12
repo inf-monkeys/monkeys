@@ -39,8 +39,8 @@ export const VinesStartNode: React.FC<IVinesStartNodeProps> = ({ isMiniNode, can
           '!pointer-events-none',
         isMiniNode ? 'rounded-l-xl border-r-0 !bg-white' : 'rounded-2xl shadow-lg',
       )}
-      onClick={() => VinesEvent.emit('flow-start-tool')}
-      onContextMenu={() => VinesEvent.emit('flow-start-tool')}
+      onClick={() => VinesEvent.emit('flow-start-tool', vines.workflowId)}
+      onContextMenu={() => VinesEvent.emit('flow-start-tool', vines.workflowId)}
     >
       <div
         className={cn(

@@ -371,7 +371,7 @@ export class ForkJoinNode extends ControlFlowVinesNode<VinesForkJoinTaskDef> {
       icon: '+',
       onClick: () =>
         VinesEvent.emit('flow-select-nodes', {
-          selectMode: true,
+          _wid: this._vinesCore.workflowId,
           targetNodeId: this.id,
         }),
     });

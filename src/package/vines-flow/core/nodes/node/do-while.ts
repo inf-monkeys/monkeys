@@ -66,7 +66,7 @@ export class DoWhileNode extends ControlFlowVinesNode<DoWhileTaskDef> {
         icon: '+',
         onClick: () =>
           VinesEvent.emit('flow-select-nodes', {
-            selectMode: true,
+            _wid: this._vinesCore.workflowId,
             targetNodeId: this.children?.[0]?.id ?? this.id,
           }),
       },
@@ -95,7 +95,7 @@ export class DoWhileNode extends ControlFlowVinesNode<DoWhileTaskDef> {
       icon: '+',
       onClick: () =>
         VinesEvent.emit('flow-select-nodes', {
-          selectMode: true,
+          _wid: this._vinesCore.workflowId,
           targetNodeId: this.id,
         }),
     });
@@ -111,7 +111,7 @@ export class DoWhileNode extends ControlFlowVinesNode<DoWhileTaskDef> {
         icon: '+',
         onClick: () =>
           VinesEvent.emit('flow-select-nodes', {
-            selectMode: true,
+            _wid: this._vinesCore.workflowId,
             targetNodeId: this.children?.[0]?.id ?? this.id,
           }),
       },
@@ -140,7 +140,7 @@ export class DoWhileNode extends ControlFlowVinesNode<DoWhileTaskDef> {
       icon: '+',
       onClick: () =>
         VinesEvent.emit('flow-select-nodes', {
-          selectMode: true,
+          _wid: this._vinesCore.workflowId,
           targetNodeId: this.id,
         }),
     });

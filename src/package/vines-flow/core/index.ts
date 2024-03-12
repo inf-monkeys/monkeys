@@ -11,7 +11,7 @@ import {
   VinesTask,
 } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesTools } from '@/package/vines-flow/core/tools';
-import { VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
+import { VinesToolDef, VinesVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IVinesFlowRenderOptions, IVinesFlowRenderType, IVinesMode } from '@/package/vines-flow/core/typings.ts';
 import { createTask } from '@/package/vines-flow/core/utils.ts';
 import VinesEvent from '@/utils/events';
@@ -24,6 +24,8 @@ export class VinesCore extends VinesTools(VinesBase) {
   public nodes: VinesNode[] = [];
 
   public tasks: MonkeyTaskDefTypes[] = [];
+
+  public variables: VinesVariable[] = [];
 
   public mode: IVinesMode = IVinesMode.EDIT;
 
@@ -59,6 +61,7 @@ export class VinesCore extends VinesTools(VinesBase) {
         (needToInit = true);
       workflow?.workflowId && (this.workflowId = workflow.workflowId);
       workflow?.version && (this.version = workflow.version);
+      workflow?.variables && (this.variables = workflow.variables);
     }
     workflowId && (this.workflowId = workflowId);
     version && (this.version = version);
@@ -341,5 +344,9 @@ export class VinesCore extends VinesTools(VinesBase) {
   private sendUpdateEvent() {
     this.sendEvent('update', this.getRaw());
   }
+  // endregion
+
+  // region Variables
+
   // endregion
 }

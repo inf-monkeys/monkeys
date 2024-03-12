@@ -329,7 +329,7 @@ export class SwitchNode extends ControlFlowVinesNode<SwitchTaskDef> {
         y: entryPointOut.y - (useHorizontal ? 16 : 18),
       },
       icon: '+',
-      onClick: () => VinesEvent.emit('flow-select-nodes', { targetNodeId: this.id }),
+      onClick: () => VinesEvent.emit('flow-select-nodes', { _wid: this._vinesCore.workflowId, targetNodeId: this.id }),
     });
   }
 
