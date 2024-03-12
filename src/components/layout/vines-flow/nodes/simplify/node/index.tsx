@@ -7,6 +7,7 @@ import { NodeDnd } from '@/components/layout/vines-flow/nodes/simplify/node/dnd.
 import { VinesEndNode } from '@/components/layout/vines-flow/nodes/simplify/node/endpoint/end.tsx';
 import { VinesStartNode } from '@/components/layout/vines-flow/nodes/simplify/node/endpoint/start.tsx';
 import { VinesSimpleNode } from '@/components/layout/vines-flow/nodes/simplify/node/simple';
+import { NodeToolbar } from '@/components/layout/vines-flow/toolbar/node';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
@@ -95,6 +96,8 @@ export const SimplifyNode: React.FC<ISimplifyNodeProps> = ({ node }) => {
           <SimplifyNodeExpand nodeId={nodeId} customData={customData} toolName={toolName} />
         )}
       </div>
+
+      {!isStartNode && !isEndNode && <NodeToolbar node={node} />}
     </>
   );
 };
