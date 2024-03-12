@@ -4,7 +4,8 @@ import { VinesCore } from '@/package/vines-flow/core';
 import { JoinNode, VinesJoinTaskDef } from '@/package/vines-flow/core/nodes';
 import { ControlFlowVinesNode, VinesNode } from '@/package/vines-flow/core/nodes/base.ts';
 import { drawSmoothLine, VinesSVGPosition } from '@/package/vines-flow/core/nodes/svg-utils.ts';
-import { IVinesMoveAfterTargetType, IVinesNodePosition } from '@/package/vines-flow/core/nodes/typings.ts';
+import { IVinesMoveAfterTargetType, IVinesNodePosition, VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
+import { IVinesInsertChildParams } from '@/package/vines-flow/core/typings.ts';
 import { getBoundary } from '@/package/vines-flow/core/utils.ts';
 import VinesEvent from '@/utils/events.ts';
 
@@ -462,6 +463,14 @@ export class ForkJoinNode extends ControlFlowVinesNode<VinesForkJoinTaskDef> {
     return super.moveAfter(targetType);
   }
 
+  private findBranch(id: string): VinesNode<VinesTask>[] | undefined {
+    for (const branch of this.branches) {
+      if (branch.some((it) => it.id === id)) {
+        return branch;
+      }
+    }
+  }
+
   /**
    * 插入分支
    * */
@@ -488,12 +497,70 @@ export class ForkJoinNode extends ControlFlowVinesNode<VinesForkJoinTaskDef> {
     return true;
   }
 
+  /**
+   * 插入节点
+   * @param params 插入参数
+   * */
+  override insertChild(params: IVinesInsertChildParams): VinesNode | VinesNode[] | null {
+    const insertedNode = super.insertChild(params);
+    if (insertedNode) {
+      const { targetId, insertBefore } = params;
+      const branch = this.findBranch(targetId);
+      if (branch) {
+        const insertIndex = branch.findIndex((child) => child.id === targetId);
+        const isFakeNode = +/fake_node/.test(targetId);
+        const insertedNodes = Array.isArray(insertedNode) ? insertedNode : [insertedNode];
+        if (insertBefore) {
+          branch.splice(insertIndex, isFakeNode, ...insertedNodes);
+        } else {
+          branch.splice(insertIndex + 1 - isFakeNode, isFakeNode, ...insertedNodes);
+        }
+        this.children = this.branches.flat();
+        this.updateRelevanceJoinNode();
+      }
+      return insertedNode;
+    }
+    return null;
+  }
+
+  /**
+   * 删除节点
+   * @param targetId 目标节点 ID
+   * @param path 路径
+   * */
+  override deleteChild(targetId: string, path: VinesNode[] = []) {
+    if (super.deleteChild(targetId, path)) {
+      const branch = this.findBranch(targetId);
+      if (branch) {
+        const deleteIndex = branch.findIndex((child) => child.id === targetId);
+        branch.splice(deleteIndex, 1);
+
+        if (!branch.length) {
+          const newFakeNode = VinesNode.createFakeNode(this._vinesCore);
+          branch.splice(deleteIndex, 0, newFakeNode);
+          this.children = this.branches.flat();
+          this.updateRelevanceJoinNode();
+        }
+      }
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * 获取节点原始数据
+   * */
   override getRaw() {
     (this._task as VinesForkJoinTaskDef).forkTasks = this.branches.map((branch) => branch.map((node) => node.getRaw()));
 
     return super.getRaw();
   }
 
+  /**
+   * 更新节点原始数据
+   * @param nodeId 节点 ID
+   * @param task 任务数据
+   * */
   override updateRaw(nodeId: string, task: VinesForkJoinTaskDef) {
     if (this.id === nodeId) {
       this.parseChildren(task?.forkTasks ?? []);
