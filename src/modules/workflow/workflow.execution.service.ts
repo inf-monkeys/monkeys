@@ -210,7 +210,7 @@ export class WorkflowExecutionService {
   }
 
   public async startWorkflow(request: StartWorkflowRequest) {
-    const { teamId, userId, workflowId, triggerType, chatSessionId } = request;
+    const { teamId, userId, workflowId, triggerType, chatSessionId, workflowContext } = request;
     let { version } = request;
     if (!version) {
       version = await this.workflowRepository.getMaxVersion(teamId, workflowId);
@@ -229,6 +229,8 @@ export class WorkflowExecutionService {
         userId,
         teamId,
         chatSessionId,
+        appId: workflowContext.appId,
+        appUrl: workflowContext.appUrl,
       },
     };
     const workflowInstanceId = await conductorClient.workflowResource.startWorkflow({

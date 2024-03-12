@@ -35,7 +35,7 @@ export class ToolsRegistryCronService {
         }
         logger.info('Refresh tools succeed');
       } catch (error) {
-        logger.info('Refresh tools failed', error);
+        logger.info('Refresh tools failed', error.message);
       } finally {
         // 释放锁
         await this.lockManager.releaseLock(this.lockResource, identifier);

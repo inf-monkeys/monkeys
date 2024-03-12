@@ -23,9 +23,13 @@ export class AppService implements OnApplicationBootstrap {
 
     for (const { name, manifestUrl } of config.tools) {
       logger.info(`Load ${name} tools of ${manifestUrl}`);
-      this.workerRegistryService.registerToolsServer({
-        manifestUrl: manifestUrl,
-      });
+      this.workerRegistryService
+        .registerToolsServer({
+          manifestUrl: manifestUrl,
+        })
+        .catch((error) => {
+          logger.warn(`Load tool ${name}(${manifestUrl}) failed: ${error.message}`);
+        });
     }
   }
 }

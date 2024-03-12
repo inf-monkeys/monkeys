@@ -13,6 +13,7 @@ import { Injectable } from '@nestjs/common';
 export class ConductorService {
   TOOL_NAME_KEY = '__toolName';
   APIINFO_KEY = '__apiInfo';
+  CONTEXT_KEY = '__context';
 
   constructor(private readonly toolsRepository: ToolsRepository) {}
 
@@ -40,6 +41,10 @@ export class ConductorService {
           task.workflowTask.name = realBlockName;
         }
       }
+
+      delete task.inputData[this.APIINFO_KEY];
+      delete task.inputData[this.TOOL_NAME_KEY];
+      delete task.inputData[this.CONTEXT_KEY];
     }
   }
 
@@ -84,6 +89,7 @@ export class ConductorService {
       // use CUSTOM_BLOCK_NAME_KEY to store real task_name
       task.inputParameters[this.TOOL_NAME_KEY] = task.name;
       task.inputParameters[this.APIINFO_KEY] = tool.extra.apiInfo;
+      task.inputParameters[this.CONTEXT_KEY] = '${workflow.input.__context}';
       task.name = CONDUCTOR_TASK_DEF_NAME;
 
       // 特殊类型的 block：SUB_WORKFLOW

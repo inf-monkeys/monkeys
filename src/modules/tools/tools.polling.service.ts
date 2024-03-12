@@ -20,7 +20,7 @@ export class ToolsPollingService {
 
   private async requestExternalApi(task: Task) {
     const inpuData = task.inputData as WorkerInputData;
-    const { __toolName, __apiInfo, ...rest } = inpuData;
+    const { __toolName, __apiInfo, __context, ...rest } = inpuData;
     const tool = await this.toolsRepository.getToolByName(__toolName);
     logger.info(`Start to execute tool: ${__toolName}`);
     if (!tool) {
@@ -40,6 +40,11 @@ export class ToolsPollingService {
       baseURL: server.baseUrl,
       url: path,
       data: rest,
+      headers: {
+        'x-monkeys-appid': __context.appId,
+        'x-monkeys-userid': __context.userId,
+        'x-monkeys-teamid': __context.teamId,
+      },
     });
     logger.info(`Execute worker success: ${__toolName}`);
     return data;
