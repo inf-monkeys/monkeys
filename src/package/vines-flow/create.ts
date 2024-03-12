@@ -1,4 +1,4 @@
-import React, { createContext, createElement, useContext, useEffect, useReducer } from 'react';
+import React, { createContext, createElement, useCallback, useContext, useEffect, useReducer } from 'react';
 
 import { useSWRConfig } from 'swr';
 
@@ -10,6 +10,7 @@ import { useUpdateWorkflow, useWorkflowList } from '@/apis/workflow';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { _vines } from '@/package/vines-flow/index.ts';
 import { readLocalStorageValue } from '@/utils';
+import { useRetimer } from '@/utils/use-retimer.ts';
 
 interface VinesContext {
   _refresher?: number;
@@ -27,25 +28,33 @@ export const createVinesCore = () => {
 
     const { trigger } = useUpdateWorkflow(readLocalStorageValue('vines-apikey', '', false), _vines.workflowId ?? '');
 
-    const handleUpdate = (tasks: VinesTask[]) => {
-      forceUpdate();
+    const reTimer = useRetimer();
+    const handleUpdate = useCallback(
+      (tasks: VinesTask[]) => {
+        reTimer(
+          setTimeout(() => {
+            forceUpdate();
 
-      const workflowId = _vines.workflowId;
-      if (!workflowId) {
-        toast.error('工作流 ID 不存在！');
-        return;
-      }
+            const workflowId = _vines.workflowId;
+            if (!workflowId) {
+              toast.error('工作流 ID 不存在！');
+              return;
+            }
 
-      toast.promise(trigger({ version: _vines.version, workflowDef: { tasks } } as Partial<MonkeyWorkflow>), {
-        loading: '更新中...',
-        success: '更新成功',
-        error: '更新失败',
-      });
+            toast.promise(trigger({ version: _vines.version, workflowDef: { tasks } } as Partial<MonkeyWorkflow>), {
+              loading: '更新中...',
+              success: '更新成功',
+              error: '更新失败',
+            });
 
-      void mutate(`/api/workflow/${workflowId}`, (prev) => ({ ...prev, workflowDef: { tasks } }), {
-        revalidate: false,
-      });
-    };
+            void mutate(`/api/workflow/${workflowId}`, (prev) => ({ ...prev, workflowDef: { tasks } }), {
+              revalidate: false,
+            });
+          }, 100) as unknown as number,
+        );
+      },
+      [reTimer],
+    );
 
     useEffect(() => {
       _vines.on('refresh', forceUpdate);
