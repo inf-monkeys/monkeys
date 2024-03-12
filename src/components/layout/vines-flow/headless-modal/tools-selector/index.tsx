@@ -32,6 +32,7 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
   useEffect(() => {
     const handleOpen = ({ targetNodeId: targetId, disabled = false, insertBefore = false }) => {
       setOpen(true);
+      setSearchValue('');
       setTargetNodeId(targetId);
       setDisabledSelector(disabled);
       setIsInsertBefore(insertBefore);
