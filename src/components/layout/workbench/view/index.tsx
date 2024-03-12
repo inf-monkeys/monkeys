@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 
+import { useElementSize } from '@mantine/hooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { GitBranchPlus } from 'lucide-react';
 
@@ -7,12 +8,15 @@ import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
 import { WorkbenchViewHeader } from '@/components/layout/workbench/view/header.tsx';
 import { VinesIFrame } from '@/components/ui/vines-iframe';
+import { usePageStore } from '@/store/usePageStore';
 import { useLocalStorage } from '@/utils';
 
 interface IWorkbenchViewProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const WorkbenchView: React.FC<IWorkbenchViewProps> = () => {
   const { data: pages } = useWorkspacePages();
+
+  const { ref, width, height } = useElementSize();
 
   const [page, setPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
 
@@ -25,8 +29,14 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = () => {
     }
   }, [hasPage]);
 
+  const { setContainerWidth, setContainerHeight } = usePageStore();
+  useEffect(() => {
+    setContainerWidth(width);
+    setContainerHeight(height);
+  }, [width, height]);
+
   return (
-    <div className="relative w-full flex-1 overflow-x-clip">
+    <div ref={ref} className="relative w-full flex-1 overflow-x-clip">
       <AnimatePresence>
         {hasPages && hasPage ? (
           <motion.div
