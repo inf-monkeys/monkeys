@@ -1,4 +1,5 @@
 import { MonkeyTaskDefTypes } from '@inf-monkeys/vines';
+import { toast } from 'sonner';
 
 import { VinesBase } from '@/package/vines-flow/core/base';
 import { VINES_DEF_NODE } from '@/package/vines-flow/core/consts.ts';
@@ -193,7 +194,7 @@ export class VinesCore extends VinesTools(VinesBase) {
   ): VinesNode | VinesNode[] {
     const tool = typeof toolOrName === 'string' ? this.getTool(toolOrName) : toolOrName;
     if (!tool) {
-      console.warn(`[VinesFlow] 未找到工具 ${toolOrName}`);
+      toast.error(`未找到工具 ${toolOrName}`);
       return [];
     }
     return VinesNode.create(createTask(tool, extendObject), this).afterCreate();
@@ -269,7 +270,7 @@ export class VinesCore extends VinesTools(VinesBase) {
    * */
   public move(sourceId: string, targetId: string, insertBefore: boolean, callAfter = true) {
     if (!this.canMove(sourceId, targetId)) {
-      console.warn('[VinesRender] 检测到头部插入身体');
+      toast.error('无法移动节点到目标节点内部！');
       return;
     }
 
