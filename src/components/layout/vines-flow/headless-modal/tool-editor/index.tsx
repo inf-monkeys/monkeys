@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { toast } from 'sonner';
 
@@ -20,9 +20,11 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
   const [node, setNode] = useState<VinesNode>();
   const [open, setOpen] = useState(false);
 
+  const nodeIdRef = useRef<string>('');
   useEffect(() => {
     const handleOpen = (nodeId: string) => {
       setOpen(true);
+      nodeIdRef.current = nodeId;
       setNode(vines.getNodeById(nodeId));
     };
     VinesEvent.on('flow-tool-editor', handleOpen);
@@ -35,11 +37,13 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
     try {
       const task = JSON.parse(data);
       if (node) {
-        vines.updateRaw(node?.id ?? '', task, false);
+        vines.updateRaw(nodeIdRef.current, task, false);
       } else {
         toast.error('工具不存在');
       }
-    } catch {}
+    } catch {
+      /* empty */
+    }
   };
 
   const task = (node?.getRaw() || {}) as JSONValue;
