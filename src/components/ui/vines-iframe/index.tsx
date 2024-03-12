@@ -40,35 +40,33 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }
 
   return (
     <AnimatePresence mode="wait">
-      <VinesProvider>
-        {hasPages &&
-          renderer
-            .filter(({ teamId, workflowId, type }) => teamId && workflowId && type)
-            .map(({ _id, workflowId, type }) => {
-              const View = IFRAME_MAP[type ?? ''];
-              return (
-                <motion.div
-                  key={_id}
-                  variants={{
-                    enter: {
-                      opacity: 1,
-                      display: 'block',
+      {hasPages &&
+        renderer
+          .filter(({ teamId, workflowId, type }) => teamId && workflowId && type)
+          .map(({ _id, workflowId, type }) => {
+            const View = IFRAME_MAP[type ?? ''];
+            return (
+              <motion.div
+                key={_id}
+                variants={{
+                  enter: {
+                    opacity: 1,
+                    display: 'block',
+                  },
+                  exit: {
+                    opacity: 0,
+                    transitionEnd: {
+                      display: 'none',
                     },
-                    exit: {
-                      opacity: 0,
-                      transitionEnd: {
-                        display: 'none',
-                      },
-                    },
-                  }}
-                  animate={_id === page?._id ? 'enter' : 'exit'}
-                  className="absolute left-0 top-0 size-full"
-                >
-                  {page ? <View workflowId={workflowId} /> : <Page404 />}
-                </motion.div>
-              );
-            })}
-      </VinesProvider>
+                  },
+                }}
+                animate={_id === page?._id ? 'enter' : 'exit'}
+                className="absolute left-0 top-0 size-full"
+              >
+                <VinesProvider>{page ? <View workflowId={workflowId} /> : <Page404 />}</VinesProvider>
+              </motion.div>
+            );
+          })}
     </AnimatePresence>
   );
 };

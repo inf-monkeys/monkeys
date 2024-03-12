@@ -21,7 +21,7 @@ export const SimplifyNodeExpand: React.FC<ISimplifyNodeExpandProps> = ({ nodeId,
 
   const displayName = customData?.title ?? toolDef?.displayName ?? toolName;
   const description =
-    customData?.description ?? toolDef?.description ?? (isErrorNode ? '不受支持的节点，请尝试重新创建' : '');
+    customData?.description ?? toolDef?.description ?? (isErrorNode ? '不受支持的工具，请尝试重新创建' : '');
   const displayDesc = description.length > 36 ? `${description.slice(0, 36)}...` : description;
 
   const loading = vines.status === 'idle';

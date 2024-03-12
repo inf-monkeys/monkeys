@@ -99,7 +99,7 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
           />
           <ToolButton
             icon={<Workflow />}
-            tip={`节点显示：${isRenderMini ? '极简' : isRenderComplicate ? '全参数' : '普通'}模式`}
+            tip={`工具显示：${isRenderMini ? '极简' : isRenderComplicate ? '全参数' : '普通'}模式`}
             onClick={handleRenderTypeChange}
           />
           <ToolButton icon={<Code />} tip="开发者模式" />

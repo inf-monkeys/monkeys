@@ -61,7 +61,7 @@ export class VinesNode<T extends VinesTask = VinesTask> {
   static create(task: VinesTask, vinesCore: VinesCore): VinesNode {
     const { type } = task;
     if (!VinesNode.classMap[type]) {
-      console.warn('[VinesFlow] 发现不支持的节点类型', type);
+      console.warn('[VinesFlow] 发现不支持的工具类型', type);
       return new VinesNode.classMap[TaskType.SIMPLE](task, vinesCore);
     }
     return new VinesNode.classMap[type](task, vinesCore);

@@ -27,7 +27,7 @@ export const QuickOptions: React.FC<IQuickOptionsProps> = ({ nodeId }) => {
 
   const handleDelete = () => {
     if (!nodeId) {
-      toast.error('节点数据异常！');
+      toast.error('工具数据异常！');
       return;
     }
     toast('确定要删除此工具吗？操作将不可取消', {
@@ -68,7 +68,7 @@ export const QuickOptions: React.FC<IQuickOptionsProps> = ({ nodeId }) => {
         <TooltipTrigger asChild>
           <Button className="[&_svg]:stroke-red-10" icon={<Trash2 />} variant="borderless" onClick={handleDelete} />
         </TooltipTrigger>
-        <TooltipContent>删除此节点</TooltipContent>
+        <TooltipContent>删除此工具</TooltipContent>
       </Tooltip>
     </div>
   );
