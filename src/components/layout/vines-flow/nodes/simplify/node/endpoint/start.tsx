@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { cn } from '@/utils';
+import VinesEvent from '@/utils/events.ts';
 
 interface IVinesStartNodeProps {
   isMiniNode?: boolean;
@@ -26,6 +27,8 @@ export const VinesStartNode: React.FC<IVinesStartNodeProps> = ({ isMiniNode, can
           '!pointer-events-none',
         isMiniNode ? 'rounded-l-xl border-r-0 !bg-white' : 'rounded-2xl shadow-lg',
       )}
+      onClick={() => VinesEvent.emit('flow-start-tool')}
+      onContextMenu={() => VinesEvent.emit('flow-start-tool')}
     >
       <div
         className={cn(
