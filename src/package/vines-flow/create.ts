@@ -7,21 +7,41 @@ import { toast } from 'sonner';
 
 import { useToolLists } from '@/apis/tools';
 import { useUpdateWorkflow, useWorkflowList } from '@/apis/workflow';
+import { VinesCore } from '@/package/vines-flow/core';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
-import { _vines } from '@/package/vines-flow/index.ts';
 import { readLocalStorageValue } from '@/utils';
 import { useRetimer } from '@/utils/use-retimer.ts';
 
 interface VinesContext {
+  _vines: VinesCore;
   _refresher?: number;
   forceUpdate?: React.DispatchWithoutAction;
 }
 
 const forceUpdateReducer = (value: number) => (value + 1) % 1000000;
 
-export const createVinesCore = () => {
-  const VinesContext = createContext<VinesContext | undefined>(void 0);
+const VinesMap = new Map<string, VinesCore>();
 
+function getOrCreateVinesCore(workflowId: string): VinesCore {
+  if (VinesMap.has(workflowId)) {
+    return VinesMap.get(workflowId)!;
+  }
+  const newVinesCore = new VinesCore();
+  VinesMap.set(workflowId, newVinesCore);
+  return newVinesCore;
+}
+const VinesContext = createContext<VinesContext | undefined>(void 0);
+
+export const useVinesRefresher = () => {
+  const context = useContext(VinesContext);
+  if (context === void 0) {
+    throw new Error('useVinesRefresher must be used within a VinesProvider');
+  }
+  return context;
+};
+
+export const createVinesCore = (workflowId: string) => {
+  const _vines = getOrCreateVinesCore(workflowId);
   const VinesProvider = ({ children }: { children: React.ReactNode }) => {
     const { mutate } = useSWRConfig();
     const [_refresher, forceUpdate] = useReducer(forceUpdateReducer, 0);
@@ -76,16 +96,8 @@ export const createVinesCore = () => {
       workflows?.length && _vines.updateWorkflows(workflows);
     }, [workflows]);
 
-    return createElement(VinesContext.Provider, { value: { _refresher, forceUpdate } }, children);
+    return createElement(VinesContext.Provider, { value: { _vines, _refresher, forceUpdate } }, children);
   };
 
-  const useVinesRefresher = () => {
-    const context = useContext(VinesContext);
-    if (context === void 0) {
-      throw new Error('useVinesRefresher must be used within a VinesProvider');
-    }
-    return context;
-  };
-
-  return { VinesProvider, useVinesRefresher };
+  return { VinesProvider };
 };

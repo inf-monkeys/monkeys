@@ -1,6 +1,6 @@
 import { BlockType } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
 
-import { VinesBlockDefProperties, VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
+import { VinesToolDef, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
 export const BUILT_IN_TOOLS: VinesToolDef[] = [
   {
@@ -14,7 +14,7 @@ export const BUILT_IN_TOOLS: VinesToolDef[] = [
   },
 ];
 
-export const SUB_WORKFLOW_TOOL_CHOOSE_VERSION_PROP = (workflowId: string): VinesBlockDefProperties => ({
+export const SUB_WORKFLOW_TOOL_CHOOSE_VERSION_PROP = (workflowId: string): VinesToolDefProperties => ({
   name: 'version',
   displayName: '选择工作流版本号',
   type: 'number',

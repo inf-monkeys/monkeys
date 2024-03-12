@@ -1,9 +1,9 @@
+import { useVinesRefresher } from '@/package/vines-flow';
 import { VINES_DEF_NODE } from '@/package/vines-flow/core/consts.ts';
 import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
-import { _vines, useVinesRefresher } from '@/package/vines-flow/index.ts';
 
 export const useVinesFlow = () => {
-  const { _refresher } = useVinesRefresher();
+  const { _refresher, _vines } = useVinesRefresher();
 
   const calculateAdaptiveZoom = (containerWidth: number, containerHeight: number): number => {
     const {

@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 
-import { Page404 } from '@/components/layout/workspace/404.tsx';
-import { IFRAME_MAP } from '@/components/ui/vines-iframe/consts.ts';
-import { VinesProvider } from '@/package/vines-flow';
+import { VinesView } from '@/components/ui/vines-iframe/view.tsx';
 
-interface IVinesIFramePropsRequired {
+export interface IVinesIFramePropsRequired {
   _id?: string;
   teamId?: string;
   workflowId?: string;
@@ -20,7 +18,6 @@ interface IVinesIFrameProps<P extends IVinesIFramePropsRequired> extends React.C
 
 export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }: IVinesIFrameProps<P>) => {
   const hasPages = (pages?.length ?? 0) > 0;
-
   const [renderer, setRenderer] = useState<P[]>([]);
 
   useEffect(() => {
@@ -44,28 +41,7 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }
         renderer
           .filter(({ teamId, workflowId, type }) => teamId && workflowId && type)
           .map(({ _id, workflowId, type }) => {
-            const View = IFRAME_MAP[type ?? ''];
-            return (
-              <motion.div
-                key={_id}
-                variants={{
-                  enter: {
-                    opacity: 1,
-                    display: 'block',
-                  },
-                  exit: {
-                    opacity: 0,
-                    transitionEnd: {
-                      display: 'none',
-                    },
-                  },
-                }}
-                animate={_id === page?._id ? 'enter' : 'exit'}
-                className="absolute left-0 top-0 size-full"
-              >
-                <VinesProvider>{page ? <View workflowId={workflowId} /> : <Page404 />}</VinesProvider>
-              </motion.div>
-            );
+            return <VinesView<P> id={_id} workflowId={workflowId} page={page} type={type} key={_id} />;
           })}
     </AnimatePresence>
   );
