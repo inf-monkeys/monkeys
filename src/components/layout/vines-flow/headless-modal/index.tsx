@@ -1,6 +1,8 @@
 import React from 'react';
 
 import { ContextMenu } from '@/components/layout/vines-flow/headless-modal/context-menu';
+import { EndTool } from '@/components/layout/vines-flow/headless-modal/endpoint/end-tool';
+import { StartTool } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool';
 import { ToolEditor } from '@/components/layout/vines-flow/headless-modal/tool-editor';
 import { ToolsSelector } from '@/components/layout/vines-flow/headless-modal/tools-selector';
 
@@ -12,6 +14,8 @@ export const VinesHeadlessModal: React.FC<IVinesHeadlessModalProps> = () => {
       <ContextMenu />
       <ToolsSelector />
       <ToolEditor />
+      <StartTool />
+      <EndTool />
     </div>
   );
 };

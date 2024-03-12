@@ -1,6 +1,8 @@
 import React from 'react';
 
 import { SimplifyNodeExpand } from '@/components/layout/vines-flow/nodes/simplify/expand';
+import { SimplifyEndNodeExpand } from '@/components/layout/vines-flow/nodes/simplify/expand/end.tsx';
+import { SimplifyStartNodeExpand } from '@/components/layout/vines-flow/nodes/simplify/expand/start.tsx';
 import { NodeDnd } from '@/components/layout/vines-flow/nodes/simplify/node/dnd.tsx';
 import { VinesEndNode } from '@/components/layout/vines-flow/nodes/simplify/node/endpoint/end.tsx';
 import { VinesStartNode } from '@/components/layout/vines-flow/nodes/simplify/node/endpoint/start.tsx';
@@ -85,7 +87,13 @@ export const SimplifyNode: React.FC<ISimplifyNodeProps> = ({ node }) => {
         )}
         style={{ left: nodeX + (isSimplifyHorizontal ? -64 : 80), top: nodeY + (isSimplifyHorizontal ? -70 : 0) }}
       >
-        <SimplifyNodeExpand nodeId={nodeId} customData={customData} toolName={toolName} />
+        {isStartNode ? (
+          <SimplifyStartNodeExpand />
+        ) : isEndNode ? (
+          <SimplifyEndNodeExpand />
+        ) : (
+          <SimplifyNodeExpand nodeId={nodeId} customData={customData} toolName={toolName} />
+        )}
       </div>
     </>
   );
