@@ -70,7 +70,7 @@ export class ComfyuiController {
     });
   }
 
-  @Post('/check-dependencies')
+  @Post('/helpers/check-dependencies')
   @ApiOperation({
     summary: '检测 comfyui workflow 的依赖：第三方模型和第三方 node',
     description: '检测 comfyui workflow 的依赖：第三方模型和第三方 node',
