@@ -400,23 +400,23 @@ export class VinesNode<T extends VinesTask = VinesTask> {
     return this.children.map((childNode) => childNode.destroy());
   }
 
-  check(): boolean {
+  public check(): boolean {
     return this.children.some((childNode) => childNode.check());
   }
 
-  afterCreate(): VinesNode | VinesNode[] {
+  public afterCreate(): VinesNode | VinesNode[] {
     return this;
   }
 
-  async insertAfter(): Promise<void> {
+  public insertAfter() {
     return void 0;
   }
 
-  async moveAfter(targetType?: IVinesMoveAfterTargetType): Promise<void> {
+  public moveAfter(targetType?: IVinesMoveAfterTargetType) {
     return void targetType;
   }
 
-  async deleteAfter(): Promise<void> {
+  public deleteAfter() {
     return void 0;
   }
 
