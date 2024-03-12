@@ -190,13 +190,13 @@ export class VinesCore extends VinesTools(VinesBase) {
   public createNode(
     toolOrName: VinesToolDef | string,
     extendObject: Record<string, string> = {},
-  ): VinesNode | undefined {
+  ): VinesNode | VinesNode[] {
     const tool = typeof toolOrName === 'string' ? this.getTool(toolOrName) : toolOrName;
     if (!tool) {
       console.warn(`[VinesFlow] 未找到工具 ${toolOrName}`);
-      return;
+      return [];
     }
-    return VinesNode.create(createTask(tool, extendObject), this);
+    return VinesNode.create(createTask(tool, extendObject), this).afterCreate();
   }
 
   /**
@@ -259,6 +259,64 @@ export class VinesCore extends VinesTools(VinesBase) {
     return false;
   }
 
+  /**
+   * 移动节点
+   * @param sourceId 源节点 ID
+   * @param targetId 目标节点 ID
+   * @param insertBefore 是否插入到目标节点之前
+   * @param callAfter 是否触发节点的 moveAfter 方法
+   * 警告：在 moveAfter 内调用此方法会导致死循环，请将 callAfter 设置为 false
+   * */
+  public move(sourceId: string, targetId: string, insertBefore: boolean, callAfter = true) {
+    if (!this.canMove(sourceId, targetId)) {
+      console.warn('[VinesRender] 检测到头部插入身体');
+      return;
+    }
+
+    const sourceIndex = this.nodes.findIndex((childNode) => childNode.id === sourceId);
+    const targetIndex = this.nodes.findIndex((childNode) => childNode.id === targetId);
+    if (sourceIndex !== -1 && targetIndex !== -1) {
+      const [sourceNode] = this.nodes.splice(sourceIndex, 1);
+      const shift = sourceIndex <= targetIndex ? -1 : 0;
+      const insertIndex = insertBefore ? targetIndex + shift : targetIndex + shift + 1;
+      this.nodes.splice(insertIndex, 0, sourceNode);
+
+      callAfter && this.getNodeById(targetId)?.moveAfter('target');
+      callAfter && this.getNodeById(sourceId)?.moveAfter('source');
+
+      this.sendUpdateEvent();
+    } else if (sourceIndex !== -1 && targetIndex === -1) {
+      const [sourceNode] = this.nodes.splice(sourceIndex, 1);
+      this.insertNode(targetId, sourceNode, insertBefore, callAfter);
+
+      callAfter && this.getNodeById(targetId)?.moveAfter('target');
+      callAfter && this.getNodeById(sourceId)?.moveAfter('source');
+    } else {
+      const sourceNode = this.getNodeById(sourceId);
+      const targetNode = this.getNodeById(targetId);
+      if (sourceNode && targetNode) {
+        this.deleteNode(sourceId);
+        this.insertNode(targetId, sourceNode, insertBefore, callAfter);
+      }
+
+      callAfter && targetNode?.moveAfter('target');
+      callAfter && sourceNode?.moveAfter('source');
+
+      this.sendUpdateEvent();
+    }
+  }
+
+  private canMove(sourceId: string, targetId: string): boolean {
+    const sourceNode = this.getNodeById(sourceId);
+    return !!sourceNode && !sourceNode.findChildById(targetId);
+  }
+
+  /**
+   * 更新节点 Task
+   * @param nodeId 节点 ID
+   * @param task Task
+   * @param update 是否触发更新事件
+   * */
   public updateRaw(nodeId: string, task: VinesTask, update = true) {
     for (const node of this.nodes) {
       if (node.updateRaw(nodeId, task)) {
