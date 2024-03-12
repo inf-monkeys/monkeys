@@ -46,6 +46,7 @@
     "reflect-metadata": "^0.1.13",
     "retry-as-promised": "^7.0.4",
     "rxjs": "^7.8.1",
+    "shortid": "^2.2.16",
     "typeorm": "^0.3.20",
     "yaml": "^2.4.0"
   },
@@ -59,6 +60,7 @@
     "@types/jsonpath": "^0.2.4",
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.3.1",
+    "@types/shortid": "^0.0.32",
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",

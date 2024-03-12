@@ -12,9 +12,10 @@ import { RepositoryMoule } from './modules/infra/database/repositories/repositor
 import { OpenapiModule } from './modules/openapi/openapi.module';
 import { ToolsModule } from './modules/tools/tools.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
+import { ComfyuiModule } from './modules/comfyui/comfyui.module';
 
 @Module({
-  imports: [DatabaseModule, ToolsModule, RepositoryMoule, WorkflowModule, OpenapiModule, GatewaysModule, ScheduleModule.forRoot(), CronJobModule, ExportModule],
+  imports: [DatabaseModule, ToolsModule, RepositoryMoule, WorkflowModule, OpenapiModule, GatewaysModule, ScheduleModule.forRoot(), CronJobModule, ExportModule, ComfyuiModule],
   controllers: [AppController],
   providers: [AppService],
 })

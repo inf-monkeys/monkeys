@@ -212,4 +212,18 @@ export class ToolsRepository {
       },
     });
   }
+
+  public async createTool(tool: ToolsEntity) {
+    await this.toolsRepository.save(tool);
+  }
+
+  public async updateTool(name: string, updates: Partial<ToolsEntity>) {
+    await this.toolsRepository.update(
+      {
+        name,
+        isDeleted: false,
+      },
+      updates,
+    );
+  }
 }

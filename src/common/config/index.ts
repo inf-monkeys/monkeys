@@ -43,6 +43,10 @@ export interface CronConfig {
   enabled: boolean;
 }
 
+export interface ComfyUICofig {
+  baseUrl: string;
+}
+
 export interface Config {
   server: ServerConfig;
   conductor: ConductorConfig;
@@ -51,6 +55,7 @@ export interface Config {
   vector: VectorGatewayService;
   tools: ToolServiceConfig[];
   cron: CronConfig;
+  comfyui: ComfyUICofig;
 }
 
 const port = readConfig('server.port', 3000);
@@ -87,5 +92,8 @@ export const config: Config = {
   tools: readConfig('tools', []),
   cron: {
     enabled: readConfig('cron.enabled', true),
+  },
+  comfyui: {
+    baseUrl: readConfig('comfyui.baseUrl', 'http://127.0.0.1:8188'),
   },
 };

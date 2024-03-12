@@ -1,4 +1,5 @@
 import { config } from '@/common/config';
+import { ComfyuiServerEntity } from '@/entities/comfyui/comfyui-server.entity';
 import { ThemeEntity } from '@/entities/config/theme';
 import { ToolsCredentialEntity } from '@/entities/tools/tools-credential.entity';
 import { ToolsServerEntity } from '@/entities/tools/tools-server.entity';
@@ -21,6 +22,7 @@ export const entities: EntityClassOrSchema[] = [
   WorkflowChatSessionEntity,
   WorkflowTriggersEntity,
   WorkflowTemplateEntity,
+  ComfyuiServerEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({
