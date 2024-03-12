@@ -2,18 +2,30 @@ import React from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
+import { useTriggers, useTriggerTypes } from '@/apis/workflow/trigger';
+import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
+import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 
 interface ISimplifyStartNodeExpandProps {}
 
 export const SimplifyStartNodeExpand: React.FC<ISimplifyStartNodeExpandProps> = () => {
+  const { vines } = useVinesFlow();
+  const { apikey } = useVinesPage();
+
+  const { data: triggerTypes } = useTriggerTypes(apikey);
+  const { data: triggers } = useTriggers(vines.workflowId, vines.version, apikey);
+
   const { canvasMode } = useFlowStore();
   const visible = canvasMode === CanvasStatus.EDIT;
 
+  const trigger = triggers?.find(({ enabled }) => enabled);
+  const triggerType = triggerTypes?.find(({ type }) => type === trigger?.type);
+
   return (
     <div className="absolute flex select-none flex-col gap-1">
-      <h1 className="text-xl font-bold leading-6">开始</h1>
+      <h1 className="text-xl font-bold leading-6">{triggerType?.displayName ?? '开始'}</h1>
       <AnimatePresence>
         {visible && (
           <motion.div
@@ -22,7 +34,7 @@ export const SimplifyStartNodeExpand: React.FC<ISimplifyStartNodeExpandProps> = 
             animate={{ opacity: 1, marginTop: 0 }}
             exit={{ opacity: 0, marginTop: -24 }}
           >
-            <span className="text-sm text-opacity-70">点击配置工作流输入和触发器</span>
+            <span className="text-sm text-opacity-70">{triggerType?.description ?? '点击配置工作流输入和触发器'}</span>
           </motion.div>
         )}
       </AnimatePresence>
