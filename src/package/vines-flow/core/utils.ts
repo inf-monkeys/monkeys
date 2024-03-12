@@ -4,7 +4,7 @@ import { customAlphabet } from 'nanoid';
 
 import { VinesNode, VinesSubWorkflowTaskDef } from '@/package/vines-flow/core/nodes';
 import { IVinesNodeBoundary, VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
-import { VinesBlockDefProperties, VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
+import { VinesToolDef, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
 export const createNanoId = customAlphabet('6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz', 8);
 
@@ -132,7 +132,7 @@ export const createTask = (tool: VinesToolDef, extendObject = {}) => {
 export const VARIABLE_REGEXP = /\$\{[a-zA-Z0-9_]+\.[a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)*}/g;
 
 export const autoTypeTransform = (
-  properties: VinesBlockDefProperties[] | undefined,
+  properties: VinesToolDefProperties[] | undefined,
   obj: Record<string, unknown>,
 ): Record<string, unknown> => {
   properties?.forEach(({ name, type, default: defaultValue, typeOptions }) => {

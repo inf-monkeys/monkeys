@@ -11,8 +11,8 @@ import {
   TOOL_CATEGORY_SORT_INDEX_LIST,
 } from '@/package/vines-flow/core/tools/consts.ts';
 import {
-  VinesBlockDefProperties,
   VinesToolDef,
+  VinesToolDefProperties,
   VinesToolWithCategory,
 } from '@/package/vines-flow/core/tools/typings.ts';
 import { Constructor, VINES_STATUS } from '@/package/vines-flow/core/typings.ts';
@@ -55,7 +55,7 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
     public updateWorkflows(workflows: MonkeyWorkflow[]) {
       this.vinesSubWorkflowTools = workflows.map((workflow) => {
         const workflowId = workflow.workflowId;
-        const variablesToTools: VinesBlockDefProperties[] =
+        const variablesToTools: VinesToolDefProperties[] =
           workflow.variables?.map((v) => ({ ...v, name: `parameters.${v.name}` })) || [];
 
         return {
@@ -72,7 +72,7 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
       this.checkoutData();
     }
 
-    private workflowOutputToBlockDefProperties(workflow: MonkeyWorkflow): VinesBlockDefProperties[] {
+    private workflowOutputToBlockDefProperties(workflow: MonkeyWorkflow): VinesToolDefProperties[] {
       if (workflow?.output?.length) {
         return workflow.output.map(({ key, value }) => ({
           name: key,
