@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { useParams } from '@tanstack/react-router';
 
-import { Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { ToolLists } from '@/components/layout/vines-flow/headless-modal/tools-selector/list.tsx';
+import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
@@ -64,6 +65,8 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
       ...it,
     ]) as VinesToolWithCategory[];
 
+  const tabsNode = useRef<HTMLDivElement>(null);
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-[50rem]">
@@ -73,13 +76,33 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
           <Input className="pl-9" placeholder="输入关键词或类别来搜索工具" onChange={setSearchValue} />
         </div>
         <Tabs defaultValue="all">
-          <TabsList>
-            {list.map(([, , categoryKey, category], index) => (
-              <TabsTrigger value={categoryKey} key={index}>
-                {category}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          <div className="flex justify-between">
+            <div ref={tabsNode} className="max-w-[690px] overflow-x-hidden overflow-y-clip">
+              <TabsList>
+                {list.map(([, , categoryKey, category], index) => (
+                  <TabsTrigger value={categoryKey} key={index}>
+                    {category}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+            <div className="relative flex items-center">
+              <div className="pointer-events-none absolute -left-4 h-full w-10 bg-gradient-to-l from-white from-60%" />
+              <Button
+                icon={<ChevronLeft size={16} />}
+                variant="outline"
+                className="!scale-75"
+                onClick={() => tabsNode.current?.scrollBy({ left: -200, behavior: 'smooth' })}
+              />
+              <Button
+                icon={<ChevronRight size={16} />}
+                variant="outline"
+                className="!scale-75"
+                onClick={() => tabsNode.current?.scrollBy({ left: 200, behavior: 'smooth' })}
+              />
+            </div>
+          </div>
+
           {list.map(([list, length, category], index) => (
             <TabsContent value={category} key={index}>
               <ToolLists list={list} length={length} category={category} onClick={handleOnClick} />

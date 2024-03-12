@@ -23,7 +23,7 @@ export const ToolLists: React.FC<IToolListsProps> = ({ list, length, category, o
       height={450}
       rowCount={Math.ceil(length / 3)}
       rowHeight={100}
-      width={750}
+      width={758}
       itemData={list}
     >
       {({ columnIndex, rowIndex, style, data }: GridChildComponentProps) => {
