@@ -1,12 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { VinesEdgePath } from '@/package/vines-flow/core/nodes/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
+import { useRetimer } from '@/utils/use-retimer.ts';
 
 export const VinesEdges: React.FC = () => {
   const { vines, VINES_REFRESHER } = useVinesFlow();
+
+  const reTimer = useRetimer();
 
   const genEdgePath = (structure: [string, VinesEdgePath]) => {
     const [id, edgeStructure] = structure;
@@ -21,15 +24,29 @@ export const VinesEdges: React.FC = () => {
   const [visible, setVisible] = useState(false);
   const [edgeStagger, setEdgeStagger] = useState(0.2);
 
+  const edgesLengthRef = useRef(0);
+
+  const handleUpdate = useCallback(
+    (edges: [string, VinesEdgePath][], length: number) => {
+      reTimer(
+        setTimeout(() => {
+          edgesLengthRef.current = length;
+          if (!length) return;
+          setEdges(edges);
+
+          setEdgeStagger(length * 0.12 > 2 ? 2 / length : 0.12);
+          setTimeout(() => setVisible(length > 0), 100);
+        }, 116) as unknown as number,
+      );
+    },
+    [reTimer],
+  );
+
   useEffect(() => {
     const edges = vines.svg();
     const edgeLength = edges.length;
-
-    if (!edgeLength) return;
-    setEdges(edges);
-
-    setEdgeStagger(edgeLength * 0.12 > 2 ? 2 / edgeLength : 0.12);
-    setTimeout(() => setVisible(edgeLength > 0), 100);
+    edgeLength !== edgesLengthRef.current && setVisible(false);
+    handleUpdate(edges, edgeLength);
   }, [VINES_REFRESHER]);
 
   return (
@@ -41,16 +58,9 @@ export const VinesEdges: React.FC = () => {
           className="absolute size-full stroke-[4]"
           style={{ strokeLinecap: 'round' }}
           variants={{
-            hidden: { opacity: 0 },
-            visible: {
-              opacity: 1,
-              transition: {
-                staggerChildren: edgeStagger,
-              },
-            },
-            exit: {
-              opacity: 0,
-            },
+            hidden: { opacity: 0, transition: { duration: 0.1 } },
+            visible: { opacity: 1, transition: { duration: 0.1, staggerChildren: edgeStagger } },
+            exit: { opacity: 0, transition: { duration: 0.1 } },
           }}
           initial="hidden"
           animate="visible"
@@ -62,15 +72,7 @@ export const VinesEdges: React.FC = () => {
               <motion.g
                 key={index}
                 data-id={id}
-                variants={{
-                  hidden: { opacity: 0 },
-                  visible: {
-                    opacity: 1,
-                  },
-                  exit: {
-                    opacity: 0,
-                  },
-                }}
+                variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 }, exit: { opacity: 0 } }}
               >
                 <path d={path} className="stroke-border dark:stroke-gray-10" />
 
@@ -78,10 +80,7 @@ export const VinesEdges: React.FC = () => {
                   key={index + '-vines-edge-path'}
                   d={path}
                   transition={{ duration: 0.25 }}
-                  exit={{
-                    opacity: 0,
-                    pathLength: 0,
-                  }}
+                  exit={{ opacity: 0, pathLength: 0 }}
                 />
               </motion.g>
             );
