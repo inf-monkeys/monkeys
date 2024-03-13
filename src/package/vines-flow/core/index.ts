@@ -30,7 +30,7 @@ export class VinesCore extends VinesTools(VinesBase) {
 
   public tasks: MonkeyTaskDefTypes[] = [];
 
-  public variables: VinesWorkflowVariable[] = [];
+  public workflowInput: VinesWorkflowVariable[] = [];
 
   public mode: IVinesMode = IVinesMode.EDIT;
 
@@ -66,7 +66,7 @@ export class VinesCore extends VinesTools(VinesBase) {
         (needToInit = true);
       workflow?.workflowId && (this.workflowId = workflow.workflowId);
       workflow?.version && (this.version = workflow.version);
-      workflow?.variables && (this.variables = workflow.variables);
+      workflow?.variables && (this.workflowInput = workflow.variables);
     }
     workflowId && (this.workflowId = workflowId);
     version && (this.version = version);
@@ -352,7 +352,7 @@ export class VinesCore extends VinesTools(VinesBase) {
   // endregion
 
   // region Variables
-  public getWorkflowVariables(): { variables: IVinesVariable[]; mapper: VinesVariableMapper } {
+  public generateWorkflowVariables(): { variables: IVinesVariable[]; mapper: VinesVariableMapper } {
     const nodes = this.getAllNodes().filter((it) => !(it instanceof EndPointNode) && !it.isFake);
     const nodesVariables: IVinesVariable[] = [];
     let nodesVariablesMapper: VinesVariableMapper = new Map();
@@ -365,7 +365,7 @@ export class VinesCore extends VinesTools(VinesBase) {
 
     const workflowInputVariable = this.generateVariable(
       'workflow',
-      this.variables,
+      this.workflowInput,
       '${{target}.input.{variable}}',
       '$.{target}.input.{variable}',
     );
