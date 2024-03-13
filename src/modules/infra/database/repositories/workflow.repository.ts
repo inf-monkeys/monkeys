@@ -1,5 +1,6 @@
 import { calcMd5 } from '@/common/utils/utils';
 import { WorkflowMetadataEntity, WorkflowOutputValue, WorkflowValidationIssue } from '@/entities/workflow/workflow';
+import { WorkflowChatSessionEntity } from '@/entities/workflow/workflow-chat-session';
 import { WorkflowExecutionEntity } from '@/entities/workflow/workflow-execution';
 import { WorkflowTriggerType, WorkflowTriggersEntity } from '@/entities/workflow/workflow-trigger';
 import { BlockDefProperties, MonkeyTaskDefTypes } from '@inf-monkeys/vines';
@@ -24,6 +25,8 @@ export class WorkflowRepository {
     private readonly workflowMetadataRepository: Repository<WorkflowMetadataEntity>,
     @InjectRepository(WorkflowTriggersEntity)
     private readonly workflowTriggerRepository: Repository<WorkflowTriggersEntity>,
+    @InjectRepository(WorkflowChatSessionEntity)
+    private readonly workflowChatSessionRepository: Repository<WorkflowChatSessionEntity>,
   ) {}
 
   public async findWorkflowByCondition(condition: FindWorkflowCondition) {
@@ -330,5 +333,62 @@ export class WorkflowRepository {
         enabled: false,
       },
     );
+  }
+
+  public async createChatSession(teamId: string, userId: string, workflowId: string, displayName: string) {
+    const id = new ObjectId();
+    const timestamp = +new Date();
+    const entity: Partial<WorkflowChatSessionEntity> = {
+      id: id,
+      displayName,
+      workflowId,
+      teamId,
+      creatorUserId: userId,
+      createdTimestamp: timestamp,
+      updatedTimestamp: timestamp,
+      isDeleted: false,
+    };
+    await this.workflowChatSessionRepository.save(entity);
+    return entity;
+  }
+
+  public async listChatSessions(teamId: string, workflowId: string) {
+    return await this.workflowChatSessionRepository.find({
+      where: {
+        teamId,
+        workflowId,
+        isDeleted: false,
+      },
+    });
+  }
+
+  public async deleteChatSession(teamId: string, sessionId: string) {
+    await this.workflowChatSessionRepository.update(
+      {
+        id: new ObjectId(sessionId),
+        teamId,
+        isDeleted: false,
+      },
+      {
+        isDeleted: true,
+      },
+    );
+    return {
+      success: true,
+    };
+  }
+
+  public async updateChatSession(teamId: string, sessionId: string, updates: Partial<WorkflowChatSessionEntity>) {
+    await this.workflowChatSessionRepository.update(
+      {
+        id: new ObjectId(sessionId),
+        teamId,
+        isDeleted: false,
+      },
+      updates,
+    );
+    return {
+      success: true,
+    };
   }
 }

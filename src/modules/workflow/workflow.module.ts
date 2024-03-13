@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConductorModule } from './conductor/conductor.module';
 import { WorkflowAssetsController } from './workflow.assets.controller';
 import { WorkflowAssetsService } from './workflow.assets.service';
+import { WorkflowChatSessionController } from './workflow.chat-sessions.controller';
+import { WorkflowChatSessionService } from './workflow.chat-sessions.service';
 import { WorkflowCommonService } from './workflow.common.service';
 import { WorkflowCrudController } from './workflow.crud.controller';
 import { WorkflowCrudService } from './workflow.curd.service';
@@ -15,8 +17,25 @@ import { WorkflowWebhookController } from './workflow.webhook.controller';
 import { WorkflowWebhookService } from './workflow.webhook.service';
 
 @Module({
-  controllers: [WorkflowCrudController, WorkflowValidateController, WorkflowExecutionController, WorkflowWebhookController, WorkflowTriggerController, WorkflowAssetsController],
-  providers: [WorkflowCrudService, WorkflowValidateService, WorkflowExecutionService, WorkflowWebhookService, WorkflowCommonService, WorkflowTriggerService, WorkflowAssetsService],
+  controllers: [
+    WorkflowCrudController,
+    WorkflowValidateController,
+    WorkflowExecutionController,
+    WorkflowWebhookController,
+    WorkflowTriggerController,
+    WorkflowAssetsController,
+    WorkflowChatSessionController,
+  ],
+  providers: [
+    WorkflowCrudService,
+    WorkflowValidateService,
+    WorkflowExecutionService,
+    WorkflowWebhookService,
+    WorkflowCommonService,
+    WorkflowTriggerService,
+    WorkflowAssetsService,
+    WorkflowChatSessionService,
+  ],
   imports: [ConductorModule],
   exports: [WorkflowCrudService],
 })
