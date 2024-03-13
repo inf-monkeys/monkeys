@@ -8,13 +8,17 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import url from 'url';
+import { CredentialsRepository } from '../infra/database/repositories/credential.repository';
 import { ToolsRepository } from '../infra/database/repositories/tools.repository';
 import { ApiType, AuthType, ManifestJson, RegisterWorkerParams, SchemaVersion } from './interfaces';
 import { parseOpenApiSpecAsBlocks } from './utils/openapi-parser';
 
 @Injectable()
 export class ToolsRegistryService {
-  constructor(private readonly toolsRepository: ToolsRepository) {}
+  constructor(
+    private readonly toolsRepository: ToolsRepository,
+    private readonly credentialsRepository: CredentialsRepository,
+  ) {}
 
   private async validateManifestJson(data: ManifestJson) {
     if (!data) {
@@ -99,7 +103,7 @@ export class ToolsRegistryService {
     // Save server info and credentials
     await this.toolsRepository.saveServer(manifestUrl, baseUrl, manifestData);
     if (manifestData.credentials) {
-      await this.toolsRepository.createOrUpdateCredentials(namespace, manifestData.credentials);
+      await this.credentialsRepository.createOrUpdateCredentialTypes(namespace, manifestData.credentials);
     }
 
     await this.toolsRepository.createOrUpdateTools(namespace, tools);

@@ -1,36 +1,31 @@
-import { CredentialAuthType } from '@/modules/tools/interfaces';
-import { BlockDefProperties } from '@inf-monkeys/vines';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
-@Entity({ name: 'tools_credential' })
+/**
+ * 密钥数据表
+ */
+@Entity({ name: 'tools_credentials' })
 export class ToolsCredentialEntity extends BaseEntity {
-  @Column()
-  name: string;
-
-  @Column()
-  namespace: string;
+  @Column({
+    name: 'team_id',
+  })
+  teamId: string;
 
   @Column({
     name: 'display_name',
   })
   displayName: string;
 
+  @Column({
+    name: 'creator_user_id',
+  })
+  creatorUserId: string;
+
   @Column()
-  type: CredentialAuthType;
+  type: string;
 
   @Column({
-    nullable: true,
+    type: 'text',
   })
-  description?: string;
-
-  @Column({
-    nullable: true,
-  })
-  icon?: string;
-
-  @Column({
-    type: 'simple-json',
-  })
-  properties: BlockDefProperties[];
+  data: string | { [x: string]: any };
 }

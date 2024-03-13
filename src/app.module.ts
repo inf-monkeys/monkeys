@@ -4,6 +4,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CommonMiddleware } from './common/middlewares/common.middleware';
 import { ToolsMiddleware } from './common/middlewares/tools.middleware';
+import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
+import { ComfyuiModule } from './modules/comfyui/comfyui.module';
 import { ExportModule } from './modules/export/export.module';
 import { GatewaysModule } from './modules/gateways/gateways.module';
 import { CronJobModule } from './modules/infra/cron/cron.module';
@@ -12,10 +14,9 @@ import { RepositoryMoule } from './modules/infra/database/repositories/repositor
 import { OpenapiModule } from './modules/openapi/openapi.module';
 import { ToolsModule } from './modules/tools/tools.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
-import { ComfyuiModule } from './modules/comfyui/comfyui.module';
 
 @Module({
-  imports: [DatabaseModule, ToolsModule, RepositoryMoule, WorkflowModule, OpenapiModule, GatewaysModule, ScheduleModule.forRoot(), CronJobModule, ExportModule, ComfyuiModule],
+  imports: [DatabaseModule, ToolsModule, RepositoryMoule, WorkflowModule, OpenapiModule, GatewaysModule, ScheduleModule.forRoot(), CronJobModule, ExportModule, ComfyuiModule, BootstrapModule],
   controllers: [AppController],
   providers: [AppService],
 })

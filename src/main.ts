@@ -7,10 +7,10 @@ import { config } from './common/config';
 import { ExceptionsFilter } from './common/filters/exception.filter';
 import { logger } from './common/logger';
 import { ValidationPipe } from './common/pipes/validator.pipe';
+import { BootstrapService } from './modules/bootstrap/bootstrap.service';
 import { setupBuiltInWorkerSwagger } from './modules/tools/builtin/builtin.swagger';
 import { setupExampleWorkerSwagger } from './modules/tools/example/example.swagger';
 import { ToolsPollingService } from './modules/tools/tools.polling.service';
-import { ToolsRegistryService } from './modules/tools/tools.registry.service';
 import { setupSwagger } from './setupSwagger';
 
 process.on('unhandledRejection', (err: Error) => {
@@ -50,9 +50,9 @@ async function bootstrap() {
   const toolsPollingService = await app.resolve<ToolsPollingService>(ToolsPollingService);
   toolsPollingService.startPolling();
 
-  // Register built in tools
-  const toolsRegistryService = await app.resolve<ToolsRegistryService>(ToolsRegistryService);
-  toolsRegistryService.initBuiltInTools();
+  // System bootstrap
+  const bootstrapService = await app.resolve<BootstrapService>(BootstrapService);
+  await bootstrapService.bootstrap();
 
   await app.listen(config.server.port);
 }

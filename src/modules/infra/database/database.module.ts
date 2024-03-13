@@ -1,6 +1,8 @@
 import { config } from '@/common/config';
 import { ComfyuiServerEntity } from '@/entities/comfyui/comfyui-server.entity';
 import { ThemeEntity } from '@/entities/config/theme';
+import { SystemConfigurationEntity } from '@/entities/system/system-configuration.entity';
+import { ToolsCredentialTypeEntity } from '@/entities/tools/tools-credential-type.entity';
 import { ToolsCredentialEntity } from '@/entities/tools/tools-credential.entity';
 import { ToolsServerEntity } from '@/entities/tools/tools-server.entity';
 import { ToolsEntity } from '@/entities/tools/tools.entity';
@@ -15,6 +17,7 @@ import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-clas
 export const entities: EntityClassOrSchema[] = [
   ThemeEntity,
   ToolsEntity,
+  ToolsCredentialTypeEntity,
   ToolsCredentialEntity,
   ToolsServerEntity,
   WorkflowExecutionEntity,
@@ -23,6 +26,7 @@ export const entities: EntityClassOrSchema[] = [
   WorkflowTriggersEntity,
   WorkflowTemplateEntity,
   ComfyuiServerEntity,
+  SystemConfigurationEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({

@@ -33,7 +33,7 @@ export class ExportController {
     res.send(zipContent);
   }
 
-  @Post('/import-tenant')
+  @Post('/import')
   async importTeam(@Req() req: IRequest, @Body() dto: ImportTeamDto) {
     const { userId } = req;
     const { zipUrl } = dto;
