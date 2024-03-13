@@ -1,6 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { entities } from '../database.module';
+import { entities } from '../entities/database.module';
 import { ComfyuiRepository } from './comfyui.repository';
 import { CredentialsRepository } from './credential.repository';
 import { SystemConfigurationRepository } from './system-configuration.repository';

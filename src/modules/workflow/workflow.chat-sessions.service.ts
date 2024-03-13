@@ -1,6 +1,6 @@
 import { WorkflowChatSessionEntity } from '@/entities/workflow/workflow-chat-session';
 import { Injectable } from '@nestjs/common';
-import { WorkflowRepository } from '../infra/database/repositories/workflow.repository';
+import { WorkflowRepository } from '../../repositories/workflow.repository';
 
 @Injectable()
 export class WorkflowChatSessionService {

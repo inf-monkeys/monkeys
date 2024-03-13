@@ -1,7 +1,7 @@
-import { WorkflowOutputValue } from '@/entities/workflow/workflow';
+import { WorkflowOutputValue } from '@/entities/workflow/workflow-metadata';
 import { WorkflowTask } from '@io-orkes/conductor-javascript';
 import { Injectable } from '@nestjs/common';
-import { ToolsRepository } from '../infra/database/repositories/tools.repository';
+import { ToolsRepository } from '../../repositories/tools.repository';
 import { WorkflowValidator } from './workflow-validator';
 
 @Injectable()

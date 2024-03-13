@@ -2,7 +2,7 @@ import { logger } from '@/common/logger';
 import { IRequest } from '@/common/typings/request';
 import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
-import { WorkflowRepository } from '../infra/database/repositories/workflow.repository';
+import { WorkflowRepository } from '../../repositories/workflow.repository';
 import { LlmModelJson, RichMediaJson, SdModelJson, TableCollectionsJson, TeamInfoJson, TextCollectionJson, WorkflowWithPagesJson } from '../workflow/interfaces';
 import { WorkflowCrudService } from '../workflow/workflow.curd.service';
 import { ExportTeamDto } from './dto/export-team.dto';

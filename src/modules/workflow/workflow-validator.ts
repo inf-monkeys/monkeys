@@ -1,6 +1,6 @@
 import { extractDependencies } from '@/common/utils/code';
 import { flatTasks } from '@/common/utils/conductor';
-import { ValidationIssueType, ValidationReasonType, WorkflowOutputValue, WorkflowValidationIssue } from '@/entities/workflow/workflow';
+import { ValidationIssueType, ValidationReasonType, WorkflowOutputValue, WorkflowValidationIssue } from '@/entities/workflow/workflow-metadata';
 import { BlockDefProperties, BlockDefPropertyOptions, BlockDefPropertyTypes, BlockDefinition, BlockType } from '@inf-monkeys/vines';
 import { WorkflowTask } from '@io-orkes/conductor-javascript';
 import _ from 'lodash';

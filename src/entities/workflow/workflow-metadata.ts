@@ -1,6 +1,6 @@
 import { BlockDefProperties, MonkeyTaskDefTypes } from '@inf-monkeys/vines';
 import { Column, Entity } from 'typeorm';
-import { BaseEntity } from '../base/base';
+import { BaseAssetEntity } from '../base/base-asset';
 import { WorkflowTriggerType } from './workflow-trigger';
 
 export enum ValidationIssueType {
@@ -45,7 +45,7 @@ export interface WorkflowOutputValue {
 }
 
 @Entity({ name: 'workflow_metadatas' })
-export class WorkflowMetadataEntity extends BaseEntity {
+export class WorkflowMetadataEntity extends BaseAssetEntity {
   @Column()
   workflowId: string;
 
@@ -54,17 +54,6 @@ export class WorkflowMetadataEntity extends BaseEntity {
 
   @Column()
   name: string;
-
-  @Column({
-    nullable: true,
-  })
-  description?: string;
-
-  @Column({
-    nullable: true,
-    name: 'icon_url',
-  })
-  iconUrl?: string;
 
   /**
    * 工作流是否成功激活，非激活状态的工作流不允许执行
@@ -79,16 +68,6 @@ export class WorkflowMetadataEntity extends BaseEntity {
     default: true,
   })
   validated?: boolean;
-
-  @Column({
-    name: 'creator_user_id',
-  })
-  creatorUserId: string;
-
-  @Column({
-    name: 'team_id',
-  })
-  teamId: string;
 
   @Column({
     nullable: true,

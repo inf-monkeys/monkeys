@@ -5,7 +5,7 @@ import { Task, TaskDef, TaskManager } from '@io-orkes/conductor-javascript';
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import os from 'os';
-import { ToolsRepository } from '../infra/database/repositories/tools.repository';
+import { ToolsRepository } from '../../repositories/tools.repository';
 import { WorkerInputData } from './interfaces';
 
 export const CONDUCTOR_TASK_DEF_NAME = 'monkeys';

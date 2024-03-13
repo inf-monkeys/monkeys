@@ -1,7 +1,7 @@
 import { calcMd5 } from '@/common/utils/utils';
-import { WorkflowMetadataEntity, WorkflowOutputValue, WorkflowValidationIssue } from '@/entities/workflow/workflow';
 import { WorkflowChatSessionEntity } from '@/entities/workflow/workflow-chat-session';
 import { WorkflowExecutionEntity } from '@/entities/workflow/workflow-execution';
+import { WorkflowMetadataEntity, WorkflowOutputValue, WorkflowValidationIssue } from '@/entities/workflow/workflow-metadata';
 import { WorkflowTriggerType, WorkflowTriggersEntity } from '@/entities/workflow/workflow-trigger';
 import { BlockDefProperties, MonkeyTaskDefTypes } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
@@ -68,6 +68,7 @@ export class WorkflowRepository {
       tasks,
       variables,
       output,
+      assetType: 'workflow',
     };
     await this.workflowMetadataRepository.save(entity);
     return entity;

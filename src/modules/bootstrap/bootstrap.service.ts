@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SystemConfigurationRepository } from '../infra/database/repositories/system-configuration.repository';
+import { SystemConfigurationRepository } from '../../repositories/system-configuration.repository';
 import { ToolsRegistryService } from '../tools/tools.registry.service';
 
 @Injectable()

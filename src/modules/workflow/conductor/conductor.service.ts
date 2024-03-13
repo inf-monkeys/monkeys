@@ -1,10 +1,10 @@
 import { conductorClient } from '@/common/conductor';
 import { InputParametersType } from '@/common/typings/workflow';
 import { flatTasks } from '@/common/utils/conductor';
-import { WorkflowMetadataEntity, WorkflowOutputValue } from '@/entities/workflow/workflow';
-import { ToolsRepository } from '@/modules/infra/database/repositories/tools.repository';
+import { WorkflowMetadataEntity, WorkflowOutputValue } from '@/entities/workflow/workflow-metadata';
 import { DoWhileMode } from '@/modules/tools/conductor-system-tools/do-while';
 import { CONDUCTOR_TASK_DEF_NAME } from '@/modules/tools/tools.polling.service';
+import { ToolsRepository } from '@/repositories/tools.repository';
 import { BlockType } from '@inf-monkeys/vines';
 import { Task, WorkflowTask } from '@io-orkes/conductor-javascript';
 import { Injectable } from '@nestjs/common';

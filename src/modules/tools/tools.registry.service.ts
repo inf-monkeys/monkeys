@@ -8,8 +8,8 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import url from 'url';
-import { CredentialsRepository } from '../infra/database/repositories/credential.repository';
-import { ToolsRepository } from '../infra/database/repositories/tools.repository';
+import { CredentialsRepository } from '../../repositories/credential.repository';
+import { ToolsRepository } from '../../repositories/tools.repository';
 import { ApiType, AuthType, ManifestJson, RegisterWorkerParams, SchemaVersion } from './interfaces';
 import { parseOpenApiSpecAsBlocks } from './utils/openapi-parser';
 

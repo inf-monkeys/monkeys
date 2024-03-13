@@ -6,9 +6,9 @@ import { ToolsCredentialTypeEntity } from '@/entities/tools/tools-credential-typ
 import { ToolsCredentialEntity } from '@/entities/tools/tools-credential.entity';
 import { ToolsServerEntity } from '@/entities/tools/tools-server.entity';
 import { ToolsEntity } from '@/entities/tools/tools.entity';
-import { WorkflowMetadataEntity } from '@/entities/workflow/workflow';
 import { WorkflowChatSessionEntity } from '@/entities/workflow/workflow-chat-session';
 import { WorkflowExecutionEntity } from '@/entities/workflow/workflow-execution';
+import { WorkflowMetadataEntity } from '@/entities/workflow/workflow-metadata';
 import { WorkflowTemplateEntity } from '@/entities/workflow/workflow-template';
 import { WorkflowTriggersEntity } from '@/entities/workflow/workflow-trigger';
 import { TypeOrmModule } from '@nestjs/typeorm';

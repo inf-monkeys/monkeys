@@ -3,8 +3,8 @@ import { BlockType } from '@inf-monkeys/vines';
 import { WorkflowTask } from '@io-orkes/conductor-javascript';
 import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
-import { ToolsRepository } from '../infra/database/repositories/tools.repository';
-import { WorkflowRepository } from '../infra/database/repositories/workflow.repository';
+import { ToolsRepository } from '../../repositories/tools.repository';
+import { WorkflowRepository } from '../../repositories/workflow.repository';
 import { WorkflowRelatedAssetResult } from './interfaces';
 import { WorkflowCommonService } from './workflow.common.service';
 

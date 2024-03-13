@@ -8,8 +8,8 @@ import { Injectable } from '@nestjs/common';
 import axios, { AxiosRequestConfig } from 'axios';
 import _ from 'lodash';
 import { ObjectId } from 'mongodb';
-import { ComfyuiRepository } from '../infra/database/repositories/comfyui.repository';
-import { ToolsRepository } from '../infra/database/repositories/tools.repository';
+import { ComfyuiRepository } from '../../repositories/comfyui.repository';
+import { ToolsRepository } from '../../repositories/tools.repository';
 import { ComfyuiWorkflowFileType } from './dto/req/import-from-comfyui.dto';
 import { ComfyuiDepencency, ComfyuiDepencencyType, ImportFromComfyuiParams, LoadComfyuiWorkflowParams, UpdateComfyuiWorkflowParams } from './interfaces';
 

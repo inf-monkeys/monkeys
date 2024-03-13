@@ -1,6 +1,6 @@
 import { AssetType, MonkeyTaskDefTypes, MonkeyWorkflowDef } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
-import { WorkflowRepository } from '../infra/database/repositories/workflow.repository';
+import { WorkflowRepository } from '../../repositories/workflow.repository';
 
 @Injectable()
 export class WorkflowCommonService {

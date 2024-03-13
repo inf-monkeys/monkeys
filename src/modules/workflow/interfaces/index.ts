@@ -1,5 +1,5 @@
 import { WorkflowExecutionContext } from '@/common/dto/workflow-execution-context.dto';
-import { WorkflowMetadataEntity, WorkflowOutputValue } from '@/entities/workflow/workflow';
+import { WorkflowMetadataEntity, WorkflowOutputValue } from '@/entities/workflow/workflow-metadata';
 import { PageInstanceType, PagePermission } from '@/entities/workflow/workflow-page';
 import { WebhookTriggerConfig } from '@/entities/workflow/workflow-trigger';
 import { AssetType, BlockDefProperties, MonkeyTaskDefTypes, WorkflowTriggerType, WorkflowValidationIssue } from '@inf-monkeys/vines';
