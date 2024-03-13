@@ -1,3 +1,4 @@
+import { VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 
 export const VINES_DEF_NODE = {
@@ -26,3 +27,21 @@ export const VINES_DEF_NODE = {
     },
   },
 };
+
+export const VINES_ENV_VARIABLES: VinesToolDefProperties[] = [
+  {
+    name: 'userId',
+    displayName: '用户 ID',
+    type: 'string',
+  },
+  {
+    name: 'teamId',
+    displayName: '团队 ID',
+    type: 'string',
+  },
+  {
+    name: 'chatSessionId',
+    displayName: '会话 ID',
+    type: 'string',
+  },
+];

@@ -17,6 +17,7 @@ import {
   VinesEdgePath,
   VinesTask,
 } from '@/package/vines-flow/core/nodes/typings.ts';
+import { IVinesVariable, VinesVariableMapper } from '@/package/vines-flow/core/tools/typings.ts';
 import { IVinesInsertChildParams } from '@/package/vines-flow/core/typings.ts';
 import { createNanoId, createSubWorkflowDef } from '@/package/vines-flow/core/utils.ts';
 import VinesEvent from '@/utils/events.ts';
@@ -424,6 +425,23 @@ export class VinesNode<T extends VinesTask = VinesTask> {
 
   get isFake() {
     return this.id.startsWith('fake_node_');
+  }
+  // endregion
+
+  // region Variable
+  public variable(): { variables: IVinesVariable[]; mapper: VinesVariableMapper } {
+    const tool = this._vinesCore.getTool(this._task?.name ?? '');
+    if (!tool) {
+      return {
+        variables: [],
+        mapper: new Map(),
+      };
+    }
+
+    const variables = this._vinesCore.generateVariable(this.id, tool.output);
+    const mapper = this._vinesCore.generateVariableMapper(variables, this.customData?.title ?? tool.displayName ?? '');
+
+    return { variables, mapper };
   }
   // endregion
 }
