@@ -34,7 +34,7 @@ export const ToolConfig: React.FC<INodeConfigProps> = ({ node }) => {
             <Index node={node} tool={tool} updateRaw={vines.updateRaw} />
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={40} className="flex flex-1 flex-col overflow-y-auto px-4 [&_span]:line-clamp-1">
+          <ResizablePanel defaultSize={40} className="flex flex-1 flex-col overflow-y-auto px-4">
             <h1 className="line-clamp-1 text-base font-bold">输出</h1>
             <div className="h-[calc(100%-1.5rem)]">
               <ToolOutput nodeId={node?.id} />
