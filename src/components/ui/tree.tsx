@@ -1,6 +1,5 @@
 import React, { forwardRef, useCallback, useMemo, useState } from 'react';
 
-import { useElementSize } from '@mantine/hooks';
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
 import { ChevronDownIcon, type LucideIcon } from 'lucide-react';
 
@@ -62,11 +61,9 @@ const Tree = forwardRef<HTMLDivElement, TreeProps>(
       return ids;
     }, [data, initialSelectedItemId]);
 
-    const { ref: refRoot, width, height } = useElementSize();
-
     return (
-      <div ref={refRoot} className={cn('overflow-hidden', className)}>
-        <ScrollArea style={{ width, height }}>
+      <div className={cn('overflow-hidden', className)}>
+        <ScrollArea>
           <div className="relative p-2">
             <TreeItem
               data={data}

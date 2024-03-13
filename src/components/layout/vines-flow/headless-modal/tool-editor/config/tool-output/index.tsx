@@ -42,16 +42,16 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
                   toast.success('变量已复制');
                 }}
               >
-                <div
-                  className="text-xxs cursor-default select-none whitespace-nowrap rounded-sm px-1 py-1 font-medium leading-none shadow-inner"
+                <span
+                  className="text-xxs line-clamp-1 cursor-default select-none whitespace-nowrap break-all rounded-sm px-1 py-1 font-medium leading-none shadow-inner"
                   style={{
                     backgroundColor: (isMultiple ? tag?.multipleColor : tag?.color) ?? '#2b2e35',
                   }}
                 >
                   {tag?.name ?? it.type}
                   {isMultiple ? '列表' : ''}
-                </div>
-                {it.label}
+                </span>
+                <span className="line-clamp-1 break-normal">{it.label}</span>
               </div>
             </TooltipTrigger>
             <TooltipContent>{it.id}</TooltipContent>
@@ -63,16 +63,16 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
         const isMultiple = it.isMultiple;
         return (
           <div className="flex size-full items-center gap-2 p-2 text-sm" onClick={onExpand}>
-            <div
-              className="text-xxs cursor-default select-none whitespace-nowrap rounded-sm px-1 py-1 font-medium leading-none shadow-inner"
+            <span
+              className="text-xxs line-clamp-1 cursor-default select-none whitespace-nowrap break-all rounded-sm px-1 py-1 font-medium leading-none shadow-inner"
               style={{
                 backgroundColor: (isMultiple ? tag?.multipleColor : tag?.color) ?? '#2b2e35',
               }}
             >
               {tag?.name ?? it.type}
               {isMultiple ? '列表' : ''}
-            </div>
-            {it.label}
+            </span>
+            <span className="line-clamp-1 break-normal">{it.label}</span>
             <div className="flex-1">
               <Tooltip>
                 <TooltipTrigger asChild>
