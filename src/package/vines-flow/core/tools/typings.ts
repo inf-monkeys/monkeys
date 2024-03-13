@@ -30,10 +30,19 @@ export type VinesVariableMapper = Map<
 
 export interface IVinesVariable {
   targetId: string;
-  name: string;
+  id: string;
   jsonpath: string;
-  displayName: string;
+  label: string;
   originalName: string;
   type: BlockDefPropertyTypes;
+  isMultiple: boolean;
   children?: IVinesVariable[];
+}
+
+export interface IVinesVariableTag {
+  [key: string]: {
+    name: string;
+    color: string;
+    multipleColor: string;
+  };
 }

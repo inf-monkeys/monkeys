@@ -146,23 +146,18 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
         const finalPrevOriginName = isMultipleValues ? prev.slice(0, -1) + '[0].' : prev;
         const finalName = format(nameTemplate, { target: targetId, variable: finalPrevOriginName + name });
         const finalJsonpath = format(jsonpathTemplate, { target: targetId, variable: finalPrevOriginName + name });
+        const isMultiple = get(typeOptions, 'multipleValues', false);
 
         return {
-          name: finalName,
+          id: finalName,
           jsonpath: finalJsonpath,
           originalName: finalPrevOriginName + name,
-          displayName,
+          label: displayName,
           type,
           targetId,
+          isMultiple,
           children: properties
-            ? this.generateVariable(
-                targetId,
-                properties,
-                nameTemplate,
-                jsonpathTemplate,
-                `${name}.`,
-                get(typeOptions, 'multipleValues', false),
-              )
+            ? this.generateVariable(targetId, properties, nameTemplate, jsonpathTemplate, `${name}.`, isMultiple)
             : [],
         } as IVinesVariable;
       });
@@ -173,9 +168,9 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
 
       for (const def of defs.flatMap((it) => [it, it.children]).flat()) {
         if (!def) continue;
-        const { name, type, displayName, jsonpath, originalName } = def;
-        const variableDisplayName = `${nodeName}的${displayName}`;
-        mapper.set(name, {
+        const { id, type, label, jsonpath, originalName } = def;
+        const variableDisplayName = `${nodeName}的${label}`;
+        mapper.set(id, {
           name: originalName,
           displayName: variableDisplayName,
           type,
