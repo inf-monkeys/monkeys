@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { useForceUpdate } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 
 import { ToolConfig } from '@/components/layout/vines-flow/headless-modal/tool-editor/config';
@@ -20,7 +20,7 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
   const { workflowId } = useFlowStore();
   const { vines } = useVinesFlow();
 
-  const [forceUpdate] = useForceUpdate();
+  const [activeTab, setActiveTab] = useState('config');
 
   const [node, setNode] = useState<VinesNode>();
   const [open, setOpen] = useState(false);
@@ -33,6 +33,8 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
       setOpen(true);
       nodeIdRef.current = nodeId;
       setNode(vines.getNodeById(nodeId));
+      setActiveTab('empty');
+      setTimeout(() => setActiveTab('config'));
     };
     VinesEvent.on('flow-tool-editor', handleOpen);
     return () => {
@@ -61,19 +63,35 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
         <DialogTitle asChild>
           <Header node={node} />
         </DialogTitle>
-        <Tabs defaultValue="config">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="config">配置参数</TabsTrigger>
             <TabsTrigger value="dev">开发模式</TabsTrigger>
             <TabsTrigger value="more-config">高级配置</TabsTrigger>
           </TabsList>
-          <TabsContent className="mt-4 h-[25em]" value="config">
-            <ToolConfig node={node} forceUpdate={forceUpdate} />
-          </TabsContent>
-          <TabsContent className="mt-4 h-[25em]" value="dev">
-            <CodeEditor data={task} lineNumbers={4} onUpdate={handleRawUpdate} />
-          </TabsContent>
-          <TabsContent className="mt-4 h-[25em]" value="more-config"></TabsContent>
+          <AnimatePresence>
+            <motion.div
+              key={activeTab}
+              className="w-full"
+              initial={{ x: 10, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -10, opacity: 0 }}
+              transition={{ duration: activeTab === 'empty' ? 0 : 0.2 }}
+            >
+              {activeTab === 'config' && (
+                <TabsContent className="mt-4 h-[25em]" value="config">
+                  <ToolConfig node={node} />
+                </TabsContent>
+              )}
+              {activeTab === 'dev' && (
+                <TabsContent className="mt-4 h-[25em]" value="dev">
+                  <CodeEditor data={task} lineNumbers={4} onUpdate={handleRawUpdate} />
+                </TabsContent>
+              )}
+              {activeTab === 'more-config' && <TabsContent className="mt-4 h-[25em]" value="more-config"></TabsContent>}
+              {activeTab === 'empty' && <TabsContent className="mt-4 h-[25em]" value="empty"></TabsContent>}
+            </motion.div>
+          </AnimatePresence>
         </Tabs>
         <DialogFooter>
           <Button variant="outline" onClick={() => vines.emit('update', vines.getRaw())}>
