@@ -1,17 +1,19 @@
 import React from 'react';
 
-import { Index } from 'src/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input';
+import { ToolInput } from 'src/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input';
 
 import { ToolOutput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-output';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable.tsx';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 
 interface INodeConfigProps {
   node?: VinesNode;
+  forceUpdate?: () => void;
 }
 
-export const ToolConfig: React.FC<INodeConfigProps> = ({ node }) => {
+export const ToolConfig: React.FC<INodeConfigProps> = ({ node, forceUpdate }) => {
   const { vines } = useVinesFlow();
 
   const task = node?.getRaw();
@@ -29,9 +31,11 @@ export const ToolConfig: React.FC<INodeConfigProps> = ({ node }) => {
         </div>
       ) : (
         <ResizablePanelGroup direction="horizontal">
-          <ResizablePanel minSize={50} className="flex flex-1 flex-col gap-4 overflow-y-auto px-4">
+          <ResizablePanel minSize={50} className="flex flex-1 flex-col gap-4 overflow-y-auto pl-4 pr-2">
             <h1 className="text-base font-bold">输入</h1>
-            <Index node={node} tool={tool} updateRaw={vines.updateRaw} />
+            <ScrollArea className="h-[calc(100%-1.5rem)] pr-2">
+              <ToolInput node={node} tool={tool} />
+            </ScrollArea>
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={40} className="flex flex-1 flex-col overflow-y-auto px-4">

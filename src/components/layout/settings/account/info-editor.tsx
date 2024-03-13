@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input.tsx';
+import { Input } from '@/components/ui/input';
 
 interface IInfoEditorProps extends React.ComponentPropsWithoutRef<'div'> {
   title: string;

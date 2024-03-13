@@ -330,7 +330,11 @@ export class VinesCore extends VinesTools(VinesBase) {
     for (const node of this.nodes) {
       if (node.updateRaw(nodeId, task)) {
         this.tasks = this.getRaw();
-        update && this.sendUpdateEvent();
+        if (update) {
+          this.sendUpdateEvent();
+        } else {
+          this.emit('refresh');
+        }
         return this.tasks;
       }
     }

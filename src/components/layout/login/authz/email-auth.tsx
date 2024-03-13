@@ -6,7 +6,7 @@ import { ILoginViaMail, loginViaMailSchema } from 'src/schema/authz';
 
 import { AuthWrapper } from '@/components/layout/login/authz/auth-wrapper.tsx';
 import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form.tsx';
-import { Input } from '@/components/ui/input.tsx';
+import { Input } from '@/components/ui/input';
 
 interface IEmailAuthProps extends React.ComponentPropsWithoutRef<'div'> {
   onFinished?: () => void;

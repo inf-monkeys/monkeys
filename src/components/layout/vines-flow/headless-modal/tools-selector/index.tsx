@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { ToolLists } from '@/components/layout/vines-flow/headless-modal/tools-selector/list.tsx';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input.tsx';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { VinesToolDef, VinesToolWithCategory } from '@/package/vines-flow/core/tools/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';

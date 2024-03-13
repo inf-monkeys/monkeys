@@ -1,14 +1,15 @@
 import * as React from 'react';
 
-import { cn } from '@/utils/index.ts';
+import { cn } from '@/utils';
 
 export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   onChange?: (value: string) => void;
   onEnterPress?: () => void;
+  onDelPress?: () => void;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, onChange, onEnterPress, type, ...props }, ref) => {
+  ({ className, onChange, onEnterPress, onDelPress, type, ...props }, ref) => {
     return (
       <input
         type={type}
@@ -18,13 +19,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         ref={ref}
         onChange={(e) => onChange?.(e.target.value)}
-        onKeyDown={
-          onEnterPress
-            ? (key) => {
-                key.key === 'Enter' && onEnterPress();
-              }
-            : undefined
-        }
+        onKeyDown={(key) => {
+          if (key.key === 'Enter') {
+            onEnterPress?.();
+          }
+          if (key.key === 'Backspace' && key.currentTarget.value === '') {
+            onDelPress?.();
+          }
+        }}
         {...props}
       />
     );

@@ -9,7 +9,7 @@ import { createTeam, useTeams } from '@/apis/authz/team';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form.tsx';
-import { Input } from '@/components/ui/input.tsx';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { Tooltip } from '@/components/ui/tooltip';
 import { createTeamSchema, ICreateTeam } from '@/schema/settings/team.ts';
