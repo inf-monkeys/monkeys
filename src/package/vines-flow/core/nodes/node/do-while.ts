@@ -11,6 +11,7 @@ import {
   VinesSVGPosition,
 } from '@/package/vines-flow/core/nodes/svg-utils.ts';
 import { IVinesCollectDoWhileOutputTaskDef, IVinesNodePosition } from '@/package/vines-flow/core/nodes/typings.ts';
+import { IVinesVariable, VinesVariableMapper } from '@/package/vines-flow/core/tools/typings.ts';
 import { IVinesInsertChildParams } from '@/package/vines-flow/core/typings.ts';
 import { createTask } from '@/package/vines-flow/core/utils.ts';
 import VinesEvent from '@/utils/events';
@@ -322,4 +323,30 @@ export class DoWhileNode extends ControlFlowVinesNode<DoWhileTaskDef> {
 
     return super.destroy();
   }
+
+  // region Variables
+  override variable(): { variables: IVinesVariable[]; mapper: VinesVariableMapper } {
+    const { variables, mapper } = super.variable();
+
+    const extraVariables = this._vinesCore.generateVariable(
+      this.id,
+      [
+        {
+          name: '',
+          type: 'string',
+          displayName: '循环结果',
+        },
+      ],
+      '${{target}.output}',
+      '$.{target}[*]',
+    );
+    const extraMapper = this._vinesCore.generateVariableMapper(extraVariables, this.customData?.title ?? '循环');
+
+    return {
+      variables: [...variables, ...extraVariables],
+      mapper: new Map([...mapper, ...extraMapper]),
+    };
+  }
+
+  // endregion
 }

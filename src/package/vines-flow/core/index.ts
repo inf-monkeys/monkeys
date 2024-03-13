@@ -2,7 +2,7 @@ import { MonkeyTaskDefTypes } from '@inf-monkeys/vines';
 import { toast } from 'sonner';
 
 import { VinesBase } from '@/package/vines-flow/core/base';
-import { VINES_DEF_NODE } from '@/package/vines-flow/core/consts.ts';
+import { VINES_DEF_NODE, VINES_ENV_VARIABLES } from '@/package/vines-flow/core/consts.ts';
 import { EndPointNode, VinesNode } from '@/package/vines-flow/core/nodes';
 import {
   IVinesNodePosition,
@@ -11,7 +11,12 @@ import {
   VinesTask,
 } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesTools } from '@/package/vines-flow/core/tools';
-import { VinesToolDef, VinesVariable } from '@/package/vines-flow/core/tools/typings.ts';
+import {
+  IVinesVariable,
+  VinesToolDef,
+  VinesVariableMapper,
+  VinesWorkflowVariable,
+} from '@/package/vines-flow/core/tools/typings.ts';
 import { IVinesFlowRenderOptions, IVinesFlowRenderType, IVinesMode } from '@/package/vines-flow/core/typings.ts';
 import { createTask } from '@/package/vines-flow/core/utils.ts';
 import VinesEvent from '@/utils/events';
@@ -25,7 +30,7 @@ export class VinesCore extends VinesTools(VinesBase) {
 
   public tasks: MonkeyTaskDefTypes[] = [];
 
-  public variables: VinesVariable[] = [];
+  public variables: VinesWorkflowVariable[] = [];
 
   public mode: IVinesMode = IVinesMode.EDIT;
 
@@ -347,6 +352,37 @@ export class VinesCore extends VinesTools(VinesBase) {
   // endregion
 
   // region Variables
+  public getWorkflowVariables(): { variables: IVinesVariable[]; mapper: VinesVariableMapper } {
+    const nodes = this.getAllNodes().filter((it) => !(it instanceof EndPointNode) && !it.isFake);
+    const nodesVariables: IVinesVariable[] = [];
+    let nodesVariablesMapper: VinesVariableMapper = new Map();
 
+    for (const node of nodes) {
+      const { variables, mapper } = node.variable();
+      nodesVariables.push(...variables);
+      nodesVariablesMapper = new Map([...nodesVariablesMapper, ...mapper]);
+    }
+
+    const workflowInputVariable = this.generateVariable(
+      'workflow',
+      this.variables,
+      '${{target}.input.{variable}}',
+      '$.{target}.input.{variable}',
+    );
+    const workflowInputVariableMapper = this.generateVariableMapper(workflowInputVariable, '工作流输入');
+
+    const workflowEnvVariable = this.generateVariable(
+      'workflow.input',
+      VINES_ENV_VARIABLES,
+      '${{target}.__context.{variable}}',
+      '$.{target}.__context.{variable}',
+    );
+    const workflowEnvVariableMapper = this.generateVariableMapper(workflowEnvVariable, '环境变量');
+
+    return {
+      variables: [...workflowInputVariable, ...workflowEnvVariable, ...nodesVariables],
+      mapper: new Map([...workflowInputVariableMapper, ...workflowEnvVariableMapper, ...nodesVariablesMapper]),
+    };
+  }
   // endregion
 }

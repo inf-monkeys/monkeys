@@ -11,11 +11,14 @@ import {
   TOOL_CATEGORY_SORT_INDEX_LIST,
 } from '@/package/vines-flow/core/tools/consts.ts';
 import {
+  IVinesVariable,
   VinesToolDef,
   VinesToolDefProperties,
   VinesToolWithCategory,
+  VinesVariableMapper,
 } from '@/package/vines-flow/core/tools/typings.ts';
 import { Constructor, VINES_STATUS } from '@/package/vines-flow/core/typings.ts';
+import { format } from '@/utils/string-template.ts';
 
 export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
   return class extends Base {
@@ -128,5 +131,64 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
         (a, b) => TOOL_CATEGORY_SORT_INDEX_LIST.indexOf(a[2]) - TOOL_CATEGORY_SORT_INDEX_LIST.indexOf(b[2]),
       );
     }
+
+    // region Variable
+    public generateVariable(
+      targetId: string,
+      defs: VinesToolDefProperties[],
+      nameTemplate = '${{target}.output.{variable}}',
+      jsonpathTemplate = '$.{target}[*].{variable}',
+      prev = '',
+      prevIsMultipleValues = false,
+    ): IVinesVariable[] {
+      return defs.map(({ name, displayName, type, properties, typeOptions }) => {
+        const isMultipleValues = prev && prevIsMultipleValues;
+        const finalPrevOriginName = isMultipleValues ? prev.slice(0, -1) + '[0].' : prev;
+        const finalName = format(nameTemplate, { target: targetId, variable: finalPrevOriginName + name });
+        const finalJsonpath = format(jsonpathTemplate, { target: targetId, variable: finalPrevOriginName + name });
+
+        return {
+          name: finalName,
+          jsonpath: finalJsonpath,
+          originalName: finalPrevOriginName + name,
+          displayName,
+          type,
+          targetId,
+          children: properties
+            ? this.generateVariable(
+                targetId,
+                properties,
+                nameTemplate,
+                jsonpathTemplate,
+                `${name}.`,
+                get(typeOptions, 'multipleValues', false),
+              )
+            : [],
+        } as IVinesVariable;
+      });
+    }
+
+    public generateVariableMapper(defs: IVinesVariable[], nodeName: string): VinesVariableMapper {
+      const mapper: VinesVariableMapper = new Map();
+
+      for (const def of defs.flatMap((it) => [it, it.children]).flat()) {
+        if (!def) continue;
+        const { name, type, displayName, jsonpath, originalName } = def;
+        const variableDisplayName = `${nodeName}的${displayName}`;
+        mapper.set(name, {
+          name: originalName,
+          displayName: variableDisplayName,
+          type,
+        });
+        mapper.set(jsonpath, {
+          name: jsonpath,
+          displayName: variableDisplayName,
+          type,
+        });
+      }
+
+      return mapper;
+    }
+    // endregion
   };
 }

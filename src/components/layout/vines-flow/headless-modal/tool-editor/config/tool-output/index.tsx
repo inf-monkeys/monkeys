@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { useVinesFlow } from '@/package/vines-flow';
 import { VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
 
 interface IToolOutputProps {
@@ -8,5 +9,9 @@ interface IToolOutputProps {
 }
 
 export const ToolOutput: React.FC<IToolOutputProps> = ({ tool, nodeId }) => {
+  const { vines } = useVinesFlow();
+
+  console.log(vines.getWorkflowVariables());
+
   return <></>;
 };
