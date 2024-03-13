@@ -12,7 +12,7 @@ import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form.tsx';
-import { Input } from '@/components/ui/input.tsx';
+import { Input } from '@/components/ui/input';
 import { PHONE_REGEX, VERIFY_CODE_REGEX } from '@/consts/authz';
 import { IToggleAccountViaSms, toggleAccountViaSmsSchema } from '@/schema/authz/toggle-account.ts';
 import { maskEmail, maskPhone } from '@/utils/maskdata.ts';

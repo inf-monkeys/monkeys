@@ -8,7 +8,7 @@ import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { JoinPublicTeamItem } from '@/components/layout/settings/account/team/join-public-team/team-item.tsx';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input.tsx';
+import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Spinner } from '@/components/ui/spinner';
 import { Tooltip } from '@/components/ui/tooltip';

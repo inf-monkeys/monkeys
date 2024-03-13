@@ -10,7 +10,7 @@ import { sendSmsVerifyCode } from '@/apis/authz';
 import { AuthWrapper } from '@/components/layout/login/authz/auth-wrapper.tsx';
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form.tsx';
-import { Input } from '@/components/ui/input.tsx';
+import { Input } from '@/components/ui/input';
 import { PHONE_REGEX } from '@/consts/authz';
 
 interface IPhoneAuthProps extends React.ComponentPropsWithoutRef<'div'> {

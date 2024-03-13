@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { cloneDeep, omit, set } from 'lodash';
 import { toast } from 'sonner';
 
-import { Input } from '@/components/ui/input.tsx';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label.tsx';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';

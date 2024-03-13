@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import { useForceUpdate } from 'framer-motion';
 import { toast } from 'sonner';
 
 import { ToolConfig } from '@/components/layout/vines-flow/headless-modal/tool-editor/config';
@@ -18,6 +19,8 @@ interface IToolEditorProps extends React.ComponentPropsWithoutRef<'div'> {}
 export const ToolEditor: React.FC<IToolEditorProps> = () => {
   const { workflowId } = useFlowStore();
   const { vines } = useVinesFlow();
+
+  const [forceUpdate] = useForceUpdate();
 
   const [node, setNode] = useState<VinesNode>();
   const [open, setOpen] = useState(false);
@@ -65,7 +68,7 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
             <TabsTrigger value="more-config">高级配置</TabsTrigger>
           </TabsList>
           <TabsContent className="mt-4 h-[25em]" value="config">
-            <ToolConfig node={node} />
+            <ToolConfig node={node} forceUpdate={forceUpdate} />
           </TabsContent>
           <TabsContent className="mt-4 h-[25em]" value="dev">
             <CodeEditor data={task} lineNumbers={4} onUpdate={handleRawUpdate} />

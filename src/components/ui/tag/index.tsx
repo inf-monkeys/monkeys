@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import './index.scss';
 
@@ -89,7 +89,7 @@ const Tag = React.forwardRef<HTMLDivElement, TagProps>(
   ) => {
     const [intoVisible, setIntoVisible] = useState(visible);
 
-    useMemo(() => setIntoVisible(visible), [visible]);
+    useEffect(() => setIntoVisible(visible), [visible]);
 
     return (
       <div
