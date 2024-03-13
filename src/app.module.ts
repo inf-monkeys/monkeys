@@ -10,9 +10,9 @@ import { ComfyuiModule } from './modules/comfyui/comfyui.module';
 import { ExportModule } from './modules/export/export.module';
 import { GatewaysModule } from './modules/gateways/gateways.module';
 import { CronJobModule } from './modules/infra/cron/cron.module';
-import { OpenapiModule } from './modules/openapi/openapi.module';
 import { ToolsModule } from './modules/tools/tools.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
+import { OpenapiModule } from './openapi.module';
 import { RepositoryMoule } from './repositories/repositories.module';
 
 @Module({

@@ -131,4 +131,8 @@ export class ToolsRegistryService {
 
     await this.toolsRepository.createOrUpdateTools('system', builtInBlocks);
   }
+
+  public async listTools() {
+    return await this.toolsRepository.listTools();
+  }
 }

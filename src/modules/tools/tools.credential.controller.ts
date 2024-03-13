@@ -5,12 +5,12 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateCredentialDto } from './dto/req/create-credential.dto';
 import { ListCredentialsDto } from './dto/req/list-credentials.dto';
 import { UpdateCredentialDto } from './dto/req/update-credential.dto';
-import { CredentialsService } from './tools.credential.service';
+import { ToolsCredentialsService } from './tools.credential.service';
 
 @Controller('')
-@ApiTags('Credentials')
-export class CredentialsController {
-  constructor(private readonly service: CredentialsService) {}
+@ApiTags('Tools/Credentials')
+export class ToolsCredentialsController {
+  constructor(private readonly service: ToolsCredentialsService) {}
 
   @Get('/credential-types')
   @ApiOperation({

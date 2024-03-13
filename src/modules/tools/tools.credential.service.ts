@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { CredentialsRepository } from '../../repositories/credential.repository';
 
 @Injectable()
-export class CredentialsService {
+export class ToolsCredentialsService {
   constructor(private readonly credentialsRepository: CredentialsRepository) {}
 
   public async getCredentialType(name: string) {
