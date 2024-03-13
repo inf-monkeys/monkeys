@@ -4,7 +4,7 @@ import { BlockDefPropertyTypeOptions, BlockDefPropertyTypes } from '@inf-monkeys
 import { debounce, get, isEmpty, isNumber, isString, omit } from 'lodash';
 
 import { BlankInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/blank.tsx';
-import { InputPropertyWrapper } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/InputPropertyWrapper.tsx';
+import { InputPropertyWrapper } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/wrapper.tsx';
 import { VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
 export interface IVinesInputPropertyProps {

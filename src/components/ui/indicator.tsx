@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 
 import { cn } from '@/utils';
 
@@ -6,7 +6,7 @@ interface IIndicatorProps extends React.ComponentPropsWithoutRef<'div'> {
   dot?: boolean;
 }
 
-export const Indicator = React.forwardRef<HTMLDivElement, IIndicatorProps>(
+export const Indicator = forwardRef<HTMLDivElement, IIndicatorProps>(
   ({ children, className, dot = true, ...props }, ref) => {
     return (
       <div ref={ref} className={cn('relative inline-flex', className)} {...props}>
@@ -21,3 +21,5 @@ export const Indicator = React.forwardRef<HTMLDivElement, IIndicatorProps>(
     );
   },
 );
+
+Indicator.displayName = 'Indicator';

@@ -6,16 +6,17 @@ import { ToolOutput } from '@/components/layout/vines-flow/headless-modal/tool-e
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
+import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 
 interface INodeConfigProps {
   node?: VinesNode;
-  forceUpdate?: () => void;
 }
 
-export const ToolConfig: React.FC<INodeConfigProps> = ({ node, forceUpdate }) => {
+export const ToolConfig: React.FC<INodeConfigProps> = ({ node }) => {
   const { vines } = useVinesFlow();
 
+  const workflowVersion = vines.version ?? 1;
   const task = node?.getRaw();
   const toolName = task?.name ?? '';
 
@@ -31,10 +32,15 @@ export const ToolConfig: React.FC<INodeConfigProps> = ({ node, forceUpdate }) =>
         </div>
       ) : (
         <ResizablePanelGroup direction="horizontal">
-          <ResizablePanel minSize={50} className="flex flex-1 flex-col gap-4 overflow-y-auto pl-4 pr-2">
+          <ResizablePanel minSize={50} className="flex flex-1 flex-col gap-2 overflow-y-auto pl-4 pr-2">
             <h1 className="text-base font-bold">输入</h1>
             <ScrollArea className="h-[calc(100%-1.5rem)] pr-2">
-              <ToolInput node={node} tool={tool} />
+              <ToolInput
+                node={node}
+                tool={tool}
+                workflowVersion={workflowVersion}
+                updateRaw={(nodeId: string, task: VinesTask, update: boolean) => vines.updateRaw(nodeId, task, update)}
+              />
             </ScrollArea>
           </ResizablePanel>
           <ResizableHandle withHandle />
