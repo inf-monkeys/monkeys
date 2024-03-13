@@ -9,23 +9,22 @@ import {
   calculateDisplayInputs,
   getPropertyValueFromTask,
 } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/utils.ts';
-import { useVinesFlow } from '@/package/vines-flow';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
+import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesToolDef, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 import { VARIABLE_REGEXP } from '@/package/vines-flow/core/utils.ts';
 
 interface IToolInputProps {
   tool?: VinesToolDef;
+  updateRaw?: (nodeId: string, task: VinesTask, update: boolean) => void;
+  workflowVersion?: number;
   node?: VinesNode;
 }
 
-export const ToolInput: React.FC<IToolInputProps> = ({ tool, node }) => {
-  const { vines } = useVinesFlow();
-
-  const workflowVersion = vines.version ?? 1;
+export const ToolInput: React.FC<IToolInputProps> = ({ node, tool, updateRaw, workflowVersion = 1 }) => {
   const nodeId = node?.id ?? '';
   const task = node?.getRaw();
-  const input = vines?.getTool(task?.name ?? '')?.input;
+  const input = tool?.input;
 
   const inputParams = get(task, 'inputParameters', {});
   const finalInputs = calculateDisplayInputs(input ?? [], inputParams);
@@ -62,11 +61,11 @@ export const ToolInput: React.FC<IToolInputProps> = ({ tool, node }) => {
       set(newTask, `inputParameters.${name}`, value);
     }
 
-    vines.updateRaw(nodeId, newTask, false);
+    updateRaw?.(nodeId, newTask, false);
   };
 
   return (
-    <div className="flex flex-col gap-4 px-1">
+    <div className="flex flex-col gap-4 px-1 py-2">
       {finalInputs?.map((def, index) => (
         <VinesInputProperty
           key={index}

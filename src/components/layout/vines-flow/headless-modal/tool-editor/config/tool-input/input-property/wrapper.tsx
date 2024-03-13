@@ -4,6 +4,7 @@ import { Info, RefreshCcw } from 'lucide-react';
 
 import { useWorkflowValidation } from '@/apis/workflow/validation';
 import { Button } from '@/components/ui/button';
+import { Indicator } from '@/components/ui/indicator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VINES_VARIABLE_TAG } from '@/package/vines-flow/core/tools/consts.ts';
 import { VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
@@ -50,15 +51,17 @@ export const InputPropertyWrapper: React.FC<IInputPropertyWrapperProps> = ({
           <div className="flex items-center gap-2">
             <Tooltip open={tipsOpen} onOpenChange={(val) => tips && setTipsOpen(val)}>
               <TooltipTrigger asChild>
-                <div
-                  className="text-xxs cursor-default select-none whitespace-nowrap rounded-sm px-1 py-1 font-bold leading-none shadow-inner"
-                  style={{
-                    backgroundColor: (isMultiple ? tag?.multipleColor : tag?.color) ?? '#2b2e35',
-                  }}
-                >
-                  {tag?.name ?? type}
-                  {isMultiple ? '列表' : ''}
-                </div>
+                <Indicator dot={!hasValue && required}>
+                  <div
+                    className="text-xxs cursor-default select-none whitespace-nowrap rounded-sm px-1 py-1 font-bold leading-none shadow-inner"
+                    style={{
+                      backgroundColor: (isMultiple ? tag?.multipleColor : tag?.color) ?? '#2b2e35',
+                    }}
+                  >
+                    {tag?.name ?? type}
+                    {isMultiple ? '列表' : ''}
+                  </div>
+                </Indicator>
               </TooltipTrigger>
               <TooltipContent>{tips}</TooltipContent>
             </Tooltip>
