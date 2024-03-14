@@ -30,17 +30,17 @@ export const VINES_DEF_NODE = {
 
 export const VINES_ENV_VARIABLES: VinesToolDefProperties[] = [
   {
-    name: 'userId',
+    name: '__context.userId',
     displayName: '用户 ID',
     type: 'string',
   },
   {
-    name: 'teamId',
+    name: '__context.teamId',
     displayName: '团队 ID',
     type: 'string',
   },
   {
-    name: 'chatSessionId',
+    name: '__context.chatSessionId',
     displayName: '会话 ID',
     type: 'string',
   },
