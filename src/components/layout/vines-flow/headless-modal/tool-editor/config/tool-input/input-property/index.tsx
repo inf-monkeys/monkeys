@@ -9,6 +9,7 @@ import { CollectionInput } from '@/components/layout/vines-flow/headless-modal/t
 import { EditorInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/editor.tsx';
 import { FileInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/file.tsx';
 import { MultiFieldObjectInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/multi-field-object.tsx';
+import { NoticeInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/notice.tsx';
 import { NumberInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/number.tsx';
 import { OptionsInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/options.tsx';
 import { StringInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/string.tsx';
@@ -175,6 +176,7 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
       {hasCollectionInput && type !== 'file' && <CollectionInput {...finalProps} />}
 
       {isBlankInput && <BlankInput {...finalProps} />}
+      {hasNotice && <NoticeInput {...finalProps} />}
     </InputPropertyWrapper>
   );
 };
