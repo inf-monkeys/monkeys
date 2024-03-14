@@ -6,6 +6,7 @@ import { debounce, get, isEmpty, isNumber, isString } from 'lodash';
 import { BlankInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/blank.tsx';
 import { BooleanInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/boolean.tsx';
 import { EditorInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/editor.tsx';
+import { NumberInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/number.tsx';
 import { StringInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/string.tsx';
 import { InputPropertyWrapper } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/wrapper.tsx';
 import { IVinesVariableMap, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
@@ -133,6 +134,7 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
 
       {hasStringInput && <StringInput {...finalProps} />}
       {hasBooleanInput && <BooleanInput {...finalProps} />}
+      {hasNumberInput && <NumberInput {...finalProps} />}
 
       {isBlankInput && <BlankInput {...finalProps} />}
     </InputPropertyWrapper>
