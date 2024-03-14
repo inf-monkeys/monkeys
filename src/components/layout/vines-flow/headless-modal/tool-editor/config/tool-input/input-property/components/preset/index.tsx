@@ -5,6 +5,7 @@ import { get } from 'lodash';
 
 import { IVinesInputPropertyProps } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property';
 import { ComfyuiModelPresets } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/comfyui-model.tsx';
+import { LlmModelPresets } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/llm-model.tsx';
 import { SdModelPresets } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/sd-model.tsx';
 
 export interface IVinesInputPresetProps {
@@ -22,6 +23,7 @@ export const PresetInput: React.FC<IVinesInputPropertyProps & IVinesInputPresetP
   return (
     <div className="relative min-h-8">
       {assetType === 'sd-model' && <SdModelPresets {...childProps} />}
+      {assetType === 'llm-model' && <LlmModelPresets {...childProps} />}
 
       {assetType?.startsWith('comfyui-model') && <ComfyuiModelPresets {...childProps} />}
     </div>
