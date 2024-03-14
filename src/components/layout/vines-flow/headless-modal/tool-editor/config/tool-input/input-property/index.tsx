@@ -10,6 +10,7 @@ import { NumberInput } from '@/components/layout/vines-flow/headless-modal/tool-
 import { OptionsInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/options.tsx';
 import { StringInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/string.tsx';
 import { InputPropertyWrapper } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/wrapper.tsx';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { IVinesVariableMap, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
 export interface IVinesInputPropertyProps {
@@ -113,9 +114,9 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
   };
 
   const handleOnRadioChange = useCallback(
-    (it) => {
+    (it: string) => {
       void (!assetType && onChange?.(null));
-      setTimeout(() => setComponentMode(it.target.value));
+      setTimeout(() => setComponentMode(it as 'component' | 'input'));
     },
     [assetType],
   );
@@ -130,6 +131,34 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
       headerVisible={type !== 'notice'}
       isMultiple={isMultipleValues}
       hasValue={hasValue}
+      headerExtra={
+        type === 'file' ? (
+          <Tabs value={componentMode} onValueChange={handleOnRadioChange}>
+            <TabsList className="!h-6">
+              <TabsTrigger value="component" className="text-xxs !py-1">
+                文件上传
+              </TabsTrigger>
+              <TabsTrigger value="input" className="text-xxs !py-1">
+                变量输入
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        ) : (
+          (isPureCollection || assetType) &&
+          assetType !== 'fork-join-branch' && (
+            <Tabs value={componentMode} onValueChange={handleOnRadioChange}>
+              <TabsList className="!h-6">
+                <TabsTrigger value="component" className="text-xxs !py-1">
+                  {assetType ? '变量输入' : '列表'}
+                </TabsTrigger>
+                <TabsTrigger value="input" className="text-xxs !py-1">
+                  {assetType ? '预置选项' : '变量输入'}
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          )
+        )
+      }
     >
       {enableEditor && <EditorInput disabled={disabled} {...finalProps} />}
 
