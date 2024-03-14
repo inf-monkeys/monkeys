@@ -8,6 +8,7 @@ import { BooleanInput } from '@/components/layout/vines-flow/headless-modal/tool
 import { CollectionInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/collection.tsx';
 import { EditorInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/editor.tsx';
 import { FileInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/file.tsx';
+import { MultiFieldObjectInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/multi-field-object.tsx';
 import { NumberInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/number.tsx';
 import { OptionsInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/options.tsx';
 import { StringInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/string.tsx';
@@ -163,6 +164,7 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
       }
     >
       {enableEditor && <EditorInput disabled={disabled} {...finalProps} />}
+      {isMultiFieldObject && <MultiFieldObjectInput {...finalProps} />}
 
       {hasStringInput && <StringInput {...finalProps} />}
       {hasBooleanInput && <BooleanInput {...finalProps} />}
