@@ -403,8 +403,8 @@ export class VinesCore extends VinesTools(VinesBase) {
       },
       'workflow.input',
       VINES_ENV_VARIABLES,
-      '${{target}.__context.{variable}}',
-      '$.{target}.__context.{variable}',
+      '${{target}.{variable}}',
+      '$.{target}.{variable}',
     );
     const workflowEnvVariableMapper = this.generateVariableMapper(workflowEnvVariable, '环境变量');
 
