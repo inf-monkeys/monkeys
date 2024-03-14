@@ -19,14 +19,13 @@ export type VinesWorkflowVariable = Pick<
   'name' | 'type' | 'displayName' | 'typeOptions' | 'default'
 >;
 
-export type VinesVariableMapper = Map<
-  string,
-  {
-    name: string;
-    displayName: string;
-    type: BlockDefPropertyTypes;
-  }
->;
+export interface IVinesVariableMap {
+  name: string;
+  displayName: string;
+  type: BlockDefPropertyTypes;
+}
+
+export type VinesVariableMapper = Map<string, IVinesVariableMap>;
 
 export interface IVinesVariable {
   targetId: string;

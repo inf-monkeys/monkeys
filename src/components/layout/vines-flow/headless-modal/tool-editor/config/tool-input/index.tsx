@@ -11,17 +11,24 @@ import {
 } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/utils.ts';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
-import { VinesToolDef, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
+import { IVinesVariableMap, VinesToolDef, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 import { VARIABLE_REGEXP } from '@/package/vines-flow/core/utils.ts';
 
 interface IToolInputProps {
   tool?: VinesToolDef;
   updateRaw?: (nodeId: string, task: VinesTask, update: boolean) => void;
   workflowVersion?: number;
+  variableMapper: Record<string, IVinesVariableMap>;
   node?: VinesNode;
 }
 
-export const ToolInput: React.FC<IToolInputProps> = ({ node, tool, updateRaw, workflowVersion = 1 }) => {
+export const ToolInput: React.FC<IToolInputProps> = ({
+  node,
+  tool,
+  updateRaw,
+  variableMapper,
+  workflowVersion = 1,
+}) => {
   const nodeId = node?.id ?? '';
   const task = node?.getRaw();
   const input = tool?.input;
@@ -74,6 +81,7 @@ export const ToolInput: React.FC<IToolInputProps> = ({ node, tool, updateRaw, wo
           workflowVersion={workflowVersion}
           value={getPropertyValueFromTask(def, task, !isSpecialNode)}
           onChange={(value: unknown) => handleUpdate(value, def)}
+          variableMapper={variableMapper}
         />
       ))}
     </div>

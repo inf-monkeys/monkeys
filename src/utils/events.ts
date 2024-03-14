@@ -15,7 +15,8 @@ export type FlowEventType =
   | 'flow-tool-editor'
   | 'flow-delete-node'
   | 'flow-start-tool'
-  | 'flow-end-tool';
+  | 'flow-end-tool'
+  | 'flow-variable-selector';
 export type EventType = AppEventType | FlowCanvasEventType | FlowEventType;
 
 const VinesEvent = new EventEmitter<EventType>();

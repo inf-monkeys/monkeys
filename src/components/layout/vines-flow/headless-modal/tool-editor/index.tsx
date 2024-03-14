@@ -33,6 +33,7 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
       setOpen(true);
       nodeIdRef.current = nodeId;
       setNode(vines.getNodeById(nodeId));
+      vines.generateWorkflowVariables();
       setActiveTab('empty');
       setTimeout(() => setActiveTab('config'));
     };
