@@ -12,6 +12,7 @@ import { MultiFieldObjectInput } from '@/components/layout/vines-flow/headless-m
 import { NoticeInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/notice.tsx';
 import { NumberInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/number.tsx';
 import { OptionsInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/options.tsx';
+import { PresetInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset';
 import { StringInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/string.tsx';
 import { InputPropertyWrapper } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/wrapper.tsx';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
@@ -30,19 +31,20 @@ export interface IVinesInputPropertyProps {
 export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) => {
   const { def, nodeId, workflowVersion, disabled } = props;
   const { onChange, value, ...childProps } = props;
-  const [type, isMultipleValues, enableEditor, isPureCollection, isMultiFieldObject, assetType] = useMemo(() => {
-    const options = get(def, 'typeOptions', {}) as BlockDefPropertyTypeOptions;
-    const type = get(def, 'type', 'string') as BlockDefPropertyTypes;
-    const isMultipleValues = get(options, 'multipleValues', false);
-    const isMultiFieldObject = get(options, 'multiFieldObject', false);
-    const enableEditor = get(options, 'editor', null) === 'code' || (type === 'json' && !isMultiFieldObject);
+  const [type, typeOptions, isMultipleValues, enableEditor, isPureCollection, isMultiFieldObject, assetType] =
+    useMemo(() => {
+      const options = get(def, 'typeOptions', {}) as BlockDefPropertyTypeOptions;
+      const type = get(def, 'type', 'string') as BlockDefPropertyTypes;
+      const isMultipleValues = get(options, 'multipleValues', false);
+      const isMultiFieldObject = get(options, 'multiFieldObject', false);
+      const enableEditor = get(options, 'editor', null) === 'code' || (type === 'json' && !isMultiFieldObject);
 
-    const isPureCollection =
-      (['string', 'boolean', 'number', 'file'].includes(type) && isMultipleValues) || type === 'file';
-    const assetType = get(options, 'assetType', null);
+      const isPureCollection =
+        (['string', 'boolean', 'number', 'file'].includes(type) && isMultipleValues) || type === 'file';
+      const assetType = get(options, 'assetType', null);
 
-    return [type, isMultipleValues, enableEditor, isPureCollection, isMultiFieldObject, assetType];
-  }, [def]);
+      return [type, options, isMultipleValues, enableEditor, isPureCollection, isMultiFieldObject, assetType];
+    }, [def]);
 
   const [componentMode, setComponentMode] = useState<'component' | 'input'>('component');
 
@@ -174,6 +176,14 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
       {hasFileInput && <FileInput {...finalProps} />}
 
       {hasCollectionInput && type !== 'file' && <CollectionInput {...finalProps} />}
+      {hasPresetOptions && (
+        <PresetInput
+          typeOptions={typeOptions}
+          componentMode={componentMode}
+          setComponentMode={setComponentMode}
+          {...finalProps}
+        />
+      )}
 
       {isBlankInput && <BlankInput {...finalProps} />}
       {hasNotice && <NoticeInput {...finalProps} />}
