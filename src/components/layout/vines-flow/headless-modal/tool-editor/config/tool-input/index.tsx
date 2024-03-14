@@ -1,6 +1,5 @@
 import React from 'react';
 
-import data from '@emoji-mart/data';
 import { cloneDeep, get, set } from 'lodash';
 import { toast } from 'sonner';
 
@@ -45,7 +44,7 @@ export const ToolInput: React.FC<IToolInputProps> = ({
       const keyType = keyDef.type;
       if (keyType === 'number') {
         if (!isNaN(Number(value)) && !VARIABLE_REGEXP.test(value as string)) {
-          value = Number(data);
+          value = Number(value);
         }
       } else if (['jsonObject', 'nestedJsonObject', 'nestedArray'].includes(keyType)) {
         try {
