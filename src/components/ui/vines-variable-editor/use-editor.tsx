@@ -184,7 +184,7 @@ export const useVariableEditor = (opt: UseVariableEditorOptions) => {
         return <VariableElement {...props} />;
       default:
         return (
-          <p className="align-middle" {...attributes}>
+          <p className="align-middle leading-tight" {...attributes}>
             {props?.children}
           </p>
         );
@@ -193,7 +193,7 @@ export const useVariableEditor = (opt: UseVariableEditorOptions) => {
 
   const renderLeaf = useCallback(
     (props: RenderLeafProps) => (
-      <span className="inline-block pt-0.5 align-middle" {...props.attributes}>
+      <span className="inline-block pt-0.5 align-middle [&_span]:mt-1" {...props.attributes}>
         {props?.children}
       </span>
     ),
@@ -267,7 +267,7 @@ export const useVariableEditor = (opt: UseVariableEditorOptions) => {
     return (
       <div
         className={cn(
-          'relative rounded-md border border-input text-sm has-[:focus-visible]:!ring-2 has-[:focus-visible]:!ring-vines-500 has-[:focus-visible]:!ring-offset-2',
+          'relative min-h-10 rounded-md border border-input text-sm has-[:focus-visible]:!ring-2 has-[:focus-visible]:!ring-vines-500 has-[:focus-visible]:!ring-offset-2 [&>div]:mt-1',
           opt.className,
         )}
       >

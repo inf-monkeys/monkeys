@@ -41,7 +41,7 @@ export const StringInput: React.FC<IVinesInputPropertyProps & IStringInputProps>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              className="absolute right-0 top-0 !scale-75 cursor-pointer opacity-50 hover:opacity-100"
+              className="absolute right-1 top-1 !scale-75 cursor-pointer opacity-50 hover:opacity-100"
               variant="borderless"
               icon={<Link2Icon />}
               onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
