@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 
-import { get, property } from 'lodash';
+import { get } from 'lodash';
 import { Link2Icon } from 'lucide-react';
 
 import { IVinesInputPropertyProps } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property';
@@ -50,7 +50,7 @@ export const StringInput: React.FC<IVinesInputPropertyProps & IStringInputProps>
                   workflowId,
                   e,
                   variableEditorRef.current.insertVariable,
-                  get(property, 'typeOptions.assemblyValueType', 'simple'),
+                  get(def, 'typeOptions.assemblyValueType', 'simple'),
                 )
               }
             />

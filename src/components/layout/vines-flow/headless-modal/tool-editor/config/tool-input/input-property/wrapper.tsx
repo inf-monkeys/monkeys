@@ -66,7 +66,9 @@ export const InputPropertyWrapper: React.FC<IInputPropertyWrapperProps> = ({
               <TooltipContent>{tips}</TooltipContent>
             </Tooltip>
             <span className="ml-1 line-clamp-1 text-sm font-bold leading-tight">{displayName}</span>
-            <span className="text-text1 pointer-events-none line-clamp-1 select-none leading-tight">{name}</span>
+            <span className="pointer-events-none line-clamp-1 select-none text-xs leading-tight text-gray-500">
+              {name}
+            </span>
           </div>
           {headerExtra}
         </div>
