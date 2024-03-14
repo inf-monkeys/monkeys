@@ -438,8 +438,22 @@ export class VinesNode<T extends VinesTask = VinesTask> {
       };
     }
 
-    const variables = this._vinesCore.generateVariable(this.id, tool.output);
-    const mapper = this._vinesCore.generateVariableMapper(variables, this.customData?.title ?? tool.displayName ?? '');
+    const customData = this.customData;
+    const nodeTitle = customData?.title ?? tool.displayName ?? '';
+    const nodeDesc = customData?.description ?? tool.description ?? '';
+    const nodeIcon = customData?.icon ?? tool.icon ?? '';
+
+    const variables = this._vinesCore.generateVariable(
+      {
+        id: this.id,
+        name: nodeTitle,
+        desc: nodeDesc,
+        icon: nodeIcon,
+      },
+      this.id,
+      tool.output,
+    );
+    const mapper = this._vinesCore.generateVariableMapper(variables, nodeTitle);
 
     return { variables, mapper };
   }

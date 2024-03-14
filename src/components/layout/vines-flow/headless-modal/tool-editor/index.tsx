@@ -17,7 +17,7 @@ import VinesEvent from '@/utils/events';
 interface IToolEditorProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ToolEditor: React.FC<IToolEditorProps> = () => {
-  const { workflowId } = useFlowStore();
+  const { workflowId, disableNodeEditorClose } = useFlowStore();
   const { vines } = useVinesFlow();
 
   const [activeTab, setActiveTab] = useState('config');
@@ -59,7 +59,7 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
   const task = (node?.getRaw() || {}) as JSONValue;
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(val) => !disableNodeEditorClose && setOpen(val)}>
       <DialogContent className="max-w-[50rem]">
         <DialogTitle asChild>
           <Header node={node} />

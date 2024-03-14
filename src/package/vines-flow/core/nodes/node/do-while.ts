@@ -328,7 +328,19 @@ export class DoWhileNode extends ControlFlowVinesNode<DoWhileTaskDef> {
   override variable(): { variables: IVinesVariable[]; mapper: VinesVariableMapper } {
     const { variables, mapper } = super.variable();
 
+    const tool = this._vinesCore.getTool(this._task?.name ?? '');
+    const customData = this.customData;
+    const nodeTitle = customData?.title ?? tool?.displayName ?? '';
+    const nodeDesc = customData?.description ?? tool?.description ?? '';
+    const nodeIcon = customData?.icon ?? tool?.icon ?? '';
+
     const extraVariables = this._vinesCore.generateVariable(
+      {
+        id: this.id,
+        name: nodeTitle,
+        desc: nodeDesc,
+        icon: nodeIcon,
+      },
       this.id,
       [
         {

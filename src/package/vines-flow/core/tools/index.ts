@@ -12,6 +12,7 @@ import {
 } from '@/package/vines-flow/core/tools/consts.ts';
 import {
   IVinesVariable,
+  IVinesVariableGroupInfo,
   VinesToolDef,
   VinesToolDefProperties,
   VinesToolWithCategory,
@@ -134,6 +135,7 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
 
     // region Variable
     public generateVariable(
+      group: IVinesVariableGroupInfo,
       targetId: string,
       defs: VinesToolDefProperties[],
       nameTemplate = '${{target}.output.{variable}}',
@@ -149,6 +151,7 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
         const isMultiple = get(typeOptions, 'multipleValues', false);
 
         return {
+          group,
           id: finalName,
           jsonpath: finalJsonpath,
           originalName: finalPrevOriginName + name,
@@ -157,7 +160,7 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
           targetId,
           isMultiple,
           children: properties
-            ? this.generateVariable(targetId, properties, nameTemplate, jsonpathTemplate, `${name}.`, isMultiple)
+            ? this.generateVariable(group, targetId, properties, nameTemplate, jsonpathTemplate, `${name}.`, isMultiple)
             : [],
         } as IVinesVariable;
       });

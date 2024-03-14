@@ -24,6 +24,12 @@ import VinesEvent from '@/utils/events';
 export class VinesCore extends VinesTools(VinesBase) {
   public workflowId: string | undefined;
 
+  public workflowIcon = 'emoji:🍀:#ceefc5';
+
+  public workflowName = '未命名应用';
+
+  public workflowDesc = '';
+
   public version = 1;
 
   public nodes: VinesNode[] = [];
@@ -71,6 +77,9 @@ export class VinesCore extends VinesTools(VinesBase) {
       workflow?.workflowId && (this.workflowId = workflow.workflowId);
       workflow?.version && (this.version = workflow.version);
       workflow?.variables && (this.workflowInput = workflow.variables);
+      workflow?.name && (this.workflowName = workflow.name);
+      workflow?.description && (this.workflowDesc = workflow.description);
+      workflow?.iconUrl && (this.workflowIcon = workflow.iconUrl);
     }
     workflowId && (this.workflowId = workflowId);
     version && (this.version = version);
@@ -372,6 +381,12 @@ export class VinesCore extends VinesTools(VinesBase) {
     }
 
     const workflowInputVariable = this.generateVariable(
+      {
+        id: 'workflow',
+        name: this.workflowName,
+        desc: this.workflowDesc,
+        icon: this.workflowIcon,
+      },
       'workflow',
       this.workflowInput,
       '${{target}.input.{variable}}',
@@ -380,6 +395,12 @@ export class VinesCore extends VinesTools(VinesBase) {
     const workflowInputVariableMapper = this.generateVariableMapper(workflowInputVariable, '工作流输入');
 
     const workflowEnvVariable = this.generateVariable(
+      {
+        id: 'workflowInput',
+        name: this.workflowName + '的环境变量',
+        desc: this.workflowDesc,
+        icon: this.workflowIcon,
+      },
       'workflow.input',
       VINES_ENV_VARIABLES,
       '${{target}.__context.{variable}}',
