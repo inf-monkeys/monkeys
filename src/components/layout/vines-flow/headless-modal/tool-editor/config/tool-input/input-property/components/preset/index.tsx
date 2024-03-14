@@ -4,7 +4,9 @@ import { BlockDefPropertyTypeOptions } from '@inf-monkeys/vines/src/models/Block
 import { get } from 'lodash';
 
 import { IVinesInputPropertyProps } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property';
+import { ComfyuiModelPresets } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/comfyui-model.tsx';
 import { SdModelPresets } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/sd-model.tsx';
+
 export interface IVinesInputPresetProps {
   typeOptions: BlockDefPropertyTypeOptions;
   componentMode: 'component' | 'input';
@@ -17,5 +19,11 @@ export const PresetInput: React.FC<IVinesInputPropertyProps & IVinesInputPresetP
 }) => {
   const assetType = get(typeOptions, 'assetType', null);
 
-  return <div className="relative min-h-8">{assetType === 'sd-model' && <SdModelPresets {...childProps} />}</div>;
+  return (
+    <div className="relative min-h-8">
+      {assetType === 'sd-model' && <SdModelPresets {...childProps} />}
+
+      {assetType?.startsWith('comfyui-model') && <ComfyuiModelPresets {...childProps} />}
+    </div>
+  );
 };

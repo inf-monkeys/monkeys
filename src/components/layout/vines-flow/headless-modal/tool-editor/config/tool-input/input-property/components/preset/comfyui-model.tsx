@@ -3,38 +3,34 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { BlockDefPropertyTypes } from '@inf-monkeys/vines';
 import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
-import { isString, uniqBy } from 'lodash';
+import { get, isString } from 'lodash';
 
-import { useBuiltInModels, useSDModels } from '@/apis/model';
+import { useComfyuiModels } from '@/apis/comfyui';
 import { IVinesInputPropertyProps } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property';
 import { IVinesInputPresetProps } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/index.tsx';
 import { StringInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/string.tsx';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { IVinesToolPropertiesOptions, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
-export const SdModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInputPresetProps, 'typeOptions'>> = (
+export const ComfyuiModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInputPresetProps, 'typeOptions'>> = (
   props,
 ) => {
   const { componentMode, setComponentMode, value, onChange, disabled, ...childProps } = props;
 
-  const { data: sdModels, isLoading: isSdModelsLoading } = useSDModels({ page: 1, limit: 9999 });
-  const { data: builtInModels, isLoading: isBuiltInModelsLoading } = useBuiltInModels();
-
-  const loading = isSdModelsLoading || isBuiltInModelsLoading;
+  const { data: comfyuiModels, isLoading } = useComfyuiModels();
 
   const [options, setOptions] = useState<IVinesToolPropertiesOptions[]>([]);
   const [optionsVariableMapper, setOptionsVariableMapper] = useState<Record<string, VinesToolDefProperties>>({});
 
   useEffect(() => {
-    if (!sdModels || !builtInModels) return;
+    if (!comfyuiModels) return;
 
-    const opts = uniqBy(
-      sdModels
-        .concat(builtInModels)
-        .filter((m) => m.modelId)
-        .map((m) => ({ name: m.name, value: m.modelId })),
-      (it) => it.value,
-    );
+    const assetType = get(childProps, 'def.typeOptions.assetType', '');
+
+    const comfyuiModel = comfyuiModels[assetType.replace('comfyui-model-', '')];
+    if (!comfyuiModel?.length) return;
+
+    const opts = comfyuiModel.map((model) => ({ name: model, value: model }));
     setOptions(opts);
 
     const newOptionsVariableMapper: Record<string, VinesToolDefProperties> = {};
@@ -43,11 +39,11 @@ export const SdModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInpu
         (newOptionsVariableMapper[optValue] = {
           displayName: name,
           name: optValue,
-          type: '图像模型' as BlockDefPropertyTypes,
+          type: '模型' as BlockDefPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);
-  }, [sdModels, builtInModels]);
+  }, [comfyuiModels]);
 
   const handleOnSelectChange = useCallback(
     (value: unknown) => {
@@ -59,7 +55,7 @@ export const SdModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInpu
 
   return (
     <AnimatePresence>
-      {!loading && Object.keys(optionsVariableMapper).length ? (
+      {!isLoading ? (
         componentMode === 'input' ? (
           <motion.div
             key="SdModelPresets_input"
