@@ -5,6 +5,7 @@ import { get } from 'lodash';
 
 import { IVinesInputPropertyProps } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property';
 import { ComfyuiModelPresets } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/comfyui-model.tsx';
+import { ForkJoinBranchPresets } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/fork-join-branch.tsx';
 import { LlmModelPresets } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/llm-model.tsx';
 import { SdModelPresets } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/sd-model.tsx';
 
@@ -24,6 +25,8 @@ export const PresetInput: React.FC<IVinesInputPropertyProps & IVinesInputPresetP
     <div className="relative min-h-8">
       {assetType === 'sd-model' && <SdModelPresets {...childProps} />}
       {assetType === 'llm-model' && <LlmModelPresets {...childProps} />}
+
+      {assetType === 'fork-join-branch' && <ForkJoinBranchPresets {...childProps} />}
 
       {assetType?.startsWith('comfyui-model') && <ComfyuiModelPresets {...childProps} />}
     </div>
