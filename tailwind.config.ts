@@ -1,6 +1,7 @@
 import type { Config } from 'tailwindcss';
 
 import tailwindcss_animate from 'tailwindcss-animate';
+import tailwindcss_typography from '@tailwindcss/typography';
 import createPlugin from 'windy-radix-palette';
 import { nextui } from '@nextui-org/theme';
 
@@ -94,7 +95,7 @@ const config = {
       },
     },
   },
-  plugins: [tailwindcss_animate, createPlugin({ opacitySupport: true }).plugin, nextui()],
+  plugins: [tailwindcss_typography, tailwindcss_animate, createPlugin({ opacitySupport: true }).plugin, nextui()],
 } satisfies Config;
 
 export default config;
