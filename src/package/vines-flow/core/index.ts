@@ -32,6 +32,10 @@ export class VinesCore extends VinesTools(VinesBase) {
 
   public workflowInput: VinesWorkflowVariable[] = [];
 
+  public variables: IVinesVariable[] = [];
+
+  public variablesMapper: VinesVariableMapper = new Map();
+
   public mode: IVinesMode = IVinesMode.EDIT;
 
   public renderOptions: IVinesFlowRenderOptions = {
@@ -383,9 +387,16 @@ export class VinesCore extends VinesTools(VinesBase) {
     );
     const workflowEnvVariableMapper = this.generateVariableMapper(workflowEnvVariable, '环境变量');
 
+    this.variables = [...workflowInputVariable, ...workflowEnvVariable, ...nodesVariables];
+    this.variablesMapper = new Map([
+      ...workflowInputVariableMapper,
+      ...workflowEnvVariableMapper,
+      ...nodesVariablesMapper,
+    ]);
+
     return {
-      variables: [...workflowInputVariable, ...workflowEnvVariable, ...nodesVariables],
-      mapper: new Map([...workflowInputVariableMapper, ...workflowEnvVariableMapper, ...nodesVariablesMapper]),
+      variables: this.variables,
+      mapper: this.variablesMapper,
     };
   }
   // endregion

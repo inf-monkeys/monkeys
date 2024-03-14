@@ -24,6 +24,8 @@ export const ToolConfig: React.FC<INodeConfigProps> = ({ node }) => {
 
   const isEmpty = !tool || (!tool?.input?.length && !tool?.output?.length);
 
+  const variableMapper = Object.fromEntries(vines.variablesMapper.entries());
+
   return (
     <main className="flex size-full overflow-clip">
       {isEmpty ? (
@@ -40,6 +42,7 @@ export const ToolConfig: React.FC<INodeConfigProps> = ({ node }) => {
                 tool={tool}
                 workflowVersion={workflowVersion}
                 updateRaw={(nodeId: string, task: VinesTask, update: boolean) => vines.updateRaw(nodeId, task, update)}
+                variableMapper={variableMapper}
               />
             </ScrollArea>
           </ResizablePanel>

@@ -5,8 +5,9 @@ import { debounce, get, isEmpty, isNumber, isString } from 'lodash';
 
 import { BlankInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/blank.tsx';
 import { EditorInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/editor.tsx';
+import { StringInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/string.tsx';
 import { InputPropertyWrapper } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/wrapper.tsx';
-import { VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
+import { IVinesVariableMap, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
 export interface IVinesInputPropertyProps {
   def: VinesToolDefProperties;
@@ -14,6 +15,7 @@ export interface IVinesInputPropertyProps {
   onChange: (value: unknown) => void;
   nodeId: string;
   workflowVersion: number;
+  variableMapper: Record<string, IVinesVariableMap>;
   disabled?: boolean;
 }
 
@@ -124,7 +126,10 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
       isMultiple={isMultipleValues}
       hasValue={hasValue}
     >
-      {enableEditor && <EditorInput value={value} onChange={handleOnChange} disabled={disabled} {...childProps} />}
+      {enableEditor && <EditorInput value={tempValue} onChange={handleOnChange} disabled={disabled} {...childProps} />}
+
+      {hasStringInput && <StringInput value={tempValue} onChange={handleOnChange} {...childProps} />}
+
       {isBlankInput && <BlankInput value={tempValue} onChange={handleOnChange} {...childProps} />}
     </InputPropertyWrapper>
   );
