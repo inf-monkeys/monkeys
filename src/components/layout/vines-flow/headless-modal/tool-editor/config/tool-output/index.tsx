@@ -28,7 +28,7 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
       className="size-full flex-shrink-0"
       data={data}
       expandAll
-      initialSelectedItemId={data?.[0].id}
+      initialSelectedItemId={data?.[0]?.id}
       leafRenderer={(it: IVinesVariable) => {
         const tag = VINES_VARIABLE_TAG[it.type];
         const isMultiple = it.isMultiple;

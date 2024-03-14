@@ -22,7 +22,8 @@ export const ToolConfig: React.FC<INodeConfigProps> = ({ node }) => {
 
   const tool = vines.getTool(toolName);
 
-  const isEmpty = !tool || (!tool?.input?.length && !tool?.output?.length);
+  const isEmptyOutput = !tool?.output?.length;
+  const isEmpty = !tool || (!tool?.input?.length && isEmptyOutput);
 
   const variableMapper = Object.fromEntries(vines.variablesMapper.entries());
 
@@ -46,13 +47,17 @@ export const ToolConfig: React.FC<INodeConfigProps> = ({ node }) => {
               />
             </ScrollArea>
           </ResizablePanel>
-          <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={40} className="flex flex-1 flex-col overflow-y-auto px-4">
-            <h1 className="line-clamp-1 text-base font-bold">输出</h1>
-            <div className="h-[calc(100%-1.5rem)]">
-              <ToolOutput nodeId={node?.id} />
-            </div>
-          </ResizablePanel>
+          {isEmptyOutput ? null : (
+            <>
+              <ResizableHandle withHandle />
+              <ResizablePanel defaultSize={40} className="flex flex-1 flex-col overflow-y-auto px-4">
+                <h1 className="line-clamp-1 text-base font-bold">输出</h1>
+                <div className="h-[calc(100%-1.5rem)]">
+                  <ToolOutput nodeId={node?.id} />
+                </div>
+              </ResizablePanel>
+            </>
+          )}
         </ResizablePanelGroup>
       )}
     </main>
