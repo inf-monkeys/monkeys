@@ -27,6 +27,13 @@ export interface IVinesVariableMap {
 
 export type VinesVariableMapper = Map<string, IVinesVariableMap>;
 
+export interface IVinesVariableGroupInfo {
+  id: string;
+  name: string; // 组名
+  desc: string; // 组描述
+  icon: string; // 组图标
+}
+
 export interface IVinesVariable {
   targetId: string;
   id: string;
@@ -35,6 +42,7 @@ export interface IVinesVariable {
   originalName: string;
   type: BlockDefPropertyTypes;
   isMultiple: boolean;
+  group: IVinesVariableGroupInfo;
   children?: IVinesVariable[];
 }
 

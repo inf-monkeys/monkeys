@@ -33,6 +33,9 @@ export interface FlowStore {
   setActiveDraggableNodeId: (activeDraggableNodeId: string) => void;
   overNodeId: string;
   setOverNodeId: (overNodeId: string) => void;
+
+  disableNodeEditorClose: boolean;
+  setDisableNodeEditorClose: (disable: boolean) => void;
 }
 
 const createFlowStore = () =>
@@ -66,6 +69,9 @@ const createFlowStore = () =>
       setActiveDraggableNodeId: (activeDraggableNodeId) => set({ activeDraggableNodeId }),
       overNodeId: '',
       setOverNodeId: (overNodeId) => set({ overNodeId }),
+
+      disableNodeEditorClose: false,
+      setDisableNodeEditorClose: (disableNodeEditorClose) => set({ disableNodeEditorClose }),
     })),
   );
 

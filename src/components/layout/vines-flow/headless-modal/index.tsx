@@ -5,6 +5,7 @@ import { EndTool } from '@/components/layout/vines-flow/headless-modal/endpoint/
 import { StartTool } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool';
 import { ToolEditor } from '@/components/layout/vines-flow/headless-modal/tool-editor';
 import { ToolsSelector } from '@/components/layout/vines-flow/headless-modal/tools-selector';
+import { VinesVariableSelector } from '@/components/layout/vines-flow/headless-modal/variable-selector';
 
 interface IVinesHeadlessModalProps {}
 
@@ -16,6 +17,7 @@ export const VinesHeadlessModal: React.FC<IVinesHeadlessModalProps> = () => {
       <ToolEditor />
       <StartTool />
       <EndTool />
+      <VinesVariableSelector />
     </div>
   );
 };
