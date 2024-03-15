@@ -148,7 +148,7 @@ export const FileList: React.FC<IFilesProps> = ({
     it.status = 'uploading';
     updateListById(fileId, it);
 
-    const existingFileUrl = (await getResourceByMd5(it.md5 as string))?.url;
+    const existingFileUrl = (await getResourceByMd5(it.md5 as string))?.data?.url;
     let ossUrl: string = '';
     if (existingFileUrl) {
       ossUrl = existingFileUrl;
