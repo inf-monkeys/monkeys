@@ -6,7 +6,7 @@ import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import os from 'os';
 import { ToolsRepository } from '../../repositories/tools.repository';
-import { WorkerInputData } from './interfaces';
+import { AuthType, WorkerInputData } from './interfaces';
 
 export const CONDUCTOR_TASK_DEF_NAME = 'monkeys';
 
@@ -35,16 +35,34 @@ export class ToolsPollingService {
     if (!server) {
       throw new Error(`Failed to execute worker "${__toolName}", may not exists or not functioning now.`);
     }
+    const { type: authType, authorization_type = 'bearer', verification_tokens = {} } = server.auth;
+    const headers: { [x: string]: string } = {
+      'x-monkeys-appid': __context.appId,
+      'x-monkeys-userid': __context.userId,
+      'x-monkeys-teamid': __context.teamId,
+    };
+    switch (authType) {
+      case AuthType.none:
+        break;
+      case AuthType.service_http:
+        if (authorization_type !== 'bearer') {
+          throw new Error(`Unsupported authorization_type: ${authorization_type}`);
+        }
+        const token = verification_tokens['monkeys'];
+        if (!token) {
+          throw new Error(`monkeys verification_token is empty`);
+        }
+        headers['authorization'] = `Bearer ${token}`;
+        break;
+      default:
+        break;
+    }
     const { data } = await axios({
       method,
       baseURL: server.baseUrl,
       url: path,
       data: rest,
-      headers: {
-        'x-monkeys-appid': __context.appId,
-        'x-monkeys-userid': __context.userId,
-        'x-monkeys-teamid': __context.teamId,
-      },
+      headers: headers,
     });
     logger.info(`Execute worker success: ${__toolName}`);
     return data;

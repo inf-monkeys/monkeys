@@ -1,17 +1,10 @@
-import { ApiType, AuthType, SchemaVersion } from '@/modules/tools/interfaces';
+import { ApiType, AuthConfig, SchemaVersion } from '@/modules/tools/interfaces';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
 export interface INodeCredentialDescription {
   name: string;
   required?: boolean;
-}
-
-export class AuthConfig {
-  @Column({
-    name: 'auth_type',
-  })
-  type: AuthType;
 }
 
 export class ApiConfig {

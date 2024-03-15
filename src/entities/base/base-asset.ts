@@ -11,6 +11,7 @@ export class BaseAssetEntity extends BaseEntity {
   @Column({
     type: 'simple-json',
     name: 'tags',
+    nullable: true,
   })
   tags?: string[];
 
@@ -60,6 +61,7 @@ export class BaseAssetEntity extends BaseEntity {
   @Column({
     name: 'public_asset_category_ids',
     type: 'simple-json',
+    nullable: true,
   })
   publicAssetCategoryIds?: string[];
 
