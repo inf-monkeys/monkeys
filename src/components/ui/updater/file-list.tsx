@@ -5,7 +5,8 @@ import { set } from 'lodash';
 import { CheckCircle2, FileCheck, FileClock, FileSearch, FileX2, Loader2, UploadCloud, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { getResourceByMd5 } from '@/apis/resources';
+import { createResource, getResourceByMd5 } from '@/apis/resources';
+import { VinesResourceImageParams, VinesResourceSource, VinesResourceType } from '@/apis/resources/typting.ts';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
@@ -17,6 +18,7 @@ import {
   coverFileSize,
   escapeFileName,
   generateUploadFilePrefix,
+  getImageSize,
   uploadFile,
 } from '@/components/ui/updater/utils.ts';
 import { cn } from '@/utils';
@@ -26,6 +28,7 @@ interface IFilesProps extends React.ComponentPropsWithoutRef<'div'> {
   setFiles: React.Dispatch<React.SetStateAction<FileWithPath[]>>;
   isUploading: boolean;
   setIsUploading: React.Dispatch<React.SetStateAction<boolean>>;
+  saveToResource?: boolean;
   onFinished?: (urls: string[]) => void;
   limit?: number;
 }
@@ -50,6 +53,7 @@ export const FileList: React.FC<IFilesProps> = ({
   isUploading,
   setIsUploading,
   onFinished,
+  saveToResource = true,
 }) => {
   const [list, setList] = useState<IFile[]>([]);
   const [hiddenList, setHiddenList] = useState<string[]>([]);
@@ -165,7 +169,23 @@ export const FileList: React.FC<IFilesProps> = ({
         updateListById(fileId, it);
       });
 
-      // TODO: 记录 MD5
+      if (saveToResource) {
+        let params: VinesResourceImageParams | undefined = void 0;
+        if (file.type.startsWith('image')) {
+          params = await getImageSize(ossUrl);
+        }
+        await createResource({
+          type: file.type as VinesResourceType,
+          md5: it.md5,
+          name: file.name,
+          source: VinesResourceSource.UPLOAD,
+          url: ossUrl,
+          tags: [],
+          categoryIds: [],
+          size: file.size,
+          params,
+        });
+      }
     }
 
     it.url = ossUrl;
