@@ -17,7 +17,7 @@ import VinesEvent from '@/utils/events.ts';
 interface IEndToolProps {}
 
 export const EndTool: React.FC<IEndToolProps> = () => {
-  const { workflowId, disableNodeEditorClose } = useFlowStore();
+  const { workflowId, disableDialogClose } = useFlowStore();
   const [open, setOpen] = useState(false);
 
   const { vines } = useVinesFlow();
@@ -46,7 +46,7 @@ export const EndTool: React.FC<IEndToolProps> = () => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={(val) => !disableNodeEditorClose && setOpen(val)}>
+    <Dialog open={open} onOpenChange={(val) => !disableDialogClose && setOpen(val)}>
       <DialogContent>
         <DialogTitle>工作流输出配置</DialogTitle>
         <WorkflowOutputConfig output={output} setOutput={setOutput} />

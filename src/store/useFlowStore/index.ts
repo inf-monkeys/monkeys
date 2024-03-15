@@ -34,8 +34,8 @@ export interface FlowStore {
   overNodeId: string;
   setOverNodeId: (overNodeId: string) => void;
 
-  disableNodeEditorClose: boolean;
-  setDisableNodeEditorClose: (disable: boolean) => void;
+  disableDialogClose: boolean;
+  setDisableDialogClose: (disable: boolean) => void;
 }
 
 const createFlowStore = () =>
@@ -70,8 +70,8 @@ const createFlowStore = () =>
       overNodeId: '',
       setOverNodeId: (overNodeId) => set({ overNodeId }),
 
-      disableNodeEditorClose: false,
-      setDisableNodeEditorClose: (disableNodeEditorClose) => set({ disableNodeEditorClose }),
+      disableDialogClose: false,
+      setDisableDialogClose: (disableDialogClose) => set({ disableDialogClose }),
     })),
   );
 
