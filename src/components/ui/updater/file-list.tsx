@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { FileWithPath } from '@mantine/dropzone';
 import { set } from 'lodash';
 import { CheckCircle2, FileCheck, FileClock, FileSearch, FileX2, Loader2, UploadCloud, XCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { getResourceByMd5 } from '@/apis/resources';
 import { Button } from '@/components/ui/button';
@@ -122,8 +123,13 @@ export const FileList: React.FC<IFilesProps> = ({
   const [uploadQueue, setUploadQueue] = useState<string[]>([]);
   const handleOnClickUpload = async () => {
     if (!isWaitToUpload) return;
+    const filteredList = finalLists.filter((it) => !/(https|http):\/\/[^\s/]+\.[^\s/]+\/\S+\.\w{2,5}/g.test(it.path));
+    if (!filteredList.length) {
+      toast.error('没有需要上传的文件');
+      return;
+    }
     setIsUploading(true);
-    setUploadQueue(finalLists.map((it) => it.id));
+    setUploadQueue(filteredList.map((it) => it.id));
     setList((prev) => prev.map((it) => ({ ...it, progress: '0' })));
   };
 
@@ -150,7 +156,7 @@ export const FileList: React.FC<IFilesProps> = ({
       const fileNameArray = file.name.split('.');
       const fileNameWithoutSuffix = fileNameArray.length > 1 ? fileNameArray.slice(0, -1).join('.') : fileNameArray[0];
       const suffix = fileNameArray.length > 1 ? fileNameArray.pop() : null;
-      const filename = `${it.id}_${escapeFileName(fileNameWithoutSuffix)}${suffix ? '.'.concat(suffix) : ''}`;
+      const filename = `workflow/${it.id}_${escapeFileName(fileNameWithoutSuffix)}${suffix ? '.'.concat(suffix) : ''}`;
 
       it.status = 'busy';
       updateListById(fileId, it);
@@ -158,6 +164,8 @@ export const FileList: React.FC<IFilesProps> = ({
         it.progress = progress.toFixed(2);
         updateListById(fileId, it);
       });
+
+      // TODO: 记录 MD5
     }
 
     it.url = ossUrl;
@@ -173,6 +181,7 @@ export const FileList: React.FC<IFilesProps> = ({
       void handleUpload();
     } else if (isUploading) {
       setTimeout(() => onFinished?.(finalLists.map((it) => it?.url ?? '').filter((it) => it)), 1000);
+      setIsUploading(false);
     }
   }, [uploadQueue]);
 
@@ -253,7 +262,9 @@ export const FileList: React.FC<IFilesProps> = ({
               <FileClock size={32} />
               <p className="text-xs">等待文件中</p>
             </>
-          ) : finalLists.every((it) => it.status === 'success') ? (
+          ) : finalLists
+              .filter((it) => !/(https|http):\/\/[^\s/]+\.[^\s/]+\/\S+\.\w{2,5}/g.test(it.path))
+              .every((it) => it.status === 'success') ? (
             <>
               <FileCheck size={32} />
               <p className="text-xs">上传成功</p>

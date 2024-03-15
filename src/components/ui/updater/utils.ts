@@ -117,3 +117,26 @@ export const uploadFile = async (file: File, filename: string, onProgress: (prog
 
   return baseUrl + filename;
 };
+
+export function getFileNameByOssUrl(url?: string) {
+  if (!url) return '未知文件';
+
+  url = decodeURIComponent(url);
+
+  const OSS_FILE_REG = /^https:\/\/static\.infmonkeys\.com\/(?:\S+\/)*(\S+\.\S+)$/;
+  const OSS_FILE_WITH_PREFIX_REG = /^https:\/\/static\.infmonkeys\.com\/(?:\S+\/)*(R\S+)_(\S+\.\S+)$/;
+  const FILE_REG = /^https?:\/\/\S+\/(?:\S+\/)*(\S+\.\S+)$/;
+
+  const isOssFile = OSS_FILE_REG.test(url);
+  const isOssFileWithPrefix = OSS_FILE_WITH_PREFIX_REG.test(url);
+  const isFile = FILE_REG.test(url);
+
+  if (!isOssFile && isFile) {
+    return FILE_REG.exec(url)![1];
+  } else if (isOssFile && !isOssFileWithPrefix) {
+    return OSS_FILE_REG.exec(url)![1];
+  } else if (isOssFileWithPrefix) {
+    return OSS_FILE_WITH_PREFIX_REG.exec(url)![2];
+  }
+  return '未知文件';
+}
