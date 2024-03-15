@@ -25,7 +25,7 @@ interface IVinesVariableSelectorProps {}
 export type VariableInsertType = 'simple' | 'jsonpath' | 'taskReferenceName';
 
 export const VinesVariableSelector: React.FC<IVinesVariableSelectorProps> = () => {
-  const { workflowId, setDisableNodeEditorClose } = useFlowStore();
+  const { workflowId, setDisableDialogClose } = useFlowStore();
 
   const { vines } = useVinesFlow();
 
@@ -62,7 +62,7 @@ export const VinesVariableSelector: React.FC<IVinesVariableSelectorProps> = () =
       insertTypeRef.current = insertType;
 
       setOpen(true);
-      setDisableNodeEditorClose(true);
+      setDisableDialogClose(true);
     };
     VinesEvent.on('flow-variable-selector', handleOpen);
     return () => {
@@ -75,7 +75,7 @@ export const VinesVariableSelector: React.FC<IVinesVariableSelectorProps> = () =
       open={open}
       onOpenChange={(val) => {
         setOpen(val);
-        setDisableNodeEditorClose(false);
+        setDisableDialogClose(false);
       }}
     >
       <PopoverTrigger asChild>
@@ -108,7 +108,7 @@ export const VinesVariableSelector: React.FC<IVinesVariableSelectorProps> = () =
                         setInsertVariablesFnRef.current(id);
                       }
                       setOpen(false);
-                      setDisableNodeEditorClose(false);
+                      setDisableDialogClose(false);
                     }}
                   >
                     {label}
