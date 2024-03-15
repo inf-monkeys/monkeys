@@ -63,6 +63,8 @@ export class VinesCore extends VinesTools(VinesBase) {
     this.nodes = this.tasks.map((it) => VinesNode.create(it, this));
     this.nodes.splice(0, 0, EndPointNode.createStart(this));
     this.nodes.push(EndPointNode.createEnd(this));
+
+    this.getAllNodes(false).map((it) => it.check());
   }
 
   public update(
