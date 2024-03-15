@@ -1,14 +1,29 @@
 import React, { useEffect, useState } from 'react';
 
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { toast } from 'sonner';
+
+import { useUpdateWorkflow } from '@/apis/workflow';
+import {
+  IVinesOutputData,
+  WorkflowOutputConfig,
+} from '@/components/layout/vines-flow/headless-modal/endpoint/end-tool/workflow-output-config';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
+import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
+import { readLocalStorageValue } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IEndToolProps {}
 
 export const EndTool: React.FC<IEndToolProps> = () => {
-  const { workflowId } = useFlowStore();
+  const { workflowId, disableNodeEditorClose } = useFlowStore();
   const [open, setOpen] = useState(false);
+
+  const { vines } = useVinesFlow();
+  const { trigger } = useUpdateWorkflow(readLocalStorageValue('vines-apikey', '', false), workflowId ?? '');
+
+  const [output, setOutput] = useState<IVinesOutputData[]>([]);
 
   useEffect(() => {
     const handleOpen = (_wid: string) => {
@@ -22,10 +37,24 @@ export const EndTool: React.FC<IEndToolProps> = () => {
     };
   }, [workflowId]);
 
+  const handleUpdate = () => {
+    toast.promise(trigger({ output, version: vines.version }), {
+      loading: '保存中...',
+      success: '保存成功',
+      error: '保存失败',
+    });
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(val) => !disableNodeEditorClose && setOpen(val)}>
       <DialogContent>
         <DialogTitle>工作流输出配置</DialogTitle>
+        <WorkflowOutputConfig output={output} setOutput={setOutput} />
+        <DialogFooter>
+          <Button variant="outline" onClick={handleUpdate}>
+            保存
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
