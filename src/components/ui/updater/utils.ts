@@ -140,3 +140,19 @@ export function getFileNameByOssUrl(url?: string) {
   }
   return '未知文件';
 }
+
+export async function getImageSize(url: string): Promise<{ width: number; height: number } | undefined> {
+  const TTL = 6000;
+  const img = new Image();
+  img.src = url;
+
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(undefined), TTL);
+    img.onload = () => {
+      resolve({
+        width: img.naturalWidth,
+        height: img.naturalHeight,
+      });
+    };
+  });
+}

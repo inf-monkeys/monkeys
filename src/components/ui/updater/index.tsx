@@ -17,6 +17,7 @@ interface IUpdaterProps {
   onBeforeUpload?: () => void; // 上传前回调
   onFinished?: (urls: string[]) => void; // 上传完成回调
   onFilesUpdate?: (files: FileWithPath[]) => void; // 文件列表更新回调
+  saveToResource?: boolean; // 是否保存到富媒体桶
 }
 
 export const Updater: React.FC<IUpdaterProps> = ({
@@ -27,6 +28,7 @@ export const Updater: React.FC<IUpdaterProps> = ({
   onFinished,
   onBeforeUpload,
   onFilesUpdate,
+  saveToResource,
 }) => {
   const [files, setFiles] = useState<FileWithPath[]>(initialFiles);
 
@@ -87,6 +89,7 @@ export const Updater: React.FC<IUpdaterProps> = ({
             isUploading={isUploading}
             setIsUploading={setIsUploading}
             onFinished={onFinished}
+            saveToResource={saveToResource}
           />
         </SmoothTransition>
       )}
