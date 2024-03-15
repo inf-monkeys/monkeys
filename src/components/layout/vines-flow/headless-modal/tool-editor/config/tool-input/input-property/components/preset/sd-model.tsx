@@ -67,6 +67,7 @@ export const SdModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInpu
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
           >
             <Select onValueChange={handleOnSelectChange} defaultValue={isString(value) ? value : ''}>
               <SelectTrigger>
@@ -90,6 +91,7 @@ export const SdModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInpu
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
           >
             <StringInput
               value={value}
@@ -107,6 +109,7 @@ export const SdModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInpu
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.1 }}
         >
           <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
         </motion.div>

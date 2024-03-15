@@ -53,9 +53,19 @@ export const ComfyuiModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVine
     [onChange, setComponentMode],
   );
 
+  const [refresh, setRefresh] = useState(false);
+
+  useEffect(() => {
+    if (!comfyuiModels) return;
+    if (Object.keys(optionsVariableMapper).length && Object.keys(comfyuiModels).length) {
+      setRefresh(true);
+      setTimeout(() => setRefresh(false), 132);
+    }
+  }, [optionsVariableMapper, comfyuiModels]);
+
   return (
     <AnimatePresence>
-      {!isLoading ? (
+      {!isLoading && !refresh ? (
         componentMode === 'input' ? (
           <motion.div
             key="SdModelPresets_input"
@@ -63,6 +73,7 @@ export const ComfyuiModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVine
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
           >
             <Select onValueChange={handleOnSelectChange} defaultValue={isString(value) ? value : ''}>
               <SelectTrigger>
@@ -86,6 +97,7 @@ export const ComfyuiModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVine
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
           >
             <StringInput
               value={value}
@@ -103,6 +115,7 @@ export const ComfyuiModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVine
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.1 }}
         >
           <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
         </motion.div>

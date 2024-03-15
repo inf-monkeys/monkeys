@@ -49,9 +49,19 @@ export const LlmModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInp
     [onChange, setComponentMode],
   );
 
+  const [refresh, setRefresh] = useState(false);
+
+  useEffect(() => {
+    if (!llmModels) return;
+    if (Object.keys(optionsVariableMapper).length && llmModels.length) {
+      setRefresh(true);
+      setTimeout(() => setRefresh(false), 132);
+    }
+  }, [optionsVariableMapper, llmModels]);
+
   return (
     <AnimatePresence>
-      {!isLoading ? (
+      {!isLoading && !refresh ? (
         componentMode === 'input' ? (
           <motion.div
             key="SdModelPresets_input"
@@ -59,6 +69,7 @@ export const LlmModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInp
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
           >
             <Select onValueChange={handleOnSelectChange} defaultValue={isString(value) ? value : ''}>
               <SelectTrigger>
@@ -82,6 +93,7 @@ export const LlmModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInp
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
           >
             <StringInput
               value={value}
@@ -99,6 +111,7 @@ export const LlmModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInp
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.1 }}
         >
           <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
         </motion.div>

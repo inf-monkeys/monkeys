@@ -54,9 +54,19 @@ export const TextCollectionPresets: React.FC<IVinesInputPropertyProps & Omit<IVi
     [onChange, setComponentMode],
   );
 
+  const [refresh, setRefresh] = useState(false);
+
+  useEffect(() => {
+    if (!vectorCollections) return;
+    if (Object.keys(optionsVariableMapper).length && vectorCollections.length) {
+      setRefresh(true);
+      setTimeout(() => setRefresh(false), 132);
+    }
+  }, [optionsVariableMapper, vectorCollections]);
+
   return (
     <AnimatePresence>
-      {!isLoading ? (
+      {!isLoading && !refresh ? (
         componentMode === 'input' ? (
           <motion.div
             key="SdModelPresets_input"
@@ -64,6 +74,7 @@ export const TextCollectionPresets: React.FC<IVinesInputPropertyProps & Omit<IVi
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
           >
             <Select onValueChange={handleOnSelectChange} defaultValue={isString(value) ? value : ''}>
               <SelectTrigger>
@@ -87,6 +98,7 @@ export const TextCollectionPresets: React.FC<IVinesInputPropertyProps & Omit<IVi
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
           >
             <StringInput
               value={value}
@@ -104,8 +116,9 @@ export const TextCollectionPresets: React.FC<IVinesInputPropertyProps & Omit<IVi
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.1 }}
         >
-          <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+          <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="md" aria-label="Loading..." />
         </motion.div>
       )}
     </AnimatePresence>
