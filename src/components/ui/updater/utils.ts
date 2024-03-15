@@ -98,7 +98,7 @@ export const uploadFile = async (file: File, filename: string, onProgress: (prog
         }).then((res) => {
           resolve({
             PartNumber: i + 1,
-            ETag: res.getResponseHeader('ETag') as string,
+            ETag: res.getResponseHeader('ETag')?.replace(/"/g, '') as string,
           });
         });
       });
@@ -142,17 +142,19 @@ export function getFileNameByOssUrl(url?: string) {
 }
 
 export async function getImageSize(url: string): Promise<{ width: number; height: number } | undefined> {
-  const TTL = 6000;
-  const img = new Image();
-  img.src = url;
+  const TTL = 10000;
 
   return new Promise((resolve) => {
-    setTimeout(() => resolve(undefined), TTL);
-    img.onload = () => {
+    const img = new Image();
+    img.addEventListener('load', () => {
       resolve({
         width: img.naturalWidth,
         height: img.naturalHeight,
       });
-    };
+    });
+
+    img.src = url;
+
+    setTimeout(() => resolve(undefined), TTL);
   });
 }
