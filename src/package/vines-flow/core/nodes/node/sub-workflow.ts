@@ -1,6 +1,6 @@
 import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import { type SubWorkflowTaskDef, TaskType } from '@io-orkes/conductor-javascript';
-import { set } from 'lodash';
+import { has, set } from 'lodash';
 
 import { VinesCore } from '@/package/vines-flow/core';
 import { ControlFlowVinesNode, VinesNode } from '@/package/vines-flow/core/nodes/base.ts';
@@ -46,18 +46,18 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
     this._task.name = this._task.name.replace(/^sub_workflow:/, 'sub_workflow_');
     this._task.taskReferenceName = this._task.taskReferenceName.replace(/^sub_workflow:/, 'sub_workflow_');
     this.id = this._task.taskReferenceName;
-    if (this._task.inputParameters) {
-      void (
-        !this._task.inputParameters?.name &&
-        (this._task.inputParameters.name = this._task.name.replace('sub_workflow_', ''))
-      );
-      if (this._task.inputParameters?.version) {
-        this._task.inputParameters.version = Number(this._task.inputParameters.version) || 1;
-        void ((this._task.inputParameters.version as number) < 1 && (this._task.inputParameters.version = 1));
-      } else {
-        this._task.inputParameters.version = 1;
-      }
-    }
+
+    const name = this._task.name.replace('sub_workflow_', '');
+    const hasNameInInputParameters = has(this._task, 'inputParameters.name');
+    !hasNameInInputParameters && set(this._task, 'inputParameters.name', name);
+    set(this._task, 'subWorkflow.name', name);
+
+    const hasVersionInInputParameters = has(this._task, 'inputParameters.version');
+    set(
+      this._task,
+      'inputParameters.version',
+      hasVersionInInputParameters ? Number(this._task.inputParameters?.version ?? 1) || 1 : 1,
+    );
 
     return super.check();
   }
