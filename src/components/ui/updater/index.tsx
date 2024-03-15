@@ -16,6 +16,7 @@ interface IUpdaterProps {
   accept?: string[]; // 文件类型限制
   onBeforeUpload?: () => void; // 上传前回调
   onFinished?: (urls: string[]) => void; // 上传完成回调
+  onFilesUpdate?: (files: FileWithPath[]) => void; // 文件列表更新回调
 }
 
 export const Updater: React.FC<IUpdaterProps> = ({
@@ -25,6 +26,7 @@ export const Updater: React.FC<IUpdaterProps> = ({
   limit,
   onFinished,
   onBeforeUpload,
+  onFilesUpdate,
 }) => {
   const [files, setFiles] = useState<FileWithPath[]>(initialFiles);
 
@@ -36,6 +38,17 @@ export const Updater: React.FC<IUpdaterProps> = ({
       onBeforeUpload?.();
     }
   }, [isUploading]);
+
+  useEffect(() => {
+    if (initialFiles?.length) {
+      setIsInteracted(true);
+      setFiles(initialFiles);
+    }
+  }, [initialFiles]);
+
+  useEffect(() => {
+    onFilesUpdate?.(files);
+  }, [files]);
 
   return (
     <div className="flex w-full flex-col gap-4">
