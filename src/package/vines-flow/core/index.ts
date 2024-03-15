@@ -65,6 +65,7 @@ export class VinesCore extends VinesTools(VinesBase) {
     this.nodes.push(EndPointNode.createEnd(this));
 
     this.getAllNodes(false).map((it) => it.check());
+    this.generateWorkflowVariables();
   }
 
   public update(
