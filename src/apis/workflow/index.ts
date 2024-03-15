@@ -34,3 +34,6 @@ export const useUpdateWorkflow = (apikey: string, workflowId: string) =>
     workflowId ? `/api/workflow/${workflowId}` : null,
     vinesFetcher<MonkeyWorkflow>({ method: 'PUT', apikey }),
   );
+
+export const useWorkflowVersions = (workflowId: string) =>
+  useSWR<MonkeyWorkflow[] | undefined>(workflowId ? `/api/workflow/${workflowId}/versions` : null, vinesFetcher());

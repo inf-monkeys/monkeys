@@ -9,6 +9,7 @@ import { ForkJoinBranchPresets } from '@/components/layout/vines-flow/headless-m
 import { LlmModelPresets } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/llm-model.tsx';
 import { SdModelPresets } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/sd-model.tsx';
 import { TextCollectionPresets } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/text-collection.tsx';
+import { WorkflowVersionPresets } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/workflow-version.tsx';
 
 export interface IVinesInputPresetProps {
   typeOptions: BlockDefPropertyTypeOptions;
@@ -27,7 +28,7 @@ export const PresetInput: React.FC<IVinesInputPropertyProps & IVinesInputPresetP
       {assetType === 'sd-model' && <SdModelPresets {...childProps} />}
       {assetType === 'llm-model' && <LlmModelPresets {...childProps} />}
       {assetType === 'text-collection' && <TextCollectionPresets {...childProps} />}
-
+      {assetType === 'workflow-version' && <WorkflowVersionPresets {...childProps} />}
       {assetType === 'fork-join-branch' && <ForkJoinBranchPresets {...childProps} />}
 
       {assetType?.startsWith('comfyui-model') && <ComfyuiModelPresets {...childProps} />}
