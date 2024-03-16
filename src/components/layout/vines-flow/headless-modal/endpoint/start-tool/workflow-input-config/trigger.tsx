@@ -4,6 +4,7 @@ import { Plus, Trash2 } from 'lucide-react';
 
 import { useTriggers, useTriggerTypes } from '@/apis/workflow/trigger';
 import { ITriggerType } from '@/apis/workflow/trigger/typings.ts';
+import { TriggerSelector } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool/workflow-input-config/trigger-selector';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
@@ -11,6 +12,7 @@ import { Switch } from '@/components/ui/switch';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
+import VinesEvent from '@/utils/events.ts';
 
 interface IWorkflowTriggerProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -45,9 +47,10 @@ export const WorkflowTrigger: React.FC<IWorkflowTriggerProps> = () => {
           );
         })}
       </ScrollArea>
-      <Button variant="outline" icon={<Plus />}>
+      <Button variant="outline" icon={<Plus />} onClick={() => VinesEvent.emit('flow-trigger-selector', workflowId)}>
         添加触发器
       </Button>
+      <TriggerSelector />
     </div>
   );
 };

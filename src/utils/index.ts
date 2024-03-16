@@ -4,6 +4,7 @@ import {
 } from '@mantine/hooks';
 import clsx, { ClassValue } from 'clsx';
 import { isString } from 'lodash';
+import { customAlphabet } from 'nanoid';
 import { parse, stringify } from 'superjson';
 import { twMerge } from 'tailwind-merge';
 
@@ -39,3 +40,6 @@ export const setLocalStorage = <T>(key: string, value: T) => {
   localStorage.setItem(key, finalData);
   dispatchLocalStorageEvent(key, value);
 };
+
+export const nanoIdLowerCase = customAlphabet('6789bcdfghjkmnpqrtwz', 8);
+export const nanoIdUpperCase = customAlphabet('6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz', 8);
