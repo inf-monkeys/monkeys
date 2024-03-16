@@ -1,10 +1,21 @@
 import React from 'react';
 
-import { get, isArray, isBoolean } from 'lodash';
+import { cloneDeep, get, isArray, isBoolean } from 'lodash';
 import { Edit, Plus, Trash2 } from 'lucide-react';
 
 import { VINES_WORKFLOW_INPUT_TYPE_DISPLAY_MAPPER } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool/workflow-input-config/consts.ts';
 import { InputEditor } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool/workflow-input-config/input-editor';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog.tsx';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
@@ -22,6 +33,15 @@ export const InputConfig: React.FC<IInputConfigProps> = () => {
   const inputs = vines.workflowInput.map((it) =>
     isBoolean(it.default) ? { ...it, default: it.default.toString() } : it,
   );
+
+  const handleRemoveInput = (variableId: string) => {
+    const newInputs = cloneDeep(inputs);
+    const index = newInputs.findIndex((it) => it.name === variableId);
+    if (index !== -1) {
+      newInputs.splice(index, 1);
+    }
+    vines.update({ variables: newInputs });
+  };
 
   return (
     <div className="relative flex h-80 w-full flex-col gap-4 py-2">
@@ -51,7 +71,23 @@ export const InputConfig: React.FC<IInputConfigProps> = () => {
                     className="scale-80"
                     onClick={() => VinesEvent.emit('flow-input-editor', vines.workflowId, variableId)}
                   />
-                  <Button icon={<Trash2 />} variant="outline" className="scale-80 [&_svg]:stroke-red-10" />
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button icon={<Trash2 />} variant="outline" className="scale-80 [&_svg]:stroke-red-10" />
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>确定要删除此输入吗</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          删除后，此输入将不无法在工作流中使用，且无法恢复。
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>取消</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleRemoveInput(variableId)}>确认删除</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
               <div className="flex flex-col gap-2 break-words rounded-sm border border-input p-2 text-xs shadow-sm">
