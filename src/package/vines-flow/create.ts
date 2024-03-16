@@ -61,20 +61,19 @@ export const createVinesCore = (workflowId: string) => {
               return;
             }
 
-            toast.promise(
-              trigger({
-                version: _vines.version,
-                workflowDef: { tasks },
-                variables: _vines.workflowInput,
-              } as Partial<MonkeyWorkflow>),
-              {
-                loading: '更新中...',
-                success: '更新成功',
-                error: '更新失败',
-              },
-            );
+            const newWorkflow = {
+              version: _vines.version,
+              ...(tasks?.length && { workflowDef: { tasks } }),
+              variables: _vines.workflowInput,
+            } as Partial<MonkeyWorkflow>;
 
-            void mutate(`/api/workflow/${workflowId}`, (prev) => ({ ...prev, workflowDef: { tasks } }), {
+            toast.promise(trigger(newWorkflow), {
+              loading: '更新中...',
+              success: '更新成功',
+              error: '更新失败',
+            });
+
+            void mutate(`/api/workflow/${workflowId}`, (prev) => ({ ...prev, ...newWorkflow }), {
               revalidate: false,
             });
           }, 100) as unknown as number,

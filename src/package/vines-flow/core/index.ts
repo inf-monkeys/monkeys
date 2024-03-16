@@ -69,7 +69,7 @@ export class VinesCore extends VinesTools(VinesBase) {
   }
 
   public update(
-    { workflow, workflowId, version, tasks, variables, renderType, renderDirection }: IVinesWorkflowUpdate,
+    { workflow, workflowId, version, tasks, variable, variables, renderType, renderDirection }: IVinesWorkflowUpdate,
     render = true,
   ) {
     let needToInit = false;
@@ -87,8 +87,16 @@ export class VinesCore extends VinesTools(VinesBase) {
     workflowId && (this.workflowId = workflowId);
     version && (this.version = version);
     tasks && (this.tasks = tasks.filter((task) => task)) && (needToInit = true);
-    if (variables) {
-      this.workflowInput = variables;
+    if (variables || variable) {
+      variables && (this.workflowInput = variables);
+      if (variable) {
+        const index = this.workflowInput.findIndex((it) => it.name === variable.name);
+        if (index !== -1) {
+          this.workflowInput[index] = variable;
+        } else {
+          this.workflowInput.push(variable);
+        }
+      }
       this.generateWorkflowVariables();
       this.sendEvent('update');
     }

@@ -23,6 +23,7 @@ export interface IVinesWorkflowUpdate {
   workflowId?: string;
   version?: number;
   tasks?: MonkeyTaskDefTypes[];
+  variable?: VinesWorkflowVariable;
   variables?: VinesWorkflowVariable[];
   renderDirection?: IVinesFlowRenderOptions['direction'];
   renderType?: IVinesFlowRenderOptions['type'];
