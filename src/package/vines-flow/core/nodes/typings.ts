@@ -3,6 +3,7 @@ import type { ForkJoinTaskDef, JoinTaskDef, SimpleTaskDef } from '@io-orkes/cond
 
 import { VinesForkJoinTaskDef } from '@/package/vines-flow/core/nodes/node/fork-join.ts';
 import { VinesJoinTaskDef } from '@/package/vines-flow/core/nodes/node/join.ts';
+import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IVinesFlowRenderOptions } from '@/package/vines-flow/core/typings.ts';
 
 export interface NodeCustomData {
@@ -22,6 +23,7 @@ export interface IVinesWorkflowUpdate {
   workflowId?: string;
   version?: number;
   tasks?: MonkeyTaskDefTypes[];
+  variables?: VinesWorkflowVariable[];
   renderDirection?: IVinesFlowRenderOptions['direction'];
   renderType?: IVinesFlowRenderOptions['type'];
 }

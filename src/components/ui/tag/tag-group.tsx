@@ -1,8 +1,10 @@
 import React from 'react';
 
 import { Tag } from '@/components/ui/tag/index.tsx';
+import { cn } from '@/utils';
 
 interface TagGroupProps {
+  className?: string;
   tagList: {
     color?: 'primary' | 'secondary' | 'tertiary' | 'warning' | 'danger' | null | undefined;
     children: React.ReactNode;
@@ -18,7 +20,8 @@ interface TagGroupProps {
 }
 
 const TagGroup: React.FC<TagGroupProps> = ({
-  width = 220,
+  className,
+  width,
   tagList,
   closable = false,
   maxTagCount,
@@ -27,9 +30,10 @@ const TagGroup: React.FC<TagGroupProps> = ({
   shape,
 }) => {
   return (
-    <div className="flex items-center gap-2 bg-grayA-4 bg-opacity-90 p-2" style={{ width }}>
+    <div className={cn('flex items-center gap-2 rounded-md bg-muted p-2', className)} style={{ width }}>
       {tagList.slice(0, maxTagCount).map((tag, index) => (
         <Tag
+          className="bg-slate-5 shadow-sm"
           key={index}
           size={size}
           color={tag.color}
