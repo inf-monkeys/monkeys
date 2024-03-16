@@ -51,7 +51,7 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
   const handleRenderTypeChange = () => {
     setVisible(false);
     setTimeout(() => {
-      const map = Object.values(IVinesFlowRenderType);
+      const map = Object.values(IVinesFlowRenderType).filter((it) => it !== IVinesFlowRenderType.COMPLICATE);
       const currentIndex = map.indexOf(vines.renderOptions.type);
       const nextIndex = (currentIndex + 1) % map.length;
       const nextRenderType = map[nextIndex];
