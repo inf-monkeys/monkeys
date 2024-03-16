@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
+import { WorkflowInputConfig } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool/workflow-input-config';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { useFlowStore } from '@/store/useFlowStore';
 import VinesEvent from '@/utils/events.ts';
@@ -26,6 +27,7 @@ export const StartTool: React.FC<IStartToolProps> = () => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
         <DialogTitle>触发器与工作流输入</DialogTitle>
+        <WorkflowInputConfig />
       </DialogContent>
     </Dialog>
   );

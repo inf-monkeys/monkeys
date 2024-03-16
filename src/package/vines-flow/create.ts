@@ -61,11 +61,18 @@ export const createVinesCore = (workflowId: string) => {
               return;
             }
 
-            toast.promise(trigger({ version: _vines.version, workflowDef: { tasks } } as Partial<MonkeyWorkflow>), {
-              loading: '更新中...',
-              success: '更新成功',
-              error: '更新失败',
-            });
+            toast.promise(
+              trigger({
+                version: _vines.version,
+                workflowDef: { tasks },
+                variables: _vines.workflowInput,
+              } as Partial<MonkeyWorkflow>),
+              {
+                loading: '更新中...',
+                success: '更新成功',
+                error: '更新失败',
+              },
+            );
 
             void mutate(`/api/workflow/${workflowId}`, (prev) => ({ ...prev, workflowDef: { tasks } }), {
               revalidate: false,

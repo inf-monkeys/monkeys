@@ -1,0 +1,91 @@
+import React from 'react';
+
+import { get, isArray, isBoolean } from 'lodash';
+import { Edit, Plus, Trash2 } from 'lucide-react';
+
+import { VINES_WORKFLOW_INPUT_TYPE_DISPLAY_MAPPER } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool/workflow-input-config/consts.ts';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card.tsx';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { Tag } from '@/components/ui/tag';
+import { TagGroup } from '@/components/ui/tag/tag-group.tsx';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useVinesFlow } from '@/package/vines-flow';
+
+interface IInputConfigProps extends React.ComponentPropsWithoutRef<'div'> {}
+
+export const InputConfig: React.FC<IInputConfigProps> = () => {
+  const { vines } = useVinesFlow();
+
+  const inputs = vines.workflowInput.map((it) =>
+    isBoolean(it.default) ? { ...it, default: it.default.toString() } : it,
+  );
+
+  return (
+    <div className="relative flex h-80 w-full flex-col gap-4 py-2">
+      <ScrollArea className="px-2">
+        {inputs.map((it, index) => {
+          const { name: variableName, displayName, type, default: defaultData, typeOptions } = it;
+          const defaultValueType = typeof defaultData;
+          const assetType = get(typeOptions, 'assetType', null);
+          const multipleValues = get(typeOptions, 'multipleValues', false);
+          return (
+            <Card className="mb-2 flex flex-col gap-2 p-4" key={index}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Tag className="bg-muted text-xs font-bold shadow-sm">
+                    {
+                      VINES_WORKFLOW_INPUT_TYPE_DISPLAY_MAPPER[
+                        type + (assetType ? `:${assetType}` : '') + (multipleValues ? '-list' : '')
+                      ]
+                    }
+                  </Tag>
+                  <h1 className="font-bold">{displayName}</h1>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button icon={<Edit />} variant="outline" className="scale-80" />
+                  <Button icon={<Trash2 />} variant="outline" className="scale-80" />
+                </div>
+              </div>
+              <div className="flex flex-col gap-2 break-words rounded-sm border border-input p-2 text-xs shadow-sm">
+                {defaultValueType === 'undefined' ? (
+                  <p>暂无默认值</p>
+                ) : (
+                  <>
+                    <span className="-mt-1 text-xs text-gray-10">默认值</span>
+                    {defaultValueType === 'boolean' ? (
+                      defaultData ? (
+                        '真'
+                      ) : (
+                        '假'
+                      )
+                    ) : isArray(defaultData) ? (
+                      <TagGroup
+                        className="bg-slate-1/80 shadow-sm"
+                        maxTagCount={2}
+                        tagList={(defaultData as string[]).map((v) => ({
+                          children: (
+                            <Tooltip>
+                              <TooltipTrigger>{v.length > 25 ? v.slice(0, 25) + '...' : v}</TooltipTrigger>
+                              <TooltipContent>{v}</TooltipContent>
+                            </Tooltip>
+                          ),
+                        }))}
+                        size="large"
+                      />
+                    ) : (
+                      JSON.stringify(defaultData)
+                    )}
+                  </>
+                )}
+              </div>
+            </Card>
+          );
+        })}
+      </ScrollArea>
+      <Button variant="outline" icon={<Plus />}>
+        新建配置
+      </Button>
+    </div>
+  );
+};
