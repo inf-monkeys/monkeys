@@ -23,9 +23,11 @@ export const WorkflowTrigger: React.FC<IWorkflowTriggerProps> = () => {
   return (
     <div className="relative flex h-80 w-full flex-col gap-4 py-2">
       <ScrollArea className="px-2">
-        {triggers?.map((it, i) => (
-          <Trigger trigger={it} workflowId={workflowId} workflowVersion={workflowVersion} key={i} />
-        ))}
+        <div className="flex flex-col gap-4">
+          {triggers?.map((it, i) => (
+            <Trigger trigger={it} workflowId={workflowId} workflowVersion={workflowVersion} key={i} />
+          ))}
+        </div>
       </ScrollArea>
       <Button variant="outline" icon={<Plus />} onClick={() => VinesEvent.emit('flow-trigger-selector', workflowId)}>
         添加触发器
