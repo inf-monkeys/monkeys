@@ -16,6 +16,7 @@ export type FlowEventType =
   | 'flow-delete-node'
   | 'flow-start-tool'
   | 'flow-end-tool'
+  | 'flow-raw-data-editor'
   | 'flow-variable-selector'
   | 'flow-input-editor'
   | 'flow-trigger-selector'

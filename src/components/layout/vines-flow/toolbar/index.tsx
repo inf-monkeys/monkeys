@@ -27,8 +27,16 @@ interface IVinesToolbarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
   const { vines } = useVinesFlow();
-  const { canvasMode, canvasDisabled, isCanvasMoving, setCanvasMode, setCanvasDisabled, setCanvasMoving, setVisible } =
-    useFlowStore();
+  const {
+    workflowId,
+    canvasMode,
+    canvasDisabled,
+    isCanvasMoving,
+    setCanvasMode,
+    setCanvasDisabled,
+    setCanvasMoving,
+    setVisible,
+  } = useFlowStore();
 
   const isEditMode = canvasMode === CanvasStatus.EDIT;
   const isHorizontal = vines.renderDirection === 'horizontal';
@@ -102,7 +110,11 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
             tip={`工具显示：${isRenderMini ? '极简' : isRenderComplicate ? '全参数' : '普通'}模式`}
             onClick={handleRenderTypeChange}
           />
-          <ToolButton icon={<Code />} tip="开发者模式" />
+          <ToolButton
+            icon={<Code />}
+            tip="开发者模式"
+            onClick={() => VinesEvent.emit('flow-raw-data-editor', workflowId)}
+          />
         </Card>
       </motion.div>
     </AnimatePresence>

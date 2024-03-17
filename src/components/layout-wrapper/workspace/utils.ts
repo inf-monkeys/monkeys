@@ -20,7 +20,7 @@ export const useVinesPage = () => {
 
   const { page, setPage } = usePageStore();
 
-  const { data: workflow, mutate: mutateWorkflow } = useGetWorkflow(apikey, workflowId);
+  const { data: workflow, mutate: mutateWorkflow } = useGetWorkflow(workflowId, apikey);
 
   const originPagesRef = useRef<IPageType[] | null>(null);
   const isUpdatePageLocker = useRef(false);
@@ -111,7 +111,7 @@ export const useVinesFlowWithPage = (_workflowId?: string) => {
   const { workflowId, pageId, teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
 
   const [apikey] = useLocalStorage('vines-apikey', '', false);
-  const { data: workflow, mutate: mutateWorkflow } = useGetWorkflow(apikey, _workflowId ?? workflowId);
+  const { data: workflow, mutate: mutateWorkflow } = useGetWorkflow(_workflowId ?? workflowId, apikey);
 
   return {
     workflowId,
