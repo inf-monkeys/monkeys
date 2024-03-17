@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { InputConfig } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config.tsx';
+import { InputConfig } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config';
 import { WorkflowTrigger } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool/workflow-input-config/triggers';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 
