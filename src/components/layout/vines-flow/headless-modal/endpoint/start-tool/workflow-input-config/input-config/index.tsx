@@ -3,8 +3,8 @@ import React from 'react';
 import { cloneDeep, get, isArray, isBoolean } from 'lodash';
 import { Edit, Plus, Trash2 } from 'lucide-react';
 
-import { VINES_WORKFLOW_INPUT_TYPE_DISPLAY_MAPPER } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool/workflow-input-config/consts.ts';
-import { InputEditor } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool/workflow-input-config/input-editor';
+import { VINES_WORKFLOW_INPUT_TYPE_DISPLAY_MAPPER } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/consts.ts';
+import { InputEditor } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor';
 import {
   AlertDialog,
   AlertDialogAction,

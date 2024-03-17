@@ -6,7 +6,7 @@ import { get, isArray, isBoolean, isUndefined, omit, pick, set } from 'lodash';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
-import { WORKFLOW_INPUT_TYPE_OPTION_LIST } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool/workflow-input-config/consts.ts';
+import { WORKFLOW_INPUT_TYPE_OPTION_LIST } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/consts.ts';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
