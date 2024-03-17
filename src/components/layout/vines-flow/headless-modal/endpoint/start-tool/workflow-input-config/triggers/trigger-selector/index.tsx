@@ -6,6 +6,8 @@ import { toast } from 'sonner';
 
 import { useTriggerCreate, useTriggerTypes } from '@/apis/workflow/trigger';
 import { ITriggerType, WorkflowTriggerType } from '@/apis/workflow/trigger/typings.ts';
+import { ScheduleTrigger } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool/workflow-input-config/triggers/trigger-selector/schedule-trigger';
+import { WebhookTrigger } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool/workflow-input-config/triggers/trigger-selector/webhook-trigger';
 import { Card } from '@/components/ui/card.tsx';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -55,6 +57,14 @@ export const TriggerSelector: React.FC<ITriggerSelectorProps> = () => {
       });
     }
 
+    if (type === WorkflowTriggerType.SCHEDULER) {
+      VinesEvent.emit('flow-trigger-schedule', workflowId);
+    }
+
+    if (type === WorkflowTriggerType.WEBHOOK) {
+      VinesEvent.emit('flow-trigger-webhook', workflowId);
+    }
+
     setOpen(false);
   };
 
@@ -98,6 +108,8 @@ export const TriggerSelector: React.FC<ITriggerSelectorProps> = () => {
           })}
         </div>
       </DialogContent>
+      <ScheduleTrigger />
+      <WebhookTrigger />
     </Dialog>
   );
 };
