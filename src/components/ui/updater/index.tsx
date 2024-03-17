@@ -52,10 +52,12 @@ export const Updater: React.FC<IUpdaterProps> = ({
     onFilesUpdate?.(files);
   }, [files]);
 
+  const disabled = isUploading || files.length >= (limit ?? 999);
+
   return (
     <div className="flex w-full flex-col gap-4">
       <Dropzone
-        className={cn(isUploading && 'pointer-events-none cursor-not-allowed opacity-60')}
+        className={cn((isUploading || disabled) && 'pointer-events-none cursor-not-allowed opacity-60')}
         onDrop={(_files) => {
           setFiles((prev) => [...prev, ..._files]);
           !isInteracted && setIsInteracted(true);
@@ -63,7 +65,7 @@ export const Updater: React.FC<IUpdaterProps> = ({
         accept={accept}
         maxSize={maxSize * 1024 ** 2}
         maxFiles={limit}
-        disabled={isUploading}
+        disabled={disabled}
         onReject={(file) => file.forEach((it) => toast.error(`文件 ${it.file.name} 超出限制`))}
       >
         <div className="vines-center h-40 gap-4">
@@ -74,7 +76,7 @@ export const Updater: React.FC<IUpdaterProps> = ({
               {accept
                 ? `仅支持 ${accept.map((it) => `.${it?.split('/')?.[1] ?? it}`).join('、')} 格式的文件`
                 : '支持上传任意格式的文件'}
-              ，不超过 {maxSize}MB
+              ，不超过 {maxSize}MB{limit ? `，最多可上传 ${limit} 个文件` : ''}
             </p>
           </div>
         </div>

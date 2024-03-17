@@ -248,6 +248,7 @@ export const FileList: React.FC<IFilesProps> = ({
                           className="scale-90 [&_svg]:stroke-black dark:[&_svg]:stroke-gold-12"
                           icon={<XCircle />}
                           variant="borderless"
+                          type="button"
                           onClick={() => setFiles((prev) => prev.filter((it) => it.path !== path))}
                         />
                       </TableCell>
