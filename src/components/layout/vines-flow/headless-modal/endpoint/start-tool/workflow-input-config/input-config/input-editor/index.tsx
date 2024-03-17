@@ -88,7 +88,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
     form.setValue('assetType', get(currentVariable, 'typeOptions.assetType', ''));
   }, [currentVariable]);
 
-  const handleSubmit = form.handleSubmit(async (data) => {
+  const handleSubmit = form.handleSubmit((data) => {
     const { multipleValues, assetType, default: Default } = pick(data, ['multipleValues', 'assetType', 'default']);
     const finalVariable = omit(data, ['multipleValues', 'assetType', 'default']);
     multipleValues && set(finalVariable, 'typeOptions.multipleValues', true);
