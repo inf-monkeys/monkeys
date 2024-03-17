@@ -67,3 +67,10 @@ export interface IVinesTrigger {
   webhookPath?: string;
   webhookConfig?: IVinesWebhookTriggerConfig;
 }
+
+export interface IUpdateTriggerParams {
+  enabled?: boolean;
+  cron?: string;
+  type?: WorkflowTriggerType;
+  webhookConfig?: IVinesWebhookTriggerConfig;
+}
