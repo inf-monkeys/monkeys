@@ -4,7 +4,7 @@ import { Plus } from 'lucide-react';
 import { TriggerSelector } from 'src/components/layout/vines-flow/headless-modal/endpoint/start-tool/workflow-input-config/triggers/trigger-selector';
 
 import { useTriggers } from '@/apis/workflow/trigger';
-import { Trigger } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool/workflow-input-config/triggers/Trigger.tsx';
+import { Trigger } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool/workflow-input-config/triggers/trigger.tsx';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { useVinesFlow } from '@/package/vines-flow';

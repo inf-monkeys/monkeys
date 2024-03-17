@@ -69,8 +69,14 @@ export interface IVinesTrigger {
 }
 
 export interface IUpdateTriggerParams {
+  type?: WorkflowTriggerType;
   enabled?: boolean;
   cron?: string;
-  type?: WorkflowTriggerType;
   webhookConfig?: IVinesWebhookTriggerConfig;
+}
+
+export interface ICreateTriggerPragma extends Omit<IUpdateTriggerParams, 'enabled' | 'type'> {
+  triggerType: WorkflowTriggerType;
+  enabled: boolean;
+  version: number;
 }

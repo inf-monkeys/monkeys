@@ -2,7 +2,12 @@ import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
-import { ITriggerType, IUpdateTriggerParams, IVinesTrigger } from '@/apis/workflow/trigger/typings.ts';
+import {
+  ICreateTriggerPragma,
+  ITriggerType,
+  IUpdateTriggerParams,
+  IVinesTrigger,
+} from '@/apis/workflow/trigger/typings.ts';
 
 export const useTriggers = (workflowId?: string, version = 1, apikey?: string) =>
   useSWR<IVinesTrigger[] | undefined>(
@@ -26,4 +31,10 @@ export const useTriggerRemove = (workflowId?: string, triggerId?: string) =>
   useSWRMutation<ITriggerType | undefined, unknown, string | null>(
     workflowId && triggerId ? `/api/workflow/${workflowId}/triggers/${triggerId}` : null,
     vinesFetcher({ method: 'DELETE' }),
+  );
+
+export const useTriggerCreate = (workflowId?: string) =>
+  useSWRMutation<ITriggerType | undefined, unknown, string | null, ICreateTriggerPragma>(
+    workflowId ? `/api/workflow/${workflowId}/triggers` : null,
+    vinesFetcher({ method: 'POST' }),
   );
