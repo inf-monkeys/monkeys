@@ -45,7 +45,7 @@ export const VinesVersionToolbar: React.FC<IVinesVersionToolbarProps> = () => {
           <Command>
             <CommandInput placeholder="搜索版本" />
             <CommandEmpty>找不到此版本</CommandEmpty>
-            <ScrollArea className="h-72">
+            <ScrollArea className="max-h-72">
               <CommandGroup>
                 {workflowVersion.map((id) => {
                   const finalId = id.toString();
