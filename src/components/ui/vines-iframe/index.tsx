@@ -35,13 +35,15 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }
     });
   }, [pages]);
 
+  const currentPageId = page?._id;
+
   return (
     <AnimatePresence mode="wait">
       {hasPages &&
         renderer
           .filter(({ teamId, workflowId, type }) => teamId && workflowId && type)
           .map(({ _id, workflowId, type }) => {
-            return <VinesView<P> id={_id} workflowId={workflowId} page={page} type={type} key={_id} />;
+            return <VinesView id={_id} workflowId={workflowId} pageId={currentPageId} type={type} key={_id} />;
           })}
     </AnimatePresence>
   );

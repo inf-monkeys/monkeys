@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 
 import stringify from 'fast-json-stable-stringify';
-import { differenceWith, isEqual, omit } from 'lodash';
+import { cloneDeep, differenceWith, isEqual, omit, set } from 'lodash';
 
 import { updateWorkspacePages, useWorkspacePagesWithWorkflowId } from '@/apis/pages';
 import { IPageType } from '@/apis/pages/typings.ts';
@@ -90,6 +90,16 @@ export const useVinesPage = () => {
       },
     });
 
+  const updatePageData = async (key: string, value: unknown) => {
+    if (!page) return;
+    const pageIndex = pages?.findIndex((it) => it._id === page._id) ?? -1;
+    if (pageIndex === -1) return;
+    const newPages = cloneDeep(pages);
+    if (!newPages?.[pageIndex]) return;
+    set(newPages[pageIndex], key, value);
+    return setPages(newPages);
+  };
+
   return {
     workflow,
     mutateWorkflow,
@@ -99,6 +109,7 @@ export const useVinesPage = () => {
     pagesMutate,
     page,
     setPage,
+    updatePageData,
     pageId,
     teamId,
     apikey,
