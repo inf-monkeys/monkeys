@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 
 import { ToolButton } from '@/components/layout/vines-flow/toolbar/tool-button.tsx';
+import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Card } from '@/components/ui/card.tsx';
 import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
@@ -26,6 +27,7 @@ import VinesEvent from '@/utils/events';
 interface IVinesToolbarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
+  const { updatePageData } = useVinesPage();
   const { vines } = useVinesFlow();
   const {
     workflowId,
@@ -65,6 +67,7 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
       const nextIndex = (currentIndex + 1) % map.length;
       const nextRenderType = map[nextIndex];
       vines.update({ renderType: nextRenderType });
+      void updatePageData('customOptions.render.type', nextRenderType);
       setTimeout(() => setVisible(true), 80);
     }, 80);
   };

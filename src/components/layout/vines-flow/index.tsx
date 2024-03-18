@@ -41,7 +41,10 @@ export const VinesFlow: React.FC<IVinesFlowProps> = ({ workflowId }) => {
 
   const initialWorkflowVersionRef = useRef<number>();
   const vinesVersion = vines.version;
-  const finalVersion = vinesVersion && initialWorkflowVersionRef.current !== vinesVersion ? vinesVersion : void 0;
+  const finalVersion =
+    initialWorkflowVersionRef.current && vinesVersion && initialWorkflowVersionRef.current !== vinesVersion
+      ? vinesVersion
+      : void 0;
   const { data: workflow } = useGetWorkflow(
     finalWorkflowId,
     finalVersion,
@@ -53,7 +56,6 @@ export const VinesFlow: React.FC<IVinesFlowProps> = ({ workflowId }) => {
     if (workflow) {
       const initialWorkflowVersion = initialWorkflowVersionRef.current;
       const workflowVersion = workflow.version;
-
       if (!initialWorkflowVersion || initialWorkflowVersion < vinesVersion) {
         initialWorkflowVersionRef.current = workflowVersion;
       }
