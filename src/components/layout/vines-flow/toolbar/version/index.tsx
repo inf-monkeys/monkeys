@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card.tsx';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
@@ -44,30 +45,32 @@ export const VinesVersionToolbar: React.FC<IVinesVersionToolbarProps> = () => {
           <Command>
             <CommandInput placeholder="搜索版本" />
             <CommandEmpty>找不到此版本</CommandEmpty>
-            <CommandGroup>
-              {workflowVersion.map((id) => {
-                const finalId = id.toString();
-                return (
-                  <CommandItem
-                    className="cursor-pointer"
-                    key={id}
-                    value={finalId}
-                    onSelect={(currentValue) => {
-                      setOpen(false);
-                      if (currentValue === vinesVersion) return;
-                      setVisible(false);
-                      setTimeout(() => {
-                        vines.update({ version: parseInt(currentValue) });
-                        setTimeout(() => setVisible(true), 80);
-                      }, 164);
-                    }}
-                  >
-                    <Check className={cn('mr-2 h-4 w-4', vinesVersion === finalId ? 'opacity-100' : 'opacity-0')} />
-                    版本 {finalId}
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
+            <ScrollArea className="h-72">
+              <CommandGroup>
+                {workflowVersion.map((id) => {
+                  const finalId = id.toString();
+                  return (
+                    <CommandItem
+                      className="cursor-pointer"
+                      key={id}
+                      value={finalId}
+                      onSelect={(currentValue) => {
+                        setOpen(false);
+                        if (currentValue === vinesVersion) return;
+                        setVisible(false);
+                        setTimeout(() => {
+                          vines.update({ version: parseInt(currentValue) });
+                          setTimeout(() => setVisible(true), 80);
+                        }, 164);
+                      }}
+                    >
+                      <Check className={cn('mr-2 h-4 w-4', vinesVersion === finalId ? 'opacity-100' : 'opacity-0')} />
+                      版本 {finalId}
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+            </ScrollArea>
           </Command>
         </PopoverContent>
       </Popover>
