@@ -16,7 +16,7 @@ interface INodeControllerProps {
 }
 
 export const NodeController: React.FC<INodeControllerProps> = memo(({ nodes, nodeStagger }) => {
-  const { canvasDisabled, canvasMode } = useFlowStore();
+  const { canvasDisabled, canvasMode, isLatestWorkflowVersion } = useFlowStore();
 
   const controller = nodes
     .map((node) => node.getController().map((it, index) => ({ id: `${node.id}_controller_${index}`, ...it })))
@@ -45,7 +45,8 @@ export const NodeController: React.FC<INodeControllerProps> = memo(({ nodes, nod
       animate="visible"
       className={cn(
         'transition-all',
-        (canvasDisabled || canvasMode !== CanvasStatus.EDIT) && 'pointer-events-none !opacity-0',
+        (canvasDisabled || canvasMode !== CanvasStatus.EDIT || !isLatestWorkflowVersion) &&
+          'pointer-events-none !opacity-0',
       )}
     >
       {controller.map(({ id, icon, position: { x, y }, onClick, needConfirmation, disabled }) => (

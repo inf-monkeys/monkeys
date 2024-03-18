@@ -30,7 +30,7 @@ export class VinesCore extends VinesTools(VinesBase) {
 
   public workflowDesc = '';
 
-  public version = 1;
+  public version = 0;
 
   public nodes: VinesNode[] = [];
 

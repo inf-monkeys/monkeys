@@ -11,13 +11,13 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
-import { readLocalStorageValue } from '@/utils';
+import { cn, readLocalStorageValue } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IEndToolProps {}
 
 export const EndTool: React.FC<IEndToolProps> = () => {
-  const { workflowId, disableDialogClose } = useFlowStore();
+  const { workflowId, disableDialogClose, isLatestWorkflowVersion } = useFlowStore();
   const [open, setOpen] = useState(false);
 
   const { vines } = useVinesFlow();
@@ -50,7 +50,7 @@ export const EndTool: React.FC<IEndToolProps> = () => {
       <DialogContent>
         <DialogTitle>工作流输出配置</DialogTitle>
         <WorkflowOutputConfig output={output} setOutput={setOutput} />
-        <DialogFooter>
+        <DialogFooter className={cn(!isLatestWorkflowVersion && 'hidden')}>
           <Button variant="outline" onClick={handleUpdate}>
             保存
           </Button>

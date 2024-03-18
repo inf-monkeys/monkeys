@@ -9,12 +9,13 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
+import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IWorkflowTriggerProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const WorkflowTrigger: React.FC<IWorkflowTriggerProps> = () => {
-  const { workflowId } = useFlowStore();
+  const { workflowId, isLatestWorkflowVersion } = useFlowStore();
   const { vines } = useVinesFlow();
 
   const workflowVersion = vines.version;
@@ -29,7 +30,12 @@ export const WorkflowTrigger: React.FC<IWorkflowTriggerProps> = () => {
           ))}
         </div>
       </ScrollArea>
-      <Button variant="outline" icon={<Plus />} onClick={() => VinesEvent.emit('flow-trigger-selector', workflowId)}>
+      <Button
+        className={cn(!isLatestWorkflowVersion && 'hidden')}
+        variant="outline"
+        icon={<Plus />}
+        onClick={() => VinesEvent.emit('flow-trigger-selector', workflowId)}
+      >
         添加触发器
       </Button>
       <TriggerSelector />

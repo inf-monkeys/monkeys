@@ -22,6 +22,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { Switch } from '@/components/ui/switch';
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { useFlowStore } from '@/store/useFlowStore';
+import { cn } from '@/utils';
 
 interface ITriggerProps {
   workflowId: string;
@@ -31,6 +33,8 @@ interface ITriggerProps {
 
 export const Trigger: React.FC<ITriggerProps> = ({ trigger, workflowVersion, workflowId }) => {
   const { type, _id, enabled } = trigger;
+
+  const { isLatestWorkflowVersion } = useFlowStore();
 
   const { mutate } = useSWRConfig();
 
@@ -68,7 +72,7 @@ export const Trigger: React.FC<ITriggerProps> = ({ trigger, workflowVersion, wor
       <CardHeader className="relative pl-20">
         <div className="absolute left-0 top-0 flex size-full items-center justify-between px-6">
           <VinesIcon src={icon} size="md" />
-          <Switch checked={enabled} onCheckedChange={handleEnableChange} />
+          <Switch disabled={!isLatestWorkflowVersion} checked={enabled} onCheckedChange={handleEnableChange} />
         </div>
         <CardTitle>{displayName}</CardTitle>
         <CardDescription>{description}</CardDescription>
@@ -76,7 +80,12 @@ export const Trigger: React.FC<ITriggerProps> = ({ trigger, workflowVersion, wor
       <CardFooter className="flex items-center justify-end">
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button className="text-red-10 [&_svg]:stroke-red-10" variant="outline" icon={<Trash2 />} size="small">
+            <Button
+              className={cn('text-red-10 [&_svg]:stroke-red-10', !isLatestWorkflowVersion && 'hidden')}
+              variant="outline"
+              icon={<Trash2 />}
+              size="small"
+            >
               删除触发器
             </Button>
           </AlertDialogTrigger>

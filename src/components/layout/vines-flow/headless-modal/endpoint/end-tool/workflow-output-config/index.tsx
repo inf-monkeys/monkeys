@@ -4,8 +4,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { get } from 'lodash';
 import { Info, Plus, TrashIcon } from 'lucide-react';
 
+import { useGetWorkflow } from '@/apis/workflow';
 import { WorkflowOutputVariableEditor } from '@/components/layout/vines-flow/headless-modal/endpoint/end-tool/workflow-output-config/variable-editor.tsx';
-import { useVinesFlowWithPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Button } from '@/components/ui/button';
 import { CodeEditor } from '@/components/ui/code-editor';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.t
 import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
-import { cn } from '@/utils';
+import { cn, useLocalStorage } from '@/utils';
 
 export interface IVinesOutputData {
   key: string;
@@ -26,10 +26,10 @@ interface IWorkflowOutputConfigProps extends React.ComponentPropsWithoutRef<'div
 }
 
 export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({ output, setOutput }) => {
-  const { canvasMode, workflowId } = useFlowStore();
+  const { canvasMode, workflowId, isLatestWorkflowVersion } = useFlowStore();
 
   const { vines } = useVinesFlow();
-  const { workflow } = useVinesFlowWithPage(workflowId);
+  const { data: workflow } = useGetWorkflow(workflowId, void 0, useLocalStorage('vines-apikey', '', false)[0]);
 
   const variableMapper = Object.fromEntries(vines.variablesMapper.entries());
 
@@ -124,7 +124,7 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({ out
                   outputRef.current = [{ key: 'output1', value: 'simple data' }];
                   setOutput(outputRef.current);
                 }}
-                disabled={disabled}
+                disabled={disabled || !isLatestWorkflowVersion}
               >
                 新建输出配置
               </Button>
@@ -192,7 +192,7 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({ out
           onUpdate={handleUpdateRaw}
           lineNumbers={3}
           minimap={false}
-          readonly={disabled}
+          readonly={disabled || !isLatestWorkflowVersion}
         />
         {editorError && (
           <p className="pointer-events-none absolute bottom-7 left-8 flex items-center gap-2 text-xs text-danger opacity-80">
