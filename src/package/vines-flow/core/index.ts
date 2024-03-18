@@ -56,16 +56,16 @@ export class VinesCore extends VinesTools(VinesBase) {
   private nodeInitSize = { width: 80, height: 80 };
 
   private init() {
-    if (this.nodeInitSize.width !== 80 || this.nodeInitSize.height !== 80) {
-      this.setAllNodeSize(this.nodeInitSize.width, this.nodeInitSize.height);
-    }
-
     this.nodes = this.tasks.map((it) => VinesNode.create(it, this));
     this.nodes.splice(0, 0, EndPointNode.createStart(this));
     this.nodes.push(EndPointNode.createEnd(this));
 
     this.getAllNodes(false).map((it) => it.check());
     this.generateWorkflowVariables();
+
+    if (this.nodeInitSize.width !== 80 || this.nodeInitSize.height !== 80) {
+      this.setAllNodeSize(this.nodeInitSize.width, this.nodeInitSize.height);
+    }
   }
 
   public update(
