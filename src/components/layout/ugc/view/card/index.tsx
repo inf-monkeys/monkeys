@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 
 import { Row } from '@tanstack/react-table';
+import _ from 'lodash';
 
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { IUgcRenderOptions } from '@/components/layout/ugc/typings.ts';
@@ -9,7 +10,7 @@ import { cn } from '@/utils';
 
 interface IUgcViewCardProps<E extends object> {
   row: Row<IAssetItem<E>>;
-  renderOptions: IUgcRenderOptions<E>;
+  renderOptions: IUgcRenderOptions<IAssetItem<E>>;
   operateArea?: (item: IAssetItem<E>) => React.ReactNode;
   onItemClick?: (item: IAssetItem<E>, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   index: number;
@@ -22,26 +23,21 @@ export const UgcViewCard = <E extends object>({
   operateArea,
   onItemClick,
 }: IUgcViewCardProps<E>) => {
-  const logo = useMemo(
-    () => (renderOptions.logo ? row.renderValue<React.ReactNode>(renderOptions.logo.toString()) : ''),
-    [index, row],
-  );
-  const title = useMemo(
-    () => (renderOptions.title ? row.renderValue<string>(renderOptions.title.toString()) : ''),
-    [index, row],
-  );
-  const subtitle = useMemo(
-    () => (renderOptions.subtitle ? row.renderValue<React.ReactNode>(renderOptions.subtitle.toString()) : ''),
-    [index, row],
-  );
-  const description = useMemo(
-    () => (renderOptions.description ? row.renderValue<string>(renderOptions.description.toString()) : '暂无描述'),
-    [index, row],
-  );
+  const getRenderNode = (key: string, defaultValue?: React.ReactNode) =>
+    renderOptions[key]
+      ? _.isFunction(renderOptions[key])
+        ? (renderOptions[key](row.original) as React.ReactNode)
+        : row.renderValue<React.ReactNode>(renderOptions[key])
+      : defaultValue ?? '';
+
+  const logo = useMemo(() => getRenderNode('logo'), [index, row]);
+  const title = useMemo(() => getRenderNode('title'), [index, row]);
+  const subtitle = useMemo(() => getRenderNode('subtitle'), [index, row]);
+  const description = useMemo(() => getRenderNode('description', '暂无描述'), [index, row]);
 
   return (
     <Card
-      className={cn('h-44', {
+      className={cn('h-40', {
         'cursor-pointer transition-colors hover:bg-[--bg-hover-color]': !!onItemClick,
         'cursor-default': !onItemClick,
       })}
