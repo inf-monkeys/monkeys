@@ -78,6 +78,7 @@ export const useVinesPage = () => {
     if (originPagesRef.current === null) {
       originPagesRef.current = JSON.parse(stringify(pages));
     }
+    setPage(pages.find((it) => it._id === pageId) ?? null);
   }, [pages]);
 
   const navigateTo = (pageId: string) =>

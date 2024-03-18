@@ -104,7 +104,7 @@ export class VinesCore extends VinesTools(VinesBase) {
     needToInit && this.init();
 
     renderDirection && (this.renderOptions.direction = renderDirection);
-    if (renderType) {
+    if (renderType && VINES_DEF_NODE?.[renderType]) {
       this.renderOptions.type = renderType;
       const { width, height } = VINES_DEF_NODE[renderType];
       this.setAllNodeSize(width, height);
