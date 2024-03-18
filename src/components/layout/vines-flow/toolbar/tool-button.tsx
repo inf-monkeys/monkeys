@@ -13,7 +13,15 @@ interface IToolButtonProps extends React.ComponentPropsWithoutRef<'button'> {
   keys?: KbdKey | KbdKey[] | string[] | string;
 }
 
-export const ToolButton: React.FC<IToolButtonProps> = ({ onClick, className, tip, icon, keys, side = 'right' }) => {
+export const ToolButton: React.FC<IToolButtonProps> = ({
+  onClick,
+  className,
+  tip,
+  icon,
+  keys,
+  side = 'right',
+  disabled,
+}) => {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -22,6 +30,7 @@ export const ToolButton: React.FC<IToolButtonProps> = ({ onClick, className, tip
           variant="borderless"
           icon={icon}
           onClick={onClick}
+          disabled={disabled}
         />
       </TooltipTrigger>
       <TooltipContent side={side} className="flex items-center gap-2">

@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 
 import { Check, ChevronsUpDown } from 'lucide-react';
 
-import { useWorkflowVersions } from '@/apis/workflow';
+import { useWorkflowVersions } from '@/apis/workflow/version';
+import { WorkflowRelease } from '@/components/layout/vines-flow/toolbar/version/release.tsx';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card.tsx';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
@@ -22,7 +23,7 @@ export const VinesVersionToolbar: React.FC<IVinesVersionToolbarProps> = () => {
 
   const vinesVersion = vines.version.toString();
 
-  const workflowVersion = data?.map((it) => it.version)?.reverse() || [];
+  const workflowVersion = data?.map((it) => it.version) || [];
 
   useEffect(() => {
     if (data) {
@@ -70,6 +71,7 @@ export const VinesVersionToolbar: React.FC<IVinesVersionToolbarProps> = () => {
           </Command>
         </PopoverContent>
       </Popover>
+      <WorkflowRelease />
     </Card>
   );
 };

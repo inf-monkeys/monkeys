@@ -5,6 +5,7 @@ import { useParams } from '@tanstack/react-router';
 import { useWindowEvent } from '@mantine/hooks';
 import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
+import { set } from 'lodash';
 
 import { useGetWorkflow } from '@/apis/workflow';
 import { VinesEdges } from '@/components/layout/vines-flow/edges';
@@ -50,11 +51,28 @@ export const VinesFlow: React.FC<IVinesFlowProps> = ({ workflowId }) => {
   useEffect(() => {
     workflowId && setWorkflowId(finalWorkflowId);
     if (workflow) {
-      if (!initialWorkflowVersionRef.current) {
-        initialWorkflowVersionRef.current = workflow.version;
+      const initialWorkflowVersion = initialWorkflowVersionRef.current;
+      const workflowVersion = workflow.version;
+
+      if (!initialWorkflowVersion || initialWorkflowVersion < vinesVersion) {
+        initialWorkflowVersionRef.current = workflowVersion;
       }
-      vines.update({ workflow });
+
+      if (workflowVersion < vinesVersion) {
+        set(workflow, 'version', vinesVersion);
+      }
+
+      if (workflowVersion !== vinesVersion && initialWorkflowVersion) {
+        setVisible(false);
+        setTimeout(() => {
+          vines.update({ workflow });
+          setTimeout(() => setVisible(true), 80);
+        }, 164);
+      } else {
+        vines.update({ workflow });
+      }
     }
+
     if (!workflow?.workflowDef?.tasks?.length) {
       setVisible(false);
     }

@@ -76,6 +76,20 @@ export const createVinesCore = (workflowId: string) => {
             void mutate(`/api/workflow/${workflowId}`, (prev) => ({ ...prev, ...newWorkflow }), {
               revalidate: false,
             });
+            void mutate(
+              `/api/workflow/${workflowId}/versions`,
+              (prev: MonkeyWorkflow[] | undefined) => {
+                const currentVersionWorkflowIndex = prev?.findIndex((it) => it.version === _vines.version);
+                if (currentVersionWorkflowIndex === void 0 || currentVersionWorkflowIndex === -1) {
+                  return prev;
+                }
+                prev?.splice(currentVersionWorkflowIndex, 1, { ...prev[currentVersionWorkflowIndex], ...newWorkflow });
+                return prev;
+              },
+              {
+                revalidate: false,
+              },
+            );
           }, 100) as unknown as number,
         );
       },
