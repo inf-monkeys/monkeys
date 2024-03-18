@@ -57,6 +57,7 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
     setCanvasMode(canvasMode === CanvasStatus.EDIT ? CanvasStatus.READONLY : CanvasStatus.EDIT);
   const handleDirectionChange = () => {
     setVisible(false);
+    void updatePageData('customOptions.render.useHorizontal', !isHorizontal);
     setTimeout(() => vines.update({ renderDirection: isHorizontal ? 'vertical' : 'horizontal' }), 80);
   };
   const handleRenderTypeChange = () => {

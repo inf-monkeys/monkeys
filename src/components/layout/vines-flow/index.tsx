@@ -5,7 +5,7 @@ import { useParams } from '@tanstack/react-router';
 import { useWindowEvent } from '@mantine/hooks';
 import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
-import { set } from 'lodash';
+import { get, set } from 'lodash';
 
 import { useGetWorkflow } from '@/apis/workflow';
 import { VinesEdges } from '@/components/layout/vines-flow/edges';
@@ -15,6 +15,7 @@ import { VinesNodes } from '@/components/layout/vines-flow/nodes';
 import { VinesToolbar } from '@/components/layout/vines-flow/toolbar';
 import { VinesVersionToolbar } from '@/components/layout/vines-flow/toolbar/version';
 import { VinesFlowWrapper } from '@/components/layout/vines-flow/wrapper';
+import { IVinesFlowRenderOptions } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
@@ -27,7 +28,7 @@ interface IVinesFlowProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const VinesFlow: React.FC<IVinesFlowProps> = ({ workflowId }) => {
-  const { containerWidth, containerHeight } = usePageStore();
+  const { containerWidth, containerHeight, page } = usePageStore();
   const { setWorkflowId, visible, setVisible, setInitialScale, canvasMode } = useFlowStore();
 
   const { workflowId: pageWorkflowId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
@@ -79,6 +80,15 @@ export const VinesFlow: React.FC<IVinesFlowProps> = ({ workflowId }) => {
       setVisible(false);
     }
   }, [workflow]);
+
+  useEffect(() => {
+    if (!page) return;
+    const renderDirection = (
+      get(page, 'customOptions.render.useHorizontal', false) ? 'horizontal' : 'vertical'
+    ) as IVinesFlowRenderOptions['direction'];
+    const renderType = get(page, 'customOptions.render.type', 'simplify') as IVinesFlowRenderOptions['type'];
+    vines.update({ renderDirection, renderType });
+  }, [page]);
 
   useEffect(() => {
     const initialScale = calculateAdaptiveZoom(containerWidth, containerHeight);
