@@ -16,3 +16,7 @@ export type IRenderType =
   | 'color';
 
 export type IDisplayMode = 'table' | 'gallery' | 'card' | null;
+
+export type IUgcRenderOptions<E> = {
+  [type in IRenderType]?: keyof E | string;
+};
