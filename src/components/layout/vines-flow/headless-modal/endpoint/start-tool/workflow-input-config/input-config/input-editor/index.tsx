@@ -37,7 +37,7 @@ import VinesEvent from '@/utils/events.ts';
 interface IInputEditorProps {}
 
 export const InputEditor: React.FC<IInputEditorProps> = () => {
-  const { workflowId } = useFlowStore();
+  const { workflowId, isLatestWorkflowVersion } = useFlowStore();
 
   const { vines } = useVinesFlow();
 
@@ -256,7 +256,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
                   )}
                 />
               </div>
-              {type === 'file' && (
+              {type === 'file' && isLatestWorkflowVersion && (
                 <>
                   <Separator orientation="vertical" className="mx-2" />
                   <div className="flex w-[40rem] flex-col gap-2">
@@ -272,7 +272,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
             </div>
 
             <DialogFooter>
-              <Button type="submit" variant="outline">
+              <Button type="submit" variant="outline" className={cn(!isLatestWorkflowVersion && 'hidden')}>
                 确定
               </Button>
             </DialogFooter>

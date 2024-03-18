@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { useHotkeys } from '@mantine/hooks';
-import { AnimatePresence, motion } from 'framer-motion';
 import {
   BetweenHorizontalStart,
   BetweenVerticalStart,
@@ -21,6 +20,7 @@ import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
+import { cn } from '@/utils';
 import VinesEvent from '@/utils/events';
 
 interface IVinesToolbarProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -32,6 +32,7 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
     canvasMode,
     canvasDisabled,
     isCanvasMoving,
+    isLatestWorkflowVersion,
     setCanvasMode,
     setCanvasDisabled,
     setCanvasMoving,
@@ -73,50 +74,42 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
     ['ctrl+d', handleDirectionChange, { preventDefault: true }],
   ]);
 
+  const isNotLatestWorkflowVersion = !isLatestWorkflowVersion;
+
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        key="vines-canvas-toolbar"
-        className="absolute left-0 top-0 z-40 flex items-center p-4"
-      >
-        <Card className="flex flex-col flex-nowrap gap-2 p-2">
-          <ToolButton icon={<ZoomInIcon />} tip="放大" keys={['ctrl', '+']} onClick={handleZoomIn} />
-          <ToolButton icon={<Fullscreen />} tip="适应屏幕" keys={['ctrl', '1']} onClick={handleFitScreen} />
-          <ToolButton icon={<ZoomOutIcon />} tip="缩小" keys={['ctrl', '-']} onClick={handleZoomOut} />
-          <ToolButton
-            icon={isCanvasMoving ? <Hand /> : <MousePointer2 />}
-            tip={isCanvasMoving ? '鼠标' : '移动视图'}
-            keys={['space']}
-            onClick={handleCanvasMove}
-          />
-          <ToolButton
-            className={isEditMode ? '' : '[&_svg]:stroke-red-10'}
-            icon={<Lock />}
-            tip={isEditMode ? '只读模式' : '编辑模式'}
-            keys={['ctrl', 'L']}
-            onClick={handleToggleMode}
-          />
-          <ToolButton
-            icon={isHorizontal ? <BetweenHorizontalStart /> : <BetweenVerticalStart />}
-            tip={`排版方向：${isHorizontal ? '横向' : '纵向'}`}
-            keys={['ctrl', 'D']}
-            onClick={handleDirectionChange}
-          />
-          <ToolButton
-            icon={<Workflow />}
-            tip={`工具显示：${isRenderMini ? '极简' : isRenderComplicate ? '全参数' : '普通'}模式`}
-            onClick={handleRenderTypeChange}
-          />
-          <ToolButton
-            icon={<Code />}
-            tip="开发者模式"
-            onClick={() => VinesEvent.emit('flow-raw-data-editor', workflowId)}
-          />
-        </Card>
-      </motion.div>
-    </AnimatePresence>
+    <Card className="absolute left-0 top-0 z-40 m-4 flex flex-col flex-nowrap gap-2 p-2">
+      <ToolButton icon={<ZoomInIcon />} tip="放大" keys={['ctrl', '+']} onClick={handleZoomIn} />
+      <ToolButton icon={<Fullscreen />} tip="适应屏幕" keys={['ctrl', '1']} onClick={handleFitScreen} />
+      <ToolButton icon={<ZoomOutIcon />} tip="缩小" keys={['ctrl', '-']} onClick={handleZoomOut} />
+      <ToolButton
+        icon={isCanvasMoving ? <Hand /> : <MousePointer2 />}
+        tip={isCanvasMoving ? '鼠标' : '移动视图'}
+        keys={['space']}
+        onClick={handleCanvasMove}
+      />
+      <ToolButton
+        className={cn(!isEditMode && '[&_svg]:stroke-red-10', isNotLatestWorkflowVersion && 'hidden')}
+        icon={<Lock />}
+        tip={isEditMode ? '只读模式' : '编辑模式'}
+        keys={['ctrl', 'L']}
+        onClick={handleToggleMode}
+      />
+      <ToolButton
+        icon={isHorizontal ? <BetweenHorizontalStart /> : <BetweenVerticalStart />}
+        tip={`排版方向：${isHorizontal ? '横向' : '纵向'}`}
+        keys={['ctrl', 'D']}
+        onClick={handleDirectionChange}
+      />
+      <ToolButton
+        icon={<Workflow />}
+        tip={`工具显示：${isRenderMini ? '极简' : isRenderComplicate ? '全参数' : '普通'}模式`}
+        onClick={handleRenderTypeChange}
+      />
+      <ToolButton
+        icon={<Code />}
+        tip="开发者模式"
+        onClick={() => VinesEvent.emit('flow-raw-data-editor', workflowId)}
+      />
+    </Card>
   );
 };

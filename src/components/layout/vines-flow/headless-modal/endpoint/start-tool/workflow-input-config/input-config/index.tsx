@@ -23,11 +23,15 @@ import { Tag } from '@/components/ui/tag';
 import { TagGroup } from '@/components/ui/tag/tag-group.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useVinesFlow } from '@/package/vines-flow';
+import { useFlowStore } from '@/store/useFlowStore';
+import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IInputConfigProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const InputConfig: React.FC<IInputConfigProps> = () => {
+  const { isLatestWorkflowVersion } = useFlowStore();
+
   const { vines } = useVinesFlow();
 
   const inputs = vines.workflowInput.map((it) =>
@@ -73,7 +77,11 @@ export const InputConfig: React.FC<IInputConfigProps> = () => {
                   />
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button icon={<Trash2 />} variant="outline" className="scale-80 [&_svg]:stroke-red-10" />
+                      <Button
+                        icon={<Trash2 />}
+                        variant="outline"
+                        className={cn('scale-80 [&_svg]:stroke-red-10', !isLatestWorkflowVersion && 'hidden')}
+                      />
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
@@ -129,7 +137,12 @@ export const InputConfig: React.FC<IInputConfigProps> = () => {
           );
         })}
       </ScrollArea>
-      <Button variant="outline" icon={<Plus />} onClick={() => VinesEvent.emit('flow-input-editor', vines.workflowId)}>
+      <Button
+        className={cn(!isLatestWorkflowVersion && 'hidden')}
+        variant="outline"
+        icon={<Plus />}
+        onClick={() => VinesEvent.emit('flow-input-editor', vines.workflowId)}
+      >
         新建配置
       </Button>
       <InputEditor />

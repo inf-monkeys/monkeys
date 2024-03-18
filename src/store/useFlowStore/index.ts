@@ -5,8 +5,11 @@ import { createContext } from 'zustand-utils';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 
 export interface FlowStore {
-  workflowId: string; // 不建议从此处获取，建议从 useVinesFlow 获取
+  workflowId: string;
   setWorkflowId: (workflowId: string) => void;
+
+  isLatestWorkflowVersion: boolean;
+  setIsLatestWorkflowVersion: (isLatestWorkflowVersion: boolean) => void;
 
   visible: boolean;
   setVisible: (visible: boolean) => void;
@@ -43,6 +46,9 @@ const createFlowStore = () =>
     immer((set) => ({
       workflowId: '',
       setWorkflowId: (workflowId) => set({ workflowId }),
+
+      isLatestWorkflowVersion: true,
+      setIsLatestWorkflowVersion: (isLatestWorkflowVersion) => set({ isLatestWorkflowVersion }),
 
       visible: false,
       setVisible: (visible) => set({ visible }),

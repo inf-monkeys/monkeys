@@ -6,6 +6,8 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
+import { useFlowStore } from '@/store/useFlowStore';
+import { cn } from '@/utils';
 import VinesEvent from '@/utils/events';
 
 interface IQuickOptionsProps {
@@ -13,6 +15,7 @@ interface IQuickOptionsProps {
 }
 
 export const QuickOptions: React.FC<IQuickOptionsProps> = ({ nodeId }) => {
+  const { isLatestWorkflowVersion } = useFlowStore();
   const { vines } = useVinesFlow();
 
   const nodes = vines
@@ -66,7 +69,12 @@ export const QuickOptions: React.FC<IQuickOptionsProps> = ({ nodeId }) => {
       </Tooltip>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button className="[&_svg]:stroke-red-10" icon={<Trash2 />} variant="borderless" onClick={handleDelete} />
+          <Button
+            className={cn('[&_svg]:stroke-red-10', !isLatestWorkflowVersion && 'hidden')}
+            icon={<Trash2 />}
+            variant="borderless"
+            onClick={handleDelete}
+          />
         </TooltipTrigger>
         <TooltipContent>删除此工具</TooltipContent>
       </Tooltip>

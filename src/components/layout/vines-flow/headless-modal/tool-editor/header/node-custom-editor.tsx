@@ -11,12 +11,14 @@ import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
+import { useFlowStore } from '@/store/useFlowStore';
 
 interface INodeCustomEditorProps {
   node?: VinesNode;
 }
 
 export const NodeCustomEditor: React.FC<INodeCustomEditorProps> = ({ node }) => {
+  const { isLatestWorkflowVersion } = useFlowStore();
   const { vines } = useVinesFlow();
 
   const nodeId = node?.id ?? '';
@@ -54,7 +56,7 @@ export const NodeCustomEditor: React.FC<INodeCustomEditorProps> = ({ node }) => 
 
   return (
     <Tooltip>
-      <Popover onOpenChange={(value) => !value && handleUpdate()}>
+      <Popover onOpenChange={(value) => !value && isLatestWorkflowVersion && handleUpdate()}>
         <PopoverTrigger asChild>
           <TooltipTrigger asChild>
             <div className="flex cursor-pointer items-center gap-4 rounded-md p-2 transition-all hover:bg-gray-2 hover:shadow">
