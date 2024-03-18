@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
 
+import _ from 'lodash';
 import { CreditCard, Images, Table2 } from 'lucide-react';
 
-import { IDisplayMode } from '@/components/layout/ugc/typings.ts';
+import { IDisplayMode, IDisplayModeStorage } from '@/components/layout/ugc/typings.ts';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,9 +26,14 @@ interface IUgcViewHeaderProps extends React.ComponentPropsWithoutRef<'div'> {
 export const UgcViewHeader: React.FC<IUgcViewHeaderProps> = ({ assetKey, subtitle }) => {
   const team = useVinesTeam();
 
-  const [displayMode, setDisplayMode] = useLocalStorage<IDisplayMode>(
-    `vines-${team.teamId}-${assetKey}-display-mode`,
-    'card',
+  const [displayModeStorage, setDisplayModeStorage] = useLocalStorage<IDisplayModeStorage>(
+    `vines-ui-asset-display-mode`,
+    {},
+  );
+
+  const displayMode = useMemo(
+    () => _.get(displayModeStorage, [team.teamId, assetKey], 'card'),
+    [displayModeStorage, team.teamId, assetKey],
   );
 
   const displayModeIcon = useMemo(
@@ -62,7 +68,15 @@ export const UgcViewHeader: React.FC<IUgcViewHeaderProps> = ({ assetKey, subtitl
             <DropdownMenuRadioGroup
               value={displayMode ?? 'card'}
               onValueChange={(v) => {
-                setDisplayMode(v as IDisplayMode);
+                setDisplayModeStorage((prev) => {
+                  return {
+                    ...prev,
+                    [team.teamId]: {
+                      ...prev[team.teamId],
+                      [assetKey]: v as IDisplayMode,
+                    },
+                  };
+                });
               }}
             >
               <DropdownMenuRadioItem value="table">表格视图</DropdownMenuRadioItem>

@@ -5,7 +5,9 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import { useClipboard } from '@mantine/hooks';
 import { Copy, FileUp, FolderUp, Link, MoreHorizontal, Pencil, Trash } from 'lucide-react';
+import moment from 'moment';
 
+import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { IPaginationListData } from '@/apis/typings.ts';
 import { listUgcWorkflowsMock } from '@/apis/ugc/mock.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
@@ -41,43 +43,43 @@ export const Workflows: React.FC = () => {
         data={listUgcWorkflowsMock as unknown as IPaginationListData<IAssetItem<MonkeyWorkflow>>}
         columns={[
           {
-            accessorKey: '_id',
-          },
-          {
-            accessorKey: 'workflowId',
-          },
-          {
             accessorKey: 'iconUrl',
+            header: '图标',
             accessorFn: (row) => <VinesIcon size="md">{(row.iconUrl as string) ?? ''}</VinesIcon>,
+            cell: (props) => props.getValue() as React.ReactNode,
           },
           {
             accessorKey: 'name',
+            header: '名称',
           },
           {
             accessorKey: 'user',
+            header: '用户',
+            cell: (props) => <span>{(props.getValue() as IVinesUser).name ?? ''}</span>,
           },
           {
             accessorKey: 'createdTimestamp',
-            cell: (props) => '',
+            header: '创建时间',
+            cell: (props) => <span>{moment(props.getValue() as number).format('YYYY-MM-DD HH:mm:ss')}</span>,
           },
           {
             accessorKey: 'updatedTimestamp',
-          },
-          {
-            id: 'subtitle',
-            accessorFn: (row) => (
-              <div className="flex gap-1">
-                <span>{row.user?.name ?? '未知'}</span>
-                <span>创建于</span>
-                <span>{formatTimeDiffPrevious(row.createdTimestamp)}</span>
-              </div>
-            ),
+            header: '更新时间',
+            cell: (props) => <span>{moment(props.getValue() as number).format('YYYY-MM-DD HH:mm:ss')}</span>,
           },
         ]}
         renderOptions={{
           logo: 'iconUrl',
           title: 'name',
-          subtitle: 'subtitle',
+          subtitle: (item) => {
+            return (
+              <div className="flex gap-1">
+                <span>{item.user?.name ?? '未知'}</span>
+                <span>创建于</span>
+                <span>{formatTimeDiffPrevious(item.createdTimestamp)}</span>
+              </div>
+            );
+          },
         }}
         operateArea={(item) => (
           <DropdownMenu>
