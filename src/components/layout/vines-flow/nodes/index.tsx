@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
+import { ComplicateNodes } from '@/components/layout/vines-flow/nodes/complicate';
 import { NodeController } from '@/components/layout/vines-flow/nodes/controller.tsx';
 import { SimplifyNodes } from '@/components/layout/vines-flow/nodes/simplify';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
@@ -47,7 +48,7 @@ export const VinesNodes: React.FC<IVinesNodesProps> = () => {
     <>
       {visible && <NodeController nodes={vinesNodes} nodeStagger={nodeStagger} />}
       {vines.renderOptions.type === IVinesFlowRenderType.COMPLICATE ? (
-        <></>
+        <ComplicateNodes nodes={vinesNodes} nodeStagger={nodeStagger} visible={visible} />
       ) : (
         <SimplifyNodes nodes={vinesNodes} nodeStagger={nodeStagger} visible={visible} />
       )}

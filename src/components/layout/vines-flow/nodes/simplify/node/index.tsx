@@ -25,9 +25,8 @@ export const SimplifyNode: React.FC<ISimplifyNodeProps> = ({ node }) => {
     id: nodeId,
     position: { x: nodeX, y: nodeY },
     customData,
-    _task,
   } = node;
-  const { name: toolName } = _task;
+  const { name: toolName } = node.getRaw();
 
   const { vines } = useVinesFlow();
   const { canvasMode, canvasDisabled } = useFlowStore();
