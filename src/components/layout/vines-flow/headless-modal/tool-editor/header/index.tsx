@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { NodeCustomEditor } from '@/components/layout/vines-flow/headless-modal/tool-editor/header/node-custom-editor.tsx';
+import { NodeCustomEditor } from '@/components/layout/vines-flow/headless-modal/tool-editor/header/node-custom-editor';
 import { QuickOptions } from '@/components/layout/vines-flow/headless-modal/tool-editor/header/quick-options.tsx';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 

@@ -38,7 +38,7 @@ export const VinesIconSelector: React.FC<IVinesIconSelectorProps> = ({ children,
       }
       setSelectedEmoji(emoji);
     }
-  }, []);
+  }, [emojiLink]);
 
   return (
     <Popover open={visible} onOpenChange={setVisible}>
