@@ -20,7 +20,7 @@ export const ComplicateTriggerNode: React.FC = () => {
   const triggerType = triggerTypes?.find(({ type }) => type === trigger?.type);
 
   return (
-    <div className="absolute left-0 top-0 size-full">
+    <>
       <ComplicateNodeHeader
         tool={{} as VinesToolDef}
         toolName=""
@@ -44,6 +44,6 @@ export const ComplicateTriggerNode: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </>
   );
 };
