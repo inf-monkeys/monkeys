@@ -13,6 +13,7 @@ import { Card } from '@/components/ui/card.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
+import { VINES_STATUS } from '@/package/vines-flow/core/typings.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { cn } from '@/utils';
@@ -94,7 +95,7 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
         onMouseEnter={() => (mouseFocusRef.current = true)}
         onMouseLeave={() => (mouseFocusRef.current = false)}
       >
-        {!tool && isSimpleNode ? (
+        {vines.status === VINES_STATUS.IDLE && isSimpleNode ? (
           <motion.div
             className="flex h-full w-full items-center justify-center"
             key={'vines-complicate-loading-' + nodeId}
