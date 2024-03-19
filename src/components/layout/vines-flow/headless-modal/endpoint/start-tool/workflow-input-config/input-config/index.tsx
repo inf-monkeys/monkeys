@@ -29,7 +29,7 @@ import VinesEvent from '@/utils/events.ts';
 
 interface IInputConfigProps extends React.ComponentPropsWithoutRef<'div'> {}
 
-export const InputConfig: React.FC<IInputConfigProps> = () => {
+export const InputConfig: React.FC<IInputConfigProps> = ({ className }) => {
   const { isLatestWorkflowVersion } = useFlowStore();
 
   const { vines } = useVinesFlow();
@@ -48,7 +48,7 @@ export const InputConfig: React.FC<IInputConfigProps> = () => {
   };
 
   return (
-    <div className="relative flex h-80 w-full flex-col gap-4 py-2">
+    <div className={cn('relative flex h-80 w-full flex-col gap-4 py-2', className)}>
       <ScrollArea className="px-2">
         {inputs.map((it, index) => {
           const { name: variableId, displayName, type, default: defaultData, typeOptions } = it;
