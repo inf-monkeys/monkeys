@@ -125,6 +125,7 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({ out
                   setOutput(outputRef.current);
                 }}
                 disabled={disabled || !isLatestWorkflowVersion}
+                variant="outline"
               >
                 新建输出配置
               </Button>
@@ -164,7 +165,14 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({ out
                       workflowId={workflowId}
                     />
                   </div>
-                  {!disabled && <Button icon={<TrashIcon />} onClick={() => handleDelete(index)} disabled={disabled} />}
+                  {!disabled && (
+                    <Button
+                      icon={<TrashIcon />}
+                      onClick={() => handleDelete(index)}
+                      disabled={disabled}
+                      variant="outline"
+                    />
+                  )}
                 </div>
               ))}
               {!disabled && (
@@ -176,6 +184,7 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({ out
                       setOutput(outputRef.current);
                     }}
                     disabled={disabled}
+                    variant="outline"
                   >
                     新建输出配置
                   </Button>
