@@ -87,7 +87,7 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
               </TabsList>
             </div>
             <div className="relative flex items-center">
-              <div className="pointer-events-none absolute -left-4 h-full w-10 bg-gradient-to-l from-white from-60%" />
+              <div className="pointer-events-none absolute -left-4 h-full w-10 bg-gradient-to-l from-background from-60%" />
               <Button
                 icon={<ChevronLeft size={16} />}
                 variant="outline"

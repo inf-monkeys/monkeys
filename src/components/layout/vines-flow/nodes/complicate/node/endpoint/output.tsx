@@ -46,9 +46,7 @@ export const ComplicateEndNode: React.FC = () => {
           保存配置
         </Button>
       </ComplicateNodeHeader>
-      <div className="w-full px-5">
-        <WorkflowOutputConfig output={output} setOutput={setOutput} />
-      </div>
+      <WorkflowOutputConfig className="px-5" output={output} setOutput={setOutput} />
     </>
   );
 };
