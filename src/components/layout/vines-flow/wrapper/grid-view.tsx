@@ -220,7 +220,7 @@ export const GridView: React.FC<IGridViewProps> = ({ toggleMoveState, children }
             setStartY(null);
             movedRef.current = false;
           } else if ((e.target as SVGSVGElement).getAttribute('data-id') === 'vines-drag' && button === 2) {
-            setTimeout(() => VinesEvent.emit('canvas-context-menu', workflowId, e));
+            setTimeout(() => VinesEvent.emit('canvas-context-menu', workflowId, e, 'CANVAS'));
           }
         }}
         onMouseMove={handleMouseMove}
