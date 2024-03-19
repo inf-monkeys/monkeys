@@ -59,6 +59,8 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
 
   const task = (node?.getRaw() || {}) as JSONValue;
 
+  const disabled = !isLatestWorkflowVersion;
+
   return (
     <Dialog open={open} onOpenChange={(val) => !disableDialogClose && setOpen(val)}>
       <DialogContent className="max-w-[50rem]">
@@ -87,7 +89,7 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
               )}
               {activeTab === 'dev' && (
                 <TabsContent className="mt-4 h-[25em]" value="dev">
-                  <CodeEditor data={task} lineNumbers={4} onUpdate={handleRawUpdate} />
+                  <CodeEditor data={task} lineNumbers={4} onUpdate={handleRawUpdate} readonly={disabled} />
                 </TabsContent>
               )}
               {activeTab === 'more-config' && <TabsContent className="mt-4 h-[25em]" value="more-config"></TabsContent>}
@@ -97,7 +99,7 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
         </Tabs>
         <DialogFooter>
           <Button
-            className={cn(!isLatestWorkflowVersion && 'hidden')}
+            className={cn(disabled && 'hidden')}
             variant="outline"
             onClick={() => vines.emit('update', vines.getRaw())}
           >

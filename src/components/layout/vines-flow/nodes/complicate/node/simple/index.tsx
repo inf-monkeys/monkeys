@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { CircleEllipsisIcon, Save } from 'lucide-react';
 
 import { ToolInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input';
+import { ToolCustomDataEditor } from '@/components/layout/vines-flow/headless-modal/tool-editor/header/node-custom-editor/editor.tsx';
 import { ComplicateNodeHeader } from '@/components/layout/vines-flow/nodes/complicate/node/header.tsx';
 import { Button } from '@/components/ui/button';
 import { CodeEditor, JSONValue } from '@/components/ui/code-editor';
@@ -12,6 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.t
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { IVinesNodeCustomData, VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { IVinesVariableMap, VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
+import { useFlowStore } from '@/store/useFlowStore';
+import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IComplicateSimpleNodeProps {
@@ -41,6 +44,7 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
   onRawUpdate,
   vinesUpdateRaw,
 }) => {
+  const { isLatestWorkflowVersion } = useFlowStore();
   const [activeTab, setActiveTab] = useState('config');
 
   const isUnSupport = !tool;
@@ -48,13 +52,21 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
     isUnSupport && setActiveTab('dev');
   }, [isUnSupport]);
 
+  const disabled = !isLatestWorkflowVersion;
+
   return (
     <>
       <ComplicateNodeHeader tool={tool} toolName={toolName} customData={customData}>
         <div className="flex gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button icon={<Save />} size="small" variant="outline" onClick={onSaved} />
+              <Button
+                className={cn(disabled && 'hidden')}
+                icon={<Save />}
+                size="small"
+                variant="outline"
+                onClick={onSaved}
+              />
             </TooltipTrigger>
             <TooltipContent>保存配置</TooltipContent>
           </Tooltip>
@@ -107,11 +119,29 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
             )}
             {activeTab === 'dev' && (
               <TabsContent className="mt-4 h-80" value="dev">
-                <CodeEditor data={(task || {}) as JSONValue} lineNumbers={4} onUpdate={onRawUpdate} />
+                <CodeEditor
+                  data={(task || {}) as JSONValue}
+                  lineNumbers={4}
+                  onUpdate={onRawUpdate}
+                  readonly={disabled}
+                />
               </TabsContent>
             )}
             {activeTab === 'more-config' && <TabsContent className="mt-4 h-80" value="more-config"></TabsContent>}
-            {activeTab === 'custom-config' && <TabsContent className="mt-4 h-80" value="custom-config"></TabsContent>}
+            {activeTab === 'custom-config' && (
+              <TabsContent className="mt-4 h-80" value="custom-config">
+                <ToolCustomDataEditor
+                  icon={customData.icon ?? tool?.icon ?? ''}
+                  defaultIcon={tool?.icon}
+                  name={customData.title ?? ''}
+                  defaultName={tool?.displayName ?? ''}
+                  desc={customData?.description ?? ''}
+                  defaultDesc={tool?.description ?? ''}
+                  task={task}
+                  updateRaw={(newTask) => vinesUpdateRaw?.(nodeId, newTask, true)}
+                />
+              </TabsContent>
+            )}
           </motion.div>
         </AnimatePresence>
       </Tabs>
