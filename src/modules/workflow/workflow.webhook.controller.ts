@@ -1,11 +1,13 @@
+import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { IRequest } from '@/common/typings/request';
-import { All, Body, Controller, Param, Query, Req, Res } from '@nestjs/common';
+import { All, Body, Controller, Param, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { WorkflowWebhookService } from './workflow.webhook.service';
 
 @Controller('workflow')
 @ApiTags('Workflows/Webhook')
+@UseGuards(CompatibleAuthGuard)
 export class WorkflowWebhookController {
   constructor(private readonly service: WorkflowWebhookService) {}
 

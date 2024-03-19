@@ -9,7 +9,7 @@ import { ToolsRegistryCronService } from './services/tools-registry.cron.service
     {
       provide: 'LOCK',
       useFactory: () => {
-        return config.redis.enabled ? new RedisLockManager(config.redis.url) : new InMemoryLockManager();
+        return config.redis.url ? new RedisLockManager(config.redis.url) : new InMemoryLockManager();
       },
     },
     ToolsRegistryCronService,

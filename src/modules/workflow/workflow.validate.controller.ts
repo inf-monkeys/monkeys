@@ -1,13 +1,15 @@
+import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { ValidationIssueType } from '@/entities/workflow/workflow-metadata';
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ValidateWorkflowDto } from './dto/req/validate-workflow.dto';
 import { WorkflowValidateService } from './workflow.validate.service';
 
 @Controller('workflow')
 @ApiTags('Workflows/Validation')
+@UseGuards(CompatibleAuthGuard)
 export class WorkflowValidateController {
   constructor(private readonly service: WorkflowValidateService) {}
 

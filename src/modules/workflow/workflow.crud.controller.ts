@@ -1,6 +1,7 @@
+import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { Body, Controller, Delete, Get, Param, Post, Put, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateWorkflowDefDto } from './dto/req/create-workflow-def.dto';
 import { ImportWorkflowDto } from './dto/req/import-workflow.dto';
@@ -9,6 +10,7 @@ import { WorkflowCrudService } from './workflow.curd.service';
 
 @Controller('/workflow/metadata')
 @ApiTags('Workflows/CRUD')
+@UseGuards(CompatibleAuthGuard)
 export class WorkflowCrudController {
   constructor(private readonly service: WorkflowCrudService) {}
 

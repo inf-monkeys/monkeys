@@ -1,6 +1,7 @@
+import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { IRequest } from '@/common/typings/request';
 import { extractAssetFromZip, generateZip } from '@/common/utils/zip-asset';
-import { Body, Controller, Param, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import fs from 'fs';
 import { ObjectId } from 'mongodb';
@@ -9,6 +10,7 @@ import { ImportTeamDto } from './dto/import-team.dto';
 import { ExportService } from './export.service';
 
 @Controller('/tenant-assets')
+@UseGuards(CompatibleAuthGuard)
 export class ExportController {
   constructor(private readonly service: ExportService) {}
 

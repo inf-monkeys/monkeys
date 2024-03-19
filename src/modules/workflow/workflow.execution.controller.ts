@@ -1,9 +1,10 @@
 import { config } from '@/common/config';
 import { WorkflowExecutionContext } from '@/common/dto/workflow-execution-context.dto';
+import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { WorkflowTriggerType } from '@/entities/workflow/workflow-trigger';
-import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SearchWorkflowExecutionsDto } from './dto/req/search-workflow-execution.dto';
 import { StartWorkflowDto } from './dto/req/start-workflow.dto';
@@ -11,6 +12,7 @@ import { WorkflowExecutionService } from './workflow.execution.service';
 
 @Controller('/workflow')
 @ApiTags('Workflows/Execution')
+@UseGuards(CompatibleAuthGuard)
 export class WorkflowExecutionController {
   constructor(private readonly service: WorkflowExecutionService) {}
 

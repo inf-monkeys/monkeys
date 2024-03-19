@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { CommonMiddleware } from './common/middlewares/common.middleware';
 import { ToolsMiddleware } from './common/middlewares/tools.middleware';
 import { DatabaseModule } from './entities/database.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
 import { ComfyuiModule } from './modules/comfyui/comfyui.module';
 import { ExportModule } from './modules/export/export.module';
@@ -16,7 +17,20 @@ import { OpenapiModule } from './openapi.module';
 import { RepositoryMoule } from './repositories/repositories.module';
 
 @Module({
-  imports: [DatabaseModule, ToolsModule, RepositoryMoule, WorkflowModule, OpenapiModule, GatewaysModule, ScheduleModule.forRoot(), CronJobModule, ExportModule, ComfyuiModule, BootstrapModule],
+  imports: [
+    DatabaseModule,
+    ToolsModule,
+    RepositoryMoule,
+    WorkflowModule,
+    OpenapiModule,
+    GatewaysModule,
+    ScheduleModule.forRoot(),
+    CronJobModule,
+    ExportModule,
+    ComfyuiModule,
+    BootstrapModule,
+    AuthModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

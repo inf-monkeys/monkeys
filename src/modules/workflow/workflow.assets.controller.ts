@@ -1,6 +1,7 @@
+import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { Controller, Get, Param, Query, Req } from '@nestjs/common';
+import { Controller, Get, Param, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { WorkflowRepository } from '../../repositories/workflow.repository';
 import { WorkflowRelatedAssetResult } from './interfaces';
@@ -9,6 +10,7 @@ import { WorkflowCommonService } from './workflow.common.service';
 
 @Controller('/workflow')
 @ApiTags('Workflows/Assets')
+@UseGuards(CompatibleAuthGuard)
 export class WorkflowAssetsController {
   constructor(
     private readonly service: WorkflowAssetsService,

@@ -1,3 +1,4 @@
+import { ClientAuthMethod } from 'openid-client';
 import { DataSourceOptions } from 'typeorm';
 import { readConfig } from './readYaml';
 
@@ -24,8 +25,8 @@ export interface ServerConfig {
 }
 
 export interface RedisConfig {
-  enabled: boolean;
   url: string;
+  prefix: string;
 }
 
 export interface VectorGatewayService {
@@ -47,6 +48,32 @@ export interface ComfyUICofig {
   baseUrl: string;
 }
 
+export enum AuthMethod {
+  password = 'password',
+  phone = 'phone',
+  oidc = 'oidc',
+}
+
+export interface OIDCIdpConfig {
+  client_id: string;
+  client_secret: string;
+  issuer: string;
+  id_token_signed_response_alg: string;
+  token_endpoint_auth_method: ClientAuthMethod;
+  redirect_uri: string;
+  post_logout_redirect_uri: string;
+  scope: string;
+  grant_type: string;
+  response_type: string;
+  button_text: string;
+}
+
+export interface AuthConfig {
+  enabled: AuthMethod[];
+  sessionSecret?: string;
+  oidc?: OIDCIdpConfig;
+}
+
 export interface Config {
   server: ServerConfig;
   conductor: ConductorConfig;
@@ -56,6 +83,7 @@ export interface Config {
   tools: ToolServiceConfig[];
   cron: CronConfig;
   comfyui: ComfyUICofig;
+  auth: AuthConfig;
 }
 
 const port = readConfig('server.port', 3000);
@@ -82,8 +110,8 @@ export const config: Config = {
     synchronize: true,
   }),
   redis: {
-    enabled: readConfig('redis.enabled', false),
-    url: readConfig('redis.url', 'redis://localhost:6379'),
+    url: readConfig('redis.url'),
+    prefix: readConfig('redis.prefix', 'monkeys:'),
   },
   vector: {
     enabled: readConfig('vector.enabled', false),
@@ -95,5 +123,22 @@ export const config: Config = {
   },
   comfyui: {
     baseUrl: readConfig('comfyui.baseUrl', 'http://127.0.0.1:8188'),
+  },
+  auth: {
+    enabled: readConfig('auth.enabled', []),
+    sessionSecret: readConfig('auth.sessionSecret', 'monkeys'),
+    oidc: {
+      issuer: readConfig('auth.oidc.issuer'),
+      client_id: readConfig('auth.oidc.client_id'),
+      client_secret: readConfig('auth.oidc.client_secret'),
+      redirect_uri: readConfig('auth.oidc.redirect_uri', `http://localhost:${port}/api/auth/oidc/callback`),
+      post_logout_redirect_uri: readConfig('auth.oidc.post_logout_redirect_uri', `http://localhost:${port}`),
+      id_token_signed_response_alg: readConfig('auth.oidc.id_token_signed_response_alg', 'HS256'),
+      token_endpoint_auth_method: readConfig('auth.oidc.token_endpoint_auth_method', 'client_secret_post'),
+      scope: readConfig('auth.oidc.scope', 'openid profile'),
+      grant_type: readConfig('auth.oidc.grant_type', 'authorization_code'),
+      response_type: readConfig('auth.oidc.response_type', 'code'),
+      button_text: readConfig('auth.oidc.button_text', 'OIDC'),
+    },
   },
 };

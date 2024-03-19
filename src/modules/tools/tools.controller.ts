@@ -1,6 +1,7 @@
+import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { All, Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
+import { All, Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RegisterToolDto } from './dto/req/register-tool.dto';
 import { ToolsForwardService } from './tools.forward.service';
@@ -8,6 +9,7 @@ import { ToolsRegistryService } from './tools.registry.service';
 
 @Controller('tools')
 @ApiTags('Tools')
+@UseGuards(CompatibleAuthGuard)
 export class ToolsController {
   constructor(
     private readonly toolRegistryService: ToolsRegistryService,

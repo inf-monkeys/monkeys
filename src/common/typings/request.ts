@@ -12,6 +12,7 @@ export interface IRequest extends express.Request {
   userId: string;
   teamId: string;
   isAdmin?: boolean;
+  user: any;
 }
 
 export interface IAdminRequest extends express.Request {

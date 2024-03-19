@@ -1,7 +1,8 @@
+import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { CreateChatSessionDto, UpdateChatSessionDto } from '@inf-monkeys/vines';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import _ from 'lodash';
 import { ListChatSessionsDto } from './dto/req/list-chat-sessions.dto';
@@ -9,6 +10,7 @@ import { WorkflowChatSessionService } from './workflow.chat-sessions.service';
 
 @Controller('/chat-sessions')
 @ApiTags('Workflow/Chat Sessions')
+@UseGuards(CompatibleAuthGuard)
 export class WorkflowChatSessionController {
   constructor(private readonly service: WorkflowChatSessionService) {}
 
