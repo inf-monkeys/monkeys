@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { ComplicateFakeNode } from '@/components/layout/vines-flow/nodes/complicate/node/endpoint/fake.tsx';
 import { ComplicateEndNode } from '@/components/layout/vines-flow/nodes/complicate/node/endpoint/output.tsx';
 import { ComplicateTriggerNode } from '@/components/layout/vines-flow/nodes/complicate/node/endpoint/trigger.tsx';
+import { ComplicateSimpleNode } from '@/components/layout/vines-flow/nodes/complicate/node/simple';
 import { Card } from '@/components/ui/card.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
@@ -102,7 +103,14 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
               ) : isFakeNode ? (
                 <ComplicateFakeNode insertFromNodeId={nodeId} />
               ) : (
-                <div key={'vines-complicate-' + nodeId} />
+                <ComplicateSimpleNode
+                  key={'vines-complicate-' + nodeId}
+                  workflowId={vines.workflowId ?? ''}
+                  nodeId={nodeId}
+                  tool={tool}
+                  toolName={toolName}
+                  customData={customData}
+                />
               )}
             </motion.div>
             {isSimpleNode && <div />}

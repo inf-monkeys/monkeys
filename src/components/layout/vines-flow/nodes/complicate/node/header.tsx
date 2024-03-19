@@ -36,7 +36,7 @@ export const ComplicateNodeHeader: React.FC<Props> = ({
       data-id="vines-drag"
     >
       <div className="flex items-center gap-4">
-        <div className="flex size-12 items-center justify-center overflow-clip rounded-sm border shadow-sm">
+        <div className="flex size-12 items-center justify-center overflow-clip rounded-lg border shadow-sm">
           <VinesIcon src={isUnsupported ? 'emoji:⚠️:#35363b' : customIcon ?? tool?.icon} size="lg" />
         </div>
         <div className="flex max-w-[13rem] flex-col gap-1 leading-5">
