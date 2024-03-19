@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { CircleEllipsisIcon, Save } from 'lucide-react';
@@ -43,6 +43,11 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState('config');
 
+  const isUnSupport = !tool;
+  useEffect(() => {
+    isUnSupport && setActiveTab('dev');
+  }, [isUnSupport]);
+
   return (
     <>
       <ComplicateNodeHeader tool={tool} toolName={toolName} customData={customData}>
@@ -68,10 +73,14 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
       </ComplicateNodeHeader>
       <Tabs className="px-5" value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="config">配置参数</TabsTrigger>
+          {tool && <TabsTrigger value="config">配置参数</TabsTrigger>}
           <TabsTrigger value="dev">开发模式</TabsTrigger>
-          <TabsTrigger value="more-config">高级配置</TabsTrigger>
-          <TabsTrigger value="custom-config">自定义配置</TabsTrigger>
+          {tool && (
+            <>
+              <TabsTrigger value="more-config">高级配置</TabsTrigger>
+              <TabsTrigger value="custom-config">自定义配置</TabsTrigger>
+            </>
+          )}
         </TabsList>
         <AnimatePresence>
           <motion.div
