@@ -30,20 +30,18 @@ export const ComplicateTriggerNode: React.FC = () => {
           description: triggerType?.description ?? '',
         }}
       />
-      <div className="w-full px-5">
-        <Tabs defaultValue="input">
-          <TabsList>
-            <TabsTrigger value="input">输入配置</TabsTrigger>
-            <TabsTrigger value="trigger">触发器</TabsTrigger>
-          </TabsList>
-          <TabsContent value="input">
-            <InputConfig className="h-[21rem]" />
-          </TabsContent>
-          <TabsContent value="trigger">
-            <WorkflowTrigger className="h-[21rem]" />
-          </TabsContent>
-        </Tabs>
-      </div>
+      <Tabs className="px-5" defaultValue="input">
+        <TabsList>
+          <TabsTrigger value="input">输入配置</TabsTrigger>
+          <TabsTrigger value="trigger">触发器</TabsTrigger>
+        </TabsList>
+        <TabsContent value="input">
+          <InputConfig className="h-[21rem]" />
+        </TabsContent>
+        <TabsContent value="trigger">
+          <WorkflowTrigger className="h-[21rem]" />
+        </TabsContent>
+      </Tabs>
     </>
   );
 };

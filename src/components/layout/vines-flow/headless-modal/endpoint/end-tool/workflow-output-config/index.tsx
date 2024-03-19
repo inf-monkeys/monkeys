@@ -25,7 +25,7 @@ interface IWorkflowOutputConfigProps extends React.ComponentPropsWithoutRef<'div
   setOutput: React.Dispatch<React.SetStateAction<IVinesOutputData[]>>;
 }
 
-export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({ output, setOutput }) => {
+export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({ className, output, setOutput }) => {
   const { canvasMode, workflowId, isLatestWorkflowVersion } = useFlowStore();
 
   const { vines } = useVinesFlow();
@@ -102,7 +102,7 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({ out
   const disabled = canvasMode !== CanvasStatus.EDIT;
 
   return (
-    <Tabs defaultValue="output">
+    <Tabs defaultValue="output" className={className}>
       <TabsList>
         <TabsTrigger value="output">输出配置</TabsTrigger>
         <TabsTrigger value="rawdata">原始数据</TabsTrigger>
