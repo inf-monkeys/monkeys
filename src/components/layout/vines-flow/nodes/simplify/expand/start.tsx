@@ -3,16 +3,16 @@ import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { useTriggers, useTriggerTypes } from '@/apis/workflow/trigger';
-import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
+import { readLocalStorageValue } from '@/utils';
 
 interface ISimplifyStartNodeExpandProps {}
 
 export const SimplifyStartNodeExpand: React.FC<ISimplifyStartNodeExpandProps> = () => {
   const { vines } = useVinesFlow();
-  const { apikey } = useVinesPage();
+  const apikey = readLocalStorageValue('vines-apikey', '', false);
 
   const { data: triggerTypes } = useTriggerTypes(apikey);
   const { data: triggers } = useTriggers(vines.workflowId, vines.version, apikey);

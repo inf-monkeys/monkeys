@@ -14,7 +14,7 @@ import VinesEvent from '@/utils/events.ts';
 
 interface IWorkflowTriggerProps extends React.ComponentPropsWithoutRef<'div'> {}
 
-export const WorkflowTrigger: React.FC<IWorkflowTriggerProps> = () => {
+export const WorkflowTrigger: React.FC<IWorkflowTriggerProps> = ({ className }) => {
   const { workflowId, isLatestWorkflowVersion } = useFlowStore();
   const { vines } = useVinesFlow();
 
@@ -22,7 +22,7 @@ export const WorkflowTrigger: React.FC<IWorkflowTriggerProps> = () => {
   const { data: triggers } = useTriggers(workflowId, workflowVersion);
 
   return (
-    <div className="relative flex h-80 w-full flex-col gap-4 py-2">
+    <div className={cn('relative flex h-80 w-full flex-col gap-4 py-2', className)}>
       <ScrollArea className="px-2">
         <div className="flex flex-col gap-4">
           {triggers?.map((it, i) => (
