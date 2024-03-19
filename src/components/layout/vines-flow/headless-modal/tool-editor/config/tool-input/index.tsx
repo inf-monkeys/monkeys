@@ -8,7 +8,6 @@ import {
   calculateDisplayInputs,
   getPropertyValueFromTask,
 } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/utils.ts';
-import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { IVinesVariableMap, VinesToolDef, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 import { VARIABLE_REGEXP } from '@/package/vines-flow/core/utils.ts';
@@ -18,18 +17,18 @@ interface IToolInputProps {
   updateRaw?: (nodeId: string, task: VinesTask, update: boolean) => void;
   workflowVersion?: number;
   variableMapper: Record<string, IVinesVariableMap>;
-  node?: VinesNode;
+  nodeId: string;
+  task?: VinesTask;
 }
 
 export const ToolInput: React.FC<IToolInputProps> = ({
-  node,
+  nodeId,
+  task,
   tool,
   updateRaw,
   variableMapper,
   workflowVersion = 1,
 }) => {
-  const nodeId = node?.id ?? '';
-  const task = node?.getRaw();
   const input = tool?.input;
 
   const inputParams = get(task, 'inputParameters', {});

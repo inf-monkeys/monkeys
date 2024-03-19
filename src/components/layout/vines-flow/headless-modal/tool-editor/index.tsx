@@ -82,7 +82,7 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
             >
               {activeTab === 'config' && (
                 <TabsContent className="mt-4 h-[25em]" value="config">
-                  <ToolConfig node={node} />
+                  <ToolConfig nodeId={node?.id ?? ''} task={node?.getRaw()} />
                 </TabsContent>
               )}
               {activeTab === 'dev' && (

@@ -3,6 +3,7 @@ import React, { useRef, useState } from 'react';
 import { useClickOutside } from '@mantine/hooks';
 import { CircularProgress } from '@nextui-org/progress';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 
 import { ComplicateFakeNode } from '@/components/layout/vines-flow/nodes/complicate/node/endpoint/fake.tsx';
 import { ComplicateEndNode } from '@/components/layout/vines-flow/nodes/complicate/node/endpoint/output.tsx';
@@ -11,6 +12,7 @@ import { ComplicateSimpleNode } from '@/components/layout/vines-flow/nodes/compl
 import { Card } from '@/components/ui/card.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
+import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { cn } from '@/utils';
@@ -57,11 +59,26 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
     // void (canvasMode === CanvasStatus.RUNNING && setAutoFollow(false));
   };
 
+  const handleRawUpdate = (data: string) => {
+    try {
+      const task = JSON.parse(data);
+      if (node) {
+        vines.updateRaw(nodeId, task, false);
+      } else {
+        toast.error('工具不存在');
+      }
+    } catch {
+      /* empty */
+    }
+  };
+
   const tool = vines.getTool(toolName);
   const isStartNode = nodeId === 'workflow_start';
   const isEndNode = nodeId === 'workflow_end';
   const isFakeNode = nodeId.startsWith('fake_node');
   const isSimpleNode = !isStartNode && !isEndNode && !isFakeNode;
+
+  const variableMapper = Object.fromEntries(vines.variablesMapper.entries());
 
   return (
     <div
@@ -106,10 +123,18 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
                 <ComplicateSimpleNode
                   key={'vines-complicate-' + nodeId}
                   workflowId={vines.workflowId ?? ''}
+                  workflowVersion={vines.version}
+                  task={node.getRaw()}
                   nodeId={nodeId}
                   tool={tool}
                   toolName={toolName}
                   customData={customData}
+                  variableMapper={variableMapper}
+                  onSaved={() => vines.emit('update', vines.getRaw())}
+                  onRawUpdate={handleRawUpdate}
+                  vinesUpdateRaw={(nodeId: string, task: VinesTask, update: boolean) =>
+                    vines.updateRaw(nodeId, task, update)
+                  }
                 />
               )}
             </motion.div>
