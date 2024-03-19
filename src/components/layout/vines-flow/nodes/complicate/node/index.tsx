@@ -4,6 +4,7 @@ import { useClickOutside } from '@mantine/hooks';
 import { CircularProgress } from '@nextui-org/progress';
 import { motion } from 'framer-motion';
 
+import { ComplicateFakeNode } from '@/components/layout/vines-flow/nodes/complicate/node/endpoint/fake.tsx';
 import { ComplicateEndNode } from '@/components/layout/vines-flow/nodes/complicate/node/endpoint/output.tsx';
 import { ComplicateTriggerNode } from '@/components/layout/vines-flow/nodes/complicate/node/endpoint/trigger.tsx';
 import { Card } from '@/components/ui/card.tsx';
@@ -99,7 +100,7 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
               ) : isEndNode ? (
                 <ComplicateEndNode key="vines-complicate-end-node" />
               ) : isFakeNode ? (
-                <div />
+                <ComplicateFakeNode insertFromNodeId={nodeId} />
               ) : (
                 <div key={'vines-complicate-' + nodeId} />
               )}
