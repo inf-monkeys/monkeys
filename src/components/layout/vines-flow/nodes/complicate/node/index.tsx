@@ -9,6 +9,7 @@ import { ComplicateFakeNode } from '@/components/layout/vines-flow/nodes/complic
 import { ComplicateEndNode } from '@/components/layout/vines-flow/nodes/complicate/node/endpoint/output.tsx';
 import { ComplicateTriggerNode } from '@/components/layout/vines-flow/nodes/complicate/node/endpoint/trigger.tsx';
 import { ComplicateSimpleNode } from '@/components/layout/vines-flow/nodes/complicate/node/simple';
+import { ComplicateSimpleNodeExpand } from '@/components/layout/vines-flow/nodes/complicate/node/simple/expand';
 import { Card } from '@/components/ui/card.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
@@ -139,7 +140,7 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
                 />
               )}
             </motion.div>
-            {isSimpleNode && <div />}
+            {isSimpleNode && <ComplicateSimpleNodeExpand nodeId={nodeId} visible={isNodeFocus} />}
           </>
         )}
       </Card>
