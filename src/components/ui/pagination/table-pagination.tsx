@@ -56,7 +56,7 @@ export const TablePagination: React.FC<ITablePaginationProps> = ({
       <div className="ml-4 flex items-center gap-2 text-nowrap">
         <span>{`共 ${rowCount} 条，第 ${paginationState.active} 页，`}每页</span>
         <Select
-          defaultValue={pagination.pageSize.toString()}
+          value={pagination.pageSize.toString()}
           onValueChange={(v) =>
             onPaginationChange((prev) => {
               return {
@@ -71,7 +71,7 @@ export const TablePagination: React.FC<ITablePaginationProps> = ({
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectLabel>每页最大条目数</SelectLabel>
+              <SelectLabel>每页条目</SelectLabel>
               <SelectItem value="5">5</SelectItem>
               <SelectItem value="10">10</SelectItem>
               <SelectItem value="20">20</SelectItem>

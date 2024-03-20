@@ -1,12 +1,12 @@
 import React, { useMemo, useState } from 'react';
 
 import { useElementSize } from '@mantine/hooks';
-import { ColumnDef, getCoreRowModel, PaginationState, useReactTable } from '@tanstack/react-table';
+import { ColumnDef, functionalUpdate, getCoreRowModel, PaginationState, useReactTable } from '@tanstack/react-table';
 import { AnimatePresence } from 'framer-motion';
-import _ from 'lodash';
+import _, { isNull } from 'lodash';
 
 import { IAssetItem, IListUgcItemsFnType, IPreloadUgcItemsFnType } from '@/apis/ugc/typings.ts';
-import { IDisplayModeStorage, IUgcRenderOptions } from '@/components/layout/ugc/typings.ts';
+import { IDefaultPageSizeStorage, IDisplayModeStorage, IUgcRenderOptions } from '@/components/layout/ugc/typings.ts';
 import { UgcViewCard } from '@/components/layout/ugc/view/card';
 import { UgcViewHeader } from '@/components/layout/ugc/view/header.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
@@ -27,7 +27,7 @@ interface IUgcViewProps<E extends object> {
   operateArea?: (item: IAssetItem<E>) => React.ReactNode;
   onItemClick?: (item: IAssetItem<E>, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   subtitle?: React.ReactNode;
-  defaultLimit?: number;
+  defaultPageSize?: number;
 }
 
 export const UgcView = <E extends object>({
@@ -40,7 +40,7 @@ export const UgcView = <E extends object>({
   operateArea,
   onItemClick,
   subtitle,
-  defaultLimit = 24,
+  defaultPageSize = 24,
 }: IUgcViewProps<E>): React.ReactNode => {
   const { ref } = useElementSize();
 
@@ -73,12 +73,35 @@ export const UgcView = <E extends object>({
 
   const team = useVinesTeam();
 
-  // const dtoRef = useRef<IListUgcDto>({ page: 1, limit: defaultLimit, filter: {} });
+  const [displayModeStorage] = useLocalStorage<IDisplayModeStorage>(`vines-ui-asset-display-mode`, {});
+  const displayMode = useMemo(
+    () => (!team || !assetKey ? null : _.get(displayModeStorage, [team.teamId, assetKey], 'card')),
+    [displayModeStorage, team.teamId, assetKey],
+  );
+
+  const [defaultPageSizeStorage, setDefaultPageSizeStorage] = useLocalStorage<IDefaultPageSizeStorage>(
+    `vines-ui-asset-default-page-size`,
+    {},
+  );
+  const defaultPageSizeLS = useMemo(
+    () => (!team || !assetKey ? null : _.get(defaultPageSizeStorage, [team.teamId, assetKey], defaultPageSize)),
+    [defaultPageSizeStorage, team.teamId, assetKey, defaultPageSize],
+  );
 
   const [pagination, setPagination] = useState<PaginationState>({
-    pageSize: defaultLimit,
+    pageSize: defaultPageSizeLS ?? defaultPageSize,
     pageIndex: 0,
   });
+
+  useMemo(() => {
+    defaultPageSizeLS &&
+      setPagination((prev) => {
+        return {
+          ...prev,
+          pageSize: defaultPageSizeLS,
+        };
+      });
+  }, [defaultPageSizeLS]);
 
   const {
     data: rawData,
@@ -97,7 +120,7 @@ export const UgcView = <E extends object>({
         ? _.pick(rawData, ['total', 'limit', 'page'])
         : {
             total: 0,
-            limit: defaultLimit,
+            limit: pagination.pageSize,
             page: 1,
           },
     [rawData],
@@ -110,6 +133,20 @@ export const UgcView = <E extends object>({
       filter: {},
     });
 
+  // 单独写是为了存储 pageSize
+  // const handleSetPagination = (newPagination: PaginationState) => {
+  //   setPagination(newPagination);
+  //   setDefaultPageSizeStorage((prev) => {
+  //     return {
+  //       ...prev,
+  //       [team.teamId]: {
+  //         ...prev[team.teamId],
+  //         [assetKey]: newPagination.pageSize,
+  //       },
+  //     };
+  //   });
+  // };
+
   // 使用 tanstack table 管理状态
   const table = useReactTable({
     data,
@@ -120,21 +157,29 @@ export const UgcView = <E extends object>({
     },
     manualPagination: true,
     rowCount: pageData.total,
-    onPaginationChange: setPagination,
+    onPaginationChange: (updater) =>
+      setPagination((old) => {
+        const newVal = functionalUpdate(updater, old);
+        setDefaultPageSizeStorage((prev) => {
+          return {
+            ...prev,
+            [team.teamId]: {
+              ...prev[team.teamId],
+              [assetKey]: newVal.pageSize,
+            },
+          };
+        });
+        return newVal;
+      }),
   });
-
-  const [displayModeStorage] = useLocalStorage<IDisplayModeStorage>(`vines-ui-asset-display-mode`, {});
-
-  const displayMode = useMemo(
-    () => _.get(displayModeStorage, [team.teamId, assetKey], 'card'),
-    [displayModeStorage, team.teamId, assetKey],
-  );
 
   return (
     <div ref={ref} className="relative w-full flex-1 overflow-x-clip">
       <UgcViewHeader assetKey={assetKey} subtitle={subtitle} mutate={mutate} />
       <SmoothTransition className="relative overflow-clip">
-        <AnimatePresence>{isLoading && <Loading motionKey="vines-assets-loading" />}</AnimatePresence>
+        <AnimatePresence>
+          {isLoading || (isNull(displayMode) && <Loading motionKey="vines-assets-loading" />)}
+        </AnimatePresence>
         <div className="flex flex-col">
           <ScrollArea className="relative h-[calc(100vh-11rem)] w-full rounded-r-lg px-4 py-2">
             {displayMode === 'card' && (
