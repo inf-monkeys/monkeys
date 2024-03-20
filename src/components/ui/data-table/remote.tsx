@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 import {
   ColumnDef,
@@ -12,16 +12,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 
-import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select.tsx';
+import { TablePagination } from '@/components/ui/pagination/table-pagination.tsx';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface IRemoteDataTableProps<TData, TValue> {
@@ -32,6 +23,8 @@ interface IRemoteDataTableProps<TData, TValue> {
     pagination: PaginationState;
   };
   onPaginationChange: OnChangeFn<PaginationState>;
+  preloadHover?: (pageIndex: number, e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void;
+  showPagination?: boolean;
 }
 
 export function RemoteDataTable<TData, TValue>({
@@ -40,6 +33,8 @@ export function RemoteDataTable<TData, TValue>({
   state,
   onPaginationChange,
   rowCount,
+  preloadHover,
+  showPagination = true,
 }: IRemoteDataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -95,43 +90,16 @@ export function RemoteDataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between py-4">
-        <div className="flex items-center gap-2 text-nowrap">
-          {`共 ${table.getRowCount()} 条，第 ${(table.options.state.pagination?.pageIndex ?? 0) + 1} 页，`}每页
-          <Select
-            defaultValue={state.pagination.pageSize.toString()}
-            onValueChange={(v) => table.setPageSize(parseInt(v))}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="选择" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>每页最大条目数</SelectLabel>
-                <SelectItem value="1">1</SelectItem>
-                <SelectItem value="5">5</SelectItem>
-                <SelectItem value="10">10</SelectItem>
-                <SelectItem value="20">20</SelectItem>
-                <SelectItem value="50">50</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          条
+      {showPagination && (
+        <div className="w-full py-2">
+          <TablePagination
+            rowCount={rowCount}
+            pagination={state.pagination}
+            onPaginationChange={onPaginationChange}
+            preloadHover={preloadHover}
+          />
         </div>
-        <div className="flex space-x-2">
-          <Button
-            theme="tertiary"
-            size="small"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            上一页
-          </Button>
-          <Button theme="tertiary" size="small" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-            下一页
-          </Button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
