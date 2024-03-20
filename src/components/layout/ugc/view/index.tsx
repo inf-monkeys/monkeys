@@ -1,7 +1,14 @@
 import React, { useMemo, useState } from 'react';
 
 import { useElementSize } from '@mantine/hooks';
-import { ColumnDef, functionalUpdate, getCoreRowModel, PaginationState, useReactTable } from '@tanstack/react-table';
+import {
+  ColumnDef,
+  functionalUpdate,
+  getCoreRowModel,
+  PaginationState,
+  Updater,
+  useReactTable,
+} from '@tanstack/react-table';
 import { AnimatePresence } from 'framer-motion';
 import _, { isNull } from 'lodash';
 
@@ -14,7 +21,7 @@ import { RemoteDataTable } from '@/components/ui/data-table/remote.tsx';
 import { Loading } from '@/components/ui/loading';
 import { TablePagination } from '@/components/ui/pagination/table-pagination.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition';
+import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
 import { useLocalStorage } from '@/utils';
 
 interface IUgcViewProps<E extends object> {
@@ -134,18 +141,21 @@ export const UgcView = <E extends object>({
     });
 
   // 单独写是为了存储 pageSize
-  // const handleSetPagination = (newPagination: PaginationState) => {
-  //   setPagination(newPagination);
-  //   setDefaultPageSizeStorage((prev) => {
-  //     return {
-  //       ...prev,
-  //       [team.teamId]: {
-  //         ...prev[team.teamId],
-  //         [assetKey]: newPagination.pageSize,
-  //       },
-  //     };
-  //   });
-  // };
+  const onPaginationChange = (updater: Updater<PaginationState>) => {
+    setPagination((old) => {
+      const newVal = functionalUpdate(updater, old);
+      setDefaultPageSizeStorage((prev) => {
+        return {
+          ...prev,
+          [team.teamId]: {
+            ...prev[team.teamId],
+            [assetKey]: newVal.pageSize,
+          },
+        };
+      });
+      return newVal;
+    });
+  };
 
   // 使用 tanstack table 管理状态
   const table = useReactTable({
@@ -157,20 +167,7 @@ export const UgcView = <E extends object>({
     },
     manualPagination: true,
     rowCount: pageData.total,
-    onPaginationChange: (updater) =>
-      setPagination((old) => {
-        const newVal = functionalUpdate(updater, old);
-        setDefaultPageSizeStorage((prev) => {
-          return {
-            ...prev,
-            [team.teamId]: {
-              ...prev[team.teamId],
-              [assetKey]: newVal.pageSize,
-            },
-          };
-        });
-        return newVal;
-      }),
+    onPaginationChange,
   });
 
   return (
