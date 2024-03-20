@@ -68,10 +68,21 @@ export interface OIDCIdpConfig {
   button_text: string;
 }
 
+export interface PasswordConfig {
+  saltTemplate: string;
+}
+
+export interface JwtConfig {
+  secret: string;
+  expires_in: number | string;
+}
+
 export interface AuthConfig {
   enabled: AuthMethod[];
   sessionSecret?: string;
   oidc?: OIDCIdpConfig;
+  password?: PasswordConfig;
+  jwt: JwtConfig;
 }
 
 export interface Config {
@@ -139,6 +150,13 @@ export const config: Config = {
       grant_type: readConfig('auth.oidc.grant_type', 'authorization_code'),
       response_type: readConfig('auth.oidc.response_type', 'code'),
       button_text: readConfig('auth.oidc.button_text', 'OIDC'),
+    },
+    password: {
+      saltTemplate: readConfig('auth.password.saltTemplate', '***monkeys***{{password}}***'),
+    },
+    jwt: {
+      secret: readConfig('auth.jwt.secret', 'monkeys'),
+      expires_in: readConfig('auth.jwt.expires_in', '30d'),
     },
   },
 };

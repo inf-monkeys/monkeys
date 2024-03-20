@@ -27,7 +27,7 @@ export class OidcController {
   async logout(@Req() req: any, @Res() res: Response) {
     const id_token = req.user ? req.user.id_token : undefined;
     req.logout(() => {});
-    req.session.destroy(async (error: any) => {
+    req.session.destroy(async () => {
       const TrustIssuer = await Issuer.discover(`${config.auth.oidc.issuer}/.well-known/openid-configuration`);
       const end_session_endpoint = TrustIssuer.metadata.end_session_endpoint;
       if (end_session_endpoint) {

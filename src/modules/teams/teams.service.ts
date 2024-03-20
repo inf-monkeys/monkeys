@@ -1,0 +1,19 @@
+import { TeamEntity } from '@/entities/identity/team';
+import { TeamRepository } from '@/repositories/team.repository';
+import { Injectable } from '@nestjs/common';
+
+export const DEFAULT_TEAM_DESCRIPTION = '用户很懒，还没留下描述';
+export const DEFAULT_TEAM_PHOTO = 'https://static.aside.fun/upload/cnMh7q.jpg';
+
+@Injectable()
+export class TeamsService {
+  constructor(private readonly teamRepository: TeamRepository) {}
+
+  async getUserTeams(userId: string): Promise<TeamEntity[]> {
+    return await this.teamRepository.getUserTeams(userId);
+  }
+
+  public async createTeam(userId: string, teamName: string, description?: string, logoUrl?: string, isBuiltIn = false, workflowTaskNamePrefix?: string, createMethod: 'self' | 'import' = 'self') {
+    return await this.teamRepository.createTeam(userId, teamName, description, logoUrl, isBuiltIn, createMethod);
+  }
+}

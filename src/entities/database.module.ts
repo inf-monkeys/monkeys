@@ -13,6 +13,9 @@ import { WorkflowTemplateEntity } from '@/entities/workflow/workflow-template';
 import { WorkflowTriggersEntity } from '@/entities/workflow/workflow-trigger';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
+import { TeamEntity } from './identity/team';
+import { UserEntity } from './identity/user';
+import { UserTeamRelationshipEntity } from './identity/user-team-relationship';
 
 export const entities: EntityClassOrSchema[] = [
   ThemeEntity,
@@ -27,6 +30,9 @@ export const entities: EntityClassOrSchema[] = [
   WorkflowTemplateEntity,
   ComfyuiServerEntity,
   SystemConfigurationEntity,
+  UserEntity,
+  TeamEntity,
+  UserTeamRelationshipEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({
