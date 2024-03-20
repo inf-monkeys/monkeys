@@ -1,11 +1,13 @@
+import type { Task, Workflow as WorkflowExecution } from '@io-orkes/conductor-javascript';
+
 import { VinesNode } from '@/package/vines-flow/core/nodes';
+import { VinesNodeRunTask } from '@/package/vines-flow/core/nodes/typings.ts';
 
 export type Constructor<T = {}> = new (...args: any[]) => T;
 
 export enum VINES_STATUS {
   IDLE = 'idle',
   READY = 'ready',
-  BUSY = 'busy',
 }
 
 export enum IVinesFlowRenderType {
@@ -30,3 +32,25 @@ export interface IVinesInsertChildParams {
   path: VinesNode[];
   insertBefore?: boolean;
 }
+
+export interface IVinesFlowRunParams {
+  inputData?: Record<string, unknown>;
+  instanceId?: string;
+  version?: number;
+  debug?: boolean;
+}
+
+export type VinesWorkflowExecutionType =
+  | 'SCHEDULED'
+  | 'RUNNING'
+  | 'COMPLETED'
+  | 'FAILED'
+  | 'TIMED_OUT'
+  | 'TERMINATED'
+  | 'PAUSED'
+  | 'CANCELED';
+
+export type VinesWorkflowExecution = Omit<WorkflowExecution, 'tasks'> & {
+  tasks: VinesNodeRunTask[];
+  originTasks: Array<Task>;
+};

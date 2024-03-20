@@ -15,6 +15,8 @@ import {
   IVinesNodePosition,
   IVinesNodeSize,
   VinesEdgePath,
+  VinesNodeRunTask,
+  VinesNodeStatus,
   VinesTask,
 } from '@/package/vines-flow/core/nodes/typings.ts';
 import { IVinesVariable, VinesVariableMapper } from '@/package/vines-flow/core/tools/typings.ts';
@@ -40,6 +42,10 @@ export class VinesNode<T extends VinesTask = VinesTask> {
   public _svgPath: VinesEdgePath = [];
 
   public children: VinesNode[];
+
+  public runningStatus: VinesNodeStatus = 'DEFAULT';
+
+  public runningTask: VinesNodeRunTask = this.defaultRunningTask;
 
   protected readonly _vinesCore: VinesCore;
 
@@ -456,6 +462,29 @@ export class VinesNode<T extends VinesTask = VinesTask> {
     const mapper = this._vinesCore.generateVariableMapper(variables, nodeTitle);
 
     return { variables, mapper };
+  }
+  // endregion
+
+  // region Runner
+  public clearRunningStatus() {
+    this.runningStatus = 'DEFAULT';
+  }
+
+  public clearRunningTask() {
+    this.runningTask = this.defaultRunningTask;
+  }
+
+  public updateStatus(task: VinesNodeRunTask) {
+    this.runningTask = { ...task, originStatus: task.status };
+    this.runningStatus = task.status;
+  }
+
+  private get defaultRunningTask(): VinesNodeRunTask {
+    return {
+      ...this._task,
+      status: 'DEFAULT',
+      originStatus: 'SCHEDULED',
+    };
   }
   // endregion
 }
