@@ -23,8 +23,11 @@ export type IUgcRenderOptions<E> = {
   [type in IRenderType]?: keyof E | ((item: E) => React.ReactNode);
 };
 
-export interface IDisplayModeStorage {
+export type IAssetCustomStorage<T> = {
   [teamId: string]: {
-    [assetKey: string]: IDisplayMode;
+    [assetKey: string]: T;
   };
-}
+};
+
+export type IDisplayModeStorage = IAssetCustomStorage<IDisplayMode>;
+export type IDefaultPageSizeStorage = IAssetCustomStorage<number>;
