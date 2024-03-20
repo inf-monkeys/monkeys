@@ -13,9 +13,16 @@ import { AnimatePresence } from 'framer-motion';
 import _, { isNull } from 'lodash';
 
 import { IAssetItem, IListUgcItemsFnType, IPreloadUgcItemsFnType } from '@/apis/ugc/typings.ts';
-import { IDefaultPageSizeStorage, IDisplayModeStorage, IUgcRenderOptions } from '@/components/layout/ugc/typings.ts';
+import {
+  IDefaultPageSizeStorage,
+  IDisplayModeStorage,
+  ISortCondition,
+  ISortConditionStorage,
+  IUgcRenderOptions,
+} from '@/components/layout/ugc/typings.ts';
 import { UgcViewCard } from '@/components/layout/ugc/view/card';
-import { UgcViewHeader } from '@/components/layout/ugc/view/header.tsx';
+import { UgcViewHeader } from '@/components/layout/ugc/view/header';
+import { DEFAULT_SORT_CONDITION } from '@/components/layout/ugc/view/header/consts.ts';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { RemoteDataTable } from '@/components/ui/data-table/remote.tsx';
 import { Loading } from '@/components/ui/loading';
@@ -80,10 +87,17 @@ export const UgcView = <E extends object>({
 
   const team = useVinesTeam();
 
+  // local storage
   const [displayModeStorage] = useLocalStorage<IDisplayModeStorage>(`vines-ui-asset-display-mode`, {});
   const displayMode = useMemo(
     () => (!team || !assetKey ? null : _.get(displayModeStorage, [team.teamId, assetKey], 'card')),
     [displayModeStorage, team.teamId, assetKey],
+  );
+
+  const [sortConditionStorage] = useLocalStorage<ISortConditionStorage>(`vines-ui-asset-sort-condition`, {});
+  const sortCondition: ISortCondition = useMemo(
+    () => _.get(sortConditionStorage, [team.teamId, assetKey], DEFAULT_SORT_CONDITION),
+    [sortConditionStorage, team.teamId, assetKey],
   );
 
   const [defaultPageSizeStorage, setDefaultPageSizeStorage] = useLocalStorage<IDefaultPageSizeStorage>(
@@ -95,10 +109,26 @@ export const UgcView = <E extends object>({
     [defaultPageSizeStorage, team.teamId, assetKey, defaultPageSize],
   );
 
+  // state
   const [pagination, setPagination] = useState<PaginationState>({
     pageSize: defaultPageSizeLS ?? defaultPageSize,
     pageIndex: 0,
   });
+  // const [sorting, setSorting] = useState<SortingState>([
+  //   {
+  //     desc: sortCondition.orderBy === 'desc',
+  //     id: sortCondition.orderColumn,
+  //   },
+  // ]);
+  //
+  // useMemo(() => {
+  //   setSorting([
+  //     {
+  //       desc: sortCondition.orderBy === 'desc',
+  //       id: sortCondition.orderColumn,
+  //     },
+  //   ]);
+  // }, [sortCondition]);
 
   useMemo(() => {
     defaultPageSizeLS &&
@@ -118,6 +148,8 @@ export const UgcView = <E extends object>({
     page: pagination.pageIndex + 1,
     limit: pagination.pageSize,
     filter: {},
+    orderBy: sortCondition.orderBy,
+    orderColumn: sortCondition.orderColumn,
   });
 
   const data = useMemo(() => (rawData && _.isArray(rawData.data) ? rawData.data : []), [rawData]);
@@ -164,10 +196,12 @@ export const UgcView = <E extends object>({
     getCoreRowModel: getCoreRowModel(),
     state: {
       pagination,
+      // sorting,
     },
     manualPagination: true,
     rowCount: pageData.total,
     onPaginationChange,
+    // manualSorting: true,
   });
 
   return (
@@ -178,7 +212,7 @@ export const UgcView = <E extends object>({
           {isLoading || (isNull(displayMode) && <Loading motionKey="vines-assets-loading" />)}
         </AnimatePresence>
         <div className="flex flex-col">
-          <ScrollArea className="relative h-[calc(100vh-11rem)] w-full rounded-r-lg px-4 py-2">
+          <ScrollArea className="relative h-[calc(100vh-10.5rem)] w-full rounded-r-lg px-4 py-2">
             {displayMode === 'card' && (
               <div className="grid w-full grid-cols-1 gap-6 overflow-y-auto lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                 {table.getRowModel().rows.map((row, index) => (
@@ -205,6 +239,7 @@ export const UgcView = <E extends object>({
             )}
           </ScrollArea>
           <TablePagination
+            className="py-0"
             pagination={table.getState().pagination}
             onPaginationChange={table.setPagination}
             rowCount={table.getRowCount()}

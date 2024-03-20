@@ -34,7 +34,7 @@ export const UgcViewCard = <E extends object>({
   const logo = useMemo(() => getRenderNode('logo'), [index, row]);
   const title = useMemo(() => getRenderNode('title'), [index, row]);
   const subtitle = useMemo(() => getRenderNode('subtitle'), [index, row]);
-  const description = useMemo(() => getRenderNode('description', '暂无描述'), [index, row]);
+  const description = useMemo(() => getRenderNode('description') || '暂无描述', [index, row]);
 
   return (
     <Card

@@ -89,6 +89,7 @@ export const Workflows: React.FC = () => {
         renderOptions={{
           logo: 'iconUrl',
           title: 'name',
+          description: 'description',
           subtitle: (item) => {
             return (
               <div className="flex gap-1">

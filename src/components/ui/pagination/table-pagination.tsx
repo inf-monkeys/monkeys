@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select.tsx';
+import { cn } from '@/utils';
 
 export interface ITablePaginationProps {
   rowCount: number;
@@ -30,6 +31,7 @@ export interface ITablePaginationProps {
   };
   onPaginationChange: OnChangeFn<PaginationState>;
   preloadHover?: (pageIndex: number, e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void;
+  className?: string;
 }
 
 export const TablePagination: React.FC<ITablePaginationProps> = ({
@@ -37,6 +39,7 @@ export const TablePagination: React.FC<ITablePaginationProps> = ({
   pagination,
   onPaginationChange,
   preloadHover,
+  className,
 }) => {
   const total = Math.round(rowCount / pagination.pageSize);
   const paginationState = usePagination({
@@ -52,7 +55,7 @@ export const TablePagination: React.FC<ITablePaginationProps> = ({
     },
   });
   return (
-    <div className="flex justify-between py-1">
+    <div className={cn('flex justify-between py-1', className)}>
       <div className="ml-4 flex items-center gap-2 text-nowrap">
         <span>{`共 ${rowCount} 条，第 ${paginationState.active} 页，`}每页</span>
         <Select

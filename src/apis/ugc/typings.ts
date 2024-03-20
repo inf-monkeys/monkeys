@@ -5,6 +5,7 @@ import { AssetType } from '@inf-monkeys/vines';
 import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { IBaseEntity, IPaginationListData } from '@/apis/typings.ts';
+import { ISortConditionOrderBy, ISortConditionOrderColumn } from '@/components/layout/ugc/typings.ts';
 
 export interface IAssetTag {
   _id: string;
@@ -31,9 +32,6 @@ export interface IAssetPublicCategory extends IBaseEntity {
   type: AssetType;
 }
 
-type IOrderColumn = 'createdTimestamp' | 'updatedTimestamp';
-type IOrderBy = 'DESC' | 'ASC';
-
 type IListUgcFilter = {
   userIds?: string[];
   createdTimestamp?: (number | null)[];
@@ -56,8 +54,8 @@ export interface IListUgcDto {
   page: number;
   limit: number;
   search?: string;
-  orderColumn?: IOrderColumn;
-  orderBy?: IOrderBy;
+  orderColumn?: ISortConditionOrderColumn;
+  orderBy?: ISortConditionOrderBy;
   filter: IListUgcFilter;
 }
 
