@@ -3,7 +3,6 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CacheModule } from './common/cache/cache.module';
-import { CommonMiddleware } from './common/middlewares/common.middleware';
 import { ToolsMiddleware } from './common/middlewares/tools.middleware';
 import { DatabaseModule } from './entities/database.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -40,7 +39,6 @@ import { RepositoryMoule } from './repositories/repositories.module';
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(CommonMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL });
     consumer.apply(ToolsMiddleware).forRoutes({ path: '/api/system-tools', method: RequestMethod.ALL });
   }
 }
