@@ -52,6 +52,7 @@ export enum AuthMethod {
   password = 'password',
   phone = 'phone',
   oidc = 'oidc',
+  apikey = 'apikey',
 }
 
 export interface OIDCIdpConfig {
