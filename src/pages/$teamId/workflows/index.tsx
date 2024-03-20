@@ -2,15 +2,12 @@ import React from 'react';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import { useClipboard } from '@mantine/hooks';
 import { Copy, FileUp, FolderUp, Link, MoreHorizontal, Pencil, Trash } from 'lucide-react';
 import moment from 'moment';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
-import { IPaginationListData } from '@/apis/typings.ts';
-import { listUgcWorkflowsMock } from '@/apis/ugc/mock.ts';
-import { IAssetItem } from '@/apis/ugc/typings.ts';
+import { preloadUgcWorkflows, useUgcWorkflows } from '@/apis/ugc';
 import { UgcSidebar } from '@/components/layout/ugc/sidebar';
 import { UgcView } from '@/components/layout/ugc/view';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
@@ -25,7 +22,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
-import { Tooltip } from '@/components/ui/tooltip';
+import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { useTimeDiff } from '@/utils/time.ts';
 
@@ -39,33 +36,54 @@ export const Workflows: React.FC = () => {
       <UgcSidebar title="工作流" />
       <UgcView
         assetKey="workflow"
-        // fetchFunction={async () => listUgcWorkflowsMock as unknown as IPaginationListData<IAssetItem<MonkeyWorkflow>>}
-        data={listUgcWorkflowsMock as unknown as IPaginationListData<IAssetItem<MonkeyWorkflow>>}
+        useUgcFetcher={useUgcWorkflows}
+        preloadUgcFetcher={preloadUgcWorkflows}
         columns={[
           {
             accessorKey: 'iconUrl',
             header: '图标',
             accessorFn: (row) => <VinesIcon size="md">{(row.iconUrl as string) ?? ''}</VinesIcon>,
             cell: (props) => props.getValue() as React.ReactNode,
+            maxSize: 48,
           },
           {
             accessorKey: 'name',
             header: '名称',
           },
           {
+            accessorKey: 'description',
+            header: '描述',
+            cell: (props) => <span className="text-opacity-70">{(props.getValue() as string) || '暂无描述'}</span>,
+          },
+          {
             accessorKey: 'user',
             header: '用户',
             cell: (props) => <span>{(props.getValue() as IVinesUser).name ?? ''}</span>,
+            maxSize: 48,
           },
           {
             accessorKey: 'createdTimestamp',
             header: '创建时间',
-            cell: (props) => <span>{moment(props.getValue() as number).format('YYYY-MM-DD HH:mm:ss')}</span>,
+            cell: (props) => (
+              <Tooltip content={moment(props.getValue() as number).format('YYYY-MM-DD HH:mm:ss')}>
+                <TooltipTrigger asChild>
+                  <span className="cursor-default">{formatTimeDiffPrevious(props.getValue() as number)}</span>
+                </TooltipTrigger>
+              </Tooltip>
+            ),
+            maxSize: 72,
           },
           {
             accessorKey: 'updatedTimestamp',
             header: '更新时间',
-            cell: (props) => <span>{moment(props.getValue() as number).format('YYYY-MM-DD HH:mm:ss')}</span>,
+            cell: (props) => (
+              <Tooltip content={moment(props.getValue() as number).format('YYYY-MM-DD HH:mm:ss')}>
+                <TooltipTrigger asChild>
+                  <span className="cursor-default">{formatTimeDiffPrevious(props.getValue() as number)}</span>
+                </TooltipTrigger>
+              </Tooltip>
+            ),
+            maxSize: 72,
           },
         ]}
         renderOptions={{

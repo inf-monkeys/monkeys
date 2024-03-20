@@ -1,3 +1,5 @@
+import { SWRResponse } from 'swr';
+
 import { AssetType } from '@inf-monkeys/vines';
 
 import { IVinesTeam } from '@/apis/authz/team/typings.ts';
@@ -59,4 +61,7 @@ export interface IListUgcDto {
   filter: IListUgcFilter;
 }
 
-export type IListUgcItemsFnType<T> = (dto: IListUgcDto) => Promise<IPaginationListData<IAssetItem<T>>>;
+export type IListUgcItemsFnType<T> = (
+  dto: IListUgcDto,
+) => SWRResponse<IPaginationListData<IAssetItem<T>> | undefined, any>;
+export type IPreloadUgcItemsFnType<T> = (dto: IListUgcDto) => Promise<any>;
