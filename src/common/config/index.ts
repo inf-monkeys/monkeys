@@ -72,6 +72,19 @@ export interface PasswordConfig {
   saltTemplate: string;
 }
 
+export interface DysmsConfig {
+  accessKeyId: string;
+  accessKeySecret: string;
+  regionId: string;
+  signName: string;
+  templateCode: string;
+}
+
+export interface SMSConfig {
+  provider: 'dysms';
+  config: DysmsConfig;
+}
+
 export interface JwtConfig {
   secret: string;
   expires_in: number | string;
@@ -83,6 +96,7 @@ export interface AuthConfig {
   oidc?: OIDCIdpConfig;
   password?: PasswordConfig;
   jwt: JwtConfig;
+  sms: SMSConfig;
 }
 
 export interface Config {
@@ -157,6 +171,10 @@ export const config: Config = {
     jwt: {
       secret: readConfig('auth.jwt.secret', 'monkeys'),
       expires_in: readConfig('auth.jwt.expires_in', '30d'),
+    },
+    sms: {
+      provider: 'dysms',
+      config: readConfig('auth.sms.config', {}),
     },
   },
 };

@@ -1,6 +1,7 @@
 import { UserEntity } from '@/entities/identity/user';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { pickBy } from 'lodash';
 import { ObjectId } from 'mongodb';
 import { Repository } from 'typeorm';
 
@@ -59,5 +60,21 @@ export class UserRepository {
     };
     await this.userRepository.save(newUser);
     return newUser;
+  }
+
+  async registryOrGetUser(data: { phone?: string; email?: string; password?: string }) {
+    const { phone, email } = data;
+    if (!phone && !email) return null;
+    const user = await this.userRepository.findOne({
+      where: {
+        ...pickBy({ phone, email }, (v) => typeof v !== 'undefined'),
+        isDeleted: false,
+      },
+    });
+    if (user) {
+      await this.updateUserLastLogin(user.id.toHexString());
+      return user;
+    }
+    return this.registerUser(data);
   }
 }

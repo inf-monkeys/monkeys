@@ -2,14 +2,17 @@ import { AuthMethod, config } from '@/common/config';
 import { Module } from '@nestjs/common';
 import { OidcModule } from './oidc/oidc.module';
 import { PasswordModule } from './password/password.module';
+import { PhoneModule } from './phone/phone.module';
 
 const imports: Array<any> = [];
 if (config.auth.enabled.includes(AuthMethod.oidc)) {
   imports.push(OidcModule);
 }
-console.log(config.auth.enabled);
 if (config.auth.enabled.includes(AuthMethod.password)) {
   imports.push(PasswordModule);
+}
+if (config.auth.enabled.includes(AuthMethod.phone)) {
+  imports.push(PhoneModule);
 }
 
 @Module({
