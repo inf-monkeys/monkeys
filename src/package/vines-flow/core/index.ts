@@ -1,6 +1,13 @@
 import { MonkeyTaskDefTypes } from '@inf-monkeys/vines';
 import { toast } from 'sonner';
 
+import {
+  executionWorkflow,
+  executionWorkflowPause,
+  executionWorkflowResume,
+  executionWorkflowTerminate,
+  executionWorkflowWithDebug,
+} from '@/apis/workflow/execution';
 import { VinesBase } from '@/package/vines-flow/core/base';
 import { VINES_DEF_NODE, VINES_ENV_VARIABLES } from '@/package/vines-flow/core/consts.ts';
 import { EndPointNode, VinesNode } from '@/package/vines-flow/core/nodes';
@@ -17,7 +24,14 @@ import {
   VinesVariableMapper,
   VinesWorkflowVariable,
 } from '@/package/vines-flow/core/tools/typings.ts';
-import { IVinesFlowRenderOptions, IVinesFlowRenderType, IVinesMode } from '@/package/vines-flow/core/typings.ts';
+import {
+  IVinesFlowRenderOptions,
+  IVinesFlowRenderType,
+  IVinesFlowRunParams,
+  IVinesMode,
+  VinesWorkflowExecution,
+  VinesWorkflowExecutionType,
+} from '@/package/vines-flow/core/typings.ts';
 import { createTask } from '@/package/vines-flow/core/utils.ts';
 import VinesEvent from '@/utils/events';
 
@@ -50,6 +64,12 @@ export class VinesCore extends VinesTools(VinesBase) {
   };
 
   public canvasSize = { width: 0, height: 0 };
+
+  public runningStatus: VinesWorkflowExecutionType = 'SCHEDULED';
+
+  public runningInstanceId = '';
+
+  public runningWorkflowExecution: VinesWorkflowExecution | null = null;
 
   private position: IVinesNodePosition = { x: 0, y: 0 };
 
@@ -435,6 +455,149 @@ export class VinesCore extends VinesTools(VinesBase) {
       variables: this.variables,
       mapper: this.variablesMapper,
     };
+  }
+  // endregion
+
+  // region RUNNER
+  public async start({
+    inputData = {},
+    instanceId,
+    version = this.version,
+    debug = false,
+  }: IVinesFlowRunParams): Promise<boolean> {
+    if (this.runningStatus !== 'SCHEDULED' || !this.nodes.length) {
+      toast.warning('启动运行失败！已有工作流在运行中或工作流为空');
+      return false;
+    }
+    if (!this.workflowId) {
+      toast.warning('启动运行失败！工作流 ID 为空');
+      return false;
+    }
+
+    this.getAllNodes(false).forEach((it) => {
+      it.clearRunningStatus();
+      it.clearRunningTask();
+    });
+
+    if (!instanceId) {
+      if (debug) {
+        instanceId = await executionWorkflowWithDebug(this.workflowId, inputData, this.getRaw(), version);
+      } else {
+        instanceId = await executionWorkflow(this.workflowId, inputData, version);
+      }
+    }
+
+    if (!instanceId) {
+      toast.error('启动运行失败！无法获取工作流实例 ID');
+      return false;
+    }
+
+    this.runningInstanceId = instanceId;
+    this.runningStatus = 'RUNNING';
+    this.nodes[0].runningStatus = 'COMPLETED';
+
+    this.sendEvent('execution', true);
+
+    return true;
+  }
+
+  public async stop() {
+    if (['RUNNING', 'PAUSED'].includes(this.runningStatus) && this.runningInstanceId) {
+      this.runningStatus = 'CANCELED';
+
+      try {
+        await executionWorkflowTerminate(this.runningInstanceId);
+        toast.warning('运行已终止');
+      } catch (_) {
+        toast.error('终止运行异常！（可能未能成功停止）');
+        this.runningStatus = 'SCHEDULED';
+      }
+
+      this.sendEvent('execution', false);
+
+      this.clearRunningStatus();
+    } else {
+      toast.warning('无法终止运行！当前工作流未在运行中');
+    }
+  }
+
+  public async pause() {
+    if (this.runningStatus === 'RUNNING' && this.runningInstanceId) {
+      try {
+        await executionWorkflowPause(this.runningInstanceId);
+        toast.warning('运行已暂停');
+      } catch (_) {
+        toast.error('暂停运行异常！（可能未能成功暂停）');
+        this.runningStatus = 'SCHEDULED';
+      }
+      this.runningStatus = 'PAUSED';
+
+      this.sendEvent('execution', false);
+    } else {
+      toast.warning('无法暂停运行！当前工作流未在运行中');
+    }
+  }
+
+  public async resume() {
+    if (this.runningStatus === 'PAUSED' && this.runningInstanceId) {
+      try {
+        await executionWorkflowResume(this.runningInstanceId);
+        toast.success('运行已恢复');
+      } catch (_) {
+        toast.error('恢复运行异常！（可能未能成功恢复）');
+        this.runningStatus = 'SCHEDULED';
+      }
+      this.runningStatus = 'RUNNING';
+
+      this.sendEvent('execution', true);
+    } else {
+      toast.warning('无法恢复运行！当前工作流未在暂停中');
+    }
+  }
+
+  public updateWorkflowExecution(data: VinesWorkflowExecution) {
+    if (!this.runningInstanceId || !('status' in data) || !('tasks' in data)) return;
+    this.runningWorkflowExecution = data;
+    this.runningStatus = data.status!;
+
+    for (const task of data.tasks) {
+      const taskId = task.workflowTask?.taskReferenceName;
+      const currentTaskStatus = task.status;
+      if (!taskId || !currentTaskStatus) continue;
+
+      const node = this.getNodeById(taskId);
+      if (!node) {
+        continue;
+      }
+      node.updateStatus(task);
+    }
+
+    if (this.runningStatus !== 'RUNNING') {
+      const lastNode = this.nodes.at(-1);
+      lastNode && (lastNode.runningStatus = 'COMPLETED');
+
+      if (this.runningStatus === 'COMPLETED') {
+        toast.success('工作流运行完毕！');
+        this.runningStatus = 'SCHEDULED';
+      }
+      this.sendEvent('execution', false);
+    }
+
+    this.sendEvent('refresh');
+  }
+
+  public clearRunningStatus() {
+    const allNodes = this.getAllNodes();
+    allNodes.forEach((it) => it.runningStatus !== 'SCHEDULED' && (it.runningTask.status = 'CANCELED'));
+    void (this.runningStatus !== 'SCHEDULED' && (this.runningStatus = 'CANCELED'));
+    this.sendEvent('refresh');
+    setTimeout(() => {
+      allNodes.forEach((it) => it.clearRunningStatus());
+      requestAnimationFrame(() => {
+        this.runningStatus = 'SCHEDULED';
+        this.sendEvent('refresh');
+      });
+    }, 80);
   }
   // endregion
 }

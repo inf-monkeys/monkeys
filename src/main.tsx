@@ -41,7 +41,7 @@ ReactDOM.createRoot(document.getElementById('vines-ui')!).render(
       <LagRadar />
     </Suspense>
     <Portal.Root>
-      <Toaster richColors />
+      <Toaster richColors visibleToasts={10} />
     </Portal.Root>
   </>,
 );

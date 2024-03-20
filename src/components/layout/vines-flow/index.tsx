@@ -13,7 +13,7 @@ import { VinesFlowEvents } from '@/components/layout/vines-flow/events.tsx';
 import { VinesHeadlessModal } from '@/components/layout/vines-flow/headless-modal';
 import { VinesNodes } from '@/components/layout/vines-flow/nodes';
 import { VinesToolbar } from '@/components/layout/vines-flow/toolbar';
-import { VinesVersionToolbar } from '@/components/layout/vines-flow/toolbar/version';
+import { VinesExpandToolbar } from '@/components/layout/vines-flow/toolbar/expand';
 import { VinesFlowWrapper } from '@/components/layout/vines-flow/wrapper';
 import { IVinesFlowRenderOptions } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
@@ -141,7 +141,7 @@ export const VinesFlow: React.FC<IVinesFlowProps> = ({ workflowId }) => {
       </AnimatePresence>
       <VinesHeadlessModal />
       <VinesToolbar />
-      <VinesVersionToolbar />
+      <VinesExpandToolbar />
       <VinesFlowEvents />
     </main>
   );
