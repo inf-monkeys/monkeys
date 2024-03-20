@@ -1,43 +1,50 @@
-import { ToolServiceConfig, config } from '@/common/config';
+import { config } from '@/common/config';
 import { IRequest } from '@/common/typings/request';
-import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
-import { lastValueFrom } from 'rxjs';
+import { ToolsRepository } from '@/repositories/tools.repository';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import axios from 'axios';
+import { AuthType } from './interfaces';
 
 @Injectable()
 export class ToolsForwardService {
-  private tools: ToolServiceConfig[] = [];
-  constructor(private readonly httpService: HttpService) {
-    this.tools = config.tools;
-  }
+  constructor(private readonly toolsRepository: ToolsRepository) {}
 
-  public async forward(toolName: string, request: IRequest) {
-    const tool = this.tools.find((x) => (x.name = toolName));
-    if (!tool) {
-      throw new Error(`Tool ${toolName} not found`);
+  public async forward(toolNamespace: string, request: IRequest) {
+    const server = await this.toolsRepository.getServerByNamespace(toolNamespace);
+    if (!server) {
+      throw new NotFoundException();
     }
-    const { baseUrl } = tool;
-    try {
-      const resp$ = this.httpService.request({
-        method: request.method,
-        url: request.url,
-        headers: {
-          'x-monkeys-userid': request.userId,
-          'x-monkeys-teamid': request.teamId,
-          'x-monkeys-appid': config.server.appId,
-        },
-        data: request.body,
-        baseURL: baseUrl,
-      });
-      const resp = await lastValueFrom(resp$);
-      return resp.data;
-    } catch (e) {
-      if (e.response) {
-        // backend error
-        throw Error(`Request tool ${toolName} ` + e.response.data.message || e.response.data.error);
-      } else {
-        throw Error(`Request tool ${toolName} ` + e.message);
-      }
+    const {
+      auth: { type: authType, authorization_type, verification_tokens },
+    } = server;
+    const headers: { [x: string]: string } = {
+      'x-monkeys-appid': config.server.appId,
+      'x-monkeys-userid': request.userId,
+      'x-monkeys-teamid': request.teamId,
+    };
+    switch (authType) {
+      case AuthType.none:
+        break;
+      case AuthType.service_http:
+        if (authorization_type !== 'bearer') {
+          throw new Error(`Unsupported authorization_type: ${authorization_type}`);
+        }
+        const token = verification_tokens['monkeys'];
+        if (!token) {
+          throw new Error(`monkeys verification_token is empty`);
+        }
+        headers['authorization'] = `Bearer ${token}`;
+        break;
+      default:
+        break;
     }
+    const { data } = await axios({
+      method: request.method,
+      url: request.url.replace(`/api/tools/${toolNamespace}`, ''),
+      headers: headers,
+      data: request.body,
+      baseURL: server.baseUrl,
+    });
+    return data;
   }
 }

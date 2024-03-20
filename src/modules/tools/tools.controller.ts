@@ -36,12 +36,10 @@ export class ToolsController {
     });
   }
 
-  @All('/:toolName/*')
+  @All('/:toolNamespace/*')
   @ApiExcludeEndpoint()
-  public async forwardToTool(@Req() req: IRequest, @Param('toolName') toolName: string) {
-    const result = await this.toolForwardService.forward(toolName, req);
-    return new SuccessResponse({
-      data: result,
-    });
+  public async forwardToTool(@Req() req: IRequest, @Param('toolNamespace') toolNamespace: string) {
+    const result = await this.toolForwardService.forward(toolNamespace, req);
+    return result;
   }
 }

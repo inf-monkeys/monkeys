@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId } from 'mongodb';
 import { In, Repository } from 'typeorm';
+import { ApikeyRepository } from './apikey.repository';
 
 @Injectable()
 export class TeamRepository {
@@ -12,6 +13,7 @@ export class TeamRepository {
     private readonly teamRepository: Repository<TeamEntity>,
     @InjectRepository(UserTeamRelationshipEntity)
     private readonly userTeamRelationRepository: Repository<UserTeamRelationshipEntity>,
+    private readonly apiKeyRepository: ApikeyRepository,
   ) {}
 
   async getUserTeams(userId: string): Promise<TeamEntity[]> {
@@ -44,7 +46,7 @@ export class TeamRepository {
     return !!team;
   }
 
-  async createTeam(userId: string, teamName: string, description?: string, logoUrl?: string, isBuiltIn = false, workflowTaskNamePrefix?: string, createMethod: 'self' | 'import' = 'self') {
+  async createTeam(userId: string, teamName: string, description?: string, logoUrl?: string, isBuiltIn = false, workflowTaskNamePrefix?: string) {
     if (await this.checkNameConflict(userId, teamName)) {
       throw new Error('同名团队已经存在，请更换名称');
     }
@@ -72,10 +74,22 @@ export class TeamRepository {
     };
     await this.userTeamRelationRepository.save(newReplationships);
     await this.teamRepository.save(newTeam);
+    await this.apiKeyRepository.initApiKeyIfNotExists(teamId, userId);
 
     // TODO
     // this.assetCommonService.initAssets(teamId, userId);
 
     return teamId;
+  }
+
+  public async isUserInTeam(userId: string, teamId: string) {
+    const entity = await this.userTeamRelationRepository.findOne({
+      where: {
+        userId,
+        teamId,
+        isDeleted: false,
+      },
+    });
+    return !!entity;
   }
 }

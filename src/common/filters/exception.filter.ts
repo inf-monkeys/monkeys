@@ -10,7 +10,7 @@ export class ExceptionsFilter implements ExceptionFilter {
     const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
     logger.error('Request Exception: ', exception);
     const message = exception instanceof AxiosError ? (exception.response?.data ? JSON.stringify(exception.response?.data) : exception.message) : (exception as Error).message;
-    response.status(HttpStatus.OK).json({
+    response.status(status).json({
       code: status,
       message,
     });

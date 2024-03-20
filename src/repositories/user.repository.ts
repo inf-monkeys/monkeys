@@ -6,7 +6,6 @@ import { ObjectId } from 'mongodb';
 import { Repository } from 'typeorm';
 
 const defaultAvatar = 'https://static.aside.fun/upload/frame/0XMWE1.jpg';
-const phoneNumberRegexp = /^1[3456789]\d{9}$/;
 export const OBJECT_ID_PATTERN = /[0-9][0-9a-z]{23}/;
 
 @Injectable()
