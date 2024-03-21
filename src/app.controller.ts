@@ -10,6 +10,13 @@ import { ISystemConfig } from './common/typings/system';
 export class AppController {
   constructor(private readonly service: AppService) {}
 
+  @Get('/healthz')
+  public async healthz() {
+    return {
+      status: 'OK',
+    };
+  }
+
   @Get('/tools-openapi.json')
   public async getCombinedToolsSwagger() {
     const data = await this.service.getCombinedToolsSwagger();
