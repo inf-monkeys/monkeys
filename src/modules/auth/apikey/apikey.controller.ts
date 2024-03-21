@@ -2,11 +2,12 @@ import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApikeyService } from './apikey.service';
 import { CreateApiKeyDto } from './dto/create-apikey.dto';
 
 @Controller('/auth/apikey')
+@ApiTags('APIKey')
 @UseGuards(CompatibleAuthGuard)
 export class ApikeyController {
   constructor(private readonly apiKeyService: ApikeyService) {}

@@ -9,7 +9,7 @@ import { ListChatSessionsDto } from './dto/req/list-chat-sessions.dto';
 import { WorkflowChatSessionService } from './workflow.chat-sessions.service';
 
 @Controller('/chat-sessions')
-@ApiTags('Workflow/Chat Sessions')
+@ApiTags('Workflows/Chat Sessions')
 @UseGuards(CompatibleAuthGuard)
 export class WorkflowChatSessionController {
   constructor(private readonly service: WorkflowChatSessionService) {}
