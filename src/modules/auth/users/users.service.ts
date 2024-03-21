@@ -8,4 +8,8 @@ export class UsersService {
   public async findById(userId: string) {
     return await this.userRepository.findById(userId);
   }
+
+  async updateUserInfo(userId: string, data: { name?: string; photo?: string }) {
+    return await this.userRepository.updateUserInfo(userId, data);
+  }
 }

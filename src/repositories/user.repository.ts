@@ -76,4 +76,27 @@ export class UserRepository {
     }
     return this.registerUser(data);
   }
+
+  async updateUserInfo(userId: string, data: { name?: string; photo?: string }) {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new Error('用户不存在');
+    }
+    const { name, photo } = data;
+    const updates: Partial<UserEntity> = {};
+    if (name) updates.name = name;
+    if (photo) updates.photo = photo;
+    if (JSON.stringify(updates) === '{}') {
+      throw new Error('暂无需要变更的资料');
+    }
+    await this.userRepository.update(
+      {
+        id: new ObjectId(userId),
+      },
+      updates,
+    );
+    return {
+      success: true,
+    };
+  }
 }
