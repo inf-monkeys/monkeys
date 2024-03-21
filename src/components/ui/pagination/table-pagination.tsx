@@ -41,7 +41,7 @@ export const TablePagination: React.FC<ITablePaginationProps> = ({
   preloadHover,
   className,
 }) => {
-  const total = Math.round(rowCount / pagination.pageSize);
+  const total = Math.ceil(rowCount / pagination.pageSize);
   const paginationState = usePagination({
     total,
     page: pagination.pageIndex + 1,
