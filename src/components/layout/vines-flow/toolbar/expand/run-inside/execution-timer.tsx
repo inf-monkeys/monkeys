@@ -7,15 +7,17 @@ import moment from 'moment';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesWorkflowExecutionType } from '@/package/vines-flow/core/typings.ts';
+import { cn } from '@/utils';
 
 interface IExecutionTimerProps {
   status: VinesWorkflowExecutionType;
   startTime: number;
   endTime: number;
   onClick: () => void;
+  className?: string;
 }
 
-export const ExecutionTimer: React.FC<IExecutionTimerProps> = ({ status, startTime, endTime, onClick }) => {
+export const ExecutionTimer: React.FC<IExecutionTimerProps> = ({ status, startTime, endTime, onClick, className }) => {
   const [execTime, setExecTime] = useState<string>('--:--:--');
 
   const handleUpdateTimeUseStartTime = () => {
@@ -34,11 +36,13 @@ export const ExecutionTimer: React.FC<IExecutionTimerProps> = ({ status, startTi
     return () => stop();
   }, [status, startTime, endTime]);
 
+  const isPaused = status === 'PAUSED';
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <Button
-          className="px-3"
+          className={cn('px-3', className)}
           variant="outline"
           onClick={() => ['RUNNING', 'PAUSED'].includes(status) && onClick()}
           icon={
@@ -50,7 +54,7 @@ export const ExecutionTimer: React.FC<IExecutionTimerProps> = ({ status, startTi
               <CircleSlash />
             ) : status === 'TIMED_OUT' ? (
               <TimerOff />
-            ) : status === 'PAUSED' ? (
+            ) : isPaused ? (
               <PlayCircle />
             ) : status === 'RUNNING' ? (
               <PauseCircle />
@@ -59,10 +63,10 @@ export const ExecutionTimer: React.FC<IExecutionTimerProps> = ({ status, startTi
             )
           }
         >
-          {execTime}
+          {isPaused ? '已暂停' : execTime}
         </Button>
       </TooltipTrigger>
-      <TooltipContent>
+      <TooltipContent side="bottom">
         工作流
         {status === 'COMPLETED'
           ? '已完成运行'
