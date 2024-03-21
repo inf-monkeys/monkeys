@@ -4,8 +4,10 @@ import { ApikeyModule } from './apikey/apikey.module';
 import { OidcModule } from './oidc/oidc.module';
 import { PasswordModule } from './password/password.module';
 import { PhoneModule } from './phone/phone.module';
+import { TeamsModule } from './teams/teams.module';
+import { UsersModule } from './users/users.module';
 
-const imports: Array<any> = [];
+const imports: Array<any> = [TeamsModule, UsersModule];
 if (config.auth.enabled.includes(AuthMethod.oidc)) {
   imports.push(OidcModule);
 }

@@ -1,7 +1,8 @@
 import { Controller, Get } from '@nestjs/common';
 import { isErrorResult, merge } from 'openapi-merge';
 import { AppService } from './app.service';
-import { config } from './common/config';
+import { AuthMethod, config } from './common/config';
+import { APIKEY_AUTH_DOC, NONE_AUTH_DOC } from './common/openapi';
 import { SuccessResponse } from './common/response';
 import { ISystemConfig } from './common/typings/system';
 
@@ -58,6 +59,7 @@ export class AppController {
         {
           name: '开发准备/鉴权机制',
           'x-displayName': '鉴权机制',
+          description: config.auth.enabled.includes(AuthMethod.apikey) ? APIKEY_AUTH_DOC : NONE_AUTH_DOC,
         },
       ];
       const tagGroups: Array<{

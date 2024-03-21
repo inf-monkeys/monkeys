@@ -27,7 +27,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3 # 抽取项目信息，主要是镜像的tag
         with:
-          images: swr.ap-southeast-1.myhuaweicloud.com/vines/monkeys
+          images: swr.ap-southeast-1.myhuaweicloud.com/storyboard/monkeys
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4 # docker build & push

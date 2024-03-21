@@ -4,10 +4,15 @@ import { logger } from '../logger';
 
 @Catch()
 export class ExceptionsFilter implements ExceptionFilter {
-  catch(exception: unknown, host: ArgumentsHost) {
+  catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
-    const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+    let status = HttpStatus.INTERNAL_SERVER_ERROR;
+    if (exception.statusCode) {
+      status = exception.statusCode;
+    } else if (exception instanceof HttpException) {
+      status = exception.getStatus();
+    }
     logger.error('Request Exception: ', exception);
     const message = exception instanceof AxiosError ? (exception.response?.data ? JSON.stringify(exception.response?.data) : exception.message) : (exception as Error).message;
     response.status(status).json({

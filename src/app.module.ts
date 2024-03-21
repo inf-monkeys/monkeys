@@ -12,7 +12,6 @@ import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
 import { ExportModule } from './modules/export/export.module';
 import { GatewaysModule } from './modules/gateways/gateways.module';
 import { CronJobModule } from './modules/infra/cron/cron.module';
-import { TeamsModule } from './modules/teams/teams.module';
 import { ToolsModule } from './modules/tools/tools.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { OpenapiModule } from './openapi.module';
@@ -32,7 +31,6 @@ import { RepositoryMoule } from './repositories/repositories.module';
     ExportModule,
     BootstrapModule,
     AuthModule,
-    TeamsModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
     }),
