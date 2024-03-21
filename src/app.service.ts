@@ -19,15 +19,17 @@ export class AppService implements OnApplicationBootstrap {
     const result = await Promise.all(
       servers.map(async (server) => {
         const specUrl = server.getSpecUrl();
-        const { data: specData } = await axios.get<OpenAPIObject>(specUrl);
-        return {
-          namespace: server.namespace,
-          displayName: server.displayName,
-          spec: specData,
-        };
+        try {
+          const { data: specData } = await axios.get<OpenAPIObject>(specUrl);
+          return {
+            namespace: server.namespace,
+            displayName: server.displayName,
+            spec: specData,
+          };
+        } catch (error) {}
       }),
     );
-    return result;
+    return result.filter(Boolean);
   }
 
   private registerTools() {

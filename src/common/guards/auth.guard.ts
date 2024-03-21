@@ -46,17 +46,19 @@ export class CompatibleAuthGuard implements CanActivate {
           userId = result.sub;
           isAuthenticated = true;
           teamId = request.headers['x-monkeys-teamid'];
-          if (!teamId) {
-            throw new ForbiddenException('Header x-monkeys-teamid must be provided');
-          }
+          // if (!teamId) {
+          //   throw new ForbiddenException('Header x-monkeys-teamid must be provided');
+          // }
         }
       }
 
       if (isAuthenticated) {
         // Validate team
-        const isUserInTeam = await this.teamRepository.isUserInTeam(userId, teamId);
-        if (!isUserInTeam) {
-          throw new ForbiddenException();
+        if (teamId) {
+          const isUserInTeam = await this.teamRepository.isUserInTeam(userId, teamId);
+          if (!isUserInTeam) {
+            throw new ForbiddenException();
+          }
         }
         request.userId = userId;
         request.teamId = teamId;

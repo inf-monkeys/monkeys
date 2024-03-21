@@ -19,6 +19,9 @@ import { RepositoryMoule } from './repositories/repositories.module';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+    }),
     DatabaseModule,
     CacheModule,
     ToolsModule,
@@ -31,9 +34,6 @@ import { RepositoryMoule } from './repositories/repositories.module';
     ExportModule,
     BootstrapModule,
     AuthModule,
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'),
-    }),
   ],
   controllers: [AppController],
   providers: [AppService],
