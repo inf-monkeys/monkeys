@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 
 import { ComplicateFakeNode } from '@/components/layout/vines-flow/nodes/complicate/node/endpoint/fake.tsx';
 import { ComplicateEndNode } from '@/components/layout/vines-flow/nodes/complicate/node/endpoint/output.tsx';
-import { ComplicateTriggerNode } from '@/components/layout/vines-flow/nodes/complicate/node/endpoint/trigger.tsx';
+import { ComplicateTriggerNode } from '@/components/layout/vines-flow/nodes/complicate/node/endpoint/start/trigger.tsx';
 import { ComplicateSimpleNode } from '@/components/layout/vines-flow/nodes/complicate/node/simple';
 import { ComplicateSimpleNodeExpand } from '@/components/layout/vines-flow/nodes/complicate/node/simple/expand';
 import { Card } from '@/components/ui/card.tsx';

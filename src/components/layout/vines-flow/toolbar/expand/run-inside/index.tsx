@@ -2,6 +2,7 @@ import React from 'react';
 
 import { get } from 'lodash';
 import { LogOut, Play, RotateCcw, StopCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { ExecutionTimer } from '@/components/layout/vines-flow/toolbar/expand/run-inside/execution-timer.tsx';
 import { ToolButton } from '@/components/layout/vines-flow/toolbar/tool-button.tsx';
@@ -11,11 +12,12 @@ import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { cn } from '@/utils';
+import VinesEvent from '@/utils/events.ts';
 
 interface IVinesRunInsideToolbarProps {}
 
 export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () => {
-  const { isLatestWorkflowVersion, canvasMode, setCanvasMode } = useFlowStore();
+  const { isLatestWorkflowVersion, canvasMode, setCanvasMode, setZoomToNodeId, setIsUserInteraction } = useFlowStore();
   const { vines } = useVinesFlow();
 
   const workflowExecution = vines.runningWorkflowExecution;
@@ -30,7 +32,7 @@ export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () =
   const executionStartTime = get(workflowExecution, 'startTime', 0);
   const executionEndTime = get(workflowExecution, 'endTime', 0);
 
-  const isRUNNINGMode = canvasMode === CanvasStatus.RUNNING;
+  const isRUNNINGMode = [CanvasStatus.RUNNING, CanvasStatus.WAIT_TO_RUNNING].includes(canvasMode);
   const isReExecution = hasExecution && isRUNNINGMode;
 
   return (
@@ -44,8 +46,17 @@ export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () =
           if (isExecutionRunning) {
             vines.stop();
           } else {
-            vines.start({});
-            setCanvasMode(CanvasStatus.RUNNING);
+            const hasWorkflowVariables = vines.workflowInput.length > 0;
+            if (hasWorkflowVariables) {
+              setZoomToNodeId('complicate-workflow_start');
+              setTimeout(() => VinesEvent.emit('canvas-zoom-to-node'));
+              toast.info('请先完善工作流表单');
+            } else {
+              vines.start({});
+              setIsUserInteraction(null);
+              setTimeout(() => VinesEvent.emit('canvas-auto-zoom'));
+            }
+            setCanvasMode(hasWorkflowVariables ? CanvasStatus.WAIT_TO_RUNNING : CanvasStatus.RUNNING);
           }
         }}
       />
@@ -56,13 +67,15 @@ export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () =
         endTime={executionEndTime}
         onClick={() => (isExecutionPaused ? vines.resume() : vines.pause())}
       />
-      <ToolButton
-        className={cn(isRUNNINGMode ? '' : 'hidden')}
-        icon={<LogOut />}
-        tip="返回编辑模式"
-        side="bottom"
-        onClick={() => setCanvasMode(CanvasStatus.EDIT)}
-      />
+      {!isExecutionRunning && (
+        <ToolButton
+          className={cn(isRUNNINGMode ? '' : 'hidden')}
+          icon={<LogOut />}
+          tip="返回编辑模式"
+          side="bottom"
+          onClick={() => setCanvasMode(CanvasStatus.EDIT)}
+        />
+      )}
     </Card>
   );
 };

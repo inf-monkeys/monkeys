@@ -39,6 +39,7 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
     setCanvasDisabled,
     setCanvasMoving,
     setVisible,
+    setIsUserInteraction,
   } = useFlowStore();
 
   const isEditMode = canvasMode === CanvasStatus.EDIT;
@@ -48,7 +49,10 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
 
   const handleZoomIn = () => VinesEvent.emit('canvas-zoom-in');
   const handleZoomOut = () => VinesEvent.emit('canvas-zoom-out');
-  const handleFitScreen = () => VinesEvent.emit('canvas-auto-zoom');
+  const handleFitScreen = () => {
+    VinesEvent.emit('canvas-auto-zoom');
+    setIsUserInteraction(null);
+  };
   const handleCanvasMove = () => {
     setCanvasMoving(!isCanvasMoving);
     setCanvasDisabled(!canvasDisabled);
@@ -78,7 +82,7 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
     ['ctrl+d', handleDirectionChange, { preventDefault: true }],
   ]);
 
-  const isRUNNING = canvasMode === CanvasStatus.RUNNING;
+  const isRUNNING = [CanvasStatus.RUNNING, CanvasStatus.WAIT_TO_RUNNING].includes(canvasMode);
   const isNotLatestWorkflowVersion = !isLatestWorkflowVersion;
 
   return (
