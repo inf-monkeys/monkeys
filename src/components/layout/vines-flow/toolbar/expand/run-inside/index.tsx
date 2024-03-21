@@ -73,7 +73,11 @@ export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () =
           icon={<LogOut />}
           tip="返回编辑模式"
           side="bottom"
-          onClick={() => setCanvasMode(CanvasStatus.EDIT)}
+          onClick={() => {
+            setCanvasMode(CanvasStatus.EDIT);
+            setIsUserInteraction(null);
+            setTimeout(() => VinesEvent.emit('canvas-auto-zoom'));
+          }}
         />
       )}
     </Card>
