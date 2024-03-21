@@ -10,13 +10,15 @@ import {
 } from '@/components/layout/vines-flow/headless-modal/endpoint/end-tool/workflow-output-config';
 import { ComplicateNodeHeader } from '@/components/layout/vines-flow/nodes/complicate/node/header.tsx';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card.tsx';
+import { CodeEditor } from '@/components/ui/code-editor';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
 import { useFlowStore } from '@/store/useFlowStore';
-import { readLocalStorageValue } from '@/utils';
+import { cn, readLocalStorageValue } from '@/utils';
 
 export const ComplicateEndNode: React.FC = () => {
-  const { workflowId } = useFlowStore();
+  const { workflowId, isWorkflowRUNNING } = useFlowStore();
 
   const { vines } = useVinesFlow();
   const { trigger } = useUpdateWorkflow(readLocalStorageValue('vines-apikey', '', false), workflowId ?? '');
@@ -31,6 +33,9 @@ export const ComplicateEndNode: React.FC = () => {
     });
   };
 
+  const executionOutput = vines.runningWorkflowExecution?.output ?? {};
+  const hasExecutionOutput = Object.keys(executionOutput).length > 0;
+
   return (
     <>
       <ComplicateNodeHeader
@@ -42,11 +47,29 @@ export const ComplicateEndNode: React.FC = () => {
           description: '',
         }}
       >
-        <Button variant="outline" size="small" icon={<Save />} onClick={handleUpdate}>
+        <Button
+          className={cn(isWorkflowRUNNING && 'hidden')}
+          variant="outline"
+          size="small"
+          icon={<Save />}
+          onClick={handleUpdate}
+        >
           保存配置
         </Button>
       </ComplicateNodeHeader>
-      <WorkflowOutputConfig className="px-5" output={output} setOutput={setOutput} />
+      {isWorkflowRUNNING ? (
+        <Card className="mx-5 h-[23.5rem]">
+          {hasExecutionOutput ? (
+            <CodeEditor data={executionOutput} readonly={true} lineNumbers={3} />
+          ) : (
+            <div className="vines-center size-full">
+              <h1 className="font-bold">暂无输出</h1>
+            </div>
+          )}
+        </Card>
+      ) : (
+        <WorkflowOutputConfig className="px-5" output={output} setOutput={setOutput} />
+      )}
     </>
   );
 };

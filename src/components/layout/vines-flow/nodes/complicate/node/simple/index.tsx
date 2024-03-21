@@ -44,7 +44,7 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
   onRawUpdate,
   vinesUpdateRaw,
 }) => {
-  const { isLatestWorkflowVersion } = useFlowStore();
+  const { isLatestWorkflowVersion, isWorkflowRUNNING } = useFlowStore();
   const [activeTab, setActiveTab] = useState('config');
 
   const isUnSupport = !tool;
@@ -61,7 +61,7 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                className={cn(disabled && 'hidden')}
+                className={cn((disabled || isWorkflowRUNNING) && 'hidden')}
                 icon={<Save />}
                 size="small"
                 variant="outline"
@@ -73,6 +73,7 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
+                className={cn(isWorkflowRUNNING && 'hidden')}
                 icon={<CircleEllipsisIcon />}
                 size="small"
                 variant="outline"
@@ -84,7 +85,7 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
         </div>
       </ComplicateNodeHeader>
       <Tabs className="px-5" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
+        <TabsList className={cn(isWorkflowRUNNING && 'hidden')}>
           {tool && <TabsTrigger value="config">配置参数</TabsTrigger>}
           <TabsTrigger value="dev">开发模式</TabsTrigger>
           {tool && (
@@ -104,9 +105,10 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
             transition={{ duration: activeTab === 'empty' ? 0 : 0.2 }}
           >
             {activeTab === 'config' && (
-              <TabsContent className="mt-4 h-80" value="config">
+              <TabsContent className={cn(isWorkflowRUNNING ? 'h-[23rem]' : 'mt-4 h-80')} value="config">
                 <ScrollArea className="h-full pr-2">
                   <ToolInput
+                    className={cn(isWorkflowRUNNING && 'pointer-events-none')}
                     nodeId={nodeId}
                     task={task}
                     tool={tool}
