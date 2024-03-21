@@ -55,7 +55,7 @@ export const GridView: React.FC<IGridViewProps> = ({ toggleMoveState, children }
     });
     VinesEvent.on('canvas-zoom-in', zoomIn);
     VinesEvent.on('canvas-zoom-out', zoomOut);
-    VinesEvent.on('canvas-auto-zoom', handleAutoZoom);
+    VinesEvent.on('canvas-auto-zoom', () => !isUserInteraction && handleAutoZoom());
     VinesEvent.on('canvas-zoom-to-node', () => {
       if (zoomToNodeId) {
         requestAnimationFrame(() => {
@@ -73,7 +73,7 @@ export const GridView: React.FC<IGridViewProps> = ({ toggleMoveState, children }
       VinesEvent.removeAllListeners('canvas-auto-zoom');
       VinesEvent.removeAllListeners('canvas-zoom-to-node');
     };
-  }, [zoomToNodeId, initialScale, canvasMode]);
+  }, [zoomToNodeId, initialScale, canvasMode, isUserInteraction]);
 
   const node = useRef<HTMLDivElement>(null);
   const context = useTransformContext();
