@@ -38,7 +38,7 @@ export class UserEntity extends BaseEntity {
   password?: string;
 
   @Column({
-    type: 'integer',
+    type: 'bigint',
     nullable: true,
     name: 'last_login_at',
   })
