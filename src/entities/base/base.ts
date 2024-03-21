@@ -20,13 +20,15 @@ export class BaseEntity {
 
   @Column({
     name: 'created_timestamp',
-    default: () => Date.now(),
+    default: Date.now(),
+    type: 'bigint',
   })
   createdTimestamp: number;
 
   @Column({
     name: 'updated_timestamp',
-    default: () => Date.now(),
+    default: Date.now(),
+    type: 'bigint',
   })
   updatedTimestamp: number;
 
