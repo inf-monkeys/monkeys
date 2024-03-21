@@ -3,6 +3,7 @@ import React, { useLayoutEffect } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 
 import { Account } from '@/components/layout/settings/account';
+import { ApiKey } from '@/components/layout/settings/api-key';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import VinesEvent from '@/utils/events.ts';
@@ -40,7 +41,9 @@ export const Settings: React.FC = () => {
         <TabsContent value="account">
           <Account />
         </TabsContent>
-        <TabsContent value="api-key"></TabsContent>
+        <TabsContent value="api-key">
+          <ApiKey />
+        </TabsContent>
       </Tabs>
     </div>
   );

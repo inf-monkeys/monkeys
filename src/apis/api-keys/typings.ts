@@ -1,4 +1,4 @@
-export enum ApiKeyStatus {
+export enum IApiKeyStatus {
   Valid = 'valid',
   Revoked = 'revoked',
 }
@@ -8,7 +8,7 @@ export interface IApiKey {
   teamId: string;
   creatorUserId: string;
   apiKey: string;
-  status: ApiKeyStatus;
+  status: IApiKeyStatus;
   desc?: string;
   createdTimestamp: number;
   updatedTimestamp: number;
