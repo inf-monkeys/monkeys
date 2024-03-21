@@ -1,5 +1,4 @@
 import { Controller, Get } from '@nestjs/common';
-import _ from 'lodash';
 import { isErrorResult, merge } from 'openapi-merge';
 import { AppService } from './app.service';
 import { config } from './common/config';
@@ -34,38 +33,56 @@ export class AppController {
           url: config.server.appUrl,
         },
       ];
-      const tagGroups = [
-        {
-          name: '开发准备',
-          tags: ['开发准备/基本概念'],
-        },
-      ];
+
       for (const path in output.paths) {
         const namespace = path.split('/')[3];
         const displayName = data.find((x) => x.namespace === namespace).displayName;
         for (const method in output.paths[path]) {
           let tags = output.paths[path][method].tags;
           if (tags) {
-            // tags = tags.map((tag) => `${displayName}/${tag}`);
-          } else {
-            tags = [`${displayName}`];
+            tags = tags.map((tag) => `${displayName}/${tag}`);
           }
           output.paths[path][method].tags = tags;
-          if (!_.find(tagGroups, (x) => x.name === displayName)) {
-            tagGroups.push({
-              name: displayName,
-              tags: tags,
-            });
-          } else {
-            const index = _.findIndex(tagGroups, (x) => x.name === displayName);
-            const newTags = _.uniq(tagGroups[index].tags.concat(tags));
-            tagGroups.splice(index, 1, {
-              name: tagGroups[index].name,
-              tags: newTags,
-            });
-          }
         }
       }
+
+      let tags: Array<{
+        name: string;
+        description?: string;
+        'x-displayName'?: string;
+      }> = [
+        {
+          name: '开发准备/介绍',
+          'x-displayName': '介绍',
+        },
+        {
+          name: '开发准备/鉴权机制',
+          'x-displayName': '鉴权机制',
+        },
+      ];
+      const tagGroups: Array<{
+        name: string;
+        tags: string[];
+        description?: string;
+      }> = [
+        {
+          name: '开发准备',
+          tags: ['开发准备/介绍', '开发准备/鉴权机制'],
+        },
+      ];
+      for (const server of data) {
+        const itemTags = server.spec.tags?.map((x) => ({
+          name: `${server.displayName}/${x.name}`,
+          description: x.description,
+          'x-displayName': x.name.split('/')[x.name.split('/').length - 1],
+        }));
+        tagGroups.push({
+          name: server.displayName,
+          tags: itemTags.map((x) => x.name),
+        });
+        tags = tags.concat(itemTags);
+      }
+      output.tags = tags;
       output['x-tagGroups'] = tagGroups;
       return output;
     }

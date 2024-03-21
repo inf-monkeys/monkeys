@@ -1,13 +1,14 @@
 import { MonkeyToolCategories, MonkeyToolDescription, MonkeyToolDisplayName, MonkeyToolIcon, MonkeyToolInput, MonkeyToolOutput } from '@/common/decorators/monkey-block-api-extensions.decorator';
 import { IRequest } from '@/common/typings/request';
 import { Body, Controller, Get, Post, Req } from '@nestjs/common';
-import { ApiExcludeEndpoint, ApiOperation } from '@nestjs/swagger';
+import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiType, AuthType, ManifestJson, SchemaVersion } from '../interfaces';
 import { AddTwoNumberDto } from './dto/req/add-two-number.dto';
 import { NthPowerOfDto } from './dto/req/nth-power-of.dto';
 import { EXAMPLE_WORKER_OPENAPI_PATH } from './example.swagger';
 
 @Controller('/example-tool')
+@ApiTags('示例计算工具')
 export class ExampleToolsController {
   @Get('/manifest.json')
   @ApiExcludeEndpoint()

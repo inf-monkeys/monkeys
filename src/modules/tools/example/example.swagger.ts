@@ -12,5 +12,20 @@ export const setupExampleWorkerSwagger = (app: INestApplication) => {
     include: [ExampleToolsModule],
     deepScanRoutes: true,
   });
+  for (const path in document.paths) {
+    for (const method in document.paths[path]) {
+      const tags = document.paths[path][method].tags;
+      if (tags?.length) {
+        for (const tag of tags) {
+          if (!document.tags.find((x) => x.name === tag)) {
+            document.tags.push({
+              name: tag,
+              description: '',
+            });
+          }
+        }
+      }
+    }
+  }
   SwaggerModule.setup(EXAMPLE_WORKER_OPENAPI_PATH, app, document);
 };
