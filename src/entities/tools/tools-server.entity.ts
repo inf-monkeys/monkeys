@@ -1,5 +1,6 @@
 import { ApiType, AuthConfig, SchemaVersion } from '@/modules/tools/interfaces';
 import { Column, Entity } from 'typeorm';
+import url from 'url';
 import { BaseEntity } from '../base/base';
 
 export interface INodeCredentialDescription {
@@ -21,6 +22,11 @@ export class ApiConfig {
 
 @Entity({ name: 'tools_server' })
 export class ToolsServerEntity extends BaseEntity {
+  @Column({
+    name: 'display_name',
+  })
+  displayName: string;
+
   @Column({
     name: 'base_url',
   })
@@ -53,4 +59,18 @@ export class ToolsServerEntity extends BaseEntity {
     type: 'simple-json',
   })
   api: ApiConfig;
+
+  public getSpecUrl() {
+    const {
+      manifestUrl,
+      api: { url: specUrl },
+    } = this;
+    let realSpecUrl = specUrl;
+    if (!realSpecUrl.startsWith('http://') && !realSpecUrl.startsWith('https://')) {
+      const parsedUrl = url.parse(manifestUrl);
+      const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
+      realSpecUrl = url.resolve(baseUrl, realSpecUrl);
+    }
+    return realSpecUrl;
+  }
 }

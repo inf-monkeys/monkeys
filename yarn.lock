@@ -901,6 +901,13 @@
     jsonc-parser "3.2.1"
     pluralize "8.0.0"
 
+"@nestjs/serve-static@^4.0.1":
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@nestjs/serve-static/-/serve-static-4.0.1.tgz#287b8b059602705184980b4c8c24b62cc24d26c1"
+  integrity sha512-AoOrVdAe+WmsceuCcA8nWmKUYmaOsg9pqBCbIj7PS4W3XdikJQMtfxgSIoOlyUksZdhTBFjHqKh0Yhpj6pulwQ==
+  dependencies:
+    path-to-regexp "0.2.5"
+
 "@nestjs/swagger@^7.3.0":
   version "7.3.0"
   resolved "https://registry.yarnpkg.com/@nestjs/swagger/-/swagger-7.3.0.tgz#0b5e397cc5a592422df9afb24c79af928fea5954"
@@ -1741,6 +1748,14 @@ asynckit@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==
+
+atlassian-openapi@^1.0.8:
+  version "1.0.18"
+  resolved "https://registry.yarnpkg.com/atlassian-openapi/-/atlassian-openapi-1.0.18.tgz#963150c17426858b5ac51be9a07a9e9aef427ca9"
+  integrity sha512-IXgF/cYD8DW1mYB/ejDm/lKQMNXi2iCsxus2Y0ffZOxfa/SLoz0RuEZ4xu4suSRjtlda7qZDonQ6TAkQPVuQig==
+  dependencies:
+    jsonpointer "^5.0.0"
+    urijs "^1.19.10"
 
 axios@*, axios@^1.4.0, axios@^1.6.7:
   version "1.6.7"
@@ -4062,6 +4077,11 @@ jsonpath@^1.1.1:
     static-eval "2.0.2"
     underscore "1.12.1"
 
+jsonpointer@^5.0.0:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/jsonpointer/-/jsonpointer-5.0.1.tgz#2110e0af0900fd37467b5907ecd13a7884a1b559"
+  integrity sha512-p/nXbhSEcu3pZRdkW1OfJhpsVtW1gd4Wa1fnQc9YLiTfAjn0312eMKimbdIQzuZl9aa9xUGaRlP9T/CJE/ditQ==
+
 jsonwebtoken@^9.0.2:
   version "9.0.2"
   resolved "https://registry.yarnpkg.com/jsonwebtoken/-/jsonwebtoken-9.0.2.tgz#65ff91f4abef1784697d40952bb1998c504caaf3"
@@ -4236,7 +4256,7 @@ lodash.once@^4.0.0:
   resolved "https://registry.yarnpkg.com/lodash.once/-/lodash.once-4.1.1.tgz#0dd3971213c7c56df880977d504c88fb471a97ac"
   integrity sha512-Sb487aTOCr9drQVL8pIxOzVhafOjZN9UU54hiN8PU3uAiSV7lx1yYNpbNmex2PK6dSJoNTSJUUswT651yww3Mg==
 
-lodash@4.17.21, lodash@^4.17.21:
+lodash@4.17.21, lodash@^4.17.15, lodash@^4.17.21:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
@@ -4623,6 +4643,15 @@ onetime@^5.1.0, onetime@^5.1.2:
   dependencies:
     mimic-fn "^2.1.0"
 
+openapi-merge@^1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/openapi-merge/-/openapi-merge-1.3.2.tgz#dc77a8e85ac63a5d7373eb63f05ab8b93ff78380"
+  integrity sha512-qRWBwPMiKIUrAcKW6lstMPKpFEWy32dBbP1UjHH9jlWgw++2BCqOVbsjO5Wa4H1Ll3c4cn+lyi4TinUy8iswzw==
+  dependencies:
+    atlassian-openapi "^1.0.8"
+    lodash "^4.17.15"
+    ts-is-present "^1.1.1"
+
 openid-client@^5.6.5:
   version "5.6.5"
   resolved "https://registry.yarnpkg.com/openid-client/-/openid-client-5.6.5.tgz#c149ad07b9c399476dc347097e297bbe288b8b00"
@@ -4800,6 +4829,11 @@ path-to-regexp@0.1.7:
   version "0.1.7"
   resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-0.1.7.tgz#df604178005f522f15eb4490e7247a1bfaa67f8c"
   integrity sha512-5DFkuoqlv1uYQKxy8omFBeJPQcdoE07Kv2sferDCrAq1ohOU+MSDswDIbnx3YAM60qIOnYa53wBhXW0EbMonrQ==
+
+path-to-regexp@0.2.5:
+  version "0.2.5"
+  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-0.2.5.tgz#0b426991e387fc4c675de23557f358715eb66fb0"
+  integrity sha512-l6qtdDPIkmAmzEO6egquYDfqQGPMRNGjYtrU13HAXb3YSRrt7HSb1sJY0pKp6o2bAa86tSB6iwaW2JbthPKr7Q==
 
 path-to-regexp@3.2.0:
   version "3.2.0"
@@ -5715,6 +5749,11 @@ ts-api-utils@^1.0.1:
   resolved "https://registry.yarnpkg.com/ts-api-utils/-/ts-api-utils-1.2.1.tgz#f716c7e027494629485b21c0df6180f4d08f5e8b"
   integrity sha512-RIYA36cJn2WiH9Hy77hdF9r7oEwxAtB/TS9/S4Qd90Ap4z5FSiin5zEiTL44OII1Y3IIlEvxwxFUVgrHSZ/UpA==
 
+ts-is-present@^1.1.1:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/ts-is-present/-/ts-is-present-1.2.2.tgz#ba59b4a9d2bc22b99d1ba7f4af3d5eb320408d95"
+  integrity sha512-cA5MPLWGWYXvnlJb4TamUUx858HVHBsxxdy8l7jxODOLDyGYnQOllob2A2jyDghGa5iJHs2gzFNHvwGJ0ZfR8g==
+
 ts-jest@^29.1.0:
   version "29.1.2"
   resolved "https://registry.yarnpkg.com/ts-jest/-/ts-jest-29.1.2.tgz#7613d8c81c43c8cb312c6904027257e814c40e09"
@@ -5910,6 +5949,11 @@ uri-js@^4.2.2:
   integrity sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==
   dependencies:
     punycode "^2.1.0"
+
+urijs@^1.19.10:
+  version "1.19.11"
+  resolved "https://registry.yarnpkg.com/urijs/-/urijs-1.19.11.tgz#204b0d6b605ae80bea54bea39280cdb7c9f923cc"
+  integrity sha512-HXgFDgDommxn5/bIv0cnQZsPhHDA90NPHD6+c/v21U5+Sx5hoP8+dP9IZXBU1gIfvdRfhG8cel9QNPeionfcCQ==
 
 util-deprecate@^1.0.1, util-deprecate@~1.0.1:
   version "1.0.2"

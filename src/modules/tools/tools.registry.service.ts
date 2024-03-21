@@ -24,6 +24,9 @@ export class ToolsRegistryService {
     if (!data) {
       throw new Error('Error when parse manifest json: manifest data is empty');
     }
+    if (!data.display_name) {
+      throw new Error('Error when parse manifest json: display_name is missing');
+    }
     if (!data.schema_version) {
       throw new Error('Error when parse manifest json: schema_version is missing');
     }
@@ -77,6 +80,7 @@ export class ToolsRegistryService {
     const {
       api: { url: specUrl, type: apiType },
       namespace,
+      display_name,
     } = manifestData;
 
     let realSpecUrl = specUrl;
@@ -101,7 +105,7 @@ export class ToolsRegistryService {
     }
 
     // Save server info and credentials
-    await this.toolsRepository.saveServer(manifestUrl, baseUrl, manifestData);
+    await this.toolsRepository.saveServer(display_name, manifestUrl, baseUrl, manifestData);
     if (manifestData.credentials) {
       await this.credentialsRepository.createOrUpdateCredentialTypes(namespace, manifestData.credentials);
     }

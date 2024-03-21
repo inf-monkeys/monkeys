@@ -1,5 +1,4 @@
 import { config } from '@/common/config';
-import { ComfyuiServerEntity } from '@/entities/comfyui/comfyui-server.entity';
 import { ThemeEntity } from '@/entities/config/theme';
 import { SystemConfigurationEntity } from '@/entities/system/system-configuration.entity';
 import { ToolsCredentialTypeEntity } from '@/entities/tools/tools-credential-type.entity';
@@ -29,7 +28,6 @@ export const entities: EntityClassOrSchema[] = [
   WorkflowChatSessionEntity,
   WorkflowTriggersEntity,
   WorkflowTemplateEntity,
-  ComfyuiServerEntity,
   SystemConfigurationEntity,
   UserEntity,
   TeamEntity,

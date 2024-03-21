@@ -1,13 +1,14 @@
 import { MonkeyToolCategories, MonkeyToolExtra, MonkeyToolIcon, MonkeyToolInput, MonkeyToolName, MonkeyToolOutput } from '@/common/decorators/monkey-block-api-extensions.decorator';
 import { IToolsRequest } from '@/common/typings/request';
 import { Body, Controller, Get, Post, Req } from '@nestjs/common';
-import { ApiExcludeEndpoint, ApiOperation } from '@nestjs/swagger';
+import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiType, AuthType, ManifestJson, SchemaVersion } from '../interfaces';
 import { BuiltinToolsService } from './builtin.service';
 import { BUILTIN_TOOL_OPENAPI_PATH } from './builtin.swagger';
 import { CollectDoWhileOutputDto } from './dto/req/collect-dowhile-output.req.dto';
 
 @Controller('/system-tools/')
+@ApiTags('工作流相关')
 export class BuiltinToolsController {
   constructor(private readonly service: BuiltinToolsService) {}
 
@@ -16,7 +17,8 @@ export class BuiltinToolsController {
   public getMetadata(): ManifestJson {
     return {
       schema_version: SchemaVersion.v1,
-      namespace: 'monkeys_builtin_tools',
+      display_name: '内置工具',
+      namespace: 'monkey_tools_builtin',
       auth: {
         type: AuthType.none,
       },

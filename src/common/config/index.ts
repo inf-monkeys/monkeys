@@ -113,12 +113,13 @@ export interface Config {
 }
 
 const port = readConfig('server.port', 3000);
+const appUrl = readConfig('server.appUrl', `http://localhost:${port}`);
 
 export const config: Config = {
   server: {
     port,
     appId: readConfig('server.appId', 'monkeys'),
-    appUrl: readConfig('server.appUrl', `http://localhost:${port}`),
+    appUrl: appUrl,
     loadExample: readConfig('server.loadExample', true),
   },
   conductor: {
@@ -157,8 +158,8 @@ export const config: Config = {
       issuer: readConfig('auth.oidc.issuer'),
       client_id: readConfig('auth.oidc.client_id'),
       client_secret: readConfig('auth.oidc.client_secret'),
-      redirect_uri: readConfig('auth.oidc.redirect_uri', `http://localhost:${port}/api/auth/oidc/callback`),
-      post_logout_redirect_uri: readConfig('auth.oidc.post_logout_redirect_uri', `http://localhost:${port}`),
+      redirect_uri: readConfig('auth.oidc.redirect_uri', `${appUrl}/api/auth/oidc/callback`),
+      post_logout_redirect_uri: readConfig('auth.oidc.post_logout_redirect_uri', appUrl),
       id_token_signed_response_alg: readConfig('auth.oidc.id_token_signed_response_alg', 'HS256'),
       token_endpoint_auth_method: readConfig('auth.oidc.token_endpoint_auth_method', 'client_secret_post'),
       scope: readConfig('auth.oidc.scope', 'openid profile'),

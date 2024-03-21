@@ -35,6 +35,7 @@ export interface AuthConfig {
 
 export interface ManifestJson {
   schema_version: SchemaVersion;
+  display_name: string;
   namespace: string;
   auth: AuthConfig;
   api: {

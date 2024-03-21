@@ -14,7 +14,8 @@ export class ExampleToolsController {
   public getMetadata(): ManifestJson {
     return {
       schema_version: SchemaVersion.v1,
-      namespace: 'monkeys_example_worker',
+      display_name: '示例工具',
+      namespace: 'monkey_tools_example',
       auth: {
         type: AuthType.none,
       },

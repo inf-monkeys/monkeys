@@ -27,7 +27,7 @@ export class ToolsRegistryCronService {
 
       try {
         logger.info('Start to refresh tools');
-        const registries = await this.toolsRepository.listRegistries();
+        const registries = await this.toolsRepository.listServers();
         for (const registry of registries) {
           await this.toolsRegistryService.registerToolsServer({
             manifestUrl: registry.manifestUrl,

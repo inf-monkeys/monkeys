@@ -1,21 +1,34 @@
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
+import { OpenAPIObject } from '@nestjs/swagger';
+import axios from 'axios';
 import { config } from './common/config';
 import { logger } from './common/logger';
 import { BUILTIN_TOOL_OPENAPI_MENIFEST_URL } from './modules/tools/builtin/builtin.swagger';
 import { EXAMPLE_WORKER_OPENAPI_MENIFEST_URL } from './modules/tools/example/example.swagger';
 import { ToolsRegistryService } from './modules/tools/tools.registry.service';
-import { ComfyuiRepository } from './repositories/comfyui.repository';
-import { TeamRepository } from './repositories/team.repository';
-import { UserRepository } from './repositories/user.repository';
-
+import { ToolsRepository } from './repositories/tools.repository';
 @Injectable()
 export class AppService implements OnApplicationBootstrap {
   constructor(
     private readonly workerRegistryService: ToolsRegistryService,
-    private readonly comfyuiRepository: ComfyuiRepository,
-    private readonly userRepository: UserRepository,
-    private readonly teamRepository: TeamRepository,
+    private readonly toolsRepository: ToolsRepository,
   ) {}
+
+  public async getCombinedToolsSwagger() {
+    const servers = await this.toolsRepository.listServers();
+    const result = await Promise.all(
+      servers.map(async (server) => {
+        const specUrl = server.getSpecUrl();
+        const { data: specData } = await axios.get<OpenAPIObject>(specUrl);
+        return {
+          namespace: server.namespace,
+          displayName: server.displayName,
+          spec: specData,
+        };
+      }),
+    );
+    return result;
+  }
 
   private registerTools() {
     logger.info(`Load builtin tools of ${BUILTIN_TOOL_OPENAPI_MENIFEST_URL}`);
@@ -43,6 +56,5 @@ export class AppService implements OnApplicationBootstrap {
 
   onApplicationBootstrap() {
     this.registerTools();
-    this.comfyuiRepository.createOrUpdateDefaultServer();
   }
 }
