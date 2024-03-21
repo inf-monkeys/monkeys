@@ -17,7 +17,8 @@ import VinesEvent from '@/utils/events.ts';
 interface IVinesRunInsideToolbarProps {}
 
 export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () => {
-  const { isLatestWorkflowVersion, canvasMode, setCanvasMode, setZoomToNodeId, setIsUserInteraction } = useFlowStore();
+  const { isLatestWorkflowVersion, isWorkflowRUNNING, setCanvasMode, setZoomToNodeId, setIsUserInteraction } =
+    useFlowStore();
   const { vines } = useVinesFlow();
 
   const workflowExecution = vines.runningWorkflowExecution;
@@ -32,8 +33,7 @@ export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () =
   const executionStartTime = get(workflowExecution, 'startTime', 0);
   const executionEndTime = get(workflowExecution, 'endTime', 0);
 
-  const isRUNNINGMode = [CanvasStatus.RUNNING, CanvasStatus.WAIT_TO_RUNNING].includes(canvasMode);
-  const isReExecution = hasExecution && isRUNNINGMode;
+  const isReExecution = hasExecution && isWorkflowRUNNING;
 
   return (
     <Card className={cn('flex flex-nowrap gap-2 p-2', (!isLatestWorkflowVersion || disabled) && 'hidden')}>
@@ -61,7 +61,7 @@ export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () =
         }}
       />
       <ExecutionTimer
-        className={hasExecution && isRUNNINGMode ? '' : 'hidden'}
+        className={hasExecution && isWorkflowRUNNING ? '' : 'hidden'}
         status={isExecutionStatus}
         startTime={executionStartTime}
         endTime={executionEndTime}
@@ -69,7 +69,7 @@ export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () =
       />
       {!isExecutionRunning && (
         <ToolButton
-          className={cn(isRUNNINGMode ? '' : 'hidden')}
+          className={cn(isWorkflowRUNNING ? '' : 'hidden')}
           icon={<LogOut />}
           tip="返回编辑模式"
           side="bottom"

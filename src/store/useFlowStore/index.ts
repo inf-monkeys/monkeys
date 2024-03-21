@@ -20,7 +20,9 @@ export interface FlowStore {
   setInitialScale: (scale: number) => void;
 
   canvasMode: CanvasStatus;
+  isWorkflowRUNNING: boolean;
   setCanvasMode: (mode: CanvasStatus) => void;
+
   canvasDisabled: boolean;
   setCanvasDisabled: (disabled: boolean) => void;
   isCanvasMoving: boolean;
@@ -59,7 +61,12 @@ const createFlowStore = () =>
       setScale: (scale) => set({ scale }),
 
       canvasMode: CanvasStatus.EDIT,
-      setCanvasMode: (canvasMode) => set({ canvasMode }),
+      isWorkflowRUNNING: false,
+      setCanvasMode: (canvasMode) =>
+        set({
+          canvasMode,
+          isWorkflowRUNNING: [CanvasStatus.RUNNING, CanvasStatus.WAIT_TO_RUNNING].includes(canvasMode),
+        }),
       canvasDisabled: false,
       setCanvasDisabled: (canvasDisabled) => set({ canvasDisabled }),
       isCanvasMoving: false,

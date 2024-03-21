@@ -11,6 +11,7 @@ import {
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { IVinesVariableMap, VinesToolDef, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 import { VARIABLE_REGEXP } from '@/package/vines-flow/core/utils.ts';
+import { cn } from '@/utils';
 
 interface IToolInputProps {
   tool?: VinesToolDef;
@@ -19,6 +20,7 @@ interface IToolInputProps {
   variableMapper: Record<string, IVinesVariableMap>;
   nodeId: string;
   task?: VinesTask;
+  className?: string;
 }
 
 export const ToolInput: React.FC<IToolInputProps> = ({
@@ -28,6 +30,7 @@ export const ToolInput: React.FC<IToolInputProps> = ({
   updateRaw,
   variableMapper,
   workflowVersion = 1,
+  className,
 }) => {
   const input = tool?.input;
 
@@ -70,7 +73,7 @@ export const ToolInput: React.FC<IToolInputProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-4 px-1 py-2">
+    <div className={cn('flex flex-col gap-4 px-1 py-2', className)}>
       {finalInputs?.map((def, index) => (
         <VinesInputProperty
           key={index}

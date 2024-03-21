@@ -35,6 +35,7 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
     canvasDisabled,
     isCanvasMoving,
     isLatestWorkflowVersion,
+    isWorkflowRUNNING,
     setCanvasMode,
     setCanvasDisabled,
     setCanvasMoving,
@@ -82,7 +83,6 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
     ['ctrl+d', handleDirectionChange, { preventDefault: true }],
   ]);
 
-  const isRUNNING = [CanvasStatus.RUNNING, CanvasStatus.WAIT_TO_RUNNING].includes(canvasMode);
   const isNotLatestWorkflowVersion = !isLatestWorkflowVersion;
 
   return (
@@ -97,7 +97,10 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
         onClick={handleCanvasMove}
       />
       <ToolButton
-        className={cn(!isEditMode && '[&_svg]:stroke-red-10', (isNotLatestWorkflowVersion || isRUNNING) && 'hidden')}
+        className={cn(
+          !isEditMode && '[&_svg]:stroke-red-10',
+          (isNotLatestWorkflowVersion || isWorkflowRUNNING) && 'hidden',
+        )}
         icon={<Lock />}
         tip={isEditMode ? '只读模式' : '编辑模式'}
         keys={['ctrl', 'L']}
@@ -110,13 +113,13 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
         onClick={handleDirectionChange}
       />
       <ToolButton
-        className={cn(isRUNNING && 'hidden')}
+        className={cn(isWorkflowRUNNING && 'hidden')}
         icon={<Workflow />}
         tip={`工具显示：${isRenderMini ? '极简' : isRenderComplicate ? '全参数' : '普通'}模式`}
         onClick={handleRenderTypeChange}
       />
       <ToolButton
-        className={cn(isRUNNING && 'hidden')}
+        className={cn(isWorkflowRUNNING && 'hidden')}
         icon={<Code />}
         tip="开发者模式"
         onClick={() => VinesEvent.emit('flow-raw-data-editor', workflowId)}
