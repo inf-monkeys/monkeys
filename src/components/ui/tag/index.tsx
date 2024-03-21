@@ -16,6 +16,7 @@ const tagVariants = cva(
         circle: 'rounded-xl',
       },
       size: {
+        xs: 'h-[18px] text-xs',
         small: 'h-[22px] text-sm',
         large: 'h-[26px]',
       },
@@ -42,13 +43,14 @@ const tagVariants = cva(
 
 interface IconWrapperProps {
   children: React.ReactNode;
-  size?: 'large' | 'small' | null;
+  size?: 'large' | 'small' | 'xs' | null;
 }
 
 const IconWrapper: React.FC<IconWrapperProps> = ({ children, size = 'small' }) => {
   return (
     <div
       className={cn('mx-[2px]', {
+        '[&_svg]:w-[14px]': size === 'xs',
         '[&_svg]:w-[18px]': size === 'small',
         '[&_svg]:w-[22px]': size === 'large',
       })}
