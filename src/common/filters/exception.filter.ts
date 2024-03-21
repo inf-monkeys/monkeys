@@ -13,8 +13,13 @@ export class ExceptionsFilter implements ExceptionFilter {
     } else if (exception instanceof HttpException) {
       status = exception.getStatus();
     }
-    logger.error('Request Exception: ', exception);
-    const message = exception instanceof AxiosError ? (exception.response?.data ? JSON.stringify(exception.response?.data) : exception.message) : (exception as Error).message;
+    let message = '';
+    if (status === HttpStatus.NOT_FOUND) {
+      message = 'Not Found';
+    } else {
+      logger.error('Request Exception: ', exception);
+      message = exception instanceof AxiosError ? (exception.response?.data ? JSON.stringify(exception.response?.data) : exception.message) : (exception as Error).message;
+    }
     response.status(status).json({
       code: status,
       message,
