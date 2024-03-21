@@ -14,10 +14,10 @@ RUN yarn
 COPY . .
 
 # Creates a "dist" folder with the production build
-RUN yarn
+RUN npm run build
 
 # Expose server port
 EXPOSE 3000
 
 # Start the server using the production build
-CMD node dist/main.js
+CMD yarn start:prod
