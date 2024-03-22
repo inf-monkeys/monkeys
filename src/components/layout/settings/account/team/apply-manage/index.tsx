@@ -80,7 +80,7 @@ export const ApplyManage: React.FC<IApplyManageProps> = ({ teamId }) => {
           {applyListData?.applyUserList && (
             <div className="flex flex-col gap-2">
               {applyListData.applyUserList.map((user) => (
-                <ApplyItem key={user._id} user={user} teamId={teamId} afterOperate={handleAfterOperate} />
+                <ApplyItem key={user.id} user={user} teamId={teamId} afterOperate={handleAfterOperate} />
               ))}
             </div>
           )}

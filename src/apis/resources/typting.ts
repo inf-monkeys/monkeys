@@ -1,7 +1,7 @@
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 
 export interface IMd5Response {
-  _id: string;
+  id: string;
   assetType: string;
   teamId: string;
   creatorUserId: string;
@@ -36,7 +36,7 @@ export type VinesResourceImageParams = {
 export type VinesResourceType = 'image' | 'text' | 'dataset';
 
 export interface IVinesResource {
-  _id: string;
+  id: string;
   type: VinesResourceType;
   md5?: string;
   size?: number;

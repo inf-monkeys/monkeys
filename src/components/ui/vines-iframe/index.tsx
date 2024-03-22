@@ -5,7 +5,7 @@ import { AnimatePresence } from 'framer-motion';
 import { VinesView } from '@/components/ui/vines-iframe/view.tsx';
 
 export interface IVinesIFramePropsRequired {
-  _id?: string;
+  id?: string;
   teamId?: string;
   workflowId?: string;
   type?: string;
@@ -22,7 +22,7 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }
 
   useEffect(() => {
     if (!page) return;
-    if (renderer.findIndex(({ _id }) => _id === page._id) === -1) {
+    if (renderer.findIndex(({ id }) => id === page.id) === -1) {
       setRenderer((prev) => [...prev, page]);
     }
   }, [page]);
@@ -31,19 +31,19 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }
     if (!hasPages) return;
     setRenderer((prev) => {
       if (!pages) return prev;
-      return prev.filter((it) => pages.find(({ _id }) => _id === it._id));
+      return prev.filter((it) => pages.find(({ id }) => id === it.id));
     });
   }, [pages]);
 
-  const currentPageId = page?._id;
+  const currentPageId = page?.id;
 
   return (
     <AnimatePresence mode="wait">
       {hasPages &&
         renderer
           .filter(({ teamId, workflowId, type }) => teamId && workflowId && type)
-          .map(({ _id, workflowId, type }) => {
-            return <VinesView id={_id} workflowId={workflowId} pageId={currentPageId} type={type} key={_id} />;
+          .map(({ id, workflowId, type }) => {
+            return <VinesView id={id} workflowId={workflowId} pageId={currentPageId} type={type} key={id} />;
           })}
     </AnimatePresence>
   );

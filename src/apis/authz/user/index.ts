@@ -12,7 +12,7 @@ export const useUser = () =>
 export const getUser = () => vinesFetcher<IVinesUser>({ simple: true })('/api/users/profile');
 
 export const updateUserInfo = (data: IUpdateUserInfo) =>
-  vinesFetcher<IVinesUser, IUpdateUserInfo>({ method: 'POST', simple: true })('/api/users/profile', data);
+  vinesFetcher<IVinesUser, IUpdateUserInfo>({ method: 'PUT', simple: true })('/api/users/profile', data);
 
 export const searchUsers = (keyword: string) =>
   vinesFetcher<

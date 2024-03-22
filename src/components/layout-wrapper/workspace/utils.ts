@@ -38,14 +38,14 @@ export const useVinesPage = () => {
     const diffPages = differenceWith(pages, originPagesRef.current, isEqual);
     const omitKeys: { [key: string]: string[] } = {};
     diffPages.forEach((page) => {
-      const originPage = originPagesRef.current?.find((it) => it._id === page._id);
+      const originPage = originPagesRef.current?.find((it) => it.id === page.id);
       if (originPage) {
         Object.entries(page).forEach(([key, value]) => {
           if (isEqual(value, originPage[key as keyof IPageType])) {
-            if (!omitKeys[page._id]) {
-              omitKeys[page._id] = ['updatedTimestamp', key];
+            if (!omitKeys[page.id]) {
+              omitKeys[page.id] = ['updatedTimestamp', key];
             } else {
-              omitKeys[page._id].push(key);
+              omitKeys[page.id].push(key);
             }
           }
         });
@@ -53,7 +53,7 @@ export const useVinesPage = () => {
     });
 
     const finalPages = diffPages
-      .map((it) => ({ pageId: it._id, ...omit(it, omitKeys[it._id]) }))
+      .map((it) => ({ pageId: it.id, ...omit(it, omitKeys[it.id]) }))
       .filter((it) => Object.keys(it).length > 1);
     originPagesRef.current = JSON.parse(stringify(pages));
 
@@ -78,7 +78,7 @@ export const useVinesPage = () => {
     if (originPagesRef.current === null) {
       originPagesRef.current = JSON.parse(stringify(pages));
     }
-    setPage(pages.find((it) => it._id === pageId) ?? null);
+    setPage(pages.find((it) => it.id === pageId) ?? null);
   }, [pages]);
 
   const navigateTo = (pageId: string) =>
@@ -93,7 +93,7 @@ export const useVinesPage = () => {
 
   const updatePageData = async (key: string, value: unknown) => {
     if (!page) return;
-    const pageIndex = pages?.findIndex((it) => it._id === page._id) ?? -1;
+    const pageIndex = pages?.findIndex((it) => it.id === page.id) ?? -1;
     if (pageIndex === -1) return;
     const newPages = cloneDeep(pages);
     if (!newPages?.[pageIndex]) return;

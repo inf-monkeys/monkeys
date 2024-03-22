@@ -71,7 +71,7 @@ export const SpaceTabs: React.FC<ITabsProps> = () => {
     handleVisibilityChange();
   }, [pages]);
 
-  const pageIds = pages?.map(({ _id }) => _id) ?? [];
+  const pageIds = pages?.map(({ id }) => id) ?? [];
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -91,7 +91,7 @@ export const SpaceTabs: React.FC<ITabsProps> = () => {
   const pageLength = pages?.length ?? 0;
   const disableDND = pageLength === 1;
   const pageNavLastIndex = pageLength - 1;
-  const activeIndex = pages?.findIndex(({ _id }) => _id === pageId) ?? 0;
+  const activeIndex = pages?.findIndex(({ id }) => id === pageId) ?? 0;
 
   return (
     <DndContext
@@ -103,10 +103,10 @@ export const SpaceTabs: React.FC<ITabsProps> = () => {
       <header ref={headerNode} className="relative mx-3 mt-2 flex h-10 overflow-x-clip scroll-smooth">
         <div ref={tabsNode} className={cn('flex overflow-hidden', scrollToolVisible && 'pr-32')}>
           <SortableContext items={pageIds} strategy={horizontalListSortingStrategy} disabled={disableDND}>
-            {pages?.map(({ _id, displayName, instance }, index) => (
+            {pages?.map(({ id, displayName, instance }, index) => (
               <SpaceTab
-                key={_id}
-                id={_id}
+                key={id}
+                id={id}
                 icon={instance?.icon ?? '⚠️'}
                 displayName={displayName ?? '未知视图'}
                 activeIndex={activeIndex}

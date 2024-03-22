@@ -4,7 +4,7 @@ export enum IApiKeyStatus {
 }
 
 export interface IApiKey {
-  _id: string;
+  id: string;
   teamId: string;
   creatorUserId: string;
   apiKey: string;

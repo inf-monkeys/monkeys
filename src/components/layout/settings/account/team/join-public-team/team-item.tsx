@@ -26,7 +26,7 @@ export const JoinPublicTeamItem: React.FC<IJoinPublicTeamItemProps> = ({ team, i
           </div>
         </div>
         <div className="flex gap-2">
-          <Button disabled={isHandleAccept} onClick={() => handleApplyTeam(team._id)}>
+          <Button disabled={isHandleAccept} onClick={() => handleApplyTeam(team.id)}>
             申请加入
           </Button>
         </div>

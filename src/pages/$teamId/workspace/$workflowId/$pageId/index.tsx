@@ -22,7 +22,7 @@ export const WorkspacePage: React.FC = () => {
   useEffect(() => {
     if (pages && pageId && teamId) {
       // 二次检查 pageId
-      const page = pages.find(({ _id }) => _id === pageId);
+      const page = pages.find(({ id }) => id === pageId);
       if (page) {
         setPage(page);
         const pageApiKey = page.apiKey;

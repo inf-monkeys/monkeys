@@ -8,12 +8,12 @@ import { IBaseEntity, IPaginationListData } from '@/apis/typings.ts';
 import { ISortConditionOrderBy, ISortConditionOrderColumn } from '@/components/layout/ugc/typings.ts';
 
 export interface IAssetTag {
-  _id: string;
+  id: string;
   name: string;
 }
 
 export type IAssetItem<T = object> = T & {
-  _id: string;
+  id: string;
   name: string;
   description: string;
   iconUrl: string;

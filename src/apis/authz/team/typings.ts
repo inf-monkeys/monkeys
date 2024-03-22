@@ -2,7 +2,6 @@ import { IVinesUser } from '@/apis/authz/user/typings.ts';
 
 export interface IVinesTeam {
   id: string;
-  _id: string;
   name: string;
   logoUrl?: string;
   description?: string;
@@ -18,14 +17,14 @@ export interface IVinesTeam {
 export type ITeamUpdate = Partial<Pick<IVinesTeam, 'name' | 'description' | 'logoUrl' | 'customTheme'>>;
 
 export type ITeamMember = {
-  list: Array<IVinesUser & { _id: string }>;
+  list: Array<IVinesUser>;
   listTotal: number;
 };
 
 export type ITeamCreate = Pick<IVinesTeam, 'name' | 'description' | 'logoUrl'>;
 
 export interface ITeamApplyListData {
-  _id: string;
+  id: string;
   teamId: string;
   applyList: string[];
   applyUserList?: IVinesUser[];
@@ -68,7 +67,7 @@ export enum ITeamInviteStatus {
 }
 
 export type ITeamInvite = {
-  _id: string;
+  id: string;
   inviterUserId: string;
   targetUserId?: string;
   teamId: string;
