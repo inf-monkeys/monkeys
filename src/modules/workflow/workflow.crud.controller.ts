@@ -2,9 +2,10 @@ import { ListDto } from '@/common/dto/list.dto';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateWorkflowDefDto } from './dto/req/create-workflow-def.dto';
+import { GetWorkflowDto } from './dto/req/get-workflow.dto';
 import { ImportWorkflowDto } from './dto/req/import-workflow.dto';
 import { UpdateWorkflowDefDto } from './dto/req/update-workflow-def.dto';
 import { WorkflowCrudService } from './workflow.curd.service';
@@ -25,6 +26,24 @@ export class WorkflowCrudController {
     const data = await this.service.listWorkflows(teamId, body);
     return new SuccessResponse({
       data,
+    });
+  }
+
+  @Get('/:workflowId')
+  @ApiOperation({
+    summary: '获取 workflow 定义',
+    description: '获取 workflow 定义',
+  })
+  public async getWorkflowDef(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Query() dto: GetWorkflowDto) {
+    const { teamId } = req;
+    const { version: versionStr } = dto;
+    let version = undefined;
+    if (versionStr) {
+      version = parseInt(versionStr.toString());
+    }
+    const result = await this.service.getWorkflowDef(teamId, workflowId, version);
+    return new SuccessResponse({
+      data: result,
     });
   }
 

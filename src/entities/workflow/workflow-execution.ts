@@ -26,6 +26,7 @@ export class WorkflowExecutionEntity extends BaseEntity {
 
   @Column({
     name: 'trigger_type',
+    type: 'varchar',
   })
   triggerType: WorkflowTriggerType;
 

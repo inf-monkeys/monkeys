@@ -27,6 +27,7 @@ export class ToolsEntity extends BaseEntity {
 
   @Column({
     default: BlockType.SIMPLE,
+    type: 'varchar',
   })
   type: BlockType;
 

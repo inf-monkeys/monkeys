@@ -5,6 +5,7 @@ import { BaseEntity } from '../base/base';
 export class UserEntity extends BaseEntity {
   @Column({
     type: 'varchar',
+    nullable: true,
   })
   name: string;
 
