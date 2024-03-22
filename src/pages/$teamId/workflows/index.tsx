@@ -24,10 +24,9 @@ import {
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
-import { useTimeDiff } from '@/utils/time.ts';
+import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const Workflows: React.FC = () => {
-  const { formatTimeDiffPrevious } = useTimeDiff();
   const navigate = useNavigate();
   const clipboard = useClipboard({ timeout: 500 });
 

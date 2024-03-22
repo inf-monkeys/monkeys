@@ -4,7 +4,8 @@ import { get } from 'lodash';
 import { LogOut, Play, RotateCcw, StopCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { ExecutionTimer } from '@/components/layout/vines-flow/toolbar/expand/run-inside/execution-timer.tsx';
+import { ExecutionRecover } from '@/components/layout/vines-flow/toolbar/expand/execution/execution-recover.tsx';
+import { ExecutionTimer } from '@/components/layout/vines-flow/toolbar/expand/execution/execution-timer.tsx';
 import { ToolButton } from '@/components/layout/vines-flow/toolbar/tool-button.tsx';
 import { Card } from '@/components/ui/card.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
@@ -67,6 +68,7 @@ export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () =
         endTime={executionEndTime}
         onClick={() => (isExecutionPaused ? vines.resume() : vines.pause())}
       />
+      <ExecutionRecover className={!isLatestWorkflowVersion || disabled ? 'hidden' : ''} />
       {!isExecutionRunning && (
         <ToolButton
           className={cn(isWorkflowRUNNING ? '' : 'hidden')}
