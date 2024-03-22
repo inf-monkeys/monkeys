@@ -5,5 +5,5 @@ export const pageSearchSchema = z.object({
 });
 
 export const loginCallbackPageSearchSchema = z.object({
-  callback: z.string().optional(),
+  access_token: z.string().optional(),
 });
