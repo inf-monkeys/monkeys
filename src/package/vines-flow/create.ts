@@ -1,4 +1,4 @@
-import React, { createContext, createElement, useCallback, useContext, useEffect, useReducer, useState } from 'react';
+import React, { createContext, createElement, useCallback, useContext, useEffect, useReducer } from 'react';
 
 import { useSWRConfig } from 'swr';
 
@@ -7,9 +7,9 @@ import { toast } from 'sonner';
 
 import { useToolLists } from '@/apis/tools';
 import { useUpdateWorkflow, useWorkflowList } from '@/apis/workflow';
-import { useWorkflowExecution } from '@/apis/workflow/execution';
 import { VinesCore } from '@/package/vines-flow/core';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
+import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
 import { readLocalStorageValue } from '@/utils';
 import { useRetimer } from '@/utils/use-retimer.ts';
 
@@ -98,12 +98,18 @@ export const createVinesCore = (workflowId: string) => {
       [reTimer],
     );
 
+    const handleUpdateExecutionDataToSWR = useCallback((instanceId: string, data: VinesWorkflowExecution) => {
+      void mutate(`/api/workflow/${instanceId}/execution-detail`, data, { revalidate: false });
+    }, []);
+
     useEffect(() => {
       _vines.on('refresh', forceUpdate);
       _vines.on('update', handleUpdate);
+      _vines.on('update-execution', handleUpdateExecutionDataToSWR);
       return () => {
         _vines.off('refresh', forceUpdate);
         _vines.off('update', handleUpdate);
+        _vines.off('update-execution', handleUpdateExecutionDataToSWR);
       };
     }, []);
 
@@ -117,37 +123,6 @@ export const createVinesCore = (workflowId: string) => {
     useEffect(() => {
       workflows?.length && _vines.updateWorkflows(workflows);
     }, [workflows]);
-
-    const [workflowExecutionController, setWorkflowExecutionController] = useState(false);
-    const {
-      data: workflowExecution,
-      mutate: workflowExecutionMutate,
-      error: workflowExecutionError,
-    } = useWorkflowExecution(workflowExecutionController ? _vines.runningInstanceId : '', apikey);
-
-    useEffect(() => {
-      if (workflowExecutionError instanceof Error) {
-        _vines.stop().then(() => toast.error(`应用运行状态异常：${workflowExecutionError.message}`));
-      }
-      if (!workflowExecution) return;
-      _vines.updateWorkflowExecution(workflowExecution);
-    }, [workflowExecution, workflowExecutionError]);
-
-    const handleWorkflowExecution = useCallback((enable: boolean) => {
-      if (!enable) {
-        // 在终止获取执行状态前，再次获取一次执行状态
-        workflowExecutionMutate().then(() => setWorkflowExecutionController(false));
-        return;
-      }
-      setWorkflowExecutionController(enable);
-    }, []);
-
-    useEffect(() => {
-      _vines.on('execution', handleWorkflowExecution);
-      return () => {
-        _vines.off('execution', handleWorkflowExecution);
-      };
-    }, []);
 
     return createElement(VinesContext.Provider, { value: { _vines, _refresher, forceUpdate } }, children);
   };

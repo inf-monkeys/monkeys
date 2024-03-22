@@ -43,7 +43,7 @@ export class VinesNode<T extends VinesTask = VinesTask> {
 
   public children: VinesNode[];
 
-  public runningStatus: VinesNodeStatus = 'DEFAULT';
+  public executionStatus: VinesNodeStatus = 'DEFAULT';
 
   public runningTask: VinesNodeRunTask = this.defaultRunningTask;
 
@@ -466,8 +466,8 @@ export class VinesNode<T extends VinesTask = VinesTask> {
   // endregion
 
   // region Runner
-  public clearRunningStatus() {
-    this.runningStatus = 'DEFAULT';
+  public clearExecutionStatus() {
+    this.executionStatus = 'DEFAULT';
   }
 
   public clearRunningTask() {
@@ -476,7 +476,7 @@ export class VinesNode<T extends VinesTask = VinesTask> {
 
   public updateStatus(task: VinesNodeRunTask) {
     this.runningTask = { ...task, originStatus: task.status };
-    this.runningStatus = task.status;
+    this.executionStatus = task.status;
   }
 
   private get defaultRunningTask(): VinesNodeRunTask {

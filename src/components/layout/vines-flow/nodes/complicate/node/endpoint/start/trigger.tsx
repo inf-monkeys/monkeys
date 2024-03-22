@@ -56,7 +56,7 @@ export const ComplicateTriggerNode: React.FC = () => {
                 onSubmit={(inputData) => {
                   vines.start({ inputData });
                   setIsUserInteraction(null);
-                  setTimeout(() => VinesEvent.emit('canvas-auto-zoom'));
+                  setTimeout(() => VinesEvent.emit('canvas-auto-zoom'), 80);
                   setCanvasMode(CanvasStatus.RUNNING);
                 }}
               >
