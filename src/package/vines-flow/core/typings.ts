@@ -1,5 +1,6 @@
 import type { Task, Workflow as WorkflowExecution } from '@io-orkes/conductor-javascript';
 
+import { WorkflowTriggerType } from '@/apis/workflow/trigger/typings.ts';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { VinesNodeRunTask } from '@/package/vines-flow/core/nodes/typings.ts';
 
@@ -41,16 +42,17 @@ export interface IVinesFlowRunParams {
 }
 
 export type VinesWorkflowExecutionType =
-  | 'SCHEDULED'
+  | 'SCHEDULED' // Vines 内置状态
   | 'RUNNING'
   | 'COMPLETED'
   | 'FAILED'
   | 'TIMED_OUT'
   | 'TERMINATED'
   | 'PAUSED'
-  | 'CANCELED';
+  | 'CANCELED'; // Vines 内置状态
 
 export type VinesWorkflowExecution = Omit<WorkflowExecution, 'tasks'> & {
   tasks: VinesNodeRunTask[];
   originTasks: Array<Task>;
+  triggerType: WorkflowTriggerType;
 };

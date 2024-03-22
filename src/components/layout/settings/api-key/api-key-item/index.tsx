@@ -25,7 +25,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { Tag } from '@/components/ui/tag';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
-import { useTimeDiff } from '@/utils/time.ts';
+import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 interface IApiKeyItemProps extends React.ComponentPropsWithoutRef<'div'> {
   apiKey: IApiKey;
@@ -33,7 +33,6 @@ interface IApiKeyItemProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const ApiKeyItem: React.FC<IApiKeyItemProps> = ({ apiKey, mutate }) => {
-  const { formatTimeDiffPrevious } = useTimeDiff();
   const [loading, setLoading] = useState(false);
   const clipboard = useClipboard();
   const handleRevokeApiKey = (apiKeyId: string) => {

@@ -1,6 +1,6 @@
-import { MonkeyTaskDefTypes } from '@inf-monkeys/vines';
+import { MonkeyTaskDefTypes, MonkeyWorkflow } from '@inf-monkeys/vines';
 import equal from 'fast-deep-equal/es6';
-import { omit } from 'lodash';
+import { isArray, omit } from 'lodash';
 import { toast } from 'sonner';
 
 import {
@@ -104,10 +104,13 @@ export class VinesCore extends VinesTools(VinesBase) {
         (needToInit = true);
       workflow?.workflowId && (this.workflowId = workflow.workflowId);
       workflow?.version && (this.version = workflow.version);
-      workflow?.variables && (this.workflowInput = workflow.variables);
       workflow?.name && (this.workflowName = workflow.name);
       workflow?.description && (this.workflowDesc = workflow.description);
       workflow?.iconUrl && (this.workflowIcon = workflow.iconUrl);
+
+      if (isArray(workflow?.variables) && workflow?.variables?.length) {
+        this.workflowInput = workflow.variables;
+      }
     }
     workflowId && (this.workflowId = workflowId);
     version && (this.version = version);
@@ -504,6 +507,37 @@ export class VinesCore extends VinesTools(VinesBase) {
     this.executionTimeout = setTimeout(this.handleExecution.bind(this), 0);
 
     return true;
+  }
+
+  public swapExecutionInstance({
+    workflowId,
+    workflowDefinition,
+  }: Pick<VinesWorkflowExecution, 'workflowId' | 'workflowDefinition'>) {
+    if (workflowId === this.executionInstanceId) {
+      return;
+    }
+
+    if (this.executionStatus === 'RUNNING') {
+      toast.warning('无法切换运行实例！当前工作流正在运行中');
+      return;
+    }
+
+    if (!workflowId) {
+      toast.error('切换失败！无法获取工作流实例 ID');
+      return false;
+    }
+
+    this.update({ workflow: workflowDefinition as unknown as MonkeyWorkflow });
+
+    setTimeout(() => {
+      this.executionInstanceId = workflowId;
+      this.executionStatus = 'RUNNING';
+      this.nodes[0].executionStatus = 'COMPLETED';
+
+      this.executionTimeout = setTimeout(this.handleExecution.bind(this), 0);
+
+      toast.success(`工作流运行实例「${workflowId}」已恢复！`);
+    }, 200);
   }
 
   public async stop() {
