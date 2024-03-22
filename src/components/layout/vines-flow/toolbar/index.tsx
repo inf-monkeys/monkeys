@@ -21,7 +21,7 @@ import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
-import { cn } from '@/utils';
+import { cn, useLocalStorage } from '@/utils';
 import VinesEvent from '@/utils/events';
 
 interface IVinesToolbarProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -43,6 +43,13 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
     setIsUserInteraction,
   } = useFlowStore();
 
+  const [, setLocalRenderDirection] = useLocalStorage<string>('vines-ui-process-page-render-direction', 'false', false);
+  const [, setLocalRenderType] = useLocalStorage<string>(
+    'vines-ui-process-page-render-type',
+    IVinesFlowRenderType.SIMPLIFY,
+    false,
+  );
+
   const isEditMode = canvasMode === CanvasStatus.EDIT;
   const isHorizontal = vines.renderDirection === 'horizontal';
   const isRenderMini = vines.renderOptions.type === IVinesFlowRenderType.MINI;
@@ -63,6 +70,7 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
   const handleDirectionChange = () => {
     setVisible(false);
     void updatePageData('customOptions.render.useHorizontal', !isHorizontal);
+    setLocalRenderDirection(!isHorizontal ? 'true' : 'false');
     setTimeout(() => vines.update({ renderDirection: isHorizontal ? 'vertical' : 'horizontal' }), 80);
   };
   const handleRenderTypeChange = () => {
@@ -74,6 +82,7 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
       const nextRenderType = map[nextIndex];
       vines.update({ renderType: nextRenderType });
       void updatePageData('customOptions.render.type', nextRenderType);
+      setLocalRenderType(nextRenderType);
       setTimeout(() => setVisible(true), 80);
     }, 80);
   };

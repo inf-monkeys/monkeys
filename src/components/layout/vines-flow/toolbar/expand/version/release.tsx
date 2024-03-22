@@ -22,20 +22,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog.tsx';
-import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
 
-interface IWorkflowReleaseProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface IWorkflowReleaseProps extends React.ComponentPropsWithoutRef<'div'> {
+  version?: number;
+  onVersionChange?: (version: number) => void;
+}
 
-export const WorkflowRelease: React.FC<IWorkflowReleaseProps> = () => {
+export const WorkflowRelease: React.FC<IWorkflowReleaseProps> = ({ version, onVersionChange }) => {
   const { mutate } = useSWRConfig();
 
   const { workflowId, isLatestWorkflowVersion, setVisible } = useFlowStore();
 
-  const { vines } = useVinesFlow();
-
-  const { data: validation, mutate: reValidation } = useWorkflowValidation(workflowId, vines.version);
+  const { data: validation, mutate: reValidation } = useWorkflowValidation(workflowId, version);
   const { data: workflowVersions } = useWorkflowVersions(workflowId);
   const { trigger } = useCreateWorkflowRelease(workflowId);
 
@@ -73,7 +73,7 @@ export const WorkflowRelease: React.FC<IWorkflowReleaseProps> = () => {
       success: () => {
         setVisible(false);
         setTimeout(() => {
-          vines.update({ version: nextVersionNumber });
+          onVersionChange?.(nextVersionNumber);
 
           void mutate(`/api/workflow/metadata/${workflowId}/versions`);
 

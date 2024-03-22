@@ -68,7 +68,7 @@ export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () =
         endTime={executionEndTime}
         onClick={() => (isExecutionPaused ? vines.resume() : vines.pause())}
       />
-      <ExecutionRecover className={!isLatestWorkflowVersion || disabled ? 'hidden' : ''} />
+      <ExecutionRecover className={!isExecutionRunning && !isReExecution ? 'hidden' : ''} />
       {!isExecutionRunning && (
         <ToolButton
           className={cn(isWorkflowRUNNING ? '' : 'hidden')}
