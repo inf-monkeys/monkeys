@@ -10,7 +10,7 @@ import { useTeams } from '@/apis/authz/team';
 import { useUser } from '@/apis/authz/user';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { logout, swapAccount } from '@/components/router/guard/auth.ts';
-import { Route } from '@/pages/login.tsx';
+import { Route } from '@/pages/login';
 import { useLocalStorage } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 import { maskEmail, maskPhone } from '@/utils/maskdata.ts';

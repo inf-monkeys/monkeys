@@ -1,7 +1,12 @@
-export type LoginMethods = 'sms' | 'password';
-export type OemModule = 'payment' | 'vines-ai';
+export type SystemModule = 'payment' | 'vines-ai';
 
-export interface IOemConfig {
+export enum AuthMethod {
+  password = 'password',
+  phone = 'phone',
+  oidc = 'oidc',
+}
+
+export interface ISystemConfig {
   theme: {
     name: string;
     favicon: {
@@ -15,8 +20,8 @@ export interface IOemConfig {
     };
     logoUrl: string;
   };
-  identity: {
-    loginMethods: LoginMethods[];
+  auth: {
+    enabled: AuthMethod[];
   };
   pages: {
     allowPageKeys: string[] | '*';
@@ -25,5 +30,5 @@ export interface IOemConfig {
     clientUrl: string;
     [name: string]: string;
   };
-  module: OemModule[] | '*';
+  module: SystemModule[] | '*';
 }

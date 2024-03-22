@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { logout, saveAuthToken } from '@/components/router/guard/auth.ts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Button } from '@/components/ui/button';
-import { Route } from '@/pages/login.tsx';
+import { Route } from '@/pages/login';
 
 export interface IUser {
   id: string;
