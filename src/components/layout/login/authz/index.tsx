@@ -42,7 +42,8 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
 
   const handleSwapUsers = () => setSwap('users');
 
-  const handleOidcLogin = () => (window.location.href = `/api/auth/oidc/login?redirect_to=${window.location.href}`);
+  const handleOidcLogin = () =>
+    (window.location.href = `/api/auth/oidc/login?redirect_to=${window.location.origin}/login/callback`);
 
   const areValuesUsed = enablePassword || enablePhone;
 
