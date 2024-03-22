@@ -22,6 +22,9 @@ export interface ISystemConfig {
   };
   auth: {
     enabled: AuthMethod[];
+    oidc?: {
+      buttonText?: string;
+    };
   };
   pages: {
     allowPageKeys: string[] | '*';

@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, UseFormReturn } from 'react-hook-form';
 import { ILoginViaMail, loginViaMailSchema } from 'src/schema/authz';
 
+import { AuthMethod } from '@/apis/common/typings.ts';
 import { AuthWrapper } from '@/components/layout/login/authz/auth-wrapper.tsx';
 import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input';
@@ -22,7 +23,7 @@ export const EmailAuth: React.FC<IEmailAuthProps> = ({ onFinished }) => {
   });
 
   return (
-    <AuthWrapper form={form as unknown as UseFormReturn<never>} onFinished={onFinished}>
+    <AuthWrapper form={form as unknown as UseFormReturn<never>} onFinished={onFinished} method={AuthMethod.password}>
       <FormField
         name="email"
         control={form.control}

@@ -31,13 +31,15 @@ export const UserList: React.FC<IUserListProps> = ({ users }) => {
     toast.promise(
       new Promise((resolve) =>
         setTimeout(() => {
-          if (saveAuthToken(token) > 0) {
-            resolve(
-              navigate({
-                to: redirect_url ?? '/',
-              }),
-            );
-          }
+          saveAuthToken(token).then((usersCount) => {
+            if (usersCount > 0) {
+              resolve(
+                navigate({
+                  to: redirect_url ?? '/',
+                }),
+              );
+            }
+          });
         }, 500),
       ),
       {

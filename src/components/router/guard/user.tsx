@@ -41,13 +41,13 @@ export const UserGuard: React.FC = () => {
   const isNeedToUpdate = useRef(true);
   useEffect(() => {
     if (!user) return;
-    const currentUser = user._id ?? '';
+    const currentUser = user?.id ?? '';
     if (localUser.id !== currentUser) {
       void mutate();
       isNeedToUpdate.current = true;
     } else if (isNeedToUpdate.current) {
-      const newUserData = pick(user, ['name', 'phone', 'email', 'photo', '_id', 'id', 'loginsCount']);
-      const userId = newUserData.id ?? newUserData._id;
+      const newUserData = pick(user, ['id', 'name', 'nickname', 'photo', 'email', 'phone', 'loginsCount']);
+      const userId = newUserData.id ?? newUserData.id;
       const finalUser = { ...newUserData, id: userId };
       setUser(finalUser);
       const newUsers = setWith(users, `${userId}.data`, finalUser);
@@ -64,9 +64,20 @@ export const UserGuard: React.FC = () => {
   }, [userIds, localUser.id]);
 
   useEffect(() => {
-    if (error?.message === '请先登录') {
-      toast.error('登录已过期，请重新登录');
-      void navigate({ to: '/login' });
+    if (error instanceof Error) {
+      const errorMessage = error?.message;
+
+      if (errorMessage !== '需要登录') {
+        if (errorMessage === '请先登录') {
+          toast.error('登录已过期，请重新登录');
+        } else {
+          toast.error('接口数据异常！请重新登录');
+        }
+
+        localStorage.removeItem('vines-token');
+        localStorage.removeItem('vines-team-id');
+        void navigate({ to: '/login' });
+      }
     }
   }, [error]);
 

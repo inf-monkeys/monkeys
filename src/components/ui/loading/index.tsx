@@ -10,7 +10,7 @@ interface ILoadingProps {
 export const Loading: React.FC<ILoadingProps> = ({ motionKey }) => {
   return (
     <motion.div
-      className="vines-center absolute size-full backdrop-blur"
+      className="vines-center absolute size-full"
       key={motionKey}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1, transition: { duration: 0.2 } }}

@@ -1,6 +1,5 @@
 export interface IVinesUser {
-  _id: string;
-  id?: string;
+  id: string;
   name: string;
   phone?: string;
   photo: string;

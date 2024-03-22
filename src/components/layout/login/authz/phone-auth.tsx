@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { ILoginViaSms, loginViaSmsSchema } from 'src/schema/authz';
 
 import { sendSmsVerifyCode } from '@/apis/authz';
+import { AuthMethod } from '@/apis/common/typings.ts';
 import { AuthWrapper } from '@/components/layout/login/authz/auth-wrapper.tsx';
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form.tsx';
@@ -53,7 +54,7 @@ export const PhoneAuth: React.FC<IPhoneAuthProps> = ({ onFinished }) => {
   };
 
   return (
-    <AuthWrapper form={form as unknown as UseFormReturn<never>} onFinished={onFinished}>
+    <AuthWrapper form={form as unknown as UseFormReturn<never>} onFinished={onFinished} method={AuthMethod.phone}>
       <FormField
         name="phoneNumber"
         control={form.control}

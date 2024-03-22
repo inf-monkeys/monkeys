@@ -8,7 +8,7 @@ export interface IVinesHeaderOptions {
 export const vinesHeader = ({ apikey, useToast = false }: IVinesHeaderOptions) => {
   const teamId = localStorage.getItem('vines-team-id');
   if (apikey) {
-    return { 'X-Vines-Apikey': apikey, ...(teamId && { Team: teamId }) };
+    return { 'X-Vines-Apikey': apikey, ...(teamId && { 'x-monkeys-teamid': teamId }) };
   }
 
   const token = localStorage.getItem('vines-token');
@@ -21,5 +21,5 @@ export const vinesHeader = ({ apikey, useToast = false }: IVinesHeaderOptions) =
     }
   }
 
-  return { Authentication: `Bearer ${token}`, ...(teamId && { Team: teamId }) };
+  return { Authorization: `Bearer ${token}`, ...(teamId && { 'x-monkeys-teamid': teamId }) };
 };
