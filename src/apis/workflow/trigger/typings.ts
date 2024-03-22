@@ -63,7 +63,7 @@ export interface IVinesTrigger {
   type: WorkflowTriggerType;
   updatedTimestamp: number;
   workflowId: string;
-  _id: string;
+  id: string;
   webhookPath?: string;
   webhookConfig?: IVinesWebhookTriggerConfig;
 }

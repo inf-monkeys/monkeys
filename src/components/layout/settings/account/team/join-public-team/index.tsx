@@ -48,8 +48,8 @@ export const JoinPublicTeam: React.FC<IJoinPublicTeamProps> = () => {
     const isTeams = await searchTeams(keywords);
     if (!isTeams) return;
     // 过滤已加入的团队
-    const userTeamIds = (teams || userTeams || []).map((v: IVinesTeam) => v._id);
-    const newTeams = isTeams.filter((v: IVinesTeam) => !userTeamIds.includes(v._id));
+    const userTeamIds = (teams || userTeams || []).map((v: IVinesTeam) => v.id);
+    const newTeams = isTeams.filter((v: IVinesTeam) => !userTeamIds.includes(v.id));
     setSearchResult(newTeams);
 
     setIsLoading(false);
@@ -102,7 +102,7 @@ export const JoinPublicTeam: React.FC<IJoinPublicTeamProps> = () => {
           <div className="flex flex-col gap-2">
             {searchResult.map((team: IVinesTeam) => (
               <JoinPublicTeamItem
-                key={team._id}
+                key={team.id}
                 team={team}
                 isHandleAccept={isHandleAccept}
                 handleApplyTeam={handleApplyTeam}

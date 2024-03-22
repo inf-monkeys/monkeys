@@ -33,11 +33,11 @@ interface IInviteManageProps extends React.ComponentPropsWithoutRef<'div'> {
 
 export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible }) => {
   const { team } = useVinesTeam();
-  const { data: inviteList, isLoading, mutate: mutateInviteList } = useTeamInvites(team?._id);
+  const { data: inviteList, isLoading, mutate: mutateInviteList } = useTeamInvites(team?.id);
 
   const handleEditRemark = (inviteId: string, remark: string) => {
-    if (inviteId && team && team._id) {
-      toast.promise(updateTeamInviteRemark(team._id, inviteId, remark), {
+    if (inviteId && team && team.id) {
+      toast.promise(updateTeamInviteRemark(team.id, inviteId, remark), {
         success: () => {
           void mutateInviteList();
           return '更新备注成功';
@@ -51,8 +51,8 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
   };
 
   const handleToggleLinkPause = async (inviteId: string) => {
-    if (inviteId && team && team._id) {
-      toast.promise(toggleTeamInviteStatus(team._id, inviteId), {
+    if (inviteId && team && team.id) {
+      toast.promise(toggleTeamInviteStatus(team.id, inviteId), {
         success: () => {
           mutateInviteList();
           return '操作成功';
@@ -66,12 +66,12 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
   };
 
   const handleDeleteLink = async (inviteId: string) => {
-    if (inviteId && team && team._id) {
+    if (inviteId && team && team.id) {
       toast(`确定要删除吗？该操作不可恢复。`, {
         action: {
           label: '确定',
           onClick: () => {
-            toast.promise(deleteTeamInvite(team._id, inviteId), {
+            toast.promise(deleteTeamInvite(team.id, inviteId), {
               success: () => {
                 mutateInviteList();
                 return '删除成功';
@@ -104,7 +104,7 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
           title="编辑备注"
           placeholder="请输入备注"
           initialValue={cell.getValue() as string}
-          onFinished={(val) => handleEditRemark(row.original._id, val)}
+          onFinished={(val) => handleEditRemark(row.original.id, val)}
         >
           <div className="group flex cursor-pointer items-center gap-2 transition-opacity hover:opacity-75">
             <span>{cell.getValue() as string}</span>
@@ -195,7 +195,7 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem
-                  onSelect={() => handleToggleLinkPause(row.original._id)}
+                  onSelect={() => handleToggleLinkPause(row.original.id)}
                   disabled={Boolean(row.original.outdateTimestamp)}
                 >
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
@@ -203,7 +203,7 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
                   </DropdownMenuShortcut>
                   {row.original.status === ITeamInviteStatus.DISABLED ? '启用' : '禁用'}
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => handleDeleteLink(row.original._id)}>
+                <DropdownMenuItem onSelect={() => handleDeleteLink(row.original.id)}>
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <Settings size={15} />
                   </DropdownMenuShortcut>

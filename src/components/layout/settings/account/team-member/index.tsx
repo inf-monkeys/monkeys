@@ -20,7 +20,7 @@ interface ITeamMemberProps extends React.ComponentPropsWithoutRef<'div'> {}
 export const TeamMember: React.FC<ITeamMemberProps> = () => {
   const [user] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
   const { team, isTeamOwner } = useVinesTeam();
-  const { data, mutate } = useTeamUsers(team?._id);
+  const { data, mutate } = useTeamUsers(team?.id);
 
   const handleRemoveTeamMember = (userId: string) => {
     if (team) {
@@ -28,7 +28,7 @@ export const TeamMember: React.FC<ITeamMemberProps> = () => {
         action: {
           label: '确认',
           onClick: () => {
-            toast.promise(removeTeamMember(team._id, userId), {
+            toast.promise(removeTeamMember(team.id, userId), {
               success: () => {
                 void mutate();
                 return '删除成功';
@@ -45,7 +45,7 @@ export const TeamMember: React.FC<ITeamMemberProps> = () => {
   const currentUserId = user.id ?? '';
   const isOwner = isTeamOwner(currentUserId);
 
-  const finalMember = data?.list?.sort((a) => (a._id === currentUserId ? -1 : 1)) ?? [];
+  const finalMember = data?.list?.sort((a) => (a.id === currentUserId ? -1 : 1)) ?? [];
 
   return (
     <Card>
@@ -58,8 +58,8 @@ export const TeamMember: React.FC<ITeamMemberProps> = () => {
       </CardHeader>
       <ScrollShadow className="max-h-64">
         <CardContent className="grid gap-4">
-          {finalMember.map(({ _id, name, photo, phone, email }) => (
-            <div className="flex items-center gap-4" key={_id}>
+          {finalMember.map(({ id, name, photo, phone, email }) => (
+            <div className="flex items-center gap-4" key={id}>
               <Avatar className="size-10">
                 <AvatarImage className="aspect-auto" src={photo} alt={name} />
                 <AvatarFallback className="rounded-none p-2 text-xs">{name.substring(0, 2)}</AvatarFallback>
@@ -68,7 +68,7 @@ export const TeamMember: React.FC<ITeamMemberProps> = () => {
                 <h3 className="line-clamp-1 font-semibold leading-tight">{name}</h3>
                 <p className="line-clamp-1 text-xs"> {phone ? maskPhone(phone) : maskEmail(email ?? '')}</p>
               </div>
-              {_id !== currentUserId && isOwner && (
+              {id !== currentUserId && isOwner && (
                 <div className="flex h-8 flex-1 justify-end">
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -76,7 +76,7 @@ export const TeamMember: React.FC<ITeamMemberProps> = () => {
                         size="small"
                         theme="danger"
                         icon={<Trash2 />}
-                        onClick={() => handleRemoveTeamMember(_id)}
+                        onClick={() => handleRemoveTeamMember(id)}
                       />
                     </TooltipTrigger>
                     <TooltipContent>删除用户</TooltipContent>

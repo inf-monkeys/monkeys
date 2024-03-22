@@ -40,7 +40,7 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
 
           if (newPages) {
             await pagesMutate(newPages, { revalidate: false });
-            const newPageId = newPages.at(-1)?._id;
+            const newPageId = newPages.at(-1)?.id;
             if (newPageId) {
               await navigateTo(newPageId);
             }
@@ -52,7 +52,7 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
 
   const handleRenamePage = async () => {
     if (!pages) return;
-    const currentPage = pages.findIndex(({ _id }) => _id === pageId);
+    const currentPage = pages.findIndex(({ id }) => id === pageId);
     if (currentPage === -1) return;
 
     const newPages = [...pages];
@@ -69,7 +69,7 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
   const handlePinPage = async (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (!pages) return;
-    const currentPage = pages.findIndex(({ _id }) => _id === pageId);
+    const currentPage = pages.findIndex(({ id }) => id === pageId);
     if (currentPage === -1) return;
 
     toast.promise(toggleWorkspacePagePin(pageId, !isPin), {

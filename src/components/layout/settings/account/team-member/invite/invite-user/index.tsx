@@ -37,7 +37,7 @@ export const InviteUser: React.FC<IInviteUserProps> = ({ visible, setVisible }) 
   const { team } = useVinesTeam();
   const [currentUser] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
   const clipboard = useClipboard();
-  const { mutate: mutateInviteLinkList } = useTeamInvites(team?._id);
+  const { mutate: mutateInviteLinkList } = useTeamInvites(team?.id);
 
   const handleSearchUsers = async () => {
     if (!keywords) {
@@ -59,7 +59,7 @@ export const InviteUser: React.FC<IInviteUserProps> = ({ visible, setVisible }) 
   };
 
   const handleCopyInviteLink = async () => {
-    if (team && team._id && currentUser.id) {
+    if (team && team.id && currentUser.id) {
       setIsHandleCreateInviteLink(true);
       const teamId = team.id;
       const inviterUserId = currentUser?.id;
@@ -131,7 +131,7 @@ export const InviteUser: React.FC<IInviteUserProps> = ({ visible, setVisible }) 
           )}
           <div className="flex flex-col gap-2">
             {searchResult.map((user) => (
-              <UserItem key={user.id} user={user} outdateType={outdateType} teamId={team?._id} />
+              <UserItem key={user.id} user={user} outdateType={outdateType} teamId={team?.id} />
             ))}
           </div>
         </ScrollArea>

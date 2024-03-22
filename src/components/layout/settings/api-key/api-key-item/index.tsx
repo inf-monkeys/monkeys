@@ -99,7 +99,7 @@ export const ApiKeyItem: React.FC<IApiKeyItemProps> = ({ apiKey, mutate }) => {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>取消</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => handleRevokeApiKey(apiKey._id)}>确定</AlertDialogAction>
+                  <AlertDialogAction onClick={() => handleRevokeApiKey(apiKey.id)}>确定</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>

@@ -39,7 +39,7 @@ export const AddSpaceTab: React.FC<IAddSpaceTabProps> = ({ className }) => {
 
     if (newPages) {
       await pagesMutate(newPages, { revalidate: false });
-      const newPageId = newPages.at(-1)?._id;
+      const newPageId = newPages.at(-1)?.id;
       newPageId && (await navigateTo(newPageId));
     }
   };

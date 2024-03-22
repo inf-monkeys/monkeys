@@ -24,14 +24,14 @@ export const UserItem: React.FC<IUserItemProps> = ({ user, teamId, outdateType }
   const [isHandleCopyLink, setIsHandleCopyLink] = useState(false);
   const clipboard = useClipboard();
   const handleCopyLink = () => {
-    if (teamId && currentUser._id) {
+    if (teamId && currentUser.id) {
       setIsHandleCopyLink(true);
       toast.promise(
         createTeamInviteLink({
           teamId,
           outdateType,
-          targetUserId: user._id,
-          inviterUserId: currentUser._id,
+          targetUserId: user.id,
+          inviterUserId: currentUser.id,
         }),
         {
           success: (link) => {

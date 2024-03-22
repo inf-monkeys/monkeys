@@ -7,7 +7,7 @@ export interface IVectorMetadataField {
 }
 
 export interface IVectorCollection {
-  _id: string;
+  id: string;
   createTime: number;
   dimension: number;
   name: string;

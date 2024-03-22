@@ -23,7 +23,7 @@ export const WorkspaceIndex: React.FC = () => {
       void navigate({
         to: '/$teamId/workspace/$workflowId/$pageId',
         params: {
-          pageId: page._id,
+          pageId: page.id,
         },
         search: {
           to,

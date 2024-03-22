@@ -1,5 +1,5 @@
 export interface ILLMModel {
-  _id: string;
+  id: string;
   origin: 'built-in' | 'user';
   teamId?: string;
   name: string;

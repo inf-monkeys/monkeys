@@ -21,7 +21,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = () => {
   const [page, setPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
 
   const hasPages = (pages?.length ?? 0) > 0;
-  const hasPage = !!(page?._id && page?.teamId && page?.workflowId && page?.type);
+  const hasPage = !!(page?.id && page?.teamId && page?.workflowId && page?.type);
 
   useEffect(() => {
     if (!hasPage && pages?.length) {

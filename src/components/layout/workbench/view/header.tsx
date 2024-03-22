@@ -21,8 +21,8 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page 
   const workflow = page?.workflow;
 
   const handleUnPin = () => {
-    if (!page?._id) return;
-    toast.promise(toggleWorkspacePagePin(page._id, false), {
+    if (!page?.id) return;
+    toast.promise(toggleWorkspacePagePin(page.id, false), {
       loading: `正在取消标星中...`,
       success: () => {
         void mutate('/api/pages');
@@ -56,7 +56,7 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page 
         </Tooltip>
         <Link
           to="/$teamId/workspace/$workflowId/$pageId"
-          params={{ workflowId: workflow?.workflowId, pageId: page?._id }}
+          params={{ workflowId: workflow?.workflowId, pageId: page?.id }}
         >
           <Button variant="outline">进入视图</Button>
         </Link>

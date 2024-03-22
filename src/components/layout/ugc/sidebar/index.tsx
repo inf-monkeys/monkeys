@@ -15,11 +15,11 @@ export const UgcSidebar: React.FC<IUgcSidebarProps> = ({ title }) => {
   const [visible, setVisible] = useState(true);
   //
   // useEffect(() => {
-  //   if (!currentPage?._id) {
+  //   if (!currentPage?.id) {
   //     if (data?.length) {
   //       setCurrentPage(data[0]);
   //     }
-  //   } else if (!data?.find((page) => page._id === currentPage._id)) {
+  //   } else if (!data?.find((page) => page.id === currentPage.id)) {
   //     setCurrentPage({});
   //   }
   // }, [currentPage, data]);

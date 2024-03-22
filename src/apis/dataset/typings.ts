@@ -1,5 +1,5 @@
 export interface IVinesDataset {
-  _id: string;
+  id: string;
   name: string;
   teamId: string;
   fileIds: string[];

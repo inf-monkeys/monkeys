@@ -20,7 +20,7 @@ export const Space: React.FC<ISpaceProps> = ({ children }) => {
     setContainerHeight(height);
   }, [width, height]);
 
-  const isFirstNavActive = pageId === pages?.[0]._id;
+  const isFirstNavActive = pageId === pages?.[0].id;
 
   return (
     <>

@@ -13,7 +13,7 @@ export interface IPageInstance {
 }
 
 export interface IPageType {
-  _id: string;
+  id: string;
   createdTimestamp: number;
   updatedTimestamp: number;
   isDeleted?: boolean;

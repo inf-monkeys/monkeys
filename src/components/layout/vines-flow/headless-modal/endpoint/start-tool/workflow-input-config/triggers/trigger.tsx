@@ -32,7 +32,7 @@ interface ITriggerProps {
 }
 
 export const Trigger: React.FC<ITriggerProps> = ({ trigger, workflowVersion, workflowId }) => {
-  const { type, _id, enabled } = trigger;
+  const { type, id, enabled } = trigger;
 
   const { isLatestWorkflowVersion } = useFlowStore();
 
@@ -40,8 +40,8 @@ export const Trigger: React.FC<ITriggerProps> = ({ trigger, workflowVersion, wor
 
   const { data: triggerTypes } = useTriggerTypes();
 
-  const { trigger: updateTrigger } = useTriggerUpdate(workflowId, _id);
-  const { trigger: removeTrigger } = useTriggerRemove(workflowId, _id);
+  const { trigger: updateTrigger } = useTriggerUpdate(workflowId, id);
+  const { trigger: removeTrigger } = useTriggerRemove(workflowId, id);
 
   const handleEnableChange = (val: boolean) => {
     toast.promise(updateTrigger({ enabled: val }), {

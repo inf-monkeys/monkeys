@@ -23,7 +23,7 @@ export const ApplyItem: React.FC<IApplyItemProps> = ({ user, teamId, afterOperat
       toast.promise(
         updateTeamApply({
           teamId,
-          applyUserId: user._id,
+          applyUserId: user.id,
           apply: accept,
         }),
         {
