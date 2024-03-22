@@ -20,12 +20,6 @@ export class CompatibleAuthGuard implements CanActivate {
       let isAuthenticated = false;
       let userId: string;
       let teamId: string;
-      const authenticatedByOidc = request.isAuthenticated();
-      if (authenticatedByOidc) {
-        userId = request.user.sub;
-        isAuthenticated = true;
-      }
-
       let authorizationToken = request.headers['authorization'] as string;
       if (authorizationToken) {
         authorizationToken = authorizationToken.replace('Bearer ', '');
@@ -46,9 +40,6 @@ export class CompatibleAuthGuard implements CanActivate {
           userId = result.id;
           isAuthenticated = true;
           teamId = request.headers['x-monkeys-teamid'];
-          // if (!teamId) {
-          //   throw new ForbiddenException('Header x-monkeys-teamid must be provided');
-          // }
         }
       }
 

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
+import { UsersModule } from '../users/users.module';
 import { OidcController } from './oidc.controller';
 import { OidcService } from './oidc.service';
 import { OidcStrategy, buildOpenIdClient } from './oidc.strategy';
@@ -17,6 +18,6 @@ const OidcStrategyFactory = {
 @Module({
   controllers: [OidcController],
   providers: [OidcStrategyFactory, SessionSerializer, OidcService],
-  imports: [PassportModule.register({ session: true, defaultStrategy: 'oidc' })],
+  imports: [UsersModule, PassportModule.register({ session: true, defaultStrategy: 'oidc' })],
 })
 export class OidcModule {}

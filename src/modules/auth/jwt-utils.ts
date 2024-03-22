@@ -31,4 +31,16 @@ export class JwtHelper {
     };
     return jwt.sign(payload, config.auth.jwt.secret, { expiresIn });
   }
+
+  public static decodeJWTToken(token: string) {
+    try {
+      // 解码JWT，不验证签名
+      const decoded = jwt.decode(token);
+      return decoded;
+    } catch (error) {
+      // 处理解码过程中可能发生的错误
+      console.error('Error decoding JWT:', error.message);
+      return null;
+    }
+  }
 }

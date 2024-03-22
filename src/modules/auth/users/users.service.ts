@@ -1,5 +1,7 @@
 import { UserRepository } from '@/repositories/user.repository';
 import { Injectable } from '@nestjs/common';
+import { JwtPayload } from 'jsonwebtoken';
+import { JwtHelper } from '../jwt-utils';
 
 @Injectable()
 export class UsersService {
@@ -9,7 +11,22 @@ export class UsersService {
     return await this.userRepository.findById(userId);
   }
 
-  async updateUserInfo(userId: string, data: { name?: string; photo?: string }) {
+  public async updateUserInfo(userId: string, data: { name?: string; photo?: string }) {
     return await this.userRepository.updateUserInfo(userId, data);
+  }
+
+  public async registerByOidcIdToken(idToken: string) {
+    const userinfo = JwtHelper.decodeJWTToken(idToken) as JwtPayload;
+    if (!userinfo) {
+      throw new Error('Invalid jwt token');
+    }
+    const { sub, name, nickname, picture, email, phone, phone_number } = userinfo;
+    return await this.userRepository.registryOrGetUser({
+      email,
+      phone: phone || phone_number,
+      photo: picture,
+      name: nickname || name,
+      externalId: sub,
+    });
   }
 }

@@ -26,6 +26,7 @@ export class PhoneService {
     }
     // 验证通过
     let user = await this.userRepository.registryOrGetUser({ phone: phoneNumber });
+    await this.userRepository.updateUserLastLogin(user.id.toHexString());
     user = omit(user, ['password']);
     if (user) {
       if (user.isBlocked) {

@@ -4,9 +4,13 @@ import { IRequest } from '@/common/typings/request';
 import { Controller, Get, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { Issuer } from 'openid-client';
+import { JwtHelper } from '../jwt-utils';
+import { UsersService } from '../users/users.service';
 
 @Controller('/auth/oidc')
 export class OidcController {
+  constructor(private readonly userService: UsersService) {}
+
   @UseGuards(OidcGuard)
   @Get('/login')
   login() {}
@@ -18,9 +22,12 @@ export class OidcController {
 
   @UseGuards(OidcGuard)
   @Get('/callback')
-  loginCallback(@Query('state') state: string, @Res() res: Response, @Req() req: IRequest) {
+  async loginCallback(@Query('state') state: string, @Res() res: Response, @Req() req: IRequest) {
     const redirect_to = state.replace('redirect_to=', '');
-    res.redirect(`${redirect_to}?access_token=${req.user.access_token}`);
+    const id_token = req.user.id_token;
+    const user = await this.userService.registerByOidcIdToken(id_token);
+    const jwtToken = JwtHelper.signToken(user);
+    res.redirect(`${redirect_to}?access_token=${jwtToken}`);
   }
 
   @Get('/logout')

@@ -1,12 +1,28 @@
 import { UserEntity } from '@/entities/identity/user';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { pickBy } from 'lodash';
 import { ObjectId } from 'mongodb';
 import { Repository } from 'typeorm';
 
 const defaultAvatar = 'https://static.aside.fun/upload/frame/0XMWE1.jpg';
 export const OBJECT_ID_PATTERN = /[0-9][0-9a-z]{23}/;
+
+export interface RegisterUserParams {
+  name?: string;
+  phone?: string;
+  email?: string;
+  password?: string;
+  photo?: string;
+  externalId?: string;
+}
+
+export interface RegisterOrUpdateUserParams {
+  name?: string;
+  phone?: string;
+  email?: string;
+  photo?: string;
+  externalId?: string;
+}
 
 @Injectable()
 export class UserRepository {
@@ -42,39 +58,72 @@ export class UserRepository {
     }
   }
 
-  public async registerUser(data: { phone?: string; email?: string; password?: string }) {
-    const { phone, email, password } = data;
+  public async registerUser(data: RegisterUserParams) {
+    const { phone, email, name, password, photo, externalId } = data;
     const newUser: UserEntity = {
       id: new ObjectId(),
-      name: phone || email,
+      name: name || phone || email,
       phone,
       email,
       password,
-      photo: defaultAvatar,
+      photo: photo || defaultAvatar,
       createdTimestamp: Date.now(),
       updatedTimestamp: Date.now(),
       lastLoginAt: Date.now(),
       isDeleted: false,
       isBlocked: false,
+      externalId,
     };
     await this.userRepository.save(newUser);
     return newUser;
   }
 
-  async registryOrGetUser(data: { phone?: string; email?: string; password?: string }) {
-    const { phone, email } = data;
-    if (!phone && !email) return null;
-    const user = await this.userRepository.findOne({
-      where: {
-        ...pickBy({ phone, email }, (v) => typeof v !== 'undefined'),
-        isDeleted: false,
-      },
-    });
-    if (user) {
-      await this.updateUserLastLogin(user.id.toHexString());
-      return user;
+  async registryOrGetUser(data: RegisterOrUpdateUserParams) {
+    const { phone, email, externalId, photo, name } = data;
+    if (!phone && !email && !externalId) {
+      throw new Error('用户信息必须包含手机号、邮箱或者唯一 ID');
     }
-    return this.registerUser(data);
+
+    const userMatchByPhone = phone
+      ? await this.userRepository.findOne({
+          where: {
+            phone,
+            isDeleted: false,
+          },
+        })
+      : null;
+    const userMatchByEmail = email
+      ? await this.userRepository.findOne({
+          where: {
+            email,
+            isDeleted: false,
+          },
+        })
+      : null;
+    const userMatchByExternalId = externalId
+      ? await this.userRepository.findOne({
+          where: {
+            externalId,
+            isDeleted: false,
+          },
+        })
+      : null;
+
+    const matchCount = [userMatchByEmail, userMatchByPhone, userMatchByExternalId].filter(Boolean).length;
+    if (matchCount === 0) {
+      return this.registerUser(data);
+    } else if (matchCount === 1) {
+      const user = [userMatchByEmail, userMatchByPhone, userMatchByExternalId].filter(Boolean)[0];
+      user.email = email;
+      user.phone = phone;
+      user.externalId = externalId;
+      user.photo = photo;
+      user.name = name;
+      await this.userRepository.save(user);
+      return user;
+    } else if (matchCount > 1) {
+      throw new Error('此 OIDC 用户通过邮箱、手机号、唯一 ID 匹配到了系统中的多个用户');
+    }
   }
 
   async updateUserInfo(userId: string, data: { name?: string; photo?: string }) {

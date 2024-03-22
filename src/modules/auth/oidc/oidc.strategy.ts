@@ -22,7 +22,12 @@ export class OidcStrategy extends PassportStrategy(Strategy, 'oidc') {
   constructor(client: Client) {
     super({
       client: client,
-      params: {},
+      params: {
+        id_token_signed_response_alg: config.auth.oidc.id_token_signed_response_alg,
+        token_endpoint_auth_method: config.auth.oidc.token_endpoint_auth_method,
+        redirect_uri: config.auth.oidc.redirect_uri,
+        scope: config.auth.oidc.scope,
+      },
       passReqToCallback: false,
       usePKCE: false,
     });

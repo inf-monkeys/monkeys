@@ -1,7 +1,11 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
 @Entity({ name: 'users' })
+// TODO: 之前的数据手机号有重复的
+@Index(['phone'])
+@Index(['email'])
+@Index(['externalId'])
 export class UserEntity extends BaseEntity {
   @Column({
     type: 'varchar',
@@ -64,4 +68,11 @@ export class UserEntity extends BaseEntity {
     name: 'is_blocked',
   })
   isBlocked?: boolean;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    name: 'external_id',
+  })
+  externalId?: string;
 }
