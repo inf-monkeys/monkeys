@@ -1,4 +1,5 @@
 import { config } from '@/common/config';
+import { ListDto } from '@/common/dto/list.dto';
 import { flatTasks } from '@/common/utils/conductor';
 import { extractAssetFromZip } from '@/common/utils/zip-asset';
 import { ValidationIssueType, WorkflowMetadataEntity, WorkflowOutputValue, WorkflowValidationIssue } from '@/entities/workflow/workflow-metadata';
@@ -29,7 +30,9 @@ export class WorkflowCrudService {
     private readonly workflowValidateService: WorkflowValidateService,
   ) {}
 
-  public async getRecentlyUsedWorkflows() {}
+  public async listWorkflows(teamId: string, dto: ListDto) {
+    return await this.workflowRepository.listWorkflows(teamId, dto);
+  }
 
   public async createWorkflowDef(teamId: string, userId: string, data: CreateWorkflowData, options?: CreateWorkflowOptions) {
     const { assetsPolicy, isTheSameTeam = false, replaceSqlDatabaseMap, replaceVectorDatabaseMap, replaceLlmModelMap, replaceSdModelMap } = options || {};

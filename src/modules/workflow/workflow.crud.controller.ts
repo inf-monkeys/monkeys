@@ -1,3 +1,4 @@
+import { ListDto } from '@/common/dto/list.dto';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
@@ -14,13 +15,14 @@ import { WorkflowCrudService } from './workflow.curd.service';
 export class WorkflowCrudController {
   constructor(private readonly service: WorkflowCrudService) {}
 
-  @Get('/recently')
+  @Get('/')
   @ApiOperation({
-    summary: '获取近期使用的 workflows',
-    description: '获取 7 天内更新过的 workflows',
+    summary: '获取工作流列表',
+    description: '获取工作流列表',
   })
-  public async getRecentlyUsedWorkflows() {
-    const data = await this.service.getRecentlyUsedWorkflows();
+  public async listWorkflows(@Req() req: IRequest, @Body() body: ListDto) {
+    const { teamId } = req;
+    const data = await this.service.listWorkflows(teamId, body);
     return new SuccessResponse({
       data,
     });

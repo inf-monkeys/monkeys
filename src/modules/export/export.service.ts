@@ -30,7 +30,7 @@ export class ExportService {
     // 导出工作流文件
     const workflows: WorkflowWithPagesJson[] = [];
     if (exportWorkflows) {
-      const workflowList = await this.workflowRepository.listWorkflows(teamId);
+      const workflowList = await this.workflowRepository.getAllWorkflowsInTeam(teamId);
       const workflowIds = workflowList.map((x) => x.workflowId);
       await Promise.all(
         workflowIds.map(async (workflowId) => {

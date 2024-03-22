@@ -46,7 +46,9 @@ export interface WorkflowOutputValue {
 
 @Entity({ name: 'workflow_metadatas' })
 export class WorkflowMetadataEntity extends BaseAssetEntity {
-  @Column()
+  @Column({
+    name: 'workflow_id',
+  })
   workflowId: string;
 
   @Column()
