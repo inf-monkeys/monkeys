@@ -43,7 +43,7 @@ export class CompatibleAuthGuard implements CanActivate {
           const result = JwtHelper.validateToken({
             idToken: authorizationToken,
           });
-          userId = result.sub;
+          userId = result.id;
           isAuthenticated = true;
           teamId = request.headers['x-monkeys-teamid'];
           // if (!teamId) {

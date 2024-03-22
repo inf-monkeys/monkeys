@@ -16,7 +16,7 @@ export class ToolsRegistryCronService {
     private readonly toolsRepository: ToolsRepository,
   ) {}
 
-  @Cron('* * * * *')
+  @Cron('*/5 * * * * *')
   public async runScheduler() {
     if (!config.cron.enabled) {
       return;
@@ -26,14 +26,12 @@ export class ToolsRegistryCronService {
       // 成功获取到锁，执行需要加锁的代码
 
       try {
-        logger.info('Start to refresh tools');
         const registries = await this.toolsRepository.listServers();
         for (const registry of registries) {
           await this.toolsRegistryService.registerToolsServer({
             manifestUrl: registry.manifestUrl,
           });
         }
-        logger.info('Refresh tools succeed');
       } catch (error) {
         logger.info('Refresh tools failed', error.message);
       } finally {

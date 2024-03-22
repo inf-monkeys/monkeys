@@ -37,7 +37,7 @@ export class UserRepository {
     const user = await this.findById(userId);
     if (user) {
       user.lastLoginAt = Date.now();
-      user.loginsCount = (user.lastLoginAt || 0) + 1;
+      user.loginsCount = (user.loginsCount || 0) + 1;
       await this.userRepository.save(user);
     }
   }
