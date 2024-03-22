@@ -1,6 +1,7 @@
 import { UserEntity } from '@/entities/identity/user';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import _ from 'lodash';
 import { ObjectId } from 'mongodb';
 import { Repository } from 'typeorm';
 
@@ -109,11 +110,11 @@ export class UserRepository {
         })
       : null;
 
-    const matchCount = [userMatchByEmail, userMatchByPhone, userMatchByExternalId].filter(Boolean).length;
+    const matchCount = _.uniq([userMatchByEmail, userMatchByPhone, userMatchByExternalId].filter(Boolean).map((x) => x.id.toHexString())).length;
     if (matchCount === 0) {
       return this.registerUser(data);
     } else if (matchCount === 1) {
-      const user = [userMatchByEmail, userMatchByPhone, userMatchByExternalId].filter(Boolean)[0];
+      const user = [userMatchByEmail, userMatchByPhone].filter(Boolean)[0];
       user.email = email;
       user.phone = phone;
       user.externalId = externalId;
@@ -121,7 +122,7 @@ export class UserRepository {
       user.name = name;
       await this.userRepository.save(user);
       return user;
-    } else if (matchCount > 1) {
+    } else {
       throw new Error('此 OIDC 用户通过邮箱、手机号、唯一 ID 匹配到了系统中的多个用户');
     }
   }
