@@ -33,7 +33,7 @@ export const WorkspaceIndex: React.FC = () => {
   }, [pages]);
 
   useEffect(() => {
-    void preload(`/api/workflow/${workflowId}`, vinesFetcher());
+    void preload(`/api/workflow/metadata/${workflowId}`, vinesFetcher());
   }, [workflowId]);
 
   return (
