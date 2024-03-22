@@ -7,26 +7,28 @@ import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
 
-interface IVinesVersionToolbarProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface IVinesVersionToolbarProps extends React.ComponentPropsWithoutRef<'div'> {
+  version?: number;
+  onVersionChange?: (version: number) => void;
+}
 
-export const VinesVersionToolbar: React.FC<IVinesVersionToolbarProps> = () => {
+export const VinesVersionToolbar: React.FC<IVinesVersionToolbarProps> = ({ version = 1, onVersionChange }) => {
   const { workflowId, setVisible, setIsLatestWorkflowVersion } = useFlowStore();
-  const { vines } = useVinesFlow();
+
   const { data } = useWorkflowVersions(workflowId);
 
   const [open, setOpen] = useState(false);
 
-  const vinesVersion = vines.version.toString();
+  const vinesVersion = version.toString();
 
   const workflowVersion = data?.map((it) => it.version) || [];
 
   useEffect(() => {
     if (data) {
-      setIsLatestWorkflowVersion(Math.max(...data.map((x) => x.version)) === vines.version);
+      setIsLatestWorkflowVersion(Math.max(...data.map((x) => x.version)) === version);
     }
   }, [data, vinesVersion]);
 
@@ -56,7 +58,7 @@ export const VinesVersionToolbar: React.FC<IVinesVersionToolbarProps> = () => {
                       if (currentValue === vinesVersion) return;
                       setVisible(false);
                       setTimeout(() => {
-                        vines.update({ version: parseInt(currentValue) });
+                        onVersionChange?.(parseInt(currentValue));
                         setTimeout(() => setVisible(true), 80);
                       }, 164);
                     }}

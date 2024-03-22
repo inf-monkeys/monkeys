@@ -15,7 +15,7 @@ import { VinesNodes } from '@/components/layout/vines-flow/nodes';
 import { VinesToolbar } from '@/components/layout/vines-flow/toolbar';
 import { VinesExpandToolbar } from '@/components/layout/vines-flow/toolbar/expand';
 import { VinesFlowWrapper } from '@/components/layout/vines-flow/wrapper';
-import { IVinesFlowRenderOptions } from '@/package/vines-flow/core/typings.ts';
+import { IVinesFlowRenderOptions, IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
@@ -81,14 +81,20 @@ export const VinesFlow: React.FC<IVinesFlowProps> = ({ workflowId }) => {
     }
   }, [workflow]);
 
+  const [localRenderDirection] = useLocalStorage<string>('vines-ui-process-page-render-direction', 'false', false);
+  const [localRenderType] = useLocalStorage<string>(
+    'vines-ui-process-page-render-type',
+    IVinesFlowRenderType.SIMPLIFY,
+    false,
+  );
+
   useEffect(() => {
-    if (!page) return;
     const renderDirection = (
-      get(page, 'customOptions.render.useHorizontal', false) ? 'horizontal' : 'vertical'
+      get(page, 'customOptions.render.useHorizontal', localRenderDirection === 'true') ? 'horizontal' : 'vertical'
     ) as IVinesFlowRenderOptions['direction'];
-    const renderType = get(page, 'customOptions.render.type', 'simplify') as IVinesFlowRenderOptions['type'];
+    const renderType = get(page, 'customOptions.render.type', localRenderType) as IVinesFlowRenderOptions['type'];
     vines.update({ renderDirection, renderType });
-  }, [page]);
+  }, [page, localRenderDirection, localRenderType]);
 
   useEffect(() => {
     const initialScale = calculateAdaptiveZoom(containerWidth, containerHeight);
