@@ -3,7 +3,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useDocumentTitle, useFavicon } from '@mantine/hooks';
 import { get } from 'lodash';
 
-import { useOemConfig } from '@/apis/common';
+import { useSystemConfig } from '@/apis/common';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { useAppStore } from '@/store/useAppStore';
 import { EDarkModeTrigger } from '@/store/useAppStore/dark-mode.slice.ts';
@@ -15,7 +15,7 @@ export const OEM: React.FC = () => {
   const { team } = useVinesTeam();
   const [localDarkMode, setLocalDarkMode] = useLocalStorage<string>('vines-ui-dark-mode', '', false);
 
-  const { data: oem } = useOemConfig();
+  const { data: oem } = useSystemConfig();
 
   const { toggleDarkMode, setDarkMode, setDarkModeTrigger } = useAppStore();
 

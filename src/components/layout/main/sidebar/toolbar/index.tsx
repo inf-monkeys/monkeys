@@ -7,7 +7,7 @@ import { UserCog } from 'lucide-react';
 import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Route } from '@/pages/login.tsx';
+import { Route } from '@/pages/login';
 
 export const Toolbar: React.FC = () => {
   const navigate = useNavigate({ from: Route.fullPath });

@@ -11,7 +11,7 @@ import { useLogin } from '@/apis/authz';
 import { saveAuthToken } from '@/components/router/guard/auth.ts';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form.tsx';
-import { Route } from '@/pages/login.tsx';
+import { Route } from '@/pages/login';
 
 interface IAuthWrapperProps extends React.ComponentPropsWithoutRef<'div'> {
   form: UseFormReturn<never>;

@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from '@tanstack/react-router';
 
 import { useGetWorkflow } from '@/apis/workflow';
-import { Route } from '@/pages/login.tsx';
+import { Route } from '@/pages/login';
 import { cn } from '@/utils';
 
 interface IWorkflowCellProps {

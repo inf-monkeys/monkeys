@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select.tsx';
-import { Route } from '@/pages/login.tsx';
+import { Route } from '@/pages/login';
 import { useLocalStorage } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 import { maskEmail, maskPhone } from '@/utils/maskdata.ts';

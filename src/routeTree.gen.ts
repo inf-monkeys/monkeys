@@ -11,9 +11,10 @@
 // Import Routes
 
 import { Route as rootRoute } from './pages/__root'
-import { Route as LoginImport } from './pages/login'
 import { Route as IndexImport } from './pages/index'
+import { Route as LoginIndexImport } from './pages/login/index'
 import { Route as TeamIdIndexImport } from './pages/$teamId/index'
+import { Route as LoginCallbackImport } from './pages/login/callback'
 import { Route as TeamIdWorkspaceIndexImport } from './pages/$teamId/workspace/index'
 import { Route as TeamIdWorkflowsIndexImport } from './pages/$teamId/workflows/index'
 import { Route as TeamIdWorkbenchIndexImport } from './pages/$teamId/workbench/index'
@@ -39,18 +40,23 @@ import { Route as TeamIdWorkspaceWorkflowIdPageIdIndexImport } from './pages/$te
 
 // Create/Update Routes
 
-const LoginRoute = LoginImport.update({
-  path: '/login',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const IndexRoute = IndexImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
 } as any)
 
+const LoginIndexRoute = LoginIndexImport.update({
+  path: '/login/',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const TeamIdIndexRoute = TeamIdIndexImport.update({
   path: '/$teamId/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const LoginCallbackRoute = LoginCallbackImport.update({
+  path: '/login/callback',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -179,12 +185,16 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/login': {
-      preLoaderRoute: typeof LoginImport
+    '/login/callback': {
+      preLoaderRoute: typeof LoginCallbackImport
       parentRoute: typeof rootRoute
     }
     '/$teamId/': {
       preLoaderRoute: typeof TeamIdIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/login/': {
+      preLoaderRoute: typeof LoginIndexImport
       parentRoute: typeof rootRoute
     }
     '/$teamId/action-tools/': {
@@ -282,8 +292,9 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren([
   IndexRoute,
-  LoginRoute,
+  LoginCallbackRoute,
   TeamIdIndexRoute,
+  LoginIndexRoute,
   TeamIdActionToolsIndexRoute,
   TeamIdApplicationStoreIndexRoute,
   TeamIdCanvasIndexRoute,

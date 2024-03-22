@@ -4,9 +4,10 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { get } from 'lodash';
-import { AuthContainer } from 'src/components/layout/login/authz';
 
-import { useOemConfig } from '@/apis/common';
+import { useSystemConfig } from '@/apis/common';
+import { AuthMethod } from '@/apis/common/typings.ts';
+import { AuthContainer } from '@/components/layout/login/authz';
 import { AuthzUsers } from '@/components/layout/login/users';
 import { IUserTokens } from '@/components/router/guard/auth.ts';
 import { AppLogo } from '@/components/ui/logo';
@@ -15,7 +16,7 @@ import { pageSearchSchema } from '@/schema/common.ts';
 import { useLocalStorage } from '@/utils';
 
 const Login: React.FC = () => {
-  const { data: oem } = useOemConfig();
+  const { data: oem } = useSystemConfig();
 
   const [tokens] = useLocalStorage<IUserTokens>('vines-tokens', {});
   const [swap, setSwap] = useLocalStorage('vines-authz-swap', 'users', false);
@@ -23,9 +24,14 @@ const Login: React.FC = () => {
   const logoUrl = get(oem, 'theme.logoUrl', '');
   const appName = get(oem, 'theme.name', '');
 
-  const loginMethods = get(oem, 'identity.loginMethods', [] as string[]);
-  const isPhoneEnable = loginMethods.includes('sms');
-  const isEmailEnable = loginMethods.includes('password');
+  const loginMethods: AuthMethod[] = get(oem, 'auth.enabled', [] as AuthMethod[]);
+  const loginMethodsLength = loginMethods.length;
+
+  const isPhoneEnable = loginMethods.includes(AuthMethod.phone);
+  const isPasswordEnable = loginMethods.includes(AuthMethod.password);
+  const isOidcEnabled = loginMethods.includes(AuthMethod.oidc);
+
+  const oidcButtonText: string = get(oem, 'auth.oidc.buttonText', 'OIDC');
 
   const hasTokens = Object.keys(tokens).length > 0;
 
@@ -34,7 +40,7 @@ const Login: React.FC = () => {
       <AppLogo url={logoUrl.includes('vines.svg') ? void 0 : logoUrl} alt={appName} height={36} />
       <div className="relative flex w-full flex-col items-center">
         <AnimatePresence>
-          {!isEmailEnable && !isPhoneEnable ? (
+          {!loginMethodsLength ? (
             <motion.div
               className="flex select-none items-center justify-center"
               key="vines-login-disabled"
@@ -51,8 +57,11 @@ const Login: React.FC = () => {
           ) : (
             <SmoothTransition initialHeight={264}>
               <AuthContainer
-                enableEmail={isEmailEnable}
+                loginMethodsLength={loginMethodsLength}
+                enableOidc={isOidcEnabled}
+                enablePassword={isPasswordEnable}
                 enablePhone={isPhoneEnable}
+                oidcButtonText={oidcButtonText}
                 setSwap={setSwap}
                 hasTokens={hasTokens}
               />
@@ -64,7 +73,7 @@ const Login: React.FC = () => {
   );
 };
 
-export const Route = createFileRoute('/login')({
+export const Route = createFileRoute('/login/')({
   component: Login,
   validateSearch: pageSearchSchema.parse,
 });
