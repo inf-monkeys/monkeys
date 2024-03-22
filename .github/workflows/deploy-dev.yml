@@ -1,0 +1,23 @@
+name: Deploy to k8s dev
+
+on: [workflow_dispatch]
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Publish to k8s dev
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          script: |
+            curl -X PUT \
+              -H "Content-Type: application/yaml" \
+              -H "Cookie: KuboardUsername=admin; KuboardAccessKey=tshfj5haeats.35adchyi3dbwarhifxk43x43htptfc6d" \
+              -d '{"kind":"deployments","namespace":"vines","name":"vines-ui-next-dev"}' \
+              "http://172.24.0.51:30080/kuboard-api/cluster/default/kind/CICDApi/admin/resource/restartWorkload"
