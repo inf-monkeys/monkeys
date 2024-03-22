@@ -9,11 +9,12 @@ import { WorkflowListQuery } from '@/apis/workflow/typings.ts';
 
 export const useGetWorkflow = (workflowId: string, version?: number, apikey?: string) =>
   useSWR<MonkeyWorkflow | undefined>(
-    workflowId ? `/api/workflow/${workflowId}${version ? `?version=${version}` : ''}` : null,
+    workflowId ? `/api/workflow/metadata/${workflowId}${version ? `?version=${version}` : ''}` : null,
     vinesFetcher({ apikey }),
   );
 
-export const getWorkflow = (workflowId: string) => vinesFetcher<MonkeyWorkflow | null>()(`/api/workflow/${workflowId}`);
+export const getWorkflow = (workflowId: string) =>
+  vinesFetcher<MonkeyWorkflow | null>({ simple: true })(`/api/workflow/metadata/${workflowId}`);
 
 export const useWorkflowList = (query: WorkflowListQuery = {}) =>
   useSWR<MonkeyWorkflow[] | undefined>(`/api/workflow/metadata?${queryString.stringify(query)}`, vinesFetcher());
@@ -25,7 +26,7 @@ export const updateWorkflow = (
   workflow: Partial<MonkeyWorkflow>,
 ) =>
   vinesFetcher<MonkeyWorkflow, Partial<MonkeyWorkflow>>({ method: 'PUT', simple: true, apikey })(
-    `/api/workflow/${workflowId}`,
+    `/api/workflow/metadata/${workflowId}`,
     {
       ...workflow,
       version: workflowVersion,
