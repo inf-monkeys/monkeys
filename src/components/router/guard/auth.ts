@@ -1,9 +1,11 @@
 import { ParsedLocation, redirect } from '@tanstack/react-router';
 
-import { has, set } from 'lodash';
+import { has, pick, set } from 'lodash';
 import { decodeToken as jwtDecodeToken, isExpired as jwtIsExpired } from 'react-jwt';
 import { toast } from 'sonner';
+import { isJWT } from 'validator';
 
+import { getUser } from '@/apis/authz/user';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { readLocalStorageValue, setLocalStorage } from '@/utils';
 
@@ -33,20 +35,33 @@ export const authGuard = ({ location }: { location: ParsedLocation }) => {
   }
 };
 
-export const saveAuthToken = (token: string): number => {
-  const decodeToken = jwtDecodeToken(token) as { id: string } | undefined;
-  if (!decodeToken) {
-    toast.error('登录信息解析失败！');
+export const saveAuthToken = async (token: string): Promise<number> => {
+  if (!isJWT(token)) {
+    toast.error('身份信息解析失败！');
     return 0;
   }
 
+  setLocalStorage('vines-token', token);
+
   const localData = readLocalStorageValue<IUserTokens>(TOKEN_KEY, {});
 
-  const userId = decodeToken.id;
-  set(localData, `[${userId}].data`, decodeToken);
-  set(localData, `[${userId}].token`, token);
-  setLocalStorage('vines-token', token);
-  setLocalStorage('vines-account', decodeToken);
+  const localUserData = Object.values(localData).find((it) => it.token === token);
+  if (!localUserData) {
+    const user = await getUser();
+    const userId = user?.id;
+    if (!user || !userId) {
+      toast.error('用户信息获取失败！');
+      return 0;
+    }
+    const userData = pick(user, ['id', 'name', 'nickname', 'photo', 'email', 'phone', 'loginsCount']);
+
+    set(localData, `[${userId}].data`, userData);
+    set(localData, `[${userId}].token`, token);
+    setLocalStorage('vines-account', userData);
+  } else {
+    setLocalStorage('vines-account', localUserData.data);
+  }
+
   setLocalStorage(TOKEN_KEY, localData);
 
   const userCount = Object.keys(localData).length;

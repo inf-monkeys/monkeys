@@ -59,10 +59,10 @@ export const InviteUser: React.FC<IInviteUserProps> = ({ visible, setVisible }) 
   };
 
   const handleCopyInviteLink = async () => {
-    if (team && team._id && currentUser._id) {
+    if (team && team._id && currentUser.id) {
       setIsHandleCreateInviteLink(true);
       const teamId = team.id;
-      const inviterUserId = currentUser?._id;
+      const inviterUserId = currentUser?.id;
       toast.promise(
         createTeamInviteLink({
           teamId,
@@ -131,7 +131,7 @@ export const InviteUser: React.FC<IInviteUserProps> = ({ visible, setVisible }) 
           )}
           <div className="flex flex-col gap-2">
             {searchResult.map((user) => (
-              <UserItem key={user._id} user={user} outdateType={outdateType} teamId={team?._id} />
+              <UserItem key={user.id} user={user} outdateType={outdateType} teamId={team?._id} />
             ))}
           </div>
         </ScrollArea>

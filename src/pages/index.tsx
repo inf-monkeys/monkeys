@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
+import { CircularProgress } from '@nextui-org/progress';
 import { motion } from 'framer-motion';
 
 import { useTeams } from '@/apis/authz/team';
@@ -42,6 +43,7 @@ const TeamsIdPage: React.FC = () => {
 
   return (
     <>
+      <CircularProgress className="mb-4 [&_circle:last-child]:stroke-vines-500" aria-label="Loading..." />
       <h1 className="animate-pulse font-bold text-vines-500">正在载入中</h1>
       <motion.div
         className="-mb-28 flex flex-col items-center"
