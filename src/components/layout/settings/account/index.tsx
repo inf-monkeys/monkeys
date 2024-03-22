@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { useSystemConfig } from '@/apis/common';
 import { ConsumerDetails } from '@/components/layout/settings/account/consumer-details';
 import { ConsumptionTrendChart } from '@/components/layout/settings/account/consumption-trend-chart';
 import { RechargeDetails } from '@/components/layout/settings/account/recharge-details';
@@ -13,6 +14,10 @@ import { WorkflowUsage } from '@/components/layout/settings/account/workflow-usa
 interface IAccountProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const Account: React.FC<IAccountProps> = () => {
+  const { data: oem } = useSystemConfig();
+
+  const hasPayment = (oem?.module || []).includes('payment');
+
   return (
     <div className="grid grid-cols-[1fr_2fr] items-start justify-center gap-4">
       <div className="grid items-start gap-4">
@@ -20,14 +25,21 @@ export const Account: React.FC<IAccountProps> = () => {
         <Team />
         <TeamMember />
       </div>
-      <div className="grid items-start gap-6">
-        <TeamProperty />
-        <RechargeDetails />
-        <ConsumerDetails />
-        <ConsumptionTrendChart />
-        <WorkflowUsage />
-        <WorkflowComponentUsage />
-      </div>
+
+      {hasPayment ? (
+        <div className="grid items-start gap-6">
+          <TeamProperty />
+          <RechargeDetails />
+          <ConsumerDetails />
+          <ConsumptionTrendChart />
+          <WorkflowUsage />
+          <WorkflowComponentUsage />
+        </div>
+      ) : (
+        <div className="vines-center size-full">
+          <h1 className="font-bold">支付模块已禁用</h1>
+        </div>
+      )}
     </div>
   );
 };
