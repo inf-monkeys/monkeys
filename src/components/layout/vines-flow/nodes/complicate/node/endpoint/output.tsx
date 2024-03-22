@@ -33,7 +33,7 @@ export const ComplicateEndNode: React.FC = () => {
     });
   };
 
-  const executionOutput = vines.runningWorkflowExecution?.output ?? {};
+  const executionOutput = vines.executionWorkflowExecution?.output ?? {};
   const hasExecutionOutput = Object.keys(executionOutput).length > 0;
 
   return (

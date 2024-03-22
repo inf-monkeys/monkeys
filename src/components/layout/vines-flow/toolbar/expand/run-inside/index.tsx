@@ -21,12 +21,12 @@ export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () =
     useFlowStore();
   const { vines } = useVinesFlow();
 
-  const workflowExecution = vines.runningWorkflowExecution;
+  const workflowExecution = vines.executionWorkflowExecution;
 
   const disabled = vines.renderOptions.type !== IVinesFlowRenderType.COMPLICATE;
 
-  const hasExecution = vines.runningWorkflowExecution !== null;
-  const isExecutionStatus = vines.runningStatus;
+  const hasExecution = vines.executionWorkflowExecution !== null;
+  const isExecutionStatus = vines.executionStatus;
   const isExecutionPaused = isExecutionStatus === 'PAUSED';
   const isExecutionRunning = isExecutionStatus === 'RUNNING' || isExecutionPaused;
 

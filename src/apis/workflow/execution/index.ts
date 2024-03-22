@@ -34,10 +34,10 @@ export const useWorkflowExecution = (instanceId: string, apikey?: string) =>
   useSWR<VinesWorkflowExecution | undefined>(
     instanceId ? `/api/workflow/${instanceId}/execution-detail` : null,
     vinesFetcher({ apikey }),
-    {
-      refreshInterval: 500,
-    },
   );
+
+export const getWorkflowExecution = (instanceId: string) =>
+  vinesFetcher<VinesWorkflowExecution>({ simple: true })(`/api/workflow/${instanceId}/execution-detail`);
 
 export const executionWorkflowTerminate = (instanceId: string) =>
   vinesFetcher({ method: 'POST' })(`/api/workflow/${instanceId}/terminate`);

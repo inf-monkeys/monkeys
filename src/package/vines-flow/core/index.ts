@@ -1,4 +1,6 @@
 import { MonkeyTaskDefTypes } from '@inf-monkeys/vines';
+import equal from 'fast-deep-equal/es6';
+import { omit } from 'lodash';
 import { toast } from 'sonner';
 
 import {
@@ -7,6 +9,7 @@ import {
   executionWorkflowResume,
   executionWorkflowTerminate,
   executionWorkflowWithDebug,
+  getWorkflowExecution,
 } from '@/apis/workflow/execution';
 import { VinesBase } from '@/package/vines-flow/core/base';
 import { VINES_DEF_NODE, VINES_ENV_VARIABLES } from '@/package/vines-flow/core/consts.ts';
@@ -65,11 +68,13 @@ export class VinesCore extends VinesTools(VinesBase) {
 
   public canvasSize = { width: 0, height: 0 };
 
-  public runningStatus: VinesWorkflowExecutionType = 'SCHEDULED';
+  public executionStatus: VinesWorkflowExecutionType = 'SCHEDULED';
 
-  public runningInstanceId = '';
+  public executionInstanceId = '';
 
-  public runningWorkflowExecution: VinesWorkflowExecution | null = null;
+  public executionWorkflowExecution: VinesWorkflowExecution | null = null;
+
+  private executionTimeout: ReturnType<typeof setTimeout> | null = null;
 
   private position: IVinesNodePosition = { x: 0, y: 0 };
 
@@ -465,7 +470,7 @@ export class VinesCore extends VinesTools(VinesBase) {
     version = this.version,
     debug = false,
   }: IVinesFlowRunParams): Promise<boolean> {
-    if (this.runningStatus !== 'SCHEDULED' || !this.nodes.length) {
+    if (this.executionStatus !== 'SCHEDULED' || !this.nodes.length) {
       toast.warning('启动运行失败！已有工作流在运行中或工作流为空');
       return false;
     }
@@ -475,7 +480,7 @@ export class VinesCore extends VinesTools(VinesBase) {
     }
 
     this.getAllNodes(false).forEach((it) => {
-      it.clearRunningStatus();
+      it.clearExecutionStatus();
       it.clearRunningTask();
     });
 
@@ -492,73 +497,99 @@ export class VinesCore extends VinesTools(VinesBase) {
       return false;
     }
 
-    this.runningInstanceId = instanceId;
-    this.runningStatus = 'RUNNING';
-    this.nodes[0].runningStatus = 'COMPLETED';
+    this.executionInstanceId = instanceId;
+    this.executionStatus = 'RUNNING';
+    this.nodes[0].executionStatus = 'COMPLETED';
 
-    this.sendEvent('execution', true);
+    this.executionTimeout = setTimeout(this.handleExecution.bind(this), 0);
 
     return true;
   }
 
   public async stop() {
-    if (['RUNNING', 'PAUSED'].includes(this.runningStatus) && this.runningInstanceId) {
-      this.runningStatus = 'CANCELED';
+    if (['RUNNING', 'PAUSED'].includes(this.executionStatus) && this.executionInstanceId) {
+      this.executionStatus = 'CANCELED';
 
       try {
-        await executionWorkflowTerminate(this.runningInstanceId);
-        toast.warning('运行已终止');
+        await executionWorkflowTerminate(this.executionInstanceId);
       } catch (_) {
         toast.error('终止运行异常！（可能未能成功停止）');
-        this.runningStatus = 'SCHEDULED';
+        this.executionStatus = 'SCHEDULED';
       }
 
-      this.sendEvent('execution', false);
+      this.executionTimeout = setTimeout(this.handleExecution.bind(this), 0);
 
-      this.clearRunningStatus();
+      this.clearExecutionStatus();
     } else {
       toast.warning('无法终止运行！当前工作流未在运行中');
     }
   }
 
   public async pause() {
-    if (this.runningStatus === 'RUNNING' && this.runningInstanceId) {
+    if (this.executionStatus === 'RUNNING' && this.executionInstanceId) {
       try {
-        await executionWorkflowPause(this.runningInstanceId);
-        toast.warning('运行已暂停');
+        await executionWorkflowPause(this.executionInstanceId);
+        toast.warning('工作流运行已暂停');
       } catch (_) {
         toast.error('暂停运行异常！（可能未能成功暂停）');
-        this.runningStatus = 'SCHEDULED';
+        this.executionStatus = 'SCHEDULED';
       }
-      this.runningStatus = 'PAUSED';
+      this.executionStatus = 'PAUSED';
 
-      this.sendEvent('execution', false);
+      this.executionTimeout = setTimeout(this.handleExecution.bind(this), 0);
     } else {
       toast.warning('无法暂停运行！当前工作流未在运行中');
     }
   }
 
   public async resume() {
-    if (this.runningStatus === 'PAUSED' && this.runningInstanceId) {
+    if (this.executionStatus === 'PAUSED' && this.executionInstanceId) {
       try {
-        await executionWorkflowResume(this.runningInstanceId);
+        await executionWorkflowResume(this.executionInstanceId);
         toast.success('运行已恢复');
       } catch (_) {
         toast.error('恢复运行异常！（可能未能成功恢复）');
-        this.runningStatus = 'SCHEDULED';
+        this.executionStatus = 'SCHEDULED';
       }
-      this.runningStatus = 'RUNNING';
+      this.executionStatus = 'RUNNING';
 
-      this.sendEvent('execution', true);
+      this.executionTimeout = setTimeout(this.handleExecution.bind(this), 0);
     } else {
       toast.warning('无法恢复运行！当前工作流未在暂停中');
     }
   }
 
-  public updateWorkflowExecution(data: VinesWorkflowExecution) {
-    if (!this.runningInstanceId || !('status' in data) || !('tasks' in data)) return;
-    this.runningWorkflowExecution = data;
-    this.runningStatus = data.status!;
+  public updateWorkflowExecution(data: VinesWorkflowExecution, render = true) {
+    if (!this.executionInstanceId || !('status' in data) || !('tasks' in data)) return;
+    this.executionWorkflowExecution = data;
+
+    const newExecutionStatus = data.status;
+    if (newExecutionStatus !== 'RUNNING' && newExecutionStatus !== this.executionStatus) {
+      const lastNode = this.nodes.at(-1);
+      lastNode && (lastNode.executionStatus = 'COMPLETED');
+
+      switch (newExecutionStatus) {
+        case 'COMPLETED':
+          toast.success('工作流运行完毕！');
+          break;
+        case 'FAILED':
+          toast.error('工作流运行失败！');
+          break;
+        case 'TIMED_OUT':
+          toast.warning('工作流运行超时！');
+          break;
+        case 'TERMINATED':
+          toast.warning('工作流运行已终止！');
+          break;
+        default:
+          break;
+      }
+
+      if (newExecutionStatus !== 'PAUSED') {
+        this.executionStatus = 'SCHEDULED';
+      }
+    }
+    this.executionStatus = newExecutionStatus!;
 
     for (const task of data.tasks) {
       const taskId = task.workflowTask?.taskReferenceName;
@@ -572,29 +603,55 @@ export class VinesCore extends VinesTools(VinesBase) {
       node.updateStatus(task);
     }
 
-    if (this.runningStatus !== 'RUNNING') {
-      const lastNode = this.nodes.at(-1);
-      lastNode && (lastNode.runningStatus = 'COMPLETED');
-
-      if (this.runningStatus === 'COMPLETED') {
-        toast.success('工作流运行完毕！');
-        this.runningStatus = 'SCHEDULED';
-      }
-      this.sendEvent('execution', false);
-    }
-
-    this.sendEvent('refresh');
+    render && this.sendEvent('refresh');
   }
 
-  public clearRunningStatus() {
+  private _prevExecutionData: Partial<VinesWorkflowExecution> | undefined;
+  private async fetchWorkflowExecution() {
+    const data = await getWorkflowExecution(this.executionInstanceId);
+    if (!data) return;
+
+    const equalData = omit(data, [
+      'createTime',
+      'updateTime',
+      'startTime',
+      'workflowVersion',
+      'workflowName',
+      'workflowDefinition',
+      'startBy',
+      'triggerType',
+    ]);
+
+    const needRender = !equal(equalData, this._prevExecutionData);
+
+    this.updateWorkflowExecution(data, needRender);
+    this._prevExecutionData = equalData;
+
+    if (needRender) {
+      this.sendEvent('update-execution', this.executionInstanceId, data);
+    }
+  }
+
+  private async handleExecution() {
+    const waitTimeout = new Promise((resolve) => setTimeout(resolve, 1000));
+    const workPromise = this.fetchWorkflowExecution();
+    await Promise.all([workPromise, waitTimeout]);
+    if (this.executionStatus === 'RUNNING') {
+      this.executionTimeout = setTimeout(this.handleExecution.bind(this), 0);
+    } else if (this.executionStatus !== 'PAUSED') {
+      this.clearExecutionStatus();
+    }
+  }
+
+  public clearExecutionStatus() {
     const allNodes = this.getAllNodes();
-    allNodes.forEach((it) => it.runningStatus !== 'SCHEDULED' && (it.runningTask.status = 'CANCELED'));
-    void (this.runningStatus !== 'SCHEDULED' && (this.runningStatus = 'CANCELED'));
+    allNodes.forEach((it) => it.executionStatus !== 'SCHEDULED' && (it.runningTask.status = 'CANCELED'));
+    void (this.executionStatus !== 'SCHEDULED' && (this.executionStatus = 'CANCELED'));
     this.sendEvent('refresh');
     setTimeout(() => {
-      allNodes.forEach((it) => it.clearRunningStatus());
+      allNodes.forEach((it) => it.clearExecutionStatus());
       requestAnimationFrame(() => {
-        this.runningStatus = 'SCHEDULED';
+        this.executionStatus = 'SCHEDULED';
         this.sendEvent('refresh');
       });
     }, 80);
