@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 
-import { get } from 'lodash';
+import { get, isString } from 'lodash';
 import { Link2Icon } from 'lucide-react';
 
 import { IVinesInputPropertyProps } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property';
@@ -11,6 +11,7 @@ import { VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.
 import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
+import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 interface IStringInputProps {
   extraVariableMapper?: Record<string, VinesToolDefProperties>;
@@ -32,7 +33,7 @@ export const StringInput: React.FC<IVinesInputPropertyProps & IStringInputProps>
     <div className={cn('relative', { 'pointer-events-none': disabled })}>
       <VariableEditor
         editorRef={variableEditorRef}
-        initialValue={value?.toString() ?? ''}
+        initialValue={isString(value) ? value : stringify(value)}
         onChange={onChange}
         placeholder={def?.placeholder ?? `请输入${def?.displayName}`}
         initialPointMapper={{ ...variableMapper, ...extraVariableMapper }}
