@@ -76,7 +76,7 @@ export const VinesFlow: React.FC<IVinesFlowProps> = ({ workflowId }) => {
       }
     }
 
-    if (!workflow?.workflowDef?.tasks?.length) {
+    if (!workflow?.tasks?.length) {
       setVisible(false);
     }
   }, [workflow]);

@@ -87,7 +87,7 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
           },
         }));
       } else {
-        const finalBlock = workflow.workflowDef?.tasks?.at(-1);
+        const finalBlock = workflow?.tasks?.at(-1);
         if (!finalBlock) {
           return [];
         }

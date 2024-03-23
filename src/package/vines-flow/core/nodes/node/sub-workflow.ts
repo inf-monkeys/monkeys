@@ -15,7 +15,7 @@ import { IVinesInsertChildParams, IVinesMode } from '@/package/vines-flow/core/t
 import { getBoundary } from '@/package/vines-flow/core/utils.ts';
 
 export type VinesSubWorkflowTaskDef = SubWorkflowTaskDef & {
-  subWorkflow: Pick<MonkeyWorkflow, 'name' | 'iconUrl' | 'description'> & { workflowDef: { tasks: VinesTask[] } };
+  subWorkflow: Pick<MonkeyWorkflow, 'name' | 'iconUrl' | 'description'> & { tasks: VinesTask[] };
 };
 
 export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDef> {
@@ -25,7 +25,7 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
 
   constructor(task: VinesSubWorkflowTaskDef, vinesCore: VinesCore) {
     super(task, vinesCore);
-    this.parseChildren(task?.subWorkflow?.workflowDef?.tasks ?? []);
+    this.parseChildren(task?.subWorkflow?.tasks ?? []);
   }
 
   private parseChildren(tasks: VinesTask[]) {
@@ -35,7 +35,7 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
   override getRaw() {
     set(
       this._task,
-      'subWorkflow.workflowDef.tasks',
+      'subWorkflow.tasks',
       this.children.map((it) => it.getRaw()),
     );
     return this._task;

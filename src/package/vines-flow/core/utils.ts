@@ -39,9 +39,7 @@ export function createSubWorkflowDef(tasks: VinesTask[]) {
       name: nodeId,
       iconUrl: 'emoji:🍀:#ceefc5',
       description: '',
-      workflowDef: {
-        tasks,
-      },
+      tasks,
     },
   };
 
