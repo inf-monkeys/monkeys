@@ -65,7 +65,7 @@ export const createVinesCore = (workflowId: string) => {
 
             const newWorkflow = {
               version: _vines.version,
-              ...(tasks?.length && { workflowDef: { tasks } }),
+              ...(tasks?.length && { tasks }),
               variables: _vines.workflowInput,
             } as Partial<MonkeyWorkflow>;
 

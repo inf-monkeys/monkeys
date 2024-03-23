@@ -99,9 +99,7 @@ export class VinesCore extends VinesTools(VinesBase) {
   ) {
     let needToInit = false;
     if (workflow) {
-      workflow?.workflowDef?.tasks &&
-        (this.tasks = workflow.workflowDef.tasks.filter((task) => task)) &&
-        (needToInit = true);
+      workflow?.tasks && (this.tasks = workflow.tasks.filter((task) => task)) && (needToInit = true);
       workflow?.workflowId && (this.workflowId = workflow.workflowId);
       workflow?.version && (this.version = workflow.version);
       workflow?.name && (this.workflowName = workflow.name);

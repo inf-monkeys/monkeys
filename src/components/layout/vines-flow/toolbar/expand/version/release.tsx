@@ -86,9 +86,9 @@ export const WorkflowRelease: React.FC<IWorkflowReleaseProps> = ({ version, onVe
   };
 
   const targetVersions = workflowVersions?.slice(0, 2).map((it) => {
-    const workflow = pick(it, ['workflowDef', 'output', 'variables', 'name', 'logo', 'desc']);
-    const tasks = workflow.workflowDef?.tasks?.filter((task) => task.name !== 'fake_node') ?? [];
-    return { ...workflow, workflowDef: { tasks } };
+    const workflow = pick(it, ['tasks', 'output', 'variables', 'name', 'logo', 'desc']);
+    const tasks = workflow?.tasks?.filter((task) => task.name !== 'fake_node') ?? [];
+    return { ...workflow, tasks };
   });
 
   useEffect(() => {
