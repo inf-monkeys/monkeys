@@ -112,4 +112,10 @@ export class WorkflowMetadataEntity extends BaseAssetEntity {
     nullable: true,
   })
   md5?: string;
+
+  @Column({
+    nullable: true,
+    default: false,
+  })
+  hidden?: boolean;
 }

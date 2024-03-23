@@ -394,7 +394,13 @@ export class WorkflowRepository {
     };
   }
 
-  public async listWorkflows(teamId: string, dto: ListDto) {
+  public async listWorkflows(
+    teamId: string,
+    dto: ListDto,
+  ): Promise<{
+    totalCount: number;
+    list: WorkflowMetadataEntity[];
+  }> {
     const { page = 0, limit = 24 } = dto;
     const queryBuilder = this.workflowMetadataRepository
       .createQueryBuilder('workflow_metadata')
@@ -402,17 +408,30 @@ export class WorkflowRepository {
       .addSelect('MAX(workflow_metadata.version)', 'max_version')
       .where('workflow_metadata.team_id = :teamId', { teamId })
       .andWhere('workflow_metadata.is_deleted = :isDeleted', { isDeleted: false })
+      .andWhere('workflow_metadata.hidden = :hidden', { hidden: false })
       .groupBy('workflow_metadata.workflow_id');
+    const count = await this.workflowMetadataRepository
+      .createQueryBuilder('workflow_metadata')
+      .innerJoin(`(${queryBuilder.getQuery()})`, 'latest_workflow', 'workflow_metadata.workflow_id = latest_workflow.workflow_id AND workflow_metadata.version = latest_workflow.max_version')
+      .where('workflow_metadata.team_id = :teamId', { teamId })
+      .andWhere('workflow_metadata.is_deleted = :isDeleted', { isDeleted: false })
+      .andWhere('workflow_metadata.hidden = :hidden', { hidden: false })
+      .setParameters(queryBuilder.getParameters())
+      .getCount();
     const workflows = await this.workflowMetadataRepository
       .createQueryBuilder('workflow_metadata')
       .innerJoin(`(${queryBuilder.getQuery()})`, 'latest_workflow', 'workflow_metadata.workflow_id = latest_workflow.workflow_id AND workflow_metadata.version = latest_workflow.max_version')
       .where('workflow_metadata.team_id = :teamId', { teamId })
       .andWhere('workflow_metadata.is_deleted = :isDeleted', { isDeleted: false })
+      .andWhere('workflow_metadata.hidden = :hidden', { hidden: false })
       .setParameters(queryBuilder.getParameters())
       // .orderBy('workflow.workflow_id', 'ASC') // 或者你可以根据需要对结果进行排序
       .skip(page * limit) // 设置跳过的记录数来实现分页
       .take(limit) // 设置取出的记录数
       .getMany();
-    return workflows;
+    return {
+      totalCount: count,
+      list: workflows,
+    };
   }
 }

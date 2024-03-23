@@ -1,6 +1,6 @@
 import { ListDto } from '@/common/dto/list.dto';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
-import { SuccessResponse } from '@/common/response';
+import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -21,12 +21,11 @@ export class WorkflowCrudController {
     summary: '获取工作流列表',
     description: '获取工作流列表',
   })
-  public async listWorkflows(@Req() req: IRequest, @Body() body: ListDto) {
+  public async listWorkflows(@Req() req: IRequest, @Query() body: ListDto) {
     const { teamId } = req;
-    const data = await this.service.listWorkflows(teamId, body);
-    return new SuccessResponse({
-      data,
-    });
+    const { page, limit } = body;
+    const { totalCount, list } = await this.service.listWorkflows(teamId, body);
+    return new SuccessListResponse({ data: list, total: totalCount, page: +page, limit: +limit });
   }
 
   @Get('/:workflowId')
