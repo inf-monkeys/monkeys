@@ -5,10 +5,11 @@ import { debounce, merge } from 'lodash';
 
 import { useAppStore } from '@/store/useAppStore';
 import { cn } from '@/utils';
+import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 export type JSONValue = null | string | number | boolean | { [x: string]: JSONValue } | Array<JSONValue>;
 
-interface ICodeEditorProps {
+export interface ICodeEditorProps {
   data: JSONValue;
   onUpdate?: (rawData: string) => void;
   className?: string;
@@ -81,7 +82,7 @@ export const CodeEditor: React.FC<ICodeEditorProps> = ({
     [options, readonly, lineNumbers],
   );
 
-  const finalData = useMemo(() => (typeof data === 'string' ? data : JSON.stringify(data, null, 2)), [data]);
+  const finalData = useMemo(() => (typeof data === 'string' ? data : JSON.stringify(data, null, 2)), [stringify(data)]);
 
   return (
     <MonacoEditor
