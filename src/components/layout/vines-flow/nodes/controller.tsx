@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { cn } from '@/utils';
@@ -16,7 +17,8 @@ interface INodeControllerProps {
 }
 
 export const NodeController: React.FC<INodeControllerProps> = memo(({ nodes, nodeStagger }) => {
-  const { canvasDisabled, canvasMode, isLatestWorkflowVersion } = useFlowStore();
+  const { canvasMode, isLatestWorkflowVersion } = useFlowStore();
+  const { canvasDisabled } = useCanvasStore();
 
   const controller = nodes
     .map((node) => node.getController().map((it, index) => ({ id: `${node.id}_controller_${index}`, ...it })))

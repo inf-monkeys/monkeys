@@ -28,6 +28,9 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
 
     public tools: VinesToolDef[] = [];
 
+    private toolInitialized = false;
+    private subWorkflowInitialized = false;
+
     /**
      * 获取 Vines 工具链中的工具
      * @param key 工具名称
@@ -40,7 +43,7 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
     // ... other methods
     private checkoutData() {
       if (this.status !== VINES_STATUS.IDLE) return;
-      if (this.vinesTools.length && this.vinesSubWorkflowTools.length) {
+      if (this.toolInitialized && this.subWorkflowInitialized) {
         this.tools = this.vinesTools.concat(this.vinesSubWorkflowTools);
         this.status = VINES_STATUS.READY;
         this.sendEvent('refresh');
@@ -53,6 +56,7 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
           TOOL_CATEGORY_SORT_INDEX_LIST.indexOf(a.categories?.[0] ?? '') -
           TOOL_CATEGORY_SORT_INDEX_LIST.indexOf(b.categories?.[0] ?? ''),
       );
+      this.toolInitialized = true;
       this.checkoutData();
     }
 
@@ -73,6 +77,7 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
           extra: workflow,
         };
       });
+      this.subWorkflowInitialized = true;
       this.checkoutData();
     }
 
