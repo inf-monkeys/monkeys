@@ -33,6 +33,7 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
     size: { width, height },
     customData,
     executionTask,
+    executionStatus,
   } = node;
   const { name: toolName } = node.getRaw();
 
@@ -83,6 +84,7 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
   const isSimpleNode = !isStartNode && !isEndNode && !isFakeNode;
 
   const variableMapper = Object.fromEntries(vines.variablesMapper.entries());
+  const nodeExecutionStatus = executionTask?.originStatus ?? executionStatus;
 
   return (
     <div
@@ -139,6 +141,8 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
                   vinesUpdateRaw={(nodeId: string, task: VinesTask, update: boolean) =>
                     vines.updateRaw(nodeId, task, update)
                   }
+                  workflowStatus={vines.executionStatus}
+                  status={nodeExecutionStatus}
                 />
               )}
             </motion.div>

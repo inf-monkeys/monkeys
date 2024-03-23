@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CircleEllipsisIcon, Save } from 'lucide-react';
 
+import { ExecutionStatusIcon } from '@/components/layout/vines-execution/status-icon';
 import { ToolInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input';
 import { ToolCustomDataEditor } from '@/components/layout/vines-flow/headless-modal/tool-editor/header/node-custom-editor/editor.tsx';
 import { ComplicateNodeHeader } from '@/components/layout/vines-flow/nodes/complicate/node/header.tsx';
@@ -11,8 +12,9 @@ import { CodeEditor, JSONValue } from '@/components/ui/code-editor';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { IVinesNodeCustomData, VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
+import { IVinesNodeCustomData, VinesNodeExecutionTask, VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { IVinesVariableMap, VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
+import { VinesWorkflowExecutionType } from '@/package/vines-flow/core/typings.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
@@ -29,6 +31,8 @@ interface IComplicateSimpleNodeProps {
   onSaved?: () => void;
   onRawUpdate?: (data: string) => void;
   vinesUpdateRaw?: (nodeId: string, task: VinesTask, update: boolean) => void;
+  status: VinesNodeExecutionTask['status'];
+  workflowStatus: VinesWorkflowExecutionType;
 }
 
 export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
@@ -43,6 +47,8 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
   onSaved,
   onRawUpdate,
   vinesUpdateRaw,
+  status,
+  workflowStatus,
 }) => {
   const { isLatestWorkflowVersion, isWorkflowRUNNING } = useFlowStore();
   const [activeTab, setActiveTab] = useState('config');
@@ -82,6 +88,9 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
             </TooltipTrigger>
             <TooltipContent>更多</TooltipContent>
           </Tooltip>
+          {isWorkflowRUNNING && (
+            <ExecutionStatusIcon className="mr-2" status={status} workflowStatus={workflowStatus} />
+          )}
         </div>
       </ComplicateNodeHeader>
       <Tabs className="px-5" value={activeTab} onValueChange={setActiveTab}>
