@@ -20,7 +20,7 @@ export const NodeToolbar: React.FC<INodeToolbarProps> = ({ node }) => {
   } = node;
 
   const { vines } = useVinesFlow();
-  const { overNodeId, activeDraggableNodeId, setZoomToNodeId } = useFlowStore();
+  const { overNodeId, activeDraggableNodeId } = useFlowStore();
 
   const visible = overNodeId === id && activeDraggableNodeId !== overNodeId;
 
@@ -45,7 +45,6 @@ export const NodeToolbar: React.FC<INodeToolbarProps> = ({ node }) => {
     async (_isOver: boolean, dId: string) => {
       if (!visible && activeDraggableNodeIdRef.current) {
         const { over: overNodeId, draggable: draggableNodeId } = operationNodeIdRef.current;
-        setZoomToNodeId(draggableNodeId);
         if (dId === 'insertAfter') {
           vines.move(draggableNodeId, overNodeId, true);
         } else if (dId === 'insertBefore') {

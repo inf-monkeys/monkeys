@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { VinesToolDef, VinesToolWithCategory } from '@/package/vines-flow/core/tools/typings.ts';
+import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import VinesEvent from '@/utils/events';
@@ -16,7 +17,7 @@ import VinesEvent from '@/utils/events';
 interface IToolsSelectorProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
-  const { workflowId, setZoomToNodeId } = useFlowStore();
+  const { workflowId } = useFlowStore();
   const { vines } = useVinesFlow();
 
   const [open, setOpen] = useState(false);
@@ -42,6 +43,7 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
     };
   }, [workflowId]);
 
+  const isComplicate = vines.renderOptions.type === IVinesFlowRenderType.COMPLICATE;
   const handleOnClick = (tool: VinesToolDef) => {
     if (disabledSelector) return;
     setOpen(false);
@@ -55,7 +57,14 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
     const finalTargetNodeId = targetNodeId || (vines.getAllNodes()?.at(-1)?.id ?? '');
     vines.insertNode(finalTargetNodeId, node, isInsertBefore ?? false);
 
-    setZoomToNodeId(Array.isArray(node) ? node[0].id : node.id);
+    setTimeout(
+      () =>
+        VinesEvent.emit(
+          'canvas-zoom-to-node',
+          (isComplicate ? 'complicate-' : '') + (Array.isArray(node) ? node[0].id : node.id),
+        ),
+      750,
+    );
   };
 
   const list = vines
