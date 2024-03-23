@@ -19,7 +19,7 @@
 
 [![License](https://img.shields.io/github/license/inf-monkeys/monkeys)](http://www.apache.org/licenses/LICENSE-2.0)
 [![GitHub stars](https://img.shields.io/github/stars/inf-monkeys/monkeys?style=social&label=Star&maxAge=2592000)](https://GitHub.com/inf-monkeys/monkeys/stargazers/)
-[![GitHub forks](https://img.shields.io/github/forks/inf-monkeys/monkeys?style=social&label=Fork&maxAge=2592000)](https://GitHub.com/Netflix/conductor/network/)
+[![GitHub forks](https://img.shields.io/github/forks/inf-monkeys/monkeys?style=social&label=Fork&maxAge=2592000)](https://github.com/inf-monkeys/monkeys)
 
 </div>
 

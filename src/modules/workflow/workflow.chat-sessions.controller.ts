@@ -8,7 +8,7 @@ import _ from 'lodash';
 import { ListChatSessionsDto } from './dto/req/list-chat-sessions.dto';
 import { WorkflowChatSessionService } from './workflow.chat-sessions.service';
 
-@Controller('/chat-sessions')
+@Controller('/workflow/chat-sessions')
 @ApiTags('Workflows/Chat Sessions')
 @UseGuards(CompatibleAuthGuard)
 export class WorkflowChatSessionController {

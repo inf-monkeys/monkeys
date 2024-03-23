@@ -7,7 +7,7 @@ import { CreateWorkflowTriggerDto } from './dto/req/create-trigger.dto';
 import { UpdateWorkflowTriggerDto } from './dto/req/update-trigger.dto';
 import { WorkflowTriggerService } from './workflow.trigger.service';
 
-@Controller()
+@Controller('worfklow/')
 @ApiTags('Workflows/Trigger')
 @UseGuards(CompatibleAuthGuard)
 export class WorkflowTriggerController {

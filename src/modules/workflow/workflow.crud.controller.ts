@@ -47,6 +47,38 @@ export class WorkflowCrudController {
     });
   }
 
+  @Get('/:workflowId/versions')
+  @ApiOperation({
+    summary: '获取工作流的所有版本',
+    description: '获取工作流的所有版本',
+  })
+  public async getWorkflowVersions(@Req() req: IRequest, @Param('workflowId') workflowId: string) {
+    const result = await this.service.getWorklfowVersions(workflowId);
+    return new SuccessResponse({
+      data: result,
+    });
+  }
+
+  @Get('/:workflowId/validation-issues')
+  @ApiOperation({
+    summary: '获取工作流的所有版本',
+    description: '获取工作流的所有版本',
+  })
+  public async getWorkflowValicationIssues(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Query('version') versionStr: string) {
+    const { teamId } = req;
+    let version = undefined;
+    if (versionStr) {
+      version = parseInt(versionStr.toString());
+    }
+    const workflow = await this.service.getWorkflowDef(teamId, workflowId, version);
+    return new SuccessResponse({
+      data: {
+        validationIssues: workflow.validationIssues || [],
+        validated: workflow.validated,
+      },
+    });
+  }
+
   @Post()
   @ApiOperation({
     summary: '创建 workflow 定义',

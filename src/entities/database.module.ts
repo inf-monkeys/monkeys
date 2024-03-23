@@ -16,6 +16,7 @@ import { ApiKeyEntity } from './apikey/apikey';
 import { TeamEntity } from './identity/team';
 import { UserEntity } from './identity/user';
 import { UserTeamRelationshipEntity } from './identity/user-team-relationship';
+import { WorkflowPageEntity } from './workflow/workflow-page';
 
 export const entities: EntityClassOrSchema[] = [
   ThemeEntity,
@@ -33,6 +34,7 @@ export const entities: EntityClassOrSchema[] = [
   TeamEntity,
   UserTeamRelationshipEntity,
   ApiKeyEntity,
+  WorkflowPageEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({

@@ -16,36 +16,55 @@ export interface PageInstance {
 
 @Entity({ name: 'workflow_pages' })
 export class WorkflowPageEntity extends BaseEntity {
-  @Column()
+  @Column({
+    name: 'display_name',
+  })
   displayName: string;
 
-  @Column()
+  @Column({
+    type: 'varchar',
+  })
   type: PageInstance['type'];
 
-  @Column()
+  @Column({
+    name: 'workflow_id',
+    type: 'varchar',
+  })
   workflowId: string;
 
-  @Column()
+  @Column({
+    name: 'is_builtin',
+    type: 'boolean',
+  })
   isBuiltIn: boolean;
 
-  @Column()
-  creatorUserId: string;
-
-  @Column()
+  @Column({
+    name: 'team_id',
+    type: 'varchar',
+  })
   teamId: string;
 
-  @Column()
+  @Column({
+    type: 'simple-json',
+  })
   permissions: PagePermission[];
 
-  @Column()
-  apiKey: string;
-
-  @Column()
+  @Column({
+    name: 'sort_index',
+    type: 'integer',
+  })
   sortIndex: number;
 
-  @Column()
+  @Column({
+    name: 'custom_options',
+    type: 'simple-json',
+    nullable: true,
+  })
   customOptions?: Record<string, any>;
 
-  @Column()
+  @Column({
+    default: false,
+    type: 'boolean',
+  })
   pinned?: boolean;
 }

@@ -30,12 +30,17 @@ export class WorkflowCrudService {
     private readonly workflowValidateService: WorkflowValidateService,
   ) {}
 
-  public async getWorkflowDef(teamId: string, workflowId: string, version?: number): Promise<any> {
+  public async getWorkflowDef(teamId: string, workflowId: string, version?: number): Promise<WorkflowMetadataEntity> {
     if (!version) {
       version = await this.workflowRepository.getMaxVersion(teamId, workflowId);
     }
     const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
     return workflow;
+  }
+
+  public async getWorklfowVersions(workflowId: string) {
+    const versions = await this.workflowRepository.getWorklfowVersions(workflowId);
+    return versions;
   }
 
   public async listWorkflows(teamId: string, dto: ListDto) {

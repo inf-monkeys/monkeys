@@ -1,4 +1,6 @@
+import { WorkflowPageEntity } from '@/entities/workflow/workflow-page';
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConductorModule } from './conductor/conductor.module';
 import { WorkflowAssetsController } from './workflow.assets.controller';
 import { WorkflowAssetsService } from './workflow.assets.service';
@@ -9,6 +11,8 @@ import { WorkflowCrudController } from './workflow.crud.controller';
 import { WorkflowCrudService } from './workflow.curd.service';
 import { WorkflowExecutionController } from './workflow.execution.controller';
 import { WorkflowExecutionService } from './workflow.execution.service';
+import { WorkflowPageController } from './workflow.page.controller';
+import { WorkflowPageService } from './workflow.page.service';
 import { WorkflowTriggerController } from './workflow.trigger.controller';
 import { WorkflowTriggerService } from './workflow.trigger.service';
 import { WorkflowValidateController } from './workflow.validate.controller';
@@ -25,6 +29,7 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     WorkflowTriggerController,
     WorkflowAssetsController,
     WorkflowChatSessionController,
+    WorkflowPageController,
   ],
   providers: [
     WorkflowCrudService,
@@ -35,8 +40,9 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     WorkflowTriggerService,
     WorkflowAssetsService,
     WorkflowChatSessionService,
+    WorkflowPageService,
   ],
-  imports: [ConductorModule],
+  imports: [ConductorModule, TypeOrmModule.forFeature([WorkflowPageEntity])],
   exports: [WorkflowCrudService],
 })
 export class WorkflowModule {}
