@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
 
 import _ from 'lodash';
 import { ArrowDownNarrowWide, ArrowDownWideNarrow } from 'lucide-react';
@@ -29,7 +29,7 @@ interface IUgcHeaderSortButtonProps extends IAssetCustomProps {
   assetKey: string;
 }
 
-export const UgcHeaderSortButton: React.FC<IUgcHeaderSortButtonProps> = ({ assetKey }) => {
+export const UgcHeaderSortButton: React.FC<IUgcHeaderSortButtonProps> = memo(({ assetKey }) => {
   const team = useVinesTeam();
 
   const [sortConditionStorage, setSortConditionStorage] = useLocalStorage<ISortConditionStorage>(
@@ -37,8 +37,10 @@ export const UgcHeaderSortButton: React.FC<IUgcHeaderSortButtonProps> = ({ asset
     {},
   );
 
-  const sortCondition: ISortCondition = useMemo(() => {
-    if (!_.has(sortConditionStorage, [team.teamId, assetKey]))
+  const sortCondition: ISortCondition = _.get(sortConditionStorage, [team.teamId, assetKey], DEFAULT_SORT_CONDITION);
+
+  useEffect(() => {
+    if (!_.has(sortConditionStorage, [team.teamId, assetKey])) {
       setTimeout(() => {
         setSortConditionStorage({
           ...sortConditionStorage,
@@ -48,13 +50,15 @@ export const UgcHeaderSortButton: React.FC<IUgcHeaderSortButtonProps> = ({ asset
           },
         });
       });
-    return _.get(sortConditionStorage, [team.teamId, assetKey], DEFAULT_SORT_CONDITION);
-  }, [sortConditionStorage, team.teamId, assetKey]);
+    }
+  }, [sortConditionStorage]);
 
   const sortConditionIcon = useMemo(
     () => (sortCondition.orderBy === 'ASC' ? <ArrowDownNarrowWide /> : <ArrowDownWideNarrow />),
     [sortCondition.orderBy],
   );
+
+  const teamId = team.teamId;
 
   return (
     <DropdownMenu>
@@ -74,10 +78,10 @@ export const UgcHeaderSortButton: React.FC<IUgcHeaderSortButtonProps> = ({ asset
             setSortConditionStorage((prev) => {
               return {
                 ...prev,
-                [team.teamId]: {
-                  ...prev[team.teamId],
+                [teamId]: {
+                  ...prev[teamId],
                   [assetKey]: {
-                    ...prev[team.teamId][assetKey],
+                    ...prev[teamId][assetKey],
                     orderBy: v as ISortConditionOrderBy,
                   },
                 },
@@ -95,10 +99,10 @@ export const UgcHeaderSortButton: React.FC<IUgcHeaderSortButtonProps> = ({ asset
             setSortConditionStorage((prev) => {
               return {
                 ...prev,
-                [team.teamId]: {
-                  ...prev[team.teamId],
+                [teamId]: {
+                  ...prev[teamId],
                   [assetKey]: {
-                    ...prev[team.teamId][assetKey],
+                    ...prev[teamId][assetKey],
                     orderColumn: v as ISortConditionOrderColumn,
                   },
                 },
@@ -112,4 +116,6 @@ export const UgcHeaderSortButton: React.FC<IUgcHeaderSortButtonProps> = ({ asset
       </DropdownMenuContent>
     </DropdownMenu>
   );
-};
+});
+
+UgcHeaderSortButton.displayName = 'UgcHeaderSortButton';
