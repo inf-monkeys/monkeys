@@ -77,7 +77,7 @@ export const useVariableEditor = (opt: UseVariableEditorOptions) => {
       const pointerSortedMapper = _.sortBy(Object.entries(pointerMapper), (a) => -a[0].length).reverse();
       const pointerKeyMapper = ['\n', ...pointerSortedMapper.map(([it]) => it)];
       try {
-        const exactMatchRegex = new RegExp(`^${text}$`);
+        const exactMatchRegex = new RegExp(`^${text.replace(/\s/g, '')}$`);
         pointerKeyMapper.sort((a, b) => (exactMatchRegex.test(b) ? 1 : exactMatchRegex.test(a) ? -1 : 0));
       } catch (e) {
         console.warn('[VinesEditor] 无法解析的文本', e);
@@ -132,9 +132,27 @@ export const useVariableEditor = (opt: UseVariableEditorOptions) => {
         paragraphs.push({ type: 'paragraph', children });
       });
 
-      // 为 paragraphs 中 children 为空的插入一条 {text: ''}
+      const mergedParagraphs: CustomDescendant[] = [];
+      paragraphs.forEach((it) => {
+        let children = it.children as CustomLeaf[];
 
-      return paragraphs.map((it) => {
+        children = children.reduce((acc: CustomLeaf[], cur: CustomLeaf) => {
+          if (acc.length === 0) {
+            return [cur];
+          }
+          const last = acc[acc.length - 1];
+          if (last.text && cur.text) {
+            last.text += cur.text;
+          } else {
+            acc.push(cur);
+          }
+          return acc;
+        }, []);
+
+        mergedParagraphs.push({ ...it, children });
+      });
+
+      return mergedParagraphs.map((it) => {
         if (it.children.length === 0) {
           return { ...it, children: [{ text: '' }] };
         }
