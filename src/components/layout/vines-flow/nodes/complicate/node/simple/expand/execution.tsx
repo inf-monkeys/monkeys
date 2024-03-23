@@ -2,6 +2,9 @@ import React, { useMemo } from 'react';
 
 import moment from 'moment';
 
+import { ExecutionRawDataDisplay } from '@/components/layout/vines-execution/data-display/raw';
+import { JSONValue } from '@/components/ui/code-editor';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
 
 interface IComplicateSimpleNodeExecutionExpandProps {
@@ -31,6 +34,9 @@ export const ComplicateSimpleNodeExecutionExpand: React.FC<IComplicateSimpleNode
     return '-';
   }, [executionStartTime, executionEndTime]);
 
+  const externalStorageInputDataUrl = executionTask?.externalOutputPayloadStoragePath;
+  const externalStorageOutputDataUrl = executionTask?.externalOutputPayloadStoragePath;
+
   return (
     <div className="flex flex-col gap-3 p-5">
       <div className="text-text1 flex shrink-0 grow-0 flex-wrap text-xs">
@@ -38,6 +44,30 @@ export const ComplicateSimpleNodeExecutionExpand: React.FC<IComplicateSimpleNode
         <p className="mr-4">结束时间：{endTime}</p>
         <p className="mr-4">运行时长：{currentDuration}</p>
       </div>
+      <Tabs defaultValue="data">
+        <TabsList>
+          <TabsTrigger value="data">数据</TabsTrigger>
+          <TabsTrigger value="input">输入</TabsTrigger>
+          <TabsTrigger value="output">输出</TabsTrigger>
+          <TabsTrigger value="raw">原始数据</TabsTrigger>
+        </TabsList>
+        <TabsContent value="data" className="h-[20.5rem]"></TabsContent>
+        <TabsContent value="input" className="h-[20.5rem]">
+          <ExecutionRawDataDisplay
+            data={executionTask?.inputData ?? {}}
+            externalStorageDataUrl={externalStorageInputDataUrl}
+          />
+        </TabsContent>
+        <TabsContent value="output" className="h-[20.5rem]">
+          <ExecutionRawDataDisplay
+            data={executionTask?.outputData ?? {}}
+            externalStorageDataUrl={externalStorageOutputDataUrl}
+          />
+        </TabsContent>
+        <TabsContent value="raw" className="h-[20.5rem]">
+          <ExecutionRawDataDisplay data={(executionTask as JSONValue) ?? {}} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
