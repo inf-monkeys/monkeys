@@ -185,18 +185,23 @@ export class ConductorService {
   public async saveWorkflowInConductor(workflowEntity: WorkflowMetadataEntity) {
     const { tasks, teamId, workflowId, description, version, output } = workflowEntity;
     await this.convertVinesTasksToConductorTasks(teamId, output, tasks, {});
-    await conductorClient.metadataResource.create({
-      name: workflowId,
-      description,
-      version: version,
-      restartable: true,
-      workflowStatusListenerEnabled: true,
-      schemaVersion: 2,
-      ownerEmail: 'dev@inf-monkeys.com',
-      timeoutPolicy: 'TIME_OUT_WF',
-      timeoutSeconds: 60 * 60 * 24,
-      tasks,
-    });
+    await conductorClient.metadataResource.update(
+      [
+        {
+          name: workflowId,
+          description,
+          version: version,
+          restartable: true,
+          workflowStatusListenerEnabled: true,
+          schemaVersion: 2,
+          ownerEmail: 'dev@inf-monkeys.com',
+          timeoutPolicy: 'TIME_OUT_WF',
+          timeoutSeconds: 60 * 60 * 24,
+          tasks,
+        },
+      ],
+      true,
+    );
   }
 
   public async getWorkflowExecutionStatus(teamId: string, workflowInstanceId: string) {
