@@ -15,7 +15,7 @@ import {
   IVinesNodePosition,
   IVinesNodeSize,
   VinesEdgePath,
-  VinesNodeRunTask,
+  VinesNodeExecutionTask,
   VinesNodeStatus,
   VinesTask,
 } from '@/package/vines-flow/core/nodes/typings.ts';
@@ -45,7 +45,7 @@ export class VinesNode<T extends VinesTask = VinesTask> {
 
   public executionStatus: VinesNodeStatus = 'DEFAULT';
 
-  public runningTask: VinesNodeRunTask = this.defaultRunningTask;
+  public executionTask: VinesNodeExecutionTask = this.defaultRunningTask;
 
   protected readonly _vinesCore: VinesCore;
 
@@ -471,15 +471,15 @@ export class VinesNode<T extends VinesTask = VinesTask> {
   }
 
   public clearRunningTask() {
-    this.runningTask = this.defaultRunningTask;
+    this.executionTask = this.defaultRunningTask;
   }
 
-  public updateStatus(task: VinesNodeRunTask) {
-    this.runningTask = { ...task, originStatus: task.status };
+  public updateStatus(task: VinesNodeExecutionTask) {
+    this.executionTask = { ...task, originStatus: task.status };
     this.executionStatus = task.status;
   }
 
-  private get defaultRunningTask(): VinesNodeRunTask {
+  private get defaultRunningTask(): VinesNodeExecutionTask {
     return {
       ...this._task,
       status: 'DEFAULT',

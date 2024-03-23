@@ -2,7 +2,7 @@ import type { Task, Workflow as WorkflowExecution } from '@io-orkes/conductor-ja
 
 import { WorkflowTriggerType } from '@/apis/workflow/trigger/typings.ts';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
-import { VinesNodeRunTask } from '@/package/vines-flow/core/nodes/typings.ts';
+import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
 
 export type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -52,7 +52,7 @@ export type VinesWorkflowExecutionType =
   | 'CANCELED'; // Vines 内置状态
 
 export type VinesWorkflowExecution = Omit<WorkflowExecution, 'tasks'> & {
-  tasks: VinesNodeRunTask[];
+  tasks: VinesNodeExecutionTask[];
   originTasks: Array<Task>;
   triggerType: WorkflowTriggerType;
 };

@@ -84,7 +84,7 @@ export interface IVinesCollectDoWhileOutputTaskDef extends SimpleTaskDef {
 }
 
 export type VinesNodeStatus = Task['status'] | 'DEFAULT';
-export type VinesNodeRunTask = Omit<Task, 'status' | 'originStatus'> & {
+export type VinesNodeExecutionTask = Omit<Task, 'status' | 'originStatus'> & {
   status: VinesNodeStatus;
   originStatus: Task['status'] | VinesNodeStatus;
 };

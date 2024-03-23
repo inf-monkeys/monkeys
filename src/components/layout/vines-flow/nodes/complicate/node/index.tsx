@@ -31,12 +31,13 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
     position: { x: nodeX, y: nodeY },
     size: { width, height },
     customData,
+    executionTask,
   } = node;
   const { name: toolName } = node.getRaw();
 
   const { vines } = useVinesFlow();
 
-  const { canvasMode, isUserInteraction, setZoomToNodeId, setIsUserInteraction } = useFlowStore();
+  const { canvasMode, isUserInteraction, isWorkflowRUNNING, setZoomToNodeId, setIsUserInteraction } = useFlowStore();
 
   const mouseFocusRef = useRef(false);
   const [isNodeFocus, setIsNodeFocus] = useState(false);
@@ -140,7 +141,14 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
                 />
               )}
             </motion.div>
-            {isSimpleNode && <ComplicateSimpleNodeExpand nodeId={nodeId} visible={isNodeFocus} />}
+            {isSimpleNode && (
+              <ComplicateSimpleNodeExpand
+                nodeId={nodeId}
+                visible={isNodeFocus}
+                executionTask={executionTask}
+                isWorkflowRUNNING={isWorkflowRUNNING}
+              />
+            )}
           </>
         )}
       </Card>
