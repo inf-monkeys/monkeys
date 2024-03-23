@@ -59,7 +59,6 @@ export class ToolsRepository {
     const originalTools = await this.toolsRepository.find({
       where: {
         namespace,
-        isDeleted: false,
       },
     });
     const originalToolNames = originalTools.map((x) => x.name);
@@ -118,6 +117,7 @@ export class ToolsRepository {
           output: latestDef.output,
           rules: latestDef.rules,
           extra: latestDef.extra,
+          isDeleted: false,
         };
       });
       await this.toolsRepository.save(entitiesToUpdate);
