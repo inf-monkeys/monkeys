@@ -28,12 +28,14 @@ export class ToolsRegistryCronService {
       try {
         const registries = await this.toolsRepository.listServers();
         for (const registry of registries) {
-          await this.toolsRegistryService.registerToolsServer({
-            manifestUrl: registry.manifestUrl,
-          });
+          try {
+            await this.toolsRegistryService.registerToolsServer({
+              manifestUrl: registry.manifestUrl,
+            });
+          } catch (error) {
+            logger.info(`Refresh tools ${registry.namespace} failed`, error.message);
+          }
         }
-      } catch (error) {
-        logger.info('Refresh tools failed', error.message);
       } finally {
         // 释放锁
         await this.lockManager.releaseLock(this.lockResource, identifier);

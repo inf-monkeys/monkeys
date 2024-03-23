@@ -9,7 +9,6 @@ import { ToolsRegistryService } from './tools.registry.service';
 
 @Controller('tools')
 @ApiTags('Tools')
-@UseGuards(CompatibleAuthGuard)
 export class ToolsController {
   constructor(
     private readonly toolRegistryService: ToolsRegistryService,
@@ -29,6 +28,7 @@ export class ToolsController {
   }
 
   @Post('/register')
+  @UseGuards(CompatibleAuthGuard)
   public async registerWorker(@Body() body: RegisterToolDto) {
     const { manifestJsonUrl } = body;
     return await this.toolRegistryService.registerToolsServer({
@@ -38,6 +38,7 @@ export class ToolsController {
 
   @All('/:toolNamespace/*')
   @ApiExcludeEndpoint()
+  @UseGuards(CompatibleAuthGuard)
   public async forwardToTool(@Req() req: IRequest, @Param('toolNamespace') toolNamespace: string) {
     const result = await this.toolForwardService.forward(toolNamespace, req);
     return result;

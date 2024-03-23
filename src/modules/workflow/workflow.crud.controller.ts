@@ -139,7 +139,7 @@ export class WorkflowCrudController {
   @Post('/:workflowId/clone')
   @ApiOperation({
     summary: 'Clone workflow',
-    description: 'Clone worfklow',
+    description: 'Clone workflow',
   })
   public async cloneWorkflow(@Req() req: IRequest, @Param('workflowId') workflowId: string) {
     const { teamId, userId } = req;
