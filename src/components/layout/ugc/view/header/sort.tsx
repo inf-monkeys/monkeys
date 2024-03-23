@@ -33,20 +33,20 @@ export const UgcHeaderSortButton: React.FC<IUgcHeaderSortButtonProps> = ({ asset
   const team = useVinesTeam();
 
   const [sortConditionStorage, setSortConditionStorage] = useLocalStorage<ISortConditionStorage>(
-    `vines-ui-asset-sort-condition`,
+    'vines-ui-asset-sort-condition',
     {},
   );
 
   const sortCondition: ISortCondition = useMemo(() => {
     if (!_.has(sortConditionStorage, [team.teamId, assetKey]))
-      setSortConditionStorage((prev) => {
-        return {
-          ...prev,
+      setTimeout(() => {
+        setSortConditionStorage({
+          ...sortConditionStorage,
           [team.teamId]: {
-            ...prev[team.teamId],
+            ...sortConditionStorage[team.teamId],
             [assetKey]: DEFAULT_SORT_CONDITION,
           },
-        };
+        });
       });
     return _.get(sortConditionStorage, [team.teamId, assetKey], DEFAULT_SORT_CONDITION);
   }, [sortConditionStorage, team.teamId, assetKey]);
