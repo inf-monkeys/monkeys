@@ -3,6 +3,7 @@ import React, { createContext, createElement, useCallback, useContext, useEffect
 import { useSWRConfig } from 'swr';
 
 import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { isArray } from 'lodash';
 import { toast } from 'sonner';
 
 import { useToolLists } from '@/apis/tools';
@@ -117,11 +118,11 @@ export const createVinesCore = (workflowId: string) => {
     const { data: workflows } = useWorkflowList({ page: 1, limit: 9999 });
 
     useEffect(() => {
-      tools?.length && _vines.updateTools(tools);
+      isArray(tools) && _vines.updateTools(tools);
     }, [tools]);
 
     useEffect(() => {
-      workflows?.length && _vines.updateWorkflows(workflows);
+      isArray(workflows) && _vines.updateWorkflows(workflows);
     }, [workflows]);
 
     return createElement(VinesContext.Provider, { value: { _vines, _refresher, forceUpdate } }, children);
