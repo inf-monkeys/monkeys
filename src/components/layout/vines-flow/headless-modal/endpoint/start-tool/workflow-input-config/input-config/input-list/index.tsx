@@ -9,6 +9,7 @@ import { Tag } from '@/components/ui/tag';
 import { TagGroup } from '@/components/ui/tag/tag-group.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
+import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 interface IWorkflowInputListProps {
   inputs: VinesWorkflowVariable[];
@@ -70,7 +71,7 @@ export const WorkflowInputList: React.FC<IWorkflowInputListProps> = ({ inputs, c
                       size="large"
                     />
                   ) : (
-                    JSON.stringify(defaultData)
+                    stringify(defaultData)
                   )}
                 </>
               )}
