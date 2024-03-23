@@ -74,8 +74,9 @@ export const useVariableEditor = (opt: UseVariableEditorOptions) => {
 
   const convertTextToDescendants = useCallback(
     (text: string): CustomDescendant[] => {
-      const pointerSortedMapper = _.sortBy(Object.entries(pointerMapper), (a) => -a[0].length).reverse();
+      const pointerSortedMapper = _.sortBy(Object.entries(pointerMapper), ([key]) => -key.length).reverse();
       const pointerKeyMapper = ['\n', ...pointerSortedMapper.map(([it]) => it)];
+
       try {
         const exactMatchRegex = new RegExp(`^${text.replace(/\s/g, '')}$`);
         pointerKeyMapper.sort((a, b) => (exactMatchRegex.test(b) ? 1 : exactMatchRegex.test(a) ? -1 : 0));
@@ -85,11 +86,11 @@ export const useVariableEditor = (opt: UseVariableEditorOptions) => {
       }
 
       const finalTextArr: string[] = [];
-
       let i = 0;
+
       while (i < text.length) {
-        // eslint-disable-next-line @typescript-eslint/no-loop-func
         const prefix = _.find(pointerKeyMapper, (it) => _.startsWith(text, it, i));
+
         if (prefix) {
           finalTextArr.push(prefix);
           i += prefix.length;
@@ -101,6 +102,7 @@ export const useVariableEditor = (opt: UseVariableEditorOptions) => {
 
       const finalTextArrGroup: string[][] = [[]];
       let finalTextArrGroupIndex = 0;
+
       finalTextArr.forEach((it) => {
         if (it === '\n') {
           finalTextArrGroupIndex++;
@@ -114,10 +116,12 @@ export const useVariableEditor = (opt: UseVariableEditorOptions) => {
 
       finalTextArrGroup.forEach((it) => {
         const children: CustomLeaf[] = [];
-        for (const it2 of it) {
-          if (pointerKeyMapper.includes(it2)) {
-            const pointer = it2;
+
+        for (const character of it) {
+          if (pointerKeyMapper.includes(character)) {
+            const pointer = character;
             const { displayName: schemaDisplayName, type: schemaType } = pointerMapper[pointer];
+
             children.push({
               type: 'variable',
               pointer,
@@ -126,37 +130,43 @@ export const useVariableEditor = (opt: UseVariableEditorOptions) => {
               children: [{ text: '' }],
             } as unknown as CustomLeaf);
           } else {
-            children.push({ text: it2 });
+            children.push({ text: character });
           }
         }
+
         paragraphs.push({ type: 'paragraph', children });
       });
 
       const mergedParagraphs: CustomDescendant[] = [];
-      paragraphs.forEach((it) => {
-        let children = it.children as CustomLeaf[];
+
+      paragraphs.forEach((paragraph) => {
+        let children = paragraph.children as CustomLeaf[];
 
         children = children.reduce((acc: CustomLeaf[], cur: CustomLeaf) => {
           if (acc.length === 0) {
             return [cur];
           }
+
           const last = acc[acc.length - 1];
+
           if (last.text && cur.text) {
             last.text += cur.text;
           } else {
             acc.push(cur);
           }
+
           return acc;
         }, []);
 
-        mergedParagraphs.push({ ...it, children });
+        mergedParagraphs.push({ ...paragraph, children });
       });
 
-      return mergedParagraphs.map((it) => {
-        if (it.children.length === 0) {
-          return { ...it, children: [{ text: '' }] };
+      return mergedParagraphs.map((paragraph) => {
+        if (paragraph.children.length === 0) {
+          return { ...paragraph, children: [{ text: '' }] };
         }
-        return it;
+
+        return paragraph;
       });
     },
     [pointerMapper],
