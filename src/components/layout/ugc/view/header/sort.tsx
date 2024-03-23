@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import _ from 'lodash';
 import { ArrowDownNarrowWide, ArrowDownWideNarrow } from 'lucide-react';
@@ -29,7 +29,7 @@ interface IUgcHeaderSortButtonProps extends IAssetCustomProps {
   assetKey: string;
 }
 
-export const UgcHeaderSortButton: React.FC<IUgcHeaderSortButtonProps> = memo(({ assetKey }) => {
+export const UgcHeaderSortButton: React.FC<IUgcHeaderSortButtonProps> = ({ assetKey }) => {
   const team = useVinesTeam();
 
   const [sortConditionStorage, setSortConditionStorage] = useLocalStorage<ISortConditionStorage>(
@@ -116,6 +116,4 @@ export const UgcHeaderSortButton: React.FC<IUgcHeaderSortButtonProps> = memo(({ 
       </DropdownMenuContent>
     </DropdownMenu>
   );
-});
-
-UgcHeaderSortButton.displayName = 'UgcHeaderSortButton';
+};
