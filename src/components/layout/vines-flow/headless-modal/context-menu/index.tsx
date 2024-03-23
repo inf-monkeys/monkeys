@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { cn } from '@/utils';
@@ -19,7 +20,8 @@ import VinesEvent from '@/utils/events';
 interface IContextMenuProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ContextMenu: React.FC<IContextMenuProps> = () => {
-  const { workflowId, canvasMode, canvasDisabled, isLatestWorkflowVersion } = useFlowStore();
+  const { workflowId, canvasMode, isLatestWorkflowVersion } = useFlowStore();
+  const { canvasDisabled } = useCanvasStore();
 
   const [{ x, y }, setPosition] = useSetState({ x: 0, y: 0 });
   const [open, setOpen] = useState(false);

@@ -3,17 +3,17 @@ import React, { createElement } from 'react';
 import { StoreApi } from 'zustand';
 
 export const withProviders =
-  <S extends StoreApi<unknown>>(
+  (
     Component: React.FC,
     ...providers: [
       ({
         createStore,
         children,
       }: {
-        createStore: () => S;
+        createStore: () => any;
         children: React.ReactNode;
-      }) => React.FunctionComponentElement<React.ProviderProps<S | undefined>>,
-      () => S,
+      }) => React.FunctionComponentElement<React.ProviderProps<any | undefined>>,
+      () => StoreApi<unknown>,
     ][]
   ) =>
   (props: React.Attributes | null | undefined) => {

@@ -15,6 +15,7 @@ import { useVinesFlow } from '@/package/vines-flow';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VINES_STATUS } from '@/package/vines-flow/core/typings.ts';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { cn } from '@/utils';
@@ -37,7 +38,8 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
 
   const { vines } = useVinesFlow();
 
-  const { canvasMode, isUserInteraction, isWorkflowRUNNING, setZoomToNodeId, setIsUserInteraction } = useFlowStore();
+  const { canvasMode, isWorkflowRUNNING } = useFlowStore();
+  const { isUserInteraction, setIsUserInteraction } = useCanvasStore();
 
   const mouseFocusRef = useRef(false);
   const [isNodeFocus, setIsNodeFocus] = useState(false);
@@ -55,8 +57,7 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
     if (isNodeFocus) return;
 
     setIsNodeFocus(true);
-    setZoomToNodeId('complicate-' + nodeId);
-    setTimeout(() => VinesEvent.emit('canvas-zoom-to-node'));
+    setTimeout(() => VinesEvent.emit('canvas-zoom-to-node', 'complicate-' + nodeId));
 
     // TODO: 激活运行时自动跟随
     // void (canvasMode === CanvasStatus.RUNNING && setAutoFollow(false));

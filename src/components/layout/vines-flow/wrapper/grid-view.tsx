@@ -11,6 +11,7 @@ import {
   getXYPosition,
   handleZoomToPoint,
 } from '@/components/layout/vines-flow/wrapper/utlis.ts';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
@@ -20,22 +21,20 @@ interface IGridViewProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const GridView: React.FC<IGridViewProps> = ({ toggleMoveState, children }) => {
-  const {
-    workflowId,
-    initialScale,
-    isCanvasMoving,
-    canvasMode,
-    isUserInteraction,
-    zoomToNodeId,
-    setScale,
-    setIsUserInteraction,
-    setZoomToNodeId,
-  } = useFlowStore();
+  const { workflowId, initialScale } = useFlowStore();
+  const { isCanvasMoving, isUserInteraction, setScale, setIsUserInteraction } = useCanvasStore();
   const { zoomIn, zoomOut, centerView, zoomToElement, setTransform } = useControls();
 
   useTransformEffect(debounce(({ state }) => setScale(state.scale), 100));
 
   const handleAutoZoom = useCallback(() => centerView(initialScale), [initialScale]);
+
+  useEffect(() => {
+    VinesEvent.on('canvas-auto-zoom', () => !isUserInteraction && handleAutoZoom());
+    return () => {
+      VinesEvent.removeAllListeners('canvas-auto-zoom');
+    };
+  }, [initialScale, isUserInteraction]);
 
   useEffect(() => {
     keyboardJS.on(['ctrl + =', 'command + ='], (e) => {
@@ -55,25 +54,14 @@ export const GridView: React.FC<IGridViewProps> = ({ toggleMoveState, children }
     });
     VinesEvent.on('canvas-zoom-in', zoomIn);
     VinesEvent.on('canvas-zoom-out', zoomOut);
-    VinesEvent.on('canvas-auto-zoom', () => !isUserInteraction && handleAutoZoom());
-    VinesEvent.on('canvas-zoom-to-node', () => {
-      if (zoomToNodeId) {
-        requestAnimationFrame(() => {
-          zoomToElement(zoomToNodeId, 1.2);
-          setTimeout(() => {
-            setZoomToNodeId('');
-          }, 80);
-        });
-      }
-    });
+    VinesEvent.on('canvas-zoom-to-node', (zoomToNodeId) => zoomToElement(zoomToNodeId, 1.2));
     return () => {
       keyboardJS.unbind(['ctrl + =', 'command + =', 'ctrl + -', 'command + -', 'ctrl + 1', 'command + 1']);
       VinesEvent.removeAllListeners('canvas-zoom-in');
       VinesEvent.removeAllListeners('canvas-zoom-out');
-      VinesEvent.removeAllListeners('canvas-auto-zoom');
       VinesEvent.removeAllListeners('canvas-zoom-to-node');
     };
-  }, [zoomToNodeId, initialScale, canvasMode, isUserInteraction]);
+  }, []);
 
   const node = useRef<HTMLDivElement>(null);
   const context = useTransformContext();

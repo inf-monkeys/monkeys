@@ -10,6 +10,7 @@ import { ToolButton } from '@/components/layout/vines-flow/toolbar/tool-button.t
 import { Card } from '@/components/ui/card.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { cn } from '@/utils';
@@ -18,8 +19,8 @@ import VinesEvent from '@/utils/events.ts';
 interface IVinesRunInsideToolbarProps {}
 
 export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () => {
-  const { isLatestWorkflowVersion, isWorkflowRUNNING, setCanvasMode, setZoomToNodeId, setIsUserInteraction } =
-    useFlowStore();
+  const { isLatestWorkflowVersion, isWorkflowRUNNING, setCanvasMode } = useFlowStore();
+  const { setIsUserInteraction } = useCanvasStore();
   const { vines } = useVinesFlow();
 
   const workflowExecution = vines.executionWorkflowExecution;
@@ -49,8 +50,7 @@ export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () =
           } else {
             const hasWorkflowVariables = vines.workflowInput.length > 0;
             if (hasWorkflowVariables) {
-              setZoomToNodeId('complicate-workflow_start');
-              setTimeout(() => VinesEvent.emit('canvas-zoom-to-node'));
+              setTimeout(() => VinesEvent.emit('canvas-zoom-to-node', 'complicate-workflow_start'));
               toast.info('请先完善工作流表单');
             } else {
               vines.start({});

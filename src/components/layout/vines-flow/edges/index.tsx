@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -6,7 +6,7 @@ import { VinesEdgePath } from '@/package/vines-flow/core/nodes/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { useRetimer } from '@/utils/use-retimer.ts';
 
-export const VinesEdges: React.FC = () => {
+export const VinesEdges: React.FC = memo(() => {
   const { vines, VINES_REFRESHER } = useVinesFlow();
 
   const reTimer = useRetimer();
@@ -89,4 +89,6 @@ export const VinesEdges: React.FC = () => {
       )}
     </AnimatePresence>
   );
-};
+});
+
+VinesEdges.displayName = 'VinesEdges';
