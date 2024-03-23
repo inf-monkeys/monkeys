@@ -14,25 +14,12 @@ export interface FlowStore {
   visible: boolean;
   setVisible: (visible: boolean) => void;
 
-  scale: number;
-  setScale: (scale: number) => void;
   initialScale: number;
   setInitialScale: (scale: number) => void;
 
   canvasMode: CanvasStatus;
   isWorkflowRUNNING: boolean;
   setCanvasMode: (mode: CanvasStatus) => void;
-
-  canvasDisabled: boolean;
-  setCanvasDisabled: (disabled: boolean) => void;
-  isCanvasMoving: boolean;
-  setCanvasMoving: (moving: boolean) => void;
-
-  isUserInteraction: string | null;
-  setIsUserInteraction: (isUserInteraction: string | null) => void;
-
-  zoomToNodeId: string;
-  setZoomToNodeId: (zoomToNodeId: string) => void;
 
   activeDraggableNodeId: string;
   setActiveDraggableNodeId: (activeDraggableNodeId: string) => void;
@@ -57,8 +44,6 @@ const createFlowStore = () =>
 
       initialScale: 1.2,
       setInitialScale: (initialScale) => set({ initialScale }),
-      scale: 1.2,
-      setScale: (scale) => set({ scale }),
 
       canvasMode: CanvasStatus.EDIT,
       isWorkflowRUNNING: false,
@@ -67,16 +52,6 @@ const createFlowStore = () =>
           canvasMode,
           isWorkflowRUNNING: [CanvasStatus.RUNNING, CanvasStatus.WAIT_TO_RUNNING].includes(canvasMode),
         }),
-      canvasDisabled: false,
-      setCanvasDisabled: (canvasDisabled) => set({ canvasDisabled }),
-      isCanvasMoving: false,
-      setCanvasMoving: (isCanvasMoving) => set({ isCanvasMoving }),
-
-      isUserInteraction: '',
-      setIsUserInteraction: (isUserInteraction) => set({ isUserInteraction }),
-
-      zoomToNodeId: '',
-      setZoomToNodeId: (zoomToNodeId) => set({ zoomToNodeId }),
 
       activeDraggableNodeId: '',
       setActiveDraggableNodeId: (activeDraggableNodeId) => set({ activeDraggableNodeId }),

@@ -35,11 +35,13 @@ export const ComplicateSimpleNodeExecutionExpand: React.FC<IComplicateSimpleNode
       return '-';
     }, [executionStartTime, executionEndTime]);
 
-    const isCompleted = executionTask?.originStatus !== 'IN_PROGRESS';
-
     const executionOutputData = executionTask?.outputData ?? {};
     const externalStorageInputDataUrl = executionTask?.externalOutputPayloadStoragePath;
     const externalStorageOutputDataUrl = executionTask?.externalOutputPayloadStoragePath;
+
+    const isCompleted =
+      Object.keys(executionOutputData).length > 0 ||
+      !['IN_PROGRESS', 'SCHEDULED'].includes(executionTask?.originStatus ?? '');
 
     return (
       <div className="flex flex-col gap-3 p-5">

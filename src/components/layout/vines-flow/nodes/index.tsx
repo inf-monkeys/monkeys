@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 
 import { ComplicateNodes } from '@/components/layout/vines-flow/nodes/complicate';
 import { NodeController } from '@/components/layout/vines-flow/nodes/controller.tsx';
@@ -10,7 +10,7 @@ import { useRetimer } from '@/utils/use-retimer.ts';
 
 interface IVinesNodesProps extends React.ComponentPropsWithoutRef<'div'> {}
 
-export const VinesNodes: React.FC<IVinesNodesProps> = () => {
+export const VinesNodes: React.FC<IVinesNodesProps> = memo(() => {
   const { vines, VINES_REFRESHER } = useVinesFlow();
 
   const reTimer = useRetimer();
@@ -54,4 +54,6 @@ export const VinesNodes: React.FC<IVinesNodesProps> = () => {
       )}
     </>
   );
-};
+});
+
+VinesNodes.displayName = 'VinesNodes';
