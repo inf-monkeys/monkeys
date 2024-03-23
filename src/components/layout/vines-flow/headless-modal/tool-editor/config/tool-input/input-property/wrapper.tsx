@@ -76,14 +76,17 @@ export const InputPropertyWrapper: React.FC<IInputPropertyWrapperProps> = ({
       {children}
 
       {description && (
-        <div className="flex gap-2 rounded-md bg-gray-600 bg-opacity-20 p-2 shadow-sm">
+        <div className="flex gap-2 rounded-md border border-input p-2 shadow-sm">
           <Info size={14} />
           <span className="-mt-0.5 w-[calc(100%-14px)] text-xs text-opacity-70">{description}</span>
         </div>
       )}
 
       {errors?.map((it, index) => (
-        <div className="flex justify-between gap-2 rounded bg-red-600 bg-opacity-20 px-2 py-1 shadow-sm" key={index}>
+        <div
+          className="flex justify-between gap-2 rounded border border-input bg-red-600 bg-opacity-20 px-2 py-1 shadow-sm"
+          key={index}
+        >
           <div className="flex gap-2 text-red-10">
             <Info size={14} />
             <span className="-mt-0.5 w-[calc(100%-14px)] text-xs text-opacity-70">{it.humanMessage.zh}</span>
