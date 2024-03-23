@@ -8,7 +8,7 @@ import { IWorkflowValidationIssue } from '@/apis/workflow/validation/typings.ts'
 
 export const useWorkflowVersions = (workflowId: string) =>
   useSWR<MonkeyWorkflow[] | undefined>(
-    workflowId ? `/api/workflow/${workflowId}/versions` : null,
+    workflowId ? `/api/workflow/metadata/${workflowId}/versions` : null,
     vinesFetcher({ wrapper: (data) => data?.reverse() }),
   );
 
@@ -18,4 +18,4 @@ export const useCreateWorkflowRelease = (workflowId: string) =>
     unknown,
     string | null,
     Partial<MonkeyWorkflow>
-  >(workflowId ? `/api/workflow/${workflowId}/versions` : null, vinesFetcher({ method: 'POST' }));
+  >(workflowId ? `/api/workflow/metadata/${workflowId}/versions` : null, vinesFetcher({ method: 'POST' }));

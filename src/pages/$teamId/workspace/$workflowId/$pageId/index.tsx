@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 
-import { toast } from 'sonner';
 import isMongoId from 'validator/es/lib/isMongoId';
 import z from 'zod';
 
@@ -26,11 +25,11 @@ export const WorkspacePage: React.FC = () => {
       if (page) {
         setPage(page);
         const pageApiKey = page.apiKey;
-        if (!pageApiKey) {
-          toast.error('页面 API-KEY 获取失败！');
-        } else {
-          setApikey(pageApiKey);
-        }
+        // if (!pageApiKey) {
+        //   toast.error('页面 API-KEY 获取失败！');
+        // } else {
+        //   setApikey(pageApiKey);
+        // }
       } else {
         void navigate({
           to: '/$teamId/workflows',
