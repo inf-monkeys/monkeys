@@ -1,9 +1,9 @@
-import stringify from 'fast-json-stable-stringify';
 import _ from 'lodash';
 import { toast } from 'sonner';
 
 import { IOriginData } from '@/apis/typings.ts';
 import { IVinesHeaderOptions, vinesHeader } from '@/apis/utils.ts';
+import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 import 'unfetch/polyfill';
 

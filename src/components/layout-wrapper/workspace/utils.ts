@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react';
 
 import { useNavigate, useParams } from '@tanstack/react-router';
 
-import stringify from 'fast-json-stable-stringify';
 import { cloneDeep, differenceWith, isEqual, omit, set } from 'lodash';
 
 import { updateWorkspacePages, useWorkspacePagesWithWorkflowId } from '@/apis/pages';
@@ -11,6 +10,7 @@ import { useGetWorkflow } from '@/apis/workflow';
 import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId';
 import { usePageStore } from '@/store/usePageStore';
 import { useLocalStorage } from '@/utils';
+import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 export const useVinesPage = () => {
   const navigate = useNavigate({ from: Route.fullPath });

@@ -1,4 +1,4 @@
-import stringify from 'fast-json-stable-stringify';
+import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 export const simpleGet = async <T>(url: string) => (await fetch(url).then(async (r) => (await r.json())?.data)) as T;
 
