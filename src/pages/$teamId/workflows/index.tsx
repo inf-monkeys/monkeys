@@ -174,7 +174,6 @@ export const Workflows: React.FC = () => {
           </>
         }
       />
-      ;
     </main>
   );
 };
