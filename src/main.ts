@@ -10,6 +10,7 @@ import { AppModule } from './app.module';
 import { config } from './common/config';
 import { ExceptionsFilter } from './common/filters/exception.filter';
 import { logger } from './common/logger';
+import { ValidationPipe } from './common/pipes/validator.pipe';
 import { BootstrapService } from './modules/bootstrap/bootstrap.service';
 import { setupBuiltInWorkerSwagger } from './modules/tools/builtin/builtin.swagger';
 import { setupExampleWorkerSwagger } from './modules/tools/example/example.swagger';
@@ -28,7 +29,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.setGlobalPrefix('/api/');
-  // app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new ExceptionsFilter());
   app.use(bodyParser.json({ limit: '100mb' }));
   app.use(bodyParser.urlencoded({ limit: '100mb', extended: true }));

@@ -21,10 +21,10 @@ export class WorkflowCrudController {
     summary: '获取工作流列表',
     description: '获取工作流列表',
   })
-  public async listWorkflows(@Req() req: IRequest, @Query() body: ListDto) {
+  public async listWorkflows(@Req() req: IRequest, @Query() query: ListDto) {
     const { teamId } = req;
-    const { page, limit } = body;
-    const { totalCount, list } = await this.service.listWorkflows(teamId, body);
+    const { page, limit } = query;
+    const { totalCount, list } = await this.service.listWorkflows(teamId, query);
     return new SuccessListResponse({ data: list, total: totalCount, page: +page, limit: +limit });
   }
 

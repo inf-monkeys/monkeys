@@ -401,7 +401,7 @@ export class WorkflowRepository {
     totalCount: number;
     list: WorkflowMetadataEntity[];
   }> {
-    const { page = 0, limit = 24 } = dto;
+    const { page = 1, limit = 24 } = dto;
     const queryBuilder = this.workflowMetadataRepository
       .createQueryBuilder('workflow_metadata')
       .select('workflow_metadata.workflow_id', 'workflow_id')
@@ -426,7 +426,7 @@ export class WorkflowRepository {
       .andWhere('workflow_metadata.hidden = :hidden', { hidden: false })
       .setParameters(queryBuilder.getParameters())
       // .orderBy('workflow.workflow_id', 'ASC') // 或者你可以根据需要对结果进行排序
-      .skip(page * limit) // 设置跳过的记录数来实现分页
+      .skip((page - 1) * limit) // 设置跳过的记录数来实现分页
       .take(limit) // 设置取出的记录数
       .getMany();
     return {
