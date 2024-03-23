@@ -5,7 +5,7 @@ import { CreatePageDto } from '@inf-monkeys/vines';
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { IPageInstance, IPageType, IPinPage } from '@/apis/pages/typings.ts';
 
-export const useWorkspacePages = () => useSWR<IPinPage[] | undefined>('/api/pages', vinesFetcher());
+export const useWorkspacePages = () => useSWR<IPinPage[] | undefined>('/api/workflow/pages', vinesFetcher());
 
 export const useWorkspacePagesWithWorkflowId = (workflowId: string) =>
   useSWR<IPageType[] | undefined>(workflowId ? `/api/workflow/${workflowId}/pages` : null, vinesFetcher());
@@ -20,7 +20,7 @@ export const updateWorkspacePages = (
   });
 
 export const useWorkspacePageInstances = () =>
-  useSWR<IPageInstance[] | undefined>('/api/page-types', vinesFetcher(), {
+  useSWR<IPageInstance[] | undefined>('/api/workflow/pages/types', vinesFetcher(), {
     refreshInterval: 600000,
     revalidateOnFocus: false,
   });

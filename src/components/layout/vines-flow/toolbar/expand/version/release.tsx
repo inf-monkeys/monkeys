@@ -75,7 +75,7 @@ export const WorkflowRelease: React.FC<IWorkflowReleaseProps> = () => {
         setTimeout(() => {
           vines.update({ version: nextVersionNumber });
 
-          void mutate(`/api/workflow/${workflowId}/versions`);
+          void mutate(`/api/workflow/metadata/${workflowId}/versions`);
 
           setTimeout(() => setVisible(true), 80);
         }, 164);

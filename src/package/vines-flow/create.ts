@@ -75,11 +75,11 @@ export const createVinesCore = (workflowId: string) => {
               error: '更新失败',
             });
 
-            void mutate(`/api/workflow/${workflowId}`, (prev) => ({ ...prev, ...newWorkflow }), {
+            void mutate(`/api/workflow/metadata/${workflowId}`, (prev) => ({ ...prev, ...newWorkflow }), {
               revalidate: false,
             });
             void mutate(
-              `/api/workflow/${workflowId}/versions`,
+              `/api/workflow/metadata/${workflowId}/versions`,
               (prev: MonkeyWorkflow[] | undefined) => {
                 const currentVersionWorkflowIndex = prev?.findIndex((it) => it.version === _vines.version);
                 if (currentVersionWorkflowIndex === void 0 || currentVersionWorkflowIndex === -1) {
