@@ -679,7 +679,7 @@ export class VinesCore extends VinesTools(VinesBase) {
 
   public clearExecutionStatus() {
     const allNodes = this.getAllNodes();
-    allNodes.forEach((it) => it.executionStatus !== 'SCHEDULED' && (it.runningTask.status = 'CANCELED'));
+    allNodes.forEach((it) => it.executionStatus !== 'SCHEDULED' && (it.executionTask.status = 'CANCELED'));
     void (this.executionStatus !== 'SCHEDULED' && (this.executionStatus = 'CANCELED'));
     this.sendEvent('refresh');
     setTimeout(() => {
