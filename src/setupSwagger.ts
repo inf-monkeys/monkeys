@@ -6,7 +6,7 @@ import { APIKEY_AUTH_DOC, NONE_AUTH_DOC } from './common/openapi';
 import { OpenapiModule } from './openapi.module';
 
 export const setupSwagger = (app: INestApplication) => {
-  const builder = new DocumentBuilder().setTitle('Monkeys OPEN API').setDescription('Monkeys OPEN API').setVersion('1.0').addServer('/api', 'VINES API SERVER').addBearerAuth();
+  const builder = new DocumentBuilder().setTitle('Monkeys OPEN API').setDescription('Monkeys OPEN API').setVersion('1.0').addServer('/', 'VINES API SERVER').addBearerAuth();
   const document = SwaggerModule.createDocument(app, builder.build(), {
     include: [OpenapiModule],
     deepScanRoutes: true,

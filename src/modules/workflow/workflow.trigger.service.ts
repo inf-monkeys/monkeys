@@ -6,6 +6,34 @@ import { WorkflowRepository } from '../../repositories/workflow.repository';
 import { CreateWorkflowTriggerDto } from './dto/req/create-trigger.dto';
 import { UpdateWorkflowTriggerDto } from './dto/req/update-trigger.dto';
 
+export interface Trigger {
+  displayName: string;
+  icon: string;
+  type: WorkflowTriggerType;
+  description: string;
+}
+
+export const TRIGGERS: Trigger[] = [
+  {
+    displayName: '手动触发',
+    type: WorkflowTriggerType.MANUALLY,
+    icon: 'emoji:👆:#434343',
+    description: '调试工作流时手动触发运行',
+  },
+  {
+    displayName: '定时任务',
+    type: WorkflowTriggerType.SCHEDULER,
+    icon: 'emoji:⏰:#f2c1be',
+    description: '按自定义任务计划运行工作流',
+  },
+  {
+    displayName: 'Webhook',
+    type: WorkflowTriggerType.WEBHOOK,
+    icon: 'emoji:🔗:#f2c1be',
+    description: '按照自定义 Webhook 触发工作流',
+  },
+];
+
 @Injectable()
 export class WorkflowTriggerService {
   constructor(private readonly workflowRepository: WorkflowRepository) {}

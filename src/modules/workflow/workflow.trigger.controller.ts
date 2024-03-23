@@ -5,13 +5,24 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards 
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateWorkflowTriggerDto } from './dto/req/create-trigger.dto';
 import { UpdateWorkflowTriggerDto } from './dto/req/update-trigger.dto';
-import { WorkflowTriggerService } from './workflow.trigger.service';
+import { TRIGGERS, WorkflowTriggerService } from './workflow.trigger.service';
 
-@Controller('worfklow/')
+@Controller('workflow/')
 @ApiTags('Workflows/Trigger')
 @UseGuards(CompatibleAuthGuard)
 export class WorkflowTriggerController {
   constructor(private readonly service: WorkflowTriggerService) {}
+
+  @Get('/trigger-types')
+  @ApiOperation({
+    summary: '获取触发器类型',
+    description: '获取触发器类型',
+  })
+  public async getTriggerTypes() {
+    return new SuccessResponse({
+      data: TRIGGERS,
+    });
+  }
 
   @Post('/:workflowId/triggers')
   @ApiOperation({
