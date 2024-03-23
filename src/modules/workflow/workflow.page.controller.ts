@@ -13,15 +13,6 @@ export class WorkflowPageController {
   constructor(private readonly pageService: WorkflowPageService) {}
 
   @ApiOperation({
-    summary: '获取视图类型定义',
-    description: '获取视图类型定义',
-  })
-  @Get('/pages/types')
-  async listPageTypes() {
-    return new SuccessResponse({ data: BUILT_IN_PAGE_INSTANCES });
-  }
-
-  @ApiOperation({
     summary: '获取工作流下的所有视图（根据 sortIndex 从小到大排序），返回视图列表',
     description: '获取工作流下的所有视图（根据 sortIndex 从小到大排序），返回视图列表',
   })
@@ -58,6 +49,23 @@ export class WorkflowPageController {
   }
 
   @ApiOperation({
+    summary: '获取视图类型定义',
+    description: '获取视图类型定义',
+  })
+  @Get('/pages/types')
+  async listPageTypes() {
+    return new SuccessResponse({ data: BUILT_IN_PAGE_INSTANCES });
+  }
+
+  @UseGuards(CompatibleAuthGuard)
+  @Get('/pages/pinned')
+  async getPinnedPages(@Req() request: IRequest) {
+    const { teamId } = request;
+    const data = await this.pageService.getPinnedPages(teamId);
+    return new SuccessResponse({ data });
+  }
+
+  @ApiOperation({
     summary: '获取工作流视图详情',
     description: '获取工作流视图详情，无需鉴权',
   })
@@ -76,19 +84,6 @@ export class WorkflowPageController {
   async removeWorkflowPage(@Param('workflowId') workflowId: string, @Param('pageId') pageId: string, @Req() request: IRequest) {
     const { teamId, userId } = request;
     const data = await this.pageService.removeWorkflowPage(workflowId, teamId, userId, pageId);
-    return new SuccessResponse({ data });
-  }
-
-  /**
-   * 获取被钉的 workflow pages
-   * @param request
-   * @returns
-   */
-  @UseGuards(CompatibleAuthGuard)
-  @Get('/pages')
-  async listPublicPages(@Req() request: IRequest) {
-    const { teamId } = request;
-    const data = await this.pageService.listPublicPages(teamId);
     return new SuccessResponse({ data });
   }
 

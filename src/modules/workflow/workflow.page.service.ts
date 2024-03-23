@@ -1,8 +1,9 @@
 import { PageInstance, WorkflowPageEntity } from '@/entities/workflow/workflow-page';
+import { WorkflowRepository } from '@/repositories/workflow.repository';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId } from 'bson';
-import { keyBy } from 'lodash';
+import { keyBy, uniq } from 'lodash';
 import { Repository } from 'typeorm';
 import { CreatePageDto } from './dto/req/create-page.dto';
 import { UpdatePagesDto } from './dto/req/update-pages.dto';
@@ -40,6 +41,7 @@ export class WorkflowPageService {
   constructor(
     @InjectRepository(WorkflowPageEntity)
     private readonly pageRepository: Repository<WorkflowPageEntity>,
+    private readonly workflowRepository: WorkflowRepository,
   ) {}
 
   async listWorkflowPages(workflowId: string, teamId?: string) {
@@ -200,8 +202,21 @@ export class WorkflowPageService {
     };
   }
 
-  public async listPublicPages(teamId: string) {
-    return [];
+  public async getPinnedPages(teamId: string) {
+    const pages = await this.pageRepository.find({
+      where: {
+        teamId,
+        pinned: true,
+        isDeleted: false,
+      },
+    });
+    const workflowIds = uniq(pages.map((page) => page.workflowId));
+    const workflows = await this.workflowRepository.findWorkflowByIds(workflowIds);
+    const workflowMap = keyBy(workflows, 'workflowId');
+    return pages.map((p) => ({
+      ...p,
+      workflow: workflowMap[p.workflowId],
+    }));
   }
 
   async pinPage(teamId: string, _: string, pageId: string, pin: boolean) {

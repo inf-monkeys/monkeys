@@ -65,6 +65,7 @@ export class WorkflowPageEntity extends BaseEntity {
   @Column({
     default: false,
     type: 'boolean',
+    nullable: true,
   })
   pinned?: boolean;
 }
