@@ -95,11 +95,23 @@ After you start the project, you can visit the following OpenAPI documentations:
 - [http://localhost:3000/openapi/server/](http://localhost:3000/openapi/server/)
 - [http://localhost:3000/openapi/tools/](http://localhost:3000/openapi/tools/)
 
+## Write Your Own Monkey Tool
+
+We provided detailed information on how to write your own monkey tool, it's as simple as writing standard RESTFul APIs. You can read more on this topic at [Write your own tools](#TODO)
+
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
 If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+
+### Contributors
+
+<a href="https://github.com/inf-monkeys/monkeys/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=inf-monkeys/monkeys" />
+</a>
+
+### How to Contribute
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feat/AmazingFeature`)
