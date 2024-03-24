@@ -15,7 +15,7 @@ export const executionWorkflow = (workflowId: string, inputData: Record<string, 
     method: 'POST',
     simple: true,
     wrapper: (it) => (it as unknown as { workflowInstanceId: string })?.workflowInstanceId ?? '',
-  })(`/api/workflow/${workflowId}/start`, {
+  })(`/api/workflow/executions/${workflowId}/start`, {
     inputData,
     version,
   });
@@ -30,7 +30,7 @@ export const executionWorkflowWithDebug = (
     method: 'POST',
     simple: true,
     wrapper: (it) => (it as unknown as { workflowInstanceId: string })?.workflowInstanceId ?? '',
-  })(`/api/workflow/${workflowId}/debug`, {
+  })(`/api/workflow/executions/${workflowId}/debug`, {
     inputData,
     tasks,
     version,
@@ -38,21 +38,21 @@ export const executionWorkflowWithDebug = (
 
 export const useWorkflowExecution = (instanceId: string, apikey?: string) =>
   useSWR<VinesWorkflowExecution | undefined>(
-    instanceId ? `/api/workflow/${instanceId}/execution-detail` : null,
+    instanceId ? `/api/workflow/executions/${instanceId}/execution-detail` : null,
     vinesFetcher({ apikey }),
   );
 
 export const getWorkflowExecution = (instanceId: string) =>
-  vinesFetcher<VinesWorkflowExecution>({ simple: true })(`/api/workflow/${instanceId}/execution-detail`);
+  vinesFetcher<VinesWorkflowExecution>({ simple: true })(`/api/workflow/executions/${instanceId}/execution-detail`);
 
 export const executionWorkflowTerminate = (instanceId: string) =>
-  vinesFetcher({ method: 'POST' })(`/api/workflow/${instanceId}/terminate`);
+  vinesFetcher({ method: 'POST' })(`/api/workflow/executions/${instanceId}/terminate`);
 
 export const executionWorkflowPause = (instanceId: string) =>
-  vinesFetcher({ method: 'POST' })(`/api/workflow/${instanceId}/pause`);
+  vinesFetcher({ method: 'POST' })(`/api/workflow/executions/${instanceId}/pause`);
 
 export const executionWorkflowResume = (instanceId: string) =>
-  vinesFetcher({ method: 'POST' })(`/api/workflow/${instanceId}/resume`);
+  vinesFetcher({ method: 'POST' })(`/api/workflow/executions/${instanceId}/resume`);
 
 export const useSearchWorkflowExecutions = () =>
   useSWRMutation<VinesWorkflowExecutionLists | undefined, unknown, string, IVinesSearchWorkflowExecutionsParams>(

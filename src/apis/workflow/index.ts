@@ -40,4 +40,4 @@ export const useUpdateWorkflow = (apikey: string, workflowId: string) =>
     unknown,
     string | null,
     Partial<MonkeyWorkflow>
-  >(workflowId ? `/api/workflow/${workflowId}` : null, vinesFetcher({ method: 'PUT', apikey }));
+  >(workflowId ? `/api/workflow/metadata/${workflowId}` : null, vinesFetcher({ method: 'PUT', apikey }));
