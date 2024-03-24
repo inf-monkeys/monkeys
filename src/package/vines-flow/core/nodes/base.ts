@@ -474,7 +474,7 @@ export class VinesNode<T extends VinesTask = VinesTask> {
     this.executionTask = this.defaultRunningTask;
   }
 
-  public updateStatus(task: VinesNodeExecutionTask) {
+  public async updateStatus(task: VinesNodeExecutionTask) {
     this.executionTask = { ...task, originStatus: task.status };
     this.executionStatus = task.status;
   }
