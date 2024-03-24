@@ -75,7 +75,7 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
   }
 
   get isNested() {
-    return this.id.startsWith('sub_workflow_nested_');
+    return this.id.startsWith('sub_workflow_nested_') && this.children.length > 0;
   }
 
   override get needRenderChildren() {
