@@ -595,7 +595,7 @@ export class VinesCore extends VinesTools(VinesBase) {
     }
   }
 
-  public updateWorkflowExecution(data: VinesWorkflowExecution, render = true) {
+  public async updateWorkflowExecution(data: VinesWorkflowExecution, render = true) {
     if (!this.executionInstanceId || !('status' in data) || !('tasks' in data)) return;
     this.executionWorkflowExecution = data;
 
@@ -636,7 +636,7 @@ export class VinesCore extends VinesTools(VinesBase) {
       if (!node) {
         continue;
       }
-      node.updateStatus(task);
+      await node.updateStatus(task);
     }
 
     render && this.sendEvent('refresh');
@@ -660,7 +660,7 @@ export class VinesCore extends VinesTools(VinesBase) {
 
     const needRender = !equal(equalData, this._prevExecutionData);
 
-    this.updateWorkflowExecution(data, needRender);
+    await this.updateWorkflowExecution(data, needRender);
     this._prevExecutionData = equalData;
 
     if (needRender) {

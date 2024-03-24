@@ -2,6 +2,7 @@ import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import { type SubWorkflowTaskDef, TaskType } from '@io-orkes/conductor-javascript';
 import { get, has, set } from 'lodash';
 
+import { getWorkflowExecution } from '@/apis/workflow/execution';
 import { VinesCore } from '@/package/vines-flow/core';
 import { ControlFlowVinesNode, VinesNode } from '@/package/vines-flow/core/nodes/base.ts';
 import { drawSmoothLine, VinesSVGPosition } from '@/package/vines-flow/core/nodes/svg-utils.ts';
@@ -9,6 +10,7 @@ import {
   IVinesNodeBoundary,
   IVinesNodePosition,
   VinesEdgePath,
+  VinesNodeExecutionTask,
   VinesTask,
 } from '@/package/vines-flow/core/nodes/typings.ts';
 import { IVinesInsertChildParams } from '@/package/vines-flow/core/typings.ts';
@@ -283,4 +285,23 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
     return super.insertChild(params);
   }
   // endregion
+
+  override async updateStatus(task: VinesNodeExecutionTask): Promise<void> {
+    await super.updateStatus(task);
+    if (this.executionStatus === 'IN_PROGRESS' || this.executionStatus === 'COMPLETED') {
+      const instanceId = task.outputData?.subWorkflowId;
+      if (!instanceId) return;
+      if (this?.childNodes?.[0]) {
+        this.childNodes[0].executionStatus = 'IN_PROGRESS';
+      }
+
+      const data = await getWorkflowExecution(instanceId);
+      for (const _task of data?.tasks ?? []) {
+        const taskId = _task.workflowTask?.taskReferenceName;
+        if (!taskId) return;
+        const childNode = this.findChildById(taskId);
+        childNode?.updateStatus(_task);
+      }
+    }
+  }
 }
