@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge.tsx';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/utils';
 
 interface ITagInputProps extends Omit<React.HTMLAttributes<HTMLInputElement>, 'onChange'> {
   value?: string[];
@@ -27,6 +28,11 @@ export const TagInput = forwardRef<HTMLInputElement, ITagInputProps>(
       }
     }, [focused]);
 
+    const handleUnselect = (index: number) => {
+      if (disabled) return;
+      onChange(value.filter((_, i) => i !== index));
+    };
+
     return (
       <div
         ref={ref}
@@ -35,12 +41,28 @@ export const TagInput = forwardRef<HTMLInputElement, ITagInputProps>(
       >
         {value?.map((tag, index) => (
           <Badge
-            className="group"
+            className="data-[disabled]:bg-muted-foreground data-[fixed]:bg-muted-foreground data-[disabled]:text-muted data-[fixed]:text-muted data-[disabled]:hover:bg-muted-foreground data-[fixed]:hover:bg-muted-foreground"
             key={index}
-            onClick={() => !disabled && onChange(value.filter((_, i) => i !== index))}
           >
-            {tag}
-            <X className="-mr-1 ml-1 cursor-pointer group-hover:[&]:stroke-gray-8" size={14} />
+            <span className="text-xs">{tag}</span>
+            <button
+              className={cn(
+                'ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2',
+                disabled && 'hidden',
+              )}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleUnselect(index);
+                }
+              }}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onClick={() => handleUnselect(index)}
+            >
+              <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+            </button>
           </Badge>
         ))}
         <Input
