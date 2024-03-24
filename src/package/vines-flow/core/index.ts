@@ -499,6 +499,7 @@ export class VinesCore extends VinesTools(VinesBase) {
     this.executionStatus = 'RUNNING';
     this.nodes[0].executionStatus = 'COMPLETED';
 
+    this.renderOptions.direction = 'vertical';
     this.fillUpSubWorkflow();
 
     this.executionTimeout = setTimeout(this.handleExecution.bind(this), 0);
@@ -524,7 +525,8 @@ export class VinesCore extends VinesTools(VinesBase) {
       return false;
     }
 
-    this.update({ workflow: workflowDefinition as unknown as MonkeyWorkflow });
+    this.fillUpSubWorkflow();
+    this.update({ workflow: workflowDefinition as unknown as MonkeyWorkflow, renderDirection: 'vertical' });
 
     setTimeout(() => {
       this.executionInstanceId = workflowId;

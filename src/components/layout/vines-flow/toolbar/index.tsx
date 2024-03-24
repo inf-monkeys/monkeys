@@ -107,6 +107,7 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
         onClick={handleToggleMode}
       />
       <ToolButton
+        className={cn(isWorkflowRUNNING && 'hidden')}
         icon={isHorizontal ? <BetweenHorizontalStart /> : <BetweenVerticalStart />}
         tip={`排版方向：${isHorizontal ? '横向' : '纵向'}`}
         keys={['ctrl', 'D']}
