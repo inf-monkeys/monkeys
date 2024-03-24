@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 
-import { Info, RefreshCcw } from 'lucide-react';
+import { Info } from 'lucide-react';
 
-import { useWorkflowValidation } from '@/apis/workflow/validation';
-import { Button } from '@/components/ui/button';
+import { InputErrors } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/wrapper/errors.tsx';
 import { Indicator } from '@/components/ui/indicator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VINES_VARIABLE_TAG } from '@/package/vines-flow/core/tools/consts.ts';
 import { VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
-import { useFlowStore } from '@/store/useFlowStore';
 
 interface IInputPropertyWrapperProps {
   def: VinesToolDefProperties;
@@ -31,14 +29,6 @@ export const InputPropertyWrapper: React.FC<IInputPropertyWrapperProps> = ({
   isMultiple = false,
   headerVisible = true,
 }) => {
-  const { workflowId } = useFlowStore();
-  const { data: validation } = useWorkflowValidation(workflowId, workflowVersion);
-
-  const errors =
-    validation?.validationIssues?.filter(
-      ({ detailReason, taskReferenceName }) => detailReason.name === name && taskReferenceName === nodeId,
-    ) ?? [];
-
   const tag = VINES_VARIABLE_TAG[type];
 
   const [tipsOpen, setTipsOpen] = useState(false);
@@ -82,20 +72,7 @@ export const InputPropertyWrapper: React.FC<IInputPropertyWrapperProps> = ({
         </div>
       )}
 
-      {errors?.map((it, index) => (
-        <div
-          className="flex justify-between gap-2 rounded border border-input bg-red-600 bg-opacity-20 px-2 py-1 shadow-sm"
-          key={index}
-        >
-          <div className="flex gap-2 text-red-10">
-            <Info size={14} />
-            <span className="-mt-0.5 w-[calc(100%-14px)] text-xs text-opacity-70">{it.humanMessage.zh}</span>
-          </div>
-          <Tooltip>
-            <Button icon={<RefreshCcw />} className="-my-1.5 -mr-2.5 !size-8 !scale-[0.6]" />
-          </Tooltip>
-        </div>
-      ))}
+      <InputErrors toolDefName={name} nodeId={nodeId} />
     </main>
   );
 };

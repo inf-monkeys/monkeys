@@ -1,3 +1,6 @@
+import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
+import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
+
 export enum ValidationIssueType {
   ERROR = 'ERROR',
   WANTING = 'WANTING',
@@ -27,4 +30,9 @@ export interface IWorkflowValidationIssue {
 export interface IWorkflowValidation {
   validationIssues: IWorkflowValidationIssue[];
   validated: boolean;
+}
+
+export interface IValidateWorkflowParams {
+  tasks?: VinesTask[];
+  output?: VinesWorkflowVariable[];
 }
