@@ -12,7 +12,6 @@ interface IInputPropertyWrapperProps {
   def: VinesToolDefProperties;
   children: React.ReactNode;
   nodeId: string;
-  workflowVersion: number;
   headerExtra?: React.ReactNode;
   isMultiple?: boolean;
   hasValue?: boolean;
@@ -21,7 +20,6 @@ interface IInputPropertyWrapperProps {
 
 export const InputPropertyWrapper: React.FC<IInputPropertyWrapperProps> = ({
   nodeId,
-  workflowVersion,
   children,
   headerExtra,
   def: { type, displayName, name, description, required = false },

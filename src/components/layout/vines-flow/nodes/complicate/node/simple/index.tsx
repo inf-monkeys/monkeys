@@ -21,7 +21,6 @@ import VinesEvent from '@/utils/events.ts';
 
 interface IComplicateSimpleNodeProps {
   workflowId: string;
-  workflowVersion: number;
   nodeId: string;
   task?: VinesTask;
   tool?: VinesToolDef;
@@ -37,7 +36,6 @@ interface IComplicateSimpleNodeProps {
 
 export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
   workflowId,
-  workflowVersion,
   nodeId,
   task,
   tool,
@@ -121,7 +119,6 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
                     nodeId={nodeId}
                     task={task}
                     tool={tool}
-                    workflowVersion={workflowVersion}
                     updateRaw={vinesUpdateRaw}
                     variableMapper={variableMapper}
                   />

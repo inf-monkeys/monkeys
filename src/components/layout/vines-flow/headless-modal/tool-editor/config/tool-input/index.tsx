@@ -17,7 +17,6 @@ import { stringify } from '@/utils/fast-stable-stringify.ts';
 interface IToolInputProps {
   tool?: VinesToolDef;
   updateRaw?: (nodeId: string, task: VinesTask, update: boolean) => void;
-  workflowVersion?: number;
   variableMapper: Record<string, IVinesVariableMap>;
   nodeId: string;
   task?: VinesTask;
@@ -25,7 +24,7 @@ interface IToolInputProps {
 }
 
 export const ToolInput: React.FC<IToolInputProps> = memo(
-  ({ nodeId, task, tool, updateRaw, variableMapper, workflowVersion = 1, className }) => {
+  ({ nodeId, task, tool, updateRaw, variableMapper, className }) => {
     const input = tool?.input;
 
     const inputParams = get(task, 'inputParameters', {});
@@ -73,7 +72,6 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
             key={def.name + index}
             def={def}
             nodeId={nodeId}
-            workflowVersion={workflowVersion}
             value={getPropertyValueFromTask(def, task, !isSpecialNode)}
             onChange={(value: unknown) => handleUpdate(value, def)}
             variableMapper={variableMapper}
