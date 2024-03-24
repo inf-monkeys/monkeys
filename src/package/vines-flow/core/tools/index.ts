@@ -42,9 +42,9 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
 
     // ... other methods
     private checkoutData() {
+      this.tools = this.vinesTools.concat(this.vinesSubWorkflowTools);
       if (this.status !== VINES_STATUS.IDLE) return;
       if (this.toolInitialized && this.subWorkflowInitialized) {
-        this.tools = this.vinesTools.concat(this.vinesSubWorkflowTools);
         this.status = VINES_STATUS.READY;
         this.sendEvent('refresh');
       }
@@ -61,6 +61,7 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
     }
 
     public updateWorkflows(workflows: MonkeyWorkflow[]) {
+      console.log('更新！');
       this.vinesSubWorkflowTools = workflows.map((workflow) => {
         const workflowId = workflow.workflowId;
         const variablesToTools: VinesToolDefProperties[] =
