@@ -5,6 +5,7 @@ import moment from 'moment';
 
 import { VinesAbstractDataPreview } from '@/components/layout/vines-execution/data-display/abstract';
 import { ExecutionRawDataDisplay } from '@/components/layout/vines-execution/data-display/raw';
+import { VinesExecutionHumanInteraction } from '@/components/layout/vines-execution/human-interaction';
 import { JSONValue } from '@/components/ui/code-editor';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
@@ -36,16 +37,18 @@ export const ComplicateSimpleNodeExecutionExpand: React.FC<IComplicateSimpleNode
     }, [executionStartTime, executionEndTime]);
 
     const executionOutputData = executionTask?.outputData ?? {};
+    const executionInputData = executionTask?.inputData ?? {};
     const externalStorageInputDataUrl = executionTask?.externalOutputPayloadStoragePath;
     const externalStorageOutputDataUrl = executionTask?.externalOutputPayloadStoragePath;
 
     const isCompleted =
       Object.keys(executionOutputData).length > 0 ||
       !['IN_PROGRESS', 'SCHEDULED'].includes(executionTask?.originStatus ?? '');
+    const isHUMANInteraction = executionTask?.taskType === 'HUMAN';
 
     return (
       <div className="flex flex-col gap-3 p-5">
-        <div className="text-text1 flex shrink-0 grow-0 flex-wrap text-xs">
+        <div className="flex shrink-0 grow-0 flex-wrap text-xs text-gray-10">
           <p className="mr-4">开始时间：{startTime}</p>
           <p className="mr-4">结束时间：{endTime}</p>
           <p className="mr-4">运行时长：{currentDuration}</p>
@@ -60,6 +63,15 @@ export const ComplicateSimpleNodeExecutionExpand: React.FC<IComplicateSimpleNode
           <TabsContent value="data" className="h-[20.5rem]">
             {isCompleted ? (
               <VinesAbstractDataPreview className="h-[20.5rem] px-2" data={executionOutputData} />
+            ) : isHUMANInteraction ? (
+              <VinesExecutionHumanInteraction
+                instanceId={executionTask?.workflowInstanceId ?? ''}
+                taskId={executionTask?.taskId ?? ''}
+                inputData={executionInputData}
+                outputData={executionOutputData}
+                taskDefName={executionTask?.taskDefName ?? ''}
+                isCompleted={isCompleted}
+              />
             ) : (
               <div className="vines-center size-full">
                 <CircularProgress
@@ -71,10 +83,7 @@ export const ComplicateSimpleNodeExecutionExpand: React.FC<IComplicateSimpleNode
             )}
           </TabsContent>
           <TabsContent value="input" className="h-[20.5rem]">
-            <ExecutionRawDataDisplay
-              data={executionTask?.inputData ?? {}}
-              externalStorageDataUrl={externalStorageInputDataUrl}
-            />
+            <ExecutionRawDataDisplay data={executionInputData} externalStorageDataUrl={externalStorageInputDataUrl} />
           </TabsContent>
           <TabsContent value="output" className="h-[20.5rem]">
             <ExecutionRawDataDisplay data={executionOutputData} externalStorageDataUrl={externalStorageOutputDataUrl} />
