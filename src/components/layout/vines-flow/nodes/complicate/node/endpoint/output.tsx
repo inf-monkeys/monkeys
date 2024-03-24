@@ -68,7 +68,7 @@ export const ComplicateEndNode: React.FC = () => {
           )}
         </Card>
       ) : (
-        <WorkflowOutputConfig className="px-5" output={output} setOutput={setOutput} />
+        <WorkflowOutputConfig className="px-5" contentClassName="px-0" output={output} setOutput={setOutput} />
       )}
     </>
   );

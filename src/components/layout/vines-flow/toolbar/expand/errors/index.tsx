@@ -96,7 +96,7 @@ export const VinesExpandToolErrors: React.FC<IVinesExpandToolErrorsProps> = ({ d
             </div>
             {messages.map((it, index) => (
               <p className="text-text1 text-xs" key={index}>
-                {it}
+                - {it}
               </p>
             ))}
           </div>
