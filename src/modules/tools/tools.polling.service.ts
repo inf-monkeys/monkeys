@@ -1,6 +1,7 @@
 import { conductorClient } from '@/common/conductor';
 import { config } from '@/common/config';
 import { logger } from '@/common/logger';
+import { sleep } from '@/common/utils/utils';
 import { Task, TaskDef, TaskManager } from '@io-orkes/conductor-javascript';
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
@@ -87,7 +88,29 @@ export class ToolsPollingService {
     }
   }
 
+  private async waitUntilConductorStartUp() {
+    const healthCheckUrl = '/health';
+    while (true) {
+      try {
+        const { data } = await axios.get<{
+          healthResults: any[];
+          suppressedHealthResults: any[];
+          healthy: boolean;
+        }>(healthCheckUrl, {
+          baseURL: config.conductor.baseUrl.replace('/api', ''),
+        });
+        if (data.healthy) {
+          break;
+        }
+        await sleep(200);
+      } catch (error) {
+        logger.warn('Can not connect to conductor: ', error.message);
+      }
+    }
+  }
+
   public async startPolling() {
+    await this.waitUntilConductorStartUp();
     await conductorClient.metadataResource.registerTaskDef([
       {
         name: CONDUCTOR_TASK_DEF_NAME,
