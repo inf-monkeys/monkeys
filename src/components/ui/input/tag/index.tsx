@@ -40,11 +40,8 @@ export const TagInput = forwardRef<HTMLInputElement, ITagInputProps>(
         onClick={() => inputRef.current?.focus()}
       >
         {value?.map((tag, index) => (
-          <Badge
-            className="data-[disabled]:bg-muted-foreground data-[fixed]:bg-muted-foreground data-[disabled]:text-muted data-[fixed]:text-muted data-[disabled]:hover:bg-muted-foreground data-[fixed]:hover:bg-muted-foreground"
-            key={index}
-          >
-            <span className="text-xs">{tag}</span>
+          <Badge className="bg-muted" key={index}>
+            <span className="text-xs text-gold-12">{tag}</span>
             <button
               className={cn(
                 'ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2',
