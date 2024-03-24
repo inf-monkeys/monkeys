@@ -304,4 +304,32 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
       }
     }
   }
+
+  override checkChildren(path: VinesNode[] = []) {
+    if (!this.isNested && !this.children.length) {
+      const subWorkflowTasks = get(
+        this._vinesCore.getTool(this._task.name),
+        'extra.workflowDef.tasks',
+        [],
+      ) as VinesTask[];
+      if (subWorkflowTasks.length) {
+        this.children = subWorkflowTasks.map((it) => VinesNode.create(it, this._vinesCore));
+        if (this.children.some((it) => it instanceof SubWorkflowNode && path.some((node) => node.id === it.id))) {
+          throw new Error('[VinesFlow] 存在子流程循环引用');
+        }
+        this.children.forEach((it) => it.checkChildren([this, ...path]));
+        return true;
+      }
+    }
+
+    return super.checkChildren([this, ...path]);
+  }
+
+  override restoreChildren(): boolean {
+    if (!this.isNested) {
+      this.children = [];
+      return true;
+    }
+    return super.restoreChildren();
+  }
 }

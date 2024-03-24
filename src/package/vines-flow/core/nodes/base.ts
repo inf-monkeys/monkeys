@@ -487,6 +487,14 @@ export class VinesNode<T extends VinesTask = VinesTask> {
     };
   }
   // endregion
+
+  public checkChildren(path: VinesNode[] = []): boolean {
+    return this.children.some((childNode) => childNode.checkChildren([childNode, ...path]));
+  }
+
+  public restoreChildren(path: VinesNode[] = []): boolean {
+    return this.children.some((childNode) => childNode.restoreChildren([childNode, ...path]));
+  }
 }
 
 // 「控制流程节点」公用逻辑
