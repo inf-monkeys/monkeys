@@ -4,7 +4,7 @@ import { get, has, set } from 'lodash';
 
 import { VinesCore } from '@/package/vines-flow/core';
 import { ControlFlowVinesNode, VinesNode } from '@/package/vines-flow/core/nodes/base.ts';
-import { drawSmoothLine } from '@/package/vines-flow/core/nodes/svg-utils.ts';
+import { drawSmoothLine, VinesSVGPosition } from '@/package/vines-flow/core/nodes/svg-utils.ts';
 import {
   IVinesNodeBoundary,
   IVinesNodePosition,
@@ -92,11 +92,15 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
       return super.render(position, [this, ...(path ?? [])], isLastNode);
     }
 
-    if (!this.isNested) {
+    if (this._vinesCore.renderDirection === 'horizontal') return this.renderHorizontal(position, path, isLastNode);
+
+    if (this.isNested) {
+      this.renderChildren(position, path);
+    } else {
       this.position.x = position.x;
       this.position.y = position.y;
 
-      const childOffset = 5;
+      const childOffset = this.size.width / 2 + 5;
 
       const nodeHeight = this.size.height;
 
@@ -114,8 +118,29 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
       } else {
         position.y = this.entryPoint.out.y;
       }
+    }
+  }
+
+  override renderHorizontal(position: IVinesNodePosition, _path?: VinesNode[], _isLastNode: boolean = false) {
+    if (this.isNested) {
+      this.renderChildren(position, _path);
     } else {
-      this.renderChildren(position, path);
+      this.position.x = position.x;
+      this.position.y = position.y;
+
+      const childOffset = -(this.size.width / 2 + 5);
+
+      const nodeWidth = this.size.width;
+
+      position.x += nodeWidth + 82;
+      position.y += childOffset;
+      this.renderChildren(position, _path);
+      const { top } = this.getBoundary();
+      const offset = top - this.position.y;
+      if (offset < childOffset) {
+        this.children.filter((it) => it.needRender).forEach((it) => it.move(0, childOffset - offset));
+      }
+      position.y -= childOffset;
     }
   }
 
@@ -132,9 +157,11 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
       return this.children.forEach((it, index) => it.renderEdge(index === this.children.length - 1 && lastNode));
     }
 
-    this._svgPath = this.renderHead(this.childNodes);
+    this._svgPath = this.renderHead(this.childNodes, 32);
 
     this.children.forEach((it, index) => it.renderEdge(index === this.children.length - 1));
+
+    if (this._vinesCore.renderDirection === 'horizontal') return this.renderHorizontalEdge(lastNode);
 
     const lastChildEntry = this.children.at(-1)?.entryPoint ?? this.children[0].entryPoint;
 
@@ -144,12 +171,36 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
         drawSmoothLine({
           sourceX: lastChildEntry.out.x,
           sourceY: lastChildEntry.out.y,
-          targetX: this.position.x + 40,
+          targetX: this.position.x + this.size.width / 2,
           targetY: lastChildEntry.out.y + 120,
           centerY: lastChildEntry.out.y + 48,
         }),
       ],
     ];
+  }
+
+  override renderHorizontalEdge(lastNode: boolean = false) {
+    if (this.children.length) {
+      const lastChild = this.children.filter((it) => it.needRender).at(-1);
+      if (lastChild) {
+        this.extraSvgPath = [
+          [
+            this.id + '_end',
+            drawSmoothLine({
+              sourceX: lastChild.entryPoint.out.x,
+              sourceY: lastChild.entryPoint.out.y,
+              targetX: lastChild.entryPoint.out.x + 82,
+              targetY: this.position.y + this.size.height / 2,
+              centerY: lastChild.entryPoint.in.y + 48,
+              sourcePosition: VinesSVGPosition.Right,
+              targetPosition: VinesSVGPosition.Left,
+            }),
+          ],
+        ];
+      }
+    } else {
+      return super.renderHorizontalEdge(lastNode);
+    }
   }
 
   override renderController() {
