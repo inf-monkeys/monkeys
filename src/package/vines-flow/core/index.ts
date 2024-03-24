@@ -1,6 +1,6 @@
 import { MonkeyTaskDefTypes, MonkeyWorkflow } from '@inf-monkeys/vines';
 import equal from 'fast-deep-equal/es6';
-import { get, isArray, omit } from 'lodash';
+import { isArray, omit } from 'lodash';
 import { toast } from 'sonner';
 
 import {
@@ -13,7 +13,7 @@ import {
 } from '@/apis/workflow/execution';
 import { VinesBase } from '@/package/vines-flow/core/base';
 import { VINES_DEF_NODE, VINES_ENV_VARIABLES } from '@/package/vines-flow/core/consts.ts';
-import { EndPointNode, SubWorkflowNode, VinesNode } from '@/package/vines-flow/core/nodes';
+import { EndPointNode, VinesNode } from '@/package/vines-flow/core/nodes';
 import {
   IVinesNodePosition,
   IVinesWorkflowUpdate,
@@ -468,6 +468,19 @@ export class VinesCore extends VinesTools(VinesBase) {
     version = this.version,
     debug = false,
   }: IVinesFlowRunParams): Promise<boolean> {
+    this.renderOptions.direction = 'vertical';
+    try {
+      if (this.nodes.some((it) => it.checkChildren([it]))) {
+        this.setAllNodeSize(this.nodeInitSize.width, this.nodeInitSize.height);
+        this.render();
+        this.sendEvent('refresh');
+      }
+    } catch (e) {
+      toast.error('启动运行失败！工作流存在循环引用');
+      this.nodes.forEach((it) => it.restoreChildren());
+      return false;
+    }
+
     if (this.executionStatus !== 'SCHEDULED' || !this.nodes.length) {
       toast.warning('启动运行失败！已有工作流在运行中或工作流为空');
       return false;
@@ -499,9 +512,6 @@ export class VinesCore extends VinesTools(VinesBase) {
     this.executionStatus = 'RUNNING';
     this.nodes[0].executionStatus = 'COMPLETED';
 
-    this.renderOptions.direction = 'vertical';
-    this.fillUpSubWorkflow();
-
     this.executionTimeout = setTimeout(this.handleExecution.bind(this), 0);
 
     return true;
@@ -525,7 +535,8 @@ export class VinesCore extends VinesTools(VinesBase) {
       return false;
     }
 
-    this.fillUpSubWorkflow();
+    this.restoreSubWorkflowChildren();
+
     this.update({ workflow: workflowDefinition as unknown as MonkeyWorkflow, renderDirection: 'vertical' });
 
     setTimeout(() => {
@@ -548,7 +559,7 @@ export class VinesCore extends VinesTools(VinesBase) {
       } catch (_) {
         toast.error('终止运行异常！（可能未能成功停止）');
         this.executionStatus = 'SCHEDULED';
-        this.cleanUpSubWorkflow();
+        this.restoreSubWorkflowChildren();
       }
 
       this.executionTimeout = setTimeout(this.handleExecution.bind(this), 0);
@@ -567,7 +578,7 @@ export class VinesCore extends VinesTools(VinesBase) {
       } catch (_) {
         toast.error('暂停运行异常！（可能未能成功暂停）');
         this.executionStatus = 'SCHEDULED';
-        this.cleanUpSubWorkflow();
+        this.restoreSubWorkflowChildren();
       }
       this.executionStatus = 'PAUSED';
 
@@ -585,7 +596,7 @@ export class VinesCore extends VinesTools(VinesBase) {
       } catch (_) {
         toast.error('恢复运行异常！（可能未能成功恢复）');
         this.executionStatus = 'SCHEDULED';
-        this.cleanUpSubWorkflow();
+        this.restoreSubWorkflowChildren();
       }
       this.executionStatus = 'RUNNING';
 
@@ -675,7 +686,7 @@ export class VinesCore extends VinesTools(VinesBase) {
     if (this.executionStatus === 'RUNNING') {
       this.executionTimeout = setTimeout(this.handleExecution.bind(this), 0);
     } else if (this.executionStatus !== 'PAUSED') {
-      this.cleanUpSubWorkflow();
+      this.restoreSubWorkflowChildren();
       this.clearExecutionStatus();
     }
   }
@@ -694,41 +705,11 @@ export class VinesCore extends VinesTools(VinesBase) {
     }, 80);
   }
 
-  private fillUpSubWorkflow() {
-    let needRender = false;
-    for (const node of this.getAllNodes(false)) {
-      if (node instanceof SubWorkflowNode) {
-        if (!node.isNested) {
-          const subWorkflowTasks = get(this.getTool(node.getRaw().name), 'extra.workflowDef.tasks', []) as VinesTask[];
-          if (subWorkflowTasks.length) {
-            node.children = subWorkflowTasks.map((it) => VinesNode.create(it, this));
-            needRender = true;
-          }
-        }
-      }
-    }
-    if (needRender) {
-      this.setAllNodeSize(this.nodeInitSize.width, this.nodeInitSize.height);
-      this.render();
-      this.sendEvent('refresh');
-    }
-  }
-
-  private cleanUpSubWorkflow() {
-    let needRender = false;
-    for (const node of this.getAllNodes(false)) {
-      if (node instanceof SubWorkflowNode) {
-        if (!node.isNested) {
-          node.children = [];
-          needRender = true;
-        }
-      }
-    }
-    if (needRender) {
-      this.setAllNodeSize(this.nodeInitSize.width, this.nodeInitSize.height);
-      this.render();
-      this.sendEvent('refresh');
-    }
+  private restoreSubWorkflowChildren() {
+    this.nodes.some((it) => it.restoreChildren());
+    this.setAllNodeSize(this.nodeInitSize.width, this.nodeInitSize.height);
+    this.render();
+    this.sendEvent('refresh');
   }
   // endregion
 }
