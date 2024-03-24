@@ -6,6 +6,7 @@ import queryString from 'query-string';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { WorkflowListQuery } from '@/apis/workflow/typings.ts';
+import { IWorkflowValidation } from '@/apis/workflow/validation/typings.ts';
 
 export const useGetWorkflow = (workflowId: string, version?: number, apikey?: string) =>
   useSWR<MonkeyWorkflow | undefined>(
@@ -34,7 +35,9 @@ export const updateWorkflow = (
   );
 
 export const useUpdateWorkflow = (apikey: string, workflowId: string) =>
-  useSWRMutation<MonkeyWorkflow | undefined, unknown, string | null, Partial<MonkeyWorkflow>>(
-    workflowId ? `/api/workflow/${workflowId}` : null,
-    vinesFetcher<MonkeyWorkflow>({ method: 'PUT', apikey }),
-  );
+  useSWRMutation<
+    (IWorkflowValidation & { success: boolean }) | undefined,
+    unknown,
+    string | null,
+    Partial<MonkeyWorkflow>
+  >(workflowId ? `/api/workflow/${workflowId}` : null, vinesFetcher({ method: 'PUT', apikey }));

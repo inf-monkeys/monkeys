@@ -23,9 +23,15 @@ export interface IVinesOutputData {
 interface IWorkflowOutputConfigProps extends React.ComponentPropsWithoutRef<'div'> {
   output: IVinesOutputData[];
   setOutput: React.Dispatch<React.SetStateAction<IVinesOutputData[]>>;
+  contentClassName?: string;
 }
 
-export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({ className, output, setOutput }) => {
+export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({
+  className,
+  contentClassName,
+  output,
+  setOutput,
+}) => {
   const { canvasMode, workflowId, isLatestWorkflowVersion } = useFlowStore();
 
   const { vines } = useVinesFlow();
@@ -134,7 +140,7 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({ cla
             </motion.div>
           ) : initial ? (
             <motion.div
-              className="flex h-full w-full flex-col gap-4 overflow-y-auto p-4"
+              className={cn('flex h-full w-full flex-col gap-4 overflow-y-auto p-4', contentClassName)}
               key="vines-workflow-output-config"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -142,9 +148,9 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({ cla
               transition={{ duration: 0.2 }}
             >
               {output.map((it, index) => (
-                <div key={index} className="flex items-center gap-4">
+                <div key={index} className="flex items-center gap-2">
                   <Input
-                    className="h-10 flex-[30%]"
+                    className="h-10 min-w-20 flex-[30%]"
                     value={it.key}
                     onChange={(val) => handleValueChange(index, val, 'key')}
                     placeholder="参数名"

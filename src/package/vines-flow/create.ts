@@ -58,6 +58,7 @@ export const createVinesCore = (workflowId: string) => {
           setTimeout(() => {
             forceUpdate();
 
+            const workflowVersion = _vines.version;
             const workflowId = _vines.workflowId;
             if (!workflowId) {
               toast.error('工作流 ID 不存在！');
@@ -65,24 +66,29 @@ export const createVinesCore = (workflowId: string) => {
             }
 
             const newWorkflow = {
-              version: _vines.version,
-              ...(tasks?.length && { tasks }),
+              version: workflowVersion,
+              ...(tasks?.length && { workflowDef: { tasks } }),
               variables: _vines.workflowInput,
             } as Partial<MonkeyWorkflow>;
 
             toast.promise(trigger(newWorkflow), {
               loading: '更新中...',
-              success: '更新成功',
+              success: (newValidation) => {
+                void mutate(`/api/workflow/${workflowId}/validation-issues?version=${workflowVersion}`, newValidation, {
+                  revalidate: false,
+                });
+                return '更新成功';
+              },
               error: '更新失败',
             });
 
-            void mutate(`/api/workflow/metadata/${workflowId}`, (prev) => ({ ...prev, ...newWorkflow }), {
+            void mutate(`/api/workflow/${workflowId}`, (prev) => ({ ...prev, ...newWorkflow }), {
               revalidate: false,
             });
             void mutate(
-              `/api/workflow/metadata/${workflowId}/versions`,
+              `/api/workflow/${workflowId}/versions`,
               (prev: MonkeyWorkflow[] | undefined) => {
-                const currentVersionWorkflowIndex = prev?.findIndex((it) => it.version === _vines.version);
+                const currentVersionWorkflowIndex = prev?.findIndex((it) => it.version === workflowVersion);
                 if (currentVersionWorkflowIndex === void 0 || currentVersionWorkflowIndex === -1) {
                   return prev;
                 }
