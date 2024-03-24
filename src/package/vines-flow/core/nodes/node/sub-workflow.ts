@@ -11,7 +11,7 @@ import {
   VinesEdgePath,
   VinesTask,
 } from '@/package/vines-flow/core/nodes/typings.ts';
-import { IVinesInsertChildParams, IVinesMode } from '@/package/vines-flow/core/typings.ts';
+import { IVinesInsertChildParams } from '@/package/vines-flow/core/typings.ts';
 import { getBoundary } from '@/package/vines-flow/core/utils.ts';
 
 export type VinesSubWorkflowTaskDef = SubWorkflowTaskDef & {
@@ -47,17 +47,18 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
     this._task.taskReferenceName = this._task.taskReferenceName.replace(/^sub_workflow:/, 'sub_workflow_');
     this.id = this._task.taskReferenceName;
 
-    const name = this._task.name.replace('sub_workflow_', '');
+    const taskName = this._task.name;
+    const subWorkflowId = taskName.replace('sub_workflow_', '');
     const hasNameInInputParameters = has(this._task, 'inputParameters.name');
-    !hasNameInInputParameters && set(this._task, 'inputParameters.name', name);
+    !hasNameInInputParameters && set(this._task, 'inputParameters.name', subWorkflowId);
 
     const hasVersionInInputParameters = has(this._task, 'inputParameters.version');
     const subWorkflowVersion = hasVersionInInputParameters ? Number(this._task.inputParameters?.version ?? 1) || 1 : 1;
     set(this._task, 'inputParameters.version', subWorkflowVersion);
 
-    set(this._task, 'subWorkflow.name', name);
+    set(this._task, 'subWorkflow.name', subWorkflowId);
 
-    set(this._task, 'subWorkflowParam.name', name);
+    set(this._task, 'subWorkflowParam.name', subWorkflowId);
     set(this._task, 'subWorkflowParam.version', subWorkflowVersion);
 
     return super.check();
@@ -79,14 +80,7 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
   }
 
   override get needRenderChildren() {
-    return !this.isNested || this._vinesCore.mode === IVinesMode.EXEC;
-  }
-
-  override get childNodes(): VinesNode[] {
-    if (this._vinesCore.mode !== IVinesMode.EDIT) {
-      return super.childNodes;
-    }
-    return [];
+    return !this.isNested || this._vinesCore.executionStatus === 'RUNNING';
   }
 
   // region Render
