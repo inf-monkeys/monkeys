@@ -1,6 +1,6 @@
 import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import { type SubWorkflowTaskDef, TaskType } from '@io-orkes/conductor-javascript';
-import { has, set } from 'lodash';
+import { get, has, set } from 'lodash';
 
 import { VinesCore } from '@/package/vines-flow/core';
 import { ControlFlowVinesNode, VinesNode } from '@/package/vines-flow/core/nodes/base.ts';
@@ -50,16 +50,28 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
     const name = this._task.name.replace('sub_workflow_', '');
     const hasNameInInputParameters = has(this._task, 'inputParameters.name');
     !hasNameInInputParameters && set(this._task, 'inputParameters.name', name);
-    set(this._task, 'subWorkflow.name', name);
 
     const hasVersionInInputParameters = has(this._task, 'inputParameters.version');
-    set(
-      this._task,
-      'inputParameters.version',
-      hasVersionInInputParameters ? Number(this._task.inputParameters?.version ?? 1) || 1 : 1,
-    );
+    const subWorkflowVersion = hasVersionInInputParameters ? Number(this._task.inputParameters?.version ?? 1) || 1 : 1;
+    set(this._task, 'inputParameters.version', subWorkflowVersion);
+
+    set(this._task, 'subWorkflow.name', name);
+
+    set(this._task, 'subWorkflowParam.name', name);
+    set(this._task, 'subWorkflowParam.version', subWorkflowVersion);
 
     return super.check();
+  }
+
+  override afterCreate(): VinesNode | VinesNode[] {
+    this.check();
+    return super.afterCreate();
+  }
+
+  override updateRaw(nodeId: string, task: VinesSubWorkflowTaskDef): boolean {
+    const workflowVersion = Number(get(task, 'inputParameters.version', 1));
+    set(task, 'subWorkflowParam.version', workflowVersion);
+    return super.updateRaw(nodeId, task);
   }
 
   get isNested() {
