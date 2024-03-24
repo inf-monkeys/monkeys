@@ -79,6 +79,7 @@ async function bootstrap() {
   const bootstrapService = await app.resolve<BootstrapService>(BootstrapService);
   await bootstrapService.bootstrap();
 
-  await app.listen(config.server.port);
+  await app.listen(config.server.port, '0.0.0.0');
+  logger.info(`🚀: Start service at 0.0.0.0:${config.server.port}`);
 }
 bootstrap();

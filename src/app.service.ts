@@ -3,6 +3,7 @@ import { OpenAPIObject } from '@nestjs/swagger';
 import axios from 'axios';
 import { config } from './common/config';
 import { logger } from './common/logger';
+import { sleep } from './common/utils/utils';
 import { BUILTIN_TOOL_OPENAPI_MENIFEST_URL } from './modules/tools/builtin/builtin.swagger';
 import { EXAMPLE_WORKER_OPENAPI_MENIFEST_URL } from './modules/tools/example/example.swagger';
 import { ToolsRegistryService } from './modules/tools/tools.registry.service';
@@ -32,7 +33,21 @@ export class AppService implements OnApplicationBootstrap {
     return result.filter(Boolean);
   }
 
-  private registerTools() {
+  private async waitServerHttpServiceAvailable() {
+    while (true) {
+      try {
+        await axios.get('/api/healthz', {
+          baseURL: `http://127.0.0.1:${config.server.port}`,
+        });
+        break;
+      } catch (error) {
+        await sleep(200);
+      }
+    }
+  }
+
+  private async registerTools() {
+    await this.waitServerHttpServiceAvailable();
     logger.info(`Load builtin tools of ${BUILTIN_TOOL_OPENAPI_MENIFEST_URL}`);
     this.workerRegistryService.registerToolsServer({
       manifestUrl: BUILTIN_TOOL_OPENAPI_MENIFEST_URL,

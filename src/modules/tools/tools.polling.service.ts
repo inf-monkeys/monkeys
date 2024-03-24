@@ -102,9 +102,10 @@ export class ToolsPollingService {
         if (data.healthy) {
           break;
         }
-        await sleep(200);
       } catch (error) {
         logger.warn('Can not connect to conductor: ', error.message);
+      } finally {
+        await sleep(200);
       }
     }
   }

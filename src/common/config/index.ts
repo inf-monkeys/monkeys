@@ -113,7 +113,7 @@ export interface Config {
 }
 
 const port = readConfig('server.port', 3000);
-const appUrl = readConfig('server.appUrl', `http://localhost:${port}`);
+const appUrl = readConfig('server.appUrl', `http://127.0.0.1:${port}`);
 
 export const config: Config = {
   server: {
@@ -123,7 +123,7 @@ export const config: Config = {
     loadExample: readConfig('server.loadExample', true),
   },
   conductor: {
-    baseUrl: readConfig('conductor.baseUrl', 'http://localhost:8080/api'),
+    baseUrl: readConfig('conductor.baseUrl', 'http://127.0.0.1:8080/api'),
     auth: readConfig('conductor.auth', null),
     polling: {
       interval: readConfig('conductor.polling.interval', 100),
