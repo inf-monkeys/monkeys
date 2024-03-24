@@ -46,12 +46,15 @@ export const ComplicateSimpleNodeExecutionExpand: React.FC<IComplicateSimpleNode
       !['IN_PROGRESS', 'SCHEDULED'].includes(executionTask?.originStatus ?? '');
     const isHUMANInteraction = executionTask?.taskType === 'HUMAN';
 
+    const executionTaskIteration = executionTask?.iteration ?? 0;
+
     return (
       <div className="flex flex-col gap-3 p-5">
         <div className="flex shrink-0 grow-0 flex-wrap text-xs text-gray-10">
           <p className="mr-4">开始时间：{startTime}</p>
           <p className="mr-4">结束时间：{endTime}</p>
           <p className="mr-4">运行时长：{currentDuration}</p>
+          {executionTaskIteration ? <p className="mr-4">迭代轮次：{executionTaskIteration}</p> : null}
         </div>
         <Tabs defaultValue="data">
           <TabsList>
