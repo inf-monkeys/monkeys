@@ -27,7 +27,7 @@ export const getBoundary = (children: VinesNode[]): IVinesNodeBoundary => {
 
 export function createSubWorkflowDef(tasks: VinesTask[]) {
   const nodeId = 'sub_workflow_nested_' + createNanoId();
-  const subWorkflowTaskDef: Required<Omit<VinesSubWorkflowTaskDef, 'subWorkflowParam'>> = {
+  const subWorkflowTaskDef: Required<VinesSubWorkflowTaskDef> = {
     name: 'sub_workflow',
     taskReferenceName: nodeId,
     type: TaskType.SUB_WORKFLOW,
@@ -40,6 +40,10 @@ export function createSubWorkflowDef(tasks: VinesTask[]) {
       iconUrl: 'emoji:🍀:#ceefc5',
       description: '',
       tasks,
+    },
+    subWorkflowParam: {
+      name: nodeId,
+      version: 1,
     },
   };
 
