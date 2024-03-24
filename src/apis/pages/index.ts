@@ -36,7 +36,7 @@ export const deleteWorkspacePage = (workflowId: string, pageId: string) =>
 
 export const toggleWorkspacePagePin = (pageId: string, pin: boolean) =>
   vinesFetcher<Omit<IPageType, 'instance'>, { pin: boolean }>({ method: 'POST', simple: true })(
-    `/api/pages/${pageId}/pin`,
+    `/api/workflow/pages/${pageId}/pin`,
     {
       pin,
     },
