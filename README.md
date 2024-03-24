@@ -99,6 +99,32 @@ After you start the project, you can visit the following OpenAPI documentations:
 
 We provided detailed information on how to write your own monkey tool, it's as simple as writing standard RESTFul APIs. You can read more on this topic at [Write your own tools](#TODO)
 
+## Relase
+
+### Relase Docker Image
+
+1. Modify `package.json` `version` by run:
+
+```sh
+npm version patch
+```
+
+Or you can modify `package.json` version manually and run:
+
+```sh
+git tag v0.0.1
+```
+
+2. Push tags
+
+```sh
+git push
+git push --tags
+```
+
+3. Create GitHub release.
+4. Wait for ci to complete.
+
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
