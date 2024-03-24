@@ -14,7 +14,7 @@ import { NumberInput } from '@/components/layout/vines-flow/headless-modal/tool-
 import { OptionsInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/options.tsx';
 import { PresetInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset';
 import { StringInput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/components/string.tsx';
-import { InputPropertyWrapper } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/wrapper.tsx';
+import { InputPropertyWrapper } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-input/input-property/wrapper';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { IVinesVariableMap, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
