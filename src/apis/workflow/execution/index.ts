@@ -3,6 +3,7 @@ import useSWRMutation from 'swr/mutation';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import {
+  IUpdateExecutionTaskParams,
   IVinesSearchWorkflowExecutionsParams,
   VinesWorkflowExecutionLists,
 } from '@/apis/workflow/execution/typings.ts';
@@ -56,5 +57,11 @@ export const executionWorkflowResume = (instanceId: string) =>
 export const useSearchWorkflowExecutions = () =>
   useSWRMutation<VinesWorkflowExecutionLists | undefined, unknown, string, IVinesSearchWorkflowExecutionsParams>(
     `/api/workflow/executions/search`,
+    vinesFetcher({ method: 'POST' }),
+  );
+
+export const useUpdateExecutionTask = (instanceId: string, taskId: string) =>
+  useSWRMutation<string | undefined, unknown, string | null, IUpdateExecutionTaskParams>(
+    instanceId && taskId ? `/api/workflow/${instanceId}/tasks/${taskId}` : null,
     vinesFetcher({ method: 'POST' }),
   );

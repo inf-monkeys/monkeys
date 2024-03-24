@@ -24,3 +24,8 @@ export interface IVinesSearchWorkflowExecutionsParams {
   pagination?: { page: number; limit: number };
   status?: WorkflowExecution['status'][];
 }
+
+export type IUpdateExecutionTaskParams = {
+  status: 'COMPLETED' | 'FAILED' | 'CANCELED';
+  outputData: Record<string, unknown>;
+};
