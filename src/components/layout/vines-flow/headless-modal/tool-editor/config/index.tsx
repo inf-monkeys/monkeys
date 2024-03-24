@@ -41,7 +41,6 @@ export const ToolConfig: React.FC<INodeConfigProps> = ({ nodeId, task }) => {
                 nodeId={nodeId}
                 task={task}
                 tool={tool}
-                workflowVersion={workflowVersion}
                 updateRaw={(nodeId: string, task: VinesTask, update: boolean) => vines.updateRaw(nodeId, task, update)}
                 variableMapper={variableMapper}
               />

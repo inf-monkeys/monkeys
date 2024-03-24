@@ -23,13 +23,12 @@ export interface IVinesInputPropertyProps {
   value: unknown;
   onChange: (value: unknown) => void;
   nodeId: string;
-  workflowVersion: number;
   variableMapper: Record<string, IVinesVariableMap>;
   disabled?: boolean;
 }
 
 export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) => {
-  const { def, nodeId, workflowVersion, disabled } = props;
+  const { def, nodeId, disabled } = props;
   const { onChange, value, ...childProps } = props;
   const [type, typeOptions, isMultipleValues, enableEditor, isPureCollection, isMultiFieldObject, assetType] =
     useMemo(() => {
@@ -133,7 +132,6 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
     <InputPropertyWrapper
       def={def}
       nodeId={nodeId}
-      workflowVersion={workflowVersion}
       headerVisible={type !== 'notice'}
       isMultiple={isMultipleValues}
       hasValue={hasValue}

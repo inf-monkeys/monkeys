@@ -129,7 +129,6 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
                 <ComplicateSimpleNode
                   key={'vines-complicate-' + nodeId}
                   workflowId={vines.workflowId ?? ''}
-                  workflowVersion={vines.version}
                   task={node.getRaw()}
                   nodeId={nodeId}
                   tool={tool}
