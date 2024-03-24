@@ -7,7 +7,6 @@ import { useWorkflowValidate, useWorkflowValidation } from '@/apis/workflow/vali
 import { Button } from '@/components/ui/button';
 import { Tooltip } from '@/components/ui/tooltip';
 import { useVinesFlow } from '@/package/vines-flow';
-import { useFlowStore } from '@/store/useFlowStore';
 
 interface IInputErrorsProps extends React.ComponentPropsWithoutRef<'div'> {
   nodeId: string;
@@ -15,10 +14,9 @@ interface IInputErrorsProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const InputErrors: React.FC<IInputErrorsProps> = ({ nodeId, toolDefName }) => {
-  const { workflowId } = useFlowStore();
   const { vines } = useVinesFlow();
 
-  const { data: validation, mutate } = useWorkflowValidation(workflowId, vines.version);
+  const { data: validation, mutate } = useWorkflowValidation(vines.workflowId ?? '', vines.version);
   const { trigger, isMutating } = useWorkflowValidate();
 
   const errors =

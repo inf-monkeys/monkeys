@@ -2,6 +2,7 @@ import React from 'react';
 
 import { VinesRunInsideToolbar } from 'src/components/layout/vines-flow/toolbar/expand/execution';
 
+import { VinesExpandToolErrors } from '@/components/layout/vines-flow/toolbar/expand/errors';
 import { VinesVersionToolbar } from '@/components/layout/vines-flow/toolbar/expand/version';
 import { WorkflowRelease } from '@/components/layout/vines-flow/toolbar/expand/version/release.tsx';
 import { Card } from '@/components/ui/card.tsx';
@@ -31,6 +32,7 @@ export const VinesExpandToolbar: React.FC<IVinesVersionToolbarProps> = () => {
         <VinesVersionToolbar version={vinesVersion} onVersionChange={handleVersionChange} />
         <WorkflowRelease version={vinesVersion} onVersionChange={handleVersionChange} />
       </Card>
+      <VinesExpandToolErrors disabled={isWorkflowRUNNING} />
     </div>
   );
 };
