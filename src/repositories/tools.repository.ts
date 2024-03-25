@@ -1,7 +1,7 @@
 import { ToolsServerEntity } from '@/entities/tools/tools-server.entity';
 import { ToolsEntity } from '@/entities/tools/tools.entity';
 import { ManifestJson } from '@/modules/tools/interfaces';
-import { BlockDefinition, BlockType } from '@inf-monkeys/vines';
+import { BlockDefinition } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId } from 'mongodb';
@@ -73,7 +73,7 @@ export class ToolsRepository {
           isDeleted: false,
           createdTimestamp: +new Date(),
           updatedTimestamp: +new Date(),
-          type: BlockType.SIMPLE,
+          type: x.type,
           namespace: namespace,
           name: x.name,
           displayName: x.displayName,
@@ -117,6 +117,7 @@ export class ToolsRepository {
           output: latestDef.output,
           rules: latestDef.rules,
           extra: latestDef.extra,
+          type: latestDef.type,
           isDeleted: false,
         };
       });

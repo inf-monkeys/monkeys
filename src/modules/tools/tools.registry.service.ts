@@ -1,5 +1,6 @@
 import { logger } from '@/common/logger';
 import { enumToList } from '@/common/utils';
+import { SYSTEM_NAMESPACE } from '@/entities/tools/tools-server.entity';
 import { BlockDefinition } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 import { OpenAPIObject } from '@nestjs/swagger';
@@ -35,6 +36,10 @@ export class ToolsRegistryService {
     }
     if (!data.namespace) {
       throw new Error('Error when parse manifest json: namespace is missing');
+    }
+    const reservedNamespace = [SYSTEM_NAMESPACE];
+    if (reservedNamespace.includes(data.namespace)) {
+      throw new Error(`Error when parse manifest json: namespace is can not use reserved word: ${data.namespace}`);
     }
 
     if (!data.auth) {
@@ -133,7 +138,7 @@ export class ToolsRegistryService {
       )
     ).map((x) => x.default);
 
-    await this.toolsRepository.createOrUpdateTools('system', builtInBlocks);
+    await this.toolsRepository.createOrUpdateTools(SYSTEM_NAMESPACE, builtInBlocks);
   }
 
   public async listTools() {

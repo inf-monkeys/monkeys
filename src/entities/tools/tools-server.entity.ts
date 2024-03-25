@@ -20,6 +20,8 @@ export class ApiConfig {
   url: string;
 }
 
+export const SYSTEM_NAMESPACE = 'system';
+
 @Entity({ name: 'tools_server' })
 export class ToolsServerEntity extends BaseEntity {
   @Column({

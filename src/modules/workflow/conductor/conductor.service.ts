@@ -1,6 +1,7 @@
 import { conductorClient } from '@/common/conductor';
 import { InputParametersType } from '@/common/typings/workflow';
 import { flatTasks } from '@/common/utils/conductor';
+import { SYSTEM_NAMESPACE } from '@/entities/tools/tools-server.entity';
 import { WorkflowMetadataEntity, WorkflowOutputValue } from '@/entities/workflow/workflow-metadata';
 import { DoWhileMode } from '@/modules/tools/conductor-system-tools/do-while';
 import { CONDUCTOR_TASK_DEF_NAME } from '@/modules/tools/tools.polling.service';
@@ -89,11 +90,14 @@ export class ConductorService {
       if (!tool) {
         continue;
       }
-      // use CUSTOM_BLOCK_NAME_KEY to store real task_name
-      task.inputParameters[this.TOOL_NAME_KEY] = task.name;
-      task.inputParameters[this.APIINFO_KEY] = tool.extra.apiInfo;
-      task.inputParameters[this.CONTEXT_KEY] = '${workflow.input.__context}';
-      task.name = CONDUCTOR_TASK_DEF_NAME;
+
+      if (tool.namespace !== SYSTEM_NAMESPACE) {
+        // use CUSTOM_BLOCK_NAME_KEY to store real task_name
+        task.inputParameters[this.TOOL_NAME_KEY] = task.name;
+        task.inputParameters[this.APIINFO_KEY] = tool.extra.apiInfo;
+        task.inputParameters[this.CONTEXT_KEY] = '${workflow.input.__context}';
+        task.name = CONDUCTOR_TASK_DEF_NAME;
+      }
 
       // 特殊类型的 block：SUB_WORKFLOW
       if (task.type === 'SUB_WORKFLOW') {
