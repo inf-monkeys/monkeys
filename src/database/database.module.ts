@@ -13,6 +13,11 @@ import { WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-tr
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
 import { ApiKeyEntity } from './entities/apikey/apikey';
+import { TableCollectionEntity } from './entities/assets/collection/table-collection/table-collection';
+import { TextCollectionEntity } from './entities/assets/collection/text-collection/text-collection';
+import { MediaFileEntity } from './entities/assets/media/media-file';
+import { LlmModelEntity } from './entities/assets/model/llm-model/llm-model';
+import { SdModelEntity } from './entities/assets/model/sd-model/sd-model';
 import { TeamEntity } from './entities/identity/team';
 import { UserEntity } from './entities/identity/user';
 import { UserTeamRelationshipEntity } from './entities/identity/user-team-relationship';
@@ -35,6 +40,11 @@ export const entities: EntityClassOrSchema[] = [
   UserTeamRelationshipEntity,
   ApiKeyEntity,
   WorkflowPageEntity,
+  LlmModelEntity,
+  SdModelEntity,
+  TableCollectionEntity,
+  TextCollectionEntity,
+  MediaFileEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({

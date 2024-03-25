@@ -70,7 +70,6 @@ export class WorkflowRepository {
       tasks,
       variables,
       output,
-      assetType: 'workflow',
     };
     await this.workflowMetadataRepository.save(entity);
     return entity;

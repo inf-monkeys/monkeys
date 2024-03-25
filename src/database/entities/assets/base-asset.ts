@@ -1,13 +1,8 @@
-import { AssetType } from '@/common/typings/asset';
+import { AuthorizedTarget } from '@/common/typings/asset';
 import { Column } from 'typeorm';
-import { BaseEntity } from './base';
+import { BaseEntity } from '../base/base';
 
 export class BaseAssetEntity extends BaseEntity {
-  @Column({
-    name: 'asset_type',
-  })
-  assetType: AssetType;
-
   @Column({
     type: 'simple-json',
     name: 'tags',
@@ -64,6 +59,12 @@ export class BaseAssetEntity extends BaseEntity {
     nullable: true,
   })
   publicAssetCategoryIds?: string[];
+
+  @Column({
+    nullable: true,
+    type: 'simple-json',
+  })
+  authorizedTargets?: AuthorizedTarget[];
 
   @Column({
     nullable: true,

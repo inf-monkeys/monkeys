@@ -1,3 +1,4 @@
+import { getMap } from '@/common/utils/map';
 import { TeamEntity } from '@/database/entities/identity/team';
 import { UserTeamRelationshipEntity } from '@/database/entities/identity/user-team-relationship';
 import { Injectable } from '@nestjs/common';
@@ -15,6 +16,27 @@ export class TeamRepository {
     private readonly userTeamRelationRepository: Repository<UserTeamRelationshipEntity>,
     private readonly apiKeyRepository: ApikeyRepository,
   ) {}
+
+  public async getTeamById(id: string) {
+    return await this.teamRepository.findOne({
+      where: {
+        id: new ObjectId(id),
+      },
+    });
+  }
+
+  public async getTeamsByIdsAsMap(ids: string[]) {
+    let userHash: Record<string, TeamEntity> = {};
+    if (ids?.length) {
+      const users = await this.teamRepository.find({
+        where: {
+          id: In(ids.map((x) => new ObjectId(x))),
+        },
+      });
+      userHash = getMap(users, (u) => u.id.toHexString());
+    }
+    return userHash;
+  }
 
   async getUserTeams(userId: string): Promise<TeamEntity[]> {
     const relationships = await this.userTeamRelationRepository.find({

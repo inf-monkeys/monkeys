@@ -3,7 +3,7 @@ import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
 import { LoginByPhoneDto } from './dto/req/login-by-phone.dto';
 import { PhoneService } from './phone.service';
 
-const phoneNumberRegexp = /^1[3456789]\d{9}$/;
+export const phoneNumberRegexp = /^1[3456789]\d{9}$/;
 
 @Controller('/auth/phone')
 export class PhoneController {

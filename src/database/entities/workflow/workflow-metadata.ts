@@ -1,6 +1,6 @@
 import { BlockDefProperties, MonkeyTaskDefTypes } from '@inf-monkeys/vines';
 import { Column, Entity } from 'typeorm';
-import { BaseAssetEntity } from '../base/base-asset';
+import { BaseAssetEntity } from '../assets/base-asset';
 import { WorkflowTriggerType } from './workflow-trigger';
 
 export enum ValidationIssueType {

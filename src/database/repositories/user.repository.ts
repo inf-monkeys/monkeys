@@ -1,10 +1,11 @@
 import { AuthMethod } from '@/common/config';
+import { getMap } from '@/common/utils/map';
 import { UserEntity } from '@/database/entities/identity/user';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
 import { ObjectId } from 'mongodb';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 const defaultAvatar = 'https://static.aside.fun/upload/frame/0XMWE1.jpg';
 export const OBJECT_ID_PATTERN = /[0-9][0-9a-z]{23}/;
@@ -63,7 +64,7 @@ export class UserRepository {
 
   public async registerUser(data: RegisterUserParams) {
     const { phone, email, name, password, photo, externalId } = data;
-    const newUser: UserEntity = {
+    const user = await this.userRepository.save({
       id: new ObjectId(),
       name: name || phone || email,
       phone,
@@ -76,9 +77,8 @@ export class UserRepository {
       isDeleted: false,
       isBlocked: false,
       externalId,
-    };
-    await this.userRepository.save(newUser);
-    return newUser;
+    });
+    return user;
   }
 
   async registryOrGetUser(data: RegisterOrUpdateUserParams) {
@@ -150,5 +150,18 @@ export class UserRepository {
     return {
       success: true,
     };
+  }
+
+  public async getUsersByIdsAsMap(ids: string[]) {
+    let userHash: Record<string, UserEntity> = {};
+    if (ids?.length) {
+      const users = await this.userRepository.find({
+        where: {
+          id: In(ids.map((x) => new ObjectId(x))),
+        },
+      });
+      userHash = getMap(users, (u) => u.id.toHexString());
+    }
+    return userHash;
   }
 }
