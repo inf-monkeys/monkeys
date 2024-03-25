@@ -61,7 +61,6 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
     }
 
     public updateWorkflows(workflows: MonkeyWorkflow[]) {
-      console.log('更新！');
       this.vinesSubWorkflowTools = workflows.map((workflow) => {
         const workflowId = workflow.workflowId;
         const variablesToTools: VinesToolDefProperties[] =

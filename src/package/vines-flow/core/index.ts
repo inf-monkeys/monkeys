@@ -469,15 +469,9 @@ export class VinesCore extends VinesTools(VinesBase) {
     debug = false,
   }: IVinesFlowRunParams): Promise<boolean> {
     this.renderOptions.direction = 'vertical';
-    try {
-      if (this.nodes.some((it) => it.checkChildren([it]))) {
-        this.setAllNodeSize(this.nodeInitSize.width, this.nodeInitSize.height);
-        this.render();
-        this.sendEvent('refresh');
-      }
-    } catch (e) {
+
+    if (!this.fillUpSubWorkflowChildren()) {
       toast.error('启动运行失败！工作流存在循环引用');
-      this.nodes.forEach((it) => it.restoreChildren());
       return false;
     }
 
@@ -703,6 +697,20 @@ export class VinesCore extends VinesTools(VinesBase) {
         this.sendEvent('refresh');
       });
     }, 80);
+  }
+
+  public fillUpSubWorkflowChildren() {
+    try {
+      if (this.nodes.some((it) => it.checkChildren([it]))) {
+        this.setAllNodeSize(this.nodeInitSize.width, this.nodeInitSize.height);
+        this.render();
+        this.sendEvent('refresh');
+      }
+    } catch (e) {
+      this.nodes.forEach((it) => it.restoreChildren());
+      return false;
+    }
+    return true;
   }
 
   private restoreSubWorkflowChildren() {
