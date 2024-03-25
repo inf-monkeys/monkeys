@@ -43,6 +43,6 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     WorkflowPageService,
   ],
   imports: [ConductorModule, TypeOrmModule.forFeature([WorkflowPageEntity])],
-  exports: [WorkflowCrudService],
+  exports: [WorkflowCrudService, WorkflowExecutionService],
 })
 export class WorkflowModule {}

@@ -70,16 +70,22 @@ export class WorkflowTriggersEntity extends BaseEntity {
   /**
    * 定时任务具备的参数
    */
-  @Column()
+  @Column({
+    nullable: true,
+  })
   cron?: string;
 
   @Column({
     name: 'next_trigger_time',
+    nullable: true,
+    type: 'bigint',
   })
   nextTriggerTime?: number;
 
   @Column({
     name: 'last_trigger_time',
+    nullable: true,
+    type: 'bigint',
   })
   lastTriggerTime?: number;
 
@@ -88,12 +94,14 @@ export class WorkflowTriggersEntity extends BaseEntity {
    */
   @Column({
     name: 'webhook_path',
+    nullable: true,
   })
   webhookPath?: string;
 
   @Column({
     name: 'workflow_config',
     type: 'simple-json',
+    nullable: true,
   })
   webhookConfig?: WebhookTriggerConfig;
 }

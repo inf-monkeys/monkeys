@@ -1,4 +1,5 @@
 import { ListDto } from '@/common/dto/list.dto';
+import { getNextCronTimestamp } from '@/common/utils/cron';
 import { calcMd5 } from '@/common/utils/utils';
 import { WorkflowChatSessionEntity } from '@/entities/workflow/workflow-chat-session';
 import { WorkflowExecutionEntity } from '@/entities/workflow/workflow-execution';
@@ -335,6 +336,26 @@ export class WorkflowRepository {
         enabled: false,
       },
     );
+  }
+
+  public async getTriggersToRun() {
+    const currentTimestamp = +new Date();
+    const query = this.workflowTriggerRepository
+      .createQueryBuilder('workflow_trigger')
+      .where('workflow_trigger.enabled = :enabled', { enabled: true })
+      .andWhere('(workflow_trigger.next_trigger_time IS NULL OR workflow_trigger.next_trigger_time < :currentTimestamp)', { currentTimestamp })
+      .andWhere('workflow_trigger.is_deleted = :isDeleted', { isDeleted: false });
+    const triggersToRun = await query.getMany();
+    return triggersToRun;
+  }
+
+  public async updateNextTriggerTime(currentTimestamp: number, triggers: WorkflowTriggersEntity[]) {
+    const triggersToUpdate = triggers.map((x) => {
+      x.nextTriggerTime = getNextCronTimestamp(x.cron);
+      x.lastTriggerTime = currentTimestamp;
+      return x;
+    });
+    await this.workflowTriggerRepository.save(triggersToUpdate);
   }
 
   public async createChatSession(teamId: string, userId: string, workflowId: string, displayName: string) {
