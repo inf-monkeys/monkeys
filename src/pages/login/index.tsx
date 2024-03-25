@@ -35,7 +35,7 @@ const Login: React.FC = () => {
   const oidcButtonText: string = get(oem, 'auth.oidc.buttonText', 'OIDC');
   const autoSigninOidc: boolean = get(oem, 'auth.oidc.autoSignin', false);
 
-  if (autoSigninOidc) {
+  if (autoSigninOidc && isOidcEnabled) {
     handleOidcLogin();
     return <></>;
   }
