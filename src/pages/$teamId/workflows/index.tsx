@@ -57,7 +57,7 @@ export const Workflows: React.FC = () => {
           {
             accessorKey: 'user',
             header: '用户',
-            cell: (props) => <span>{(props.getValue() as IVinesUser).name ?? ''}</span>,
+            cell: (props) => <span>{(props.getValue() as IVinesUser)?.name ?? ''}</span>,
             maxSize: 48,
           },
           {
