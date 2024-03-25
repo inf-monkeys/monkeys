@@ -1,3 +1,4 @@
+import { AuthMethod } from '@/common/config';
 import { UserEntity } from '@/entities/identity/user';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -50,11 +51,12 @@ export class UserRepository {
     });
   }
 
-  public async updateUserLastLogin(userId: string) {
+  public async updateUserLastLogin(userId: string, authMethod: AuthMethod) {
     const user = await this.findById(userId);
     if (user) {
       user.lastLoginAt = Date.now();
       user.loginsCount = (user.loginsCount || 0) + 1;
+      user.lastAuthMethod = authMethod;
       await this.userRepository.save(user);
     }
   }

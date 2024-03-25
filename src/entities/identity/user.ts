@@ -1,3 +1,4 @@
+import { AuthMethod } from '@/common/config';
 import { Column, Entity, Index } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
@@ -75,4 +76,11 @@ export class UserEntity extends BaseEntity {
     name: 'external_id',
   })
   externalId?: string;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    name: 'last_auth_method',
+  })
+  lastAuthMethod?: AuthMethod;
 }

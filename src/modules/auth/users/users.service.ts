@@ -1,3 +1,4 @@
+import { AuthMethod } from '@/common/config';
 import { UserRepository } from '@/repositories/user.repository';
 import { Injectable } from '@nestjs/common';
 import { JwtPayload } from 'jsonwebtoken';
@@ -21,12 +22,14 @@ export class UsersService {
       throw new Error('Invalid jwt token');
     }
     const { sub, name, nickname, picture, email, phone, phone_number, preferred_username } = userinfo;
-    return await this.userRepository.registryOrGetUser({
+    const user = await this.userRepository.registryOrGetUser({
       email,
       phone: phone || phone_number,
       photo: picture,
       name: nickname || name || preferred_username,
       externalId: sub,
     });
+    await this.userRepository.updateUserLastLogin(user.id.toHexString(), AuthMethod.oidc);
+    return user;
   }
 }

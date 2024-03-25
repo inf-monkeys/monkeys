@@ -1,4 +1,4 @@
-import { config } from '@/common/config';
+import { AuthMethod, config } from '@/common/config';
 import { UserRepository } from '@/repositories/user.repository';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import crypto from 'crypto-js';
@@ -25,7 +25,7 @@ export class PasswordService {
         throw new ForbiddenException('密码错误或用户不存在，请检查');
       }
       // 验证通过
-      await this.userRepository.updateUserLastLogin(user.id.toHexString());
+      await this.userRepository.updateUserLastLogin(user.id.toHexString(), AuthMethod.password);
     } else {
       // 注册
       const PASSWORD_REG = /^(?=.*[a-zA-Z])(?=.*\d).{8,32}$/;

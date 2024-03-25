@@ -56,6 +56,7 @@ export enum AuthMethod {
 }
 
 export interface OIDCIdpConfig {
+  auto_signin: boolean;
   client_id: string;
   client_secret: string;
   issuer: string;
@@ -155,6 +156,7 @@ export const config: Config = {
     enabled: readConfig('auth.enabled', []),
     sessionSecret: readConfig('auth.sessionSecret', 'monkeys'),
     oidc: {
+      auto_signin: readConfig('auth.oidc.auto_signin', false),
       issuer: readConfig('auth.oidc.issuer'),
       client_id: readConfig('auth.oidc.client_id'),
       client_secret: readConfig('auth.oidc.client_secret'),

@@ -1,5 +1,5 @@
 import { CacheManager } from '@/common/cache';
-import { config } from '@/common/config';
+import { AuthMethod, config } from '@/common/config';
 import { sendSms } from '@/common/utils/sms';
 import { getRandomNumber } from '@/common/utils/utils';
 import { UserRepository } from '@/repositories/user.repository';
@@ -26,7 +26,7 @@ export class PhoneService {
     }
     // 验证通过
     let user = await this.userRepository.registryOrGetUser({ phone: phoneNumber });
-    await this.userRepository.updateUserLastLogin(user.id.toHexString());
+    await this.userRepository.updateUserLastLogin(user.id.toHexString(), AuthMethod.phone);
     user = omit(user, ['password']);
     if (user) {
       if (user.isBlocked) {

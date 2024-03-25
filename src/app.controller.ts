@@ -117,6 +117,7 @@ export class AppController {
         enabled: config.auth.enabled,
         oidc: {
           buttonText: config.auth.oidc.button_text,
+          autoSignin: config.auth.oidc.auto_signin,
         },
       },
       pages: {
