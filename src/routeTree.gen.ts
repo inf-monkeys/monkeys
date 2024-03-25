@@ -32,10 +32,6 @@ import { Route as TeamIdCanvasIndexImport } from './pages/$teamId/canvas/index'
 import { Route as TeamIdApplicationStoreIndexImport } from './pages/$teamId/application-store/index'
 import { Route as TeamIdActionToolsIndexImport } from './pages/$teamId/action-tools/index'
 import { Route as TeamIdWorkspaceWorkflowIdIndexImport } from './pages/$teamId/workspace/$workflowId/index'
-import { Route as TeamIdWorkspaceWorkflowIdVinesProcessIndexImport } from './pages/$teamId/workspace/$workflowId/vines-process/index'
-import { Route as TeamIdWorkspaceWorkflowIdVinesPreviewIndexImport } from './pages/$teamId/workspace/$workflowId/vines-preview/index'
-import { Route as TeamIdWorkspaceWorkflowIdVinesLogIndexImport } from './pages/$teamId/workspace/$workflowId/vines-log/index'
-import { Route as TeamIdWorkspaceWorkflowIdVinesChatIndexImport } from './pages/$teamId/workspace/$workflowId/vines-chat/index'
 import { Route as TeamIdWorkspaceWorkflowIdPageIdIndexImport } from './pages/$teamId/workspace/$workflowId/$pageId/index'
 
 // Create/Update Routes
@@ -147,30 +143,6 @@ const TeamIdWorkspaceWorkflowIdIndexRoute =
     getParentRoute: () => rootRoute,
   } as any)
 
-const TeamIdWorkspaceWorkflowIdVinesProcessIndexRoute =
-  TeamIdWorkspaceWorkflowIdVinesProcessIndexImport.update({
-    path: '/$teamId/workspace/$workflowId/vines-process/',
-    getParentRoute: () => rootRoute,
-  } as any)
-
-const TeamIdWorkspaceWorkflowIdVinesPreviewIndexRoute =
-  TeamIdWorkspaceWorkflowIdVinesPreviewIndexImport.update({
-    path: '/$teamId/workspace/$workflowId/vines-preview/',
-    getParentRoute: () => rootRoute,
-  } as any)
-
-const TeamIdWorkspaceWorkflowIdVinesLogIndexRoute =
-  TeamIdWorkspaceWorkflowIdVinesLogIndexImport.update({
-    path: '/$teamId/workspace/$workflowId/vines-log/',
-    getParentRoute: () => rootRoute,
-  } as any)
-
-const TeamIdWorkspaceWorkflowIdVinesChatIndexRoute =
-  TeamIdWorkspaceWorkflowIdVinesChatIndexImport.update({
-    path: '/$teamId/workspace/$workflowId/vines-chat/',
-    getParentRoute: () => rootRoute,
-  } as any)
-
 const TeamIdWorkspaceWorkflowIdPageIdIndexRoute =
   TeamIdWorkspaceWorkflowIdPageIdIndexImport.update({
     path: '/$teamId/workspace/$workflowId/$pageId/',
@@ -269,22 +241,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdPageIdIndexImport
       parentRoute: typeof rootRoute
     }
-    '/$teamId/workspace/$workflowId/vines-chat/': {
-      preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdVinesChatIndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/$teamId/workspace/$workflowId/vines-log/': {
-      preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdVinesLogIndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/$teamId/workspace/$workflowId/vines-preview/': {
-      preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdVinesPreviewIndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/$teamId/workspace/$workflowId/vines-process/': {
-      preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdVinesProcessIndexImport
-      parentRoute: typeof rootRoute
-    }
   }
 }
 
@@ -313,10 +269,6 @@ export const routeTree = rootRoute.addChildren([
   TeamIdWorkspaceIndexRoute,
   TeamIdWorkspaceWorkflowIdIndexRoute,
   TeamIdWorkspaceWorkflowIdPageIdIndexRoute,
-  TeamIdWorkspaceWorkflowIdVinesChatIndexRoute,
-  TeamIdWorkspaceWorkflowIdVinesLogIndexRoute,
-  TeamIdWorkspaceWorkflowIdVinesPreviewIndexRoute,
-  TeamIdWorkspaceWorkflowIdVinesProcessIndexRoute,
 ])
 
 /* prettier-ignore-end */
