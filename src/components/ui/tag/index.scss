@@ -9,12 +9,12 @@
 }
 
 .tag-color-primary {
-  --bg-color: color(display-p3 var(--vines-500) / var(--tw-bg-opacity, 1));
+  --bg-color: rgb(var(--vines-400) / var(--tw-bg-opacity, 1));
   --text-color: rgba(var(--gray12) / var(--tw-text-opacity, 1))
 }
 
 .tag-color-secondary {
-  --bg-color: color(display-p3 var(--vines-900) / var(--tw-bg-opacity, 1));
+  --bg-color: rgb(var(--vines-900) / var(--tw-bg-opacity, 1));
   --text-color: rgba(var(--gray12) / var(--tw-text-opacity, 1))
 }
 
