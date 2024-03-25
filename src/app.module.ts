@@ -7,7 +7,7 @@ import { AppService } from './app.service';
 import { CacheModule } from './common/cache/cache.module';
 import { ToolsMiddleware } from './common/middlewares/tools.middleware';
 import { DatabaseModule } from './database/database.module';
-import { RepositoryMoule } from './database/repositories/repositories.module';
+import { RepositoryMoule } from './database/repositories.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
 import { ExportModule } from './modules/export/export.module';
