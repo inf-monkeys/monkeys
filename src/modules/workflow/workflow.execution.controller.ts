@@ -3,7 +3,7 @@ import { WorkflowExecutionContext } from '@/common/dto/workflow-execution-contex
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { WorkflowTriggerType } from '@/entities/workflow/workflow-trigger';
+import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
 import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SearchWorkflowExecutionsDto } from './dto/req/search-workflow-execution.dto';

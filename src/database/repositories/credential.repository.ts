@@ -1,5 +1,5 @@
-import { ToolsCredentialTypeEntity } from '@/entities/tools/tools-credential-type.entity';
-import { ToolsCredentialEntity } from '@/entities/tools/tools-credential.entity';
+import { ToolsCredentialTypeEntity } from '@/database/entities/tools/tools-credential-type.entity';
+import { ToolsCredentialEntity } from '@/database/entities/tools/tools-credential.entity';
 import { CredentialDefinition } from '@/modules/tools/interfaces';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';

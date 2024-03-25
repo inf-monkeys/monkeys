@@ -1,4 +1,4 @@
-import { WorkflowPageEntity } from '@/entities/workflow/workflow-page';
+import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConductorModule } from './conductor/conductor.module';

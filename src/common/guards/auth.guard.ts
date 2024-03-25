@@ -1,6 +1,6 @@
+import { ApikeyRepository } from '@/database/repositories/apikey.repository';
+import { TeamRepository } from '@/database/repositories/team.repository';
 import { JwtHelper } from '@/modules/auth/jwt-utils';
-import { ApikeyRepository } from '@/repositories/apikey.repository';
-import { TeamRepository } from '@/repositories/team.repository';
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { config } from '../config';
 import { IRequest } from '../typings/request';

@@ -1,5 +1,5 @@
 import { AuthMethod } from '@/common/config';
-import { UserEntity } from '@/entities/identity/user';
+import { UserEntity } from '@/database/entities/identity/user';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';

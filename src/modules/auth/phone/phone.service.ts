@@ -2,7 +2,7 @@ import { CacheManager } from '@/common/cache';
 import { AuthMethod, config } from '@/common/config';
 import { sendSms } from '@/common/utils/sms';
 import { getRandomNumber } from '@/common/utils/utils';
-import { UserRepository } from '@/repositories/user.repository';
+import { UserRepository } from '@/database/repositories/user.repository';
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { omit } from 'lodash';
 import { JwtHelper } from '../jwt-utils';

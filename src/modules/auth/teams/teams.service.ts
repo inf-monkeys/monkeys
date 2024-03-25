@@ -1,5 +1,5 @@
-import { TeamEntity } from '@/entities/identity/team';
-import { TeamRepository } from '@/repositories/team.repository';
+import { TeamEntity } from '@/database/entities/identity/team';
+import { TeamRepository } from '@/database/repositories/team.repository';
 import { Injectable } from '@nestjs/common';
 
 export const DEFAULT_TEAM_DESCRIPTION = '用户很懒，还没留下描述';

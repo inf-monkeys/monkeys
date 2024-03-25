@@ -1,5 +1,5 @@
 import { AuthMethod, config } from '@/common/config';
-import { UserRepository } from '@/repositories/user.repository';
+import { UserRepository } from '@/database/repositories/user.repository';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import crypto from 'crypto-js';
 import { omit } from 'lodash';

@@ -1,9 +1,9 @@
 import { config } from '@/common/config';
 import { WorkflowExecutionContext } from '@/common/dto/workflow-execution-context.dto';
 import { IRequest } from '@/common/typings/request';
-import { WebhookTriggerResponseUntil, WorkflowTriggerAuthType, WorkflowTriggerMethod, WorkflowTriggerType } from '@/entities/workflow/workflow-trigger';
+import { WebhookTriggerResponseUntil, WorkflowTriggerAuthType, WorkflowTriggerMethod, WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
 import { Injectable } from '@nestjs/common';
-import { WorkflowRepository } from '../../repositories/workflow.repository';
+import { WorkflowRepository } from '../../database/repositories/workflow.repository';
 import { WorkflowExecutionService } from './workflow.execution.service';
 
 @Injectable()

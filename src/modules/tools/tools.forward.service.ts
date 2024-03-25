@@ -1,6 +1,6 @@
 import { config } from '@/common/config';
 import { IRequest } from '@/common/typings/request';
-import { ToolsRepository } from '@/repositories/tools.repository';
+import { ToolsRepository } from '@/database/repositories/tools.repository';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import axios from 'axios';
 import { AuthType } from './interfaces';

@@ -1,5 +1,5 @@
-import { TeamEntity } from '@/entities/identity/team';
-import { UserTeamRelationshipEntity } from '@/entities/identity/user-team-relationship';
+import { TeamEntity } from '@/database/entities/identity/team';
+import { UserTeamRelationshipEntity } from '@/database/entities/identity/user-team-relationship';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId } from 'mongodb';

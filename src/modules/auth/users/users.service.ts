@@ -1,5 +1,5 @@
 import { AuthMethod } from '@/common/config';
-import { UserRepository } from '@/repositories/user.repository';
+import { UserRepository } from '@/database/repositories/user.repository';
 import { Injectable } from '@nestjs/common';
 import { JwtPayload } from 'jsonwebtoken';
 import { JwtHelper } from '../jwt-utils';

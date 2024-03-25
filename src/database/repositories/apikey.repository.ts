@@ -1,5 +1,5 @@
 import { generateRandomApiKey } from '@/common/utils/apikey';
-import { ApiKeyEntity, ApiKeyStatus } from '@/entities/apikey/apikey';
+import { ApiKeyEntity, ApiKeyStatus } from '@/database/entities/apikey/apikey';
 import { CreateApiKeyDto } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';

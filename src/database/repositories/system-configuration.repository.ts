@@ -1,4 +1,4 @@
-import { SystemConfigurationEntity } from '@/entities/system/system-configuration.entity';
+import { SystemConfigurationEntity } from '@/database/entities/system/system-configuration.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import crypto from 'crypto';

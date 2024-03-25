@@ -1,10 +1,10 @@
 import { ListDto } from '@/common/dto/list.dto';
 import { getNextCronTimestamp } from '@/common/utils/cron';
 import { calcMd5 } from '@/common/utils/utils';
-import { WorkflowChatSessionEntity } from '@/entities/workflow/workflow-chat-session';
-import { WorkflowExecutionEntity } from '@/entities/workflow/workflow-execution';
-import { WorkflowMetadataEntity, WorkflowOutputValue, WorkflowValidationIssue } from '@/entities/workflow/workflow-metadata';
-import { WorkflowTriggerType, WorkflowTriggersEntity } from '@/entities/workflow/workflow-trigger';
+import { WorkflowChatSessionEntity } from '@/database/entities/workflow/workflow-chat-session';
+import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
+import { WorkflowMetadataEntity, WorkflowOutputValue, WorkflowValidationIssue } from '@/database/entities/workflow/workflow-metadata';
+import { WorkflowTriggerType, WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
 import { BlockDefProperties, MonkeyTaskDefTypes } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';

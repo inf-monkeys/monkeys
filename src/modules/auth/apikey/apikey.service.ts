@@ -1,4 +1,4 @@
-import { ApikeyRepository } from '@/repositories/apikey.repository';
+import { ApikeyRepository } from '@/database/repositories/apikey.repository';
 import { Injectable } from '@nestjs/common';
 import { CreateApiKeyDto } from './dto/create-apikey.dto';
 

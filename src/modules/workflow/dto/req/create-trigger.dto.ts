@@ -1,4 +1,4 @@
-import { WebhookTriggerConfig, WorkflowTriggerType } from '@/entities/workflow/workflow-trigger';
+import { WebhookTriggerConfig, WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
 import { ApiProperty } from '@nestjs/swagger';
 import * as Joiful from 'joiful';
 

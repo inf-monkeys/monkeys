@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { CredentialsRepository } from '../../repositories/credential.repository';
+import { CredentialsRepository } from '../../database/repositories/credential.repository';
 
 @Injectable()
 export class ToolsCredentialsService {

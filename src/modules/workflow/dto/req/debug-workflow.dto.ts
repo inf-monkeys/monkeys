@@ -1,4 +1,4 @@
-import { WorkflowOutputValue } from '@/entities/workflow/workflow-metadata';
+import { WorkflowOutputValue } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTask } from '@io-orkes/conductor-javascript';
 import { ApiProperty } from '@nestjs/swagger';
 

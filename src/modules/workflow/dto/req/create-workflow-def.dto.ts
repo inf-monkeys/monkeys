@@ -1,4 +1,4 @@
-import { WorkflowOutputValue } from '@/entities/workflow/workflow-metadata';
+import { WorkflowOutputValue } from '@/database/entities/workflow/workflow-metadata';
 import { BlockDefProperties, MonkeyTaskDefTypes } from '@inf-monkeys/vines';
 import { ApiProperty } from '@nestjs/swagger';
 import * as Joiful from 'joiful';

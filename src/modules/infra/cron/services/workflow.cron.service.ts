@@ -1,9 +1,9 @@
 import { config } from '@/common/config';
 import { logger } from '@/common/logger';
 import { LockManager } from '@/common/utils/lock';
-import { WorkflowTriggerType } from '@/entities/workflow/workflow-trigger';
+import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
+import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { WorkflowExecutionService } from '@/modules/workflow/workflow.execution.service';
-import { WorkflowRepository } from '@/repositories/workflow.repository';
 import { Inject, Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { WorkflowExecutionContext } from '../../../../common/dto/workflow-execution-context.dto';

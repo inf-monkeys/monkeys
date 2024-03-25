@@ -1,5 +1,5 @@
 import { config } from '@/common/config';
-import { UserEntity } from '@/entities/identity/user';
+import { UserEntity } from '@/database/entities/identity/user';
 import { ForbiddenException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 

@@ -4,10 +4,10 @@ import axios from 'axios';
 import { config } from './common/config';
 import { logger } from './common/logger';
 import { sleep } from './common/utils/utils';
+import { ToolsRepository } from './database/repositories/tools.repository';
 import { BUILTIN_TOOL_OPENAPI_MENIFEST_URL } from './modules/tools/builtin/builtin.swagger';
 import { EXAMPLE_WORKER_OPENAPI_MENIFEST_URL } from './modules/tools/example/example.swagger';
 import { ToolsRegistryService } from './modules/tools/tools.registry.service';
-import { ToolsRepository } from './repositories/tools.repository';
 @Injectable()
 export class AppService implements OnApplicationBootstrap {
   constructor(

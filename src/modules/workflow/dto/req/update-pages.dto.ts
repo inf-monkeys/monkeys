@@ -1,4 +1,4 @@
-import { WorkflowPageEntity } from '@/entities/workflow/workflow-page';
+import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
 import { ApiProperty } from '@nestjs/swagger';
 import * as joiful from 'joiful';
 

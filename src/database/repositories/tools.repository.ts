@@ -1,5 +1,5 @@
-import { ToolsServerEntity } from '@/entities/tools/tools-server.entity';
-import { ToolsEntity } from '@/entities/tools/tools.entity';
+import { ToolsServerEntity } from '@/database/entities/tools/tools-server.entity';
+import { ToolsEntity } from '@/database/entities/tools/tools.entity';
 import { ManifestJson } from '@/modules/tools/interfaces';
 import { BlockDefinition } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';

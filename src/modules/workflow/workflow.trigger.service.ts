@@ -1,9 +1,9 @@
 import { calculateTimeDifference, getNextCronTimestamp } from '@/common/utils/cron';
-import { WorkflowTriggerType, WorkflowTriggersEntity } from '@/entities/workflow/workflow-trigger';
+import { WorkflowTriggerType, WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
 import { Injectable } from '@nestjs/common';
 import { ObjectId } from 'mongodb';
 import * as uuid from 'uuid';
-import { WorkflowRepository } from '../../repositories/workflow.repository';
+import { WorkflowRepository } from '../../database/repositories/workflow.repository';
 import { CreateWorkflowTriggerDto } from './dto/req/create-trigger.dto';
 import { UpdateWorkflowTriggerDto } from './dto/req/update-trigger.dto';
 

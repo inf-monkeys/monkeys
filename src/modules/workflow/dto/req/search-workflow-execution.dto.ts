@@ -1,7 +1,7 @@
 import { OrderBy } from '@/common/dto/order.enum';
 import { PaginationDto } from '@/common/dto/pagination.dto';
 import { WorkflowStatusEnum } from '@/common/dto/status.enum';
-import { WorkflowTriggerType } from '@/entities/workflow/workflow-trigger';
+import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
 import { ApiProperty } from '@nestjs/swagger';
 import * as Joiful from 'joiful';
 

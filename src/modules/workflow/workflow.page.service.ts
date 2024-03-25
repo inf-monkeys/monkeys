@@ -1,5 +1,5 @@
-import { PageInstance, WorkflowPageEntity } from '@/entities/workflow/workflow-page';
-import { WorkflowRepository } from '@/repositories/workflow.repository';
+import { PageInstance, WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
+import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId } from 'bson';

@@ -1,6 +1,6 @@
 import { logger } from '@/common/logger';
 import { enumToList } from '@/common/utils';
-import { SYSTEM_NAMESPACE } from '@/entities/tools/tools-server.entity';
+import { SYSTEM_NAMESPACE } from '@/database/entities/tools/tools-server.entity';
 import { BlockDefinition } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 import { OpenAPIObject } from '@nestjs/swagger';
@@ -9,8 +9,8 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import url from 'url';
-import { CredentialsRepository } from '../../repositories/credential.repository';
-import { ToolsRepository } from '../../repositories/tools.repository';
+import { CredentialsRepository } from '../../database/repositories/credential.repository';
+import { ToolsRepository } from '../../database/repositories/tools.repository';
 import { ApiType, AuthType, ManifestJson, RegisterWorkerParams, SchemaVersion } from './interfaces';
 import { parseOpenApiSpecAsBlocks } from './utils/openapi-parser';
 
