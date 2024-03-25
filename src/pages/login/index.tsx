@@ -5,6 +5,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { AnimatePresence, motion } from 'framer-motion';
 import { get } from 'lodash';
 
+import { handleOidcLogin } from '@/apis/authz/oidc';
 import { useSystemConfig } from '@/apis/common';
 import { AuthMethod } from '@/apis/common/typings.ts';
 import { AuthContainer } from '@/components/layout/login/authz';
@@ -32,6 +33,12 @@ const Login: React.FC = () => {
   const isOidcEnabled = loginMethods.includes(AuthMethod.oidc);
 
   const oidcButtonText: string = get(oem, 'auth.oidc.buttonText', 'OIDC');
+  const autoSigninOidc: boolean = get(oem, 'auth.oidc.autoSignin', false);
+
+  if (autoSigninOidc) {
+    handleOidcLogin();
+    return <></>;
+  }
 
   const hasTokens = Object.keys(tokens).length > 0;
 
