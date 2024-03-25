@@ -20,12 +20,12 @@ export class UsersService {
     if (!userinfo) {
       throw new Error('Invalid jwt token');
     }
-    const { sub, name, nickname, picture, email, phone, phone_number } = userinfo;
+    const { sub, name, nickname, picture, email, phone, phone_number, preferred_username } = userinfo;
     return await this.userRepository.registryOrGetUser({
       email,
       phone: phone || phone_number,
       photo: picture,
-      name: nickname || name,
+      name: nickname || name || preferred_username,
       externalId: sub,
     });
   }

@@ -6,7 +6,7 @@ import { config } from '../config';
 export class OidcGuard extends AuthGuard('oidc') {
   getAuthenticateOptions(context: ExecutionContext) {
     const req = context.switchToHttp().getRequest();
-    const redirect_to = req.query.redirect_to || config.server.appId;
+    const redirect_to = req.query.redirect_to || config.server.appUrl;
     return {
       state: `redirect_to=${redirect_to}`,
     };

@@ -114,7 +114,7 @@ export class UserRepository {
     if (matchCount === 0) {
       return this.registerUser(data);
     } else if (matchCount === 1) {
-      const user = [userMatchByEmail, userMatchByPhone].filter(Boolean)[0];
+      const user = [userMatchByEmail, userMatchByPhone, userMatchByExternalId].filter(Boolean)[0];
       user.email = email;
       user.phone = phone;
       user.externalId = externalId;
