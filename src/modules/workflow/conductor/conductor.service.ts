@@ -86,6 +86,9 @@ export class ConductorService {
       }
 
       const tool = tools.find((x) => x.name === task.name);
+      if (!tool) {
+        continue;
+      }
       // use CUSTOM_BLOCK_NAME_KEY to store real task_name
       task.inputParameters[this.TOOL_NAME_KEY] = task.name;
       task.inputParameters[this.APIINFO_KEY] = tool.extra.apiInfo;
