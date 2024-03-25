@@ -1,34 +1,40 @@
 import React from 'react';
 
+import { useElementSize } from '@mantine/hooks';
+import { motion } from 'framer-motion';
+
+import { VinesActuator } from '@/components/layout/vines-execution/actuator';
 import { VinesExecutionHistory } from '@/components/layout/vines-execution/history';
 import { Separator } from '@/components/ui/separator.tsx';
-import { useVinesFlow } from '@/package/vines-flow';
 
+// million-ignore
 export const VinesPreView: React.FC = () => {
-  const { vines } = useVinesFlow();
+  const { ref, height } = useElementSize();
 
-  const hasExecution = vines.executionWorkflowExecution !== null;
-  const isExecutionStatus = vines.executionStatus;
-  const isExecutionPaused = isExecutionStatus === 'PAUSED';
-  const isExecutionRunning = isExecutionStatus === 'RUNNING' || isExecutionPaused;
-
-  const hasWorkflowVariables = vines.workflowInput.length > 0;
+  const finalHeight = height - 108;
 
   return (
-    <div className="space-y-6 p-10">
+    <div ref={ref} className="h-full max-h-full space-y-6 p-10">
       <div className="space-y-0.5">
         <h2 className="text-2xl font-bold tracking-tight">预览工作流</h2>
-        <p className="text-muted-foreground">
-          {`${hasWorkflowVariables ? '填写表单' : '直接'}运行工作流或查看历史运行记录`}
-        </p>
+        <p className="text-muted-foreground">运行工作流或查看历史运行记录</p>
       </div>
       <Separator className="my-6" />
-      <div className="flex flex-row space-x-12 space-y-0">
-        <aside className="w-3/5"></aside>
+      <motion.div
+        className="flex flex-row space-x-6 space-y-0"
+        style={{ height: finalHeight }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: finalHeight ? 1 : 0 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+      >
+        <aside className="relative w-3/5">
+          <VinesActuator height={finalHeight} />
+        </aside>
         <div className="flex-1">
           <VinesExecutionHistory />
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

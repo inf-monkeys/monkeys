@@ -516,12 +516,12 @@ export class VinesCore extends VinesTools(VinesBase) {
     workflowDefinition,
   }: Pick<VinesWorkflowExecution, 'workflowId' | 'workflowDefinition'>) {
     if (workflowId === this.executionInstanceId) {
-      return;
+      return false;
     }
 
     if (this.executionStatus === 'RUNNING') {
       toast.warning('无法切换运行实例！当前工作流正在运行中');
-      return;
+      return false;
     }
 
     if (!workflowId) {
@@ -542,6 +542,8 @@ export class VinesCore extends VinesTools(VinesBase) {
 
       toast.success(`工作流运行实例「${workflowId}」已恢复！`);
     }, 200);
+
+    return true;
   }
 
   public async stop() {
