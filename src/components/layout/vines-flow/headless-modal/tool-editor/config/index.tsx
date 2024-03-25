@@ -16,7 +16,6 @@ interface INodeConfigProps {
 export const ToolConfig: React.FC<INodeConfigProps> = ({ nodeId, task }) => {
   const { vines } = useVinesFlow();
 
-  const workflowVersion = vines.version ?? 1;
   const toolName = task?.name ?? '';
 
   const tool = vines.getTool(toolName);
