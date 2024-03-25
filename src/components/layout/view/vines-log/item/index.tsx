@@ -40,7 +40,7 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
 
   return (
     <Card>
-      <CardContent className="flex p-4 text-xs">
+      <CardContent className="flex items-center p-4 text-xs">
         <div className="flex flex-1 items-center gap-4">
           <div className="flex-shrink-0">
             <VinesIcon src={workflowDefinition.iconUrl} size="sm" />
@@ -68,7 +68,7 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
         </div>
 
         <div className="flex flex-shrink-0 flex-col">
-          <div className="flex w-[140px] items-center gap-2">
+          <div className="flex w-24 items-center gap-2">
             <div
               className={cn('h-[8px] w-[8px] rounded-full', {
                 'bg-green-10': workflowExecution.status === 'COMPLETED',
@@ -80,20 +80,12 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
             />
             <span>{workflowExecution.status ? statusMapper[workflowExecution.status] : 'UNKNOWN'}</span>
           </div>
-          <div className="ml-4 opacity-50">{timelapse}</div>
+          <span className="ml-4 opacity-50">{timelapse}</span>
         </div>
 
-        <div className="w-[240px] flex-shrink-0">
-          <div className="flex items-center gap-2">
-            {/*//FIXME: 当前接口无法获得发起执行者的信息*/}
-            {/*<Avatar className="size-4">*/}
-            {/*  <AvatarImage className="aspect-auto" src={} alt={teamName} />*/}
-            {/*  <AvatarFallback className="rounded-none p-2 text-xs">{teamName.substring(0, 2)}</AvatarFallback>*/}
-            {/*</Avatar>*/}
-            {/*<span className="line-clamp-1 opacity-70">{asUserName(user)}</span>*/}
-            <div className="opacity-50">于 {formatTimeDiffPrevious(moment(workflowExecution.startTime).valueOf())}</div>
-          </div>
-        </div>
+        <span className="w-32 flex-shrink-0 opacity-50">
+          于 {formatTimeDiffPrevious(moment(workflowExecution.startTime).valueOf())}
+        </span>
       </CardContent>
     </Card>
   );

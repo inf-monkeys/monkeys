@@ -2,13 +2,10 @@ import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
-import {
-  IUpdateExecutionTaskParams,
-  IVinesSearchWorkflowExecutionsParams,
-  VinesWorkflowExecutionLists,
-} from '@/apis/workflow/execution/typings.ts';
+import { IUpdateExecutionTaskParams, VinesWorkflowExecutionLists } from '@/apis/workflow/execution/typings.ts';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
+import { IVinesSearchWorkflowExecutionsParams } from '@/schema/workspace/workflow-execution.ts';
 
 export const executionWorkflow = (workflowId: string, inputData: Record<string, unknown>, version = 1) =>
   vinesFetcher<string>({
