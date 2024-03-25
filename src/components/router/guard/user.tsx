@@ -6,9 +6,11 @@ import { useNavigate } from '@tanstack/react-router';
 import { pick, setWith } from 'lodash';
 import { toast } from 'sonner';
 
+import { handleOidcLogout } from '@/apis/authz/oidc';
 import { useTeams } from '@/apis/authz/team';
 import { useUser } from '@/apis/authz/user';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
+import { AuthMethod } from '@/apis/common/typings';
 import { logout, swapAccount } from '@/components/router/guard/auth.ts';
 import { Route } from '@/pages/login';
 import { useLocalStorage } from '@/utils';
@@ -30,7 +32,11 @@ export const UserGuard: React.FC = () => {
     if (await logout(id ?? localUser.id ?? '')) {
       const filtered = userIds.filter((it) => it !== id);
       if (!filtered.length) {
-        await navigate({ to: '/login' });
+        if (user?.lastAuthMethod === AuthMethod.oidc) {
+          handleOidcLogout();
+        } else {
+          await navigate({ to: '/login' });
+        }
       } else {
         swapAccount(filtered[0]);
         setTimeout(() => teamsMutate());
