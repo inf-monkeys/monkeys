@@ -1,15 +1,14 @@
 import React, { useEffect, useMemo } from 'react';
 
-import { useParams } from '@tanstack/react-router';
-
 import _ from 'lodash';
 
 import { useSearchWorkflowExecutions } from '@/apis/workflow/execution';
 import { VinesLogItem } from '@/components/layout/view/vines-log/item';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { useVinesFlow } from '@/package/vines-flow';
 
 export const VinesLogView: React.FC = () => {
-  const { workflowId: pageWorkflowId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
+  const { vines } = useVinesFlow();
 
   const { data: searchWorkflowExecutionsData, trigger } = useSearchWorkflowExecutions();
 
@@ -22,12 +21,12 @@ export const VinesLogView: React.FC = () => {
   }, [workflowDefinitions]);
 
   useEffect(() => {
-    if (pageWorkflowId) {
+    if (vines.workflowId) {
       void trigger({
-        workflowId: pageWorkflowId,
+        workflowId: vines.workflowId,
       });
     }
-  }, [pageWorkflowId]);
+  }, [vines.workflowId]);
 
   return (
     <main className="flex p-4">
