@@ -4,6 +4,7 @@ import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertCircle, CheckCircle2, Circle, CircleDashed, CircleSlash, PauseCircle } from 'lucide-react';
 
+import { getExecutionStatusText } from '@/components/layout/vines-execution/status-icon/utils.ts';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesWorkflowExecutionType } from '@/package/vines-flow/core/typings.ts';
@@ -11,12 +12,14 @@ import { cn } from '@/utils';
 
 interface IExecutionStatusIconProps {
   className?: string;
-  status: VinesNodeExecutionTask['status'];
-  workflowStatus: VinesWorkflowExecutionType;
+  size?: number;
+  status: VinesNodeExecutionTask['status'] | string;
+  workflowStatus: VinesWorkflowExecutionType | string;
+  spinClassName?: string;
 }
 
 export const ExecutionStatusIcon: React.FC<IExecutionStatusIconProps> = memo(
-  ({ className, status = '', workflowStatus }) => {
+  ({ className, status = '', workflowStatus, size = 20, spinClassName }) => {
     return (
       <Tooltip>
         <TooltipTrigger asChild>
@@ -28,9 +31,11 @@ export const ExecutionStatusIcon: React.FC<IExecutionStatusIconProps> = memo(
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
+                  className="flex"
+                  style={{ width: size, height: size }}
                 >
                   <CircularProgress
-                    className="-mr-4 scale-50 [&_circle:last-child]:stroke-vines-500"
+                    className={cn('-ml-4 scale-50 [&_circle:last-child]:stroke-vines-500', spinClassName)}
                     size="lg"
                     aria-label="Loading..."
                   />
@@ -42,16 +47,16 @@ export const ExecutionStatusIcon: React.FC<IExecutionStatusIconProps> = memo(
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <CheckCircle2 size={20} className="stroke-green-10" />
+                  <CheckCircle2 size={size} className="stroke-green-10" />
                 </motion.div>
-              ) : status === 'CANCELED' ? (
+              ) : ['CANCELED', 'TERMINATED'].includes(status) ? (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <CircleSlash size={20} className="stroke-gray-10" />
+                  <CircleSlash size={size} className="stroke-gray-10" />
                 </motion.div>
               ) : ['SKIPPED', 'TIMED_OUT'].includes(status) ? (
                 <motion.div
@@ -60,7 +65,7 @@ export const ExecutionStatusIcon: React.FC<IExecutionStatusIconProps> = memo(
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <Circle size={20} />
+                  <Circle size={size} />
                 </motion.div>
               ) : ['FAILED', 'FAILED_WITH_TERMINAL_ERROR'].includes(status) ? (
                 <motion.div
@@ -69,7 +74,7 @@ export const ExecutionStatusIcon: React.FC<IExecutionStatusIconProps> = memo(
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <AlertCircle size={20} className="stroke-red-10" />
+                  <AlertCircle size={size} className="stroke-red-10" />
                 </motion.div>
               ) : workflowStatus === 'PAUSED' ? (
                 <motion.div
@@ -78,7 +83,7 @@ export const ExecutionStatusIcon: React.FC<IExecutionStatusIconProps> = memo(
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <PauseCircle size={20} className="stroke-yellow-10" />
+                  <PauseCircle size={size} className="stroke-yellow-10" />
                 </motion.div>
               ) : workflowStatus !== 'SCHEDULED' ? (
                 <motion.div
@@ -87,37 +92,13 @@ export const ExecutionStatusIcon: React.FC<IExecutionStatusIconProps> = memo(
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <CircleDashed size={20} />
+                  <CircleDashed size={size} />
                 </motion.div>
               ) : null}
             </AnimatePresence>
           </div>
         </TooltipTrigger>
-        <TooltipContent>
-          {status === 'COMPLETED'
-            ? '运行完毕'
-            : status === 'CANCELED'
-              ? '已取消'
-              : status === 'SKIPPED'
-                ? '已跳过'
-                : status === 'TIMED_OUT'
-                  ? '超时'
-                  : status === 'FAILED'
-                    ? '失败'
-                    : status === 'FAILED_WITH_TERMINAL_ERROR'
-                      ? '失败'
-                      : status === 'IN_PROGRESS'
-                        ? '运行中'
-                        : status === 'SCHEDULED'
-                          ? '已计划 / 正在运行中'
-                          : status === 'RUNNING'
-                            ? '运行中'
-                            : workflowStatus === 'PAUSED'
-                              ? '工作流运行已暂停'
-                              : workflowStatus === 'SCHEDULED'
-                                ? '已计划，等待工作流运行准备'
-                                : '未知状态'}
-        </TooltipContent>
+        <TooltipContent>{getExecutionStatusText(status, workflowStatus)}</TooltipContent>
       </Tooltip>
     );
   },

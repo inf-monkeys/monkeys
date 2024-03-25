@@ -1,0 +1,55 @@
+import React from 'react';
+
+import { useClipboard } from '@mantine/hooks';
+import { Copy } from 'lucide-react';
+import { toast } from 'sonner';
+
+import { ExecutionStatusIcon } from '@/components/layout/vines-execution/status-icon';
+import { getExecutionStatusText } from '@/components/layout/vines-execution/status-icon/utils.ts';
+import { Button } from '@/components/ui/button';
+import { CardDescription } from '@/components/ui/card.tsx';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
+
+interface IActuatorHeaderProps {
+  instanceId: string;
+  workflowStatus: VinesWorkflowExecution['status'] | string;
+}
+
+export const ActuatorHeader: React.FC<IActuatorHeaderProps> = ({ instanceId, workflowStatus }) => {
+  const clipboard = useClipboard({ timeout: 500 });
+
+  return (
+    <header className="flex w-full items-center gap-4 p-2">
+      <ExecutionStatusIcon
+        size={45}
+        workflowStatus={workflowStatus as string}
+        status={workflowStatus as string}
+        spinClassName="scale-90 -ml-0"
+      />
+      <div>
+        <h1 className="text-xl font-bold">
+          工作流{getExecutionStatusText(workflowStatus as string, workflowStatus as string)}
+        </h1>
+        <div className="flex items-center gap-2">
+          <CardDescription>实例 ID: {instanceId}</CardDescription>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                className="-m-2 scale-50"
+                icon={<Copy />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  clipboard.copy(instanceId);
+                  toast.success('已复制实例 ID');
+                }}
+                variant="outline"
+              />
+            </TooltipTrigger>
+            <TooltipContent>点击复制</TooltipContent>
+          </Tooltip>
+        </div>
+      </div>
+    </header>
+  );
+};
