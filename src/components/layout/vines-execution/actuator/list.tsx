@@ -8,7 +8,9 @@ import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { useVinesFlow } from '@/package/vines-flow';
+import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
+import { cn } from '@/utils';
 
 export interface IActuatorToolList {
   id: string;
@@ -17,13 +19,16 @@ export interface IActuatorToolList {
   name: string;
   customName?: string;
   description: string;
+  node: VinesNode;
 }
 
 interface IActuatorToolListProps {
   height: number;
+  activeTool?: VinesNode;
+  setActiveTool?: React.Dispatch<React.SetStateAction<VinesNode | undefined>>;
 }
 
-export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({ height }) => {
+export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({ height, activeTool, setActiveTool }) => {
   const { vines, VINES_REFRESHER } = useVinesFlow();
 
   const [tools, setTools] = useState<IActuatorToolList[]>([]);
@@ -44,6 +49,7 @@ export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({ height }) =
       const customDesc = customData?.description ?? '';
 
       newTools.push({
+        node,
         id: node.id,
         status: node.executionStatus,
         icon: customData?.icon ?? tool?.icon ?? '',
@@ -52,21 +58,28 @@ export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({ height }) =
         description: customDesc ? `${customDesc} / ${toolDesc}` : `${toolDesc}`,
       });
     }
+    !activeTool && setActiveTool && setActiveTool(nodes[1]);
     setTools(newTools);
   }, [VINES_REFRESHER]);
 
   return (
-    <ScrollArea style={{ height }}>
+    <ScrollArea className="pr-3" style={{ height }}>
       <div className="flex flex-col gap-2">
         <AnimatePresence>
-          {tools.map(({ id, status, icon, name, customName, description }) => (
+          {tools.map(({ id, status, icon, name, customName, description, node }) => (
             <motion.div
               key={id}
               initial={{ opacity: 0, bottom: -30, marginTop: -12 }}
               animate={{ opacity: 1, bottom: 0, marginTop: 0 }}
               exit={{ opacity: 0, bottom: -30, marginTop: -12 }}
             >
-              <Card className="relative flex items-center p-2">
+              <Card
+                className={cn(
+                  'relative m-1 flex cursor-pointer items-center p-2 hover:bg-gray-10/5 active:bg-gray-10/10',
+                  activeTool?.id === id && 'outline outline-vines-500',
+                )}
+                onClick={() => setActiveTool?.(node)}
+              >
                 <div className="flex items-center gap-2">
                   <div className="flex size-12 items-center justify-center overflow-clip rounded-lg border shadow-sm">
                     <VinesIcon src={icon} size="lg" />

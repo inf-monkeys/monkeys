@@ -650,7 +650,7 @@ export class VinesCore extends VinesTools(VinesBase) {
   }
 
   private _prevExecutionData: Partial<VinesWorkflowExecution> | undefined;
-  private async fetchWorkflowExecution() {
+  public async fetchWorkflowExecution() {
     const data = await getWorkflowExecution(this.executionInstanceId);
     if (!data) return;
 
