@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { useFlowStore } from '@/store/useFlowStore';
-import VinesEvent from '@/utils/events';
+import VinesEvent from '@/utils/events.ts';
 
 interface IVinesFlowEventsProps {}
 

@@ -3,8 +3,10 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 
 import { Page404 } from '@/components/layout/workspace/404.tsx';
+import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper.tsx';
 import { IFRAME_MAP } from '@/components/ui/vines-iframe/consts.ts';
 import { createVinesCore } from '@/package/vines-flow';
+import { createFlowStore, FlowStoreProvider } from '@/store/useFlowStore';
 
 interface IVinesViewProps {
   id?: string;
@@ -21,7 +23,11 @@ export function VinesView({ id, workflowId, pageId, type }: IVinesViewProps) {
     const { VinesProvider } = createVinesCore(workflowId);
     return (
       <VinesProvider>
-        <View workflowId={workflowId} />
+        <FlowStoreProvider createStore={createFlowStore}>
+          <VinesViewWrapper workflowId={workflowId}>
+            <View />
+          </VinesViewWrapper>
+        </FlowStoreProvider>
       </VinesProvider>
     );
   }, [pageId, workflowId]);

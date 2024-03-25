@@ -1,15 +1,11 @@
-import React, { useEffect, useRef } from 'react';
-
-import { useParams } from '@tanstack/react-router';
+import React, { useEffect } from 'react';
 
 import { useWindowEvent } from '@mantine/hooks';
 import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
-import { get, set } from 'lodash';
+import { get } from 'lodash';
 
-import { useGetWorkflow } from '@/apis/workflow';
 import { VinesEdges } from '@/components/layout/vines-flow/edges';
-import { VinesFlowEvents } from '@/components/layout/vines-flow/events.tsx';
 import { VinesHeadlessModal } from '@/components/layout/vines-flow/headless-modal';
 import { VinesNodes } from '@/components/layout/vines-flow/nodes';
 import { VinesToolbar } from '@/components/layout/vines-flow/toolbar';
@@ -21,65 +17,20 @@ import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { usePageStore } from '@/store/usePageStore';
 import { useLocalStorage } from '@/utils';
-import VinesEvent from '@/utils/events';
+import VinesEvent from '@/utils/events.ts';
+import { VinesFlowEvents } from '@/view/vines-flow/events.tsx';
 
-interface IVinesFlowProps extends React.ComponentPropsWithoutRef<'div'> {
-  workflowId?: string;
-}
+interface IVinesFlowProps {}
 
-export const VinesFlow: React.FC<IVinesFlowProps> = ({ workflowId }) => {
+export const VinesFlow: React.FC<IVinesFlowProps> = () => {
   const { containerWidth, containerHeight, page } = usePageStore();
-  const { setWorkflowId, visible, setVisible, setInitialScale, canvasMode } = useFlowStore();
-
-  const { workflowId: pageWorkflowId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
-  const finalWorkflowId = pageWorkflowId ?? workflowId ?? '';
+  const { visible, setVisible, setInitialScale, canvasMode } = useFlowStore();
 
   const {
     vines,
     vinesCanvasSize: { width, height },
     calculateAdaptiveZoom,
   } = useVinesFlow();
-
-  const initialWorkflowVersionRef = useRef<number>();
-  const vinesVersion = vines.version;
-  const finalVersion =
-    initialWorkflowVersionRef.current && vinesVersion && initialWorkflowVersionRef.current !== vinesVersion
-      ? vinesVersion
-      : void 0;
-  const { data: workflow } = useGetWorkflow(
-    finalWorkflowId,
-    finalVersion,
-    useLocalStorage('vines-apikey', '', false)[0],
-  );
-
-  useEffect(() => {
-    workflowId && setWorkflowId(finalWorkflowId);
-    if (workflow) {
-      const initialWorkflowVersion = initialWorkflowVersionRef.current;
-      const workflowVersion = workflow.version;
-      if (!initialWorkflowVersion || initialWorkflowVersion < vinesVersion) {
-        initialWorkflowVersionRef.current = workflowVersion;
-      }
-
-      if (workflowVersion < vinesVersion) {
-        set(workflow, 'version', vinesVersion);
-      }
-
-      if (workflowVersion !== vinesVersion && initialWorkflowVersion) {
-        setVisible(false);
-        setTimeout(() => {
-          vines.update({ workflow });
-          setTimeout(() => setVisible(true), 80);
-        }, 164);
-      } else {
-        vines.update({ workflow });
-      }
-    }
-
-    if (!workflow?.tasks?.length) {
-      setVisible(false);
-    }
-  }, [workflow]);
 
   const [localRenderDirection] = useLocalStorage<string>('vines-ui-process-page-render-direction', 'false', false);
   const [localRenderType] = useLocalStorage<string>(
