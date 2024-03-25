@@ -58,7 +58,7 @@ export const VinesViewWrapper: React.FC<IVinesViewWrapperProps> = memo(({ workfl
       }
     }
 
-    if (!workflow?.workflowDef?.tasks?.length) {
+    if (!workflow?.tasks?.length) {
       setVisible(false);
     }
   }, [workflow]);
