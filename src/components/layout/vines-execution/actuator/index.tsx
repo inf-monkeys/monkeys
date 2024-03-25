@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { BugPlay } from 'lucide-react';
@@ -6,9 +6,11 @@ import { BugPlay } from 'lucide-react';
 import { ActuatorHeader } from '@/components/layout/vines-execution/actuator/header.tsx';
 import { ActuatorToolList } from '@/components/layout/vines-execution/actuator/list.tsx';
 import { VinesWorkflowInput } from '@/components/layout/vines-execution/workflow-input';
+import { ComplicateSimpleNodeExecutionExpand } from '@/components/layout/vines-flow/nodes/complicate/node/simple/expand/execution.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
+import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 
@@ -27,6 +29,14 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
 
   const hasWorkflowVariables = vines.workflowInput.length > 0;
 
+  const [activeTool, setActiveTool] = useState<VinesNode>();
+
+  useEffect(() => {
+    if (vines.executionInstanceId) {
+      void vines.fetchWorkflowExecution().then(() => vines.emit('refresh'));
+    }
+  }, []);
+
   return (
     <AnimatePresence>
       {hasExecution ? (
@@ -41,10 +51,12 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
           <ActuatorHeader workflowStatus={workflowStatus} instanceId={vines.executionInstanceId} />
           <div className="flex items-center">
             <div className="w-2/5">
-              <ActuatorToolList height={height - 80} />
+              <ActuatorToolList height={height - 80} activeTool={activeTool} setActiveTool={setActiveTool} />
             </div>
             <Separator orientation="vertical" className="mx-2" />
-            <div className="flex-1"></div>
+            <div className="h-full flex-1">
+              <ComplicateSimpleNodeExecutionExpand executionTask={activeTool?.executionTask} />
+            </div>
           </div>
         </motion.div>
       ) : (
