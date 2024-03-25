@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ShieldCheck, Users } from 'lucide-react';
 
+import { handleOidcLogin } from '@/apis/authz/oidc';
 import { EmailAuth } from '@/components/layout/login/authz/email-auth.tsx';
 import { PhoneAuth } from '@/components/layout/login/authz/phone-auth.tsx';
 import { Button } from '@/components/ui/button';
@@ -41,9 +42,6 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
   }, [onlyOne]);
 
   const handleSwapUsers = () => setSwap('users');
-
-  const handleOidcLogin = () =>
-    (window.location.href = `/api/auth/oidc/login?redirect_to=${window.location.origin}/login/callback`);
 
   const areValuesUsed = enablePassword || enablePhone;
 

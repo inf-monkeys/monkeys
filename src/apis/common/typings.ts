@@ -24,6 +24,7 @@ export interface ISystemConfig {
     enabled: AuthMethod[];
     oidc?: {
       buttonText?: string;
+      autoSignin?: boolean;
     };
   };
   pages: {
