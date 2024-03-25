@@ -1,3 +1,5 @@
+import { AuthMethod } from '@/apis/common/typings';
+
 export interface IVinesUser {
   id: string;
   name: string;
@@ -9,6 +11,7 @@ export interface IVinesUser {
   lastLoginAt: number;
   createdTimestamp: number;
   updatedTimestamp: number;
+  lastAuthMethod?: AuthMethod;
 }
 
 export interface IUpdateUserInfo {
