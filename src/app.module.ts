@@ -6,13 +6,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CacheModule } from './common/cache/cache.module';
 import { ToolsMiddleware } from './common/middlewares/tools.middleware';
+import { CronJobModule } from './cronjobs/cron.module';
 import { DatabaseModule } from './database/database.module';
 import { RepositoryMoule } from './database/repositories.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
 import { ExportModule } from './modules/export/export.module';
-import { GatewaysModule } from './modules/gateways/gateways.module';
-import { CronJobModule } from './modules/infra/cron/cron.module';
 import { ToolsModule } from './modules/tools/tools.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { OpenapiModule } from './openapi.module';
@@ -28,7 +27,6 @@ import { OpenapiModule } from './openapi.module';
     RepositoryMoule,
     WorkflowModule,
     OpenapiModule,
-    GatewaysModule,
     ScheduleModule.forRoot(),
     CronJobModule,
     ExportModule,

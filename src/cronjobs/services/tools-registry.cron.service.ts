@@ -4,7 +4,7 @@ import { LockManager } from '@/common/utils/lock';
 import { ToolsRegistryService } from '@/modules/tools/tools.registry.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { ToolsRepository } from '../../../../database/repositories/tools.repository';
+import { ToolsRepository } from '../../database/repositories/tools.repository';
 
 @Injectable()
 export class ToolsRegistryCronService {

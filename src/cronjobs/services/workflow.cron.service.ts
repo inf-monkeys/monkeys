@@ -6,7 +6,7 @@ import { WorkflowRepository } from '@/database/repositories/workflow.repository'
 import { WorkflowExecutionService } from '@/modules/workflow/workflow.execution.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { WorkflowExecutionContext } from '../../../../common/dto/workflow-execution-context.dto';
+import { WorkflowExecutionContext } from '../../common/dto/workflow-execution-context.dto';
 
 @Injectable()
 export class WorkflowCronService {

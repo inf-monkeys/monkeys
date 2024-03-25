@@ -24,7 +24,9 @@ export class MediaFileEntity extends BaseAssetEntity {
   @Column()
   url: string;
 
-  @Column()
+  @Column({
+    type: 'varchar',
+  })
   source: MediaSource;
 
   @Column()
