@@ -38,7 +38,7 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }
   const currentPageId = page?.id;
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence>
       {hasPages &&
         renderer
           .filter(({ teamId, workflowId, type }) => teamId && workflowId && type)

@@ -58,7 +58,9 @@ export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({ height, act
         description: customDesc ? `${customDesc} / ${toolDesc}` : `${toolDesc}`,
       });
     }
-    !activeTool && setActiveTool && setActiveTool(nodes[1]);
+    if (activeTool?.executionTask?.status === 'DEFAULT' || !activeTool) {
+      setActiveTool?.(nodes[1]);
+    }
     setTools(newTools);
   }, [VINES_REFRESHER]);
 
