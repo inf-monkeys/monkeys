@@ -1,3 +1,4 @@
+import { WorkflowTriggerType } from '@inf-monkeys/vines/src/models/WorkflowDefDto.ts';
 import z from 'zod';
 
 export const vinesSearchWorkflowExecutionsSchema = z.object({
@@ -8,8 +9,8 @@ export const vinesSearchWorkflowExecutionsSchema = z.object({
   endTimeTo: z.number().optional(),
   orderBy: z
     .object({
-      filed: z.enum(['startTime', 'endTime', 'workflowId', 'workflowType', 'status']),
-      order: z.enum(['DESC', 'ASC']),
+      filed: z.enum(['startTime', 'endTime', 'workflowId', 'workflowType', 'status']).optional(),
+      order: z.enum(['DESC', 'ASC']).optional(),
     })
     .optional(),
   pagination: z
@@ -18,7 +19,10 @@ export const vinesSearchWorkflowExecutionsSchema = z.object({
       limit: z.number(),
     })
     .optional(),
-  status: z.enum(['RUNNING', 'COMPLETED', 'FAILED', 'TIMED_OUT', 'TERMINATED', 'PAUSED']).optional(),
+  status: z.array(z.enum(['RUNNING', 'COMPLETED', 'FAILED', 'TIMED_OUT', 'TERMINATED', 'PAUSED'])).optional(),
+  triggerTypes: z
+    .array(z.enum([WorkflowTriggerType.MANUALLY, WorkflowTriggerType.SCHEDULER, WorkflowTriggerType.WEBHOOK]))
+    .optional(),
   workflowInstanceId: z.string().optional(),
   versions: z.array(z.number()).optional(),
 });
