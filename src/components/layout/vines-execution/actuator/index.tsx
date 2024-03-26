@@ -3,10 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { BugPlay } from 'lucide-react';
 
+import { VinesActuatorDetail } from '@/components/layout/vines-execution/actuator/detail';
 import { ActuatorHeader } from '@/components/layout/vines-execution/actuator/header.tsx';
 import { ActuatorToolList } from '@/components/layout/vines-execution/actuator/list.tsx';
 import { VinesWorkflowInput } from '@/components/layout/vines-execution/workflow-input';
-import { ComplicateSimpleNodeExecutionExpand } from '@/components/layout/vines-flow/nodes/complicate/node/simple/expand/execution.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
@@ -37,6 +37,8 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
     }
   }, []);
 
+  const actuatorHeight = height - 64;
+
   return (
     <AnimatePresence>
       {hasExecution ? (
@@ -49,14 +51,12 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
           className="absolute left-0 top-0 flex size-full flex-col gap-4"
         >
           <ActuatorHeader workflowStatus={workflowStatus} instanceId={vines.executionInstanceId} />
-          <div className="flex items-center">
+          <div className="flex items-center" style={{ height: actuatorHeight }}>
             <div className="w-2/5">
-              <ActuatorToolList height={height - 80} activeTool={activeTool} setActiveTool={setActiveTool} />
+              <ActuatorToolList height={actuatorHeight} activeTool={activeTool} setActiveTool={setActiveTool} />
             </div>
-            <Separator orientation="vertical" className="mx-2" />
-            <div className="h-full flex-1">
-              <ComplicateSimpleNodeExecutionExpand executionTask={activeTool?.executionTask} />
-            </div>
+            <Separator orientation="vertical" className="ml-2 mr-6" />
+            <VinesActuatorDetail executionTask={activeTool?.executionTask} height={actuatorHeight} />
           </div>
         </motion.div>
       ) : (

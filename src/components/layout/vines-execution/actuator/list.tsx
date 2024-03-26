@@ -89,14 +89,14 @@ export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({ height, act
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <div className="flex items-end gap-2">
-                            <p className="line-clamp-1 text-sm font-bold leading-tight">{customName}</p>
-                            {name && (
+                            <p className="line-clamp-1 text-sm font-bold leading-tight">{customName || name}</p>
+                            {customName && (
                               <span className="line-clamp-1 min-w-[3rem] text-xs font-light text-gray-10">{name}</span>
                             )}
                           </div>
                         </TooltipTrigger>
                         <TooltipContent className="max-w-64">
-                          {name} / {customName}
+                          {`${customName}${customName ? ' / ' : ''}${name}`}
                         </TooltipContent>
                       </Tooltip>
                     </div>

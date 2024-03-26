@@ -11,10 +11,10 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/utils';
 
 interface IVinesExecutionHumanInteractionProps {
+  height?: number;
   instanceId: string;
   taskId: string;
   inputData: Record<string, any>;
-  outputData: Record<string, any>;
   taskDefName: string;
   isCompleted: boolean;
 }
@@ -22,10 +22,10 @@ interface IVinesExecutionHumanInteractionProps {
 const IMG_REGEXP = /https?:\/\/\S+\.(?:png|webp|jpg|jpeg)/i;
 
 export const VinesExecutionHumanInteraction: React.FC<IVinesExecutionHumanInteractionProps> = ({
+  height,
   instanceId,
   taskId,
   inputData,
-  outputData,
   taskDefName,
   isCompleted,
 }) => {
@@ -82,7 +82,7 @@ export const VinesExecutionHumanInteraction: React.FC<IVinesExecutionHumanIntera
   const isEmpty = !textInteracts.length && !imageInteracts.length;
   const selectedLength = selectedItems.length;
   return (
-    <div className="relative size-full">
+    <div className="relative size-full" style={{ height }}>
       <AnimatePresence>
         {isCompleted || disableTaskId === taskId ? (
           <motion.div
