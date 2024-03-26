@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import React, { memo } from 'react';
 
 import { VinesAbstractBoolean } from '@/components/layout/vines-execution/data-display/abstract/node/boolean.tsx';
 import { VinesAbstractImage } from '@/components/layout/vines-execution/data-display/abstract/node/image.tsx';
@@ -13,17 +13,18 @@ import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 interface IVinesAbstractDataPreviewProps {
   className?: string;
+  style?: React.CSSProperties;
   data: JSONValue;
 }
 
 export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
-  ({ data, className }) => {
+  ({ data, className, style }) => {
     const previewData = previewDataGenerator(data);
 
     const previewDataLength = previewData.length;
 
     return (
-      <ScrollArea className={className}>
+      <ScrollArea className={className} style={style}>
         <div className="flex h-full w-full flex-col gap-1">
           {previewData.map(({ name, type, value }, i) => {
             return (

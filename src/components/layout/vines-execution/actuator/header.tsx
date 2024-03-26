@@ -20,7 +20,7 @@ export const ActuatorHeader: React.FC<IActuatorHeaderProps> = ({ instanceId, wor
   const clipboard = useClipboard({ timeout: 500 });
 
   return (
-    <header className="flex w-full items-center gap-4 p-2">
+    <header className="flex w-full items-center gap-4 px-2">
       <ExecutionStatusIcon
         size={45}
         workflowStatus={workflowStatus as string}

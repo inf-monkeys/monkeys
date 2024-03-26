@@ -3,8 +3,8 @@ import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { has } from 'lodash';
 
+import { VinesActuatorDetail } from '@/components/layout/vines-execution/actuator/detail';
 import { ToolOutput } from '@/components/layout/vines-flow/headless-modal/tool-editor/config/tool-output';
-import { ComplicateSimpleNodeExecutionExpand } from '@/components/layout/vines-flow/nodes/complicate/node/simple/expand/execution.tsx';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
 
 interface IComplicateSimpleNodeExpandProps {
@@ -33,7 +33,9 @@ export const ComplicateSimpleNodeExpand: React.FC<IComplicateSimpleNodeExpandPro
           exit={{ opacity: 0, marginLeft: -45, scale: 0.95 }}
         >
           {hasExecutionData ? (
-            <ComplicateSimpleNodeExecutionExpand executionTask={executionTask} />
+            <div className="p-5">
+              <VinesActuatorDetail executionTask={executionTask} height={435} />
+            </div>
           ) : (
             <div className="flex flex-1 flex-col overflow-y-auto p-5">
               <h1 className="line-clamp-1 text-base font-bold">输出</h1>

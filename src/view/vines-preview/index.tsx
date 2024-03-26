@@ -21,7 +21,7 @@ export const VinesPreView: React.FC = () => {
       </div>
       <Separator className="my-6" />
       <motion.div
-        className="flex flex-row space-x-6 space-y-0"
+        className="flex"
         style={{ height: finalHeight }}
         initial={{ opacity: 0 }}
         animate={{ opacity: finalHeight ? 1 : 0 }}
@@ -31,6 +31,7 @@ export const VinesPreView: React.FC = () => {
         <aside className="relative w-3/5">
           <VinesActuator height={finalHeight} />
         </aside>
+        <Separator orientation="vertical" className="mx-3" />
         <div className="flex-1">
           <VinesExecutionHistory />
         </div>
