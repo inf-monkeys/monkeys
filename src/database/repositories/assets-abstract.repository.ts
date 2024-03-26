@@ -6,15 +6,15 @@ import { ForbiddenException } from '@nestjs/common';
 import { uniq } from 'lodash';
 import { ObjectId } from 'mongodb';
 import { FindManyOptions, FindOptionsOrder, FindOptionsWhere, Repository } from 'typeorm';
-import { BaseAssetEntity } from '../entities/assets/base-asset';
+import { AssetPublishConfig, AssetPublishPolicy, BaseAssetEntity } from '../entities/assets/base-asset';
 import { TeamRepository } from './team.repository';
 import { UserRepository } from './user.repository';
 
 export class AbstractAssetRepository<E extends BaseAssetEntity> {
   constructor(
-    private readonly repository: Repository<E>,
-    private readonly userRepository: UserRepository,
-    private readonly teamRepository: TeamRepository,
+    public readonly repository: Repository<E>,
+    public readonly userRepository: UserRepository,
+    public readonly teamRepository: TeamRepository,
   ) {}
 
   private async _withIdentity(item: E): Promise<AssetWithIdentity<E>> {
@@ -135,7 +135,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     return condition as unknown as FindManyOptions<E>;
   }
 
-  public async findById(id: string, additionQuery: Record<string, any> = {}, withIdentity = true): Promise<E | undefined> {
+  public async getAssetById(id: string, additionQuery: Record<string, any> = {}, withIdentity = true): Promise<E | undefined> {
     const entity = await this.repository.findOne({
       where: {
         isDeleted: false,
@@ -181,5 +181,48 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
       return { data: await this._withIdentities(data), total, page: +page, limit: +limit };
     }
     return { data, total, page: +page, limit: +limit };
+  }
+
+  public async publishAsset(teamId: string, assetId: string, publishConfig: AssetPublishConfig) {
+    const asset = await this.getAssetById(assetId);
+    if (!asset) {
+      throw new Error('资产不存在');
+    }
+    if (asset.teamId !== teamId) {
+      throw new Error('无权限操作此资产');
+    }
+    const isPreset = asset.isPreset;
+    if (isPreset) {
+      throw new Error('无法发布预置资产');
+    }
+    asset.isPublished = true;
+    asset.publishConfig = publishConfig;
+    await this.repository.save(asset);
+    return true;
+  }
+
+  public async forkAsset(teamId: string, assetId: string) {
+    const asset = await this.getAssetById(assetId);
+    if (!asset) {
+      throw new Error('资产不存在');
+    }
+    const { isPublished, publishConfig } = asset;
+    if (!isPublished) {
+      throw new Error('此资产未发布');
+    }
+    if (asset.teamId === teamId) {
+      throw new Error('此资产由此团队发布，不能克隆');
+    }
+    const { policy } = publishConfig;
+    switch (policy) {
+      case AssetPublishPolicy.authorize:
+        break;
+      case AssetPublishPolicy.clone:
+        break;
+      case AssetPublishPolicy.createNew:
+        break;
+      default:
+        break;
+    }
   }
 }

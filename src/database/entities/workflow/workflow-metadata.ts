@@ -54,9 +54,6 @@ export class WorkflowMetadataEntity extends BaseAssetEntity {
   @Column()
   version: number;
 
-  @Column()
-  name: string;
-
   /**
    * 工作流是否成功激活，非激活状态的工作流不允许执行
    *

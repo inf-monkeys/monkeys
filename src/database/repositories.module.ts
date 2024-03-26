@@ -2,6 +2,13 @@ import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { entities } from './database.module';
 import { ApikeyRepository } from './repositories/apikey.repository';
+import { CanvasAssetRepositroy } from './repositories/assets-canvas.repository';
+import { AssetsCommonRepository } from './repositories/assets-common.repository';
+import { LlmModelAssetRepositroy } from './repositories/assets-llm-model.respository';
+import { MediaFileAssetRepositroy } from './repositories/assets-media-file.repository';
+import { SdModelAssetRepositroy } from './repositories/assets-sd-model.repository';
+import { TableCollectionAssetRepositroy } from './repositories/assets-table-collection.repository';
+import { TextCollectionAssetRepositroy } from './repositories/assets-text-collections.repository';
 import { CredentialsRepository } from './repositories/credential.repository';
 import { SystemConfigurationRepository } from './repositories/system-configuration.repository';
 import { TeamRepository } from './repositories/team.repository';
@@ -11,8 +18,38 @@ import { WorkflowRepository } from './repositories/workflow.repository';
 
 @Global()
 @Module({
-  providers: [ToolsRepository, WorkflowRepository, CredentialsRepository, SystemConfigurationRepository, UserRepository, TeamRepository, ApikeyRepository],
-  exports: [ToolsRepository, WorkflowRepository, CredentialsRepository, SystemConfigurationRepository, UserRepository, TeamRepository, ApikeyRepository],
+  providers: [
+    ToolsRepository,
+    WorkflowRepository,
+    CredentialsRepository,
+    SystemConfigurationRepository,
+    UserRepository,
+    TeamRepository,
+    ApikeyRepository,
+    AssetsCommonRepository,
+    CanvasAssetRepositroy,
+    LlmModelAssetRepositroy,
+    SdModelAssetRepositroy,
+    TextCollectionAssetRepositroy,
+    TableCollectionAssetRepositroy,
+    MediaFileAssetRepositroy,
+  ],
+  exports: [
+    ToolsRepository,
+    WorkflowRepository,
+    CredentialsRepository,
+    SystemConfigurationRepository,
+    UserRepository,
+    TeamRepository,
+    ApikeyRepository,
+    AssetsCommonRepository,
+    CanvasAssetRepositroy,
+    LlmModelAssetRepositroy,
+    SdModelAssetRepositroy,
+    TextCollectionAssetRepositroy,
+    TableCollectionAssetRepositroy,
+    MediaFileAssetRepositroy,
+  ],
   imports: [TypeOrmModule.forFeature(entities)],
 })
 export class RepositoryMoule {}

@@ -1,15 +1,17 @@
-import { AuthorizedTarget } from '@/common/typings/asset';
 import { Column } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
-export class BaseAssetEntity extends BaseEntity {
-  @Column({
-    type: 'simple-json',
-    name: 'tags',
-    nullable: true,
-  })
-  tags?: string[];
+export enum AssetPublishPolicy {
+  authorize = 'authorize',
+  clone = 'clone',
+  createNew = 'createNew',
+}
 
+export class AssetPublishConfig {
+  policy: AssetPublishPolicy;
+}
+
+export class BaseAssetEntity extends BaseEntity {
   @Column({
     name: 'team_id',
   })
@@ -34,41 +36,23 @@ export class BaseAssetEntity extends BaseEntity {
   })
   description?: string;
 
-  // 业务字段开始
   @Column({
-    name: 'original_asset_id',
-    nullable: true,
-  })
-  originAssetId?: string;
-
-  @Column({
-    name: 'is_preset_asset',
+    name: 'is_preset',
     default: false,
   })
-  isPresetAsset?: boolean;
+  isPreset?: boolean;
 
   @Column({
-    name: 'is_public_asset',
+    name: 'is_published',
     default: false,
+    comment: '此资产是否被发布',
   })
-  isPublicAsset?: boolean;
+  isPublished?: boolean;
 
   @Column({
-    name: 'public_asset_category_ids',
+    name: 'publish_config',
     type: 'simple-json',
     nullable: true,
   })
-  publicAssetCategoryIds?: string[];
-
-  @Column({
-    nullable: true,
-    type: 'simple-json',
-  })
-  authorizedTargets?: AuthorizedTarget[];
-
-  @Column({
-    nullable: true,
-    type: 'simple-json',
-  })
-  _importJson?: Record<string, any>;
+  publishConfig?: AssetPublishConfig;
 }
