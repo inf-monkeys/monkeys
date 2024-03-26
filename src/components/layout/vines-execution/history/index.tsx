@@ -95,7 +95,7 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
               >
                 <Card className="flex w-full cursor-pointer items-center justify-between gap-3 p-6">
                   <CardHeader className="p-0">
-                    <CardTitle>{`${formatTimeDiffPrevious(startTime ?? 0)}${getDescOfTriggerType(triggerType ?? '')}`}</CardTitle>
+                    <CardTitle className="text-xl">{`${formatTimeDiffPrevious(startTime ?? 0)}${getDescOfTriggerType(triggerType ?? '')}`}</CardTitle>
                     <div className="flex items-center gap-2">
                       <CardDescription>实例 ID: {instanceId}</CardDescription>
                       <Tooltip>
