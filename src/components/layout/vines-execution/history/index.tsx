@@ -18,6 +18,7 @@ import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
+import { useRetimer } from '@/utils/use-retimer.ts';
 
 interface IVinesExecutionHistoryProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -25,6 +26,7 @@ interface IVinesExecutionHistoryProps extends React.ComponentPropsWithoutRef<'di
 export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () => {
   const { workflowId, setCanvasMode } = useFlowStore();
   const clipboard = useClipboard({ timeout: 500 });
+  const reTimer = useRetimer();
 
   const { vines } = useVinesFlow();
 
@@ -33,21 +35,24 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
   const [activeInstanceId, setActiveInstanceId] = useState('_');
 
   const vinesExecutionStatus = vines.executionStatus;
+
   useEffect(() => {
     if (!workflowId) return;
-    setTimeout(
-      () => {
-        trigger({ workflowId, pagination: { page: 1, limit: 100 } }).then((it) => {
-          const executionInstance = it?.data?.find((it) => it.status === 'PAUSED' || it.status === 'RUNNING');
-          const instanceId = executionInstance?.workflowId;
-          if (instanceId) {
-            vines.swapExecutionInstance(executionInstance);
-            setActiveInstanceId(instanceId);
-            setCanvasMode(CanvasStatus.RUNNING);
-          }
-        });
-      },
-      !data ? 0 : 800,
+    reTimer(
+      setTimeout(
+        () => {
+          trigger({ workflowId, pagination: { page: 1, limit: 100 } }).then((it) => {
+            const executionInstance = it?.data?.find((it) => it.status === 'PAUSED' || it.status === 'RUNNING');
+            const instanceId = executionInstance?.workflowId;
+            if (instanceId) {
+              vines.swapExecutionInstance(executionInstance);
+              setActiveInstanceId(instanceId);
+              setCanvasMode(CanvasStatus.RUNNING);
+            }
+          });
+        },
+        !data ? 0 : 800,
+      ) as unknown as number,
     );
   }, [workflowId, vinesExecutionStatus]);
 
