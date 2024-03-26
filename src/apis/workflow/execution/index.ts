@@ -56,7 +56,6 @@ export const useSearchWorkflowExecutions = () =>
     `/api/workflow/executions/search`,
     vinesFetcher({ method: 'POST' }),
   );
-
 export const useUpdateExecutionTask = (instanceId: string, taskId: string) =>
   useSWRMutation<string | undefined, unknown, string | null, IUpdateExecutionTaskParams>(
     instanceId && taskId ? `/api/workflow/${instanceId}/tasks/${taskId}` : null,

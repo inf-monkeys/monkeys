@@ -1,3 +1,4 @@
+import { WorkflowTriggerType } from '@inf-monkeys/vines';
 import { Workflow } from '@io-orkes/conductor-javascript';
 
 export const EXECUTION_STATUS_LIST: { status: Workflow['status']; text: string }[] = [
@@ -8,3 +9,11 @@ export const EXECUTION_STATUS_LIST: { status: Workflow['status']; text: string }
   { status: 'TIMED_OUT', text: '已超时' },
   { status: 'TERMINATED', text: '已终止' },
 ];
+
+export const TRIGGER_TYPE_LIST: { value: WorkflowTriggerType; text: string }[] = [
+  { value: WorkflowTriggerType.MANUALLY, text: '手动执行' },
+  { value: WorkflowTriggerType.SCHEDULER, text: '定时任务' },
+  { value: WorkflowTriggerType.WEBHOOK, text: 'Webhook' },
+];
+
+export const LOG_VIEW_HEIGHT = 'h-[calc(100vh-3.5rem-0.5rem-0.25rem-1rem-2rem-5rem-2rem)]';
