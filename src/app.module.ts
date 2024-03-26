@@ -15,6 +15,7 @@ import { ExportModule } from './modules/export/export.module';
 import { ToolsModule } from './modules/tools/tools.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { OpenapiModule } from './openapi.module';
+import { AssetsModule } from './modules/assets/assets.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { OpenapiModule } from './openapi.module';
     ExportModule,
     BootstrapModule,
     AuthModule,
+    AssetsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

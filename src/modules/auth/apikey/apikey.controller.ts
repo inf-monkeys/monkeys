@@ -7,7 +7,7 @@ import { ApikeyService } from './apikey.service';
 import { CreateApiKeyDto } from './dto/create-apikey.dto';
 
 @Controller('/auth/apikey')
-@ApiTags('APIKey')
+@ApiTags('Auth/APIKey')
 @UseGuards(CompatibleAuthGuard)
 export class ApikeyController {
   constructor(private readonly apiKeyService: ApikeyService) {}
