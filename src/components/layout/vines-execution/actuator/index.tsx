@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 
+import { useParams } from '@tanstack/react-router';
+
 import { AnimatePresence, motion } from 'framer-motion';
 import { BugPlay, RotateCcw, StopCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { IPinPage } from '@/apis/pages/typings.ts';
 import { VinesActuatorDetail } from '@/components/layout/vines-execution/actuator/detail';
 import { ActuatorHeader } from '@/components/layout/vines-execution/actuator/header.tsx';
 import { ActuatorToolList } from '@/components/layout/vines-execution/actuator/list.tsx';
@@ -16,6 +19,7 @@ import { useVinesFlow } from '@/package/vines-flow';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
+import { useLocalStorage } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IVinesActuatorProps {
@@ -23,7 +27,11 @@ interface IVinesActuatorProps {
 }
 
 export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
-  const { setCanvasMode } = useFlowStore();
+  const { setCanvasMode, workflowId } = useFlowStore();
+
+  const { workflowId: routeWorkflowId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
+  const [page] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
+
   const { vines } = useVinesFlow();
 
   const workflowExecution = vines.executionWorkflowExecution;
@@ -37,11 +45,12 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
 
   const [activeTool, setActiveTool] = useState<VinesNode>();
 
+  const isViewActive = workflowId === (routeWorkflowId ?? page?.workflowId);
   useEffect(() => {
-    if (vines.executionInstanceId) {
+    if (vines.executionInstanceId && isViewActive) {
       void vines.fetchWorkflowExecution().then(() => vines.emit('refresh'));
     }
-  }, []);
+  }, [isViewActive]);
 
   const actuatorHeight = height - 64;
 
