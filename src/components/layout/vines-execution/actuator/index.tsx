@@ -78,6 +78,7 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
                       } else {
                         const hasWorkflowVariables = vines.workflowInput.length > 0;
                         if (hasWorkflowVariables) {
+                          vines.executionWorkflowExecution = null;
                           toast.info('请先完善工作流表单');
                         } else {
                           vines.start({});
