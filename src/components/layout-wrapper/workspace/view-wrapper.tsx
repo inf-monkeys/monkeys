@@ -7,6 +7,7 @@ import { set } from 'lodash';
 import { useGetWorkflow } from '@/apis/workflow';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
+import { usePageStore } from '@/store/usePageStore';
 import { useLocalStorage } from '@/utils';
 
 interface IVinesViewWrapperProps {
@@ -15,6 +16,7 @@ interface IVinesViewWrapperProps {
 }
 
 export const VinesViewWrapper: React.FC<IVinesViewWrapperProps> = memo(({ workflowId, children }) => {
+  const { page } = usePageStore();
   const { setWorkflowId, setVisible } = useFlowStore();
 
   const { workflowId: pageWorkflowId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
@@ -58,7 +60,9 @@ export const VinesViewWrapper: React.FC<IVinesViewWrapperProps> = memo(({ workfl
       }
     }
 
-    if (!workflow?.tasks?.length) {
+    vines.executionWorkflowToast = page?.type === 'process';
+
+    if (!workflow?.workflowDef?.tasks?.length) {
       setVisible(false);
     }
   }, [workflow]);

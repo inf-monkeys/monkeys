@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 
+import { useNavigate } from '@tanstack/react-router';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ScrollArea } from '@mantine/core';
 import { format } from 'date-fns';
@@ -16,6 +18,7 @@ import {
   TRIGGER_TYPE_LIST,
 } from '@/components/layout/view/vines-log/filter/consts.ts';
 import { VinesLogItem } from '@/components/layout/view/vines-log/item';
+import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar.tsx';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
@@ -24,6 +27,7 @@ import MultipleSelector from '@/components/ui/multiple-selector';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
 import { useVinesFlow } from '@/package/vines-flow';
+import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
 import {
   IVinesSearchWorkflowExecutionsParams,
   vinesSearchWorkflowExecutionsSchema,
@@ -31,7 +35,9 @@ import {
 import { cn } from '@/utils';
 
 export const VinesLogView: React.FC = () => {
+  const { pages } = useVinesPage();
   const { vines } = useVinesFlow();
+  const navigate = useNavigate();
 
   const form = useForm<IVinesSearchWorkflowExecutionsParams>({
     resolver: zodResolver(vinesSearchWorkflowExecutionsSchema),
@@ -104,6 +110,24 @@ export const VinesLogView: React.FC = () => {
       toast.warning('请等待页面加载完毕');
     }
   };
+
+  const handleNavigateToPreview = (execution: VinesWorkflowExecution) => {
+    const previewPage = pages?.find(({ type }) => type === 'preview');
+    if (previewPage) {
+      if (vines.swapExecutionInstance(execution)) {
+        void navigate({
+          to: '/$teamId/workspace/$workflowId/$pageId',
+          params: {
+            pageId: previewPage._id,
+          },
+        });
+      }
+    } else {
+      toast.error('打开详情失败！找不到预览视图');
+    }
+  };
+
+  const workflowExecutionLength = workflowExecutions?.length ?? 0;
 
   return (
     <main className="flex flex-col gap-2 p-10">
@@ -270,9 +294,9 @@ export const VinesLogView: React.FC = () => {
                     control={form.control}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>执行 ID</FormLabel>
+                        <FormLabel>实例 ID</FormLabel>
                         <FormControl>
-                          <Input placeholder="请输入应用执行 ID" {...field} />
+                          <Input placeholder="请输入应用实例 ID" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -312,31 +336,32 @@ export const VinesLogView: React.FC = () => {
             </div>
           </ScrollArea>
         </div>
-        <div className="flex-1">
+        <div className="h-full flex-1">
           <ScrollArea className={LOG_VIEW_HEIGHT}>
-            <div className="flex flex-col gap-3 px-2">
-              {workflowExecutions &&
-                workflowDefinitions &&
-                workflowExecutions.map((workflowExecution, index) => (
-                  <VinesLogItem
-                    key={index}
-                    workflowExecution={workflowExecution}
-                    workflowDefinition={workflowDefinitionIdMapper[workflowExecution.workflowName!]}
-                  />
-                ))}
-              {workflowExecutions &&
-                workflowDefinitions &&
-                workflowTotal &&
-                (workflowTotal - workflowExecutions.length <= 0 ? (
+            <div className="flex h-full flex-col gap-3 px-2">
+              {!workflowExecutionLength && <div className="vines-center size-full">暂无数据</div>}
+              {workflowExecutions && workflowDefinitions
+                ? workflowExecutions.map((workflowExecution, index) => (
+                    <VinesLogItem
+                      key={index}
+                      onClick={() => handleNavigateToPreview(workflowExecution)}
+                      workflowExecution={workflowExecution}
+                      workflowDefinition={workflowDefinitionIdMapper[workflowExecution.workflowName!]}
+                    />
+                  ))
+                : null}
+              {workflowExecutions && workflowDefinitions && workflowTotal ? (
+                workflowTotal - workflowExecutionLength <= 0 ? (
                   <div className="w-full cursor-default text-center">到底了</div>
                 ) : (
                   <div
                     className="w-full cursor-pointer bg-opacity-0 py-2 text-center hover:bg-foreground-500 hover:bg-opacity-5"
                     onClick={() => handleSubmit(true)}
                   >
-                    剩余 {workflowTotal - workflowExecutions.length} 项，点击加载
+                    剩余 {workflowTotal - workflowExecutionLength} 项，点击加载
                   </div>
-                ))}
+                )
+              ) : null}
             </div>
           </ScrollArea>
         </div>
