@@ -84,7 +84,7 @@ export const ComplicateTriggerNode: React.FC = () => {
                   <TabsTrigger value="trigger">触发器</TabsTrigger>
                 </TabsList>
                 <TabsContent value="input">
-                  <InputConfig className="h-[21rem]" />
+                  <InputConfig className="h-[21rem]" contentWidth={308} />
                 </TabsContent>
                 <TabsContent value="trigger">
                   <WorkflowTrigger className="h-[21rem]" />

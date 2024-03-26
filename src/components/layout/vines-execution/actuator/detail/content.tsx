@@ -44,7 +44,7 @@ export const VinesActuatorDetailContent: React.FC<IVinesActuatorDetailContentPro
             <TabsTrigger value="raw">原始数据</TabsTrigger>
           </TabsList>
           <TabsContent value="data">
-            <ScrollArea style={{ height: finalHeight }}>
+            <ScrollArea className="[&>div>div]:h-full" style={{ height: finalHeight }}>
               {isCompleted ? (
                 <VinesAbstractDataPreview className="px-2" style={{ height: finalHeight }} data={executionOutputData} />
               ) : isHUMANInteraction ? (

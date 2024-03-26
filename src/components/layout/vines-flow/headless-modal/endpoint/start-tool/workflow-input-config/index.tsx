@@ -14,7 +14,7 @@ export const WorkflowInputConfig: React.FC<IWorkflowInputConfigProps> = () => {
         <TabsTrigger value="trigger">触发器</TabsTrigger>
       </TabsList>
       <TabsContent value="input">
-        <InputConfig />
+        <InputConfig contentWidth={412} />
       </TabsContent>
       <TabsContent value="trigger">
         <WorkflowTrigger />
