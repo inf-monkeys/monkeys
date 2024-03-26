@@ -14,13 +14,14 @@ import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
 interface IActuatorHeaderProps {
   instanceId: string;
   workflowStatus: VinesWorkflowExecution['status'] | string;
+  children?: React.ReactNode;
 }
 
-export const ActuatorHeader: React.FC<IActuatorHeaderProps> = ({ instanceId, workflowStatus }) => {
+export const ActuatorHeader: React.FC<IActuatorHeaderProps> = ({ instanceId, workflowStatus, children }) => {
   const clipboard = useClipboard({ timeout: 500 });
 
   return (
-    <header className="flex w-full items-center gap-4 px-2">
+    <header className="flex w-full items-center gap-4 pl-2">
       <ExecutionStatusIcon
         size={45}
         workflowStatus={workflowStatus as string}
@@ -32,7 +33,7 @@ export const ActuatorHeader: React.FC<IActuatorHeaderProps> = ({ instanceId, wor
           工作流{getExecutionStatusText(workflowStatus as string, workflowStatus as string)}
         </h1>
         <div className="flex items-center gap-2">
-          <CardDescription>实例 ID: {instanceId}</CardDescription>
+          <CardDescription className="line-clamp-1">实例 ID: {instanceId}</CardDescription>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -50,6 +51,7 @@ export const ActuatorHeader: React.FC<IActuatorHeaderProps> = ({ instanceId, wor
           </Tooltip>
         </div>
       </div>
+      <div className="ml-4 flex flex-1 justify-end">{children}</div>
     </header>
   );
 };
