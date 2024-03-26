@@ -475,7 +475,7 @@ export class VinesCore extends VinesTools(VinesBase) {
       return false;
     }
 
-    if (this.executionStatus !== 'SCHEDULED' || !this.nodes.length) {
+    if (['RUNNING', 'PAUSED'].includes(this.executionStatus) || !this.nodes.length) {
       toast.warning('启动运行失败！已有工作流在运行中或工作流为空');
       return false;
     }
