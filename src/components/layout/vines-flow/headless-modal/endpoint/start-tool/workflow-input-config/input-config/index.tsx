@@ -22,9 +22,12 @@ import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
-interface IInputConfigProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface IInputConfigProps {
+  className?: string;
+  contentWidth?: number;
+}
 
-export const InputConfig: React.FC<IInputConfigProps> = ({ className }) => {
+export const InputConfig: React.FC<IInputConfigProps> = ({ className, contentWidth }) => {
   const { isLatestWorkflowVersion } = useFlowStore();
 
   const { vines } = useVinesFlow();
@@ -44,7 +47,7 @@ export const InputConfig: React.FC<IInputConfigProps> = ({ className }) => {
 
   return (
     <div className={cn('relative flex h-80 w-full flex-col gap-4 py-2', className)}>
-      <WorkflowInputList inputs={inputs} className="px-2">
+      <WorkflowInputList inputs={inputs} className="px-2" contentWidth={contentWidth}>
         {(variableId) => (
           <div className="flex items-center gap-1">
             <Button
