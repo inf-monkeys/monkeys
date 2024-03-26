@@ -71,6 +71,8 @@ export class VinesCore extends VinesTools(VinesBase) {
 
   public executionWorkflowExecution: VinesWorkflowExecution | null = null;
 
+  public executionWorkflowToast = false;
+
   private executionTimeout: ReturnType<typeof setTimeout> | null = null;
 
   private position: IVinesNodePosition = { x: 0, y: 0 };
@@ -611,21 +613,23 @@ export class VinesCore extends VinesTools(VinesBase) {
       const lastNode = this.nodes.at(-1);
       lastNode && (lastNode.executionStatus = 'COMPLETED');
 
-      switch (newExecutionStatus) {
-        case 'COMPLETED':
-          toast.success('工作流运行完毕！');
-          break;
-        case 'FAILED':
-          toast.error('工作流运行失败！');
-          break;
-        case 'TIMED_OUT':
-          toast.warning('工作流运行超时！');
-          break;
-        case 'TERMINATED':
-          toast.warning('工作流运行已终止！');
-          break;
-        default:
-          break;
+      if (this.executionWorkflowToast) {
+        switch (newExecutionStatus) {
+          case 'COMPLETED':
+            toast.success('工作流运行完毕！');
+            break;
+          case 'FAILED':
+            toast.error('工作流运行失败！');
+            break;
+          case 'TIMED_OUT':
+            toast.warning('工作流运行超时！');
+            break;
+          case 'TERMINATED':
+            toast.warning('工作流运行已终止！');
+            break;
+          default:
+            break;
+        }
       }
 
       if (newExecutionStatus !== 'PAUSED') {
