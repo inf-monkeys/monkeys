@@ -32,18 +32,24 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
 
   const [activeInstanceId, setActiveInstanceId] = useState('_');
 
+  const vinesExecutionStatus = vines.executionStatus;
   useEffect(() => {
     if (!workflowId) return;
-    trigger({ workflowId, pagination: { page: 1, limit: 100 } }).then((it) => {
-      const executionInstance = it?.data?.find((it) => it.status === 'PAUSED' || it.status === 'RUNNING');
-      const instanceId = executionInstance?.workflowId;
-      if (instanceId) {
-        vines.swapExecutionInstance(executionInstance);
-        setActiveInstanceId(instanceId);
-        setCanvasMode(CanvasStatus.RUNNING);
-      }
-    });
-  }, [workflowId]);
+    setTimeout(
+      () => {
+        trigger({ workflowId, pagination: { page: 1, limit: 100 } }).then((it) => {
+          const executionInstance = it?.data?.find((it) => it.status === 'PAUSED' || it.status === 'RUNNING');
+          const instanceId = executionInstance?.workflowId;
+          if (instanceId) {
+            vines.swapExecutionInstance(executionInstance);
+            setActiveInstanceId(instanceId);
+            setCanvasMode(CanvasStatus.RUNNING);
+          }
+        });
+      },
+      !data ? 0 : 800,
+    );
+  }, [workflowId, vinesExecutionStatus]);
 
   const finalData =
     data?.data?.sort((a) => (a.status === 'PAUSED' || a.status === 'RUNNING' ? -1 : 1)).slice(0, 20) ?? [];
@@ -60,7 +66,7 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
         />
       </div>
       <CommandList className="relative h-full max-h-none">
-        {isMutating || !data ? (
+        {!data && isMutating ? (
           <CommandLoading className="vines-center absolute z-10 size-full py-6">
             <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
           </CommandLoading>
