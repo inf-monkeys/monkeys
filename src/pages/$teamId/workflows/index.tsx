@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 
 import { useClipboard } from '@mantine/hooks';
 import { Copy, FileUp, FolderUp, Link, MoreHorizontal, Pencil, Trash } from 'lucide-react';
@@ -27,7 +27,6 @@ import { VinesIcon } from '@/components/ui/vines-icon';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const Workflows: React.FC = () => {
-  const navigate = useNavigate();
   const clipboard = useClipboard({ timeout: 500 });
 
   return (
@@ -162,10 +161,7 @@ export const Workflows: React.FC = () => {
           </DropdownMenu>
         )}
         onItemClick={(item) => {
-          void navigate({
-            to: '/$teamId/workspace/$workflowId',
-            params: { teamId: item.teamId, workflowId: item.workflowId },
-          });
+          window.open(`/${item.teamId}/workspace/${item.workflowId}`, '_blank');
         }}
         subtitle={
           <>
