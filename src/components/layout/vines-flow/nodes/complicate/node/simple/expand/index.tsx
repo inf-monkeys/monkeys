@@ -32,7 +32,7 @@ export const ComplicateSimpleNodeExpand: React.FC<IComplicateSimpleNodeExpandPro
           animate={{ opacity: 1, marginLeft: 0, scale: 1 }}
           exit={{ opacity: 0, marginLeft: -45, scale: 0.95 }}
         >
-          {hasExecutionData ? (
+          {hasExecutionData && isWorkflowRUNNING ? (
             <div className="p-5">
               <VinesActuatorDetail executionTask={executionTask} height={435} />
             </div>
