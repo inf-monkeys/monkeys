@@ -106,7 +106,7 @@ export const createVinesCore = (workflowId: string) => {
     );
 
     const handleUpdateExecutionDataToSWR = useCallback((instanceId: string, data: VinesWorkflowExecution) => {
-      void mutate(`/api/workflow/${instanceId}/execution-detail`, data, { revalidate: false });
+      void mutate(`/api/workflow/executions/${instanceId}`, data, { revalidate: false });
     }, []);
 
     useEffect(() => {
