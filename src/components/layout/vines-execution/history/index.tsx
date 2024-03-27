@@ -18,6 +18,7 @@ import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { usePageStore } from '@/store/usePageStore';
+import { useViewStore } from '@/store/useViewStore';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 import { useRetimer } from '@/utils/use-retimer.ts';
 
@@ -25,6 +26,7 @@ interface IVinesExecutionHistoryProps extends React.ComponentPropsWithoutRef<'di
 
 // million-ignore
 export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () => {
+  const { visible } = useViewStore();
   const { setCanvasMode } = useFlowStore();
   const { workflowId } = usePageStore();
 
@@ -40,7 +42,7 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
   const vinesExecutionStatus = vines.executionStatus;
 
   useEffect(() => {
-    if (!workflowId) return;
+    if (!workflowId || !visible) return;
     reTimer(
       setTimeout(
         () => {
@@ -57,7 +59,7 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
         !data ? 0 : 800,
       ) as unknown as number,
     );
-  }, [workflowId, vinesExecutionStatus]);
+  }, [workflowId, vinesExecutionStatus, visible]);
 
   const finalData =
     data?.data?.sort((a) => (a.status === 'PAUSED' || a.status === 'RUNNING' ? -1 : 1)).slice(0, 20) ?? [];

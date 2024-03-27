@@ -1,10 +1,7 @@
 import React, { SVGProps } from 'react';
 
-import { useParams } from '@tanstack/react-router';
-
-import { IPinPage } from '@/apis/pages/typings.ts';
-import { usePageStore } from '@/store/usePageStore';
-import { cn, useLocalStorage } from '@/utils';
+import { useViewStore } from '@/store/useViewStore';
+import { cn } from '@/utils';
 
 type DotsProps = {
   gap: number;
@@ -21,10 +18,7 @@ export const DotsBackground: React.FC<SVGProps<SVGSVGElement> & DotsProps> = ({
   scale,
   onContextMenu,
 }) => {
-  const { workflowId } = usePageStore();
-  const { workflowId: routeWorkflowId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
-
-  const [page] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
+  const { visible } = useViewStore();
 
   const gapScale = scale || 1;
   const [gapX, gapY] = Array.isArray(gap) ? gap : [gap, gap];
@@ -32,7 +26,7 @@ export const DotsBackground: React.FC<SVGProps<SVGSVGElement> & DotsProps> = ({
   const radius = (size || 1) / 2;
 
   return (
-    workflowId === (routeWorkflowId ?? page?.workflowId) && (
+    visible && (
       <svg className={cn('absolute left-0 top-0 h-full w-full', className)} onContextMenu={onContextMenu}>
         <pattern id="vines-pattern" width={dotWidth} height={dotHeight} patternUnits="userSpaceOnUse">
           <circle className="fill-gold-12" cx={radius} cy={radius} r={radius} />

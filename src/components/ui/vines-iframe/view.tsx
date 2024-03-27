@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { motion } from 'framer-motion';
 
@@ -7,6 +7,7 @@ import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wra
 import { IFRAME_MAP } from '@/components/ui/vines-iframe/consts.ts';
 import { createVinesCore } from '@/package/vines-flow';
 import { createFlowStore, FlowStoreProvider } from '@/store/useFlowStore';
+import { useViewStore } from '@/store/useViewStore';
 
 interface IVinesViewProps {
   id?: string;
@@ -16,21 +17,27 @@ interface IVinesViewProps {
 }
 
 export function VinesView({ id, workflowId, pageId, type }: IVinesViewProps) {
+  const { setVisible } = useViewStore();
   const View = IFRAME_MAP[type ?? ''];
 
   const content = useMemo(() => {
-    if (!pageId || !workflowId) return <Page404 />;
+    if (!id || !workflowId) return <Page404 />;
     const { VinesProvider } = createVinesCore(workflowId);
     return (
-      <VinesProvider>
-        <FlowStoreProvider createStore={createFlowStore}>
+      <FlowStoreProvider createStore={createFlowStore}>
+        <VinesProvider>
           <VinesViewWrapper workflowId={workflowId}>
             <View />
           </VinesViewWrapper>
-        </FlowStoreProvider>
-      </VinesProvider>
+        </VinesProvider>
+      </FlowStoreProvider>
     );
-  }, [pageId, workflowId]);
+  }, [id, workflowId]);
+
+  useEffect(() => {
+    const finalVisible = id === pageId;
+    setTimeout(() => setVisible(finalVisible), finalVisible ? 0 : 216);
+  }, [pageId, id]);
 
   return (
     <motion.div
