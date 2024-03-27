@@ -15,5 +15,3 @@ export const TRIGGER_TYPE_LIST: { value: WorkflowTriggerType; text: string }[] =
   { value: WorkflowTriggerType.SCHEDULER, text: '定时任务' },
   { value: WorkflowTriggerType.WEBHOOK, text: 'Webhook' },
 ];
-
-export const LOG_VIEW_HEIGHT = 'h-[calc(100vh-3.5rem-0.5rem-0.25rem-1rem-2rem-5rem-2rem)]';
