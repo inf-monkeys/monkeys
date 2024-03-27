@@ -16,11 +16,13 @@ import { IAssetItem, IListUgcItemsFnType, IPreloadUgcItemsFnType } from '@/apis/
 import {
   IDefaultPageSizeStorage,
   IDisplayModeStorage,
+  IOperateAreaProps,
   ISortCondition,
   ISortConditionStorage,
   IUgcRenderOptions,
 } from '@/components/layout/ugc/typings.ts';
 import { UgcViewCard } from '@/components/layout/ugc/view/card';
+import { UgcViewGalleryItem } from '@/components/layout/ugc/view/gallery';
 import { UgcViewHeader } from '@/components/layout/ugc/view/header';
 import { DEFAULT_SORT_CONDITION } from '@/components/layout/ugc/view/header/consts.ts';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
@@ -38,7 +40,7 @@ interface IUgcViewProps<E extends object> {
   // data: IPaginationListData<IAssetItem<E>>;
   columns: ColumnDef<IAssetItem<E>>[];
   renderOptions: IUgcRenderOptions<IAssetItem<E>>;
-  operateArea?: (item: IAssetItem<E>) => React.ReactNode;
+  operateArea?: IOperateAreaProps<E>;
   onItemClick?: (item: IAssetItem<E>, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   subtitle?: React.ReactNode;
   defaultPageSize?: number;
@@ -114,21 +116,6 @@ export const UgcView = <E extends object>({
     pageSize: defaultPageSizeLS ?? defaultPageSize,
     pageIndex: 0,
   });
-  // const [sorting, setSorting] = useState<SortingState>([
-  //   {
-  //     desc: sortCondition.orderBy === 'desc',
-  //     id: sortCondition.orderColumn,
-  //   },
-  // ]);
-  //
-  // useMemo(() => {
-  //   setSorting([
-  //     {
-  //       desc: sortCondition.orderBy === 'desc',
-  //       id: sortCondition.orderColumn,
-  //     },
-  //   ]);
-  // }, [sortCondition]);
 
   useMemo(() => {
     defaultPageSizeLS &&
@@ -236,6 +223,20 @@ export const UgcView = <E extends object>({
                 state={table.getState()}
                 showPagination={false}
               />
+            )}
+            {displayMode === 'gallery' && (
+              <div className="flex flex-wrap gap-4">
+                {table.getRowModel().rows.map((row, index) => (
+                  <UgcViewGalleryItem
+                    row={row}
+                    key={index}
+                    index={index}
+                    renderOptions={renderOptions}
+                    operateArea={operateArea}
+                    onItemClick={onItemClick}
+                  />
+                ))}
+              </div>
             )}
           </ScrollArea>
           <TablePagination
