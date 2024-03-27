@@ -4,6 +4,7 @@ import { useNavigate } from '@tanstack/react-router';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ScrollArea } from '@mantine/core';
+import { useElementSize } from '@mantine/hooks';
 import { format } from 'date-fns';
 import _ from 'lodash';
 import { CalendarIcon } from 'lucide-react';
@@ -12,11 +13,7 @@ import { toast } from 'sonner';
 
 import { useSearchWorkflowExecutions } from '@/apis/workflow/execution';
 import { useWorkflowVersions } from '@/apis/workflow/version';
-import {
-  EXECUTION_STATUS_LIST,
-  LOG_VIEW_HEIGHT,
-  TRIGGER_TYPE_LIST,
-} from '@/components/layout/view/vines-log/filter/consts.ts';
+import { EXECUTION_STATUS_LIST, TRIGGER_TYPE_LIST } from '@/components/layout/view/vines-log/filter/consts.ts';
 import { VinesLogItem } from '@/components/layout/view/vines-log/item';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Button } from '@/components/ui/button';
@@ -25,6 +22,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import MultipleSelector from '@/components/ui/multiple-selector';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Separator } from '@/components/ui/separator.tsx';
 import { Switch } from '@/components/ui/switch';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
@@ -40,6 +38,8 @@ export const VinesLogView: React.FC = () => {
   const { pages } = useVinesPage();
   const { vines } = useVinesFlow();
   const navigate = useNavigate();
+
+  const { ref, height } = useElementSize();
 
   const form = useForm<IVinesSearchWorkflowExecutionsParams>({
     resolver: zodResolver(vinesSearchWorkflowExecutionsSchema),
@@ -131,17 +131,20 @@ export const VinesLogView: React.FC = () => {
 
   const workflowExecutionLength = workflowExecutions?.length ?? 0;
 
+  const finalHeight = height - 108;
+
   return (
-    <main className="flex flex-col gap-2 p-10">
-      <div className="flex justify-between px-2">
-        <span className="text-lg font-bold">{vines.workflowName}</span>
-        <span>
-          共 {workflowTotal} 项{workflowExecutions && workflowDefinitions && `，已加载 ${workflowExecutions.length} 项`}
-        </span>
+    <main ref={ref} className="flex h-full max-h-full flex-col gap-2 p-10">
+      <div className="space-y-0.5">
+        <h2 className="text-2xl font-bold tracking-tight">日志视图</h2>
+        <p className="text-muted-foreground">
+          {`共 ${workflowTotal ?? '-'} 项${(workflowExecutions && workflowDefinitions && `，已加载 ${workflowExecutions.length ?? '-'} 项`) || ''}`}
+        </p>
       </div>
+      <Separator className="my-4" />
       <div className="flex gap-4">
         <div className="w-[300px]">
-          <ScrollArea className={LOG_VIEW_HEIGHT}>
+          <ScrollArea style={{ height: finalHeight }}>
             <div className="flex flex-col gap-4 px-2">
               <Form {...form}>
                 <form
@@ -339,7 +342,7 @@ export const VinesLogView: React.FC = () => {
           </ScrollArea>
         </div>
         <div className="h-full flex-1">
-          <ScrollArea className={LOG_VIEW_HEIGHT}>
+          <ScrollArea style={{ height: finalHeight }}>
             <div className="flex h-full flex-col gap-3 px-2">
               {!workflowExecutionLength && <div className="vines-center size-full">暂无数据</div>}
               {workflowExecutions && workflowDefinitions
