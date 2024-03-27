@@ -98,6 +98,7 @@ export class ToolsPollingService {
           healthy: boolean;
         }>(healthCheckUrl, {
           baseURL: config.conductor.baseUrl.replace('/api', ''),
+          auth: config.conductor.auth,
         });
         if (data.healthy) {
           break;
