@@ -19,6 +19,7 @@ import { useVinesFlow } from '@/package/vines-flow';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
+import { usePageStore } from '@/store/usePageStore';
 import { useLocalStorage } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
@@ -27,7 +28,8 @@ interface IVinesActuatorProps {
 }
 
 export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
-  const { setCanvasMode, workflowId } = useFlowStore();
+  const { setCanvasMode } = useFlowStore();
+  const { workflowId } = usePageStore();
 
   const { workflowId: routeWorkflowId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
   const [page] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});

@@ -9,13 +9,15 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
+import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IWorkflowTriggerProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const WorkflowTrigger: React.FC<IWorkflowTriggerProps> = ({ className }) => {
-  const { workflowId, isLatestWorkflowVersion } = useFlowStore();
+  const { isLatestWorkflowVersion } = useFlowStore();
+  const { workflowId } = usePageStore();
   const { vines } = useVinesFlow();
 
   const workflowVersion = vines.version;

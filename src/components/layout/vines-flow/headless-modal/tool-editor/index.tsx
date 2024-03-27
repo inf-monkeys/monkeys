@@ -12,13 +12,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.t
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { useFlowStore } from '@/store/useFlowStore';
+import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events';
 
 interface IToolEditorProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ToolEditor: React.FC<IToolEditorProps> = () => {
-  const { workflowId, disableDialogClose, isLatestWorkflowVersion } = useFlowStore();
+  const { disableDialogClose, isLatestWorkflowVersion } = useFlowStore();
+  const { workflowId } = usePageStore();
   const { vines } = useVinesFlow();
 
   const [activeTab, setActiveTab] = useState('config');

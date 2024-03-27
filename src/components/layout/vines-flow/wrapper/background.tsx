@@ -3,7 +3,7 @@ import React, { SVGProps } from 'react';
 import { useParams } from '@tanstack/react-router';
 
 import { IPinPage } from '@/apis/pages/typings.ts';
-import { useFlowStore } from '@/store/useFlowStore';
+import { usePageStore } from '@/store/usePageStore';
 import { cn, useLocalStorage } from '@/utils';
 
 type DotsProps = {
@@ -21,7 +21,7 @@ export const DotsBackground: React.FC<SVGProps<SVGSVGElement> & DotsProps> = ({
   scale,
   onContextMenu,
 }) => {
-  const { workflowId } = useFlowStore();
+  const { workflowId } = usePageStore();
   const { workflowId: routeWorkflowId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
 
   const [page] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});

@@ -5,9 +5,6 @@ import { createContext } from 'zustand-utils';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 
 export interface FlowStore {
-  workflowId: string;
-  setWorkflowId: (workflowId: string) => void;
-
   isLatestWorkflowVersion: boolean;
   setIsLatestWorkflowVersion: (isLatestWorkflowVersion: boolean) => void;
 
@@ -33,9 +30,6 @@ export interface FlowStore {
 const createFlowStore = () =>
   create<FlowStore>()(
     immer((set) => ({
-      workflowId: '',
-      setWorkflowId: (workflowId) => set({ workflowId }),
-
       isLatestWorkflowVersion: true,
       setIsLatestWorkflowVersion: (isLatestWorkflowVersion) => set({ isLatestWorkflowVersion }),
 

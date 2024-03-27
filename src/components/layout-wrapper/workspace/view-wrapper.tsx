@@ -16,8 +16,8 @@ interface IVinesViewWrapperProps {
 }
 
 export const VinesViewWrapper: React.FC<IVinesViewWrapperProps> = memo(({ workflowId, children }) => {
-  const { page } = usePageStore();
-  const { setWorkflowId, setVisible } = useFlowStore();
+  const { page, setWorkflowId } = usePageStore();
+  const { setVisible } = useFlowStore();
 
   const { workflowId: pageWorkflowId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
   const finalWorkflowId = pageWorkflowId ?? workflowId ?? '';

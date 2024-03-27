@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 
 import { WorkflowInputConfig } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool/workflow-input-config';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { useFlowStore } from '@/store/useFlowStore';
+import { usePageStore } from '@/store/usePageStore';
 import VinesEvent from '@/utils/events.ts';
 
 interface IStartToolProps {}
 
 export const StartTool: React.FC<IStartToolProps> = () => {
-  const { workflowId } = useFlowStore();
+  const { workflowId } = usePageStore();
 
   const [open, setOpen] = useState(false);
 
