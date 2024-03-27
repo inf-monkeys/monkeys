@@ -1,10 +1,12 @@
 import React, { useMemo } from 'react';
 
 import { Row } from '@tanstack/react-table';
-import _ from 'lodash';
+import { MoreHorizontal } from 'lucide-react';
 
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { IUgcRenderOptions } from '@/components/layout/ugc/typings.ts';
+import { IOperateAreaProps, IUgcRenderOptions } from '@/components/layout/ugc/typings.ts';
+import { getRenderNodeFn } from '@/components/layout/ugc/view/utils/node-renderer.tsx';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils';
@@ -12,7 +14,7 @@ import { cn } from '@/utils';
 interface IUgcViewCardProps<E extends object> {
   row: Row<IAssetItem<E>>;
   renderOptions: IUgcRenderOptions<IAssetItem<E>>;
-  operateArea?: (item: IAssetItem<E>) => React.ReactNode;
+  operateArea?: IOperateAreaProps<E>;
   onItemClick?: (item: IAssetItem<E>, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   index: number;
 }
@@ -24,12 +26,10 @@ export const UgcViewCard = <E extends object>({
   operateArea,
   onItemClick,
 }: IUgcViewCardProps<E>) => {
-  const getRenderNode = (key: string, defaultValue?: React.ReactNode) =>
-    renderOptions[key]
-      ? _.isFunction(renderOptions[key])
-        ? (renderOptions[key](row.original) as React.ReactNode)
-        : row.renderValue<React.ReactNode>(renderOptions[key])
-      : defaultValue ?? '';
+  const getRenderNode = getRenderNodeFn({
+    row,
+    renderOptions,
+  });
 
   const logo = useMemo(() => getRenderNode('logo'), [index, row]);
   const title = useMemo(() => getRenderNode('title'), [index, row]);
@@ -62,7 +62,9 @@ export const UgcViewCard = <E extends object>({
             <span className="text-xs">{subtitle}</span>
           </div>
           <div className="flex-1" />
-          <div>{operateArea?.(row.original)}</div>
+          <div>
+            {operateArea && operateArea(row.original, <Button icon={<MoreHorizontal />} size="small" />, '操作')}
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4 pt-0">

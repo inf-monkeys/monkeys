@@ -1,19 +1,18 @@
 import React from 'react';
 
+import { IAssetItem } from '@/apis/ugc/typings.ts';
+
+export type IOperateAreaProps<E> = (
+  item: IAssetItem<E>,
+  trigger: React.ReactNode,
+  tooltipTriggerContent?: string,
+) => React.ReactNode;
+
 export type IAssetCustomProps = {
   assetKey: string;
 };
 
-export type IRenderType =
-  | 'title'
-  | 'subtitle'
-  | 'description'
-  | 'user-profile'
-  | 'team-profile'
-  | 'tags'
-  | 'time'
-  | 'logo'
-  | 'color';
+export type IRenderKey = 'title' | 'subtitle' | 'description' | 'tags' | 'time' | 'logo' | 'cover';
 
 export type IDisplayMode = 'table' | 'gallery' | 'card' | null;
 export type ISortConditionOrderBy = 'DESC' | 'ASC';
@@ -25,7 +24,7 @@ export type ISortCondition = {
 export type IDividePageType = 'pagination' | 'scroll' | null;
 
 export type IUgcRenderOptions<E> = {
-  [type in IRenderType]?: keyof E | ((item: E) => React.ReactNode);
+  [type in IRenderKey]?: keyof E | ((item: E) => React.ReactNode);
 };
 
 export type IAssetCustomStorage<T> = {

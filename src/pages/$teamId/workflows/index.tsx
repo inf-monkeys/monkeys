@@ -3,13 +3,13 @@ import React from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 
 import { useClipboard } from '@mantine/hooks';
-import { Copy, FileUp, FolderUp, Link, MoreHorizontal, Pencil, Trash } from 'lucide-react';
-import moment from 'moment';
+import { Copy, FileUp, FolderUp, Link, Pencil, Trash } from 'lucide-react';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { preloadUgcWorkflows, useUgcWorkflows } from '@/apis/ugc';
 import { UgcSidebar } from '@/components/layout/ugc/sidebar';
 import { UgcView } from '@/components/layout/ugc/view';
+import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,7 +23,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
-import { VinesIcon } from '@/components/ui/vines-icon';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const Workflows: React.FC = () => {
@@ -40,7 +39,7 @@ export const Workflows: React.FC = () => {
           {
             accessorKey: 'iconUrl',
             header: '图标',
-            accessorFn: (row) => <VinesIcon size="md">{(row.iconUrl as string) ?? ''}</VinesIcon>,
+            accessorFn: (row) => RenderIcon({ iconUrl: row.iconUrl }),
             cell: (props) => props.getValue() as React.ReactNode,
             maxSize: 48,
           },
@@ -51,36 +50,24 @@ export const Workflows: React.FC = () => {
           {
             accessorKey: 'description',
             header: '描述',
-            cell: (props) => <span className="text-opacity-70">{(props.getValue() as string) || '暂无描述'}</span>,
+            cell: (props) => RenderDescription({ description: props.getValue() as string }),
           },
           {
             accessorKey: 'user',
             header: '用户',
-            cell: (props) => <span>{(props.getValue() as IVinesUser)?.name ?? ''}</span>,
+            cell: (props) => RenderUser({ user: props.getValue() as IVinesUser }),
             maxSize: 48,
           },
           {
             accessorKey: 'createdTimestamp',
             header: '创建时间',
-            cell: (props) => (
-              <Tooltip content={moment(props.getValue() as number).format('YYYY-MM-DD HH:mm:ss')}>
-                <TooltipTrigger asChild>
-                  <span className="cursor-default">{formatTimeDiffPrevious(props.getValue() as number)}</span>
-                </TooltipTrigger>
-              </Tooltip>
-            ),
+            cell: (props) => RenderTime({ time: props.getValue() as number }),
             maxSize: 72,
           },
           {
             accessorKey: 'updatedTimestamp',
             header: '更新时间',
-            cell: (props) => (
-              <Tooltip content={moment(props.getValue() as number).format('YYYY-MM-DD HH:mm:ss')}>
-                <TooltipTrigger asChild>
-                  <span className="cursor-default">{formatTimeDiffPrevious(props.getValue() as number)}</span>
-                </TooltipTrigger>
-              </Tooltip>
-            ),
+            cell: (props) => RenderTime({ time: props.getValue() as number }),
             maxSize: 72,
           },
         ]}
@@ -97,14 +84,22 @@ export const Workflows: React.FC = () => {
               </div>
             );
           },
+          cover: (item) => {
+            return RenderIcon({ iconUrl: item.iconUrl, size: 'max' });
+          },
         }}
-        operateArea={(item) => (
+        operateArea={(item, trigger, tooltipTriggerContent) => (
           <DropdownMenu>
-            <Tooltip content="操作">
-              <DropdownMenuTrigger asChild>
-                <Button icon={<MoreHorizontal />} size="small" />
-              </DropdownMenuTrigger>
-            </Tooltip>
+            {tooltipTriggerContent ? (
+              <Tooltip content={tooltipTriggerContent}>
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+                </TooltipTrigger>
+              </Tooltip>
+            ) : (
+              <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+            )}
+
             <DropdownMenuContent
               onClick={(e) => {
                 e.stopPropagation();

@@ -8,11 +8,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
 import { splitEmojiLink } from '@/components/ui/vines-icon/utils.ts';
 import { cn } from '@/utils';
 
+export type IVinesIconSize = 'auto' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'max';
+
 interface IVinesIconProps extends React.ComponentPropsWithoutRef<'div'> {
   src?: string;
   preClassName?: string;
   backgroundColor?: string;
-  size?: 'auto' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'max';
+  size?: IVinesIconSize;
 }
 
 export const VinesIcon: React.FC<IVinesIconProps> = ({
