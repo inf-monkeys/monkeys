@@ -19,13 +19,19 @@ export class ToolsPollingService {
     return os.hostname();
   }
 
-  private async requestExternalApi(task: Task) {
+  private async monkeyToolHandler(task: Task) {
     const inpuData = task.inputData as WorkerInputData;
     const { __toolName, __apiInfo, __context, ...rest } = inpuData;
     const tool = await this.toolsRepository.getToolByName(__toolName);
     logger.info(`Start to execute tool: ${__toolName}`);
     if (!tool) {
-      throw new Error(`Failed to execute tool "${__toolName}", may not exists or not functioning now.`);
+      return {
+        outputData: {
+          success: false,
+          errMsg: `Failed to execute tool "${__toolName}", may not exists or not functioning now.`,
+        },
+        status: 'FAILED',
+      };
     }
     if (!__apiInfo) {
       throw new Error(`Failed to execute tool "${__toolName}", __apiInfo is missing`);
@@ -34,7 +40,13 @@ export class ToolsPollingService {
     const namespace = __toolName.split('__')[0];
     const server = await this.toolsRepository.getServerByNamespace(namespace);
     if (!server) {
-      throw new Error(`Failed to execute worker "${__toolName}", may not exists or not functioning now.`);
+      return {
+        outputData: {
+          success: false,
+          errMsg: `Failed to execute tool "${__toolName}", may not exists or not functioning now.`,
+        },
+        status: 'FAILED',
+      };
     }
     const { type: authType, authorization_type = 'bearer', verification_tokens = {} } = server.auth;
     const headers: { [x: string]: string } = {
@@ -47,44 +59,66 @@ export class ToolsPollingService {
         break;
       case AuthType.service_http:
         if (authorization_type !== 'bearer') {
-          throw new Error(`Unsupported authorization_type: ${authorization_type}`);
+          return {
+            outputData: {
+              success: false,
+              errMsg: `Failed to execute tool "${__toolName}": Unsupported authorization_type: ${authorization_type}`,
+            },
+            status: 'FAILED',
+          };
         }
         const token = verification_tokens['monkeys'];
         if (!token) {
-          throw new Error(`monkeys verification_token is empty`);
+          return {
+            outputData: {
+              success: false,
+              errMsg: `Failed to execute tool "${__toolName}": monkeys verification_token is empty`,
+            },
+            status: 'FAILED',
+          };
         }
         headers['authorization'] = `Bearer ${token}`;
         break;
       default:
         break;
     }
-    const { data } = await axios({
-      method,
-      baseURL: server.baseUrl,
-      url: path,
-      data: rest,
-      headers: headers,
-    });
-    logger.info(`Execute worker success: ${__toolName}`);
-    return data;
-  }
 
-  private async workerHandler(task: Task) {
     try {
-      const outputData = await this.requestExternalApi(task);
+      const { data } = await axios({
+        method,
+        baseURL: server.baseUrl,
+        url: path,
+        data: rest,
+        headers: headers,
+      });
+      logger.info(`Execute worker success: ${__toolName}`);
       return {
-        outputData: outputData,
+        outputData: data,
         status: 'COMPLETED',
       };
     } catch (error) {
-      logger.error(error.message);
-      return {
-        outputData: {
-          success: false,
-          errMsg: error.message,
-        },
-        status: 'FAILED',
-      };
+      logger.error(`执行 tool ${server.displayName}(${server.namespace} 的 ${__toolName} 失败: `, error);
+      if (error.code === 'ECONNREFUSED') {
+        return {
+          outputData: {
+            success: false,
+            errMsg: `${server.displayName}(${server.namespace}) 服务暂时不可用`,
+          },
+          status: 'FAILED',
+        };
+      } else {
+        // const statusCode = error.response?.status;
+        const errData = error.response?.data;
+        let errorMsg = errData || error.message;
+        errorMsg = typeof errorMsg == 'object' && errorMsg != null ? JSON.stringify(errData) : errorMsg;
+        return {
+          outputData: {
+            success: false,
+            errMsg: `Execution failed: ${errorMsg}`,
+          },
+          status: 'FAILED',
+        };
+      }
     }
   }
 
@@ -130,7 +164,7 @@ export class ToolsPollingService {
           taskDefName: CONDUCTOR_TASK_DEF_NAME,
           concurrency: config.conductor.polling.concurrency,
           pollInterval: config.conductor.polling.interval,
-          execute: this.workerHandler.bind(this),
+          execute: this.monkeyToolHandler.bind(this),
         },
       ],
       {
