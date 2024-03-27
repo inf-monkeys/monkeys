@@ -23,6 +23,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog.tsx';
 import { useFlowStore } from '@/store/useFlowStore';
+import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
 interface IWorkflowReleaseProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -33,7 +34,8 @@ interface IWorkflowReleaseProps extends React.ComponentPropsWithoutRef<'div'> {
 export const WorkflowRelease: React.FC<IWorkflowReleaseProps> = ({ version, onVersionChange }) => {
   const { mutate } = useSWRConfig();
 
-  const { workflowId, isLatestWorkflowVersion, setVisible } = useFlowStore();
+  const { isLatestWorkflowVersion, setVisible } = useFlowStore();
+  const { workflowId } = usePageStore();
 
   const { data: validation, mutate: reValidation } = useWorkflowValidation(workflowId, version);
   const { data: workflowVersions } = useWorkflowVersions(workflowId);

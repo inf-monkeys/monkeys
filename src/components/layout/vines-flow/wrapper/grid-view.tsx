@@ -13,6 +13,7 @@ import {
 } from '@/components/layout/vines-flow/wrapper/utlis.ts';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
+import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
@@ -21,7 +22,8 @@ interface IGridViewProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const GridView: React.FC<IGridViewProps> = ({ toggleMoveState, children }) => {
-  const { workflowId, initialScale } = useFlowStore();
+  const { initialScale } = useFlowStore();
+  const { workflowId } = usePageStore();
   const { isCanvasMoving, isUserInteraction, setScale, setIsUserInteraction } = useCanvasStore();
   const { zoomIn, zoomOut, centerView, zoomToElement, setTransform } = useControls();
 

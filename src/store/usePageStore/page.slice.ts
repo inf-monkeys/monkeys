@@ -14,6 +14,9 @@ export interface PageSlice {
   setVisibleCustomSetting: (loading: boolean) => void;
 
   pageTitle: string;
+
+  workflowId: string;
+  setWorkflowId: (workflowId: string) => void;
 }
 
 export const createPageSlice: ImmerStateCreator<PageSlice> = (set) => ({
@@ -26,4 +29,6 @@ export const createPageSlice: ImmerStateCreator<PageSlice> = (set) => ({
   visibleCustomSetting: false,
   setVisibleCustomSetting: (visibleCustomSetting) => set({ visibleCustomSetting }),
   pageTitle: '',
+  workflowId: '',
+  setWorkflowId: (workflowId) => set({ workflowId }),
 });

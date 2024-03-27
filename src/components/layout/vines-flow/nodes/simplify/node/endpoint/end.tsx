@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { VinesIcon } from '@/components/ui/vines-icon';
-import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
+import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
@@ -13,7 +13,7 @@ interface IVinesEndNodeProps {
 }
 
 export const VinesEndNode: React.FC<IVinesEndNodeProps> = ({ isMiniNode, canvasMode, canvasDisabled }) => {
-  const { workflowId } = useFlowStore();
+  const { workflowId } = usePageStore();
 
   return (
     <div

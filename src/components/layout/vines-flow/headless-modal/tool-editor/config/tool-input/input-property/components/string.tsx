@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VariableEditor, VariableEditorRefProps } from '@/components/ui/vines-variable-editor';
 import { VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
-import { useFlowStore } from '@/store/useFlowStore';
+import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
@@ -25,7 +25,7 @@ export const StringInput: React.FC<IVinesInputPropertyProps & IStringInputProps>
   variableMapper,
   extraVariableMapper = {},
 }) => {
-  const { workflowId } = useFlowStore();
+  const { workflowId } = usePageStore();
 
   const variableEditorRef = useRef<VariableEditorRefProps>({ insertVariable: () => {} });
 

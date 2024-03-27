@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
-import { useFlowStore } from '@/store/useFlowStore';
+import { usePageStore } from '@/store/usePageStore';
 import VinesEvent from '@/utils/events.ts';
 
 interface IWebhookTriggerProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const WebhookTrigger: React.FC<IWebhookTriggerProps> = () => {
-  const { workflowId } = useFlowStore();
+  const { workflowId } = usePageStore();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {

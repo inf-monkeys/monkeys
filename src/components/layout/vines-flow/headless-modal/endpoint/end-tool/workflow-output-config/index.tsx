@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.t
 import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
+import { usePageStore } from '@/store/usePageStore';
 import { cn, useLocalStorage } from '@/utils';
 
 export interface IVinesOutputData {
@@ -32,7 +33,8 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({
   output,
   setOutput,
 }) => {
-  const { canvasMode, workflowId, isLatestWorkflowVersion } = useFlowStore();
+  const { canvasMode, isLatestWorkflowVersion } = useFlowStore();
+  const { workflowId } = usePageStore();
 
   const { vines } = useVinesFlow();
   const { data: workflow } = useGetWorkflow(workflowId, void 0, useLocalStorage('vines-apikey', '', false)[0]);

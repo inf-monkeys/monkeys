@@ -11,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
+import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
@@ -19,7 +20,8 @@ interface IExecutionRecoverProps {
 }
 
 export const ExecutionRecover: React.FC<IExecutionRecoverProps> = ({ className }) => {
-  const { workflowId, setCanvasMode } = useFlowStore();
+  const { setCanvasMode } = useFlowStore();
+  const { workflowId } = usePageStore();
   const { trigger, data } = useSearchWorkflowExecutions();
 
   const { vines } = useVinesFlow();

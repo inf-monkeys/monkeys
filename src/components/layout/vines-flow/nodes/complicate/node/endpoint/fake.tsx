@@ -1,14 +1,14 @@
 import React from 'react';
 
 import { VinesIcon } from '@/components/ui/vines-icon';
-import { useFlowStore } from '@/store/useFlowStore';
+import { usePageStore } from '@/store/usePageStore';
 import VinesEvent from '@/utils/events.ts';
 interface IComplicateFakeNodeProps {
   insertFromNodeId: string;
 }
 
 export const ComplicateFakeNode: React.FC<IComplicateFakeNodeProps> = ({ insertFromNodeId }) => {
-  const { workflowId } = useFlowStore();
+  const { workflowId } = usePageStore();
   const handleOnClick = () => {
     VinesEvent.emit('flow-select-nodes', {
       _wid: workflowId,
