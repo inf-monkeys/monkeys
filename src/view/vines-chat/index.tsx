@@ -1,11 +1,11 @@
 import React from 'react';
 
-import { Page404 } from '@/components/layout/workspace/404.tsx';
+import { ChatSidebar } from '@/components/layout/view/vines-chat/sidebar';
 
 export const VinesChatView: React.FC = () => {
   return (
-    <>
-      <Page404 title="对话视图" />
-    </>
+    <div className="flex size-full p-10">
+      <ChatSidebar />
+    </div>
   );
 };
