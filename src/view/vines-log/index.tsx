@@ -32,9 +32,11 @@ import {
   IVinesSearchWorkflowExecutionsParams,
   vinesSearchWorkflowExecutionsSchema,
 } from '@/schema/workspace/workflow-execution.ts';
+import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 
 export const VinesLogView: React.FC = () => {
+  const { visible } = useViewStore();
   const { pages } = useVinesPage();
   const { vines } = useVinesFlow();
   const navigate = useNavigate();
@@ -83,10 +85,10 @@ export const VinesLogView: React.FC = () => {
   }, [workflowDefinitions]);
 
   useEffect(() => {
-    if (vines.workflowId) {
+    if (vines.workflowId && visible) {
       void handleSubmit();
     }
-  }, [vines.workflowId]);
+  }, [vines.workflowId, visible]);
 
   const handleSubmit = (loadNextPage?: boolean) => {
     if (vines.workflowId) {
