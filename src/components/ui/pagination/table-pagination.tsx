@@ -125,7 +125,7 @@ export const TablePagination: React.FC<ITablePaginationProps> = ({
           )}
           <PaginationItem>
             <PaginationNext
-              disabled={paginationState.active === total}
+              disabled={paginationState.active === total || total === 0}
               onClick={() => paginationState.next()}
               onMouseOver={
                 preloadHover && paginationState.active != total
