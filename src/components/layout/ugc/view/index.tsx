@@ -39,7 +39,6 @@ interface IUgcViewProps<E extends object> {
   assetKey: string;
   useUgcFetcher: IListUgcItemsFnType<E>;
   preloadUgcFetcher: IPreloadUgcItemsFnType<E>;
-  // data: IPaginationListData<IAssetItem<E>>;
   columns: ColumnDef<IAssetItem<E>>[];
   renderOptions: IUgcRenderOptions<IAssetItem<E>>;
   operateArea?: IOperateAreaProps<E>;
@@ -52,7 +51,6 @@ export const UgcView = <E extends object>({
   assetKey,
   useUgcFetcher,
   preloadUgcFetcher,
-  // data,
   columns,
   renderOptions,
   operateArea,
@@ -61,34 +59,6 @@ export const UgcView = <E extends object>({
   defaultPageSize = 24,
 }: IUgcViewProps<E>): React.ReactNode => {
   const { ref } = useElementSize();
-
-  // const { formatTimeDiffPrevious } = useTimeDiff();
-  // const [dto, setDto] = useState<IListUgcDto>({ page: 1, limit: defaultLimit, filter: {} });
-  // const dtoRef = useRef<IListUgcDto>({ page: 1, limit: defaultLimit, filter: {} });
-  // const [list, setList] = useState<IAssetItem<E>[]>([]);
-  // const listRef = useRef<IAssetItem<E>[]>([]);
-  // const [total, setTotal] = useState(0);
-  // const totalRef = useRef(0);
-  // const [loading, toggleLoading] = useState(false);
-  // const loadingRef = useRef(false);
-  // const [activeItem, setActiveItem] = useState<{ item: IAssetItem<E>; itemKey?: string } | null>(null);
-  // const [search, setSearch] = useState('');
-  // const [searchMode, toggleSearchMode] = useState(false);
-  // const [tags, setTags] = useState<string[]>([]);
-  // const [filterRules, setFilterRules] = useState<IUgcFilterRules[]>([]);
-  // const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
-  // const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
-  // const [mode, setMode] = useState<IDisplayMode>(null);
-  // const [dividePageMethod, setDividePageMethod] = useState<ISortCondition['dividePage'] | null>(null);
-  // const containerRef = useRef<HTMLDivElement>(null);
-  // const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  // const listContainerRef = useRef<HTMLDivElement>();
-  // const [sidebarVisible, toggleSidebarVisible] = useState(true);
-  // const [publicCategories, setPublicCategories] = useState<IAssetPublicCategory[]>([]);
-  // const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
-  // const [currentAsset, setCurrentAsset] = useState<IAssetItem<E> | null>(null);
-  // const [expandBlockCategory, setExpandBlockCategory] = useState<'simple' | 'extra' | null>('simple');
-
   const team = useVinesTeam();
 
   // local storage
@@ -129,11 +99,7 @@ export const UgcView = <E extends object>({
       });
   }, [defaultPageSizeLS]);
 
-  const {
-    data: rawData,
-    isLoading,
-    mutate,
-  } = useUgcFetcher({
+  const { data: rawData, isLoading } = useUgcFetcher({
     page: pagination.pageIndex + 1,
     limit: pagination.pageSize,
     filter: {},
@@ -195,20 +161,18 @@ export const UgcView = <E extends object>({
     getCoreRowModel: getCoreRowModel(),
     state: {
       pagination,
-      // sorting,
     },
     manualPagination: true,
     rowCount: pageData.total,
     onPaginationChange,
-    // manualSorting: true,
   });
 
   return (
     <div ref={ref} className="relative w-full flex-1 overflow-x-clip">
-      <UgcViewHeader assetKey={assetKey} subtitle={subtitle} mutate={mutate} />
+      <UgcViewHeader assetKey={assetKey} subtitle={subtitle} />
       <SmoothTransition className="relative overflow-clip">
         <AnimatePresence>
-          {isLoading || (isNull(displayMode) && <Loading motionKey="vines-assets-loading" />)}
+          {(isLoading || isNull(displayMode)) && <Loading motionKey={`vines-assets-${assetKey}-loading`} />}
         </AnimatePresence>
         <div className="flex flex-col">
           <ScrollArea className="relative h-[calc(100vh-10.5rem)] w-full rounded-r-lg px-4 py-2">
