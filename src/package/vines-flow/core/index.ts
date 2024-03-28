@@ -18,6 +18,7 @@ import {
   IVinesNodePosition,
   IVinesWorkflowUpdate,
   VinesEdgePath,
+  VinesNodeExecutionTask,
   VinesTask,
 } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesTools } from '@/package/vines-flow/core/tools';
@@ -691,23 +692,26 @@ export class VinesCore extends VinesTools(VinesBase) {
     }
   }
 
-  public clearExecutionStatus() {
+  public clearExecutionStatus(refresh = true) {
     const allNodes = this.getAllNodes();
     allNodes.forEach((it) => it.executionStatus !== 'SCHEDULED' && (it.executionTask.status = 'CANCELED'));
     void (this.executionStatus !== 'SCHEDULED' && (this.executionStatus = 'CANCELED'));
-    this.sendEvent('refresh');
-    setTimeout(() => {
-      allNodes.forEach((it) => it.clearExecutionStatus());
-      requestAnimationFrame(() => {
-        this.executionStatus = 'SCHEDULED';
-        this.sendEvent('refresh');
-      });
-    }, 80);
+    refresh && this.sendEvent('refresh');
+    setTimeout(
+      () => {
+        allNodes.forEach((it) => it.clearExecutionStatus());
+        requestAnimationFrame(() => {
+          this.executionStatus = 'SCHEDULED';
+          refresh && this.sendEvent('refresh');
+        });
+      },
+      refresh ? 80 : 0,
+    );
   }
 
-  public fillUpSubWorkflowChildren() {
+  public fillUpSubWorkflowChildren(render = true) {
     try {
-      if (this.nodes.some((it) => it.checkChildren([it]))) {
+      if (this.nodes.some((it) => it.checkChildren([it])) && render) {
         this.setAllNodeSize(this.nodeInitSize.width, this.nodeInitSize.height);
         this.render();
         this.sendEvent('refresh');
@@ -719,11 +723,40 @@ export class VinesCore extends VinesTools(VinesBase) {
     return true;
   }
 
-  private restoreSubWorkflowChildren() {
+  private restoreSubWorkflowChildren(render = true) {
     this.nodes.some((it) => it.restoreChildren());
-    this.setAllNodeSize(this.nodeInitSize.width, this.nodeInitSize.height);
-    this.render();
-    this.sendEvent('refresh');
+    if (render) {
+      this.setAllNodeSize(this.nodeInitSize.width, this.nodeInitSize.height);
+      this.render();
+      this.sendEvent('refresh');
+    }
+  }
+
+  public async flatWorkflowExecution(execution: VinesWorkflowExecution): Promise<VinesNodeExecutionTask[]> {
+    if (!('tasks' in execution)) return [];
+
+    this.fillUpSubWorkflowChildren(false);
+
+    const nodeExecutions: VinesNodeExecutionTask[] = [];
+    for (const task of execution.tasks) {
+      const taskId = task.workflowTask?.taskReferenceName;
+      const currentTaskStatus = task.status;
+      if (!taskId || !currentTaskStatus) continue;
+
+      const node = this.getNodeById(taskId);
+      if (!node) {
+        continue;
+      }
+      await node.updateStatus(task);
+    }
+
+    const vinesNodes = this.getAllNodes();
+    vinesNodes.slice(1, vinesNodes.length - 1).forEach((it) => nodeExecutions.push(it.executionTask));
+
+    this.restoreSubWorkflowChildren(false);
+    this.clearExecutionStatus(false);
+
+    return nodeExecutions;
   }
   // endregion
 }

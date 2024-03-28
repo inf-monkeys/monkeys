@@ -11,7 +11,7 @@ export const VinesAbstractImage: React.FC<IVinesAbstractImageProps> = ({ childre
     <img
       src={children?.toString()}
       alt="image"
-      className="rounded-md border border-input bg-background object-cover shadow-md"
+      className="max-w-96 rounded-md border border-input bg-background object-cover shadow-md"
     />
   );
 };
