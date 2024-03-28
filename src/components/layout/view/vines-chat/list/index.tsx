@@ -1,0 +1,89 @@
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+
+import { useDocumentVisibility, useInterval, useNetwork } from '@mantine/hooks';
+import equal from 'fast-deep-equal/es6';
+import { omit } from 'lodash';
+
+import { useSearchWorkflowExecutions } from '@/apis/workflow/execution';
+import { IVinesChatListItem } from '@/components/layout/view/vines-chat/list/typings.ts';
+import { VirtualizedList } from '@/components/layout/view/vines-chat/list/virtualized';
+import { useVinesUser } from '@/components/router/guard/user.tsx';
+import { useVinesFlow } from '@/package/vines-flow';
+import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
+
+interface IVinesChatListProps {
+  visible: boolean;
+  workflowId: string;
+}
+
+export const VinesChatList: React.FC<IVinesChatListProps> = ({ visible, workflowId }) => {
+  const { userPhoto, userName } = useVinesUser();
+  const { vines } = useVinesFlow();
+  const { data, trigger } = useSearchWorkflowExecutions();
+
+  const handleUpdateList = useCallback(
+    () =>
+      trigger({
+        orderBy: { filed: 'startTime', order: 'DESC' },
+        pagination: { page: 1, limit: 100 },
+        workflowId,
+      }),
+    [workflowId],
+  );
+
+  const networkStatus = useNetwork();
+  const documentState = useDocumentVisibility();
+  const interval = useInterval(handleUpdateList, 1500);
+
+  useEffect(() => {
+    if (networkStatus.online && documentState === 'visible' && visible) {
+      interval.start();
+    } else {
+      interval.stop();
+    }
+  }, [documentState, networkStatus, visible]);
+
+  useEffect(() => {
+    visible && handleUpdateList();
+  }, [visible]);
+
+  const [list, setList] = useState<IVinesChatListItem[] | undefined>();
+
+  const prevData = useRef<IVinesChatListItem[]>([]);
+  useEffect(() => {
+    const dirtyData =
+      data?.data
+        ?.filter((it) => !it.tasks?.length)
+        ?.map(
+          ({ workflowId, output, input, status, startTime }) =>
+            ({ instanceId: workflowId!, output, input, status, timestamp: startTime }) as unknown as IVinesChatListItem,
+        ) ?? [];
+
+    if (equal(prevData.current, dirtyData) || !dirtyData.length) return;
+    prevData.current = dirtyData;
+
+    const newList: IVinesChatListItem[] = [];
+
+    const vinesWorkflowInput = vines.workflowInput;
+    const botPhoto = vines.workflowIcon;
+    for (const it of dirtyData.toReversed()) {
+      const originalInput = omit(it.input, ['__context']);
+      const input = vinesWorkflowInput
+        .map((it) => ({ ...it, default: originalInput[it.name] }))
+        .filter((it) => it.default) as unknown as VinesWorkflowVariable[];
+
+      newList.push({
+        ...it,
+        input,
+        originalInput,
+        userPhoto,
+        userName,
+        botPhoto,
+      });
+    }
+
+    setList(newList);
+  }, [data?.data]);
+
+  return list && <VirtualizedList data={list} />;
+};

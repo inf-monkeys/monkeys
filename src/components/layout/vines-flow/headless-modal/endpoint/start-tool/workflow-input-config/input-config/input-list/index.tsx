@@ -10,16 +10,29 @@ import { Tag } from '@/components/ui/tag';
 import { TagGroup } from '@/components/ui/tag/tag-group.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
+import { cn } from '@/utils';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 interface IWorkflowInputListProps {
   inputs: VinesWorkflowVariable[];
   children?: (variableId: string) => React.ReactNode;
   className?: string;
+  cardClassName?: string;
   contentWidth?: number;
+  defaultValueText?: string;
 }
 
-export const WorkflowInputList: React.FC<IWorkflowInputListProps> = ({ inputs, children, className, contentWidth }) => {
+export const WorkflowInputList: React.FC<IWorkflowInputListProps> = ({
+  inputs,
+  defaultValueText = '默认值',
+  children,
+  className,
+  cardClassName,
+  contentWidth,
+}) => {
+  const inputLength = inputs.length;
+  const inputLastIndex = inputLength - 1;
+
   return (
     <ScrollArea className={className}>
       {inputs.map((it, index) => {
@@ -29,7 +42,14 @@ export const WorkflowInputList: React.FC<IWorkflowInputListProps> = ({ inputs, c
         const multipleValues = get(typeOptions, 'multipleValues', false);
         const child = children?.(variableId);
         return (
-          <Card className="mb-2 flex flex-col gap-2 p-4" key={index}>
+          <Card
+            className={cn(
+              'flex flex-col gap-2 p-4',
+              inputLength > 1 && index !== inputLastIndex && 'mb-2',
+              cardClassName,
+            )}
+            key={index}
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Tag className="text-xxs bg-muted py-1 shadow-sm">
@@ -44,12 +64,12 @@ export const WorkflowInputList: React.FC<IWorkflowInputListProps> = ({ inputs, c
               {child}
             </div>
             <Separator />
-            <div className="break-word flex flex-col gap-2 p-2 text-xs" style={{ width: contentWidth }}>
+            <div className="break-word flex flex-col gap-2 px-2 text-xs" style={{ width: contentWidth }}>
               {defaultValueType === 'undefined' ? (
                 <p>暂无默认值</p>
               ) : (
                 <>
-                  <span className="-mt-1 text-xs text-gray-10">默认值</span>
+                  {defaultValueText && <span className="-mt-1 text-xs text-gray-10">{defaultValueText}</span>}
                   {defaultValueType === 'boolean' ? (
                     defaultData ? (
                       '真'
@@ -74,7 +94,7 @@ export const WorkflowInputList: React.FC<IWorkflowInputListProps> = ({ inputs, c
                       size="large"
                     />
                   ) : (
-                    <p className="break-words">{stringify(defaultData)}</p>
+                    <p className="break-words">{stringify(defaultData).replace(/^"|"$/g, '')}</p>
                   )}
                 </>
               )}
