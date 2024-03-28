@@ -12,6 +12,7 @@ import { AuthWrapper } from '@/components/layout/login/authz/auth-wrapper.tsx';
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp.tsx';
 import { PHONE_REGEX } from '@/consts/authz';
 
 interface IPhoneAuthProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -73,12 +74,26 @@ export const PhoneAuth: React.FC<IPhoneAuthProps> = ({ onFinished }) => {
         control={form.control}
         render={({ field }) => (
           <FormItem>
-            <div className="flex w-full items-center gap-4">
+            <div className="flex w-full items-center justify-between gap-2">
               <FormControl>
-                <Input placeholder="请输入短信验证码" inputMode="numeric" maxLength={6} {...field} className="grow" />
+                <InputOTP maxLength={6} {...field}>
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
               </FormControl>
 
-              <Button disabled={disabledCodeInput || interval.active} onClick={handleSandSmsCode}>
+              <Button
+                className="flex-1"
+                disabled={disabledCodeInput || interval.active}
+                onClick={handleSandSmsCode}
+                size="small"
+              >
                 {interval.active ? `${countDownSeconds} s` : '发送验证码'}
               </Button>
             </div>

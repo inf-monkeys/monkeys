@@ -61,6 +61,7 @@
     "file-saver": "^2.0.5",
     "framer-motion": "^11.0.8",
     "immer": "^10.0.3",
+    "input-otp": "^1.2.3",
     "keyboardjs": "^2.7.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.335.0",
