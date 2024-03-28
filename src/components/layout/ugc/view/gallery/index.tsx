@@ -72,18 +72,21 @@ export const UgcViewGalleryItem = <E extends object>({
               className="w-64"
             >
               <div className="flex flex-col gap-3">
-                {row.getAllCells().map((cell, index) => {
-                  return (
-                    <div className="grid grid-cols-5 text-sm" key={index}>
-                      <span className="col-span-2 flex justify-start font-bold">
-                        {cell.column.columnDef.header?.toString() ?? ''}
-                      </span>
-                      <span className="col-span-3 flex flex-wrap justify-end">
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </span>
-                    </div>
-                  );
-                })}
+                {row
+                  .getAllCells()
+                  .filter((c) => c.column.columnDef.id != 'operate')
+                  .map((cell, index) => {
+                    return (
+                      <div className="grid grid-cols-5 text-sm" key={index}>
+                        <span className="col-span-2 flex justify-start font-bold">
+                          {cell.column.columnDef.header?.toString() ?? ''}
+                        </span>
+                        <span className="col-span-3 flex flex-wrap justify-end">
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </span>
+                      </div>
+                    );
+                  })}
               </div>
             </PopoverContent>
           </Popover>

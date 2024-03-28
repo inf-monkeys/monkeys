@@ -46,6 +46,16 @@ export const Workflows: React.FC = () => {
           {
             accessorKey: 'name',
             header: '名称',
+            cell: ({ row, getValue }) => (
+              <a
+                className="transition-colors hover:text-primary-500"
+                href={`/${row.original.teamId}/workspace/${row.original.workflowId}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {getValue() as string}
+              </a>
+            ),
           },
           {
             accessorKey: 'description',
