@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 
-import { Row } from '@tanstack/react-table';
+import { flexRender, Row } from '@tanstack/react-table';
 import { CircleEllipsis, Info } from 'lucide-react';
 
 import { IAssetItem } from '@/apis/ugc/typings.ts';
@@ -69,13 +69,18 @@ export const UgcViewGalleryItem = <E extends object>({
               onClick={(e) => {
                 e.stopPropagation();
               }}
+              className="w-64"
             >
               <div className="flex flex-col gap-3">
                 {row.getAllCells().map((cell, index) => {
                   return (
-                    <div className="grid grid-cols-4 text-sm" key={index}>
-                      <span className="col-span-1 font-bold">{cell.column.columnDef.header?.toString() ?? ''}</span>
-                      {/*<span className="col-span-3">{cell.renderValue().toString()}</span>*/}
+                    <div className="grid grid-cols-5 text-sm" key={index}>
+                      <span className="col-span-2 flex justify-start font-bold">
+                        {cell.column.columnDef.header?.toString() ?? ''}
+                      </span>
+                      <span className="col-span-3 flex flex-wrap justify-end">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </span>
                     </div>
                   );
                 })}
