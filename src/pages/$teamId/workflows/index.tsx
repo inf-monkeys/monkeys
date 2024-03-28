@@ -4,6 +4,7 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { useClipboard } from '@mantine/hooks';
 import { Copy, FileUp, FolderUp, Link, Pencil, Trash } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { preloadUgcWorkflows, useUgcWorkflows } from '@/apis/ugc';
@@ -122,6 +123,7 @@ export const Workflows: React.FC = () => {
                 <DropdownMenuItem
                   onSelect={() => {
                     clipboard.copy(location.origin.concat(`/${item.teamId}/workspace/${item.workflowId}`));
+                    toast.success('链接复制成功');
                   }}
                 >
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">

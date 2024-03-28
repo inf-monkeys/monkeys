@@ -31,34 +31,33 @@ interface IUgcHeaderSortButtonProps extends IAssetCustomProps {
 
 export const UgcHeaderSortButton: React.FC<IUgcHeaderSortButtonProps> = ({ assetKey }) => {
   const team = useVinesTeam();
+  const teamId = team.teamId;
 
   const [sortConditionStorage, setSortConditionStorage] = useLocalStorage<ISortConditionStorage>(
     'vines-ui-asset-sort-condition',
     {},
   );
 
-  const sortCondition: ISortCondition = _.get(sortConditionStorage, [team.teamId, assetKey], DEFAULT_SORT_CONDITION);
+  const sortCondition: ISortCondition = _.get(sortConditionStorage, [teamId, assetKey], DEFAULT_SORT_CONDITION);
 
   useEffect(() => {
-    if (!_.has(sortConditionStorage, [team.teamId, assetKey])) {
+    if (!_.has(sortConditionStorage, [teamId, assetKey])) {
       setTimeout(() => {
         setSortConditionStorage({
           ...sortConditionStorage,
-          [team.teamId]: {
-            ...sortConditionStorage[team.teamId],
+          [teamId]: {
+            ...sortConditionStorage[teamId],
             [assetKey]: DEFAULT_SORT_CONDITION,
           },
         });
       });
     }
-  }, [sortConditionStorage]);
+  }, [sortConditionStorage, teamId]);
 
   const sortConditionIcon = useMemo(
     () => (sortCondition.orderBy === 'ASC' ? <ArrowDownNarrowWide /> : <ArrowDownWideNarrow />),
     [sortCondition.orderBy],
   );
-
-  const teamId = team.teamId;
 
   return (
     <DropdownMenu>
