@@ -11,6 +11,7 @@ import {
 } from '@tanstack/react-table';
 import { AnimatePresence } from 'framer-motion';
 import _, { isNull } from 'lodash';
+import { MoreHorizontal } from 'lucide-react';
 
 import { IAssetItem, IListUgcItemsFnType, IPreloadUgcItemsFnType } from '@/apis/ugc/typings.ts';
 import {
@@ -26,6 +27,7 @@ import { UgcViewGalleryItem } from '@/components/layout/ugc/view/gallery';
 import { UgcViewHeader } from '@/components/layout/ugc/view/header';
 import { DEFAULT_SORT_CONDITION } from '@/components/layout/ugc/view/header/consts.ts';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
+import { Button } from '@/components/ui/button';
 import { RemoteDataTable } from '@/components/ui/data-table/remote.tsx';
 import { Loading } from '@/components/ui/loading';
 import { TablePagination } from '@/components/ui/pagination/table-pagination.tsx';
@@ -175,6 +177,16 @@ export const UgcView = <E extends object>({
       return newVal;
     });
   };
+
+  // 添加操作列
+  if (operateArea && !columns.find((c) => c.id === 'operate')) {
+    columns.push({
+      id: 'operate',
+      size: 24,
+      header: '操作',
+      cell: ({ row }) => operateArea(row.original, <Button icon={<MoreHorizontal />} size="small" />, '操作'),
+    });
+  }
 
   // 使用 tanstack table 管理状态
   const table = useReactTable({
