@@ -347,17 +347,17 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
       >
         <div
           className={cn(
-            'group rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-vines-500 focus-within:ring-offset-2',
+            'group rounded-md border border-input bg-background px-1 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-vines-500 focus-within:ring-offset-2',
             className,
           )}
         >
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap">
             {selected.map((option) => {
               return (
                 <Badge
                   key={option.value}
                   className={cn(
-                    'data-[disabled]:bg-muted-foreground data-[disabled]:text-muted data-[disabled]:hover:bg-muted-foreground',
+                    'mx-1 data-[disabled]:bg-muted-foreground data-[disabled]:text-muted data-[disabled]:hover:bg-muted-foreground',
                     'data-[fixed]:bg-muted-foreground data-[fixed]:text-muted data-[fixed]:hover:bg-muted-foreground',
                     badgeClassName,
                   )}
