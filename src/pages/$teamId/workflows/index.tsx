@@ -85,7 +85,7 @@ export const Workflows: React.FC = () => {
             );
           },
           cover: (item) => {
-            return RenderIcon({ iconUrl: item.iconUrl, size: 'max' });
+            return RenderIcon({ iconUrl: item.iconUrl, size: 'gallery' });
           },
         }}
         operateArea={(item, trigger, tooltipTriggerContent) => (

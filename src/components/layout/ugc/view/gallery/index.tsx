@@ -95,7 +95,7 @@ export const UgcViewGalleryItem = <E extends object>({
       <div className="flex flex-col items-center gap-1">
         <Tooltip content={title}>
           <TooltipTrigger asChild>
-            <span className="max-w-48 truncate text-base font-bold group-hover:text-primary-500">{title}</span>
+            <span className="max-w-36 truncate text-base font-bold group-hover:text-primary-500">{title}</span>
           </TooltipTrigger>
         </Tooltip>
 
