@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Tag } from '@/components/ui/tag';
+import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils';
 
 export interface IUgcTagSelectorProps {
@@ -79,17 +80,41 @@ export const UgcTagSelector = ({ assetType, assetTags, assetId, mutate }: IUgcTa
     >
       <PopoverTrigger asChild>
         <div
-          className="flex cursor-pointer flex-wrap gap-1 text-xs"
+          className="flex cursor-pointer flex-wrap items-center gap-1 overflow-hidden text-xs"
           onClick={(e) => {
             e.stopPropagation();
           }}
         >
           {assetTags && assetTags.length > 0 ? (
-            assetTags.map((tag, index) => (
-              <Tag color="primary" key={index} size="xs" className="cursor-pointer">
-                {tag}
-              </Tag>
-            ))
+            (() => {
+              const rest = assetTags.length - 4;
+              return (
+                <>
+                  {assetTags.slice(0, 4).map((tag, index) => (
+                    <Tag color="primary" key={index} size="xs" className="cursor-pointer">
+                      {tag}
+                    </Tag>
+                  ))}
+                  {rest > 0 && (
+                    <Tooltip
+                      content={
+                        <div className="flex gap-1">
+                          {assetTags.slice(4).map((tag, index) => (
+                            <Tag color="primary" key={index} size="xs" className="cursor-pointer">
+                              {tag}
+                            </Tag>
+                          ))}
+                        </div>
+                      }
+                    >
+                      <TooltipTrigger asChild>
+                        <span className="px-1">+{rest}</span>
+                      </TooltipTrigger>
+                    </Tooltip>
+                  )}
+                </>
+              );
+            })()
           ) : (
             <span className="flex flex-nowrap items-center gap-1 opacity-75 transition-opacity hover:opacity-90">
               <Plus size={15} />

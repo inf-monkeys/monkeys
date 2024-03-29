@@ -31,7 +31,16 @@ export const RenderUser: React.FC<{
 
 export const RenderDescription: React.FC<{
   description?: string;
-}> = ({ description }) => <span className="text-opacity-70">{description || '暂无描述'}</span>;
+}> = ({ description }) =>
+  !description || description === '' ? (
+    <span className="line-clamp-3 text-opacity-70">暂无描述</span>
+  ) : (
+    <Tooltip content={<span className="flex max-w-64 flex-wrap">{description}</span>} contentProps={{ side: 'bottom' }}>
+      <TooltipTrigger asChild>
+        <span className="line-clamp-3 text-opacity-70">{description}</span>
+      </TooltipTrigger>
+    </Tooltip>
+  );
 
 export const RenderIcon: React.FC<{
   iconUrl?: string;
