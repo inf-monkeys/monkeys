@@ -13,12 +13,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription } from '@/components/ui/card.tsx';
 import { JSONValue } from '@/components/ui/code-editor';
+import { VinesHighlighter } from '@/components/ui/highlighter';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { cn } from '@/utils';
-import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 const MessageItem = memo<{ data: IVinesChatListItem }>(({ data }) => {
   const clipboard = useClipboard({ timeout: 500 });
@@ -26,8 +26,9 @@ const MessageItem = memo<{ data: IVinesChatListItem }>(({ data }) => {
   const status = data.status;
   const instanceId = data.instanceId;
   const inputs = data.input;
+  const originalInput = data.originalInput;
   const hasInput = inputs.length > 0;
-  const hasOriginalInput = !isEmpty(data.originalInput);
+  const hasOriginalInput = !isEmpty(originalInput);
 
   const botPhoto = data.botPhoto;
   const userPhoto = data.userPhoto;
@@ -57,7 +58,7 @@ const MessageItem = memo<{ data: IVinesChatListItem }>(({ data }) => {
                 cardClassName="p-0 border-transparent shadow-transparent"
               />
             ) : hasOriginalInput ? (
-              stringify(data.originalInput)
+              <VinesHighlighter language="json">{JSON.stringify(originalInput, null, 2)}</VinesHighlighter>
             ) : (
               '手动或自动执行触发'
             )}
