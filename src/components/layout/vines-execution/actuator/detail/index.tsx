@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 
 import { useElementSize } from '@mantine/hooks';
 
-import { VinesActuatorDetailContent } from '@/components/layout/vines-execution/actuator/detail/content.tsx';
+import { VinesActuatorDetailContent } from '@/components/layout/vines-execution/actuator/detail/content';
 import { VinesActuatorDetailHeader } from '@/components/layout/vines-execution/actuator/detail/header.tsx';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
 

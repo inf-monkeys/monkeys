@@ -51,9 +51,11 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ visible, workflow
   const [list, setList] = useState<IVinesChatListItem[] | undefined>();
 
   const prevData = useRef<IVinesChatListItem[]>([]);
+
+  const executionData = data?.data;
   useEffect(() => {
     const dirtyData =
-      data?.data
+      executionData
         ?.filter((it) => !it.tasks?.length)
         ?.map(
           ({ workflowId, output, input, status, startTime, endTime }) =>
@@ -69,6 +71,11 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ visible, workflow
 
     if (equal(prevData.current, dirtyData) || !dirtyData.length) return;
     prevData.current = dirtyData;
+
+    const workingList = executionData?.filter(({ status }) => ['RUNNING', 'PAUSED'].includes(status ?? ''));
+    if (workingList?.length) {
+      vines.swapExecutionInstance(workingList[0]);
+    }
 
     const newList: IVinesChatListItem[] = [];
 
@@ -93,7 +100,7 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ visible, workflow
     }
 
     setList(newList);
-  }, [data?.data]);
+  }, [executionData]);
 
   return list && <VirtualizedList data={list} />;
 };

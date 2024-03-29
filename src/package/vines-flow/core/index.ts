@@ -532,7 +532,7 @@ export class VinesCore extends VinesTools(VinesBase) {
       return false;
     }
 
-    this.restoreSubWorkflowChildren();
+    this.fillUpSubWorkflowChildren();
 
     this.update({ workflow: workflowDefinition as unknown as MonkeyWorkflow, renderDirection: 'vertical' });
 

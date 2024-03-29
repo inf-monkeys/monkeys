@@ -4,7 +4,8 @@ import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 
 import { IVinesChatListItem } from '@/components/layout/view/vines-chat/list/typings.ts';
 import { AutoScroll } from '@/components/layout/view/vines-chat/list/virtualized/auto-scroll.tsx';
-import { VirtualizedItem } from '@/components/layout/view/vines-chat/list/virtualized/item.tsx';
+import { ChatMessage } from '@/components/layout/view/vines-chat/list/virtualized/chat-message';
+import { VinesRealTimeChatMessage } from '@/components/layout/view/vines-chat/list/virtualized/chat-message/real-time.tsx';
 
 interface IVirtualizedListProps {
   data: IVinesChatListItem[];
@@ -22,6 +23,8 @@ export const VirtualizedList = memo<IVirtualizedListProps>(({ data }) => {
 
   const overScan = window.innerHeight;
 
+  const LastItemIndex = data.length - 1;
+
   return (
     <main className="relative flex h-full flex-col">
       <Virtuoso
@@ -29,8 +32,13 @@ export const VirtualizedList = memo<IVirtualizedListProps>(({ data }) => {
         atBottomThreshold={60}
         data={data}
         followOutput={'auto'}
-        initialTopMostItemIndex={data?.length - 1}
-        itemContent={VirtualizedItem}
+        initialTopMostItemIndex={LastItemIndex}
+        itemContent={(index: number, data: IVinesChatListItem) => {
+          return <ChatMessage data={data} isLast={index === LastItemIndex} />;
+        }}
+        components={{
+          Footer: VinesRealTimeChatMessage,
+        }}
         overscan={overScan}
         ref={virtuosoRef}
       />
