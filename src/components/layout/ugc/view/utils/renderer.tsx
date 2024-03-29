@@ -38,7 +38,4 @@ export const RenderIcon: React.FC<{
   size?: IVinesIconSize;
 }> = ({ iconUrl, size = 'md' }) => <VinesIcon size={size}>{iconUrl ?? ''}</VinesIcon>;
 
-export const RenderTags = (props: IUgcTagSelectorProps) => {
-  console.log('6');
-  return <UgcTagSelector {...props} />;
-};
+export const RenderTags = (props: IUgcTagSelectorProps) => <UgcTagSelector {...props} />;

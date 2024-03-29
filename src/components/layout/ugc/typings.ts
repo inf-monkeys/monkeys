@@ -1,6 +1,17 @@
 import React from 'react';
 
+import { ColumnDef, Row } from '@tanstack/react-table';
+
 import { IAssetItem } from '@/apis/ugc/typings.ts';
+
+export interface IUgcViewItemProps<E extends object> {
+  row: Row<IAssetItem<E>>;
+  columns: ColumnDef<IAssetItem<E>, any>[];
+  renderOptions: IUgcRenderOptions<IAssetItem<E>>;
+  operateArea?: IOperateAreaProps<E>;
+  onItemClick?: (item: IAssetItem<E>, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+  index: number;
+}
 
 export type IOperateAreaProps<E> = (
   item: IAssetItem<E>,
@@ -24,7 +35,7 @@ export type ISortCondition = {
 export type IDividePageType = 'pagination' | 'scroll' | null;
 
 export type IUgcRenderOptions<E> = {
-  [type in IRenderKey]?: keyof E | ((item: E) => React.ReactNode);
+  [type in IRenderKey]?: ColumnDef<E>['id'] | ((item: E) => React.ReactNode);
 };
 
 export type IAssetCustomStorage<T> = {

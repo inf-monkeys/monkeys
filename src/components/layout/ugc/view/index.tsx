@@ -29,6 +29,7 @@ import { UgcViewCard } from '@/components/layout/ugc/view/card';
 import { UgcViewGalleryItem } from '@/components/layout/ugc/view/gallery';
 import { UgcViewHeader } from '@/components/layout/ugc/view/header';
 import { DEFAULT_SORT_CONDITION } from '@/components/layout/ugc/view/header/consts.ts';
+import { RenderTags } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { RemoteDataTable } from '@/components/ui/data-table/remote.tsx';
@@ -159,27 +160,32 @@ export const UgcView = <E extends object>({
   const columns = createColumns(columnHelper);
 
   // 修改 tag 列
-  // const tagColumn = columns.find((c) => c.accessorKey === 'assetTags');
-  // if (tagColumn) {
-  //   const index = columns.indexOf(tagColumn);
-  //   columns[index] = {
-  //     ...tagColumn,
-  //     accessorFn: (row) => RenderTags({ assetType, assetId: row._id, assetTags: row.assetTags, mutate }),
-  //     cell: ({ getValue }) => getValue() as React.ReactNode,
-  //   };
-  // }
+  const tagColumn = columns.find((c) => c.id === 'assetTags');
+  if (tagColumn) {
+    const index = columns.indexOf(tagColumn);
+    columns[index] = {
+      ...tagColumn,
+      cell: ({ row }) =>
+        RenderTags({
+          assetType,
+          assetId: row.original._id,
+          assetTags: row.original.assetTags,
+          mutate,
+        }),
+    };
+  }
 
   // 添加操作列
   if (operateArea && !columns.find((c) => c.id === 'operate')) {
-    columns.push({
-      id: 'operate',
-      size: 24,
-      header: '操作',
-      cell: ({ row }) => operateArea(row.original, <Button icon={<MoreHorizontal />} size="small" />, '操作'),
-    });
+    columns.push(
+      columnHelper.display({
+        id: 'operate',
+        size: 24,
+        header: '操作',
+        cell: ({ row }) => operateArea(row.original, <Button icon={<MoreHorizontal />} size="small" />, '操作'),
+      }),
+    );
   }
-
-  console.log(columns);
 
   // 使用 tanstack table 管理状态
   const table = useReactTable({
@@ -210,6 +216,7 @@ export const UgcView = <E extends object>({
                     row={row}
                     key={index}
                     index={index}
+                    columns={columns}
                     renderOptions={renderOptions}
                     operateArea={operateArea}
                     onItemClick={onItemClick}
@@ -232,6 +239,7 @@ export const UgcView = <E extends object>({
                 {table.getRowModel().rows.map((row, index) => (
                   <UgcViewGalleryItem
                     row={row}
+                    columns={columns}
                     key={index}
                     index={index}
                     renderOptions={renderOptions}
