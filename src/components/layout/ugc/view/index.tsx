@@ -1,8 +1,11 @@
 import React, { useMemo, useState } from 'react';
 
+import { AssetType } from '@inf-monkeys/vines';
 import { useElementSize } from '@mantine/hooks';
 import {
   ColumnDef,
+  ColumnHelper,
+  createColumnHelper,
   functionalUpdate,
   getCoreRowModel,
   PaginationState,
@@ -37,9 +40,11 @@ import { useLocalStorage } from '@/utils';
 
 interface IUgcViewProps<E extends object> {
   assetKey: string;
+  assetType: AssetType;
   useUgcFetcher: IListUgcItemsFnType<E>;
   preloadUgcFetcher: IPreloadUgcItemsFnType<E>;
-  columns: ColumnDef<IAssetItem<E>>[];
+  // columns: ColumnDef<IAssetItem<E>>[];
+  createColumns: (columnHelper: ColumnHelper<IAssetItem<E>>) => ColumnDef<IAssetItem<E>, any>[];
   renderOptions: IUgcRenderOptions<IAssetItem<E>>;
   operateArea?: IOperateAreaProps<E>;
   onItemClick?: (item: IAssetItem<E>, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
@@ -49,9 +54,10 @@ interface IUgcViewProps<E extends object> {
 
 export const UgcView = <E extends object>({
   assetKey,
+  assetType,
   useUgcFetcher,
   preloadUgcFetcher,
-  columns,
+  createColumns,
   renderOptions,
   operateArea,
   onItemClick,
@@ -99,7 +105,12 @@ export const UgcView = <E extends object>({
       });
   }, [defaultPageSizeLS]);
 
-  const { data: rawData, isLoading } = useUgcFetcher({
+  // fetch data
+  const {
+    data: rawData,
+    isLoading,
+    mutate,
+  } = useUgcFetcher({
     page: pagination.pageIndex + 1,
     limit: pagination.pageSize,
     filter: {},
@@ -144,6 +155,20 @@ export const UgcView = <E extends object>({
     });
   };
 
+  const columnHelper = createColumnHelper<IAssetItem<E>>();
+  const columns = createColumns(columnHelper);
+
+  // 修改 tag 列
+  // const tagColumn = columns.find((c) => c.accessorKey === 'assetTags');
+  // if (tagColumn) {
+  //   const index = columns.indexOf(tagColumn);
+  //   columns[index] = {
+  //     ...tagColumn,
+  //     accessorFn: (row) => RenderTags({ assetType, assetId: row._id, assetTags: row.assetTags, mutate }),
+  //     cell: ({ getValue }) => getValue() as React.ReactNode,
+  //   };
+  // }
+
   // 添加操作列
   if (operateArea && !columns.find((c) => c.id === 'operate')) {
     columns.push({
@@ -153,6 +178,8 @@ export const UgcView = <E extends object>({
       cell: ({ row }) => operateArea(row.original, <Button icon={<MoreHorizontal />} size="small" />, '操作'),
     });
   }
+
+  console.log(columns);
 
   // 使用 tanstack table 管理状态
   const table = useReactTable({

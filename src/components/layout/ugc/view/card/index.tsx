@@ -34,11 +34,11 @@ export const UgcViewCard = <E extends object>({
   const logo = useMemo(() => getRenderNode('logo'), [index, row]);
   const title = useMemo(() => getRenderNode('title'), [index, row]);
   const subtitle = useMemo(() => getRenderNode('subtitle'), [index, row]);
+  const tags = useMemo(() => getRenderNode('assetTags', undefined, true), [index, row]);
   const description = useMemo(() => getRenderNode('description') || '暂无描述', [index, row]);
-
   return (
     <Card
-      className={cn('h-40', {
+      className={cn('h-44', {
         'cursor-pointer transition-colors hover:bg-[--bg-hover-color]': !!onItemClick,
         'cursor-default': !onItemClick,
       })}
@@ -67,7 +67,8 @@ export const UgcViewCard = <E extends object>({
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-4 pt-0">
+      <CardContent className="flex flex-col gap-2 p-4 pt-0">
+        {tags}
         <div className="flex flex-col gap-1 text-xs text-opacity-70">{description}</div>
       </CardContent>
     </Card>

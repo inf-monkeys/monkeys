@@ -34,54 +34,101 @@ export const Workflows: React.FC = () => {
       <UgcSidebar title="工作流" />
       <UgcView
         assetKey="workflow"
+        assetType="workflow"
         useUgcFetcher={useUgcWorkflows}
         preloadUgcFetcher={preloadUgcWorkflows}
-        columns={[
-          {
-            accessorKey: 'iconUrl',
-            header: '图标',
-            accessorFn: (row) => RenderIcon({ iconUrl: row.iconUrl }),
-            cell: (props) => props.getValue() as React.ReactNode,
-            maxSize: 48,
-          },
-          {
-            accessorKey: 'name',
-            header: '名称',
-            cell: ({ row, getValue }) => (
-              <a
-                className="transition-colors hover:text-primary-500"
-                href={`/${row.original.teamId}/workspace/${row.original.workflowId}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {getValue() as string}
-              </a>
-            ),
-          },
-          {
-            accessorKey: 'description',
-            header: '描述',
-            cell: (props) => RenderDescription({ description: props.getValue() as string }),
-          },
-          {
-            accessorKey: 'user',
-            header: '用户',
-            cell: (props) => RenderUser({ user: props.getValue() as IVinesUser }),
-            maxSize: 48,
-          },
-          {
-            accessorKey: 'createdTimestamp',
-            header: '创建时间',
-            cell: (props) => RenderTime({ time: props.getValue() as number }),
-            maxSize: 72,
-          },
-          {
-            accessorKey: 'updatedTimestamp',
-            header: '更新时间',
-            cell: (props) => RenderTime({ time: props.getValue() as number }),
-            maxSize: 72,
-          },
-        ]}
+        // columns={[
+        //   {
+        //     accessorKey: 'iconUrl',
+        //     header: '图标',
+        //     accessorFn: (row) => RenderIcon({ iconUrl: row.iconUrl }),
+        //     cell: (props) => props.getValue() as React.ReactNode,
+        //     maxSize: 48,
+        //   },
+        //   {
+        //     accessorKey: 'name',
+        //     header: '名称',
+        //     cell: ({ row, getValue }) => (
+        //       <a
+        //         className="transition-colors hover:text-primary-500"
+        //         href={`/${row.original.teamId}/workspace/${row.original.workflowId}`}
+        //         target="_blank"
+        //         rel="noreferrer"
+        //       >
+        //         {getValue() as string}
+        //       </a>
+        //     ),
+        //   },
+        //   {
+        //     accessorKey: 'description',
+        //     header: '描述',
+        //     cell: (props) => RenderDescription({ description: props.getValue() as string }),
+        //   },
+        //   {
+        //     accessorKey: 'user',
+        //     header: '用户',
+        //     cell: (props) => RenderUser({ user: props.getValue() as IVinesUser }),
+        //     maxSize: 48,
+        //   },
+        //   {
+        //     accessorKey: 'assetTags',
+        //     header: '标签',
+        //     maxSize: 128,
+        //   },
+        //   {
+        //     accessorKey: 'createdTimestamp',
+        //     header: '创建时间',
+        //     cell: (props) => RenderTime({ time: props.getValue() as number }),
+        //     maxSize: 72,
+        //   },
+        //   {
+        //     accessorKey: 'updatedTimestamp',
+        //     header: '更新时间',
+        //     cell: (props) => RenderTime({ time: props.getValue() as number }),
+        //     maxSize: 72,
+        //   },
+        // ]}
+        createColumns={(columnHelper) => {
+          return [
+            columnHelper.accessor('iconUrl', {
+              header: '图标',
+              cell: ({ getValue }) => RenderIcon({ iconUrl: getValue() as string }),
+              maxSize: 48,
+            }),
+            columnHelper.accessor('name', {
+              header: '名称',
+              cell: ({ row, getValue }) => (
+                <a
+                  className="transition-colors hover:text-primary-500"
+                  href={`/${row.original.teamId}/workspace/${row.original.workflowId}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {getValue() as string}
+                </a>
+              ),
+            }),
+            columnHelper.accessor('description', {
+              header: '描述',
+              cell: ({ getValue }) => RenderDescription({ description: getValue() as string }),
+            }),
+            columnHelper.accessor('user', {
+              header: '用户',
+              cell: ({ getValue }) => RenderUser({ user: getValue() as IVinesUser }),
+              maxSize: 48,
+            }),
+            columnHelper.accessor('createdTimestamp', {
+              header: '创建时间',
+              cell: ({ getValue }) => RenderTime({ time: getValue() as number }),
+              maxSize: 72,
+            }),
+            columnHelper.accessor('updatedTimestamp', {
+              header: '更新时间',
+              cell: ({ getValue }) => RenderTime({ time: getValue() as number }),
+              maxSize: 72,
+            }),
+          ];
+        }}
         renderOptions={{
           logo: 'iconUrl',
           title: 'name',

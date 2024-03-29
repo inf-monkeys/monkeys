@@ -3,14 +3,16 @@ import React from 'react';
 import { Tag } from '@/components/ui/tag/index.tsx';
 import { cn } from '@/utils';
 
-interface TagGroupProps {
+export interface ITagGroupItem {
+  color?: 'primary' | 'secondary' | 'tertiary' | 'warning' | 'danger' | null | undefined;
+  children: React.ReactNode;
+  prefixIcon?: React.ReactNode;
+  suffixIcon?: React.ReactNode;
+}
+
+export interface ITagGroupProps {
   className?: string;
-  tagList: {
-    color?: 'primary' | 'secondary' | 'tertiary' | 'warning' | 'danger' | null | undefined;
-    children: React.ReactNode;
-    prefixIcon?: React.ReactNode;
-    suffixIcon?: React.ReactNode;
-  }[];
+  tagList: ITagGroupItem[];
   onTagClose?: (tagChildren: React.ReactNode, e: MouseEvent, tagKey?: string | number) => void;
   size?: 'large' | 'small';
   shape?: 'square' | 'circle';
@@ -19,7 +21,7 @@ interface TagGroupProps {
   closable?: boolean;
 }
 
-const TagGroup: React.FC<TagGroupProps> = ({
+const TagGroup: React.FC<ITagGroupProps> = ({
   className,
   width,
   tagList,
