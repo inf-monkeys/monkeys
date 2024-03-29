@@ -1,5 +1,5 @@
 export interface IVinesChatSession {
-  _id: string;
+  id: string;
   displayName: string;
   creatorUserId: string;
   teamId: string;

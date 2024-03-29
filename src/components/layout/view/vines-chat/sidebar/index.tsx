@@ -33,7 +33,7 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
         <div className="grid gap-2">
           {data?.map((session) => (
             <Card
-              key={session._id}
+              key={session.id}
               className="flex cursor-pointer items-center gap-2 px-3 py-2 hover:bg-gray-10/5 active:bg-gray-10/10"
             >
               <MessageSquare size={16} />
