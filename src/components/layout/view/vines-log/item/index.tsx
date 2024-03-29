@@ -3,7 +3,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import { useClipboard } from '@mantine/hooks';
 import { Copy } from 'lucide-react';
-import moment from 'moment';
 import { toast } from 'sonner';
 
 import { getDescOfTriggerType } from '@/apis/workflow/trigger/utils.ts';
@@ -105,7 +104,7 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
             </div>
 
             <span className="w-32 flex-shrink-0 opacity-50">
-              于 {formatTimeDiffPrevious(moment(workflowExecution.startTime).valueOf())}
+              于 {formatTimeDiffPrevious(workflowExecution.startTime ?? 0)}
             </span>
           </CardContent>
         </TooltipTrigger>

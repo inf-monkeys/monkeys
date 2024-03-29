@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { ColumnDef } from '@tanstack/react-table';
+import dayjs from 'dayjs';
 import { MoreHorizontal, Pause, Pencil, Play, Settings } from 'lucide-react';
-import moment from 'moment';
 import { toast } from 'sonner';
 
 import { deleteTeamInvite, toggleTeamInviteStatus, updateTeamInviteRemark, useTeamInvites } from '@/apis/authz/team';
@@ -118,7 +118,7 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
       header: '失效时间',
       size: 200,
       cell: ({ cell }) =>
-        cell.getValue() ? moment(cell.getValue() as number).format('YYYY-MM-DD HH:mm:ss') : '永久有效',
+        cell.getValue() ? dayjs(cell.getValue() as number).format('YYYY-MM-DD HH:mm:ss') : '永久有效',
     },
     {
       accessorKey: 'inviterUser',

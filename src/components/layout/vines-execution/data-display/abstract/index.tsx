@@ -9,6 +9,7 @@ import { previewDataGenerator } from '@/components/layout/vines-execution/data-d
 import { JSONValue } from '@/components/ui/code-editor';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
+import { cn } from '@/utils';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 interface IVinesAbstractDataPreviewProps {
@@ -24,7 +25,7 @@ export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
     const previewDataLength = previewData.length;
 
     return (
-      <ScrollArea className={className} style={style}>
+      <ScrollArea className={cn('[&>div>div]:h-full', className)} style={style}>
         <div className="flex h-full w-full flex-col gap-1">
           {previewData.map(({ name, type, value }, i) => {
             return (
@@ -39,7 +40,7 @@ export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
               </div>
             );
           })}
-          {!previewDataLength && <h1 className="mx-auto mt-12 text-sm font-bold">该工具执行后暂无输出</h1>}
+          {!previewDataLength && <h1 className="m-auto text-sm font-bold">该工具执行后暂无输出</h1>}
         </div>
       </ScrollArea>
     );

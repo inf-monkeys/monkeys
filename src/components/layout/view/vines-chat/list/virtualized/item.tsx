@@ -29,7 +29,7 @@ export const VirtualizedItem = (_index: number, data: IVinesChatListItem) => {
           <AvatarImage className="aspect-auto" src={userPhoto} alt={userName} />
           <AvatarFallback className="rounded-none p-2 text-xs">{userName.substring(0, 2)}</AvatarFallback>
         </Avatar>
-        <Card className={cn('text-md p-4', hasInput && 'min-w-80')}>
+        <Card className={cn('p-4 text-sm', hasInput && 'min-w-80')}>
           {hasInput ? (
             <WorkflowInputList
               inputs={inputs}

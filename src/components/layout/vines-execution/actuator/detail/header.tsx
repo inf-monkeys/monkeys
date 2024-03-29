@@ -1,6 +1,6 @@
 import React, { forwardRef, useMemo } from 'react';
 
-import moment from 'moment/moment';
+import dayjs from 'dayjs';
 
 interface IVinesActuatorDetailHeaderProps {
   executionStartTime?: number;
@@ -10,10 +10,10 @@ interface IVinesActuatorDetailHeaderProps {
 
 export const VinesActuatorDetailHeader = forwardRef<HTMLHeadingElement, IVinesActuatorDetailHeaderProps>(
   ({ executionStartTime = 0, executionEndTime = 0, iteration = 0 }, ref) => {
-    const startTime = executionStartTime ? moment(executionStartTime).format('YYYY-MM-DD HH:mm:ss') : '-';
-    const endTime = executionEndTime ? moment(executionEndTime).format('YYYY-MM-DD HH:mm:ss') : '-';
+    const startTime = executionStartTime ? dayjs(executionStartTime).format('YYYY-MM-DD HH:mm:ss') : '-';
+    const endTime = executionEndTime ? dayjs(executionEndTime).format('YYYY-MM-DD HH:mm:ss') : '-';
     const currentDuration = useMemo(() => {
-      const duration = moment.duration(moment(executionEndTime).diff(moment(executionStartTime)));
+      const duration = dayjs.duration(dayjs(executionEndTime).diff(dayjs(executionStartTime)));
       const days = duration.days();
       const hours = duration.hours();
       const minutes = duration.minutes();

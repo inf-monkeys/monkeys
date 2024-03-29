@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
 import { useInterval } from '@mantine/hooks';
+import dayjs from 'dayjs';
 import { CheckCircle, CircleDashed, CircleSlash, PauseCircle, PlayCircle, TimerOff, XCircle } from 'lucide-react';
-import moment from 'moment';
 
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -21,7 +21,7 @@ export const ExecutionTimer: React.FC<IExecutionTimerProps> = ({ status, startTi
   const [execTime, setExecTime] = useState<string>('--:--:--');
 
   const handleUpdateTimeUseStartTime = () => {
-    startTime && setExecTime(moment.utc(moment().diff(startTime)).format('HH:mm:ss'));
+    startTime && setExecTime(dayjs.utc(dayjs().diff(startTime)).format('HH:mm:ss'));
   };
   const { start, stop } = useInterval(handleUpdateTimeUseStartTime, 1000);
 
@@ -31,7 +31,7 @@ export const ExecutionTimer: React.FC<IExecutionTimerProps> = ({ status, startTi
       start();
     } else {
       stop();
-      endTime && setTimeout(() => setExecTime(moment.utc(moment(endTime).diff(startTime)).format('HH:mm:ss')), 1000);
+      endTime && setTimeout(() => setExecTime(dayjs.utc(dayjs(endTime).diff(startTime)).format('HH:mm:ss')), 1000);
     }
     return () => stop();
   }, [status, startTime, endTime]);

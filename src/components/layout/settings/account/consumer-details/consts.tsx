@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { ColumnDef } from '@tanstack/react-table';
+import dayjs from 'dayjs';
 import { ArrowUpDown, MinusSquare, PlusSquareIcon } from 'lucide-react';
-import moment from 'moment';
 
 import { IOrder } from '@/apis/authz/team/payment/typings.ts';
 import { WorkflowCell } from '@/components/layout/settings/account/consumer-details/workflow-cell.tsx';
@@ -45,7 +45,7 @@ export const columns: ColumnDef<IOrder>[] = [
       );
     },
     enableSorting: true,
-    cell: ({ cell }) => <span>{moment(cell.getValue() as number).format('YYYY-MM-DD HH:mm:ss')}</span>,
+    cell: ({ cell }) => <span>{dayjs(cell.getValue() as number).format('YYYY-MM-DD HH:mm:ss')}</span>,
   },
   {
     accessorKey: 'amount',
