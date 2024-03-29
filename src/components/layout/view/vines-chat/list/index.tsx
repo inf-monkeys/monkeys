@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useDocumentVisibility, useInterval, useNetwork } from '@mantine/hooks';
+import dayjs from 'dayjs';
 import equal from 'fast-deep-equal/es6';
 import { omit } from 'lodash';
 
@@ -55,8 +56,15 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ visible, workflow
       data?.data
         ?.filter((it) => !it.tasks?.length)
         ?.map(
-          ({ workflowId, output, input, status, startTime }) =>
-            ({ instanceId: workflowId!, output, input, status, timestamp: startTime }) as unknown as IVinesChatListItem,
+          ({ workflowId, output, input, status, startTime, endTime }) =>
+            ({
+              instanceId: workflowId!,
+              output,
+              input,
+              status,
+              startTime,
+              endTime,
+            }) as unknown as IVinesChatListItem,
         ) ?? [];
 
     if (equal(prevData.current, dirtyData) || !dirtyData.length) return;
@@ -79,6 +87,8 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ visible, workflow
         userPhoto,
         userName,
         botPhoto,
+        startTime: dayjs(it.startTime).format('YY-MM-DD HH:mm:ss'),
+        endTime: dayjs(it.endTime).format('YY-MM-DD HH:mm:ss'),
       });
     }
 
