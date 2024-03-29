@@ -5,7 +5,7 @@ import * as jsonpath from 'jsonpath';
 @Injectable()
 export class BuiltinToolsService {
   private async collectDoWhileInputInSubworkflow(workflowInstanceId: string, collectData: (taskReferenceName: string, data: any) => void) {
-    const data = await conductorClient.workflowResource.getExecutionStatus(workflowInstanceId, true);
+    const data = await conductorClient.workflowResource.getExecutionStatus(workflowInstanceId, true, true, true);
     const { tasks } = data;
     for (const task of tasks) {
       if (task.taskType === 'DO_WHILE') {
@@ -31,7 +31,7 @@ export class BuiltinToolsService {
       result[taskReferenceName].push(data);
     };
 
-    const data = await conductorClient.workflowResource.getExecutionStatus(workflowInstanceId!, true);
+    const data = await conductorClient.workflowResource.getExecutionStatus(workflowInstanceId!, true, true, true);
     const { tasks } = data;
     const doWhileTask = tasks.find((t: any) => t.taskType === 'DO_WHILE' && t.referenceTaskName === doWhileTaskReferenceName);
     if (!doWhileTask) {

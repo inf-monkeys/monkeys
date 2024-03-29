@@ -496,6 +496,11 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-2.0.2.tgz#d9fae00a2d5cb40f92cfe64b47ad749fbc38f917"
   integrity sha512-6EwiSjwWYP7pTckG6I5eyFANjPhmPjUX9JRLUSfNPC7FX7zK9gyZAfUEaECL6ALTpGX5AjnBq3C9XmVWPitNpw==
 
+"@inf-monkeys/conductor-javascript@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@inf-monkeys/conductor-javascript/-/conductor-javascript-1.0.2.tgz#e3d527409125420c2042bebd981519d7c5baac70"
+  integrity sha512-zMM20A5R5Gsy915uYboJa7j7XYx+Z8M1cQNlT2A1Q2XXRC2gfVFNo+74TtpoizTxQsUJsS7vU0q0uqd/VIciXA==
+
 "@inf-monkeys/vines@^0.0.64":
   version "0.0.64"
   resolved "https://registry.yarnpkg.com/@inf-monkeys/vines/-/vines-0.0.64.tgz#3e87275ec00ba11954cef5d7691fa485d22cfb0f"

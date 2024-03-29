@@ -4,7 +4,7 @@ import { PaginationDto } from '@/common/dto/pagination.dto';
 import { sleep } from '@/common/utils/utils';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
-import { Workflow } from '@io-orkes/conductor-javascript';
+import { Workflow } from '@inf-monkeys/conductor-javascript';
 import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
 import retry from 'retry-as-promised';

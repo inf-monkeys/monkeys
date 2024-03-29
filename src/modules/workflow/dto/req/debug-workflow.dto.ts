@@ -1,5 +1,5 @@
 import { WorkflowOutputValue } from '@/database/entities/workflow/workflow-metadata';
-import { WorkflowTask } from '@io-orkes/conductor-javascript';
+import { WorkflowTask } from '@inf-monkeys/conductor-javascript';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class DebugWorkflowDto {

@@ -1,6 +1,6 @@
 import { flatTasks } from '@/common/utils/conductor';
+import { WorkflowTask } from '@inf-monkeys/conductor-javascript';
 import { BlockType } from '@inf-monkeys/vines';
-import { WorkflowTask } from '@io-orkes/conductor-javascript';
 import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
 import { ToolsRepository } from '../../database/repositories/tools.repository';

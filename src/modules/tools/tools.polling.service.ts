@@ -2,7 +2,7 @@ import { conductorClient } from '@/common/conductor';
 import { config } from '@/common/config';
 import { logger } from '@/common/logger';
 import { sleep } from '@/common/utils/utils';
-import { Task, TaskDef, TaskManager } from '@io-orkes/conductor-javascript';
+import { Task, TaskDef, TaskManager } from '@inf-monkeys/conductor-javascript';
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import os from 'os';

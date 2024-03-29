@@ -1,4 +1,4 @@
-import { Task } from '@io-orkes/conductor-javascript';
+import { Task } from '@inf-monkeys/conductor-javascript';
 import { ApiProperty } from '@nestjs/swagger';
 import * as Joiful from 'joiful';
 

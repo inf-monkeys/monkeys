@@ -6,8 +6,8 @@ import { WorkflowMetadataEntity, WorkflowOutputValue } from '@/database/entities
 import { ToolsRepository } from '@/database/repositories/tools.repository';
 import { DoWhileMode } from '@/modules/tools/conductor-system-tools/do-while';
 import { CONDUCTOR_TASK_DEF_NAME } from '@/modules/tools/tools.polling.service';
+import { Task, WorkflowTask } from '@inf-monkeys/conductor-javascript';
 import { BlockType } from '@inf-monkeys/vines';
-import { Task, WorkflowTask } from '@io-orkes/conductor-javascript';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -212,7 +212,7 @@ export class ConductorService {
   }
 
   public async getWorkflowExecutionStatus(teamId: string, workflowInstanceId: string) {
-    const data = await conductorClient.workflowResource.getExecutionStatus(workflowInstanceId);
+    const data = await conductorClient.workflowResource.getExecutionStatus(workflowInstanceId, true, true);
     await this.convertConductorTasksToVinesTasks(teamId, (data.tasks || []) as Task[]);
     return data;
   }
