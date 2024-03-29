@@ -1,6 +1,6 @@
 import React from 'react';
 
-import moment from 'moment/moment';
+import dayjs from 'dayjs';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
@@ -10,7 +10,7 @@ import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const RenderTime: React.FC<{ time: number }> = ({ time }) => {
   return (
-    <Tooltip content={moment(time).format('YYYY-MM-DD HH:mm:ss')}>
+    <Tooltip content={dayjs(time).format('YYYY-MM-DD HH:mm:ss')}>
       <TooltipTrigger asChild>
         <span className="cursor-default">{formatTimeDiffPrevious(time)}</span>
       </TooltipTrigger>

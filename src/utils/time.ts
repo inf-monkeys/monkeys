@@ -1,7 +1,7 @@
-import moment from 'moment/moment';
+import dayjs from 'dayjs';
 
 export const formatTimeDiff = (diffValue: number) => {
-  const duration = moment.duration(diffValue);
+  const duration = dayjs.duration(diffValue);
 
   if (duration.asMonths() >= 1) {
     return `${Math.floor(duration.asMonths())} 月`;
@@ -35,8 +35,8 @@ export const timestampToCST = (timestamp: number | undefined) => {
   return date.toLocaleString('zh-CN', { hour12: false });
 };
 
-export const formatTimeGap = (timestamp: moment.MomentInput, prevTimestamp: moment.MomentInput) => {
-  const diff = moment.duration(moment(timestamp).valueOf() - moment(prevTimestamp).valueOf());
+export const formatTimeGap = (timestamp: dayjs.ConfigType, prevTimestamp: dayjs.ConfigType) => {
+  const diff = dayjs.duration(dayjs(timestamp).valueOf() - dayjs(prevTimestamp).valueOf());
   const diffAsSeconds = diff.asSeconds();
   if (diffAsSeconds < 0) {
     return '-';
@@ -46,6 +46,10 @@ export const formatTimeGap = (timestamp: moment.MomentInput, prevTimestamp: mome
   } else if (diff.asMinutes() < 60) {
     return diff.minutes() + 'm ' + diff.seconds() + 's';
   } else {
-    return diff.hours() + ':' + diff.minutes() + ':' + diff.seconds();
+    // 注意：dayjs的duration对象没有直接提供hours()方法，需要通过asHours()获取小时数并向下取整
+    const hours = Math.floor(diff.asHours());
+    const minutes = diff.minutes();
+    const seconds = diff.seconds();
+    return hours + ':' + minutes + ':' + seconds;
   }
 };

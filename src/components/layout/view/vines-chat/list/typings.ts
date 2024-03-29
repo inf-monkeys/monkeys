@@ -3,6 +3,7 @@ import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
 
 export interface IVinesChatListItem {
   timestamp: number;
+  endTimestamp: number;
   input: VinesWorkflowVariable[];
   originalInput: Required<VinesWorkflowExecution['input']>;
   output: Required<VinesWorkflowExecution['output']>;

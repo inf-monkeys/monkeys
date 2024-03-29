@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { KeyedMutator } from 'swr';
 
 import { useClipboard } from '@mantine/hooks';
+import dayjs from 'dayjs';
 import { KeyRound, X } from 'lucide-react';
-import moment from 'moment/moment';
 import { toast } from 'sonner';
 
 import { revokeApiKey } from '@/apis/api-keys/api-key.ts';
@@ -74,7 +74,7 @@ export const ApiKeyItem: React.FC<IApiKeyItemProps> = ({ apiKey, mutate }) => {
           </span>
           <span className="flex gap-1 text-xs [&_*]:text-opacity-70">
             <span>{apiKey.apiKey}</span>
-            <Tooltip content={moment(apiKey.createdTimestamp).format('YYYY-MM-DD HH:mm:ss')}>
+            <Tooltip content={dayjs(apiKey.createdTimestamp).format('YYYY-MM-DD HH:mm:ss')}>
               <TooltipTrigger asChild>
                 <span>创建于 {formatTimeDiffPrevious(apiKey.createdTimestamp)}</span>
               </TooltipTrigger>
