@@ -2,8 +2,8 @@ import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.t
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
 
 export interface IVinesChatListItem {
-  timestamp: number;
-  endTimestamp: number;
+  startTime: string;
+  endTime: string;
   input: VinesWorkflowVariable[];
   originalInput: Required<VinesWorkflowExecution['input']>;
   output: Required<VinesWorkflowExecution['output']>;
