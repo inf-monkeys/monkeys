@@ -1,6 +1,7 @@
 import useSWR, { preload } from 'swr';
 
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { AssetType, MonkeyWorkflow } from '@inf-monkeys/vines';
+import _ from 'lodash';
 import queryString from 'query-string';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
@@ -34,5 +35,20 @@ export const preloadUgcItems = <T extends object>(dto: IListUgcDto, url: string,
   return preload(method === 'GET' ? swrUrl : [swrUrl, dto], fetcher);
 };
 
-export const useUgcWorkflows = (dto: IListUgcDto) => useUgcItems<MonkeyWorkflow>(dto, '/api/workflow/metadata');
-export const preloadUgcWorkflows = (dto: IListUgcDto) => preloadUgcItems<MonkeyWorkflow>(dto, '/api/workflow/metadata');
+export const useUgcWorkflows = (dto: IListUgcDto) => useUgcItems<MonkeyWorkflow>(dto, '/api/workflow/list');
+export const preloadUgcWorkflows = (dto: IListUgcDto) => preloadUgcItems<MonkeyWorkflow>(dto, '/api/workflow/list');
+
+export const useAssetTagList = (assetKey?: string) =>
+  useSWR<string[] | undefined>(assetKey ? `/api/assets/${assetKey}/tags` : null, vinesFetcher(), {
+    refreshInterval: 600000,
+    revalidateOnFocus: false,
+  });
+
+export const updateAssetItem = (type: AssetType, id: string, data: any) =>
+  vinesFetcher({
+    method: 'PUT',
+    simple: true,
+  })(
+    `/api/assets/${type}/${id}`,
+    _.pickBy(data, (v) => !_.isNil(v)),
+  );

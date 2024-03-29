@@ -13,9 +13,9 @@ interface IGetRenderNodeFnProps<E extends object> {
 
 export const getRenderNodeFn =
   <E extends object>({ row, renderOptions }: IGetRenderNodeFnProps<E>) =>
-  (key: string, defaultValue?: React.ReactNode) =>
+  (key: string, defaultValue?: React.ReactNode, rowKey = false) =>
     renderOptions[key]
       ? _.isFunction(renderOptions[key])
         ? (renderOptions[key](row.original) as React.ReactNode)
-        : row.renderValue<React.ReactNode>(renderOptions[key])
+        : row.renderValue<React.ReactNode>(rowKey ? key : renderOptions[key])
       : defaultValue ?? '';
