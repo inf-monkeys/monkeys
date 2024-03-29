@@ -1,40 +1,32 @@
 import React, { useMemo } from 'react';
 
-import { Row } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
 
-import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { IOperateAreaProps, IUgcRenderOptions } from '@/components/layout/ugc/typings.ts';
+import { IUgcViewItemProps } from '@/components/layout/ugc/typings.ts';
 import { getRenderNodeFn } from '@/components/layout/ugc/view/utils/node-renderer.tsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils';
 
-interface IUgcViewCardProps<E extends object> {
-  row: Row<IAssetItem<E>>;
-  renderOptions: IUgcRenderOptions<IAssetItem<E>>;
-  operateArea?: IOperateAreaProps<E>;
-  onItemClick?: (item: IAssetItem<E>, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
-  index: number;
-}
-
 export const UgcViewCard = <E extends object>({
   row,
+  columns,
   index,
   renderOptions,
   operateArea,
   onItemClick,
-}: IUgcViewCardProps<E>) => {
+}: IUgcViewItemProps<E>) => {
   const getRenderNode = getRenderNodeFn({
     row,
+    columns,
     renderOptions,
   });
 
   const logo = useMemo(() => getRenderNode('logo'), [index, row]);
   const title = useMemo(() => getRenderNode('title'), [index, row]);
   const subtitle = useMemo(() => getRenderNode('subtitle'), [index, row]);
-  const tags = useMemo(() => getRenderNode('assetTags', undefined, true), [index, row]);
+  const tags = useMemo(() => getRenderNode('assetTags'), [index, row]);
   const description = useMemo(() => getRenderNode('description') || '暂无描述', [index, row]);
   return (
     <Card

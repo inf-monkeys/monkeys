@@ -4,7 +4,7 @@ import { flexRender, Row } from '@tanstack/react-table';
 import { CircleEllipsis, Info } from 'lucide-react';
 
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { IOperateAreaProps, IUgcRenderOptions } from '@/components/layout/ugc/typings.ts';
+import { IOperateAreaProps, IUgcRenderOptions, IUgcViewItemProps } from '@/components/layout/ugc/typings.ts';
 import { getRenderNodeFn } from '@/components/layout/ugc/view/utils/node-renderer.tsx';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
@@ -20,13 +20,15 @@ interface IUgcViewGalleryItemProps<E extends object> {
 
 export const UgcViewGalleryItem = <E extends object>({
   row,
+  columns,
   index,
   renderOptions,
   operateArea,
   onItemClick,
-}: IUgcViewGalleryItemProps<E>) => {
+}: IUgcViewItemProps<E>) => {
   const getRenderNode = getRenderNodeFn({
     row,
+    columns,
     renderOptions,
   });
 
