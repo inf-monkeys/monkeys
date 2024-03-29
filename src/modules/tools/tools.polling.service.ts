@@ -34,7 +34,13 @@ export class ToolsPollingService {
       };
     }
     if (!__apiInfo) {
-      throw new Error(`Failed to execute tool "${__toolName}", __apiInfo is missing`);
+      return {
+        outputData: {
+          success: false,
+          errMsg: `Failed to execute tool "${__toolName}", __apiInfo is missing`,
+        },
+        status: 'FAILED',
+      };
     }
     const { method, path } = __apiInfo;
     const namespace = __toolName.split('__')[0];

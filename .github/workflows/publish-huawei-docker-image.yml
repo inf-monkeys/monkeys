@@ -1,4 +1,4 @@
-name: Build Prod
+name: Publish Docker image for Huawei Registry
 
 on:
   release:
