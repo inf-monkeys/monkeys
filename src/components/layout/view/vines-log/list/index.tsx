@@ -6,8 +6,8 @@ import _ from 'lodash';
 import { toast } from 'sonner';
 
 import { VinesWorkflowExecutionLists } from '@/apis/workflow/execution/typings';
-import { VinesLogItem } from '@/components/layout/view/vines-log/item';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
+import { VinesLogItem } from '@/components/layout/view/vines-log/item';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
 
@@ -36,7 +36,7 @@ export const VinesLogList: React.FC<IVinesLogListProps> = ({ searchWorkflowExecu
         void navigate({
           to: '/$teamId/workspace/$workflowId/$pageId',
           params: {
-            pageId: previewPage._id,
+            pageId: previewPage.id,
           },
         });
       }
