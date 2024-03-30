@@ -1,4 +1,6 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, RefObject, useEffect, useState } from 'react';
+
+import { VirtuosoHandle } from 'react-virtuoso';
 
 import { VinesBotChatMessage } from '@/components/layout/view/vines-chat/list/virtualized/chat-message/bot.tsx';
 import { VinesActuatorDetailData } from '@/components/layout/vines-execution/actuator/detail/content/data.tsx';
@@ -21,9 +23,17 @@ interface IRealTimeToolOutputs {
   execution?: VinesNodeExecutionTask;
 }
 
-export const VinesRealTimeChatMessage = memo(() => {
-  const { vines, VINES_REFRESHER } = useVinesFlow();
+interface IVinesRealTimeChatMessageProps {
+  context: {
+    virtuosoRef: RefObject<VirtuosoHandle>;
+  };
+}
 
+export const VinesRealTimeChatMessage = memo((props) => {
+  const { vines, VINES_REFRESHER } = useVinesFlow();
+  const {
+    context: { virtuosoRef },
+  } = props as IVinesRealTimeChatMessageProps;
   const workflowStatus = vines.executionStatus;
 
   const [outputs, setOutputs] = useState<IRealTimeToolOutputs[]>([]);
@@ -67,7 +77,11 @@ export const VinesRealTimeChatMessage = memo(() => {
       botPhoto={botPhoto}
       instanceId={instanceId}
     >
-      <SmoothTransition>
+      <SmoothTransition
+        onAnimationComplete={() =>
+          setTimeout(() => virtuosoRef.current?.scrollToIndex({ align: 'end', behavior: 'auto', index: 'LAST' }), 32)
+        }
+      >
         <div className="flex flex-col gap-4">
           {outputs.map(({ icon, name, customName, description, execution }, i) => (
             <Card className="flex flex-col gap-2 p-2" key={i}>
