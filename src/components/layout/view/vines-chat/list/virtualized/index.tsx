@@ -31,6 +31,7 @@ export const VirtualizedList = memo<IVirtualizedListProps>(({ data }) => {
         atBottomStateChange={setAtBottom}
         atBottomThreshold={60}
         data={data}
+        context={{ virtuosoRef }}
         followOutput={'auto'}
         initialTopMostItemIndex={LastItemIndex}
         itemContent={(index: number, data: IVinesChatListItem) => {
