@@ -42,6 +42,9 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ visible, workflow
     } else {
       interval.stop();
     }
+    return () => {
+      interval.stop();
+    };
   }, [documentState, networkStatus, visible]);
 
   useEffect(() => {

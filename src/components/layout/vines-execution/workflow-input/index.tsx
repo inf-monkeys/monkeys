@@ -13,17 +13,31 @@ import { Switch } from '@/components/ui/switch';
 import { VinesUpdater } from '@/components/ui/updater';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
+import { cn } from '@/utils';
 
 interface IVinesWorkflowInputProps {
   inputs: VinesWorkflowVariable[];
   height?: number;
   children?: React.ReactNode;
   onSubmit?: (data: IWorkflowInputForm) => void;
+
+  formClassName?: string;
+  scrollAreaClassName?: string;
+  itemClassName?: string;
 }
 
 const BOOLEAN_VALUES = ['true', 'yes', '是', '1'];
 
-export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({ inputs, height, children, onSubmit }) => {
+export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
+  inputs,
+  height,
+  children,
+  onSubmit,
+
+  formClassName,
+  scrollAreaClassName,
+  itemClassName,
+}) => {
   const form = useForm<IWorkflowInputForm>({
     resolver: zodResolver(workflowInputFormSchema),
   });
@@ -74,12 +88,12 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({ inputs,
   return (
     <Form {...form}>
       <form
-        className="flex flex-col gap-4"
+        className={cn('flex flex-col gap-4', formClassName)}
         onSubmit={handleSubmit}
         onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
       >
-        <ScrollArea style={{ height }}>
-          <div className="flex flex-col gap-4">
+        <ScrollArea className={scrollAreaClassName} style={{ height }}>
+          <div className={cn('flex flex-col gap-4', formClassName)}>
             {inputs?.map(({ displayName, name, type, typeOptions }) => {
               const isMultiple = typeOptions?.multipleValues ?? false;
               const isNumber = type === 'number';
@@ -89,7 +103,12 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({ inputs,
                   name={name}
                   control={form.control}
                   render={({ field: { value, onChange, ...field } }) => (
-                    <FormItem className="overflow-clip rounded-lg border bg-card px-3 pb-1 pt-2 text-card-foreground shadow-sm">
+                    <FormItem
+                      className={cn(
+                        'overflow-clip rounded-lg border bg-card px-3 pb-1 pt-2 text-card-foreground shadow-sm',
+                        itemClassName,
+                      )}
+                    >
                       <FormLabel className="font-bold">{displayName}</FormLabel>
                       <FormControl>
                         <>
