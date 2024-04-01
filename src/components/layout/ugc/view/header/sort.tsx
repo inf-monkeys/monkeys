@@ -4,11 +4,11 @@ import _ from 'lodash';
 import { ArrowDownNarrowWide, ArrowDownWideNarrow } from 'lucide-react';
 
 import {
-  IAssetCustomProps,
   ISortCondition,
   ISortConditionOrderBy,
   ISortConditionOrderColumn,
   ISortConditionStorage,
+  IUgcCustomProps,
 } from '@/components/layout/ugc/typings.ts';
 import { DEFAULT_SORT_CONDITION } from '@/components/layout/ugc/view/header/consts.ts';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
@@ -25,7 +25,7 @@ import {
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalStorage } from '@/utils';
 
-interface IUgcHeaderSortButtonProps extends IAssetCustomProps {}
+interface IUgcHeaderSortButtonProps extends IUgcCustomProps {}
 
 export const UgcHeaderSortButton: React.FC<IUgcHeaderSortButtonProps> = ({ assetKey }) => {
   const team = useVinesTeam();

@@ -20,7 +20,7 @@ export type IOperateAreaProps<E> = (
   tooltipTriggerContent?: string,
 ) => React.ReactNode;
 
-export type IAssetCustomProps = {
+export type IUgcCustomProps = {
   assetType: AssetType;
   assetKey: string;
 };

@@ -208,13 +208,24 @@ export const UgcView = <E extends object>({
 
   return (
     <div className="flex size-full">
-      <UgcSidebar title={assetName} />
+      <UgcSidebar
+        title={assetName}
+        assetKey={assetKey}
+        assetType={assetType}
+        filterListProps={{
+          onChange: setFilter,
+          filterButtonProps: {
+            filter,
+            onChange: setFilter,
+          },
+        }}
+      />
       <div ref={ref} className="relative w-full flex-1 overflow-x-clip">
         <UgcViewHeader
           assetKey={assetKey}
           assetType={assetType}
           subtitle={subtitle}
-          filterProps={{
+          filterButtonProps={{
             filter,
             onChange: setFilter,
           }}
