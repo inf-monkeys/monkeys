@@ -2,8 +2,8 @@ import React, { memo } from 'react';
 
 import { isEmpty } from 'lodash';
 
-import { IVinesChatListItem } from '@/components/layout/view/vines-chat/list/typings.ts';
-import { VinesBotChatMessage } from '@/components/layout/view/vines-chat/list/virtualized/chat-message/bot.tsx';
+import { IVinesChatListItem } from '@/components/layout/view/vines-chat/chat-list/typings.ts';
+import { VinesBotChatMessage } from '@/components/layout/view/vines-chat/chat-list/virtualized/chat-message/bot.tsx';
 import { VinesAbstractDataPreview } from '@/components/layout/vines-execution/data-display/abstract';
 import { WorkflowInputList } from '@/components/layout/vines-flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-list';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
