@@ -7,13 +7,13 @@ import { useWorkflowChatSessions } from '@/apis/workflow/chat';
 import { Card } from '@/components/ui/card.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { usePageStore } from '@/store/usePageStore';
+import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
 
 interface IChatSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
-  const { workflowId } = usePageStore();
+  const { workflowId } = useFlowStore();
   const { data } = useWorkflowChatSessions(workflowId);
 
   const [visible, setVisible] = useState(true);

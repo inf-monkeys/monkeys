@@ -18,7 +18,7 @@ import { VariableEditorRefProps } from '@/components/ui/vines-variable-editor';
 import { useVinesFlow } from '@/package/vines-flow';
 import { IVinesVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { useCanvasStore } from '@/store/useCanvasStore';
-import { usePageStore } from '@/store/usePageStore';
+import { useFlowStore } from '@/store/useFlowStore';
 import VinesEvent from '@/utils/events.ts';
 
 interface IVinesVariableSelectorProps {}
@@ -27,7 +27,7 @@ export type VariableInsertType = 'simple' | 'jsonpath' | 'taskReferenceName';
 
 export const VinesVariableSelector: React.FC<IVinesVariableSelectorProps> = () => {
   const { setDisableDialogClose } = useCanvasStore();
-  const { workflowId } = usePageStore();
+  const { workflowId } = useFlowStore();
 
   const { vines } = useVinesFlow();
 

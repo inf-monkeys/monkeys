@@ -10,8 +10,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useCanvasStore } from '@/store/useCanvasStore';
+import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
-import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
@@ -21,7 +21,7 @@ interface IExecutionRecoverProps {
 
 export const ExecutionRecover: React.FC<IExecutionRecoverProps> = ({ className }) => {
   const { setCanvasMode } = useCanvasStore();
-  const { workflowId } = usePageStore();
+  const { workflowId } = useFlowStore();
   const { trigger, data } = useSearchWorkflowExecutions();
 
   const { vines } = useVinesFlow();

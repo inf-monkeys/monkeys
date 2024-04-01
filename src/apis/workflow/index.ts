@@ -8,17 +8,16 @@ import { vinesFetcher } from '@/apis/fetcher.ts';
 import { WorkflowListQuery } from '@/apis/workflow/typings.ts';
 import { IWorkflowValidation } from '@/apis/workflow/validation/typings.ts';
 
-export const useGetWorkflow = (workflowId: string, version?: number, apikey?: string) =>
+export const useGetWorkflow = (workflowId: string, version?: number) =>
   useSWR<MonkeyWorkflow | undefined>(
-    workflowId ? `/api/workflow/metadata/${workflowId}${version ? `?version=${version}` : ''}` : null,
-    vinesFetcher({ apikey }),
+    workflowId ? `/api/workflow/${workflowId}${version ? `?version=${version}` : ''}` : null,
+    vinesFetcher(),
   );
 
-export const getWorkflow = (workflowId: string) =>
-  vinesFetcher<MonkeyWorkflow | null>({ simple: true })(`/api/workflow/metadata/${workflowId}`);
+export const getWorkflow = (workflowId: string) => vinesFetcher<MonkeyWorkflow | null>()(`/api/workflow/${workflowId}`);
 
 export const useWorkflowList = (query: WorkflowListQuery = {}) =>
-  useSWR<MonkeyWorkflow[] | undefined>(`/api/workflow/metadata?${queryString.stringify(query)}`, vinesFetcher());
+  useSWR<MonkeyWorkflow[] | undefined>(`/api/workflow/list?${queryString.stringify(query)}`, vinesFetcher());
 
 export const updateWorkflow = (
   apikey: string,
@@ -27,7 +26,7 @@ export const updateWorkflow = (
   workflow: Partial<MonkeyWorkflow>,
 ) =>
   vinesFetcher<MonkeyWorkflow, Partial<MonkeyWorkflow>>({ method: 'PUT', simple: true, apikey })(
-    `/api/workflow/metadata/${workflowId}`,
+    `/api/workflow/${workflowId}`,
     {
       ...workflow,
       version: workflowVersion,
@@ -40,4 +39,4 @@ export const useUpdateWorkflow = (apikey: string, workflowId: string) =>
     unknown,
     string | null,
     Partial<MonkeyWorkflow>
-  >(workflowId ? `/api/workflow/metadata/${workflowId}` : null, vinesFetcher({ method: 'PUT', apikey }));
+  >(workflowId ? `/api/workflow/${workflowId}` : null, vinesFetcher({ method: 'PUT', apikey }));

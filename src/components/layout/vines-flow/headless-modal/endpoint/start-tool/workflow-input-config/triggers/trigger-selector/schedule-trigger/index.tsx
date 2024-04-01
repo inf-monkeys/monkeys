@@ -17,13 +17,13 @@ import {
   IWorkflowTriggerSchedule,
   workflowTriggerScheduleSchema,
 } from '@/schema/workspace/workflow-trigger-schedule.ts';
-import { usePageStore } from '@/store/usePageStore';
+import { useFlowStore } from '@/store/useFlowStore';
 import VinesEvent from '@/utils/events.ts';
 
 interface IScheduleTriggerProps {}
 
 export const ScheduleTrigger: React.FC<IScheduleTriggerProps> = () => {
-  const { workflowId } = usePageStore();
+  const { workflowId } = useFlowStore();
   const { mutate } = useSWRConfig();
 
   const [open, setOpen] = useState(false);

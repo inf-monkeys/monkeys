@@ -23,7 +23,6 @@ import { useCanvasStore } from '@/store/useCanvasStore';
 import { useCanvasInteractionStore } from '@/store/useCanvasStore/interaction.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
-import { usePageStore } from '@/store/usePageStore';
 import { cn, useLocalStorage } from '@/utils';
 import VinesEvent from '@/utils/events';
 
@@ -32,8 +31,7 @@ interface IVinesToolbarProps extends React.ComponentPropsWithoutRef<'div'> {}
 export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
   const { updatePageData } = useVinesPage();
   const { vines } = useVinesFlow();
-  const { isLatestWorkflowVersion } = useFlowStore();
-  const { workflowId } = usePageStore();
+  const { isLatestWorkflowVersion, workflowId } = useFlowStore();
   const { canvasMode, isWorkflowRUNNING, setCanvasMode, setVisible } = useCanvasStore();
   const { canvasDisabled, isCanvasMoving, setCanvasDisabled, setCanvasMoving, setIsUserInteraction } =
     useCanvasInteractionStore();

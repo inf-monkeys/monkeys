@@ -31,15 +31,13 @@ import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInput, workflowInputSchema } from '@/schema/workspace/workflow-input.ts';
 import { useFlowStore } from '@/store/useFlowStore';
-import { usePageStore } from '@/store/usePageStore';
 import { cn, nanoIdLowerCase } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IInputEditorProps {}
 
 export const InputEditor: React.FC<IInputEditorProps> = () => {
-  const { isLatestWorkflowVersion } = useFlowStore();
-  const { workflowId } = usePageStore();
+  const { isLatestWorkflowVersion, workflowId } = useFlowStore();
 
   const { vines } = useVinesFlow();
 
