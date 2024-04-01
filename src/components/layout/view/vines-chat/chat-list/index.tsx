@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { useDocumentVisibility, useInterval, useNetwork } from '@mantine/hooks';
 import dayjs from 'dayjs';
@@ -11,6 +11,7 @@ import { VirtualizedList } from '@/components/layout/view/vines-chat/chat-list/v
 import { useVinesUser } from '@/components/router/guard/user.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
+import { readLocalStorageValue, useLocalStorage } from '@/utils';
 
 interface IVinesChatListProps {
   visible: boolean;
@@ -22,15 +23,17 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ visible, workflow
   const { vines } = useVinesFlow();
   const { data, trigger } = useSearchWorkflowExecutions();
 
-  const handleUpdateList = useCallback(
-    () =>
-      trigger({
-        orderBy: { filed: 'startTime', order: 'DESC' },
-        pagination: { page: 1, limit: 100 },
-        workflowId,
-      }),
-    [workflowId],
-  );
+  const [localChatSessions] = useLocalStorage<Record<string, string>>('vines-ui-chat-session', {});
+
+  const handleUpdateList = () => {
+    const sessions = readLocalStorageValue<Record<string, string>>('vines-ui-chat-session', {});
+    void trigger({
+      orderBy: { filed: 'startTime', order: 'DESC' },
+      pagination: { page: 1, limit: 100 },
+      workflowId,
+      ...(sessions[workflowId] ? { chatSessionIds: [sessions[workflowId]] } : {}),
+    });
+  };
 
   const networkStatus = useNetwork();
   const documentState = useDocumentVisibility();
@@ -49,7 +52,7 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ visible, workflow
 
   useEffect(() => {
     visible && handleUpdateList();
-  }, [visible]);
+  }, [visible, localChatSessions]);
 
   const [list, setList] = useState<IVinesChatListItem[] | undefined>();
 
@@ -72,7 +75,7 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ visible, workflow
             }) as unknown as IVinesChatListItem,
         ) ?? [];
 
-    if (equal(prevData.current, dirtyData) || !dirtyData.length) return;
+    if (equal(prevData.current, dirtyData)) return;
     prevData.current = dirtyData;
 
     const workingList = executionData?.filter(({ status }) => ['RUNNING', 'PAUSED'].includes(status ?? ''));

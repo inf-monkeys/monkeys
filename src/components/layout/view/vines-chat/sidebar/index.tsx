@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useFlowStore } from '@/store/useFlowStore';
-import { cn } from '@/utils';
+import { cn, useLocalStorage } from '@/utils';
 
 interface IChatSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -20,13 +20,17 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
   const { data, mutate } = useWorkflowChatSessions(workflowId);
   const { trigger } = useCreateWorkflowChatSession();
 
-  const [visible, setVisible] = useState(true);
+  const [chatSessions, setChatSessions] = useLocalStorage<Record<string, string>>('vines-ui-chat-session', {});
+
+  const [visible, setVisible] = useState(false);
+
+  const activeSessionId = chatSessions[workflowId] ?? data?.[0]?._id;
 
   return (
     <div className="flex h-full max-w-64">
       <motion.div
         className="flex flex-col gap-4 overflow-clip [&_h1]:line-clamp-1 [&_span]:line-clamp-1"
-        initial={{ width: 256, paddingRight: 16 }}
+        initial={{ width: visible ? 256 : 0, paddingRight: visible ? 16 : 0 }}
         animate={{
           width: visible ? 256 : 0,
           paddingRight: visible ? 16 : 0,
@@ -34,9 +38,27 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
         }}
       >
         <h1 className="text-2xl font-bold">对话列表</h1>
-        <div className="grid gap-2">
+        <div className="grid gap-2 px-1">
           {data?.map((session, i) => (
-            <ChatSession session={session} key={session._id} disableDelete={!i} onDeleted={() => mutate()} />
+            <ChatSession
+              active={activeSessionId === session._id}
+              session={session}
+              key={session._id}
+              disableDelete={!i}
+              onDeleted={() => mutate()}
+              onClick={() => {
+                if (!i) {
+                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                  const { [workflowId]: _, ...rest } = chatSessions;
+                  setChatSessions(rest);
+                } else {
+                  setChatSessions({
+                    ...chatSessions,
+                    [workflowId]: session._id,
+                  });
+                }
+              }}
+            />
           ))}
           <InfoEditor
             title="新建会话"
@@ -44,7 +66,14 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
             onFinished={(displayName) =>
               toast.promise(trigger({ displayName, workflowId }), {
                 loading: '新建中...',
-                success: '新建成功',
+                success: (session) => {
+                  session &&
+                    setChatSessions({
+                      ...chatSessions,
+                      [workflowId]: session._id,
+                    });
+                  return '新建成功';
+                },
                 error: '新建失败',
                 finally: () => void mutate(),
               })
@@ -66,7 +95,7 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
               <ChevronRight className={cn(visible && 'scale-x-[-1]')} />
             </div>
           </TooltipTrigger>
-          <TooltipContent>{visible ? '收起' : '展开'}</TooltipContent>
+          <TooltipContent>{visible ? '收起会话列表' : '展开会话列表'}</TooltipContent>
         </Tooltip>
       </Separator>
     </div>
