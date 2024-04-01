@@ -2,7 +2,7 @@ import React, { memo, RefObject, useEffect, useState } from 'react';
 
 import { VirtuosoHandle } from 'react-virtuoso';
 
-import { VinesBotChatMessage } from '@/components/layout/view/vines-chat/list/virtualized/chat-message/bot.tsx';
+import { VinesBotChatMessage } from '@/components/layout/view/vines-chat/chat-list/virtualized/chat-message/bot.tsx';
 import { VinesActuatorDetailData } from '@/components/layout/vines-execution/actuator/detail/content/data.tsx';
 import { ExecutionStatusIcon } from '@/components/layout/vines-execution/status-icon';
 import { Card, CardContent, CardHeader } from '@/components/ui/card.tsx';

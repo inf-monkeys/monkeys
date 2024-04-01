@@ -6,8 +6,8 @@ import equal from 'fast-deep-equal/es6';
 import { omit } from 'lodash';
 
 import { useSearchWorkflowExecutions } from '@/apis/workflow/execution';
-import { IVinesChatListItem } from '@/components/layout/view/vines-chat/list/typings.ts';
-import { VirtualizedList } from '@/components/layout/view/vines-chat/list/virtualized';
+import { IVinesChatListItem } from '@/components/layout/view/vines-chat/chat-list/typings.ts';
+import { VirtualizedList } from '@/components/layout/view/vines-chat/chat-list/virtualized';
 import { useVinesUser } from '@/components/router/guard/user.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';

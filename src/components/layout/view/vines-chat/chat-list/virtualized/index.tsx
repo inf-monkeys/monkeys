@@ -2,10 +2,10 @@ import React, { memo, useEffect, useRef, useState } from 'react';
 
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 
-import { IVinesChatListItem } from '@/components/layout/view/vines-chat/list/typings.ts';
-import { AutoScroll } from '@/components/layout/view/vines-chat/list/virtualized/auto-scroll.tsx';
-import { ChatMessage } from '@/components/layout/view/vines-chat/list/virtualized/chat-message';
-import { VinesRealTimeChatMessage } from '@/components/layout/view/vines-chat/list/virtualized/chat-message/real-time.tsx';
+import { IVinesChatListItem } from '@/components/layout/view/vines-chat/chat-list/typings.ts';
+import { AutoScroll } from '@/components/layout/view/vines-chat/chat-list/virtualized/auto-scroll.tsx';
+import { ChatMessage } from '@/components/layout/view/vines-chat/chat-list/virtualized/chat-message';
+import { VinesRealTimeChatMessage } from '@/components/layout/view/vines-chat/chat-list/virtualized/chat-message/real-time.tsx';
 
 interface IVirtualizedListProps {
   data: IVinesChatListItem[];

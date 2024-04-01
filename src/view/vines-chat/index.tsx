@@ -5,7 +5,7 @@ import { useElementSize } from '@mantine/hooks';
 import { AnInput } from '@/components/layout/view/vines-chat/chat-input/an-input.tsx';
 import { EmptyInput } from '@/components/layout/view/vines-chat/chat-input/empty.tsx';
 import { FormInput } from '@/components/layout/view/vines-chat/chat-input/form.tsx';
-import { VinesChatList } from '@/components/layout/view/vines-chat/list';
+import { VinesChatList } from '@/components/layout/view/vines-chat/chat-list';
 import { ChatSidebar } from '@/components/layout/view/vines-chat/sidebar';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Separator } from '@/components/ui/separator.tsx';
