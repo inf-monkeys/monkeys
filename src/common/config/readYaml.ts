@@ -5,8 +5,8 @@ import * as yaml from 'yaml';
 
 // 解析配置文件
 let rawConfigs = [];
-if (process.env.AUTHING_CONFIG_FILE) {
-  rawConfigs = [path.resolve(process.env.AUTHING_CONFIG_FILE)];
+if (process.env.MONKEYS_CONFIG_FILE) {
+  rawConfigs = [path.resolve(process.env.MONKEYS_CONFIG_FILE)];
 } else {
   rawConfigs = [path.resolve('/etc/monkeys/config.yaml'), path.resolve('./config.yaml')];
 }
