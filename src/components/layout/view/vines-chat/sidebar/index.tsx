@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 
 import { motion } from 'framer-motion';
 import { ChevronRight, Plus } from 'lucide-react';
+import { toast } from 'sonner';
 
-import { useWorkflowChatSessions } from '@/apis/workflow/chat';
+import { useCreateWorkflowChatSession, useWorkflowChatSessions } from '@/apis/workflow/chat';
+import { InfoEditor } from '@/components/layout/settings/account/info-editor.tsx';
 import { ChatSession } from '@/components/layout/view/vines-chat/sidebar/chat-session.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -16,6 +18,7 @@ interface IChatSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
   const { workflowId } = useFlowStore();
   const { data, mutate } = useWorkflowChatSessions(workflowId);
+  const { trigger } = useCreateWorkflowChatSession();
 
   const [visible, setVisible] = useState(true);
 
@@ -35,9 +38,22 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
           {data?.map((session, i) => (
             <ChatSession session={session} key={session._id} disableDelete={!i} onDeleted={() => mutate()} />
           ))}
-          <Button variant="outline" icon={<Plus />}>
-            新建会话
-          </Button>
+          <InfoEditor
+            title="新建会话"
+            placeholder="输入会话名称，16 字以内"
+            onFinished={(displayName) =>
+              toast.promise(trigger({ displayName, workflowId }), {
+                loading: '新建中...',
+                success: '新建成功',
+                error: '新建失败',
+                finally: () => void mutate(),
+              })
+            }
+          >
+            <Button variant="outline" icon={<Plus />}>
+              新建会话
+            </Button>
+          </InfoEditor>
         </div>
       </motion.div>
       <Separator orientation="vertical" className="vines-center">
