@@ -15,15 +15,13 @@ import { useCanvasStore } from '@/store/useCanvasStore';
 import { useCanvasInteractionStore } from '@/store/useCanvasStore/interaction.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
-import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events';
 
 interface IContextMenuProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ContextMenu: React.FC<IContextMenuProps> = () => {
-  const { isLatestWorkflowVersion } = useFlowStore();
-  const { workflowId } = usePageStore();
+  const { isLatestWorkflowVersion, workflowId } = useFlowStore();
   const { canvasMode } = useCanvasStore();
   const { canvasDisabled } = useCanvasInteractionStore();
 

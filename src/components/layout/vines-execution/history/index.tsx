@@ -16,8 +16,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { useCanvasStore } from '@/store/useCanvasStore';
+import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
-import { usePageStore } from '@/store/usePageStore';
 import { useViewStore } from '@/store/useViewStore';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 import { useRetimer } from '@/utils/use-retimer.ts';
@@ -28,7 +28,7 @@ interface IVinesExecutionHistoryProps extends React.ComponentPropsWithoutRef<'di
 export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () => {
   const { visible } = useViewStore();
   const { setCanvasMode } = useCanvasStore();
-  const { workflowId } = usePageStore();
+  const { workflowId } = useFlowStore();
 
   const clipboard = useClipboard({ timeout: 500 });
   const reTimer = useRetimer();

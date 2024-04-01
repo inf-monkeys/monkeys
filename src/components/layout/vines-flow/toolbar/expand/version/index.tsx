@@ -9,7 +9,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
-import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
 interface IVinesVersionToolbarProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -18,9 +17,8 @@ interface IVinesVersionToolbarProps extends React.ComponentPropsWithoutRef<'div'
 }
 
 export const VinesVersionToolbar: React.FC<IVinesVersionToolbarProps> = ({ version = 1, onVersionChange }) => {
-  const { setIsLatestWorkflowVersion } = useFlowStore();
+  const { setIsLatestWorkflowVersion, workflowId } = useFlowStore();
   const { setVisible } = useCanvasStore();
-  const { workflowId } = usePageStore();
 
   const { data } = useWorkflowVersions(workflowId);
 

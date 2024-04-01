@@ -16,9 +16,6 @@ export interface PageSlice {
   setVisibleCustomSetting: (loading: boolean) => void;
 
   pageTitle: string;
-
-  workflowId: string;
-  setWorkflowId: (workflowId: string) => void;
 }
 
 export const usePageStore = create<PageSlice>()(
@@ -32,7 +29,5 @@ export const usePageStore = create<PageSlice>()(
     visibleCustomSetting: false,
     setVisibleCustomSetting: (visibleCustomSetting) => set({ visibleCustomSetting }),
     pageTitle: '',
-    workflowId: '',
-    setWorkflowId: (workflowId) => set({ workflowId }),
   })),
 );

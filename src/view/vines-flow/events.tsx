@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
 
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
-import { usePageStore } from '@/store/usePageStore';
+import { useFlowStore } from '@/store/useFlowStore';
 import VinesEvent from '@/utils/events.ts';
 
 interface IVinesFlowEventsProps {}
 
 export const VinesFlowEvents: React.FC<IVinesFlowEventsProps> = () => {
-  const { workflowId } = usePageStore();
+  const { workflowId } = useFlowStore();
   const { vines } = useVinesFlow();
 
   const handleRemoveNode = (_wid: string, nodeId: string) => {

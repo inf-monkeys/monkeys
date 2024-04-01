@@ -11,13 +11,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.t
 import { VinesToolDef, VinesToolWithCategory } from '@/package/vines-flow/core/tools/typings.ts';
 import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
-import { usePageStore } from '@/store/usePageStore';
+import { useFlowStore } from '@/store/useFlowStore';
 import VinesEvent from '@/utils/events';
 
 interface IToolsSelectorProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
-  const { workflowId } = usePageStore();
+  const { workflowId } = useFlowStore();
   const { vines } = useVinesFlow();
 
   const [open, setOpen] = useState(false);

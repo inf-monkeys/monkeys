@@ -6,6 +6,7 @@ import { Page404 } from '@/components/layout/workspace/404.tsx';
 import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper.tsx';
 import { IFRAME_MAP } from '@/components/ui/vines-iframe/consts.ts';
 import { createVinesCore } from '@/package/vines-flow';
+import { CanvasStoreProvider, createCanvasStore } from '@/store/useCanvasStore';
 import { createFlowStore, FlowStoreProvider } from '@/store/useFlowStore';
 import { useViewStore } from '@/store/useViewStore';
 
@@ -25,11 +26,13 @@ export function VinesView({ id, workflowId, pageId, type }: IVinesViewProps) {
     const { VinesProvider } = createVinesCore(workflowId);
     return (
       <FlowStoreProvider createStore={createFlowStore}>
-        <VinesProvider>
-          <VinesViewWrapper workflowId={workflowId}>
-            <View />
-          </VinesViewWrapper>
-        </VinesProvider>
+        <CanvasStoreProvider createStore={createCanvasStore}>
+          <VinesProvider>
+            <VinesViewWrapper workflowId={workflowId}>
+              <View />
+            </VinesViewWrapper>
+          </VinesProvider>
+        </CanvasStoreProvider>
       </FlowStoreProvider>
     );
   }, [id, workflowId]);

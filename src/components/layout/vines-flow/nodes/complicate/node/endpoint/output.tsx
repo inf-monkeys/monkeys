@@ -15,12 +15,12 @@ import { CodeEditor } from '@/components/ui/code-editor';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
 import { useCanvasStore } from '@/store/useCanvasStore';
-import { usePageStore } from '@/store/usePageStore';
+import { useFlowStore } from '@/store/useFlowStore';
 import { cn, readLocalStorageValue } from '@/utils';
 
 export const ComplicateEndNode: React.FC = () => {
   const { isWorkflowRUNNING } = useCanvasStore();
-  const { workflowId } = usePageStore();
+  const { workflowId } = useFlowStore();
 
   const { vines } = useVinesFlow();
   const { trigger } = useUpdateWorkflow(readLocalStorageValue('vines-apikey', '', false), workflowId ?? '');

@@ -13,13 +13,13 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/compone
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { useVinesFlow } from '@/package/vines-flow';
-import { usePageStore } from '@/store/usePageStore';
+import { useFlowStore } from '@/store/useFlowStore';
 import VinesEvent from '@/utils/events.ts';
 
 interface ITriggerSelectorProps {}
 
 export const TriggerSelector: React.FC<ITriggerSelectorProps> = () => {
-  const { workflowId } = usePageStore();
+  const { workflowId } = useFlowStore();
 
   const { mutate } = useSWRConfig();
 

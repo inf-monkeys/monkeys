@@ -14,8 +14,7 @@ import { useVinesFlow } from '@/package/vines-flow';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
-import { usePageStore } from '@/store/usePageStore';
-import { cn, useLocalStorage } from '@/utils';
+import { cn } from '@/utils';
 
 export interface IVinesOutputData {
   key: string;
@@ -34,12 +33,11 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({
   output,
   setOutput,
 }) => {
-  const { isLatestWorkflowVersion } = useFlowStore();
+  const { isLatestWorkflowVersion, workflowId } = useFlowStore();
   const { canvasMode } = useCanvasStore();
-  const { workflowId } = usePageStore();
 
   const { vines } = useVinesFlow();
-  const { data: workflow } = useGetWorkflow(workflowId, void 0, useLocalStorage('vines-apikey', '', false)[0]);
+  const { data: workflow } = useGetWorkflow(workflowId, vines.version);
 
   const variableMapper = Object.fromEntries(vines.variablesMapper.entries());
 
