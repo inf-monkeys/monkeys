@@ -2,13 +2,13 @@ import React from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { useFlowStore } from '@/store/useFlowStore';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 
 interface ISimplifyEndNodeExpandProps {}
 
 export const SimplifyEndNodeExpand: React.FC<ISimplifyEndNodeExpandProps> = () => {
-  const { canvasMode } = useFlowStore();
+  const { canvasMode } = useCanvasStore();
   const visible = canvasMode === CanvasStatus.EDIT;
 
   return (

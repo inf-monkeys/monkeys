@@ -22,6 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog.tsx';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
@@ -34,7 +35,8 @@ interface IWorkflowReleaseProps extends React.ComponentPropsWithoutRef<'div'> {
 export const WorkflowRelease: React.FC<IWorkflowReleaseProps> = ({ version, onVersionChange }) => {
   const { mutate } = useSWRConfig();
 
-  const { isLatestWorkflowVersion, setVisible } = useFlowStore();
+  const { isLatestWorkflowVersion } = useFlowStore();
+  const { setVisible } = useCanvasStore();
   const { workflowId } = usePageStore();
 
   const { data: validation, mutate: reValidation } = useWorkflowValidation(workflowId, version);

@@ -14,12 +14,12 @@ import { Card } from '@/components/ui/card.tsx';
 import { CodeEditor } from '@/components/ui/code-editor';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
-import { useFlowStore } from '@/store/useFlowStore';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cn, readLocalStorageValue } from '@/utils';
 
 export const ComplicateEndNode: React.FC = () => {
-  const { isWorkflowRUNNING } = useFlowStore();
+  const { isWorkflowRUNNING } = useCanvasStore();
   const { workflowId } = usePageStore();
 
   const { vines } = useVinesFlow();

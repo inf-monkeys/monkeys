@@ -1,11 +1,38 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
-import { createPageSlice, PageSlice } from '@/store/usePageStore/page.slice.ts';
+import { IPageType } from '@/apis/pages/typings.ts';
 
-export type PageSlices = PageSlice;
-export const usePageStore = create<PageSlices>()(
-  immer((...a) => ({
-    ...createPageSlice(...a),
+export interface PageSlice {
+  page: IPageType | null;
+  setPage: (page: IPageType | null) => void;
+
+  containerWidth: number;
+  setContainerWidth: (width: number) => void;
+  containerHeight: number;
+  setContainerHeight: (height: number) => void;
+
+  visibleCustomSetting: boolean;
+  setVisibleCustomSetting: (loading: boolean) => void;
+
+  pageTitle: string;
+
+  workflowId: string;
+  setWorkflowId: (workflowId: string) => void;
+}
+
+export const usePageStore = create<PageSlice>()(
+  immer((set) => ({
+    page: null,
+    setPage: (page) => set({ page, pageTitle: page?.displayName }),
+    containerWidth: 0,
+    setContainerWidth: (containerWidth) => set({ containerWidth }),
+    containerHeight: 0,
+    setContainerHeight: (containerHeight) => set({ containerHeight }),
+    visibleCustomSetting: false,
+    setVisibleCustomSetting: (visibleCustomSetting) => set({ visibleCustomSetting }),
+    pageTitle: '',
+    workflowId: '',
+    setWorkflowId: (workflowId) => set({ workflowId }),
   })),
 );

@@ -17,7 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { VariableEditorRefProps } from '@/components/ui/vines-variable-editor';
 import { useVinesFlow } from '@/package/vines-flow';
 import { IVinesVariable } from '@/package/vines-flow/core/tools/typings.ts';
-import { useFlowStore } from '@/store/useFlowStore';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { usePageStore } from '@/store/usePageStore';
 import VinesEvent from '@/utils/events.ts';
 
@@ -26,7 +26,7 @@ interface IVinesVariableSelectorProps {}
 export type VariableInsertType = 'simple' | 'jsonpath' | 'taskReferenceName';
 
 export const VinesVariableSelector: React.FC<IVinesVariableSelectorProps> = () => {
-  const { setDisableDialogClose } = useFlowStore();
+  const { setDisableDialogClose } = useCanvasStore();
   const { workflowId } = usePageStore();
 
   const { vines } = useVinesFlow();

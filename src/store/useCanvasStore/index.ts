@@ -2,32 +2,52 @@ import { create, StoreApi } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { createContext } from 'zustand-utils';
 
+import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
+
 export interface CanvasStore {
-  canvasDisabled: boolean;
-  setCanvasDisabled: (disabled: boolean) => void;
-  isCanvasMoving: boolean;
-  setCanvasMoving: (moving: boolean) => void;
+  visible: boolean;
+  setVisible: (visible: boolean) => void;
 
-  scale: number;
-  setScale: (scale: number) => void;
+  initialScale: number;
+  setInitialScale: (scale: number) => void;
 
-  isUserInteraction: string | null;
-  setIsUserInteraction: (isUserInteraction: string | null) => void;
+  canvasMode: CanvasStatus;
+  isWorkflowRUNNING: boolean;
+  setCanvasMode: (mode: CanvasStatus) => void;
+
+  activeDraggableNodeId: string;
+  setActiveDraggableNodeId: (activeDraggableNodeId: string) => void;
+  overNodeId: string;
+  setOverNodeId: (overNodeId: string) => void;
+
+  disableDialogClose: boolean;
+  setDisableDialogClose: (disable: boolean) => void;
 }
 
 const createCanvasStore = () =>
   create<CanvasStore>()(
     immer((set) => ({
-      canvasDisabled: false,
-      setCanvasDisabled: (canvasDisabled) => set({ canvasDisabled }),
-      isCanvasMoving: false,
-      setCanvasMoving: (isCanvasMoving) => set({ isCanvasMoving }),
+      visible: false,
+      setVisible: (visible) => set({ visible }),
 
-      scale: 1.2,
-      setScale: (scale) => set({ scale }),
+      initialScale: 1.2,
+      setInitialScale: (initialScale) => set({ initialScale }),
 
-      isUserInteraction: null,
-      setIsUserInteraction: (isUserInteraction) => set({ isUserInteraction }),
+      canvasMode: CanvasStatus.EDIT,
+      isWorkflowRUNNING: false,
+      setCanvasMode: (canvasMode) =>
+        set({
+          canvasMode,
+          isWorkflowRUNNING: [CanvasStatus.RUNNING, CanvasStatus.WAIT_TO_RUNNING].includes(canvasMode),
+        }),
+
+      activeDraggableNodeId: '',
+      setActiveDraggableNodeId: (activeDraggableNodeId) => set({ activeDraggableNodeId }),
+      overNodeId: '',
+      setOverNodeId: (overNodeId) => set({ overNodeId }),
+
+      disableDialogClose: false,
+      setDisableDialogClose: (disableDialogClose) => set({ disableDialogClose }),
     })),
   );
 

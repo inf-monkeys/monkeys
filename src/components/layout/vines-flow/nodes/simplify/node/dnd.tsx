@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { useCanvasStore } from '@/store/useCanvasStore';
-import { useFlowStore } from '@/store/useFlowStore';
+import { useCanvasInteractionStore } from '@/store/useCanvasStore/interaction.ts';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events';
@@ -25,8 +25,8 @@ export const NodeDnd: React.FC<INodeDndProps> = ({ node, children, onOver, onCli
   } = node;
 
   const { vines } = useVinesFlow();
-  const { canvasMode, setOverNodeId } = useFlowStore();
-  const { scale, canvasDisabled } = useCanvasStore();
+  const { canvasMode, setOverNodeId } = useCanvasStore();
+  const { scale, canvasDisabled } = useCanvasInteractionStore();
 
   const isEditCanvasMode = canvasMode === CanvasStatus.EDIT;
   const isNodeDisabledDroppable = nodeId.startsWith('fake_node') || nodeId === 'workflow_start';

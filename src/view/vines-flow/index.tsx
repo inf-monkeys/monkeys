@@ -13,7 +13,7 @@ import { VinesExpandToolbar } from '@/components/layout/vines-flow/toolbar/expan
 import { VinesFlowWrapper } from '@/components/layout/vines-flow/wrapper';
 import { IVinesFlowRenderOptions, IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
-import { useFlowStore } from '@/store/useFlowStore';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { usePageStore } from '@/store/usePageStore';
 import { useLocalStorage } from '@/utils';
@@ -24,7 +24,7 @@ interface IVinesFlowProps {}
 
 export const VinesFlow: React.FC<IVinesFlowProps> = () => {
   const { containerWidth, containerHeight, page } = usePageStore();
-  const { visible, setVisible, setInitialScale, canvasMode } = useFlowStore();
+  const { canvasMode, visible, setVisible, setInitialScale } = useCanvasStore();
 
   const {
     vines,

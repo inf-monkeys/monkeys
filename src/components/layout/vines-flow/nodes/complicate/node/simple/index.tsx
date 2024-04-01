@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { IVinesNodeCustomData, VinesNodeExecutionTask, VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { IVinesVariableMap, VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
 import { VinesWorkflowExecutionType } from '@/package/vines-flow/core/typings.ts';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
@@ -48,7 +49,8 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
   status,
   workflowStatus,
 }) => {
-  const { isLatestWorkflowVersion, isWorkflowRUNNING } = useFlowStore();
+  const { isLatestWorkflowVersion } = useFlowStore();
+  const { isWorkflowRUNNING } = useCanvasStore();
   const [activeTab, setActiveTab] = useState('config');
 
   const isUnSupport = !tool;

@@ -12,7 +12,7 @@ import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { useCanvasStore } from '@/store/useCanvasStore';
-import { useFlowStore } from '@/store/useFlowStore';
+import { useCanvasInteractionStore } from '@/store/useCanvasStore/interaction.ts';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events';
@@ -30,8 +30,8 @@ export const SimplifyNode: React.FC<ISimplifyNodeProps> = ({ node }) => {
   const { name: toolName } = node.getRaw();
 
   const { vines } = useVinesFlow();
-  const { canvasMode } = useFlowStore();
-  const { canvasDisabled } = useCanvasStore();
+  const { canvasMode } = useCanvasStore();
+  const { canvasDisabled } = useCanvasInteractionStore();
 
   const handleNodeClick = () => {
     if (![CanvasStatus.EDIT, CanvasStatus.READONLY].includes(canvasMode)) return;

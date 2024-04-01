@@ -2,17 +2,17 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import keyboardJS from 'keyboardjs';
 import { TransformWrapper } from 'react-zoom-pan-pinch';
-import { useFlowStore } from 'src/store/useFlowStore';
 
 import { GridView } from '@/components/layout/vines-flow/wrapper/grid-view.tsx';
 import { useCanvasStore } from '@/store/useCanvasStore';
+import { useCanvasInteractionStore } from '@/store/useCanvasStore/interaction.ts';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 
 interface IVinesFlowWrapperProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const VinesFlowWrapper: React.FC<IVinesFlowWrapperProps> = ({ children }) => {
-  const { initialScale, canvasMode } = useFlowStore();
-  const { isCanvasMoving, setCanvasMoving, setCanvasDisabled } = useCanvasStore();
+  const { initialScale, canvasMode } = useCanvasStore();
+  const { isCanvasMoving, setCanvasMoving, setCanvasDisabled } = useCanvasInteractionStore();
 
   const [isToggleScale, setIsToggleScale] = useState(false);
 

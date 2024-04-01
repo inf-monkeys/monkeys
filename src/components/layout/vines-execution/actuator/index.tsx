@@ -14,7 +14,7 @@ import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
-import { useFlowStore } from '@/store/useFlowStore';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { useViewStore } from '@/store/useViewStore';
 import VinesEvent from '@/utils/events.ts';
@@ -24,7 +24,7 @@ interface IVinesActuatorProps {
 }
 
 export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
-  const { setCanvasMode } = useFlowStore();
+  const { setCanvasMode } = useCanvasStore();
   const { visible } = useViewStore();
 
   const { vines } = useVinesFlow();

@@ -13,14 +13,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.t
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
 import { useCanvasStore } from '@/store/useCanvasStore';
-import { useFlowStore } from '@/store/useFlowStore';
+import { useCanvasInteractionStore } from '@/store/useCanvasStore/interaction.ts';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { readLocalStorageValue } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 export const ComplicateTriggerNode: React.FC = () => {
-  const { canvasMode, setCanvasMode } = useFlowStore();
-  const { setIsUserInteraction } = useCanvasStore();
+  const { canvasMode, setCanvasMode } = useCanvasStore();
+  const { setIsUserInteraction } = useCanvasInteractionStore();
   const { vines } = useVinesFlow();
 
   const apikey = readLocalStorageValue('vines-apikey', '', false);

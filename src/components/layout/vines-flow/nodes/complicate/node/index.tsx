@@ -16,7 +16,7 @@ import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VINES_STATUS } from '@/package/vines-flow/core/typings.ts';
 import { useCanvasStore } from '@/store/useCanvasStore';
-import { useFlowStore } from '@/store/useFlowStore';
+import { useCanvasInteractionStore } from '@/store/useCanvasStore/interaction.ts';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
@@ -39,8 +39,8 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
 
   const { vines } = useVinesFlow();
 
-  const { canvasMode, isWorkflowRUNNING } = useFlowStore();
-  const { isUserInteraction, setIsUserInteraction } = useCanvasStore();
+  const { canvasMode, isWorkflowRUNNING } = useCanvasStore();
+  const { isUserInteraction, setIsUserInteraction } = useCanvasInteractionStore();
 
   const mouseFocusRef = useRef(false);
   const [isNodeFocus, setIsNodeFocus] = useState(false);

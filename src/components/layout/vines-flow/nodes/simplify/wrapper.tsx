@@ -3,12 +3,12 @@ import React, { useCallback } from 'react';
 import { DndContext, DragStartEvent, MouseSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { restrictToWindowEdges, snapCenterToCursor } from '@dnd-kit/modifiers';
 
-import { useFlowStore } from '@/store/useFlowStore';
+import { useCanvasStore } from '@/store/useCanvasStore';
 
 interface ISimplifyWrapperProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const SimplifyWrapper: React.FC<ISimplifyWrapperProps> = ({ children }) => {
-  const { setActiveDraggableNodeId, setOverNodeId } = useFlowStore();
+  const { setActiveDraggableNodeId, setOverNodeId } = useCanvasStore();
 
   const handleDragStart = useCallback(({ active }: DragStartEvent) => {
     const { id } = active;
