@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
@@ -19,7 +20,8 @@ import VinesEvent from '@/utils/events';
 interface IToolEditorProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ToolEditor: React.FC<IToolEditorProps> = () => {
-  const { disableDialogClose, isLatestWorkflowVersion } = useFlowStore();
+  const { isLatestWorkflowVersion } = useFlowStore();
+  const { disableDialogClose } = useCanvasStore();
   const { workflowId } = usePageStore();
   const { vines } = useVinesFlow();
 

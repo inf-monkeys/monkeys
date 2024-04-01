@@ -6,7 +6,7 @@ import { ArrowDownToLine, ArrowUpToLine } from 'lucide-react';
 import { ToolDroppable } from '@/components/layout/vines-flow/toolbar/node/item.tsx';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
-import { useFlowStore } from '@/store/useFlowStore';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { cn } from '@/utils';
 
 interface INodeToolbarProps {
@@ -20,7 +20,7 @@ export const NodeToolbar: React.FC<INodeToolbarProps> = ({ node }) => {
   } = node;
 
   const { vines } = useVinesFlow();
-  const { overNodeId, activeDraggableNodeId } = useFlowStore();
+  const { overNodeId, activeDraggableNodeId } = useCanvasStore();
 
   const visible = overNodeId === id && activeDraggableNodeId !== overNodeId;
 

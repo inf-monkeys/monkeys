@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import { useTriggers, useTriggerTypes } from '@/apis/workflow/trigger';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
-import { useFlowStore } from '@/store/useFlowStore';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { readLocalStorageValue } from '@/utils';
 
@@ -17,7 +17,7 @@ export const SimplifyStartNodeExpand: React.FC<ISimplifyStartNodeExpandProps> = 
   const { data: triggerTypes } = useTriggerTypes(apikey);
   const { data: triggers } = useTriggers(vines.workflowId, vines.version, apikey);
 
-  const { canvasMode } = useFlowStore();
+  const { canvasMode } = useCanvasStore();
   const visible = canvasMode === CanvasStatus.EDIT;
 
   const trigger = triggers?.find(({ enabled }) => enabled);

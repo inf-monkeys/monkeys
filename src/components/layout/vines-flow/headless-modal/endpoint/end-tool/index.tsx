@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
 import { useVinesFlow } from '@/package/vines-flow';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cn, readLocalStorageValue } from '@/utils';
@@ -18,8 +19,9 @@ import VinesEvent from '@/utils/events.ts';
 interface IEndToolProps {}
 
 export const EndTool: React.FC<IEndToolProps> = () => {
-  const { disableDialogClose, isLatestWorkflowVersion } = useFlowStore();
+  const { isLatestWorkflowVersion } = useFlowStore();
   const { workflowId } = usePageStore();
+  const { disableDialogClose } = useCanvasStore();
 
   const [open, setOpen] = useState(false);
 

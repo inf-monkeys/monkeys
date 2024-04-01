@@ -11,6 +11,7 @@ import { CodeEditor } from '@/components/ui/code-editor';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { usePageStore } from '@/store/usePageStore';
@@ -33,7 +34,8 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({
   output,
   setOutput,
 }) => {
-  const { canvasMode, isLatestWorkflowVersion } = useFlowStore();
+  const { isLatestWorkflowVersion } = useFlowStore();
+  const { canvasMode } = useCanvasStore();
   const { workflowId } = usePageStore();
 
   const { vines } = useVinesFlow();

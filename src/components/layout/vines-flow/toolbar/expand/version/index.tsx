@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
@@ -17,7 +18,8 @@ interface IVinesVersionToolbarProps extends React.ComponentPropsWithoutRef<'div'
 }
 
 export const VinesVersionToolbar: React.FC<IVinesVersionToolbarProps> = ({ version = 1, onVersionChange }) => {
-  const { setVisible, setIsLatestWorkflowVersion } = useFlowStore();
+  const { setIsLatestWorkflowVersion } = useFlowStore();
+  const { setVisible } = useCanvasStore();
   const { workflowId } = usePageStore();
 
   const { data } = useWorkflowVersions(workflowId);

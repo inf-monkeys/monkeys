@@ -8,13 +8,13 @@ import { WorkflowRelease } from '@/components/layout/vines-flow/toolbar/expand/v
 import { Card } from '@/components/ui/card.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
-import { useFlowStore } from '@/store/useFlowStore';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { cn } from '@/utils';
 
 interface IVinesVersionToolbarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const VinesExpandToolbar: React.FC<IVinesVersionToolbarProps> = () => {
-  const { isWorkflowRUNNING } = useFlowStore();
+  const { isWorkflowRUNNING } = useCanvasStore();
 
   const { vines } = useVinesFlow();
   const vinesVersion = vines.version;

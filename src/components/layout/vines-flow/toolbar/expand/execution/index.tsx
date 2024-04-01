@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/card.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useCanvasStore } from '@/store/useCanvasStore';
+import { useCanvasInteractionStore } from '@/store/useCanvasStore/interaction.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { cn } from '@/utils';
@@ -19,8 +20,9 @@ import VinesEvent from '@/utils/events.ts';
 interface IVinesRunInsideToolbarProps {}
 
 export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () => {
-  const { isLatestWorkflowVersion, isWorkflowRUNNING, setCanvasMode } = useFlowStore();
-  const { setIsUserInteraction } = useCanvasStore();
+  const { isLatestWorkflowVersion } = useFlowStore();
+  const { isWorkflowRUNNING, setCanvasMode } = useCanvasStore();
+  const { setIsUserInteraction } = useCanvasInteractionStore();
   const { vines } = useVinesFlow();
 
   const workflowExecution = vines.executionWorkflowExecution;
