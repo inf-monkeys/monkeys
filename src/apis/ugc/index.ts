@@ -8,11 +8,10 @@ import { vinesFetcher } from '@/apis/fetcher.ts';
 import { IPaginationListData } from '@/apis/typings.ts';
 import { paginationWrapper } from '@/apis/wrapper.ts';
 
-import { IAssetItem, IListUgcDto } from './typings';
+import { IAssetItem, IListUgcDto, IUgcFilterRules } from './typings';
 
 export const useUgcItems = <T extends object>(dto: IListUgcDto, url: string, method: 'GET' | 'POST' = 'GET') => {
   const swrUrl = method === 'GET' ? `${url}?${qs.stringify(dto, { encode: false })}` : url;
-  console.log(swrUrl, dto);
   const fetcher =
     method === 'GET'
       ? vinesFetcher({ wrapper: paginationWrapper })
@@ -44,6 +43,10 @@ export const useAssetTagList = (assetKey?: string) =>
     refreshInterval: 600000,
     revalidateOnFocus: false,
   });
+
+export const createUgcFilterRules = (name: string, rules: Partial<IListUgcDto['filter']>, type: AssetType) => {
+  return vinesFetcher<IUgcFilterRules>({ method: 'POST', simple: true })('/api/assets/filters', { name, rules, type });
+};
 
 export const updateAssetItem = (type: AssetType, id: string, data: any) =>
   vinesFetcher({

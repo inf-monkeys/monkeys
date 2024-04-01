@@ -25,9 +25,7 @@ import {
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalStorage } from '@/utils';
 
-interface IUgcHeaderSortButtonProps extends IAssetCustomProps {
-  assetKey: string;
-}
+interface IUgcHeaderSortButtonProps extends IAssetCustomProps {}
 
 export const UgcHeaderSortButton: React.FC<IUgcHeaderSortButtonProps> = ({ assetKey }) => {
   const team = useVinesTeam();

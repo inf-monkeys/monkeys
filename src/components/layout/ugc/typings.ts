@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { AssetType } from '@inf-monkeys/vines';
 import { ColumnDef, Row } from '@tanstack/react-table';
 
 import { IAssetItem } from '@/apis/ugc/typings.ts';
@@ -20,6 +21,7 @@ export type IOperateAreaProps<E> = (
 ) => React.ReactNode;
 
 export type IAssetCustomProps = {
+  assetType: AssetType;
   assetKey: string;
 };
 

@@ -16,7 +16,8 @@ import { AnimatePresence } from 'framer-motion';
 import _, { isNull } from 'lodash';
 import { MoreHorizontal } from 'lucide-react';
 
-import { IAssetItem, IListUgcItemsFnType, IPreloadUgcItemsFnType } from '@/apis/ugc/typings.ts';
+import { IAssetItem, IListUgcDto, IListUgcItemsFnType, IPreloadUgcItemsFnType } from '@/apis/ugc/typings.ts';
+import { UgcSidebar } from '@/components/layout/ugc/sidebar';
 import {
   IDefaultPageSizeStorage,
   IDisplayModeStorage,
@@ -41,6 +42,7 @@ import { useLocalStorage } from '@/utils';
 
 interface IUgcViewProps<E extends object> {
   assetKey: string;
+  assetName: string;
   assetType: AssetType;
   useUgcFetcher: IListUgcItemsFnType<E>;
   preloadUgcFetcher: IPreloadUgcItemsFnType<E>;
@@ -55,6 +57,7 @@ interface IUgcViewProps<E extends object> {
 
 export const UgcView = <E extends object>({
   assetKey,
+  assetName,
   assetType,
   useUgcFetcher,
   preloadUgcFetcher,
@@ -106,6 +109,9 @@ export const UgcView = <E extends object>({
       });
   }, [defaultPageSizeLS]);
 
+  // filter
+  const [filter, setFilter] = useState<Partial<IListUgcDto['filter']>>({});
+
   // fetch data
   const {
     data: rawData,
@@ -114,7 +120,7 @@ export const UgcView = <E extends object>({
   } = useUgcFetcher({
     page: pagination.pageIndex + 1,
     limit: pagination.pageSize,
-    filter: {},
+    filter,
     orderBy: sortCondition.orderBy,
     orderColumn: sortCondition.orderColumn,
   });
@@ -201,64 +207,75 @@ export const UgcView = <E extends object>({
   });
 
   return (
-    <div ref={ref} className="relative w-full flex-1 overflow-x-clip">
-      <UgcViewHeader assetKey={assetKey} subtitle={subtitle} />
-      <SmoothTransition className="relative overflow-clip">
-        <AnimatePresence>
-          {(isLoading || isNull(displayMode)) && <Loading motionKey={`vines-assets-${assetKey}-loading`} />}
-        </AnimatePresence>
-        <div className="flex flex-col">
-          <ScrollArea className="relative h-[calc(100vh-10.5rem)] w-full rounded-r-lg px-4 py-2">
-            {displayMode === 'card' && (
-              <div className="grid w-full grid-cols-1 gap-6 overflow-y-auto lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-                {table.getRowModel().rows.map((row, index) => (
-                  <UgcViewCard
-                    row={row}
-                    key={index}
-                    index={index}
-                    columns={columns}
-                    renderOptions={renderOptions}
-                    operateArea={operateArea}
-                    onItemClick={onItemClick}
-                  />
-                ))}
-              </div>
-            )}
-            {displayMode === 'table' && (
-              <RemoteDataTable
-                columns={columns}
-                data={data}
-                onPaginationChange={table.setPagination}
-                rowCount={table.getRowCount()}
-                state={table.getState()}
-                showPagination={false}
-              />
-            )}
-            {displayMode === 'gallery' && (
-              <div className="flex flex-wrap gap-4">
-                {table.getRowModel().rows.map((row, index) => (
-                  <UgcViewGalleryItem
-                    row={row}
-                    columns={columns}
-                    key={index}
-                    index={index}
-                    renderOptions={renderOptions}
-                    operateArea={operateArea}
-                    onItemClick={onItemClick}
-                  />
-                ))}
-              </div>
-            )}
-          </ScrollArea>
-          <TablePagination
-            className="py-0"
-            pagination={table.getState().pagination}
-            onPaginationChange={table.setPagination}
-            rowCount={table.getRowCount()}
-            preloadHover={handlePreload}
-          />
-        </div>
-      </SmoothTransition>
+    <div className="flex size-full">
+      <UgcSidebar title={assetName} />
+      <div ref={ref} className="relative w-full flex-1 overflow-x-clip">
+        <UgcViewHeader
+          assetKey={assetKey}
+          assetType={assetType}
+          subtitle={subtitle}
+          filterProps={{
+            filter,
+            onChange: setFilter,
+          }}
+        />
+        <SmoothTransition className="relative overflow-clip">
+          <AnimatePresence>
+            {(isLoading || isNull(displayMode)) && <Loading motionKey={`vines-assets-${assetKey}-loading`} />}
+          </AnimatePresence>
+          <div className="flex flex-col">
+            <ScrollArea className="relative h-[calc(100vh-10.5rem)] w-full rounded-r-lg px-4 py-2">
+              {displayMode === 'card' && (
+                <div className="grid w-full grid-cols-1 gap-6 overflow-y-auto lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                  {table.getRowModel().rows.map((row, index) => (
+                    <UgcViewCard
+                      row={row}
+                      key={index}
+                      index={index}
+                      columns={columns}
+                      renderOptions={renderOptions}
+                      operateArea={operateArea}
+                      onItemClick={onItemClick}
+                    />
+                  ))}
+                </div>
+              )}
+              {displayMode === 'table' && (
+                <RemoteDataTable
+                  columns={columns}
+                  data={data}
+                  onPaginationChange={table.setPagination}
+                  rowCount={table.getRowCount()}
+                  state={table.getState()}
+                  showPagination={false}
+                />
+              )}
+              {displayMode === 'gallery' && (
+                <div className="flex flex-wrap gap-4">
+                  {table.getRowModel().rows.map((row, index) => (
+                    <UgcViewGalleryItem
+                      row={row}
+                      columns={columns}
+                      key={index}
+                      index={index}
+                      renderOptions={renderOptions}
+                      operateArea={operateArea}
+                      onItemClick={onItemClick}
+                    />
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
+            <TablePagination
+              className="py-0"
+              pagination={table.getState().pagination}
+              onPaginationChange={table.setPagination}
+              rowCount={table.getRowCount()}
+              preloadHover={handlePreload}
+            />
+          </div>
+        </SmoothTransition>
+      </div>
     </div>
   );
 };
