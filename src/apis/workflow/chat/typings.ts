@@ -8,3 +8,8 @@ export interface IVinesChatSession {
   updatedTimestamp: number;
   isDeleted: boolean;
 }
+
+export interface IVinesCreateChatSessionParams {
+  workflowId: string;
+  displayName: string;
+}
