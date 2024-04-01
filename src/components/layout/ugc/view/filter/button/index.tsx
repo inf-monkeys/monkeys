@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 
+import { mutate } from 'swr';
+
 import { format } from 'date-fns';
 import { CalendarIcon, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useTeamUsers } from '@/apis/authz/team';
-import { createUgcFilterRules, useAssetTagList } from '@/apis/ugc';
+import { createAssetFilterRules, useAssetTagList } from '@/apis/ugc';
 import { IListUgcDto } from '@/apis/ugc/typings.ts';
-import { IAssetCustomProps } from '@/components/layout/ugc/typings.ts';
+import { IUgcCustomProps } from '@/components/layout/ugc/typings.ts';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar.tsx';
@@ -19,7 +21,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils';
 
-export interface IUgcViewFilterButtonProps extends IAssetCustomProps {
+export interface IUgcViewFilterButtonProps extends IUgcCustomProps {
   filter: Partial<IListUgcDto['filter']>;
   onChange: (filter: Partial<IListUgcDto['filter']>) => void;
   defaultAddToFavourite?: boolean;
@@ -233,10 +235,11 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
                   toast.warning('请输入分组名称');
                   return;
                 }
-                toast.promise(createUgcFilterRules(filterName, filter, assetType), {
+                toast.promise(createAssetFilterRules(filterName, filter, assetType), {
                   loading: '保存中...',
                   success: () => {
                     setVisible(false);
+                    void mutate(`/api/assets/filters?type=${assetType}`);
                     return '保存成功';
                   },
                   error: '保存失败，请检查网络后重试',

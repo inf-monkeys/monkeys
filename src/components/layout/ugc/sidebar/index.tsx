@@ -3,28 +3,19 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 
+import { IUgcCustomProps } from '@/components/layout/ugc/typings.ts';
+import { IUgcViewFilterListProps, UgcViewFilterList } from '@/components/layout/ugc/view/filter/list';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils';
 
-interface IUgcSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
+interface IUgcSidebarProps extends IUgcCustomProps {
   title: string;
+  filterListProps: Omit<IUgcViewFilterListProps, keyof IUgcCustomProps>;
 }
 
-export const UgcSidebar: React.FC<IUgcSidebarProps> = ({ title }) => {
+export const UgcSidebar: React.FC<IUgcSidebarProps> = ({ assetType, assetKey, title, filterListProps }) => {
   const [visible, setVisible] = useState(true);
-  //
-  // useEffect(() => {
-  //   if (!currentPage?.id) {
-  //     if (data?.length) {
-  //       setCurrentPage(data[0]);
-  //     }
-  //   } else if (!data?.find((page) => page.id === currentPage.id)) {
-  //     setCurrentPage({});
-  //   }
-  // }, [currentPage, data]);
-
-  const [current, setCurrent] = useState(true);
 
   return (
     <div className="flex h-full max-w-64">
@@ -38,19 +29,7 @@ export const UgcSidebar: React.FC<IUgcSidebarProps> = ({ title }) => {
         }}
       >
         <h1 className="text-2xl font-bold">{title}</h1>
-        <div className="grid gap-2">
-          <div
-            className={cn(
-              'flex cursor-pointer items-start space-x-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
-              current && 'bg-accent text-accent-foreground',
-            )}
-            // onClick={() => setCurrentPage(page)}
-          >
-            <div className="flex flex-col gap-0.5 px-2 py-1">
-              <span className="text-xs">全部</span>
-            </div>
-          </div>
-        </div>
+        <UgcViewFilterList assetType={assetType} assetKey={assetKey} {...filterListProps} />
       </motion.div>
       <Separator orientation="vertical" className="vines-center">
         <Tooltip>

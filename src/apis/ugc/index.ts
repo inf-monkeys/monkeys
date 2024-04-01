@@ -41,11 +41,18 @@ export const preloadUgcWorkflows = (dto: IListUgcDto) => preloadUgcItems<MonkeyW
 export const useAssetTagList = (assetKey?: string) =>
   useSWR<string[] | undefined>(assetKey ? `/api/assets/${assetKey}/tags` : null, vinesFetcher(), {
     refreshInterval: 600000,
-    revalidateOnFocus: false,
   });
 
-export const createUgcFilterRules = (name: string, rules: Partial<IListUgcDto['filter']>, type: AssetType) => {
+export const useAssetFilterRuleList = (type: AssetType) =>
+  useSWR<IUgcFilterRules[] | undefined>(`/api/assets/filters?type=${type}`, vinesFetcher(), {
+    refreshInterval: 600000,
+  });
+
+export const createAssetFilterRules = (name: string, rules: Partial<IListUgcDto['filter']>, type: AssetType) => {
   return vinesFetcher<IUgcFilterRules>({ method: 'POST', simple: true })('/api/assets/filters', { name, rules, type });
+};
+export const removeAssetFilterRules = (id: string) => {
+  return vinesFetcher<boolean>({ method: 'DELETE' })(`/api/assets/filters/${id}`);
 };
 
 export const updateAssetItem = (type: AssetType, id: string, data: any) =>
