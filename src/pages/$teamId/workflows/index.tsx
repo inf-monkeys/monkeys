@@ -8,7 +8,6 @@ import { toast } from 'sonner';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { preloadUgcWorkflows, useUgcWorkflows } from '@/apis/ugc';
-import { UgcSidebar } from '@/components/layout/ugc/sidebar';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
@@ -30,64 +29,13 @@ export const Workflows: React.FC = () => {
   const clipboard = useClipboard({ timeout: 500 });
 
   return (
-    <main className="flex size-full">
-      <UgcSidebar title="工作流" />
+    <main className="size-full">
       <UgcView
         assetKey="workflow"
         assetType="workflow"
+        assetName="工作流"
         useUgcFetcher={useUgcWorkflows}
         preloadUgcFetcher={preloadUgcWorkflows}
-        // columns={[
-        //   {
-        //     accessorKey: 'iconUrl',
-        //     header: '图标',
-        //     accessorFn: (row) => RenderIcon({ iconUrl: row.iconUrl }),
-        //     cell: (props) => props.getValue() as React.ReactNode,
-        //     maxSize: 48,
-        //   },
-        //   {
-        //     accessorKey: 'name',
-        //     header: '名称',
-        //     cell: ({ row, getValue }) => (
-        //       <a
-        //         className="transition-colors hover:text-primary-500"
-        //         href={`/${row.original.teamId}/workspace/${row.original.workflowId}`}
-        //         target="_blank"
-        //         rel="noreferrer"
-        //       >
-        //         {getValue() as string}
-        //       </a>
-        //     ),
-        //   },
-        //   {
-        //     accessorKey: 'description',
-        //     header: '描述',
-        //     cell: (props) => RenderDescription({ description: props.getValue() as string }),
-        //   },
-        //   {
-        //     accessorKey: 'user',
-        //     header: '用户',
-        //     cell: (props) => RenderUser({ user: props.getValue() as IVinesUser }),
-        //     maxSize: 48,
-        //   },
-        //   {
-        //     accessorKey: 'assetTags',
-        //     header: '标签',
-        //     maxSize: 128,
-        //   },
-        //   {
-        //     accessorKey: 'createdTimestamp',
-        //     header: '创建时间',
-        //     cell: (props) => RenderTime({ time: props.getValue() as number }),
-        //     maxSize: 72,
-        //   },
-        //   {
-        //     accessorKey: 'updatedTimestamp',
-        //     header: '更新时间',
-        //     cell: (props) => RenderTime({ time: props.getValue() as number }),
-        //     maxSize: 72,
-        //   },
-        // ]}
         createColumns={(columnHelper) => {
           return [
             columnHelper.accessor('iconUrl', {

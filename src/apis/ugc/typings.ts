@@ -46,7 +46,7 @@ export interface IUgcFilterRules extends IBaseEntity {
   teamId: string;
   creatorUserId: string;
   name: string;
-  rules: Record<string, unknown>;
+  rules: Partial<IListUgcDto['filter']>;
   isUserPrivate?: boolean;
 }
 
