@@ -2,7 +2,7 @@ import useSWR, { preload } from 'swr';
 
 import { AssetType, MonkeyWorkflow } from '@inf-monkeys/vines';
 import _ from 'lodash';
-import queryString from 'query-string';
+import qs from 'qs';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { IPaginationListData } from '@/apis/typings.ts';
@@ -11,7 +11,8 @@ import { paginationWrapper } from '@/apis/wrapper.ts';
 import { IAssetItem, IListUgcDto } from './typings';
 
 export const useUgcItems = <T extends object>(dto: IListUgcDto, url: string, method: 'GET' | 'POST' = 'GET') => {
-  const swrUrl = method === 'GET' ? `${url}?${queryString.stringify(dto)}` : url;
+  const swrUrl = method === 'GET' ? `${url}?${qs.stringify(dto, { encode: false })}` : url;
+  console.log(swrUrl, dto);
   const fetcher =
     method === 'GET'
       ? vinesFetcher({ wrapper: paginationWrapper })
@@ -23,7 +24,7 @@ export const useUgcItems = <T extends object>(dto: IListUgcDto, url: string, met
   return useSWR<IPaginationListData<IAssetItem<T>> | undefined>(method === 'GET' ? swrUrl : [swrUrl, dto], fetcher);
 };
 export const preloadUgcItems = <T extends object>(dto: IListUgcDto, url: string, method: 'GET' | 'POST' = 'GET') => {
-  const swrUrl = method === 'GET' ? `${url}?${queryString.stringify(dto)}` : url;
+  const swrUrl = method === 'GET' ? `${url}?${qs.stringify(dto, { encode: false })}` : url;
   const fetcher =
     method === 'GET'
       ? vinesFetcher({ wrapper: paginationWrapper })
