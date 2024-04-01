@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 
 import { motion } from 'framer-motion';
-import { ChevronRight, MessageSquare } from 'lucide-react';
+import { ChevronRight, Plus } from 'lucide-react';
 
 import { useWorkflowChatSessions } from '@/apis/workflow/chat';
-import { Card } from '@/components/ui/card.tsx';
+import { ChatSession } from '@/components/layout/view/vines-chat/sidebar/chat-session.tsx';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useFlowStore } from '@/store/useFlowStore';
@@ -14,7 +15,7 @@ interface IChatSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
   const { workflowId } = useFlowStore();
-  const { data } = useWorkflowChatSessions(workflowId);
+  const { data, mutate } = useWorkflowChatSessions(workflowId);
 
   const [visible, setVisible] = useState(true);
 
@@ -31,15 +32,12 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
       >
         <h1 className="text-2xl font-bold">对话列表</h1>
         <div className="grid gap-2">
-          {data?.map((session) => (
-            <Card
-              key={session.id}
-              className="flex cursor-pointer items-center gap-2 px-3 py-2 hover:bg-gray-10/5 active:bg-gray-10/10"
-            >
-              <MessageSquare size={16} />
-              <span>{session.displayName}</span>
-            </Card>
+          {data?.map((session, i) => (
+            <ChatSession session={session} key={session._id} disableDelete={!i} onDeleted={() => mutate()} />
           ))}
+          <Button variant="outline" icon={<Plus />}>
+            新建会话
+          </Button>
         </div>
       </motion.div>
       <Separator orientation="vertical" className="vines-center">
