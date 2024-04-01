@@ -14,15 +14,23 @@ interface IChatSessionProps {
   session: IVinesChatSession;
   disableDelete?: boolean;
   onDeleted?: () => void;
+  active?: boolean;
+  onClick?: () => void;
 }
 
-export const ChatSession: React.FC<IChatSessionProps> = ({ session, disableDelete, onDeleted }) => {
+export const ChatSession: React.FC<IChatSessionProps> = ({ session, active, onClick, disableDelete, onDeleted }) => {
   const { trigger } = useDeleteWorkflowChatSession(session._id);
 
   const sessionDisplayName = session.displayName;
 
   return (
-    <Card className="group flex cursor-pointer items-center gap-2 px-3 py-2 hover:bg-gray-10/5 active:bg-gray-10/10">
+    <Card
+      className={cn(
+        'group flex cursor-pointer items-center gap-2 px-3 py-2 hover:bg-gray-10/5 active:bg-gray-10/10',
+        active && 'outline outline-vines-500',
+      )}
+      onClick={onClick}
+    >
       <MessageSquare size={16} />
       <span>{sessionDisplayName}</span>
       <div

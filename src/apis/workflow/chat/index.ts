@@ -11,7 +11,7 @@ export const useWorkflowChatSessions = (workflowId: string) =>
   );
 
 export const useCreateWorkflowChatSession = () =>
-  useSWRMutation<IVinesChatSession[] | undefined, unknown, string, IVinesCreateChatSessionParams>(
+  useSWRMutation<IVinesChatSession | undefined, unknown, string, IVinesCreateChatSessionParams>(
     '/api/chat-sessions',
     vinesFetcher({ method: 'POST' }),
   );
