@@ -38,7 +38,7 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
   const { team } = useVinesTeam();
 
   const { data: teamMember } = useTeamUsers(team?.id);
-  const { data: tagsData } = useAssetTagList(assetType);
+  const { data: tagsData } = useAssetTagList();
 
   const [addToFavourite, setAddToFavourite] = useState(defaultAddToFavourite);
 
@@ -47,13 +47,13 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
   const defaultUsersOptions = (teamMember?.list ?? []).map((user) => {
     return {
       label: user.name,
-      value: user._id,
+      value: user.id,
     };
   });
   const defaultTagsOptions = (tagsData ?? []).map((tag) => {
     return {
-      label: tag,
-      value: tag,
+      label: tag.name,
+      value: tag.id,
     };
   });
 
@@ -72,7 +72,7 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
           <MultipleSelector
             value={(filter?.userIds ?? []).map((userId) => {
               return {
-                label: teamMember?.list.find((user) => user._id === userId)?.name ?? '未知用户',
+                label: teamMember?.list.find((user) => user.id === userId)?.name ?? '未知用户',
                 value: userId,
               };
             })}
@@ -90,8 +90,9 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
           <Label>标签</Label>
           <MultipleSelector
             value={(filter?.tagIds ?? []).map((tagId) => {
+              const tag = tagsData?.find((x) => x.id === tagId);
               return {
-                label: tagId,
+                label: tag?.name || tagId,
                 value: tagId,
               };
             })}

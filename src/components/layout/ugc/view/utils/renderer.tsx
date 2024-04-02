@@ -22,10 +22,10 @@ export const RenderUser: React.FC<{
 }> = ({ user }) => (
   <div className="flex items-center gap-1">
     <Avatar className="size-5">
-      <AvatarImage className="aspect-auto" src={user.photo} alt={user.name} />
-      <AvatarFallback className="rounded-none p-2 text-xs">{user.name.substring(0, 2)}</AvatarFallback>
+      <AvatarImage className="aspect-auto" src={user?.photo} alt={user?.name} />
+      <AvatarFallback className="rounded-none p-2 text-xs">{user?.name.substring(0, 2)}</AvatarFallback>
     </Avatar>
-    <span>{user.name}</span>
+    <span>{user?.name}</span>
   </div>
 );
 
