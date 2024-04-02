@@ -14,6 +14,7 @@ import {
   ZoomOutIcon,
 } from 'lucide-react';
 
+import { MoreToolbar } from '@/components/layout/vines-flow/toolbar/more.tsx';
 import { ToolButton } from '@/components/layout/vines-flow/toolbar/tool-button.tsx';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Card } from '@/components/ui/card.tsx';
@@ -127,6 +128,7 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
         tip="开发者模式"
         onClick={() => VinesEvent.emit('flow-raw-data-editor', workflowId)}
       />
+      <MoreToolbar />
     </Card>
   );
 };
