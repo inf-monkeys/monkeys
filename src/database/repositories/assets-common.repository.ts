@@ -27,7 +27,7 @@ export class AssetsCommonRepository {
     @InjectRepository(AssetFilterEntity)
     private readonly assetsFilterRepository: MongoRepository<AssetFilterEntity>,
     @InjectRepository(AssetsTagEntity)
-    private readonly assetTagDefinitioRepo: MongoRepository<AssetsTagEntity>,
+    private readonly assetTagRepo: MongoRepository<AssetsTagEntity>,
     @InjectRepository(AssetsTagRelationsEntity)
     private readonly assetsTagRelationsRepo: MongoRepository<AssetsTagRelationsEntity>,
     private readonly userRepository: UserRepository,
@@ -100,7 +100,7 @@ export class AssetsCommonRepository {
   }
 
   public async listTags(teamId: string) {
-    return await this.assetTagDefinitioRepo.find({
+    return await this.assetTagRepo.find({
       where: {
         teamId,
         isDeleted: false,
@@ -112,7 +112,7 @@ export class AssetsCommonRepository {
     if (typeof name !== 'string' || !name.trim()) {
       throw new Error('请输入标签名称');
     }
-    const exists = await this.assetTagDefinitioRepo.findOne({
+    const exists = await this.assetTagRepo.findOne({
       where: {
         teamId,
         name,
@@ -132,7 +132,7 @@ export class AssetsCommonRepository {
       color,
       _pinyin: pinyin(name, { toneType: 'none' }).replace(/\s/g, ''),
     };
-    await this.assetTagDefinitioRepo.save(entity);
+    await this.assetTagRepo.save(entity);
     return entity;
   }
 
@@ -145,7 +145,7 @@ export class AssetsCommonRepository {
     },
   ) {
     const { name, color } = updates;
-    const exists = await this.assetTagDefinitioRepo.findOne({
+    const exists = await this.assetTagRepo.findOne({
       where: {
         teamId,
         id: new ObjectId(tagId),
@@ -157,7 +157,7 @@ export class AssetsCommonRepository {
     }
 
     if (updates.name && updates.name !== exists.name) {
-      const nameConfilct = await this.assetTagDefinitioRepo.exists({
+      const nameConfilct = await this.assetTagRepo.exists({
         where: {
           teamId,
           name,
@@ -180,7 +180,7 @@ export class AssetsCommonRepository {
       toUpdates.color = color;
     }
 
-    await this.assetTagDefinitioRepo.updateOne(
+    await this.assetTagRepo.updateOne(
       {
         id: new ObjectId(tagId),
       },
@@ -189,7 +189,7 @@ export class AssetsCommonRepository {
   }
 
   public async deleteTag(teamId: string, tagId: string) {
-    await this.assetTagDefinitioRepo.updateOne(
+    await this.assetTagRepo.updateOne(
       {
         teamId,
         id: new ObjectId(tagId),
@@ -267,6 +267,23 @@ export class AssetsCommonRepository {
       result.team = teamProfile;
     }
 
+    if (withTags) {
+      const tagIds = (
+        await this.assetsTagRelationsRepo.find({
+          where: {
+            assetType: item.assetType,
+            assetId: item.getAssetId(),
+            isDeleted: false,
+          },
+        })
+      ).map((x) => x.tagId);
+      result.assetTags = await this.assetTagRepo.find({
+        where: {
+          id: In(tagIds.map((x) => new ObjectId(x))),
+        },
+      });
+    }
+
     return result;
   }
 
@@ -293,7 +310,7 @@ export class AssetsCommonRepository {
       const allTagIds = uniq(allTagRels.map((x) => x.tagId));
       const allTagDefs =
         withTags && allTagIds.length
-          ? await this.assetTagDefinitioRepo.find({
+          ? await this.assetTagRepo.find({
               where: {
                 id: In(allTagIds.map((x) => new ObjectId(x))),
               },
