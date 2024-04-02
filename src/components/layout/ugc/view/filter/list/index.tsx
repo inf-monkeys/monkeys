@@ -107,7 +107,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                       }}
                     >
                       <AlertDialogHeader>
-                        <AlertDialogTitle>确定要删除分组</AlertDialogTitle>
+                        <AlertDialogTitle>分组删除确认</AlertDialogTitle>
                         <AlertDialogDescription>确定要删除分组「{rule.name}」？此操作不可恢复。</AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>

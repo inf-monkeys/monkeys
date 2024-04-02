@@ -1,3 +1,9 @@
+import { useCallback, useEffect, useRef } from 'react';
+
+import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { TaskType, WorkflowDef } from '@io-orkes/conductor-javascript';
+
+import { createWorkflow as createWorkflowFromAPI } from '@/apis/workflow';
 import { useVinesRefresher } from '@/package/vines-flow';
 import { VINES_DEF_NODE } from '@/package/vines-flow/core/consts.ts';
 import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
@@ -44,4 +50,53 @@ export const useVinesFlow = () => {
 
     VINES_REFRESHER: _refresher,
   };
+};
+
+export const useWorkflow = (workflow?: { workflowId?: string }) => {
+  const workflowRef = useRef<{ id?: string }>({});
+
+  useEffect(() => {
+    workflow?.workflowId && (workflowRef.current.id = workflow.workflowId);
+  }, [workflow]);
+
+  const createWorkflow = useCallback(
+    async (
+      name: string,
+      workflowDef?: Omit<WorkflowDef, 'version' | 'name' | 'inputParameters' | 'timeoutSeconds'>,
+      subWorkflowMasterId?: string,
+    ) => {
+      if (!workflowDef) {
+        workflowDef = {
+          tasks: [
+            {
+              name: 'fake_node',
+              taskReferenceName: `fake_node_${Math.random().toString(36).slice(-8)}`,
+              type: 'SIMPLE' as TaskType.SIMPLE,
+            },
+          ],
+        };
+      }
+      const newWorkflow: Partial<
+        Pick<
+          MonkeyWorkflow,
+          'name' | 'variables' | 'description' | 'iconUrl' | 'workflowDef' | 'hidden' | 'masterWorkflowId'
+        >
+      > = {
+        name,
+        description: '',
+        iconUrl: 'emoji:🍀:#ceefc5',
+        workflowDef: workflowDef as WorkflowDef,
+      };
+
+      if (subWorkflowMasterId) {
+        newWorkflow.hidden = true;
+        newWorkflow.masterWorkflowId = subWorkflowMasterId === 'current' ? workflowRef.current.id : subWorkflowMasterId;
+      }
+
+      return (await createWorkflowFromAPI(newWorkflow))?.workflowId;
+    },
+    [],
+  );
+
+  return { createWorkflow };
 };
