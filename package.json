@@ -60,6 +60,7 @@
     "openid-client": "^5.6.5",
     "passport": "^0.7.0",
     "pg": "^8.11.3",
+    "pinyin-pro": "^3.19.6",
     "reflect-metadata": "^0.1.13",
     "retry-as-promised": "^7.0.4",
     "rxjs": "^7.8.1",

@@ -1,4 +1,3 @@
-import { AssetType } from '@/common/typings/asset';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
@@ -12,8 +11,9 @@ export class AssetsTagEntity extends BaseEntity {
   @Column()
   name: string;
 
-  @Column({
-    type: 'varchar',
-  })
-  type: AssetType;
+  @Column()
+  color: string;
+
+  @Column()
+  _pinyin: string;
 }
