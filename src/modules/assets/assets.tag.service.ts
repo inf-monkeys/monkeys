@@ -1,3 +1,4 @@
+import { AssetType } from '@/common/typings/asset';
 import { AssetsCommonRepository } from '@/database/repositories/assets-common.repository';
 import { Injectable } from '@nestjs/common';
 
@@ -22,5 +23,13 @@ export class AssetsTagService {
 
   public async deleteTag(teamId: string, tagId: string) {
     return await this.assetsCommonRepository.deleteTag(teamId, tagId);
+  }
+
+  public async addTagsToAsset(teamId: string, assetType: AssetType, assetId: string, tagIds: string[]) {
+    return await this.assetsCommonRepository.addTagsToAsset(teamId, assetType, assetId, tagIds);
+  }
+
+  public async removeAssetTags(teamId: string, assetType: AssetType, assetId: string, tagIds: string[]) {
+    return await this.assetsCommonRepository.removeAssetTags(teamId, assetType, assetId, tagIds);
   }
 }

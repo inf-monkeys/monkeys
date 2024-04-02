@@ -1,3 +1,4 @@
+import { AssetType } from '@/common/typings/asset';
 import { BlockDefProperties, MonkeyTaskDefTypes } from '@inf-monkeys/vines';
 import { Column, Entity } from 'typeorm';
 import { BaseAssetEntity } from '../assets/base-asset';
@@ -46,6 +47,8 @@ export interface WorkflowOutputValue {
 
 @Entity({ name: 'workflow_metadatas' })
 export class WorkflowMetadataEntity extends BaseAssetEntity {
+  assetType: AssetType = 'workflow';
+
   @Column({
     name: 'workflow_id',
   })
@@ -115,4 +118,8 @@ export class WorkflowMetadataEntity extends BaseAssetEntity {
     default: false,
   })
   hidden?: boolean;
+
+  public getAssetId() {
+    return this.workflowId;
+  }
 }

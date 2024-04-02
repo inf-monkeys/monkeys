@@ -1,10 +1,13 @@
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
+import { AssetType } from '@/common/typings/asset';
 import { IRequest } from '@/common/typings/request';
 import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AssetsTagService } from './assets.tag.service';
+import { AddTagToAssetDto } from './req/add-tag-to-asset.dto';
 import { CreateTagDto } from './req/create-tag.dto';
+import { RemoveAssetTags } from './req/remove-asset-tags.dto';
 import { UpdateTagDto } from './req/update-tag.dto';
 
 @Controller('assets')
@@ -25,31 +28,41 @@ export class AssetsTagController {
   }
 
   @Post('/tags')
-  async createTag(@Req() request: IRequest, @Body() body: CreateTagDto) {
-    const { teamId } = request;
+  async createTag(@Req() req: IRequest, @Body() body: CreateTagDto) {
+    const { teamId } = req;
     const { name, color } = body;
-    if (typeof name !== 'string' || !name.trim()) {
-      throw new Error('请输入标签名称');
-    }
-    if (typeof color !== 'string' || !color.trim()) {
-      throw new Error('请输入标签颜色');
-    }
     const data = await this.service.createTag(teamId, name, color);
     return new SuccessResponse({ data });
   }
 
   @Put('/tags/:tagId')
-  async updateTag(@Req() request: IRequest, @Param('tagId') tagId: string, @Body() body: UpdateTagDto) {
-    const { teamId } = request;
+  async updateTag(@Req() req: IRequest, @Param('tagId') tagId: string, @Body() body: UpdateTagDto) {
+    const { teamId } = req;
     const { name, color } = body;
     const data = await this.service.updateTag(teamId, tagId, name, color);
     return new SuccessResponse({ data });
   }
 
   @Delete('/tags/:tagId')
-  async deeteTag(@Req() request: IRequest, @Param('tagId') tagId: string) {
-    const { teamId } = request;
+  async deeteTag(@Req() req: IRequest, @Param('tagId') tagId: string) {
+    const { teamId } = req;
     const data = await this.service.deleteTag(teamId, tagId);
+    return new SuccessResponse({ data });
+  }
+
+  @Put('/:assetType/:assetId/tags')
+  public async addTagsToAsset(@Req() req: IRequest, @Param('assetType') assetType: AssetType, @Param('assetId') assetId: string, @Body() body: AddTagToAssetDto) {
+    const { teamId } = req;
+    const { tagIds = [] } = body;
+    const data = await this.service.addTagsToAsset(teamId, assetType, assetId, tagIds);
+    return new SuccessResponse({ data });
+  }
+
+  @Delete('/:assetType/:assetId/tags')
+  public async removeAssetTags(@Req() req: IRequest, @Param('assetType') assetType: AssetType, @Param('assetId') assetId: string, @Body() body: RemoveAssetTags) {
+    const { teamId } = req;
+    const { tagIds } = body;
+    const data = await this.service.removeAssetTags(teamId, assetType, assetId, tagIds);
     return new SuccessResponse({ data });
   }
 }

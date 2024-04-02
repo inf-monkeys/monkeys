@@ -4,6 +4,7 @@ import { flatTasks } from '@/common/utils/conductor';
 import { extractAssetFromZip } from '@/common/utils/zip-asset';
 import { ValidationIssueType, WorkflowMetadataEntity, WorkflowOutputValue, WorkflowValidationIssue } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
+import { AssetsCommonRepository } from '@/database/repositories/assets-common.repository';
 import { WorkflowTask } from '@inf-monkeys/conductor-javascript';
 import { AssetType, BlockDefProperties, BlockType, MonkeyTaskDefTypes } from '@inf-monkeys/vines';
 import { Injectable, NotFoundException } from '@nestjs/common';
@@ -28,6 +29,7 @@ export class WorkflowCrudService {
     private readonly conductorService: ConductorService,
     private readonly workflowRepository: WorkflowRepository,
     private readonly workflowValidateService: WorkflowValidateService,
+    private readonly assetsCommonRepository: AssetsCommonRepository,
   ) {}
 
   public async getWorkflowDef(teamId: string, workflowId: string, version?: number): Promise<WorkflowMetadataEntity> {
@@ -44,7 +46,15 @@ export class WorkflowCrudService {
   }
 
   public async listWorkflows(teamId: string, dto: ListDto) {
-    return await this.workflowRepository.listWorkflows(teamId, dto);
+    const { list, totalCount } = await this.workflowRepository.listWorkflows(teamId, dto);
+    return {
+      totalCount,
+      list: await this.assetsCommonRepository.fillAdditionalInfoList(list, {
+        withUser: true,
+        withTeam: true,
+        withTags: true,
+      }),
+    };
   }
 
   public async createWorkflowDef(teamId: string, userId: string, data: CreateWorkflowData, options?: CreateWorkflowOptions) {

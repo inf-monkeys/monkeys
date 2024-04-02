@@ -1,3 +1,4 @@
+import { AssetType } from '@/common/typings/asset';
 import { Column, Entity } from 'typeorm';
 import { BaseAssetEntity } from '../base-asset';
 
@@ -16,6 +17,8 @@ export type MediaImageParams = {
 
 @Entity({ name: 'media_files' })
 export class MediaFileEntity extends BaseAssetEntity {
+  assetType: AssetType = 'media-file';
+
   @Column({
     type: 'varchar',
   })

@@ -1,3 +1,4 @@
+import { AssetType } from '@/common/typings/asset';
 import { Column } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
@@ -12,6 +13,8 @@ export class AssetPublishConfig {
 }
 
 export class BaseAssetEntity extends BaseEntity {
+  assetType: AssetType;
+
   @Column({
     name: 'team_id',
   })
@@ -55,4 +58,8 @@ export class BaseAssetEntity extends BaseEntity {
     nullable: true,
   })
   publishConfig?: AssetPublishConfig;
+
+  public getAssetId(): string {
+    return this.id.toHexString();
+  }
 }

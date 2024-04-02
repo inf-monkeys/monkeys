@@ -3,17 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CanvasApplicationEntity } from '../entities/assets/canvas/canvas';
 import { AbstractAssetRepository } from './assets-abstract.repository';
-import { TeamRepository } from './team.repository';
-import { UserRepository } from './user.repository';
+import { AssetsCommonRepository } from './assets-common.repository';
 
 @Injectable()
 export class CanvasAssetRepositroy extends AbstractAssetRepository<CanvasApplicationEntity> {
   constructor(
     @InjectRepository(CanvasApplicationEntity)
     public readonly assetRepository: Repository<CanvasApplicationEntity>,
-    public readonly userRepository: UserRepository,
-    public readonly teamRepository: TeamRepository,
+    public readonly assetCommonRepository: AssetsCommonRepository,
   ) {
-    super(assetRepository, userRepository, teamRepository);
+    super(assetRepository, assetCommonRepository);
   }
 }

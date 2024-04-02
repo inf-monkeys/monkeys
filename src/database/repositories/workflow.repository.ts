@@ -55,7 +55,7 @@ export class WorkflowRepository {
     },
   ) {
     const { name, description, iconUrl, tasks, variables, output } = data;
-    const entity: WorkflowMetadataEntity = {
+    await this.workflowMetadataRepository.save({
       id: new ObjectId(),
       createdTimestamp: Date.now(),
       updatedTimestamp: Date.now(),
@@ -70,9 +70,8 @@ export class WorkflowRepository {
       tasks,
       variables,
       output,
-    };
-    await this.workflowMetadataRepository.save(entity);
-    return entity;
+    });
+    return await this.getWorkflowById(workflowId, version);
   }
 
   public async getWorkflowById(workflowId: string, version: number) {

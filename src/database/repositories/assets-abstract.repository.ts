@@ -1,51 +1,17 @@
 import { ListDto } from '@/common/dto/list.dto';
-import { AssetWithIdentity, ConvertListDtoToDbQueryOptions } from '@/common/typings/asset';
+import { ConvertListDtoToDbQueryOptions } from '@/common/typings/asset';
 import { IRequest } from '@/common/typings/request';
-import { getPublicProfile } from '@/common/utils/user';
 import { ForbiddenException } from '@nestjs/common';
-import { uniq } from 'lodash';
 import { ObjectId } from 'mongodb';
 import { FindManyOptions, FindOptionsOrder, FindOptionsWhere, Repository } from 'typeorm';
 import { AssetPublishConfig, AssetPublishPolicy, BaseAssetEntity } from '../entities/assets/base-asset';
-import { TeamRepository } from './team.repository';
-import { UserRepository } from './user.repository';
+import { AssetsCommonRepository, AssetsFillAdditionalInfoOptions } from './assets-common.repository';
 
 export class AbstractAssetRepository<E extends BaseAssetEntity> {
   constructor(
     public readonly repository: Repository<E>,
-    public readonly userRepository: UserRepository,
-    public readonly teamRepository: TeamRepository,
+    public readonly assetCommonRepository: AssetsCommonRepository,
   ) {}
-
-  private async _withIdentity(item: E): Promise<AssetWithIdentity<E>> {
-    if (!item) return null;
-    const { teamId, creatorUserId } = item as BaseAssetEntity;
-    let userProfile = {};
-    if (creatorUserId) {
-      const user = await this.userRepository.findById(creatorUserId);
-      userProfile = getPublicProfile(user);
-    }
-    const teamProfile = await this.teamRepository.getTeamById(teamId);
-
-    return {
-      ...item,
-      user: userProfile || {},
-      team: teamProfile || {},
-    };
-  }
-
-  private async _withIdentities(list: E[]): Promise<AssetWithIdentity<E>[]> {
-    const teamIds = uniq((list as E[]).map((l) => l.teamId).filter((l) => l));
-    const userIds = uniq((list as E[]).map((l) => l.creatorUserId).filter((l) => l));
-    const usersMap = await this.userRepository.getUsersByIdsAsMap(userIds);
-    const teamHash = await this.teamRepository.getTeamsByIdsAsMap(teamIds);
-
-    return list.map<AssetWithIdentity<E>>((item) => ({
-      ...item,
-      user: usersMap?.[item.creatorUserId] ? getPublicProfile(usersMap?.[item.creatorUserId]) : {},
-      team: teamHash?.[item.teamId] ?? {},
-    }));
-  }
 
   public _buildDbQuery(dto: ListDto, options: ConvertListDtoToDbQueryOptions = {}, request?: IRequest): FindManyOptions<E> {
     const { filter = {}, orderBy = 'DESC', orderColumn = 'createdTimestamp', page = 1, limit = 24 } = dto;
@@ -135,7 +101,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     return condition as unknown as FindManyOptions<E>;
   }
 
-  public async getAssetById(id: string, additionQuery: Record<string, any> = {}, withIdentity = true): Promise<E | undefined> {
+  public async getAssetById(id: string, additionQuery: Record<string, any> = {}, options?: AssetsFillAdditionalInfoOptions): Promise<E | undefined> {
     const entity = await this.repository.findOne({
       where: {
         isDeleted: false,
@@ -143,10 +109,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
         ...additionQuery,
       } as Partial<E> as FindOptionsWhere<E>,
     });
-    if (withIdentity) {
-      const dataWithIdentity = await this._withIdentity(entity);
-      return dataWithIdentity;
-    }
+    return await this.assetCommonRepository.fillAdditionalInfo(entity, options);
   }
 
   public async listAssets(dto: ListDto, request: IRequest | null = null, withIdentity = true, options: ConvertListDtoToDbQueryOptions = {}) {
@@ -178,7 +141,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     );
     const [data, total] = await this.repository.findAndCount(query);
     if (withIdentity) {
-      return { data: await this._withIdentities(data), total, page: +page, limit: +limit };
+      return { data: await this.assetCommonRepository.fillAdditionalInfoList(data), total, page: +page, limit: +limit };
     }
     return { data, total, page: +page, limit: +limit };
   }

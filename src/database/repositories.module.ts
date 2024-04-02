@@ -9,6 +9,7 @@ import { MediaFileAssetRepositroy } from './repositories/assets-media-file.repos
 import { SdModelAssetRepositroy } from './repositories/assets-sd-model.repository';
 import { TableCollectionAssetRepositroy } from './repositories/assets-table-collection.repository';
 import { TextCollectionAssetRepositroy } from './repositories/assets-text-collections.repository';
+import { WorkflowAssetRepositroy } from './repositories/assets-workflow.respository';
 import { CredentialsRepository } from './repositories/credential.repository';
 import { SystemConfigurationRepository } from './repositories/system-configuration.repository';
 import { TeamRepository } from './repositories/team.repository';
@@ -33,6 +34,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     TextCollectionAssetRepositroy,
     TableCollectionAssetRepositroy,
     MediaFileAssetRepositroy,
+    WorkflowAssetRepositroy,
   ],
   exports: [
     ToolsRepository,
@@ -49,6 +51,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     TextCollectionAssetRepositroy,
     TableCollectionAssetRepositroy,
     MediaFileAssetRepositroy,
+    WorkflowAssetRepositroy,
   ],
   imports: [TypeOrmModule.forFeature(entities)],
 })

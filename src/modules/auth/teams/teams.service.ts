@@ -16,4 +16,8 @@ export class TeamsService {
   public async createTeam(userId: string, teamName: string, description?: string, logoUrl?: string, isBuiltIn = false, workflowTaskNamePrefix?: string, createMethod: 'self' | 'import' = 'self') {
     return await this.teamRepository.createTeam(userId, teamName, description, logoUrl, isBuiltIn, createMethod);
   }
+
+  public async getTeamMembers(teamId: string) {
+    return await this.teamRepository.getTeamMembers(teamId);
+  }
 }

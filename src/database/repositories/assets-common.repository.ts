@@ -1,14 +1,25 @@
-import { AssetType } from '@/common/typings/asset';
+import { AssetType, AssetWithAdditionalInfo } from '@/common/typings/asset';
+import { getPublicProfile } from '@/common/utils/user';
 import { CreateAssetFilterDto } from '@/modules/assets/req/create-asset-filter.dto';
 import { UpdateAssetFilterDto } from '@/modules/assets/req/update-asset-filter.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { isNil, pickBy } from 'lodash';
+import { isNil, pickBy, uniq } from 'lodash';
 import { ObjectId } from 'mongodb';
 import { pinyin } from 'pinyin-pro';
-import { DeepPartial, MongoRepository } from 'typeorm';
+import { DeepPartial, In, MongoRepository } from 'typeorm';
 import { AssetFilterEntity } from '../entities/assets/asset-filter';
-import { AssetsTagEntity } from '../entities/assets/asset-tags';
+import { AssetsTagEntity } from '../entities/assets/asset-tag-definitions';
+import { AssetsTagRelationsEntity } from '../entities/assets/asset-tags';
+import { BaseAssetEntity } from '../entities/assets/base-asset';
+import { TeamRepository } from './team.repository';
+import { UserRepository } from './user.repository';
+
+export interface AssetsFillAdditionalInfoOptions {
+  withUser?: boolean;
+  withTeam?: boolean;
+  withTags?: boolean;
+}
 
 @Injectable()
 export class AssetsCommonRepository {
@@ -16,7 +27,11 @@ export class AssetsCommonRepository {
     @InjectRepository(AssetFilterEntity)
     private readonly assetsFilterRepository: MongoRepository<AssetFilterEntity>,
     @InjectRepository(AssetsTagEntity)
-    private readonly assetTagRepo: MongoRepository<AssetsTagEntity>,
+    private readonly assetTagDefinitioRepo: MongoRepository<AssetsTagEntity>,
+    @InjectRepository(AssetsTagRelationsEntity)
+    private readonly assetsTagRelationsRepo: MongoRepository<AssetsTagRelationsEntity>,
+    private readonly userRepository: UserRepository,
+    private readonly teamRepository: TeamRepository,
   ) {}
 
   public async listFilters(teamId: string, assetType: AssetType) {
@@ -85,7 +100,7 @@ export class AssetsCommonRepository {
   }
 
   public async listTags(teamId: string) {
-    return await this.assetTagRepo.find({
+    return await this.assetTagDefinitioRepo.find({
       where: {
         teamId,
         isDeleted: false,
@@ -93,8 +108,11 @@ export class AssetsCommonRepository {
     });
   }
 
-  public async createTag(teamId: string, name: string, color: string) {
-    const exists = await this.assetTagRepo.findOne({
+  public async createTag(teamId: string, name: string, color?: string) {
+    if (typeof name !== 'string' || !name.trim()) {
+      throw new Error('请输入标签名称');
+    }
+    const exists = await this.assetTagDefinitioRepo.findOne({
       where: {
         teamId,
         name,
@@ -102,9 +120,9 @@ export class AssetsCommonRepository {
       },
     });
     if (exists) {
-      throw new Error('同名 tag 已存在');
+      return exists;
     }
-    await this.assetTagRepo.save({
+    const entity = {
       id: new ObjectId(),
       isDeleted: false,
       createdTimestamp: Date.now(),
@@ -113,7 +131,9 @@ export class AssetsCommonRepository {
       name,
       color,
       _pinyin: pinyin(name, { toneType: 'none' }).replace(/\s/g, ''),
-    });
+    };
+    await this.assetTagDefinitioRepo.save(entity);
+    return entity;
   }
 
   public async updateTag(
@@ -125,7 +145,7 @@ export class AssetsCommonRepository {
     },
   ) {
     const { name, color } = updates;
-    const exists = await this.assetTagRepo.findOne({
+    const exists = await this.assetTagDefinitioRepo.findOne({
       where: {
         teamId,
         id: new ObjectId(tagId),
@@ -137,7 +157,7 @@ export class AssetsCommonRepository {
     }
 
     if (updates.name && updates.name !== exists.name) {
-      const nameConfilct = await this.assetTagRepo.exists({
+      const nameConfilct = await this.assetTagDefinitioRepo.exists({
         where: {
           teamId,
           name,
@@ -160,7 +180,7 @@ export class AssetsCommonRepository {
       toUpdates.color = color;
     }
 
-    await this.assetTagRepo.updateOne(
+    await this.assetTagDefinitioRepo.updateOne(
       {
         id: new ObjectId(tagId),
       },
@@ -169,7 +189,7 @@ export class AssetsCommonRepository {
   }
 
   public async deleteTag(teamId: string, tagId: string) {
-    await this.assetTagRepo.updateOne(
+    await this.assetTagDefinitioRepo.updateOne(
       {
         teamId,
         id: new ObjectId(tagId),
@@ -178,5 +198,132 @@ export class AssetsCommonRepository {
         isDeleted: true,
       },
     );
+  }
+
+  public async addTagsToAsset(teamId: string, assetType: AssetType, assetId: string, tagIds: string[]) {
+    for (const tagId of tagIds) {
+      const exists = await this.assetsTagRelationsRepo.findOne({
+        where: {
+          assetType,
+          assetId,
+          tagId,
+          isDeleted: false,
+        },
+      });
+      if (!exists) {
+        await this.assetsTagRelationsRepo.save({
+          id: new ObjectId(),
+          isDeleted: false,
+          createdTimestamp: Date.now(),
+          updatedTimestamp: Date.now(),
+          teamId,
+          assetType,
+          assetId,
+          tagId,
+        });
+      }
+    }
+  }
+
+  public async removeAssetTags(teamId: string, assetType: AssetType, assetId: string, tagIds: string[]) {
+    if (tagIds.length) {
+      await this.assetsTagRelationsRepo.update(
+        {
+          teamId,
+          assetType,
+          assetId,
+        },
+        {
+          isDeleted: true,
+        },
+      );
+    }
+  }
+
+  public async fillAdditionalInfo<E extends BaseAssetEntity>(item: E, options?: AssetsFillAdditionalInfoOptions): Promise<AssetWithAdditionalInfo<E>> {
+    const { withTeam = false, withUser = false, withTags = false } = options || {};
+    const result: AssetWithAdditionalInfo<E> = {
+      ...item,
+    };
+    if (!item) return null;
+    const { teamId, creatorUserId } = item as E;
+
+    if (withUser) {
+      if (creatorUserId) {
+        const user = await this.userRepository.findById(creatorUserId);
+        if (user) {
+          const userProfile = getPublicProfile(user);
+          result.user = userProfile;
+        } else {
+          result.user = {};
+        }
+      } else {
+        result.user = {};
+      }
+    }
+
+    if (withTeam) {
+      const teamProfile = await this.teamRepository.getTeamById(teamId);
+      result.team = teamProfile;
+    }
+
+    return result;
+  }
+
+  public async fillAdditionalInfoList<E extends BaseAssetEntity>(list: E[], options?: AssetsFillAdditionalInfoOptions): Promise<AssetWithAdditionalInfo<E>[]> {
+    const { withTeam = false, withUser = false, withTags = false } = options || {};
+
+    const teamIds = uniq((list as E[]).map((l) => l.teamId).filter((l) => l));
+    const userIds = uniq((list as E[]).map((l) => l.creatorUserId).filter((l) => l));
+    const assetIds = uniq(list.map((l) => l.getAssetId()).flat());
+
+    const assetIdToTags: { [x: string]: AssetsTagEntity[] } = {};
+
+    if (withTags) {
+      const allTagRels =
+        withTags && assetIds.length
+          ? await this.assetsTagRelationsRepo.find({
+              where: list.map((x) => ({
+                assetType: x.assetType,
+                assetId: x.getAssetId(),
+                isDeleted: false,
+              })),
+            })
+          : [];
+      const allTagIds = uniq(allTagRels.map((x) => x.tagId));
+      const allTagDefs =
+        withTags && allTagIds.length
+          ? await this.assetTagDefinitioRepo.find({
+              where: {
+                id: In(allTagIds.map((x) => new ObjectId(x))),
+              },
+            })
+          : [];
+      for (const item of list) {
+        const itemTagIds = allTagRels.filter((x) => x.assetId === item.getAssetId()).map((x) => x.tagId);
+        assetIdToTags[item.getAssetId()] = allTagDefs.filter((x) => itemTagIds.includes(x.id.toHexString()));
+      }
+    }
+
+    const teamHash = withTeam ? await this.teamRepository.getTeamsByIdsAsMap(teamIds) : null;
+    const userHash = withTeam ? await this.userRepository.getUsersByIdsAsMap(userIds) : null;
+
+    const result: Array<AssetWithAdditionalInfo<E>> = [];
+    for (const originalItem of list) {
+      const item: AssetWithAdditionalInfo<E> = {
+        ...originalItem,
+      };
+      if (withUser) {
+        item.user = userHash?.[originalItem.creatorUserId] ? getPublicProfile(userHash?.[originalItem.creatorUserId]) : {};
+      }
+      if (withTeam) {
+        item.team = teamHash?.[originalItem.teamId] ?? {};
+      }
+      if (withTags) {
+        item.assetTags = assetIdToTags[originalItem.getAssetId()];
+      }
+      result.push(item);
+    }
+    return result;
   }
 }

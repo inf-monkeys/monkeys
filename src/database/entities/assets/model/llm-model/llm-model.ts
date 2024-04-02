@@ -1,8 +1,11 @@
+import { AssetType } from '@/common/typings/asset';
 import { BaseAssetEntity } from '@/database/entities/assets/base-asset';
 import { Column, Entity } from 'typeorm';
 
 @Entity({ name: 'llm_models' })
 export class LlmModelEntity extends BaseAssetEntity {
+  assetType: AssetType = 'llm-model';
+
   @Column({
     name: 'base_model',
   })

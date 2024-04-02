@@ -3,17 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TextCollectionEntity } from '../entities/assets/collection/text-collection/text-collection';
 import { AbstractAssetRepository } from './assets-abstract.repository';
-import { TeamRepository } from './team.repository';
-import { UserRepository } from './user.repository';
+import { AssetsCommonRepository } from './assets-common.repository';
 
 @Injectable()
 export class TextCollectionAssetRepositroy extends AbstractAssetRepository<TextCollectionEntity> {
   constructor(
     @InjectRepository(TextCollectionEntity)
     public readonly assetRepository: Repository<TextCollectionEntity>,
-    public readonly userRepository: UserRepository,
-    public readonly teamRepository: TeamRepository,
+    public readonly assetCommonRepository: AssetsCommonRepository,
   ) {
-    super(assetRepository, userRepository, teamRepository);
+    super(assetRepository, assetCommonRepository);
   }
 }

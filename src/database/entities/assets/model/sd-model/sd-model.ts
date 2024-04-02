@@ -1,3 +1,4 @@
+import { AssetType } from '@/common/typings/asset';
 import { BaseAssetEntity } from '@/database/entities/assets/base-asset';
 import { Column, Entity } from 'typeorm';
 
@@ -19,6 +20,8 @@ export interface XYZTestResult {
 
 @Entity({ name: 'sd_models' })
 export class SdModelEntity extends BaseAssetEntity {
+  assetType: AssetType = 'sd-model';
+
   @Column({
     type: 'varchar',
   })

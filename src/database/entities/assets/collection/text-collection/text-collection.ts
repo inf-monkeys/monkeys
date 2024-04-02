@@ -1,3 +1,4 @@
+import { AssetType } from '@/common/typings/asset';
 import { BaseAssetEntity } from '@/database/entities/assets/base-asset';
 import { Column, Entity } from 'typeorm';
 
@@ -11,6 +12,8 @@ export type VectorCollectionField = {
 
 @Entity({ name: 'text_collections' })
 export class TextCollectionEntity extends BaseAssetEntity {
+  assetType: AssetType = 'text-collection';
+
   @Column({
     name: 'display_name',
   })

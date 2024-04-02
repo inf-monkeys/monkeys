@@ -15,7 +15,8 @@ import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-clas
 import { ApiKeyEntity } from './entities/apikey/apikey';
 import { AssetAuthorizationEntity } from './entities/assets/asset-authorization';
 import { AssetFilterEntity } from './entities/assets/asset-filter';
-import { AssetsTagEntity } from './entities/assets/asset-tags';
+import { AssetsTagEntity } from './entities/assets/asset-tag-definitions';
+import { AssetsTagRelationsEntity } from './entities/assets/asset-tags';
 import { CanvasApplicationEntity } from './entities/assets/canvas/canvas';
 import { TableCollectionEntity } from './entities/assets/collection/table-collection/table-collection';
 import { TextCollectionEntity } from './entities/assets/collection/text-collection/text-collection';
@@ -53,6 +54,7 @@ export const entities: EntityClassOrSchema[] = [
   AssetsTagEntity,
   CanvasApplicationEntity,
   AssetAuthorizationEntity,
+  AssetsTagRelationsEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({

@@ -3,17 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LlmModelEntity } from '../entities/assets/model/llm-model/llm-model';
 import { AbstractAssetRepository } from './assets-abstract.repository';
-import { TeamRepository } from './team.repository';
-import { UserRepository } from './user.repository';
+import { AssetsCommonRepository } from './assets-common.repository';
 
 @Injectable()
 export class LlmModelAssetRepositroy extends AbstractAssetRepository<LlmModelEntity> {
   constructor(
     @InjectRepository(LlmModelEntity)
     public readonly assetRepository: Repository<LlmModelEntity>,
-    public readonly userRepository: UserRepository,
-    public readonly teamRepository: TeamRepository,
+    public readonly assetCommonRepository: AssetsCommonRepository,
   ) {
-    super(assetRepository, userRepository, teamRepository);
+    super(assetRepository, assetCommonRepository);
   }
 }

@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId } from 'mongodb';
 import { In, Repository } from 'typeorm';
 import { ApikeyRepository } from './apikey.repository';
+import { UserRepository } from './user.repository';
 
 @Injectable()
 export class TeamRepository {
@@ -15,6 +16,7 @@ export class TeamRepository {
     @InjectRepository(UserTeamRelationshipEntity)
     private readonly userTeamRelationRepository: Repository<UserTeamRelationshipEntity>,
     private readonly apiKeyRepository: ApikeyRepository,
+    private readonly userRepository: UserRepository,
   ) {}
 
   public async getTeamById(id: string) {
@@ -113,5 +115,19 @@ export class TeamRepository {
       },
     });
     return !!entity;
+  }
+
+  public async getTeamMembers(teamId: string) {
+    const relationships = await this.userTeamRelationRepository.find({
+      where: {
+        teamId,
+        isDeleted: false,
+      },
+    });
+    const userIds = relationships.map((x) => x.userId);
+    if (!userIds.length) {
+      return [];
+    }
+    return await this.userRepository.findByIds(userIds);
   }
 }

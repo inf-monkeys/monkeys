@@ -43,6 +43,15 @@ export class UserRepository {
     });
   }
 
+  public async findByIds(userIds: string[]) {
+    return await this.userRepository.find({
+      where: {
+        id: In(userIds.map((x) => new ObjectId(x))),
+        isDeleted: false,
+      },
+    });
+  }
+
   public async findByEmail(email: string) {
     return await this.userRepository.findOne({
       where: {
@@ -158,6 +167,7 @@ export class UserRepository {
       const users = await this.userRepository.find({
         where: {
           id: In(ids.map((x) => new ObjectId(x))),
+          isDeleted: false,
         },
       });
       userHash = getMap(users, (u) => u.id.toHexString());

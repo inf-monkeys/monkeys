@@ -1,19 +1,29 @@
+import { AssetType } from '@/common/typings/asset';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
-@Entity({ name: 'asset_tags' })
-export class AssetsTagEntity extends BaseEntity {
+@Entity({ name: 'asset_tag_relations' })
+export class AssetsTagRelationsEntity extends BaseEntity {
   @Column({
     name: 'team_id',
   })
   teamId: string;
 
-  @Column()
-  name: string;
+  @Column({
+    name: 'tag_id',
+    type: 'varchar',
+  })
+  tagId: string;
 
-  @Column()
-  color: string;
+  @Column({
+    name: 'asset_type',
+    type: 'varchar',
+  })
+  assetType: AssetType;
 
-  @Column()
-  _pinyin: string;
+  @Column({
+    name: 'asset_id',
+    type: 'varchar',
+  })
+  assetId: string;
 }

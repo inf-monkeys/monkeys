@@ -1,9 +1,12 @@
+import { AssetType } from '@/common/typings/asset';
 import { CanvasApplication } from '@/common/typings/canvas';
 import { Column, Entity } from 'typeorm';
 import { BaseAssetEntity } from '../base-asset';
 
 @Entity({ name: 'canvas_applications' })
 export class CanvasApplicationEntity extends BaseAssetEntity {
+  assetType: AssetType = 'canvas';
+
   @Column({
     name: 'app_name',
     type: 'varchar',
