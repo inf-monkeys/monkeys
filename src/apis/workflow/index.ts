@@ -2,9 +2,11 @@ import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
 import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import FileSaver from 'file-saver';
 import qs from 'qs';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
+import { IWorkflowRelatedAssetResult } from '@/apis/ugc/asset-typings.ts';
 import { WorkflowListQuery } from '@/apis/workflow/typings.ts';
 import { IWorkflowValidation } from '@/apis/workflow/validation/typings.ts';
 
@@ -18,6 +20,19 @@ export const getWorkflow = (workflowId: string) => vinesFetcher<MonkeyWorkflow |
 
 export const useWorkflowList = (query: WorkflowListQuery = {}) =>
   useSWR<MonkeyWorkflow[] | undefined>(`/api/workflow/list?${qs.stringify(query)}`, vinesFetcher());
+
+export const createWorkflow = (workflowParams: Partial<MonkeyWorkflow>) =>
+  vinesFetcher<{ workflowId: string }>({ method: 'POST', simple: true })('/api/workflow', workflowParams);
+
+export const cloneWorkflow = (workflowId: string) =>
+  vinesFetcher<{
+    workflowId: string;
+  }>({ method: 'POST' })(`/api/workflow/${workflowId}/clone`);
+
+export const deleteWorkflow = (workflowId: string) =>
+  vinesFetcher({
+    method: 'DELETE',
+  })(`/api/workflow/${workflowId}`);
 
 export const updateWorkflow = (
   apikey: string,
@@ -40,3 +55,22 @@ export const useUpdateWorkflow = (apikey: string, workflowId: string) =>
     string | null,
     Partial<MonkeyWorkflow>
   >(workflowId ? `/api/workflow/${workflowId}` : null, vinesFetcher({ method: 'PUT', apikey }));
+
+export const useWorkflowRelatedAssets = (workflowId?: string, version?: number) =>
+  useSWR<IWorkflowRelatedAssetResult | undefined>(
+    workflowId ? `/api/workflow/${workflowId}/related-assets${version ? `?version=${version}` : ''}` : null,
+    vinesFetcher(),
+  );
+
+export const exportWorkflow = async (workflowId: string, name: string, version?: number) =>
+  vinesFetcher({
+    method: 'GET',
+    simple: true,
+    responseResolver: async (r) => {
+      FileSaver.saveAs(await r.blob(), version ? `${name}(版本${version}).zip` : `${name}(全部版本).zip`);
+    },
+  })(
+    version
+      ? `/api/workflow/${workflowId}/export?version=${version}&exportAssets=1`
+      : `/api/workflow/${workflowId}/export?exportAssets=1`,
+  );

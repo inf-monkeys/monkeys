@@ -18,7 +18,7 @@ export const ExecutionRawDataDisplay: React.FC<IExecutionRawDataDisplayProps> = 
       {externalStorageDataUrl ? (
         <div className="vines-center size-full flex-col gap-2">
           <p className="font-bold">内容过大，请到 OSS 下载查看</p>
-          <Button variant="outline" size="small" onClick={() => window.open(externalStorageDataUrl, '_blank')}>
+          <Button variant="outline" size="small" onClick={() => open(externalStorageDataUrl, '_blank')}>
             点击查看
           </Button>
         </div>

@@ -16,7 +16,7 @@ export const VinesAbstractUrl: React.FC<IVinesAbstractUrlProps> = ({ children })
       <TooltipTrigger asChild>
         <div
           className="flex items-center gap-1 underline hover:decoration-2 [&>*]:cursor-pointer"
-          onClick={() => window.open(children?.toString(), '_blank')}
+          onClick={() => open(children?.toString(), '_blank')}
         >
           <ExternalLink size={14} className="-mb-1" />
           <Label>{children?.toString()}</Label>
