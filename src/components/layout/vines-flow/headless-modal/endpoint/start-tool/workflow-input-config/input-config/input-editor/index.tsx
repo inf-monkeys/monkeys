@@ -97,7 +97,6 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
 
     if (finalVariable.type === 'boolean') {
       if (multipleValues) {
-        console.log(Default);
         set(
           finalVariable,
           'default',

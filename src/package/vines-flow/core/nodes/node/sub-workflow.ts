@@ -1,6 +1,7 @@
 import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import { type SubWorkflowTaskDef, TaskType } from '@io-orkes/conductor-javascript';
-import { get, has, set } from 'lodash';
+import equal from 'fast-deep-equal/es6';
+import { get, has, omit, set } from 'lodash';
 
 import { getWorkflowExecution } from '@/apis/workflow/execution';
 import { VinesCore } from '@/package/vines-flow/core';
@@ -13,7 +14,7 @@ import {
   VinesNodeExecutionTask,
   VinesTask,
 } from '@/package/vines-flow/core/nodes/typings.ts';
-import { IVinesInsertChildParams } from '@/package/vines-flow/core/typings.ts';
+import { IVinesInsertChildParams, VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
 import { getBoundary } from '@/package/vines-flow/core/utils.ts';
 
 export type VinesSubWorkflowTaskDef = SubWorkflowTaskDef & {
@@ -286,23 +287,43 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
   }
   // endregion
 
-  override async updateStatus(task: VinesNodeExecutionTask): Promise<void> {
+  private _prevExecutionData: Partial<VinesWorkflowExecution> | undefined;
+  override async updateStatus(task: VinesNodeExecutionTask): Promise<boolean> {
     await super.updateStatus(task);
-    if (this.executionStatus === 'IN_PROGRESS' || this.executionStatus === 'COMPLETED') {
+    if (['IN_PROGRESS', 'COMPLETED', 'SCHEDULED'].includes(this.executionStatus ?? '')) {
       const instanceId = task.outputData?.subWorkflowId;
-      if (!instanceId) return;
+      if (!instanceId) return false;
       if (this?.childNodes?.[0]) {
         this.childNodes[0].executionStatus = 'IN_PROGRESS';
       }
 
       const data = await getWorkflowExecution(instanceId);
+      if (!data) return false;
+
+      const equalData = omit(data, [
+        'createTime',
+        'updateTime',
+        'startTime',
+        'workflowVersion',
+        'workflowName',
+        'workflowDefinition',
+        'startBy',
+        'triggerType',
+      ]);
+
+      const needRender = !equal(equalData, this._prevExecutionData);
+
       for (const _task of data?.tasks ?? []) {
         const taskId = _task.workflowTask?.taskReferenceName;
-        if (!taskId) return;
+        if (!taskId) continue;
         const childNode = this.findChildById(taskId);
         childNode?.updateStatus(_task);
       }
+      this._prevExecutionData = equalData;
+
+      return needRender;
     }
+    return false;
   }
 
   override checkChildren(path: VinesNode[] = []) {

@@ -648,7 +648,10 @@ export class VinesCore extends VinesTools(VinesBase) {
       if (!node) {
         continue;
       }
-      await node.updateStatus(task);
+
+      if ((await node.updateStatus(task)) && !render) {
+        render = true;
+      }
     }
 
     render && this.sendEvent('refresh');

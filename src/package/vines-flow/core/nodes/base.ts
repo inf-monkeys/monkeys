@@ -474,9 +474,10 @@ export class VinesNode<T extends VinesTask = VinesTask> {
     this.executionTask = this.defaultRunningTask;
   }
 
-  public async updateStatus(task: VinesNodeExecutionTask) {
+  public async updateStatus(task: VinesNodeExecutionTask): Promise<boolean> {
     this.executionTask = { ...task, originStatus: task.status };
     this.executionStatus = task.status;
+    return false;
   }
 
   private get defaultRunningTask(): VinesNodeExecutionTask {

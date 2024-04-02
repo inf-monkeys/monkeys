@@ -68,9 +68,9 @@ export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({ height, act
     <ScrollArea className="pr-3" style={{ height }}>
       <div className="flex flex-col gap-2">
         <AnimatePresence>
-          {tools.map(({ id, status, icon, name, customName, description, node }) => (
+          {tools.map(({ id, status, icon, name, customName, description, node }, i) => (
             <motion.div
-              key={id}
+              key={id + i}
               initial={{ opacity: 0, bottom: -30, marginTop: -12 }}
               animate={{ opacity: 1, bottom: 0, marginTop: 0 }}
               exit={{ opacity: 0, bottom: -30, marginTop: -12 }}
