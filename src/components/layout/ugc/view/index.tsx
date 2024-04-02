@@ -174,7 +174,7 @@ export const UgcView = <E extends object>({
       cell: ({ row }) =>
         RenderTags({
           assetType,
-          assetId: row.original._id,
+          assetId: row.original.id,
           assetTags: row.original.assetTags,
           mutate,
         }),

@@ -19,7 +19,7 @@ interface IChatSessionProps {
 }
 
 export const ChatSession: React.FC<IChatSessionProps> = ({ session, active, onClick, disableDelete, onDeleted }) => {
-  const { trigger } = useDeleteWorkflowChatSession(session._id);
+  const { trigger } = useDeleteWorkflowChatSession(session.id);
 
   const sessionDisplayName = session.displayName;
 

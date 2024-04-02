@@ -10,6 +10,8 @@ import { ISortConditionOrderBy, ISortConditionOrderColumn } from '@/components/l
 export interface IAssetTag {
   id: string;
   name: string;
+  _pinyin: string;
+  icon: string;
 }
 
 export type IAssetItem<T = object> = T & {
@@ -21,7 +23,7 @@ export type IAssetItem<T = object> = T & {
   creatorUserId?: string;
   team?: Partial<IVinesTeam>;
   user?: Partial<IVinesUser>;
-  assetTags?: string[];
+  assetTags?: IAssetTag[];
   assetType?: AssetType;
   isPresetAsset?: boolean;
   isPublicAsset?: boolean;

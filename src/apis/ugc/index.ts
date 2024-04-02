@@ -8,7 +8,7 @@ import { vinesFetcher } from '@/apis/fetcher.ts';
 import { IPaginationListData } from '@/apis/typings.ts';
 import { paginationWrapper } from '@/apis/wrapper.ts';
 
-import { IAssetItem, IListUgcDto, IUgcFilterRules } from './typings';
+import { IAssetItem, IAssetTag, IListUgcDto, IUgcFilterRules } from './typings';
 
 export const useUgcItems = <T extends object>(dto: IListUgcDto, url: string, method: 'GET' | 'POST' = 'GET') => {
   const swrUrl = method === 'GET' ? `${url}?${qs.stringify(dto, { encode: false })}` : url;
@@ -38,8 +38,8 @@ export const preloadUgcItems = <T extends object>(dto: IListUgcDto, url: string,
 export const useUgcWorkflows = (dto: IListUgcDto) => useUgcItems<MonkeyWorkflow>(dto, '/api/workflow/metadata');
 export const preloadUgcWorkflows = (dto: IListUgcDto) => preloadUgcItems<MonkeyWorkflow>(dto, '/api/workflow/metadata');
 
-export const useAssetTagList = (assetKey?: string) =>
-  useSWR<string[] | undefined>(assetKey ? `/api/assets/${assetKey}/tags` : null, vinesFetcher(), {
+export const useAssetTagList = () =>
+  useSWR<IAssetTag[] | undefined>(`/api/assets/tags`, vinesFetcher(), {
     refreshInterval: 600000,
   });
 
@@ -55,11 +55,15 @@ export const removeAssetFilterRules = (id: string) => {
   return vinesFetcher<boolean>({ method: 'DELETE' })(`/api/assets/filters/${id}`);
 };
 
-export const updateAssetItem = (type: AssetType, id: string, data: any) =>
+export const createTag = (name: string) => {
+  return vinesFetcher<IAssetTag>({ method: 'POST', simple: true })(`/api/assets/tags/`, { name });
+};
+
+export const updateAssetTag = (type: AssetType, id: string, data: any) =>
   vinesFetcher({
     method: 'PUT',
     simple: true,
   })(
-    `/api/assets/${type}/${id}`,
+    `/api/assets/${type}/${id}/tags`,
     _.pickBy(data, (v) => !_.isNil(v)),
   );
