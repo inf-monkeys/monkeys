@@ -51,11 +51,24 @@ export const executionWorkflowPause = (instanceId: string) =>
 export const executionWorkflowResume = (instanceId: string) =>
   vinesFetcher({ method: 'POST' })(`/api/workflow/executions/${instanceId}/resume`);
 
-export const useSearchWorkflowExecutions = () =>
+export const useMutationSearchWorkflowExecutions = () =>
   useSWRMutation<VinesWorkflowExecutionLists | undefined, unknown, string, IVinesSearchWorkflowExecutionsParams>(
     `/api/workflow/executions/search`,
     vinesFetcher({ method: 'POST' }),
   );
+export const useSearchWorkflowExecutions = (
+  params: IVinesSearchWorkflowExecutionsParams | null,
+  refreshInterval = 500,
+) =>
+  useSWR<VinesWorkflowExecutionLists | undefined>(
+    params ? ['/api/workflow/executions/search', params] : null,
+    (args) =>
+      vinesFetcher<VinesWorkflowExecutionLists, IVinesSearchWorkflowExecutionsParams>({ method: 'POST', simple: true })(
+        ...(args as [string, IVinesSearchWorkflowExecutionsParams]),
+      ),
+    { refreshInterval },
+  );
+
 export const useUpdateExecutionTask = (instanceId: string, taskId: string) =>
   useSWRMutation<string | undefined, unknown, string | null, IUpdateExecutionTaskParams>(
     instanceId && taskId ? `/api/workflow/${instanceId}/tasks/${taskId}` : null,

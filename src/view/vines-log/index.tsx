@@ -6,7 +6,7 @@ import { useElementSize } from '@mantine/hooks';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
-import { useSearchWorkflowExecutions } from '@/apis/workflow/execution';
+import { useMutationSearchWorkflowExecutions } from '@/apis/workflow/execution';
 import { VinesLogFilter } from '@/components/layout/view/vines-log/filter';
 import { VinesLogList } from '@/components/layout/view/vines-log/list';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -30,7 +30,7 @@ export const VinesLogView: React.FC = () => {
     },
   });
 
-  const { data: searchWorkflowExecutionsData, trigger, isMutating } = useSearchWorkflowExecutions();
+  const { data: searchWorkflowExecutionsData, trigger, isMutating } = useMutationSearchWorkflowExecutions();
 
   const workflowPageRef = useRef(1);
   const workflowDefinitions = searchWorkflowExecutionsData?.definitions;

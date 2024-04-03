@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import { Page404 } from '@/components/layout/workspace/404.tsx';
 import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper.tsx';
 import { IFRAME_MAP } from '@/components/ui/vines-iframe/consts.ts';
-import { createVinesCore } from '@/package/vines-flow';
 import { CanvasStoreProvider, createCanvasStore } from '@/store/useCanvasStore';
 import { createFlowStore, FlowStoreProvider } from '@/store/useFlowStore';
 import { useViewStore } from '@/store/useViewStore';
@@ -22,20 +21,17 @@ export function VinesView({ id, workflowId, pageId, type }: IVinesViewProps) {
   const View = IFRAME_MAP[type ?? ''];
 
   const content = useMemo(() => {
-    if (!id || !workflowId) return <Page404 />;
-    const { VinesProvider } = createVinesCore(workflowId);
+    if (!id) return <Page404 />;
     return (
       <FlowStoreProvider createStore={createFlowStore}>
         <CanvasStoreProvider createStore={createCanvasStore}>
-          <VinesProvider>
-            <VinesViewWrapper workflowId={workflowId}>
-              <View />
-            </VinesViewWrapper>
-          </VinesProvider>
+          <VinesViewWrapper workflowId={workflowId}>
+            <View />
+          </VinesViewWrapper>
         </CanvasStoreProvider>
       </FlowStoreProvider>
     );
-  }, [id, workflowId]);
+  }, [id]);
 
   useEffect(() => {
     const finalVisible = id === pageId;

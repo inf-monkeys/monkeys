@@ -22,7 +22,16 @@ interface IExecutionRecoverProps {
 export const ExecutionRecover: React.FC<IExecutionRecoverProps> = ({ className }) => {
   const { setCanvasMode } = useCanvasStore();
   const { workflowId } = useFlowStore();
-  const { trigger, data } = useSearchWorkflowExecutions();
+  const { data } = useSearchWorkflowExecutions(
+    workflowId
+      ? {
+          workflowId,
+          status: ['PAUSED', 'RUNNING'],
+          pagination: { page: 1, limit: 100 },
+        }
+      : null,
+    0,
+  );
 
   const { vines } = useVinesFlow();
 
@@ -30,17 +39,15 @@ export const ExecutionRecover: React.FC<IExecutionRecoverProps> = ({ className }
   const [activeInstanceId, setActiveInstanceId] = useState('');
 
   useEffect(() => {
-    if (!workflowId) return;
-    trigger({ workflowId, status: ['PAUSED', 'RUNNING'], pagination: { page: 1, limit: 100 } }).then((it) => {
-      const executionInstance = it?.data?.at(0);
-      const instanceId = executionInstance?.workflowId;
-      if (instanceId) {
-        vines.swapExecutionInstance(executionInstance);
-        setActiveInstanceId(instanceId);
-        setCanvasMode(CanvasStatus.RUNNING);
-      }
-    });
-  }, [workflowId]);
+    if (!workflowId || !data) return;
+    const executionInstance = data?.data?.at(0);
+    const instanceId = executionInstance?.workflowId;
+    if (instanceId) {
+      vines.swapExecutionInstance(executionInstance);
+      setActiveInstanceId(instanceId);
+      setCanvasMode(CanvasStatus.RUNNING);
+    }
+  }, [workflowId, data]);
 
   const executions = data?.data ?? [];
   const hasData = (executions.length ?? 0) > 1;
