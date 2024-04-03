@@ -17,11 +17,10 @@ export const simpleFilePut = (
   process: (value: number, event: ProgressEvent<XMLHttpRequestEventTarget>) => void,
 ): Promise<XMLHttpRequest> =>
   new Promise((resolve, reject) => {
-    const form = new FormData();
-    form.set('file', file);
-
     const req = new XMLHttpRequest();
     req.open('PUT', url);
+
+    req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
     req.upload.addEventListener('progress', (e) => {
       if (e.lengthComputable) {
@@ -41,5 +40,5 @@ export const simpleFilePut = (
       reject(new Error('Request error'));
     };
 
-    req.send(form);
+    req.send(file);
   });
