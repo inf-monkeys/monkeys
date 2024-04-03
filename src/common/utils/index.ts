@@ -2,14 +2,4 @@ export const enumToList = (enumItem: any) => {
   return Object.keys(enumItem).map((key) => enumItem[key]);
 };
 
-export const generateDbId = () => {
-  const timestamp = Math.floor(new Date().getTime() / 1000).toString(16);
-  const randomness = Math.floor(Math.random() * 0xffffff)
-    .toString(16)
-    .padStart(6, '0');
-  const counter = Math.floor(Math.random() * 0xffffff)
-    .toString(16)
-    .padStart(6, '0');
-
-  return timestamp + randomness + counter;
-};
+export const generateDbId = (m = Math, d = Date, h = 16, s = (s) => m.floor(s).toString(h)) => s(d.now() / 1000) + ' '.repeat(h).replace(/./g, () => s(m.random() * h));
