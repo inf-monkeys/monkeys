@@ -12,23 +12,27 @@ import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { cn, useLocalStorage } from '@/utils';
+import { useRetimer } from '@/utils/use-retimer.ts';
 
 interface IWorkbenchSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
+  const reTimer = useRetimer();
   const { data } = useWorkspacePages();
   const [visible, setVisible] = useState(true);
 
   const [currentPage, setCurrentPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', data?.[0] ?? {});
-
   useEffect(() => {
-    if (!currentPage?.id) {
-      if (data?.length) {
-        setCurrentPage(data[0]);
-      }
-    } else if (!data?.find((page) => page.id === currentPage.id)) {
-      setCurrentPage({});
-    }
+    reTimer(
+      setTimeout(() => {
+        if (data?.length && !currentPage?._id) {
+          setCurrentPage(data[0]);
+        }
+        if (currentPage?._id && !data?.find((page) => page._id === currentPage._id)) {
+          setCurrentPage({});
+        }
+      }, 180) as unknown as number,
+    );
   }, [currentPage, data]);
 
   return (
@@ -46,10 +50,10 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
         <div className="grid gap-2">
           {data?.map((page) => (
             <div
-              key={page.id}
+              key={page._id}
               className={cn(
                 'flex cursor-pointer items-start space-x-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
-                currentPage?.id === page.id && 'bg-accent text-accent-foreground',
+                currentPage?._id === page._id && 'bg-accent text-accent-foreground',
               )}
               onClick={() => setCurrentPage(page)}
             >
