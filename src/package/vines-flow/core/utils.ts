@@ -1,4 +1,11 @@
-import { DoWhileTaskDef, ForkJoinTaskDef, SwitchTaskDef, TaskType, WorkflowTask } from '@io-orkes/conductor-javascript';
+import {
+  DoWhileTaskDef,
+  ForkJoinTaskDef,
+  type SubWorkflowTaskDef,
+  SwitchTaskDef,
+  TaskType,
+  WorkflowTask,
+} from '@io-orkes/conductor-javascript';
 import { get, merge, setWith } from 'lodash';
 import { customAlphabet } from 'nanoid';
 
@@ -27,23 +34,21 @@ export const getBoundary = (children: VinesNode[]): IVinesNodeBoundary => {
 
 export function createSubWorkflowDef(tasks: VinesTask[]) {
   const nodeId = 'sub_workflow_nested_' + createNanoId();
-  const subWorkflowTaskDef: Required<VinesSubWorkflowTaskDef> = {
+  const subWorkflowTaskDef: Omit<SubWorkflowTaskDef, 'subWorkflowParam'> & {
+    subWorkflowParam: {
+      workflowDefinition: {
+        tasks: VinesTask[];
+      };
+    };
+  } = {
     name: 'sub_workflow',
     taskReferenceName: nodeId,
     type: TaskType.SUB_WORKFLOW,
-    inputParameters: {
-      name: '',
-      version: 1,
-    },
-    subWorkflow: {
-      name: nodeId,
-      iconUrl: 'emoji:🍀:#ceefc5',
-      description: '',
-      tasks,
-    },
+    inputParameters: {},
     subWorkflowParam: {
-      name: nodeId,
-      version: 1,
+      workflowDefinition: {
+        tasks,
+      },
     },
   };
 

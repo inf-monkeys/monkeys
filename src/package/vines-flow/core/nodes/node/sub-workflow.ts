@@ -1,5 +1,4 @@
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
-import { type SubWorkflowTaskDef, TaskType } from '@io-orkes/conductor-javascript';
+import { type SubWorkflowTaskDef, TaskType, WorkflowDef } from '@io-orkes/conductor-javascript';
 import equal from 'fast-deep-equal/es6';
 import { get, has, omit, set } from 'lodash';
 
@@ -18,7 +17,9 @@ import { IVinesInsertChildParams, VinesWorkflowExecution } from '@/package/vines
 import { getBoundary } from '@/package/vines-flow/core/utils.ts';
 
 export type VinesSubWorkflowTaskDef = SubWorkflowTaskDef & {
-  subWorkflow: Pick<MonkeyWorkflow, 'name' | 'iconUrl' | 'description'> & { tasks: VinesTask[] };
+  subWorkflowParam: {
+    workflowDefinition: WorkflowDef;
+  };
 };
 
 export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDef> {
@@ -28,7 +29,7 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
 
   constructor(task: VinesSubWorkflowTaskDef, vinesCore: VinesCore) {
     super(task, vinesCore);
-    this.parseChildren(task?.subWorkflow?.tasks ?? []);
+    this.parseChildren(task?.subWorkflowParam?.workflowDefinition?.tasks ?? []);
   }
 
   private parseChildren(tasks: VinesTask[]) {
@@ -36,11 +37,14 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
   }
 
   override getRaw() {
-    set(
-      this._task,
-      'subWorkflow.tasks',
-      this.children.map((it) => it.getRaw()),
-    );
+    if (this.isNested) {
+      set(
+        this._task,
+        'subWorkflowParam.workflowDefinition.tasks',
+        this.children.map((it) => it.getRaw()),
+      );
+    }
+
     return this._task;
   }
 
@@ -50,19 +54,22 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
     this._task.taskReferenceName = this._task.taskReferenceName.replace(/^sub_workflow:/, 'sub_workflow_');
     this.id = this._task.taskReferenceName;
 
-    const taskName = this._task.name;
-    const subWorkflowId = taskName.replace('sub_workflow_', '');
-    const hasNameInInputParameters = has(this._task, 'inputParameters.name');
-    !hasNameInInputParameters && set(this._task, 'inputParameters.name', subWorkflowId);
+    if (!this.isNested) {
+      const taskName = this._task.name;
+      const subWorkflowId = taskName.replace('sub_workflow_', '');
 
-    const hasVersionInInputParameters = has(this._task, 'inputParameters.version');
-    const subWorkflowVersion = hasVersionInInputParameters ? Number(this._task.inputParameters?.version ?? 1) || 1 : 1;
-    set(this._task, 'inputParameters.version', subWorkflowVersion);
+      const hasNameInInputParameters = has(this._task, 'inputParameters.name');
+      !hasNameInInputParameters && set(this._task, 'inputParameters.name', subWorkflowId);
 
-    set(this._task, 'subWorkflow.name', subWorkflowId);
+      const hasVersionInInputParameters = has(this._task, 'inputParameters.version');
+      const subWorkflowVersion = hasVersionInInputParameters
+        ? Number(this._task.inputParameters?.version ?? 1) || 1
+        : 1;
+      set(this._task, 'inputParameters.version', subWorkflowVersion);
 
-    set(this._task, 'subWorkflowParam.name', subWorkflowId);
-    set(this._task, 'subWorkflowParam.version', subWorkflowVersion);
+      set(this._task, 'subWorkflowParam.name', subWorkflowId);
+      set(this._task, 'subWorkflowParam.version', subWorkflowVersion);
+    }
 
     return super.check();
   }
@@ -293,9 +300,6 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
     if (['IN_PROGRESS', 'COMPLETED', 'SCHEDULED'].includes(this.executionStatus ?? '')) {
       const instanceId = task.outputData?.subWorkflowId;
       if (!instanceId) return false;
-      if (this?.childNodes?.[0]) {
-        this.childNodes[0].executionStatus = 'IN_PROGRESS';
-      }
 
       const data = await getWorkflowExecution(instanceId);
       if (!data) return false;
@@ -311,13 +315,15 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
         'triggerType',
       ]);
 
-      const needRender = !equal(equalData, this._prevExecutionData);
+      let needRender = !equal(equalData, this._prevExecutionData);
 
       for (const _task of data?.tasks ?? []) {
         const taskId = _task.workflowTask?.taskReferenceName;
         if (!taskId) continue;
         const childNode = this.findChildById(taskId);
-        childNode?.updateStatus(_task);
+        if ((await childNode?.updateStatus(_task)) && !needRender) {
+          needRender = true;
+        }
       }
       this._prevExecutionData = equalData;
 
