@@ -10,16 +10,16 @@ export class S3Helpers {
     this.checkS3Config();
     this.client = new S3Client({
       credentials: {
-        accessKeyId: config.s3.aws_access_key_id,
-        secretAccessKey: config.s3.aws_secret_access_key,
+        accessKeyId: config.s3.accessKeyId,
+        secretAccessKey: config.s3.secretAccessKey,
       },
-      endpoint: config.s3.endpoint_url,
-      region: config.s3.region_name,
+      endpoint: config.s3.endpoint,
+      region: config.s3.region,
     });
   }
 
   private checkS3Config() {
-    if (config.s3.aws_access_key_id && config.s3.aws_secret_access_key && config.s3.region_name && config.s3.endpoint_url && config.s3.bucket_name) {
+    if (config.s3.accessKeyId && config.s3.secretAccessKey && config.s3.region && config.s3.endpoint && config.s3.bucket) {
       return;
     }
     throw new Error('未配置 s3 存储，请联系管理员');
@@ -27,7 +27,7 @@ export class S3Helpers {
 
   public async getFile(fileKey: string) {
     const command = new GetObjectCommand({
-      Bucket: config.s3.bucket_name,
+      Bucket: config.s3.bucket,
       Key: fileKey,
     });
     const res = await this.client.send(command);
@@ -36,17 +36,17 @@ export class S3Helpers {
 
   public async uploadFile(fileBuffer: string | Buffer | Readable | ReadableStream<any> | Blob | Uint8Array, fileKey: string) {
     const command = new PutObjectCommand({
-      Bucket: config.s3.bucket_name,
+      Bucket: config.s3.bucket,
       Key: fileKey,
       Body: fileBuffer,
     });
     await this.client.send(command);
-    return config.s3.public_access_url + '/' + fileKey;
+    return config.s3.publicAccessUrl + '/' + fileKey;
   }
 
   public async deleteFile(fileKey: string) {
     const command = new DeleteObjectCommand({
-      Bucket: config.s3.bucket_name,
+      Bucket: config.s3.bucket,
       Key: fileKey,
     });
     const res = await this.client.send(command);
@@ -55,7 +55,7 @@ export class S3Helpers {
 
   public async getFileSignedUrl(fileKey: string) {
     const command = new GetObjectCommand({
-      Bucket: config.s3.bucket_name,
+      Bucket: config.s3.bucket,
       Key: fileKey,
     });
 
@@ -65,7 +65,7 @@ export class S3Helpers {
 
   public async getUploadFileSignedUrl(fileKey: string) {
     const command = new PutObjectCommand({
-      Bucket: config.s3.bucket_name,
+      Bucket: config.s3.bucket,
       Key: fileKey,
       ContentType: '*/*',
     });

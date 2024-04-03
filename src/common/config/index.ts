@@ -102,13 +102,12 @@ export interface AuthConfig {
 }
 
 export interface S3Config {
-  enabled: false;
-  endpoint_url: string;
-  aws_access_key_id: string;
-  aws_secret_access_key: string;
-  region_name: string;
-  bucket_name: string;
-  public_access_url: string;
+  endpoint: string;
+  accessKeyId: string;
+  secretAccessKey: string;
+  region: string;
+  bucket: string;
+  publicAccessUrl: string;
 }
 
 export interface Config {

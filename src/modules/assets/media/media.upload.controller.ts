@@ -9,8 +9,8 @@ export class MediaUploadController {
   async genStsToken() {
     return new SuccessResponse({
       data: {
-        region: config.s3.region_name,
-        baseUrl: config.s3.public_access_url + '/',
+        region: config.s3.region,
+        baseUrl: config.s3.publicAccessUrl + '/',
       },
     });
   }
