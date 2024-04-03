@@ -32,9 +32,9 @@ export class WorkflowCrudService {
     private readonly assetsCommonRepository: AssetsCommonRepository,
   ) {}
 
-  public async getWorkflowDef(teamId: string, workflowId: string, version?: number): Promise<WorkflowMetadataEntity> {
+  public async getWorkflowDef(workflowId: string, version?: number): Promise<WorkflowMetadataEntity> {
     if (!version) {
-      version = await this.workflowRepository.getMaxVersion(teamId, workflowId);
+      version = await this.workflowRepository.getMaxVersion(workflowId);
     }
     const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
     return workflow;
@@ -412,7 +412,7 @@ export class WorkflowCrudService {
     return json;
   }
 
-  private async exportWorkflowOfVersion(workflowId: string, version: number) {
+  public async exportWorkflowOfVersion(workflowId: string, version: number) {
     const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
     const triggers = await this.workflowRepository.listWorkflowTriggers(workflowId, version);
     const json: WorkflowExportJson = this.convertWorkflowToJson(workflow, triggers);

@@ -9,12 +9,12 @@ import { ExportTeamDto } from './dto/export-team.dto';
 import { ImportTeamDto } from './dto/import-team.dto';
 import { ExportService } from './export.service';
 
-@Controller('/tenant-assets')
+@Controller('')
 @UseGuards(CompatibleAuthGuard)
 export class ExportController {
   constructor(private readonly service: ExportService) {}
 
-  @Post('/export')
+  @Post('/tenant-assets/export')
   async exportData(@Req() req: IRequest, @Param('teamId') teamId: string, @Res() res: Response, @Body() dto: ExportTeamDto) {
     const { teamInfo, workflows, sqlDatabases, richMedias, vectorDatabases, sdModels, llmModels } = await this.service.exportTeamData(req, dto);
 
@@ -35,7 +35,7 @@ export class ExportController {
     res.send(zipContent);
   }
 
-  @Post('/import')
+  @Post('/tenant-assets/import')
   async importTeam(@Req() req: IRequest, @Body() dto: ImportTeamDto) {
     const { userId } = req;
     const { zipUrl } = dto;

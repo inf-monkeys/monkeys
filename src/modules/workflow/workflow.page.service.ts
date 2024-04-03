@@ -44,11 +44,11 @@ export class WorkflowPageService {
     private readonly workflowRepository: WorkflowRepository,
   ) {}
 
-  async listWorkflowPages(workflowId: string, teamId?: string) {
+  async listWorkflowPages(workflowId: string) {
+    const workflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(workflowId);
     let pages: WorkflowPageEntity[] = [];
     const existsPages = await this.pageRepository.find({
       where: {
-        teamId,
         workflowId,
         isDeleted: false,
       },
@@ -66,7 +66,7 @@ export class WorkflowPageService {
         displayName: item.name,
         workflowId,
         isBuiltIn: true,
-        teamId,
+        teamId: workflow.teamId,
         permissions: item.allowedPermissions, // 默认授予全部权限
         sortIndex: ++sortIndex,
         createdTimestamp: Date.now(),
@@ -82,8 +82,8 @@ export class WorkflowPageService {
     }));
   }
 
-  async listWorkflowPagesBrief(workflowId: string, teamId?: string): Promise<WorkflowPageJson[]> {
-    const pages = await this.listWorkflowPages(workflowId, teamId);
+  async listWorkflowPagesBrief(workflowId: string): Promise<WorkflowPageJson[]> {
+    const pages = await this.listWorkflowPages(workflowId);
     return pages.map((page) => ({
       displayName: page.displayName,
       pinned: page.pinned,
@@ -144,7 +144,7 @@ export class WorkflowPageService {
     };
 
     await this.pageRepository.save(page);
-    return this.listWorkflowPages(workflowId, teamId);
+    return this.listWorkflowPages(workflowId);
   }
 
   async updateWorkflowPages(workflowId: string, teamId: string, userId: string, body: UpdatePagesDto) {
@@ -184,7 +184,7 @@ export class WorkflowPageService {
         updatedTimestamp: Date.now(),
       },
     );
-    return this.listWorkflowPages(workflowId, teamId);
+    return this.listWorkflowPages(workflowId);
   }
 
   async getWorkflowPageByPageId(pageId: string) {

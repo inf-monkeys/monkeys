@@ -86,6 +86,11 @@ export class WorkflowRepository {
     });
   }
 
+  public async getWorkflowByIdWithoutVersion(workflowId: string) {
+    const maxVersion = await this.getMaxVersion(workflowId);
+    return await this.getWorkflowById(workflowId, maxVersion);
+  }
+
   public async findWorkflowByIds(ids: string[]) {
     if (!ids?.length) {
       return [];
@@ -243,10 +248,9 @@ export class WorkflowRepository {
     return versions;
   }
 
-  public async getMaxVersion(teamId: string, workflowId: string) {
+  public async getMaxVersion(workflowId: string) {
     const versions = await this.workflowMetadataRepository.find({
       where: {
-        teamId,
         workflowId,
       },
     });

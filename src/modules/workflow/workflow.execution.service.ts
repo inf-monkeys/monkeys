@@ -213,7 +213,7 @@ export class WorkflowExecutionService {
     const { teamId, userId, workflowId, triggerType, chatSessionId, workflowContext } = request;
     let { version } = request;
     if (!version) {
-      version = await this.workflowRepository.getMaxVersion(teamId, workflowId);
+      version = await this.workflowRepository.getMaxVersion(workflowId);
     }
     const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
     if (!workflow) {

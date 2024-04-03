@@ -2,19 +2,26 @@ import { ListDto } from '@/common/dto/list.dto';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { generateZip } from '@/common/utils/zip-asset';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
 import { CreateWorkflowDefDto } from './dto/req/create-workflow-def.dto';
 import { GetWorkflowDto } from './dto/req/get-workflow.dto';
 import { ImportWorkflowDto } from './dto/req/import-workflow.dto';
 import { UpdateWorkflowDefDto } from './dto/req/update-workflow-def.dto';
+import { WorkflowWithAssetsJson } from './interfaces';
 import { WorkflowCrudService } from './workflow.curd.service';
+import { WorkflowPageService } from './workflow.page.service';
 
 @Controller('/workflow/metadata')
 @ApiTags('Workflows/CRUD')
 @UseGuards(CompatibleAuthGuard)
 export class WorkflowCrudController {
-  constructor(private readonly service: WorkflowCrudService) {}
+  constructor(
+    private readonly service: WorkflowCrudService,
+    private readonly pageService: WorkflowPageService,
+  ) {}
 
   @Get('/')
   @ApiOperation({
@@ -34,13 +41,12 @@ export class WorkflowCrudController {
     description: '获取 workflow 定义',
   })
   public async getWorkflowDef(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Query() dto: GetWorkflowDto) {
-    const { teamId } = req;
     const { version: versionStr } = dto;
     let version = undefined;
     if (versionStr) {
       version = parseInt(versionStr.toString());
     }
-    const result = await this.service.getWorkflowDef(teamId, workflowId, version);
+    const result = await this.service.getWorkflowDef(workflowId, version);
     return new SuccessResponse({
       data: result,
     });
@@ -64,12 +70,11 @@ export class WorkflowCrudController {
     description: '获取工作流的所有版本',
   })
   public async getWorkflowValicationIssues(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Query('version') versionStr: string) {
-    const { teamId } = req;
     let version = undefined;
     if (versionStr) {
       version = parseInt(versionStr.toString());
     }
-    const workflow = await this.service.getWorkflowDef(teamId, workflowId, version);
+    const workflow = await this.service.getWorkflowDef(workflowId, version);
     return new SuccessResponse({
       data: {
         validationIssues: workflow.validationIssues || [],
@@ -118,6 +123,69 @@ export class WorkflowCrudController {
         validated,
       },
     });
+  }
+
+  @Get('/:workflowId/export')
+  @ApiOperation({
+    summary: '导出 workflow',
+    description: '导出 workflow',
+  })
+  public async exportWorkflow(
+    @Req() req: IRequest,
+    @Res() res: Response,
+    @Param('workflowId') workflowId: string,
+    @Query('version') versionStr: string,
+    // @Query('exportAssets') exportAssetsStr: string,
+  ) {
+    let version = undefined;
+    // const exportAssets = exportAssetsStr === '1' || exportAssetsStr === 'true';
+    let json: WorkflowWithAssetsJson = {
+      workflows: [],
+      pages: [],
+      sdModels: [],
+      llmModels: [],
+      textCollections: [],
+      tableCollections: [],
+      invalidAssetMessages: [],
+    };
+    if (versionStr) {
+      version = parseInt(versionStr);
+      const { workflow } = await this.service.exportWorkflowOfVersion(workflowId, version);
+      const pages = await this.pageService.listWorkflowPagesBrief(workflowId);
+      json.workflows = [workflow];
+      json.pages = pages;
+    } else {
+      json = await this.service.exportWorkflow(workflowId);
+    }
+
+    // if (exportAssets) {
+    //   const assets = await this.service.getWorkflowRelatedAssets(workflowId, version);
+    //   json.llmModels = assets.llmModels;
+    //   json.sdModels = assets.sdModels;
+    //   json.tableCollections = assets.tableCollections;
+    //   json.textCollections = assets.textCollections;
+    // }
+
+    const zipContent = await generateZip({
+      workflows: [
+        {
+          workflows: json.workflows,
+          pages: json.pages,
+        },
+      ],
+      sdModels: json.sdModels,
+      llmModels: json.llmModels,
+      tableCollections: json.tableCollections,
+      textCollections: json.textCollections,
+    });
+    const workflowName = json.workflows[0].name;
+    const fileName = version ? `${workflowName}(版本${version})` : `${workflowName}(全部版本)`;
+    res.set({
+      'Content-Type': 'application/zip',
+      'Content-Disposition': `attachment; filename=${encodeURIComponent(fileName)}.vines`,
+    });
+
+    res.send(zipContent);
   }
 
   @Post('/import-from-zip')

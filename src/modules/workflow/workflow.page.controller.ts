@@ -18,9 +18,8 @@ export class WorkflowPageController {
   })
   @UseGuards(CompatibleAuthGuard)
   @Get('/:workflowId/pages')
-  async listWorkflowPages(@Param('workflowId') workflowId: string, @Req() request: IRequest) {
-    const { teamId } = request;
-    const data = await this.pageService.listWorkflowPages(workflowId, teamId);
+  async listWorkflowPages(@Param('workflowId') workflowId: string) {
+    const data = await this.pageService.listWorkflowPages(workflowId);
     return new SuccessResponse({ data });
   }
 
