@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 
-import isMongoId from 'validator/es/lib/isMongoId';
 import z from 'zod';
 
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
@@ -24,12 +23,6 @@ export const WorkspacePage: React.FC = () => {
       const page = pages.find(({ id }) => id === pageId);
       if (page) {
         setPage(page);
-        const pageApiKey = page.apiKey;
-        // if (!pageApiKey) {
-        //   toast.error('页面 API-KEY 获取失败！');
-        // } else {
-        //   setApikey(pageApiKey);
-        // }
       } else {
         void navigate({
           to: '/$teamId/workflows',
@@ -55,7 +48,7 @@ export const Route = createFileRoute('/$teamId/workspace/$workflowId/$pageId/')(
   beforeLoad: (opts) => {
     const pageId = opts.params.pageId;
 
-    if (!z.string().refine(isMongoId).safeParse(pageId).success) {
+    if (!z.string().safeParse(pageId).success) {
       throw redirect({
         to: '/$teamId/workflows',
         params: {
