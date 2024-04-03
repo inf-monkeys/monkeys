@@ -72,7 +72,7 @@ export class VinesCore extends VinesTools(VinesBase) {
 
   public executionWorkflowExecution: VinesWorkflowExecution | null = null;
 
-  public executionWorkflowToast = false;
+  public executionWorkflowDisableRestore = false;
 
   private executionTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -614,7 +614,7 @@ export class VinesCore extends VinesTools(VinesBase) {
       const lastNode = this.nodes.at(-1);
       lastNode && (lastNode.executionStatus = 'COMPLETED');
 
-      if (this.executionWorkflowToast) {
+      if (this.executionWorkflowDisableRestore) {
         switch (newExecutionStatus) {
           case 'COMPLETED':
             toast.success('工作流运行完毕！');
@@ -690,7 +690,7 @@ export class VinesCore extends VinesTools(VinesBase) {
     if (this.executionStatus === 'RUNNING') {
       this.executionTimeout = setTimeout(this.handleExecution.bind(this), 0);
     } else if (this.executionStatus !== 'PAUSED') {
-      this.restoreSubWorkflowChildren();
+      this.executionWorkflowDisableRestore && this.restoreSubWorkflowChildren();
       this.clearExecutionStatus();
     }
   }
