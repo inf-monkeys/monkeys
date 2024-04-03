@@ -58,7 +58,7 @@ export class WorkflowRepository {
   ) {
     const { name, description, iconUrl, tasks, variables, output } = data;
     await this.workflowMetadataRepository.save({
-      id: generateDbId(),
+      id: workflowId,
       createdTimestamp: Date.now(),
       updatedTimestamp: Date.now(),
       isDeleted: false,
