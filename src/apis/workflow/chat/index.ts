@@ -6,18 +6,18 @@ import { IVinesChatSession, IVinesCreateChatSessionParams } from '@/apis/workflo
 
 export const useWorkflowChatSessions = (workflowId: string) =>
   useSWR<IVinesChatSession[] | undefined>(
-    workflowId ? `/api/chat-sessions?workflowId=${workflowId}` : null,
+    workflowId ? `/api/workflow/chat-sessions?workflowId=${workflowId}` : null,
     vinesFetcher(),
   );
 
 export const useCreateWorkflowChatSession = () =>
   useSWRMutation<IVinesChatSession | undefined, unknown, string, IVinesCreateChatSessionParams>(
-    '/api/chat-sessions',
+    '/api/workflow/chat-sessions',
     vinesFetcher({ method: 'POST' }),
   );
 
 export const useDeleteWorkflowChatSession = (sessionId?: string) =>
   useSWRMutation<{ success: boolean } | undefined, unknown, string | null>(
-    sessionId ? `/api/chat-sessions/${sessionId}` : null,
+    sessionId ? `/api/workflow/chat-sessions/${sessionId}` : null,
     vinesFetcher({ method: 'DELETE' }),
   );
