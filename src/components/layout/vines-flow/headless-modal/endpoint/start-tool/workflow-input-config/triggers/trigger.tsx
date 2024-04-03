@@ -19,7 +19,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog.tsx';
 import { Button } from '@/components/ui/button';
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { Switch } from '@/components/ui/switch';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { useFlowStore } from '@/store/useFlowStore';
@@ -67,6 +67,8 @@ export const Trigger: React.FC<ITriggerProps> = ({ trigger, workflowVersion, wor
 
   const { icon, displayName, description } = (triggerTypes?.find((it) => it.type === type) || {}) as ITriggerType;
 
+  const webhookPath = trigger.webhookPath;
+
   return (
     <Card className="relative">
       <CardHeader className="relative pl-20">
@@ -77,6 +79,12 @@ export const Trigger: React.FC<ITriggerProps> = ({ trigger, workflowVersion, wor
         <CardTitle>{displayName}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
+      {webhookPath && (
+        <CardContent>
+          <p className="text-sm">请求地址：</p>
+          <span className="text-xs text-gray-11">{`${new URL(window.location.href).origin}/api/workflow/webhook/${trigger.webhookPath}`}</span>
+        </CardContent>
+      )}
       <CardFooter className="flex items-center justify-end">
         <AlertDialog>
           <AlertDialogTrigger asChild>
