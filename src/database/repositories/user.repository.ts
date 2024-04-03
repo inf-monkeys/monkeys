@@ -1,10 +1,10 @@
 import { AuthMethod } from '@/common/config';
+import { generateDbId } from '@/common/utils';
 import { getMap } from '@/common/utils/map';
 import { UserEntity } from '@/database/entities/identity/user';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
-import { ObjectId } from 'mongodb';
 import { In, Repository } from 'typeorm';
 
 const defaultAvatar = 'https://static.aside.fun/upload/frame/0XMWE1.jpg';
@@ -37,7 +37,7 @@ export class UserRepository {
   public async findById(userId: string) {
     return await this.userRepository.findOne({
       where: {
-        id: new ObjectId(userId),
+        id: userId,
         isDeleted: false,
       },
     });
@@ -46,7 +46,7 @@ export class UserRepository {
   public async findByIds(userIds: string[]) {
     return await this.userRepository.find({
       where: {
-        id: In(userIds.map((x) => new ObjectId(x))),
+        id: In(userIds),
         isDeleted: false,
       },
     });
@@ -74,7 +74,7 @@ export class UserRepository {
   public async registerUser(data: RegisterUserParams) {
     const { phone, email, name, password, photo, externalId } = data;
     const user = await this.userRepository.save({
-      id: new ObjectId(),
+      id: generateDbId(),
       name: name || phone || email,
       phone,
       email,
@@ -121,7 +121,7 @@ export class UserRepository {
         })
       : null;
 
-    const matchCount = _.uniq([userMatchByEmail, userMatchByPhone, userMatchByExternalId].filter(Boolean).map((x) => x.id.toHexString())).length;
+    const matchCount = _.uniq([userMatchByEmail, userMatchByPhone, userMatchByExternalId].filter(Boolean).map((x) => x.id)).length;
     if (matchCount === 0) {
       return this.registerUser(data);
     } else if (matchCount === 1) {
@@ -152,7 +152,7 @@ export class UserRepository {
     }
     await this.userRepository.update(
       {
-        id: new ObjectId(userId),
+        id: userId,
       },
       updates,
     );
@@ -166,11 +166,11 @@ export class UserRepository {
     if (ids?.length) {
       const users = await this.userRepository.find({
         where: {
-          id: In(ids.map((x) => new ObjectId(x))),
+          id: In(ids),
           isDeleted: false,
         },
       });
-      userHash = getMap(users, (u) => u.id.toHexString());
+      userHash = getMap(users, (u) => u.id);
     }
     return userHash;
   }

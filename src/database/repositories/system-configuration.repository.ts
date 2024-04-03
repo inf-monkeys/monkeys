@@ -1,8 +1,8 @@
+import { generateDbId } from '@/common/utils';
 import { SystemConfigurationEntity } from '@/database/entities/system/system-configuration.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import crypto from 'crypto';
-import { ObjectId } from 'mongodb';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -31,7 +31,7 @@ export class SystemConfigurationRepository {
       return;
     }
     const entity: SystemConfigurationEntity = {
-      id: new ObjectId(),
+      id: generateDbId(),
       createdTimestamp: +new Date(),
       updatedTimestamp: +new Date(),
       isDeleted: false,

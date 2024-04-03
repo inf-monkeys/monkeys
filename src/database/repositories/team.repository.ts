@@ -1,9 +1,9 @@
+import { generateDbId } from '@/common/utils';
 import { getMap } from '@/common/utils/map';
 import { TeamEntity } from '@/database/entities/identity/team';
 import { UserTeamRelationshipEntity } from '@/database/entities/identity/user-team-relationship';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ObjectId } from 'mongodb';
 import { In, Repository } from 'typeorm';
 import { ApikeyRepository } from './apikey.repository';
 import { UserRepository } from './user.repository';
@@ -22,7 +22,7 @@ export class TeamRepository {
   public async getTeamById(id: string) {
     return await this.teamRepository.findOne({
       where: {
-        id: new ObjectId(id),
+        id,
       },
     });
   }
@@ -32,10 +32,10 @@ export class TeamRepository {
     if (ids?.length) {
       const users = await this.teamRepository.find({
         where: {
-          id: In(ids.map((x) => new ObjectId(x))),
+          id: In(ids),
         },
       });
-      userHash = getMap(users, (u) => u.id.toHexString());
+      userHash = getMap(users, (u) => u.id);
     }
     return userHash;
   }
@@ -53,7 +53,7 @@ export class TeamRepository {
     }
     return await this.teamRepository.find({
       where: {
-        id: In(teamIds.map((id) => new ObjectId(id))),
+        id: In(teamIds),
         isDeleted: false,
       },
     });
@@ -76,7 +76,7 @@ export class TeamRepository {
     }
     const now = Date.now();
     const newTeam: TeamEntity = {
-      id: new ObjectId(),
+      id: generateDbId(),
       name: teamName,
       description,
       iconUrl: logoUrl,
@@ -87,9 +87,9 @@ export class TeamRepository {
       isDeleted: false,
       workflowTaskNamePrefix,
     };
-    const teamId = newTeam.id.toHexString() as string;
+    const teamId = newTeam.id as string;
     const newReplationships: UserTeamRelationshipEntity = {
-      id: new ObjectId(),
+      id: generateDbId(),
       userId,
       teamId,
       createdTimestamp: now,

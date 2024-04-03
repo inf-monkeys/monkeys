@@ -1,8 +1,8 @@
+import { generateDbId } from '@/common/utils';
 import { PageInstance, WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
 import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ObjectId } from 'bson';
 import { keyBy, uniq } from 'lodash';
 import { Repository } from 'typeorm';
 import { CreatePageDto } from './dto/req/create-page.dto';
@@ -61,7 +61,7 @@ export class WorkflowPageService {
     } else {
       let sortIndex = 0;
       pages = BUILT_IN_PAGE_INSTANCES.map((item) => ({
-        id: new ObjectId(),
+        id: generateDbId(),
         type: item.type,
         displayName: item.name,
         workflowId,
@@ -96,7 +96,7 @@ export class WorkflowPageService {
 
   async importWorkflowPage(workflowId: string, teamId: string, userId: string, pages: WorkflowPageJson[]) {
     for (const { displayName, sortIndex, pinned, type, isBuiltIn, permissions } of pages) {
-      const pageId = new ObjectId();
+      const pageId = generateDbId();
       const page: WorkflowPageEntity = {
         id: pageId,
         type: type,
@@ -127,7 +127,7 @@ export class WorkflowPageService {
         sortIndexValue = 9999;
       }
     }
-    const pageId = new ObjectId();
+    const pageId = generateDbId();
     const page: WorkflowPageEntity = {
       id: pageId,
       type,
@@ -175,7 +175,7 @@ export class WorkflowPageService {
   async removeWorkflowPage(workflowId: string, teamId: string, userId: string, pageId: string) {
     await this.pageRepository.update(
       {
-        id: new ObjectId(pageId),
+        id: pageId,
         teamId,
         workflowId,
       },
@@ -190,7 +190,7 @@ export class WorkflowPageService {
   async getWorkflowPageByPageId(pageId: string) {
     const page = await this.pageRepository.findOne({
       where: {
-        id: new ObjectId(pageId),
+        id: pageId,
         isDeleted: false,
       },
     });
@@ -222,7 +222,7 @@ export class WorkflowPageService {
   async pinPage(teamId: string, _: string, pageId: string, pin: boolean) {
     const page = await this.pageRepository.findOne({
       where: {
-        id: new ObjectId(pageId),
+        id: pageId,
         teamId,
         isDeleted: false,
       },

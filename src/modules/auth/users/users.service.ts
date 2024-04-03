@@ -29,7 +29,7 @@ export class UsersService {
       name: nickname || name || preferred_username,
       externalId: sub,
     });
-    await this.userRepository.updateUserLastLogin(user.id.toHexString(), AuthMethod.oidc);
+    await this.userRepository.updateUserLastLogin(user.id, AuthMethod.oidc);
     return user;
   }
 }

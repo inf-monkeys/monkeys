@@ -2,7 +2,6 @@ import { AssetFilter, ListDto } from '@/common/dto/list.dto';
 import { AssetType, ConvertListDtoToDbQueryOptions } from '@/common/typings/asset';
 import { IRequest } from '@/common/typings/request';
 import { ForbiddenException } from '@nestjs/common';
-import { ObjectId } from 'mongodb';
 import { Between, FindManyOptions, FindOptionsOrder, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { AssetPublishConfig, AssetPublishPolicy, BaseAssetEntity } from '../entities/assets/base-asset';
 import { AssetsCommonRepository, AssetsFillAdditionalInfoOptions } from './assets-common.repository';
@@ -142,7 +141,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     const entity = await this.repository.findOne({
       where: {
         isDeleted: false,
-        id: new ObjectId(id),
+        id: id,
         ...additionQuery,
       } as Partial<E> as FindOptionsWhere<E>,
     });

@@ -1,5 +1,6 @@
 import { config } from '@/common/config';
 import { ListDto } from '@/common/dto/list.dto';
+import { generateDbId } from '@/common/utils';
 import { flatTasks } from '@/common/utils/conductor';
 import { extractAssetFromZip } from '@/common/utils/zip-asset';
 import { ValidationIssueType, WorkflowMetadataEntity, WorkflowOutputValue, WorkflowValidationIssue } from '@/database/entities/workflow/workflow-metadata';
@@ -10,7 +11,6 @@ import { AssetType, BlockDefProperties, BlockType, MonkeyTaskDefTypes } from '@i
 import { Injectable, NotFoundException } from '@nestjs/common';
 import fs from 'fs';
 import _ from 'lodash';
-import { ObjectId } from 'mongodb';
 import { ToolsRepository } from '../../database/repositories/tools.repository';
 import { WorkflowRepository } from '../../database/repositories/workflow.repository';
 import { ConductorService } from './conductor/conductor.service';
@@ -60,7 +60,7 @@ export class WorkflowCrudService {
   public async createWorkflowDef(teamId: string, userId: string, data: CreateWorkflowData, options?: CreateWorkflowOptions) {
     const { assetsPolicy, isTheSameTeam = false, replaceSqlDatabaseMap, replaceVectorDatabaseMap, replaceLlmModelMap, replaceSdModelMap } = options || {};
     const { name, iconUrl, description, tasks, variables, triggers, output, version = 1 } = data;
-    const workflowId = options?.useExistId || new ObjectId().toHexString();
+    const workflowId = options?.useExistId || generateDbId();
 
     // 从应用市场 clone 的时候，资产的授权策略
     const tools = await this.toolsRepository.listTools();
@@ -369,7 +369,7 @@ export class WorkflowCrudService {
 
   public async cloneWorkflow(teamId: string, userId: string, originalWorkflowId: string) {
     const versions = await this.workflowRepository.getWorklfowVersions(originalWorkflowId);
-    const newWorkflowId = new ObjectId().toHexString();
+    const newWorkflowId = generateDbId();
     for (const { version } of versions) {
       const originalWorkflow = await this.workflowRepository.getWorkflowById(originalWorkflowId, version);
       await this.createWorkflowDef(

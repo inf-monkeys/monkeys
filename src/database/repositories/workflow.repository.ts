@@ -1,4 +1,5 @@
 import { ListDto } from '@/common/dto/list.dto';
+import { generateDbId } from '@/common/utils';
 import { getNextCronTimestamp } from '@/common/utils/cron';
 import { calcMd5 } from '@/common/utils/utils';
 import { WorkflowChatSessionEntity } from '@/database/entities/workflow/workflow-chat-session';
@@ -9,7 +10,6 @@ import { BlockDefProperties, MonkeyTaskDefTypes } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
-import { ObjectId } from 'mongodb';
 import { In, Repository } from 'typeorm';
 import { WorkflowAssetRepositroy } from './assets-workflow.respository';
 
@@ -58,7 +58,7 @@ export class WorkflowRepository {
   ) {
     const { name, description, iconUrl, tasks, variables, output } = data;
     await this.workflowMetadataRepository.save({
-      id: new ObjectId(),
+      id: generateDbId(),
       createdTimestamp: Date.now(),
       updatedTimestamp: Date.now(),
       isDeleted: false,
@@ -92,7 +92,7 @@ export class WorkflowRepository {
     }
     return await this.workflowMetadataRepository.find({
       where: {
-        id: In(ids.map((id) => new ObjectId(id))),
+        id: In(ids),
         isDeleted: false,
       },
     });
@@ -268,7 +268,7 @@ export class WorkflowRepository {
 
   public async saveWorkflowExecution(workflowId: string, version: number, workflowInstanceId: string, userId: string, triggerType: WorkflowTriggerType, chatSessionId: string) {
     await this.workflowExecutionRepository.save({
-      id: new ObjectId(),
+      id: generateDbId(),
       createdTimestamp: Date.now(),
       updatedTimestamp: Date.now(),
       isDeleted: false,
@@ -284,7 +284,7 @@ export class WorkflowRepository {
   public async deleteTrigger(workflowId: string, triggerId: string) {
     return await this.workflowTriggerRepository.update(
       {
-        id: new ObjectId(triggerId),
+        id: triggerId,
         workflowId,
       },
       {
@@ -317,7 +317,7 @@ export class WorkflowRepository {
     const trigger = await this.workflowTriggerRepository.findOne({
       where: {
         workflowId,
-        id: new ObjectId(triggerId),
+        id: triggerId,
       },
     });
     return trigger;
@@ -359,7 +359,7 @@ export class WorkflowRepository {
   }
 
   public async createChatSession(teamId: string, userId: string, workflowId: string, displayName: string) {
-    const id = new ObjectId();
+    const id = generateDbId();
     const timestamp = +new Date();
     const entity: Partial<WorkflowChatSessionEntity> = {
       id: id,
@@ -388,7 +388,7 @@ export class WorkflowRepository {
   public async deleteChatSession(teamId: string, sessionId: string) {
     await this.workflowChatSessionRepository.update(
       {
-        id: new ObjectId(sessionId),
+        id: sessionId,
         teamId,
         isDeleted: false,
       },
@@ -404,7 +404,7 @@ export class WorkflowRepository {
   public async updateChatSession(teamId: string, sessionId: string, updates: Partial<WorkflowChatSessionEntity>) {
     await this.workflowChatSessionRepository.update(
       {
-        id: new ObjectId(sessionId),
+        id: sessionId,
         teamId,
         isDeleted: false,
       },
@@ -515,7 +515,7 @@ LIMIT $2 OFFSET $3;
     const workflowIds: string[] = res.map((x) => x.workflow_id);
     const workflows = await this.workflowMetadataRepository.find({
       where: {
-        id: In(workflowIds.map((x) => new ObjectId(x))),
+        id: In(workflowIds),
       },
       order: {
         [orderColumn]: orderByNumber,

@@ -1,10 +1,10 @@
+import { generateDbId } from '@/common/utils';
 import { ToolsCredentialTypeEntity } from '@/database/entities/tools/tools-credential-type.entity';
 import { ToolsCredentialEntity } from '@/database/entities/tools/tools-credential.entity';
 import { CredentialDefinition } from '@/modules/tools/interfaces';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AES, enc } from 'crypto-js';
-import { ObjectId } from 'mongodb';
 import { DeepPartial, FindManyOptions, In, Repository } from 'typeorm';
 import { SystemConfigurationRepository } from './system-configuration.repository';
 
@@ -51,7 +51,7 @@ export class CredentialsRepository {
     if (credentialsToCreate.length) {
       const entitiesToCreate: ToolsCredentialTypeEntity[] = credentialsToCreate.map(
         (x): ToolsCredentialTypeEntity => ({
-          id: new ObjectId(),
+          id: generateDbId(),
           isDeleted: false,
           createdTimestamp: +new Date(),
           updatedTimestamp: +new Date(),
@@ -132,7 +132,7 @@ export class CredentialsRepository {
   public async getCredentialById(credentialId: string) {
     const entity = await this.toolsCredentialRepository.findOne({
       where: {
-        id: new ObjectId(credentialId),
+        id: credentialId,
       },
     });
     if (entity) {
@@ -146,7 +146,7 @@ export class CredentialsRepository {
     const entity = await this.toolsCredentialRepository.findOne({
       where: {
         teamId,
-        id: new ObjectId(credentialId),
+        id: credentialId,
       },
     });
     return !!entity;
@@ -155,7 +155,7 @@ export class CredentialsRepository {
   public async deleteCredential(teamId: string, id: string) {
     const credential = await this.toolsCredentialRepository.findOne({
       where: {
-        id: new ObjectId(id),
+        id,
         teamId,
         isDeleted: false,
       },
@@ -165,7 +165,7 @@ export class CredentialsRepository {
     }
     await this.toolsCredentialRepository.update(
       {
-        id: new ObjectId(id),
+        id,
         teamId,
       },
       {
@@ -179,7 +179,7 @@ export class CredentialsRepository {
 
   public async createCredentail(teamId: string, creatorUserId: string, displayName: string, type: string, data: { [x: string]: any }) {
     const encryptedData = this.encrypt(data);
-    const id = new ObjectId();
+    const id = generateDbId();
     await this.toolsCredentialRepository.save({
       teamId,
       creatorUserId,
@@ -189,13 +189,13 @@ export class CredentialsRepository {
       type,
       isDeleted: false,
     });
-    return await this.getCredentialById(id.toHexString());
+    return await this.getCredentialById(id);
   }
 
   public async updateCredential(teamId: string, id: string, displayName: string, data: { [x: string]: any }) {
     const credential = await this.toolsCredentialRepository.findOne({
       where: {
-        id: new ObjectId(id),
+        id,
         teamId,
         isDeleted: false,
       },
@@ -213,7 +213,7 @@ export class CredentialsRepository {
     }
     await this.toolsCredentialRepository.update(
       {
-        id: new ObjectId(id),
+        id: id,
         teamId,
         isDeleted: false,
       },

@@ -1,7 +1,7 @@
+import { generateDbId } from '@/common/utils';
 import { calculateTimeDifference, getNextCronTimestamp } from '@/common/utils/cron';
 import { WorkflowTriggerType, WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
 import { Injectable } from '@nestjs/common';
-import { ObjectId } from 'mongodb';
 import * as uuid from 'uuid';
 import { WorkflowRepository } from '../../database/repositories/workflow.repository';
 import { CreateWorkflowTriggerDto } from './dto/req/create-trigger.dto';
@@ -70,7 +70,7 @@ export class WorkflowTriggerService {
     }
 
     const newTrigger: Partial<WorkflowTriggersEntity> = {
-      id: new ObjectId(),
+      id: generateDbId(),
       workflowId,
       workflowVersion: version,
       type: triggerType,

@@ -1,10 +1,10 @@
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { IRequest } from '@/common/typings/request';
+import { generateDbId } from '@/common/utils';
 import { extractAssetFromZip, generateZip } from '@/common/utils/zip-asset';
 import { Body, Controller, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import fs from 'fs';
-import { ObjectId } from 'mongodb';
 import { ExportTeamDto } from './dto/export-team.dto';
 import { ImportTeamDto } from './dto/import-team.dto';
 import { ExportService } from './export.service';
@@ -53,7 +53,7 @@ export class ExportController {
     // const teamId = await this.teamService.createTeam(userId, name, teamJson.description, teamJson.logoUrl, false, teamJson.workflowTaskNamePrefix, 'import');
 
     // TODO: fix me
-    const teamId = new ObjectId().toHexString();
+    const teamId = generateDbId();
     try {
       await this.service.importTeamData(teamId, userId, {
         workflows,

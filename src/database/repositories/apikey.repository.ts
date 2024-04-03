@@ -1,9 +1,9 @@
+import { generateDbId } from '@/common/utils';
 import { generateRandomApiKey } from '@/common/utils/apikey';
 import { ApiKeyEntity, ApiKeyStatus } from '@/database/entities/apikey/apikey';
 import { CreateApiKeyDto } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ObjectId } from 'mongodb';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -34,7 +34,7 @@ export class ApikeyRepository {
     const apiKey = generateRandomApiKey();
     const { desc } = body;
     const record: ApiKeyEntity = {
-      id: new ObjectId(),
+      id: generateDbId(),
       creatorUserId: userId,
       teamId,
       apiKey,
@@ -65,7 +65,7 @@ export class ApikeyRepository {
   public async revokeApiKey(userId: string, teamId: string, keyId: string) {
     await this.apiKeyRepo.update(
       {
-        id: new ObjectId(keyId),
+        id: keyId,
         creatorUserId: userId,
         teamId,
         isDeleted: false,

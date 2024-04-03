@@ -1,8 +1,8 @@
+import { generateDbId } from '@/common/utils';
 import { MediaSource } from '@/database/entities/assets/media/media-file';
 import { CreateRichMediaDto } from '@/modules/assets/media/dto/req/create-rich-media.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ObjectId } from 'mongodb';
 import { Repository } from 'typeorm';
 import { MediaFileEntity } from '../entities/assets/media/media-file';
 
@@ -16,7 +16,7 @@ export class MediaRepository {
   public async getMediaById(id: string) {
     return await this.mediaFileEntity.findOne({
       where: {
-        id: new ObjectId(id),
+        id: id,
       },
     });
   }
@@ -33,7 +33,7 @@ export class MediaRepository {
 
   public async createMedia(teamId: string, userId: string, body: CreateRichMediaDto) {
     const { url, source = MediaSource.UPLOAD, name, params, type, size, md5 } = body;
-    const mediaId = new ObjectId();
+    const mediaId = generateDbId();
     await this.mediaFileEntity.save({
       id: mediaId,
       iconUrl: '',
@@ -51,6 +51,6 @@ export class MediaRepository {
       updatedTimestamp: Date.now(),
       isDeleted: false,
     });
-    return await this.getMediaById(mediaId.toHexString());
+    return await this.getMediaById(mediaId);
   }
 }

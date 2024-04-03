@@ -1,11 +1,11 @@
 import { AssetType, AssetWithAdditionalInfo } from '@/common/typings/asset';
+import { generateDbId } from '@/common/utils';
 import { getPublicProfile } from '@/common/utils/user';
 import { CreateAssetFilterDto } from '@/modules/assets/req/create-asset-filter.dto';
 import { UpdateAssetFilterDto } from '@/modules/assets/req/update-asset-filter.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isNil, pickBy, uniq } from 'lodash';
-import { ObjectId } from 'mongodb';
 import { pinyin } from 'pinyin-pro';
 import { DeepPartial, In, MongoRepository } from 'typeorm';
 import { AssetFilterEntity } from '../entities/assets/asset-filter';
@@ -48,7 +48,7 @@ export class AssetsCommonRepository {
   public async createAssetFilter(teamId: string, userId: string, body: CreateAssetFilterDto) {
     const { name, type, rules } = body;
     const data: AssetFilterEntity = {
-      id: new ObjectId(),
+      id: generateDbId(),
       teamId,
       creatorUserId: userId,
       name,
@@ -65,7 +65,7 @@ export class AssetsCommonRepository {
   public async updateAssetFilter(teamId: string, filterId: string, updates: UpdateAssetFilterDto) {
     await this.assetsFilterRepository.update(
       {
-        id: new ObjectId(filterId),
+        id: filterId,
         teamId: teamId,
         isDeleted: false,
       },
@@ -76,7 +76,7 @@ export class AssetsCommonRepository {
     );
     return await this.assetsFilterRepository.findOne({
       where: {
-        id: new ObjectId(filterId),
+        id: filterId,
         teamId: teamId,
         isDeleted: false,
       },
@@ -86,7 +86,7 @@ export class AssetsCommonRepository {
   public async deleteAssetFilter(teamId: string, filterId: string) {
     await this.assetsFilterRepository.updateOne(
       {
-        id: new ObjectId(filterId),
+        id: filterId,
         teamId,
         isDeleted: false,
       },
@@ -123,7 +123,7 @@ export class AssetsCommonRepository {
       return exists;
     }
     const entity = {
-      id: new ObjectId(),
+      id: generateDbId(),
       isDeleted: false,
       createdTimestamp: Date.now(),
       updatedTimestamp: Date.now(),
@@ -148,7 +148,7 @@ export class AssetsCommonRepository {
     const exists = await this.assetTagRepo.findOne({
       where: {
         teamId,
-        id: new ObjectId(tagId),
+        id: tagId,
         isDeleted: false,
       },
     });
@@ -182,7 +182,7 @@ export class AssetsCommonRepository {
 
     await this.assetTagRepo.updateOne(
       {
-        id: new ObjectId(tagId),
+        id: tagId,
       },
       toUpdates,
     );
@@ -192,7 +192,7 @@ export class AssetsCommonRepository {
     await this.assetTagRepo.updateOne(
       {
         teamId,
-        id: new ObjectId(tagId),
+        id: tagId,
       },
       {
         isDeleted: true,
@@ -212,7 +212,7 @@ export class AssetsCommonRepository {
       });
       if (!exists) {
         await this.assetsTagRelationsRepo.save({
-          id: new ObjectId(),
+          id: generateDbId(),
           isDeleted: false,
           createdTimestamp: Date.now(),
           updatedTimestamp: Date.now(),
@@ -295,7 +295,7 @@ export class AssetsCommonRepository {
       ).map((x) => x.tagId);
       result.assetTags = await this.assetTagRepo.find({
         where: {
-          id: In(tagIds.map((x) => new ObjectId(x))),
+          id: tagIds,
         },
       });
     }
@@ -328,13 +328,13 @@ export class AssetsCommonRepository {
         withTags && allTagIds.length
           ? await this.assetTagRepo.find({
               where: {
-                id: In(allTagIds.map((x) => new ObjectId(x))),
+                id: allTagIds,
               },
             })
           : [];
       for (const item of list) {
         const itemTagIds = allTagRels.filter((x) => x.assetId === item.getAssetId()).map((x) => x.tagId);
-        assetIdToTags[item.getAssetId()] = allTagDefs.filter((x) => itemTagIds.includes(x.id.toHexString()));
+        assetIdToTags[item.getAssetId()] = allTagDefs.filter((x) => itemTagIds.includes(x.id));
       }
     }
 

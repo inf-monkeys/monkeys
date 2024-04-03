@@ -1,10 +1,10 @@
+import { generateDbId } from '@/common/utils';
 import { ToolsServerEntity } from '@/database/entities/tools/tools-server.entity';
 import { ToolsEntity } from '@/database/entities/tools/tools.entity';
 import { ManifestJson } from '@/modules/tools/interfaces';
 import { BlockDefinition } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ObjectId } from 'mongodb';
 import { In, Repository } from 'typeorm';
 
 @Injectable()
@@ -43,7 +43,7 @@ export class ToolsRepository {
       },
     });
     const entity = new ToolsServerEntity();
-    entity.id = originalEntity?.id || new ObjectId();
+    entity.id = originalEntity?.id || generateDbId();
     entity.schemaVersion = data.schema_version;
     entity.api = data.api;
     entity.auth = data.auth;
@@ -69,7 +69,7 @@ export class ToolsRepository {
     if (toolsToCreate.length) {
       const entitiesToCreate: ToolsEntity[] = toolsToCreate.map(
         (x): ToolsEntity => ({
-          id: new ObjectId(),
+          id: generateDbId(),
           isDeleted: false,
           createdTimestamp: +new Date(),
           updatedTimestamp: +new Date(),

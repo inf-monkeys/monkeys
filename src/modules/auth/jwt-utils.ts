@@ -22,7 +22,7 @@ export class JwtHelper {
 
   public static signToken(user: UserEntity, expiresIn = config.auth.jwt.expires_in) {
     const payload: UserPayload = {
-      id: user.id.toHexString(),
+      id: user.id,
       name: user.name,
       photo: user.photo,
       nickname: user.nickname,

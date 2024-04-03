@@ -1,22 +1,11 @@
-import { config } from '@/common/config';
-import { ObjectId } from 'mongodb';
-import { Column, ObjectIdColumn, PrimaryColumn } from 'typeorm';
-
-const isMongo = config.database.type === 'mongodb';
-const IdColumn = isMongo
-  ? ObjectIdColumn
-  : () =>
-      PrimaryColumn({
-        type: 'varchar',
-        transformer: {
-          to: (value: ObjectId) => value?.toHexString(),
-          from: (value: string) => new ObjectId(value),
-        },
-      });
+import { Column, PrimaryColumn } from 'typeorm';
 
 export class BaseEntity {
-  @IdColumn()
-  id: ObjectId;
+  @PrimaryColumn({
+    type: 'varchar',
+    length: 128,
+  })
+  id: string;
 
   @Column({
     name: 'created_timestamp',
