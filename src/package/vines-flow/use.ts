@@ -77,15 +77,12 @@ export const useWorkflow = (workflow?: { workflowId?: string }) => {
         };
       }
       const newWorkflow: Partial<
-        Pick<
-          MonkeyWorkflow,
-          'name' | 'variables' | 'description' | 'iconUrl' | 'workflowDef' | 'hidden' | 'masterWorkflowId'
-        >
+        Pick<MonkeyWorkflow, 'name' | 'variables' | 'description' | 'iconUrl' | 'tasks' | 'hidden' | 'masterWorkflowId'>
       > = {
         name,
         description: '',
         iconUrl: 'emoji:🍀:#ceefc5',
-        workflowDef: workflowDef as WorkflowDef,
+        tasks: workflowDef.tasks,
       };
 
       if (subWorkflowMasterId) {
