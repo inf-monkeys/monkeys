@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { useDocumentVisibility, useInterval, useNetwork } from '@mantine/hooks';
+import { CircularProgress } from '@nextui-org/progress';
 import dayjs from 'dayjs';
 import equal from 'fast-deep-equal/es6';
 import { omit } from 'lodash';
@@ -11,48 +11,29 @@ import { VirtualizedList } from '@/components/layout/view/vines-chat/chat-list/v
 import { useVinesUser } from '@/components/router/guard/user.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
-import { readLocalStorageValue, useLocalStorage } from '@/utils';
+import { useLocalStorage } from '@/utils';
 
 interface IVinesChatListProps {
   visible: boolean;
   workflowId: string;
 }
 
-export const VinesChatList: React.FC<IVinesChatListProps> = ({ visible, workflowId }) => {
+export const VinesChatList: React.FC<IVinesChatListProps> = ({ workflowId }) => {
   const { userPhoto, userName } = useVinesUser();
   const { vines } = useVinesFlow();
-  const { data, trigger } = useSearchWorkflowExecutions();
 
-  const [localChatSessions] = useLocalStorage<Record<string, string>>('vines-ui-chat-session', {});
+  const [sessions] = useLocalStorage<Record<string, string>>('vines-ui-chat-session', {});
 
-  const handleUpdateList = () => {
-    const sessions = readLocalStorageValue<Record<string, string>>('vines-ui-chat-session', {});
-    void trigger({
-      orderBy: { filed: 'startTime', order: 'DESC' },
-      pagination: { page: 1, limit: 100 },
-      workflowId,
-      ...(sessions[workflowId] ? { chatSessionIds: [sessions[workflowId]] } : {}),
-    });
-  };
-
-  const networkStatus = useNetwork();
-  const documentState = useDocumentVisibility();
-  const interval = useInterval(handleUpdateList, 1500);
-
-  useEffect(() => {
-    if (networkStatus.online && documentState === 'visible' && visible) {
-      interval.start();
-    } else {
-      interval.stop();
-    }
-    return () => {
-      interval.stop();
-    };
-  }, [documentState, networkStatus, visible]);
-
-  useEffect(() => {
-    visible && handleUpdateList();
-  }, [visible, localChatSessions]);
+  const { data, isLoading } = useSearchWorkflowExecutions(
+    workflowId
+      ? {
+          orderBy: { filed: 'startTime', order: 'DESC' },
+          pagination: { page: 1, limit: 100 },
+          workflowId,
+          ...(sessions[workflowId] ? { chatSessionIds: [sessions[workflowId]] } : {}),
+        }
+      : null,
+  );
 
   const [list, setList] = useState<IVinesChatListItem[] | undefined>();
 
@@ -108,5 +89,11 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ visible, workflow
     setList(newList);
   }, [executionData]);
 
-  return list && <VirtualizedList data={list} />;
+  return isLoading && !list ? (
+    <div className="vines-center size-full">
+      <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+    </div>
+  ) : (
+    list && <VirtualizedList data={list} />
+  );
 };

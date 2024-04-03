@@ -20,7 +20,6 @@ import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { useViewStore } from '@/store/useViewStore';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
-import { useRetimer } from '@/utils/use-retimer.ts';
 
 interface IVinesExecutionHistoryProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -31,35 +30,32 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
   const { workflowId } = useFlowStore();
 
   const clipboard = useClipboard({ timeout: 500 });
-  const reTimer = useRetimer();
 
   const { vines } = useVinesFlow();
 
-  const { trigger, data, isMutating } = useSearchWorkflowExecutions();
+  const { data, mutate, isLoading } = useSearchWorkflowExecutions(
+    workflowId ? { workflowId, pagination: { page: 1, limit: 100 } } : null,
+    0,
+  );
 
   const [activeInstanceId, setActiveInstanceId] = useState('_');
 
   const vinesExecutionStatus = vines.executionStatus;
 
   useEffect(() => {
-    if (!workflowId || !visible) return;
-    reTimer(
-      setTimeout(
-        () => {
-          trigger({ workflowId, pagination: { page: 1, limit: 100 } }).then((it) => {
-            const executionInstance = it?.data?.find((it) => it.status === 'PAUSED' || it.status === 'RUNNING');
-            const instanceId = executionInstance?.workflowId;
-            if (instanceId) {
-              vines.swapExecutionInstance(executionInstance);
-              setActiveInstanceId(instanceId);
-              setCanvasMode(CanvasStatus.RUNNING);
-            }
-          });
-        },
-        !data ? 0 : 800,
-      ) as unknown as number,
-    );
-  }, [workflowId, vinesExecutionStatus, visible]);
+    if (!workflowId || !visible || !data) return;
+    const executionInstance = data?.data?.find((it) => it.status === 'PAUSED' || it.status === 'RUNNING');
+    const instanceId = executionInstance?.workflowId;
+    if (instanceId) {
+      vines.swapExecutionInstance(executionInstance);
+      setActiveInstanceId(instanceId);
+      setCanvasMode(CanvasStatus.RUNNING);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    !['SCHEDULED', 'CANCELED'].includes(vinesExecutionStatus) && mutate();
+  }, [vinesExecutionStatus]);
 
   const finalData =
     data?.data?.sort((a) => (a.status === 'PAUSED' || a.status === 'RUNNING' ? -1 : 1)).slice(0, 20) ?? [];
@@ -76,7 +72,7 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
         />
       </div>
       <CommandList className="relative h-full max-h-none">
-        {!data && isMutating ? (
+        {!data && isLoading ? (
           <CommandLoading className="vines-center absolute z-10 size-full py-6">
             <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
           </CommandLoading>
