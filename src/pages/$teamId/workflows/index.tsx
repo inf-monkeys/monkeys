@@ -16,6 +16,7 @@ import { ExportWorkflowDialog } from '@/components/dialog/export-workflow';
 import { IExportWorkflowWithAssetsContext } from '@/components/dialog/export-workflow/typings.ts';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { WorkflowInfoEditor } from '@/components/layout/workspace/workflow/info-editor';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import {
@@ -53,6 +54,7 @@ export const Workflows: React.FC = () => {
   const [isCreating, setIsCreating] = useState(false);
 
   const [currentWorkflow, setCurrentWorkflow] = useState<IAssetItem<MonkeyWorkflow>>();
+  const [workflowEditorVisible, setWorkflowEditorVisible] = useState(false);
   const [deleteAlertDialogVisible, setDeleteAlertDialogVisible] = useState(false);
   const [exportDialogVisible, setExportDialogVisible] = useState(false);
   const [exportAssetContext, setExportAssetContext] = useState<IExportWorkflowWithAssetsContext | undefined>();
@@ -71,6 +73,10 @@ export const Workflows: React.FC = () => {
     }
     void mutateWorkflows();
     open(`/${teamId}/workspace/${workflowId}`, '_blank');
+  };
+
+  const handleAfterUpdateWorkflow = () => {
+    void mutateWorkflows();
   };
 
   const handleCloneWorkflow = async (workflowId: string) => {
@@ -220,7 +226,12 @@ export const Workflows: React.FC = () => {
                   </DropdownMenuShortcut>
                   创建副本
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => {}}>
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setCurrentWorkflow(item);
+                    setWorkflowEditorVisible(true);
+                  }}
+                >
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <Pencil size={15} />
                   </DropdownMenuShortcut>
@@ -299,6 +310,12 @@ export const Workflows: React.FC = () => {
             </Button>
           </>
         }
+      />
+      <WorkflowInfoEditor
+        visible={workflowEditorVisible}
+        setVisible={setWorkflowEditorVisible}
+        workflow={currentWorkflow}
+        afterUpdate={handleAfterUpdateWorkflow}
       />
       <AlertDialog open={deleteAlertDialogVisible} onOpenChange={setDeleteAlertDialogVisible}>
         <AlertDialogContent
