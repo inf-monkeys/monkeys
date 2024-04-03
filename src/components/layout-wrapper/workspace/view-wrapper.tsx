@@ -57,7 +57,10 @@ export const VinesViewWrapper: React.FC<IVinesViewWrapperProps> = memo(({ workfl
       }
     }
 
-    vines.executionWorkflowDisableRestore = page?.type === 'process';
+    if (page?.type === 'process') {
+      vines.executionWorkflowDisableRestore = true;
+      vines.restoreSubWorkflowChildren();
+    }
 
     if (!workflow?.workflowDef?.tasks?.length) {
       setVisible(false);
