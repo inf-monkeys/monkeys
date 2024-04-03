@@ -38,6 +38,7 @@ export function createSubWorkflowDef(tasks: VinesTask[]) {
     subWorkflowParam: {
       name: string;
       workflowDefinition: {
+        name: string;
         tasks: VinesTask[];
       };
     };
@@ -49,6 +50,7 @@ export function createSubWorkflowDef(tasks: VinesTask[]) {
     subWorkflowParam: {
       name: nodeId,
       workflowDefinition: {
+        name: nodeId,
         tasks,
       },
     },
