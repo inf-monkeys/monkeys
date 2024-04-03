@@ -22,17 +22,17 @@ export const useWorkflowList = (query: WorkflowListQuery = {}) =>
   useSWR<MonkeyWorkflow[] | undefined>(`/api/workflow/list?${qs.stringify(query)}`, vinesFetcher());
 
 export const createWorkflow = (workflowParams: Partial<MonkeyWorkflow>) =>
-  vinesFetcher<{ workflowId: string }>({ method: 'POST', simple: true })('/api/workflow', workflowParams);
+  vinesFetcher<{ workflowId: string }>({ method: 'POST', simple: true })('/api/workflow/metadata', workflowParams);
 
 export const cloneWorkflow = (workflowId: string) =>
   vinesFetcher<{
     workflowId: string;
-  }>({ method: 'POST' })(`/api/workflow/${workflowId}/clone`);
+  }>({ method: 'POST' })(`/api/workflow/metadata/${workflowId}/clone`);
 
 export const deleteWorkflow = (workflowId: string) =>
   vinesFetcher({
     method: 'DELETE',
-  })(`/api/workflow/${workflowId}`);
+  })(`/api/workflow/metadata/${workflowId}`);
 
 export const updateWorkflow = (
   apikey: string,
