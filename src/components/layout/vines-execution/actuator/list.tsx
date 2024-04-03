@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -72,9 +72,22 @@ export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({ height, act
     setTools(newTools);
   }, [VINES_REFRESHER]);
 
+  const container = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (container.current) {
+      container.current.childNodes.forEach((node) => {
+        if (node instanceof HTMLElement) {
+          if (node.dataset.nodeId === activeTool?.id) {
+            setTimeout(() => node.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' }), 300);
+          }
+        }
+      });
+    }
+  }, [activeTool]);
+
   return (
     <ScrollArea className="pr-3" style={{ height }}>
-      <div className="flex flex-col gap-2">
+      <div ref={container} className="flex flex-col gap-2">
         <AnimatePresence>
           {tools.map(({ id, status, icon, name, customName, description, node }, i) => (
             <motion.div
@@ -82,6 +95,7 @@ export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({ height, act
               initial={{ opacity: 0, bottom: -30, marginTop: -12 }}
               animate={{ opacity: 1, bottom: 0, marginTop: 0 }}
               exit={{ opacity: 0, bottom: -30, marginTop: -12 }}
+              data-node-id={id}
             >
               <Card
                 className={cn(
