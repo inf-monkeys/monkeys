@@ -1,3 +1,4 @@
+import { config } from '@/common/config';
 import { ListDto } from '@/common/dto/list.dto';
 import { generateDbId } from '@/common/utils';
 import { getNextCronTimestamp } from '@/common/utils/cron';
@@ -480,13 +481,13 @@ AND team_id = $1
 SELECT 
     COUNT(iw.workflow_id)
 FROM 
-    public.infmonkeys_workflow_metadatas iw
+    public.${config.server.appId}_workflow_metadatas iw
 INNER JOIN (
     SELECT 
         workflow_id, 
         MAX(version) AS max_version
     FROM 
-        public.infmonkeys_workflow_metadatas
+        public.${config.server.appId}_workflow_metadatas
     WHERE 
         ${where}
     GROUP BY 
@@ -499,13 +500,13 @@ INNER JOIN (
 SELECT 
     iw.workflow_id
 FROM 
-    public.infmonkeys_workflow_metadatas iw
+    public.${config.server.appId}_workflow_metadatas iw
 INNER JOIN (
     SELECT 
         workflow_id, 
         MAX(version) AS max_version
     FROM 
-        public.infmonkeys_workflow_metadatas
+        public.${config.server.appId}_workflow_metadatas
     WHERE 
         ${where}
     GROUP BY 

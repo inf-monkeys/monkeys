@@ -77,8 +77,8 @@ export class WorkflowCrudController {
     const workflow = await this.service.getWorkflowDef(workflowId, version);
     return new SuccessResponse({
       data: {
-        validationIssues: workflow.validationIssues || [],
-        validated: workflow.validated,
+        validationIssues: workflow?.validationIssues || [],
+        validated: workflow?.validated,
       },
     });
   }
