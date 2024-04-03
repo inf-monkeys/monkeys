@@ -420,36 +420,88 @@ export class WorkflowRepository {
     totalCount: number;
     list: WorkflowMetadataEntity[];
   }> {
-    const { page = 1, limit = 24 } = dto;
-    const queryBuilder = this.workflowMetadataRepository
-      .createQueryBuilder('workflow_metadata')
-      .select('workflow_metadata.workflow_id', 'workflow_id')
-      .addSelect('MAX(workflow_metadata.version)', 'max_version')
-      .where('workflow_metadata.team_id = :teamId', { teamId })
-      .andWhere('workflow_metadata.is_deleted = :isDeleted', { isDeleted: false })
-      .andWhere('workflow_metadata.hidden = :hidden', { hidden: false })
-      .groupBy('workflow_metadata.workflow_id');
-    const count = await this.workflowMetadataRepository
-      .createQueryBuilder('workflow_metadata')
-      .innerJoin(`(${queryBuilder.getQuery()})`, 'latest_workflow', 'workflow_metadata.workflow_id = latest_workflow.workflow_id AND workflow_metadata.version = latest_workflow.max_version')
-      .where('workflow_metadata.team_id = :teamId', { teamId })
-      .andWhere('workflow_metadata.is_deleted = :isDeleted', { isDeleted: false })
-      .andWhere('workflow_metadata.hidden = :hidden', { hidden: false })
-      .setParameters(queryBuilder.getParameters())
-      .getCount();
-    const workflows = await this.workflowMetadataRepository
-      .createQueryBuilder('workflow_metadata')
-      .innerJoin(`(${queryBuilder.getQuery()})`, 'latest_workflow', 'workflow_metadata.workflow_id = latest_workflow.workflow_id AND workflow_metadata.version = latest_workflow.max_version')
-      .where('workflow_metadata.team_id = :teamId', { teamId })
-      .andWhere('workflow_metadata.is_deleted = :isDeleted', { isDeleted: false })
-      .andWhere('workflow_metadata.hidden = :hidden', { hidden: false })
-      .setParameters(queryBuilder.getParameters())
-      // .orderBy('workflow.workflow_id', 'ASC') // 或者你可以根据需要对结果进行排序
-      .skip((page - 1) * limit) // 设置跳过的记录数来实现分页
-      .take(limit) // 设置取出的记录数
-      .getMany();
+    const { page = 1, limit = 24, orderBy = 'DESC', orderColumn = 'createdTimestamp' } = dto;
+    let orderColumnName = '';
+    switch (orderColumn) {
+      case 'createdTimestamp':
+        orderColumnName = 'created_timestamp';
+        break;
+      case 'updatedTimestamp':
+        orderColumnName = 'updated_timestamp';
+        break;
+      default:
+        orderColumnName = 'created_timestamp';
+        break;
+    }
+    let orderByName = 'DESC';
+    let orderByNumber = -1;
+    switch (orderBy) {
+      case 'DESC':
+        orderByName = 'DESC';
+        orderByNumber = -1;
+        break;
+      case 'ASC':
+        orderByName = 'ASC';
+        orderByNumber = 1;
+        break;
+      default:
+        orderByName = 'DESC';
+        orderByNumber = -1;
+        break;
+    }
+    const totalCountSql = `
+SELECT 
+    COUNT(iw.workflow_id)
+FROM 
+    public.infmonkeys_workflow_metadatas iw
+INNER JOIN (
+    SELECT 
+        workflow_id, 
+        MAX(version) AS max_version
+    FROM 
+        public.infmonkeys_workflow_metadatas
+    WHERE 
+        is_deleted = false
+        AND team_id = $1
+    GROUP BY 
+        workflow_id
+) mv ON iw.workflow_id = mv.workflow_id AND iw.version = mv.max_version;
+    `;
+    const totalCountRes = await this.workflowMetadataRepository.query(totalCountSql, [teamId]);
+    const totalCount = totalCountRes[0]['count'];
+    const sql = `
+SELECT 
+    iw.workflow_id
+FROM 
+    public.infmonkeys_workflow_metadatas iw
+INNER JOIN (
+    SELECT 
+        workflow_id, 
+        MAX(version) AS max_version
+    FROM 
+        public.infmonkeys_workflow_metadatas
+    WHERE 
+        is_deleted = false
+        AND team_id = $1
+    GROUP BY 
+        workflow_id
+) mv ON iw.workflow_id = mv.workflow_id AND iw.version = mv.max_version
+ORDER BY 
+    iw.${orderColumnName} ${orderByName}
+LIMIT $2 OFFSET $3;
+    `;
+    const res = await this.workflowMetadataRepository.query(sql, [teamId, limit, (page - 1) * limit]);
+    const workflowIds: string[] = res.map((x) => x.workflow_id);
+    const workflows = await this.workflowMetadataRepository.find({
+      where: {
+        id: In(workflowIds.map((x) => new ObjectId(x))),
+      },
+      order: {
+        [orderColumn]: orderByNumber,
+      },
+    });
     return {
-      totalCount: count,
+      totalCount,
       list: workflows,
     };
   }
