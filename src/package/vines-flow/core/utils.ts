@@ -36,6 +36,7 @@ export function createSubWorkflowDef(tasks: VinesTask[]) {
   const nodeId = 'sub_workflow_nested_' + createNanoId();
   const subWorkflowTaskDef: Omit<SubWorkflowTaskDef, 'subWorkflowParam'> & {
     subWorkflowParam: {
+      name: string;
       workflowDefinition: {
         tasks: VinesTask[];
       };
@@ -46,6 +47,7 @@ export function createSubWorkflowDef(tasks: VinesTask[]) {
     type: TaskType.SUB_WORKFLOW,
     inputParameters: {},
     subWorkflowParam: {
+      name: nodeId,
       workflowDefinition: {
         tasks,
       },
