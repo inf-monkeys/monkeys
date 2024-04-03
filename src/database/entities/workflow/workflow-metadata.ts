@@ -48,6 +48,9 @@ export interface WorkflowOutputValue {
 @Entity({ name: 'workflow_metadatas' })
 export class WorkflowMetadataEntity extends BaseAssetEntity {
   assetType: AssetType = 'workflow';
+  public getAssetId() {
+    return this.workflowId;
+  }
 
   @Column({
     name: 'workflow_id',
@@ -118,8 +121,4 @@ export class WorkflowMetadataEntity extends BaseAssetEntity {
     default: false,
   })
   hidden?: boolean;
-
-  public getAssetId() {
-    return this.workflowId;
-  }
 }

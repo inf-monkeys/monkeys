@@ -240,6 +240,22 @@ export class AssetsCommonRepository {
     }
   }
 
+  public async findAssetIdsByTagIds(assetType: AssetType, tagIds: string[]) {
+    if (!tagIds.length) {
+      return [];
+    }
+    return (
+      await this.assetsTagRelationsRepo.find({
+        where: {
+          assetType,
+          tagId: In(tagIds),
+          isDeleted: false,
+        },
+        select: ['assetId'],
+      })
+    ).map((x) => x.assetId);
+  }
+
   public async fillAdditionalInfo<E extends BaseAssetEntity>(item: E, options?: AssetsFillAdditionalInfoOptions): Promise<AssetWithAdditionalInfo<E>> {
     const { withTeam = false, withUser = false, withTags = false } = options || {};
     const result: AssetWithAdditionalInfo<E> = {

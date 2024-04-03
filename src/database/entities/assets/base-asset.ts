@@ -14,6 +14,9 @@ export class AssetPublishConfig {
 
 export class BaseAssetEntity extends BaseEntity {
   assetType: AssetType;
+  public getAssetId(): string {
+    return this.id.toHexString();
+  }
 
   @Column({
     name: 'team_id',
@@ -58,8 +61,4 @@ export class BaseAssetEntity extends BaseEntity {
     nullable: true,
   })
   publishConfig?: AssetPublishConfig;
-
-  public getAssetId(): string {
-    return this.id.toHexString();
-  }
 }

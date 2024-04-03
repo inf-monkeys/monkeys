@@ -4,7 +4,7 @@ import * as Joiful from 'joiful';
 
 type OrderColumn = 'createdTimestamp' | 'updatedTimestamp';
 type OrderBy = 'DESC' | 'ASC';
-type Filter = {
+export type AssetFilter = {
   userIds?: string[];
   createdTimestamp?: (number | null)[];
   updatedTimestamp?: (number | null)[];
@@ -41,5 +41,5 @@ export class ListDto extends PaginationDto {
     required: false,
   })
   @Joiful.object().default({})
-  filter?: Filter;
+  filter?: AssetFilter;
 }

@@ -1,9 +1,9 @@
-import { ListDto } from '@/common/dto/list.dto';
-import { ConvertListDtoToDbQueryOptions } from '@/common/typings/asset';
+import { AssetFilter, ListDto } from '@/common/dto/list.dto';
+import { AssetType, ConvertListDtoToDbQueryOptions } from '@/common/typings/asset';
 import { IRequest } from '@/common/typings/request';
 import { ForbiddenException } from '@nestjs/common';
 import { ObjectId } from 'mongodb';
-import { FindManyOptions, FindOptionsOrder, FindOptionsWhere, Repository } from 'typeorm';
+import { Between, FindManyOptions, FindOptionsOrder, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { AssetPublishConfig, AssetPublishPolicy, BaseAssetEntity } from '../entities/assets/base-asset';
 import { AssetsCommonRepository, AssetsFillAdditionalInfoOptions } from './assets-common.repository';
 
@@ -12,6 +12,43 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     public readonly repository: Repository<E>,
     public readonly assetCommonRepository: AssetsCommonRepository,
   ) {}
+
+  public async findAssetIdsByCommonFilter(assetType: AssetType, filter: AssetFilter, assetIdField: string = 'id') {
+    const condition: FindOptionsWhere<BaseAssetEntity> = {};
+    if (filter.createdTimestamp) {
+      const [startCreatedTimestamp, endCreatedTimestamp] = filter.createdTimestamp;
+      if (startCreatedTimestamp && endCreatedTimestamp) {
+        condition.createdTimestamp = Between(Number(startCreatedTimestamp), Number(endCreatedTimestamp));
+      } else if (startCreatedTimestamp) {
+        condition.createdTimestamp = MoreThanOrEqual(Number(startCreatedTimestamp));
+      } else if (endCreatedTimestamp) {
+        condition.createdTimestamp = LessThanOrEqual(Number(endCreatedTimestamp));
+      }
+    }
+    if (filter.updatedTimestamp) {
+      const [startUpdatedTimestamp, endUpdatedTimestamp] = filter.updatedTimestamp;
+      if (startUpdatedTimestamp && endUpdatedTimestamp) {
+        condition.updatedTimestamp = Between(Number(startUpdatedTimestamp), Number(endUpdatedTimestamp));
+      } else if (startUpdatedTimestamp) {
+        condition.updatedTimestamp = MoreThanOrEqual(Number(startUpdatedTimestamp));
+      } else if (endUpdatedTimestamp) {
+        condition.updatedTimestamp = LessThanOrEqual(Number(endUpdatedTimestamp));
+      }
+    }
+    if (filter.tagIds?.length) {
+      const assetIds = await this.assetCommonRepository.findAssetIdsByTagIds(assetType, filter.tagIds);
+      if (assetIds.length) {
+        condition[assetIdField] = In(assetIds);
+      }
+    }
+    if (filter.userIds?.length) {
+      condition.creatorUserId = In(filter.userIds);
+    }
+    const assets = await this.repository.find({
+      where: condition as unknown as FindOptionsWhere<E>,
+    });
+    return assets.map((x) => x.getAssetId());
+  }
 
   public _buildDbQuery(dto: ListDto, options: ConvertListDtoToDbQueryOptions = {}, request?: IRequest): FindManyOptions<E> {
     const { filter = {}, orderBy = 'DESC', orderColumn = 'createdTimestamp', page = 1, limit = 24 } = dto;

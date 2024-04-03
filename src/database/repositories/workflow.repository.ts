@@ -11,6 +11,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
 import { ObjectId } from 'mongodb';
 import { In, Repository } from 'typeorm';
+import { WorkflowAssetRepositroy } from './assets-workflow.respository';
 
 export interface FindWorkflowCondition {
   teamId: string;
@@ -29,6 +30,7 @@ export class WorkflowRepository {
     private readonly workflowTriggerRepository: Repository<WorkflowTriggersEntity>,
     @InjectRepository(WorkflowChatSessionEntity)
     private readonly workflowChatSessionRepository: Repository<WorkflowChatSessionEntity>,
+    private readonly workflowAssetRepositroy: WorkflowAssetRepositroy,
   ) {}
 
   public async findWorkflowByCondition(condition: FindWorkflowCondition) {
@@ -420,7 +422,18 @@ export class WorkflowRepository {
     totalCount: number;
     list: WorkflowMetadataEntity[];
   }> {
-    const { page = 1, limit = 24, orderBy = 'DESC', orderColumn = 'createdTimestamp' } = dto;
+    const { page = 1, limit = 24, orderBy = 'DESC', orderColumn = 'createdTimestamp', filter } = dto;
+    let workflowIdsConstraints = [];
+    if (filter) {
+      workflowIdsConstraints = await this.workflowAssetRepositroy.findAssetIdsByCommonFilter('workflow', filter, 'workflowId');
+      if (!workflowIdsConstraints.length) {
+        return {
+          totalCount: 0,
+          list: [],
+        };
+      }
+    }
+
     let orderColumnName = '';
     switch (orderColumn) {
       case 'createdTimestamp':
@@ -449,6 +462,16 @@ export class WorkflowRepository {
         orderByNumber = -1;
         break;
     }
+    const where = workflowIdsConstraints.length
+      ? `
+is_deleted = false
+AND team_id = $1
+AND workflow_id in (${workflowIdsConstraints.map((x) => `'${x}'`)})
+    `
+      : `
+is_deleted = false
+AND team_id = $1
+      `;
     const totalCountSql = `
 SELECT 
     COUNT(iw.workflow_id)
@@ -461,8 +484,7 @@ INNER JOIN (
     FROM 
         public.infmonkeys_workflow_metadatas
     WHERE 
-        is_deleted = false
-        AND team_id = $1
+        ${where}
     GROUP BY 
         workflow_id
 ) mv ON iw.workflow_id = mv.workflow_id AND iw.version = mv.max_version;
@@ -481,8 +503,7 @@ INNER JOIN (
     FROM 
         public.infmonkeys_workflow_metadatas
     WHERE 
-        is_deleted = false
-        AND team_id = $1
+        ${where}
     GROUP BY 
         workflow_id
 ) mv ON iw.workflow_id = mv.workflow_id AND iw.version = mv.max_version
