@@ -726,7 +726,7 @@ export class VinesCore extends VinesTools(VinesBase) {
     return true;
   }
 
-  private restoreSubWorkflowChildren(render = true) {
+  public restoreSubWorkflowChildren(render = true) {
     this.nodes.some((it) => it.restoreChildren());
     if (render) {
       this.setAllNodeSize(this.nodeInitSize.width, this.nodeInitSize.height);
