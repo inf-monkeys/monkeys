@@ -379,6 +379,8 @@ export class WorkflowCrudService {
           name: originalWorkflow.name + ' - 副本',
           version: version,
           tasks: originalWorkflow.tasks,
+          iconUrl: originalWorkflow.iconUrl,
+          description: originalWorkflow.description,
         },
         {
           useExistId: newWorkflowId,
