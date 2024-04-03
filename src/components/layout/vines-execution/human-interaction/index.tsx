@@ -59,9 +59,10 @@ export const VinesExecutionHumanInteraction: React.FC<IVinesExecutionHumanIntera
     const handleOk = (choose: boolean) => {
       const outputData = {
         choose,
-        ...(inputData?.outputType === 'array-join' && {
-          selected: selectedItems.join(inputData?.arrayJoinSeparator ?? ''),
-        }),
+        selected:
+          inputData?.outputType === 'array-join'
+            ? selectedItems.join(inputData?.arrayJoinSeparator ?? '')
+            : selectedItems,
       };
       toast.promise(trigger({ status: 'COMPLETED', outputData }), {
         loading: '正在提交...',

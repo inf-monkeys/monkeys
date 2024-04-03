@@ -58,9 +58,17 @@ export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({ height, act
         description: customDesc ? `${customDesc} / ${toolDesc}` : `${toolDesc}`,
       });
     }
-    if (activeTool?.executionTask?.status === 'DEFAULT' || !activeTool) {
-      setActiveTool?.(nodes[1]);
+
+    if (setActiveTool) {
+      const activeNode = nodes
+        .filter((node) => ['IN_PROGRESS', 'SCHEDULED'].includes(node.executionTask?.status ?? ''))
+        .sort((a, b) => (a.executionTask?.startTime ?? 0) - (b.executionTask?.startTime ?? 0))
+        .sort((a) => (a.type === 'SUB_WORKFLOW' ? 1 : -1));
+      if (activeNode?.[0]) {
+        setActiveTool(activeNode[0]);
+      }
     }
+
     setTools(newTools);
   }, [VINES_REFRESHER]);
 
