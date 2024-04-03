@@ -4,7 +4,6 @@ import { preload } from 'swr';
 import { createFileRoute, redirect, useNavigate, useParams } from '@tanstack/react-router';
 
 import { CircularProgress } from '@nextui-org/progress';
-import isMongoId from 'validator/es/lib/isMongoId';
 import z from 'zod';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
@@ -48,7 +47,7 @@ export const Route = createFileRoute('/$teamId/workspace/$workflowId/')({
   beforeLoad: (opts) => {
     const workflowId = opts.params.workflowId;
 
-    if (!z.string().refine(isMongoId).safeParse(workflowId).success) {
+    if (!z.string().safeParse(workflowId).success) {
       throw redirect({
         to: '/$teamId/workflows',
         params: {
