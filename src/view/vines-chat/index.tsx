@@ -33,7 +33,7 @@ export const VinesChatView: React.FC = () => {
   const finalHeight = height - 68;
 
   return (
-    <div ref={ref} className="flex size-full p-10">
+    <div ref={ref} className="flex size-full p-6">
       <ChatSidebar />
       <div className={cn('flex flex-1 flex-col gap-4 overflow-clip p-4 pb-0', hasMoreThanOneInput && 'flex-row')}>
         <div className="size-full flex-1">

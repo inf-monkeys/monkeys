@@ -69,7 +69,7 @@ export const VinesLogView: React.FC = () => {
   const finalHeight = height - 108;
 
   return (
-    <main ref={ref} className="flex h-full max-h-full flex-col gap-2 p-10">
+    <main ref={ref} className="flex h-full max-h-full flex-col gap-2 p-6">
       <div className="space-y-0.5">
         <h2 className="text-2xl font-bold tracking-tight">日志视图</h2>
         <p className="text-muted-foreground">
