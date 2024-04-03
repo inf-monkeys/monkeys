@@ -29,11 +29,6 @@ export const SIDEBAR_MAP: NavItem[] = [
         name: 'workflows',
         label: '工作流',
       },
-      {
-        path: '/$teamId/canvas',
-        name: 'canvas',
-        label: '无限画板',
-      },
     ],
   },
   {
