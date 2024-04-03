@@ -54,7 +54,7 @@ export const useUpdateWorkflow = (apikey: string, workflowId: string) =>
     unknown,
     string | null,
     Partial<MonkeyWorkflow>
-  >(workflowId ? `/api/workflow/${workflowId}` : null, vinesFetcher({ method: 'PUT', apikey }));
+  >(workflowId ? `/api/workflow/metadata/${workflowId}` : null, vinesFetcher({ method: 'PUT', apikey }));
 
 export const useWorkflowRelatedAssets = (workflowId?: string, version?: number) =>
   useSWR<IWorkflowRelatedAssetResult | undefined>(
@@ -71,6 +71,6 @@ export const exportWorkflow = async (workflowId: string, name: string, version?:
     },
   })(
     version
-      ? `/api/workflow/${workflowId}/export?version=${version}&exportAssets=1`
-      : `/api/workflow/${workflowId}/export?exportAssets=1`,
+      ? `/api/workflow/metadata/${workflowId}/export?version=${version}&exportAssets=1`
+      : `/api/workflow/metadata/${workflowId}/export?exportAssets=1`,
   );
