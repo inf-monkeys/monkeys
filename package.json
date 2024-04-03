@@ -30,6 +30,8 @@
     "@alicloud/dysmsapi20170525": "^2.0.24",
     "@alicloud/openapi-client": "^0.4.8",
     "@alicloud/tea-util": "^1.4.7",
+    "@aws-sdk/client-s3": "^3.540.0",
+    "@aws-sdk/s3-request-presigner": "^3.540.0",
     "@inf-monkeys/conductor-javascript": "^1.0.2",
     "@inf-monkeys/vines": "^0.0.64",
     "@nestjs/axios": "^3.0.2",

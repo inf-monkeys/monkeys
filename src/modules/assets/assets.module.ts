@@ -7,10 +7,11 @@ import { AssetsPublishService } from './assets.publish.service';
 import { AssetsTagController } from './assets.tag.controller';
 import { AssetsTagService } from './assets.tag.service';
 import { CanvasModule } from './canvas/canvas.module';
+import { MediaModule } from './media/media.module';
 
 @Module({
   controllers: [AssetsFiltersController, AssetsPublishController, AssetsTagController],
   providers: [AssetsFilterService, AssetsPublishService, AssetsTagService, AssetsCommomService],
-  imports: [CanvasModule],
+  imports: [CanvasModule, MediaModule],
 })
 export class AssetsModule {}

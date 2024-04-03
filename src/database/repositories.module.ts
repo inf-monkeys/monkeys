@@ -11,6 +11,7 @@ import { TableCollectionAssetRepositroy } from './repositories/assets-table-coll
 import { TextCollectionAssetRepositroy } from './repositories/assets-text-collections.repository';
 import { WorkflowAssetRepositroy } from './repositories/assets-workflow.respository';
 import { CredentialsRepository } from './repositories/credential.repository';
+import { MediaRepository } from './repositories/media.repository';
 import { SystemConfigurationRepository } from './repositories/system-configuration.repository';
 import { TeamRepository } from './repositories/team.repository';
 import { ToolsRepository } from './repositories/tools.repository';
@@ -35,6 +36,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     TableCollectionAssetRepositroy,
     MediaFileAssetRepositroy,
     WorkflowAssetRepositroy,
+    MediaRepository,
   ],
   exports: [
     ToolsRepository,
@@ -52,6 +54,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     TableCollectionAssetRepositroy,
     MediaFileAssetRepositroy,
     WorkflowAssetRepositroy,
+    MediaRepository,
   ],
   imports: [TypeOrmModule.forFeature(entities)],
 })

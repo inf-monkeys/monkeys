@@ -101,6 +101,16 @@ export interface AuthConfig {
   sms: SMSConfig;
 }
 
+export interface S3Config {
+  enabled: false;
+  endpoint_url: string;
+  aws_access_key_id: string;
+  aws_secret_access_key: string;
+  region_name: string;
+  bucket_name: string;
+  public_access_url: string;
+}
+
 export interface Config {
   server: ServerConfig;
   conductor: ConductorConfig;
@@ -111,6 +121,7 @@ export interface Config {
   cron: CronConfig;
   comfyui: ComfyUICofig;
   auth: AuthConfig;
+  s3: S3Config;
 }
 
 const port = readConfig('server.port', 3000);
@@ -181,4 +192,5 @@ export const config: Config = {
       config: readConfig('auth.sms.config', {}),
     },
   },
+  s3: readConfig('s3', {}),
 };
