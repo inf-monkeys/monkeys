@@ -43,7 +43,10 @@ export class TeamsController {
     const { teamId } = req;
     const data = await this.service.getTeamMembers(teamId);
     return new SuccessResponse({
-      data,
+      data: {
+        totalCount: data.length,
+        list: data,
+      },
     });
   }
 }
