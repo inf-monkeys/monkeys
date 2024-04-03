@@ -35,7 +35,6 @@ export const UgcViewGalleryItem = <E extends object>({
   const cover = useMemo(() => getRenderNode('cover'), [index, row]);
   const title = useMemo(() => getRenderNode('title'), [index, row]);
   const subtitle = useMemo(() => getRenderNode('subtitle'), [index, row]);
-  const description = useMemo(() => getRenderNode('description') || '暂无描述', [index, row]);
 
   return (
     <div
@@ -104,10 +103,12 @@ export const UgcViewGalleryItem = <E extends object>({
           </TooltipTrigger>
         </Tooltip>
 
-        <span className="text-xs opacity-70">{subtitle}</span>
+        <Tooltip content={subtitle} contentProps={{ side: 'bottom' }}>
+          <TooltipTrigger asChild>
+            <span className="max-w-36 text-ellipsis text-xs opacity-70">{subtitle}</span>
+          </TooltipTrigger>
+        </Tooltip>
       </div>
-
-      {/*<div>{operateArea?.(row.original)}</div>*/}
     </div>
   );
 };
