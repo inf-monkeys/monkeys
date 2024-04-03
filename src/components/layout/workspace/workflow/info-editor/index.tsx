@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -14,13 +15,39 @@ import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
 import { IWorkflowInfo, workflowInfoSchema } from '@/schema/workspace/workflow-info.ts';
 
-interface IWorkflowInfoEditorProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface IWorkflowInfoEditorProps {
+  workflow?: MonkeyWorkflow;
+  children?: React.ReactNode;
+  visible?: boolean;
+  setVisible?: (v: boolean) => void;
+  afterUpdate?: () => void;
+}
 
-export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({ children }) => {
-  const { workflow, mutateWorkflow, apikey } = useVinesPage();
+export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
+  workflow: propWorkflow,
+  children,
+  visible,
+  setVisible,
+  afterUpdate,
+}) => {
+  const { workflow: vinesPageWorkflow, mutateWorkflow, apikey } = useVinesPage();
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(visible ?? false);
   const [isLoading, setIsLoading] = useState(false);
+
+  useMemo(() => {
+    typeof visible != 'undefined' && setOpen(visible);
+  }, [visible]);
+
+  useMemo(() => {
+    if (typeof setVisible != 'undefined') {
+      setTimeout(() => {
+        setVisible(open);
+      });
+    }
+  }, [open]);
+
+  const workflow = propWorkflow || vinesPageWorkflow;
 
   const form = useForm<IWorkflowInfo>({
     resolver: zodResolver(workflowInfoSchema),
@@ -47,7 +74,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({ childre
     }
     const newWorkflow = await updateWorkflow(apikey, workflow?.workflowId, workflow?.version ?? 1, data);
     if (newWorkflow) {
-      await mutateWorkflow();
+      afterUpdate ? afterUpdate() : await mutateWorkflow();
       setOpen(false);
       setIsLoading(false);
       toast.success('工作流信息已更新');
@@ -58,7 +85,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({ childre
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>工作流信息</DialogTitle>
@@ -72,14 +99,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({ childre
                 <FormItem>
                   <FormLabel>工作流名称</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="请输入工作流名称"
-                      inputMode="numeric"
-                      maxLength={6}
-                      {...field}
-                      className="grow"
-                      autoFocus
-                    />
+                    <Input placeholder="请输入工作流名称" {...field} className="grow" autoFocus />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
