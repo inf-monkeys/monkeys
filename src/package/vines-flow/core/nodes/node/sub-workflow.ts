@@ -54,10 +54,11 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
     this._task.taskReferenceName = this._task.taskReferenceName.replace(/^sub_workflow:/, 'sub_workflow_');
     this.id = this._task.taskReferenceName;
 
-    if (!this.isNested) {
-      const taskName = this._task.name;
-      const subWorkflowId = taskName.replace('sub_workflow_', '');
+    const taskName = this._task.name;
+    const subWorkflowId = taskName.replace('sub_workflow_', '');
 
+    const isNested = this.isNested;
+    if (!isNested) {
       const hasNameInInputParameters = has(this._task, 'inputParameters.name');
       !hasNameInInputParameters && set(this._task, 'inputParameters.name', subWorkflowId);
 
@@ -65,11 +66,12 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
       const subWorkflowVersion = hasVersionInInputParameters
         ? Number(this._task.inputParameters?.version ?? 1) || 1
         : 1;
-      set(this._task, 'inputParameters.version', subWorkflowVersion);
 
-      set(this._task, 'subWorkflowParam.name', subWorkflowId);
+      set(this._task, 'inputParameters.version', subWorkflowVersion);
       set(this._task, 'subWorkflowParam.version', subWorkflowVersion);
     }
+
+    set(this._task, 'subWorkflowParam.name', isNested ? this.id : subWorkflowId);
 
     return super.check();
   }
