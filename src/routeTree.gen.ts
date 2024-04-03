@@ -28,7 +28,6 @@ import { Route as TeamIdModelStoreIndexImport } from './pages/$teamId/model-stor
 import { Route as TeamIdMediaDataIndexImport } from './pages/$teamId/media-data/index'
 import { Route as TeamIdImageModelsIndexImport } from './pages/$teamId/image-models/index'
 import { Route as TeamIdDataStoreIndexImport } from './pages/$teamId/data-store/index'
-import { Route as TeamIdCanvasIndexImport } from './pages/$teamId/canvas/index'
 import { Route as TeamIdApplicationStoreIndexImport } from './pages/$teamId/application-store/index'
 import { Route as TeamIdActionToolsIndexImport } from './pages/$teamId/action-tools/index'
 import { Route as TeamIdWorkspaceWorkflowIdIndexImport } from './pages/$teamId/workspace/$workflowId/index'
@@ -121,11 +120,6 @@ const TeamIdDataStoreIndexRoute = TeamIdDataStoreIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const TeamIdCanvasIndexRoute = TeamIdCanvasIndexImport.update({
-  path: '/$teamId/canvas/',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const TeamIdApplicationStoreIndexRoute =
   TeamIdApplicationStoreIndexImport.update({
     path: '/$teamId/application-store/',
@@ -175,10 +169,6 @@ declare module '@tanstack/react-router' {
     }
     '/$teamId/application-store/': {
       preLoaderRoute: typeof TeamIdApplicationStoreIndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/$teamId/canvas/': {
-      preLoaderRoute: typeof TeamIdCanvasIndexImport
       parentRoute: typeof rootRoute
     }
     '/$teamId/data-store/': {
@@ -253,7 +243,6 @@ export const routeTree = rootRoute.addChildren([
   LoginIndexRoute,
   TeamIdActionToolsIndexRoute,
   TeamIdApplicationStoreIndexRoute,
-  TeamIdCanvasIndexRoute,
   TeamIdDataStoreIndexRoute,
   TeamIdImageModelsIndexRoute,
   TeamIdMediaDataIndexRoute,
