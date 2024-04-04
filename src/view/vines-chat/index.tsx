@@ -1,12 +1,12 @@
 import React from 'react';
 
 import { useElementSize } from '@mantine/hooks';
+import { ChatSidebar } from 'src/components/layout/vines-view/chat/sidebar';
 
-import { AnInput } from '@/components/layout/view/vines-chat/chat-input/an-input.tsx';
-import { EmptyInput } from '@/components/layout/view/vines-chat/chat-input/empty.tsx';
-import { FormInput } from '@/components/layout/view/vines-chat/chat-input/form.tsx';
-import { VinesChatList } from '@/components/layout/view/vines-chat/chat-list';
-import { ChatSidebar } from '@/components/layout/view/vines-chat/sidebar';
+import { AnInput } from '@/components/layout/vines-view/chat/chat-input/an-input.tsx';
+import { EmptyInput } from '@/components/layout/vines-view/chat/chat-input/empty.tsx';
+import { FormInput } from '@/components/layout/vines-view/chat/chat-input/form.tsx';
+import { VinesChatList } from '@/components/layout/vines-view/chat/messages';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Separator } from '@/components/ui/separator.tsx';
 import { useVinesFlow } from '@/package/vines-flow';

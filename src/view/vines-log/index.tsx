@@ -5,10 +5,10 @@ import { ScrollArea } from '@mantine/core';
 import { useElementSize } from '@mantine/hooks';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { VinesLogFilter } from 'src/components/layout/vines-view/execution-log/filter';
+import { VinesLogList } from 'src/components/layout/vines-view/execution-log/list';
 
 import { useMutationSearchWorkflowExecutions } from '@/apis/workflow/execution';
-import { VinesLogFilter } from '@/components/layout/view/vines-log/filter';
-import { VinesLogList } from '@/components/layout/view/vines-log/list';
 import { Separator } from '@/components/ui/separator.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import {

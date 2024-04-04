@@ -2,9 +2,9 @@ import React from 'react';
 
 import { useElementSize } from '@mantine/hooks';
 import { motion } from 'framer-motion';
+import { VinesExecutionHistory } from 'src/components/layout/vines-view/execution/history';
 
-import { VinesActuator } from '@/components/layout/vines-execution/actuator';
-import { VinesExecutionHistory } from '@/components/layout/vines-execution/history';
+import { VinesActuator } from '@/components/layout/vines-view/execution/actuator';
 import { Separator } from '@/components/ui/separator.tsx';
 
 // million-ignore
