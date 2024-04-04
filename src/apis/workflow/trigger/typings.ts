@@ -1,3 +1,5 @@
+import { BlockDefProperties } from '@inf-monkeys/vines';
+
 export enum WorkflowTriggerType {
   // 手动
   MANUALLY = 'MANUAL',
@@ -12,6 +14,7 @@ export interface ITriggerType {
   displayName: string;
   icon: string;
   description: string;
+  properties?: BlockDefProperties[];
 }
 
 export enum WorkflowTriggerMethod {
@@ -76,7 +79,9 @@ export interface IUpdateTriggerParams {
 }
 
 export interface ICreateTriggerPragma extends Omit<IUpdateTriggerParams, 'enabled' | 'type'> {
-  triggerType: WorkflowTriggerType;
+  triggerType: WorkflowTriggerType | string;
   enabled: boolean;
   version: number;
+
+  extraData?: { [x: string]: any };
 }
