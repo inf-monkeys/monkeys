@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ScrollArea } from '@mantine/core';
 import { useElementSize } from '@mantine/hooks';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -9,6 +8,7 @@ import { VinesLogFilter } from 'src/components/layout/vines-view/execution-log/f
 import { VinesLogList } from 'src/components/layout/vines-view/execution-log/list';
 
 import { useMutationSearchWorkflowExecutions } from '@/apis/workflow/execution';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import {
@@ -77,14 +77,14 @@ export const VinesLogView: React.FC = () => {
         </p>
       </div>
       <Separator className="my-4" />
-      <div className="flex gap-4">
-        <div className="w-[300px]">
+      <div className="flex h-full gap-4">
+        <div className="w-2/5 max-w-80">
           <ScrollArea style={{ height: finalHeight }}>
             <VinesLogFilter form={form} handleSubmit={handleSubmit} isMutating={isMutating} />
           </ScrollArea>
         </div>
         <div className="h-full flex-1">
-          <ScrollArea style={{ height: finalHeight }}>
+          <ScrollArea className="[&>div>div]:h-full" style={{ height: finalHeight }}>
             <VinesLogList searchWorkflowExecutionsData={searchWorkflowExecutionsData} handleSubmit={handleSubmit} />
           </ScrollArea>
         </div>

@@ -2,7 +2,9 @@ import React, { useMemo } from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
 
+import { motion } from 'framer-motion';
 import _ from 'lodash';
+import { BookDashed } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { VinesWorkflowExecutionLists } from '@/apis/workflow/execution/typings';
@@ -49,7 +51,18 @@ export const VinesLogList: React.FC<IVinesLogListProps> = ({ searchWorkflowExecu
 
   return (
     <div className="flex h-full flex-col gap-3 px-2">
-      {!workflowExecutionLength && <div className="vines-center size-full">暂无数据</div>}
+      {!workflowExecutionLength && (
+        <motion.div
+          className="vines-center size-full flex-col"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: { delay: 0.3 } }}
+        >
+          <BookDashed size={64} />
+          <div className="mt-4 flex flex-col text-center">
+            <h2 className="font-bold">暂无执行记录</h2>
+          </div>
+        </motion.div>
+      )}
       {workflowExecutions && workflowDefinitions
         ? workflowExecutions.map((workflowExecution, index) => (
             <VinesLogItem
