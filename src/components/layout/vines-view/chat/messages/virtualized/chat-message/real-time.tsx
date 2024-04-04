@@ -78,8 +78,9 @@ export const VinesRealTimeChatMessage = memo((props) => {
       instanceId={instanceId}
     >
       <SmoothTransition
+        className="overflow-clip"
         onAnimationComplete={() =>
-          setTimeout(() => virtuosoRef.current?.scrollToIndex({ align: 'end', behavior: 'auto', index: 'LAST' }), 32)
+          setTimeout(() => virtuosoRef.current?.scrollToIndex({ align: 'end', behavior: 'smooth', index: 'LAST' }), 32)
         }
       >
         <div className="flex flex-col gap-4">
