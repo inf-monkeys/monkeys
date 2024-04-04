@@ -13,9 +13,9 @@ export const EmptyInput: React.FC<IEmptyInputProps> = ({ disabled, onClick }) =>
   return (
     <div className="flex">
       <div className="vines-center flex-1">
-        <p className="text-sm text-gray-10">暂未配置输入，可直接运行</p>
+        <p className="text-sm text-gray-10">{disabled ? '正在运行中' : '暂未配置输入，可直接运行'}</p>
       </div>
-      <Button disabled={disabled} variant="outline" icon={<Play />} onClick={() => onClick()}>
+      <Button disabled={disabled} variant="outline" icon={<Play />} onClick={() => onClick()} loading={disabled}>
         运行
       </Button>
     </div>

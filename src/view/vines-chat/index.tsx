@@ -51,7 +51,7 @@ export const VinesChatView: React.FC = () => {
               />
             </>
           ) : (
-            <AnInput inputs={workflowInput} onClick={handleExecutionWorkflow} />
+            <AnInput disabled={disabled} inputs={workflowInput} onClick={handleExecutionWorkflow} />
           )
         ) : (
           <EmptyInput disabled={disabled} onClick={handleExecutionWorkflow} />

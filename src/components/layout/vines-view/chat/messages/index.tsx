@@ -3,7 +3,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { CircularProgress } from '@nextui-org/progress';
 import dayjs from 'dayjs';
 import equal from 'fast-deep-equal/es6';
+import { AnimatePresence, motion } from 'framer-motion';
 import { omit } from 'lodash';
+import { MessageSquareDashed } from 'lucide-react';
 
 import { useSearchWorkflowExecutions } from '@/apis/workflow/execution';
 import { IVinesChatListItem } from '@/components/layout/vines-view/chat/messages/typings.ts';
@@ -89,11 +91,44 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ workflowId }) => 
     setList(newList);
   }, [executionData]);
 
-  return isLoading && !list ? (
-    <div className="vines-center size-full">
-      <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
-    </div>
-  ) : (
-    list && <VirtualizedList data={list} />
+  return (
+    <AnimatePresence>
+      {isLoading && !list ? (
+        <motion.div
+          key="vines-chat-loading"
+          className="vines-center size-full"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+        </motion.div>
+      ) : list?.length ? (
+        <motion.div
+          key="vines-chat-context"
+          className="size-full"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2, delay: 0.35 }}
+        >
+          <VirtualizedList data={list} />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="vines-chat-empty"
+          className="vines-center size-full flex-col"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: { delay: 0.3 } }}
+          transition={{ duration: 0.2 }}
+        >
+          <MessageSquareDashed size={64} />
+          <div className="mt-4 flex flex-col text-center">
+            <h2 className="font-bold">暂无对话</h2>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
