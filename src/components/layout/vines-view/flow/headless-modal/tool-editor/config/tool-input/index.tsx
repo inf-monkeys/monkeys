@@ -69,6 +69,7 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
       <div className={cn('flex flex-col gap-4 px-1 py-2', className)}>
         {finalInputs?.map((def, index) => (
           <VinesInputProperty
+            toolName={tool?.name || ''}
             key={def.name + index}
             def={def}
             nodeId={nodeId}

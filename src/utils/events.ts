@@ -21,7 +21,8 @@ export type FlowEventType =
   | 'flow-input-editor'
   | 'flow-trigger-selector'
   | 'flow-trigger-schedule'
-  | 'flow-trigger-webhook';
+  | 'flow-trigger-webhook'
+  | 'flow-trigger-custom';
 export type EventType = AppEventType | FlowCanvasEventType | FlowEventType;
 
 const VinesEvent = new EventEmitter<EventType>();

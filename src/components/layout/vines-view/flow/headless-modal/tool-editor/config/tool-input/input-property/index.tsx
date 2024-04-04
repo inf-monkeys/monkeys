@@ -18,13 +18,18 @@ import { InputPropertyWrapper } from '@/components/layout/vines-view/flow/headle
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { IVinesVariableMap, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
+import { QRCodeInput } from './components/qrcode';
+
 export interface IVinesInputPropertyProps {
+  toolName: string;
   def: VinesToolDefProperties;
   value: unknown;
   onChange: (value: unknown) => void;
   nodeId: string;
   variableMapper: Record<string, IVinesVariableMap>;
   disabled?: boolean;
+  // 有些输入框比如 qrcode 可能是有状态的，需要传递自定义上下文（比如工作流 id、触发器 id）来确定二维码状态
+  context?: { [x: string]: any };
 }
 
 export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) => {
@@ -93,6 +98,7 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
   const hasFileInput = useSimpleInput && componentMode === 'component' && type === 'file';
   const hasPresetOptions = assetType;
   const hasNotice = type === 'notice';
+  const hasQrcode = type === ('qrcode' as any);
   const isBlankInput =
     useSimpleInput &&
     !hasNotice &&
@@ -102,6 +108,7 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
     !hasNumberInput &&
     !hasOptionsInput &&
     !hasFileInput &&
+    !hasQrcode &&
     !hasPresetOptions;
 
   const [tempValue, setTempValue] = useState(value);
@@ -168,6 +175,7 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
       {isMultiFieldObject && <MultiFieldObjectInput {...finalProps} />}
 
       {hasStringInput && <StringInput {...finalProps} />}
+      {hasQrcode && <QRCodeInput {...finalProps} />}
       {hasBooleanInput && <BooleanInput {...finalProps} />}
       {hasNumberInput && <NumberInput {...finalProps} />}
       {hasOptionsInput && <OptionsInput {...finalProps} />}

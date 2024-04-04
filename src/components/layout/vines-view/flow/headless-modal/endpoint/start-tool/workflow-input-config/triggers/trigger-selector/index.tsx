@@ -16,6 +16,8 @@ import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
 import VinesEvent from '@/utils/events.ts';
 
+import { CustomTrigger } from './custom-trigger';
+
 interface ITriggerSelectorProps {}
 
 export const TriggerSelector: React.FC<ITriggerSelectorProps> = () => {
@@ -55,14 +57,12 @@ export const TriggerSelector: React.FC<ITriggerSelectorProps> = () => {
         },
         error: '触发器创建失败',
       });
-    }
-
-    if (type === WorkflowTriggerType.SCHEDULER) {
+    } else if (type === WorkflowTriggerType.SCHEDULER) {
       VinesEvent.emit('flow-trigger-schedule', workflowId);
-    }
-
-    if (type === WorkflowTriggerType.WEBHOOK) {
+    } else if (type === WorkflowTriggerType.WEBHOOK) {
       VinesEvent.emit('flow-trigger-webhook', workflowId);
+    } else {
+      VinesEvent.emit('flow-trigger-custom', workflowId, triggerType);
     }
 
     setOpen(false);
@@ -112,6 +112,7 @@ export const TriggerSelector: React.FC<ITriggerSelectorProps> = () => {
       </Dialog>
       <ScheduleTrigger />
       <WebhookTrigger />
+      <CustomTrigger />
     </>
   );
 };

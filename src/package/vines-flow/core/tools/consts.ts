@@ -95,4 +95,9 @@ export const VINES_VARIABLE_TAG: IVinesVariableTag = {
     color: '#e28352',
     multipleColor: '#d16e3e',
   },
+  qrcode: {
+    name: '二维码',
+    color: '#e28352',
+    multipleColor: '#d16e3e',
+  },
 };
