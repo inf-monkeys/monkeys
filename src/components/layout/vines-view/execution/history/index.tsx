@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useClipboard } from '@mantine/hooks';
 import { CircularProgress } from '@nextui-org/progress';
 import { Command as CommandPrimitive, CommandLoading } from 'cmdk';
-import { Copy, Search } from 'lucide-react';
+import { Copy, MousePointerSquareDashed, Search } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useSearchWorkflowExecutions } from '@/apis/workflow/execution';
@@ -19,6 +19,7 @@ import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { useViewStore } from '@/store/useViewStore';
+import { cn } from '@/utils';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 interface IVinesExecutionHistoryProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -61,24 +62,36 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
     data?.data?.sort((a) => (a.status === 'PAUSED' || a.status === 'RUNNING' ? -1 : 1)).slice(0, 20) ?? [];
 
   const workflowStatus = vines.executionStatus;
+  const isEmpty = !finalData?.length && !isLoading;
 
   return (
     <Command className="bg-transparent" value={activeInstanceId}>
       <div className="relative m-4 mt-1 flex items-center rounded-md border border-input px-2 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-vines-500 has-[:focus-visible]:ring-offset-2 [&>div]:mt-1">
         <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
         <CommandPrimitive.Input
-          className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+          className={cn(
+            'flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
+            isEmpty && 'pointer-events-none opacity-85',
+          )}
           placeholder="搜索运行实例 ID"
         />
       </div>
-      <CommandList className="relative h-full max-h-none">
+      {isEmpty && (
+        <div className="vines-center size-full flex-1 flex-col">
+          <MousePointerSquareDashed size={64} />
+          <div className="mt-4 flex flex-col text-center">
+            <h2 className="font-bold">暂无运行实例</h2>
+          </div>
+        </div>
+      )}
+      <CommandList className={cn('relative h-full max-h-none', isEmpty && 'hidden')}>
         {!data && isLoading ? (
           <CommandLoading className="vines-center absolute z-10 size-full py-6">
             <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
           </CommandLoading>
-        ) : (
+        ) : !isEmpty ? (
           <CommandEmpty>找不到此运行实例</CommandEmpty>
-        )}
+        ) : null}
 
         <CommandGroup>
           {finalData.map((it) => {
