@@ -38,10 +38,9 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
     useCanvasInteractionStore();
 
   const [, setLocalRenderDirection] = useLocalStorage<string>('vines-ui-process-page-render-direction', 'false', false);
-  const [, setLocalRenderType] = useLocalStorage<string>(
+  const [, setLocalRenderType] = useLocalStorage<Record<string, IVinesFlowRenderType>>(
     'vines-ui-process-page-render-type',
-    IVinesFlowRenderType.SIMPLIFY,
-    false,
+    {},
   );
 
   const isEditMode = canvasMode === CanvasStatus.EDIT;
@@ -76,7 +75,7 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
       const nextRenderType = map[nextIndex];
       vines.update({ renderType: nextRenderType });
       void updatePageData('customOptions.render.type', nextRenderType);
-      setLocalRenderType(nextRenderType);
+      setLocalRenderType({ [workflowId]: nextRenderType });
       setTimeout(() => setVisible(true), 80);
     }, 80);
   };

@@ -14,6 +14,7 @@ import { VinesExpandToolbar } from '@/components/layout/vines-view/flow/toolbar/
 import { IVinesFlowRenderOptions, IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { useCanvasStore } from '@/store/useCanvasStore';
+import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { usePageStore } from '@/store/usePageStore';
 import { useLocalStorage } from '@/utils';
@@ -23,6 +24,7 @@ import { VinesFlowEvents } from '@/view/vines-flow/events.tsx';
 interface IVinesFlowProps {}
 
 export const VinesFlow: React.FC<IVinesFlowProps> = () => {
+  const { workflowId } = useFlowStore();
   const { containerWidth, containerHeight, page } = usePageStore();
   const { canvasMode, visible, setVisible, setInitialScale } = useCanvasStore();
 
@@ -33,17 +35,19 @@ export const VinesFlow: React.FC<IVinesFlowProps> = () => {
   } = useVinesFlow();
 
   const [localRenderDirection] = useLocalStorage<string>('vines-ui-process-page-render-direction', 'false', false);
-  const [localRenderType] = useLocalStorage<string>(
-    'vines-ui-process-page-render-type',
-    IVinesFlowRenderType.SIMPLIFY,
-    false,
-  );
+  const [localRenderType] = useLocalStorage<Record<string, IVinesFlowRenderType>>('vines-ui-process-page-render-type', {
+    [workflowId]: IVinesFlowRenderType.SIMPLIFY,
+  });
 
   useEffect(() => {
     const renderDirection = (
       get(page, 'customOptions.render.useHorizontal', localRenderDirection === 'true') ? 'horizontal' : 'vertical'
     ) as IVinesFlowRenderOptions['direction'];
-    const renderType = get(page, 'customOptions.render.type', localRenderType) as IVinesFlowRenderOptions['type'];
+    const renderType = get(
+      page,
+      'customOptions.render.type',
+      localRenderType[workflowId],
+    ) as IVinesFlowRenderOptions['type'];
     vines.update({ renderDirection, renderType });
   }, [page, localRenderDirection, localRenderType]);
 
