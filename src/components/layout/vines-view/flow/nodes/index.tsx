@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 
 import { ComplicateNodes } from '@/components/layout/vines-view/flow/nodes/complicate';
 import { NodeController } from '@/components/layout/vines-view/flow/nodes/controller.tsx';
@@ -21,27 +21,22 @@ export const VinesNodes: React.FC<IVinesNodesProps> = memo(() => {
   const [nodeStagger, setNodeStagger] = useState(0.2);
 
   const nodeLengthRef = useRef(0);
-  const handleUpdate = useCallback(
-    (nodes: VinesNode[], length: number) => {
-      reTimer(
-        setTimeout(() => {
-          nodeLengthRef.current = length;
-          setVisible(length > 0);
-          if (!length) return;
-
-          setVinesNodes(nodes);
-          setNodeStagger(length * 0.12 > 2 ? 2 / length : 0.12);
-        }, 116) as unknown as number,
-      );
-    },
-    [reTimer],
-  );
 
   useEffect(() => {
     const nodes = vines.getAllNodes();
     const nodeLength = nodes.length;
     nodeLength !== nodeLengthRef.current && setVisible(false);
-    handleUpdate(nodes, nodeLength);
+
+    reTimer(
+      setTimeout(() => {
+        nodeLengthRef.current = nodeLength;
+        setVisible(nodeLength > 0);
+        if (!nodeLength) return;
+
+        setVinesNodes(nodes);
+        setNodeStagger(nodeLength * 0.12 > 2 ? 2 / nodeLength : 0.12);
+      }, 116) as unknown as number,
+    );
   }, [VINES_REFRESHER]);
 
   return (

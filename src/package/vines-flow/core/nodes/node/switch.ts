@@ -1,4 +1,5 @@
 import { SwitchTaskDef, TaskType } from '@io-orkes/conductor-javascript';
+import { get, isEmpty, merge, omit } from 'lodash';
 
 import { VinesCore } from '@/package/vines-flow/core';
 import { ControlFlowVinesNode, VinesNode } from '@/package/vines-flow/core/nodes/base.ts';
@@ -25,11 +26,33 @@ export class SwitchNode extends ControlFlowVinesNode<SwitchTaskDef> {
   }
 
   private parseChildren(decisionCases: SwitchTaskDef['decisionCases']) {
-    this.decisions = {};
     for (const [branchName, branchTasks] of Object.entries(decisionCases)) {
-      this.decisions[branchName] = branchTasks.map((it) => VinesNode.create(it, this._vinesCore));
+      if (this.decisions[branchName]?.length) {
+        branchTasks.forEach((it) => {
+          const nodeId = it.taskReferenceName;
+          const node = this.decisions[branchName].find((node) => node.id === nodeId);
+          if (node) {
+            node.updateRaw(nodeId, it);
+          } else {
+            this.decisions[branchName].push(VinesNode.create(it, this._vinesCore));
+          }
+        });
+      } else {
+        this.decisions[branchName] = branchTasks.map((it) => VinesNode.create(it, this._vinesCore));
+      }
     }
-    this.children.push(...Object.values(this.decisions).flat());
+    this.children = Object.values(this.decisions).flat();
+  }
+
+  override check(): boolean {
+    const parameters = get(this._task, 'inputParameters.parameters', {});
+    if (!isEmpty(parameters)) {
+      merge(this._task, { inputParameters: parameters });
+    }
+
+    this._task = omit(this._task, ['inputParameters.parameters']) as SwitchTaskDef;
+
+    return super.check();
   }
 
   // region Render
