@@ -84,6 +84,7 @@ export default defineNode({
       name: 'loopCount',
       type: 'number',
       required: true,
+      default: 2,
       displayOptions: {
         show: {
           mode: [DoWhileMode.Fixed],

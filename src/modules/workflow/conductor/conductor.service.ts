@@ -100,18 +100,6 @@ export class ConductorService {
         task.name = CONDUCTOR_TASK_DEF_NAME;
       }
 
-      // 特殊类型的 block: SWITCH
-      if (task.type === 'SWITCH') {
-        const { parameters } = task.inputParameters;
-        task.inputParameters = parameters;
-      }
-
-      // https://conductor.netflix.com/documentation/configuration/workflowdef/operators/set-variable-task.html
-      if (task.type === BlockType.SET_VARIABLE) {
-        const { parameters } = task.inputParameters;
-        task.inputParameters = parameters;
-      }
-
       // 循环 block 的列表循环模式
       if (task.type === 'DO_WHILE') {
         const { mode = DoWhileMode.Expression, loopCount = 0 } = task.inputParameters;
@@ -200,7 +188,9 @@ export class ConductorService {
       ],
       true,
     );
-    console.log(res);
+    if (!res.bulkSuccessfulResults?.length) {
+      throw new Error('Save workflow in conductor failed');
+    }
   }
 
   public async getWorkflowExecutionStatus(teamId: string, workflowInstanceId: string) {

@@ -335,21 +335,51 @@ export class WorkflowValidator {
   }
 
   private static validateSubWorkflow(task: WorkflowTask) {
-    const { name, version } = task.inputParameters;
     const issues: WorkflowValidationIssue[] = [];
-    if (!name || !version) {
+    const { subWorkflowParam } = task;
+    if (!subWorkflowParam) {
       issues.push({
         taskReferenceName: task.taskReferenceName,
         issueType: ValidationIssueType.ERROR,
         humanMessage: {
-          zh: `请选择子流程版本号`,
-          en: `Missing Sub Workflow version`,
+          zh: `子流程数据结构错误: subWorkflowParam 不存在`,
+          en: `Sub workflow error: subWorkflowParam is missing`,
         },
         detailReason: {
-          type: ValidationReasonType.VALUE_REQUIRED,
-          name: 'version',
+          type: ValidationReasonType.SUB_WORKFLOW_PARAM_MISSING,
+          name: 'subWorkflowParam',
         },
       });
+    } else {
+      const { workflowDefinition, name, version } = task.subWorkflowParam;
+      if (!name) {
+        issues.push({
+          taskReferenceName: task.taskReferenceName,
+          issueType: ValidationIssueType.ERROR,
+          humanMessage: {
+            zh: `子流程数据结构错误: name 不存在`,
+            en: `Sub workflow error: name is missing`,
+          },
+          detailReason: {
+            type: ValidationReasonType.VALUE_REQUIRED,
+            name: 'name',
+          },
+        });
+      }
+      if (!workflowDefinition && !version) {
+        issues.push({
+          taskReferenceName: task.taskReferenceName,
+          issueType: ValidationIssueType.ERROR,
+          humanMessage: {
+            zh: `子流程数据结构错误: version 未设置`,
+            en: `Sub workflow error: version is missing`,
+          },
+          detailReason: {
+            type: ValidationReasonType.VALUE_REQUIRED,
+            name: 'version',
+          },
+        });
+      }
     }
     return issues;
   }

@@ -137,8 +137,8 @@ export const config: Config = {
     baseUrl: readConfig('conductor.baseUrl', 'http://127.0.0.1:8080/api'),
     auth: readConfig('conductor.auth', null),
     polling: {
-      interval: readConfig('conductor.polling.interval', 100),
-      concurrency: readConfig('conductor.polling.concurrency', 20),
+      interval: readConfig('conductor.polling.interval', 10),
+      concurrency: readConfig('conductor.polling.concurrency', 10),
     },
     workerPrefix: readConfig('conductor.workerPrefix'),
   },
