@@ -14,7 +14,7 @@ export interface ICredentialType {
   properties: BlockDefPropertiesExtended[];
   tokenScript: string;
   testConnectionScript?: string;
-  type: CredentialAuthType;
+  type: ICredentialAuthType;
 }
 
 export interface ICredentialDetail {

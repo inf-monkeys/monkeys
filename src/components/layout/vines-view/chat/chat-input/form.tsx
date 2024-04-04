@@ -25,7 +25,7 @@ export const FormInput: React.FC<IFormInputProps> = ({ inputs, height, onClick, 
       animate={{ marginRight: disabled ? -width - 35 : 0 }}
     >
       <VinesWorkflowInput inputs={inputs} height={height} onSubmit={onClick}>
-        <Button variant="outline" type="submit" className="line-clamp-1">
+        <Button variant="outline" type="submit" className="line-clamp-1" loading={disabled}>
           运行工作流
         </Button>
       </VinesWorkflowInput>

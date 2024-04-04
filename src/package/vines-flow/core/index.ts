@@ -487,7 +487,14 @@ export class VinesCore extends VinesTools(VinesBase) {
       return false;
     }
 
-    this.getAllNodes(false).forEach((it) => {
+    const nodes = this.getAllNodes(false);
+
+    if (nodes.some((it) => it.id.includes('fake_node'))) {
+      toast.warning('启动运行失败！存在空工具');
+      return false;
+    }
+
+    nodes.forEach((it) => {
       it.clearExecutionStatus();
       it.clearRunningTask();
     });
