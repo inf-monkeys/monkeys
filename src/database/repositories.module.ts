@@ -15,6 +15,7 @@ import { MediaRepository } from './repositories/media.repository';
 import { SystemConfigurationRepository } from './repositories/system-configuration.repository';
 import { TeamRepository } from './repositories/team.repository';
 import { ToolsRepository } from './repositories/tools.repository';
+import { TriggerTypeRepository } from './repositories/trigger-type.repository';
 import { UserRepository } from './repositories/user.repository';
 import { WorkflowRepository } from './repositories/workflow.repository';
 
@@ -37,6 +38,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     MediaFileAssetRepositroy,
     WorkflowAssetRepositroy,
     MediaRepository,
+    TriggerTypeRepository,
   ],
   exports: [
     ToolsRepository,
@@ -55,6 +57,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     MediaFileAssetRepositroy,
     WorkflowAssetRepositroy,
     MediaRepository,
+    TriggerTypeRepository,
   ],
   imports: [TypeOrmModule.forFeature(entities)],
 })

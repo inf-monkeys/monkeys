@@ -1,6 +1,7 @@
 import { logger } from '@/common/logger';
 import { enumToList, isValidNamespace } from '@/common/utils';
 import { SYSTEM_NAMESPACE } from '@/database/entities/tools/tools-server.entity';
+import { TriggerTypeRepository } from '@/database/repositories/trigger-type.repository';
 import { BlockDefinition } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 import { OpenAPIObject } from '@nestjs/swagger';
@@ -19,6 +20,7 @@ export class ToolsRegistryService {
   constructor(
     private readonly toolsRepository: ToolsRepository,
     private readonly credentialsRepository: CredentialsRepository,
+    private readonly triggerTypesRepository: TriggerTypeRepository,
   ) {}
 
   private async validateManifestJson(data: ManifestJson) {
@@ -117,6 +119,9 @@ export class ToolsRegistryService {
     await this.toolsRepository.saveServer(display_name, manifestUrl, baseUrl, manifestData);
     if (manifestData.credentials) {
       await this.credentialsRepository.createOrUpdateCredentialTypes(namespace, manifestData.credentials);
+    }
+    if (manifestData.triggers) {
+      await this.triggerTypesRepository.createOrUpdateTriggerTypes(namespace, manifestData.triggers);
     }
 
     await this.toolsRepository.createOrUpdateTools(namespace, tools);

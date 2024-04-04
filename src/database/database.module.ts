@@ -26,6 +26,7 @@ import { SdModelEntity } from './entities/assets/model/sd-model/sd-model';
 import { TeamEntity } from './entities/identity/team';
 import { UserEntity } from './entities/identity/user';
 import { UserTeamRelationshipEntity } from './entities/identity/user-team-relationship';
+import { ToolsTriggerTypesEntity } from './entities/tools/tools-trigger-types';
 import { WorkflowPageEntity } from './entities/workflow/workflow-page';
 
 export const entities: EntityClassOrSchema[] = [
@@ -34,6 +35,7 @@ export const entities: EntityClassOrSchema[] = [
   ToolsCredentialTypeEntity,
   ToolsCredentialEntity,
   ToolsServerEntity,
+  ToolsTriggerTypesEntity,
   WorkflowExecutionEntity,
   WorkflowMetadataEntity,
   WorkflowChatSessionEntity,

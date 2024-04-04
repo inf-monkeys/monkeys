@@ -1,20 +1,15 @@
 import { generateDbId } from '@/common/utils';
 import { calculateTimeDifference, getNextCronTimestamp } from '@/common/utils/cron';
 import { WorkflowTriggerType, WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
+import { TriggerTypeRepository } from '@/database/repositories/trigger-type.repository';
 import { Injectable } from '@nestjs/common';
 import * as uuid from 'uuid';
 import { WorkflowRepository } from '../../database/repositories/workflow.repository';
+import { TriggerDefinition } from '../tools/interfaces';
 import { CreateWorkflowTriggerDto } from './dto/req/create-trigger.dto';
 import { UpdateWorkflowTriggerDto } from './dto/req/update-trigger.dto';
 
-export interface Trigger {
-  displayName: string;
-  icon: string;
-  type: WorkflowTriggerType;
-  description: string;
-}
-
-export const TRIGGERS: Trigger[] = [
+export const BUILTIN_TRIGGERS: TriggerDefinition[] = [
   {
     displayName: '手动触发',
     type: WorkflowTriggerType.MANUALLY,
@@ -37,7 +32,23 @@ export const TRIGGERS: Trigger[] = [
 
 @Injectable()
 export class WorkflowTriggerService {
-  constructor(private readonly workflowRepository: WorkflowRepository) {}
+  constructor(
+    private readonly workflowRepository: WorkflowRepository,
+    private readonly triggerTypesRepository: TriggerTypeRepository,
+  ) {}
+
+  public async listTriggerTypes(): Promise<TriggerDefinition[]> {
+    const customTriggers = await this.triggerTypesRepository.listTriggerTypes();
+    return BUILTIN_TRIGGERS.concat(
+      customTriggers.map((item) => ({
+        displayName: item.displayName,
+        description: item.description,
+        icon: item.icon,
+        properties: item.properties,
+        type: item.type,
+      })),
+    );
+  }
 
   public async deleteWorkflowTrigger(workflowId: string, triggerId: string) {
     return await this.workflowRepository.deleteTrigger(workflowId, triggerId);
@@ -48,9 +59,10 @@ export class WorkflowTriggerService {
   }
 
   public async createWorkflowTrigger(workflowId: string, triggerConfig: CreateWorkflowTriggerDto) {
-    const { triggerType, cron, enabled = true, webhookConfig, version } = triggerConfig;
+    const { triggerType, cron, enabled = true, webhookConfig, version, extraConfig } = triggerConfig;
 
     let nextTriggerTime = undefined;
+    let isCustomTrigger = false;
     if (triggerType === WorkflowTriggerType.SCHEDULER) {
       if (!cron) {
         throw new Error(`${triggerType} 类型的触发器必须设置 cron 参数`);
@@ -61,12 +73,13 @@ export class WorkflowTriggerService {
         throw new Error(`触发器最少允许设置 1 分钟时间间隔`);
       }
       nextTriggerTime = getNextCronTimestamp(cron);
-    }
-
-    if (triggerType === WorkflowTriggerType.WEBHOOK) {
+    } else if (triggerType === WorkflowTriggerType.WEBHOOK) {
       if (!webhookConfig) {
         throw new Error(`${triggerType} 类型的触发器必须设置 webhookConfig 参数`);
       }
+    } else {
+      // 否则是插件提供的触发器，需要调用插件的触发器接口
+      isCustomTrigger = true;
     }
 
     const newTrigger: Partial<WorkflowTriggersEntity> = {
@@ -75,9 +88,11 @@ export class WorkflowTriggerService {
       workflowVersion: version,
       type: triggerType,
       enabled,
-      webhookConfig,
     };
 
+    if (webhookConfig) {
+      newTrigger.webhookConfig;
+    }
     if (cron) {
       newTrigger.cron = cron;
     }
@@ -87,7 +102,10 @@ export class WorkflowTriggerService {
     if (triggerType === WorkflowTriggerType.WEBHOOK) {
       newTrigger.webhookPath = uuid.v4();
     }
-    await this.workflowRepository.createWorkflowTrigger(newTrigger);
+    const trigger = await this.workflowRepository.createWorkflowTrigger(newTrigger);
+
+    if (isCustomTrigger) {
+    }
   }
 
   public async updateWorkflowTrigger(workflowId: string, triggerId: string, triggerConfig: UpdateWorkflowTriggerDto) {

@@ -27,6 +27,14 @@ export interface CredentialDefinition {
   type: CredentialAuthType;
 }
 
+export interface TriggerDefinition {
+  description?: string;
+  displayName: string;
+  properties?: BlockDefProperties[];
+  icon?: string;
+  type: string;
+}
+
 export interface AuthConfig {
   type: AuthType;
   authorization_type?: 'bearer';
@@ -43,6 +51,7 @@ export interface ManifestJson {
     url: string;
   };
   contact_email: string;
+  triggers?: TriggerDefinition[];
   credentials?: CredentialDefinition[];
   credentialEncryptKey?: string;
 }

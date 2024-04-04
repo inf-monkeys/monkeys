@@ -40,6 +40,14 @@ export class CreateWorkflowTriggerDto {
   webhookConfig?: WebhookTriggerConfig;
 
   @ApiProperty({
+    description: '其他配置',
+    name: 'extraConfig',
+    type: Object,
+    required: false,
+  })
+  extraConfig?: { [x: string]: any };
+
+  @ApiProperty({
     description: '工作流版本',
     name: 'version',
     type: Number,

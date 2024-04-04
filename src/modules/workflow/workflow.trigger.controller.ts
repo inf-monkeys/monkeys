@@ -5,7 +5,7 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards 
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateWorkflowTriggerDto } from './dto/req/create-trigger.dto';
 import { UpdateWorkflowTriggerDto } from './dto/req/update-trigger.dto';
-import { TRIGGERS, WorkflowTriggerService } from './workflow.trigger.service';
+import { WorkflowTriggerService } from './workflow.trigger.service';
 
 @Controller('workflow/')
 @ApiTags('Workflows/Trigger')
@@ -20,7 +20,7 @@ export class WorkflowTriggerController {
   })
   public async getTriggerTypes() {
     return new SuccessResponse({
-      data: TRIGGERS,
+      data: await this.service.listTriggerTypes(),
     });
   }
 
