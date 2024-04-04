@@ -21,7 +21,7 @@ export default defineNode({
       displayName: '循环模式',
       name: 'mode',
       type: 'options',
-      default: DoWhileMode.Expression,
+      default: DoWhileMode.Fixed,
       options: [
         {
           name: '循环列表模式',

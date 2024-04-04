@@ -1,5 +1,5 @@
 import { logger } from '@/common/logger';
-import { enumToList } from '@/common/utils';
+import { enumToList, isValidNamespace } from '@/common/utils';
 import { SYSTEM_NAMESPACE } from '@/database/entities/tools/tools-server.entity';
 import { BlockDefinition } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
@@ -40,6 +40,10 @@ export class ToolsRegistryService {
     const reservedNamespace = [SYSTEM_NAMESPACE];
     if (reservedNamespace.includes(data.namespace)) {
       throw new Error(`Error when parse manifest json: namespace is can not use reserved word: ${data.namespace}`);
+    }
+
+    if (!isValidNamespace(data.namespace)) {
+      throw new Error(`Error when parse manifest json: for namespace, only numbers, letters, and underscores are allowed, and two consecutive underscores are not permitted.`);
     }
 
     if (!data.auth) {

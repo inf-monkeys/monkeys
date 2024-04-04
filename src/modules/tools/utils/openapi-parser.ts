@@ -1,3 +1,4 @@
+import { isValidToolName } from '@/common/utils';
 import { BlockDefPropertyTypes, BlockDefinition, BlockType } from '@inf-monkeys/vines';
 import { OpenAPIObject, OperationObject, ParameterObject, ReferenceObject, RequestBodyObject, SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 
@@ -12,6 +13,9 @@ export const parseOpenApiSpecAsBlocks = (namespace: string, specData: OpenAPIObj
           continue;
         }
         const name = apiContent['x-monkey-tool-name'];
+        if (!isValidToolName(name)) {
+          throw new Error(`Error when parse tool: For tool name, only numbers, letters, and underscores are allowed, and two consecutive underscores are not permitted.`);
+        }
         const extra = apiContent['x-monkey-tool-extra'] || {};
         extra.apiInfo = {
           method,
@@ -19,7 +23,7 @@ export const parseOpenApiSpecAsBlocks = (namespace: string, specData: OpenAPIObj
         };
         const block: BlockDefinition = {
           type: BlockType.SIMPLE,
-          name: `${namespace}__${name}`,
+          name: `${namespace}$$${name}`,
           displayName: apiContent['x-monkey-tool-display-name'] || apiContent.summary,
           description: apiContent['x-monkey-tool-description'] || apiContent.description,
           categories: apiContent['x-monkey-tool-categories'] || [],

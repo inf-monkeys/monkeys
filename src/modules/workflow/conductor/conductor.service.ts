@@ -1,4 +1,5 @@
 import { conductorClient } from '@/common/conductor';
+import { config } from '@/common/config';
 import { InputParametersType } from '@/common/typings/workflow';
 import { flatTasks } from '@/common/utils/conductor';
 import { SYSTEM_NAMESPACE } from '@/database/entities/tools/tools-server.entity';
@@ -22,17 +23,17 @@ export class ConductorService {
     // const team = await this.teamService.getTeamById(teamId);
 
     for (const task of tasks) {
-      // const workflowTaskNamePrefix = team?.workflowTaskNamePrefix || config.conductor.workerPrefix;
-      // if (workflowTaskNamePrefix) {
-      //   // 移除前缀
-      //   if (task.taskDefName.startsWith(workflowTaskNamePrefix)) {
-      //     task.taskDefName = task.taskDefName.replace(workflowTaskNamePrefix, '');
-      //     task.taskType = task.taskType.replace(workflowTaskNamePrefix, '');
-      //     if (task.workflowTask) {
-      //       task.workflowTask.name = task.workflowTask.name.replace(workflowTaskNamePrefix, '');
-      //     }
-      //   }
-      // }
+      const workflowTaskNamePrefix = config.conductor.workerPrefix;
+      if (workflowTaskNamePrefix) {
+        // 移除前缀
+        if (task.taskDefName.startsWith(workflowTaskNamePrefix)) {
+          task.taskDefName = task.taskDefName.replace(workflowTaskNamePrefix, '');
+          task.taskType = task.taskType.replace(workflowTaskNamePrefix, '');
+          if (task.workflowTask) {
+            task.workflowTask.name = task.workflowTask.name.replace(workflowTaskNamePrefix, '');
+          }
+        }
+      }
       // 将 conductor 里面的 api 转换成真实的 name
       if (task.inputData && task.inputData[this.TOOL_NAME_KEY]) {
         const realBlockName = task.inputData[this.TOOL_NAME_KEY];
@@ -99,16 +100,6 @@ export class ConductorService {
         task.name = CONDUCTOR_TASK_DEF_NAME;
       }
 
-      // 特殊类型的 block：SUB_WORKFLOW
-      if (task.type === 'SUB_WORKFLOW') {
-        const { name, version, parameters } = task.inputParameters;
-        task.inputParameters = parameters || {};
-        task.subWorkflowParam = task.subWorkflowParam || {
-          name,
-          version,
-        };
-      }
-
       // 特殊类型的 block: SWITCH
       if (task.type === 'SWITCH') {
         const { parameters } = task.inputParameters;
@@ -130,7 +121,7 @@ export class ConductorService {
             if (loopCount < 2) {
               throw new Error('固定次数循环模式的循环次数必须大于 1');
             }
-            task.loopCondition = `if ($.${task.taskReferenceName}['iteration'] < ${loopCount}) { true; } else { false; }`;
+            task.loopCondition = `if ($.${task.taskReferenceName}['iteration'] < '${loopCount}') { true; } else { false; }`;
           }
           // 输入装配表达式的情况
           else if (typeof loopCount === 'string' && loopCount.trim().startsWith('${')) {
@@ -192,7 +183,7 @@ export class ConductorService {
   public async saveWorkflowInConductor(workflowEntity: WorkflowMetadataEntity) {
     const { tasks, teamId, workflowId, description, version, output } = workflowEntity;
     await this.convertVinesTasksToConductorTasks(teamId, output, tasks, {});
-    await conductorClient.metadataResource.update(
+    const res = await conductorClient.metadataResource.update(
       [
         {
           name: workflowId,
@@ -209,6 +200,7 @@ export class ConductorService {
       ],
       true,
     );
+    console.log(res);
   }
 
   public async getWorkflowExecutionStatus(teamId: string, workflowInstanceId: string) {

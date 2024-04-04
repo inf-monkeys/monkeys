@@ -9,7 +9,7 @@ import os from 'os';
 import { ToolsRepository } from '../../database/repositories/tools.repository';
 import { AuthType, WorkerInputData } from './interfaces';
 
-export const CONDUCTOR_TASK_DEF_NAME = 'monkeys';
+export const CONDUCTOR_TASK_DEF_NAME = config.conductor.workerPrefix ? `${config.conductor.workerPrefix}monkeys` : 'monkeys';
 
 @Injectable()
 export class ToolsPollingService {
@@ -43,7 +43,7 @@ export class ToolsPollingService {
       };
     }
     const { method, path } = __apiInfo;
-    const namespace = __toolName.split('__')[0];
+    const namespace = __toolName.split('$$')[0];
     const server = await this.toolsRepository.getServerByNamespace(namespace);
     if (!server) {
       return {
@@ -56,9 +56,9 @@ export class ToolsPollingService {
     }
     const { type: authType, authorization_type = 'bearer', verification_tokens = {} } = server.auth;
     const headers: { [x: string]: string } = {
-      'x-monkeys-appid': __context.appId,
-      'x-monkeys-userid': __context.userId,
-      'x-monkeys-teamid': __context.teamId,
+      'x-monkeys-appid': __context?.appId,
+      'x-monkeys-userid': __context?.userId,
+      'x-monkeys-teamid': __context?.teamId,
     };
     switch (authType) {
       case AuthType.none:

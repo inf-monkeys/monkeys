@@ -8,6 +8,7 @@ export const getForkedTasks = (allTasks: any[], currentTask: any) => {
     Object.values(task.forkTasks || [])
       .concat(Object.values(task.decisionCases || {}))
       .concat(task.loopOver || [])
+      .concat(task.subWorkflowParam?.workflowDefinition?.tasks || [])
       .flat()
       .forEach((task) => {
         queue.push(task);
