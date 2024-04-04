@@ -5,7 +5,7 @@ import { useNavigate } from '@tanstack/react-router';
 import _ from 'lodash';
 import { toast } from 'sonner';
 
-import { VinesWorkflowExecutionLists } from '@/apis/workflow/execution/typings.ts';
+import { VinesWorkflowExecutionLists } from '@/apis/workflow/execution/typings';
 import { VinesLogItem } from '@/components/layout/vines-view/execution-log/item';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { useVinesFlow } from '@/package/vines-flow';
@@ -36,7 +36,7 @@ export const VinesLogList: React.FC<IVinesLogListProps> = ({ searchWorkflowExecu
         void navigate({
           to: '/$teamId/workspace/$workflowId/$pageId',
           params: {
-            pageId: previewPage._id,
+            pageId: previewPage.id,
           },
         });
       }
