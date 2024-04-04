@@ -7,16 +7,16 @@ import { AnInput } from '@/components/layout/vines-view/chat/chat-input/an-input
 import { EmptyInput } from '@/components/layout/vines-view/chat/chat-input/empty.tsx';
 import { FormInput } from '@/components/layout/vines-view/chat/chat-input/form.tsx';
 import { VinesChatList } from '@/components/layout/vines-view/chat/messages';
-import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Separator } from '@/components/ui/separator.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
+import { useFlowStore } from '@/store/useFlowStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 
 export const VinesChatView: React.FC = () => {
   const { ref, height } = useElementSize();
 
-  const { workflowId } = useVinesPage();
+  const { workflowId } = useFlowStore();
   const { visible } = useViewStore();
 
   const { vines } = useVinesFlow();
