@@ -1,6 +1,6 @@
 import { type SubWorkflowTaskDef, TaskType, WorkflowDef } from '@io-orkes/conductor-javascript';
 import equal from 'fast-deep-equal/es6';
-import { get, has, omit, set } from 'lodash';
+import { get, isEmpty, merge, omit, set } from 'lodash';
 
 import { getWorkflowExecution } from '@/apis/workflow/execution';
 import { VinesCore } from '@/package/vines-flow/core';
@@ -59,22 +59,33 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
 
     const isNested = this.isNested;
 
-    const finalName = isNested ? this.id : subWorkflowId;
+    const nameInInputParameters = get(this._task, 'inputParameters.name', '');
+
+    const finalName = nameInInputParameters ? nameInInputParameters : isNested ? this.id : subWorkflowId;
     set(this._task, 'subWorkflowParam.name', finalName);
     if (!isNested) {
-      const hasNameInInputParameters = has(this._task, 'inputParameters.name');
-      !hasNameInInputParameters && set(this._task, 'inputParameters.name', subWorkflowId);
+      const versionInInputParameters = get(
+        this._task,
+        'inputParameters.version',
+        get(this._task, 'subWorkflowParam.version', 1),
+      );
+      const subWorkflowVersion = Number(versionInInputParameters);
 
-      const hasVersionInInputParameters = has(this._task, 'inputParameters.version');
-      const subWorkflowVersion = hasVersionInInputParameters
-        ? Number(this._task.inputParameters?.version ?? 1) || 1
-        : 1;
-
-      set(this._task, 'inputParameters.version', subWorkflowVersion);
       set(this._task, 'subWorkflowParam.version', subWorkflowVersion);
     } else {
       set(this._task, 'subWorkflowParam.workflowDefinition.name', finalName);
     }
+
+    const parameters = get(this._task, 'inputParameters.parameters', {});
+    if (!isEmpty(parameters)) {
+      merge(this._task, { inputParameters: parameters });
+    }
+
+    this._task = omit(this._task, [
+      'inputParameters.name',
+      'inputParameters.version',
+      'inputParameters.parameters',
+    ]) as VinesSubWorkflowTaskDef;
 
     return super.check();
   }
@@ -85,7 +96,9 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
   }
 
   override updateRaw(nodeId: string, task: VinesSubWorkflowTaskDef): boolean {
-    const workflowVersion = Number(get(task, 'inputParameters.version', 1));
+    const workflowVersion = Number(
+      get(task, 'inputParameters.version', get(this._task, 'subWorkflowParam.version', 1)),
+    );
     set(task, 'subWorkflowParam.version', workflowVersion);
     return super.updateRaw(nodeId, task);
   }
