@@ -36,7 +36,7 @@ export const WorkspacePage: React.FC = () => {
 
   useEffect(() => {
     if (!workflow) return;
-    const workflowName = workflow.name;
+    const workflowName = workflow.displayName;
     workflowName && VinesEvent.emit('vines-update-site-title', (pageTitle ? `${pageTitle} - ` : '') + workflowName);
   }, [workflow, pageTitle]);
 

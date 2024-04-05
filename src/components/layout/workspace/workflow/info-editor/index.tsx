@@ -52,7 +52,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
   const form = useForm<IWorkflowInfo>({
     resolver: zodResolver(workflowInfoSchema),
     defaultValues: {
-      name: workflow?.name ?? '未命名应用',
+      displayName: workflow?.displayName ?? '未命名应用',
       description: workflow?.description ?? '',
       iconUrl: workflow?.iconUrl ?? 'emoji:🍀:#ceefc5',
     },
@@ -60,7 +60,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
 
   useEffect(() => {
     if (!workflow) return;
-    form.setValue('name', workflow.name || '未命名应用');
+    form.setValue('displayName', workflow.displayName || '未命名应用');
     form.setValue('description', workflow.description || '');
     form.setValue('iconUrl', workflow.iconUrl || 'emoji:🍀:#ceefc5');
   }, [workflow]);
@@ -93,7 +93,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
         <Form {...form}>
           <form onSubmit={handleSubmit} className="flex flex-col gap-2">
             <FormField
-              name="name"
+              name="displayName"
               control={form.control}
               render={({ field }) => (
                 <FormItem>

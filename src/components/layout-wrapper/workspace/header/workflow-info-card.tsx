@@ -2,8 +2,8 @@ import React from 'react';
 
 import { Pencil } from 'lucide-react';
 
-import { WorkflowInfoEditor } from '@/components/layout/workspace/workflow/info-editor';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
+import { WorkflowInfoEditor } from '@/components/layout/workspace/workflow/info-editor';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 
@@ -19,7 +19,7 @@ export const WorkflowInfoCard: React.FC<IWorkflowInfoCardProps> = () => {
           <div className="group flex cursor-pointer items-center gap-2.5">
             <VinesIcon size="sm">{workflow?.iconUrl || 'emoji:🍀:#ceefc5'}</VinesIcon>
             <div className="flex flex-col gap-0.5">
-              <h1 className="font-bold leading-tight">{workflow?.name}</h1>
+              <h1 className="font-bold leading-tight">{workflow?.displayName}</h1>
               {workflow?.description && <span className="text-xxs">{workflow.description}</span>}
             </div>
 

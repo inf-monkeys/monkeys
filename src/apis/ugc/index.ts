@@ -39,8 +39,8 @@ export const preloadUgcItems = <T extends object>(dto: IListUgcDto, url: string,
 export const useUgcWorkflows = (dto: IListUgcDto) => useUgcItems<MonkeyWorkflow>(dto, '/api/workflow/list');
 export const preloadUgcWorkflows = (dto: IListUgcDto) => preloadUgcItems<MonkeyWorkflow>(dto, '/api/workflow/list');
 
-export const useUgcActionTools = (dto: IListUgcDto) => useUgcItems<WorkflowBlock>(dto, '/api/blocks/list');
-export const preloadActionTools = (dto: IListUgcDto) => preloadUgcItems<WorkflowBlock>(dto, '/api/blocks/list');
+export const useUgcActionTools = (dto: IListUgcDto) => useUgcItems<WorkflowBlock>(dto, '/api/tools');
+export const preloadActionTools = (dto: IListUgcDto) => preloadUgcItems<WorkflowBlock>(dto, '/api/tools');
 
 export const useAssetTagList = (assetKey?: string) =>
   useSWR<string[] | undefined>(assetKey ? `/api/assets/${assetKey}/tags` : null, vinesFetcher(), {

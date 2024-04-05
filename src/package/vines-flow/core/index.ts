@@ -102,7 +102,7 @@ export class VinesCore extends VinesTools(VinesBase) {
       workflow?.tasks && (this.tasks = workflow.tasks.filter((task) => task)) && (needToInit = true);
       workflow?.workflowId && (this.workflowId = workflow.workflowId);
       workflow?.version && (this.version = workflow.version);
-      workflow?.name && (this.workflowName = workflow.name);
+      workflow?.displayName && (this.workflowName = workflow.displayName);
       workflow?.description && (this.workflowDesc = workflow.description);
       workflow?.iconUrl && (this.workflowIcon = workflow.iconUrl);
 

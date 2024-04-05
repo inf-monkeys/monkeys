@@ -25,7 +25,7 @@ export const WorkflowPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInp
   useEffect(() => {
     if (!workflowList) return;
 
-    const opts = workflowList.map((m) => ({ name: m.name, value: m.workflowId }));
+    const opts = workflowList.map((m) => ({ name: m.displayName, value: m.workflowId }));
 
     setOptions(opts);
 

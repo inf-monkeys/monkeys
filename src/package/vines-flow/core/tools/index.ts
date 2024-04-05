@@ -69,7 +69,7 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
         return {
           type: BlockType.SUB_WORKFLOW,
           name: 'sub_workflow_'.concat(workflowId),
-          displayName: workflow.name,
+          displayName: workflow.displayName,
           input: [SUB_WORKFLOW_TOOL_CHOOSE_VERSION_PROP(workflowId), ...variablesToTools],
           output: this.workflowOutputToBlockDefProperties(workflow),
           icon: workflow.iconUrl,

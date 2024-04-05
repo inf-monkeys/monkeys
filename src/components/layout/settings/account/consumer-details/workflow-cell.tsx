@@ -29,7 +29,7 @@ export const WorkflowCell: React.FC<IWorkflowCellProps> = ({ workflowId }) => {
           });
       }}
     >
-      {workflow ? workflow?.name ?? '未知' : '工作流不存在'}
+      {workflow ? workflow?.displayName ?? '未知' : '工作流不存在'}
     </span>
   );
 };

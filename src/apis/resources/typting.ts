@@ -42,7 +42,7 @@ export interface IVinesResource {
   size?: number;
   teamId: string;
   userId: string;
-  name: string;
+  displayName: string;
   url: string;
   tags: string[];
   categoryIds: string[];

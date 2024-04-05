@@ -61,7 +61,7 @@ export const useWorkflow = (workflow?: { workflowId?: string }) => {
 
   const createWorkflow = useCallback(
     async (
-      name: string,
+      displayName: string,
       workflowDef?: Omit<WorkflowDef, 'version' | 'name' | 'inputParameters' | 'timeoutSeconds'>,
       subWorkflowMasterId?: string,
     ) => {
@@ -77,9 +77,12 @@ export const useWorkflow = (workflow?: { workflowId?: string }) => {
         };
       }
       const newWorkflow: Partial<
-        Pick<MonkeyWorkflow, 'name' | 'variables' | 'description' | 'iconUrl' | 'tasks' | 'hidden' | 'masterWorkflowId'>
+        Pick<
+          MonkeyWorkflow,
+          'displayName' | 'variables' | 'description' | 'iconUrl' | 'tasks' | 'hidden' | 'masterWorkflowId'
+        >
       > = {
-        name,
+        displayName,
         description: '',
         iconUrl: 'emoji:🍀:#ceefc5',
         tasks: workflowDef.tasks,
