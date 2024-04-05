@@ -31,8 +31,11 @@ export class ToolsController {
   @UseGuards(CompatibleAuthGuard)
   public async registerWorker(@Body() body: RegisterToolDto) {
     const { manifestJsonUrl } = body;
-    return await this.toolRegistryService.registerToolsServer({
+    await this.toolRegistryService.registerToolsServer({
       manifestUrl: manifestJsonUrl,
+    });
+    return new SuccessResponse({
+      data: true,
     });
   }
 
