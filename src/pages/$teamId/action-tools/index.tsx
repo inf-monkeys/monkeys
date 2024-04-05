@@ -75,6 +75,15 @@ export const ActionTools: React.FC = () => {
                 </a>
               ),
             }),
+            columnHelper.accessor('namespace', {
+              id: 'namespace',
+              header: '工具来源',
+              cell: ({ getValue }) => (
+                <a className="transition-colors hover:text-primary-500" target="_blank" rel="noreferrer">
+                  {getValue() as string}
+                </a>
+              ),
+            }),
             columnHelper.accessor('description', {
               id: 'description',
               header: '描述',

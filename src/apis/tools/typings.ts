@@ -25,4 +25,5 @@ export interface BlockDefinitionExtended extends BlockDefinition {
 
 export interface WorkflowBlock extends BlockDefinitionExtended {
   _id: string;
+  namespace: string;
 }
