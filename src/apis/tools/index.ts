@@ -41,3 +41,8 @@ export const generateQrcode = (
   vinesFetcher<GeneQRCodeResult>({ method: method, simple: true })(`/api/tools/${toolName}${api}`, {
     context: context || {},
   });
+
+export const importTool = (manifestJsonUrl: string) =>
+  vinesFetcher<GeneQRCodeResult>({ method: 'POST', simple: true })(`/api/tools/register`, {
+    manifestJsonUrl,
+  });

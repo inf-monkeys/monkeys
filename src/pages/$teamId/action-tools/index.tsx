@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { createFileRoute } from '@tanstack/react-router';
 
@@ -10,7 +10,9 @@ import { preloadActionTools, useUgcActionTools } from '@/apis/ugc';
 import { ICredentialType } from '@/apis/ugc/credential-typings.ts';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderDescription, RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { ImportToolModal } from '@/components/layout/workspace/tools/import-tool';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
+import { Button } from '@/components/ui/button';
 import { formatTime } from '@/utils/time.ts';
 
 const pricingText = (pricing: BlockPricing) => {
@@ -46,6 +48,8 @@ const determinedCredentialVisible = (
 };
 
 export const ActionTools: React.FC = () => {
+  const [importToolVisible, setImportToolVisible] = useState(false);
+
   return (
     <main className="size-full">
       <UgcView
@@ -125,8 +129,21 @@ export const ActionTools: React.FC = () => {
         onItemClick={(item) => {
           // open(`/${item.teamId}/workspace/${item.workflowId}`, '_blank');
         }}
-        subtitle={<></>}
+        subtitle={
+          <>
+            <Button
+              variant="solid"
+              onClick={() => {
+                setImportToolVisible(true);
+              }}
+            >
+              导入
+            </Button>
+          </>
+        }
       />
+
+      <ImportToolModal visible={importToolVisible} setVisible={setImportToolVisible} />
     </main>
   );
 };
