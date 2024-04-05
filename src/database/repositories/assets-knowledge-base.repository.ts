@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { TableCollectionEntity } from '../entities/assets/collection/table-collection/table-collection';
+import { KnowLedgeBaseEntity } from '../entities/assets/knowledge-base/knowledge-base.entity';
 import { AbstractAssetRepository } from './assets-abstract.repository';
 import { AssetsCommonRepository } from './assets-common.repository';
 
 @Injectable()
-export class TableCollectionAssetRepositroy extends AbstractAssetRepository<TableCollectionEntity> {
+export class KnowledgeBaseAssetRepositroy extends AbstractAssetRepository<KnowLedgeBaseEntity> {
   constructor(
-    @InjectRepository(TableCollectionEntity)
-    public readonly assetRepository: Repository<TableCollectionEntity>,
+    @InjectRepository(KnowLedgeBaseEntity)
+    public readonly assetRepository: Repository<KnowLedgeBaseEntity>,
     public readonly assetCommonRepository: AssetsCommonRepository,
   ) {
     super(assetRepository, assetCommonRepository);

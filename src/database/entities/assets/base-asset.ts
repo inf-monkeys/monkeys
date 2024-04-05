@@ -34,8 +34,10 @@ export class BaseAssetEntity extends BaseEntity {
   })
   iconUrl?: string;
 
-  @Column()
-  name: string;
+  @Column({
+    name: 'display_name',
+  })
+  displayName: string;
 
   @Column({
     nullable: true,

@@ -2,9 +2,9 @@ import { AssetsTagEntity } from '@/database/entities/assets/asset-tag-definition
 import { TeamEntity } from '@/database/entities/identity/team';
 import { UserEntity } from '@/database/entities/identity/user';
 
-export type AssetType = 'llm-model' | 'sd-model' | 'workflow' | 'workflow-view' | 'workflow-template' | 'media-file' | 'table-collection' | 'text-collection' | 'canvas';
+export type AssetType = 'llm-model' | 'sd-model' | 'workflow' | 'workflow-view' | 'workflow-template' | 'media-file' | 'canvas' | 'knowledge-base';
 
-export const ALLOW_ASSET_TYPES: AssetType[] = ['canvas', 'llm-model', 'media-file', 'sd-model', 'table-collection', 'text-collection', 'workflow', 'workflow-view', 'workflow-template'];
+export const ALLOW_ASSET_TYPES: AssetType[] = ['canvas', 'llm-model', 'media-file', 'sd-model', 'workflow', 'workflow-view', 'workflow-template', 'knowledge-base'];
 
 export type AssetWithAdditionalInfo<T extends object> = T & {
   team?: Partial<TeamEntity>;

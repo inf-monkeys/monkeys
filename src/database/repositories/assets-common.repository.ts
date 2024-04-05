@@ -1,4 +1,4 @@
-import { AssetType, AssetWithAdditionalInfo } from '@/common/typings/asset';
+import { AssetType, AssetWithAdditionalInfo, TargetType } from '@/common/typings/asset';
 import { generateDbId } from '@/common/utils';
 import { getPublicProfile } from '@/common/utils/user';
 import { CreateAssetFilterDto } from '@/modules/assets/req/create-asset-filter.dto';
@@ -7,7 +7,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isNil, pickBy, uniq } from 'lodash';
 import { pinyin } from 'pinyin-pro';
-import { DeepPartial, In, MongoRepository } from 'typeorm';
+import { DeepPartial, In, Repository } from 'typeorm';
+import { AssetsAuthorizationEntity } from '../entities/assets/asset-authorization';
 import { AssetFilterEntity } from '../entities/assets/asset-filter';
 import { AssetsTagEntity } from '../entities/assets/asset-tag-definitions';
 import { AssetsTagRelationsEntity } from '../entities/assets/asset-tags';
@@ -25,11 +26,13 @@ export interface AssetsFillAdditionalInfoOptions {
 export class AssetsCommonRepository {
   constructor(
     @InjectRepository(AssetFilterEntity)
-    private readonly assetsFilterRepository: MongoRepository<AssetFilterEntity>,
+    private readonly assetsFilterRepository: Repository<AssetFilterEntity>,
     @InjectRepository(AssetsTagEntity)
-    private readonly assetTagRepo: MongoRepository<AssetsTagEntity>,
+    private readonly assetTagRepo: Repository<AssetsTagEntity>,
     @InjectRepository(AssetsTagRelationsEntity)
-    private readonly assetsTagRelationsRepo: MongoRepository<AssetsTagRelationsEntity>,
+    private readonly assetsTagRelationsRepo: Repository<AssetsTagRelationsEntity>,
+    @InjectRepository(AssetsAuthorizationEntity)
+    private readonly assetsAuthorizationRepository: Repository<AssetsAuthorizationEntity>,
     private readonly userRepository: UserRepository,
     private readonly teamRepository: TeamRepository,
   ) {}
@@ -84,7 +87,7 @@ export class AssetsCommonRepository {
   }
 
   public async deleteAssetFilter(teamId: string, filterId: string) {
-    await this.assetsFilterRepository.updateOne(
+    await this.assetsFilterRepository.update(
       {
         id: filterId,
         teamId,
@@ -180,7 +183,7 @@ export class AssetsCommonRepository {
       toUpdates.color = color;
     }
 
-    await this.assetTagRepo.updateOne(
+    await this.assetTagRepo.update(
       {
         id: tagId,
       },
@@ -189,7 +192,7 @@ export class AssetsCommonRepository {
   }
 
   public async deleteTag(teamId: string, tagId: string) {
-    await this.assetTagRepo.updateOne(
+    await this.assetTagRepo.update(
       {
         teamId,
         id: tagId,
@@ -295,7 +298,7 @@ export class AssetsCommonRepository {
       ).map((x) => x.tagId);
       result.assetTags = await this.assetTagRepo.find({
         where: {
-          id: tagIds,
+          id: In(tagIds),
         },
       });
     }
@@ -328,7 +331,7 @@ export class AssetsCommonRepository {
         withTags && allTagIds.length
           ? await this.assetTagRepo.find({
               where: {
-                id: allTagIds,
+                id: In(allTagIds),
               },
             })
           : [];
@@ -358,5 +361,19 @@ export class AssetsCommonRepository {
       result.push(item);
     }
     return result;
+  }
+
+  public async listAuthorizedAssetIds(teamId: string, assetType: AssetType) {
+    return (
+      await this.assetsAuthorizationRepository.find({
+        where: {
+          targetType: TargetType.TEAM,
+          targetId: teamId,
+          assetType,
+          isDeleted: false,
+        },
+        select: ['assetId'],
+      })
+    ).map((x) => x.assetId);
   }
 }

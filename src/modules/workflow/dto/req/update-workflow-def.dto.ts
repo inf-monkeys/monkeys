@@ -16,12 +16,12 @@ export class UpdateWorkflowDefDto {
 
   @ApiProperty({
     description: '工作流名称',
-    name: 'name',
+    name: 'displayName',
     type: String,
     required: false,
   })
   @Joiful.string()
-  name?: string;
+  displayName?: string;
 
   @ApiProperty({
     description: '工作流描述',

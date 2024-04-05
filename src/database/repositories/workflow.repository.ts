@@ -49,7 +49,7 @@ export class WorkflowRepository {
     workflowId: string,
     version: number,
     data: {
-      name: string;
+      displayName: string;
       description?: string;
       iconUrl?: string;
       tasks: MonkeyTaskDefTypes[];
@@ -57,7 +57,7 @@ export class WorkflowRepository {
       output: WorkflowOutputValue[];
     },
   ) {
-    const { name, description, iconUrl, tasks, variables, output } = data;
+    const { displayName, description, iconUrl, tasks, variables, output } = data;
     await this.workflowMetadataRepository.save({
       id: workflowId,
       createdTimestamp: Date.now(),
@@ -67,7 +67,7 @@ export class WorkflowRepository {
       version,
       teamId: teamId,
       creatorUserId: userId,
-      name,
+      displayName,
       description,
       iconUrl,
       tasks,
@@ -123,7 +123,7 @@ export class WorkflowRepository {
     workflowId: string,
     version: number,
     updates: {
-      name?: string;
+      displayName?: string;
       description?: string;
       iconUrl?: string;
       tasks?: MonkeyTaskDefTypes[];
@@ -135,10 +135,10 @@ export class WorkflowRepository {
       tagIds?: string[];
     },
   ) {
-    const { name, description, iconUrl, tasks, variables, activated, validationIssues, validated, output, tagIds } = updates;
+    const { displayName, description, iconUrl, tasks, variables, activated, validationIssues, validated, output, tagIds } = updates;
 
     // 字段都为空，则跳过更新
-    if ([name, description, iconUrl, tasks, variables, activated, validated, validationIssues, output, tagIds].every((item) => typeof item === 'undefined')) return;
+    if ([displayName, description, iconUrl, tasks, variables, activated, validated, validationIssues, output, tagIds].every((item) => typeof item === 'undefined')) return;
     if (variables && !Array.isArray(variables)) {
       throw new Error('variables 字段必须为数组');
     }
@@ -149,7 +149,7 @@ export class WorkflowRepository {
     await this.workflowMetadataRepository.update(
       { workflowId, isDeleted: false, teamId, version },
       {
-        ..._.pickBy({ name, iconUrl, description, tasks, variables, activated, validationIssues, validated, output, tagIds }, (v) => typeof v !== 'undefined'),
+        ..._.pickBy({ displayName, iconUrl, description, tasks, variables, activated, validationIssues, validated, output, tagIds }, (v) => typeof v !== 'undefined'),
         updatedTimestamp: Date.now(),
       },
     );

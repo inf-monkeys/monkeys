@@ -4,13 +4,13 @@ import { entities } from './database.module';
 import { ApikeyRepository } from './repositories/apikey.repository';
 import { CanvasAssetRepositroy } from './repositories/assets-canvas.repository';
 import { AssetsCommonRepository } from './repositories/assets-common.repository';
+import { KnowledgeBaseAssetRepositroy } from './repositories/assets-knowledge-base.repository';
 import { LlmModelAssetRepositroy } from './repositories/assets-llm-model.respository';
 import { MediaFileAssetRepositroy } from './repositories/assets-media-file.repository';
 import { SdModelAssetRepositroy } from './repositories/assets-sd-model.repository';
-import { TableCollectionAssetRepositroy } from './repositories/assets-table-collection.repository';
-import { TextCollectionAssetRepositroy } from './repositories/assets-text-collections.repository';
 import { WorkflowAssetRepositroy } from './repositories/assets-workflow.respository';
 import { CredentialsRepository } from './repositories/credential.repository';
+import { KnowledgeBaseRepository } from './repositories/knowledge-base.repository';
 import { MediaRepository } from './repositories/media.repository';
 import { SystemConfigurationRepository } from './repositories/system-configuration.repository';
 import { TeamRepository } from './repositories/team.repository';
@@ -33,12 +33,12 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     CanvasAssetRepositroy,
     LlmModelAssetRepositroy,
     SdModelAssetRepositroy,
-    TextCollectionAssetRepositroy,
-    TableCollectionAssetRepositroy,
+    KnowledgeBaseAssetRepositroy,
     MediaFileAssetRepositroy,
     WorkflowAssetRepositroy,
     MediaRepository,
     TriggerTypeRepository,
+    KnowledgeBaseRepository,
   ],
   exports: [
     ToolsRepository,
@@ -52,12 +52,12 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     CanvasAssetRepositroy,
     LlmModelAssetRepositroy,
     SdModelAssetRepositroy,
-    TextCollectionAssetRepositroy,
-    TableCollectionAssetRepositroy,
+    KnowledgeBaseAssetRepositroy,
     MediaFileAssetRepositroy,
     WorkflowAssetRepositroy,
     MediaRepository,
     TriggerTypeRepository,
+    KnowledgeBaseRepository,
   ],
   imports: [TypeOrmModule.forFeature(entities)],
 })

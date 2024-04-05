@@ -10,14 +10,12 @@ export type VectorCollectionField = {
   required: boolean;
 };
 
-@Entity({ name: 'text_collections' })
-export class TextCollectionEntity extends BaseAssetEntity {
-  assetType: AssetType = 'text-collection';
+@Entity({ name: 'knowledge_bases' })
+export class KnowLedgeBaseEntity extends BaseAssetEntity {
+  assetType: AssetType = 'knowledge-base';
 
-  @Column({
-    name: 'display_name',
-  })
-  displayName: string;
+  @Column({})
+  name: string;
 
   @Column({
     name: 'description',
@@ -31,12 +29,14 @@ export class TextCollectionEntity extends BaseAssetEntity {
 
   @Column({
     name: 'index_type',
+    nullable: true,
   })
   indexType: string;
 
   @Column({
     name: 'index_param',
     type: 'simple-json',
+    nullable: true,
   })
   indexParam: any;
 
@@ -46,9 +46,7 @@ export class TextCollectionEntity extends BaseAssetEntity {
   @Column({
     name: 'metadata_fields',
     type: 'simple-json',
+    nullable: true,
   })
   metadataFields: VectorCollectionField[];
-
-  entityCount?: number;
-  fileCount?: number;
 }

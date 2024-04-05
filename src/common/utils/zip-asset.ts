@@ -30,7 +30,7 @@ export const generateZip = async (params: GenerateZipParams) => {
     const workflowsFolder = zip.folder('workflows');
     workflows.forEach((workflowJson, i) => {
       const fileContent = JSON.stringify(workflowJson);
-      const name = workflowJson.workflows[0].name;
+      const name = workflowJson.workflows[0].displayName;
       workflowsFolder.file(`${i}-${name}.json`, fileContent);
     });
   }

@@ -6,7 +6,7 @@ export class CreateRichMediaDto {
   type: MediaType;
 
   @Joiful.string()
-  name: string;
+  displayName: string;
 
   @Joiful.string()
   url: string;

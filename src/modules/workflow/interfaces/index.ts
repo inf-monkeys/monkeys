@@ -125,7 +125,7 @@ export interface WorkflowPageJson {
 }
 
 export interface WorkflowExportJson extends BaseAsset {
-  name: string;
+  displayName: string;
   iconUrl: string;
   description: string;
   version?: number;
@@ -175,7 +175,7 @@ export interface CreateWorkflowOptions {
 }
 
 export interface CreateWorkflowData {
-  name: string;
+  displayName: string;
   iconUrl?: string;
   description?: string;
   version?: number;

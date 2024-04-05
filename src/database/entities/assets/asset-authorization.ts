@@ -9,8 +9,8 @@ export interface AssetFilterRule {
   userIds?: string[];
 }
 
-@Entity({ name: 'asset_authorization' })
-export class AssetAuthorizationEntity extends BaseEntity {
+@Entity({ name: 'assets_authorization' })
+export class AssetsAuthorizationEntity extends BaseEntity {
   @Column({
     name: 'asset_type',
     type: 'varchar',

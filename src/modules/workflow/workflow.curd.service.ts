@@ -59,7 +59,7 @@ export class WorkflowCrudService {
 
   public async createWorkflowDef(teamId: string, userId: string, data: CreateWorkflowData, options?: CreateWorkflowOptions) {
     const { assetsPolicy, isTheSameTeam = false, replaceSqlDatabaseMap, replaceVectorDatabaseMap, replaceLlmModelMap, replaceSdModelMap } = options || {};
-    const { name, iconUrl, description, tasks, variables, triggers, output, version = 1 } = data;
+    const { displayName, iconUrl, description, tasks, variables, triggers, output, version = 1 } = data;
     const workflowId = options?.useExistId || generateDbId();
 
     // 从应用市场 clone 的时候，资产的授权策略
@@ -214,7 +214,7 @@ export class WorkflowCrudService {
     }
 
     const workflowEntity = await this.workflowRepository.createWorkflow(teamId, userId, workflowId, version, {
-      name,
+      displayName,
       description,
       iconUrl,
       tasks,
@@ -360,7 +360,7 @@ export class WorkflowCrudService {
   public async cloneWorkflowOfVersion(teamId: string, userId: string, originalWorkflowId: string, originalWorkflowVersion: number) {
     const originalWorkflow = await this.workflowRepository.getWorkflowById(originalWorkflowId, originalWorkflowVersion);
     const workflowId = await this.createWorkflowDef(teamId, userId, {
-      name: originalWorkflow.name + ' - 副本',
+      displayName: originalWorkflow.displayName + ' - 副本',
       version: originalWorkflowVersion,
       tasks: originalWorkflow.tasks,
     });
@@ -376,7 +376,7 @@ export class WorkflowCrudService {
         teamId,
         userId,
         {
-          name: originalWorkflow.name + ' - 副本',
+          displayName: originalWorkflow.displayName + ' - 副本',
           version: version,
           tasks: originalWorkflow.tasks,
           iconUrl: originalWorkflow.iconUrl,
@@ -392,7 +392,7 @@ export class WorkflowCrudService {
 
   private convertWorkflowToJson(workflow: WorkflowMetadataEntity, triggers?: WorkflowTriggersEntity[]): WorkflowExportJson {
     const json: WorkflowExportJson = {
-      name: workflow.name,
+      displayName: workflow.displayName,
       iconUrl: workflow.iconUrl,
       description: workflow.description,
       version: workflow.version,
@@ -444,7 +444,7 @@ export class WorkflowCrudService {
     workflowId: string,
     version: number,
     updates: {
-      name?: string;
+      displayName?: string;
       description?: string;
       iconUrl?: string;
       tasks?: MonkeyTaskDefTypes[];

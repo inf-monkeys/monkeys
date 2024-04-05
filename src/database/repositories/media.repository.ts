@@ -32,7 +32,7 @@ export class MediaRepository {
   }
 
   public async createMedia(teamId: string, userId: string, body: CreateRichMediaDto) {
-    const { url, source = MediaSource.UPLOAD, name, params, type, size, md5 } = body;
+    const { url, source = MediaSource.UPLOAD, displayName, params, type, size, md5 } = body;
     const mediaId = generateDbId();
     await this.mediaFileEntity.save({
       id: mediaId,
@@ -41,7 +41,7 @@ export class MediaRepository {
       type,
       teamId,
       creatorUserId: userId,
-      name,
+      displayName,
       url,
       source: source as any,
       params,

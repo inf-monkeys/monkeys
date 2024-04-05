@@ -19,6 +19,18 @@ export class ToolsPollingService {
     return os.hostname();
   }
 
+  private replaceUrlParams(url: string, params: { [x: string]: any }) {
+    let resultUrl = url;
+
+    // 遍历对象中的每个键值对
+    for (const [key, value] of Object.entries(params)) {
+      // 替换 URL 中的占位符
+      resultUrl = resultUrl.replace(`{${key}}`, value);
+    }
+
+    return resultUrl;
+  }
+
   private async monkeyToolHandler(task: Task) {
     const inpuData = task.inputData as WorkerInputData;
     const { __toolName, __apiInfo, __context, ...rest } = inpuData;
@@ -93,7 +105,7 @@ export class ToolsPollingService {
       const { data } = await axios({
         method,
         baseURL: server.baseUrl,
-        url: path,
+        url: this.replaceUrlParams(path, rest || {}),
         data: rest,
         headers: headers,
       });

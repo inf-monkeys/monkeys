@@ -90,9 +90,9 @@ export class WorkflowCrudController {
   })
   public async createWorkflowDef(@Req() req: IRequest, @Body() body: CreateWorkflowDefDto) {
     const { teamId, userId } = req;
-    const { name, description, tasks, variables, output, iconUrl, triggers } = body;
+    const { displayName, description, tasks, variables, output, iconUrl, triggers } = body;
     const workflowId = await this.service.createWorkflowDef(teamId, userId, {
-      name,
+      displayName,
       description,
       iconUrl,
       tasks,
@@ -178,7 +178,7 @@ export class WorkflowCrudController {
       tableCollections: json.tableCollections,
       textCollections: json.textCollections,
     });
-    const workflowName = json.workflows[0].name;
+    const workflowName = json.workflows[0].displayName;
     const fileName = version ? `${workflowName}(版本${version})` : `${workflowName}(全部版本)`;
     res.set({
       'Content-Type': 'application/zip',

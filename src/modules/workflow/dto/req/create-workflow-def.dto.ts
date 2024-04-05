@@ -12,7 +12,7 @@ export class CreateWorkflowDefDto {
     required: true,
   })
   @Joiful.string().required()
-  name: string;
+  displayName: string;
 
   @ApiProperty({
     description: '工作流描述',
