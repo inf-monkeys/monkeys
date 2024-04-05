@@ -116,10 +116,10 @@ export const ExportWorkflowDialog: React.FC<IExportWorkflowDialogProps> = ({ vis
                       case 'sd-model':
                         handleOpenSdModel();
                         break;
-                      case 'table-collection':
+                      case 'knowledge-base-table':
                         handleOpenTableCollection(row.original.originalId);
                         break;
-                      case 'text-collection':
+                      case 'knowledge-base':
                         handleOpenTextCollection(row.original.originalId);
                         break;
                       default:

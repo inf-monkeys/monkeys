@@ -177,7 +177,7 @@ export const FileList: React.FC<IFilesProps> = ({
         await createResource({
           type: file.type as VinesResourceType,
           md5: it.md5,
-          name: file.name,
+          displayName: file.name,
           source: VinesResourceSource.UPLOAD,
           url: ossUrl,
           tags: [],

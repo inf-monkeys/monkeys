@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-import { mutate } from 'swr';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { mutate } from 'swr';
 
 import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import { useClipboard } from '@mantine/hooks';
@@ -17,8 +17,8 @@ import { IExportWorkflowWithAssetsContext } from '@/components/dialog/export-wor
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { WorkflowInfoEditor } from '@/components/layout/workspace/workflow/info-editor';
-import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
+import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -125,7 +125,7 @@ export const Workflows: React.FC = () => {
               cell: ({ getValue }) => RenderIcon({ iconUrl: getValue() as string }),
               maxSize: 48,
             }),
-            columnHelper.accessor('name', {
+            columnHelper.accessor('displayName', {
               id: 'title',
               header: '名称',
               cell: ({ row, getValue }) => (

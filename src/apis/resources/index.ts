@@ -8,5 +8,8 @@ export const getResourceByMd5 = (md5: string) =>
   })('/api/medias/md5/' + md5);
 
 export const createResource = (
-  parma: Pick<IVinesResource, 'type' | 'name' | 'url' | 'source' | 'tags' | 'categoryIds' | 'params' | 'size' | 'md5'>,
+  parma: Pick<
+    IVinesResource,
+    'type' | 'displayName' | 'url' | 'source' | 'tags' | 'categoryIds' | 'params' | 'size' | 'md5'
+  >,
 ) => vinesFetcher<IVinesResource>({ method: 'POST', simple: true })('/api/medias', parma);

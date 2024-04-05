@@ -61,7 +61,7 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
               </div>
               <div>
                 <div className="line-clamp-1 flex items-center gap-2 font-bold">
-                  {workflowDefinition.name}
+                  {workflowDefinition.displayName}
                   <WorkflowVersionTag version={workflowExecution.workflowDefinition?.version ?? 1} />
                   <Tag size="xs" color="tertiary">
                     {getDescOfTriggerType(workflowExecution.triggerType)}

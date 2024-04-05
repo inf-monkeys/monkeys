@@ -60,7 +60,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
               <VinesIcon size="sm">{page.workflow?.iconUrl}</VinesIcon>
               <div className="flex flex-col gap-0.5">
                 <h1 className="font-bold leading-tight">{page.displayName}</h1>
-                <span className="text-xxs">{page.workflow?.name ?? '未命名应用'}</span>
+                <span className="text-xxs">{page.workflow?.displayName ?? '未命名应用'}</span>
               </div>
             </div>
           ))}

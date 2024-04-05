@@ -5,7 +5,7 @@ import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { isString } from 'lodash';
 
-import { useVectorCollections } from '@/apis/vector';
+import { useKnowledgeBases } from '@/apis/knowledge-base';
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
 import { IVinesInputPresetProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/index.tsx';
 import { StringInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/string.tsx';
@@ -13,13 +13,13 @@ import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { IVinesToolPropertiesOptions, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
-export const TextCollectionPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInputPresetProps, 'typeOptions'>> = (
+export const KnowledgeBaseSelector: React.FC<IVinesInputPropertyProps & Omit<IVinesInputPresetProps, 'typeOptions'>> = (
   props,
 ) => {
   const { componentMode, setComponentMode, value, onChange, disabled, ...childProps } = props;
 
   const { teamId } = useVinesTeam();
-  const { data: vectorCollections, isLoading } = useVectorCollections();
+  const { data: vectorCollections, isLoading } = useKnowledgeBases();
 
   const [options, setOptions] = useState<IVinesToolPropertiesOptions[]>([]);
   const [optionsVariableMapper, setOptionsVariableMapper] = useState<Record<string, VinesToolDefProperties>>({});

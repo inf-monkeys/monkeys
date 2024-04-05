@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { useSWRConfig } from 'swr';
 import { Link } from '@tanstack/react-router';
+import { useSWRConfig } from 'swr';
 
 import { Star } from 'lucide-react';
 import { toast } from 'sonner';
@@ -38,7 +38,7 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page 
         <VinesIcon size="sm">{workflow?.iconUrl}</VinesIcon>
         <div className="flex flex-col gap-0.5">
           <h1 className="font-bold leading-tight">{page?.displayName}</h1>
-          <span className="text-xxs">{workflow?.name ?? '未命名应用'}</span>
+          <span className="text-xxs">{workflow?.displayName ?? '未命名应用'}</span>
         </div>
       </div>
       <div className="flex gap-4">
