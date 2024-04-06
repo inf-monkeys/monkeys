@@ -1,6 +1,6 @@
 type Args = Record<string | number, any>;
 
-const VariableREGEXP = /\{([0-9a-zA-Z_]+)\}/g;
+const VariableREGEXP = /\{([0-9a-zA-Z_]+)}/g;
 
 export function format(string: string, ...args: any[]): string {
   let argsObject: Args;
@@ -18,7 +18,7 @@ export function format(string: string, ...args: any[]): string {
     if (string[index - 1] === '{' && string[index + match.length] === '}') {
       return i;
     } else {
-      const result = argsObject.hasOwnProperty(i) ? argsObject[i] : null;
+      const result = Object.prototype.hasOwnProperty.call(argsObject, i) ? argsObject[i] : null;
       return result === null || result === undefined ? '' : result;
     }
   });

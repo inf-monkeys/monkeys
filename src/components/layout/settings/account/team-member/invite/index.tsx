@@ -17,9 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip } from '@/components/ui/tooltip';
 
-interface IInviteProps extends React.ComponentPropsWithoutRef<'div'> {}
-
-export const Invite: React.FC<IInviteProps> = ({}) => {
+export const Invite: React.FC = () => {
   const [inviteUserDialogVisible, setInviteUserDialogVisible] = useState(false);
   const [inviteManageDialogVisible, setInviteManageDialogVisible] = useState(false);
 
