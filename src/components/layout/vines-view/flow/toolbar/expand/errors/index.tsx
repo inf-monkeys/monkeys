@@ -80,7 +80,7 @@ export const VinesExpandToolErrors: React.FC<IVinesExpandToolErrorsProps> = ({ d
             <div className="flex items-center justify-between gap-8">
               <div className="flex items-center gap-2">
                 <VinesIcon src={nodeIcon} size="xs" />
-                <p className="text-sm font-bold leading-tight">{nodeName}</p>
+                <p className="line-clamp-1 max-w-36 text-sm font-bold leading-tight">{nodeName}</p>
               </div>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -95,7 +95,7 @@ export const VinesExpandToolErrors: React.FC<IVinesExpandToolErrorsProps> = ({ d
               </Tooltip>
             </div>
             {messages.map((it, index) => (
-              <p className="text-text1 text-xs" key={index}>
+              <p className="text-xs" key={index}>
                 - {it}
               </p>
             ))}
