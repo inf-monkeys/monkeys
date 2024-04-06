@@ -1,6 +1,6 @@
 import { type SubWorkflowTaskDef, TaskType, WorkflowDef } from '@io-orkes/conductor-javascript';
 import equal from 'fast-deep-equal/es6';
-import { get, isEmpty, merge, omit, set } from 'lodash';
+import { get, omit, set } from 'lodash';
 
 import { getWorkflowExecution } from '@/apis/workflow/execution';
 import { VinesCore } from '@/package/vines-flow/core';
@@ -72,20 +72,10 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
       const subWorkflowVersion = Number(versionInInputParameters);
 
       set(this._task, 'subWorkflowParam.version', subWorkflowVersion);
+      set(this._task, 'inputParameters.version', subWorkflowVersion);
     } else {
       set(this._task, 'subWorkflowParam.workflowDefinition.name', finalName);
     }
-
-    const parameters = get(this._task, 'inputParameters.parameters', {});
-    if (!isEmpty(parameters)) {
-      merge(this._task, { inputParameters: parameters });
-    }
-
-    this._task = omit(this._task, [
-      'inputParameters.name',
-      'inputParameters.version',
-      'inputParameters.parameters',
-    ]) as VinesSubWorkflowTaskDef;
 
     return super.check();
   }
