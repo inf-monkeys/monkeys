@@ -46,7 +46,9 @@ export function createSubWorkflowDef(tasks: VinesTask[]) {
     name: 'sub_workflow',
     taskReferenceName: nodeId,
     type: TaskType.SUB_WORKFLOW,
-    inputParameters: {},
+    inputParameters: {
+      version: 1,
+    },
     subWorkflowParam: {
       name: nodeId,
       workflowDefinition: {
