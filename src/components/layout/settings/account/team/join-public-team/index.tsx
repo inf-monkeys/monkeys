@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Inbox, PlusCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { applyTeam, searchTeams, useTeams } from '@/apis/authz/team';
+import { makeJoinTeamRequest, searchTeams, useTeams } from '@/apis/authz/team';
 import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { JoinPublicTeamItem } from '@/components/layout/settings/account/team/join-public-team/team-item.tsx';
 import { Button } from '@/components/ui/button';
@@ -27,7 +27,7 @@ export const JoinPublicTeam: React.FC<IJoinPublicTeamProps> = () => {
   async function handleApplyTeam(teamId: string) {
     setIsHandleAccept(true);
     if (userTeams) {
-      toast.promise(applyTeam(teamId), {
+      toast.promise(makeJoinTeamRequest(teamId), {
         success: () => {
           setVisible(false);
           return '申请成功';
