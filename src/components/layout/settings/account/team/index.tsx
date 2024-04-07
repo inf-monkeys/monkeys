@@ -17,6 +17,7 @@ import { JoinPublicTeam } from '@/components/layout/settings/account/team/join-p
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
+import { VinesImageEditor } from '@/components/ui/image-editor';
 import { cn, useLocalStorage } from '@/utils';
 
 interface ITeamProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -47,6 +48,7 @@ export const Team: React.FC<ITeamProps> = () => {
   const isOwner = user?.id === team?.ownerUserId;
   const teamName = team?.name || '团队';
   const teamDescription = team?.description || '暂无描述';
+  const teamLogo = team?.logoUrl;
 
   return (
     <Card>
@@ -59,10 +61,12 @@ export const Team: React.FC<ITeamProps> = () => {
         </div>
       </CardHeader>
       <CardContent className={cn('flex gap-4', !isOwner && 'pointer-events-none')}>
-        <Avatar className="size-10">
-          <AvatarImage className="aspect-auto" src={team?.logoUrl} alt={teamName} />
-          <AvatarFallback className="rounded-none p-2 text-xs">{teamName.substring(0, 2)}</AvatarFallback>
-        </Avatar>
+        <VinesImageEditor value={teamLogo} onChange={(val) => handleUpdateTeam('logoUrl', val)}>
+          <Avatar className="size-10 cursor-pointer">
+            <AvatarImage className="aspect-auto" src={teamLogo} alt={teamName} />
+            <AvatarFallback className="rounded-none p-2 text-xs">{teamName.substring(0, 2)}</AvatarFallback>
+          </Avatar>
+        </VinesImageEditor>
         <div className="flex flex-col justify-center">
           <InfoEditor
             disabled={!isOwner}
