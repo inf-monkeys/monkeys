@@ -140,6 +140,9 @@ dependencies:
   cmdk:
     specifier: ^0.2.1
     version: 0.2.1(@types/react@18.2.74)(react-dom@18.2.0)(react@18.2.0)
+  cropperjs:
+    specifier: ^1.6.1
+    version: 1.6.1
   date-fns:
     specifier: ^3.6.0
     version: 3.6.0
@@ -200,6 +203,9 @@ dependencies:
   react:
     specifier: ^18.2.0
     version: 18.2.0
+  react-cropper:
+    specifier: ^2.3.3
+    version: 2.3.3(react@18.2.0)
   react-day-picker:
     specifier: ^8.10.0
     version: 8.10.0(date-fns@3.6.0)(react@18.2.0)
@@ -4627,6 +4633,10 @@ packages:
       typescript: 5.4.4
     dev: true
 
+  /cropperjs@1.6.1:
+    resolution: {integrity: sha512-F4wsi+XkDHCOMrHMYjrTEE4QBOrsHHN5/2VsVAaRq8P7E5z7xQpT75S+f/9WikmBEailas3+yo+6zPIomW+NOA==}
+    dev: false
+
   /cross-spawn@7.0.3:
     resolution: {integrity: sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==}
     engines: {node: '>= 8'}
@@ -7275,6 +7285,18 @@ packages:
   /quick-lru@6.1.2:
     resolution: {integrity: sha512-AAFUA5O1d83pIHEhJwWCq/RQcRukCkn/NSm2QsTEMle5f2hP0ChI2+3Xb051PZCkLryI/Ir1MVKviT2FIloaTQ==}
     engines: {node: '>=12'}
+    dev: false
+
+  /react-cropper@2.3.3(react@18.2.0):
+    resolution: {integrity: sha512-zghiEYkUb41kqtu+2jpX2Ntigf+Jj1dF9ew4lAobPzI2adaPE31z0p+5TcWngK6TvmWQUwK3lj4G+NDh1PDQ1w==}
+    peerDependencies:
+      react: '*'
+    peerDependenciesMeta:
+      react:
+        optional: true
+    dependencies:
+      cropperjs: 1.6.1
+      react: 18.2.0
     dev: false
 
   /react-day-picker@8.10.0(date-fns@3.6.0)(react@18.2.0):

@@ -9,6 +9,7 @@ import { IUserTokens } from '@/components/router/guard/auth.ts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
+import { VinesImageEditor } from '@/components/ui/image-editor';
 import { useLocalStorage } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
@@ -27,6 +28,7 @@ export const User: React.FC<IUserProps> = () => {
   };
 
   const userName = user.name || 'AI';
+  const userPhoto = user.photo;
 
   return (
     <Card>
@@ -35,10 +37,12 @@ export const User: React.FC<IUserProps> = () => {
         <CardDescription>点击即可编辑信息</CardDescription>
       </CardHeader>
       <CardContent className="flex gap-4">
-        <Avatar className="size-10">
-          <AvatarImage className="aspect-auto" src={user.photo} alt={userName} />
-          <AvatarFallback className="rounded-none p-2 text-xs">{userName.substring(0, 2)}</AvatarFallback>
-        </Avatar>
+        <VinesImageEditor value={userPhoto} onChange={(val) => handleUpdateUser('photo', val)}>
+          <Avatar className="size-10 cursor-pointer">
+            <AvatarImage className="aspect-auto" src={userPhoto} alt={userName} />
+            <AvatarFallback className="rounded-none p-2 text-xs">{userName.substring(0, 2)}</AvatarFallback>
+          </Avatar>
+        </VinesImageEditor>
         <div className="flex flex-col justify-center">
           <UserName user={user} updateUser={handleUpdateUser} />
           <UserAccount user={user} updateUser={handleUpdateUser} />

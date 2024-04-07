@@ -6,9 +6,11 @@ import { get, set } from 'lodash';
 import { toast } from 'sonner';
 
 import { updateTeam } from '@/apis/authz/team';
+import { ITeamUpdate } from '@/apis/authz/team/typings.ts';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
+import { VinesImageEditor } from '@/components/ui/image-editor';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 
 interface ITeamLogoProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -45,6 +47,26 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
     });
   };
 
+  const handleUpdateTeamLogo = (val: string) => {
+    toast.promise(
+      new Promise((resolve) => {
+        updateTeam({
+          logoUrl: val,
+        } as unknown as ITeamUpdate).then(async () => {
+          await mutate('/api/teams');
+          resolve('');
+        });
+      }),
+      {
+        loading: '更新中...',
+        success: '更新成功！',
+        error: '更新失败！请稍后再重试',
+      },
+    );
+  };
+
+  const teamLogo = team?.logoUrl;
+
   return (
     <Card>
       <CardHeader>
@@ -52,10 +74,12 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
         <CardDescription>你可以在这里设置团队的系统图标</CardDescription>
       </CardHeader>
       <CardContent className="flex items-center justify-between">
-        <Avatar className="size-10">
-          <AvatarImage className="aspect-auto" src={team?.logoUrl} alt={teamName} />
-          <AvatarFallback className="rounded-none p-2 text-xs">{teamName.substring(0, 2)}</AvatarFallback>
-        </Avatar>
+        <VinesImageEditor value={teamLogo} onChange={handleUpdateTeamLogo}>
+          <Avatar className="size-10 cursor-pointer">
+            <AvatarImage className="aspect-auto" src={team?.logoUrl} alt={teamName} />
+            <AvatarFallback className="rounded-none p-2 text-xs">{teamName.substring(0, 2)}</AvatarFallback>
+          </Avatar>
+        </VinesImageEditor>
         <Tabs value={selected} onValueChange={handleUpdate}>
           <TabsList>
             <TabsTrigger value="team">团队图标</TabsTrigger>
