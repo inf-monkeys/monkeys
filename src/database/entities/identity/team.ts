@@ -61,4 +61,11 @@ export class TeamEntity extends BaseEntity {
     type: 'simple-json',
   })
   customTheme?: TeamCustomTheme;
+
+  @Column({
+    name: 'enable_join_request',
+    nullable: true,
+    default: false,
+  })
+  enableJoinRequest?: boolean;
 }

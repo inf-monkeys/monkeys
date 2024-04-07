@@ -20,4 +20,12 @@ export class TeamsService {
   public async getTeamMembers(teamId: string) {
     return await this.teamRepository.getTeamMembers(teamId);
   }
+
+  public async makeJoinTeamRequest(teamId: string, userId: string) {
+    return await this.teamRepository.makeJoinTeamRequest(teamId, userId);
+  }
+
+  public async listJoinRequests(teamId: string) {
+    return await this.teamRepository.listJoinRequests(teamId);
+  }
 }

@@ -23,8 +23,9 @@ import { MediaFileEntity } from './entities/assets/media/media-file';
 import { LlmModelEntity } from './entities/assets/model/llm-model/llm-model';
 import { SdModelEntity } from './entities/assets/model/sd-model/sd-model';
 import { TeamEntity } from './entities/identity/team';
+import { TeamJoinRequestsEntity } from './entities/identity/team-join-request';
 import { UserEntity } from './entities/identity/user';
-import { UserTeamRelationshipEntity } from './entities/identity/user-team-relationship';
+import { TeamMembersEntity } from './entities/identity/user-team-relationship';
 import { ToolsTriggerTypesEntity } from './entities/tools/tools-trigger-types';
 import { WorkflowPageEntity } from './entities/workflow/workflow-page';
 
@@ -43,7 +44,7 @@ export const entities: EntityClassOrSchema[] = [
   SystemConfigurationEntity,
   UserEntity,
   TeamEntity,
-  UserTeamRelationshipEntity,
+  TeamMembersEntity,
   ApiKeyEntity,
   WorkflowPageEntity,
   LlmModelEntity,
@@ -55,6 +56,7 @@ export const entities: EntityClassOrSchema[] = [
   CanvasApplicationEntity,
   AssetsAuthorizationEntity,
   AssetsTagRelationsEntity,
+  TeamJoinRequestsEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({

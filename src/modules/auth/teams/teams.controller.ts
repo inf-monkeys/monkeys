@@ -1,7 +1,7 @@
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DEFAULT_TEAM_DESCRIPTION, DEFAULT_TEAM_PHOTO, TeamsService } from './teams.service';
 
@@ -47,6 +47,23 @@ export class TeamsController {
         totalCount: data.length,
         list: data,
       },
+    });
+  }
+
+  @Post('/:teamId/join-requests')
+  public async makeJoinRequest(@Req() req: IRequest, @Param('teamId') teamId: string) {
+    const { userId } = req;
+    const data = await this.service.makeJoinTeamRequest(teamId, userId);
+    return new SuccessResponse({
+      data,
+    });
+  }
+
+  @Get('/:teamId/join-requests')
+  public async listJoinRequests(@Req() req: IRequest, @Param('teamId') teamId: string) {
+    const data = await this.service.listJoinRequests(teamId);
+    return new SuccessResponse({
+      data,
     });
   }
 }

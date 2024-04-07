@@ -1,10 +1,13 @@
 import { generateDbId } from '@/common/utils';
 import { getMap } from '@/common/utils/map';
 import { TeamEntity } from '@/database/entities/identity/team';
-import { UserTeamRelationshipEntity } from '@/database/entities/identity/user-team-relationship';
+import { TeamMembersEntity } from '@/database/entities/identity/user-team-relationship';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { uniq } from 'lodash';
 import { In, Repository } from 'typeorm';
+import { TeamJoinRequestStatus, TeamJoinRequestsEntity } from '../entities/identity/team-join-request';
+import { UserEntity } from '../entities/identity/user';
 import { ApikeyRepository } from './apikey.repository';
 import { UserRepository } from './user.repository';
 
@@ -13,8 +16,10 @@ export class TeamRepository {
   constructor(
     @InjectRepository(TeamEntity)
     private readonly teamRepository: Repository<TeamEntity>,
-    @InjectRepository(UserTeamRelationshipEntity)
-    private readonly userTeamRelationRepository: Repository<UserTeamRelationshipEntity>,
+    @InjectRepository(TeamMembersEntity)
+    private readonly teamMembersRepository: Repository<TeamMembersEntity>,
+    @InjectRepository(TeamJoinRequestsEntity)
+    private readonly teamJoinRequestRepository: Repository<TeamJoinRequestsEntity>,
     private readonly apiKeyRepository: ApikeyRepository,
     private readonly userRepository: UserRepository,
   ) {}
@@ -41,7 +46,7 @@ export class TeamRepository {
   }
 
   async getUserTeams(userId: string): Promise<TeamEntity[]> {
-    const relationships = await this.userTeamRelationRepository.find({
+    const relationships = await this.teamMembersRepository.find({
       where: {
         userId,
         isDeleted: false,
@@ -88,7 +93,7 @@ export class TeamRepository {
       workflowTaskNamePrefix,
     };
     const teamId = newTeam.id as string;
-    const newReplationships: UserTeamRelationshipEntity = {
+    const newReplationships: TeamMembersEntity = {
       id: generateDbId(),
       userId,
       teamId,
@@ -96,7 +101,7 @@ export class TeamRepository {
       updatedTimestamp: now,
       isDeleted: false,
     };
-    await this.userTeamRelationRepository.save(newReplationships);
+    await this.teamMembersRepository.save(newReplationships);
     await this.teamRepository.save(newTeam);
     await this.apiKeyRepository.initApiKeyIfNotExists(teamId, userId);
 
@@ -107,7 +112,7 @@ export class TeamRepository {
   }
 
   public async isUserInTeam(userId: string, teamId: string) {
-    const entity = await this.userTeamRelationRepository.findOne({
+    const entity = await this.teamMembersRepository.findOne({
       where: {
         userId,
         teamId,
@@ -118,7 +123,7 @@ export class TeamRepository {
   }
 
   public async getTeamMembers(teamId: string) {
-    const relationships = await this.userTeamRelationRepository.find({
+    const relationships = await this.teamMembersRepository.find({
       where: {
         teamId,
         isDeleted: false,
@@ -129,5 +134,60 @@ export class TeamRepository {
       return [];
     }
     return await this.userRepository.findByIds(userIds);
+  }
+
+  public async makeJoinTeamRequest(teamId: string, userId: string) {
+    const team = await this.getTeamById(teamId);
+    if (!team) {
+      throw new Error('团队不存在');
+    }
+
+    const isAccepted = await this.isUserInTeam(userId, teamId);
+    if (isAccepted) {
+      throw new Error('您已加入该团队，无需重复加入：'.concat(teamId));
+    }
+
+    if (!team.enableJoinRequest) {
+      throw new Error('团队未开放申请加入');
+    }
+
+    const hasRequested = await this.teamJoinRequestRepository.exists({
+      where: {
+        teamId,
+        userId,
+        status: TeamJoinRequestStatus.PENDING,
+      },
+    });
+    if (hasRequested) {
+      throw new Error('您已申请加入该团队，请耐心等待审批');
+    }
+
+    const now = Date.now();
+    await this.teamJoinRequestRepository.save({
+      id: generateDbId(),
+      createdTimestamp: now,
+      updatedTimestamp: now,
+      teamId: teamId,
+      userId: userId,
+      status: TeamJoinRequestStatus.PENDING,
+    });
+  }
+
+  public async listJoinRequests(teamId: string) {
+    const records = await this.teamJoinRequestRepository.find({
+      where: {
+        teamId,
+        isDeleted: false,
+      },
+    });
+
+    const userIds = uniq(records.map((x) => x.userId));
+    const users = await this.userRepository.findByIds(userIds);
+
+    const result: Array<TeamJoinRequestsEntity & { user: UserEntity }> = records.map((record) => ({
+      ...record,
+      user: users.find((user) => user.id === record.userId),
+    }));
+    return result;
   }
 }
