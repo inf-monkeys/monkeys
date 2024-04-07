@@ -51,6 +51,7 @@ export class ToolsRepository {
     entity.manifestUrl = manifestUrl;
     entity.baseUrl = baseUrl;
     entity.displayName = displayName;
+    entity.triggerEndpoints = data.triggerEndpoints;
     await this.toolsServerRepository.save(entity);
   }
 

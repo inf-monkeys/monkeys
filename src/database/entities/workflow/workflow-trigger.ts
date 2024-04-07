@@ -106,9 +106,9 @@ export class WorkflowTriggersEntity extends BaseEntity {
   webhookConfig?: WebhookTriggerConfig;
 
   @Column({
-    name: 'extra_config',
+    name: 'extra_data',
     type: 'simple-json',
     nullable: true,
   })
-  extraConfig?: { [x: string]: any };
+  extraData?: { [x: string]: any };
 }

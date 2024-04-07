@@ -1,11 +1,13 @@
-import { generateDbId } from '@/common/utils';
+import { enumToList, generateDbId } from '@/common/utils';
 import { calculateTimeDifference, getNextCronTimestamp } from '@/common/utils/cron';
 import { WorkflowTriggerType, WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
+import { ToolsRepository } from '@/database/repositories/tools.repository';
 import { TriggerTypeRepository } from '@/database/repositories/trigger-type.repository';
 import { Injectable } from '@nestjs/common';
 import * as uuid from 'uuid';
 import { WorkflowRepository } from '../../database/repositories/workflow.repository';
-import { TriggerDefinition } from '../tools/interfaces';
+import { TriggerDefinition, TriggerEndpointType } from '../tools/interfaces';
+import { ToolsForwardService } from '../tools/tools.forward.service';
 import { CreateWorkflowTriggerDto } from './dto/req/create-trigger.dto';
 import { UpdateWorkflowTriggerDto } from './dto/req/update-trigger.dto';
 
@@ -35,7 +37,28 @@ export class WorkflowTriggerService {
   constructor(
     private readonly workflowRepository: WorkflowRepository,
     private readonly triggerTypesRepository: TriggerTypeRepository,
+    private readonly toolsRepository: ToolsRepository,
+    private readonly toolsForwardService: ToolsForwardService,
   ) {}
+
+  private isCustomTrigger(type: WorkflowTriggerType) {
+    return !enumToList(WorkflowTriggerType).includes(type);
+  }
+
+  private async getTriggerActionEndpint(toolNamespace: string, type: TriggerEndpointType) {
+    const toolServer = await this.toolsRepository.getServerByNamespace(toolNamespace);
+    if (!toolServer) {
+      throw new Error(`INTERNAL SERVER ERROR: tool server ${toolNamespace} not exists`);
+    }
+    if (!toolServer.triggerEndpoints) {
+      throw new Error(`INTERNAL SERVER ERROR: tool server ${toolNamespace} triggerEndpoints is missing`);
+    }
+    const triggerEndpoint = toolServer.triggerEndpoints.find((x) => x.type === type);
+    if (!triggerEndpoint) {
+      throw new Error(`INTERNAL SERVER ERROR: tool server ${toolNamespace} triggerEndpoint of ${type} is missing`);
+    }
+    return triggerEndpoint;
+  }
 
   public async listTriggerTypes(): Promise<TriggerDefinition[]> {
     const customTriggers = await this.triggerTypesRepository.listTriggerTypes();
@@ -51,7 +74,26 @@ export class WorkflowTriggerService {
   }
 
   public async deleteWorkflowTrigger(workflowId: string, triggerId: string) {
-    return await this.workflowRepository.deleteTrigger(workflowId, triggerId);
+    const trigger = await this.workflowRepository.getWorkflowTrigger(triggerId);
+    if (!trigger) {
+      throw new Error('触发器不存在');
+    }
+    const triggerType = trigger.type;
+    const isCustomTrigger = this.isCustomTrigger(triggerType);
+    if (isCustomTrigger) {
+      const toolNamespace = triggerType.split('__')[0];
+      const { method, url } = await this.getTriggerActionEndpint(toolNamespace, TriggerEndpointType.delete);
+      await this.toolsForwardService.request(toolNamespace, {
+        method,
+        url,
+        data: {
+          triggerId,
+        },
+      });
+      return await this.workflowRepository.deleteTrigger(workflowId, triggerId);
+    } else {
+      return await this.workflowRepository.deleteTrigger(workflowId, triggerId);
+    }
   }
 
   public async listWorkflowTriggers(workflowId: string, version: number) {
@@ -59,10 +101,11 @@ export class WorkflowTriggerService {
   }
 
   public async createWorkflowTrigger(workflowId: string, triggerConfig: CreateWorkflowTriggerDto) {
-    const { triggerType, cron, enabled = true, webhookConfig, version, extraConfig } = triggerConfig;
+    const { triggerType, cron, enabled = true, webhookConfig, version, extraData } = triggerConfig;
 
     let nextTriggerTime = undefined;
     let isCustomTrigger = false;
+    let toolNamespace: string = undefined;
     if (triggerType === WorkflowTriggerType.SCHEDULER) {
       if (!cron) {
         throw new Error(`${triggerType} 类型的触发器必须设置 cron 参数`);
@@ -80,14 +123,17 @@ export class WorkflowTriggerService {
     } else {
       // 否则是插件提供的触发器，需要调用插件的触发器接口
       isCustomTrigger = true;
+      toolNamespace = triggerType.split('__')[0];
     }
 
+    const triggerId = generateDbId();
     const newTrigger: Partial<WorkflowTriggersEntity> = {
-      id: generateDbId(),
+      id: triggerId,
       workflowId,
       workflowVersion: version,
       type: triggerType,
       enabled,
+      extraData,
     };
 
     if (webhookConfig) {
@@ -102,16 +148,36 @@ export class WorkflowTriggerService {
     if (triggerType === WorkflowTriggerType.WEBHOOK) {
       newTrigger.webhookPath = uuid.v4();
     }
-    const trigger = await this.workflowRepository.createWorkflowTrigger(newTrigger);
 
     if (isCustomTrigger) {
+      const { method, url } = await this.getTriggerActionEndpint(toolNamespace, TriggerEndpointType.create);
+      await this.toolsForwardService.request(toolNamespace, {
+        method,
+        url,
+        data: {
+          triggerId,
+          enabled,
+          workflowId,
+          worfklowVersion: version,
+          extraData,
+        },
+      });
+      await this.workflowRepository.createWorkflowTrigger(newTrigger);
+    } else {
+      // 在插件 tools 里面注册触发器
+      await this.workflowRepository.createWorkflowTrigger(newTrigger);
     }
   }
 
-  public async updateWorkflowTrigger(workflowId: string, triggerId: string, triggerConfig: UpdateWorkflowTriggerDto) {
-    const { type: triggerType, cron, enabled, webhookConfig } = triggerConfig;
-
+  public async updateWorkflowTrigger(triggerId: string, updates: UpdateWorkflowTriggerDto) {
+    const trigger = await this.workflowRepository.getWorkflowTrigger(triggerId);
+    if (!trigger) {
+      throw new Error('触发器不存在');
+    }
+    const { cron, enabled, webhookConfig, extraData } = updates;
     let nextTriggerTime = undefined;
+    const triggerType = trigger.type;
+    const isCustomTrigger = this.isCustomTrigger(triggerType);
     if (triggerType === WorkflowTriggerType.SCHEDULER) {
       if (!cron) {
         throw new Error(`${triggerType} 类型的触发器必须设置 cron 参数`);
@@ -124,8 +190,6 @@ export class WorkflowTriggerService {
       nextTriggerTime = getNextCronTimestamp(cron);
     }
 
-    const trigger = await this.workflowRepository.getWorkflowTrigger(workflowId, triggerId);
-
     if (!trigger) {
       throw new Error('触发器不存在！');
     }
@@ -133,12 +197,10 @@ export class WorkflowTriggerService {
     trigger.type = triggerType;
     if (enabled !== undefined) {
       trigger.enabled = enabled;
-      if (enabled) {
-        // 将其他触发器都设置为禁用
-        await this.workflowRepository.disableAllTriggers(workflowId);
-      }
     }
-
+    if (extraData) {
+      trigger.extraData = extraData;
+    }
     if (cron) {
       trigger.cron = cron;
     }
@@ -150,6 +212,20 @@ export class WorkflowTriggerService {
       trigger.webhookConfig = webhookConfig;
     }
 
-    return await this.workflowRepository.saveWorkflowTrigger(trigger);
+    if (isCustomTrigger) {
+      const toolNamespace = triggerType.split('__')[0];
+      const { method, url } = await this.getTriggerActionEndpint(toolNamespace, TriggerEndpointType.update);
+      await this.toolsForwardService.request(toolNamespace, {
+        method,
+        url,
+        data: {
+          triggerId,
+          enabled,
+        },
+      });
+      return await this.workflowRepository.saveWorkflowTrigger(trigger);
+    } else {
+      return await this.workflowRepository.saveWorkflowTrigger(trigger);
+    }
   }
 }

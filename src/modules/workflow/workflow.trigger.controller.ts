@@ -57,7 +57,7 @@ export class WorkflowTriggerController {
     description: '修改触发器',
   })
   public async updateTrigger(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Param('triggerId') triggerId: string, @Body() dto: UpdateWorkflowTriggerDto) {
-    const data = await this.service.updateWorkflowTrigger(workflowId, triggerId, dto);
+    const data = await this.service.updateWorkflowTrigger(triggerId, dto);
     return new SuccessResponse({
       data,
     });

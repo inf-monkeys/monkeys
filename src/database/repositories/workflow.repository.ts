@@ -318,11 +318,11 @@ export class WorkflowRepository {
     await this.workflowTriggerRepository.save(entity);
   }
 
-  public async getWorkflowTrigger(workflowId: string, triggerId: string) {
+  public async getWorkflowTrigger(triggerId: string) {
     const trigger = await this.workflowTriggerRepository.findOne({
       where: {
-        workflowId,
         id: triggerId,
+        isDeleted: false,
       },
     });
     return trigger;
@@ -348,6 +348,7 @@ export class WorkflowRepository {
     const query = this.workflowTriggerRepository
       .createQueryBuilder('workflow_trigger')
       .where('workflow_trigger.enabled = :enabled', { enabled: true })
+      .andWhere('workflow_trigger.type = :type', { type: WorkflowTriggerType.SCHEDULER })
       .andWhere('(workflow_trigger.next_trigger_time IS NULL OR workflow_trigger.next_trigger_time < :currentTimestamp)', { currentTimestamp })
       .andWhere('workflow_trigger.is_deleted = :isDeleted', { isDeleted: false });
     const triggersToRun = await query.getMany();

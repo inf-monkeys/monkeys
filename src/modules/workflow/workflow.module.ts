@@ -1,6 +1,7 @@
 import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ToolsModule } from '../tools/tools.module';
 import { ConductorModule } from './conductor/conductor.module';
 import { WorkflowAssetsController } from './workflow.assets.controller';
 import { WorkflowAssetsService } from './workflow.assets.service';
@@ -42,7 +43,7 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     WorkflowChatSessionService,
     WorkflowPageService,
   ],
-  imports: [ConductorModule, TypeOrmModule.forFeature([WorkflowPageEntity])],
+  imports: [ConductorModule, TypeOrmModule.forFeature([WorkflowPageEntity]), ToolsModule],
   exports: [WorkflowCrudService, WorkflowExecutionService],
 })
 export class WorkflowModule {}

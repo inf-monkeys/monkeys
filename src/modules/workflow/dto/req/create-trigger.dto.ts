@@ -41,11 +41,11 @@ export class CreateWorkflowTriggerDto {
 
   @ApiProperty({
     description: '其他配置',
-    name: 'extraConfig',
+    name: 'extraData',
     type: Object,
     required: false,
   })
-  extraConfig?: { [x: string]: any };
+  extraData?: { [x: string]: any };
 
   @ApiProperty({
     description: '工作流版本',

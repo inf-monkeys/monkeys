@@ -12,7 +12,7 @@ import * as path from 'path';
 import url from 'url';
 import { CredentialsRepository } from '../../database/repositories/credential.repository';
 import { ToolsRepository } from '../../database/repositories/tools.repository';
-import { ApiType, AuthType, ManifestJson, RegisterWorkerParams, SchemaVersion } from './interfaces';
+import { ApiType, AuthType, ManifestJson, RegisterWorkerParams, SchemaVersion, TriggerEndpointConfig, TriggerEndpointType } from './interfaces';
 import { parseOpenApiSpecAsBlocks } from './utils/openapi-parser';
 
 @Injectable()
@@ -25,46 +25,69 @@ export class ToolsRegistryService {
 
   private async validateManifestJson(data: ManifestJson) {
     if (!data) {
-      throw new Error('Error when parse manifest json: manifest data is empty');
+      throw new Error('Error import tool: manifest data is empty');
     }
     if (!data.display_name) {
-      throw new Error('Error when parse manifest json: display_name is missing');
+      throw new Error('Error import tool: display_name is missing');
     }
     if (!data.schema_version) {
-      throw new Error('Error when parse manifest json: schema_version is missing');
+      throw new Error('Error import tool: schema_version is missing');
     }
     if (!enumToList(SchemaVersion).includes(data.schema_version)) {
-      throw new Error(`Error when parse manifest json: invalid schema_version "${data.schema_version}", must in any one of ${enumToList(SchemaVersion).join(',')}`);
+      throw new Error(`Error import tool: invalid schema_version "${data.schema_version}", must in any one of ${enumToList(SchemaVersion).join(',')}`);
     }
     if (!data.namespace) {
-      throw new Error('Error when parse manifest json: namespace is missing');
+      throw new Error('Error import tool: namespace is missing');
     }
     const reservedNamespace = [SYSTEM_NAMESPACE];
     if (reservedNamespace.includes(data.namespace)) {
-      throw new Error(`Error when parse manifest json: namespace is can not use reserved word: ${data.namespace}`);
+      throw new Error(`Error import tool: namespace is can not use reserved word: ${data.namespace}`);
     }
 
     if (!isValidNamespace(data.namespace)) {
-      throw new Error(`Error when parse manifest json: for namespace, only numbers, letters, and underscores are allowed, and two consecutive underscores are not permitted.`);
+      throw new Error(`Error import tool: for namespace, only numbers, letters, and underscores are allowed, and two consecutive underscores are not permitted.`);
     }
 
     if (!data.auth) {
-      throw new Error('Error when parse manifest json: auth is missing');
+      throw new Error('Error import tool: auth is missing');
     }
     if (!enumToList(AuthType).includes(data.auth.type)) {
-      throw new Error(`Error when parse manifest json: invalid auth.type "${data.auth.type}", must in any one of ${enumToList(AuthType).join(',')}`);
+      throw new Error(`Error import tool: invalid auth.type "${data.auth.type}", must in any one of ${enumToList(AuthType).join(',')}`);
     }
     if (!data.api) {
-      throw new Error('Error when parse manifest json: api is missing');
+      throw new Error('Error import tool: api is missing');
     }
     if (!enumToList(ApiType).includes(data.api.type)) {
-      throw new Error(`Error when parse manifest json: invalid api.type "${data.api.type}", must in any one of ${enumToList(ApiType).join(',')}`);
+      throw new Error(`Error import tool: invalid api.type "${data.api.type}", must in any one of ${enumToList(ApiType).join(',')}`);
     }
     if (!data.api.url) {
-      throw new Error('Error when parse manifest json: api.url is missing');
+      throw new Error('Error import tool: api.url is missing');
     }
     if (!data.contact_email) {
-      throw new Error('Error when parse manifest json: contact_email is missing');
+      throw new Error('Error import tool: contact_email is missing');
+    }
+    if (data.triggers?.length) {
+      this.validateTriggerEndpoints(data.triggerEndpoints);
+    }
+  }
+
+  private validateTriggerEndpoints(triggerEndpoints: TriggerEndpointConfig[]) {
+    if (!Array.isArray(triggerEndpoints)) {
+      throw new Error('Error import tool: triggerEndpoints is missing');
+    }
+    const types: TriggerEndpointType[] = [TriggerEndpointType.create, TriggerEndpointType.delete, TriggerEndpointType.update];
+    for (const type of types) {
+      const config = triggerEndpoints.find((x) => x.type === type);
+      if (!config) {
+        throw new Error(`Error import tool: triggerEndpoint ${type} is missing`);
+      }
+      const { url, method } = config;
+      if (!url) {
+        throw new Error(`Error import tool: triggerEndpoint ${type} url is missing`);
+      }
+      if (!method) {
+        throw new Error(`Error import tool: triggerEndpoint ${type} method is missing`);
+      }
     }
   }
 

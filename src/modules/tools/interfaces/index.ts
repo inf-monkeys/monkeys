@@ -41,6 +41,18 @@ export interface AuthConfig {
   verification_tokens?: { [x: string]: string };
 }
 
+export enum TriggerEndpointType {
+  create = 'create',
+  update = 'update',
+  delete = 'delete',
+}
+
+export interface TriggerEndpointConfig {
+  type: TriggerEndpointType;
+  url: string;
+  method: string;
+}
+
 export interface ManifestJson {
   schema_version: SchemaVersion;
   display_name: string;
@@ -51,6 +63,7 @@ export interface ManifestJson {
     url: string;
   };
   contact_email: string;
+  triggerEndpoints?: TriggerEndpointConfig[];
   triggers?: TriggerDefinition[];
   credentials?: CredentialDefinition[];
   credentialEncryptKey?: string;

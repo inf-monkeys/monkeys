@@ -38,4 +38,12 @@ export class UpdateWorkflowTriggerDto {
     required: false,
   })
   webhookConfig?: WebhookTriggerConfig;
+
+  @ApiProperty({
+    description: '其他配置',
+    name: 'extraData',
+    type: Object,
+    required: false,
+  })
+  extraData?: { [x: string]: any };
 }

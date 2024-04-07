@@ -13,6 +13,6 @@ import { ToolsRegistryService } from './tools.registry.service';
   controllers: [ToolsController, ToolsCredentialsController],
   providers: [ToolsPollingService, ToolsRegistryService, ToolsForwardService, ToolsCredentialsService],
   imports: [ExampleToolsModule, HttpModule, BuiltinToolsModule],
-  exports: [ToolsRegistryService],
+  exports: [ToolsRegistryService, ToolsForwardService],
 })
 export class ToolsModule {}
