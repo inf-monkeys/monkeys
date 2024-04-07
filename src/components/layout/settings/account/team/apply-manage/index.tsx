@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Inbox, Info } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { updateTeamApply, useTeamApplyList, useTeamUsers } from '@/apis/authz/team';
+import { updateTeamApply, useTeamJoinRequests, useTeamUsers } from '@/apis/authz/team';
 import { ApplyItem } from '@/components/layout/settings/account/team/apply-manage/apply-item.tsx';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -17,7 +17,7 @@ interface IApplyManageProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const ApplyManage: React.FC<IApplyManageProps> = ({ teamId }) => {
-  const { data: applyListData, mutate: mutateApplyList, isLoading } = useTeamApplyList(teamId);
+  const { data: applyListData, mutate: mutateApplyList, isLoading } = useTeamJoinRequests(teamId);
   const { mutate: mutateTeamUsers } = useTeamUsers(teamId);
   const [isHandleTeamPublicChange, setIsHandleTeamPublicChange] = useState(false);
 

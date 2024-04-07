@@ -44,11 +44,11 @@ export const searchTeams = (keyword: string) =>
     }
   >({ method: 'POST', simple: true })(`/api/teams/search`, { keyword });
 
-export const applyTeam = (teamId: string) =>
-  vinesFetcher<boolean>({ method: 'POST', simple: true })(`/api/teams/apply/${teamId}`);
+export const makeJoinTeamRequest = (teamId: string) =>
+  vinesFetcher<boolean>({ method: 'POST', simple: true })(`/api/teams/${teamId}/join-requests`);
 
-export const useTeamApplyList = (teamId?: string) =>
-  useSWR<ITeamApplyListData | undefined>(teamId ? `/api/teams/apply/${teamId}` : null, vinesFetcher());
+export const useTeamJoinRequests = (teamId?: string) =>
+  useSWR<ITeamApplyListData | undefined>(teamId ? `/api/teams/${teamId}/join-requests` : null, vinesFetcher());
 // export const getTeamApplyList = (teamId: string) => vinesFetcher<ITeamApplyListData>()(`/api/teams/apply/${teamId}`);
 
 export const updateTeamApply = (data: ITeamApplyUpdateData & { teamId: string }) =>
