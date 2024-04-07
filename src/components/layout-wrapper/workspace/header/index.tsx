@@ -4,6 +4,7 @@ import { useNavigate, useParams } from '@tanstack/react-router';
 
 import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
+import { IntegrationCenter } from '@/components/layout-wrapper/workspace/header/expand/integration-center';
 import { UserCard } from '@/components/layout-wrapper/workspace/header/expand/user-card.tsx';
 import { WorkflowInfoCard } from '@/components/layout-wrapper/workspace/header/workflow-info-card.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -28,6 +29,7 @@ export const WorkspaceHeader: React.FC<IWorkspaceHeaderProps> = () => {
         <WorkflowInfoCard />
       </div>
       <div className="flex items-center gap-6">
+        <IntegrationCenter />
         <VinesDarkMode className="scale-90" />
         <UserCard />
       </div>
