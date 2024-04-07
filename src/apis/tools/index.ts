@@ -16,6 +16,18 @@ export enum QRCodeStatus {
   LOGOUT = 'LOGOUT',
 }
 
+export interface QRCodeUserInfo {
+  displayName: string;
+  id: string;
+  avatar: string;
+}
+
+export interface QRCodeStatusResult {
+  sessionId: string;
+  status: QRCodeStatus;
+  userinfo?: QRCodeUserInfo;
+}
+
 export interface GeneQRCodeResult {
   sessionId: string;
   status: QRCodeStatus;
@@ -32,17 +44,33 @@ export interface GeneQRCodeResult {
   };
 }
 
-export const generateQrcode = (
+const replaceUrlParams = (url: string, params: { [x: string]: any }) => {
+  let resultUrl = url;
+
+  // 遍历对象中的每个键值对
+  for (const [key, value] of Object.entries(params)) {
+    // 替换 URL 中的占位符
+    resultUrl = resultUrl.replace(`{${key}}`, value);
+  }
+
+  return resultUrl;
+};
+
+export const callToolsApi = <T>(
   toolName: string,
   api: string,
   method: 'GET' | 'POST' | 'PUT' | 'DELETE',
-  context?: { [x: string]: any },
-) =>
-  vinesFetcher<GeneQRCodeResult>({ method: method, simple: true })(`/api/tools/${toolName}${api}`, {
-    context: context || {},
-  });
+  dataOrParams?: { [x: string]: any },
+) => {
+  api = replaceUrlParams(api, dataOrParams || {});
+  if (method.toUpperCase() === 'GET') {
+    return vinesFetcher<T>({ method: method, simple: false })(`/api/tools/${toolName}${api}`);
+  } else {
+    return vinesFetcher<T>({ method: method, simple: true })(`/api/tools/${toolName}${api}`, dataOrParams);
+  }
+};
 
 export const importTool = (manifestJsonUrl: string) =>
-  vinesFetcher<GeneQRCodeResult>({ method: 'POST', simple: true })(`/api/tools/register`, {
+  vinesFetcher({ method: 'POST', simple: true })(`/api/tools/register`, {
     manifestJsonUrl,
   });

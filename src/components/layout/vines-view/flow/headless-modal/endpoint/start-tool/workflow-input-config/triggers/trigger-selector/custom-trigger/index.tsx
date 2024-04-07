@@ -75,10 +75,10 @@ export const CustomTrigger: React.FC<ICustomTriggerProps> = () => {
                 nodeId={''}
                 value={undefined}
                 onChange={(value: unknown) => {
-                  setData({
-                    ...data,
-                    [def.name]: value,
-                  });
+                  setData((prevData) => ({
+                    ...prevData, // 复制现有的 data 对象
+                    [def.name]: value, // 更新或添加 'keyName' 字段
+                  }));
                 }}
                 variableMapper={{}}
                 context={{
