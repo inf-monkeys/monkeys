@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
-import { GeneQRCodeResult, generateQrcode, QRCodeStatus } from '@/apis/tools';
+import { callToolsApi, GeneQRCodeResult, QRCodeStatus, QRCodeStatusResult, QRCodeUserInfo } from '@/apis/tools';
+import { Loading } from '@/components/ui/loading';
 import { cn } from '@/utils';
 
 import { IVinesInputPropertyProps } from '..';
@@ -13,17 +14,49 @@ export const QRCodeInput: React.FC<IVinesInputPropertyProps & IQrcodeInputProps>
   context,
   onChange,
 }) => {
-  const [qrcodeResult, setQRCodeResult] = useState<GeneQRCodeResult | undefined>(undefined);
+  const [qrcodeStatus, setQRCodeStatus] = useState<QRCodeStatus | undefined>(undefined);
+  const [userInfo, setUserInfo] = useState<QRCodeUserInfo | undefined>(undefined);
+  const [loading, setLoading] = useState(false);
+  const [pollingForStatus, setPollingForStatus] = useState(false);
+  const [geneQrcodeResult, setGeneQRCodeResult] = useState<GeneQRCodeResult | undefined>(undefined);
   const generateQRCode = async () => {
+    setLoading(true);
     const geneEndpoint = def.typeOptions?.endpoints?.gene || {};
     const { method, url } = geneEndpoint;
-    const res = await generateQrcode(toolName, url, method, {
+    const res = await callToolsApi<GeneQRCodeResult>(toolName, url, method, {
       ...(context || {}),
       ...(def.typeOptions?.extraData || {}),
     });
-    setQRCodeResult(res);
+    setGeneQRCodeResult(res);
+    setQRCodeStatus(res?.status);
     if (res?.status === QRCodeStatus.LOGGED_IN) {
       onChange(res.sessionId);
+      setUserInfo(res.userinfo);
+    } else {
+      fetchQrCodeStatus(res!.sessionId!);
+    }
+    setLoading(false);
+  };
+
+  // 模拟API调用
+  const fetchQrCodeStatus = async (sessionId: string) => {
+    try {
+      setPollingForStatus(true);
+      const checkEndpoint = def.typeOptions?.endpoints?.check || {};
+      const { method, url } = checkEndpoint;
+      const data = { sessionId };
+      const res = await callToolsApi<QRCodeStatusResult>(toolName, url, method, data);
+      setQRCodeStatus(res?.status);
+      if (res?.status === QRCodeStatus.LOGGED_IN) {
+        setUserInfo(res.userinfo);
+        setPollingForStatus(false);
+      } else {
+        setTimeout(() => {
+          fetchQrCodeStatus(sessionId);
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
     }
   };
 
@@ -33,25 +66,34 @@ export const QRCodeInput: React.FC<IVinesInputPropertyProps & IQrcodeInputProps>
 
   return (
     <div className={cn('relative', { 'pointer-events-none': false })}>
-      {qrcodeResult?.status === QRCodeStatus.LOGGED_IN && (
-        <>已登录用户「{qrcodeResult?.userinfo?.displayName}」，可直接创建。</>
+      {loading && (
+        <div
+          style={{
+            marginTop: 20,
+          }}
+        >
+          <Loading motionKey="vines-qrcode-loading" />
+        </div>
       )}
-      {qrcodeResult?.status !== QRCodeStatus.LOGGED_IN && (
+
+      {!loading && qrcodeStatus === QRCodeStatus.LOGGED_IN && <>已登录用户「{userInfo?.displayName}」，可直接创建。</>}
+      {!loading && qrcodeStatus !== QRCodeStatus.LOGGED_IN && (
         <>
-          {qrcodeResult?.qrcode?.type === 'iframe' && (
+          {geneQrcodeResult?.qrcode?.type === 'iframe' && (
             <iframe
-              width={`${qrcodeResult.qrcode.width}px`}
-              height={`${qrcodeResult.qrcode.height}px`}
-              src={`${qrcodeResult.qrcode.src}`}
+              width={`${geneQrcodeResult.qrcode.width}px`}
+              height={`${geneQrcodeResult.qrcode.height}px`}
+              src={`${geneQrcodeResult.qrcode.src}`}
             ></iframe>
           )}
-          {qrcodeResult?.qrcode?.type === 'image' && (
+          {geneQrcodeResult?.qrcode?.type === 'image' && (
             <img
-              width={`${qrcodeResult.qrcode.width}px`}
-              height={`${qrcodeResult.qrcode.height}px`}
-              src={`${qrcodeResult.qrcode.src}`}
+              width={`${geneQrcodeResult.qrcode.width}px`}
+              height={`${geneQrcodeResult.qrcode.height}px`}
+              src={`${geneQrcodeResult.qrcode.src}`}
             ></img>
           )}
+          {pollingForStatus && <>查询最新扫描状态中 ...</>}
         </>
       )}
     </div>
