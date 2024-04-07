@@ -10,6 +10,8 @@ import { WorkflowChatSessionService } from './workflow.chat-sessions.service';
 import { WorkflowCommonService } from './workflow.common.service';
 import { WorkflowCrudController } from './workflow.crud.controller';
 import { WorkflowCrudService } from './workflow.curd.service';
+import { WorkflowCustomTriggerInvokeController } from './workflow.custom-trigger-invoke.controller';
+import { WorkflowCustomTriggerInvokeService } from './workflow.custom-trigger-invoke.service';
 import { WorkflowExecutionController } from './workflow.execution.controller';
 import { WorkflowExecutionService } from './workflow.execution.service';
 import { WorkflowPageController } from './workflow.page.controller';
@@ -31,6 +33,7 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     WorkflowAssetsController,
     WorkflowChatSessionController,
     WorkflowPageController,
+    WorkflowCustomTriggerInvokeController,
   ],
   providers: [
     WorkflowCrudService,
@@ -42,6 +45,7 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     WorkflowAssetsService,
     WorkflowChatSessionService,
     WorkflowPageService,
+    WorkflowCustomTriggerInvokeService,
   ],
   imports: [ConductorModule, TypeOrmModule.forFeature([WorkflowPageEntity]), ToolsModule],
   exports: [WorkflowCrudService, WorkflowExecutionService],

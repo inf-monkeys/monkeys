@@ -461,7 +461,7 @@ export class WorkflowCrudService {
     let validated = workflow.validated;
     let validationIssues: WorkflowValidationIssue[] = [];
     if (updates.tasks || updates.output) {
-      validationIssues = await this.workflowValidateService.validateWorkflow(updates.tasks, updates.output || workflow.output || []);
+      validationIssues = await this.workflowValidateService.validateWorkflow(updates.tasks || workflow.tasks, updates.output || workflow.output || []);
       const errors = validationIssues.filter((i) => i.issueType === ValidationIssueType.ERROR);
       validated = errors.length === 0;
       await this.workflowRepository.updateWorkflowDef(teamId, workflowId, version, {

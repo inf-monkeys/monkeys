@@ -10,6 +10,7 @@ import { TriggerDefinition, TriggerEndpointType } from '../tools/interfaces';
 import { ToolsForwardService } from '../tools/tools.forward.service';
 import { CreateWorkflowTriggerDto } from './dto/req/create-trigger.dto';
 import { UpdateWorkflowTriggerDto } from './dto/req/update-trigger.dto';
+import { WorkflowCustomTriggerInvokeService } from './workflow.custom-trigger-invoke.service';
 
 export const BUILTIN_TRIGGERS: TriggerDefinition[] = [
   {
@@ -39,6 +40,7 @@ export class WorkflowTriggerService {
     private readonly triggerTypesRepository: TriggerTypeRepository,
     private readonly toolsRepository: ToolsRepository,
     private readonly toolsForwardService: ToolsForwardService,
+    private readonly workflowCustomTriggerInvokeService: WorkflowCustomTriggerInvokeService,
   ) {}
 
   private isCustomTrigger(type: WorkflowTriggerType) {
@@ -160,6 +162,7 @@ export class WorkflowTriggerService {
           workflowId,
           worfklowVersion: version,
           extraData,
+          triggerEndpoint: this.workflowCustomTriggerInvokeService.getCustomTriggerEndpoint(triggerId),
         },
       });
       await this.workflowRepository.createWorkflowTrigger(newTrigger);
