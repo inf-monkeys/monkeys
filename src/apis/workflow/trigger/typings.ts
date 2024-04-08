@@ -14,6 +14,7 @@ export interface ITriggerType {
   displayName: string;
   icon: string;
   description: string;
+  workflowInputs?: BlockDefProperties[];
   properties?: BlockDefProperties[];
 }
 
