@@ -2,33 +2,14 @@ import React from 'react';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
-import { BlockCredentialItem } from '@inf-monkeys/vines';
-import _ from 'lodash';
-
 import { preloadActionTools, useUgcActionTools } from '@/apis/ugc';
-import { ICredentialType } from '@/apis/ugc/credential-typings.ts';
 import { ACTION_TOOLS_COLUMNS } from '@/components/layout/action-tools/consts.tsx';
 import { pricingText } from '@/components/layout/action-tools/utils.tsx';
+import { VinesExternalAccount } from '@/components/layout/ugc/external-account';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTime } from '@/utils/time.ts';
-
-const determinedCredentialVisible = (
-  credentials?: BlockCredentialItem[],
-  credentialTypesHash?: {
-    [type: string]: ICredentialType;
-  },
-): { required: boolean; missing: boolean; credentialNames?: string[] } => {
-  if (!credentials?.length) return { required: false, missing: false };
-  return {
-    required: true,
-    missing: !credentials?.length,
-    credentialNames: _.uniq(
-      credentials.map(({ name }) => credentialTypesHash?.[name]?.displayName).filter((s) => s),
-    ) as string[],
-  };
-};
 
 export const ActionTools: React.FC = () => {
   const navigate = useNavigate();
@@ -61,7 +42,11 @@ export const ActionTools: React.FC = () => {
             to: `/$teamId/action-tools/${item.name}`,
           });
         }}
-        subtitle={<></>}
+        subtitle={
+          <>
+            <VinesExternalAccount />
+          </>
+        }
       />
     </main>
   );
