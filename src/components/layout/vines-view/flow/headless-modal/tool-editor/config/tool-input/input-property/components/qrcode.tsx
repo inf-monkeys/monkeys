@@ -50,6 +50,7 @@ export const QRCodeInput: React.FC<IVinesInputPropertyProps & IQrcodeInputProps>
       if (res?.status === QRCodeStatus.LOGGED_IN) {
         setUserInfo(res.userinfo);
         setPollingForStatus(false);
+        onChange(res.sessionId);
       } else {
         setTimeout(() => {
           fetchQrCodeStatus(sessionId);

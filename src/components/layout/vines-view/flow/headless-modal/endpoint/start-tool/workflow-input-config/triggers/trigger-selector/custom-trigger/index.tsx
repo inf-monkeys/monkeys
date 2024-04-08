@@ -22,7 +22,7 @@ export const CustomTrigger: React.FC<ICustomTriggerProps> = () => {
   const [open, setOpen] = useState(false);
 
   const { vines } = useVinesFlow();
-  const { trigger } = useTriggerCreate(workflowId);
+  const { trigger: createTrigger } = useTriggerCreate(workflowId);
   const [triggerType, setTriggerType] = useState<ITriggerType | null>(null);
   const [data, setData] = useState<{ [x: string]: any }>({});
 
@@ -41,8 +41,21 @@ export const CustomTrigger: React.FC<ICustomTriggerProps> = () => {
   }, []);
 
   const handleSubmit = useCallback(() => {
+    if (!triggerType) {
+      return;
+    }
+    // 校验参数
+    const requiredPropNames = triggerType.properties?.filter((x) => x.required)?.map((x) => x.name) || [];
+    for (const key of requiredPropNames) {
+      const prop = triggerType.properties?.find((x) => x.name === key);
+      if (!data[key]) {
+        toast.error(`请配置 ${prop?.displayName} 参数`);
+        return;
+      }
+    }
+
     toast.promise(
-      trigger({
+      createTrigger({
         triggerType: triggerType!.type,
         enabled: false,
         version: workflowVersion,
@@ -52,6 +65,10 @@ export const CustomTrigger: React.FC<ICustomTriggerProps> = () => {
         loading: '创建中...',
         success: () => {
           void mutate(`/api/workflow/${workflowId}/triggers?version=${workflowVersion}`);
+          // 自动添加此触发器的 workflow 输入配置
+          if (triggerType.workflowInputs?.length) {
+            void vines.update({ variables: triggerType.workflowInputs });
+          }
           return '触发器创建成功';
         },
         error: '创建失败',
