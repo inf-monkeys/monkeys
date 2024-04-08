@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 
 import { removeAssetFilterRules, useAssetFilterRuleList } from '@/apis/ugc';
 import { IListUgcDto } from '@/apis/ugc/typings.ts';
+import { NON_FILTER_TYPE_LIST } from '@/components/layout/ugc/consts.ts';
 import { IUgcCustomProps } from '@/components/layout/ugc/typings.ts';
 import { IUgcViewFilterButtonProps, UgcViewFilterButton } from '@/components/layout/ugc/view/filter/button';
 import {
@@ -35,6 +36,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
 }) => {
   const { data: assetFilterRules, mutate } = useAssetFilterRuleList(assetType);
 
+  const filterAreaVisible = !NON_FILTER_TYPE_LIST.includes(assetType);
   const [current, setCurrent] = useState('all');
   const [searchValue, setSearchValue] = useState('');
 
@@ -57,10 +59,12 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
 
   return (
     <div className="flex flex-col gap-2 p-1">
-      <div className="flex gap-2">
-        <Input placeholder="搜索分组名称" value={searchValue} onChange={setSearchValue} />
-        <UgcViewFilterButton assetType={assetType} assetKey={assetKey} {...filterButtonProps} defaultAddToFavourite />
-      </div>
+      {filterAreaVisible && (
+        <div className="flex gap-2">
+          <Input placeholder="搜索分组名称" value={searchValue} onChange={setSearchValue} />
+          <UgcViewFilterButton assetType={assetType} assetKey={assetKey} {...filterButtonProps} defaultAddToFavourite />
+        </div>
+      )}
       <div
         className={cn(
           'group flex h-10 cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',

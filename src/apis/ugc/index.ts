@@ -67,3 +67,12 @@ export const updateAssetItem = (type: AssetType, id: string, data: any) =>
     `/api/assets/${type}/${id}`,
     _.pickBy(data, (v) => !_.isNil(v)),
   );
+
+export const useSearchReferenceWorkflows = (assetType?: AssetType, assetId?: string) =>
+  useSWR<MonkeyWorkflow[] | undefined>(
+    assetId && assetType ? `/api/assets/reference?assetType=${assetType}&assetId=${assetId}` : null,
+    vinesFetcher(),
+    {
+      refreshInterval: 600000,
+    },
+  );

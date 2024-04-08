@@ -1,22 +1,13 @@
 import React, { useMemo } from 'react';
 
-import { flexRender, Row } from '@tanstack/react-table';
+import { flexRender } from '@tanstack/react-table';
 import { CircleEllipsis, Info } from 'lucide-react';
 
-import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { IOperateAreaProps, IUgcRenderOptions, IUgcViewItemProps } from '@/components/layout/ugc/typings.ts';
+import { IUgcViewItemProps } from '@/components/layout/ugc/typings.ts';
 import { getRenderNodeFn } from '@/components/layout/ugc/view/utils/node-renderer.tsx';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils';
-
-interface IUgcViewGalleryItemProps<E extends object> {
-  row: Row<IAssetItem<E>>;
-  renderOptions: IUgcRenderOptions<IAssetItem<E>>;
-  operateArea?: IOperateAreaProps<E>;
-  onItemClick?: (item: IAssetItem<E>, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
-  index: number;
-}
 
 export const UgcViewGalleryItem = <E extends object>({
   row,
