@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { ThemeColorList } from '@/components/layout/settings/theme/color-list';
+import { ThemeMarket } from '@/components/layout/settings/theme/market';
 import { TeamLogo } from '@/components/layout/settings/theme/team-logo';
 import { TeamPrimaryColor } from '@/components/layout/settings/theme/team-primary-color';
 
@@ -12,7 +14,10 @@ export const VinesTheme: React.FC<IVinesThemeProps> = () => {
         <TeamPrimaryColor />
         <TeamLogo />
       </div>
-      <div className="grid items-start gap-4"></div>
+      <div className="grid items-start gap-4">
+        <ThemeColorList />
+        <ThemeMarket />
+      </div>
     </div>
   );
 };
