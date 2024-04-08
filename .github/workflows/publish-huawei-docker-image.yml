@@ -39,3 +39,4 @@ jobs:
           cache-from: type=registry,ref=${{ steps.meta.outputs.tags }}
           cache-to: type=inline
           provenance: false
+          platforms: linux/amd64,linux/arm64
