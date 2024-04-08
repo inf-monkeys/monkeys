@@ -33,6 +33,7 @@ export interface TriggerDefinition {
   properties?: BlockDefProperties[];
   icon?: string;
   type: string;
+  workflowInputs?: BlockDefProperties[];
 }
 
 export interface AuthConfig {

@@ -42,6 +42,7 @@ export class TriggerTypeRepository {
           description: x.description,
           icon: x.icon,
           properties: x.properties,
+          workflowInputs: x.workflowInputs,
         }),
       );
       await this.triggerTypesRepository.save(entitiesToCreate);
@@ -71,6 +72,7 @@ export class TriggerTypeRepository {
           icon: latestDef.icon,
           properties: latestDef.properties,
           type: latestDef.type,
+          workflowInputs: latestDef.workflowInputs,
         };
       });
       await this.triggerTypesRepository.save(entitiesToUpdate);

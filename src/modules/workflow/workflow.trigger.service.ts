@@ -71,6 +71,7 @@ export class WorkflowTriggerService {
         icon: item.icon,
         properties: item.properties,
         type: item.type,
+        workflowInputs: item.workflowInputs,
       })),
     );
   }

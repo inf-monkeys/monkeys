@@ -33,4 +33,11 @@ export class ToolsTriggerTypesEntity extends BaseEntity {
     nullable: true,
   })
   properties: BlockDefProperties[];
+
+  @Column({
+    type: 'simple-json',
+    nullable: true,
+    name: 'workflow_inputs',
+  })
+  workflowInputs: BlockDefProperties[];
 }
