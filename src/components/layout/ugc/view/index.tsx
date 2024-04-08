@@ -4,7 +4,6 @@ import { AssetType } from '@inf-monkeys/vines';
 import { useElementSize } from '@mantine/hooks';
 import {
   ColumnDef,
-  ColumnHelper,
   createColumnHelper,
   functionalUpdate,
   getCoreRowModel,
@@ -47,7 +46,7 @@ interface IUgcViewProps<E extends object> {
   useUgcFetcher: IListUgcItemsFnType<E>;
   preloadUgcFetcher: IPreloadUgcItemsFnType<E>;
   // columns: ColumnDef<IAssetItem<E>>[];
-  createColumns: (columnHelper: ColumnHelper<IAssetItem<E>>) => ColumnDef<IAssetItem<E>, any>[];
+  createColumns: () => ColumnDef<IAssetItem<E>, any>[];
   renderOptions: IUgcRenderOptions<IAssetItem<E>>;
   operateArea?: IOperateAreaProps<E>;
   onItemClick?: (item: IAssetItem<E>, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
@@ -163,7 +162,7 @@ export const UgcView = <E extends object>({
   };
 
   const columnHelper = createColumnHelper<IAssetItem<E>>();
-  const columns = createColumns(columnHelper);
+  const columns = createColumns();
 
   // 修改 tag 列
   const tagColumn = columns.find((c) => c.id === 'assetTags');

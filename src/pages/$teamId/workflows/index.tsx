@@ -5,6 +5,7 @@ import { mutate } from 'swr';
 
 import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import { useClipboard } from '@mantine/hooks';
+import { createColumnHelper } from '@tanstack/react-table';
 import { Copy, FileUp, FolderUp, Link, Pencil, Trash } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -117,7 +118,8 @@ export const Workflows: React.FC = () => {
         assetName="工作流"
         useUgcFetcher={useUgcWorkflows}
         preloadUgcFetcher={preloadUgcWorkflows}
-        createColumns={(columnHelper) => {
+        createColumns={() => {
+          const columnHelper = createColumnHelper<IAssetItem<MonkeyWorkflow>>();
           return [
             columnHelper.accessor('iconUrl', {
               id: 'logo',
@@ -239,7 +241,11 @@ export const Workflows: React.FC = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onSelect={() => {
-                    setExportAssetContext({ workflowId: item.workflowId, name: item.name, version: item.version });
+                    setExportAssetContext({
+                      workflowId: item.workflowId,
+                      name: item.name,
+                      version: item.version,
+                    });
                     setExportDialogVisible(true);
                   }}
                 >

@@ -16,7 +16,7 @@ export const Settings: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-2xl font-bold">配置中心</h2>
+      <h1 className="text-2xl font-bold">配置中心</h1>
       <Tabs
         defaultValue="account"
         className="[&_[role='tabpanel']]:mt-4 [&_[role='tabpanel']]:h-[calc(100vh-11.5rem)] [&_[role='tabpanel']]:overflow-y-auto [&_[role='tabpanel']]:overflow-x-hidden"
