@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -6,31 +6,18 @@ import { toast } from 'sonner';
 
 import { importTool } from '@/apis/tools';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input';
 import { IImportTool, impotrToolSchema } from '@/schema/tools/tools-import';
 
 interface IImportToolModalProps {
-  visible?: boolean;
-  setVisible?: (v: boolean) => void;
+  children?: React.ReactNode;
 }
 
-export const ImportToolModal: React.FC<IImportToolModalProps> = ({ visible, setVisible }) => {
-  const [open, setOpen] = useState(visible ?? false);
+export const ImportToolModal: React.FC<IImportToolModalProps> = ({ children }) => {
+  const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  useMemo(() => {
-    typeof visible != 'undefined' && setOpen(visible);
-  }, [visible]);
-
-  useMemo(() => {
-    if (typeof setVisible != 'undefined') {
-      setTimeout(() => {
-        setVisible(open);
-      });
-    }
-  }, [open]);
 
   const form = useForm<IImportTool>({
     resolver: zodResolver(impotrToolSchema),
@@ -39,20 +26,22 @@ export const ImportToolModal: React.FC<IImportToolModalProps> = ({ visible, setV
     },
   });
 
-  const handleSubmit = form.handleSubmit(async (data) => {
+  const handleSubmit = form.handleSubmit((data) => {
     setIsLoading(true);
-    const importResult = await importTool(data.manifestUrl);
-    if (importResult) {
-      toast.success('导入成功');
-      setOpen(false);
-    } else {
-      toast.error('导入工具失败');
-    }
-    setIsLoading(false);
+    toast.promise(importTool(data.manifestUrl), {
+      loading: '导入中...',
+      success: () => {
+        setOpen(false);
+        return '导入成功';
+      },
+      error: '导入失败',
+      finally: () => setIsLoading(false),
+    });
   });
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>导入工具</DialogTitle>
