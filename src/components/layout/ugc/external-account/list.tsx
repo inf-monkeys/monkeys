@@ -5,8 +5,10 @@ import { CircularProgress } from '@nextui-org/progress';
 import { useCredentials, useCredentialTypes } from '@/apis/credential';
 import { IVinesCredentialType } from '@/apis/credential/typings.ts';
 import { ExternalAccountManage } from '@/components/layout/ugc/external-account/manage';
+import { CreateExternalAccount } from '@/components/layout/ugc/external-account/manage/create.tsx';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card.tsx';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
@@ -57,7 +59,14 @@ export const AccountTypes: React.FC<IAccountTypesProps> = () => {
         )}
       </ScrollArea>
       <Dialog open={!!active} onOpenChange={(open) => !open && setActive(null)}>
-        <DialogContent>{active && <ExternalAccountManage detail={active} />}</DialogContent>
+        <DialogContent className="max-w-[46rem]">
+          {active && <ExternalAccountManage detail={active} />}
+          <DialogFooter>
+            <CreateExternalAccount detail={active}>
+              <Button variant="outline">创建账号</Button>
+            </CreateExternalAccount>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
     </>
   );

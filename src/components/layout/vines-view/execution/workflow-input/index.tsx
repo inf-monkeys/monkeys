@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { BlockDefProperties } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
 import { fromPairs, isArray, isBoolean } from 'lodash';
 import { useForm } from 'react-hook-form';
 
@@ -9,6 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { TagInput } from '@/components/ui/input/tag';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { Switch } from '@/components/ui/switch';
 import { VinesUpdater } from '@/components/ui/updater';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
@@ -94,7 +96,7 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
       >
         <ScrollArea className={scrollAreaClassName} style={{ height }}>
           <div className={cn('flex flex-col gap-4', formClassName)}>
-            {inputs?.map(({ displayName, name, type, typeOptions }) => {
+            {inputs?.map(({ displayName, name, type, typeOptions, ...other }) => {
               const isMultiple = typeOptions?.multipleValues ?? false;
               const isNumber = type === 'number';
               return (
@@ -178,6 +180,34 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                                 </Button>
                               </VinesUpdater>
                             </div>
+                          )}
+
+                          {type === 'options' && (
+                            <Select
+                              onValueChange={(val) =>
+                                onChange(
+                                  (
+                                    (other as BlockDefProperties)?.options?.find((it) =>
+                                      'value' in it ? it.value.toString() : '' === val,
+                                    ) as any
+                                  )?.value ?? '',
+                                )
+                              }
+                              defaultValue={value as string}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="请选择一个选项" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {(other as BlockDefProperties)?.options?.map((it, i) => (
+                                  <SelectItem value={'value' in it ? it.value.toString() : ''} key={i}>
+                                    {it.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           )}
                         </>
                       </FormControl>
