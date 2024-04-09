@@ -8,7 +8,9 @@ import { pricingText } from '@/components/layout/action-tools/utils.tsx';
 import { VinesExternalAccount } from '@/components/layout/ugc/external-account';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { ImportToolModal } from '@/components/layout/workspace/tools/import-tool';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
+import { Button } from '@/components/ui/button';
 import { formatTime } from '@/utils/time.ts';
 
 export const ActionTools: React.FC = () => {
@@ -45,6 +47,11 @@ export const ActionTools: React.FC = () => {
         subtitle={
           <>
             <VinesExternalAccount />
+            <ImportToolModal>
+              <Button variant="outline" size="small">
+                导入
+              </Button>
+            </ImportToolModal>
           </>
         }
       />
