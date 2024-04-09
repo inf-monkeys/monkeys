@@ -5,6 +5,7 @@ import { BlockDefProperties } from '@inf-monkeys/vines/src/models/BlockDefDto.ts
 import { fromPairs, isArray, isBoolean } from 'lodash';
 import { useForm } from 'react-hook-form';
 
+import { NoticeInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/notice.tsx';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input';
@@ -97,6 +98,10 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
         <ScrollArea className={scrollAreaClassName} style={{ height }}>
           <div className={cn('flex flex-col gap-4', formClassName)}>
             {inputs?.map(({ displayName, name, type, typeOptions, ...other }) => {
+              if (type === 'notice') {
+                return <NoticeInput key={name} def={{ displayName }} />;
+              }
+
               const isMultiple = typeOptions?.multipleValues ?? false;
               const isNumber = type === 'number';
               return (
