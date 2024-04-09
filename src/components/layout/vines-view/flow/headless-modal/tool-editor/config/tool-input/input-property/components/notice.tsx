@@ -2,10 +2,10 @@ import React from 'react';
 
 import remarkGfm from 'remark-gfm';
 
-import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
 import { MemoizedReactMarkdown } from '@/components/ui/markdown';
+import { VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
-export const NoticeInput: React.FC<IVinesInputPropertyProps> = ({ def }) => {
+export const NoticeInput: React.FC<{ def: Pick<VinesToolDefProperties, 'displayName'> }> = ({ def }) => {
   return (
     <div className="mb-3 flex max-h-96 overflow-y-auto rounded bg-slate-3 p-4 shadow-sm">
       <MemoizedReactMarkdown
