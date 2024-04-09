@@ -2,7 +2,7 @@ import React from 'react';
 
 import { get } from 'lodash';
 
-import { useOemConfig } from '@/apis/common';
+import { useSystemConfig } from '@/apis/common';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { AppLogo, ILogoProps } from '@/components/ui/logo';
 import { Skeleton } from '@/components/ui/skeleton.tsx';
@@ -21,7 +21,7 @@ export const VinesLogo: React.FC<Omit<ILogoProps, 'url'>> = ({
 
   const initialHeight = description ? height + 32 : height;
 
-  const { data: oem, isLoading: isOemLoading } = useOemConfig();
+  const { data: oem, isLoading: isOemLoading } = useSystemConfig();
 
   return (
     <SmoothTransition initialHeight={initialHeight} onClick={onClick}>
