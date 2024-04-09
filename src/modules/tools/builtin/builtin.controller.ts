@@ -2,7 +2,7 @@ import { MonkeyToolCategories, MonkeyToolExtra, MonkeyToolIcon, MonkeyToolInput,
 import { IToolsRequest } from '@/common/typings/request';
 import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ApiType, AuthType, ManifestJson, SchemaVersion } from '../interfaces';
+import { ApiType, AuthType, ManifestJson, SchemaVersion } from '../../../common/typings/tools';
 import { BuiltinToolsService } from './builtin.service';
 import { BUILTIN_TOOL_OPENAPI_PATH } from './builtin.swagger';
 import { CollectDoWhileOutputDto } from './dto/req/collect-dowhile-output.req.dto';

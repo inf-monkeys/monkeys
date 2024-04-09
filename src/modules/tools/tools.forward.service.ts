@@ -3,7 +3,7 @@ import { IRequest } from '@/common/typings/request';
 import { ToolsRepository } from '@/database/repositories/tools.repository';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import axios, { AxiosRequestConfig } from 'axios';
-import { AuthType } from './interfaces';
+import { AuthType } from '../../common/typings/tools';
 
 @Injectable()
 export class ToolsForwardService {

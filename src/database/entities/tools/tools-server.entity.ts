@@ -1,4 +1,4 @@
-import { ApiType, AuthConfig, SchemaVersion, TriggerEndpointConfig } from '@/modules/tools/interfaces';
+import { ApiType, AuthConfig, SchemaVersion, TriggerEndpointConfig } from '@/common/typings/tools';
 import { Column, Entity } from 'typeorm';
 import url from 'url';
 import { BaseEntity } from '../base/base';

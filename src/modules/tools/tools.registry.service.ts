@@ -10,9 +10,9 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import url from 'url';
+import { ApiType, AuthType, ManifestJson, RegisterWorkerParams, SchemaVersion, TriggerEndpointConfig, TriggerEndpointType } from '../../common/typings/tools';
 import { CredentialsRepository } from '../../database/repositories/credential.repository';
 import { ToolsRepository } from '../../database/repositories/tools.repository';
-import { ApiType, AuthType, ManifestJson, RegisterWorkerParams, SchemaVersion, TriggerEndpointConfig, TriggerEndpointType } from './interfaces';
 import { parseOpenApiSpecAsBlocks } from './utils/openapi-parser';
 
 @Injectable()

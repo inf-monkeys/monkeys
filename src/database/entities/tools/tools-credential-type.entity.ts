@@ -1,4 +1,4 @@
-import { CredentialAuthType } from '@/modules/tools/interfaces';
+import { CredentialAuthType } from '@/common/typings/tools';
 import { BlockDefProperties } from '@inf-monkeys/vines';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';

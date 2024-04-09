@@ -1,7 +1,7 @@
+import { CredentialDefinition } from '@/common/typings/tools';
 import { generateDbId } from '@/common/utils';
 import { ToolsCredentialTypeEntity } from '@/database/entities/tools/tools-credential-type.entity';
 import { ToolsCredentialEntity } from '@/database/entities/tools/tools-credential.entity';
-import { CredentialDefinition } from '@/modules/tools/interfaces';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AES, enc } from 'crypto-js';

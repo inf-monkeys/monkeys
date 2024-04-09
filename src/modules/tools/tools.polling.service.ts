@@ -6,8 +6,8 @@ import { Task, TaskDef, TaskManager } from '@inf-monkeys/conductor-javascript';
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import os from 'os';
+import { AuthType, WorkerInputData } from '../../common/typings/tools';
 import { ToolsRepository } from '../../database/repositories/tools.repository';
-import { AuthType, WorkerInputData } from './interfaces';
 
 export const CONDUCTOR_TASK_DEF_NAME = config.conductor.workerPrefix ? `${config.conductor.workerPrefix}monkeys` : 'monkeys';
 

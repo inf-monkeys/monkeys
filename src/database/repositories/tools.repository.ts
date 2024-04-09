@@ -1,7 +1,7 @@
+import { ManifestJson } from '@/common/typings/tools';
 import { generateDbId } from '@/common/utils';
 import { ToolsServerEntity } from '@/database/entities/tools/tools-server.entity';
 import { ToolsEntity } from '@/database/entities/tools/tools.entity';
-import { ManifestJson } from '@/modules/tools/interfaces';
 import { BlockDefinition } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';

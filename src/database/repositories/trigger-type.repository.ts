@@ -1,5 +1,5 @@
+import { TriggerDefinition } from '@/common/typings/tools';
 import { generateDbId } from '@/common/utils';
-import { TriggerDefinition } from '@/modules/tools/interfaces';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';

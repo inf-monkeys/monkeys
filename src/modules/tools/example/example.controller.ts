@@ -2,7 +2,7 @@ import { MonkeyToolCategories, MonkeyToolDescription, MonkeyToolDisplayName, Mon
 import { IRequest } from '@/common/typings/request';
 import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ApiType, AuthType, ManifestJson, SchemaVersion } from '../interfaces';
+import { ApiType, AuthType, ManifestJson, SchemaVersion } from '../../../common/typings/tools';
 import { AddTwoNumberDto } from './dto/req/add-two-number.dto';
 import { NthPowerOfDto } from './dto/req/nth-power-of.dto';
 import { EXAMPLE_WORKER_OPENAPI_PATH } from './example.swagger';
