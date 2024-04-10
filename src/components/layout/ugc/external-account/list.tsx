@@ -39,7 +39,7 @@ export const AccountTypes: React.FC<IAccountTypesProps> = () => {
                   onClick={() => setActive(it)}
                 >
                   <div className="size-12">
-                    <VinesIcon className="size-full" size="lg" src={it.logo} />
+                    <VinesIcon className="size-full" size="lg" src={it.iconUrl} />
                   </div>
                   <div className="leading-5">
                     <Tooltip>

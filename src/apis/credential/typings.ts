@@ -10,7 +10,7 @@ export interface IVinesCredentialType {
   public: boolean;
   name: string;
   displayName: string;
-  logo?: string;
+  iconUrl?: string;
   properties: BlockDefProperties[];
   tokenScript: string;
   testConnectionScript?: string;
