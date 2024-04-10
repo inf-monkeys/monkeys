@@ -5,7 +5,10 @@ import _ from 'lodash';
 import qs from 'qs';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
-import { WorkflowBlock } from '@/apis/tools/typings.ts';
+import { ILLMModel } from '@/apis/llm/typings.ts';
+import { ISDModel } from '@/apis/model/typings.ts';
+import { ITableData } from '@/apis/table-data/typings.ts';
+import { IWorkflowBlock } from '@/apis/tools/typings.ts';
 import { IPaginationListData } from '@/apis/typings.ts';
 import { IVectorFrontEnd } from '@/apis/vector/typings.ts';
 import { paginationWrapper } from '@/apis/wrapper.ts';
@@ -41,11 +44,20 @@ export const preloadUgcItems = <T extends object>(dto: IListUgcDto, url: string,
 export const useUgcWorkflows = (dto: IListUgcDto) => useUgcItems<MonkeyWorkflow>(dto, '/api/workflow/list');
 export const preloadUgcWorkflows = (dto: IListUgcDto) => preloadUgcItems<MonkeyWorkflow>(dto, '/api/workflow/list');
 
-export const useUgcActionTools = (dto: IListUgcDto) => useUgcItems<WorkflowBlock>(dto, '/api/tools');
-export const preloadActionTools = (dto: IListUgcDto) => preloadUgcItems<WorkflowBlock>(dto, '/api/tools');
+export const useUgcActionTools = (dto: IListUgcDto) => useUgcItems<IWorkflowBlock>(dto, '/api/blocks/list');
+export const preloadUgcActionTools = (dto: IListUgcDto) => preloadUgcItems<IWorkflowBlock>(dto, '/api/blocks/list');
+
+export const useUgcTextModels = (dto: IListUgcDto) => useUgcItems<ILLMModel>(dto, '/api/llm/models');
+export const preloadUgcTextModels = (dto: IListUgcDto) => preloadUgcItems<ILLMModel>(dto, '/api/llm/models');
+
+export const useUgcImageModels = (dto: IListUgcDto) => useUgcItems<ISDModel>(dto, '/api/sd/models');
+export const preloadUgcImageModels = (dto: IListUgcDto) => preloadUgcItems<ISDModel>(dto, '/api/sd/models');
 
 export const useUgcVectors = (dto: IListUgcDto) => useUgcItems<IVectorFrontEnd>(dto, '/api/vector/collections');
 export const preloadUgcVectors = (dto: IListUgcDto) => preloadUgcItems<IVectorFrontEnd>(dto, '/api/vector/collections');
+
+export const useUgcTableData = (dto: IListUgcDto) => useUgcItems<ITableData>(dto, '/api/database');
+export const preloadUgcTableData = (dto: IListUgcDto) => preloadUgcItems<ITableData>(dto, '/api/database');
 
 export const useAssetTagList = (assetKey?: string) =>
   useSWR<string[] | undefined>(assetKey ? `/api/assets/${assetKey}/tags` : null, vinesFetcher(), {

@@ -23,7 +23,7 @@ export interface BlockDefinitionExtended extends BlockDefinition {
   pricing?: BlockPricing;
 }
 
-export interface WorkflowBlock extends BlockDefinitionExtended {
+export interface IWorkflowBlock extends BlockDefinitionExtended {
   _id: string;
   namespace: string;
 }

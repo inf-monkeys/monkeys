@@ -6,7 +6,7 @@ import { useTool } from '@/apis/tools';
 import { useSearchReferenceWorkflows } from '@/apis/ugc';
 import { UgcDetailInfo } from '@/components/layout/ugc/detail/info';
 import { UgcDetailWorkflows } from '@/components/layout/ugc/detail/workflows';
-import { createActionToolsColumn } from '@/components/layout/ugc-pages/action-tools/consts.tsx';
+import { createActionToolsColumns } from '@/components/layout/ugc-pages/action-tools/consts.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 
@@ -34,7 +34,7 @@ export const ActionToolDetail: React.FC<IActionToolDetailProps> = () => {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="info">
-          <UgcDetailInfo columns={createActionToolsColumn} data={blockData} />
+          <UgcDetailInfo columns={createActionToolsColumns} data={blockData} />
         </TabsContent>
         <TabsContent value="workflows">
           <UgcDetailWorkflows data={blockWorkflowRefData ?? []} />

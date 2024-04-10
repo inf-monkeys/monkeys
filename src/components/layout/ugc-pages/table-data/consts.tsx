@@ -3,20 +3,20 @@ import React from 'react';
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
+import { ITableData } from '@/apis/table-data/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { IVectorFrontEnd } from '@/apis/vector/typings.ts';
 import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
 
-const columnHelper = createColumnHelper<IAssetItem<IVectorFrontEnd>>();
+const columnHelper = createColumnHelper<IAssetItem<ITableData>>();
 
-export const createTextDataColumn = [
+export const createTableDataColumns = [
   columnHelper.accessor('iconUrl', {
     id: 'logo',
     header: '图标',
     cell: ({ getValue }) => RenderIcon({ iconUrl: getValue() as string }),
     maxSize: 48,
   }),
-  columnHelper.accessor('displayName', {
+  columnHelper.accessor('name', {
     id: 'title',
     header: '名称',
     cell: ({ getValue }) => (
@@ -44,6 +44,12 @@ export const createTextDataColumn = [
   columnHelper.accessor('createdTimestamp', {
     id: 'createdTimestamp',
     header: '创建时间',
+    cell: ({ getValue }) => RenderTime({ time: getValue() as number }),
+    maxSize: 72,
+  }),
+  columnHelper.accessor('updatedTimestamp', {
+    id: 'updatedTimestamp',
+    header: '更新时间',
     cell: ({ getValue }) => RenderTime({ time: getValue() as number }),
     maxSize: 72,
   }),
