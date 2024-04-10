@@ -4,13 +4,13 @@ import { createColumnHelper } from '@tanstack/react-table';
 
 import { BlockPricing, WorkflowBlock } from '@/apis/tools/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { pricingText } from '@/components/layout/action-tools/utils.tsx';
 import { RenderDescription, RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { pricingText } from '@/components/layout/ugc-pages/action-tools/utils.ts';
 import { formatTime } from '@/utils/time.ts';
 
 const columnHelper = createColumnHelper<IAssetItem<WorkflowBlock>>();
 
-export const ACTION_TOOLS_COLUMNS = [
+export const createActionToolsColumn = [
   columnHelper.accessor('icon', {
     id: 'logo',
     header: '图标',

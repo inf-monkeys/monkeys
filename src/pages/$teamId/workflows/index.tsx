@@ -1,25 +1,24 @@
 import React, { useState } from 'react';
 
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { mutate } from 'swr';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import { useClipboard } from '@mantine/hooks';
-import { createColumnHelper } from '@tanstack/react-table';
 import { Copy, FileUp, FolderUp, Link, Pencil, Trash } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { preloadUgcWorkflows, useUgcWorkflows } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { cloneWorkflow, deleteWorkflow } from '@/apis/workflow';
 import { ExportWorkflowDialog } from '@/components/dialog/export-workflow';
 import { IExportWorkflowWithAssetsContext } from '@/components/dialog/export-workflow/typings.ts';
 import { UgcView } from '@/components/layout/ugc/view';
-import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { createWorkflowColumn } from '@/components/layout/ugc-pages/workflows/consts.tsx';
 import { WorkflowInfoEditor } from '@/components/layout/workspace/workflow/info-editor';
-import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
+import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -118,72 +117,16 @@ export const Workflows: React.FC = () => {
         assetName="工作流"
         useUgcFetcher={useUgcWorkflows}
         preloadUgcFetcher={preloadUgcWorkflows}
-        createColumns={() => {
-          const columnHelper = createColumnHelper<IAssetItem<MonkeyWorkflow>>();
-          return [
-            columnHelper.accessor('iconUrl', {
-              id: 'logo',
-              header: '图标',
-              cell: ({ getValue }) => RenderIcon({ iconUrl: getValue() as string }),
-              maxSize: 48,
-            }),
-            columnHelper.accessor('displayName', {
-              id: 'title',
-              header: '名称',
-              cell: ({ row, getValue }) => (
-                <a
-                  className="transition-colors hover:text-primary-500"
-                  href={`/${row.original.teamId}/workspace/${row.original.workflowId}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {getValue() as string}
-                </a>
-              ),
-            }),
-            columnHelper.accessor('description', {
-              id: 'description',
-              header: '描述',
-              cell: ({ getValue }) => RenderDescription({ description: getValue() as string }),
-            }),
-            columnHelper.accessor('user', {
-              id: 'user',
-              header: '用户',
-              cell: ({ getValue }) => RenderUser({ user: getValue() as IVinesUser }),
-              maxSize: 48,
-            }),
-            columnHelper.accessor('assetTags', {
-              id: 'assetTags',
-              header: '标签',
-              maxSize: 96,
-            }),
-            columnHelper.accessor('createdTimestamp', {
-              id: 'createdTimestamp',
-              header: '创建时间',
-              cell: ({ getValue }) => RenderTime({ time: getValue() as number }),
-              maxSize: 72,
-            }),
-            columnHelper.accessor('updatedTimestamp', {
-              id: 'updatedTimestamp',
-              header: '更新时间',
-              cell: ({ getValue }) => RenderTime({ time: getValue() as number }),
-              maxSize: 72,
-            }),
-          ];
-        }}
+        createColumns={() => createWorkflowColumn}
         renderOptions={{
-          subtitle: (item) => {
-            return (
-              <div className="flex gap-1">
-                <span>{item.user?.name ?? '未知'}</span>
-                <span>创建于</span>
-                <span>{formatTimeDiffPrevious(item.createdTimestamp)}</span>
-              </div>
-            );
-          },
-          cover: (item) => {
-            return RenderIcon({ iconUrl: item.iconUrl, size: 'gallery' });
-          },
+          subtitle: (item) => (
+            <div className="flex gap-1">
+              <span>{item.user?.name ?? '未知'}</span>
+              <span>创建于</span>
+              <span>{formatTimeDiffPrevious(item.createdTimestamp)}</span>
+            </div>
+          ),
+          cover: (item) => RenderIcon({ iconUrl: item.iconUrl, size: 'gallery' }),
         }}
         operateArea={(item, trigger, tooltipTriggerContent) => (
           <DropdownMenu>
@@ -282,9 +225,7 @@ export const Workflows: React.FC = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        onItemClick={(item) => {
-          open(`/${item.teamId}/workspace/${item.workflowId}`, '_blank');
-        }}
+        onItemClick={(item) => open(`/${item.teamId}/workspace/${item.workflowId}`, '_blank')}
         subtitle={
           <>
             <DropdownMenu>

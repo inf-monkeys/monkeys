@@ -4,8 +4,8 @@ import { CircularProgress } from '@nextui-org/progress';
 
 import { useCredentials, useCredentialTypes } from '@/apis/credential';
 import { IVinesCredentialType } from '@/apis/credential/typings.ts';
-import { ExternalAccountManage } from '@/components/layout/ugc/external-account/manage';
-import { CreateExternalAccount } from '@/components/layout/ugc/external-account/manage/create.tsx';
+import { ExternalAccountManage } from '@/components/layout/ugc-pages/action-tools/external-account/manage';
+import { CreateExternalAccount } from '@/components/layout/ugc-pages/action-tools/external-account/manage/create.tsx';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card.tsx';
 import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog';

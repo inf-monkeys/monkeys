@@ -2,7 +2,7 @@ import React from 'react';
 
 import { KeySquare } from 'lucide-react';
 
-import { AccountTypes } from '@/components/layout/ugc/external-account/list.tsx';
+import { AccountTypes } from '@/components/layout/ugc-pages/action-tools/external-account/list.tsx';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 

@@ -4,9 +4,9 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { useTool } from '@/apis/tools';
 import { useSearchReferenceWorkflows } from '@/apis/ugc';
-import { ACTION_TOOLS_COLUMNS } from '@/components/layout/action-tools/consts.tsx';
 import { UgcDetailInfo } from '@/components/layout/ugc/detail/info';
 import { UgcDetailWorkflows } from '@/components/layout/ugc/detail/workflows';
+import { createActionToolsColumn } from '@/components/layout/ugc-pages/action-tools/consts.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 
@@ -34,7 +34,7 @@ export const ActionToolDetail: React.FC<IActionToolDetailProps> = () => {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="info">
-          <UgcDetailInfo columns={ACTION_TOOLS_COLUMNS} data={blockData} />
+          <UgcDetailInfo columns={createActionToolsColumn} data={blockData} />
         </TabsContent>
         <TabsContent value="workflows">
           <UgcDetailWorkflows data={blockWorkflowRefData ?? []} />
