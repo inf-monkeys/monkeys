@@ -14,7 +14,7 @@ interface IUgcSidebarProps extends IUgcCustomProps {
   filterListProps: Omit<IUgcViewFilterListProps, keyof IUgcCustomProps>;
 }
 
-export const UgcSidebar: React.FC<IUgcSidebarProps> = ({ assetType, assetKey, title, filterListProps }) => {
+export const UgcSidebar: React.FC<IUgcSidebarProps> = ({ assetType, assetKey, isMarket, title, filterListProps }) => {
   const [visible, setVisible] = useState(true);
 
   return (
@@ -29,7 +29,7 @@ export const UgcSidebar: React.FC<IUgcSidebarProps> = ({ assetType, assetKey, ti
         }}
       >
         <h1 className="text-2xl font-bold">{title}</h1>
-        <UgcViewFilterList assetType={assetType} assetKey={assetKey} {...filterListProps} />
+        <UgcViewFilterList assetType={assetType} assetKey={assetKey} isMarket={isMarket} {...filterListProps} />
       </motion.div>
       <Separator orientation="vertical" className="vines-center">
         <Tooltip>

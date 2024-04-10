@@ -103,9 +103,14 @@ export const SIDEBAR_MAP: NavItem[] = [
         label: '工具市场',
       },
       {
-        path: '/$teamId/model-store',
-        name: 'model-store',
-        label: '模型市场',
+        path: '/$teamId/text-model-store',
+        name: 'text-model-store',
+        label: '文本模型市场',
+      },
+      {
+        path: '/$teamId/image-model-store',
+        name: 'image-model-store',
+        label: '图像模型市场',
       },
       {
         path: '/$teamId/data-store',

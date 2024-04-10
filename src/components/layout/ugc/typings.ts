@@ -23,6 +23,7 @@ export type IOperateAreaProps<E> = (
 export type IUgcCustomProps = {
   assetType: AssetType;
   assetKey: string;
+  isMarket?: boolean;
 };
 
 export type IRenderKey = 'title' | 'subtitle' | 'description' | 'tags' | 'time' | 'logo' | 'cover';

@@ -2,13 +2,13 @@ import React from 'react';
 
 import { createColumnHelper } from '@tanstack/react-table';
 
-import { ILLMModel } from '@/apis/llm/typings.ts';
+import { ISDModel } from '@/apis/sd/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { RenderDescription, RenderIcon, RenderTime } from '@/components/layout/ugc/view/utils/renderer.tsx';
 
-const columnHelper = createColumnHelper<IAssetItem<ILLMModel>>();
+const columnHelper = createColumnHelper<IAssetItem<ISDModel>>();
 
-export const createTextModelsColumn = [
+export const createImageModelStoreColumns = [
   columnHelper.accessor('iconUrl', {
     id: 'logo',
     header: '图标',
@@ -28,11 +28,6 @@ export const createTextModelsColumn = [
     id: 'description',
     header: '描述',
     cell: ({ getValue }) => RenderDescription({ description: getValue() as string }),
-  }),
-  columnHelper.accessor('assetTags', {
-    id: 'assetTags',
-    header: '标签',
-    maxSize: 96,
   }),
   columnHelper.accessor('createdTimestamp', {
     id: 'createdTimestamp',

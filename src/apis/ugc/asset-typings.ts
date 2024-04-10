@@ -1,5 +1,6 @@
-import { AssetType } from '@inf-monkeys/vines';
+import { AssetType, MonkeyWorkflow } from '@inf-monkeys/vines';
 
+import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { SdModelType, SdWorkProcessStatus, XYZTestResult } from '@/apis/sd/typings.ts';
 
 export interface IBaseAsset {
@@ -134,3 +135,25 @@ export interface IWorkflowRelatedAssetResult {
   tableCollections?: ITableCollectionsJson[];
   invalidAssetMessages?: string[];
 }
+
+export interface IApplicationStoreItem {
+  _id: string;
+  name: string;
+  description: string;
+  iconUrl: string;
+  teamId: string;
+  workflowId: string;
+  creatorUserId: string;
+  categoryIds: string[];
+  fetchCount: number;
+  createdTimestamp: number;
+  updatedTimestamp: number;
+  isDeleted: false;
+  workflowVersion: number;
+  assetsPolicy: { [x: string]: any };
+}
+
+export type IApplicationStoreItemDetail = IApplicationStoreItem & {
+  workflow: MonkeyWorkflow;
+  user: Partial<IVinesUser>;
+};

@@ -2,26 +2,26 @@ import React from 'react';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
-import { preloadUgcApplicationStore, useUgcApplicationStore } from '@/apis/ugc';
+import { preloadUgcImageModelStore, useUgcImageModelStore } from '@/apis/ugc';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
-import { createApplicationStoreColumn } from '@/components/layout/ugc-pages/application-store/consts.tsx';
+import { createImageModelStoreColumns } from '@/components/layout/ugc-pages/image-model-store/consts.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
-export const ApplicationStore: React.FC = () => {
+export const ImageModelStore: React.FC = () => {
   const navigate = useNavigate();
 
   return (
     <main className="size-full">
       <UgcView
-        assetKey="application-store"
-        assetType="workflow-template"
-        assetName="应用市场"
+        assetKey="image-model-store"
+        assetType="sd-model"
+        assetName="图像模型市场"
         isMarket
-        useUgcFetcher={useUgcApplicationStore}
-        preloadUgcFetcher={preloadUgcApplicationStore}
-        createColumns={() => createApplicationStoreColumn}
+        useUgcFetcher={useUgcImageModelStore}
+        preloadUgcFetcher={preloadUgcImageModelStore}
+        createColumns={() => createImageModelStoreColumns}
         renderOptions={{
           subtitle: (item) => (
             <div className="flex gap-1">
@@ -44,7 +44,7 @@ export const ApplicationStore: React.FC = () => {
   );
 };
 
-export const Route = createFileRoute('/$teamId/application-store/')({
-  component: ApplicationStore,
+export const Route = createFileRoute('/$teamId/image-model-store/')({
+  component: ImageModelStore,
   beforeLoad: teamIdGuard,
 });

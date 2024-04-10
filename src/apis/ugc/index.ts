@@ -10,6 +10,7 @@ import { ISDModel } from '@/apis/sd/typings.ts';
 import { ITableData } from '@/apis/table-data/typings.ts';
 import { IWorkflowBlock } from '@/apis/tools/typings.ts';
 import { IPaginationListData } from '@/apis/typings.ts';
+import { IApplicationStoreItemDetail } from '@/apis/ugc/asset-typings.ts';
 import { IVectorFrontEnd } from '@/apis/vector/typings.ts';
 import { paginationWrapper } from '@/apis/wrapper.ts';
 
@@ -58,6 +59,17 @@ export const preloadUgcVectors = (dto: IListUgcDto) => preloadUgcItems<IVectorFr
 
 export const useUgcTableData = (dto: IListUgcDto) => useUgcItems<ITableData>(dto, '/api/database');
 export const preloadUgcTableData = (dto: IListUgcDto) => preloadUgcItems<ITableData>(dto, '/api/database');
+
+export const useUgcApplicationStore = (dto: IListUgcDto) =>
+  useUgcItems<IApplicationStoreItemDetail>(dto, '/api/templates');
+export const preloadUgcApplicationStore = (dto: IListUgcDto) =>
+  preloadUgcItems<IApplicationStoreItemDetail>(dto, '/api/templates');
+
+export const useUgcTextModelStore = (dto: IListUgcDto) => useUgcItems<ILLMModel>(dto, '/api/llm/models/public');
+export const preloadUgcTextModelStore = (dto: IListUgcDto) => preloadUgcItems<ILLMModel>(dto, '/api/llm/models/public');
+
+export const useUgcImageModelStore = (dto: IListUgcDto) => useUgcItems<ISDModel>(dto, '/api/sd/models/public');
+export const preloadUgcImageModelStore = (dto: IListUgcDto) => preloadUgcItems<ISDModel>(dto, '/api/sd/models/public');
 
 export const useAssetTagList = (assetKey?: string) =>
   useSWR<string[] | undefined>(assetKey ? `/api/assets/${assetKey}/tags` : null, vinesFetcher(), {
