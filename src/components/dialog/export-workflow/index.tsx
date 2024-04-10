@@ -192,7 +192,7 @@ export const ExportWorkflowDialog: React.FC<IExportWorkflowDialogProps> = ({ vis
         </DialogHeader>
         {loading ? (
           <div className="my-8 flex w-full select-none items-center justify-center gap-4 text-xs">
-            <CircularProgress />
+            <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
             <div className="opacity-70">加载此工作流关联的资产中</div>
           </div>
         ) : (
