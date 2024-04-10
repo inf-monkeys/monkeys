@@ -2,7 +2,7 @@ import React from 'react';
 
 import { createColumnHelper } from '@tanstack/react-table';
 
-import { ILlmModel } from '@/apis/model/typings.ts';
+import { ILlmModel } from '@/apis/sd/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { RenderDescription, RenderIcon, RenderTime } from '@/components/layout/ugc/view/utils/renderer.tsx';
 
