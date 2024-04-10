@@ -41,8 +41,8 @@ async function bootstrap() {
   });
   app.use(
     rateLimit({
-      windowMs: 1000, // 15 minutes
-      max: 100, // limit each IP to 100 requests per windowMs
+      windowMs: config.server.rateLimit.windowMs,
+      max: config.server.rateLimit.max,
     }),
   );
   // Authentication & Session

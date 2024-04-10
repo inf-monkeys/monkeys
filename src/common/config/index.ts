@@ -22,6 +22,10 @@ export interface ServerConfig {
   appId: string;
   appUrl: string;
   loadExample: boolean;
+  rateLimit: {
+    windowMs: number;
+    max: number;
+  };
 }
 
 export interface RedisConfig {
@@ -132,6 +136,10 @@ export const config: Config = {
     appId: readConfig('server.appId', 'monkeys'),
     appUrl: appUrl,
     loadExample: readConfig('server.loadExample', true),
+    rateLimit: {
+      windowMs: readConfig('server.rateLimit.windowMs', 1000),
+      max: readConfig('server.rateLimit.max', 100),
+    },
   },
   conductor: {
     baseUrl: readConfig('conductor.baseUrl', 'http://127.0.0.1:8080/api'),
