@@ -31,6 +31,11 @@ export const createTextDataColumn = [
     cell: ({ getValue }) => RenderUser({ user: getValue() as IVinesUser }),
     maxSize: 48,
   }),
+  columnHelper.accessor('assetTags', {
+    id: 'assetTags',
+    header: '标签',
+    maxSize: 96,
+  }),
   columnHelper.accessor('description', {
     id: 'description',
     header: '描述',

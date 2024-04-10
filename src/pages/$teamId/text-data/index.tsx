@@ -6,6 +6,7 @@ import { preloadUgcVectors, useUgcVectors } from '@/apis/ugc';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createTextDataColumn } from '@/components/layout/ugc-pages/text-data/consts.tsx';
+import { CreateDataset } from '@/components/layout/ugc-pages/text-data/create-dataset';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
@@ -29,6 +30,7 @@ export const TextData: React.FC = () => {
           ),
           cover: (item) => RenderIcon({ iconUrl: item.iconUrl, size: 'gallery' }),
         }}
+        subtitle={<CreateDataset />}
       />
     </main>
   );
