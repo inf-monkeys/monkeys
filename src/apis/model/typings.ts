@@ -1,4 +1,5 @@
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
+import { IBaseEntity } from '@/apis/typings.ts';
 
 export interface ISDModelsParams {
   page: number;
@@ -22,7 +23,7 @@ export interface XYZTestResult {
   items: { x: string; y: string; href: string; prompt: string }[][];
 }
 
-export interface ISDModel {
+export interface ISDModel extends IBaseEntity {
   teamId: string;
   creatorUserId: string;
   status: SdWorkProcessStatus;

@@ -2,15 +2,15 @@ import React from 'react';
 
 import { createColumnHelper } from '@tanstack/react-table';
 
-import { BlockPricing, WorkflowBlock } from '@/apis/tools/typings.ts';
+import { BlockPricing, IWorkflowBlock } from '@/apis/tools/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { RenderDescription, RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { pricingText } from '@/components/layout/ugc-pages/action-tools/utils.ts';
 import { formatTime } from '@/utils/time.ts';
 
-const columnHelper = createColumnHelper<IAssetItem<WorkflowBlock>>();
+const columnHelper = createColumnHelper<IAssetItem<IWorkflowBlock>>();
 
-export const createActionToolsColumn = [
+export const createActionToolsColumns = [
   columnHelper.accessor('icon', {
     id: 'logo',
     header: '图标',

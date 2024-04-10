@@ -2,10 +2,10 @@ import React from 'react';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
-import { preloadActionTools, useUgcActionTools } from '@/apis/ugc';
+import { preloadUgcActionTools, useUgcActionTools } from '@/apis/ugc';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
-import { createActionToolsColumn } from '@/components/layout/ugc-pages/action-tools/consts.tsx';
+import { createActionToolsColumns } from '@/components/layout/ugc-pages/action-tools/consts.tsx';
 import { VinesExternalAccount } from '@/components/layout/ugc-pages/action-tools/external-account';
 import { pricingText } from '@/components/layout/ugc-pages/action-tools/utils.ts';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
@@ -21,8 +21,8 @@ export const ActionTools: React.FC = () => {
         assetType="block"
         assetName="执行类工具"
         useUgcFetcher={useUgcActionTools}
-        preloadUgcFetcher={preloadActionTools}
-        createColumns={() => createActionToolsColumn}
+        preloadUgcFetcher={preloadUgcActionTools}
+        createColumns={() => createActionToolsColumns}
         renderOptions={{
           subtitle: (item) => {
             const estimateTime = item.extra?.estimateTime;
