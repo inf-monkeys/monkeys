@@ -6,7 +6,7 @@ export enum CredentialAuthType {
 }
 
 export interface IVinesCredentialType {
-  _id?: string;
+  id?: string;
   public: boolean;
   name: string;
   displayName: string;
@@ -18,7 +18,7 @@ export interface IVinesCredentialType {
 }
 
 export interface IVinesCredentialDetail {
-  _id?: string;
+  id?: string;
   type: string;
   displayName: string;
   data: { [x: string]: any };
