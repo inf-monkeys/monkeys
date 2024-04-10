@@ -21,6 +21,7 @@ export interface IKnowledgeBase {
   metadataFields: IKnowledgeBaseMetadataField[];
   entityCount: number;
   fileCount: number;
+  createdTimestamp: number;
 }
 
 export type IKnowledgeBaseFrontEnd = IKnowledgeBase & { paragraph_number: number; appNumber: number };

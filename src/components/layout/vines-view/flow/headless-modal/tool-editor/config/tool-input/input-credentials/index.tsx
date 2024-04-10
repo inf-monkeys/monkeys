@@ -2,11 +2,11 @@ import React, { memo, useEffect, useState } from 'react';
 
 import { BlockCredentialItem } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
 import { KeySquare } from 'lucide-react';
+import { ExternalAccountManage } from 'src/components/layout/ugc-pages/action-tools/external-account/manage';
 
 import { useCredentials, useCredentialTypes } from '@/apis/credential';
 import { IVinesCredentialType } from '@/apis/credential/typings.ts';
-import { ExternalAccountManage } from '@/components/layout/ugc/external-account/manage';
-import { CreateExternalAccount } from '@/components/layout/ugc/external-account/manage/create.tsx';
+import { CreateExternalAccount } from '@/components/layout/ugc-pages/action-tools/external-account/manage/create.tsx';
 import { InputPropertyWrapper } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/wrapper';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog';

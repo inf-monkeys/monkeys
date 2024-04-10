@@ -7,6 +7,7 @@ import qs from 'qs';
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { WorkflowBlock } from '@/apis/tools/typings.ts';
 import { IPaginationListData } from '@/apis/typings.ts';
+import { IVectorFrontEnd } from '@/apis/vector/typings.ts';
 import { paginationWrapper } from '@/apis/wrapper.ts';
 
 import { IAssetItem, IListUgcDto, IUgcFilterRules } from './typings';
@@ -23,6 +24,7 @@ export const useUgcItems = <T extends object>(dto: IListUgcDto, url: string, met
         });
   return useSWR<IPaginationListData<IAssetItem<T>> | undefined>(method === 'GET' ? swrUrl : [swrUrl, dto], fetcher);
 };
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const preloadUgcItems = <T extends object>(dto: IListUgcDto, url: string, method: 'GET' | 'POST' = 'GET') => {
   const swrUrl = method === 'GET' ? `${url}?${qs.stringify(dto, { encode: false })}` : url;
   const fetcher =
@@ -41,6 +43,9 @@ export const preloadUgcWorkflows = (dto: IListUgcDto) => preloadUgcItems<MonkeyW
 
 export const useUgcActionTools = (dto: IListUgcDto) => useUgcItems<WorkflowBlock>(dto, '/api/tools');
 export const preloadActionTools = (dto: IListUgcDto) => preloadUgcItems<WorkflowBlock>(dto, '/api/tools');
+
+export const useUgcVectors = (dto: IListUgcDto) => useUgcItems<IVectorFrontEnd>(dto, '/api/vector/collections');
+export const preloadUgcVectors = (dto: IListUgcDto) => preloadUgcItems<IVectorFrontEnd>(dto, '/api/vector/collections');
 
 export const useAssetTagList = (assetKey?: string) =>
   useSWR<string[] | undefined>(assetKey ? `/api/assets/${assetKey}/tags` : null, vinesFetcher(), {
