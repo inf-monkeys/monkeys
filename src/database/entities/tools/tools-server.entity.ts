@@ -1,4 +1,4 @@
-import { ApiType, AuthConfig, SchemaVersion, TriggerEndpointConfig } from '@/common/typings/tools';
+import { ApiType, AuthConfig, CredentialEndpointConfig, SchemaVersion, TriggerEndpointConfig } from '@/common/typings/tools';
 import { Column, Entity } from 'typeorm';
 import url from 'url';
 import { BaseEntity } from '../base/base';
@@ -68,6 +68,13 @@ export class ToolsServerEntity extends BaseEntity {
     nullable: true,
   })
   triggerEndpoints: TriggerEndpointConfig[];
+
+  @Column({
+    type: 'simple-json',
+    name: 'credential_endpoints',
+    nullable: true,
+  })
+  credentialEndpoints: CredentialEndpointConfig[];
 
   public getSpecUrl() {
     const {

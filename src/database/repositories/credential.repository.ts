@@ -4,9 +4,7 @@ import { ToolsCredentialTypeEntity } from '@/database/entities/tools/tools-crede
 import { ToolsCredentialEntity } from '@/database/entities/tools/tools-credential.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AES, enc } from 'crypto-js';
 import { DeepPartial, FindManyOptions, In, Repository } from 'typeorm';
-import { SystemConfigurationRepository } from './system-configuration.repository';
 
 @Injectable()
 export class CredentialsRepository {
@@ -15,27 +13,13 @@ export class CredentialsRepository {
     private readonly toolsCredentialTypeRepository: Repository<ToolsCredentialTypeEntity>,
     @InjectRepository(ToolsCredentialEntity)
     private readonly toolsCredentialRepository: Repository<ToolsCredentialEntity>,
-    private readonly systemConfigurationRepository: SystemConfigurationRepository,
   ) {}
 
-  public async getEncryptKey() {
-    return;
-  }
-
-  public async encrypt(data: { [x: string]: any }) {
-    return AES.encrypt(JSON.stringify(data), await this.systemConfigurationRepository.getAesKey()).toString();
-  }
-
-  public async decrypt(data: string): Promise<{ [x: string]: any }> {
-    const decryptedData = AES.decrypt(data, await this.systemConfigurationRepository.getAesKey());
-    try {
-      return JSON.parse(decryptedData.toString(enc.Utf8));
-    } catch (e) {
-      throw new Error('Credentials could not be decrypted. The likely reason is that a different "encryptionKey" was used to encrypt the data.');
-    }
-  }
-
   public async createOrUpdateCredentialTypes(namespace: string, latestCredentials: CredentialDefinition[]) {
+    latestCredentials = latestCredentials.map((x) => {
+      x.name = `${namespace}__${x.name}`;
+      return x;
+    });
     const latestCredentialNames = latestCredentials.map((x) => x.name);
     const originalCredentials = await this.toolsCredentialTypeRepository.find({
       where: {
@@ -122,9 +106,6 @@ export class CredentialsRepository {
       },
     };
     const list = await this.toolsCredentialRepository.find(condition);
-    for (const item of list) {
-      item.data = await this.decrypt(item.data as string);
-    }
     return list;
   }
 
@@ -134,10 +115,6 @@ export class CredentialsRepository {
         id: credentialId,
       },
     });
-    if (entity) {
-      entity.data = await this.decrypt(entity.data as string);
-    }
-
     return entity;
   }
 
@@ -176,22 +153,11 @@ export class CredentialsRepository {
     };
   }
 
-  public async createCredentail(teamId: string, creatorUserId: string, displayName: string, type: string, data: { [x: string]: any }) {
-    const encryptedData = await this.encrypt(data);
-    const id = generateDbId();
-    await this.toolsCredentialRepository.save({
-      teamId,
-      creatorUserId,
-      displayName,
-      data: encryptedData,
-      id: id,
-      type,
-      isDeleted: false,
-    });
-    return await this.getCredentialById(id);
+  public async createCredentail(data: Partial<ToolsCredentialEntity>) {
+    await this.toolsCredentialRepository.save(data);
   }
 
-  public async updateCredential(teamId: string, id: string, displayName: string, data: { [x: string]: any }) {
+  public async updateCredential(teamId: string, id: string, displayName: string) {
     const credential = await this.toolsCredentialRepository.findOne({
       where: {
         id,
@@ -202,13 +168,9 @@ export class CredentialsRepository {
     if (!credential) {
       throw new Error(`密钥 ${id} 不存在`);
     }
-
     const updates: DeepPartial<ToolsCredentialEntity> = {};
     if (displayName) {
       updates.displayName = displayName;
-    }
-    if (data) {
-      updates.data = await this.encrypt(data);
     }
     await this.toolsCredentialRepository.update(
       {

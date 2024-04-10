@@ -1,5 +1,5 @@
 import { isValidToolName } from '@/common/utils';
-import { BlockDefPropertyTypes, BlockDefinition, BlockType } from '@inf-monkeys/vines';
+import { BlockCredentialItem, BlockDefPropertyTypes, BlockDefinition, BlockType } from '@inf-monkeys/vines';
 import { OpenAPIObject, OperationObject, ParameterObject, ReferenceObject, RequestBodyObject, SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 
 export const parseOpenApiSpecAsBlocks = (namespace: string, specData: OpenAPIObject): BlockDefinition[] => {
@@ -21,6 +21,13 @@ export const parseOpenApiSpecAsBlocks = (namespace: string, specData: OpenAPIObj
           method,
           path,
         };
+        let credentials: BlockCredentialItem[] = apiContent['x-monkey-tool-credentials'] || [];
+        if (credentials?.length) {
+          credentials = credentials.map((x) => {
+            x.name = `${namespace}__${x.name}`;
+            return x;
+          });
+        }
         const block: BlockDefinition = {
           type: BlockType.SIMPLE,
           name: `${namespace}$$${name}`,
@@ -31,7 +38,7 @@ export const parseOpenApiSpecAsBlocks = (namespace: string, specData: OpenAPIObj
           input: [],
           output: [],
           extra: extra,
-          credentials: apiContent['x-monkey-tool-credentials'] || [],
+          credentials: credentials,
         };
 
         const inputInSpec = apiContent['x-monkey-tool-input'];

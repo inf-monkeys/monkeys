@@ -10,7 +10,17 @@ import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import url from 'url';
-import { ApiType, AuthType, ManifestJson, RegisterWorkerParams, SchemaVersion, TriggerEndpointConfig, TriggerEndpointType } from '../../common/typings/tools';
+import {
+  ApiType,
+  AuthType,
+  CredentialEndpointConfig,
+  CredentialEndpointType,
+  ManifestJson,
+  RegisterWorkerParams,
+  SchemaVersion,
+  TriggerEndpointConfig,
+  TriggerEndpointType,
+} from '../../common/typings/tools';
 import { CredentialsRepository } from '../../database/repositories/credential.repository';
 import { ToolsRepository } from '../../database/repositories/tools.repository';
 import { parseOpenApiSpecAsBlocks } from './utils/openapi-parser';
@@ -69,6 +79,9 @@ export class ToolsRegistryService {
     if (data.triggers?.length) {
       this.validateTriggerEndpoints(data.triggerEndpoints);
     }
+    if (data.credentials?.length) {
+      this.validateCredentialEndpoints(data.credentialEndpoints);
+    }
   }
 
   private validateTriggerEndpoints(triggerEndpoints: TriggerEndpointConfig[]) {
@@ -87,6 +100,26 @@ export class ToolsRegistryService {
       }
       if (!method) {
         throw new Error(`Error import tool: triggerEndpoint ${type} method is missing`);
+      }
+    }
+  }
+
+  private validateCredentialEndpoints(credentialEndpoints: CredentialEndpointConfig[]) {
+    if (!Array.isArray(credentialEndpoints)) {
+      throw new Error('Error import tool: credentialEndpoints is missing');
+    }
+    const types: CredentialEndpointType[] = [CredentialEndpointType.create, CredentialEndpointType.delete, CredentialEndpointType.update];
+    for (const type of types) {
+      const config = credentialEndpoints.find((x) => x.type === type);
+      if (!config) {
+        throw new Error(`Error import tool: credentialEndpoint ${type} is missing`);
+      }
+      const { url, method } = config;
+      if (!url) {
+        throw new Error(`Error import tool: credentialEndpoint ${type} url is missing`);
+      }
+      if (!method) {
+        throw new Error(`Error import tool: credentialEndpoint ${type} method is missing`);
       }
     }
   }

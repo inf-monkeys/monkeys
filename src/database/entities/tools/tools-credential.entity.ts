@@ -23,9 +23,4 @@ export class ToolsCredentialEntity extends BaseEntity {
 
   @Column()
   type: string;
-
-  @Column({
-    type: 'text',
-  })
-  data: string | { [x: string]: any };
 }

@@ -1,11 +1,6 @@
-import { BlockDefProperties, BlockExtraInfo, BlockRuleItem, BlockType } from '@inf-monkeys/vines';
+import { BlockCredentialItem, BlockDefProperties, BlockExtraInfo, BlockRuleItem, BlockType } from '@inf-monkeys/vines';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
-
-export interface INodeCredentialDescription {
-  name: string;
-  required?: boolean;
-}
 
 @Entity({ name: 'tools' })
 export class ToolsEntity extends BaseEntity {
@@ -41,7 +36,7 @@ export class ToolsEntity extends BaseEntity {
     nullable: true,
     type: 'simple-json',
   })
-  credentials?: INodeCredentialDescription[];
+  credentials?: BlockCredentialItem[];
 
   @Column({
     name: 'display_name',

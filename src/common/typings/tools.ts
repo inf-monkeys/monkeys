@@ -54,6 +54,18 @@ export interface TriggerEndpointConfig {
   method: string;
 }
 
+export enum CredentialEndpointType {
+  create = 'create',
+  update = 'update',
+  delete = 'delete',
+}
+
+export interface CredentialEndpointConfig {
+  type: CredentialEndpointType;
+  url: string;
+  method: string;
+}
+
 export interface ManifestJson {
   schema_version: SchemaVersion;
   display_name: string;
@@ -66,8 +78,8 @@ export interface ManifestJson {
   contact_email: string;
   triggerEndpoints?: TriggerEndpointConfig[];
   triggers?: TriggerDefinition[];
+  credentialEndpoints?: CredentialEndpointConfig[];
   credentials?: CredentialDefinition[];
-  credentialEncryptKey?: string;
 }
 
 export interface RegisterWorkerParams {
