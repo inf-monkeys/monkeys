@@ -82,8 +82,8 @@ export const ExportWorkflowDialog: React.FC<IExportWorkflowDialogProps> = ({ vis
         return (
           <span>
             {(type === 'workflow' && '子工作流') ||
-              (type === 'sd-model' && '图像模型') ||
-              (type === 'llm-model' && '文本模型') ||
+              (type === 'sd-sd' && '图像模型') ||
+              (type === 'llm-sd' && '文本模型') ||
               (type === 'table-collection' && '表格数据') ||
               (type === 'text-collection' && '文本数据') ||
               '其他'}

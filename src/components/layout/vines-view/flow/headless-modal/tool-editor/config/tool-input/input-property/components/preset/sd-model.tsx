@@ -4,8 +4,8 @@ import { BlockDefPropertyTypes } from '@inf-monkeys/vines';
 import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { isString, uniqBy } from 'lodash';
+import { useBuiltInModels, useSDModels } from 'src/apis/sd';
 
-import { useBuiltInModels, useSDModels } from '@/apis/model';
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
 import { IVinesInputPresetProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/index.tsx';
 import { StringInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/string.tsx';

@@ -1,6 +1,6 @@
 import { AssetType } from '@inf-monkeys/vines';
 
-import { SdModelType, SdWorkProcessStatus, XYZTestResult } from '@/apis/model/typings.ts';
+import { SdModelType, SdWorkProcessStatus, XYZTestResult } from '@/apis/sd/typings.ts';
 
 export interface IBaseAsset {
   originalSite: string;

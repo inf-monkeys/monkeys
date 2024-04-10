@@ -6,7 +6,7 @@ import qs from 'qs';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { ILLMModel } from '@/apis/llm/typings.ts';
-import { ISDModel } from '@/apis/model/typings.ts';
+import { ISDModel } from '@/apis/sd/typings.ts';
 import { ITableData } from '@/apis/table-data/typings.ts';
 import { IWorkflowBlock } from '@/apis/tools/typings.ts';
 import { IPaginationListData } from '@/apis/typings.ts';
