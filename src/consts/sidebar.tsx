@@ -41,11 +41,11 @@ export const SIDEBAR_MAP: NavItem[] = [
         name: 'action-tools',
         label: '执行类工具',
       },
-      {
-        path: '/$teamId/render-tools',
-        name: 'render-tools',
-        label: '渲染类工具',
-      },
+      // {
+      //   path: '/$teamId/render-tools',
+      //   name: 'render-tools',
+      //   label: '渲染类工具',
+      // },
     ],
   },
   {
