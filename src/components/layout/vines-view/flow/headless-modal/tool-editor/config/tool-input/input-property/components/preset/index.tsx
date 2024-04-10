@@ -6,9 +6,9 @@ import { get } from 'lodash';
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
 import { ComfyuiModelPresets } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/comfyui-model.tsx';
 import { ForkJoinBranchPresets } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/fork-join-branch.tsx';
+import { KnowledgeBaseSelector } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/knowledge-base';
 import { LlmModelPresets } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/llm-model.tsx';
 import { SdModelPresets } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/sd-model.tsx';
-import { TextCollectionPresets } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/text-collection.tsx';
 import { WorkflowPresets } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/workflow.tsx';
 import { WorkflowVersionPresets } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/workflow-version.tsx';
 
@@ -28,7 +28,7 @@ export const PresetInput: React.FC<IVinesInputPropertyProps & IVinesInputPresetP
     <div className="relative min-h-8">
       {assetType === 'sd-model' && <SdModelPresets {...childProps} />}
       {assetType === 'llm-model' && <LlmModelPresets {...childProps} />}
-      {assetType === 'text-collection' && <TextCollectionPresets {...childProps} />}
+      {assetType === 'knowledge-base' && <KnowledgeBaseSelector {...childProps} />}
       {assetType === 'workflow-version' && <WorkflowVersionPresets {...childProps} />}
       {assetType === 'fork-join-branch' && <ForkJoinBranchPresets {...childProps} />}
       {assetType === 'workflow' && <WorkflowPresets {...childProps} />}

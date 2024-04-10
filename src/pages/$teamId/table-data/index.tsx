@@ -14,7 +14,7 @@ export const TableData: React.FC = () => {
     <main className="size-full">
       <UgcView
         assetKey="table-data"
-        assetType="table-collection"
+        assetType="knowledge-base-table"
         assetName="表格数据"
         useUgcFetcher={useUgcTableData}
         preloadUgcFetcher={preloadUgcTableData}
