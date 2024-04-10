@@ -2,11 +2,11 @@ import React from 'react';
 
 import { useSWRConfig } from 'swr';
 
-import { Trash } from 'lucide-react';
+import { Eraser, Trash } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { deleteVectorCollection } from '@/apis/vector';
+import { deleteAllVectorAllData, deleteVectorCollection } from '@/apis/vector';
 import { IVectorFrontEnd } from '@/apis/vector/typings.ts';
 import {
   AlertDialog,
@@ -40,13 +40,28 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
   const { mutate } = useSWRConfig();
 
   const handelDelete = () => {
-    toast.promise(deleteVectorCollection(item._id), {
+    toast.promise(deleteVectorCollection(item.name), {
       loading: '正在删除数据集...',
       success: () => {
         void mutate((key) => typeof key === 'string' && key.startsWith('/api/vector/collections'));
         return '数据集删除成功';
       },
       error: '数据集删除失败',
+    });
+  };
+
+  const handleClear = () => {
+    toast(`确定要清空${item.displayName}数据集吗？`, {
+      action: {
+        label: '确定',
+        onClick: () => {
+          toast.promise(deleteAllVectorAllData(item.name), {
+            loading: '正在清空数据集...',
+            success: '数据集清空成功',
+            error: '数据集清空失败',
+          });
+        },
+      },
     });
   };
 
@@ -72,6 +87,12 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
           <DropdownMenuLabel>数据集操作</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
+          <DropdownMenuItem className="text-red-10" onClick={handleClear}>
+            <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+              <Eraser size={15} />
+            </DropdownMenuShortcut>
+            清空数据集
+          </DropdownMenuItem>
           <AlertDialogTrigger asChild>
             <DropdownMenuItem className="text-red-10">
               <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
