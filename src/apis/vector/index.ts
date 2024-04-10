@@ -2,10 +2,21 @@ import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
-import { ICreateVectorDB, IVectorFrontEnd, IVectorSupportedEmbeddingModel } from '@/apis/vector/typings.ts';
+import {
+  ICreateVectorDB,
+  IVectorCollection,
+  IVectorFrontEnd,
+  IVectorSupportedEmbeddingModel,
+} from '@/apis/vector/typings.ts';
 
 export const useVectorCollections = () =>
   useSWR<IVectorFrontEnd[] | undefined>('/api/vector/collections', vinesFetcher());
+
+export const useVectorCollection = (collectionId: string) =>
+  useSWR<IVectorCollection | undefined>(
+    collectionId ? `/api/vector/collections/${collectionId}` : null,
+    vinesFetcher(),
+  );
 
 export const useVectorSupportedEmbeddingModels = () =>
   useSWR<IVectorSupportedEmbeddingModel[] | undefined>('/api/vector/supported-embedding-models', vinesFetcher());

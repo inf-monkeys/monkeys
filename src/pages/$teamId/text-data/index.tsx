@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { preloadUgcVectors, useUgcVectors } from '@/apis/ugc';
 import { UgcView } from '@/components/layout/ugc/view';
@@ -12,6 +12,8 @@ import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const TextData: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
     <main className="size-full">
       <UgcView
@@ -35,6 +37,11 @@ export const TextData: React.FC = () => {
         operateArea={(item, trigger, tooltipTriggerContent) => (
           <OperateArea item={item} trigger={trigger} tooltipTriggerContent={tooltipTriggerContent} />
         )}
+        onItemClick={(item) => {
+          void navigate({
+            to: `/$teamId/text-data/${item.name}`,
+          });
+        }}
       />
     </main>
   );
