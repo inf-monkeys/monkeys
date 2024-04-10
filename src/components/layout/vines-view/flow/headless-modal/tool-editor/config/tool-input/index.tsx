@@ -1,15 +1,17 @@
 import React, { memo } from 'react';
 
+import { BlockCredentialItem } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
 import { cloneDeep, get, set } from 'lodash';
 import { toast } from 'sonner';
 
+import { VinesInputCredentials } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-credentials';
 import { VinesInputProperty } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
 import {
   calculateDisplayInputs,
   getPropertyValueFromTask,
 } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/utils.ts';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
-import { IVinesVariableMap, VinesToolDef, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
+import { IVinesVariableMap, VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
 import { VARIABLE_REGEXP } from '@/package/vines-flow/core/utils.ts';
 import { cn } from '@/utils';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
@@ -32,8 +34,7 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
 
     const isSpecialNode = ['DO_WHILE', 'SWITCH'].includes(task?.type ?? '');
 
-    const handleUpdate = (value: unknown, def: VinesToolDefProperties) => {
-      const { name } = def;
+    const handleUpdate = (value: unknown, name: string) => {
       const keyDef = input?.find((it) => it.name === name);
       if (keyDef) {
         const keyType = keyDef.type;
@@ -65,8 +66,17 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
       updateRaw?.(nodeId, newTask, false);
     };
 
+    const credentials = get(tool, 'credentials', []) as BlockCredentialItem[];
+
     return (
       <div className={cn('flex flex-col gap-4 px-1 py-2', className)}>
+        {credentials.length && (
+          <VinesInputCredentials
+            credentials={credentials}
+            value={get(task, 'inputParameters.credential.id', '')}
+            onChange={(type, id) => handleUpdate({ type, id }, 'credential')}
+          />
+        )}
         {finalInputs?.map((def, index) => (
           <VinesInputProperty
             toolName={tool?.name || ''}
@@ -74,7 +84,7 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
             def={def}
             nodeId={nodeId}
             value={getPropertyValueFromTask(def, task, !isSpecialNode)}
-            onChange={(value: unknown) => handleUpdate(value, def)}
+            onChange={(value: unknown) => handleUpdate(value, def.name)}
             variableMapper={variableMapper}
           />
         ))}
