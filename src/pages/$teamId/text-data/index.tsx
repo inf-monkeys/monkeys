@@ -18,7 +18,7 @@ export const TextData: React.FC = () => {
     <main className="size-full">
       <UgcView
         assetKey="text-data"
-        assetType="text-collection"
+        assetType="knowledge-base"
         assetName="文本数据"
         useUgcFetcher={useUgcVectors}
         preloadUgcFetcher={preloadUgcVectors}
