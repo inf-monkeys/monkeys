@@ -11,9 +11,9 @@ import {
   Updater,
   useReactTable,
 } from '@tanstack/react-table';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import _, { isNull } from 'lodash';
-import { MoreHorizontal } from 'lucide-react';
+import { CircleSlash, MoreHorizontal } from 'lucide-react';
 
 import { IAssetItem, IListUgcDto, IListUgcItemsFnType, IPreloadUgcItemsFnType } from '@/apis/ugc/typings.ts';
 import { UgcSidebar } from '@/components/layout/ugc/sidebar';
@@ -239,45 +239,60 @@ export const UgcView = <E extends object>({
           </AnimatePresence>
           <div className="flex flex-col">
             <ScrollArea className="relative h-[calc(100vh-10.5rem)] w-full rounded-r-lg px-4 py-2">
-              {displayMode === 'card' && (
-                <div className="grid w-full grid-cols-1 gap-6 overflow-y-auto lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-                  {table.getRowModel().rows.map((row, index) => (
-                    <UgcViewCard
-                      row={row}
-                      key={index}
-                      index={index}
+              {table.getRowModel().rows.length === 0 ? (
+                <motion.div
+                  className="vines-center size-full h-[calc(100vh-12rem)] flex-col"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1, transition: { delay: 0.3 } }}
+                >
+                  <CircleSlash size={64} />
+                  <div className="mt-4 flex flex-col text-center">
+                    <h2 className="font-bold">暂无数据</h2>
+                  </div>
+                </motion.div>
+              ) : (
+                <>
+                  {displayMode === 'card' && (
+                    <div className="grid w-full grid-cols-1 gap-6 overflow-y-auto lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                      {table.getRowModel().rows.map((row, index) => (
+                        <UgcViewCard
+                          row={row}
+                          key={index}
+                          index={index}
+                          columns={columns}
+                          renderOptions={renderOptions}
+                          operateArea={operateArea}
+                          onItemClick={onItemClick}
+                        />
+                      ))}
+                    </div>
+                  )}
+                  {displayMode === 'table' && (
+                    <RemoteDataTable
                       columns={columns}
-                      renderOptions={renderOptions}
-                      operateArea={operateArea}
-                      onItemClick={onItemClick}
+                      data={data}
+                      onPaginationChange={table.setPagination}
+                      rowCount={table.getRowCount()}
+                      state={table.getState()}
+                      showPagination={false}
                     />
-                  ))}
-                </div>
-              )}
-              {displayMode === 'table' && (
-                <RemoteDataTable
-                  columns={columns}
-                  data={data}
-                  onPaginationChange={table.setPagination}
-                  rowCount={table.getRowCount()}
-                  state={table.getState()}
-                  showPagination={false}
-                />
-              )}
-              {displayMode === 'gallery' && (
-                <div className="flex flex-wrap gap-4">
-                  {table.getRowModel().rows.map((row, index) => (
-                    <UgcViewGalleryItem
-                      row={row}
-                      columns={columns}
-                      key={index}
-                      index={index}
-                      renderOptions={renderOptions}
-                      operateArea={operateArea}
-                      onItemClick={onItemClick}
-                    />
-                  ))}
-                </div>
+                  )}
+                  {displayMode === 'gallery' && (
+                    <div className="flex flex-wrap gap-4">
+                      {table.getRowModel().rows.map((row, index) => (
+                        <UgcViewGalleryItem
+                          row={row}
+                          columns={columns}
+                          key={index}
+                          index={index}
+                          renderOptions={renderOptions}
+                          operateArea={operateArea}
+                          onItemClick={onItemClick}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </ScrollArea>
             <TablePagination
