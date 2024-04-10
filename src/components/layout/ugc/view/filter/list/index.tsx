@@ -69,7 +69,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
       <div
         className={cn(
           'group flex h-10 cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
-          current === 'all' && 'bg-accent text-accent-foreground',
+          current === 'all' && 'border border-input bg-background text-accent-foreground shadow-sm',
         )}
         onClick={() => setCurrent('all')}
       >

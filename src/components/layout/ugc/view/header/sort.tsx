@@ -62,7 +62,7 @@ export const UgcHeaderSortButton: React.FC<IUgcHeaderSortButtonProps> = ({ asset
       <Tooltip content="排序">
         <TooltipTrigger asChild>
           <DropdownMenuTrigger asChild>
-            <Button icon={sortConditionIcon} />
+            <Button icon={sortConditionIcon} variant="outline" size="small" />
           </DropdownMenuTrigger>
         </TooltipTrigger>
       </Tooltip>

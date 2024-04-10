@@ -41,7 +41,7 @@ export const AppLogo: React.FC<ILogoProps> = memo(({ url, alt, description, clas
     )}
 
     {description && (
-      <p className="mt-2 w-full select-none rounded bg-vines-500 px-2 py-1 text-center text-xs text-white dark:bg-white dark:text-slate-3">
+      <p className="mt-2 w-full select-none rounded bg-vines-500 px-2 py-1 text-center text-xs text-white dark:bg-mauve-12 dark:text-slate-3">
         {description}
       </p>
     )}

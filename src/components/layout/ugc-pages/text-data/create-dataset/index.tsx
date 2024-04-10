@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useSWRConfig } from 'swr';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Plus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -53,7 +54,7 @@ export const CreateDataset: React.FC<ICreateDatasetProps> = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="small">
+        <Button variant="outline" size="small" icon={<Plus />}>
           创建数据集
         </Button>
       </DialogTrigger>

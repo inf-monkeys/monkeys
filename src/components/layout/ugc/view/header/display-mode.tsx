@@ -56,7 +56,7 @@ export const UgcHeaderDisplayModeButton: React.FC<IUgcHeaderDisplayModeButtonPro
       <Tooltip content="展示方式">
         <TooltipTrigger asChild>
           <DropdownMenuTrigger asChild>
-            <Button icon={displayModeIcon} />
+            <Button icon={displayModeIcon} variant="outline" size="small" />
           </DropdownMenuTrigger>
         </TooltipTrigger>
       </Tooltip>

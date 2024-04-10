@@ -108,14 +108,14 @@ export function DataTable<TData, TValue>({
           </div>
           <div className="flex space-x-2">
             <Button
-              theme="tertiary"
               size="small"
+              variant="outline"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
               上一页
             </Button>
-            <Button theme="tertiary" size="small" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+            <Button variant="outline" size="small" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
               下一页
             </Button>
           </div>

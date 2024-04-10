@@ -55,7 +55,12 @@ export const UgcViewCard = <E extends object>({
           </div>
           <div className="flex-1" />
           <div>
-            {operateArea && operateArea(row.original, <Button icon={<MoreHorizontal />} size="small" />, '操作')}
+            {operateArea &&
+              operateArea(
+                row.original,
+                <Button icon={<MoreHorizontal />} size="small" variant="outline" className="-m-1 scale-80" />,
+                '操作',
+              )}
           </div>
         </CardTitle>
       </CardHeader>

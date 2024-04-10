@@ -5,7 +5,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import { useClipboard } from '@mantine/hooks';
-import { Copy, FileUp, FolderUp, Link, Pencil, Trash } from 'lucide-react';
+import { Copy, FileUp, FolderUp, Import, Link, Pencil, Plus, Trash } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { preloadUgcWorkflows, useUgcWorkflows } from '@/apis/ugc';
@@ -230,7 +230,9 @@ export const Workflows: React.FC = () => {
           <>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button>导入</Button>
+                <Button variant="outline" size="small" icon={<Import />}>
+                  导入
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 onClick={(e) => {
@@ -252,7 +254,7 @@ export const Workflows: React.FC = () => {
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="solid" onClick={handleCreateWorkflow} loading={isCreating}>
+            <Button variant="outline" size="small" icon={<Plus />} onClick={handleCreateWorkflow} loading={isCreating}>
               新建
             </Button>
           </>
