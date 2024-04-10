@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React from 'react';
 
 import { ScrollShadow } from '@nextui-org/scroll-shadow';
 import { ChevronDownIcon } from 'lucide-react';
@@ -10,7 +10,7 @@ import { useLocalStorage } from '@/utils';
 
 interface INavListProps extends React.ComponentPropsWithoutRef<'div'> {}
 
-export const NavList: React.FC<INavListProps> = memo(() => {
+export const NavList: React.FC<INavListProps> = () => {
   const [activeIndex, setActiveIndex] = useLocalStorage<string[]>(
     'vines-ui-sidebar',
     SIDEBAR_MAP.map(({ name }) => name),
@@ -59,5 +59,4 @@ export const NavList: React.FC<INavListProps> = memo(() => {
       </Accordion>
     </ScrollShadow>
   );
-});
-NavList.displayName = 'NavList';
+};
