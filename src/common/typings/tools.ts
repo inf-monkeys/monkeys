@@ -23,7 +23,7 @@ export interface CredentialDefinition {
   displayName: string;
   description?: string;
   properties: BlockDefProperties[];
-  icon: string;
+  iconUrl: string;
   type: CredentialAuthType;
 }
 

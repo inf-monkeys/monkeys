@@ -28,8 +28,9 @@ export class ToolsCredentialTypeEntity extends BaseEntity {
 
   @Column({
     nullable: true,
+    name: 'icon_url',
   })
-  icon?: string;
+  iconUrl?: string;
 
   @Column({
     type: 'simple-json',

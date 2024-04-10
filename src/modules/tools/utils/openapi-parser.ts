@@ -31,6 +31,7 @@ export const parseOpenApiSpecAsBlocks = (namespace: string, specData: OpenAPIObj
           input: [],
           output: [],
           extra: extra,
+          credentials: apiContent['x-monkey-tool-credentials'] || [],
         };
 
         const inputInSpec = apiContent['x-monkey-tool-input'];

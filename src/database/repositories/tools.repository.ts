@@ -113,6 +113,7 @@ export class ToolsRepository {
           displayName: latestDef.displayName,
           description: latestDef.description,
           categories: latestDef.categories,
+          credentials: latestDef.credentials,
           icon: latestDef.icon,
           input: latestDef.input,
           output: latestDef.output,

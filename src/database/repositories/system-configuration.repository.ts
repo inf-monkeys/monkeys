@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class SystemConfigurationRepository {
+  private THEME_CONFIG_KEY = 'theme';
   private AES_ENCRYPT_KEY = 'aesEncryptKey';
 
   constructor(
@@ -39,5 +40,17 @@ export class SystemConfigurationRepository {
       value: crypto.randomBytes(32).toString('hex'),
     };
     await this.systemConfigurationEntity.save(entity);
+  }
+
+  public async getThemeConfig() {
+    const configuration = await this.systemConfigurationEntity.findOne({
+      where: {
+        key: this.THEME_CONFIG_KEY,
+      },
+    });
+    if (!configuration) {
+      return null;
+    }
+    return JSON.parse(configuration.value);
   }
 }

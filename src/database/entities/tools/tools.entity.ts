@@ -39,7 +39,7 @@ export class ToolsEntity extends BaseEntity {
 
   @Column({
     nullable: true,
-    type: 'text',
+    type: 'simple-json',
   })
   credentials?: INodeCredentialDescription[];
 

@@ -60,7 +60,7 @@ export class CredentialsRepository {
           name: x.name,
           displayName: x.displayName,
           description: x.description,
-          icon: x.icon,
+          iconUrl: x.iconUrl,
           properties: x.properties,
         }),
       );
@@ -88,7 +88,7 @@ export class CredentialsRepository {
           updatedTimestamp: +new Date(),
           displayName: latestDef.displayName,
           description: latestDef.description,
-          icon: latestDef.icon,
+          iconUrl: latestDef.iconUrl,
           properties: latestDef.properties,
           type: latestDef.type,
         };
@@ -121,11 +121,10 @@ export class CredentialsRepository {
         type: credentialType,
       },
     };
-    let list = await this.toolsCredentialRepository.find(condition);
-    list = list.map((x) => {
-      x.data = this.decrypt(x.data as string);
-      return x;
-    });
+    const list = await this.toolsCredentialRepository.find(condition);
+    for (const item of list) {
+      item.data = await this.decrypt(item.data as string);
+    }
     return list;
   }
 
@@ -136,7 +135,7 @@ export class CredentialsRepository {
       },
     });
     if (entity) {
-      entity.data = this.decrypt(entity.data as string);
+      entity.data = await this.decrypt(entity.data as string);
     }
 
     return entity;
@@ -178,7 +177,7 @@ export class CredentialsRepository {
   }
 
   public async createCredentail(teamId: string, creatorUserId: string, displayName: string, type: string, data: { [x: string]: any }) {
-    const encryptedData = this.encrypt(data);
+    const encryptedData = await this.encrypt(data);
     const id = generateDbId();
     await this.toolsCredentialRepository.save({
       teamId,
@@ -209,7 +208,7 @@ export class CredentialsRepository {
       updates.displayName = displayName;
     }
     if (data) {
-      updates.data = this.encrypt(data);
+      updates.data = await this.encrypt(data);
     }
     await this.toolsCredentialRepository.update(
       {

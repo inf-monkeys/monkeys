@@ -1,6 +1,7 @@
+import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateCredentialDto } from './dto/req/create-credential.dto';
 import { ListCredentialsDto } from './dto/req/list-credentials.dto';
@@ -9,6 +10,7 @@ import { ToolsCredentialsService } from './tools.credential.service';
 
 @Controller('')
 @ApiTags('Tools/Credentials')
+@UseGuards(CompatibleAuthGuard)
 export class ToolsCredentialsController {
   constructor(private readonly service: ToolsCredentialsService) {}
 
