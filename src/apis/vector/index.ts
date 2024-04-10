@@ -15,3 +15,6 @@ export const useCreateVectorCollection = () =>
     '/api/vector/collections',
     vinesFetcher({ method: 'POST' }),
   );
+
+export const deleteVectorCollection = (collectionId: string) =>
+  vinesFetcher({ method: 'DELETE' })(`/api/vector/collections/${collectionId}`);
