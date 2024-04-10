@@ -1,11 +1,14 @@
+import { RATE_LIMITER_TOKEN } from '@/common/common.module';
 import { conductorClient } from '@/common/conductor';
 import { OrderBy } from '@/common/dto/order.enum';
 import { PaginationDto } from '@/common/dto/pagination.dto';
+import { TooManyRequestsException } from '@/common/exceptions/too-many-requests';
+import { RateLimiter } from '@/common/utils/rate-limiter';
 import { sleep } from '@/common/utils/utils';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
 import { Workflow } from '@inf-monkeys/conductor-javascript';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import _ from 'lodash';
 import retry from 'retry-as-promised';
 import { FindWorkflowCondition, WorkflowRepository } from '../../database/repositories/workflow.repository';
@@ -24,6 +27,7 @@ export class WorkflowExecutionService {
   constructor(
     private readonly workflowRepository: WorkflowRepository,
     private readonly conductorService: ConductorService,
+    @Inject(RATE_LIMITER_TOKEN) private readonly rateLimiter: RateLimiter,
   ) {}
 
   private async populateMetadataByForExecutions(executions: Workflow[]): Promise<WorkflowWithMetadata[]> {
@@ -216,6 +220,12 @@ export class WorkflowExecutionService {
       version = await this.workflowRepository.getMaxVersion(workflowId);
     }
     const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
+    if (workflow.isRateLimitEnabled()) {
+      const can = await this.rateLimiter.can(`workflow_execitions:${workflowId}:${version}`, workflow.rateLimiter.windowMs, workflow.rateLimiter.max);
+      if (!can) {
+        throw new TooManyRequestsException();
+      }
+    }
     if (!workflow) {
       throw new Error('Workflow not exists');
     }

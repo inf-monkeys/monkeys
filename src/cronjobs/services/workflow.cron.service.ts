@@ -1,3 +1,4 @@
+import { LOCK_TOKEN } from '@/common/common.module';
 import { config } from '@/common/config';
 import { logger } from '@/common/logger';
 import { LockManager } from '@/common/utils/lock';
@@ -15,7 +16,7 @@ export class WorkflowCronService {
   constructor(
     private readonly workflowRepository: WorkflowRepository,
     private readonly workflowService: WorkflowExecutionService,
-    @Inject('LOCK') private readonly lockManager: LockManager,
+    @Inject(LOCK_TOKEN) private readonly lockManager: LockManager,
   ) {}
 
   private async scanAndExecute() {

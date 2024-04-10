@@ -5,7 +5,7 @@ import { getNextCronTimestamp } from '@/common/utils/cron';
 import { calcMd5 } from '@/common/utils/utils';
 import { WorkflowChatSessionEntity } from '@/database/entities/workflow/workflow-chat-session';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
-import { WorkflowMetadataEntity, WorkflowOutputValue, WorkflowValidationIssue } from '@/database/entities/workflow/workflow-metadata';
+import { WorkflowMetadataEntity, WorkflowOutputValue, WorkflowRateLimiter, WorkflowValidationIssue } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTriggerType, WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
 import { BlockDefProperties, MonkeyTaskDefTypes } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
@@ -133,12 +133,13 @@ export class WorkflowRepository {
       validationIssues?: WorkflowValidationIssue[];
       output?: WorkflowOutputValue[];
       tagIds?: string[];
+      rateLimiter?: WorkflowRateLimiter;
     },
   ) {
-    const { displayName, description, iconUrl, tasks, variables, activated, validationIssues, validated, output, tagIds } = updates;
+    const { displayName, description, iconUrl, tasks, variables, activated, validationIssues, validated, output, tagIds, rateLimiter } = updates;
 
     // 字段都为空，则跳过更新
-    if ([displayName, description, iconUrl, tasks, variables, activated, validated, validationIssues, output, tagIds].every((item) => typeof item === 'undefined')) return;
+    if ([displayName, description, iconUrl, tasks, variables, activated, validated, validationIssues, output, tagIds, rateLimiter].every((item) => typeof item === 'undefined')) return;
     if (variables && !Array.isArray(variables)) {
       throw new Error('variables 字段必须为数组');
     }
@@ -149,7 +150,7 @@ export class WorkflowRepository {
     await this.workflowMetadataRepository.update(
       { workflowId, isDeleted: false, teamId, version },
       {
-        ..._.pickBy({ displayName, iconUrl, description, tasks, variables, activated, validationIssues, validated, output, tagIds }, (v) => typeof v !== 'undefined'),
+        ..._.pickBy({ displayName, iconUrl, description, tasks, variables, activated, validationIssues, validated, output, tagIds, rateLimiter }, (v) => typeof v !== 'undefined'),
         updatedTimestamp: Date.now(),
       },
     );

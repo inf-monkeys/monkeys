@@ -3,7 +3,7 @@ import { ListDto } from '@/common/dto/list.dto';
 import { generateDbId } from '@/common/utils';
 import { flatTasks } from '@/common/utils/conductor';
 import { extractAssetFromZip } from '@/common/utils/zip-asset';
-import { ValidationIssueType, WorkflowMetadataEntity, WorkflowOutputValue, WorkflowValidationIssue } from '@/database/entities/workflow/workflow-metadata';
+import { ValidationIssueType, WorkflowMetadataEntity, WorkflowOutputValue, WorkflowRateLimiter, WorkflowValidationIssue } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
 import { AssetsCommonRepository } from '@/database/repositories/assets-common.repository';
 import { WorkflowTask } from '@inf-monkeys/conductor-javascript';
@@ -475,5 +475,11 @@ export class WorkflowCrudService {
       validated,
       validationIssues,
     };
+  }
+
+  public async updateWorkflowRateLimiter(teamId: string, workflowId: string, version: number, rateLimiter: WorkflowRateLimiter) {
+    await this.workflowRepository.updateWorkflowDef(teamId, workflowId, version, {
+      rateLimiter,
+    });
   }
 }

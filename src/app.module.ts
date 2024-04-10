@@ -4,7 +4,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { CacheModule } from './common/cache/cache.module';
+import { CommonModule } from './common/common.module';
 import { ToolsMiddleware } from './common/middlewares/tools.middleware';
 import { CronJobModule } from './cronjobs/cron.module';
 import { DatabaseModule } from './database/database.module';
@@ -19,11 +19,11 @@ import { OpenapiModule } from './openapi.module';
 
 @Module({
   imports: [
+    CommonModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
     }),
     DatabaseModule,
-    CacheModule,
     ToolsModule,
     RepositoryMoule,
     WorkflowModule,

@@ -1,4 +1,5 @@
 import { CacheManager } from '@/common/cache';
+import { CACHE_TOKEN } from '@/common/common.module';
 import { AuthMethod, config } from '@/common/config';
 import { sendSms } from '@/common/utils/sms';
 import { getRandomNumber } from '@/common/utils/utils';
@@ -10,7 +11,7 @@ import { JwtHelper } from '../jwt-utils';
 @Injectable()
 export class PhoneService {
   constructor(
-    @Inject('CACHE') private readonly cacheManager: CacheManager,
+    @Inject(CACHE_TOKEN) private readonly cacheManager: CacheManager,
     private readonly userRepository: UserRepository,
   ) {}
 

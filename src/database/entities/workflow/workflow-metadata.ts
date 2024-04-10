@@ -47,6 +47,12 @@ export interface WorkflowOutputValue {
   value: string;
 }
 
+export interface WorkflowRateLimiter {
+  enabled: boolean;
+  windowMs: number;
+  max: number;
+}
+
 @Entity({ name: 'workflow_metadatas' })
 export class WorkflowMetadataEntity extends BaseAssetEntity {
   assetType: AssetType = 'workflow';
@@ -123,4 +129,15 @@ export class WorkflowMetadataEntity extends BaseAssetEntity {
     default: false,
   })
   hidden?: boolean;
+
+  @Column({
+    name: 'rate_limiter',
+    type: 'simple-json',
+    nullable: true,
+  })
+  rateLimiter: WorkflowRateLimiter;
+
+  public isRateLimitEnabled() {
+    return this.rateLimiter?.enabled;
+  }
 }
