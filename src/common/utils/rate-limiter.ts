@@ -36,5 +36,6 @@ export class RedisRateLimiter implements RateLimiter {
 
     // 设置窗口过期时间
     await this.redis.expire(key, windowMs / 1000);
+    return true;
   }
 }
