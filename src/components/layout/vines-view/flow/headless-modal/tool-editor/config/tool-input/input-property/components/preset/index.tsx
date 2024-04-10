@@ -26,8 +26,8 @@ export const PresetInput: React.FC<IVinesInputPropertyProps & IVinesInputPresetP
 
   return (
     <div className="relative min-h-8">
-      {assetType === 'sd-sd' && <SdModelPresets {...childProps} />}
-      {assetType === 'llm-sd' && <LlmModelPresets {...childProps} />}
+      {assetType === 'sd-model' && <SdModelPresets {...childProps} />}
+      {assetType === 'llm-model' && <LlmModelPresets {...childProps} />}
       {assetType === 'text-collection' && <TextCollectionPresets {...childProps} />}
       {assetType === 'workflow-version' && <WorkflowVersionPresets {...childProps} />}
       {assetType === 'fork-join-branch' && <ForkJoinBranchPresets {...childProps} />}
