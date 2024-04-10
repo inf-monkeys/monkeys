@@ -43,6 +43,7 @@ interface IUgcViewProps<E extends object> {
   assetKey: string;
   assetName: string;
   assetType: AssetType;
+  isMarket?: boolean;
   useUgcFetcher: IListUgcItemsFnType<E>;
   preloadUgcFetcher: IPreloadUgcItemsFnType<E>;
   // columns: ColumnDef<IAssetItem<E>>[];
@@ -58,6 +59,7 @@ export const UgcView = <E extends object>({
   assetKey,
   assetName,
   assetType,
+  isMarket = false,
   useUgcFetcher,
   preloadUgcFetcher,
   createColumns,
@@ -211,6 +213,7 @@ export const UgcView = <E extends object>({
         title={assetName}
         assetKey={assetKey}
         assetType={assetType}
+        isMarket={isMarket}
         filterListProps={{
           onChange: setFilter,
           filterButtonProps: {
@@ -223,6 +226,7 @@ export const UgcView = <E extends object>({
         <UgcViewHeader
           assetKey={assetKey}
           assetType={assetType}
+          isMarket={isMarket}
           subtitle={subtitle}
           filterButtonProps={{
             filter,

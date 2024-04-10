@@ -11,8 +11,14 @@ interface IUgcViewHeaderProps extends IUgcCustomProps {
   filterButtonProps: Omit<IUgcViewFilterButtonProps, keyof IUgcCustomProps>;
 }
 
-export const UgcViewHeader: React.FC<IUgcViewHeaderProps> = ({ assetKey, assetType, filterButtonProps, subtitle }) => {
-  const filterAreaVisible = !NON_FILTER_TYPE_LIST.includes(assetType);
+export const UgcViewHeader: React.FC<IUgcViewHeaderProps> = ({
+  assetKey,
+  assetType,
+  isMarket,
+  filterButtonProps,
+  subtitle,
+}) => {
+  const filterAreaVisible = !NON_FILTER_TYPE_LIST.includes(assetType) && !isMarket;
 
   return (
     <header className="flex w-full items-center justify-end px-4 pb-2">

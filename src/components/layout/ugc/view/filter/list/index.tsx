@@ -31,12 +31,13 @@ export interface IUgcViewFilterListProps extends IUgcCustomProps {
 export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
   assetType,
   assetKey,
+  isMarket,
   onChange,
   filterButtonProps,
 }) => {
   const { data: assetFilterRules, mutate } = useAssetFilterRuleList(assetType);
 
-  const filterAreaVisible = !NON_FILTER_TYPE_LIST.includes(assetType);
+  const filterAreaVisible = !NON_FILTER_TYPE_LIST.includes(assetType) && !isMarket;
   const [current, setCurrent] = useState('all');
   const [searchValue, setSearchValue] = useState('');
 

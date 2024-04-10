@@ -2,13 +2,14 @@ import React from 'react';
 
 import { createColumnHelper } from '@tanstack/react-table';
 
-import { ILLMModel } from '@/apis/llm/typings.ts';
+import { IVinesUser } from '@/apis/authz/user/typings.ts';
+import { IApplicationStoreItemDetail } from '@/apis/ugc/asset-typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { RenderDescription, RenderIcon, RenderTime } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
 
-const columnHelper = createColumnHelper<IAssetItem<ILLMModel>>();
+const columnHelper = createColumnHelper<IAssetItem<IApplicationStoreItemDetail>>();
 
-export const createTextModelsColumn = [
+export const createApplicationStoreColumn = [
   columnHelper.accessor('iconUrl', {
     id: 'logo',
     header: '图标',
@@ -18,8 +19,13 @@ export const createTextModelsColumn = [
   columnHelper.accessor('name', {
     id: 'title',
     header: '名称',
-    cell: ({ getValue }) => (
-      <a className="transition-colors hover:text-primary-500" target="_blank" rel="noreferrer">
+    cell: ({ row, getValue }) => (
+      <a
+        className="transition-colors hover:text-primary-500"
+        href={`/${row.original.teamId}/workspace/${row.original.workflowId}`}
+        target="_blank"
+        rel="noreferrer"
+      >
         {getValue() as string}
       </a>
     ),
@@ -29,10 +35,11 @@ export const createTextModelsColumn = [
     header: '描述',
     cell: ({ getValue }) => RenderDescription({ description: getValue() as string }),
   }),
-  columnHelper.accessor('assetTags', {
-    id: 'assetTags',
-    header: '标签',
-    maxSize: 96,
+  columnHelper.accessor('user', {
+    id: 'user',
+    header: '用户',
+    cell: ({ getValue }) => RenderUser({ user: getValue() as IVinesUser }),
+    maxSize: 48,
   }),
   columnHelper.accessor('createdTimestamp', {
     id: 'createdTimestamp',

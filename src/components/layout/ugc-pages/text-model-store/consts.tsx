@@ -8,7 +8,7 @@ import { RenderDescription, RenderIcon, RenderTime } from '@/components/layout/u
 
 const columnHelper = createColumnHelper<IAssetItem<ILLMModel>>();
 
-export const createTextModelsColumn = [
+export const createTextModelStoreColumn = [
   columnHelper.accessor('iconUrl', {
     id: 'logo',
     header: '图标',
@@ -28,11 +28,6 @@ export const createTextModelsColumn = [
     id: 'description',
     header: '描述',
     cell: ({ getValue }) => RenderDescription({ description: getValue() as string }),
-  }),
-  columnHelper.accessor('assetTags', {
-    id: 'assetTags',
-    header: '标签',
-    maxSize: 96,
   }),
   columnHelper.accessor('createdTimestamp', {
     id: 'createdTimestamp',

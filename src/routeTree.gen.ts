@@ -20,13 +20,14 @@ import { Route as TeamIdWorkflowsIndexImport } from './pages/$teamId/workflows/i
 import { Route as TeamIdWorkbenchIndexImport } from './pages/$teamId/workbench/index'
 import { Route as TeamIdToolStoreIndexImport } from './pages/$teamId/tool-store/index'
 import { Route as TeamIdTextModelsIndexImport } from './pages/$teamId/text-models/index'
+import { Route as TeamIdTextModelStoreIndexImport } from './pages/$teamId/text-model-store/index'
 import { Route as TeamIdTextDataIndexImport } from './pages/$teamId/text-data/index'
 import { Route as TeamIdTableDataIndexImport } from './pages/$teamId/table-data/index'
 import { Route as TeamIdSettingsIndexImport } from './pages/$teamId/settings/index'
 import { Route as TeamIdRenderToolsIndexImport } from './pages/$teamId/render-tools/index'
-import { Route as TeamIdModelStoreIndexImport } from './pages/$teamId/model-store/index'
 import { Route as TeamIdMediaDataIndexImport } from './pages/$teamId/media-data/index'
 import { Route as TeamIdImageModelsIndexImport } from './pages/$teamId/image-models/index'
+import { Route as TeamIdImageModelStoreIndexImport } from './pages/$teamId/image-model-store/index'
 import { Route as TeamIdDataStoreIndexImport } from './pages/$teamId/data-store/index'
 import { Route as TeamIdApplicationStoreIndexImport } from './pages/$teamId/application-store/index'
 import { Route as TeamIdActionToolsIndexImport } from './pages/$teamId/action-tools/index'
@@ -81,6 +82,11 @@ const TeamIdTextModelsIndexRoute = TeamIdTextModelsIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const TeamIdTextModelStoreIndexRoute = TeamIdTextModelStoreIndexImport.update({
+  path: '/$teamId/text-model-store/',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const TeamIdTextDataIndexRoute = TeamIdTextDataIndexImport.update({
   path: '/$teamId/text-data/',
   getParentRoute: () => rootRoute,
@@ -101,11 +107,6 @@ const TeamIdRenderToolsIndexRoute = TeamIdRenderToolsIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const TeamIdModelStoreIndexRoute = TeamIdModelStoreIndexImport.update({
-  path: '/$teamId/model-store/',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const TeamIdMediaDataIndexRoute = TeamIdMediaDataIndexImport.update({
   path: '/$teamId/media-data/',
   getParentRoute: () => rootRoute,
@@ -115,6 +116,13 @@ const TeamIdImageModelsIndexRoute = TeamIdImageModelsIndexImport.update({
   path: '/$teamId/image-models/',
   getParentRoute: () => rootRoute,
 } as any)
+
+const TeamIdImageModelStoreIndexRoute = TeamIdImageModelStoreIndexImport.update(
+  {
+    path: '/$teamId/image-model-store/',
+    getParentRoute: () => rootRoute,
+  } as any,
+)
 
 const TeamIdDataStoreIndexRoute = TeamIdDataStoreIndexImport.update({
   path: '/$teamId/data-store/',
@@ -182,16 +190,16 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdDataStoreIndexImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/image-model-store/': {
+      preLoaderRoute: typeof TeamIdImageModelStoreIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/image-models/': {
       preLoaderRoute: typeof TeamIdImageModelsIndexImport
       parentRoute: typeof rootRoute
     }
     '/$teamId/media-data/': {
       preLoaderRoute: typeof TeamIdMediaDataIndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/$teamId/model-store/': {
-      preLoaderRoute: typeof TeamIdModelStoreIndexImport
       parentRoute: typeof rootRoute
     }
     '/$teamId/render-tools/': {
@@ -208,6 +216,10 @@ declare module '@tanstack/react-router' {
     }
     '/$teamId/text-data/': {
       preLoaderRoute: typeof TeamIdTextDataIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/text-model-store/': {
+      preLoaderRoute: typeof TeamIdTextModelStoreIndexImport
       parentRoute: typeof rootRoute
     }
     '/$teamId/text-models/': {
@@ -255,13 +267,14 @@ export const routeTree = rootRoute.addChildren([
   TeamIdActionToolsIndexRoute,
   TeamIdApplicationStoreIndexRoute,
   TeamIdDataStoreIndexRoute,
+  TeamIdImageModelStoreIndexRoute,
   TeamIdImageModelsIndexRoute,
   TeamIdMediaDataIndexRoute,
-  TeamIdModelStoreIndexRoute,
   TeamIdRenderToolsIndexRoute,
   TeamIdSettingsIndexRoute,
   TeamIdTableDataIndexRoute,
   TeamIdTextDataIndexRoute,
+  TeamIdTextModelStoreIndexRoute,
   TeamIdTextModelsIndexRoute,
   TeamIdToolStoreIndexRoute,
   TeamIdWorkbenchIndexRoute,
