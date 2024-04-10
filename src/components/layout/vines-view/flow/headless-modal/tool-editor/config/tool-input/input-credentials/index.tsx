@@ -47,7 +47,7 @@ export const VinesInputCredentials: React.FC<IVinesInputCredentialsProps> = memo
 
   useEffect(() => {
     if (credentialList?.length) {
-      if (credentialList?.find(({ _id }) => _id === value)) {
+      if (credentialList?.find(({ id: _id }) => _id === value)) {
         return;
       }
     }
@@ -69,9 +69,9 @@ export const VinesInputCredentials: React.FC<IVinesInputCredentialsProps> = memo
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              {credentialList?.map(({ data, _id }, i) => (
-                <SelectItem value={_id ?? ''} key={i}>
-                  {data.displayName}
+              {credentialList?.map(({ displayName, id }, i) => (
+                <SelectItem value={id ?? ''} key={i}>
+                  {displayName}
                 </SelectItem>
               ))}
               {!credentialList?.length && (

@@ -55,14 +55,14 @@ export const ExternalAccountManage: React.FC<IExternalAccountManageProps> = ({ d
             </TableRow>
           </TableHeader>
           <TableBody>
-            {credentials?.map(({ data, _id }, i) => (
+            {credentials?.map(({ displayName, id }, i) => (
               <TableRow key={i} className="table-row">
                 <TableCell className="sticky left-0 w-full min-w-24 max-w-64 break-words bg-background">
-                  {data.displayName}
+                  {displayName}
                 </TableCell>
                 {rows?.map(({ name, default: propDef }, j) => (
                   <TableCell key={j} className="w-full min-w-32 max-w-64 break-words">
-                    {data[name] ?? propDef}
+                    {/* {data[name] ?? propDef} */}
                   </TableCell>
                 ))}
                 <TableCell className="sticky right-0 w-full min-w-16 max-w-64 bg-background">
@@ -79,7 +79,7 @@ export const ExternalAccountManage: React.FC<IExternalAccountManageProps> = ({ d
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>取消</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => _id && handleDelete(_id)}>删除</AlertDialogAction>
+                        <AlertDialogAction onClick={() => id && handleDelete(id)}>删除</AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
