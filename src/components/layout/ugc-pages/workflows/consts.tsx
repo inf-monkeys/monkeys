@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import { createColumnHelper } from '@tanstack/react-table';
 
@@ -16,7 +14,7 @@ export const createWorkflowColumn = [
     cell: ({ getValue }) => RenderIcon({ iconUrl: getValue() as string }),
     maxSize: 48,
   }),
-  columnHelper.accessor('name', {
+  columnHelper.accessor('displayName', {
     id: 'title',
     header: '名称',
     cell: ({ row, getValue }) => (
