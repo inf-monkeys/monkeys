@@ -11,7 +11,7 @@ import { ITableData } from '@/apis/table-data/typings.ts';
 import { IWorkflowBlock } from '@/apis/tools/typings.ts';
 import { IPaginationListData } from '@/apis/typings.ts';
 import { IApplicationStoreItemDetail } from '@/apis/ugc/asset-typings.ts';
-import { IVectorFrontEnd } from '@/apis/vector/typings.ts';
+import { IKnowledgeBaseFrontEnd } from '@/apis/vector/typings.ts';
 import { paginationWrapper } from '@/apis/wrapper.ts';
 
 import { IAssetItem, IListUgcDto, IUgcFilterRules } from './typings';
@@ -54,8 +54,11 @@ export const preloadUgcTextModels = (dto: IListUgcDto) => preloadUgcItems<ILLMMo
 export const useUgcImageModels = (dto: IListUgcDto) => useUgcItems<ISDModel>(dto, '/api/sd/models');
 export const preloadUgcImageModels = (dto: IListUgcDto) => preloadUgcItems<ISDModel>(dto, '/api/sd/models');
 
-export const useUgcVectors = (dto: IListUgcDto) => useUgcItems<IVectorFrontEnd>(dto, '/api/vector/collections');
-export const preloadUgcVectors = (dto: IListUgcDto) => preloadUgcItems<IVectorFrontEnd>(dto, '/api/vector/collections');
+export const useUgcKnowledgeBases = (dto: IListUgcDto) =>
+  useUgcItems<IKnowledgeBaseFrontEnd>(dto, '/api/knowledge-bases');
+
+export const preloadKnowledgeBases = (dto: IListUgcDto) =>
+  preloadUgcItems<IKnowledgeBaseFrontEnd>(dto, '/api/knowledge-bases');
 
 export const useUgcTableData = (dto: IListUgcDto) => useUgcItems<ITableData>(dto, '/api/database');
 export const preloadUgcTableData = (dto: IListUgcDto) => preloadUgcItems<ITableData>(dto, '/api/database');

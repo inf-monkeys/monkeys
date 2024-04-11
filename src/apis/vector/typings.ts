@@ -6,8 +6,8 @@ export interface IVectorMetadataField {
   required: boolean;
 }
 
-export interface IVectorCollection {
-  _id: string;
+export interface IKnowledgeBase {
+  id: string;
   createTime: number;
   dimension: number;
   name: string;
@@ -24,7 +24,7 @@ export interface IVectorCollection {
   createdTimestamp: number;
 }
 
-export type IVectorFrontEnd = IVectorCollection & { paragraph_number: number; appNumber: number };
+export type IKnowledgeBaseFrontEnd = IKnowledgeBase & { paragraph_number: number; appNumber: number };
 
 export interface IVectorSupportedEmbeddingModel {
   name: string;

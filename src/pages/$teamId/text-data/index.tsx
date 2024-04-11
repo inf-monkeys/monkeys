@@ -2,12 +2,12 @@ import React from 'react';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
-import { preloadUgcVectors, useUgcVectors } from '@/apis/ugc';
-import { UgcView } from '@/components/layout/ugc/view';
-import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { preloadKnowledgeBases, useUgcKnowledgeBases } from '@/apis/ugc';
 import { createTextDataColumn } from '@/components/layout/ugc-pages/text-data/consts.tsx';
 import { CreateDataset } from '@/components/layout/ugc-pages/text-data/create-dataset';
 import { OperateArea } from '@/components/layout/ugc-pages/text-data/operate-area';
+import { UgcView } from '@/components/layout/ugc/view';
+import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
@@ -20,8 +20,8 @@ export const TextData: React.FC = () => {
         assetKey="text-data"
         assetType="knowledge-base"
         assetName="文本数据"
-        useUgcFetcher={useUgcVectors}
-        preloadUgcFetcher={preloadUgcVectors}
+        useUgcFetcher={useUgcKnowledgeBases}
+        preloadUgcFetcher={preloadKnowledgeBases}
         createColumns={() => createTextDataColumn}
         renderOptions={{
           subtitle: (item) => (

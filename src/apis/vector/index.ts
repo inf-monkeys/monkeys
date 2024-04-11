@@ -4,26 +4,26 @@ import useSWRMutation from 'swr/mutation';
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import {
   ICreateVectorDB,
-  IVectorCollection,
-  IVectorFrontEnd,
+  IKnowledgeBase,
+  IKnowledgeBaseFrontEnd,
   IVectorSupportedEmbeddingModel,
 } from '@/apis/vector/typings.ts';
 
-export const useVectorCollections = () =>
-  useSWR<IVectorFrontEnd[] | undefined>('/api/vector/collections', vinesFetcher());
+export const useKnowledgeBases = () =>
+  useSWR<IKnowledgeBaseFrontEnd[] | undefined>('/api/knowledge-bases', vinesFetcher());
 
-export const useVectorCollection = (collectionId: string) =>
-  useSWR<IVectorCollection | undefined>(
-    collectionId ? `/api/vector/collections/${collectionId}` : null,
+export const useKnowledgeBase = (collectionId: string) =>
+  useSWR<IKnowledgeBase | undefined>(collectionId ? `/api/knowledge-bases/${collectionId}` : null, vinesFetcher());
+
+export const useVectorSupportedEmbeddingModels = () =>
+  useSWR<IVectorSupportedEmbeddingModel[] | undefined>(
+    '/api/tools/monkey_tools_knowledge_base/helpers/embedding-models',
     vinesFetcher(),
   );
 
-export const useVectorSupportedEmbeddingModels = () =>
-  useSWR<IVectorSupportedEmbeddingModel[] | undefined>('/api/vector/supported-embedding-models', vinesFetcher());
-
-export const useCreateVectorCollection = () =>
+export const useCreateKnowledgeBase = () =>
   useSWRMutation<{ name: string } | undefined, unknown, string, ICreateVectorDB>(
-    '/api/vector/collections',
+    '/api/knowledge-bases',
     vinesFetcher({ method: 'POST' }),
   );
 
