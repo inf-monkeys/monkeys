@@ -3,27 +3,30 @@ import useSWRMutation from 'swr/mutation';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import {
+  ICreateVectorData,
   ICreateVectorDB,
-  IKnowledgeBase,
-  IKnowledgeBaseFrontEnd,
+  IFullTextSearchParams,
+  IFullTextSearchResult,
+  IVectorCollection,
+  IVectorFrontEnd,
   IVectorSupportedEmbeddingModel,
 } from '@/apis/vector/typings.ts';
 
-export const useKnowledgeBases = () =>
-  useSWR<IKnowledgeBaseFrontEnd[] | undefined>('/api/knowledge-bases', vinesFetcher());
+export const useVectorCollections = () =>
+  useSWR<IVectorFrontEnd[] | undefined>('/api/vector/collections', vinesFetcher());
 
-export const useKnowledgeBase = (collectionId: string) =>
-  useSWR<IKnowledgeBase | undefined>(collectionId ? `/api/knowledge-bases/${collectionId}` : null, vinesFetcher());
-
-export const useVectorSupportedEmbeddingModels = () =>
-  useSWR<IVectorSupportedEmbeddingModel[] | undefined>(
-    '/api/tools/monkey_tools_knowledge_base/helpers/embedding-models',
+export const useVectorCollection = (collectionId: string) =>
+  useSWR<IVectorCollection | undefined>(
+    collectionId ? `/api/vector/collections/${collectionId}` : null,
     vinesFetcher(),
   );
 
-export const useCreateKnowledgeBase = () =>
+export const useVectorSupportedEmbeddingModels = () =>
+  useSWR<IVectorSupportedEmbeddingModel[] | undefined>('/api/vector/supported-embedding-models', vinesFetcher());
+
+export const useCreateVectorCollection = () =>
   useSWRMutation<{ name: string } | undefined, unknown, string, ICreateVectorDB>(
-    '/api/knowledge-bases',
+    '/api/vector/collections',
     vinesFetcher({ method: 'POST' }),
   );
 
@@ -32,3 +35,31 @@ export const deleteVectorCollection = (collectionId: string) =>
 
 export const deleteAllVectorAllData = (collectionId: string) =>
   vinesFetcher({ method: 'POST' })(`/api/vector/collections/${collectionId}/delete-all-data`, {});
+
+export const useAddVectorData = (collectionId: string) =>
+  useSWRMutation<{ pk: string } | undefined, unknown, string | null, ICreateVectorData>(
+    collectionId ? `/api/vector/collections/${collectionId}/records` : null,
+    vinesFetcher({ method: 'POST' }),
+  );
+
+export const useTextSearch = (collectionId: string, params: IFullTextSearchParams, useVector = false) => {
+  const { query, from = 0, size = 30, metadataFilter } = params;
+  return useSWR<IFullTextSearchResult | undefined>(
+    collectionId && params
+      ? [
+          `/api/vector/collections/${collectionId}/${useVector ? 'vector' : 'full-text'}-search`,
+          {
+            query,
+            from,
+            size,
+            metadataFilter,
+            ...(useVector ? {} : { sortByCreatedAt: !query }),
+          },
+        ]
+      : null,
+    (args) =>
+      vinesFetcher<IFullTextSearchResult, IFullTextSearchParams>({ method: 'POST', simple: true })(
+        ...(args as [string, IFullTextSearchParams]),
+      ),
+  );
+};
