@@ -18,7 +18,8 @@ export const UgcDetailWorkflows: React.FC<IUgcDetailWorkflowsProps> = ({ data })
       cell: ({ getValue }) => RenderIcon({ iconUrl: getValue() as string }),
     },
     {
-      icon: 'name',
+      id: 'displayName',
+      accessorKey: 'displayName',
       header: '名称',
       cell: ({ row, getValue }) => (
         <a
@@ -32,7 +33,8 @@ export const UgcDetailWorkflows: React.FC<IUgcDetailWorkflowsProps> = ({ data })
       ),
     },
     {
-      icon: 'description',
+      id: 'description',
+      accessorKey: 'description',
       header: '描述',
       cell: ({ getValue }) => RenderDescription({ description: getValue() as string }),
     },
