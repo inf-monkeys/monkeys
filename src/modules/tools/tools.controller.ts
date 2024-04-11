@@ -27,6 +27,18 @@ export class ToolsController {
     });
   }
 
+  @Get(':toolName')
+  @ApiOperation({
+    summary: 'List All tools',
+    description: 'List All tools',
+  })
+  public async getToolDetail(@Param('toolName') toolName: string) {
+    const result = await this.toolRegistryService.getToolByName(toolName);
+    return new SuccessResponse({
+      data: result,
+    });
+  }
+
   @Post('/register')
   @UseGuards(CompatibleAuthGuard)
   public async registerWorker(@Body() body: RegisterToolDto) {

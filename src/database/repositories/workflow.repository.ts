@@ -422,6 +422,15 @@ export class WorkflowRepository {
     };
   }
 
+  public async getAllWorkflows(teamId: string) {
+    return await this.workflowMetadataRepository.find({
+      where: {
+        teamId,
+        isDeleted: false,
+      },
+    });
+  }
+
   public async listWorkflows(
     teamId: string,
     dto: ListDto,

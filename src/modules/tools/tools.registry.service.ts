@@ -209,4 +209,8 @@ export class ToolsRegistryService {
   public async listTools() {
     return await this.toolsRepository.listTools();
   }
+
+  public async getToolByName(name: string) {
+    return await this.toolsRepository.getToolByName(name);
+  }
 }
