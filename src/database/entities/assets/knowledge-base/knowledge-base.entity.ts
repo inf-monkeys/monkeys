@@ -18,35 +18,10 @@ export class KnowLedgeBaseEntity extends BaseAssetEntity {
   name: string;
 
   @Column({
-    name: 'description',
-  })
-  description: string;
-
-  @Column({
     name: 'embedding_model',
   })
   embeddingModel: string;
 
-  @Column({
-    name: 'index_type',
-    nullable: true,
-  })
-  indexType: string;
-
-  @Column({
-    name: 'index_param',
-    type: 'simple-json',
-    nullable: true,
-  })
-  indexParam: any;
-
   @Column()
   dimension: number;
-
-  @Column({
-    name: 'metadata_fields',
-    type: 'simple-json',
-    nullable: true,
-  })
-  metadataFields: VectorCollectionField[];
 }

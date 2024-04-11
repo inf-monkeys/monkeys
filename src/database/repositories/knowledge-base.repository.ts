@@ -1,8 +1,18 @@
+import { generateDbId } from '@/common/utils';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { KnowLedgeBaseEntity } from '../entities/assets/knowledge-base/knowledge-base.entity';
 import { AssetsCommonRepository } from './assets-common.repository';
+
+export interface CreateKnowledgeBaseParams {
+  name: string;
+  displayName: string;
+  description: string;
+  embeddingModel: string;
+  iconUrl: string;
+  dimension: number;
+}
 
 @Injectable()
 export class KnowledgeBaseRepository {
@@ -31,6 +41,21 @@ export class KnowledgeBaseRepository {
       });
       result = result.concat(authorized);
     }
+    return result;
+  }
+
+  public async createKnowledgeBase(teamId: string, creatorUserId: string, params: CreateKnowledgeBaseParams) {
+    const knowledgeBase = new KnowLedgeBaseEntity();
+    knowledgeBase.id = generateDbId();
+    knowledgeBase.teamId = teamId;
+    knowledgeBase.name = params.name;
+    knowledgeBase.dimension = params.dimension;
+    knowledgeBase.creatorUserId = creatorUserId;
+    knowledgeBase.displayName = params.displayName;
+    knowledgeBase.description = params.description;
+    knowledgeBase.embeddingModel = params.embeddingModel;
+    knowledgeBase.iconUrl = params.iconUrl;
+    const result = await this.knowledgeBaseRepository.save(knowledgeBase);
     return result;
   }
 }
