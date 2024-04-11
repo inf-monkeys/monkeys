@@ -1,13 +1,11 @@
-import React from 'react';
-
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { IVectorFrontEnd } from '@/apis/vector/typings.ts';
+import { IKnowledgeBaseFrontEnd } from '@/apis/vector/typings.ts';
 import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
 
-const columnHelper = createColumnHelper<IAssetItem<IVectorFrontEnd>>();
+const columnHelper = createColumnHelper<IAssetItem<IKnowledgeBaseFrontEnd>>();
 
 export const createTextDataColumn = [
   columnHelper.accessor('iconUrl', {

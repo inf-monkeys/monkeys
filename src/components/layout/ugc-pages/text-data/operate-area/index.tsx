@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { deleteAllVectorAllData, deleteVectorCollection } from '@/apis/vector';
-import { IVectorFrontEnd } from '@/apis/vector/typings.ts';
+import { IKnowledgeBaseFrontEnd } from '@/apis/vector/typings.ts';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,7 +31,7 @@ import {
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface IOperateAreaProps {
-  item: IAssetItem<IVectorFrontEnd>;
+  item: IAssetItem<IKnowledgeBaseFrontEnd>;
   trigger: React.ReactNode;
   tooltipTriggerContent?: string;
 }

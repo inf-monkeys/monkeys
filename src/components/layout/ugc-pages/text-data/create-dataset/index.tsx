@@ -7,7 +7,7 @@ import { Plus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
-import { useCreateVectorCollection, useVectorSupportedEmbeddingModels } from '@/apis/vector';
+import { useCreateKnowledgeBase, useVectorSupportedEmbeddingModels } from '@/apis/vector';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
-import { datasetInfoSchema, IDatasetInfo } from '@/schema/text-dataset';
+import { IDatasetInfo, datasetInfoSchema } from '@/schema/text-dataset';
 
 interface ICreateDatasetProps {}
 
@@ -23,7 +23,7 @@ export const CreateDataset: React.FC<ICreateDatasetProps> = () => {
   const { mutate } = useSWRConfig();
 
   const { data: embeddingModels } = useVectorSupportedEmbeddingModels();
-  const { trigger } = useCreateVectorCollection();
+  const { trigger } = useCreateKnowledgeBase();
 
   const form = useForm<IDatasetInfo>({
     resolver: zodResolver(datasetInfoSchema),
