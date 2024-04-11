@@ -6,7 +6,8 @@ import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Undo2 } from 'lucide-react';
 
-import { useKnowledgeBase } from '@/apis/vector';
+import { useVectorCollection } from '@/apis/vector';
+import { TextDetailHeader } from '@/components/layout/ugc-pages/text-data/text-detail/header';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -15,7 +16,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 const TextDataDetail: React.FC = () => {
   const { textId } = Route.useParams();
-  const { data: detail, isLoading } = useKnowledgeBase(textId);
+  const { data: detail, isLoading } = useVectorCollection(textId);
 
   const displayName = detail?.displayName;
 
@@ -81,7 +82,9 @@ const TextDataDetail: React.FC = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-              ></motion.div>
+              >
+                <TextDetailHeader textId={textId} />
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
