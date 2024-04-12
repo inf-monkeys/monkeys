@@ -64,7 +64,7 @@ export const WorkflowPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInp
       {!isLoading && !refresh ? (
         componentMode === 'input' ? (
           <motion.div
-            key="SdModelPresets_input"
+            key="WorkflowPresets_input"
             className="absolute left-0 top-0 w-full"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -88,7 +88,7 @@ export const WorkflowPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInp
           </motion.div>
         ) : (
           <motion.div
-            key="SdModelPresets_component"
+            key="WorkflowPresets_component"
             className="absolute left-0 top-0 w-full"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -106,7 +106,7 @@ export const WorkflowPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInp
         )
       ) : (
         <motion.div
-          key="SdModelPresets_loading"
+          key="WorkflowPresets_loading"
           className="absolute left-0 top-0 flex h-8 w-full items-center justify-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

@@ -70,7 +70,7 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
 
     return (
       <div className={cn('flex flex-col gap-4 px-1 py-2', className)}>
-        {credentials?.length > 0 && (
+        {credentials?.length && (
           <VinesInputCredentials
             credentials={credentials}
             value={get(task, 'inputParameters.credential.id', '')}
@@ -79,7 +79,6 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
         )}
         {finalInputs?.map((def, index) => (
           <VinesInputProperty
-            toolName={tool?.name || ''}
             key={def.name + index}
             def={def}
             nodeId={nodeId}
