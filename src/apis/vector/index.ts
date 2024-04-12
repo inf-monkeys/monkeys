@@ -7,8 +7,8 @@ import {
   ICreateVectorDB,
   IFullTextSearchParams,
   IFullTextSearchResult,
-  IVectorCollection,
-  IVectorFrontEnd,
+  IKnowledgeBase,
+  IKnowledgeBaseFrontEnd,
   IVectorSupportedEmbeddingModel,
 } from '@/apis/vector/typings.ts';
 
