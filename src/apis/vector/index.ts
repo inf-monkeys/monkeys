@@ -63,3 +63,9 @@ export const useTextSearch = (collectionId: string, params: IFullTextSearchParam
       ),
   );
 };
+
+export const updateVectorData = (
+  collectionId: string,
+  recordId: string,
+  data: Pick<ICreateVectorData, 'text' | 'metadata'>,
+) => vinesFetcher({ method: 'PUT', simple: true })(`/api/vector/collections/${collectionId}/records/${recordId}`, data);
