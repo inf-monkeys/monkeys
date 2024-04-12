@@ -22,6 +22,11 @@ export class ApiConfig {
 
 export const SYSTEM_NAMESPACE = 'system';
 
+export enum HealthCheckStatus {
+  UP = 'UP',
+  DOWN = 'DOWN',
+}
+
 @Entity({ name: 'tools_server' })
 export class ToolsServerEntity extends BaseEntity {
   @Column({
@@ -83,6 +88,18 @@ export class ToolsServerEntity extends BaseEntity {
   })
   rateLimiter?: ToolRateLimiterConfig;
 
+  @Column({
+    name: 'health_check',
+    nullable: true,
+  })
+  heatlhCheck?: string;
+
+  @Column({
+    name: 'health_check_status',
+    nullable: true,
+  })
+  healthCheckStatus?: HealthCheckStatus;
+
   public getSpecUrl() {
     const {
       manifestUrl,
@@ -95,5 +112,16 @@ export class ToolsServerEntity extends BaseEntity {
       realSpecUrl = url.resolve(baseUrl, realSpecUrl);
     }
     return realSpecUrl;
+  }
+
+  public getHealthCheckUrl() {
+    const { manifestUrl, heatlhCheck } = this;
+    let realHealthCheckUrl = heatlhCheck;
+    if (!realHealthCheckUrl.startsWith('http://') && !realHealthCheckUrl.startsWith('https://')) {
+      const parsedUrl = url.parse(manifestUrl);
+      const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
+      realHealthCheckUrl = url.resolve(baseUrl, realHealthCheckUrl);
+    }
+    return realHealthCheckUrl;
   }
 }

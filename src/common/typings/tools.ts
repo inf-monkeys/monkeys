@@ -80,6 +80,7 @@ export interface ManifestJson {
     url: string;
   };
   contact_email: string;
+  healthCheck?: string;
   triggerEndpoints?: TriggerEndpointConfig[];
   triggers?: TriggerDefinition[];
   credentialEndpoints?: CredentialEndpointConfig[];

@@ -5,7 +5,7 @@ import { ToolsEntity } from '@/database/entities/tools/tools.entity';
 import { BlockDefinition } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, IsNull, Not, Repository } from 'typeorm';
 
 @Injectable()
 export class ToolsRepository {
@@ -54,6 +54,7 @@ export class ToolsRepository {
     entity.triggerEndpoints = data.triggerEndpoints;
     entity.credentialEndpoints = data.credentialEndpoints;
     entity.rateLimiter = data.rateLimiter;
+    entity.heatlhCheck = data.healthCheck;
     await this.toolsServerRepository.save(entity);
   }
 
@@ -154,14 +155,23 @@ export class ToolsRepository {
     });
   }
 
+  public async listServerHasHealthCheckEndpoint() {
+    return await this.toolsServerRepository.find({
+      where: {
+        isDeleted: false,
+        heatlhCheck: Not(IsNull()),
+      },
+    });
+  }
+
   public async createTool(tool: ToolsEntity) {
     await this.toolsRepository.save(tool);
   }
 
-  public async updateTool(name: string, updates: Partial<ToolsEntity>) {
+  public async updateToolServer(namespace: string, updates: Partial<ToolsServerEntity>) {
     await this.toolsRepository.update(
       {
-        name,
+        namespace,
         isDeleted: false,
       },
       updates,
