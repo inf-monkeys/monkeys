@@ -66,6 +66,10 @@ export interface CredentialEndpointConfig {
   method: string;
 }
 
+export interface ToolRateLimiterConfig {
+  maxConcurrentRequests: number;
+}
+
 export interface ManifestJson {
   schema_version: SchemaVersion;
   display_name: string;
@@ -80,6 +84,7 @@ export interface ManifestJson {
   triggers?: TriggerDefinition[];
   credentialEndpoints?: CredentialEndpointConfig[];
   credentials?: CredentialDefinition[];
+  rateLimiter?: ToolRateLimiterConfig;
 }
 
 export interface RegisterWorkerParams {

@@ -2,7 +2,7 @@ import Redis from 'ioredis';
 
 export interface CacheManager {
   get(key: string): Promise<string | null>;
-  set(key: string, value: string | Buffer | number, secondsToken: 'EX', seconds: number | string): Promise<'OK'>;
+  set(key: string, value: string | Buffer | number, secondsToken?: 'EX', seconds?: number | string): Promise<'OK'>;
 }
 
 export class InMemoryCache implements CacheManager {

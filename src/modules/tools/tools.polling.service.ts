@@ -1,10 +1,12 @@
+import { CacheManager } from '@/common/cache';
+import { CACHE_TOKEN } from '@/common/common.module';
 import { conductorClient } from '@/common/conductor';
 import { config } from '@/common/config';
 import { logger } from '@/common/logger';
 import { ExtendedToolDefinition } from '@/common/utils/define-tool';
 import { sleep } from '@/common/utils/utils';
 import { Task, TaskDef, TaskManager } from '@inf-monkeys/conductor-javascript';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import os from 'os';
 import { AuthType, WorkerInputData } from '../../common/typings/tools';
@@ -19,6 +21,7 @@ export class ToolsPollingService {
   constructor(
     private readonly toolsRepository: ToolsRepository,
     private readonly toolsRegistryService: ToolsRegistryService,
+    @Inject(CACHE_TOKEN) private readonly cache: CacheManager,
   ) {}
 
   private getWorkerId() {
@@ -117,6 +120,28 @@ export class ToolsPollingService {
         status: 'FAILED',
       };
     }
+
+    // 根据 server 的 rate_limiter 配置，限制并发请求
+    if (server.rateLimiter) {
+      const { maxConcurrentRequests } = server.rateLimiter;
+      if (maxConcurrentRequests) {
+        // use cache manager to store the current requests count
+        const cacheKey = `${config.server.appId}:current_requests:${server.namespace}`;
+        const currentRequestsStr = await this.cache.get(cacheKey);
+        const currentRequests = parseInt(currentRequestsStr || '0');
+        if (currentRequests >= maxConcurrentRequests) {
+          return {
+            outputData: {
+              success: false,
+              errMsg: `Failed to execute tool "${__toolName}": Concurrent requests exceed the limit: ${maxConcurrentRequests}`,
+            },
+            status: 'FAILED',
+          };
+        }
+        await this.cache.set(cacheKey, currentRequests + 1);
+      }
+    }
+
     const { type: authType, authorization_type = 'bearer', verification_tokens = {} } = server.auth;
     const headers: { [x: string]: string } = {
       'x-monkeys-appid': __context?.appId,
@@ -187,6 +212,16 @@ export class ToolsPollingService {
           },
           status: 'FAILED',
         };
+      }
+    } finally {
+      if (server.rateLimiter) {
+        const { maxConcurrentRequests } = server.rateLimiter;
+        if (maxConcurrentRequests) {
+          const cacheKey = `${config.server.appId}:current_requests:${server.namespace}`;
+          const currentRequestStr = await this.cache.get(cacheKey);
+          const currentRequests = parseInt(currentRequestStr || '0');
+          await this.cache.set(cacheKey, currentRequests - 1);
+        }
       }
     }
   }

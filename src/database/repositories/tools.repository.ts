@@ -53,6 +53,7 @@ export class ToolsRepository {
     entity.displayName = displayName;
     entity.triggerEndpoints = data.triggerEndpoints;
     entity.credentialEndpoints = data.credentialEndpoints;
+    entity.rateLimiter = data.rateLimiter;
     await this.toolsServerRepository.save(entity);
   }
 
