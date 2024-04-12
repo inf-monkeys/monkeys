@@ -1,8 +1,9 @@
 import { CacheManager } from '@/common/cache';
-import { CACHE_TOKEN } from '@/common/common.module';
+import { CACHE_TOKEN, MQ_TOKEN } from '@/common/common.module';
 import { conductorClient } from '@/common/conductor';
 import { config } from '@/common/config';
 import { logger } from '@/common/logger';
+import { Mq } from '@/common/mq';
 import { ExtendedToolDefinition } from '@/common/utils/define-tool';
 import { sleep } from '@/common/utils/utils';
 import { Task, TaskDef, TaskManager } from '@inf-monkeys/conductor-javascript';
@@ -15,6 +16,9 @@ import { ToolsRepository } from '../../database/repositories/tools.repository';
 import { ToolsRegistryService } from './tools.registry.service';
 
 export const CONDUCTOR_TASK_DEF_NAME = config.conductor.workerPrefix ? `${config.conductor.workerPrefix}monkeys` : 'monkeys';
+export const TOOL_STREAM_RESPONSE_TOPIC = (workflowInstanceId: string) => {
+  return `${config.server.appId}:workflow-execution:stream:${workflowInstanceId}`;
+};
 
 @Injectable()
 export class ToolsPollingService {
@@ -23,6 +27,7 @@ export class ToolsPollingService {
     private readonly toolsRepository: ToolsRepository,
     private readonly toolsRegistryService: ToolsRegistryService,
     @Inject(CACHE_TOKEN) private readonly cache: CacheManager,
+    @Inject(MQ_TOKEN) private readonly mq: Mq,
   ) {}
 
   private getWorkerId() {
@@ -232,8 +237,8 @@ export class ToolsPollingService {
       } else {
         const data = res.data as IncomingMessage;
         await this.readIncomingMessage(data, {
-          onDataCallback: () => {
-            this.cache.lpush(`${config.server.appId}:workflow-execution:stream:${task.workflowInstanceId}`, data.read());
+          onDataCallback: (chunk) => {
+            this.mq.publish(TOOL_STREAM_RESPONSE_TOPIC(task.workflowInstanceId), chunk.toString());
           },
         });
         logger.info(`Execute worker success: ${__toolName}`);

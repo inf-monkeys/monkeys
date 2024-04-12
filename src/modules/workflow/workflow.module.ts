@@ -7,6 +7,7 @@ import { WorkflowAssetsController } from './workflow.assets.controller';
 import { WorkflowAssetsService } from './workflow.assets.service';
 import { WorkflowChatSessionController } from './workflow.chat-sessions.controller';
 import { WorkflowChatSessionService } from './workflow.chat-sessions.service';
+import { WorkflowOpenAICompatibleController } from './workflow.chat.controller';
 import { WorkflowCommonService } from './workflow.common.service';
 import { WorkflowCrudController } from './workflow.crud.controller';
 import { WorkflowCrudService } from './workflow.curd.service';
@@ -34,6 +35,7 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     WorkflowChatSessionController,
     WorkflowPageController,
     WorkflowCustomTriggerInvokeController,
+    WorkflowOpenAICompatibleController,
   ],
   providers: [
     WorkflowCrudService,

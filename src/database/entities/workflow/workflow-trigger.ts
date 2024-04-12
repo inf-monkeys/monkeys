@@ -8,6 +8,8 @@ export enum WorkflowTriggerType {
   SCHEDULER = 'SCHEDULER',
   // Webhook
   WEBHOOK = 'WEBHOOK',
+  // API
+  API = 'API',
 }
 
 export enum WorkflowTriggerMethod {

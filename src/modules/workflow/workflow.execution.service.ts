@@ -1,7 +1,9 @@
 import { RATE_LIMITER_TOKEN } from '@/common/common.module';
 import { conductorClient } from '@/common/conductor';
+import { config } from '@/common/config';
 import { OrderBy } from '@/common/dto/order.enum';
 import { PaginationDto } from '@/common/dto/pagination.dto';
+import { WorkflowExecutionContext } from '@/common/dto/workflow-execution-context.dto';
 import { TooManyRequestsException } from '@/common/exceptions/too-many-requests';
 import { RateLimiter } from '@/common/utils/rate-limiter';
 import { sleep } from '@/common/utils/utils';
@@ -214,7 +216,13 @@ export class WorkflowExecutionService {
   }
 
   public async startWorkflow(request: StartWorkflowRequest) {
-    const { teamId, userId, workflowId, triggerType, chatSessionId, workflowContext } = request;
+    const { teamId, userId, workflowId, triggerType, chatSessionId } = request;
+    const workflowContext: WorkflowExecutionContext = {
+      userId,
+      teamId: teamId,
+      appId: config.server.appId,
+      appUrl: config.server.appUrl,
+    };
     let { version } = request;
     if (!version) {
       version = await this.workflowRepository.getMaxVersion(workflowId);

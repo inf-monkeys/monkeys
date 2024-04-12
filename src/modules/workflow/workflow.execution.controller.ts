@@ -1,5 +1,3 @@
-import { config } from '@/common/config';
-import { WorkflowExecutionContext } from '@/common/dto/workflow-execution-context.dto';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
@@ -49,12 +47,6 @@ export class WorkflowExecutionController {
   })
   public async startWorkflow(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Body() body: StartWorkflowDto) {
     const { teamId, userId } = req;
-    const workflowContext: WorkflowExecutionContext = {
-      userId,
-      teamId: teamId,
-      appId: config.server.appId,
-      appUrl: config.server.appUrl,
-    };
     const { inputData, version, chatSessionId, waitForWorkflowFinished = false } = body;
     const workflowInstanceId = await this.service.startWorkflow({
       teamId,
@@ -62,7 +54,6 @@ export class WorkflowExecutionController {
       workflowId,
       inputData,
       version,
-      workflowContext,
       triggerType: WorkflowTriggerType.MANUALLY,
       chatSessionId,
     });

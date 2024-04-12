@@ -5,7 +5,6 @@ export interface CacheManager {
   get(key: string): Promise<string | null>;
   set(key: string, value: string | Buffer | number, secondsToken?: 'EX', seconds?: number | string): Promise<'OK'>;
   lpush(key: string, value: string | Buffer | number): Promise<number>;
-  subscribe(channel: string, callback: (message: string) => void): void;
 }
 
 export class InMemoryCache implements CacheManager {
@@ -32,7 +31,7 @@ export class InMemoryCache implements CacheManager {
     return this.storage[key].length;
   }
 
-  public async subscribe() {
+  public subscribe() {
     throw new Error('Method not implemented.');
   }
 }
@@ -57,10 +56,5 @@ export class RedisCache implements CacheManager {
 
   public async lpush(key: string, value: string | Buffer | number) {
     return await this.redis.lpush(key, value);
-  }
-
-  public async subscribe(channel: string, callback: (message: string) => void) {
-    this.redis.subscribe(channel);
-    this.redis.on('message', callback);
   }
 }

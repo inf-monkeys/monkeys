@@ -1,5 +1,4 @@
 import { LOCK_TOKEN } from '@/common/common.module';
-import { config } from '@/common/config';
 import { logger } from '@/common/logger';
 import { LockManager } from '@/common/utils/lock';
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
@@ -7,7 +6,6 @@ import { WorkflowRepository } from '@/database/repositories/workflow.repository'
 import { WorkflowExecutionService } from '@/modules/workflow/workflow.execution.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { WorkflowExecutionContext } from '../../common/dto/workflow-execution-context.dto';
 
 @Injectable()
 export class WorkflowCronService {
@@ -29,12 +27,6 @@ export class WorkflowCronService {
         const { workflowId, workflowVersion } = trigger;
         const workflow = workflows.find((w) => w.workflowId === workflowId && w.version === workflowVersion);
         const { creatorUserId: userId, teamId, variables = [] } = workflow;
-        const workflowContext: WorkflowExecutionContext = {
-          userId,
-          teamId: teamId,
-          appId: config.server.appId,
-          appUrl: config.server.appUrl,
-        };
         const inputData: { [x: string]: any } = {};
         variables?.forEach((v) => {
           if (v.default) {
@@ -48,7 +40,6 @@ export class WorkflowCronService {
           workflowId,
           version: trigger.workflowVersion,
           inputData,
-          workflowContext,
           triggerType: WorkflowTriggerType.SCHEDULER,
         });
         logger.log(`Run workflow by cron: workflowId=${workflowId}, inputData=${inputData}, workflowInstanceId=${workflowInstanceId}`);

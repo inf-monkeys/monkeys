@@ -1,8 +1,7 @@
-import { WorkflowExecutionContext } from '@/common/dto/workflow-execution-context.dto';
 import { WorkflowMetadataEntity, WorkflowOutputValue } from '@/database/entities/workflow/workflow-metadata';
 import { PageInstanceType, PagePermission } from '@/database/entities/workflow/workflow-page';
-import { WebhookTriggerConfig } from '@/database/entities/workflow/workflow-trigger';
-import { AssetType, BlockDefProperties, MonkeyTaskDefTypes, WorkflowTriggerType, WorkflowValidationIssue } from '@inf-monkeys/vines';
+import { WebhookTriggerConfig, WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
+import { AssetType, BlockDefProperties, MonkeyTaskDefTypes, WorkflowValidationIssue } from '@inf-monkeys/vines';
 
 export interface BaseAsset {
   originalSite: string;
@@ -207,9 +206,8 @@ export interface StartWorkflowRequest {
   teamId: string;
   userId: string;
   workflowId: string;
-  version: number;
+  version?: number;
   inputData: { [x: string]: any };
-  workflowContext: WorkflowExecutionContext;
   triggerType: WorkflowTriggerType;
   chatSessionId?: string;
 }

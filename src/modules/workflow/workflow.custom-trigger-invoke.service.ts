@@ -1,5 +1,4 @@
 import { config } from '@/common/config';
-import { WorkflowExecutionContext } from '@/common/dto/workflow-execution-context.dto';
 import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Injectable } from '@nestjs/common';
 import { WorkflowExecutionService } from './workflow.execution.service';
@@ -30,19 +29,11 @@ export class WorkflowCustomTriggerInvokeService {
       return [404, 'Workflow not exists'];
     }
     const { teamId, creatorUserId: userId } = workflow;
-    // const userToken = await this.userService.generateUserToken(userId);
-    const workflowContext: WorkflowExecutionContext = {
-      userId,
-      teamId: teamId,
-      appId: config.server.appId,
-      appUrl: config.server.appUrl,
-    };
     const workflowInstanceId = await this.workflowExecutionService.startWorkflow({
       teamId,
       userId,
       workflowId,
       inputData: rest,
-      workflowContext,
       triggerType: trigger.type,
       version: workflowVersion,
     });

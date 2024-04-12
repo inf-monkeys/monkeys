@@ -1,5 +1,3 @@
-import { config } from '@/common/config';
-import { WorkflowExecutionContext } from '@/common/dto/workflow-execution-context.dto';
 import { IRequest } from '@/common/typings/request';
 import { WebhookTriggerResponseUntil, WorkflowTriggerAuthType, WorkflowTriggerMethod, WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
 import { Injectable } from '@nestjs/common';
@@ -65,14 +63,6 @@ export class WorkflowWebhookService {
       }
     }
     const { teamId, creatorUserId: userId } = workflow;
-    // const userToken = await this.userService.generateUserToken(userId);
-    const workflowContext: WorkflowExecutionContext = {
-      userId,
-      teamId: teamId,
-      appId: config.server.appId,
-      appUrl: config.server.appUrl,
-    };
-
     let inputData = {};
     if (method === WorkflowTriggerMethod.POST) {
       inputData = body;
@@ -85,7 +75,6 @@ export class WorkflowWebhookService {
       userId,
       workflowId,
       inputData,
-      workflowContext,
       triggerType: WorkflowTriggerType.WEBHOOK,
       version: workflowVersion,
     });
