@@ -36,7 +36,6 @@ import { RemoteDataTable } from '@/components/ui/data-table/remote.tsx';
 import { Loading } from '@/components/ui/loading';
 import { TablePagination } from '@/components/ui/pagination/table-pagination.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
 import { useLocalStorage } from '@/utils';
 
 interface IUgcViewProps<E extends object> {
@@ -233,7 +232,7 @@ export const UgcView = <E extends object>({
             onChange: setFilter,
           }}
         />
-        <SmoothTransition className="relative overflow-clip">
+        <div className="relative overflow-clip">
           <AnimatePresence>
             {(isLoading || isNull(displayMode)) && <Loading motionKey={`vines-assets-${assetKey}-loading`} />}
           </AnimatePresence>
@@ -303,7 +302,7 @@ export const UgcView = <E extends object>({
               preloadHover={handlePreload}
             />
           </div>
-        </SmoothTransition>
+        </div>
       </div>
     </div>
   );

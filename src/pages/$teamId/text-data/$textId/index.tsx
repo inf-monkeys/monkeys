@@ -8,6 +8,7 @@ import { Undo2 } from 'lucide-react';
 
 import { useVectorCollection } from '@/apis/vector';
 import { TextDetailHeader } from '@/components/layout/ugc-pages/text-data/text-detail/header';
+import { ParagraphList } from '@/components/layout/ugc-pages/text-data/text-detail/paragraph-list';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -84,6 +85,7 @@ const TextDataDetail: React.FC = () => {
                 transition={{ duration: 0.2 }}
               >
                 <TextDetailHeader textId={textId} />
+                <ParagraphList textId={textId} />
               </motion.div>
             )}
           </AnimatePresence>
