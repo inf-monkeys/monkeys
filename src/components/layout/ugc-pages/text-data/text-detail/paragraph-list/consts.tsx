@@ -1,8 +1,10 @@
 import React from 'react';
 
 import { ColumnDef } from '@tanstack/react-table';
+import { Trash2 } from 'lucide-react';
 
 import { IVectorRecord } from '@/apis/vector/typings.ts';
+import { Button } from '@/components/ui/button';
 
 export const columns: ColumnDef<IVectorRecord>[] = [
   {
@@ -17,7 +19,7 @@ export const columns: ColumnDef<IVectorRecord>[] = [
     id: 'text',
     cell: ({ cell }) => {
       const text = (cell.getValue() as string) ?? '';
-      return <span>{text?.length > 100 ? text.slice(0, 100) + '...' : text}</span>;
+      return <span>{text?.length > 200 ? text.slice(0, 200) + '...' : text}</span>;
     },
   },
   {
@@ -27,10 +29,17 @@ export const columns: ColumnDef<IVectorRecord>[] = [
     size: 24,
     cell: ({ cell }) => <span>{(cell.getValue() as string)?.length}</span>,
   },
-  // {
-  //   id: 'operate',
-  //   size: 24,
-  //   header: '操作',
-  //   cell: ({ row }) => <Button icon={<MoreHorizontal />} size="small" variant="outline" />,
-  // },
+  {
+    id: 'operate',
+    header: '操作',
+    size: 64,
+    cell: ({ row }) => (
+      <div className="flex items-center gap-2">
+        <Button size="small" variant="outline">
+          编辑
+        </Button>
+        <Button className="[&_svg]:stroke-red-10" size="small" variant="outline" icon={<Trash2 />} />
+      </div>
+    ),
+  },
 ];

@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 
 import { toast } from 'sonner';
 
-import { useTextSearch } from '@/apis/vector';
-import { IVectorRecord } from '@/apis/vector/typings.ts';
+import { useTextSearch, useVectorCollection } from '@/apis/vector';
+import { IFullTextSearchParams, IVectorRecord } from '@/apis/vector/typings.ts';
 import { columns } from '@/components/layout/ugc-pages/text-data/text-detail/paragraph-list/consts.tsx';
+import { MetadataFilter } from '@/components/layout/ugc-pages/text-data/text-detail/paragraph-list/metadata-filter.tsx';
 import { Button } from '@/components/ui/button';
 import { InfiniteScrollingDataTable } from '@/components/ui/data-table/infinite.tsx';
 import { Input } from '@/components/ui/input';
@@ -16,13 +17,16 @@ interface IParagraphListProps {
 }
 
 export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
+  const { data: detail } = useVectorCollection(textId);
+
   const [from, setFrom] = useState(30);
-  const [searchMode, setSearchMode] = useState<string>('fulltext');
+  const [searchMode, setSearchMode] = useState<string>('vector');
 
   const [inputData, setInputData] = useState<string>('');
   const [query, setQuery] = useState<string>('');
+  const [metadataFilter, setMetadataFilter] = useState<IFullTextSearchParams['metadataFilter']>();
 
-  const { data, isLoading, mutate } = useTextSearch(textId, { from, query }, searchMode === 'vector');
+  const { data, isLoading, mutate } = useTextSearch(textId, { from, query, metadataFilter }, searchMode === 'vector');
 
   const [hits, setHits] = useState<IVectorRecord[]>([]);
 
@@ -89,6 +93,13 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
             {isQueryEmpty ? '重新排序搜索' : '清空'}
           </Button>
         </div>
+        <MetadataFilter
+          metadata={detail?.metadataFields ?? []}
+          onFilter={(filter) => {
+            setMetadataFilter(filter);
+            setForceClearHits(true);
+          }}
+        />
       </div>
       <InfiniteScrollingDataTable
         className="h-3/5"
