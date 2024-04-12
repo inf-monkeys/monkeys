@@ -1,44 +1,16 @@
-import { MonkeyToolCategories, MonkeyToolExtra, MonkeyToolIcon, MonkeyToolInput, MonkeyToolName, MonkeyToolOutput } from '@/common/decorators/monkey-block-api-extensions.decorator';
-import { IToolsRequest } from '@/common/typings/request';
-import { Body, Controller, Get, Post, Req } from '@nestjs/common';
-import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ApiType, AuthType, ManifestJson, SchemaVersion } from '../../../common/typings/tools';
-import { BuiltinToolsService } from './builtin.service';
-import { BUILTIN_TOOL_OPENAPI_PATH } from './builtin.swagger';
-import { CollectDoWhileOutputDto } from './dto/req/collect-dowhile-output.req.dto';
+import { conductorClient } from '@/common/conductor';
+import defineNode from '@/common/utils/define-tool';
+import { BlockType } from '@inf-monkeys/vines';
+import jsonpath from 'jsonpath';
 
-@Controller('/system-tools/')
-@ApiTags('工作流相关')
-export class BuiltinToolsController {
-  constructor(private readonly service: BuiltinToolsService) {}
-
-  @Get('/manifest.json')
-  @ApiExcludeEndpoint()
-  public getMetadata(): ManifestJson {
-    return {
-      schema_version: SchemaVersion.v1,
-      display_name: '内置工具',
-      namespace: 'monkey_tools_builtin',
-      auth: {
-        type: AuthType.none,
-      },
-      api: {
-        type: ApiType.openapi,
-        url: `${BUILTIN_TOOL_OPENAPI_PATH}-json`,
-      },
-      contact_email: 'dev@inf-monkeys.com',
-    };
-  }
-
-  @Post('collect-dowhile-output')
-  @ApiOperation({
-    summary: '收集循环结果',
-    description: '收集循环节点的执行结果',
-  })
-  @MonkeyToolName('collect_dowhile_output')
-  @MonkeyToolCategories(['process'])
-  @MonkeyToolIcon('emoji:🤖️:#7fa3f8')
-  @MonkeyToolInput([
+export default defineNode({
+  type: BlockType.SIMPLE,
+  name: 'collect_dowhile_output',
+  categories: ['process'],
+  displayName: '收集循环结果',
+  description: '收集循环节点的执行结果',
+  icon: 'emoji:🤖️:#7fa3f8',
+  input: [
     {
       name: 'doWhileTaskReferenceName',
       type: 'string',
@@ -139,20 +111,84 @@ JSONPath                      | 描述
       name: 'docs',
       type: 'notice',
     },
-  ])
-  @MonkeyToolOutput([
+  ],
+  output: [
     {
       name: 'data',
       type: 'json',
       displayName: '输出结果，为一个对象',
     },
-  ])
-  @MonkeyToolExtra({
+  ],
+  extra: {
     estimateTime: 3,
-  })
-  public async collectDowhileOutput(@Req() req: IToolsRequest, @Body() body: CollectDoWhileOutputDto) {
-    const { doWhileTaskReferenceName, jsonPathExpression } = body;
-    const result = await this.service.collectDowhileOutput(doWhileTaskReferenceName, jsonPathExpression, req.context.workflowInstanceId);
-    return result;
-  }
-}
+  },
+
+  handler: async (inputs: { [x: string]: any }) => {
+    const { doWhileTaskReferenceName, jsonPathExpression, workflowInstanceId } = inputs;
+    const collectDoWhileOutputInSubworkflow = async (workflowInstanceId: string, collectData: (taskReferenceName: string, data: any) => void) => {
+      const data = await conductorClient.workflowResource.getExecutionStatus(workflowInstanceId, true, true, true);
+      const { tasks } = data;
+      for (const task of tasks) {
+        if (task.taskType === 'DO_WHILE') {
+          continue;
+        }
+        const { outputData, taskType } = task;
+        if (taskType === 'SUB_WORKFLOW') {
+          await collectDoWhileOutputInSubworkflow(outputData.subWorkflowId, collectData);
+        } else {
+          const { referenceTaskName } = task;
+          const referenceTaskNameWithoutSuffix = referenceTaskName.split('__')[0];
+          collectData(referenceTaskNameWithoutSuffix, outputData);
+        }
+      }
+    };
+
+    let result: { [x: string]: any[] } | any = {};
+    const collectData = (taskReferenceName: string, data: any) => {
+      if (!result[taskReferenceName]) {
+        result[taskReferenceName] = [];
+      }
+      result[taskReferenceName].push(data);
+    };
+
+    const data = await conductorClient.workflowResource.getExecutionStatus(workflowInstanceId!, true, true, true);
+    const { tasks } = data;
+    const doWhileTask = tasks.find((t: any) => t.taskType === 'DO_WHILE' && t.referenceTaskName === doWhileTaskReferenceName);
+    if (!doWhileTask) {
+      throw new Error(`循环节点 ${doWhileTaskReferenceName} 不存在！`);
+    }
+
+    const { outputData } = doWhileTask;
+    const { iteration } = outputData;
+    for (let i = 1; i <= iteration; i++) {
+      const iterResult = outputData[i];
+
+      const loopItemTaskReferenceNames = Object.keys(iterResult);
+      for (const loopItemTaskReferenceName of loopItemTaskReferenceNames) {
+        const loopItemOutput = iterResult[loopItemTaskReferenceName];
+        // 说明是子流程
+        if (loopItemOutput.subWorkflowId) {
+          // 嵌套循环，递归获取每个节点的输出
+          if (loopItemTaskReferenceName.startsWith('sub_workflow')) {
+            delete loopItemOutput.subWorkflowId;
+            collectData(loopItemTaskReferenceName, loopItemOutput);
+          } else {
+            await collectDoWhileOutputInSubworkflow(loopItemOutput.subWorkflowId, collectData);
+          }
+        }
+        // 说明是普通节点，可以加入到收集的数据
+        else {
+          collectData(loopItemTaskReferenceName, loopItemOutput);
+        }
+      }
+    }
+
+    if (jsonPathExpression) {
+      result = jsonpath.query(result, jsonPathExpression);
+    }
+
+    return {
+      data: result,
+    };
+  },
+});

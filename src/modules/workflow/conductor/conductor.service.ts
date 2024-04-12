@@ -52,9 +52,10 @@ export class ConductorService {
 
   private async convertVinesTasksToConductorTasks(teamId: string, workflowOutput: WorkflowOutputValue[], tasks: WorkflowTask[], replaceWorkflowIdInOutputBlock?: { [x: string]: any }) {
     // const team = await this.teamService.getTeamById(teamId);
-
     if (workflowOutput && Array.isArray(workflowOutput) && workflowOutput.length > 0) {
-      const inputParameters: InputParametersType = {};
+      const inputParameters: InputParametersType = {
+        [this.TOOL_NAME_KEY]: 'construct_workflow_output',
+      };
       for (const item of workflowOutput) {
         const { key } = item;
         let { value } = item;
@@ -72,8 +73,8 @@ export class ConductorService {
       }
 
       tasks.push({
-        name: 'construct_value',
-        taskReferenceName: 'construct_value_ref',
+        name: CONDUCTOR_TASK_DEF_NAME,
+        taskReferenceName: 'construct_workflow_output_ref',
         type: BlockType.SIMPLE,
         inputParameters,
       });

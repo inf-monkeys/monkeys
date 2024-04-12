@@ -1,6 +1,7 @@
 import { conductorClient } from '@/common/conductor';
 import { config } from '@/common/config';
 import { logger } from '@/common/logger';
+import { ExtendedToolDefinition } from '@/common/utils/define-tool';
 import { sleep } from '@/common/utils/utils';
 import { Task, TaskDef, TaskManager } from '@inf-monkeys/conductor-javascript';
 import { Injectable } from '@nestjs/common';
@@ -8,12 +9,17 @@ import axios from 'axios';
 import os from 'os';
 import { AuthType, WorkerInputData } from '../../common/typings/tools';
 import { ToolsRepository } from '../../database/repositories/tools.repository';
+import { ToolsRegistryService } from './tools.registry.service';
 
 export const CONDUCTOR_TASK_DEF_NAME = config.conductor.workerPrefix ? `${config.conductor.workerPrefix}monkeys` : 'monkeys';
 
 @Injectable()
 export class ToolsPollingService {
-  constructor(private readonly toolsRepository: ToolsRepository) {}
+  BUILT_IN_TOOLS: ExtendedToolDefinition[] = [];
+  constructor(
+    private readonly toolsRepository: ToolsRepository,
+    private readonly toolsRegistryService: ToolsRegistryService,
+  ) {}
 
   private getWorkerId() {
     return os.hostname();
@@ -31,11 +37,56 @@ export class ToolsPollingService {
     return resultUrl;
   }
 
+  private async getBuiltInTools() {
+    if (this.BUILT_IN_TOOLS.length > 0) {
+      return this.BUILT_IN_TOOLS;
+    } else {
+      const tools = await this.toolsRegistryService.getBuiltInTools();
+      this.BUILT_IN_TOOLS = tools;
+      return tools;
+    }
+  }
+
+  private async isBuiltInTool(toolName: string) {
+    const tools = await this.getBuiltInTools();
+    return tools.find((tool) => tool.name === toolName);
+  }
+
   private async monkeyToolHandler(task: Task) {
     const inpuData = task.inputData as WorkerInputData;
     const { __toolName, __apiInfo, __context, ...rest } = inpuData;
-    const tool = await this.toolsRepository.getToolByName(__toolName);
     logger.info(`Start to execute tool: ${__toolName}`);
+
+    if (!__toolName) {
+      return {
+        outputData: {
+          success: false,
+          errMsg: 'Failed to execute tool: __toolName is missing',
+        },
+        status: 'FAILED',
+      };
+    }
+
+    const builtInTool = await this.isBuiltInTool(__toolName);
+    if (builtInTool) {
+      try {
+        const result = await builtInTool.handler(rest);
+        return {
+          outputData: result,
+          status: 'COMPLETED',
+        };
+      } catch (error) {
+        return {
+          outputData: {
+            success: false,
+            errMsg: error.message,
+          },
+          status: 'FAILED',
+        };
+      }
+    }
+
+    const tool = await this.toolsRepository.getToolByName(__toolName);
     if (!tool) {
       return {
         outputData: {

@@ -1,5 +1,6 @@
 import { logger } from '@/common/logger';
 import { enumToList, isValidNamespace } from '@/common/utils';
+import { ExtendedToolDefinition } from '@/common/utils/define-tool';
 import { SYSTEM_NAMESPACE } from '@/database/entities/tools/tools-server.entity';
 import { TriggerTypeRepository } from '@/database/repositories/trigger-type.repository';
 import { BlockDefinition } from '@inf-monkeys/vines';
@@ -184,12 +185,12 @@ export class ToolsRegistryService {
     return tools;
   }
 
-  public async initBuiltInTools() {
+  public async getBuiltInTools(): Promise<ExtendedToolDefinition[]> {
     const folder = path.resolve(__dirname, `./conductor-system-tools/`);
     if (!fs.existsSync(folder)) {
       logger.warn('Bulit in tools folder not found');
     }
-    const builtInBlocks: BlockDefinition[] = (
+    const builtInTools: ExtendedToolDefinition[] = (
       await Promise.all(
         fs.readdirSync(folder, { withFileTypes: true }).reduce(
           (result, file) => {
@@ -202,8 +203,15 @@ export class ToolsRegistryService {
         ),
       )
     ).map((x) => x.default);
+    return builtInTools;
+  }
 
-    await this.toolsRepository.createOrUpdateTools(SYSTEM_NAMESPACE, builtInBlocks);
+  public async initBuiltInTools() {
+    const builtInTools = await this.getBuiltInTools();
+    await this.toolsRepository.createOrUpdateTools(
+      SYSTEM_NAMESPACE,
+      builtInTools.filter((x) => !x.hidden),
+    );
   }
 
   public async listTools() {

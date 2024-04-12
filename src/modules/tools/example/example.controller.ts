@@ -1,4 +1,12 @@
-import { MonkeyToolCategories, MonkeyToolDescription, MonkeyToolDisplayName, MonkeyToolIcon, MonkeyToolInput, MonkeyToolOutput } from '@/common/decorators/monkey-block-api-extensions.decorator';
+import {
+  MonkeyToolCategories,
+  MonkeyToolDescription,
+  MonkeyToolDisplayName,
+  MonkeyToolIcon,
+  MonkeyToolInput,
+  MonkeyToolName,
+  MonkeyToolOutput,
+} from '@/common/decorators/monkey-block-api-extensions.decorator';
 import { IRequest } from '@/common/typings/request';
 import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -33,6 +41,8 @@ export class ExampleToolsController {
     summary: 'Add Two Numbers',
     description: 'Simply add tow numbers.',
   })
+  @MonkeyToolName('add_two_number')
+  @MonkeyToolDisplayName('Add Two Numbers')
   @MonkeyToolCategories(['math'])
   @MonkeyToolIcon('emoji:👧:#ceefc5')
   public async addTwoNumberExample(@Req() req: IRequest, @Body() body: AddTwoNumberDto) {
@@ -48,6 +58,7 @@ export class ExampleToolsController {
     description: 'Calc Nth Power, assumes may take a while ...',
   })
   @MonkeyToolCategories(['math'])
+  @MonkeyToolName('nth_power_of')
   @MonkeyToolDisplayName('Calc Nth Power')
   @MonkeyToolDescription('Calc Nth Power, assumes may take a while ...')
   @MonkeyToolIcon('emoji:👧:#ceefc5')

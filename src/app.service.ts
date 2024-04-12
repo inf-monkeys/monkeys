@@ -5,9 +5,9 @@ import { config } from './common/config';
 import { logger } from './common/logger';
 import { sleep } from './common/utils/utils';
 import { ToolsRepository } from './database/repositories/tools.repository';
-import { BUILTIN_TOOL_OPENAPI_MENIFEST_URL } from './modules/tools/builtin/builtin.swagger';
 import { EXAMPLE_WORKER_OPENAPI_MENIFEST_URL } from './modules/tools/example/example.swagger';
 import { ToolsRegistryService } from './modules/tools/tools.registry.service';
+
 @Injectable()
 export class AppService implements OnApplicationBootstrap {
   constructor(
@@ -48,10 +48,6 @@ export class AppService implements OnApplicationBootstrap {
 
   private async registerTools() {
     await this.waitServerHttpServiceAvailable();
-    logger.info(`Load builtin tools of ${BUILTIN_TOOL_OPENAPI_MENIFEST_URL}`);
-    this.workerRegistryService.registerToolsServer({
-      manifestUrl: BUILTIN_TOOL_OPENAPI_MENIFEST_URL,
-    });
     if (config.server.loadExample) {
       logger.info(`Load example tools of ${EXAMPLE_WORKER_OPENAPI_MENIFEST_URL}`);
       this.workerRegistryService.registerToolsServer({
