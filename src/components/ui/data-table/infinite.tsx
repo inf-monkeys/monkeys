@@ -8,6 +8,7 @@ import {
   TableState,
   useReactTable,
 } from '@tanstack/react-table';
+import { CircleSlash } from 'lucide-react';
 import { TableVirtuoso } from 'react-virtuoso';
 
 import { TableCell, TableHead, TableRow } from '@/components/ui/table.tsx';
@@ -52,7 +53,7 @@ export function InfiniteScrollingDataTable<TData, TValue>({
 
   return (
     <div className={cn('relative overflow-auto rounded-md border', className)}>
-      {hastData && (
+      {hastData ? (
         <TableVirtuoso
           data={rows}
           components={{
@@ -85,6 +86,11 @@ export function InfiniteScrollingDataTable<TData, TValue>({
               ))
           }
         />
+      ) : (
+        <div className="vines-center size-full flex-col gap-4">
+          <CircleSlash size={64} />
+          <h1>暂无数据</h1>
+        </div>
       )}
     </div>
   );

@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { createFileRoute, Link } from '@tanstack/react-router';
 
 import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Undo2 } from 'lucide-react';
+import { ChevronRight, Undo2 } from 'lucide-react';
 
 import { useVectorCollection } from '@/apis/vector';
 import { TextDetailHeader } from '@/components/layout/ugc-pages/text-data/text-detail/header';
@@ -14,27 +14,39 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/utils';
 
 const TextDataDetail: React.FC = () => {
   const { textId } = Route.useParams();
   const { data: detail, isLoading } = useVectorCollection(textId);
 
+  const [activeTab, setActiveTab] = useState('paragraph');
+  const [visible, setVisible] = useState(true);
+
   const displayName = detail?.displayName;
 
   return (
-    <Tabs defaultValue="paragraph" className="size-full">
+    <Tabs className="size-full" value={activeTab} onValueChange={setActiveTab}>
       <main className="flex size-full">
-        <div className="flex size-full max-w-64 flex-col gap-4">
+        <motion.div
+          className="flex size-full max-w-64 flex-col gap-4 overflow-clip"
+          initial={{ width: 256, paddingRight: 16 }}
+          animate={{
+            width: visible ? 256 : 0,
+            paddingRight: visible ? 16 : 0,
+            transition: { duration: 0.2 },
+          }}
+        >
           <header className="flex items-center gap-4">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link to="/$teamId/text-data">
-                  <Button icon={<Undo2 />} variant="outline" size="small" className="-m-1 scale-85" />
+                  <Button icon={<Undo2 />} variant="outline" size="small" className="-m-1 -ml-0.5 -mr-2 scale-85" />
                 </Link>
               </TooltipTrigger>
               <TooltipContent>返回</TooltipContent>
             </Tooltip>
-            <h1 className="text-2xl font-bold">{displayName ? displayName : '文本数据'}</h1>
+            <h1 className="line-clamp-1 text-2xl font-bold">{displayName ? displayName : '文本数据'}</h1>
           </header>
           <TabsList className="flex !h-auto flex-col gap-2 bg-transparent">
             <TabsTrigger
@@ -56,8 +68,20 @@ const TextDataDetail: React.FC = () => {
               关联工作流
             </TabsTrigger>
           </TabsList>
-        </div>
-        <Separator orientation="vertical" className="mx-4" />
+        </motion.div>
+        <Separator orientation="vertical" className="vines-center mx-4">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                className="group z-10 flex h-4 w-3.5 cursor-pointer items-center justify-center rounded-sm border bg-border px-0.5 transition-opacity hover:opacity-75 active:opacity-95"
+                onClick={() => setVisible(!visible)}
+              >
+                <ChevronRight className={cn(visible && 'scale-x-[-1]')} />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>{visible ? '收起' : '展开'}</TooltipContent>
+          </Tooltip>
+        </Separator>
         <div className="relative size-full flex-1">
           <AnimatePresence>
             {isLoading ? (
@@ -76,17 +100,19 @@ const TextDataDetail: React.FC = () => {
                 />
               </motion.div>
             ) : (
-              <motion.div
-                className="size-full"
-                key="text-data-detail"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
+              <>
                 <TextDetailHeader textId={textId} />
-                <ParagraphList textId={textId} />
-              </motion.div>
+                <motion.div
+                  key={activeTab}
+                  className="size-full"
+                  initial={{ y: 10, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -10, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {activeTab === 'paragraph' && <ParagraphList textId={textId} />}
+                </motion.div>
+              </>
             )}
           </AnimatePresence>
         </div>
