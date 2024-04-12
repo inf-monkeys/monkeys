@@ -16,6 +16,8 @@ import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
+import { ToolAdvancedConfig } from './advanced-config';
+
 interface IToolEditorProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ToolEditor: React.FC<IToolEditorProps> = () => {
@@ -94,7 +96,11 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
                   <CodeEditor data={task} lineNumbers={4} onUpdate={handleRawUpdate} readonly={disabled} />
                 </TabsContent>
               )}
-              {activeTab === 'more-config' && <TabsContent className="mt-4 h-[25em]" value="more-config"></TabsContent>}
+              {activeTab === 'more-config' && (
+                <TabsContent className="mt-4 h-[25em]" value="more-config">
+                  <ToolAdvancedConfig nodeId={node?.id ?? ''} task={node?.getRaw()} />
+                </TabsContent>
+              )}
               {activeTab === 'empty' && <TabsContent className="mt-4 h-[25em]" value="empty"></TabsContent>}
             </motion.div>
           </AnimatePresence>
