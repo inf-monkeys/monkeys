@@ -54,6 +54,9 @@ export function RemoteDataTable<TData, TValue>({
     },
   });
 
+  const { rows } = table.getRowModel();
+  const hastData = rows.length > 0;
+
   return (
     <div>
       <div className="rounded-md border">
@@ -72,8 +75,8 @@ export function RemoteDataTable<TData, TValue>({
             ))}
           </TableHeader>
           <TableBody className="h-64 overflow-y-auto">
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+            {hastData ? (
+              rows.map((row) => (
                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>

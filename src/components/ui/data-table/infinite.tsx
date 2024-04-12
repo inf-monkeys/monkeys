@@ -1,0 +1,91 @@
+import React from 'react';
+
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getSortedRowModel,
+  TableState,
+  useReactTable,
+} from '@tanstack/react-table';
+import { TableVirtuoso } from 'react-virtuoso';
+
+import { TableCell, TableHead, TableRow } from '@/components/ui/table.tsx';
+import { cn } from '@/utils';
+
+interface IInfiniteScrollingDataTableProps<TData, TValue> {
+  className?: string;
+
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  state?: Partial<TableState>;
+
+  increaseViewportBy?: number;
+  loadMore?: () => void;
+
+  tfoot?: React.ReactNode;
+}
+
+// million-ignore
+export function InfiniteScrollingDataTable<TData, TValue>({
+  className,
+
+  columns,
+  data,
+  state,
+
+  increaseViewportBy = 200,
+  loadMore,
+
+  tfoot,
+}: IInfiniteScrollingDataTableProps<TData, TValue>) {
+  const table = useReactTable({
+    data,
+    columns,
+    state,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
+
+  const { rows } = table.getRowModel();
+  const hastData = rows.length > 0;
+
+  return (
+    <div className={cn('relative overflow-auto rounded-md border', className)}>
+      {hastData && (
+        <TableVirtuoso
+          data={rows}
+          components={{
+            Table: ({ children, ...props }) => (
+              <table className="w-full caption-bottom text-sm [&>thead]:bg-slate-1 " {...props}>
+                {children}
+                {tfoot}
+              </table>
+            ),
+            TableRow: TableRow,
+          }}
+          endReached={loadMore}
+          increaseViewportBy={increaseViewportBy}
+          fixedHeaderContent={() =>
+            table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id} style={{ width: header.getSize() }}>
+                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))
+          }
+          itemContent={(_index, row) =>
+            row
+              .getVisibleCells()
+              .map((cell) => (
+                <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+              ))
+          }
+        />
+      )}
+    </div>
+  );
+}
