@@ -103,6 +103,10 @@ export interface WorkerInputData {
     userId: string;
     teamId: string;
   };
+  __advancedConfig: {
+    outputAs?: 'json' | 'stream';
+    timeout?: number;
+  };
 
   [x: string]: any;
 }

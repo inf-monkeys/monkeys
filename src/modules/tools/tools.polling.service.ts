@@ -8,6 +8,7 @@ import { sleep } from '@/common/utils/utils';
 import { Task, TaskDef, TaskManager } from '@inf-monkeys/conductor-javascript';
 import { Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
+import { IncomingMessage } from 'http';
 import os from 'os';
 import { AuthType, WorkerInputData } from '../../common/typings/tools';
 import { ToolsRepository } from '../../database/repositories/tools.repository';
@@ -55,9 +56,44 @@ export class ToolsPollingService {
     return tools.find((tool) => tool.name === toolName);
   }
 
+  private readIncomingMessage(
+    message: IncomingMessage,
+    callbacks?: {
+      onDataCallback?: (chunk: any) => void;
+      onEndCallback?: (result: any) => void;
+    },
+  ) {
+    const { onDataCallback, onEndCallback } = callbacks || {};
+    return new Promise<string>((resolve, reject) => {
+      let responseData: string = '';
+      message.on('data', (chunk) => {
+        responseData += chunk;
+        if (onDataCallback) {
+          onDataCallback(chunk);
+        }
+      });
+      message.on('end', () => {
+        if (onEndCallback) {
+          onEndCallback(responseData);
+        }
+        resolve(responseData);
+      });
+      message.on('error', (error) => {
+        console.error('Error receiving response data:', error);
+        reject(error);
+      });
+    });
+  }
+
   private async monkeyToolHandler(task: Task) {
     const inpuData = task.inputData as WorkerInputData;
-    const { __toolName, __apiInfo, __context, ...rest } = inpuData;
+    const { __toolName, __apiInfo, __context, __advancedConfig, ...rest } = inpuData;
+    const { outputAs = 'json' } = __advancedConfig || {};
+
+    if (outputAs === 'stream' && !this.cache.isRedis()) {
+      throw new Error('Stream output is not supported without redis');
+    }
+
     logger.info(`Start to execute tool: ${__toolName}`);
 
     if (!__toolName) {
@@ -178,18 +214,37 @@ export class ToolsPollingService {
     }
 
     try {
-      const { data } = await axios({
+      const responseType = outputAs === 'json' ? 'json' : 'stream';
+      const res = await axios({
         method,
         baseURL: server.baseUrl,
         url: this.replaceUrlParams(path, rest || {}),
         data: rest,
         headers: headers,
+        responseType,
       });
-      logger.info(`Execute worker success: ${__toolName}`);
-      return {
-        outputData: data,
-        status: 'COMPLETED',
-      };
+      if (responseType === 'json') {
+        logger.info(`Execute worker success: ${__toolName}`);
+        return {
+          outputData: res.data,
+          status: 'COMPLETED',
+        };
+      } else {
+        const data = res.data as IncomingMessage;
+        await this.readIncomingMessage(data, {
+          onDataCallback: () => {
+            this.cache.lpush(`${config.server.appId}:workflow-execution:stream:${task.workflowInstanceId}`, data.read());
+          },
+        });
+        logger.info(`Execute worker success: ${__toolName}`);
+        return {
+          outputData: {
+            stream: true,
+            message: 'This tool outputs stream data, can not displayed',
+          },
+          status: 'COMPLETED',
+        };
+      }
     } catch (error) {
       logger.error(`执行 tool ${server.displayName}(${server.namespace} 的 ${__toolName} 失败: `, error);
       if (error.code === 'ECONNREFUSED') {
