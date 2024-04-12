@@ -27,8 +27,14 @@ export const ImportParagraph: React.FC<IImportParagraphProps> = ({ textId, child
       success: () => {
         setVisible(false);
         setTimeout(
-          () => mutate((key) => typeof key === 'string' && key.startsWith(`/api/vector/collections/${textId}`)),
-          1000,
+          () =>
+            mutate(
+              (key) =>
+                (typeof key === 'string' && key.startsWith(`/api/vector/collections/${textId}`)) ||
+                (Array.isArray(key) &&
+                  key.some((k) => typeof k === 'string' && k.startsWith(`/api/vector/collections/${textId}`))),
+            ),
+          2000,
         );
         return '导入成功，后台向量化时数据更新可能会有延迟';
       },

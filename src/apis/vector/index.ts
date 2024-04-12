@@ -69,3 +69,6 @@ export const updateVectorData = (
   recordId: string,
   data: Pick<ICreateVectorData, 'text' | 'metadata'>,
 ) => vinesFetcher({ method: 'PUT', simple: true })(`/api/vector/collections/${collectionId}/records/${recordId}`, data);
+
+export const deleteVectorData = (collectionId: string, recordId: string) =>
+  vinesFetcher({ method: 'DELETE', simple: true })(`/api/vector/collections/${collectionId}/records/${recordId}`);
