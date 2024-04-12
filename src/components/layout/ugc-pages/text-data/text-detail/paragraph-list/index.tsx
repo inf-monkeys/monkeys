@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { useTextSearch } from '@/apis/vector';
+import { IVectorRecord } from '@/apis/vector/typings.ts';
 import { columns } from '@/components/layout/ugc-pages/text-data/text-detail/paragraph-list/consts.tsx';
 import { Button } from '@/components/ui/button';
 import { InfiniteScrollingDataTable } from '@/components/ui/data-table/infinite.tsx';
@@ -16,7 +17,13 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
   const [from, setFrom] = useState(30);
   const { data, isLoading } = useTextSearch(textId, { from });
 
-  const hits = data?.hits ?? [];
+  const [hits, setHits] = useState<IVectorRecord[]>([]);
+
+  useEffect(() => {
+    if (data?.hits) {
+      setHits((prev) => [...prev, ...data.hits]);
+    }
+  }, [data?.hits]);
 
   return (
     <>
@@ -28,7 +35,7 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
           <tfoot className="relative">
             <tr>
               <td className="absolute w-full py-4 text-center">
-                <Button variant="outline" size="small" onClick={() => setFrom((prev) => prev + 30)}>
+                <Button variant="outline" size="small" loading={isLoading} onClick={() => setFrom((prev) => prev + 30)}>
                   加载更多
                 </Button>
               </td>
