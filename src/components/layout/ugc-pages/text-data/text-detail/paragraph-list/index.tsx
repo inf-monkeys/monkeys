@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
+import { ArrowDownUp, Tag, Waypoints } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useTextSearch, useVectorCollection } from '@/apis/vector';
@@ -10,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { InfiniteScrollingDataTable } from '@/components/ui/data-table/infinite.tsx';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
+import { Separator } from '@/components/ui/separator.tsx';
 import { cn } from '@/utils';
 
 interface IParagraphListProps {
@@ -119,6 +121,22 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
           </tfoot>
         }
       />
+      <div className="mt-2 flex w-full items-center gap-4">
+        <div className="flex items-center gap-2">
+          <Waypoints className="stroke-muted-foreground" size={14} />
+          <span className="text-xs text-muted-foreground">向量维度：{detail?.dimension ?? '-'}</span>
+        </div>
+        <Separator orientation="vertical" className="h-4" />
+        <div className="flex items-center gap-2">
+          <ArrowDownUp className="stroke-muted-foreground" size={14} />
+          <span className="text-xs text-muted-foreground">Embedding 模型：{detail?.embeddingModel ?? '-'}</span>
+        </div>
+        <Separator orientation="vertical" className="h-4" />
+        <div className="flex items-center gap-2">
+          <Tag className="stroke-muted-foreground" size={14} />
+          <span className="text-xs text-muted-foreground">ID：{detail?.name ?? '-'}</span>
+        </div>
+      </div>
     </>
   );
 };
