@@ -1,10 +1,9 @@
 import React from 'react';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { Trash2 } from 'lucide-react';
 
 import { IVectorRecord } from '@/apis/vector/typings.ts';
-import { Button } from '@/components/ui/button';
+import { ParagraphOperateCell } from '@/components/layout/ugc-pages/text-data/text-detail/paragraph-list/paragraph-operate-cell.tsx';
 
 export const columns: ColumnDef<IVectorRecord>[] = [
   {
@@ -30,16 +29,10 @@ export const columns: ColumnDef<IVectorRecord>[] = [
     cell: ({ cell }) => <span>{(cell.getValue() as string)?.length}</span>,
   },
   {
+    accessorFn: (row) => row,
     id: 'operate',
     header: '操作',
     size: 64,
-    cell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        <Button size="small" variant="outline">
-          编辑
-        </Button>
-        <Button className="[&_svg]:stroke-red-10" size="small" variant="outline" icon={<Trash2 />} />
-      </div>
-    ),
+    cell: ParagraphOperateCell,
   },
 ];
