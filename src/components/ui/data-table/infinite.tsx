@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { CircularProgress } from '@nextui-org/progress';
 import {
   ColumnDef,
   flexRender,
@@ -23,6 +24,7 @@ interface IInfiniteScrollingDataTableProps<TData, TValue> {
 
   increaseViewportBy?: number;
   loadMore?: () => void;
+  loading?: boolean;
 
   tfoot?: React.ReactNode;
 }
@@ -37,6 +39,7 @@ export function InfiniteScrollingDataTable<TData, TValue>({
 
   increaseViewportBy = 200,
   loadMore,
+  loading,
 
   tfoot,
 }: IInfiniteScrollingDataTableProps<TData, TValue>) {
@@ -88,8 +91,15 @@ export function InfiniteScrollingDataTable<TData, TValue>({
         />
       ) : (
         <div className="vines-center size-full flex-col gap-4">
-          <CircleSlash size={64} />
-          <h1>暂无数据</h1>
+          {loading ? (
+            <>
+              <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+            </>
+          ) : (
+            <CircleSlash size={64} />
+          )}
+
+          <h1>{loading ? '正在加载数据...' : '暂无数据'}</h1>
         </div>
       )}
     </div>

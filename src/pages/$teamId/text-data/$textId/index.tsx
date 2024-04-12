@@ -104,7 +104,7 @@ const TextDataDetail: React.FC = () => {
                 <TextDetailHeader textId={textId} />
                 <motion.div
                   key={activeTab}
-                  className="size-full"
+                  className="mt-2 size-full"
                   initial={{ y: 10, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   exit={{ y: -10, opacity: 0 }}
