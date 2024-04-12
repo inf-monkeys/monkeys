@@ -6,9 +6,20 @@ import { CellContext } from '@tanstack/table-core';
 import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { updateVectorData } from '@/apis/vector';
+import { deleteVectorData, updateVectorData } from '@/apis/vector';
 import { IVectorRecord } from '@/apis/vector/typings.ts';
 import { ParagraphEditor } from '@/components/layout/ugc-pages/text-data/text-detail/paragraph-editor.tsx';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog.tsx';
 import { Button } from '@/components/ui/button';
 import { Route } from '@/pages/$teamId/text-data/$textId';
 
@@ -36,6 +47,27 @@ export const ParagraphOperateCell: React.FC<IParagraphOperateCellProps> = ({ cel
     });
   };
 
+  const handleDelete = () => {
+    toast.promise(deleteVectorData(textId, value._id), {
+      loading: '删除中',
+      success: () => {
+        setVisible(false);
+        setTimeout(
+          () =>
+            mutate(
+              (key) =>
+                (typeof key === 'string' && key.startsWith(`/api/vector/collections/${textId}`)) ||
+                (Array.isArray(key) &&
+                  key.some((k) => typeof k === 'string' && k.startsWith(`/api/vector/collections/${textId}`))),
+            ),
+          2000,
+        );
+        return '删除成功';
+      },
+      error: '删除失败',
+    });
+  };
+
   return (
     <div className="flex items-center gap-2">
       <ParagraphEditor
@@ -49,7 +81,21 @@ export const ParagraphOperateCell: React.FC<IParagraphOperateCellProps> = ({ cel
           编辑
         </Button>
       </ParagraphEditor>
-      <Button className="[&_svg]:stroke-red-10" size="small" variant="outline" icon={<Trash2 />} />
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button className="[&_svg]:stroke-red-10" size="small" variant="outline" icon={<Trash2 />} />
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确定要删除此段落吗</AlertDialogTitle>
+            <AlertDialogDescription>确认删除该段落吗，删除后不可被索引，该操作不可恢复！</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>删除</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

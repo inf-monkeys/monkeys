@@ -32,12 +32,13 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
 
   const [forceClearHits, setForceClearHits] = useState(false);
   useEffect(() => {
-    if (data?.hits) {
-      if (forceClearHits) {
-        setHits(data.hits);
+    const fetchHits = data?.hits;
+    if (fetchHits) {
+      if (forceClearHits || fetchHits?.[0]?._id !== hits?.[0]?._id) {
+        setHits(fetchHits);
         setForceClearHits(false);
       } else {
-        setHits((prev) => [...prev, ...data.hits]);
+        setHits((prev) => [...prev, ...fetchHits]);
       }
     }
   }, [data?.hits]);
