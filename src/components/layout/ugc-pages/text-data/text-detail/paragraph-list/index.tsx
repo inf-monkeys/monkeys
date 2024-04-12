@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 
-import { CircularProgress } from '@nextui-org/progress';
-import { AnimatePresence, motion } from 'framer-motion';
+import { toast } from 'sonner';
 
 import { useTextSearch } from '@/apis/vector';
 import { IVectorRecord } from '@/apis/vector/typings.ts';
 import { columns } from '@/components/layout/ugc-pages/text-data/text-detail/paragraph-list/consts.tsx';
 import { Button } from '@/components/ui/button';
 import { InfiniteScrollingDataTable } from '@/components/ui/data-table/infinite.tsx';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
+import { cn } from '@/utils';
 
 interface IParagraphListProps {
   textId: string;
@@ -15,22 +17,84 @@ interface IParagraphListProps {
 
 export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
   const [from, setFrom] = useState(30);
-  const { data, isLoading } = useTextSearch(textId, { from });
+  const [searchMode, setSearchMode] = useState<string>('fulltext');
+
+  const [inputData, setInputData] = useState<string>('');
+  const [query, setQuery] = useState<string>('');
+
+  const { data, isLoading, mutate } = useTextSearch(textId, { from, query }, searchMode === 'vector');
 
   const [hits, setHits] = useState<IVectorRecord[]>([]);
 
+  const [forceClearHits, setForceClearHits] = useState(false);
   useEffect(() => {
     if (data?.hits) {
-      setHits((prev) => [...prev, ...data.hits]);
+      if (forceClearHits) {
+        setHits(data.hits);
+        setForceClearHits(false);
+      } else {
+        setHits((prev) => [...prev, ...data.hits]);
+      }
     }
   }, [data?.hits]);
 
+  const isQueryEmpty = !query.length;
+
   return (
     <>
+      <div className="mb-4 flex items-center gap-2">
+        <Select
+          value={searchMode}
+          onValueChange={(val) => {
+            setSearchMode(val);
+            setHits([]);
+          }}
+        >
+          <SelectTrigger className="w-32">
+            <SelectValue placeholder="搜索模式" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="vector">向量搜索</SelectItem>
+            <SelectItem value="fulltext">全文搜索</SelectItem>
+          </SelectContent>
+        </Select>
+        <div className="relative flex flex-1 items-center">
+          <Input
+            placeholder="输入文本进行相似度排序，回车搜索"
+            value={inputData}
+            onChange={setInputData}
+            onEnterPress={() => {
+              setForceClearHits(true);
+              setQuery(inputData);
+              toast.info('已搜索');
+            }}
+          />
+          <Button
+            className={cn('absolute right-2 -mx-2 scale-80', isQueryEmpty && '-mx-3')}
+            variant="outline"
+            onClick={() => {
+              if (isQueryEmpty) {
+                setForceClearHits(true);
+                void mutate();
+                toast.info('已重新排序搜索');
+              } else {
+                setForceClearHits(false);
+                setHits([]);
+                setInputData('');
+                setQuery('');
+              }
+            }}
+            loading={isLoading}
+          >
+            {isQueryEmpty ? '重新排序搜索' : '清空'}
+          </Button>
+        </div>
+      </div>
       <InfiniteScrollingDataTable
         className="h-3/5"
         columns={columns}
         data={hits}
+        loading={isLoading}
         tfoot={
           <tfoot className="relative">
             <tr>
@@ -43,30 +107,6 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
           </tfoot>
         }
       />
-      <div className="mt-2 flex w-full items-center gap-2">
-        <AnimatePresence>
-          {isLoading && (
-            <motion.div
-              key="paragraph-loading"
-              className="flex items-center gap-2"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{
-                duration: 0.2,
-                delay: 0.2,
-              }}
-            >
-              <CircularProgress
-                className="-m-3 scale-50 [&_circle:last-child]:stroke-vines-500"
-                size="lg"
-                aria-label="Loading..."
-              />
-              <span className="text-xs text-muted-foreground">正在加载数据...</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
     </>
   );
 };

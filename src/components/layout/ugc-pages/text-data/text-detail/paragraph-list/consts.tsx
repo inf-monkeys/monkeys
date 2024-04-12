@@ -8,7 +8,7 @@ export const columns: ColumnDef<IVectorRecord>[] = [
   {
     id: 'rank',
     header: '相似度排名',
-    size: 24,
+    size: 32,
     cell: ({ row }) => <span>{row.index + 1}</span>,
   },
   {
