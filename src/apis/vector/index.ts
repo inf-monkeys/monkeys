@@ -31,6 +31,14 @@ export const useCreateVectorCollection = () =>
     vinesFetcher({ method: 'POST' }),
   );
 
+export const useUpdateVectorCollection = (collectionId?: string) =>
+  useSWRMutation<
+    IVectorCollection | undefined,
+    unknown,
+    string | null,
+    Pick<ICreateVectorDB, 'displayName' | 'description' | 'iconUrl'>
+  >(collectionId ? `/api/assets/text-collection/${collectionId}` : null, vinesFetcher({ method: 'PUT' }));
+
 export const deleteVectorCollection = (collectionId: string) =>
   vinesFetcher({ method: 'DELETE' })(`/api/vector/collections/${collectionId}`);
 
