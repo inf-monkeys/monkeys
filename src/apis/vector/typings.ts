@@ -111,3 +111,14 @@ export interface IUploadDocument {
   split: ISplitType;
   ossConfig?: IImportFromOSS;
 }
+
+export interface IVectorTask {
+  createdTimestamp: string;
+  taskId: string;
+  events: {
+    progress: number;
+    message: string;
+    timestamp: number;
+    status: string;
+  }[];
+}

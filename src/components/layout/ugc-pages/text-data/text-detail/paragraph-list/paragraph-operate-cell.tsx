@@ -60,7 +60,7 @@ export const ParagraphOperateCell: React.FC<IParagraphOperateCellProps> = ({ cel
                 (Array.isArray(key) &&
                   key.some((k) => typeof k === 'string' && k.startsWith(`/api/vector/collections/${textId}`))),
             ),
-          2000,
+          500,
         );
         return '删除成功';
       },
