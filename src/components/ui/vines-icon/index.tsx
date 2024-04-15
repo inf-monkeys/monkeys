@@ -4,7 +4,6 @@ import { isUndefined } from 'lodash';
 import emojiRenderer from 'react-easy-emoji';
 import isURL from 'validator/es/lib/isURL';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { splitEmojiLink } from '@/components/ui/vines-icon/utils.ts';
 import { cn } from '@/utils';
 
@@ -15,15 +14,16 @@ interface IVinesIconProps extends React.ComponentPropsWithoutRef<'div'> {
   preClassName?: string;
   backgroundColor?: string;
   size?: IVinesIconSize;
+  alt?: string;
 }
 
 export const VinesIcon: React.FC<IVinesIconProps> = ({
   src: propSrc,
   size = 'auto',
   style,
-  className,
   preClassName,
   children,
+  alt,
 }) => {
   const src = (propSrc ?? children ?? '').toString().trim();
 
@@ -52,14 +52,9 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
     >
       {isUndefined(src) ? (
         <div className="h-full w-full" />
-      ) : isURL(src) ? (
-        <Avatar>
-          <AvatarImage className={cn('pointer-events-none', className)} src={src} alt="icon" />
-          <AvatarFallback>AI</AvatarFallback>
-        </Avatar>
       ) : (
         <div className="flex h-full w-full items-center justify-center" style={{ backgroundColor }}>
-          {emojiRenderer(text, { protocol: 'https', ext: '.png' })}
+          {isURL(src) ? <img src={src} alt={alt} /> : emojiRenderer(text, { protocol: 'https', ext: '.png' })}
         </div>
       )}
     </div>

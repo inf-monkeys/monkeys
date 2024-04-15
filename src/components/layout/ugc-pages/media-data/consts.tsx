@@ -1,20 +1,22 @@
+import React from 'react';
+
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
+import { IMediaData } from '@/apis/media-data/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { IKnowledgeBaseFrontEnd } from '@/apis/vector/typings.ts';
-import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
 
-const columnHelper = createColumnHelper<IAssetItem<IKnowledgeBaseFrontEnd>>();
+const columnHelper = createColumnHelper<IAssetItem<IMediaData>>();
 
-export const createTextDataColumn = [
-  columnHelper.accessor('iconUrl', {
+export const createMediaDataColumn = [
+  columnHelper.display({
     id: 'logo',
     header: '图标',
-    cell: ({ getValue }) => RenderIcon({ iconUrl: getValue() as string }),
+    cell: ({ row }) => RenderIcon({ iconUrl: row.original.type === 'image' ? row.original.url : '' }),
     maxSize: 48,
   }),
-  columnHelper.accessor('displayName', {
+  columnHelper.accessor('name', {
     id: 'title',
     header: '名称',
     cell: ({ getValue }) => (
@@ -29,11 +31,6 @@ export const createTextDataColumn = [
     cell: ({ getValue }) => RenderUser({ user: getValue() as IVinesUser }),
     maxSize: 48,
   }),
-  columnHelper.accessor('description', {
-    id: 'description',
-    header: '描述',
-    cell: ({ getValue }) => RenderDescription({ description: getValue() as string }),
-  }),
   columnHelper.accessor('assetTags', {
     id: 'assetTags',
     header: '标签',
@@ -42,6 +39,12 @@ export const createTextDataColumn = [
   columnHelper.accessor('createdTimestamp', {
     id: 'createdTimestamp',
     header: '创建时间',
+    cell: ({ getValue }) => RenderTime({ time: getValue() as number }),
+    maxSize: 72,
+  }),
+  columnHelper.accessor('updatedTimestamp', {
+    id: 'updatedTimestamp',
+    header: '更新时间',
     cell: ({ getValue }) => RenderTime({ time: getValue() as number }),
     maxSize: 72,
   }),
