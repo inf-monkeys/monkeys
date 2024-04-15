@@ -28,12 +28,16 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
   fetchOptions,
   responseResolver,
 }: IFetcherOptions<U, P> = {}) => {
-  return async (url: string, params?: T) => {
+  return async (rawUrl: string | [url: string, params?: T], rawParams?: T) => {
     const headers = {
       'Content-Type': 'application/json;charset=utf-8',
       ...(auth && vinesHeader({ apikey, useToast: simple })),
       ...(fetchOptions && fetchOptions.headers),
     };
+
+    const url = _.isArray(rawUrl) ? rawUrl[0] : rawUrl;
+
+    const params = _.isArray(rawUrl) ? rawUrl[1] : rawParams;
 
     const body = params ? stringify(simple ? params : params['arg']) : undefined;
 
