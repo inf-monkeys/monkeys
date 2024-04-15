@@ -2,6 +2,7 @@ import React from 'react';
 
 import { FileText, FileType, FileUp, Import, UploadCloud } from 'lucide-react';
 
+import { ImportFile } from '@/components/layout/ugc-pages/text-data/text-detail/import/import-file.tsx';
 import { ImportParagraph } from '@/components/layout/ugc-pages/text-data/text-detail/import/import-paragraph.tsx';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,10 +27,12 @@ export const TextDetailHeader: React.FC<ITextDetailHeaderProps> = ({ textId }) =
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem>
-            <FileUp size={16} className="mr-1.5 mt-0.5" />
-            导入文档
-          </DropdownMenuItem>
+          <ImportFile textId={textId}>
+            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+              <FileUp size={16} className="mr-1.5 mt-0.5" />
+              导入文档
+            </DropdownMenuItem>
+          </ImportFile>
           <DropdownMenuSeparator />
           <DropdownMenuItem>
             <UploadCloud size={16} className="mr-1.5 mt-0.5" />从 OSS 导入

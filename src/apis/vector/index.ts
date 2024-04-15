@@ -7,8 +7,9 @@ import {
   ICreateVectorDB,
   IFullTextSearchParams,
   IFullTextSearchResult,
-  IKnowledgeBase,
-  IKnowledgeBaseFrontEnd,
+  IUploadDocument,
+  IVectorCollection,
+  IVectorFrontEnd,
   IVectorSupportedEmbeddingModel,
 } from '@/apis/vector/typings.ts';
 
@@ -30,14 +31,11 @@ export const useCreateVectorCollection = () =>
     vinesFetcher({ method: 'POST' }),
   );
 
-export const deleteKnowledgeBase = (knowledgeBaseName: string) =>
-  vinesFetcher({ method: 'DELETE' })(`/api/knowledge-bases/${knowledgeBaseName}`);
+export const deleteVectorCollection = (collectionId: string) =>
+  vinesFetcher({ method: 'DELETE' })(`/api/vector/collections/${collectionId}`);
 
-export const deleteAllKnowledgeBaseData = (knowledgeBaseName: string) =>
-  vinesFetcher({ method: 'POST' })(
-    `/api/tools/monkey_tools_knowledge_base/knowledge-bases/${knowledgeBaseName}/delete-all-data`,
-    {},
-  );
+export const deleteAllVectorAllData = (collectionId: string) =>
+  vinesFetcher({ method: 'POST' })(`/api/vector/collections/${collectionId}/delete-all-data`, {});
 
 export const useAddVectorData = (collectionId: string) =>
   useSWRMutation<{ pk: string } | undefined, unknown, string | null, ICreateVectorData>(
@@ -45,12 +43,12 @@ export const useAddVectorData = (collectionId: string) =>
     vinesFetcher({ method: 'POST' }),
   );
 
-export const useSearchKnowledgeBase = (knowledgeBaseName: string, params: IFullTextSearchParams, useVector = false) => {
+export const useTextSearch = (collectionId: string, params: IFullTextSearchParams, useVector = false) => {
   const { query, from = 0, size = 30, metadataFilter } = params;
   return useSWR<IFullTextSearchResult | undefined>(
-    knowledgeBaseName && params
+    collectionId && params
       ? [
-          `/api/tools/monkey_tools_knowledge_base/knowledge-bases/${knowledgeBaseName}/${useVector ? 'vector' : 'fulltext'}-search`,
+          `/api/vector/collections/${collectionId}/${useVector ? 'vector' : 'full-text'}-search`,
           {
             query,
             from,
@@ -75,3 +73,9 @@ export const updateVectorData = (
 
 export const deleteVectorData = (collectionId: string, recordId: string) =>
   vinesFetcher({ method: 'DELETE', simple: true })(`/api/vector/collections/${collectionId}/records/${recordId}`);
+
+export const useUploadDocumentToVectorCollection = (collectionId: string) =>
+  useSWRMutation<{ taskId: string } | undefined, unknown, string | null, IUploadDocument>(
+    collectionId ? `/api/vector/collections/${collectionId}/records` : null,
+    vinesFetcher({ method: 'POST' }),
+  );
