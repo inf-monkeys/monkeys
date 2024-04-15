@@ -41,12 +41,12 @@ export const RelatedApplication: React.FC<IRelatedApplicationProps> = ({ textId 
         </TableRow>
       </TableHeader>
       <TableBody>
-        {data?.map(({ iconUrl, name, description }, i) => (
+        {data?.map(({ iconUrl, displayName, description }, i) => (
           <TableRow key={i}>
             <TableCell>
               <VinesIcon size="sm">{iconUrl || 'emoji:🍀:#ceefc5'}</VinesIcon>
             </TableCell>
-            <TableCell className="font-medium">{name}</TableCell>
+            <TableCell className="font-medium">{displayName}</TableCell>
             <TableCell>{description}</TableCell>
           </TableRow>
         ))}
