@@ -1,6 +1,8 @@
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
+import { MonkeyWorkflow } from '@inf-monkeys/vines';
+
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import {
   ICreateVectorData,
@@ -85,4 +87,10 @@ export const useUploadDocumentToVectorCollection = (collectionId: string) =>
   useSWRMutation<{ taskId: string } | undefined, unknown, string | null, IUploadDocument>(
     collectionId ? `/api/vector/collections/${collectionId}/records` : null,
     vinesFetcher({ method: 'POST' }),
+  );
+
+export const useVectorRelationWorkflow = (collectionId: string) =>
+  useSWR<MonkeyWorkflow[] | undefined>(
+    collectionId ? `/api/workflow/text-collection-related/${collectionId}` : null,
+    vinesFetcher(),
   );

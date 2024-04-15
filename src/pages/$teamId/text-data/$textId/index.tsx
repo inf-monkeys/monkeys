@@ -10,6 +10,7 @@ import { useVectorCollection } from '@/apis/vector';
 import { BasicInfo } from '@/components/layout/ugc-pages/text-data/text-detail/basic-data';
 import { TextDetailHeader } from '@/components/layout/ugc-pages/text-data/text-detail/header';
 import { ParagraphList } from '@/components/layout/ugc-pages/text-data/text-detail/paragraph-list';
+import { RelatedApplication } from '@/components/layout/ugc-pages/text-data/text-detail/related-application';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -113,6 +114,7 @@ const TextDataDetail: React.FC = () => {
                 >
                   {activeTab === 'paragraph' && <ParagraphList textId={textId} />}
                   {activeTab === 'basic-info' && <BasicInfo textId={textId} />}
+                  {activeTab === 'associated-workflows' && <RelatedApplication textId={textId} />}
                 </motion.div>
               </>
             )}
