@@ -1,0 +1,47 @@
+.vines-button {
+  svg {
+    stroke: var(--text-color);
+  }
+
+  &[data-variant="solid"] {
+    color: theme('colors.white');
+    svg {
+      stroke: theme('colors.white');
+    }
+  }
+}
+
+.button-theme-primary {
+  --bg-color: rgb(var(--vines-500) / var(--tw-bg-opacity, 1));
+  --bg-hover-color: rgb(var(--vines-600));
+  --bg-active-color: rgb(var(--vines-700) / var(--tw-bg-opacity, 0.95));
+  --text-color: rgb(var(--vines-500) / var(--tw-text-opacity, 1));
+}
+
+.button-theme-secondary {
+  --bg-color: rgb(var(--vines-900) / var(--tw-bg-opacity, 1));
+  --bg-hover-color: rgb(var(--vines-950));
+  --bg-active-color: rgb(var(--vines-950) / var(--tw-bg-opacity, 0.95));
+  --text-color: rgb(var(--vines-500) / var(--tw-text-opacity, 1))
+}
+
+.button-theme-tertiary {
+  --bg-color: rgba(var(--gray9) / var(--tw-bg-opacity, 1));
+  --bg-hover-color: rgba(var(--gray10));
+  --bg-active-color: rgba(var(--gray10) / var(--tw-bg-opacity, 0.95));
+  --text-color: rgba(var(--gray9) / var(--tw-text-opacity, 1))
+}
+
+.button-theme-warning {
+  --bg-color: rgba(var(--amber9) / var(--tw-bg-opacity, 1));
+  --bg-hover-color: rgba(var(--amber10));
+  --bg-active-color: rgba(var(--amber10) / var(--tw-bg-opacity, 0.95));
+  --text-color: rgba(var(--amber9) / var(--tw-text-opacity, 1))
+}
+
+.button-theme-danger {
+  --bg-color: rgba(var(--tomato9) / var(--tw-bg-opacity, 1));
+  --bg-hover-color: rgba(var(--tomato10));
+  --bg-active-color: rgba(var(--tomato10) / var(--tw-bg-opacity, 0.95));
+  --text-color: rgba(var(--tomato9) / var(--tw-text-opacity, 1))
+}
