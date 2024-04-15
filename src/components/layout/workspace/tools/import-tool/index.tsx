@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input';
-import { IImportTool, impotrToolSchema } from '@/schema/tools/tools-import';
+import { IImportTool, importToolSchema } from '@/schema/workspace/tools-import.ts';
 
 interface IImportToolModalProps {
   children?: React.ReactNode;
@@ -20,7 +20,7 @@ export const ImportToolModal: React.FC<IImportToolModalProps> = ({ children }) =
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<IImportTool>({
-    resolver: zodResolver(impotrToolSchema),
+    resolver: zodResolver(importToolSchema),
     defaultValues: {
       manifestUrl: '',
     },
