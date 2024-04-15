@@ -12,6 +12,7 @@ import {
   IKnowledgeBase,
   IUploadDocument,
   IVectorSupportedEmbeddingModel,
+  IVectorTask,
 } from '@/apis/vector/typings.ts';
 
 export const useKnowledgeBase = (collectionId: string) =>
@@ -93,4 +94,19 @@ export const useVectorRelationWorkflow = (collectionId: string) =>
   useSWR<MonkeyWorkflow[] | undefined>(
     collectionId ? `/api/workflow/text-collection-related/${collectionId}` : null,
     vinesFetcher(),
+  );
+
+export const useVectorTasks = (collectionId: string) =>
+  useSWR<IVectorTask[] | undefined>(
+    collectionId ? `/api/vector/collections/${collectionId}/tasks` : null,
+    vinesFetcher(),
+  );
+
+export const useVinesTasksDetail = (collectionId: string, taskId: string) =>
+  useSWR<IVectorTask | undefined>(
+    collectionId && taskId ? `/api/vector/collections/${collectionId}/tasks/${taskId}` : null,
+    vinesFetcher(),
+    {
+      refreshInterval: 100,
+    },
   );

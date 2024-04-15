@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+import { useSWRConfig } from 'swr';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -31,6 +33,7 @@ interface IImportOSSProps {
 }
 
 export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
+  const { mutate } = useSWRConfig();
   const { trigger } = useUploadDocumentToVectorCollection(textId);
 
   const form = useForm<IImportFromOSS>({
@@ -56,6 +59,7 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
       {
         loading: '正在创建导入文档任务...',
         success: () => {
+          void mutate(`/api/vector/collections/${textId}/tasks`);
           setVisible(false);
           return '文档导入任务创建成功';
         },

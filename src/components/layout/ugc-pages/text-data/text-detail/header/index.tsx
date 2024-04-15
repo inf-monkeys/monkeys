@@ -2,6 +2,7 @@ import React from 'react';
 
 import { FileText, FileType, FileUp, Import, UploadCloud } from 'lucide-react';
 
+import { TaskList } from '@/components/layout/ugc-pages/text-data/text-detail/header/task-list.tsx';
 import { ImportFile } from '@/components/layout/ugc-pages/text-data/text-detail/import/import-file.tsx';
 import { ImportOSS } from '@/components/layout/ugc-pages/text-data/text-detail/import/import-oss.tsx';
 import { ImportParagraph } from '@/components/layout/ugc-pages/text-data/text-detail/import/import-paragraph.tsx';
@@ -20,7 +21,8 @@ interface ITextDetailHeaderProps {
 
 export const TextDetailHeader: React.FC<ITextDetailHeaderProps> = ({ textId }) => {
   return (
-    <header className="flex w-full items-center justify-end px-4 py-2">
+    <header className="flex w-full items-center justify-end gap-4 px-4 py-2">
+      <TaskList textId={textId} />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="small" icon={<Import />}>
