@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _, { isArray } from 'lodash';
 import { toast } from 'sonner';
 
 import { IOriginData } from '@/apis/typings.ts';
@@ -35,9 +35,9 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
       ...(fetchOptions && fetchOptions.headers),
     };
 
-    const url = _.isArray(rawUrl) ? rawUrl[0] : rawUrl;
-
-    const params = _.isArray(rawUrl) ? rawUrl[1] : rawParams;
+    const isArrayRawUrl = isArray(rawUrl);
+    const url = isArrayRawUrl ? rawUrl[0] : rawUrl;
+    const params = isArrayRawUrl ? rawUrl[1] : rawParams;
 
     const body = params ? stringify(simple ? params : params['arg']) : undefined;
 
