@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { ArrowDownUp, Tag, Waypoints } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { useTextSearch, useVectorCollection } from '@/apis/vector';
+import { useKnowledgeBase, useSearchKnowledgeBase } from '@/apis/vector';
 import { IFullTextSearchParams, IVectorRecord } from '@/apis/vector/typings.ts';
 import { columns } from '@/components/layout/ugc-pages/text-data/text-detail/paragraph-list/consts.tsx';
 import { MetadataFilter } from '@/components/layout/ugc-pages/text-data/text-detail/paragraph-list/metadata-filter.tsx';
@@ -19,7 +19,7 @@ interface IParagraphListProps {
 }
 
 export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
-  const { data: detail } = useVectorCollection(textId);
+  const { data: detail } = useKnowledgeBase(textId);
 
   const [from, setFrom] = useState(30);
   const [searchMode, setSearchMode] = useState<string>('vector');
@@ -28,7 +28,11 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
   const [query, setQuery] = useState<string>('');
   const [metadataFilter, setMetadataFilter] = useState<IFullTextSearchParams['metadataFilter']>();
 
-  const { data, isLoading, mutate } = useTextSearch(textId, { from, query, metadataFilter }, searchMode === 'vector');
+  const { data, isLoading, mutate } = useSearchKnowledgeBase(
+    textId,
+    { from, query, metadataFilter },
+    searchMode === 'vector' && !!query,
+  );
 
   const [hits, setHits] = useState<IVectorRecord[]>([]);
 

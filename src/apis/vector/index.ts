@@ -30,11 +30,14 @@ export const useCreateVectorCollection = () =>
     vinesFetcher({ method: 'POST' }),
   );
 
-export const deleteVectorCollection = (collectionId: string) =>
-  vinesFetcher({ method: 'DELETE' })(`/api/vector/collections/${collectionId}`);
+export const deleteKnowledgeBase = (knowledgeBaseName: string) =>
+  vinesFetcher({ method: 'DELETE' })(`/api/knowledge-bases/${knowledgeBaseName}`);
 
-export const deleteAllVectorAllData = (collectionId: string) =>
-  vinesFetcher({ method: 'POST' })(`/api/vector/collections/${collectionId}/delete-all-data`, {});
+export const deleteAllKnowledgeBaseData = (knowledgeBaseName: string) =>
+  vinesFetcher({ method: 'POST' })(
+    `/api/tools/monkey_tools_knowledge_base/knowledge-bases/${knowledgeBaseName}/delete-all-data`,
+    {},
+  );
 
 export const useAddVectorData = (collectionId: string) =>
   useSWRMutation<{ pk: string } | undefined, unknown, string | null, ICreateVectorData>(
@@ -42,12 +45,12 @@ export const useAddVectorData = (collectionId: string) =>
     vinesFetcher({ method: 'POST' }),
   );
 
-export const useTextSearch = (collectionId: string, params: IFullTextSearchParams, useVector = false) => {
+export const useSearchKnowledgeBase = (knowledgeBaseName: string, params: IFullTextSearchParams, useVector = false) => {
   const { query, from = 0, size = 30, metadataFilter } = params;
   return useSWR<IFullTextSearchResult | undefined>(
-    collectionId && params
+    knowledgeBaseName && params
       ? [
-          `/api/vector/collections/${collectionId}/${useVector ? 'vector' : 'full-text'}-search`,
+          `/api/tools/monkey_tools_knowledge_base/knowledge-bases/${knowledgeBaseName}/${useVector ? 'vector' : 'fulltext'}-search`,
           {
             query,
             from,

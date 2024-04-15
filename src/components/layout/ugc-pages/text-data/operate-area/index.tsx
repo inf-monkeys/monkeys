@@ -6,7 +6,7 @@ import { Eraser, Trash } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { deleteAllVectorAllData, deleteVectorCollection } from '@/apis/vector';
+import { deleteAllKnowledgeBaseData, deleteKnowledgeBase } from '@/apis/vector';
 import { IKnowledgeBaseFrontEnd } from '@/apis/vector/typings.ts';
 import {
   AlertDialog,
@@ -40,7 +40,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
   const { mutate } = useSWRConfig();
 
   const handelDelete = () => {
-    toast.promise(deleteVectorCollection(item.name), {
+    toast.promise(deleteKnowledgeBase(item.name), {
       loading: '正在删除数据集...',
       success: () => {
         void mutate((key) => typeof key === 'string' && key.startsWith('/api/vector/collections'));
@@ -55,7 +55,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
       action: {
         label: '确定',
         onClick: () => {
-          toast.promise(deleteAllVectorAllData(item.name), {
+          toast.promise(deleteAllKnowledgeBaseData(item.name), {
             loading: '正在清空数据集...',
             success: '数据集清空成功',
             error: '数据集清空失败',
