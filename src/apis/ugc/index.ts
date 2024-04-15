@@ -6,6 +6,7 @@ import qs from 'qs';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { ILLMModel } from '@/apis/llm/typings.ts';
+import { IMediaData } from '@/apis/media-data/typings.ts';
 import { ISDModel } from '@/apis/sd/typings.ts';
 import { ITableData } from '@/apis/table-data/typings.ts';
 import { IWorkflowBlock } from '@/apis/tools/typings.ts';
@@ -62,6 +63,10 @@ export const preloadKnowledgeBases = (dto: IListUgcDto) =>
 
 export const useUgcTableData = (dto: IListUgcDto) => useUgcItems<ITableData>(dto, '/api/database');
 export const preloadUgcTableData = (dto: IListUgcDto) => preloadUgcItems<ITableData>(dto, '/api/database');
+
+export const useUgcMediaData = (dto: IListUgcDto) => useUgcItems<IMediaData>(dto, '/api/resources/list', 'POST');
+export const preloadUgcMediaData = (dto: IListUgcDto) =>
+  preloadUgcItems<IMediaData>(dto, '/api/resources/list', 'POST');
 
 export const useUgcApplicationStore = (dto: IListUgcDto) =>
   useUgcItems<IApplicationStoreItemDetail>(dto, '/api/templates');
