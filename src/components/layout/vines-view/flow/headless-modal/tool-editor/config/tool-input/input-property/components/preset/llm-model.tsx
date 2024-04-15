@@ -61,52 +61,9 @@ export const LlmModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInp
 
   return (
     <AnimatePresence>
-      {!isLoading && !refresh ? (
-        componentMode === 'input' ? (
-          <motion.div
-            key="SdModelPresets_input"
-            className="absolute left-0 top-0 w-full"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.1 }}
-          >
-            <Select onValueChange={handleOnSelectChange} defaultValue={isString(value) ? value : ''}>
-              <SelectTrigger>
-                <SelectValue placeholder="您也可以选择预置选项" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {options.map((option, index) => (
-                    <SelectItem key={index} value={option.value as string} disabled={disabled}>
-                      {option.name}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="SdModelPresets_component"
-            className="absolute left-0 top-0 w-full"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.1 }}
-          >
-            <StringInput
-              value={value}
-              onChange={onChange}
-              extraVariableMapper={optionsVariableMapper}
-              disabled={disabled}
-              {...childProps}
-            />
-          </motion.div>
-        )
-      ) : (
+      {isLoading ? (
         <motion.div
-          key="SdModelPresets_loading"
+          key="llmModel_loading"
           className="absolute left-0 top-0 flex h-8 w-full items-center justify-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -114,6 +71,47 @@ export const LlmModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInp
           transition={{ duration: 0.1 }}
         >
           <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+        </motion.div>
+      ) : componentMode === 'input' && !refresh ? (
+        <motion.div
+          key="llmModel_input"
+          className="absolute left-0 top-0 w-full"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.1 }}
+        >
+          <Select onValueChange={handleOnSelectChange} defaultValue={isString(value) ? value : ''}>
+            <SelectTrigger>
+              <SelectValue placeholder="您也可以选择预置选项" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {options.map((option, index) => (
+                  <SelectItem key={index} value={option.value as string} disabled={disabled}>
+                    {option.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </motion.div>
+      ) : (
+        <motion.div
+          key="llmModel_component"
+          className="absolute left-0 top-0 w-full"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.1 }}
+        >
+          <StringInput
+            value={value}
+            onChange={onChange}
+            extraVariableMapper={optionsVariableMapper}
+            disabled={disabled}
+            {...childProps}
+          />
         </motion.div>
       )}
     </AnimatePresence>
