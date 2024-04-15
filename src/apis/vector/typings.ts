@@ -71,3 +71,45 @@ export interface IVectorRecord {
 export interface IFullTextSearchResult {
   hits: IVectorRecord[];
 }
+
+interface ISplit {
+  splitType: 'json' | 'auto-segment' | 'custom-segment';
+  params: any;
+}
+
+interface ISplitJSON extends ISplit {
+  splitType: 'json';
+  params: {
+    jqSchema: string;
+  };
+}
+
+interface ISplitAutoSegment extends ISplit {
+  splitType: 'auto-segment';
+}
+
+interface ISplitCustomSegment extends ISplit {
+  splitType: 'custom-segment';
+  params: {
+    preProcessRules: string[];
+    segmentParams: {
+      segmentSymbol?: string;
+      segmentMaxLength?: number;
+      segmentChunkOverlap?: number;
+    };
+  };
+}
+
+export type ISplitType = ISplitJSON | ISplitAutoSegment | ISplitCustomSegment;
+
+export interface IImportFromOSSConfig {
+  ossType: string;
+  ossConfig: { [x: string]: unknown };
+}
+
+export interface IUploadDocument {
+  collectionName: string;
+  fileURL?: string;
+  split: ISplitType;
+  ossConfig?: IImportFromOSSConfig;
+}
