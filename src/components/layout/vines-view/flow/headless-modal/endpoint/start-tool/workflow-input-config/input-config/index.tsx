@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { cloneDeep, isBoolean } from 'lodash';
+import { isBoolean } from 'lodash';
 import { Edit, Plus, Trash2 } from 'lucide-react';
 
 import { InputEditor } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor';
@@ -19,7 +19,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
-import { cn } from '@/utils';
+import { cloneDeep, cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IInputConfigProps {

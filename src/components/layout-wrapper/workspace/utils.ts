@@ -2,14 +2,14 @@ import { useEffect, useRef } from 'react';
 
 import { useNavigate, useParams } from '@tanstack/react-router';
 
-import { cloneDeep, differenceWith, isEqual, omit, set } from 'lodash';
+import { differenceWith, isEqual, omit, set } from 'lodash';
 
 import { updateWorkspacePages, useWorkspacePagesWithWorkflowId } from '@/apis/pages';
 import { IPageType } from '@/apis/pages/typings.ts';
 import { useGetWorkflow } from '@/apis/workflow';
 import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId';
 import { usePageStore } from '@/store/usePageStore';
-import { useLocalStorage } from '@/utils';
+import { cloneDeep, useLocalStorage } from '@/utils';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 export const useVinesPage = () => {
