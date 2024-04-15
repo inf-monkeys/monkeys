@@ -1,3 +1,5 @@
+import { IImportFromOSS } from '@/schema/text-dataset/import-oss.ts';
+
 export interface IVectorMetadataField {
   displayName: string;
   name: string;
@@ -102,14 +104,9 @@ interface ISplitCustomSegment extends ISplit {
 
 export type ISplitType = ISplitJSON | ISplitAutoSegment | ISplitCustomSegment;
 
-export interface IImportFromOSSConfig {
-  ossType: string;
-  ossConfig: { [x: string]: unknown };
-}
-
 export interface IUploadDocument {
   collectionName: string;
   fileURL?: string;
   split: ISplitType;
-  ossConfig?: IImportFromOSSConfig;
+  ossConfig?: IImportFromOSS;
 }
