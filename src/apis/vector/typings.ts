@@ -24,6 +24,7 @@ export interface IKnowledgeBase {
   entityCount: number;
   fileCount: number;
   createdTimestamp: number;
+  updatedTimestamp: number;
 }
 
 export type IKnowledgeBaseFrontEnd = IKnowledgeBase & { paragraph_number: number; appNumber: number };

@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronRight, Undo2 } from 'lucide-react';
 
 import { useVectorCollection } from '@/apis/vector';
+import { BasicInfo } from '@/components/layout/ugc-pages/text-data/text-detail/basic-data';
 import { TextDetailHeader } from '@/components/layout/ugc-pages/text-data/text-detail/header';
 import { ParagraphList } from '@/components/layout/ugc-pages/text-data/text-detail/paragraph-list';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
@@ -111,6 +112,7 @@ const TextDataDetail: React.FC = () => {
                   transition={{ duration: 0.2 }}
                 >
                   {activeTab === 'paragraph' && <ParagraphList textId={textId} />}
+                  {activeTab === 'basic-info' && <BasicInfo textId={textId} />}
                 </motion.div>
               </>
             )}
