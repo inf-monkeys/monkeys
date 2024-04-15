@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { CircleEllipsisIcon, Save } from 'lucide-react';
 
 import { ExecutionStatusIcon } from '@/components/layout/vines-view/execution/status-icon';
+import { ToolAdvancedConfig } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/advanced-config';
 import { ToolInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input';
 import { ToolCustomDataEditor } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/header/node-custom-editor/editor.tsx';
 import { ComplicateNodeHeader } from '@/components/layout/vines-view/flow/nodes/complicate/node/header.tsx';
@@ -137,7 +138,11 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
                 />
               </TabsContent>
             )}
-            {activeTab === 'more-config' && <TabsContent className="mt-4 h-80" value="more-config"></TabsContent>}
+            {activeTab === 'more-config' && (
+              <TabsContent className="mt-4 h-80" value="more-config">
+                <ToolAdvancedConfig nodeId={nodeId} task={task} />
+              </TabsContent>
+            )}
             {activeTab === 'custom-config' && (
               <TabsContent className="mt-4 h-80" value="custom-config">
                 <ToolCustomDataEditor
