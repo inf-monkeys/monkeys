@@ -5,10 +5,13 @@ import {
 import clsx, { ClassValue } from 'clsx';
 import { isString } from 'lodash';
 import { customAlphabet } from 'nanoid';
+import rfdc from 'rfdc';
 import { parse, stringify } from 'superjson';
 import { twMerge } from 'tailwind-merge';
 
 export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
+
+export const cloneDeep = rfdc();
 
 export const useLocalStorage = <T>(key: string, defaultValue: T, useJSON = true) =>
   mantineUseLocalStorage({

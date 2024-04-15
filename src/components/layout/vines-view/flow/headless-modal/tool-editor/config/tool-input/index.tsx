@@ -1,7 +1,7 @@
-import React, { memo } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 
 import { BlockCredentialItem } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
-import { cloneDeep, get, set } from 'lodash';
+import { get, set } from 'lodash';
 import { toast } from 'sonner';
 
 import { VinesInputCredentials } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-credentials';
@@ -13,7 +13,7 @@ import {
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { IVinesVariableMap, VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
 import { VARIABLE_REGEXP } from '@/package/vines-flow/core/utils.ts';
-import { cn } from '@/utils';
+import { cloneDeep, cn } from '@/utils';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 interface IToolInputProps {
@@ -34,7 +34,22 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
 
     const isSpecialNode = ['DO_WHILE', 'SWITCH'].includes(task?.type ?? '');
 
+    const taskRef = useRef<VinesTask | null>(null);
+    useEffect(() => {
+      const newTask = cloneDeep(task);
+      if (!newTask) {
+        toast.error('工具数据解析失败！');
+        return;
+      }
+      taskRef.current = newTask;
+    }, [nodeId]);
+
     const handleUpdate = (value: unknown, name: string) => {
+      if (!taskRef.current) {
+        toast.error('工具数据异常！');
+        return;
+      }
+
       const keyDef = input?.find((it) => it.name === name);
       if (keyDef) {
         const keyType = keyDef.type;
@@ -51,19 +66,13 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
         }
       }
 
-      const newTask = cloneDeep(task);
-      if (!newTask) {
-        toast.error('工具数据异常！');
-        return;
-      }
-
       if (['loopCondition', 'evaluatorType', 'expression'].includes(name)) {
-        set(newTask, name, value);
+        set(taskRef.current, name, value);
       } else {
-        set(newTask, `inputParameters.${name}`, value);
+        set(taskRef.current, `inputParameters.${name}`, value);
       }
 
-      updateRaw?.(nodeId, newTask, false);
+      updateRaw?.(nodeId, taskRef.current, false);
     };
 
     const credentials = get(tool, 'credentials', []) as BlockCredentialItem[];

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { cloneDeep, get, isEmpty, omit, set } from 'lodash';
+import { get, isEmpty, omit, set } from 'lodash';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
+import { cloneDeep } from '@/utils';
 
 interface IToolCustomDataEditorProps {
   task?: VinesTask;
