@@ -7,43 +7,42 @@ import {
   ICreateVectorDB,
   IFullTextSearchParams,
   IFullTextSearchResult,
+  IKnowledgeBase,
   IUploadDocument,
-  IVectorCollection,
-  IVectorFrontEnd,
   IVectorSupportedEmbeddingModel,
 } from '@/apis/vector/typings.ts';
 
-export const useVectorCollections = () =>
-  useSWR<IVectorFrontEnd[] | undefined>('/api/vector/collections', vinesFetcher());
+export const useKnowledgeBase = (collectionId: string) =>
+  useSWR<IKnowledgeBase | undefined>(collectionId ? `/api/knowledge-bases/${collectionId}` : null, vinesFetcher());
 
-export const useVectorCollection = (collectionId: string) =>
-  useSWR<IVectorCollection | undefined>(
-    collectionId ? `/api/vector/collections/${collectionId}` : null,
+export const useVectorSupportedEmbeddingModels = () =>
+  useSWR<IVectorSupportedEmbeddingModel[] | undefined>(
+    '/api/tools/monkey_tools_knowledge_base/helpers/embedding-models',
     vinesFetcher(),
   );
 
-export const useVectorSupportedEmbeddingModels = () =>
-  useSWR<IVectorSupportedEmbeddingModel[] | undefined>('/api/vector/supported-embedding-models', vinesFetcher());
-
-export const useCreateVectorCollection = () =>
+export const useCreateKnowledgeBase = () =>
   useSWRMutation<{ name: string } | undefined, unknown, string, ICreateVectorDB>(
-    '/api/vector/collections',
+    '/api/knowledge-bases',
     vinesFetcher({ method: 'POST' }),
   );
 
 export const useUpdateVectorCollection = (collectionId?: string) =>
   useSWRMutation<
-    IVectorCollection | undefined,
+    IKnowledgeBase | undefined,
     unknown,
     string | null,
     Pick<ICreateVectorDB, 'displayName' | 'description' | 'iconUrl'>
   >(collectionId ? `/api/assets/text-collection/${collectionId}` : null, vinesFetcher({ method: 'PUT' }));
 
-export const deleteVectorCollection = (collectionId: string) =>
-  vinesFetcher({ method: 'DELETE' })(`/api/vector/collections/${collectionId}`);
+export const deleteKnowledgeBase = (knowledgeBaseName: string) =>
+  vinesFetcher({ method: 'DELETE' })(`/api/knowledge-bases/${knowledgeBaseName}`);
 
-export const deleteAllVectorAllData = (collectionId: string) =>
-  vinesFetcher({ method: 'POST' })(`/api/vector/collections/${collectionId}/delete-all-data`, {});
+export const deleteAllKnowledgeBaseData = (knowledgeBaseName: string) =>
+  vinesFetcher({ method: 'POST' })(
+    `/api/tools/monkey_tools_knowledge_base/knowledge-bases/${knowledgeBaseName}/delete-all-data`,
+    {},
+  );
 
 export const useAddVectorData = (collectionId: string) =>
   useSWRMutation<{ pk: string } | undefined, unknown, string | null, ICreateVectorData>(
@@ -51,12 +50,12 @@ export const useAddVectorData = (collectionId: string) =>
     vinesFetcher({ method: 'POST' }),
   );
 
-export const useTextSearch = (collectionId: string, params: IFullTextSearchParams, useVector = false) => {
+export const useSearchKnowledgeBase = (knowledgeBaseName: string, params: IFullTextSearchParams, useVector = false) => {
   const { query, from = 0, size = 30, metadataFilter } = params;
   return useSWR<IFullTextSearchResult | undefined>(
-    collectionId && params
+    knowledgeBaseName && params
       ? [
-          `/api/vector/collections/${collectionId}/${useVector ? 'vector' : 'full-text'}-search`,
+          `/api/tools/monkey_tools_knowledge_base/knowledge-bases/${knowledgeBaseName}/${useVector ? 'vector' : 'fulltext'}-search`,
           {
             query,
             from,
