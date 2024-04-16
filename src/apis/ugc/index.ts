@@ -15,7 +15,7 @@ import { IApplicationStoreItemDetail } from '@/apis/ugc/asset-typings.ts';
 import { IKnowledgeBaseFrontEnd } from '@/apis/vector/typings.ts';
 import { paginationWrapper } from '@/apis/wrapper.ts';
 
-import { IAssetItem, IListUgcDto, IUgcFilterRules } from './typings';
+import { IAssetItem, IAssetPublicCategory, IListUgcDto, IUgcFilterRules } from './typings';
 
 export const useUgcItems = <T extends object>(dto: IListUgcDto, url: string, method: 'GET' | 'POST' = 'GET') => {
   const swrUrl = method === 'GET' ? `${url}?${qs.stringify(dto, { encode: false })}` : url;
@@ -83,8 +83,8 @@ export const useAssetTagList = (assetKey?: string) =>
     refreshInterval: 600000,
   });
 
-export const useAssetFilterRuleList = (type: AssetType) =>
-  useSWR<IUgcFilterRules[] | undefined>(`/api/assets/filters?type=${type}`, vinesFetcher(), {
+export const useAssetFilterRuleList = (type: AssetType, isMarket = false) =>
+  useSWR<IUgcFilterRules[] | undefined>(isMarket ? null : `/api/assets/filters?type=${type}`, vinesFetcher(), {
     refreshInterval: 600000,
   });
 
@@ -94,6 +94,15 @@ export const createAssetFilterRules = (name: string, rules: Partial<IListUgcDto[
 export const removeAssetFilterRules = (id: string) => {
   return vinesFetcher<boolean>({ method: 'DELETE' })(`/api/assets/filters/${id}`);
 };
+
+export const useAssetPublicCategories = (type: AssetType, isMarket = false) =>
+  useSWR<IAssetPublicCategory[] | undefined>(
+    isMarket ? `/api/assets/public-categories/${type}` : null,
+    vinesFetcher(),
+    {
+      refreshInterval: 600000,
+    },
+  );
 
 export const updateAssetItem = (type: AssetType, id: string, data: any) =>
   vinesFetcher({
