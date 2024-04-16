@@ -32,7 +32,7 @@ export const KnowledgeBaseSelector: React.FC<IVinesInputPropertyProps & Omit<IVi
       const displayName = ownedByTeam ? m.displayName : `${m.displayName}（其他团队授权）`;
       return { name: displayName, value: m.name };
     });
-    setOptions(opts);
+    console.log('opts', opts);
 
     const newOptionsVariableMapper: Record<string, VinesToolDefProperties> = {};
     opts.map(
