@@ -4,14 +4,18 @@ import { entities } from './database.module';
 import { ApikeyRepository } from './repositories/apikey.repository';
 import { CanvasAssetRepositroy } from './repositories/assets-canvas.repository';
 import { AssetsCommonRepository } from './repositories/assets-common.repository';
+import { SqlKnowledgeBaseAssetRepositroy } from './repositories/assets-knowledge-base-sql.repository';
 import { KnowledgeBaseAssetRepositroy } from './repositories/assets-knowledge-base.repository';
 import { LlmModelAssetRepositroy } from './repositories/assets-llm-model.respository';
 import { MediaFileAssetRepositroy } from './repositories/assets-media-file.repository';
 import { SdModelAssetRepositroy } from './repositories/assets-sd-model.repository';
 import { WorkflowAssetRepositroy } from './repositories/assets-workflow.respository';
 import { CredentialsRepository } from './repositories/credential.repository';
+import { SqlKnowledgeBaseRepository } from './repositories/knowledge-base-sql.repository';
 import { KnowledgeBaseRepository } from './repositories/knowledge-base.repository';
+import { LlmModelRepository } from './repositories/llm-model.repository';
 import { MediaFileRepository } from './repositories/media.repository';
+import { SdModelRepository } from './repositories/sd-model.repository';
 import { SystemConfigurationRepository } from './repositories/system-configuration.repository';
 import { TeamRepository } from './repositories/team.repository';
 import { ToolsRepository } from './repositories/tools.repository';
@@ -39,6 +43,10 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     MediaFileRepository,
     TriggerTypeRepository,
     KnowledgeBaseRepository,
+    SqlKnowledgeBaseAssetRepositroy,
+    SqlKnowledgeBaseRepository,
+    LlmModelRepository,
+    SdModelRepository,
   ],
   exports: [
     ToolsRepository,
@@ -58,6 +66,10 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     MediaFileRepository,
     TriggerTypeRepository,
     KnowledgeBaseRepository,
+    SqlKnowledgeBaseAssetRepositroy,
+    SqlKnowledgeBaseRepository,
+    LlmModelRepository,
+    SdModelRepository,
   ],
   imports: [TypeOrmModule.forFeature(entities)],
 })

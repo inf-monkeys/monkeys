@@ -12,10 +12,12 @@ import { CanvasModule } from './canvas/canvas.module';
 import { KnowledgeBaseModule } from './knowledge-base/knowledge-base.module';
 import { MediaModule } from './media/media.module';
 import { KnowledgeBaseSqlModule } from './knowledge-base-sql/knowledge-base-sql.module';
+import { LlmModelModule } from './llm-model/llm-model.module';
+import { SdModelModule } from './sd-model/sd-model.module';
 
 @Module({
   controllers: [AssetsFiltersController, AssetsPublishController, AssetsTagController, AssetsReferenceController],
   providers: [AssetsFilterService, AssetsPublishService, AssetsTagService, AssetsCommomService, AssetsReferenceService],
-  imports: [CanvasModule, MediaModule, KnowledgeBaseModule, KnowledgeBaseSqlModule],
+  imports: [CanvasModule, MediaModule, KnowledgeBaseModule, KnowledgeBaseSqlModule, LlmModelModule, SdModelModule],
 })
 export class AssetsModule {}
