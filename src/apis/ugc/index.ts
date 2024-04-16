@@ -64,9 +64,8 @@ export const preloadKnowledgeBases = (dto: IListUgcDto) =>
 export const useUgcTableData = (dto: IListUgcDto) => useUgcItems<ITableData>(dto, '/api/database');
 export const preloadUgcTableData = (dto: IListUgcDto) => preloadUgcItems<ITableData>(dto, '/api/database');
 
-export const useUgcMediaData = (dto: IListUgcDto) => useUgcItems<IMediaData>(dto, '/api/resources/list', 'POST');
-export const preloadUgcMediaData = (dto: IListUgcDto) =>
-  preloadUgcItems<IMediaData>(dto, '/api/resources/list', 'POST');
+export const useUgcMediaData = (dto: IListUgcDto) => useUgcItems<IMediaData>(dto, '/api/media-files', 'GET');
+export const preloadUgcMediaData = (dto: IListUgcDto) => preloadUgcItems<IMediaData>(dto, '/api/media-files', 'GET');
 
 export const useUgcApplicationStore = (dto: IListUgcDto) =>
   useUgcItems<IApplicationStoreItemDetail>(dto, '/api/templates');

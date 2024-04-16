@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { UseNavigateResult } from '@tanstack/react-router';
 
 import { createColumnHelper } from '@tanstack/react-table';
@@ -33,7 +31,7 @@ export const createTextDataColumns = ({ hooks }: ICreateTextDataColumnsProps) =>
         className="cursor-pointer transition-colors hover:text-primary-500"
         onClick={() => {
           void hooks.navigate({
-            to: `/$teamId/text-data/${row.original.name}`,
+            to: `/$teamId/text-data/${row.original.uuid}`,
           });
         }}
       >

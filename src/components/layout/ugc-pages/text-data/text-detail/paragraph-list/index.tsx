@@ -150,7 +150,7 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
         <Separator orientation="vertical" className="h-4" />
         <div className="flex items-center gap-2">
           <Tag className="stroke-muted-foreground" size={14} />
-          <span className="text-xs text-muted-foreground">知识库 ID：{detail?.name ?? '-'}</span>
+          <span className="text-xs text-muted-foreground">知识库 ID：{detail?.uuid ?? '-'}</span>
         </div>
       </div>
     </>

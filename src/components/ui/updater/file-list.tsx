@@ -5,7 +5,7 @@ import { set } from 'lodash';
 import { CheckCircle2, FileCheck, FileClock, FileSearch, FileX2, Loader2, UploadCloud, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { createResource, getResourceByMd5 } from '@/apis/resources';
+import { createMediaFile, getResourceByMd5 } from '@/apis/resources';
 import { VinesResourceImageParams, VinesResourceSource, VinesResourceType } from '@/apis/resources/typting.ts';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress.tsx';
@@ -174,7 +174,7 @@ export const FileList: React.FC<IFilesProps> = ({
         if (file.type.startsWith('image')) {
           params = await getImageSize(ossUrl);
         }
-        await createResource({
+        await createMediaFile({
           type: file.type as VinesResourceType,
           md5: it.md5,
           displayName: file.name,
