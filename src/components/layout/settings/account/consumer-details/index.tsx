@@ -2,12 +2,10 @@ import React, { useMemo, useState } from 'react';
 
 import { PaginationState } from '@tanstack/react-table';
 import { AnimatePresence } from 'framer-motion';
-import { Download } from 'lucide-react';
 
 import { useTeamBalance, useTeamOrderList } from '@/apis/authz/team/payment';
 import { columns } from '@/components/layout/settings/account/consumer-details/consts.tsx';
 import { balanceFormat } from '@/components/layout/settings/account/utils.ts';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { RemoteDataTable } from '@/components/ui/data-table/remote.tsx';
 import { Loading } from '@/components/ui/loading';
@@ -36,11 +34,6 @@ export const ConsumerDetails: React.FC<IConsumerDetailsProps> = () => {
         <CardDescription>
           累计消费 ￥{balanceTotalConsume[0]}.{balanceTotalConsume[1]}
         </CardDescription>
-        <div className="absolute left-0 top-0 !mt-0 flex size-full items-center justify-end p-6">
-          <Button icon={<Download />} size="small">
-            下载明细
-          </Button>
-        </div>
       </CardHeader>
       <CardContent>
         <SmoothTransition className="relative overflow-clip">
