@@ -15,7 +15,7 @@ import { ExportWorkflowDialog } from '@/components/dialog/export-workflow';
 import { IExportWorkflowWithAssetsContext } from '@/components/dialog/export-workflow/typings.ts';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
-import { createWorkflowColumn } from '@/components/layout/ugc-pages/workflows/consts.tsx';
+import { createWorkflowsColumns } from '@/components/layout/ugc-pages/workflows/consts.tsx';
 import { WorkflowInfoEditor } from '@/components/layout/workspace/workflow/info-editor';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
@@ -117,7 +117,7 @@ export const Workflows: React.FC = () => {
         assetName="工作流"
         useUgcFetcher={useUgcWorkflows}
         preloadUgcFetcher={preloadUgcWorkflows}
-        createColumns={() => createWorkflowColumn}
+        createColumns={() => createWorkflowsColumns}
         renderOptions={{
           subtitle: (item) => (
             <div className="flex gap-1">

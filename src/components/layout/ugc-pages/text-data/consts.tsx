@@ -7,7 +7,7 @@ import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/compone
 
 const columnHelper = createColumnHelper<IAssetItem<IKnowledgeBaseFrontEnd>>();
 
-export const createTextDataColumn = [
+export const createTextDataColumns = [
   columnHelper.accessor('iconUrl', {
     id: 'logo',
     header: '图标',

@@ -5,7 +5,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { preloadUgcTextModelStore, useUgcTextModelStore } from '@/apis/ugc';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
-import { createTextModelStoreColumn } from '@/components/layout/ugc-pages/text-model-store/consts.tsx';
+import { createTextModelStoreColumns } from '@/components/layout/ugc-pages/text-model-store/consts.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
@@ -21,7 +21,7 @@ export const TextModelStore: React.FC = () => {
         isMarket
         useUgcFetcher={useUgcTextModelStore}
         preloadUgcFetcher={preloadUgcTextModelStore}
-        createColumns={() => createTextModelStoreColumn}
+        createColumns={() => createTextModelStoreColumns}
         renderOptions={{
           subtitle: (item) => (
             <div className="flex gap-1">
