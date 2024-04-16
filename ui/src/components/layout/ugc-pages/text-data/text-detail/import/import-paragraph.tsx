@@ -4,7 +4,7 @@ import { useSWRConfig } from 'swr';
 
 import { toast } from 'sonner';
 
-import { useAddVectorData } from '@/apis/vector';
+import { useAddKnowledgeBaseSegment } from '@/apis/vector';
 import { ParagraphEditor } from '@/components/layout/ugc-pages/text-data/text-detail/paragraph-editor.tsx';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label.tsx';
@@ -16,7 +16,7 @@ interface IImportParagraphProps extends React.ComponentPropsWithoutRef<'div'> {
 
 export const ImportParagraph: React.FC<IImportParagraphProps> = ({ textId, children, batch = false }) => {
   const { mutate } = useSWRConfig();
-  const { trigger } = useAddVectorData(textId);
+  const { trigger } = useAddKnowledgeBaseSegment(textId);
 
   const [delimiter, setDelimiter] = useState('\\n');
   const [visible, setVisible] = useState(false);
@@ -30,9 +30,14 @@ export const ImportParagraph: React.FC<IImportParagraphProps> = ({ textId, child
           () =>
             mutate(
               (key) =>
-                (typeof key === 'string' && key.startsWith(`/api/vector/collections/${textId}`)) ||
+                (typeof key === 'string' &&
+                  key.startsWith(`/api/tools/monkey_tools_knowledge_base/knowledge-bases/${textId}`)) ||
                 (Array.isArray(key) &&
-                  key.some((k) => typeof k === 'string' && k.startsWith(`/api/vector/collections/${textId}`))),
+                  key.some(
+                    (k) =>
+                      typeof k === 'string' &&
+                      k.startsWith(`/api/tools/monkey_tools_knowledge_base/knowledge-bases/${textId}`),
+                  )),
             ),
           2000,
         );

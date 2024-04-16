@@ -29,6 +29,9 @@ export class KnowledgeBaseRepository {
         teamId,
         isDeleted: false,
       },
+      order: {
+        createdTimestamp: -1,
+      },
     });
     result = result.concat(teamOwned);
     const authorizedIds = await this.assetsCommonRepository.listAuthorizedAssetIds(teamId, 'knowledge-base');
@@ -55,7 +58,55 @@ export class KnowledgeBaseRepository {
     knowledgeBase.description = params.description;
     knowledgeBase.embeddingModel = params.embeddingModel;
     knowledgeBase.iconUrl = params.iconUrl;
+    knowledgeBase.createdTimestamp = Date.now();
+    knowledgeBase.updatedTimestamp = Date.now();
     const result = await this.knowledgeBaseRepository.save(knowledgeBase);
     return result;
+  }
+
+  public async getKnowledgeBaseByName(teamId: string, knowledgeBaseName: string) {
+    return await this.knowledgeBaseRepository.findOne({
+      where: {
+        name: knowledgeBaseName,
+        teamId,
+        isDeleted: false,
+      },
+    });
+  }
+
+  public async updateKnowledgeBase(
+    teamId: string,
+    knowledgeBaseName: string,
+    updates: {
+      displayName?: string;
+      description?: string;
+      iconUrl?: string;
+    },
+  ) {
+    const knowledgeBase = await this.getKnowledgeBaseByName(teamId, knowledgeBaseName);
+    if (!knowledgeBase) {
+      return null;
+    }
+    if (updates.displayName) {
+      knowledgeBase.displayName = updates.displayName;
+    }
+    if (updates.description) {
+      knowledgeBase.description = updates.description;
+    }
+    if (updates.iconUrl) {
+      knowledgeBase.iconUrl = updates.iconUrl;
+    }
+    knowledgeBase.updatedTimestamp = Date.now();
+    return await this.knowledgeBaseRepository.save(knowledgeBase);
+  }
+
+  public async deleteKnowledgeBase(teamId: string, knowledgeBaseName: string) {
+    const knowledgeBase = await this.getKnowledgeBaseByName(teamId, knowledgeBaseName);
+    if (!knowledgeBase) {
+      return;
+    }
+    knowledgeBase.isDeleted = true;
+    knowledgeBase.updatedTimestamp = Date.now();
+    await this.knowledgeBaseRepository.save(knowledgeBase);
   }
 }

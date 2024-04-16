@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
-import { useUploadDocumentToVectorCollection } from '@/apis/vector';
+import { useUploadDocumentToKnowledgeBase } from '@/apis/vector';
 import { IUploadDocument } from '@/apis/vector/typings.ts';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox.tsx';
@@ -24,7 +24,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { Updater } from '@/components/ui/updater';
-import { IImportFile, importFileSchema, PRE_PROCESS_RULES } from '@/schema/text-dataset/import-file.ts';
+import { IImportFile, PRE_PROCESS_RULES, importFileSchema } from '@/schema/text-dataset/import-file.ts';
 
 interface IImportFileProps {
   children?: React.ReactNode;
@@ -33,36 +33,33 @@ interface IImportFileProps {
 
 export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => {
   const { mutate } = useSWRConfig();
-  const { trigger } = useUploadDocumentToVectorCollection(textId);
+  const { trigger } = useUploadDocumentToKnowledgeBase(textId);
+  const [filename, setFilename] = useState('');
 
   const form = useForm<IImportFile>({
     resolver: zodResolver(importFileSchema),
     defaultValues: {
       fileURL: '',
-      split: {
-        splitType: 'auto-segment',
-        params: {},
-      },
+      splitterType: 'auto-segment',
+      splitterConfig: {},
     },
   });
 
   const [visible, setVisible] = useState(false);
 
   const handleSubmit = form.handleSubmit((data) => {
-    toast.promise(trigger({ collectionName: textId, ...data } as IUploadDocument), {
+    toast.promise(trigger({ knowledgeBaseId: textId, fileName: filename, ...data } as IUploadDocument), {
       loading: '正在创建导入文档任务...',
       success: () => {
         setVisible(false);
-        void mutate(`/api/vector/collections/${textId}/tasks`);
+        void mutate(`/api/tools/monkey_tools_knowledge_base/knowledge-bases/${textId}/tasks`);
         return '文档导入任务创建成功';
       },
       error: '文档导入任务创建失败',
     });
   });
 
-  const {
-    split: { splitType },
-  } = form.getValues();
+  const { splitterType } = form.getValues();
 
   return (
     <Dialog open={visible} onOpenChange={setVisible}>
@@ -93,7 +90,12 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                         ]}
                         maxSize={400}
                         limit={1}
-                        onFinished={(urls) => field.onChange(urls[0])}
+                        onFinished={(urls) => {
+                          field.onChange(urls[0]);
+                        }}
+                        onFilesUpdate={(files) => {
+                          setFilename(files[0]?.name ?? '');
+                        }}
                       />
                     </FormControl>
                     <FormDescription>在此处上传文件将自动存入「富媒体数据」</FormDescription>
@@ -103,7 +105,7 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
               />
 
               <FormField
-                name="split.splitType"
+                name="splitterType"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
@@ -113,12 +115,12 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                         onValueChange={(val) => {
                           field.onChange(val);
                           if (val === 'custom-segment') {
-                            form.setValue('split.params.segmentParams.segmentSymbol', '\n');
-                            form.setValue('split.params.segmentParams.segmentMaxLength', 1000);
-                            form.setValue('split.params.segmentParams.segmentChunkOverlap', 10);
-                            form.setValue('split.params.preProcessRules', []);
+                            form.setValue('splitterConfig.separator', '\n\n');
+                            form.setValue('splitterConfig.chunk_size', 500);
+                            form.setValue('splitterConfig.chunk_overlap', 50);
+                            form.setValue('preProcessRules', []);
                           } else {
-                            form.setValue('split.params', {});
+                            form.setValue('splitterConfig.separator', '\n\n');
                           }
                         }}
                         defaultValue={field.value}
@@ -135,7 +137,7 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                       </Select>
                     </FormControl>
                     <FormDescription>
-                      {splitType === 'auto-segment'
+                      {splitterType === 'auto-segment'
                         ? '自动设置分段规则与预处理规则，如果不了解这些参数建议选择此项'
                         : '自定义分段规则、分段长度以及预处理规则等参数'}
                     </FormDescription>
@@ -144,10 +146,10 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                 )}
               />
 
-              {splitType === 'custom-segment' && (
+              {splitterType === 'custom-segment' && (
                 <>
                   <FormField
-                    name="split.params.segmentParams.segmentSymbol"
+                    name="splitterConfig.separator"
                     control={form.control}
                     rules={{ required: '请输入分段标识符' }}
                     render={({ field }) => (
@@ -166,7 +168,7 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                     )}
                   />
                   <FormField
-                    name="split.params.segmentParams.segmentMaxLength"
+                    name="splitterConfig.chunk_size"
                     control={form.control}
                     rules={{ required: '请输入分段最大长度' }}
                     render={({ field: { value, onChange } }) => (
@@ -174,7 +176,7 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                         <FormLabel>分段最大长度</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="1000"
+                            placeholder="500"
                             value={value?.toString()}
                             onChange={(val) => onChange(Number(val))}
                             className="grow"
@@ -186,7 +188,7 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                     )}
                   />
                   <FormField
-                    name="split.params.segmentParams.segmentChunkOverlap"
+                    name="splitterConfig.chunk_overlap"
                     control={form.control}
                     rules={{ required: '请输入文本重叠量' }}
                     render={({ field: { value, onChange } }) => (
@@ -194,7 +196,7 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                         <FormLabel>文本重叠量</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="10"
+                            placeholder="50"
                             value={value?.toString()}
                             onChange={(val) => onChange(Number(val))}
                             className="grow"
@@ -206,7 +208,7 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                     )}
                   />
                   <FormField
-                    name="split.params.preProcessRules"
+                    name="preProcessRules"
                     control={form.control}
                     render={() => (
                       <FormItem>
@@ -217,7 +219,7 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                           <FormField
                             key={value}
                             control={form.control}
-                            name="split.params.preProcessRules"
+                            name="preProcessRules"
                             render={({ field }) => {
                               return (
                                 <FormItem key={value} className="flex flex-row items-center space-x-3 space-y-0">

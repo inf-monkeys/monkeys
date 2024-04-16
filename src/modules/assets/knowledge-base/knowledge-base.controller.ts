@@ -1,8 +1,9 @@
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { CreateKnowledgeBaseDto } from './dto/req/create-knowledge-base.req.dto';
+import { UpdateKnowledgeBaseDto } from './dto/req/update-knowledge-base.req.dto';
 import { KnowledgeBaseService } from './knowledge-base.service';
 
 @Controller('knowledge-bases')
@@ -26,5 +27,34 @@ export class KnowledgeBaseController {
     return new SuccessResponse({
       data,
     });
+  }
+
+  @Get(':knowledgeBaseName')
+  public async getKnowledgeBase(@Req() req: IRequest, @Param('knowledgeBaseName') knowledgeBaseName: string) {
+    const { teamId } = req;
+    const data = await this.service.getKnowledgeBaseByName(teamId, knowledgeBaseName);
+    return new SuccessResponse({
+      data,
+    });
+  }
+
+  @Put(':knowledgeBaseName')
+  public async updateKnowledgeBase(@Req() req: IRequest, @Param('knowledgeBaseName') knowledgeBaseName: string, @Body() body: UpdateKnowledgeBaseDto) {
+    const { teamId } = req;
+    const data = await this.service.updateKnowledgeBase(teamId, knowledgeBaseName, {
+      displayName: body.displayName,
+      description: body.description,
+      iconUrl: body.iconUrl,
+    });
+    return new SuccessResponse({
+      data,
+    });
+  }
+
+  @Delete(':knowledgeBaseName')
+  public async deleteKnowledgeBase(@Req() req: IRequest, @Param('knowledgeBaseName') knowledgeBaseName: string) {
+    const { teamId } = req;
+    await this.service.deleteKnowledgeBase(teamId, knowledgeBaseName);
+    return new SuccessResponse();
   }
 }
