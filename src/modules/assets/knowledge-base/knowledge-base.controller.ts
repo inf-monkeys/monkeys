@@ -33,19 +33,19 @@ export class KnowledgeBaseController {
     });
   }
 
-  @Get(':knowledgeBaseName')
-  public async getKnowledgeBase(@Req() req: IRequest, @Param('knowledgeBaseName') knowledgeBaseName: string) {
+  @Get(':knowledgeBaseId')
+  public async getKnowledgeBase(@Req() req: IRequest, @Param('knowledgeBaseId') knowledgeBaseId: string) {
     const { teamId } = req;
-    const data = await this.service.getKnowledgeBaseByName(teamId, knowledgeBaseName);
+    const data = await this.service.getKnowledgeBaseByName(teamId, knowledgeBaseId);
     return new SuccessResponse({
       data,
     });
   }
 
-  @Put(':knowledgeBaseName')
-  public async updateKnowledgeBase(@Req() req: IRequest, @Param('knowledgeBaseName') knowledgeBaseName: string, @Body() body: UpdateKnowledgeBaseDto) {
+  @Put(':knowledgeBaseId')
+  public async updateKnowledgeBase(@Req() req: IRequest, @Param('knowledgeBaseId') knowledgeBaseId: string, @Body() body: UpdateKnowledgeBaseDto) {
     const { teamId } = req;
-    const data = await this.service.updateKnowledgeBase(teamId, knowledgeBaseName, {
+    const data = await this.service.updateKnowledgeBase(teamId, knowledgeBaseId, {
       displayName: body.displayName,
       description: body.description,
       iconUrl: body.iconUrl,
@@ -55,10 +55,10 @@ export class KnowledgeBaseController {
     });
   }
 
-  @Delete(':knowledgeBaseName')
-  public async deleteKnowledgeBase(@Req() req: IRequest, @Param('knowledgeBaseName') knowledgeBaseName: string) {
+  @Delete(':knowledgeBaseId')
+  public async deleteKnowledgeBase(@Req() req: IRequest, @Param('knowledgeBaseId') knowledgeBaseId: string) {
     const { teamId } = req;
-    await this.service.deleteKnowledgeBase(teamId, knowledgeBaseName);
+    await this.service.deleteKnowledgeBase(teamId, knowledgeBaseId);
     return new SuccessResponse();
   }
 }

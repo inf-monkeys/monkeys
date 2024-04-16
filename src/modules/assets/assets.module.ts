@@ -11,10 +11,11 @@ import { AssetsTagService } from './assets.tag.service';
 import { CanvasModule } from './canvas/canvas.module';
 import { KnowledgeBaseModule } from './knowledge-base/knowledge-base.module';
 import { MediaModule } from './media/media.module';
+import { KnowledgeBaseSqlModule } from './knowledge-base-sql/knowledge-base-sql.module';
 
 @Module({
   controllers: [AssetsFiltersController, AssetsPublishController, AssetsTagController, AssetsReferenceController],
   providers: [AssetsFilterService, AssetsPublishService, AssetsTagService, AssetsCommomService, AssetsReferenceService],
-  imports: [CanvasModule, MediaModule, KnowledgeBaseModule],
+  imports: [CanvasModule, MediaModule, KnowledgeBaseModule, KnowledgeBaseSqlModule],
 })
 export class AssetsModule {}
