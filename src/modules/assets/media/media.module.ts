@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { ResourceCrudController } from './media.crud.controller';
-import { MediaService } from './media.service';
+import { MediaFileCrudController } from './media.crud.controller';
+import { MediaFileService } from './media.service';
 import { MediaUploadController } from './media.upload.controller';
 
 @Module({
-  controllers: [MediaUploadController, ResourceCrudController],
-  providers: [MediaService],
+  controllers: [MediaUploadController, MediaFileCrudController],
+  providers: [MediaFileService],
 })
 export class MediaModule {}
