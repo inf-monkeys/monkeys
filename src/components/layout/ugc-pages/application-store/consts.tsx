@@ -9,7 +9,7 @@ import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/compone
 
 const columnHelper = createColumnHelper<IAssetItem<IApplicationStoreItemDetail>>();
 
-export const createApplicationStoreColumn = [
+export const createApplicationStoreColumns = [
   columnHelper.accessor('iconUrl', {
     id: 'logo',
     header: '图标',

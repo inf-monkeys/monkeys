@@ -7,7 +7,7 @@ import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/compone
 
 const columnHelper = createColumnHelper<IAssetItem<MonkeyWorkflow>>();
 
-export const createWorkflowColumn = [
+export const createWorkflowsColumns = [
   columnHelper.accessor('iconUrl', {
     id: 'logo',
     header: '图标',

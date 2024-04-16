@@ -9,7 +9,7 @@ import { RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view
 
 const columnHelper = createColumnHelper<IAssetItem<IMediaData>>();
 
-export const createMediaDataColumn = [
+export const createMediaDataColumns = [
   columnHelper.display({
     id: 'logo',
     header: '图标',
