@@ -18,6 +18,7 @@ import { AssetFilterEntity } from './entities/assets/asset-filter';
 import { AssetsTagEntity } from './entities/assets/asset-tag-definitions';
 import { AssetsTagRelationsEntity } from './entities/assets/asset-tags';
 import { CanvasApplicationEntity } from './entities/assets/canvas/canvas';
+import { SqlKnowLedgeBaseEntity } from './entities/assets/knowledge-base/knowledge-base-sql.entity';
 import { KnowLedgeBaseEntity } from './entities/assets/knowledge-base/knowledge-base.entity';
 import { MediaFileEntity } from './entities/assets/media/media-file';
 import { LlmModelEntity } from './entities/assets/model/llm-model/llm-model';
@@ -57,6 +58,7 @@ export const entities: EntityClassOrSchema[] = [
   AssetsAuthorizationEntity,
   AssetsTagRelationsEntity,
   TeamJoinRequestsEntity,
+  SqlKnowLedgeBaseEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({

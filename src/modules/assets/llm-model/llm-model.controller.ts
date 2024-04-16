@@ -2,16 +2,16 @@ import { ListDto } from '@/common/dto/list.dto';
 import { SuccessListResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { Controller, Get, Query, Req } from '@nestjs/common';
-import { KnowledgeBaseSqlService } from './knowledge-base-sql.service';
+import { LlmModelService } from './llm-model.service';
 
-@Controller('knowledge-bases-sql')
-export class KnowledgeBaseSqlController {
-  constructor(private readonly service: KnowledgeBaseSqlService) {}
+@Controller('llm-models')
+export class LlmModelController {
+  constructor(private readonly service: LlmModelService) {}
 
   @Get('')
   public async listSqlKnowledgeBases(@Req() req: IRequest, @Query() dto: ListDto) {
     const { teamId } = req;
-    const { list, totalCount } = await this.service.listSqlKnowledgeBases(teamId, dto);
+    const { list, totalCount } = await this.service.listLlmModels(teamId, dto);
     return new SuccessListResponse({
       data: list,
       total: totalCount,
