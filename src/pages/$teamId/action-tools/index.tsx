@@ -20,12 +20,13 @@ export const ActionTools: React.FC = () => {
         assetKey="action-tools"
         assetType="block"
         assetName="执行类工具"
+        isLoadAll
         useUgcFetcher={useUgcActionTools}
         preloadUgcFetcher={preloadUgcActionTools}
         createColumns={() => createActionToolsColumns({ hooks: { navigate } })}
         renderOptions={{
           subtitle: (item) => {
-            const estimateTime = item.extra?.estimateTime;
+            const estimateTime = item.extra ? item.extra.estimateTime : undefined;
             const pricing = item.pricing;
             return (
               <span className="line-clamp-1">
