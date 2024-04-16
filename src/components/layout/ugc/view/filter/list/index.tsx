@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { Trash } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { removeAssetFilterRules, useAssetFilterRuleList } from '@/apis/ugc';
+import { removeAssetFilterRules, useAssetFilterRuleList, useAssetPublicCategories } from '@/apis/ugc';
 import { IAssetPublicCategory, IListUgcDto } from '@/apis/ugc/typings.ts';
 import { BLOCK_CATEGORY_SORT_INDEX_LIST } from '@/apis/workflow/consts.ts';
 import { IAppCategoryNameMap } from '@/apis/workflow/typings';
@@ -35,11 +35,12 @@ export interface IUgcViewFilterListProps extends IUgcCustomProps {
 export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
   assetType,
   assetKey,
-  isMarket,
+  isMarket = false,
   onChange,
   filterButtonProps,
 }) => {
-  const { data: assetFilterRules, mutate } = useAssetFilterRuleList(assetType);
+  const { data: assetFilterRules, mutate: mutateAssetFilterRules } = useAssetFilterRuleList(assetType, isMarket);
+  const { data: assetPublicCategories } = useAssetPublicCategories(assetType, isMarket);
 
   const filterAreaVisible = !NON_FILTER_TYPE_LIST.includes(assetType) && !isMarket;
   const [current, setCurrent] = useState('all');
@@ -70,6 +71,10 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
       if (assetType === 'block') {
         onChange({
           cate: current,
+        });
+      } else if (isMarket) {
+        onChange({
+          categoryIds: [current],
         });
       } else if (assetFilterRules) {
         const rule = assetFilterRules.find((r) => r._id === current);
@@ -103,12 +108,14 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
       </div>
       <ScrollArea className="h-[calc(100vh-14rem)]">
         <div className="flex flex-col gap-2">
-          {assetFilterRules &&
-            (assetType === 'block'
-              ? blockCate
-              : searchValue != ''
-                ? assetFilterRules.filter((r) => r.name.includes(searchValue))
-                : assetFilterRules
+          {(assetFilterRules || assetPublicCategories) &&
+            (isMarket && assetPublicCategories
+              ? assetPublicCategories
+              : assetType === 'block'
+                ? blockCate
+                : searchValue != '' && assetFilterRules
+                  ? assetFilterRules.filter((r) => r.name.includes(searchValue))
+                  : assetFilterRules || []
             ).map((rule, index) => {
               return (
                 <div
@@ -121,7 +128,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                 >
                   <div className="flex w-full items-center justify-between px-4 text-xs">
                     <span>{rule.name}</span>
-                    {assetType != 'block' && (
+                    {assetType != 'block' && !isMarket && (
                       <AlertDialog>
                         <Tooltip content="删除">
                           <TooltipTrigger asChild>
@@ -155,7 +162,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                                 toast.promise(removeAssetFilterRules(rule._id), {
                                   loading: '操作中...',
                                   success: () => {
-                                    void mutate();
+                                    void mutateAssetFilterRules();
                                     current === rule._id && setCurrent('all');
                                     return '删除成功';
                                   },

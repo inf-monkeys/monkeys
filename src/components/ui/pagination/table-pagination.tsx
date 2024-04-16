@@ -56,7 +56,6 @@ export const TablePagination: React.FC<ITablePaginationProps> = ({
       });
     },
   });
-  console.log(isLoadAll);
   return (
     <div className={cn('flex h-[36px] justify-between py-1', className)}>
       <div className="ml-4 flex items-center gap-2 text-nowrap">
