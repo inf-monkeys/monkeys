@@ -2,11 +2,11 @@ import React from 'react';
 
 import { useSWRConfig } from 'swr';
 
-import { Eraser, Trash } from 'lucide-react';
+import { Trash } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { deleteAllKnowledgeBaseData, deleteKnowledgeBase } from '@/apis/vector';
+import { deleteKnowledgeBase } from '@/apis/vector';
 import { IKnowledgeBaseFrontEnd } from '@/apis/vector/typings.ts';
 import {
   AlertDialog,
@@ -50,21 +50,6 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
     });
   };
 
-  const handleClear = () => {
-    toast(`确定要清空${item.displayName}数据集吗？`, {
-      action: {
-        label: '确定',
-        onClick: () => {
-          toast.promise(deleteAllKnowledgeBaseData(item.name), {
-            loading: '正在清空数据集...',
-            success: '数据集清空成功',
-            error: '数据集清空失败',
-          });
-        },
-      },
-    });
-  };
-
   return (
     <AlertDialog>
       <DropdownMenu>
@@ -87,12 +72,6 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
           <DropdownMenuLabel>数据集操作</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
-          <DropdownMenuItem className="text-red-10" onClick={handleClear}>
-            <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
-              <Eraser size={15} />
-            </DropdownMenuShortcut>
-            清空数据集
-          </DropdownMenuItem>
           <AlertDialogTrigger asChild>
             <DropdownMenuItem className="text-red-10">
               <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">

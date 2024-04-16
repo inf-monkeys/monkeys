@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { ColumnDef } from '@tanstack/react-table';
 
 import { IVectorRecord } from '@/apis/vector/typings.ts';
@@ -13,7 +11,7 @@ export const columns: ColumnDef<IVectorRecord>[] = [
     cell: ({ row }) => <span>{row.index + 1}</span>,
   },
   {
-    accessorKey: '_source.page_content',
+    accessorKey: 'page_content',
     header: '文本',
     id: 'text',
     cell: ({ cell }) => {
@@ -22,7 +20,7 @@ export const columns: ColumnDef<IVectorRecord>[] = [
     },
   },
   {
-    accessorKey: '_source.page_content',
+    accessorKey: 'page_content',
     header: '字符数',
     id: 'charCount',
     size: 24,

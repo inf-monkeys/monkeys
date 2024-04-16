@@ -6,7 +6,7 @@ import { CellContext } from '@tanstack/table-core';
 import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { deleteVectorData, updateVectorData } from '@/apis/vector';
+import { deleteSegment, updateSegment } from '@/apis/vector';
 import { IVectorRecord } from '@/apis/vector/typings.ts';
 import { ParagraphEditor } from '@/components/layout/ugc-pages/text-data/text-detail/paragraph-editor.tsx';
 import {
@@ -33,7 +33,7 @@ export const ParagraphOperateCell: React.FC<IParagraphOperateCellProps> = ({ cel
   const value = (cell.getValue() as IVectorRecord) ?? {};
 
   const handleOnConfirm = (paragraph: string, metadata: Record<string, unknown>) => {
-    toast.promise(updateVectorData(textId, value._id, { text: paragraph, metadata }), {
+    toast.promise(updateSegment(textId, value.pk, { text: paragraph, metadata }), {
       loading: '更新中',
       success: () => {
         setVisible(false);
@@ -48,7 +48,7 @@ export const ParagraphOperateCell: React.FC<IParagraphOperateCellProps> = ({ cel
   };
 
   const handleDelete = () => {
-    toast.promise(deleteVectorData(textId, value._id), {
+    toast.promise(deleteSegment(textId, value.pk), {
       loading: '删除中',
       success: () => {
         setVisible(false);
@@ -73,8 +73,8 @@ export const ParagraphOperateCell: React.FC<IParagraphOperateCellProps> = ({ cel
       <ParagraphEditor
         visible={visible}
         setVisibility={setVisible}
-        paragraph={value?._source?.page_content ?? ''}
-        metadata={value?._source?.metadata ?? {}}
+        paragraph={value?.page_content ?? ''}
+        metadata={value?.metadata ?? {}}
         onConfirm={handleOnConfirm}
       >
         <Button size="small" variant="outline">
