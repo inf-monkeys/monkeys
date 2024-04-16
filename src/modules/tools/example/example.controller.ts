@@ -45,6 +45,28 @@ export class ExampleToolsController {
   @MonkeyToolDisplayName('Add Two Numbers')
   @MonkeyToolCategories(['math'])
   @MonkeyToolIcon('emoji:👧:#ceefc5')
+  @MonkeyToolInput([
+    {
+      name: 'numA',
+      displayName: 'Number A',
+      required: true,
+      type: 'number',
+    },
+    {
+      name: 'numB',
+      displayName: 'Number B',
+      required: true,
+      type: 'number',
+    },
+  ])
+  @MonkeyToolOutput([
+    {
+      name: 'result',
+      displayName: 'Result',
+      required: true,
+      type: 'number',
+    },
+  ])
   public async addTwoNumberExample(@Req() req: IRequest, @Body() body: AddTwoNumberDto) {
     const { numA, numB } = body;
     return {
