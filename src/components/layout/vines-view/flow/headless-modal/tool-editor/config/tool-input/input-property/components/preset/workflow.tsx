@@ -61,7 +61,7 @@ export const WorkflowPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInp
 
   return (
     <AnimatePresence>
-      {!isLoading ? (
+      {isLoading ? (
         <motion.div
           key="WorkflowPresets_loading"
           className="absolute left-0 top-0 flex h-8 w-full items-center justify-center"
