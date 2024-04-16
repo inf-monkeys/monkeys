@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { useTool } from '@/apis/tools';
 import { useSearchReferenceWorkflows } from '@/apis/ugc';
@@ -13,6 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.t
 interface IActionToolDetailProps {}
 
 export const ActionToolDetail: React.FC<IActionToolDetailProps> = () => {
+  const navigate = useNavigate();
+
   const { actionToolName } = Route.useParams();
 
   const { data: blockData } = useTool(actionToolName);
@@ -34,7 +36,7 @@ export const ActionToolDetail: React.FC<IActionToolDetailProps> = () => {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="info">
-          <UgcDetailInfo columns={createActionToolsColumns} data={blockData} />
+          <UgcDetailInfo columns={createActionToolsColumns({ hooks: { navigate } })} data={blockData} />
         </TabsContent>
         <TabsContent value="workflows">
           <UgcDetailWorkflows data={blockWorkflowRefData ?? []} />

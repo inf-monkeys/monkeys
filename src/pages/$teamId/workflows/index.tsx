@@ -117,7 +117,7 @@ export const Workflows: React.FC = () => {
         assetName="工作流"
         useUgcFetcher={useUgcWorkflows}
         preloadUgcFetcher={preloadUgcWorkflows}
-        createColumns={() => createWorkflowsColumns}
+        createColumns={() => createWorkflowsColumns()}
         renderOptions={{
           subtitle: (item) => (
             <div className="flex gap-1">

@@ -21,7 +21,7 @@ export const TextModelStore: React.FC = () => {
         isMarket
         useUgcFetcher={useUgcTextModelStore}
         preloadUgcFetcher={preloadUgcTextModelStore}
-        createColumns={() => createTextModelStoreColumns}
+        createColumns={() => createTextModelStoreColumns()}
         renderOptions={{
           subtitle: (item) => (
             <div className="flex gap-1">

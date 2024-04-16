@@ -20,7 +20,7 @@ export const TextModels: React.FC = () => {
         assetName="语言模型"
         useUgcFetcher={useUgcTextModels}
         preloadUgcFetcher={preloadUgcTextModels}
-        createColumns={() => createTextModelsColumns}
+        createColumns={() => createTextModelsColumns()}
         renderOptions={{
           subtitle: (item) => {
             return (

@@ -9,7 +9,7 @@ import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/compone
 
 const columnHelper = createColumnHelper<IAssetItem<ITableData>>();
 
-export const createTableDataColumns = [
+export const createTableDataColumns = () => [
   columnHelper.accessor('iconUrl', {
     id: 'logo',
     header: '图标',

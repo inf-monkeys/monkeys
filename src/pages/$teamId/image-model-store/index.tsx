@@ -21,7 +21,7 @@ export const ImageModelStore: React.FC = () => {
         isMarket
         useUgcFetcher={useUgcImageModelStore}
         preloadUgcFetcher={preloadUgcImageModelStore}
-        createColumns={() => createImageModelStoreColumns}
+        createColumns={() => createImageModelStoreColumns()}
         renderOptions={{
           subtitle: (item) => (
             <div className="flex gap-1">

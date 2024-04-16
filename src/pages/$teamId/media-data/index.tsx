@@ -20,7 +20,7 @@ export const MediaData: React.FC = () => {
         assetName="富媒体数据"
         useUgcFetcher={useUgcMediaData}
         preloadUgcFetcher={preloadUgcMediaData}
-        createColumns={() => createMediaDataColumns}
+        createColumns={() => createMediaDataColumns()}
         renderOptions={{
           subtitle: (item) => (
             <div className="flex gap-1">
