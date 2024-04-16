@@ -1,7 +1,8 @@
+import { ListDto } from '@/common/dto/list.dto';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
-import { SuccessResponse } from '@/common/response';
+import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { CreateKnowledgeBaseDto } from './dto/req/create-knowledge-base.req.dto';
 import { UpdateKnowledgeBaseDto } from './dto/req/update-knowledge-base.req.dto';
 import { KnowledgeBaseService } from './knowledge-base.service';
@@ -12,11 +13,14 @@ export class KnowledgeBaseController {
   constructor(private readonly service: KnowledgeBaseService) {}
 
   @Get('')
-  public async listKnowledgeBases(@Req() req: IRequest) {
+  public async listKnowledgeBases(@Req() req: IRequest, @Query() dto: ListDto) {
     const { teamId } = req;
-    const data = await this.service.listKnowledgeBases(teamId);
-    return new SuccessResponse({
-      data,
+    const { list, totalCount } = await this.service.listKnowledgeBases(teamId, dto);
+    return new SuccessListResponse({
+      data: list,
+      total: totalCount,
+      page: dto.page,
+      limit: dto.limit,
     });
   }
 

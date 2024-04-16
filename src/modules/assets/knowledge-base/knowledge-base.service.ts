@@ -1,3 +1,4 @@
+import { ListDto } from '@/common/dto/list.dto';
 import { KnowledgeBaseRepository } from '@/database/repositories/knowledge-base.repository';
 import { ToolsForwardService } from '@/modules/tools/tools.forward.service';
 import { Injectable } from '@nestjs/common';
@@ -11,8 +12,8 @@ export class KnowledgeBaseService {
     private readonly toolsForwardService: ToolsForwardService,
   ) {}
 
-  public async listKnowledgeBases(teamId: string) {
-    return await this.knowledgeBaseRepository.listKnowledgeBases(teamId);
+  public async listKnowledgeBases(teamId: string, dto: ListDto) {
+    return await this.knowledgeBaseRepository.listKnowledgeBases(teamId, dto);
   }
 
   public async getKnowledgeBaseByName(teamId: string, knowledgeBaseName: string) {
