@@ -2,6 +2,7 @@ import { ListDto } from '@/common/dto/list.dto';
 import { KnowledgeBaseRepository } from '@/database/repositories/knowledge-base.repository';
 import { ToolsForwardService } from '@/modules/tools/tools.forward.service';
 import { Injectable } from '@nestjs/common';
+import { CreateKnowledgeBaseDto } from './dto/req/create-knowledge-base.req.dto';
 
 @Injectable()
 export class KnowledgeBaseService {
@@ -16,11 +17,11 @@ export class KnowledgeBaseService {
     return await this.knowledgeBaseRepository.listKnowledgeBases(teamId, dto);
   }
 
-  public async getKnowledgeBaseByName(teamId: string, knowledgeBaseName: string) {
-    return await this.knowledgeBaseRepository.getKnowledgeBaseByName(teamId, knowledgeBaseName);
+  public async getKnowledgeBaseByName(teamId: string, knowledgeBaseId: string) {
+    return await this.knowledgeBaseRepository.getKnowledgeBaseByUUID(teamId, knowledgeBaseId);
   }
 
-  public async createKnowledgeBase(teamId: string, creatorUserId: string, body: any) {
+  public async createKnowledgeBase(teamId: string, creatorUserId: string, body: CreateKnowledgeBaseDto) {
     // Create knowledge base in tools
     const data = await this.toolsForwardService.request<{
       id: string;
@@ -33,7 +34,7 @@ export class KnowledgeBaseService {
     // Create knowledge base in database
     const { id, dimension } = data;
     return await this.knowledgeBaseRepository.createKnowledgeBase(teamId, creatorUserId, {
-      name: id,
+      uuid: id,
       dimension,
       ...body,
     });

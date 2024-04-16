@@ -15,7 +15,7 @@ export class KnowLedgeBaseEntity extends BaseAssetEntity {
   assetType: AssetType = 'knowledge-base';
 
   @Column({})
-  name: string;
+  uuid: string;
 
   @Column({
     name: 'embedding_model',
