@@ -11,7 +11,7 @@ import { SdModelAssetRepositroy } from './repositories/assets-sd-model.repositor
 import { WorkflowAssetRepositroy } from './repositories/assets-workflow.respository';
 import { CredentialsRepository } from './repositories/credential.repository';
 import { KnowledgeBaseRepository } from './repositories/knowledge-base.repository';
-import { MediaRepository } from './repositories/media.repository';
+import { MediaFileRepository } from './repositories/media.repository';
 import { SystemConfigurationRepository } from './repositories/system-configuration.repository';
 import { TeamRepository } from './repositories/team.repository';
 import { ToolsRepository } from './repositories/tools.repository';
@@ -36,7 +36,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     KnowledgeBaseAssetRepositroy,
     MediaFileAssetRepositroy,
     WorkflowAssetRepositroy,
-    MediaRepository,
+    MediaFileRepository,
     TriggerTypeRepository,
     KnowledgeBaseRepository,
   ],
@@ -55,7 +55,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     KnowledgeBaseAssetRepositroy,
     MediaFileAssetRepositroy,
     WorkflowAssetRepositroy,
-    MediaRepository,
+    MediaFileRepository,
     TriggerTypeRepository,
     KnowledgeBaseRepository,
   ],

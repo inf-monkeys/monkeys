@@ -1,19 +1,29 @@
+import { ListDto } from '@/common/dto/list.dto';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
-import { SuccessResponse } from '@/common/response';
+import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { Body, Controller, Get, NotFoundException, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateRichMediaDto } from './dto/req/create-rich-media.dto';
-import { MediaService } from './media.service';
+import { MediaFileService } from './media.service';
 
 @ApiTags('Resources')
-@Controller('/medias')
+@Controller('/media-files')
 @UseGuards(CompatibleAuthGuard)
-export class ResourceCrudController {
-  constructor(protected readonly service: MediaService) {}
+export class MediaFileCrudController {
+  constructor(protected readonly service: MediaFileService) {}
 
   @Get('')
-  public async listRichMedias(@Req() request: IRequest) {}
+  public async listRichMedias(@Req() request: IRequest, @Query() dto: ListDto) {
+    const { teamId } = request;
+    const { list, totalCount } = await this.service.listRichMedias(teamId, dto);
+    return new SuccessListResponse({
+      data: list,
+      total: totalCount,
+      page: dto.page,
+      limit: dto.limit,
+    });
+  }
 
   @Post('')
   public async createRichMedia(@Req() request: IRequest, @Body() body: CreateRichMediaDto) {

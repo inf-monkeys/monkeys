@@ -1,3 +1,4 @@
+import { ListDto } from '@/common/dto/list.dto';
 import { generateDbId } from '@/common/utils';
 import { MediaSource } from '@/database/entities/assets/media/media-file';
 import { CreateRichMediaDto } from '@/modules/assets/media/dto/req/create-rich-media.dto';
@@ -5,13 +6,23 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MediaFileEntity } from '../entities/assets/media/media-file';
+import { MediaFileAssetRepositroy } from './assets-media-file.repository';
 
 @Injectable()
-export class MediaRepository {
+export class MediaFileRepository {
   constructor(
     @InjectRepository(MediaFileEntity)
     private readonly mediaFileEntity: Repository<MediaFileEntity>,
+    private readonly mediaFileAssetRepositroy: MediaFileAssetRepositroy,
   ) {}
+
+  public async listRichMedias(teamId: string, dto: ListDto) {
+    return await this.mediaFileAssetRepositroy.listAssets('media-file', teamId, dto, {
+      withTags: true,
+      withTeam: true,
+      withUser: true,
+    });
+  }
 
   public async getMediaById(id: string) {
     return await this.mediaFileEntity.findOne({
