@@ -49,11 +49,11 @@ export const preloadUgcWorkflows = (dto: IListUgcDto) => preloadUgcItems<MonkeyW
 export const useUgcActionTools = (dto: IListUgcDto) => useUgcItems<IWorkflowBlock>(dto, '/api/blocks/list');
 export const preloadUgcActionTools = (dto: IListUgcDto) => preloadUgcItems<IWorkflowBlock>(dto, '/api/blocks/list');
 
-export const useUgcTextModels = (dto: IListUgcDto) => useUgcItems<ILLMModel>(dto, '/api/llm/models');
-export const preloadUgcTextModels = (dto: IListUgcDto) => preloadUgcItems<ILLMModel>(dto, '/api/llm/models');
+export const useUgcTextModels = (dto: IListUgcDto) => useUgcItems<ILLMModel>(dto, '/api/llm-models');
+export const preloadUgcTextModels = (dto: IListUgcDto) => preloadUgcItems<ILLMModel>(dto, '/api/llm-models');
 
-export const useUgcImageModels = (dto: IListUgcDto) => useUgcItems<ISDModel>(dto, '/api/sd/models');
-export const preloadUgcImageModels = (dto: IListUgcDto) => preloadUgcItems<ISDModel>(dto, '/api/sd/models');
+export const useUgcImageModels = (dto: IListUgcDto) => useUgcItems<ISDModel>(dto, '/api/sd-models');
+export const preloadUgcImageModels = (dto: IListUgcDto) => preloadUgcItems<ISDModel>(dto, '/api/sd-models');
 
 export const useUgcKnowledgeBases = (dto: IListUgcDto) =>
   useUgcItems<IKnowledgeBaseFrontEnd>(dto, '/api/knowledge-bases');
@@ -61,8 +61,8 @@ export const useUgcKnowledgeBases = (dto: IListUgcDto) =>
 export const preloadKnowledgeBases = (dto: IListUgcDto) =>
   preloadUgcItems<IKnowledgeBaseFrontEnd>(dto, '/api/knowledge-bases');
 
-export const useUgcTableData = (dto: IListUgcDto) => useUgcItems<ITableData>(dto, '/api/database');
-export const preloadUgcTableData = (dto: IListUgcDto) => preloadUgcItems<ITableData>(dto, '/api/database');
+export const useUgcTableData = (dto: IListUgcDto) => useUgcItems<ITableData>(dto, '/api/knowledge-bases-sql');
+export const preloadUgcTableData = (dto: IListUgcDto) => preloadUgcItems<ITableData>(dto, '/api/knowledge-bases-sql');
 
 export const useUgcMediaData = (dto: IListUgcDto) => useUgcItems<IMediaData>(dto, '/api/media-files', 'GET');
 export const preloadUgcMediaData = (dto: IListUgcDto) => preloadUgcItems<IMediaData>(dto, '/api/media-files', 'GET');
@@ -72,11 +72,11 @@ export const useUgcApplicationStore = (dto: IListUgcDto) =>
 export const preloadUgcApplicationStore = (dto: IListUgcDto) =>
   preloadUgcItems<IApplicationStoreItemDetail>(dto, '/api/templates');
 
-export const useUgcTextModelStore = (dto: IListUgcDto) => useUgcItems<ILLMModel>(dto, '/api/llm/models/public');
-export const preloadUgcTextModelStore = (dto: IListUgcDto) => preloadUgcItems<ILLMModel>(dto, '/api/llm/models/public');
+export const useUgcTextModelStore = (dto: IListUgcDto) => useUgcItems<ILLMModel>(dto, '/api/llm-models/public');
+export const preloadUgcTextModelStore = (dto: IListUgcDto) => preloadUgcItems<ILLMModel>(dto, '/api/llm-models/public');
 
-export const useUgcImageModelStore = (dto: IListUgcDto) => useUgcItems<ISDModel>(dto, '/api/sd/models/public');
-export const preloadUgcImageModelStore = (dto: IListUgcDto) => preloadUgcItems<ISDModel>(dto, '/api/sd/models/public');
+export const useUgcImageModelStore = (dto: IListUgcDto) => useUgcItems<ISDModel>(dto, '/api/sd-models/public');
+export const preloadUgcImageModelStore = (dto: IListUgcDto) => preloadUgcItems<ISDModel>(dto, '/api/sd-models/public');
 
 export const useAssetTagList = (assetKey?: string) =>
   useSWR<string[] | undefined>(assetKey ? `/api/assets/${assetKey}/tags` : null, vinesFetcher(), {
