@@ -7,30 +7,56 @@ export class KnowledgeBaseService {
   private KNOWLEDGE_BASE_NAMESPACE = 'monkey_tools_knowledge_base';
 
   constructor(
-    private readonly textCollectionsRepository: KnowledgeBaseRepository,
+    private readonly knowledgeBaseRepository: KnowledgeBaseRepository,
     private readonly toolsForwardService: ToolsForwardService,
   ) {}
 
   public async listKnowledgeBases(teamId: string) {
-    return await this.textCollectionsRepository.listKnowledgeBases(teamId);
+    return await this.knowledgeBaseRepository.listKnowledgeBases(teamId);
+  }
+
+  public async getKnowledgeBaseByName(teamId: string, knowledgeBaseName: string) {
+    return await this.knowledgeBaseRepository.getKnowledgeBaseByName(teamId, knowledgeBaseName);
   }
 
   public async createKnowledgeBase(teamId: string, creatorUserId: string, body: any) {
     // Create knowledge base in tools
-    const data = await this.toolsForwardService.request(this.KNOWLEDGE_BASE_NAMESPACE, {
+    const data = await this.toolsForwardService.request<{
+      id: string;
+      dimension: number;
+    }>(this.KNOWLEDGE_BASE_NAMESPACE, {
       url: '/knowledge-bases',
       method: 'POST',
       data: body,
     });
-    if (!data?.success) {
-      throw new Error('Failed to create knowledge base');
-    }
     // Create knowledge base in database
-    const { name, dimension } = data;
-    return await this.textCollectionsRepository.createKnowledgeBase(teamId, creatorUserId, {
-      name,
+    const { id, dimension } = data;
+    return await this.knowledgeBaseRepository.createKnowledgeBase(teamId, creatorUserId, {
+      name: id,
       dimension,
       ...body,
     });
+  }
+
+  public async updateKnowledgeBase(
+    teamId: string,
+    knowledgeBaseName: string,
+    updates: {
+      displayName?: string;
+      description?: string;
+      iconUrl?: string;
+    },
+  ) {
+    return await this.knowledgeBaseRepository.updateKnowledgeBase(teamId, knowledgeBaseName, updates);
+  }
+
+  public async deleteKnowledgeBase(teamId: string, knowledgeBaseName: string) {
+    // Delete knowledge base in tools
+    await this.toolsForwardService.request(this.KNOWLEDGE_BASE_NAMESPACE, {
+      url: `/knowledge-bases/${knowledgeBaseName}`,
+      method: 'DELETE',
+    });
+    // Delete knowledge base in database
+    await this.knowledgeBaseRepository.deleteKnowledgeBase(teamId, knowledgeBaseName);
   }
 }
