@@ -18,7 +18,7 @@ export const TableData: React.FC = () => {
         assetName="表格数据"
         useUgcFetcher={useUgcTableData}
         preloadUgcFetcher={preloadUgcTableData}
-        createColumns={() => createTableDataColumns}
+        createColumns={() => createTableDataColumns()}
         renderOptions={{
           subtitle: (item) => (
             <div className="flex gap-1">

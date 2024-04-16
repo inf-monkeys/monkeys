@@ -22,7 +22,7 @@ export const ActionTools: React.FC = () => {
         assetName="执行类工具"
         useUgcFetcher={useUgcActionTools}
         preloadUgcFetcher={preloadUgcActionTools}
-        createColumns={() => createActionToolsColumns}
+        createColumns={() => createActionToolsColumns({ hooks: { navigate } })}
         renderOptions={{
           subtitle: (item) => {
             const estimateTime = item.extra?.estimateTime;

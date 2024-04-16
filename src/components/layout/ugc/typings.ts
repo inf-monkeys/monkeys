@@ -14,6 +14,10 @@ export interface IUgcViewItemProps<E extends object> {
   index: number;
 }
 
+export interface IUgcCreateColumnsProps {
+  hooks?: Record<string, any>;
+}
+
 export type IOperateAreaProps<E> = (
   item: IAssetItem<E>,
   trigger: React.ReactNode,

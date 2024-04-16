@@ -1,13 +1,24 @@
+import React from 'react';
+
+import { UseNavigateResult } from '@tanstack/react-router';
+
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { IKnowledgeBaseFrontEnd } from '@/apis/vector/typings.ts';
+import { IVectorFrontEnd } from '@/apis/vector/typings.ts';
+import { IUgcCreateColumnsProps } from '@/components/layout/ugc/typings.ts';
 import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
 
-const columnHelper = createColumnHelper<IAssetItem<IKnowledgeBaseFrontEnd>>();
+const columnHelper = createColumnHelper<IAssetItem<IVectorFrontEnd>>();
 
-export const createTextDataColumns = [
+interface ICreateTextDataColumnsProps extends IUgcCreateColumnsProps {
+  hooks: {
+    navigate: UseNavigateResult<string>;
+  };
+}
+
+export const createTextDataColumns = ({ hooks }: ICreateTextDataColumnsProps) => [
   columnHelper.accessor('iconUrl', {
     id: 'logo',
     header: '图标',
@@ -17,10 +28,17 @@ export const createTextDataColumns = [
   columnHelper.accessor('displayName', {
     id: 'title',
     header: '名称',
-    cell: ({ getValue }) => (
-      <a className="transition-colors hover:text-primary-500" target="_blank" rel="noreferrer">
+    cell: ({ getValue, row }) => (
+      <span
+        className="cursor-pointer transition-colors hover:text-primary-500"
+        onClick={() => {
+          void hooks.navigate({
+            to: `/$teamId/text-data/${row.original.name}`,
+          });
+        }}
+      >
         {getValue() as string}
-      </a>
+      </span>
     ),
   }),
   columnHelper.accessor('user', {

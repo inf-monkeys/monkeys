@@ -8,8 +8,7 @@ import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
 
 const columnHelper = createColumnHelper<IAssetItem<IApplicationStoreItemDetail>>();
-
-export const createApplicationStoreColumns = [
+export const createApplicationStoreColumns = () => [
   columnHelper.accessor('iconUrl', {
     id: 'logo',
     header: '图标',

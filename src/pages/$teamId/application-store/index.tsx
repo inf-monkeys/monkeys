@@ -21,7 +21,7 @@ export const ApplicationStore: React.FC = () => {
         isMarket
         useUgcFetcher={useUgcApplicationStore}
         preloadUgcFetcher={preloadUgcApplicationStore}
-        createColumns={() => createApplicationStoreColumns}
+        createColumns={() => createApplicationStoreColumns()}
         renderOptions={{
           subtitle: (item) => (
             <div className="flex gap-1">

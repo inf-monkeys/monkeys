@@ -22,7 +22,7 @@ export const TextData: React.FC = () => {
         assetName="文本数据"
         useUgcFetcher={useUgcVectors}
         preloadUgcFetcher={preloadUgcVectors}
-        createColumns={() => createTextDataColumns}
+        createColumns={() => createTextDataColumns({ hooks: { navigate } })}
         renderOptions={{
           subtitle: (item) => (
             <div className="flex gap-1">
