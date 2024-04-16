@@ -39,7 +39,7 @@ export const TextData: React.FC = () => {
         )}
         onItemClick={(item) => {
           void navigate({
-            to: `/$teamId/text-data/${item.name}`,
+            to: `/$teamId/text-data/${item.uuid}`,
           });
         }}
       />

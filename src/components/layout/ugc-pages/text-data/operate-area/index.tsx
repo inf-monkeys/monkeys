@@ -40,7 +40,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
   const { mutate } = useSWRConfig();
 
   const handelDelete = () => {
-    toast.promise(deleteKnowledgeBase(item.name), {
+    toast.promise(deleteKnowledgeBase(item.uuid), {
       loading: '正在删除数据集...',
       success: () => {
         void mutate((key) => typeof key === 'string' && key.startsWith('/api/vector/collections'));

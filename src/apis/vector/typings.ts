@@ -7,7 +7,7 @@ export interface IKnowledgeBase {
   id: string;
   createTime: number;
   dimension: number;
-  name: string;
+  uuid: string;
   displayName: string;
   embeddingModel: string;
   description?: string;

@@ -17,7 +17,7 @@ interface IBasicInfoProps {
 
 export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
   const { data: detail, mutate } = useKnowledgeBase(textId);
-  const { trigger } = useUpdateKnowledgeBase(detail?.name ?? '');
+  const { trigger } = useUpdateKnowledgeBase(detail?.uuid ?? '');
 
   const handleUpdate = (key: string, val: string) => {
     toast.promise(
