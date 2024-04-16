@@ -105,7 +105,7 @@ export const SIDEBAR_MAP: NavItem[] = [
       {
         path: '/$teamId/text-model-store',
         name: 'text-model-store',
-        label: '文本模型市场',
+        label: '语言模型市场',
       },
       {
         path: '/$teamId/image-model-store',
