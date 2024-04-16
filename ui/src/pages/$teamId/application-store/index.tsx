@@ -5,7 +5,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { preloadUgcApplicationStore, useUgcApplicationStore } from '@/apis/ugc';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
-import { createApplicationStoreColumn } from '@/components/layout/ugc-pages/application-store/consts.tsx';
+import { createApplicationStoreColumns } from '@/components/layout/ugc-pages/application-store/consts.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
@@ -21,7 +21,7 @@ export const ApplicationStore: React.FC = () => {
         isMarket
         useUgcFetcher={useUgcApplicationStore}
         preloadUgcFetcher={preloadUgcApplicationStore}
-        createColumns={() => createApplicationStoreColumn}
+        createColumns={() => createApplicationStoreColumns()}
         renderOptions={{
           subtitle: (item) => (
             <div className="flex gap-1">

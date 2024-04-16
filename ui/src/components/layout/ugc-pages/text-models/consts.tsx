@@ -8,7 +8,7 @@ import { RenderDescription, RenderIcon, RenderTime } from '@/components/layout/u
 
 const columnHelper = createColumnHelper<IAssetItem<ILLMModel>>();
 
-export const createTextModelsColumn = [
+export const createTextModelsColumns = () => [
   columnHelper.accessor('iconUrl', {
     id: 'logo',
     header: '图标',

@@ -8,7 +8,7 @@ import { RenderDescription, RenderIcon, RenderTime } from '@/components/layout/u
 
 const columnHelper = createColumnHelper<IAssetItem<ISDModel>>();
 
-export const createImageModelStoreColumns = [
+export const createImageModelStoreColumns = () => [
   columnHelper.accessor('iconUrl', {
     id: 'logo',
     header: '图标',

@@ -5,7 +5,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { preloadUgcTextModels, useUgcTextModels } from '@/apis/ugc';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
-import { createTextModelsColumn } from '@/components/layout/ugc-pages/text-models/consts.tsx';
+import { createTextModelsColumns } from '@/components/layout/ugc-pages/text-models/consts.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
@@ -20,7 +20,7 @@ export const TextModels: React.FC = () => {
         assetName="语言模型"
         useUgcFetcher={useUgcTextModels}
         preloadUgcFetcher={preloadUgcTextModels}
-        createColumns={() => createTextModelsColumn}
+        createColumns={() => createTextModelsColumns()}
         renderOptions={{
           subtitle: (item) => {
             return (

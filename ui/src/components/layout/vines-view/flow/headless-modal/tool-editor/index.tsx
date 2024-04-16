@@ -17,8 +17,6 @@ import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
-import { ToolAdvancedConfig } from './advanced-config';
-
 interface IToolEditorProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ToolEditor: React.FC<IToolEditorProps> = () => {

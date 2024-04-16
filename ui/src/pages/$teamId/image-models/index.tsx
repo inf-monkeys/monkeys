@@ -20,7 +20,7 @@ export const ImageModels: React.FC = () => {
         assetName="图像模型"
         useUgcFetcher={useUgcImageModels}
         preloadUgcFetcher={preloadUgcImageModels}
-        createColumns={() => createImageModelsColumns}
+        createColumns={() => createImageModelsColumns()}
         renderOptions={{
           subtitle: (item) => {
             return (

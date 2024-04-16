@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 
 import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -42,9 +42,15 @@ const TextDataDetail: React.FC = () => {
           <header className="flex items-center gap-4">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Link to="/$teamId/text-data">
-                  <Button icon={<Undo2 />} variant="outline" size="small" className="-m-1 -ml-0.5 -mr-2 scale-85" />
-                </Link>
+                <Button
+                  icon={<Undo2 />}
+                  variant="outline"
+                  size="small"
+                  className="-m-1 -ml-0.5 -mr-2 scale-85"
+                  onClick={() => {
+                    history.back();
+                  }}
+                />
               </TooltipTrigger>
               <TooltipContent>返回</TooltipContent>
             </Tooltip>
