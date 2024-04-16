@@ -60,7 +60,7 @@ export class ToolsForwardService {
     return data;
   }
 
-  public async request(toolNamespace: string, requestConfig: AxiosRequestConfig) {
+  public async request<T>(toolNamespace: string, requestConfig: AxiosRequestConfig) {
     const server = await this.toolsRepository.getServerByNamespace(toolNamespace);
     if (!server) {
       throw new NotFoundException();
@@ -87,7 +87,7 @@ export class ToolsForwardService {
       default:
         break;
     }
-    const { data } = await axios({
+    const { data } = await axios<T>({
       method: requestConfig.method,
       url: this.replaceUrlParams(requestConfig.url, requestConfig.data || requestConfig.params || {}),
       headers: headers,
