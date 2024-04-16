@@ -1,9 +1,10 @@
+import { ListDto } from '@/common/dto/list.dto';
 import { generateDbId } from '@/common/utils';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { KnowLedgeBaseEntity } from '../entities/assets/knowledge-base/knowledge-base.entity';
-import { AssetsCommonRepository } from './assets-common.repository';
+import { KnowledgeBaseAssetRepositroy } from './assets-knowledge-base.repository';
 
 export interface CreateKnowledgeBaseParams {
   name: string;
@@ -19,32 +20,15 @@ export class KnowledgeBaseRepository {
   constructor(
     @InjectRepository(KnowLedgeBaseEntity)
     private readonly knowledgeBaseRepository: Repository<KnowLedgeBaseEntity>,
-    private readonly assetsCommonRepository: AssetsCommonRepository,
+    private readonly knowledgeBaseAssetRepositroy: KnowledgeBaseAssetRepositroy,
   ) {}
 
-  public async listKnowledgeBases(teamId: string) {
-    let result: KnowLedgeBaseEntity[] = [];
-    const teamOwned = await this.knowledgeBaseRepository.find({
-      where: {
-        teamId,
-        isDeleted: false,
-      },
-      order: {
-        createdTimestamp: -1,
-      },
+  public async listKnowledgeBases(teamId: string, dto: ListDto) {
+    return await this.knowledgeBaseAssetRepositroy.listAssets('knowledge-base', teamId, dto, {
+      withTags: true,
+      withTeam: true,
+      withUser: true,
     });
-    result = result.concat(teamOwned);
-    const authorizedIds = await this.assetsCommonRepository.listAuthorizedAssetIds(teamId, 'knowledge-base');
-    if (authorizedIds) {
-      const authorized = await this.knowledgeBaseRepository.find({
-        where: {
-          id: In(authorizedIds),
-          isDeleted: false,
-        },
-      });
-      result = result.concat(authorized);
-    }
-    return result;
   }
 
   public async createKnowledgeBase(teamId: string, creatorUserId: string, params: CreateKnowledgeBaseParams) {

@@ -12,15 +12,18 @@ import { MediaService } from './media.service';
 export class ResourceCrudController {
   constructor(protected readonly service: MediaService) {}
 
+  @Get('')
+  public async listRichMedias(@Req() request: IRequest) {}
+
   @Post('')
-  public async createRichResource(@Req() request: IRequest, @Body() body: CreateRichMediaDto) {
+  public async createRichMedia(@Req() request: IRequest, @Body() body: CreateRichMediaDto) {
     const { teamId, userId } = request;
     const data = await this.service.createMedia(teamId, userId, body);
     return new SuccessResponse({ data });
   }
 
   @Get('md5/:md5')
-  async getResourceByHash(@Param('md5') md5: string, @Req() request: IRequest) {
+  async getRichMediaByHash(@Param('md5') md5: string, @Req() request: IRequest) {
     const { teamId } = request;
     const data = await this.service.getMediaByMd5(teamId, md5);
     if (!data) {
