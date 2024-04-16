@@ -45,7 +45,7 @@ export const UgcViewCard = <E extends object>({
       <CardHeader className="p-4">
         <CardTitle className="flex justify-between gap-3 font-medium">
           <div>{logo}</div>
-          <div className="flex flex-col">
+          <div className="flex max-w-[60%] flex-col">
             <Tooltip content={title}>
               <TooltipTrigger asChild>
                 <span className="line-clamp-1 text-base font-bold">{title}</span>
@@ -53,7 +53,6 @@ export const UgcViewCard = <E extends object>({
             </Tooltip>
             <span className="text-xs">{subtitle}</span>
           </div>
-          <div className="flex-1" />
           <div>
             {operateArea &&
               operateArea(
