@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { ArrowDownUp, Tag, Waypoints } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { useKnowledgeBase, useSearchKnowledgeBase } from '@/apis/vector';
+import { useKnowledgeBase, useKnowledgeBaseMetadataFields, useSearchKnowledgeBase } from '@/apis/vector';
 import { IFullTextSearchParams, IVectorRecord } from '@/apis/vector/typings.ts';
 import { columns } from '@/components/layout/ugc-pages/text-data/text-detail/paragraph-list/consts.tsx';
 import { MetadataFilter } from '@/components/layout/ugc-pages/text-data/text-detail/paragraph-list/metadata-filter.tsx';
@@ -20,9 +20,10 @@ interface IParagraphListProps {
 
 export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
   const { data: detail } = useKnowledgeBase(textId);
+  const { data: fields } = useKnowledgeBaseMetadataFields(textId);
 
-  const [from, setFrom] = useState(30);
-  const [searchMode, setSearchMode] = useState<string>('vector');
+  const [from, setFrom] = useState(0);
+  const [searchMode, setSearchMode] = useState<string>('fulltext');
 
   const [inputData, setInputData] = useState<string>('');
   const [query, setQuery] = useState<string>('');
@@ -31,7 +32,7 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
   const { data, isLoading, mutate } = useSearchKnowledgeBase(
     textId,
     { from, query, metadataFilter },
-    searchMode === 'vector' && !!query,
+    searchMode === 'vector',
   );
 
   const [hits, setHits] = useState<IVectorRecord[]>([]);
@@ -40,7 +41,7 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
   useEffect(() => {
     const fetchHits = data?.hits;
     if (fetchHits) {
-      if (forceClearHits || fetchHits?.[0]?._id !== hits?.[0]?._id) {
+      if (forceClearHits || fetchHits?.[0]?.pk !== hits?.[0]?.pk) {
         setHits(fetchHits);
         setForceClearHits(false);
       } else {
@@ -65,8 +66,8 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
             <SelectValue placeholder="搜索模式" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="vector">向量搜索</SelectItem>
             <SelectItem value="fulltext">全文搜索</SelectItem>
+            <SelectItem value="vector">向量搜索</SelectItem>
           </SelectContent>
         </Select>
         <div className="relative flex flex-1 items-center">
@@ -101,7 +102,7 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
           </Button>
         </div>
         <MetadataFilter
-          metadata={detail?.metadataFields ?? []}
+          metadata={fields ?? []}
           onFilter={(filter) => {
             setMetadataFilter(filter);
             setForceClearHits(true);
@@ -117,9 +118,20 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
           <tfoot className="relative">
             <tr>
               <td className="absolute w-full py-4 text-center">
-                <Button variant="outline" size="small" loading={isLoading} onClick={() => setFrom((prev) => prev + 30)}>
-                  加载更多
-                </Button>
+                {searchMode === 'fulltext' ? (
+                  <Button
+                    variant="outline"
+                    size="small"
+                    loading={isLoading}
+                    onClick={() => setFrom((prev) => prev + 30)}
+                  >
+                    加载更多
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="small">
+                    向量检索只显示前 10 条
+                  </Button>
+                )}
               </td>
             </tr>
           </tfoot>
@@ -138,7 +150,7 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
         <Separator orientation="vertical" className="h-4" />
         <div className="flex items-center gap-2">
           <Tag className="stroke-muted-foreground" size={14} />
-          <span className="text-xs text-muted-foreground">ID：{detail?.name ?? '-'}</span>
+          <span className="text-xs text-muted-foreground">知识库 ID：{detail?.name ?? '-'}</span>
         </div>
       </div>
     </>

@@ -22,7 +22,7 @@ interface ITextDetailHeaderProps {
 export const TextDetailHeader: React.FC<ITextDetailHeaderProps> = ({ textId }) => {
   return (
     <header className="flex w-full items-center justify-end gap-4 px-4 py-2">
-      <TaskList textId={textId} />
+      <TaskList knowledgeBaseId={textId} />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="small" icon={<Import />}>

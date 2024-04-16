@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
-import { useUploadDocumentToVectorCollection } from '@/apis/vector';
+import { useUploadDocumentToKnowledgeBase } from '@/apis/vector';
 import { IUploadDocument } from '@/apis/vector/typings.ts';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox.tsx';
@@ -34,27 +34,28 @@ interface IImportOSSProps {
 
 export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
   const { mutate } = useSWRConfig();
-  const { trigger } = useUploadDocumentToVectorCollection(textId);
+  const { trigger } = useUploadDocumentToKnowledgeBase(textId);
 
   const form = useForm<IImportFromOSS>({
     resolver: zodResolver(importFromOSSSchema),
     defaultValues: {
       ossType: 'TOS',
-      split: {
-        splitType: 'auto-segment',
-        params: {},
-      },
+      ossConfig: {},
+      splitterType: 'auto-segment',
+      splitterConfig: {},
     },
   });
 
   const [visible, setVisible] = useState(false);
 
-  const handleSubmit = form.handleSubmit(({ split, ...ossConfig }) => {
+  const handleSubmit = form.handleSubmit(({ splitterType, splitterConfig, ossType, ossConfig }) => {
     toast.promise(
       trigger({
-        collectionName: textId,
+        knowledgeBaseId: textId,
+        ossType,
         ossConfig,
-        split,
+        splitterConfig,
+        splitterType,
       } as IUploadDocument),
       {
         loading: '正在创建导入文档任务...',
@@ -68,10 +69,7 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
     );
   });
 
-  const {
-    ossType,
-    split: { splitType },
-  } = form.getValues();
+  const { ossType, splitterType } = form.getValues();
   return (
     <Dialog open={visible} onOpenChange={setVisible}>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -169,6 +167,36 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
               />
 
               <FormField
+                name="ossConfig.bucketType"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bucket 类型</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={(val) => {
+                          field.onChange(val);
+                          form.setValue('ossConfig.region', val === 'TOS' ? 'cn-beijing' : void 0);
+                        }}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="请选择 OSS 类型" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="private">私有</SelectItem>
+                          <SelectItem value="public">公开</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
                 name="ossConfig.accessKeyId"
                 control={form.control}
                 render={({ field }) => (
@@ -250,7 +278,7 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
               <Separator className="my-4" />
 
               <FormField
-                name="split.splitType"
+                name="splitterType"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
@@ -260,12 +288,12 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                         onValueChange={(val) => {
                           field.onChange(val);
                           if (val === 'custom-segment') {
-                            form.setValue('split.params.segmentParams.segmentSymbol', '\n');
-                            form.setValue('split.params.segmentParams.segmentMaxLength', 1000);
-                            form.setValue('split.params.segmentParams.segmentChunkOverlap', 10);
-                            form.setValue('split.params.preProcessRules', []);
+                            form.setValue('splitterConfig.separator', '\n\n');
+                            form.setValue('splitterConfig.chunk_size', 500);
+                            form.setValue('splitterConfig.chunk_overlap', 50);
+                            form.setValue('preProcessRules', []);
                           } else {
-                            form.setValue('split.params', {});
+                            form.setValue('splitterConfig', {});
                           }
                         }}
                         defaultValue={field.value}
@@ -282,7 +310,7 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                       </Select>
                     </FormControl>
                     <FormDescription>
-                      {splitType === 'auto-segment'
+                      {splitterType === 'auto-segment'
                         ? '自动设置分段规则与预处理规则，如果不了解这些参数建议选择此项'
                         : '自定义分段规则、分段长度以及预处理规则等参数'}
                     </FormDescription>
@@ -291,10 +319,10 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                 )}
               />
 
-              {splitType === 'custom-segment' && (
+              {splitterType === 'custom-segment' && (
                 <>
                   <FormField
-                    name="split.params.segmentParams.segmentSymbol"
+                    name="splitterConfig.separator"
                     control={form.control}
                     rules={{ required: '请输入分段标识符' }}
                     render={({ field }) => (
@@ -313,7 +341,7 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                     )}
                   />
                   <FormField
-                    name="split.params.segmentParams.segmentMaxLength"
+                    name="splitterConfig.chunk_size"
                     control={form.control}
                     rules={{ required: '请输入分段最大长度' }}
                     render={({ field: { value, onChange } }) => (
@@ -321,7 +349,7 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                         <FormLabel>分段最大长度</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="1000"
+                            placeholder="500"
                             value={value?.toString()}
                             onChange={(val) => onChange(Number(val))}
                             className="grow"
@@ -333,7 +361,7 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                     )}
                   />
                   <FormField
-                    name="split.params.segmentParams.segmentChunkOverlap"
+                    name="splitterConfig.chunk_overlap"
                     control={form.control}
                     rules={{ required: '请输入文本重叠量' }}
                     render={({ field: { value, onChange } }) => (
@@ -341,7 +369,7 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                         <FormLabel>文本重叠量</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="10"
+                            placeholder="50"
                             value={value?.toString()}
                             onChange={(val) => onChange(Number(val))}
                             className="grow"
@@ -353,7 +381,7 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                     )}
                   />
                   <FormField
-                    name="split.params.preProcessRules"
+                    name="preProcessRules"
                     control={form.control}
                     render={() => (
                       <FormItem>
@@ -364,7 +392,7 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                           <FormField
                             key={value}
                             control={form.control}
-                            name="split.params.preProcessRules"
+                            name="preProcessRules"
                             render={({ field }) => {
                               return (
                                 <FormItem key={value} className="flex flex-row items-center space-x-3 space-y-0">

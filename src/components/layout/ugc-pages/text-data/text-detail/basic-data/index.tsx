@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Edit2Icon } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { useKnowledgeBase, useUpdateVectorCollection } from '@/apis/vector';
+import { useKnowledgeBase, useUpdateKnowledgeBase } from '@/apis/vector';
 import { ICreateVectorDB } from '@/apis/vector/typings.ts';
 import { InfoEditor } from '@/components/layout/settings/account/info-editor.tsx';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,7 @@ interface IBasicInfoProps {
 
 export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
   const { data: detail, mutate } = useKnowledgeBase(textId);
-  const { trigger } = useUpdateVectorCollection(detail?.id ?? '');
+  const { trigger } = useUpdateKnowledgeBase(detail?.name ?? '');
 
   const handleUpdate = (key: string, val: string) => {
     toast.promise(
