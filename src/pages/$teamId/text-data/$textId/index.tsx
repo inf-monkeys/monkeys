@@ -8,6 +8,7 @@ import { ChevronRight, Undo2 } from 'lucide-react';
 
 import { useVectorCollection } from '@/apis/vector';
 import { BasicInfo } from '@/components/layout/ugc-pages/text-data/text-detail/basic-data';
+import { DocumentsList } from '@/components/layout/ugc-pages/text-data/text-detail/document-list';
 import { TextDetailHeader } from '@/components/layout/ugc-pages/text-data/text-detail/header';
 import { ParagraphList } from '@/components/layout/ugc-pages/text-data/text-detail/paragraph-list';
 import { RelatedApplication } from '@/components/layout/ugc-pages/text-data/text-detail/related-application';
@@ -22,7 +23,7 @@ const TextDataDetail: React.FC = () => {
   const { textId } = Route.useParams();
   const { data: detail, isLoading } = useVectorCollection(textId);
 
-  const [activeTab, setActiveTab] = useState('paragraph');
+  const [activeTab, setActiveTab] = useState('segments');
   const [visible, setVisible] = useState(true);
 
   const displayName = detail?.displayName;
@@ -58,7 +59,13 @@ const TextDataDetail: React.FC = () => {
           </header>
           <TabsList className="flex !h-auto flex-col gap-2 bg-transparent">
             <TabsTrigger
-              value="paragraph"
+              value="documents"
+              className="h-10 w-full justify-start data-[state=active]:border data-[state=active]:border-input data-[state=active]:font-normal"
+            >
+              文档
+            </TabsTrigger>
+            <TabsTrigger
+              value="segments"
               className="h-10 w-full justify-start data-[state=active]:border data-[state=active]:border-input data-[state=active]:font-normal"
             >
               段落
@@ -118,7 +125,8 @@ const TextDataDetail: React.FC = () => {
                   exit={{ y: -10, opacity: 0 }}
                   transition={{ duration: 0.2 }}
                 >
-                  {activeTab === 'paragraph' && <ParagraphList textId={textId} />}
+                  {activeTab === 'documents' && <DocumentsList knowledgeBaseId={textId} />}
+                  {activeTab === 'segments' && <ParagraphList textId={textId} />}
                   {activeTab === 'basic-info' && <BasicInfo textId={textId} />}
                   {activeTab === 'associated-workflows' && <RelatedApplication textId={textId} />}
                 </motion.div>

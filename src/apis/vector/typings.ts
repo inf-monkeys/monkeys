@@ -1,11 +1,6 @@
-import { IImportFromOSS } from '@/schema/text-dataset/import-oss.ts';
-
 export interface IVectorMetadataField {
   displayName: string;
   name: string;
-  description: string;
-  builtIn: boolean;
-  required: boolean;
 }
 
 export interface IKnowledgeBase {
@@ -20,7 +15,6 @@ export interface IKnowledgeBase {
   engine: string;
   teamId: string;
   creatorUserId: string;
-  metadataFields: IVectorMetadataField[];
   entityCount: number;
   fileCount: number;
   createdTimestamp: number;
@@ -36,6 +30,17 @@ export interface IVectorSupportedEmbeddingModel {
   enabled: boolean;
   link: string;
   model_path: string;
+}
+
+export interface IKnowledgeBaseDocument {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  knowledgeBaseId: string;
+  failedMessage: string;
+  indexStatus: string;
+  filename: string;
+  fileUrl: string;
 }
 
 export interface ICreateVectorDB {
@@ -60,15 +65,9 @@ export interface IFullTextSearchParams {
 }
 
 export interface IVectorRecord {
-  _id: string;
-  _score: string;
-  _index: string;
-  sort: number[];
-  _source: {
-    page_content: string;
-    metadata?: { [x: string]: unknown };
-    embeddings: number[];
-  };
+  page_content: string;
+  metadata?: { [x: string]: unknown };
+  pk: string;
 }
 
 export interface IFullTextSearchResult {
@@ -76,49 +75,55 @@ export interface IFullTextSearchResult {
 }
 
 interface ISplit {
-  splitType: 'json' | 'auto-segment' | 'custom-segment';
-  params: any;
+  splitterType?: 'json' | 'auto-segment' | 'custom-segment';
+  preProcessRules?: string[];
+  splitterConfig?: any;
 }
 
 interface ISplitJSON extends ISplit {
-  splitType: 'json';
-  params: {
+  splitterType: 'json';
+  splitterConfig?: {
     jqSchema: string;
   };
 }
 
-interface ISplitAutoSegment extends ISplit {
-  splitType: 'auto-segment';
+interface IAutoSplitterConfig extends ISplit {
+  splitterConfig: 'auto-segment';
 }
 
-interface ISplitCustomSegment extends ISplit {
-  splitType: 'custom-segment';
-  params: {
-    preProcessRules: string[];
-    segmentParams: {
-      segmentSymbol?: string;
-      segmentMaxLength?: number;
-      segmentChunkOverlap?: number;
-    };
+interface ICustomSplitterConfig extends ISplit {
+  splitterType: 'custom-segment';
+  preProcessRules: string[];
+  splitterConfig: {
+    separator?: string;
+    chunk_size?: number;
+    chunk_overlap?: number;
   };
 }
 
-export type ISplitType = ISplitJSON | ISplitAutoSegment | ISplitCustomSegment;
+export type ISplitType = ISplitJSON | IAutoSplitterConfig | ICustomSplitterConfig;
 
-export interface IUploadDocument {
-  collectionName: string;
+export interface IUploadDocument extends ISplit {
+  knowledgeBaseId: string;
   fileURL?: string;
-  split: ISplitType;
-  ossConfig?: IImportFromOSS;
+  fileName?: string;
+  ossType?: string;
+  ossConfig?: { [x: string]: any };
 }
 
-export interface IVectorTask {
-  createdTimestamp: string;
-  taskId: string;
-  events: {
-    progress: number;
-    message: string;
-    timestamp: number;
-    status: string;
-  }[];
+export enum KnowledgebaseTaskStatus {
+  PENDING = 'PENDING',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+}
+
+export interface IKnowledgebaseTask {
+  createdAt: string;
+  updatedAt: string;
+  id: string;
+  knowledgeBaseId: string;
+  latestMessage: string;
+  progress: number;
+  status: KnowledgebaseTaskStatus;
 }
