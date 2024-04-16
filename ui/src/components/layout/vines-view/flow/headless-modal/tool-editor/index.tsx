@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 
-import { ToolAdvancedConfig } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/advanced-config';
 import { ToolConfig } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config';
 import { Header } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/header';
 import { Button } from '@/components/ui/button';
