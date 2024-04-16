@@ -66,7 +66,7 @@ export const KnowledgeBaseSelector: React.FC<IVinesInputPropertyProps & Omit<IVi
 
   return (
     <AnimatePresence>
-      {!isLoading ? (
+      {isLoading ? (
         <motion.div
           key="textCollectionPresets_loading"
           className="absolute left-0 top-0 flex h-8 w-full items-center justify-center"

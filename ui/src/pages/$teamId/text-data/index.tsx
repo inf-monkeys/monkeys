@@ -3,7 +3,7 @@ import React from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { preloadKnowledgeBases, useUgcKnowledgeBases } from '@/apis/ugc';
-import { createTextDataColumn } from '@/components/layout/ugc-pages/text-data/consts.tsx';
+import { createTextDataColumns } from '@/components/layout/ugc-pages/text-data/consts.tsx';
 import { CreateDataset } from '@/components/layout/ugc-pages/text-data/create-dataset';
 import { OperateArea } from '@/components/layout/ugc-pages/text-data/operate-area';
 import { UgcView } from '@/components/layout/ugc/view';
@@ -22,7 +22,7 @@ export const TextData: React.FC = () => {
         assetName="文本数据"
         useUgcFetcher={useUgcKnowledgeBases}
         preloadUgcFetcher={preloadKnowledgeBases}
-        createColumns={() => createTextDataColumn}
+        createColumns={() => createTextDataColumns({ hooks: { navigate } })}
         renderOptions={{
           subtitle: (item) => (
             <div className="flex gap-1">

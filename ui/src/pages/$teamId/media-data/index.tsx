@@ -5,7 +5,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { preloadUgcMediaData, useUgcMediaData } from '@/apis/ugc';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
-import { createMediaDataColumn } from '@/components/layout/ugc-pages/media-data/consts.tsx';
+import { createMediaDataColumns } from '@/components/layout/ugc-pages/media-data/consts.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
@@ -20,7 +20,7 @@ export const MediaData: React.FC = () => {
         assetName="富媒体数据"
         useUgcFetcher={useUgcMediaData}
         preloadUgcFetcher={preloadUgcMediaData}
-        createColumns={() => createMediaDataColumn}
+        createColumns={() => createMediaDataColumns()}
         renderOptions={{
           subtitle: (item) => (
             <div className="flex gap-1">
