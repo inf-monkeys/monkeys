@@ -43,9 +43,9 @@ export const UgcViewCard = <E extends object>({
       }
     >
       <CardHeader className="p-4">
-        <CardTitle className="flex justify-between gap-3 font-medium">
+        <CardTitle className={cn('flex gap-3 font-medium', operateArea && 'justify-between')}>
           <div>{logo}</div>
-          <div className="flex max-w-[55%] flex-col">
+          <div className={cn('flex flex-col', operateArea && 'max-w-[55%]')}>
             <Tooltip content={title}>
               <TooltipTrigger asChild>
                 <span className="line-clamp-1 text-base font-bold">{title}</span>
@@ -53,15 +53,18 @@ export const UgcViewCard = <E extends object>({
             </Tooltip>
             <span className="text-xs">{subtitle}</span>
           </div>
-          <div className="flex-1" />
-          <div>
-            {operateArea &&
-              operateArea(
-                row.original,
-                <Button icon={<MoreHorizontal />} size="small" variant="outline" className="-m-1 scale-80" />,
-                '操作',
-              )}
-          </div>
+          {operateArea && (
+            <>
+              <div className="flex-1" />
+              <div>
+                {operateArea(
+                  row.original,
+                  <Button icon={<MoreHorizontal />} size="small" variant="outline" className="-m-1 scale-80" />,
+                  '操作',
+                )}
+              </div>
+            </>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-2 p-4 pt-0">
