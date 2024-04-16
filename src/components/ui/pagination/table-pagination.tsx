@@ -32,6 +32,7 @@ export interface ITablePaginationProps {
   onPaginationChange: OnChangeFn<PaginationState>;
   preloadHover?: (pageIndex: number, e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void;
   className?: string;
+  isLoadAll?: boolean;
 }
 
 export const TablePagination: React.FC<ITablePaginationProps> = ({
@@ -40,6 +41,7 @@ export const TablePagination: React.FC<ITablePaginationProps> = ({
   onPaginationChange,
   preloadHover,
   className,
+  isLoadAll = false,
 }) => {
   const total = Math.ceil(rowCount / pagination.pageSize);
   const paginationState = usePagination({
@@ -54,36 +56,44 @@ export const TablePagination: React.FC<ITablePaginationProps> = ({
       });
     },
   });
+  console.log(isLoadAll);
   return (
-    <div className={cn('flex justify-between py-1', className)}>
+    <div className={cn('flex h-[36px] justify-between py-1', className)}>
       <div className="ml-4 flex items-center gap-2 text-nowrap">
-        <span>{`共 ${rowCount} 条，第 ${paginationState.active} 页，`}每页</span>
-        <Select
-          value={pagination.pageSize.toString()}
-          onValueChange={(v) =>
-            onPaginationChange((prev) => {
-              return {
-                ...prev,
-                pageSize: parseInt(v),
-              };
-            })
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="选择" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>每页条目</SelectLabel>
-              <SelectItem value="5">5</SelectItem>
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="20">20</SelectItem>
-              <SelectItem value="24">24</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-        <span>条</span>
+        <span>
+          共 {rowCount} 条{!isLoadAll && `，第 ${paginationState.active} 页`}
+        </span>
+        {!isLoadAll && (
+          <>
+            <span>，每页</span>
+            <Select
+              value={pagination.pageSize.toString()}
+              onValueChange={(v) =>
+                onPaginationChange((prev) => {
+                  return {
+                    ...prev,
+                    pageSize: parseInt(v),
+                  };
+                })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="选择" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>每页条目</SelectLabel>
+                  <SelectItem value="5">5</SelectItem>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="20">20</SelectItem>
+                  <SelectItem value="24">24</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <span>条</span>
+          </>
+        )}
       </div>
       <Pagination>
         <PaginationContent>

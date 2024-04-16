@@ -48,12 +48,15 @@ export const createActionToolsColumns = ({ hooks }: ICreateActionToolsColumnsPro
       header: '描述',
       cell: ({ getValue }) => RenderDescription({ description: getValue() as string }),
     }),
-    columnHelper.accessor('extra.estimateTime', {
+    columnHelper.display({
       id: 'estimateTime',
       header: '预估执行时间',
-      cell: ({ getValue }) => {
-        const estimateTime = getValue() as number;
-        return <span>预计执行 {estimateTime ? formatTime(estimateTime) : '30 秒'}</span>;
+      cell: ({ row }) => {
+        return (
+          <span>
+            预计执行 {row.original.extra?.estimateTime ? formatTime(row.original.extra.estimateTime) : '30 秒'}
+          </span>
+        );
       },
     }),
     columnHelper.accessor('pricing', {

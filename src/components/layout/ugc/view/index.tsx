@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 
 import { AssetType } from '@inf-monkeys/vines';
+import { BlockDefCategory } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
 import { useElementSize } from '@mantine/hooks';
 import {
   ColumnDef,
@@ -15,6 +16,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import _, { isNull } from 'lodash';
 import { CircleSlash, MoreHorizontal } from 'lucide-react';
 
+import { IWorkflowBlock } from '@/apis/tools/typings.ts';
 import { IAssetItem, IListUgcDto, IListUgcItemsFnType, IPreloadUgcItemsFnType } from '@/apis/ugc/typings.ts';
 import { UgcSidebar } from '@/components/layout/ugc/sidebar';
 import {
@@ -42,10 +44,10 @@ interface IUgcViewProps<E extends object> {
   assetKey: string;
   assetName: string;
   assetType: AssetType;
+  isLoadAll?: boolean;
   isMarket?: boolean;
   useUgcFetcher: IListUgcItemsFnType<E>;
   preloadUgcFetcher: IPreloadUgcItemsFnType<E>;
-  // columns: ColumnDef<IAssetItem<E>>[];
   createColumns: () => ColumnDef<IAssetItem<E>, any>[];
   renderOptions: IUgcRenderOptions<IAssetItem<E>>;
   operateArea?: IOperateAreaProps<E>;
@@ -58,6 +60,7 @@ export const UgcView = <E extends object>({
   assetKey,
   assetName,
   assetType,
+  isLoadAll = false,
   isMarket = false,
   useUgcFetcher,
   preloadUgcFetcher,
@@ -104,7 +107,7 @@ export const UgcView = <E extends object>({
       setPagination((prev) => {
         return {
           ...prev,
-          pageSize: defaultPageSizeLS,
+          pageSize: isLoadAll ? 1000 : defaultPageSizeLS,
         };
       });
   }, [defaultPageSizeLS]);
@@ -125,7 +128,19 @@ export const UgcView = <E extends object>({
     orderColumn: sortCondition.orderColumn,
   });
 
-  const data = useMemo(() => (rawData && _.isArray(rawData.data) ? rawData.data : []), [rawData]);
+  const data = useMemo(
+    () =>
+      rawData && _.isArray(rawData.data)
+        ? assetType === 'block' && filter.cate
+          ? rawData.data.filter((l) =>
+              filter.cate
+                ? (l as unknown as IAssetItem<IWorkflowBlock>)?.categories?.includes(filter.cate as BlockDefCategory)
+                : true,
+            )
+          : rawData.data
+        : [],
+    [rawData, filter],
+  );
   const pageData = useMemo(
     () =>
       rawData
@@ -237,7 +252,7 @@ export const UgcView = <E extends object>({
             {(isLoading || isNull(displayMode)) && <Loading motionKey={`vines-assets-${assetKey}-loading`} />}
           </AnimatePresence>
           <div className="flex flex-col">
-            <ScrollArea className="relative h-[calc(100vh-10.5rem)] w-full rounded-r-lg px-4 py-2">
+            <ScrollArea className="relative h-[calc(100vh-9.5rem)] w-full rounded-r-lg px-4 py-2">
               {table.getRowModel().rows.length === 0 ? (
                 <motion.div
                   className="vines-center size-full h-[calc(100vh-12rem)] flex-col"
@@ -300,6 +315,7 @@ export const UgcView = <E extends object>({
               onPaginationChange={table.setPagination}
               rowCount={table.getRowCount()}
               preloadHover={handlePreload}
+              isLoadAll={isLoadAll}
             />
           </div>
         </div>
