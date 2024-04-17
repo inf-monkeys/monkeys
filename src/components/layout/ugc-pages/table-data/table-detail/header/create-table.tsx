@@ -22,6 +22,7 @@ interface ICreateTableProps {
 export const CreateTable: React.FC<ICreateTableProps> = ({ databaseId, children }) => {
   const { mutate } = useSWRConfig();
   const [visible, setVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<ICreateTable>({
     resolver: zodResolver(createTableSchema),
@@ -32,18 +33,19 @@ export const CreateTable: React.FC<ICreateTableProps> = ({ databaseId, children 
   });
 
   const handleSubmit = form.handleSubmit((data) => {
+    setIsLoading(true);
     toast.promise(createTableUseSQL(databaseId, data.tableName, data.sql), {
       loading: '正在使用 SQL 创建表中',
       success: () => {
         setVisible(false);
         setTimeout(
-          () =>
-            mutate((key) => typeof key === 'string' && key.startsWith('/api/database?filter[ids][0]=' + databaseId)),
+          () => mutate((key) => typeof key === 'string' && key.startsWith(`/api/database/${databaseId}/tables`)),
           1000,
         );
         return '使用 SQL 创建表成功，请稍后查看';
       },
       error: '使用 SQL 创建表失败',
+      finally: () => setIsLoading(false),
     });
   });
 
@@ -94,7 +96,7 @@ export const CreateTable: React.FC<ICreateTableProps> = ({ databaseId, children 
             />
 
             <DialogFooter>
-              <Button variant="outline" type="submit">
+              <Button variant="outline" type="submit" loading={isLoading}>
                 提交
               </Button>
             </DialogFooter>
