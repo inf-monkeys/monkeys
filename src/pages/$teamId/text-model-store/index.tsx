@@ -30,7 +30,7 @@ export const TextModelStore: React.FC = () => {
       <UgcView
         assetKey="text-model-store"
         assetType="llm-model"
-        assetName="文本模型市场"
+        assetName="语言模型市场"
         isMarket
         useUgcFetcher={useUgcTextModelStore}
         preloadUgcFetcher={preloadUgcTextModelStore}

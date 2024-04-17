@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { FileUp, Play, Trash } from 'lucide-react';
 
 import { preloadUgcImageModels, useUgcImageModels } from '@/apis/ugc';
+import { IAssetItem } from '@/apis/ugc/typings.ts';
+import { UgcPublishDialog } from '@/components/layout/ugc/publish-dialog';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createImageModelsColumns } from '@/components/layout/ugc-pages/image-models/consts.tsx';
@@ -24,6 +26,10 @@ import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const ImageModels: React.FC = () => {
   const navigate = useNavigate();
+
+  const [publishVisible, setPublishVisible] = useState(false);
+
+  const [current, setCurrent] = useState<IAssetItem | undefined>();
 
   return (
     <main className="size-full">
@@ -69,13 +75,18 @@ export const ImageModels: React.FC = () => {
               <DropdownMenuLabel>图像模型操作</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem onSelect={() => {}}>
+                <DropdownMenuItem>
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <Play size={15} />
                   </DropdownMenuShortcut>
                   调试
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => {}}>
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setCurrent(item);
+                    setPublishVisible(true);
+                  }}
+                >
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <FileUp size={15} />
                   </DropdownMenuShortcut>
@@ -97,6 +108,13 @@ export const ImageModels: React.FC = () => {
             to: `/$teamId/image-models/${item.name}`,
           });
         }}
+      />
+
+      <UgcPublishDialog
+        visible={publishVisible}
+        setVisible={setPublishVisible}
+        ugcId={current?._id}
+        item={current ?? {}}
       />
     </main>
   );

@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { FileUp, Trash } from 'lucide-react';
 
 import { preloadUgcTextModels, useUgcTextModels } from '@/apis/ugc';
+import { IAssetItem } from '@/apis/ugc/typings.ts';
+import { UgcPublishDialog } from '@/components/layout/ugc/publish-dialog';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createTextModelsColumns } from '@/components/layout/ugc-pages/text-models/consts.tsx';
@@ -24,6 +26,10 @@ import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const TextModels: React.FC = () => {
   const navigate = useNavigate();
+
+  const [publishVisible, setPublishVisible] = useState(false);
+
+  const [current, setCurrent] = useState<IAssetItem | undefined>();
 
   return (
     <main className="size-full">
@@ -69,7 +75,12 @@ export const TextModels: React.FC = () => {
               <DropdownMenuLabel>语言模型操作</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem onSelect={() => {}}>
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setCurrent(item);
+                    setPublishVisible(true);
+                  }}
+                >
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <FileUp size={15} />
                   </DropdownMenuShortcut>
@@ -91,6 +102,13 @@ export const TextModels: React.FC = () => {
             to: `/$teamId/text-models/${item.name}`,
           });
         }}
+      />
+
+      <UgcPublishDialog
+        visible={publishVisible}
+        setVisible={setPublishVisible}
+        ugcId={current?._id}
+        item={current ?? {}}
       />
     </main>
   );
