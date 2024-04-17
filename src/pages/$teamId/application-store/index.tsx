@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 
 import { preloadUgcApplicationStore, useUgcApplicationStore } from '@/apis/ugc';
 import { UgcView } from '@/components/layout/ugc/view';
@@ -10,8 +10,6 @@ import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const ApplicationStore: React.FC = () => {
-  const navigate = useNavigate();
-
   return (
     <main className="size-full">
       <UgcView
@@ -31,11 +29,6 @@ export const ApplicationStore: React.FC = () => {
           cover: (item) => {
             return RenderIcon({ iconUrl: item.iconUrl, size: 'gallery' });
           },
-        }}
-        onItemClick={(item) => {
-          // void navigate({
-          //   to: `/$teamId/action-tools/${item.name}`,
-          // });
         }}
       />
     </main>
