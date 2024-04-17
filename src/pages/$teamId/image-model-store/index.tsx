@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 
 import { FileDown } from 'lucide-react';
 
 import { preloadUgcImageModelStore, useUgcImageModelStore } from '@/apis/ugc';
+import { IAssetItem } from '@/apis/ugc/typings.ts';
+import { UgcImportDialog } from '@/components/layout/ugc/import-dialog';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createImageModelStoreColumns } from '@/components/layout/ugc-pages/image-model-store/consts.tsx';
@@ -23,7 +25,9 @@ import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const ImageModelStore: React.FC = () => {
-  const navigate = useNavigate();
+  const [importVisible, setImportVisible] = useState(false);
+
+  const [current, setCurrent] = useState<IAssetItem>();
 
   return (
     <main className="size-full">
@@ -66,7 +70,12 @@ export const ImageModelStore: React.FC = () => {
               <DropdownMenuLabel>图像模型市场操作</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem onSelect={() => {}}>
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setCurrent(item);
+                    setImportVisible(true);
+                  }}
+                >
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <FileDown size={15} />
                   </DropdownMenuShortcut>
@@ -81,6 +90,14 @@ export const ImageModelStore: React.FC = () => {
           //   to: `/$teamId/action-tools/${item.name}`,
           // });
         }}
+      />
+
+      <UgcImportDialog
+        visible={importVisible}
+        setVisible={setImportVisible}
+        ugcId={current?._id}
+        assetType={current?.assetType}
+        name={current?.name}
       />
     </main>
   );
