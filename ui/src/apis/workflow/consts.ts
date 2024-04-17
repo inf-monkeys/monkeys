@@ -1,0 +1,17 @@
+export const BLOCK_CATEGORY_SORT_INDEX_LIST = [
+  'all',
+  'block',
+  'gen-text',
+  'query',
+  'text',
+  'gen-image',
+  'image',
+  'file',
+  'train-model',
+  'db',
+  'auto',
+  'process',
+  'human',
+  'extra',
+  'bio',
+];

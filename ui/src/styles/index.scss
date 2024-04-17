@@ -1,0 +1,83 @@
+@tailwind base;
+
+@import "@mantine/core/styles.css";
+@import "@mantine/dropzone/styles.css";
+@import "cropperjs/dist/cropper.css";
+
+@tailwind components;
+@tailwind utilities;
+
+@import "shadcn";
+@import "utils";
+
+@layer base {
+  .vines-ui * {
+    @apply border-border transition-colors text-gold-12;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+html {
+  &.dark {
+    body {
+      background: linear-gradient(theme('colors.vines.500/0.15') 5%, theme('colors.gray.2') 50%);
+    }
+  }
+}
+
+body {
+  background: linear-gradient(theme('colors.vines.100/0.35') 0%, theme('colors.gray.1') 50%);
+  @apply overflow-clip;
+}
+
+#vines-ui {
+  @apply backdrop-blur;
+}
+
+.text-adjust {
+  -webkit-text-size-adjust: none;
+}
+
+.text-xxs {
+  font-size: 0.625rem;
+  @apply text-adjust leading-none;
+}
+
+::selection {
+  background-color: theme('colors.vines.500/0.15');
+  @media (prefers-color-scheme: dark) {
+    background-color: theme('colors.vines.500/0.25');
+  }
+}
+
+::-webkit-scrollbar,
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-corner,
+::-webkit-scrollbar-corner {
+  background-color: theme('colors.gray.8');
+}
+
+::-webkit-scrollbar-thumb,
+::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+  background: theme('colors.gray.8');
+  opacity: 0.1;
+  transition: all 1s;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+img[src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/.png"]
+{
+  @apply hidden flex-none;
+}
