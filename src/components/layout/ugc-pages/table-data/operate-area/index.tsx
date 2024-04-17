@@ -75,7 +75,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
             <DropdownMenuLabel>表格数据操作</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <UgcPublishDialog ugcId={item?._id} item={item ?? {}}>
+              <UgcPublishDialog ugcId={item?.id} item={item ?? {}}>
                 <DropdownMenuItem
                   onSelect={(e) => {
                     e.stopPropagation();

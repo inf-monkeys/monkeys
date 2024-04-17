@@ -27,7 +27,7 @@ interface IOperateAreaProps {
 }
 
 export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, tooltipTriggerContent }) => {
-  const id = item?._id;
+  const id = item?.id;
 
   return (
     <DropdownMenu>

@@ -6,6 +6,7 @@ import { useNavigate } from '@tanstack/react-router';
 
 import { useTeams } from '@/apis/authz/team';
 import { IVinesTeam } from '@/apis/authz/team/typings.ts';
+import { useSystemConfig } from '@/apis/common';
 import { useVinesRoute } from '@/components/router/useVinesRoute.ts';
 import { useLocalStorage } from '@/utils';
 
@@ -13,6 +14,10 @@ export const TeamsGuard: React.FC = () => {
   const { routeAppId } = useVinesRoute();
   const { mutate } = useSWRConfig();
   const navigate = useNavigate();
+
+  const { data: oem } = useSystemConfig();
+
+  const hasPayment = (oem?.module || []).includes('payment');
 
   const [token] = useLocalStorage<string>('vines-token', '', false);
   const [teamId, setTeamId] = useLocalStorage<string>('vines-team-id', '', false);
@@ -39,22 +44,27 @@ export const TeamsGuard: React.FC = () => {
         params: {
           teamId: latestTeamId,
         },
-      }).then(() => mutate('/api/payment/balances'));
+      }).then(() => hasPayment && mutate('/api/payment/balances'));
     }
   }, [teamId, teams]);
 
   useEffect(() => {
     if (!teamId) return;
     // 切换团队后刷新数据
-    // void mutate('/api/payment/balances');
-    // void mutate('/api/apiKeys');
-    void mutate((key) => typeof key === 'string' && key.startsWith('/api'), undefined, {
-      revalidate: true,
-    });
+    void mutate(
+      (key: unknown) => {
+        if (typeof key !== 'string') return false;
+        if (!hasPayment && key.startsWith('/api/payment/balances')) {
+          return false;
+        }
 
-    // if (!routeAppId || routeAppId === 'workspace') {
-    //   void mutate('/api/pages');
-    // }
+        return (key as string).startsWith('/api');
+      },
+      void 0,
+      {
+        revalidate: true,
+      },
+    );
   }, [teamId]);
 
   return null;

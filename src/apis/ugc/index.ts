@@ -137,3 +137,12 @@ export const forkAssetItem = (type: AssetType, id: string) =>
     method: 'POST',
     simple: true,
   })(`/api/assets/${type}/fork/${id}`);
+
+export const updateAssetItem = (type: AssetType, id: string, data: any) =>
+  vinesFetcher({
+    method: 'PUT',
+    simple: true,
+  })(
+    `/api/assets/${type}/${id}`,
+    _.pickBy(data, (v) => !_.isNil(v)),
+  );

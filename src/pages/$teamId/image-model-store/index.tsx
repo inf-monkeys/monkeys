@@ -90,7 +90,7 @@ export const ImageModelStore: React.FC = () => {
       <UgcImportDialog
         visible={importVisible}
         setVisible={setImportVisible}
-        ugcId={current?._id}
+        ugcId={current?.id}
         assetType={current?.assetType}
         name={current?.name}
       />

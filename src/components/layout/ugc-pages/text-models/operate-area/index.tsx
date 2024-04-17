@@ -48,7 +48,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
         <DropdownMenuLabel>语言模型操作</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <UgcPublishDialog ugcId={item?._id} item={item ?? {}}>
+          <UgcPublishDialog ugcId={item?.id} item={item ?? {}}>
             <DropdownMenuItem
               onSelect={(e) => {
                 e.stopPropagation();
@@ -64,7 +64,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
           <DropdownMenuSeparator />
           <UgcDeleteDialog
             assetType={item?.assetType}
-            ugcId={item?._id}
+            ugcId={item?.id}
             afterOperate={() => {
               void mutate((key) => typeof key === 'string' && key.startsWith('/api/llm/models'), undefined, {
                 revalidate: true,
