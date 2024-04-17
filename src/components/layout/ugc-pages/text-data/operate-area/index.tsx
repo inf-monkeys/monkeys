@@ -82,7 +82,12 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
           </AlertDialogTrigger>
         </DropdownMenuContent>
       </DropdownMenu>
-      <AlertDialogContent>
+      <AlertDialogContent
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+        }}
+      >
         <AlertDialogHeader>
           <AlertDialogTitle>确定要删除该文本数据集吗？</AlertDialogTitle>
           <AlertDialogDescription>删除后，该数据集将无法恢复，其中的数据也将被永久删除。</AlertDialogDescription>
