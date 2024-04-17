@@ -6,6 +6,7 @@ import { preloadUgcTableData, useUgcTableData } from '@/apis/ugc';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createTableDataColumns } from '@/components/layout/ugc-pages/table-data/consts.tsx';
+import { CreateDatabase } from '@/components/layout/ugc-pages/table-data/create-database';
 import { OperateArea } from '@/components/layout/ugc-pages/table-data/operate-area';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
@@ -35,6 +36,7 @@ export const TableData: React.FC = () => {
         operateArea={(item, trigger, tooltipTriggerContent) => (
           <OperateArea item={item} trigger={trigger} tooltipTriggerContent={tooltipTriggerContent} />
         )}
+        subtitle={<CreateDatabase />}
         onItemClick={(item) => {
           void navigate({
             to: `/$teamId/table-data/${item._id}`,
