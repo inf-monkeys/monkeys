@@ -19,7 +19,7 @@ export const TableDetailHeader: React.FC<ITableDetailHeaderProps> = ({ databaseI
 
   const handleRefresh = () => {
     toast.promise(
-      mutate((key) => typeof key === 'string' && key.startsWith('/api/database?filter[ids][0]=' + databaseId)),
+      mutate((key) => typeof key === 'string' && key.startsWith(`/api/database/${databaseId}/tables`)),
       {
         loading: '正在刷新数据',
         success: '刷新成功',

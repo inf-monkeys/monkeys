@@ -30,6 +30,7 @@ interface IImportTableDataProps {
 export const ImportTableData: React.FC<IImportTableDataProps> = ({ databaseId, children }) => {
   const { mutate } = useSWRConfig();
   const [visible, setVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<IImportFile>({
     resolver: zodResolver(importFileSchema),
@@ -40,18 +41,19 @@ export const ImportTableData: React.FC<IImportTableDataProps> = ({ databaseId, c
   });
 
   const handleSubmit = form.handleSubmit((data) => {
+    setIsLoading(true);
     toast.promise(importToDatabaseUseCSV(databaseId, data.tableName, data.url), {
       loading: '正在导入数据',
       success: () => {
         setVisible(false);
         setTimeout(
-          () =>
-            mutate((key) => typeof key === 'string' && key.startsWith('/api/database?filter[ids][0]=' + databaseId)),
+          () => mutate((key) => typeof key === 'string' && key.startsWith(`/api/database/${databaseId}/tables`)),
           2000,
         );
         return '导入成功，后台转换中，请稍后查看';
       },
       error: '导入失败',
+      finally: () => setIsLoading(false),
     });
   });
 
@@ -100,7 +102,7 @@ export const ImportTableData: React.FC<IImportTableDataProps> = ({ databaseId, c
             />
 
             <DialogFooter>
-              <Button variant="outline" type="submit">
+              <Button variant="outline" type="submit" loading={isLoading}>
                 提交
               </Button>
             </DialogFooter>

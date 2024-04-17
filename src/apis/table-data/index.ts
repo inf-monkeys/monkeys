@@ -30,6 +30,9 @@ export const createDatabase = (parma: { name: string; description: string; iconU
 export const deleteDatabase = (databaseId: string) =>
   vinesFetcher({ method: 'DELETE', simple: true })(`/api/database/${databaseId}`);
 
+export const deleteTable = (databaseId: string, tableId: string) =>
+  vinesFetcher({ method: 'DELETE', simple: true })(`/api/database/${databaseId}/tables/${tableId}`);
+
 export const importToDatabaseUseCSV = (databaseId: string, tableName: string, url: string) =>
   vinesFetcher({
     method: 'POST',

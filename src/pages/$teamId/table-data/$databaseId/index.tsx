@@ -34,9 +34,13 @@ const TableDataDetail: React.FC = () => {
     }
   }, []);
 
+  const isEmpty = !tableList?.length;
   useEffect(() => {
-    if (tableList && tableList?.length) {
+    if (tableList && !isEmpty) {
       setTableId(tableList[0]._id);
+    }
+    if (isEmpty) {
+      setTableId('');
     }
   }, [tableList]);
 
@@ -70,7 +74,11 @@ const TableDataDetail: React.FC = () => {
             <h1 className="line-clamp-1 text-2xl font-bold">{displayName ? displayName : '表格数据'}</h1>
           </header>
           <TabsList className="!h-auto bg-transparent">
-            {height && (
+            {isEmpty ? (
+              <div className="vines-center size-full" style={{ height }}>
+                <p className="text-gray-500">暂无数据</p>
+              </div>
+            ) : height ? (
               <Virtuoso
                 className="w-full"
                 style={{ height }}
@@ -84,7 +92,7 @@ const TableDataDetail: React.FC = () => {
                   </TabsTrigger>
                 )}
               />
-            )}
+            ) : null}
           </TabsList>
         </motion.div>
         <Separator orientation="vertical" className="vines-center mx-4">
