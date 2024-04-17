@@ -24,7 +24,7 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
 
   const [visible, setVisible] = useState(false);
 
-  const activeSessionId = chatSessions[workflowId] ?? data?.[0]?._id;
+  const activeSessionId = chatSessions[workflowId] ?? data?.[0]?.id;
 
   return (
     <div className="flex h-full max-w-64">
@@ -41,9 +41,9 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
         <div className="grid gap-2 px-1">
           {data?.map((session, i) => (
             <ChatSession
-              active={activeSessionId === session._id}
+              active={activeSessionId === session.id}
               session={session}
-              key={session._id}
+              key={session.id}
               disableDelete={!i}
               onDeleted={() => mutate()}
               onClick={() => {
@@ -54,7 +54,7 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
                 } else {
                   setChatSessions({
                     ...chatSessions,
-                    [workflowId]: session._id,
+                    [workflowId]: session.id,
                   });
                 }
               }}
@@ -70,7 +70,7 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
                   session &&
                     setChatSessions({
                       ...chatSessions,
-                      [workflowId]: session._id,
+                      [workflowId]: session.id,
                     });
                   return '新建成功';
                 },

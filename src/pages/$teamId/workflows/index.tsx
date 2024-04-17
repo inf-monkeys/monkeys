@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-import { mutate } from 'swr';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { mutate } from 'swr';
 
 import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import { useClipboard } from '@mantine/hooks';
@@ -17,8 +17,8 @@ import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createWorkflowsColumns } from '@/components/layout/ugc-pages/workflows/consts.tsx';
 import { WorkflowInfoEditor } from '@/components/layout/workspace/workflow/info-editor';
-import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
+import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
   AlertDialog,
   AlertDialogAction,

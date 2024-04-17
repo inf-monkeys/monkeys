@@ -6,7 +6,7 @@ import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronRight, Undo2 } from 'lucide-react';
 
-import { useVectorCollection } from '@/apis/vector';
+import { useKnowledgeBase } from '@/apis/vector';
 import { BasicInfo } from '@/components/layout/ugc-pages/text-data/text-detail/basic-data';
 import { DocumentsList } from '@/components/layout/ugc-pages/text-data/text-detail/document-list';
 import { TextDetailHeader } from '@/components/layout/ugc-pages/text-data/text-detail/header';
@@ -21,7 +21,7 @@ import { cn } from '@/utils';
 
 const TextDataDetail: React.FC = () => {
   const { textId } = Route.useParams();
-  const { data: detail, isLoading } = useVectorCollection(textId);
+  const { data: detail, isLoading } = useKnowledgeBase(textId);
 
   const [activeTab, setActiveTab] = useState('segments');
   const [visible, setVisible] = useState(true);

@@ -1,4 +1,4 @@
-export interface IVectorMetadataField {
+export interface IKnowledgeBaseMetadataField {
   displayName: string;
   name: string;
   description: string;
@@ -6,8 +6,8 @@ export interface IVectorMetadataField {
   required: boolean;
 }
 
-export interface IVectorCollection {
-  _id: string;
+export interface IKnowledgeBase {
+  id: string;
   createTime: number;
   dimension: number;
   name: string;
@@ -18,13 +18,13 @@ export interface IVectorCollection {
   engine: string;
   teamId: string;
   creatorUserId: string;
-  metadataFields: IVectorMetadataField[];
+  metadataFields: IKnowledgeBaseMetadataField[];
   entityCount: number;
   fileCount: number;
   createdTimestamp: number;
 }
 
-export type IVectorFrontEnd = IVectorCollection & { paragraph_number: number; appNumber: number };
+export type IKnowledgeBaseFrontEnd = IKnowledgeBase & { paragraph_number: number; appNumber: number };
 
 export interface IVectorSupportedEmbeddingModel {
   name: string;

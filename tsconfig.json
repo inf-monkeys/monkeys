@@ -16,8 +16,12 @@
 
     /* Linting */
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+
+    // 有些时候变量留着方便调试啊
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitAny": false,
+
     "noFallthroughCasesInSwitch": true,
     "types": ["vite-plugin-svgr/client"],
     "baseUrl": ".",

@@ -4,11 +4,11 @@ import { createColumnHelper } from '@tanstack/react-table';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { IVectorFrontEnd } from '@/apis/vector/typings.ts';
+import { IKnowledgeBaseFrontEnd } from '@/apis/vector/typings.ts';
 import { IUgcCreateColumnsProps } from '@/components/layout/ugc/typings.ts';
 import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
 
-const columnHelper = createColumnHelper<IAssetItem<IVectorFrontEnd>>();
+const columnHelper = createColumnHelper<IAssetItem<IKnowledgeBaseFrontEnd>>();
 
 interface ICreateTextDataColumnsProps extends IUgcCreateColumnsProps {
   hooks: {
