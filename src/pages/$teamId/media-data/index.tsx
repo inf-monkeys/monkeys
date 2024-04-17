@@ -33,7 +33,6 @@ export const MediaData: React.FC = () => {
         operateArea={(item, trigger, tooltipTriggerContent) => (
           <OperateArea item={item} trigger={trigger} tooltipTriggerContent={tooltipTriggerContent} />
         )}
-        onItemClick={(item) => {}}
       />
     </main>
   );
