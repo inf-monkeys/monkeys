@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { AssetType } from '@inf-monkeys/vines';
 import { toast } from 'sonner';
@@ -13,23 +13,19 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog.tsx';
 
 interface IUgcDeleteDialogProps {
-  visible: boolean;
-  setVisible: (v: boolean) => void;
   ugcId?: string;
   assetType?: AssetType;
   afterOperate?: () => void;
+  children?: React.ReactNode;
 }
 
-export const UgcDeleteDialog: React.FC<IUgcDeleteDialogProps> = ({
-  visible,
-  setVisible,
-  ugcId,
-  assetType,
-  afterOperate,
-}) => {
+export const UgcDeleteDialog: React.FC<IUgcDeleteDialogProps> = ({ children, ugcId, assetType, afterOperate }) => {
+  const [visible, setVisible] = useState(false);
+
   const handleDelete = async () => {
     if (!ugcId || !assetType) {
       toast.error('请刷新页面后重试');
@@ -53,6 +49,7 @@ export const UgcDeleteDialog: React.FC<IUgcDeleteDialogProps> = ({
 
   return (
     <AlertDialog open={visible} onOpenChange={setVisible}>
+      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>删除前确认</AlertDialogTitle>
