@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { mutate } from 'swr';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
-import { FileUp, Play, Trash } from 'lucide-react';
+import { FileUp, Trash } from 'lucide-react';
 
 import { preloadUgcImageModels, useUgcImageModels } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
@@ -74,12 +74,12 @@ export const ImageModels: React.FC = () => {
               <DropdownMenuLabel>图像模型操作</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem>
-                  <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
-                    <Play size={15} />
-                  </DropdownMenuShortcut>
-                  调试
-                </DropdownMenuItem>
+                {/*<DropdownMenuItem>*/}
+                {/*  <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">*/}
+                {/*    <Play size={15} />*/}
+                {/*  </DropdownMenuShortcut>*/}
+                {/*  调试*/}
+                {/*</DropdownMenuItem>*/}
                 <DropdownMenuItem
                   onSelect={() => {
                     setCurrent(item);
