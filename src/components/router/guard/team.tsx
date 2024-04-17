@@ -46,15 +46,15 @@ export const TeamsGuard: React.FC = () => {
   useEffect(() => {
     if (!teamId) return;
     // 切换团队后刷新数据
-    void mutate('/api/payment/balances');
-    void mutate('/api/apiKeys');
-    void mutate((key) => typeof key === 'string' && key.startsWith('/api/workflow/list'), undefined, {
+    // void mutate('/api/payment/balances');
+    // void mutate('/api/apiKeys');
+    void mutate((key) => typeof key === 'string' && key.startsWith('/api'), undefined, {
       revalidate: true,
     });
 
-    if (!routeAppId || routeAppId === 'workspace') {
-      void mutate('/api/pages');
-    }
+    // if (!routeAppId || routeAppId === 'workspace') {
+    //   void mutate('/api/pages');
+    // }
   }, [teamId]);
 
   return null;

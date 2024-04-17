@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { useSWRConfig } from 'swr';
 
@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { deleteDatabase } from '@/apis/table-data';
 import { ITableData } from '@/apis/table-data/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
+import { UgcPublishDialog } from '@/components/layout/ugc/publish-dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,6 +41,10 @@ interface IOperateAreaProps {
 export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, tooltipTriggerContent }) => {
   const { mutate } = useSWRConfig();
 
+  const [publishVisible, setPublishVisible] = useState(false);
+
+  const [current, setCurrent] = useState<IAssetItem | undefined>();
+
   const handelDelete = () => {
     toast.promise(deleteDatabase(item.uuid), {
       loading: '正在删除表格数据...',
@@ -52,60 +57,74 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
   };
 
   return (
-    <AlertDialog>
-      <DropdownMenu>
-        {tooltipTriggerContent ? (
-          <Tooltip content={tooltipTriggerContent}>
-            <TooltipTrigger asChild>
-              <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
-            </TooltipTrigger>
-          </Tooltip>
-        ) : (
-          <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
-        )}
+    <>
+      <AlertDialog>
+        <DropdownMenu>
+          {tooltipTriggerContent ? (
+            <Tooltip content={tooltipTriggerContent}>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+              </TooltipTrigger>
+            </Tooltip>
+          ) : (
+            <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+          )}
 
-        <DropdownMenuContent
+          <DropdownMenuContent
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+          >
+            <DropdownMenuLabel>表格数据操作</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem
+                onSelect={() => {
+                  setCurrent(item);
+                  setPublishVisible(true);
+                }}
+              >
+                <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                  <FileUp size={15} />
+                </DropdownMenuShortcut>
+                发布到市场
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <AlertDialogTrigger asChild>
+                <DropdownMenuItem className="text-red-10">
+                  <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                    <Trash size={15} />
+                  </DropdownMenuShortcut>
+                  删除
+                </DropdownMenuItem>
+              </AlertDialogTrigger>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <AlertDialogContent
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();
           }}
         >
-          <DropdownMenuLabel>表格数据操作</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuGroup>
-            <DropdownMenuItem>
-              <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
-                <FileUp size={15} />
-              </DropdownMenuShortcut>
-              发布到市场
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <AlertDialogTrigger asChild>
-              <DropdownMenuItem className="text-red-10">
-                <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
-                  <Trash size={15} />
-                </DropdownMenuShortcut>
-                删除
-              </DropdownMenuItem>
-            </AlertDialogTrigger>
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <AlertDialogContent
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-        }}
-      >
-        <AlertDialogHeader>
-          <AlertDialogTitle>确定要删除该表格数据吗？</AlertDialogTitle>
-          <AlertDialogDescription>删除后，该表格数据将无法恢复，其中的数据也将被永久删除。</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>取消</AlertDialogCancel>
-          <AlertDialogAction onClick={handelDelete}>删除</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确定要删除该表格数据吗？</AlertDialogTitle>
+            <AlertDialogDescription>删除后，该表格数据将无法恢复，其中的数据也将被永久删除。</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={handelDelete}>删除</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <UgcPublishDialog
+        visible={publishVisible}
+        setVisible={setPublishVisible}
+        ugcId={current?._id}
+        item={current ?? {}}
+      />
+    </>
   );
 };

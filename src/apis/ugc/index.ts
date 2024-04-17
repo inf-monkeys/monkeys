@@ -125,3 +125,9 @@ export const useSearchReferenceWorkflows = (assetType?: AssetType, assetId?: str
       refreshInterval: 600000,
     },
   );
+
+export const publishAssetItem = (type: AssetType, id: string, data: any) =>
+  vinesFetcher<IAssetItem>({
+    method: 'POST',
+    simple: true,
+  })(`/api/assets/${type}/public/${id}`, data);
