@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { FileUp, Trash } from 'lucide-react';
 
@@ -23,6 +23,8 @@ import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const TableData: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
     <main className="size-full">
       <UgcView
@@ -80,6 +82,11 @@ export const TableData: React.FC = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
+        onItemClick={(item) => {
+          void navigate({
+            to: `/$teamId/table-data/${item._id}`,
+          });
+        }}
       />
     </main>
   );

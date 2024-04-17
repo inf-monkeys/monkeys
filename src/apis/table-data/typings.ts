@@ -8,3 +8,8 @@ export interface ITableData extends IBaseEntity {
   teamId: string;
   creatorUserId: string;
 }
+
+export interface IDatabaseTable extends IBaseEntity {
+  databaseId: string;
+  name: string;
+}
