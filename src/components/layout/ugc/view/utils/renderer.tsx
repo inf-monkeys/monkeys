@@ -25,10 +25,10 @@ export const RenderUser: React.FC<{
 }> = ({ user }) => (
   <div className="flex items-center gap-1">
     <Avatar className="size-5">
-      <AvatarImage className="aspect-auto" src={user.photo} alt={user.name ?? '未知用户'} />
-      <AvatarFallback className="rounded-none p-2 text-xs">{(user.name ?? '未知用户').substring(0, 2)}</AvatarFallback>
+      <AvatarImage className="aspect-auto" src={user?.photo} alt={user?.name ?? '未知用户'} />
+      <AvatarFallback className="rounded-none p-2 text-xs">{(user?.name ?? '未知用户').substring(0, 2)}</AvatarFallback>
     </Avatar>
-    <span>{user.name ?? '未知用户'}</span>
+    <span>{user?.name ?? '未知用户'}</span>
   </div>
 );
 export const RenderDescription: React.FC<{

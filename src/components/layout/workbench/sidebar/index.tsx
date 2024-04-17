@@ -25,10 +25,10 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
   useEffect(() => {
     reTimer(
       setTimeout(() => {
-        if (data?.length && !currentPage?._id) {
+        if (data?.length && !currentPage?.id) {
           setCurrentPage(data[0]);
         }
-        if (currentPage?._id && !data?.find((page) => page._id === currentPage._id)) {
+        if (currentPage?.id && !data?.find((page) => page.id === currentPage.id)) {
           setCurrentPage({});
         }
       }, 180) as unknown as number,
@@ -50,10 +50,10 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
         <div className="grid gap-2">
           {data?.map((page) => (
             <div
-              key={page._id}
+              key={page.id}
               className={cn(
                 'flex cursor-pointer items-start space-x-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
-                currentPage?._id === page._id && 'border border-input bg-background text-accent-foreground',
+                currentPage?.id === page.id && 'border border-input bg-background text-accent-foreground',
               )}
               onClick={() => setCurrentPage(page)}
             >
