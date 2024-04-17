@@ -6,6 +6,7 @@ import { preloadUgcApplicationStore, useUgcApplicationStore } from '@/apis/ugc';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createApplicationStoreColumns } from '@/components/layout/ugc-pages/application-store/consts.tsx';
+import { OperateArea } from '@/components/layout/ugc-pages/application-store/operate-area';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
@@ -30,6 +31,9 @@ export const ApplicationStore: React.FC = () => {
             return RenderIcon({ iconUrl: item.iconUrl, size: 'gallery' });
           },
         }}
+        operateArea={(item, trigger, tooltipTriggerContent) => (
+          <OperateArea item={item} trigger={trigger} tooltipTriggerContent={tooltipTriggerContent} />
+        )}
       />
     </main>
   );

@@ -19,14 +19,7 @@ export const createApplicationStoreColumns = () => [
     id: 'title',
     header: '名称',
     cell: ({ row, getValue }) => (
-      <a
-        className="transition-colors hover:text-primary-500"
-        href={`/${row.original.teamId}/workspace/${row.original.workflowId}`}
-        target="_blank"
-        rel="noreferrer"
-      >
-        {getValue() as string}
-      </a>
+      <span className="transition-colors hover:text-primary-500">{getValue() as string}</span>
     ),
   }),
   columnHelper.accessor('description', {
