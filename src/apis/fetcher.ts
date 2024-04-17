@@ -16,7 +16,7 @@ interface IFetcherOptions<U = unknown, P extends boolean = false> extends IVines
   pagination?: P;
   wrapper?: (data: U | undefined, originData: IOriginData<U>) => U | undefined;
   fetchOptions?: RequestInit;
-  responseResolver?: (response: Response) => U;
+  responseResolver?: (response: Response) => U | Promise<U>;
 }
 
 export const vinesFetcher = <U, T = {}, P extends boolean = false>({

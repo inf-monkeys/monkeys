@@ -66,7 +66,9 @@ export const TableDatabase: React.FC<ITableDatabaseProps> = ({ databaseId, table
     toast.promise(deleteTable(databaseId, tableId), {
       loading: '正在删除表格数据...',
       success: () => {
-        void mutate((key) => typeof key === 'string' && key.startsWith(`/api/database/${databaseId}/tables`));
+        void mutate(
+          (key) => typeof key === 'string' && key.startsWith(`/api/sql-knowledge-bases/${databaseId}/tables`),
+        );
         return '表格数据删除成功';
       },
       error: '表格数据删除失败',
