@@ -33,6 +33,7 @@ import { Route as TeamIdApplicationStoreIndexImport } from './pages/$teamId/appl
 import { Route as TeamIdActionToolsIndexImport } from './pages/$teamId/action-tools/index'
 import { Route as TeamIdWorkspaceWorkflowIdIndexImport } from './pages/$teamId/workspace/$workflowId/index'
 import { Route as TeamIdTextDataTextIdIndexImport } from './pages/$teamId/text-data/$textId/index'
+import { Route as TeamIdTableDataTableIdIndexImport } from './pages/$teamId/table-data/$tableId/index'
 import { Route as TeamIdActionToolsActionToolNameIndexImport } from './pages/$teamId/action-tools/$actionToolName/index'
 import { Route as TeamIdWorkspaceWorkflowIdPageIdIndexImport } from './pages/$teamId/workspace/$workflowId/$pageId/index'
 
@@ -152,6 +153,12 @@ const TeamIdTextDataTextIdIndexRoute = TeamIdTextDataTextIdIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const TeamIdTableDataTableIdIndexRoute =
+  TeamIdTableDataTableIdIndexImport.update({
+    path: '/$teamId/table-data/$tableId/',
+    getParentRoute: () => rootRoute,
+  } as any)
+
 const TeamIdActionToolsActionToolNameIndexRoute =
   TeamIdActionToolsActionToolNameIndexImport.update({
     path: '/$teamId/action-tools/$actionToolName/',
@@ -252,6 +259,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdActionToolsActionToolNameIndexImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/table-data/$tableId/': {
+      preLoaderRoute: typeof TeamIdTableDataTableIdIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/text-data/$textId/': {
       preLoaderRoute: typeof TeamIdTextDataTextIdIndexImport
       parentRoute: typeof rootRoute
@@ -291,6 +302,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdWorkflowsIndexRoute,
   TeamIdWorkspaceIndexRoute,
   TeamIdActionToolsActionToolNameIndexRoute,
+  TeamIdTableDataTableIdIndexRoute,
   TeamIdTextDataTextIdIndexRoute,
   TeamIdWorkspaceWorkflowIdIndexRoute,
   TeamIdWorkspaceWorkflowIdPageIdIndexRoute,
