@@ -18,17 +18,16 @@ import { Route as LoginCallbackImport } from './pages/login/callback'
 import { Route as TeamIdWorkspaceIndexImport } from './pages/$teamId/workspace/index'
 import { Route as TeamIdWorkflowsIndexImport } from './pages/$teamId/workflows/index'
 import { Route as TeamIdWorkbenchIndexImport } from './pages/$teamId/workbench/index'
-import { Route as TeamIdToolStoreIndexImport } from './pages/$teamId/tool-store/index'
 import { Route as TeamIdTextModelsIndexImport } from './pages/$teamId/text-models/index'
 import { Route as TeamIdTextModelStoreIndexImport } from './pages/$teamId/text-model-store/index'
 import { Route as TeamIdTextDataIndexImport } from './pages/$teamId/text-data/index'
+import { Route as TeamIdTextDataStoreIndexImport } from './pages/$teamId/text-data-store/index'
 import { Route as TeamIdTableDataIndexImport } from './pages/$teamId/table-data/index'
 import { Route as TeamIdSettingsIndexImport } from './pages/$teamId/settings/index'
 import { Route as TeamIdRenderToolsIndexImport } from './pages/$teamId/render-tools/index'
 import { Route as TeamIdMediaDataIndexImport } from './pages/$teamId/media-data/index'
 import { Route as TeamIdImageModelsIndexImport } from './pages/$teamId/image-models/index'
 import { Route as TeamIdImageModelStoreIndexImport } from './pages/$teamId/image-model-store/index'
-import { Route as TeamIdDataStoreIndexImport } from './pages/$teamId/data-store/index'
 import { Route as TeamIdApplicationStoreIndexImport } from './pages/$teamId/application-store/index'
 import { Route as TeamIdActionToolsIndexImport } from './pages/$teamId/action-tools/index'
 import { Route as TeamIdWorkspaceWorkflowIdIndexImport } from './pages/$teamId/workspace/$workflowId/index'
@@ -74,11 +73,6 @@ const TeamIdWorkbenchIndexRoute = TeamIdWorkbenchIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const TeamIdToolStoreIndexRoute = TeamIdToolStoreIndexImport.update({
-  path: '/$teamId/tool-store/',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const TeamIdTextModelsIndexRoute = TeamIdTextModelsIndexImport.update({
   path: '/$teamId/text-models/',
   getParentRoute: () => rootRoute,
@@ -91,6 +85,11 @@ const TeamIdTextModelStoreIndexRoute = TeamIdTextModelStoreIndexImport.update({
 
 const TeamIdTextDataIndexRoute = TeamIdTextDataIndexImport.update({
   path: '/$teamId/text-data/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TeamIdTextDataStoreIndexRoute = TeamIdTextDataStoreIndexImport.update({
+  path: '/$teamId/text-data-store/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -125,11 +124,6 @@ const TeamIdImageModelStoreIndexRoute = TeamIdImageModelStoreIndexImport.update(
     getParentRoute: () => rootRoute,
   } as any,
 )
-
-const TeamIdDataStoreIndexRoute = TeamIdDataStoreIndexImport.update({
-  path: '/$teamId/data-store/',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const TeamIdApplicationStoreIndexRoute =
   TeamIdApplicationStoreIndexImport.update({
@@ -199,10 +193,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdApplicationStoreIndexImport
       parentRoute: typeof rootRoute
     }
-    '/$teamId/data-store/': {
-      preLoaderRoute: typeof TeamIdDataStoreIndexImport
-      parentRoute: typeof rootRoute
-    }
     '/$teamId/image-model-store/': {
       preLoaderRoute: typeof TeamIdImageModelStoreIndexImport
       parentRoute: typeof rootRoute
@@ -227,6 +217,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdTableDataIndexImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/text-data-store/': {
+      preLoaderRoute: typeof TeamIdTextDataStoreIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/text-data/': {
       preLoaderRoute: typeof TeamIdTextDataIndexImport
       parentRoute: typeof rootRoute
@@ -237,10 +231,6 @@ declare module '@tanstack/react-router' {
     }
     '/$teamId/text-models/': {
       preLoaderRoute: typeof TeamIdTextModelsIndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/$teamId/tool-store/': {
-      preLoaderRoute: typeof TeamIdToolStoreIndexImport
       parentRoute: typeof rootRoute
     }
     '/$teamId/workbench/': {
@@ -287,17 +277,16 @@ export const routeTree = rootRoute.addChildren([
   LoginIndexRoute,
   TeamIdActionToolsIndexRoute,
   TeamIdApplicationStoreIndexRoute,
-  TeamIdDataStoreIndexRoute,
   TeamIdImageModelStoreIndexRoute,
   TeamIdImageModelsIndexRoute,
   TeamIdMediaDataIndexRoute,
   TeamIdRenderToolsIndexRoute,
   TeamIdSettingsIndexRoute,
   TeamIdTableDataIndexRoute,
+  TeamIdTextDataStoreIndexRoute,
   TeamIdTextDataIndexRoute,
   TeamIdTextModelStoreIndexRoute,
   TeamIdTextModelsIndexRoute,
-  TeamIdToolStoreIndexRoute,
   TeamIdWorkbenchIndexRoute,
   TeamIdWorkflowsIndexRoute,
   TeamIdWorkspaceIndexRoute,
