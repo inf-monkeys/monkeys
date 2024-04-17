@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import { mutate } from 'swr';
 
@@ -27,9 +27,7 @@ interface IOperateAreaProps {
 }
 
 export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, tooltipTriggerContent }) => {
-  const [publishVisible, setPublishVisible] = useState(false);
-
-  const [current, setCurrent] = useState<IAssetItem | undefined>();
+  const id = item?._id;
 
   return (
     <DropdownMenu>
@@ -52,21 +50,23 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
         <DropdownMenuLabel>图像模型操作</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem
-            onSelect={() => {
-              setCurrent(item);
-              setPublishVisible(true);
-            }}
-          >
-            <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
-              <FileUp size={15} />
-            </DropdownMenuShortcut>
-            发布到市场
-          </DropdownMenuItem>
+          <UgcPublishDialog ugcId={id} item={item ?? {}}>
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+              }}
+            >
+              <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                <FileUp size={15} />
+              </DropdownMenuShortcut>
+              发布到市场
+            </DropdownMenuItem>
+          </UgcPublishDialog>
           <DropdownMenuSeparator />
           <UgcDeleteDialog
             assetType={item?.assetType}
-            ugcId={item?._id}
+            ugcId={id}
             afterOperate={() => {
               void mutate((key) => typeof key === 'string' && key.startsWith('/api/sd/models'), undefined, {
                 revalidate: true,
@@ -88,13 +88,6 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
           </UgcDeleteDialog>
         </DropdownMenuGroup>
       </DropdownMenuContent>
-
-      <UgcPublishDialog
-        visible={publishVisible}
-        setVisible={setPublishVisible}
-        ugcId={current?._id}
-        item={current ?? {}}
-      />
     </DropdownMenu>
   );
 };

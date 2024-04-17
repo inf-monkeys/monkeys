@@ -5,12 +5,10 @@ import { toast } from 'sonner';
 
 import { publishAssetItem } from '@/apis/ugc';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 
 interface IUgcPublishDialogProps {
-  visible: boolean;
-  setVisible: (v: boolean) => void;
   ugcId?: string;
   item: {
     assetType?: AssetType;
@@ -19,11 +17,13 @@ interface IUgcPublishDialogProps {
     iconUrl?: string;
     prevName?: string;
   };
+  children?: React.ReactNode;
 }
 
-export const UgcPublishDialog: React.FC<IUgcPublishDialogProps> = ({ visible, setVisible, ugcId, item }) => {
+export const UgcPublishDialog: React.FC<IUgcPublishDialogProps> = ({ children, ugcId, item }) => {
   const { name: rawName, description, assetType, iconUrl, prevName } = item;
 
+  const [visible, setVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const [name, setName] = useState(rawName ?? '');
@@ -71,6 +71,7 @@ export const UgcPublishDialog: React.FC<IUgcPublishDialogProps> = ({ visible, se
 
   return (
     <Dialog open={visible} onOpenChange={setVisible}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>发布到市场</DialogTitle>
