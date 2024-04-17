@@ -1,8 +1,8 @@
 import { IBaseEntity } from '@/apis/typings.ts';
 
 export interface ITableData extends IBaseEntity {
-  _id: string;
-  name: string;
+  uuid: string;
+  displayName: string;
   description: string;
   iconUrl?: string;
   teamId: string;
@@ -10,8 +10,8 @@ export interface ITableData extends IBaseEntity {
 }
 
 export interface IDatabaseTable extends IBaseEntity {
-  databaseId: string;
   name: string;
+  sql: string;
 }
 
 export type IDatabaseData = { id: number } & Record<string, string>;

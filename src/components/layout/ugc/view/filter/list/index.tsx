@@ -58,7 +58,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
             updatedTimestamp: 0,
             isDeleted: false,
           };
-        }).filter((c) => c) as IAssetPublicCategory[])
+        }).filter((c) => c) as unknown as IAssetPublicCategory[])
       : [];
   }, [assetType]);
 
@@ -77,7 +77,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
           categoryIds: [current],
         });
       } else if (assetFilterRules) {
-        const rule = assetFilterRules.find((r) => r._id === current);
+        const rule = assetFilterRules.find((r) => r.uuid === current);
         if (!rule) {
           toast.error('分组不存在，请刷新后重试');
         } else {
@@ -122,9 +122,9 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                   key={index}
                   className={cn(
                     'group flex h-10 cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
-                    current === rule._id && 'border border-input bg-background text-accent-foreground shadow-sm',
+                    current === rule.id && 'border border-input bg-background text-accent-foreground shadow-sm',
                   )}
-                  onClick={() => setCurrent(rule._id)}
+                  onClick={() => setCurrent(rule.id)}
                 >
                   <div className="flex w-full items-center justify-between px-4 text-xs">
                     <span>{rule.name}</span>
@@ -159,11 +159,11 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                             <AlertDialogCancel>取消</AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => {
-                                toast.promise(removeAssetFilterRules(rule._id), {
+                                toast.promise(removeAssetFilterRules(rule.id), {
                                   loading: '操作中...',
                                   success: () => {
                                     void mutateAssetFilterRules();
-                                    current === rule._id && setCurrent('all');
+                                    current === rule.id && setCurrent('all');
                                     return '删除成功';
                                   },
                                   error: '删除失败，请检查网络后重试',

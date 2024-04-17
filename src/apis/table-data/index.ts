@@ -10,43 +10,51 @@ import { IAssetItem } from '@/apis/ugc/typings.ts';
 export const useDatabase = (databaseId?: string) =>
   useSWR<IPaginationListData<IAssetItem<ITableData>> | undefined>(
     databaseId
-      ? `/api/database${databaseId ? `?${qs.stringify({ filter: { ids: [databaseId] } }, { encode: false })}` : ''}`
+      ? `/api/sql-knowledge-bases${databaseId ? `?${qs.stringify({ filter: { ids: [databaseId] } }, { encode: false })}` : ''}`
       : null,
     vinesFetcher(),
   );
 
 export const useDatabaseTables = (databaseId: string) =>
-  useSWR<IDatabaseTable[] | undefined>(databaseId ? `/api/database/${databaseId}/tables` : null, vinesFetcher());
+  useSWR<IDatabaseTable[] | undefined>(
+    databaseId ? `/api/tools/monkey_tools_knowledge_base/sql-knowledge-bases/${databaseId}/tables` : null,
+    vinesFetcher({
+      responseResolver: async (response) => {
+        return ((await response.json()) as any).tables as IDatabaseTable[];
+      },
+    }),
+  );
 
 export const useDatabaseData = (databaseId: string, tableId: string, page = 1, limit = 10) =>
   useSWR<IDatabaseData[] | undefined>(
-    databaseId && tableId ? `/api/database/${databaseId}/tables/${tableId}?${qs.stringify({ page, limit })}` : null,
+    databaseId && tableId
+      ? `/api/sql-knowledge-bases/${databaseId}/tables/${tableId}?${qs.stringify({ page, limit })}`
+      : null,
     vinesFetcher(),
   );
 
-export const createDatabase = (parma: { name: string; description: string; iconUrl: string }) =>
-  vinesFetcher({ method: 'POST', simple: true })(`/api/database`, parma);
+export const createDatabase = (parma: { displayName: string; description: string; iconUrl: string }) =>
+  vinesFetcher({ method: 'POST', simple: true })(`/api/sql-knowledge-bases`, parma);
 
 export const deleteDatabase = (databaseId: string) =>
-  vinesFetcher({ method: 'DELETE', simple: true })(`/api/database/${databaseId}`);
+  vinesFetcher({ method: 'DELETE', simple: true })(`/api/sql-knowledge-bases/${databaseId}`);
 
 export const deleteTable = (databaseId: string, tableId: string) =>
-  vinesFetcher({ method: 'DELETE', simple: true })(`/api/database/${databaseId}/tables/${tableId}`);
+  vinesFetcher({ method: 'DELETE', simple: true })(`/api/sql-knowledge-bases/${databaseId}/tables/${tableId}`);
 
 export const importToDatabaseUseCSV = (databaseId: string, tableName: string, url: string) =>
   vinesFetcher({
     method: 'POST',
     simple: true,
-  })(`/api/database/${databaseId}/importFromCsv`, {
+  })(`/api/tools/monkey_tools_knowledge_base/sql-knowledge-bases/${databaseId}/importFromCsv`, {
     tableName,
     url,
   });
 
-export const createTableUseSQL = (databaseId: string, tableName: string, sql: string) =>
+export const createTableUseSQL = (databaseId: string, sql: string) =>
   vinesFetcher({
     method: 'POST',
     simple: true,
-  })(`/api/database/${databaseId}/tables`, {
-    tableName,
+  })(`/api/tools/monkey_tools_knowledge_base/sql-knowledge-bases/${databaseId}/tables`, {
     sql,
   });

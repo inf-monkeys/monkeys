@@ -41,10 +41,10 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
   const { mutate } = useSWRConfig();
 
   const handelDelete = () => {
-    toast.promise(deleteDatabase(item._id), {
+    toast.promise(deleteDatabase(item.uuid), {
       loading: '正在删除表格数据...',
       success: () => {
-        void mutate((key) => typeof key === 'string' && key.startsWith('/api/database'));
+        void mutate((key) => typeof key === 'string' && key.startsWith('/api/sql-knowledge-bases'));
         return '表格数据删除成功';
       },
       error: '表格数据删除失败',

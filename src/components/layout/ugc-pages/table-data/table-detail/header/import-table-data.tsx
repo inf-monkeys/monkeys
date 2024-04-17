@@ -47,7 +47,8 @@ export const ImportTableData: React.FC<IImportTableDataProps> = ({ databaseId, c
       success: () => {
         setVisible(false);
         setTimeout(
-          () => mutate((key) => typeof key === 'string' && key.startsWith(`/api/database/${databaseId}/tables`)),
+          () =>
+            mutate((key) => typeof key === 'string' && key.startsWith(`/api/sql-knowledge-bases/${databaseId}/tables`)),
           2000,
         );
         return '导入成功，后台转换中，请稍后查看';

@@ -14,7 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
-import { databaseInfoSchema, IDatabaseInfo } from '@/schema/table-database/create-database.ts';
+import { IDatabaseInfo, databaseInfoSchema } from '@/schema/table-database/create-database.ts';
 
 interface ICreateDatabaseProps {}
 
@@ -24,7 +24,7 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
   const form = useForm<IDatabaseInfo>({
     resolver: zodResolver(databaseInfoSchema),
     defaultValues: {
-      name: '',
+      displayName: '',
       description: '',
       iconUrl: 'emoji:🍀:#ceefc5',
     },
@@ -38,7 +38,7 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
     toast.promise(createDatabase(data), {
       loading: '正在创建表格...',
       success: () => {
-        void mutate((key) => typeof key === 'string' && key.startsWith('/api/database'));
+        void mutate((key) => typeof key === 'string' && key.startsWith('/api/sql-knowledge-bases'));
         return '表格创建成功';
       },
       error: '表格创建失败',
@@ -61,7 +61,7 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
         <Form {...form}>
           <form onSubmit={handleSubmit} className="flex flex-col gap-2">
             <FormField
-              name="name"
+              name="displayName"
               control={form.control}
               render={({ field }) => (
                 <FormItem>

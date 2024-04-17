@@ -25,7 +25,7 @@ export const LlmModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInp
   useEffect(() => {
     if (!llmModels) return;
 
-    const opts = llmModels.map((m) => ({ name: m.name, value: m.id }));
+    const opts = llmModels.map((m) => ({ name: m.name, value: m.uuid }));
 
     setOptions(opts);
 

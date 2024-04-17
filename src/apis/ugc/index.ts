@@ -15,7 +15,7 @@ import { IApplicationStoreItemDetail } from '@/apis/ugc/asset-typings.ts';
 import { IKnowledgeBaseFrontEnd } from '@/apis/vector/typings.ts';
 import { paginationWrapper } from '@/apis/wrapper.ts';
 
-import { IAssetItem, IAssetPublicCategory, IListUgcDto, IUgcFilterRules } from './typings';
+import { IAssetItem, IAssetPublicCategory, IAssetTag, IListUgcDto, IUgcFilterRules } from './typings';
 
 export const useUgcItems = <T extends object>(dto: IListUgcDto, url: string, method: 'GET' | 'POST' = 'GET') => {
   const swrUrl = method === 'GET' ? `${url}?${qs.stringify(dto, { encode: false })}` : url;
@@ -43,11 +43,11 @@ export const preloadUgcItems = <T extends object>(dto: IListUgcDto, url: string,
   return preload(method === 'GET' ? swrUrl : [swrUrl, dto], fetcher);
 };
 
-export const useUgcWorkflows = (dto: IListUgcDto) => useUgcItems<MonkeyWorkflow>(dto, '/api/workflow/list');
-export const preloadUgcWorkflows = (dto: IListUgcDto) => preloadUgcItems<MonkeyWorkflow>(dto, '/api/workflow/list');
+export const useUgcWorkflows = (dto: IListUgcDto) => useUgcItems<MonkeyWorkflow>(dto, '/api/workflow/metadata');
+export const preloadUgcWorkflows = (dto: IListUgcDto) => preloadUgcItems<MonkeyWorkflow>(dto, '/api/workflow/metadata');
 
-export const useUgcActionTools = (dto: IListUgcDto) => useUgcItems<IWorkflowBlock>(dto, '/api/blocks/list');
-export const preloadUgcActionTools = (dto: IListUgcDto) => preloadUgcItems<IWorkflowBlock>(dto, '/api/blocks/list');
+export const useUgcActionTools = (dto: IListUgcDto) => useUgcItems<IWorkflowBlock>(dto, '/api/tools');
+export const preloadUgcActionTools = (dto: IListUgcDto) => preloadUgcItems<IWorkflowBlock>(dto, '/api/tools');
 
 export const useUgcTextModels = (dto: IListUgcDto) => useUgcItems<ILLMModel>(dto, '/api/llm-models');
 export const preloadUgcTextModels = (dto: IListUgcDto) => preloadUgcItems<ILLMModel>(dto, '/api/llm-models');
@@ -61,8 +61,8 @@ export const useUgcKnowledgeBases = (dto: IListUgcDto) =>
 export const preloadKnowledgeBases = (dto: IListUgcDto) =>
   preloadUgcItems<IKnowledgeBaseFrontEnd>(dto, '/api/knowledge-bases');
 
-export const useUgcTableData = (dto: IListUgcDto) => useUgcItems<ITableData>(dto, '/api/knowledge-bases-sql');
-export const preloadUgcTableData = (dto: IListUgcDto) => preloadUgcItems<ITableData>(dto, '/api/knowledge-bases-sql');
+export const useUgcTableData = (dto: IListUgcDto) => useUgcItems<ITableData>(dto, '/api/sql-knowledge-bases');
+export const preloadUgcTableData = (dto: IListUgcDto) => preloadUgcItems<ITableData>(dto, '/api/sql-knowledge-bases');
 
 export const useUgcMediaData = (dto: IListUgcDto) => useUgcItems<IMediaData>(dto, '/api/media-files', 'GET');
 export const preloadUgcMediaData = (dto: IListUgcDto) => preloadUgcItems<IMediaData>(dto, '/api/media-files', 'GET');
@@ -78,8 +78,8 @@ export const preloadUgcTextModelStore = (dto: IListUgcDto) => preloadUgcItems<IL
 export const useUgcImageModelStore = (dto: IListUgcDto) => useUgcItems<ISDModel>(dto, '/api/sd-models/public');
 export const preloadUgcImageModelStore = (dto: IListUgcDto) => preloadUgcItems<ISDModel>(dto, '/api/sd-models/public');
 
-export const useAssetTagList = (assetKey?: string) =>
-  useSWR<string[] | undefined>(assetKey ? `/api/assets/${assetKey}/tags` : null, vinesFetcher(), {
+export const useAssetTagList = () =>
+  useSWR<IAssetTag[] | undefined>(`/api/assets/tags`, vinesFetcher(), {
     refreshInterval: 600000,
   });
 
@@ -104,12 +104,16 @@ export const useAssetPublicCategories = (type: AssetType, isMarket = false) =>
     },
   );
 
-export const updateAssetItem = (type: AssetType, id: string, data: any) =>
+export const createTag = (name: string) => {
+  return vinesFetcher<IAssetTag>({ method: 'POST', simple: true })(`/api/assets/tags/`, { name });
+};
+
+export const updateAssetTag = (type: AssetType, id: string, data: any) =>
   vinesFetcher({
     method: 'PUT',
     simple: true,
   })(
-    `/api/assets/${type}/${id}`,
+    `/api/assets/${type}/${id}/tags`,
     _.pickBy(data, (v) => !_.isNil(v)),
   );
 

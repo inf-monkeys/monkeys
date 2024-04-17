@@ -1,7 +1,7 @@
 import { IBaseEntity } from '@/apis/typings.ts';
 
 export interface ILLMModel extends IBaseEntity {
-  _id: string;
+  uuid: string;
   origin: 'built-in' | 'user';
   teamId?: string;
   name: string;

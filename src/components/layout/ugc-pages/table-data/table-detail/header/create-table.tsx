@@ -11,8 +11,7 @@ import { Button } from '@/components/ui/button';
 import { CodeEditor } from '@/components/ui/code-editor';
 import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
-import { Input } from '@/components/ui/input';
-import { createTableSchema, ICreateTable } from '@/schema/table-database/create-table.ts';
+import { ICreateTable, createTableSchema } from '@/schema/table-database/create-table.ts';
 
 interface ICreateTableProps {
   databaseId: string;
@@ -27,19 +26,19 @@ export const CreateTable: React.FC<ICreateTableProps> = ({ databaseId, children 
   const form = useForm<ICreateTable>({
     resolver: zodResolver(createTableSchema),
     defaultValues: {
-      tableName: '',
       sql: '',
     },
   });
 
   const handleSubmit = form.handleSubmit((data) => {
     setIsLoading(true);
-    toast.promise(createTableUseSQL(databaseId, data.tableName, data.sql), {
+    toast.promise(createTableUseSQL(databaseId, data.sql), {
       loading: '正在使用 SQL 创建表中',
       success: () => {
         setVisible(false);
         setTimeout(
-          () => mutate((key) => typeof key === 'string' && key.startsWith(`/api/database/${databaseId}/tables`)),
+          () =>
+            mutate((key) => typeof key === 'string' && key.startsWith(`/api/sql-knowledge-bases/${databaseId}/tables`)),
           1000,
         );
         return '使用 SQL 创建表成功，请稍后查看';
@@ -60,20 +59,6 @@ export const CreateTable: React.FC<ICreateTableProps> = ({ databaseId, children 
             className="flex flex-col gap-2"
             onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
           >
-            <FormField
-              name="tableName"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>表名</FormLabel>
-                  <FormControl>
-                    <Input placeholder="请输入表名" className="grow" autoFocus {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               name="sql"
               control={form.control}
