@@ -24,6 +24,9 @@ export const useDatabaseData = (databaseId: string, tableId: string, page = 1, l
     vinesFetcher(),
   );
 
+export const createDatabase = (parma: { name: string; description: string; iconUrl: string }) =>
+  vinesFetcher({ method: 'POST', simple: true })(`/api/database`, parma);
+
 export const deleteDatabase = (databaseId: string) =>
   vinesFetcher({ method: 'DELETE', simple: true })(`/api/database/${databaseId}`);
 
