@@ -5,6 +5,7 @@ import { useSWRConfig } from 'swr';
 import { Import, Plus, RefreshCwIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { CreateTable } from '@/components/layout/ugc-pages/table-data/table-detail/header/create-table.tsx';
 import { ImportTableData } from '@/components/layout/ugc-pages/table-data/table-detail/header/import-table-data.tsx';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -40,9 +41,11 @@ export const TableDetailHeader: React.FC<ITableDetailHeaderProps> = ({ databaseI
           导入数据
         </Button>
       </ImportTableData>
-      <Button variant="outline" icon={<Plus />}>
-        创建表
-      </Button>
+      <CreateTable databaseId={databaseId}>
+        <Button variant="outline" icon={<Plus />}>
+          创建表
+        </Button>
+      </CreateTable>
     </header>
   );
 };

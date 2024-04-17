@@ -32,3 +32,12 @@ export const importToDatabaseUseCSV = (databaseId: string, tableName: string, ur
     tableName,
     url,
   });
+
+export const createTableUseSQL = (databaseId: string, tableName: string, sql: string) =>
+  vinesFetcher({
+    method: 'POST',
+    simple: true,
+  })(`/api/database/${databaseId}/tables`, {
+    tableName,
+    sql,
+  });
