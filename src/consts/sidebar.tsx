@@ -98,11 +98,6 @@ export const SIDEBAR_MAP: NavItem[] = [
         label: '应用市场',
       },
       {
-        path: '/$teamId/tool-store',
-        name: 'tool-store',
-        label: '工具市场',
-      },
-      {
         path: '/$teamId/text-model-store',
         name: 'text-model-store',
         label: '语言模型市场',
@@ -113,9 +108,9 @@ export const SIDEBAR_MAP: NavItem[] = [
         label: '图像模型市场',
       },
       {
-        path: '/$teamId/data-store',
-        name: 'data-store',
-        label: '数据市场',
+        path: '/$teamId/text-data-store',
+        name: 'text-data-store',
+        label: '文本数据市场',
       },
     ],
   },
