@@ -24,6 +24,9 @@ export const useDatabaseData = (databaseId: string, tableId: string, page = 1, l
     vinesFetcher(),
   );
 
+export const deleteDatabase = (databaseId: string) =>
+  vinesFetcher({ method: 'DELETE', simple: true })(`/api/database/${databaseId}`);
+
 export const importToDatabaseUseCSV = (databaseId: string, tableName: string, url: string) =>
   vinesFetcher({
     method: 'POST',
