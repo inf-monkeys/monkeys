@@ -43,17 +43,12 @@ export const UgcViewGalleryItem = <E extends object>({
     >
       <div className="relative flex items-end justify-end">
         {cover}
-        <div className="absolute flex translate-x-[-0.5rem] translate-y-[-0.5rem] cursor-pointer gap-1 opacity-0 drop-shadow-[0_1px_1px_rgba(0,0,0,0.7)] transition-all group-hover:opacity-100">
+        <div className="absolute flex translate-x-[-0.5rem] translate-y-[-0.5rem] cursor-pointer gap-1 opacity-0 transition-all group-hover:opacity-100">
           <Popover>
             <Tooltip content="信息">
               <TooltipTrigger asChild>
-                <PopoverTrigger
-                  asChild
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                >
-                  <Info />
+                <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
+                  <Info className="stroke-vines-500 opacity-80 drop-shadow-[0_1px_1px_rgb(var(--vines-500)/0.7)]" />
                 </PopoverTrigger>
               </TooltipTrigger>
             </Tooltip>
@@ -83,7 +78,12 @@ export const UgcViewGalleryItem = <E extends object>({
             </PopoverContent>
           </Popover>
 
-          {operateArea && operateArea(row.original, <CircleEllipsis />, '操作')}
+          {operateArea &&
+            operateArea(
+              row.original,
+              <CircleEllipsis className="stroke-vines-500 opacity-80 drop-shadow-[0_1px_1px_rgb(var(--vines-500)/0.7)]" />,
+              '操作',
+            )}
         </div>
       </div>
 
