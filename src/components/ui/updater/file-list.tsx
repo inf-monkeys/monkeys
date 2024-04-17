@@ -122,7 +122,8 @@ export const FileList: React.FC<IFilesProps> = ({
 
   const finalLists = list.filter((it) => !hiddenList.includes(it.id));
   const hasFile = finalLists.length > 0;
-  const isWaitToUpload = hasFile && finalLists.every((it) => it.status === 'wait-to-update');
+  const isWaitToUpload =
+    hasFile && finalLists.filter((it) => it.status !== 'success').every((it) => it.status === 'wait-to-update');
 
   const [uploadQueue, setUploadQueue] = useState<string[]>([]);
   const handleOnClickUpload = async () => {

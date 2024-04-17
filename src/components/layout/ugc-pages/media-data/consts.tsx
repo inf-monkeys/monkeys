@@ -13,7 +13,7 @@ export const createMediaDataColumns = () => [
   columnHelper.display({
     id: 'logo',
     header: '图标',
-    cell: ({ row }) => RenderIcon({ iconUrl: row.original.type === 'image' ? row.original.url : '' }),
+    cell: ({ row }) => RenderIcon({ iconUrl: row.original.type.startsWith('image') ? row.original.url : '' }),
     maxSize: 48,
   }),
   columnHelper.accessor('name', {

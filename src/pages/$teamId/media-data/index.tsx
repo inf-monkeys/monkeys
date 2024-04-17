@@ -12,6 +12,7 @@ import { UgcDeleteDialog } from '@/components/layout/ugc/delete-dialog';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createMediaDataColumns } from '@/components/layout/ugc-pages/media-data/consts.tsx';
+import { UploadMedia } from '@/components/layout/ugc-pages/media-data/upload';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import {
   DropdownMenu,
@@ -46,9 +47,9 @@ export const MediaData: React.FC = () => {
               {`${item.user?.name ?? '未知'} 创建于 ${formatTimeDiffPrevious(item.createdTimestamp)}`}
             </span>
           ),
-          cover: (item) => RenderIcon({ iconUrl: item.type === 'image' ? item.url : '', size: 'gallery' }),
+          cover: (item) => RenderIcon({ iconUrl: item.type.startsWith('image') ? item.url : '', size: 'gallery' }),
         }}
-        subtitle={<></>}
+        subtitle={<UploadMedia />}
         operateArea={(item, trigger, tooltipTriggerContent) => (
           <DropdownMenu>
             {tooltipTriggerContent ? (
