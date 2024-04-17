@@ -8,6 +8,8 @@ import { ChevronRight, Undo2 } from 'lucide-react';
 import { Virtuoso } from 'react-virtuoso';
 
 import { useDatabase, useDatabaseTables } from '@/apis/table-data';
+import { TableDatabase } from '@/components/layout/ugc-pages/table-data/table-detail';
+import { TableDetailHeader } from '@/components/layout/ugc-pages/table-data/table-detail/header';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
@@ -15,12 +17,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { cn } from '@/utils';
 
 const TableDataDetail: React.FC = () => {
-  const { tableId } = Route.useParams();
+  const { databaseId } = Route.useParams();
 
-  const { data: tableDetail } = useDatabase(tableId);
-  const { data: tableList, isLoading } = useDatabaseTables(tableId);
+  const { data: tableDetail } = useDatabase(databaseId);
+  const { data: tableList, isLoading } = useDatabaseTables(databaseId);
 
-  const [activeTab, setActiveTab] = useState('paragraph');
+  const [tableId, setTableId] = useState('');
   const [visible, setVisible] = useState(true);
 
   const displayName = tableDetail?.[0]?.name;
@@ -34,12 +36,12 @@ const TableDataDetail: React.FC = () => {
 
   useEffect(() => {
     if (tableList && tableList?.length) {
-      setActiveTab(tableList[0]._id);
+      setTableId(tableList[0]._id);
     }
   }, [tableList]);
 
   return (
-    <Tabs className="size-full" value={activeTab} onValueChange={setActiveTab}>
+    <Tabs className="size-full" value={tableId} onValueChange={setTableId}>
       <main ref={containerRef} className="flex size-full">
         <motion.div
           className="flex size-full max-w-64 flex-col gap-4 overflow-clip"
@@ -117,15 +119,16 @@ const TableDataDetail: React.FC = () => {
               </motion.div>
             ) : (
               <>
+                <TableDetailHeader databaseId={databaseId} />
                 <motion.div
-                  key={activeTab}
+                  key={tableId}
                   className="mt-2 size-full"
                   initial={{ y: 10, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   exit={{ y: -10, opacity: 0 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div>{activeTab}</div>
+                  <TableDatabase databaseId={databaseId} tableId={tableId} />
                 </motion.div>
               </>
             )}
@@ -136,6 +139,6 @@ const TableDataDetail: React.FC = () => {
   );
 };
 
-export const Route = createFileRoute('/$teamId/table-data/$tableId/')({
+export const Route = createFileRoute('/$teamId/table-data/$databaseId/')({
   component: TableDataDetail,
 });

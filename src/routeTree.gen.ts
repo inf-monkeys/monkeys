@@ -33,7 +33,7 @@ import { Route as TeamIdApplicationStoreIndexImport } from './pages/$teamId/appl
 import { Route as TeamIdActionToolsIndexImport } from './pages/$teamId/action-tools/index'
 import { Route as TeamIdWorkspaceWorkflowIdIndexImport } from './pages/$teamId/workspace/$workflowId/index'
 import { Route as TeamIdTextDataTextIdIndexImport } from './pages/$teamId/text-data/$textId/index'
-import { Route as TeamIdTableDataTableIdIndexImport } from './pages/$teamId/table-data/$tableId/index'
+import { Route as TeamIdTableDataDatabaseIdIndexImport } from './pages/$teamId/table-data/$databaseId/index'
 import { Route as TeamIdActionToolsActionToolNameIndexImport } from './pages/$teamId/action-tools/$actionToolName/index'
 import { Route as TeamIdWorkspaceWorkflowIdPageIdIndexImport } from './pages/$teamId/workspace/$workflowId/$pageId/index'
 
@@ -153,9 +153,9 @@ const TeamIdTextDataTextIdIndexRoute = TeamIdTextDataTextIdIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const TeamIdTableDataTableIdIndexRoute =
-  TeamIdTableDataTableIdIndexImport.update({
-    path: '/$teamId/table-data/$tableId/',
+const TeamIdTableDataDatabaseIdIndexRoute =
+  TeamIdTableDataDatabaseIdIndexImport.update({
+    path: '/$teamId/table-data/$databaseId/',
     getParentRoute: () => rootRoute,
   } as any)
 
@@ -259,8 +259,8 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdActionToolsActionToolNameIndexImport
       parentRoute: typeof rootRoute
     }
-    '/$teamId/table-data/$tableId/': {
-      preLoaderRoute: typeof TeamIdTableDataTableIdIndexImport
+    '/$teamId/table-data/$databaseId/': {
+      preLoaderRoute: typeof TeamIdTableDataDatabaseIdIndexImport
       parentRoute: typeof rootRoute
     }
     '/$teamId/text-data/$textId/': {
@@ -302,7 +302,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdWorkflowsIndexRoute,
   TeamIdWorkspaceIndexRoute,
   TeamIdActionToolsActionToolNameIndexRoute,
-  TeamIdTableDataTableIdIndexRoute,
+  TeamIdTableDataDatabaseIdIndexRoute,
   TeamIdTextDataTextIdIndexRoute,
   TeamIdWorkspaceWorkflowIdIndexRoute,
   TeamIdWorkspaceWorkflowIdPageIdIndexRoute,

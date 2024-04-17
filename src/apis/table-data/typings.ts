@@ -13,3 +13,5 @@ export interface IDatabaseTable extends IBaseEntity {
   databaseId: string;
   name: string;
 }
+
+export type IDatabaseData = { id: number } & Record<string, string>;
