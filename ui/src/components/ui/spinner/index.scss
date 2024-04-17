@@ -1,0 +1,132 @@
+@mixin keyframes($animation-name) {
+  @-webkit-keyframes #{$animation-name} {
+    @content;
+  }
+  @-moz-keyframes #{$animation-name} {
+    @content;
+  }
+  @-ms-keyframes #{$animation-name} {
+    @content;
+  }
+  @-o-keyframes #{$animation-name} {
+    @content;
+  }
+  @keyframes #{$animation-name} {
+    @content;
+  }
+}
+
+@keyframes circleAnimation {
+  from {
+    transform: scale(0) rotate(45deg);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) rotate(45deg);
+    opacity: 1;
+  }
+}
+
+@keyframes checkmarkAnimation {
+  0% {
+    height: 0;
+    width: 0;
+    opacity: 0;
+  }
+  40% {
+    height: 0;
+    width: 6px;
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    height: 10px;
+  }
+}
+
+@keyframes errorFirstLineAnimation {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes errorSecondLineAnimation {
+  from {
+    transform: scale(0) rotate(90deg);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) rotate(90deg);
+    opacity: 1;
+  }
+}
+
+.icon-check {
+  width: 20px;
+  opacity: 0;
+  height: 20px;
+  border-radius: 10px;
+  background: #61d345;
+  position: relative;
+  transform: rotate(45deg);
+  animation-delay: 100ms;
+  animation: circleAnimation 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+
+
+  &:after {
+    content: '';
+    box-sizing: border-box;
+    opacity: 0;
+    animation-delay: 200ms;
+    position: absolute;
+    border-right: 2px solid;
+    border-bottom: 2px solid;
+    border-color: #fff;
+    bottom: 6px;
+    left: 6px;
+    height: 10px;
+    width: 6px;
+    animation: checkmarkAnimation 0.2s ease-out forwards
+
+  }
+}
+
+.icon-error {
+  width: 20px;
+  opacity: 0;
+  height: 20px;
+  border-radius: 10px;
+  background: #ff4b4b;
+  position: relative;
+  transform: rotate(45deg);
+  animation-delay: 100ms;
+  animation: circleAnimation 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+
+
+  &:after,
+  &:before {
+    content: '';
+    animation-delay: 150ms;
+    position: absolute;
+    border-radius: 3px;
+    opacity: 0;
+    background: #fff;
+    bottom: 9px;
+    left: 4px;
+    height: 2px;
+    width: 12px;
+    animation: errorFirstLineAnimation 0.15s ease-out forwards;
+
+  }
+
+  &:before {
+    animation-delay: 180ms;
+    transform: rotate(90deg);
+    animation: errorSecondLineAnimation 0.15s ease-out forwards;
+  }
+}
