@@ -9,15 +9,26 @@ import { IAssetItem } from '@/apis/ugc/typings.ts';
 
 export const useDatabase = (databaseId?: string) =>
   useSWR<IPaginationListData<IAssetItem<ITableData>> | undefined>(
-    `/api/database${databaseId ? `?${qs.stringify({ filter: { ids: [databaseId] } }, { encode: false })}` : ''}`,
+    databaseId
+      ? `/api/database${databaseId ? `?${qs.stringify({ filter: { ids: [databaseId] } }, { encode: false })}` : ''}`
+      : null,
     vinesFetcher(),
   );
 
 export const useDatabaseTables = (databaseId: string) =>
-  useSWR<IDatabaseTable[] | undefined>(`/api/database/${databaseId}/tables`, vinesFetcher());
+  useSWR<IDatabaseTable[] | undefined>(databaseId ? `/api/database/${databaseId}/tables` : null, vinesFetcher());
 
 export const useDatabaseData = (databaseId: string, tableId: string, page = 1, limit = 10) =>
   useSWR<IDatabaseData[] | undefined>(
-    `/api/database/${databaseId}/tables/${tableId}?${qs.stringify({ page, limit })}`,
+    databaseId && tableId ? `/api/database/${databaseId}/tables/${tableId}?${qs.stringify({ page, limit })}` : null,
     vinesFetcher(),
   );
+
+export const importToDatabaseUseCSV = (databaseId: string, tableName: string, url: string) =>
+  vinesFetcher({
+    method: 'POST',
+    simple: true,
+  })(`/api/database/${databaseId}/importFromCsv`, {
+    tableName,
+    url,
+  });
