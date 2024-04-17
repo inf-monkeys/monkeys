@@ -85,11 +85,6 @@ export const ImageModelStore: React.FC = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        onItemClick={(item) => {
-          // void navigate({
-          //   to: `/$teamId/action-tools/${item.name}`,
-          // });
-        }}
       />
 
       <UgcImportDialog
