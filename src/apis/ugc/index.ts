@@ -131,3 +131,9 @@ export const publishAssetItem = (type: AssetType, id: string, data: any) =>
     method: 'POST',
     simple: true,
   })(`/api/assets/${type}/public/${id}`, data);
+
+export const forkAssetItem = (type: AssetType, id: string) =>
+  vinesFetcher<IAssetItem>({
+    method: 'POST',
+    simple: true,
+  })(`/api/assets/${type}/fork/${id}`);
