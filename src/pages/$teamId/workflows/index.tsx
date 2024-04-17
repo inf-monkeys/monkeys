@@ -120,11 +120,9 @@ export const Workflows: React.FC = () => {
         createColumns={() => createWorkflowsColumns()}
         renderOptions={{
           subtitle: (item) => (
-            <div className="flex gap-1">
-              <span>{item.user?.name ?? '未知'}</span>
-              <span>创建于</span>
-              <span>{formatTimeDiffPrevious(item.createdTimestamp)}</span>
-            </div>
+            <span className="line-clamp-1">
+              {`${item.user?.name ?? '未知'} 创建于 ${formatTimeDiffPrevious(item.createdTimestamp)}`}
+            </span>
           ),
           cover: (item) => RenderIcon({ iconUrl: item.iconUrl, size: 'gallery' }),
         }}
