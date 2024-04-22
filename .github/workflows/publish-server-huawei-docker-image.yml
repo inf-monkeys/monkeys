@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: Push Docker image to Huawei SWR Docker Hub
+    name: Publish Docker image to Huawei SWR Docker Hub
     runs-on: ubuntu-latest
 
     steps:
