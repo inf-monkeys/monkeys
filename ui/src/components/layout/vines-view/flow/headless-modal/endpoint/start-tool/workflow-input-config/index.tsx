@@ -4,7 +4,7 @@ import { InputConfig } from '@/components/layout/vines-view/flow/headless-modal/
 import { WorkflowTrigger } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/triggers';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 
-import { WorkflowRateLimiterConfig } from './rate-limiter';
+import { WorkflowApiConfig } from './api-config';
 
 interface IWorkflowInputConfigProps {}
 
@@ -14,7 +14,7 @@ export const WorkflowInputConfig: React.FC<IWorkflowInputConfigProps> = () => {
       <TabsList>
         <TabsTrigger value="input">工作流输入</TabsTrigger>
         <TabsTrigger value="trigger">触发器</TabsTrigger>
-        <TabsTrigger value="rateLimiter">限流配置</TabsTrigger>
+        <TabsTrigger value="rateLimiter"> API 配置</TabsTrigger>
       </TabsList>
       <TabsContent value="input">
         <InputConfig contentWidth={412} />
@@ -23,7 +23,7 @@ export const WorkflowInputConfig: React.FC<IWorkflowInputConfigProps> = () => {
         <WorkflowTrigger />
       </TabsContent>
       <TabsContent value="rateLimiter">
-        <WorkflowRateLimiterConfig />
+        <WorkflowApiConfig />
       </TabsContent>
     </Tabs>
   );

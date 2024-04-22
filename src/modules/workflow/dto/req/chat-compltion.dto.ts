@@ -1,11 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-
-export type ChatCompletionRole = 'system' | 'user' | 'assistant' | 'tool' | 'function';
-
-export class ChatCompletionMessageDto {
-  role: ChatCompletionRole;
-  content: string;
-}
+import { ChatCompletionMessageParam } from 'openai/resources';
 
 export class ChatCompletionsDto {
   @ApiProperty({
@@ -21,10 +15,9 @@ export class ChatCompletionsDto {
 
   @ApiProperty({
     description: 'Messages',
-    type: ChatCompletionMessageDto,
     isArray: true,
   })
-  messages: ChatCompletionMessageDto[];
+  messages: Array<ChatCompletionMessageParam>;
 
   @ApiProperty({
     description: '生成的最大令牌数',

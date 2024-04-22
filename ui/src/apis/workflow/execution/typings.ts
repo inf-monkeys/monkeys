@@ -29,3 +29,10 @@ export type IUpdateExecutionTaskParams = {
   status: 'COMPLETED' | 'FAILED' | 'CANCELED';
   outputData: Record<string, unknown>;
 };
+
+export interface ChatMessage {
+  startTime: string;
+  endTime: string;
+  role: string;
+  content: string;
+}

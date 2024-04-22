@@ -1,3 +1,4 @@
+import { ChatCompletionMessageParam } from 'openai/resources';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
@@ -22,4 +23,11 @@ export class WorkflowChatSessionEntity extends BaseEntity {
     name: 'workflow_id',
   })
   workflowId: string;
+
+  @Column({
+    name: 'messages',
+    nullable: true,
+    type: 'simple-json',
+  })
+  messages?: Array<ChatCompletionMessageParam>;
 }

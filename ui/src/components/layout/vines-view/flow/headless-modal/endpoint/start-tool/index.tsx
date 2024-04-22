@@ -26,7 +26,7 @@ export const StartTool: React.FC<IStartToolProps> = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
-        <DialogTitle>触发器与工作流输入</DialogTitle>
+        <DialogTitle>工作流配置</DialogTitle>
         <WorkflowInputConfig />
       </DialogContent>
     </Dialog>

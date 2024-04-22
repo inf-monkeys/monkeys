@@ -70,4 +70,11 @@ export class UpdateWorkflowDefDto {
     name: 'output',
   })
   output?: WorkflowOutputValue[];
+
+  @ApiProperty({
+    description: '是否暴露 OpenAI 兼容接口',
+    required: false,
+    type: Boolean,
+  })
+  exposeOpenaiCompatibleInterface: boolean;
 }

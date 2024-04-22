@@ -1,5 +1,6 @@
 import { WorkflowChatSessionEntity } from '@/database/entities/workflow/workflow-chat-session';
 import { Injectable } from '@nestjs/common';
+import { ChatCompletionMessageParam } from 'openai/resources';
 import { WorkflowRepository } from '../../database/repositories/workflow.repository';
 
 @Injectable()
@@ -20,5 +21,9 @@ export class WorkflowChatSessionService {
 
   public async updateChatSession(teamId: string, sessionId: string, updates: Partial<WorkflowChatSessionEntity>) {
     return await this.workflowRepository.updateChatSession(teamId, sessionId, updates);
+  }
+
+  public async getChatSessionMessages(teamId: string, sessionId: string): Promise<Array<ChatCompletionMessageParam>> {
+    return await this.workflowRepository.getChatSessionMessages(teamId, sessionId);
   }
 }

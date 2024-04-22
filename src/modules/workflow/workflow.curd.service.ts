@@ -59,7 +59,7 @@ export class WorkflowCrudService {
 
   public async createWorkflowDef(teamId: string, userId: string, data: CreateWorkflowData, options?: CreateWorkflowOptions) {
     const { assetsPolicy, isTheSameTeam = false, replaceSqlDatabaseMap, replaceVectorDatabaseMap, replaceLlmModelMap, replaceSdModelMap } = options || {};
-    const { displayName, iconUrl, description, tasks, variables, triggers, output, version = 1 } = data;
+    const { displayName, iconUrl, description, tasks, variables, triggers, output, version = 1, exposeOpenaiCompatibleInterface = false } = data;
     const workflowId = options?.useExistId || generateDbId();
 
     // 从应用市场 clone 的时候，资产的授权策略
@@ -220,6 +220,7 @@ export class WorkflowCrudService {
       tasks,
       output,
       variables,
+      exposeOpenaiCompatibleInterface,
     });
     await this.conductorService.saveWorkflowInConductor(workflowEntity);
 
@@ -451,6 +452,8 @@ export class WorkflowCrudService {
       variables?: BlockDefProperties[];
       validationIssues?: WorkflowValidationIssue[];
       output?: WorkflowOutputValue[];
+      exposeOpenaiCompatibleInterface?: boolean;
+      rateLimiter?: WorkflowRateLimiter;
     },
   ) {
     const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
@@ -475,11 +478,5 @@ export class WorkflowCrudService {
       validated,
       validationIssues,
     };
-  }
-
-  public async updateWorkflowRateLimiter(teamId: string, workflowId: string, version: number, rateLimiter: WorkflowRateLimiter) {
-    await this.workflowRepository.updateWorkflowDef(teamId, workflowId, version, {
-      rateLimiter,
-    });
   }
 }

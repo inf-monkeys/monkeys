@@ -10,7 +10,6 @@ import { CreateWorkflowDefDto } from './dto/req/create-workflow-def.dto';
 import { GetWorkflowDto } from './dto/req/get-workflow.dto';
 import { ImportWorkflowDto } from './dto/req/import-workflow.dto';
 import { UpdateWorkflowDefDto } from './dto/req/update-workflow-def.dto';
-import { UpdateWorkflowRateLimiterDto } from './dto/req/update-workflow-rate-limiter.dto';
 import { WorkflowWithAssetsJson } from './interfaces';
 import { WorkflowCrudService } from './workflow.curd.service';
 import { WorkflowPageService } from './workflow.page.service';
@@ -122,26 +121,6 @@ export class WorkflowCrudController {
         success: true,
         validationIssues,
         validated,
-      },
-    });
-  }
-
-  @Put('/:workflowId/rate-limiter')
-  @ApiOperation({
-    summary: '更新 workflow 限流配置',
-    description: '更新 workflow 限流配置',
-  })
-  public async updateWorkflowRateLimiter(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Body() body: UpdateWorkflowRateLimiterDto) {
-    const { teamId } = req;
-    const { version = 1, enabled, max, windowMs } = body;
-    await this.service.updateWorkflowRateLimiter(teamId, workflowId, version, {
-      enabled,
-      max,
-      windowMs,
-    });
-    return new SuccessResponse({
-      data: {
-        success: true,
       },
     });
   }

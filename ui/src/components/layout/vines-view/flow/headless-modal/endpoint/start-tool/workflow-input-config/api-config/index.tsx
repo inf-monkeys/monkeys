@@ -6,37 +6,39 @@ import { Save } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
-import { updateWorkflowRateLimiter, WorkflowRateLimiter } from '@/apis/workflow';
+import { updateWorkflow, WorkflowRateLimiter } from '@/apis/workflow';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useVinesFlow } from '@/package/vines-flow';
-import {
-  IWorkflowRateLimiterInfo,
-  workflowRateLimiterInfoSchema,
-} from '@/schema/workspace/workflow-rate-limiter-config';
+import { IWorkflowApiConfigInfo, workflowApiConfigInfoSchema } from '@/schema/workspace/workflow-api-config';
 import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
 
-interface IWorkflowRateLimiterProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface IWorkflowApiConfigProps extends React.ComponentPropsWithoutRef<'div'> {}
 
-export const WorkflowRateLimiterConfig: React.FC<IWorkflowRateLimiterProps> = ({ className }) => {
+export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = ({ className }) => {
   const { isLatestWorkflowVersion, workflowId } = useFlowStore();
   const { vines } = useVinesFlow();
   const { workflow, apikey } = useVinesPage();
 
   // @ts-ignore
-  const rateLimiter: WorkflowRateLimiter = workflow.rateLimiter;
+  const rateLimiter: WorkflowRateLimiter = workflow?.rateLimiter;
+  // @ts-ignore
+  const exposeOpenaiCompatibleInterface = workflow?.exposeOpenaiCompatibleInterface;
   const [isLoading, setIsLoading] = useState(false);
 
   const workflowVersion = vines.version;
 
-  const form = useForm<IWorkflowRateLimiterInfo>({
-    resolver: zodResolver(workflowRateLimiterInfoSchema),
+  const form = useForm<IWorkflowApiConfigInfo>({
+    resolver: zodResolver(workflowApiConfigInfoSchema),
     defaultValues: {
-      enabled: rateLimiter?.enabled ?? false,
-      max: rateLimiter?.max ?? 10,
-      windowMs: rateLimiter?.windowMs ?? 1000,
+      rateLimiter: {
+        enabled: rateLimiter?.enabled ?? false,
+        max: rateLimiter?.max ?? 10,
+        windowMs: rateLimiter?.windowMs ?? 1000,
+      },
+      exposeOpenaiCompatibleInterface,
     },
   });
 
@@ -49,12 +51,12 @@ export const WorkflowRateLimiterConfig: React.FC<IWorkflowRateLimiterProps> = ({
     }
 
     toast.promise(
-      updateWorkflowRateLimiter(apikey, workflowId, workflowVersion, {
+      updateWorkflow(apikey, workflowId, workflowVersion, {
         version: workflowVersion,
         ...data,
       }),
       {
-        success: data.enabled ? '已开启' : '已关闭',
+        success: '操作成功',
         loading: '操作中......',
         error: '操作失败，请检查网络后重试',
         finally: () => {
@@ -69,7 +71,21 @@ export const WorkflowRateLimiterConfig: React.FC<IWorkflowRateLimiterProps> = ({
       <Form {...form}>
         <form onSubmit={handleSubmit} className="flex flex-col">
           <FormField
-            name="enabled"
+            name="exposeOpenaiCompatibleInterface"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>启用 OpenAI 兼容的接口</FormLabel>
+                <FormControl>
+                  <Checkbox className="h-10 resize-none" {...field} checked={field.value} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            name="rateLimiter.enabled"
             control={form.control}
             render={({ field }) => (
               <FormItem>
@@ -82,10 +98,10 @@ export const WorkflowRateLimiterConfig: React.FC<IWorkflowRateLimiterProps> = ({
             )}
           />
 
-          {form.getValues().enabled && (
+          {form.getValues().rateLimiter?.enabled && (
             <>
               <FormField
-                name="windowMs"
+                name="rateLimiter.windowMs"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
@@ -99,7 +115,7 @@ export const WorkflowRateLimiterConfig: React.FC<IWorkflowRateLimiterProps> = ({
               />
 
               <FormField
-                name="max"
+                name="rateLimiter.max"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
@@ -121,7 +137,7 @@ export const WorkflowRateLimiterConfig: React.FC<IWorkflowRateLimiterProps> = ({
             icon={<Save />}
             type="submit"
           >
-            保存限流配置
+            保存 API 配置
           </Button>
         </form>
       </Form>
