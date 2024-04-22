@@ -82,17 +82,3 @@ export interface WorkflowRateLimiter {
   windowMs?: number;
   max?: number;
 }
-
-export const updateWorkflowRateLimiter = (
-  apikey: string,
-  workflowId: string,
-  workflowVersion: number,
-  rateLimiter: WorkflowRateLimiter,
-) =>
-  vinesFetcher<MonkeyWorkflow, Partial<MonkeyWorkflow>>({ method: 'PUT', simple: true, apikey })(
-    `/api/workflow/metadata/${workflowId}/rate-limiter`,
-    {
-      ...rateLimiter,
-      version: workflowVersion,
-    },
-  );

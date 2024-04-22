@@ -56,4 +56,13 @@ export class WorkflowChatSessionController {
       data,
     });
   }
+
+  @Get('/:sessionId/messages')
+  public async listChatSessionMessages(@Req() req: IRequest, @Param('sessionId') sessionId: string) {
+    const { teamId } = req;
+    const data = await this.service.getChatSessionMessages(teamId, sessionId);
+    return new SuccessResponse({
+      data,
+    });
+  }
 }

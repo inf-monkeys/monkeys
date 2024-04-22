@@ -182,6 +182,7 @@ export interface CreateWorkflowData {
   triggers?: WorkflowTriggerJson[];
   variables?: BlockDefProperties[];
   output?: WorkflowOutputValue[];
+  exposeOpenaiCompatibleInterface?: boolean;
 }
 
 export interface GenerateSubWorkflowsToSaveAtImportResult {

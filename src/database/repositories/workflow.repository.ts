@@ -11,6 +11,7 @@ import { BlockDefProperties, MonkeyTaskDefTypes } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
+import { ChatCompletionMessageParam } from 'openai/resources';
 import { In, Repository } from 'typeorm';
 import { WorkflowAssetRepositroy } from './assets-workflow.respository';
 
@@ -55,9 +56,10 @@ export class WorkflowRepository {
       tasks: MonkeyTaskDefTypes[];
       variables?: BlockDefProperties[];
       output: WorkflowOutputValue[];
+      exposeOpenaiCompatibleInterface?: boolean;
     },
   ) {
-    const { displayName, description, iconUrl, tasks, variables, output } = data;
+    const { displayName, description, iconUrl, tasks, variables, output, exposeOpenaiCompatibleInterface } = data;
     await this.workflowMetadataRepository.save({
       id: workflowId,
       createdTimestamp: Date.now(),
@@ -73,6 +75,7 @@ export class WorkflowRepository {
       tasks,
       variables,
       output,
+      exposeOpenaiCompatibleInterface,
     });
     return await this.getWorkflowById(workflowId, version);
   }
@@ -134,12 +137,18 @@ export class WorkflowRepository {
       output?: WorkflowOutputValue[];
       tagIds?: string[];
       rateLimiter?: WorkflowRateLimiter;
+      exposeOpenaiCompatibleInterface?: boolean;
     },
   ) {
-    const { displayName, description, iconUrl, tasks, variables, activated, validationIssues, validated, output, tagIds, rateLimiter } = updates;
+    const { displayName, description, iconUrl, tasks, variables, activated, validationIssues, validated, output, tagIds, rateLimiter, exposeOpenaiCompatibleInterface } = updates;
 
     // 字段都为空，则跳过更新
-    if ([displayName, description, iconUrl, tasks, variables, activated, validated, validationIssues, output, tagIds, rateLimiter].every((item) => typeof item === 'undefined')) return;
+    if (
+      [displayName, description, iconUrl, tasks, variables, activated, validated, validationIssues, output, tagIds, rateLimiter, exposeOpenaiCompatibleInterface].every(
+        (item) => typeof item === 'undefined',
+      )
+    )
+      return;
     if (variables && !Array.isArray(variables)) {
       throw new Error('variables 字段必须为数组');
     }
@@ -147,13 +156,14 @@ export class WorkflowRepository {
       throw new Error('output 字段必须为数组');
     }
     await this.workflowMetadataRepository.findOneOrFail({ where: { workflowId: workflowId, version, teamId, isDeleted: false } });
-    await this.workflowMetadataRepository.update(
-      { workflowId, isDeleted: false, teamId, version },
-      {
-        ..._.pickBy({ displayName, iconUrl, description, tasks, variables, activated, validationIssues, validated, output, tagIds, rateLimiter }, (v) => typeof v !== 'undefined'),
-        updatedTimestamp: Date.now(),
-      },
-    );
+    const updateFields = {
+      ..._.pickBy(
+        { displayName, iconUrl, description, tasks, variables, activated, validationIssues, validated, output, tagIds, rateLimiter, exposeOpenaiCompatibleInterface },
+        (v) => typeof v !== 'undefined',
+      ),
+      updatedTimestamp: Date.now(),
+    };
+    await this.workflowMetadataRepository.update({ workflowId, isDeleted: false, teamId, version }, updateFields);
     const workflow = await this.workflowMetadataRepository.findOne({
       where: {
         teamId,
@@ -389,7 +399,22 @@ export class WorkflowRepository {
         workflowId,
         isDeleted: false,
       },
+      select: ['id', 'displayName', 'createdTimestamp', 'updatedTimestamp', 'creatorUserId', 'isDeleted', 'teamId', 'workflowId'],
     });
+  }
+
+  public async getChatSessionMessages(teamId: string, sessionId: string): Promise<Array<ChatCompletionMessageParam>> {
+    const session = await this.workflowChatSessionRepository.findOne({
+      where: {
+        id: sessionId,
+        isDeleted: false,
+        teamId,
+      },
+    });
+    if (!session) {
+      throw new Error('会话不存在');
+    }
+    return session.messages;
   }
 
   public async deleteChatSession(teamId: string, sessionId: string) {
@@ -416,6 +441,22 @@ export class WorkflowRepository {
         isDeleted: false,
       },
       updates,
+    );
+    return {
+      success: true,
+    };
+  }
+
+  public async updateChatSessionMessages(teamId: string, sessionId: string, messages: Array<ChatCompletionMessageParam>) {
+    await this.workflowChatSessionRepository.update(
+      {
+        id: sessionId,
+        teamId,
+        isDeleted: false,
+      },
+      {
+        messages,
+      },
     );
     return {
       success: true,
