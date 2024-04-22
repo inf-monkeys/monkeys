@@ -1,4 +1,4 @@
-name: Publish Docker image for Huawei Registry
+name: Publish Server Docker image for Huawei Registry
 
 on:
   release:
