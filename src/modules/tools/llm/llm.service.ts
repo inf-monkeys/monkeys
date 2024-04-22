@@ -42,16 +42,19 @@ export const getModels = (
       }
     }
     if (typeof model.model === 'string') {
-      result.push({
-        name: model.displayName || model.model,
-        value: model.model,
-        type: model.type,
-      });
+      const splittedModels = model.model.split(',');
+      for (const modelValue of splittedModels) {
+        result.push({
+          name: model.displayName || model.model,
+          value: modelValue.trim(),
+          type: model.type,
+        });
+      }
     } else if (Array.isArray(model.model)) {
       for (const modelName of model.model) {
         result.push({
           name: model.displayName || modelName,
-          value: modelName,
+          value: modelName.trim(),
           type: model.type,
         });
       }
@@ -63,7 +66,14 @@ export const getModels = (
 @Injectable()
 export class LlmChatService {
   private getModelConfig(modelName: string) {
-    const model = config.models.find((x) => x.model === modelName);
+    const model = config.models.find((x) => {
+      if (typeof x.model === 'string') {
+        const splittedModels = x.model.split(',');
+        return splittedModels.includes(modelName);
+      } else if (Array.isArray(x.model)) {
+        return x.model.includes(modelName);
+      }
+    });
     if (!model) {
       throw new Error(`Model ${modelName} not exists`);
     }
