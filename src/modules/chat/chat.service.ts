@@ -82,7 +82,13 @@ export class ChatService {
 
   public async createCompelitions(params: CreateCompelitionsParams) {
     const { model, stream = false } = params;
-    const { apiKey, baseURL, defaultParams } = this.getModelConfig(model);
+    const { apiKey, baseURL, defaultParams, promptTemplate } = this.getModelConfig(model);
+
+    const prompt = params.prompt;
+    if (promptTemplate) {
+      params.prompt = promptTemplate.replace('{question}', prompt);
+    }
+
     const reqBody = {
       ...(defaultParams || {}),
       prompt: params.prompt,

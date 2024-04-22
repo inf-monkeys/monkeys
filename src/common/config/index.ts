@@ -127,6 +127,7 @@ export interface LlmModelConfig {
   iconUrl?: string;
   defaultParams?: { [x: string]: any };
   type: LlmModelEndpointType[];
+  promptTemplate?: string;
 }
 
 export interface Config {
