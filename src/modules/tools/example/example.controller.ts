@@ -13,7 +13,7 @@ import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiType, AuthType, ManifestJson, SchemaVersion } from '../../../common/typings/tools';
 import { AddTwoNumberDto } from './dto/req/add-two-number.dto';
 import { NthPowerOfDto } from './dto/req/nth-power-of.dto';
-import { EXAMPLE_WORKER_OPENAPI_PATH } from './example.swagger';
+import { EXAMPLE_TOOL_OPENAPI_PATH } from './example.swagger';
 
 @Controller('/example-tool')
 @ApiTags('示例计算工具')
@@ -30,7 +30,7 @@ export class ExampleToolsController {
       },
       api: {
         type: ApiType.openapi,
-        url: `${EXAMPLE_WORKER_OPENAPI_PATH}-json`,
+        url: `${EXAMPLE_TOOL_OPENAPI_PATH}-json`,
       },
       contact_email: 'dev@inf-monkeys.com',
     };

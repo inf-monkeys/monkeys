@@ -114,6 +114,21 @@ export interface S3Config {
   publicAccessUrl: string;
 }
 
+export enum LlmModelEndpointType {
+  CHAT_COMPLETIONS = 'chat_completions',
+  COMPLITIONS = 'completions',
+}
+
+export interface LlmModelConfig {
+  model: string | string[];
+  baseURL: string;
+  apiKey?: string;
+  displayName?: string;
+  iconUrl?: string;
+  defaultParams?: { [x: string]: any };
+  type: LlmModelEndpointType[];
+}
+
 export interface Config {
   server: ServerConfig;
   conductor: ConductorConfig;
@@ -125,6 +140,7 @@ export interface Config {
   comfyui: ComfyUICofig;
   auth: AuthConfig;
   s3: S3Config;
+  models: LlmModelConfig[];
 }
 
 const port = readConfig('server.port', 3000);
@@ -200,4 +216,5 @@ export const config: Config = {
     },
   },
   s3: readConfig('s3', {}),
+  models: readConfig('models', []),
 };

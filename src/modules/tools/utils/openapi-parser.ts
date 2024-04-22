@@ -2,7 +2,7 @@ import { isValidToolName } from '@/common/utils';
 import { BlockCredentialItem, BlockDefPropertyTypes, BlockDefinition, BlockType } from '@inf-monkeys/vines';
 import { OpenAPIObject, OperationObject, ParameterObject, ReferenceObject, RequestBodyObject, SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 
-export const parseOpenApiSpecAsBlocks = (namespace: string, specData: OpenAPIObject): BlockDefinition[] => {
+export const parseOpenApiSpecAsTools = (namespace: string, specData: OpenAPIObject): BlockDefinition[] => {
   const blocks: BlockDefinition[] = [];
   for (const path in specData.paths) {
     const pathItemObject = specData.paths[path];

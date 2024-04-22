@@ -1,6 +1,7 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ExampleToolsModule } from './example/example.module';
+import { LLmModule } from './llm/llm.module';
 import { ToolsController } from './tools.controller';
 import { ToolsCredentialsController } from './tools.credential.controller';
 import { ToolsCredentialsService } from './tools.credential.service';
@@ -11,7 +12,7 @@ import { ToolsRegistryService } from './tools.registry.service';
 @Module({
   controllers: [ToolsController, ToolsCredentialsController],
   providers: [ToolsPollingService, ToolsRegistryService, ToolsForwardService, ToolsCredentialsService],
-  imports: [ExampleToolsModule, HttpModule],
+  imports: [ExampleToolsModule, HttpModule, LLmModule],
   exports: [ToolsRegistryService, ToolsForwardService],
 })
 export class ToolsModule {}

@@ -5,7 +5,8 @@ import { config } from './common/config';
 import { logger } from './common/logger';
 import { sleep } from './common/utils/utils';
 import { ToolsRepository } from './database/repositories/tools.repository';
-import { EXAMPLE_WORKER_OPENAPI_MENIFEST_URL } from './modules/tools/example/example.swagger';
+import { EXAMPLE_TOOL_OPENAPI_MENIFEST_URL } from './modules/tools/example/example.swagger';
+import { LLM_TOOL_OPENAPI_MENIFEST_URL } from './modules/tools/llm/llm.swagger';
 import { ToolsRegistryService } from './modules/tools/tools.registry.service';
 
 @Injectable()
@@ -49,11 +50,16 @@ export class AppService implements OnApplicationBootstrap {
   private async registerTools() {
     await this.waitServerHttpServiceAvailable();
     if (config.server.loadExample) {
-      logger.info(`Load example tools of ${EXAMPLE_WORKER_OPENAPI_MENIFEST_URL}`);
+      logger.info(`Load example tools of ${EXAMPLE_TOOL_OPENAPI_MENIFEST_URL}`);
       this.workerRegistryService.registerToolsServer({
-        manifestUrl: EXAMPLE_WORKER_OPENAPI_MENIFEST_URL,
+        manifestUrl: EXAMPLE_TOOL_OPENAPI_MENIFEST_URL,
       });
     }
+
+    logger.info(`Load llm tool of ${LLM_TOOL_OPENAPI_MENIFEST_URL}`);
+    this.workerRegistryService.registerToolsServer({
+      manifestUrl: LLM_TOOL_OPENAPI_MENIFEST_URL,
+    });
 
     for (const { name, manifestUrl } of config.tools) {
       logger.info(`Load ${name} tools of ${manifestUrl}`);
