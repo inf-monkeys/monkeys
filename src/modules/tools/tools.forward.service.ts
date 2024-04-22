@@ -70,6 +70,7 @@ export class ToolsForwardService {
     } = server;
     const headers: { [x: string]: string } = {
       'x-monkeys-appid': config.server.appId,
+      'content-type': 'application/json',
     };
     switch (authType) {
       case AuthType.none:

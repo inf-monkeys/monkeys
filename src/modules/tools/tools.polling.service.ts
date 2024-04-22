@@ -151,7 +151,7 @@ export class ToolsPollingService {
       };
     }
     const { method, path } = apiInfo;
-    const namespace = __toolName.split('$$')[0];
+    const namespace = __toolName.split(':')[0];
     const server = await this.toolsRepository.getServerByNamespace(namespace);
     if (!server) {
       return {
@@ -235,7 +235,7 @@ export class ToolsPollingService {
           outputData: res.data,
           status: 'COMPLETED',
         };
-      } else {
+      } else if (responseType === 'stream') {
         const data = res.data as IncomingMessage;
         await this.readIncomingMessage(data, {
           onDataCallback: (chunk) => {

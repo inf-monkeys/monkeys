@@ -24,13 +24,13 @@ export const parseOpenApiSpecAsTools = (namespace: string, specData: OpenAPIObje
         let credentials: BlockCredentialItem[] = apiContent['x-monkey-tool-credentials'] || [];
         if (credentials?.length) {
           credentials = credentials.map((x) => {
-            x.name = `${namespace}__${x.name}`;
+            x.name = `${namespace}:${x.name}`;
             return x;
           });
         }
         const block: BlockDefinition = {
           type: BlockType.SIMPLE,
-          name: `${namespace}$$${name}`,
+          name: `${namespace}:${name}`,
           displayName: apiContent['x-monkey-tool-display-name'] || apiContent.summary,
           description: apiContent['x-monkey-tool-description'] || apiContent.description,
           categories: apiContent['x-monkey-tool-categories'] || [],
@@ -81,7 +81,7 @@ export const parseOpenApiSpecAsTools = (namespace: string, specData: OpenAPIObje
               }
               const apiBodyFieldFormItem: any = {
                 displayName: name,
-                name: `BODY#${name}`,
+                name: `${name}`,
                 required,
                 type: formType,
                 description: description,
@@ -164,7 +164,7 @@ export const parseOpenApiSpecAsTools = (namespace: string, specData: OpenAPIObje
               }
               const apiBodyFieldFormItem: any = {
                 displayName: name,
-                name: `${placeIn.toUpperCase()}#${name}`,
+                name: `${name}`,
                 required,
                 type: formType,
                 description: description,

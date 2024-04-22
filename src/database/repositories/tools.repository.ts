@@ -177,4 +177,16 @@ export class ToolsRepository {
       updates,
     );
   }
+
+  public async getToolsByNames(names: string[]) {
+    if (names?.length === 0) {
+      return [];
+    }
+    return await this.toolsRepository.find({
+      where: {
+        name: In(names),
+        isDeleted: false,
+      },
+    });
+  }
 }
