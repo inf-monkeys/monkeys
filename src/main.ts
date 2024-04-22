@@ -12,8 +12,8 @@ import { ExceptionsFilter } from './common/filters/exception.filter';
 import { logger } from './common/logger';
 import { ValidationPipe } from './common/pipes/validator.pipe';
 import { BootstrapService } from './modules/bootstrap/bootstrap.service';
+import { setupChatToolSwagger } from './modules/chat/chat.swagger';
 import { setupExampleToolSwagger } from './modules/tools/example/example.swagger';
-import { setupLlmToolSwagger } from './modules/tools/llm/llm.swagger';
 import { ToolsPollingService } from './modules/tools/tools.polling.service';
 import { setupSwagger } from './setupSwagger';
 
@@ -68,7 +68,7 @@ async function bootstrap() {
   app.use(passport.session());
 
   setupExampleToolSwagger(app);
-  setupLlmToolSwagger(app);
+  setupChatToolSwagger(app);
   setupSwagger(app);
 
   // String polling for tasks

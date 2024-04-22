@@ -64,7 +64,7 @@ export const getModels = (
 };
 
 @Injectable()
-export class LlmChatService {
+export class ChatService {
   private getModelConfig(modelName: string) {
     const model = config.models.find((x) => {
       if (typeof x.model === 'string') {
