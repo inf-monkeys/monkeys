@@ -92,7 +92,7 @@ export class ToolsPollingService {
 
   private async monkeyToolHandler(task: Task) {
     const inpuData = task.inputData as WorkerInputData;
-    const { __toolName, __apiInfo, __context, __advancedConfig, ...rest } = inpuData;
+    const { __toolName, __context, __advancedConfig, ...rest } = inpuData;
     const { outputAs = 'json' } = __advancedConfig || {};
 
     if (outputAs === 'stream' && !this.cache.isRedis()) {
@@ -140,16 +140,17 @@ export class ToolsPollingService {
         status: 'FAILED',
       };
     }
-    if (!__apiInfo) {
+    const apiInfo = tool.extra?.apiInfo;
+    if (!apiInfo) {
       return {
         outputData: {
           success: false,
-          errMsg: `Failed to execute tool "${__toolName}", __apiInfo is missing`,
+          errMsg: `Failed to execute tool "${__toolName}", apiInfo is missing`,
         },
         status: 'FAILED',
       };
     }
-    const { method, path } = __apiInfo;
+    const { method, path } = apiInfo;
     const namespace = __toolName.split('$$')[0];
     const server = await this.toolsRepository.getServerByNamespace(namespace);
     if (!server) {

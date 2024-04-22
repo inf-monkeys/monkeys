@@ -14,7 +14,6 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class ConductorService {
   TOOL_NAME_KEY = '__toolName';
-  APIINFO_KEY = '__apiInfo';
   CONTEXT_KEY = '__context';
 
   constructor(private readonly toolsRepository: ToolsRepository) {}
@@ -44,7 +43,6 @@ export class ConductorService {
         }
       }
 
-      delete task.inputData[this.APIINFO_KEY];
       delete task.inputData[this.TOOL_NAME_KEY];
       delete task.inputData[this.CONTEXT_KEY];
     }
@@ -96,7 +94,6 @@ export class ConductorService {
       if (tool.namespace !== SYSTEM_NAMESPACE) {
         // use CUSTOM_BLOCK_NAME_KEY to store real task_name
         task.inputParameters[this.TOOL_NAME_KEY] = task.name;
-        task.inputParameters[this.APIINFO_KEY] = tool.extra.apiInfo;
         task.inputParameters[this.CONTEXT_KEY] = '${workflow.input.__context}';
         task.name = CONDUCTOR_TASK_DEF_NAME;
       }
