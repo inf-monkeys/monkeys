@@ -1,15 +1,15 @@
 import { config } from '@/common/config';
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ExampleToolsModule } from './example.module';
+import { LLmModule } from './llm.module';
 
-export const EXAMPLE_TOOL_OPENAPI_PATH = '/api/example-tool/openapi';
-export const EXAMPLE_TOOL_OPENAPI_MENIFEST_URL = `${config.server.appUrl}/api/example-tool/manifest.json`;
+export const LLM_TOOL_OPENAPI_PATH = '/api/llm/openapi';
+export const LLM_TOOL_OPENAPI_MENIFEST_URL = `${config.server.appUrl}/api/llm/manifest.json`;
 
-export const setupExampleToolSwagger = (app: INestApplication) => {
-  const builder = new DocumentBuilder().setTitle('Simple Calc').setDescription('A simple calculation app').setVersion('1.0').addServer(`${config.server.appUrl}`, 'Example Calc Service API SERVER');
+export const setupLlmToolSwagger = (app: INestApplication) => {
+  const builder = new DocumentBuilder().setTitle('LLM').setDescription('LLM Chat endpoints').setVersion('1.0').addServer(`${config.server.appUrl}`, 'Chat API SERVER');
   const document = SwaggerModule.createDocument(app, builder.build(), {
-    include: [ExampleToolsModule],
+    include: [LLmModule],
     deepScanRoutes: true,
   });
   for (const path in document.paths) {
@@ -27,5 +27,5 @@ export const setupExampleToolSwagger = (app: INestApplication) => {
       }
     }
   }
-  SwaggerModule.setup(EXAMPLE_TOOL_OPENAPI_PATH, app, document);
+  SwaggerModule.setup(LLM_TOOL_OPENAPI_PATH, app, document);
 };

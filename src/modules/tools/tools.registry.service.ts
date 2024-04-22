@@ -24,7 +24,7 @@ import {
 } from '../../common/typings/tools';
 import { CredentialsRepository } from '../../database/repositories/credential.repository';
 import { ToolsRepository } from '../../database/repositories/tools.repository';
-import { parseOpenApiSpecAsBlocks } from './utils/openapi-parser';
+import { parseOpenApiSpecAsTools } from './utils/openapi-parser';
 
 @Injectable()
 export class ToolsRegistryService {
@@ -125,18 +125,18 @@ export class ToolsRegistryService {
     }
   }
 
-  private async parseOpenapiAsBlocks(
+  private async parseOpenapiAsTools(
     namespace: string,
     specUrl: string,
   ): Promise<{
     servers: ServerObject[];
-    blocks: BlockDefinition[];
+    tools: BlockDefinition[];
   }> {
     const { data: specData } = await axios.get<OpenAPIObject>(specUrl);
-    const blocks = parseOpenApiSpecAsBlocks(namespace, specData);
+    const tools = parseOpenApiSpecAsTools(namespace, specData);
     return {
       servers: specData.servers,
-      blocks,
+      tools,
     };
   }
 
@@ -165,8 +165,8 @@ export class ToolsRegistryService {
     let tools: BlockDefinition[] = [];
     switch (apiType) {
       case ApiType.openapi:
-        const res = await this.parseOpenapiAsBlocks(namespace, realSpecUrl);
-        tools = res.blocks;
+        const res = await this.parseOpenapiAsTools(namespace, realSpecUrl);
+        tools = res.tools;
         break;
       default:
         throw new Error(`Error when import block: invalid api.type "${apiType}", must in any one of ${enumToList(ApiType).join(',')}`);
