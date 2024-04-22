@@ -30,7 +30,7 @@ export default defineConfig({
     port: 2048,
     proxy: {
       '/api': {
-        target: process.env.SERVER_ENDPOINT || 'https://ai.infmonkeys.com',
+        target: process.env.SERVER_ENDPOINT || 'https://pioneer.infmonkeys.com',
         changeOrigin: true,
       },
     },
