@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
+import { get } from 'lodash';
 import { ShieldCheck, Users } from 'lucide-react';
 
 import { handleOidcLogin } from '@/apis/authz/oidc';
+import { useSystemConfig } from '@/apis/common';
 import { EmailAuth } from '@/components/layout/login/authz/email-auth.tsx';
 import { PhoneAuth } from '@/components/layout/login/authz/phone-auth.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { cn } from '@/utils';
 
 interface IAuthContainerProps extends React.ComponentPropsWithoutRef<'div'> {
   loginMethodsLength: number;
@@ -32,12 +35,21 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
   setSwap,
   hasTokens,
 }) => {
+  const { data: oem } = useSystemConfig();
+
   const [activeTab, setActiveTab] = useState('phone');
+
+  const isOIDCAutoSignIn = get(oem, 'identity.oidcAutoSignIn', false);
+  useEffect(() => {
+    if (isOIDCAutoSignIn) {
+      handleOidcLogin();
+    }
+  }, [isOIDCAutoSignIn]);
 
   const onlyOne = loginMethodsLength === 1;
   useEffect(() => {
     if (onlyOne) {
-      // setActiveTab(enablePhone ? 'phone' : 'email');
+      setActiveTab(enablePhone ? 'phone' : 'email');
     }
   }, [onlyOne]);
 
@@ -61,7 +73,7 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
           value={activeTab}
           onValueChange={setActiveTab}
         >
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className={cn('grid w-full grid-cols-2', onlyOne && 'grid-cols-1')}>
             {enablePhone && <TabsTrigger value="phone">手机号登录</TabsTrigger>}
             {enablePassword && <TabsTrigger value="email">邮箱登录</TabsTrigger>}
           </TabsList>
