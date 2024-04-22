@@ -327,6 +327,17 @@ export class ChatController {
       description: '填写 0-1 的浮点数\n用于惩罚模型生成低频词语，从而使生成的文本更加多样化。',
     },
     {
+      displayName: '工具列表',
+      name: 'tools',
+      type: 'string',
+      typeOptions: {
+        multipleValues: true,
+      },
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      assetType: 'tools',
+    },
+    {
       name: 'stream',
       displayName: '是否流式输出',
       type: 'boolean',
@@ -457,7 +468,7 @@ export class ChatController {
    */
   public async createChatCompletions(@Res() res: Response, @Body() body: CreateChatCompletionsDto) {
     const { stream = false } = body;
-    const answer = await this.service.createChatCompelitions({
+    await this.service.createChatCompelitions(res, {
       messages: body.messages,
       model: body.model,
       temperature: body.temperature,
@@ -465,32 +476,7 @@ export class ChatController {
       presence_penalty: body.presence_penalty,
       stream,
       systemPrompt: body.systemPrompt,
+      tools: body.tools,
     });
-    if (answer instanceof Error) {
-      let status = 500;
-      let errorMessage = ErrorMessage['500'];
-      Object.keys(ErrorMessage).forEach((key: string) => {
-        if (answer.message.includes(key)) {
-          status = parseInt(key, 10);
-          errorMessage = ErrorMessage[key];
-        }
-      });
-      return res.status(status).send(errorMessage);
-    } else if (stream) {
-      res.setHeader('content-type', answer.headers['content-type']);
-      res.status(200);
-      answer.data.on('data', (chunk: any) => {
-        console.log(chunk.toString());
-        res.write(chunk);
-      });
-      answer.data.on('end', () => {
-        res.end();
-      });
-      answer.data.on('error', () => {
-        res.end();
-      });
-    } else {
-      res.status(200).send(answer.data);
-    }
   }
 }

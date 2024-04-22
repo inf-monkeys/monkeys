@@ -1,13 +1,19 @@
 import { LlmModelEndpointType, config } from '@/common/config';
+import { logger } from '@/common/logger';
+import { ToolsRepository } from '@/database/repositories/tools.repository';
+import { BlockDefProperties } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
+import { OpenAIStream, StreamData, StreamingTextResponse, ToolCallPayload } from 'ai';
 import axios from 'axios';
-import { ChatCompletionRole } from 'openai/resources';
+import { Response } from 'express';
+import OpenAI from 'openai';
+import { ChatCompletion, ChatCompletionChunk, ChatCompletionMessageParam, ChatCompletionTool } from 'openai/resources';
+import { Stream } from 'openai/streaming';
+import { Readable } from 'stream';
+import { ToolsForwardService } from '../tools/tools.forward.service';
 
 export interface CreateChatCompelitionsParams {
-  messages: Array<{
-    content: string;
-    role: ChatCompletionRole;
-  }>;
+  messages: Array<ChatCompletionMessageParam>;
   model: string;
   temperature?: number;
   frequency_penalty?: number;
@@ -15,6 +21,7 @@ export interface CreateChatCompelitionsParams {
   stream?: boolean;
   max_tokens?: number;
   systemPrompt?: string;
+  tools?: string[];
 }
 
 export interface CreateCompelitionsParams {
@@ -65,6 +72,11 @@ export const getModels = (
 
 @Injectable()
 export class ChatService {
+  constructor(
+    private readonly toolsReopsitory: ToolsRepository,
+    private readonly toolForwardServie: ToolsForwardService,
+  ) {}
+
   private getModelConfig(modelName: string) {
     const model = config.models.find((x) => {
       if (typeof x.model === 'string') {
@@ -108,34 +120,159 @@ export class ChatService {
     return res;
   }
 
-  public async createChatCompelitions(params: CreateChatCompelitionsParams) {
-    const { model, stream, systemPrompt, messages } = params;
-    if (systemPrompt) {
-      params.messages = [
-        {
-          role: 'system' as ChatCompletionRole,
-          content: systemPrompt,
+  private resolveToolParameter(input: BlockDefProperties[]): ChatCompletionTool['function']['parameters'] {
+    const parameters: ChatCompletionTool['function']['parameters'] = {
+      type: 'object',
+      properties: {},
+    };
+    for (const inputItem of input) {
+      parameters.properties[inputItem.name] = {
+        type: 'string',
+        description: inputItem.description || inputItem.displayName,
+      };
+    }
+    return parameters;
+  }
+
+  public async resolveTools(tools: string[]): Promise<Array<ChatCompletionTool>> {
+    const toolEntities = await this.toolsReopsitory.getToolsByNames(tools);
+    return toolEntities.map((x) => {
+      const parameters = this.resolveToolParameter(x.input);
+      return {
+        type: 'function',
+        function: {
+          name: x.name.replaceAll(':', '__'),
+          description: x.description || x.displayName,
+          parameters: parameters,
         },
-      ].concat(messages);
+      };
+    });
+  }
+
+  private async executeTool(name: string, data: any) {
+    logger.info(`Start to call tool call: ${name} with arguments: ${JSON.stringify(data)}`);
+    name = name.replaceAll('__', ':');
+    console.log(name);
+    const tool = await this.toolsReopsitory.getToolByName(name);
+    const server = await this.toolsReopsitory.getServerByNamespace(tool.namespace);
+    const apiInfo = tool.extra?.apiInfo;
+    const { method, path } = apiInfo;
+    const result = await this.toolForwardServie.request<{ [x: string]: any }>(server.namespace, {
+      method,
+      url: path,
+      data: method.toLowerCase() === 'get' ? undefined : data,
+      params: method.toLowerCase() === 'get' ? data : undefined,
+    });
+    logger.info(`Tool call ${name} result: ${JSON.stringify(result)}`);
+    return result;
+  }
+
+  public async createChatCompelitions(res: Response, params: CreateChatCompelitionsParams) {
+    const { model, stream, systemPrompt } = params;
+    let { messages } = params;
+    if (systemPrompt) {
+      const systemMessage: ChatCompletionMessageParam = {
+        role: 'system',
+        content: systemPrompt,
+      };
+      messages = [systemMessage].concat(systemMessage);
     }
 
     const { apiKey, baseURL, defaultParams } = this.getModelConfig(model);
-    const reqBody = {
-      ...(defaultParams || {}),
-      messages: params.messages,
-      model: model,
-      temperature: params.temperature,
-      frequency_penalty: params.frequency_penalty,
-      presence_penalty: params.presence_penalty,
-      stream: stream,
-      max_tokens: params.max_tokens,
-    };
-    const res = await axios.post(`${baseURL}/chat/completions`, reqBody, {
-      responseType: stream ? 'stream' : 'json',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-      },
+    const openai = new OpenAI({
+      apiKey: apiKey,
+      baseURL: baseURL,
+      ...defaultParams,
     });
-    return res;
+    const tools: Array<ChatCompletionTool> = await this.resolveTools(params.tools);
+
+    let response: ChatCompletion | Stream<ChatCompletionChunk>;
+    try {
+      response = await openai.chat.completions.create({
+        model,
+        stream: stream,
+        temperature: params.temperature,
+        frequency_penalty: params.frequency_penalty,
+        presence_penalty: params.presence_penalty,
+        max_tokens: params.max_tokens,
+        messages,
+        tools,
+        tool_choice: 'auto',
+      });
+      if (stream) {
+        const data = new StreamData();
+        const streamResponse = OpenAIStream(response as Stream<ChatCompletionChunk>, {
+          experimental_onToolCall: async (call: ToolCallPayload, appendToolCallMessage) => {
+            for (const toolCall of call.tools) {
+              const result = await this.executeTool(toolCall.func.name, toolCall.func.arguments);
+              const newMessages = appendToolCallMessage({
+                tool_call_id: toolCall.id,
+                function_name: toolCall.func.name,
+                tool_call_result: result,
+              });
+              return openai.chat.completions.create({
+                messages: [...messages, ...newMessages] as any,
+                model,
+                stream: true,
+                tools,
+                tool_choice: 'auto',
+              });
+            }
+          },
+          onCompletion(completion) {
+            logger.info(`Completion Finished: ${completion}`);
+          },
+          onFinal() {
+            res.end();
+          },
+        });
+        const streamingTextResponse = new StreamingTextResponse(streamResponse, {}, data);
+        res.status(200);
+        const body = streamingTextResponse.body;
+        const readableStream = Readable.from(body as any);
+        readableStream.on('data', (chunk) => {
+          const decoder = new TextDecoder();
+          const chunkString = decoder.decode(chunk);
+          res.write(chunkString);
+        });
+      } else {
+        const data = response as ChatCompletion;
+        if (data.choices[0].message.tool_calls) {
+          let newMessages: Array<ChatCompletionMessageParam> = [];
+          const toolCalls = data.choices[0].message.tool_calls;
+          for (const toolCall of toolCalls) {
+            const {
+              function: { name, arguments: argumentsData },
+            } = toolCall;
+            const toolResult = await this.executeTool(name, argumentsData);
+            newMessages = newMessages.concat([
+              {
+                role: 'assistant',
+                content: '',
+                tool_calls: data.choices[0].message.tool_calls,
+              },
+              {
+                role: 'tool',
+                tool_call_id: toolCall.id,
+                content: JSON.stringify(toolResult),
+              },
+            ]);
+          }
+
+          const result = await openai.chat.completions.create({
+            messages: [...messages, ...newMessages] as any,
+            model,
+            stream: false,
+            tools,
+            tool_choice: 'auto',
+          });
+          return res.status(200).send(result);
+        } else {
+          return res.status(200).send(response);
+        }
+      }
+    } catch (error) {
+      return res.status(500).send(error.message);
+    }
   }
 }

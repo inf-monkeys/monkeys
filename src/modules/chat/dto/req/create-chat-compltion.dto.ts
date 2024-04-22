@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ChatCompletionRole } from 'openai/resources';
+import { ChatCompletionMessageParam, ChatCompletionRole } from 'openai/resources';
 
 export class ChatCompletionMessageDto {
   role: ChatCompletionRole;
@@ -23,7 +23,7 @@ export class CreateChatCompletionsDto {
     type: ChatCompletionMessageDto,
     isArray: true,
   })
-  messages: ChatCompletionMessageDto[];
+  messages: Array<ChatCompletionMessageParam>;
 
   @ApiProperty({
     description: '生成的最大令牌数',
@@ -52,6 +52,14 @@ export class CreateChatCompletionsDto {
     required: false,
   })
   presence_penalty?: number;
+
+  @ApiProperty({
+    description: '工具列表',
+    required: false,
+    isArray: true,
+    type: String,
+  })
+  tools?: string[];
 
   @ApiProperty({
     description: '指示API是否应以流的形式返回生成的回复',
