@@ -12,10 +12,10 @@ import { ApiType, AuthType, ManifestJson, SchemaVersion } from '@/common/typings
 import { Body, Controller, Get, Post, Res } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiOperation } from '@nestjs/swagger';
 import { Response } from 'express';
+import { ChatService, getModels } from './chat.service';
+import { CHAT_TOOL_OPENAPI_PATH } from './chat.swagger';
 import { CreateChatCompletionsDto } from './dto/req/create-chat-compltion.dto';
 import { CreateCompletionsDto } from './dto/req/create-compltions.dto';
-import { LlmChatService, getModels } from './llm.service';
-import { LLM_TOOL_OPENAPI_PATH } from './llm.swagger';
 
 const ErrorMessage: { [key: string]: string } = {
   400: 'Bad Request',
@@ -28,9 +28,9 @@ const ErrorMessage: { [key: string]: string } = {
   500: 'The server is busy. Please try again later.',
 };
 
-@Controller('/llm')
-export class LlmChatController {
-  constructor(private readonly service: LlmChatService) {}
+@Controller('/chat')
+export class ChatController {
+  constructor(private readonly service: ChatService) {}
 
   @Get('/manifest.json')
   @ApiExcludeEndpoint()
@@ -44,7 +44,7 @@ export class LlmChatController {
       },
       api: {
         type: ApiType.openapi,
-        url: `${LLM_TOOL_OPENAPI_PATH}-json`,
+        url: `${CHAT_TOOL_OPENAPI_PATH}-json`,
       },
       contact_email: 'dev@inf-monkeys.com',
     };
