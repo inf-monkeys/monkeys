@@ -140,6 +140,15 @@ export class ToolsRegistryService {
     };
   }
 
+  private async validateToolsParsed(tools: BlockDefinition[]) {
+    // Check if have duplicate tool
+    const toolNames = tools.map((x) => x.name);
+    const duplicateToolNames = toolNames.filter((x, i) => toolNames.indexOf(x) !== i);
+    if (duplicateToolNames.length) {
+      throw new Error(`Error when import block: duplicate tool names: ${duplicateToolNames.join(',')}`);
+    }
+  }
+
   public async registerToolsServer(params: RegisterWorkerParams) {
     const { manifestUrl } = params;
     const { data: manifestData } = await axios.get<ManifestJson>(manifestUrl);
@@ -166,6 +175,7 @@ export class ToolsRegistryService {
     switch (apiType) {
       case ApiType.openapi:
         const res = await this.parseOpenapiAsTools(namespace, realSpecUrl);
+        await this.validateToolsParsed(res.tools);
         tools = res.tools;
         break;
       default:
