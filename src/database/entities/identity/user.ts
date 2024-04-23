@@ -3,7 +3,6 @@ import { Column, Entity, Index } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
 @Entity({ name: 'users' })
-// TODO: 之前的数据手机号有重复的
 @Index(['phone'])
 @Index(['email'])
 @Index(['externalId'])
