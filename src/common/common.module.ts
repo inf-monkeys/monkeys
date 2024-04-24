@@ -1,4 +1,4 @@
-import { config } from '@/common/config';
+import { config, isRedisConfigured } from '@/common/config';
 import { InMemoryLockManager, RedisLockManager } from '@/common/utils/lock';
 import { Global, Module } from '@nestjs/common';
 import { InMemoryCache, RedisCache } from './cache';
@@ -16,25 +16,25 @@ export const MQ_TOKEN = 'MQ';
     {
       provide: LOCK_TOKEN,
       useFactory: () => {
-        return config.redis.url ? new RedisLockManager(config.redis.url) : new InMemoryLockManager();
+        return isRedisConfigured() ? new RedisLockManager(config.redis) : new InMemoryLockManager();
       },
     },
     {
       provide: CACHE_TOKEN,
       useFactory: () => {
-        return config.redis.url ? new RedisCache(config.redis.url) : new InMemoryCache();
+        return isRedisConfigured() ? new RedisCache(config.redis) : new InMemoryCache();
       },
     },
     {
       provide: RATE_LIMITER_TOKEN,
       useFactory: () => {
-        return config.redis.url ? new RedisRateLimiter(config.redis.url) : new InMemoryRateLimiter();
+        return isRedisConfigured() ? new RedisRateLimiter(config.redis) : new InMemoryRateLimiter();
       },
     },
     {
       provide: MQ_TOKEN,
       useFactory: () => {
-        return config.redis.url ? new RedisMq(config.redis.url) : new InMemoryMq();
+        return isRedisConfigured() ? new RedisMq(config.redis) : new InMemoryMq();
       },
     },
   ],

@@ -1,14 +1,21 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Inject } from '@nestjs/common';
 import { isErrorResult, merge } from 'openapi-merge';
 import { AppService } from './app.service';
+import { CacheManager } from './common/cache';
+import { CACHE_TOKEN, MQ_TOKEN } from './common/common.module';
 import { AuthMethod, config } from './common/config';
+import { Mq } from './common/mq';
 import { APIKEY_AUTH_DOC, NONE_AUTH_DOC } from './common/openapi';
 import { SuccessResponse } from './common/response';
 import { ISystemConfig } from './common/typings/system';
 
 @Controller()
 export class AppController {
-  constructor(private readonly service: AppService) {}
+  constructor(
+    private readonly service: AppService,
+    @Inject(CACHE_TOKEN) private readonly cache: CacheManager,
+    @Inject(MQ_TOKEN) private readonly mq: Mq,
+  ) {}
 
   @Get('/healthz')
   public async healthz() {

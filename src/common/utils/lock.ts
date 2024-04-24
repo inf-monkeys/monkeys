@@ -1,6 +1,7 @@
-import Redis from 'ioredis';
+import Redis, { Cluster } from 'ioredis';
 import { promisify } from 'util';
-import { config } from '../config';
+import { RedisConfig, config } from '../config';
+import { initRedisClient } from '../redis';
 
 export interface LockManager {
   acquireLock(resourceId: string, timeout?: number): Promise<string>;
@@ -32,9 +33,9 @@ export class InMemoryLockManager implements LockManager {
 }
 
 export class RedisLockManager implements LockManager {
-  redis: Redis;
-  constructor(redisUrl: string) {
-    this.redis = new Redis(redisUrl);
+  redis: Redis | Cluster;
+  constructor(redisConfig: RedisConfig) {
+    this.redis = initRedisClient(redisConfig);
   }
 
   async acquireLock(resource: string, timeout = 5000) {

@@ -1,4 +1,6 @@
-import Redis from 'ioredis';
+import Redis, { Cluster } from 'ioredis';
+import { RedisConfig } from '../config';
+import { initRedisClient } from '../redis';
 
 export interface CacheManager {
   isRedis: () => boolean;
@@ -30,16 +32,12 @@ export class InMemoryCache implements CacheManager {
     this.storage[key].push(value);
     return this.storage[key].length;
   }
-
-  public subscribe() {
-    throw new Error('Method not implemented.');
-  }
 }
 
 export class RedisCache implements CacheManager {
-  redis: Redis;
-  constructor(redisUrl: string) {
-    this.redis = new Redis(redisUrl);
+  redis: Redis | Cluster;
+  constructor(redisConfig: RedisConfig) {
+    this.redis = initRedisClient(redisConfig);
   }
 
   public isRedis() {
@@ -50,7 +48,7 @@ export class RedisCache implements CacheManager {
     return await this.redis.get(key);
   }
 
-  public async set(key: string, value: string | Buffer | number, secondsToken: 'EX', seconds: number | string) {
+  public async set(key: string, value: string | Buffer | number, secondsToken: 'EX' = 'EX', seconds: number | string = 3600) {
     return await this.redis.set(key, value, secondsToken, seconds);
   }
 

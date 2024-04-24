@@ -1,4 +1,6 @@
-import Redis from 'ioredis';
+import Redis, { Cluster } from 'ioredis';
+import { RedisConfig } from '../config';
+import { initRedisClient } from '../redis';
 
 export interface Mq {
   canuse: boolean;
@@ -18,11 +20,11 @@ export class InMemoryMq implements Mq {
 
 export class RedisMq implements Mq {
   canuse: boolean = true;
-  sub: Redis;
-  pub: Redis;
-  constructor(redisUrl: string) {
-    this.sub = new Redis(redisUrl);
-    this.pub = new Redis(redisUrl);
+  sub: Redis | Cluster;
+  pub: Redis | Cluster;
+  constructor(redisConfig: RedisConfig) {
+    this.sub = initRedisClient(redisConfig);
+    this.pub = initRedisClient(redisConfig);
   }
 
   public publish(channel: string, message: string) {
