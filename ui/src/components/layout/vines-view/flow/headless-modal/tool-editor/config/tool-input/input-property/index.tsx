@@ -27,6 +27,8 @@ export interface IVinesInputPropertyProps {
   nodeId: string;
   variableMapper: Record<string, IVinesVariableMap>;
   disabled?: boolean;
+  toolName: string;
+  context?: Record<string, unknown>;
 }
 
 export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) => {
