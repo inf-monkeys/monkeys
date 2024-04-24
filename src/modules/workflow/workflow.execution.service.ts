@@ -221,7 +221,6 @@ export class WorkflowExecutionService {
       userId,
       teamId: teamId,
       appId: config.server.appId,
-      appUrl: config.server.appUrl,
     };
     let { version } = request;
     if (!version) {
@@ -248,7 +247,6 @@ export class WorkflowExecutionService {
         teamId,
         chatSessionId,
         appId: workflowContext.appId,
-        appUrl: workflowContext.appUrl,
       },
     };
     const workflowInstanceId = await conductorClient.workflowResource.startWorkflow({
