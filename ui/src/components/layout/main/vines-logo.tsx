@@ -9,11 +9,12 @@ import { Skeleton } from '@/components/ui/skeleton.tsx';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
 import { cn } from '@/utils';
 
-export const VinesLogo: React.FC<Omit<ILogoProps, 'url'>> = ({
+export const VinesLogo: React.FC<Omit<ILogoProps, 'url'> & { disableInitialHeight?: boolean }> = ({
   description = '构建流程为中心的 AI 应用',
   className,
   height = 40,
   onClick,
+  disableInitialHeight = false,
   ...props
 }) => {
   const { team } = useVinesTeam();
@@ -38,7 +39,7 @@ export const VinesLogo: React.FC<Omit<ILogoProps, 'url'>> = ({
                 : oem.theme.logoUrl
           }
           description={description}
-          height={height}
+          height={disableInitialHeight ? void 0 : height}
           {...props}
         />
       ) : (

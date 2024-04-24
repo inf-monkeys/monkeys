@@ -12,7 +12,7 @@ interface ISidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 export const Sidebar: React.FC<ISidebarProps> = () => {
   return (
     <div className="flex h-screen w-56 flex-col justify-between gap-4 overflow-y-hidden p-5">
-      <VinesLogo />
+      <VinesLogo className="h-auto max-h-20" disableInitialHeight />
 
       <NavList />
       <div className="flex flex-col gap-2">
