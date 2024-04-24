@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { BlockDefPropertyTypeOptions, BlockDefPropertyTypes } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
 import { debounce, get, isEmpty, isNumber, isString } from 'lodash';
@@ -15,21 +15,18 @@ import { NumberInput } from '@/components/layout/vines-view/flow/headless-modal/
 import { OptionsInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/options.tsx';
 import { StringInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/string.tsx';
 import { InputPropertyWrapper } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/wrapper';
+import { Label } from '@/components/ui/label.tsx';
+import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { IVinesVariableMap, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
-import { QRCodeInput } from './components/qrcode';
-
 export interface IVinesInputPropertyProps {
-  toolName: string;
   def: VinesToolDefProperties;
   value: unknown;
   onChange: (value: unknown) => void;
   nodeId: string;
   variableMapper: Record<string, IVinesVariableMap>;
   disabled?: boolean;
-  // 有些输入框比如 qrcode 可能是有状态的，需要传递自定义上下文（比如工作流 id、触发器 id）来确定二维码状态
-  context?: { [x: string]: any };
 }
 
 export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) => {
@@ -51,6 +48,7 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
     }, [def]);
 
   const [componentMode, setComponentMode] = useState<'component' | 'input'>('component');
+  const [isManualComponentMode, setIsManualComponentMode] = useState(false);
 
   const hasValue = useMemo(() => {
     const isBooleanType = type === 'boolean';
@@ -91,14 +89,14 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
   const useSimpleInput = !enableEditor && !isMultiFieldObject && !assetType;
   const hasCollectionInput = useSimpleInput && isPureCollection && componentMode === 'component';
   const hasStringInput =
-    useSimpleInput && (componentMode === 'input' ? isPureCollection : type === 'string' && !hasCollectionInput);
+    useSimpleInput &&
+    (componentMode === 'input' ? isPureCollection || isManualComponentMode : type === 'string' && !hasCollectionInput);
   const hasBooleanInput = useSimpleInput && type === 'boolean' && (componentMode === 'input' || !isPureCollection);
   const hasNumberInput = useSimpleInput && type === 'number' && (componentMode === 'input' || !isPureCollection);
   const hasOptionsInput = useSimpleInput && type === 'options' && (componentMode === 'input' || !isPureCollection);
   const hasFileInput = useSimpleInput && componentMode === 'component' && type === 'file';
   const hasPresetOptions = assetType;
   const hasNotice = type === 'notice';
-  const hasQrcode = type === ('qrcode' as any);
   const isBlankInput =
     useSimpleInput &&
     !hasNotice &&
@@ -108,7 +106,6 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
     !hasNumberInput &&
     !hasOptionsInput &&
     !hasFileInput &&
-    !hasQrcode &&
     !hasPresetOptions;
 
   const [tempValue, setTempValue] = useState(value);
@@ -135,6 +132,15 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
 
   const finalProps = { ...childProps, onChange: handleOnChange, value: tempValue };
 
+  useEffect(() => {
+    if (type !== 'file' && (!isPureCollection || !assetType) && typeof tempValue === 'string') {
+      if (/\$\{.*}/.test(tempValue)) {
+        setIsManualComponentMode(true);
+        setComponentMode('input');
+      }
+    }
+  }, []);
+
   return (
     <InputPropertyWrapper
       def={def}
@@ -154,32 +160,45 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
               </TabsTrigger>
             </TabsList>
           </Tabs>
-        ) : (
-          (isPureCollection || assetType) &&
-          assetType !== 'fork-join-branch' && (
-            <Tabs value={componentMode} onValueChange={handleOnRadioChange}>
-              <TabsList className="!h-6">
-                <TabsTrigger value="component" className="text-xxs !py-1">
-                  {assetType ? '变量输入' : '列表'}
-                </TabsTrigger>
-                <TabsTrigger value="input" className="text-xxs !py-1">
-                  {assetType ? '预置选项' : '变量输入'}
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          )
-        )
+        ) : (isPureCollection || assetType) && assetType !== 'fork-join-branch' ? (
+          <Tabs value={componentMode} onValueChange={handleOnRadioChange}>
+            <TabsList className="!h-6">
+              <TabsTrigger value="component" className="text-xxs !py-1">
+                {assetType ? '变量输入' : '列表'}
+              </TabsTrigger>
+              <TabsTrigger value="input" className="text-xxs !py-1">
+                {assetType ? '预置选项' : '变量输入'}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        ) : ['boolean', 'json', 'options'].includes(type) ? (
+          <div className="flex items-center space-x-2">
+            <Switch
+              size="small"
+              checked={componentMode === 'input'}
+              onCheckedChange={(enable) => {
+                handleOnRadioChange(enable ? 'input' : 'component');
+                setIsManualComponentMode(enable);
+              }}
+            />
+            <Label className="text-xs font-medium text-muted-foreground">变量输入</Label>
+          </div>
+        ) : null
       }
     >
       {enableEditor && <EditorInput disabled={disabled} {...finalProps} />}
       {isMultiFieldObject && <MultiFieldObjectInput {...finalProps} />}
 
       {hasStringInput && <StringInput {...finalProps} />}
-      {hasQrcode && <QRCodeInput {...finalProps} />}
-      {hasBooleanInput && <BooleanInput {...finalProps} />}
-      {hasNumberInput && <NumberInput {...finalProps} />}
-      {hasOptionsInput && <OptionsInput {...finalProps} />}
-      {hasFileInput && <FileInput {...finalProps} />}
+
+      {!isManualComponentMode && (
+        <>
+          {hasBooleanInput && <BooleanInput {...finalProps} />}
+          {hasNumberInput && <NumberInput {...finalProps} />}
+          {hasOptionsInput && <OptionsInput {...finalProps} />}
+          {hasFileInput && <FileInput {...finalProps} />}
+        </>
+      )}
 
       {hasCollectionInput && type !== 'file' && <CollectionInput {...finalProps} />}
       {hasPresetOptions && (
