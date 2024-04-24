@@ -1,4 +1,6 @@
-import Redis from 'ioredis';
+import Redis, { Cluster } from 'ioredis';
+import { RedisConfig } from '../config';
+import { initRedisClient } from '../redis';
 
 export interface RateLimiter {
   can(key: string, windowMs: number, max: number): Promise<boolean>;
@@ -11,9 +13,9 @@ export class InMemoryRateLimiter implements RateLimiter {
 }
 
 export class RedisRateLimiter implements RateLimiter {
-  redis: Redis;
-  constructor(redisUrl: string) {
-    this.redis = new Redis(redisUrl);
+  redis: Redis | Cluster;
+  constructor(redisConfig: RedisConfig) {
+    this.redis = initRedisClient(redisConfig);
   }
 
   async can(key: string, windowMs: number, max: number): Promise<boolean> {

@@ -1,3 +1,4 @@
+import { ClusterNode, RedisOptions, SentinelAddress } from 'ioredis';
 import { ClientAuthMethod } from 'openid-client';
 import { DataSourceOptions } from 'typeorm';
 import { readConfig } from './readYaml';
@@ -28,9 +29,28 @@ export interface ServerConfig {
   };
 }
 
+export enum RedisMode {
+  standalone = 'standalone',
+  cluster = 'cluster',
+  sentinel = 'sentinel',
+}
+
 export interface RedisConfig {
-  url: string;
+  mode: RedisMode;
+
+  // Standalone config
+  url?: string;
+
+  // Cluster config
+  nodes?: ClusterNode[];
+
+  // Sentinel config
+  sentinelNodes?: Array<Partial<SentinelAddress>>;
+  sentinelName?: string;
+
+  // Common config
   prefix: string;
+  options?: RedisOptions;
 }
 
 export interface VectorGatewayService {
@@ -173,8 +193,17 @@ export const config: Config = {
     synchronize: true,
   }),
   redis: {
+    mode: readConfig('redis.mode', RedisMode.standalone),
+    // Standalone config
     url: readConfig('redis.url'),
+    // Cluster config
+    nodes: readConfig('redis.nodes', []),
+    // Sentinel config
+    sentinelNodes: readConfig('redis.sentinelNodes', []),
+    sentinelName: readConfig('redis.sentinelName'),
+    // Common config
     prefix: readConfig('redis.prefix', 'monkeys:'),
+    options: readConfig('redis.options', {}),
   },
   vector: {
     enabled: readConfig('vector.enabled', false),
@@ -219,3 +248,29 @@ export const config: Config = {
   s3: readConfig('s3', {}),
   models: readConfig('models', []),
 };
+
+export const isRedisConfigured = () => {
+  if (config.redis.mode === RedisMode.standalone) {
+    return !!config.redis.url;
+  }
+  if (config.redis.mode === RedisMode.cluster) {
+    return !!config.redis.nodes.length;
+  }
+  return false;
+};
+
+const validateConfig = () => {
+  if (config.redis.mode === RedisMode.cluster && !config.redis.nodes.length) {
+    throw new Error('Redis cluster mode requires at least one node');
+  }
+  if (config.redis.mode === RedisMode.sentinel) {
+    if (!config.redis.sentinelNodes.length) {
+      throw new Error('Redis sentinel mode requires at least one sentinel node');
+    }
+    if (!config.redis.sentinelName) {
+      throw new Error('Redis sentinel mode requires a sentinel name');
+    }
+  }
+};
+
+validateConfig();
