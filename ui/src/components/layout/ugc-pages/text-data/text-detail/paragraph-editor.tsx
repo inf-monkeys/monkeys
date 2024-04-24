@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
+import { useDebouncedState } from '@mantine/hooks';
 import { isEmpty } from 'lodash';
 import { toast } from 'sonner';
 
@@ -8,6 +9,7 @@ import { CodeEditor } from '@/components/ui/code-editor';
 import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label.tsx';
 import { Textarea } from '@/components/ui/textarea.tsx';
+import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 interface IImportParagraphProps {
   visible?: boolean;
@@ -31,15 +33,15 @@ export const ParagraphEditor: React.FC<IImportParagraphProps> = ({
   extra,
 }) => {
   const [value, setValue] = useState(paragraph);
-  const [tempMetadata, setTempMetadata] = useState(JSON.stringify(metadata));
+  const [tempMetadata, setTempMetadata] = useDebouncedState(stringify(metadata), 200);
 
   useEffect(() => {
     setValue(paragraph);
   }, [paragraph]);
 
   useEffect(() => {
-    setTempMetadata(JSON.stringify(metadata));
-  }, [metadata]);
+    setTempMetadata(stringify(metadata));
+  }, []);
 
   const handleOnConfirm = () => {
     try {
