@@ -1,4 +1,5 @@
 import { ListDto } from '@/common/dto/list.dto';
+import { logger } from '@/common/logger';
 import { KnowledgeBaseRepository } from '@/database/repositories/knowledge-base.repository';
 import { ToolsForwardService } from '@/modules/tools/tools.forward.service';
 import { Injectable } from '@nestjs/common';
@@ -54,10 +55,15 @@ export class KnowledgeBaseService {
 
   public async deleteKnowledgeBase(teamId: string, knowledgeBaseName: string) {
     // Delete knowledge base in tools
-    await this.toolsForwardService.request(this.KNOWLEDGE_BASE_NAMESPACE, {
-      url: `/knowledge-bases/${knowledgeBaseName}`,
-      method: 'DELETE',
-    });
+    try {
+      await this.toolsForwardService.request(this.KNOWLEDGE_BASE_NAMESPACE, {
+        url: `/knowledge-bases/${knowledgeBaseName}`,
+        method: 'DELETE',
+      });
+    } catch (error) {
+      logger.warn(`Failed to delete knowledge base in tools: ${error.message}`);
+    }
+
     // Delete knowledge base in database
     await this.knowledgeBaseRepository.deleteKnowledgeBase(teamId, knowledgeBaseName);
   }
