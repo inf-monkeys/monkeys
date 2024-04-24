@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { get } from 'lodash';
 import { ShieldCheck, Users } from 'lucide-react';
 
 import { handleOidcLogin } from '@/apis/authz/oidc';
-import { useSystemConfig } from '@/apis/common';
 import { EmailAuth } from '@/components/layout/login/authz/email-auth.tsx';
 import { PhoneAuth } from '@/components/layout/login/authz/phone-auth.tsx';
 import { Button } from '@/components/ui/button';
@@ -35,16 +33,7 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
   setSwap,
   hasTokens,
 }) => {
-  const { data: oem } = useSystemConfig();
-
   const [activeTab, setActiveTab] = useState('phone');
-
-  const isOIDCAutoSignIn = get(oem, 'identity.oidcAutoSignIn', false);
-  useEffect(() => {
-    if (isOIDCAutoSignIn) {
-      handleOidcLogin();
-    }
-  }, [isOIDCAutoSignIn]);
 
   const onlyOne = loginMethodsLength === 1;
   useEffect(() => {
