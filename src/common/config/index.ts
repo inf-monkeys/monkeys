@@ -188,7 +188,7 @@ export const config: Config = {
     baseUrl: readConfig('comfyui.baseUrl', 'http://127.0.0.1:8188'),
   },
   auth: {
-    enabled: readConfig('auth.enabled', []),
+    enabled: readConfig('auth.enabled', [AuthMethod.password, AuthMethod.apikey]),
     sessionSecret: readConfig('auth.sessionSecret', 'monkeys'),
     oidc: {
       auto_signin: readConfig('auth.oidc.auto_signin', false),
