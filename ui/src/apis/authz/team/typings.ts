@@ -91,3 +91,7 @@ export interface IExportTeamOptions {
   exportVectorDatabases: boolean;
   exportRichMedias: boolean;
 }
+
+export interface IInviteTeamData {
+  team: IVinesTeam;
+}

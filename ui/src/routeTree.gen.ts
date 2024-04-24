@@ -26,6 +26,7 @@ import { Route as TeamIdTableDataIndexImport } from './pages/$teamId/table-data/
 import { Route as TeamIdSettingsIndexImport } from './pages/$teamId/settings/index'
 import { Route as TeamIdRenderToolsIndexImport } from './pages/$teamId/render-tools/index'
 import { Route as TeamIdMediaDataIndexImport } from './pages/$teamId/media-data/index'
+import { Route as TeamIdJoinTeamIndexImport } from './pages/$teamId/join-team/index'
 import { Route as TeamIdImageModelsIndexImport } from './pages/$teamId/image-models/index'
 import { Route as TeamIdImageModelStoreIndexImport } from './pages/$teamId/image-model-store/index'
 import { Route as TeamIdApplicationStoreIndexImport } from './pages/$teamId/application-store/index'
@@ -110,6 +111,11 @@ const TeamIdRenderToolsIndexRoute = TeamIdRenderToolsIndexImport.update({
 
 const TeamIdMediaDataIndexRoute = TeamIdMediaDataIndexImport.update({
   path: '/$teamId/media-data/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TeamIdJoinTeamIndexRoute = TeamIdJoinTeamIndexImport.update({
+  path: '/$teamId/join-team/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -201,6 +207,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdImageModelsIndexImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/join-team/': {
+      preLoaderRoute: typeof TeamIdJoinTeamIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/media-data/': {
       preLoaderRoute: typeof TeamIdMediaDataIndexImport
       parentRoute: typeof rootRoute
@@ -279,6 +289,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdApplicationStoreIndexRoute,
   TeamIdImageModelStoreIndexRoute,
   TeamIdImageModelsIndexRoute,
+  TeamIdJoinTeamIndexRoute,
   TeamIdMediaDataIndexRoute,
   TeamIdRenderToolsIndexRoute,
   TeamIdSettingsIndexRoute,

@@ -5,6 +5,7 @@ import _ from 'lodash';
 
 import {
   IExportTeamOptions,
+  IInviteTeamData,
   ITeamApplyListData,
   ITeamApplyUpdateData,
   ITeamCreate,
@@ -90,3 +91,9 @@ export const exportTeam = async (teamId: string, teamName: string, options: IExp
     },
   })(`/api/export-tenant-assets/${teamId}`, options);
 };
+
+export const useInviteTeam = (inviteId: string) =>
+  useSWR<IInviteTeamData | undefined>(`/api/teams/invites/${inviteId}`, vinesFetcher());
+
+export const acceptTeamInvite = (inviteId: string) =>
+  vinesFetcher<boolean>({ method: 'POST', simple: true })(`/api/teams/invites/${inviteId}/accept`, {});
