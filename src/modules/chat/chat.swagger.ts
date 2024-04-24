@@ -4,7 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ChatModule } from './chat.module';
 
 export const CHAT_TOOL_OPENAPI_PATH = '/api/chat/openapi';
-export const CHAT_TOOL_OPENAPI_MENIFEST_URL = `${config.server.appUrl}/api/chat/manifest.json`;
+export const CHAT_TOOL_OPENAPI_MENIFEST_URL = `http://127.0.0.1:${config.server.port}/api/chat/manifest.json`;
 
 export const setupChatToolSwagger = (app: INestApplication) => {
   const builder = new DocumentBuilder().setTitle('LLM').setDescription('Chat endpoints').setVersion('1.0').addServer(`${config.server.appUrl}`, 'Chat API SERVER');
