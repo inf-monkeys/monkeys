@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 
 import MonacoEditor, { EditorProps, OnMount } from '@monaco-editor/react';
 import { debounce, merge } from 'lodash';
@@ -55,10 +55,16 @@ export const CodeEditor: React.FC<ICodeEditorProps> = ({
     [onUpdate, saveWait],
   );
 
+  const useRealtimeData = useRef(true);
   const handleEditorDidMount: OnMount = useCallback(
     (editor) => {
       editor.onDidChangeModelContent(() => {
+        useRealtimeData.current = false;
         saveInput(editor.getValue());
+      });
+
+      editor.onDidBlurEditorWidget(() => {
+        useRealtimeData.current = true;
       });
 
       readonly &&
@@ -87,7 +93,7 @@ export const CodeEditor: React.FC<ICodeEditorProps> = ({
   return (
     <MonacoEditor
       defaultLanguage={language}
-      value={finalData}
+      value={useRealtimeData.current ? finalData : void 0}
       height={height}
       className={cn(
         'h-full w-full',
