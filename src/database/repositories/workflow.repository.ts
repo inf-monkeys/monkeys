@@ -551,7 +551,7 @@ INNER JOIN (
 ) mv ON iw.workflow_id = mv.workflow_id AND iw.version = mv.max_version;
     `;
     const totalCountRes = await this.workflowMetadataRepository.query(totalCountSql, [teamId]);
-    const totalCount = totalCountRes[0]['count'];
+    const totalCount = Number(totalCountRes[0]['count']);
     const sql = `
 SELECT 
     iw.workflow_id
@@ -576,7 +576,7 @@ LIMIT $2 OFFSET $3;
     const workflowIds: string[] = res.map((x) => x.workflow_id);
     const workflows = await this.workflowMetadataRepository.find({
       where: {
-        id: In(workflowIds),
+        workflowId: In(workflowIds),
       },
       order: {
         [orderColumn]: orderByNumber,

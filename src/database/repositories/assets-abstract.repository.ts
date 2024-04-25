@@ -1,5 +1,6 @@
 import { AssetFilter, ListDto } from '@/common/dto/list.dto';
 import { AssetType } from '@/common/typings/asset';
+import { generateDbId } from '@/common/utils';
 import { Between, FindOptionsOrder, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { AssetPublishConfig, AssetPublishPolicy, BaseAssetEntity } from '../entities/assets/base-asset';
 import { AssetsCommonRepository, AssetsFillAdditionalInfoOptions } from './assets-common.repository';
@@ -163,6 +164,46 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
         break;
       default:
         break;
+    }
+  }
+
+  public async initBuiltInMarketPlace(assetType: AssetType, data: Partial<E>) {
+    if (!data.id) {
+      throw new Error('id is required to init built-in asset');
+    }
+    if (!data.displayName) {
+      throw new Error('displayName is required to init built-in asset');
+    }
+    const asset = this.repository.create(data as E);
+    asset.isPreset = true;
+    asset.isPublished = true;
+    asset.assetType = assetType;
+    await this.repository.save(asset);
+    return asset;
+  }
+
+  public async forkFromMarketPlaceWhenTeamCreate(teamId: string, creatorUserId: string, extraDataFunc?: (e: E) => { [x: string]: any }) {
+    const presetAssets = await this.repository.find({
+      where: {
+        isPreset: true,
+      } as FindOptionsWhere<E>,
+    });
+
+    for (const asset of presetAssets) {
+      const { id } = asset;
+      const extraData = extraDataFunc ? extraDataFunc(asset) : {};
+      const clonedAsset = this.repository.create({
+        ...asset,
+        ...extraData,
+        id: generateDbId(),
+        teamId,
+        creatorUserId,
+        forkedFrom: id,
+        isDeleted: false,
+        isPreset: false,
+        isPublished: false,
+      });
+      await this.repository.save(clonedAsset);
     }
   }
 }

@@ -7,6 +7,7 @@ import { AssetsCommonRepository } from './repositories/assets-common.repository'
 import { SqlKnowledgeBaseAssetRepositroy } from './repositories/assets-knowledge-base-sql.repository';
 import { KnowledgeBaseAssetRepositroy } from './repositories/assets-knowledge-base.repository';
 import { LlmModelAssetRepositroy } from './repositories/assets-llm-model.respository';
+import { AssetsMarketPlaceRepository } from './repositories/assets-marketplace.repository';
 import { MediaFileAssetRepositroy } from './repositories/assets-media-file.repository';
 import { SdModelAssetRepositroy } from './repositories/assets-sd-model.repository';
 import { WorkflowAssetRepositroy } from './repositories/assets-workflow.respository';
@@ -47,6 +48,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     SqlKnowledgeBaseRepository,
     LlmModelRepository,
     SdModelRepository,
+    AssetsMarketPlaceRepository,
   ],
   exports: [
     ToolsRepository,
@@ -70,6 +72,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     SqlKnowledgeBaseRepository,
     LlmModelRepository,
     SdModelRepository,
+    AssetsMarketPlaceRepository,
   ],
   imports: [TypeOrmModule.forFeature(entities)],
 })
