@@ -45,7 +45,7 @@ export interface RedisConfig {
   nodes?: ClusterNode[];
 
   // Sentinel config
-  sentinelNodes?: Array<Partial<SentinelAddress>>;
+  sentinels?: Array<Partial<SentinelAddress>>;
   sentinelName?: string;
 
   // Common config
@@ -199,7 +199,7 @@ export const config: Config = {
     // Cluster config
     nodes: readConfig('redis.nodes', []),
     // Sentinel config
-    sentinelNodes: readConfig('redis.sentinelNodes', []),
+    sentinels: readConfig('redis.sentinels', []),
     sentinelName: readConfig('redis.sentinelName'),
     // Common config
     prefix: readConfig('redis.prefix', 'monkeys:'),
@@ -256,6 +256,9 @@ export const isRedisConfigured = () => {
   if (config.redis.mode === RedisMode.cluster) {
     return !!config.redis.nodes.length;
   }
+  if (config.redis.mode === RedisMode.sentinel) {
+    return !!config.redis.sentinels.length && !!config.redis.sentinelName;
+  }
   return false;
 };
 
@@ -264,7 +267,7 @@ const validateConfig = () => {
     throw new Error('Redis cluster mode requires at least one node');
   }
   if (config.redis.mode === RedisMode.sentinel) {
-    if (!config.redis.sentinelNodes.length) {
+    if (!config.redis.sentinels.length) {
       throw new Error('Redis sentinel mode requires at least one sentinel node');
     }
     if (!config.redis.sentinelName) {
