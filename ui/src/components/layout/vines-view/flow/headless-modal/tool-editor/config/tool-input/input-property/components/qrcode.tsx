@@ -6,7 +6,12 @@ import { cn } from '@/utils';
 
 import { IVinesInputPropertyProps } from '..';
 
-interface IQrcodeInputProps {}
+interface IQrcodeInputProps {
+  toolName: string;
+  def: any;
+  context: any;
+  onChange: (sessionId: string) => void;
+}
 
 export const QRCodeInput: React.FC<IVinesInputPropertyProps & IQrcodeInputProps> = ({
   toolName,

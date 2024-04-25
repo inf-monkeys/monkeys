@@ -223,17 +223,30 @@ export class ChatService {
             logger.info(`Completion Finished: ${completion}`);
           },
           onFinal() {
+            res.write('data: [DONE]\n\n');
             res.end();
           },
         });
         const streamingTextResponse = new StreamingTextResponse(streamResponse, {}, data);
+        // set the content type to text-stream
+        res.setHeader('content-type', 'text/event-stream;charset=utf-8');
         res.status(200);
         const body = streamingTextResponse.body;
         const readableStream = Readable.from(body as any);
+        const randomChatCmplId = 'chatcmpl-' + Math.random().toString(36).substr(2, 16);
         readableStream.on('data', (chunk) => {
           const decoder = new TextDecoder();
-          const chunkString = decoder.decode(chunk);
-          res.write(chunkString);
+          let chunkString = decoder.decode(chunk);
+          chunkString = chunkString.split(':')[chunkString.split(':').length - 1].trimEnd().slice(1, -1);
+          const chunkObject = {
+            id: randomChatCmplId,
+            object: 'chat.completion.chunk',
+            created: Math.floor(Date.now() / 1000),
+            model: model,
+            system_fingerprint: null,
+            choices: [{ index: 0, delta: { content: chunkString }, logprobs: null, finish_reason: null }],
+          };
+          res.write(`data: ${JSON.stringify(chunkObject, null, 0)}\n\n`);
         });
       } else {
         const data = response as ChatCompletion;

@@ -28,6 +28,10 @@ const ErrorMessage: { [key: string]: string } = {
   500: 'The server is busy. Please try again later.',
 };
 
+export const LLM_NAMESPACE = 'llm';
+export const LLM_COMPLETION_TOOL = 'completions';
+export const LLM_CHAT_COMPLETION_TOOL = 'chat_completions';
+
 @Controller('/chat')
 export class ChatController {
   constructor(private readonly service: ChatService) {}
@@ -38,7 +42,7 @@ export class ChatController {
     return {
       schema_version: SchemaVersion.v1,
       display_name: '大语言模型',
-      namespace: 'llm',
+      namespace: LLM_NAMESPACE,
       auth: {
         type: AuthType.none,
       },
@@ -64,7 +68,7 @@ export class ChatController {
     summary: 'Completion',
     description: 'Completion',
   })
-  @MonkeyToolName('completions')
+  @MonkeyToolName(LLM_COMPLETION_TOOL)
   @MonkeyToolDisplayName('大语言模型单轮对话')
   @MonkeyToolCategories(['gen-text'])
   @MonkeyToolIcon('emoji:💬:#c15048')
@@ -271,7 +275,7 @@ export class ChatController {
     summary: 'Chat Completion',
     description: 'Chat Completion',
   })
-  @MonkeyToolName('chat_completions')
+  @MonkeyToolName(LLM_CHAT_COMPLETION_TOOL)
   @MonkeyToolDisplayName('大语言模型多轮对话')
   @MonkeyToolCategories(['gen-text'])
   @MonkeyToolIcon('emoji:💬:#c15048')
@@ -327,14 +331,18 @@ export class ChatController {
       description: '填写 0-1 的浮点数\n用于惩罚模型生成低频词语，从而使生成的文本更加多样化。',
     },
     {
+      displayName: '知识库列表',
+      name: 'knowledge_bases',
+      type: 'string',
+      assetType: 'knowledge-base',
+    },
+    {
       displayName: '工具列表',
       name: 'tools',
       type: 'string',
       typeOptions: {
         multipleValues: true,
       },
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       assetType: 'tools',
     },
     {

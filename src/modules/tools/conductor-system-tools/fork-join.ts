@@ -18,8 +18,6 @@ export default defineNode({
       },
       default: ['all'],
       required: true,
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       assetType: 'fork-join-branch',
     },
   ],

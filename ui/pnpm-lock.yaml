@@ -24,8 +24,8 @@ dependencies:
     specifier: ^3.3.4
     version: 3.3.4(react-hook-form@7.51.2)
   '@inf-monkeys/vines':
-    specifier: ^0.0.68
-    version: 0.0.68
+    specifier: ^0.0.69
+    version: 0.0.69
   '@mantine/core':
     specifier: 7.6.1
     version: 7.6.1(@mantine/hooks@7.6.1)(@types/react@18.2.74)(react-dom@18.2.0)(react@18.2.0)
@@ -1223,8 +1223,8 @@ packages:
     resolution: {integrity: sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==}
     dev: true
 
-  /@inf-monkeys/vines@0.0.68:
-    resolution: {integrity: sha512-9yXlxgoDwIHkcwzLGi/xgNWLCISKwTRG+GOin0xfAF+cQtomDULIC348td/+sfV1mvES8PMzu/c8iYaAPGUFDA==}
+  /@inf-monkeys/vines@0.0.69:
+    resolution: {integrity: sha512-3g5rbSHG3I83/HmA+vcwtD7PwIo+jKu/k9MayGC1E5YrgtzYq06SJZZbPtXWbg2xB6AijX4RX0jcaJLQYjzhgA==}
     dependencies:
       '@io-orkes/conductor-javascript': 2.0.0
       '@types/axios': 0.14.0

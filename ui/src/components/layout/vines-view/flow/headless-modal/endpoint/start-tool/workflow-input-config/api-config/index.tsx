@@ -14,6 +14,7 @@ import { useVinesFlow } from '@/package/vines-flow';
 import { IWorkflowApiConfigInfo, workflowApiConfigInfoSchema } from '@/schema/workspace/workflow-api-config';
 import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
+import { MonkeyWorkflow } from '@inf-monkeys/vines';
 
 interface IWorkflowApiConfigProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -22,9 +23,7 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = ({ className
   const { vines } = useVinesFlow();
   const { workflow, apikey } = useVinesPage();
 
-  // @ts-ignore
-  const rateLimiter: WorkflowRateLimiter = workflow?.rateLimiter;
-  // @ts-ignore
+  const rateLimiter: WorkflowRateLimiter | undefined = workflow?.rateLimiter;
   const exposeOpenaiCompatibleInterface = workflow?.exposeOpenaiCompatibleInterface;
   const [isLoading, setIsLoading] = useState(false);
 
@@ -54,7 +53,7 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = ({ className
       updateWorkflow(apikey, workflowId, workflowVersion, {
         version: workflowVersion,
         ...data,
-      }),
+      } as Partial<MonkeyWorkflow>),
       {
         success: '操作成功',
         loading: '操作中......',

@@ -52,10 +52,12 @@ export class WorkflowOpenAICompatibleController {
       res.status(201);
       const key = TOOL_STREAM_RESPONSE_TOPIC(workflowInstanceId);
       this.mq.subscribe(key, (_, message: string) => {
-        console.log(message);
         res.write(message);
+        // TODO: listen on workflow finished event
+        if (message.includes('[DONE]')) {
+          res.end();
+        }
       });
-      // TODO: listen on workflow finished event
     }
   }
 }
