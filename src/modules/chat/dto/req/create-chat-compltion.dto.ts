@@ -62,6 +62,12 @@ export class CreateChatCompletionsDto {
   tools?: string[];
 
   @ApiProperty({
+    description: '知识库上下文',
+    required: false,
+  })
+  knowledgeBase?: string;
+
+  @ApiProperty({
     description: '指示API是否应以流的形式返回生成的回复',
     example: false,
     required: false,

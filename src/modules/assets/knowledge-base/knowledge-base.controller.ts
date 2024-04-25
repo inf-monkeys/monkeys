@@ -49,6 +49,7 @@ export class KnowledgeBaseController {
       displayName: body.displayName,
       description: body.description,
       iconUrl: body.iconUrl,
+      retrievalSettings: body.retrievalSettings,
     });
     return new SuccessResponse({
       data,

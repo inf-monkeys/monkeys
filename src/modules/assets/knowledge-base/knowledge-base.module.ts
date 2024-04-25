@@ -7,5 +7,6 @@ import { KnowledgeBaseService } from './knowledge-base.service';
   controllers: [KnowledgeBaseController],
   providers: [KnowledgeBaseService],
   imports: [ToolsModule],
+  exports: [KnowledgeBaseService],
 })
 export class KnowledgeBaseModule {}

@@ -10,6 +10,7 @@ import OpenAI from 'openai';
 import { ChatCompletion, ChatCompletionChunk, ChatCompletionMessageParam, ChatCompletionTool } from 'openai/resources';
 import { Stream } from 'openai/streaming';
 import { Readable } from 'stream';
+import { KnowledgeBaseService } from '../assets/knowledge-base/knowledge-base.service';
 import { ToolsForwardService } from '../tools/tools.forward.service';
 
 export interface CreateChatCompelitionsParams {
@@ -22,6 +23,7 @@ export interface CreateChatCompelitionsParams {
   max_tokens?: number;
   systemPrompt?: string;
   tools?: string[];
+  knowledgeBase?: string;
 }
 
 export interface CreateCompelitionsParams {
@@ -75,6 +77,7 @@ export class ChatService {
   constructor(
     private readonly toolsReopsitory: ToolsRepository,
     private readonly toolForwardServie: ToolsForwardService,
+    private readonly knowledgeBaseService: KnowledgeBaseService,
   ) {}
 
   private getModelConfig(modelName: string) {
@@ -168,7 +171,7 @@ export class ChatService {
   }
 
   public async createChatCompelitions(res: Response, params: CreateChatCompelitionsParams) {
-    const { model, stream, systemPrompt } = params;
+    const { model, stream, systemPrompt, knowledgeBase } = params;
     let { messages } = params;
     if (systemPrompt) {
       const systemMessage: ChatCompletionMessageParam = {
@@ -176,6 +179,39 @@ export class ChatService {
         content: systemPrompt,
       };
       messages = [systemMessage].concat(messages as any);
+    }
+
+    if (knowledgeBase) {
+      const lastMessage = messages[messages.length - 1];
+      const { role, content: lastMessageContent } = lastMessage;
+      if (role !== 'user') {
+        throw new Error('Last message must be user');
+      }
+      try {
+        const retrieveResult = await this.knowledgeBaseService.retrieveKnowledgeBase(knowledgeBase, lastMessageContent as string);
+        if (retrieveResult?.text) {
+          logger.info(`Retrieved knowledge base: ${retrieveResult.text}`);
+          const basePrompt = `Use the following context as your learned knowledge, inside <context></context> XML tags.
+<context>
+{{#context#}}
+</context>
+
+When answer to user:
+- If you don't know, just say that you don't know.
+- If you don't know when you are not sure, ask for clarification.
+- Avoid mentioning that you obtained the information from the context.
+- And answer according to the language of the user's question.\n`;
+          const systemMessage: ChatCompletionMessageParam = {
+            role: 'system',
+            content: basePrompt.replace('{{#context#}}', retrieveResult.text),
+          };
+          messages = [systemMessage].concat(messages as any);
+        } else {
+          logger.info(`Not found any knowledge based on question: ${lastMessageContent}`);
+        }
+      } catch (error) {
+        logger.warn(`Failed to retrieve knowledge base: ${error.message}`);
+      }
     }
 
     const { apiKey, baseURL, defaultParams } = this.getModelConfig(model);

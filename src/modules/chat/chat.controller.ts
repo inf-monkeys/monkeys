@@ -300,6 +300,22 @@ export class ChatController {
       required: true,
     },
     {
+      displayName: '知识库上下文',
+      name: 'knowledgeBase',
+      type: 'string',
+      typeOptions: {
+        assetType: 'knowledge-base',
+      },
+    },
+    {
+      displayName: '工具列表',
+      name: 'tools',
+      type: 'string',
+      typeOptions: {
+        assetType: 'tools',
+      },
+    },
+    {
       displayName: '最大 Token 数',
       name: 'max_tokens',
       type: 'number',
@@ -329,21 +345,6 @@ export class ChatController {
       default: 0.5,
       required: false,
       description: '填写 0-1 的浮点数\n用于惩罚模型生成低频词语，从而使生成的文本更加多样化。',
-    },
-    {
-      displayName: '知识库列表',
-      name: 'knowledge_bases',
-      type: 'string',
-      assetType: 'knowledge-base',
-    },
-    {
-      displayName: '工具列表',
-      name: 'tools',
-      type: 'string',
-      typeOptions: {
-        multipleValues: true,
-      },
-      assetType: 'tools',
     },
     {
       name: 'stream',
@@ -485,6 +486,7 @@ export class ChatController {
       stream,
       systemPrompt: body.systemPrompt,
       tools: body.tools,
+      knowledgeBase: body.knowledgeBase,
     });
   }
 }
