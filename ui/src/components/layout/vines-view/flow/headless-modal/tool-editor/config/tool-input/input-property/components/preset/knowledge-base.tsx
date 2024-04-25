@@ -30,7 +30,7 @@ export const KnowledgeBaseSelector: React.FC<IVinesInputPropertyProps & Omit<IVi
     const opts = vectorCollections.map((m) => {
       const ownedByTeam = teamId === m.teamId;
       const displayName = ownedByTeam ? m.displayName : `${m.displayName}（其他团队授权）`;
-      return { name: displayName, value: m.name };
+      return { name: displayName, value: m.uuid };
     });
     setOptions(opts);
 
