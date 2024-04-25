@@ -59,7 +59,7 @@ export const UgcApplicationStoreUseTemplateDialog: React.FC<IUgcApplicationStore
             <VinesIcon src={item.iconUrl} size="xl" />
           </div>
           <div className="flex flex-col gap-1">
-            <span className="font-bold">{item.name}</span>
+            <span className="font-bold">{item.displayName}</span>
             <span className="text-sm">{item.description}</span>
           </div>
         </div>

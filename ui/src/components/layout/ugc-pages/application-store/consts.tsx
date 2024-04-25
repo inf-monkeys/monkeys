@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
@@ -15,7 +13,7 @@ export const createApplicationStoreColumns = () => [
     cell: ({ getValue }) => RenderIcon({ iconUrl: getValue() as string }),
     maxSize: 48,
   }),
-  columnHelper.accessor('name', {
+  columnHelper.accessor('displayName', {
     id: 'title',
     header: '名称',
     cell: ({ row, getValue }) => (
@@ -30,7 +28,7 @@ export const createApplicationStoreColumns = () => [
   columnHelper.accessor('user', {
     id: 'user',
     header: '用户',
-    cell: ({ getValue }) => RenderUser({ user: getValue() as IVinesUser }),
+    cell: ({ getValue }) => RenderUser({ user: getValue() as IVinesUser, fallbackName: '系统内置' }),
     maxSize: 48,
   }),
   columnHelper.accessor('createdTimestamp', {

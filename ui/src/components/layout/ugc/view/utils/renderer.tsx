@@ -22,13 +22,16 @@ export const RenderTime: React.FC<{ time: number }> = ({ time: rawTime }) => {
 
 export const RenderUser: React.FC<{
   user: Partial<IVinesUser>;
-}> = ({ user }) => (
+  fallbackName?: string;
+}> = ({ user, fallbackName = '未知用户' }) => (
   <div className="flex items-center gap-1">
     <Avatar className="size-5">
-      <AvatarImage className="aspect-auto" src={user?.photo} alt={user?.name ?? '未知用户'} />
-      <AvatarFallback className="rounded-none p-2 text-xs">{(user?.name ?? '未知用户').substring(0, 2)}</AvatarFallback>
+      <AvatarImage className="aspect-auto" src={user?.photo} alt={user?.name ?? fallbackName} />
+      <AvatarFallback className="rounded-none p-2 text-xs">
+        {(user?.name ?? fallbackName).substring(0, 2)}
+      </AvatarFallback>
     </Avatar>
-    <span>{user?.name ?? '未知用户'}</span>
+    <span>{user?.name ?? fallbackName}</span>
   </div>
 );
 export const RenderDescription: React.FC<{
