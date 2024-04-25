@@ -231,8 +231,14 @@ export class ToolsPollingService {
       });
       if (responseType === 'json') {
         logger.info(`Execute worker success: ${__toolName}`);
+        const outputData = res.data;
+        // 判断 outputData 是不是一个对象，否则报错
+        if (typeof outputData !== 'object') {
+          logger.warn(`Output data of tool ${__toolName} is not an object: `, outputData);
+          throw new Error('Output data must be an object');
+        }
         return {
-          outputData: res.data,
+          outputData,
           status: 'COMPLETED',
         };
       } else if (responseType === 'stream') {
