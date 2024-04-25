@@ -68,7 +68,7 @@ export const useUgcMediaData = (dto: IListUgcDto) => useUgcItems<IMediaData>(dto
 export const preloadUgcMediaData = (dto: IListUgcDto) => preloadUgcItems<IMediaData>(dto, '/api/media-files', 'GET');
 
 export const useUgcApplicationStore = (dto: IListUgcDto) =>
-  useUgcItems<IApplicationStoreItemDetail>(dto, '/api/templates');
+  useUgcItems<IApplicationStoreItemDetail>(dto, '/api/assets/workflow/marketplace');
 export const preloadUgcApplicationStore = (dto: IListUgcDto) =>
   preloadUgcItems<IApplicationStoreItemDetail>(dto, '/api/templates');
 
@@ -96,13 +96,9 @@ export const removeAssetFilterRules = (id: string) => {
 };
 
 export const useAssetPublicCategories = (type: AssetType, isMarket = false) =>
-  useSWR<IAssetPublicCategory[] | undefined>(
-    isMarket ? `/api/assets/public-categories/${type}` : null,
-    vinesFetcher(),
-    {
-      refreshInterval: 600000,
-    },
-  );
+  useSWR<IAssetPublicCategory[] | undefined>(isMarket ? `/api/assets/${type}/marketplace/tags` : null, vinesFetcher(), {
+    refreshInterval: 600000,
+  });
 
 export const createTag = (name: string) => {
   return vinesFetcher<IAssetTag>({ method: 'POST', simple: true })(`/api/assets/tags/`, { name });

@@ -59,7 +59,7 @@ export class WorkflowCrudService {
 
   public async createWorkflowDef(teamId: string, userId: string, data: CreateWorkflowData, options?: CreateWorkflowOptions) {
     const { assetsPolicy, isTheSameTeam = false, replaceSqlDatabaseMap, replaceVectorDatabaseMap, replaceLlmModelMap, replaceSdModelMap } = options || {};
-    const { displayName, iconUrl, description, tasks, variables, triggers, output, version = 1, exposeOpenaiCompatibleInterface = false } = data;
+    const { displayName, iconUrl, description, tasks, variables, triggers, output, version = 1, exposeOpenaiCompatibleInterface = false, rateLimiter } = data;
     const workflowId = options?.useExistId || generateDbId();
 
     // 从应用市场 clone 的时候，资产的授权策略
@@ -221,6 +221,7 @@ export class WorkflowCrudService {
       output,
       variables,
       exposeOpenaiCompatibleInterface,
+      rateLimiter,
     });
     await this.conductorService.saveWorkflowInConductor(workflowEntity);
 
@@ -382,6 +383,10 @@ export class WorkflowCrudService {
           tasks: originalWorkflow.tasks,
           iconUrl: originalWorkflow.iconUrl,
           description: originalWorkflow.description,
+          variables: originalWorkflow.variables,
+          output: originalWorkflow.output,
+          exposeOpenaiCompatibleInterface: originalWorkflow.exposeOpenaiCompatibleInterface,
+          rateLimiter: originalWorkflow.rateLimiter,
         },
         {
           useExistId: newWorkflowId,

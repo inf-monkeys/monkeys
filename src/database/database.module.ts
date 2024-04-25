@@ -15,8 +15,10 @@ import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-clas
 import { ApiKeyEntity } from './entities/apikey/apikey';
 import { AssetsAuthorizationEntity } from './entities/assets/asset-authorization';
 import { AssetFilterEntity } from './entities/assets/asset-filter';
+import { AssetsMarketPlaceTagEntity } from './entities/assets/asset-marketplace-tag';
+import { AssetsMarketplaceTagRelationsEntity } from './entities/assets/asset-marketplace-tag-relations';
 import { AssetsTagEntity } from './entities/assets/asset-tag-definitions';
-import { AssetsTagRelationsEntity } from './entities/assets/asset-tags';
+import { AssetsTagRelationsEntity } from './entities/assets/asset-tag-relations';
 import { CanvasApplicationEntity } from './entities/assets/canvas/canvas';
 import { SqlKnowLedgeBaseEntity } from './entities/assets/knowledge-base/knowledge-base-sql.entity';
 import { KnowLedgeBaseEntity } from './entities/assets/knowledge-base/knowledge-base.entity';
@@ -59,6 +61,8 @@ export const entities: EntityClassOrSchema[] = [
   AssetsTagRelationsEntity,
   TeamJoinRequestsEntity,
   SqlKnowLedgeBaseEntity,
+  AssetsMarketPlaceTagEntity,
+  AssetsMarketplaceTagRelationsEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({

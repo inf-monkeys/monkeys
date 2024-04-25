@@ -137,7 +137,7 @@ export interface IWorkflowRelatedAssetResult {
 }
 
 export interface IApplicationStoreItem {
-  _id: string;
+  id: string;
   name: string;
   description: string;
   iconUrl: string;

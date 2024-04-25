@@ -20,16 +20,18 @@ export const UgcApplicationStoreUseTemplateDialog: React.FC<IUgcApplicationStore
 }) => {
   const [visible, setVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const teamId = localStorage.getItem('vines-team-id');
 
   const handleUse = async () => {
-    if (!item._id) return;
+    if (!item.id) return;
 
     setIsLoading(true);
 
     toast.promise(
-      forkApplicationFromTemplate(item._id).then((flow) => {
+      forkApplicationFromTemplate(item.id).then((flow) => {
+        console.log('flow', flow);
         if (!flow) return;
-        open(`/${flow.teamId}/workspace/${flow.workflowId}`, '_blank');
+        open(`/${teamId}/workspace/${flow.workflowId}`, '_blank');
       }),
       {
         success: () => {
