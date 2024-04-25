@@ -24,6 +24,10 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { IVinesVariableMap, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
 export interface IVinesInputPropertyProps {
+  toolName?: string;
+  context?: {
+    [x: string]: any;
+  };
   def: VinesToolDefProperties;
   value: unknown;
   onChange: (value: unknown) => void;

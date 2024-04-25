@@ -8,8 +8,8 @@ export class WorkflowCommonService {
 
   ASSET_TYPE_SD_MODEL: AssetType = 'sd-model';
   ASSET_TYPE_LLM_MODEL: AssetType = 'llm-model';
-  ASSET_TYPE_TEXT_COLLECTION: AssetType = 'text-collection';
-  ASSET_TYPE_TABLE_COLLECTION: AssetType = 'table-collection';
+  ASSET_TYPE_TEXT_COLLECTION: AssetType = 'knowledge-base';
+  ASSET_TYPE_TABLE_COLLECTION: AssetType = 'knowledge-base-table';
 
   public async getAllSubWorkflowsRecursive(tasks: MonkeyTaskDefTypes[]): Promise<MonkeyWorkflowDef[]> {
     // let subWorkflows: WorkflowMetadataEntity[] = [];

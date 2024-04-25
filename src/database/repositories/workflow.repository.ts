@@ -8,7 +8,7 @@ import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-e
 import { WorkflowMetadataEntity, WorkflowOutputValue, WorkflowRateLimiter, WorkflowValidationIssue } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTriggerType, WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
 import { BlockDefProperties, MonkeyTaskDefTypes } from '@inf-monkeys/vines';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
 import { ChatCompletionMessageParam } from 'openai/resources';
@@ -81,13 +81,17 @@ export class WorkflowRepository {
   }
 
   public async getWorkflowById(workflowId: string, version: number) {
-    return await this.workflowMetadataRepository.findOne({
+    const workflow = await this.workflowMetadataRepository.findOne({
       where: {
         workflowId,
         version,
         isDeleted: false,
       },
     });
+    if (!workflow) {
+      throw new NotFoundException(`Workflow ${workflowId} not found`);
+    }
+    return workflow;
   }
 
   public async getWorkflowByIdWithoutVersion(workflowId: string) {

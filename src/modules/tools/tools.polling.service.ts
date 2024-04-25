@@ -1,11 +1,12 @@
 import { CacheManager } from '@/common/cache';
 import { CACHE_TOKEN, MQ_TOKEN } from '@/common/common.module';
 import { conductorClient } from '@/common/conductor';
-import { config } from '@/common/config';
+import { config, isRedisConfigured } from '@/common/config';
 import { logger } from '@/common/logger';
 import { Mq } from '@/common/mq';
 import { ExtendedToolDefinition } from '@/common/utils/define-tool';
 import { sleep } from '@/common/utils/utils';
+import { ToolsEntity } from '@/database/entities/tools/tools.entity';
 import { Task, TaskDef, TaskManager } from '@inf-monkeys/conductor-javascript';
 import { Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
@@ -13,6 +14,7 @@ import { IncomingMessage } from 'http';
 import os from 'os';
 import { AuthType, WorkerInputData } from '../../common/typings/tools';
 import { ToolsRepository } from '../../database/repositories/tools.repository';
+import { LLM_CHAT_COMPLETION_TOOL, LLM_COMPLETION_TOOL, LLM_NAMESPACE } from '../chat/chat.controller';
 import { ToolsRegistryService } from './tools.registry.service';
 
 export const CONDUCTOR_TASK_DEF_NAME = config.conductor.workerPrefix ? `${config.conductor.workerPrefix}monkeys` : 'monkeys';
@@ -90,14 +92,19 @@ export class ToolsPollingService {
     });
   }
 
-  private async monkeyToolHandler(task: Task) {
-    const inpuData = task.inputData as WorkerInputData;
-    const { __toolName, __context, __advancedConfig, ...rest } = inpuData;
-    const { outputAs = 'json' } = __advancedConfig || {};
-
-    if (outputAs === 'stream' && !this.cache.isRedis()) {
-      throw new Error('Stream output is not supported without redis');
+  private getToolOutputAsConfig(tool: ToolsEntity, inputData: WorkerInputData): 'json' | 'stream' {
+    if (tool.name === `${LLM_NAMESPACE}:${LLM_COMPLETION_TOOL}` || tool.name === `${LLM_NAMESPACE}:${LLM_CHAT_COMPLETION_TOOL}`) {
+      const { stream } = inputData;
+      return stream ? 'stream' : 'json';
     }
+    const { __advancedConfig } = inputData;
+    const { outputAs = 'json' } = __advancedConfig || {};
+    return outputAs;
+  }
+
+  private async monkeyToolHandler(task: Task) {
+    const inputData = task.inputData as WorkerInputData;
+    const { __toolName, __context, ...rest } = inputData;
 
     logger.info(`Start to execute tool: ${__toolName}`);
 
@@ -150,6 +157,11 @@ export class ToolsPollingService {
         status: 'FAILED',
       };
     }
+    const outputAs = this.getToolOutputAsConfig(tool, inputData);
+    if (outputAs === 'stream' && !isRedisConfigured()) {
+      throw new Error('Stream output is not supported without redis');
+    }
+
     const { method, path } = apiInfo;
     const namespace = __toolName.split(':')[0];
     const server = await this.toolsRepository.getServerByNamespace(namespace);
