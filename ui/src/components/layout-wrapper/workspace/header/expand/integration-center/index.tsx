@@ -1,8 +1,11 @@
 import React, { useEffect } from 'react';
 
-import { useClipboard } from '@mantine/hooks';
 import { Link } from '@tanstack/react-router';
+
+import { useClipboard } from '@mantine/hooks';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@radix-ui/react-tooltip';
 import { Blocks, Copy } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { useApiKeyList } from '@/apis/api-keys/api-key.ts';
 import { IApiKeyStatus } from '@/apis/api-keys/typings.ts';
@@ -13,8 +16,8 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { VinesHighlighter } from '@/components/ui/highlighter';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@radix-ui/react-tooltip';
-import { toast } from 'sonner';
+
+// @ts-ignore
 import TemplateChatZH from './templates/zh.mdx';
 
 interface IIntegrationCenterProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -102,20 +105,18 @@ export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
       </DialogTrigger>
 
       {workflow?.exposeOpenaiCompatibleInterface ? (
-        <>
-          <DialogContent className="max-h max-w-7xl">
-            <DialogTitle>集成中心</DialogTitle>
-            <DialogDescription>你可以通过 API 与其他应用集成，以实现更多功能</DialogDescription>
-            <ScrollArea className="h-[calc(100vh-200px)]">
-              <TemplateChatZH
-                // @ts-ignore
-                apiBaseUrl={apiBaseUrl}
-                apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
-                workflowId={workflowId}
-              />
-            </ScrollArea>
-          </DialogContent>
-        </>
+        <DialogContent className="max-h max-w-6xl">
+          <DialogTitle>集成中心</DialogTitle>
+          <DialogDescription>你可以通过 API 与其他应用集成，以实现更多功能</DialogDescription>
+          <ScrollArea className="h-[calc(100vh-20rem)]">
+            <TemplateChatZH
+              // @ts-ignore
+              apiBaseUrl={apiBaseUrl}
+              apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
+              workflowId={workflowId}
+            />
+          </ScrollArea>
+        </DialogContent>
       ) : (
         <DialogContent className="max-h max-w-xl">
           <DialogTitle>集成中心</DialogTitle>

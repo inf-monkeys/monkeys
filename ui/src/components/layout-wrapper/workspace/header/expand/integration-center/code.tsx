@@ -1,7 +1,9 @@
 'use client';
+import React, { Children, createContext, useContext, useEffect, useRef, useState } from 'react';
+
 import { Tab } from '@headlessui/react';
-import classNames from 'classnames';
-import { Children, createContext, useContext, useEffect, useRef, useState } from 'react';
+
+import { cn } from '@/utils';
 
 import { Tag } from './tag';
 
@@ -58,8 +60,8 @@ function CopyButton({ code }: { code: string }) {
   return (
     <button
       type="button"
-      className={classNames(
-        'group/button text-2xs absolute right-4 top-3.5 overflow-hidden rounded-full py-1 pl-2 pr-3 font-medium opacity-0 backdrop-blur transition focus:opacity-100 group-hover:opacity-100',
+      className={cn(
+        'group/button text-2xs absolute right-4 top-2 overflow-hidden rounded-md py-1 pl-2 pr-3 font-medium opacity-0 backdrop-blur transition focus:opacity-100 group-hover:opacity-100',
         copied
           ? 'bg-emerald-400/10 ring-1 ring-inset ring-emerald-400/20'
           : 'hover:bg-white/7.5 dark:bg-white/2.5 bg-white/5 dark:hover:bg-white/5',
@@ -72,7 +74,7 @@ function CopyButton({ code }: { code: string }) {
     >
       <span
         aria-hidden={copied}
-        className={classNames(
+        className={cn(
           'pointer-events-none flex items-center gap-0.5 text-zinc-400 transition duration-300',
           copied && '-translate-y-1.5 opacity-0',
         )}
@@ -82,7 +84,7 @@ function CopyButton({ code }: { code: string }) {
       </span>
       <span
         aria-hidden={!copied}
-        className={classNames(
+        className={cn(
           'pointer-events-none absolute inset-0 flex items-center justify-center text-emerald-400 transition duration-300',
           !copied && 'translate-y-1.5 opacity-0',
         )}
@@ -139,13 +141,13 @@ function CodeGroupHeader({ title, children, selectedIndex }: IChildrenProps) {
   if (!title && !hasTabs) return null;
 
   return (
-    <div className="flex min-h-[calc(theme(spacing.12)+1px)] flex-wrap items-start gap-x-4 border-b border-zinc-700 bg-zinc-800 px-4 dark:border-zinc-800 dark:bg-transparent">
+    <div className="flex min-h-10 flex-wrap items-start gap-x-4 border-b border-zinc-700 bg-zinc-800 px-4 dark:border-zinc-800 dark:bg-transparent">
       {title && <h3 className="mr-auto pt-3 text-xs font-semibold text-white">{title}</h3>}
       {hasTabs && (
         <Tab.List className="-mb-px flex gap-4 text-xs font-medium">
           {Children.map(children, (child, childIndex) => (
             <Tab
-              className={classNames(
+              className={cn(
                 'border-b py-3 transition focus:[&:not(:focus-visible)]:outline-none',
                 childIndex === selectedIndex
                   ? 'border-emerald-500 text-emerald-400'
@@ -248,7 +250,7 @@ export function CodeGroup({ children, title, inputs, targetCode, ...props }: ICh
     <CodeGroupContext.Provider value={true}>
       <Container
         {...containerProps}
-        className="not-prose my-6 overflow-hidden rounded-2xl bg-zinc-900 shadow-md dark:ring-1 dark:ring-white/10"
+        className="not-prose my-6 overflow-hidden rounded-md bg-zinc-900 shadow-md dark:ring-1 dark:ring-white/10"
       >
         <CodeGroupHeader title={title} {...headerProps}>
           {children}
