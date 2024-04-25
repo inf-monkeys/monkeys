@@ -3,9 +3,16 @@ import React, { useCallback, useState } from 'react';
 import { get, isArray } from 'lodash';
 
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
-import { CodeEditor } from '@/components/ui/code-editor';
+import { CodeEditor, ICodeEditorProps } from '@/components/ui/code-editor';
 
-export const EditorInput: React.FC<IVinesInputPropertyProps> = ({ def, value, onChange, disabled }) => {
+export const EditorInput: React.FC<IVinesInputPropertyProps & Pick<ICodeEditorProps, 'editorRef' | 'onInitial'>> = ({
+  def,
+  value,
+  onChange,
+  disabled,
+  editorRef,
+  onInitial,
+}) => {
   const { type, typeOptions } = def;
   const language = type === 'json' ? 'json' : get(typeOptions, 'editorLanguage', 'plaintext').toLowerCase();
   const isMultipleValues = get(typeOptions, 'multipleValues', false);
@@ -45,6 +52,7 @@ export const EditorInput: React.FC<IVinesInputPropertyProps> = ({ def, value, on
         </span>
       )}
       <CodeEditor
+        editorRef={editorRef}
         data={value as string}
         height="320px"
         language={language}
@@ -53,6 +61,7 @@ export const EditorInput: React.FC<IVinesInputPropertyProps> = ({ def, value, on
         readonly={disabled}
         saveWait={650}
         minimap={false}
+        onInitial={onInitial}
       />
     </div>
   );

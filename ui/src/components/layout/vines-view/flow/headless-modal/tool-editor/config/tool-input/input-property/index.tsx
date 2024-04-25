@@ -1,13 +1,15 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { BlockDefPropertyTypeOptions, BlockDefPropertyTypes } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
+import { useForceUpdate } from '@mantine/hooks';
 import { debounce, get, isEmpty, isNumber, isString } from 'lodash';
 import { PresetInput } from 'src/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset';
 
 import { BlankInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/blank.tsx';
 import { BooleanInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/boolean.tsx';
 import { CollectionInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/collection.tsx';
-import { EditorInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/editor.tsx';
+import { EditorInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/editor';
+import { InsertVariable } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/editor/insert-variable.tsx';
 import { FileInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/file.tsx';
 import { MultiFieldObjectInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/multi-field-object.tsx';
 import { NoticeInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/notice.tsx';
@@ -15,6 +17,7 @@ import { NumberInput } from '@/components/layout/vines-view/flow/headless-modal/
 import { OptionsInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/options.tsx';
 import { StringInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/string.tsx';
 import { InputPropertyWrapper } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/wrapper';
+import { IVinesEditorRefProps } from '@/components/ui/code-editor';
 import { Label } from '@/components/ui/label.tsx';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
@@ -27,8 +30,6 @@ export interface IVinesInputPropertyProps {
   nodeId: string;
   variableMapper: Record<string, IVinesVariableMap>;
   disabled?: boolean;
-  toolName: string;
-  context?: Record<string, unknown>;
 }
 
 export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) => {
@@ -143,6 +144,9 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
     }
   }, []);
 
+  const forceUpdate = useForceUpdate();
+  const editorRef = useRef<IVinesEditorRefProps>({ insertText: () => {} });
+
   return (
     <InputPropertyWrapper
       def={def}
@@ -173,7 +177,7 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
               </TabsTrigger>
             </TabsList>
           </Tabs>
-        ) : ['boolean', 'json', 'options'].includes(type) ? (
+        ) : ['boolean', 'options'].includes(type) ? (
           <div className="flex items-center space-x-2">
             <Switch
               size="small"
@@ -185,10 +189,14 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
             />
             <Label className="text-xs font-medium text-muted-foreground">变量输入</Label>
           </div>
+        ) : enableEditor ? (
+          <InsertVariable insertVariablesFn={editorRef.current.insertText} />
         ) : null
       }
     >
-      {enableEditor && <EditorInput disabled={disabled} {...finalProps} />}
+      {enableEditor && (
+        <EditorInput editorRef={editorRef} disabled={disabled} onInitial={forceUpdate} {...finalProps} />
+      )}
       {isMultiFieldObject && <MultiFieldObjectInput {...finalProps} />}
 
       {hasStringInput && <StringInput {...finalProps} />}
