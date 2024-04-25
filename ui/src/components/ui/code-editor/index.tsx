@@ -2,12 +2,17 @@ import React, { useCallback, useMemo, useRef } from 'react';
 
 import MonacoEditor, { EditorProps, OnMount } from '@monaco-editor/react';
 import { debounce, merge } from 'lodash';
+import { IRange } from 'monaco-editor';
 
 import { useAppStore } from '@/store/useAppStore';
 import { cn } from '@/utils';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 export type JSONValue = null | string | number | boolean | { [x: string]: JSONValue } | Array<JSONValue>;
+
+export interface IVinesEditorRefProps {
+  insertText: (text: string) => void;
+}
 
 export interface ICodeEditorProps {
   data: JSONValue;
@@ -21,6 +26,9 @@ export interface ICodeEditorProps {
   minimap?: boolean;
   hideBorder?: boolean;
   saveWait?: number;
+
+  editorRef?: React.MutableRefObject<IVinesEditorRefProps>;
+  onInitial?: () => void;
 }
 
 const DEFAULT_OPTIONS: EditorProps['options'] = {
@@ -47,6 +55,8 @@ export const CodeEditor: React.FC<ICodeEditorProps> = ({
   className,
   options,
   saveWait = 200,
+  editorRef,
+  onInitial,
 }) => {
   const { darkMode } = useAppStore();
 
@@ -67,10 +77,28 @@ export const CodeEditor: React.FC<ICodeEditorProps> = ({
         useRealtimeData.current = true;
       });
 
+      if (editorRef?.current) {
+        editorRef.current.insertText = (text: string) => {
+          console.log('insertText', text);
+
+          const selection = editor.getSelection();
+
+          editor.executeEdits('my-source', [
+            {
+              range: selection as unknown as IRange,
+              text: text,
+              forceMoveMarkers: true,
+            },
+          ]);
+        };
+      }
+
       readonly &&
         editor.updateOptions({
           readOnly: true,
         });
+
+      onInitial?.();
     },
     [readonly],
   );
