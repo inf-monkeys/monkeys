@@ -185,7 +185,7 @@ export const autoTypeTransform = (
     } else {
       // 最次最次用系统默认值
       if (type === 'string') {
-        setWith(obj, name, null);
+        // setWith(obj, name, null);
       } else if (typeOptions?.multipleValues) {
         setWith(obj, name, []);
       } else if (type === 'boolean') {
