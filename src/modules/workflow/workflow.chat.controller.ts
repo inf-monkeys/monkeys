@@ -33,13 +33,7 @@ export class WorkflowOpenAICompatibleController {
       teamId,
       userId,
       workflowId,
-      inputData: {
-        messages: body.messages,
-        temperature: body.temperature,
-        frequency_penalty: body.frequency_penalty,
-        presence_penalty: body.presence_penalty,
-        stream: body.stream,
-      },
+      inputData: body,
       triggerType: WorkflowTriggerType.API,
       chatSessionId: sessionId,
     });
