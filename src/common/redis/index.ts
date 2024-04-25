@@ -11,7 +11,7 @@ export const initRedisClient = (config: RedisConfig): Redis | Cluster => {
       });
     case RedisMode.sentinel:
       return new Redis({
-        sentinels: config.sentinelNodes,
+        sentinels: config.sentinels,
         name: config.sentinelName,
         ...config.options,
       });
