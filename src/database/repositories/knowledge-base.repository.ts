@@ -3,7 +3,7 @@ import { generateDbId } from '@/common/utils';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { KnowLedgeBaseEntity } from '../entities/assets/knowledge-base/knowledge-base.entity';
+import { KnowLedgeBaseEntity, KnowledgeBaseRetrievalSettings } from '../entities/assets/knowledge-base/knowledge-base.entity';
 import { KnowledgeBaseAssetRepositroy } from './assets-knowledge-base.repository';
 
 export interface CreateKnowledgeBaseParams {
@@ -48,14 +48,31 @@ export class KnowledgeBaseRepository {
     return result;
   }
 
+  public async getKnowledgeBaseByUUIDWithoutTeam(knowledgeBaseId: string) {
+    const knowledgeBase = await this.knowledgeBaseRepository.findOne({
+      where: {
+        uuid: knowledgeBaseId,
+        isDeleted: false,
+      },
+    });
+    if (!knowledgeBase) {
+      throw new Error('Knowledge base not found');
+    }
+    return knowledgeBase;
+  }
+
   public async getKnowledgeBaseByUUID(teamId: string, knowledgeBaseId: string) {
-    return await this.knowledgeBaseRepository.findOne({
+    const knowledgeBase = await this.knowledgeBaseRepository.findOne({
       where: {
         uuid: knowledgeBaseId,
         teamId,
         isDeleted: false,
       },
     });
+    if (!knowledgeBase) {
+      throw new Error('Knowledge base not found');
+    }
+    return knowledgeBase;
   }
 
   public async updateKnowledgeBase(
@@ -65,6 +82,7 @@ export class KnowledgeBaseRepository {
       displayName?: string;
       description?: string;
       iconUrl?: string;
+      retrievalSettings?: KnowledgeBaseRetrievalSettings;
     },
   ) {
     const knowledgeBase = await this.getKnowledgeBaseByUUID(teamId, knowledgeBaseId);
@@ -79,6 +97,9 @@ export class KnowledgeBaseRepository {
     }
     if (updates.iconUrl) {
       knowledgeBase.iconUrl = updates.iconUrl;
+    }
+    if (updates.retrievalSettings) {
+      knowledgeBase.retrievalSettings = updates.retrievalSettings;
     }
     knowledgeBase.updatedTimestamp = Date.now();
     return await this.knowledgeBaseRepository.save(knowledgeBase);

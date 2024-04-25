@@ -40,7 +40,7 @@ export const KnowledgeBaseSelector: React.FC<IVinesInputPropertyProps & Omit<IVi
         (newOptionsVariableMapper[optValue] = {
           displayName: name,
           name: optValue,
-          type: '文本数据集' as BlockDefPropertyTypes,
+          type: '文本知识库' as BlockDefPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);

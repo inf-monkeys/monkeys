@@ -71,10 +71,10 @@ const TextDataDetail: React.FC = () => {
               段落
             </TabsTrigger>
             <TabsTrigger
-              value="basic-info"
+              value="settings"
               className="h-10 w-full justify-start data-[state=active]:border data-[state=active]:border-input data-[state=active]:font-normal"
             >
-              基本信息
+              设置
             </TabsTrigger>
             <TabsTrigger
               value="associated-workflows"
@@ -127,7 +127,7 @@ const TextDataDetail: React.FC = () => {
                 >
                   {activeTab === 'documents' && <DocumentsList knowledgeBaseId={textId} />}
                   {activeTab === 'segments' && <ParagraphList textId={textId} />}
-                  {activeTab === 'basic-info' && <BasicInfo textId={textId} />}
+                  {activeTab === 'settings' && <BasicInfo textId={textId} />}
                   {activeTab === 'associated-workflows' && <RelatedApplication textId={textId} />}
                 </motion.div>
               </>

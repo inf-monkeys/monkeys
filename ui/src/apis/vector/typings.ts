@@ -19,6 +19,7 @@ export interface IKnowledgeBase {
   fileCount: number;
   createdTimestamp: number;
   updatedTimestamp: number;
+  retrievalSettings?: KnowledgeBaseRetrievalSettings;
 }
 
 export type IKnowledgeBaseFrontEnd = IKnowledgeBase & { paragraph_number: number; appNumber: number };
@@ -41,6 +42,17 @@ export interface IKnowledgeBaseDocument {
   indexStatus: string;
   filename: string;
   fileUrl: string;
+}
+
+export enum KnowledgeBaseRetrievalMode {
+  VectorSearch = 'vector-search',
+  FullTextSearch = 'fulltext-search',
+}
+
+export interface KnowledgeBaseRetrievalSettings {
+  mode: KnowledgeBaseRetrievalMode;
+  topK: number;
+  scoreThreshHold?: number;
 }
 
 export interface ICreateVectorDB {
