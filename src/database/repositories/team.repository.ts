@@ -105,10 +105,7 @@ export class TeamRepository {
     await this.teamRepository.save(newTeam);
     await this.apiKeyRepository.initApiKeyIfNotExists(teamId, userId);
 
-    // TODO
-    // this.assetCommonService.initAssets(teamId, userId);
-
-    return teamId;
+    return newTeam;
   }
 
   public async isUserInTeam(userId: string, teamId: string) {

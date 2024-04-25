@@ -20,11 +20,13 @@ export class BaseAssetEntity extends BaseEntity {
 
   @Column({
     name: 'team_id',
+    nullable: true,
   })
   teamId: string;
 
   @Column({
     name: 'creator_user_id',
+    nullable: true,
   })
   creatorUserId: string;
 
