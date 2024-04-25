@@ -179,7 +179,7 @@ export class ToolsRepository {
   }
 
   public async getToolsByNames(names: string[]) {
-    if (names?.length === 0) {
+    if (!names?.length) {
       return [];
     }
     return await this.toolsRepository.find({

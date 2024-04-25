@@ -175,7 +175,7 @@ export class ChatService {
         role: 'system',
         content: systemPrompt,
       };
-      messages = [systemMessage].concat(systemMessage);
+      messages = [systemMessage].concat(messages as any);
     }
 
     const { apiKey, baseURL, defaultParams } = this.getModelConfig(model);
@@ -196,8 +196,8 @@ export class ChatService {
         presence_penalty: params.presence_penalty,
         max_tokens: params.max_tokens,
         messages,
-        tools,
-        tool_choice: 'auto',
+        tools: tools?.length ? tools : undefined,
+        tool_choice: tools?.length ? 'auto' : undefined,
       });
       if (stream) {
         const data = new StreamData();
