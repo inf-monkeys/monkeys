@@ -2,6 +2,7 @@ import { AssetType } from '@/common/typings/asset';
 import { BaseAssetEntity } from '@/database/entities/assets/base-asset';
 import { AbstractAssetRepository } from '@/database/repositories/assets-abstract.repository';
 import { CanvasAssetRepositroy } from '@/database/repositories/assets-canvas.repository';
+import { SqlKnowledgeBaseAssetRepositroy } from '@/database/repositories/assets-knowledge-base-sql.repository';
 import { KnowledgeBaseAssetRepositroy } from '@/database/repositories/assets-knowledge-base.repository';
 import { LlmModelAssetRepositroy } from '@/database/repositories/assets-llm-model.respository';
 import { MediaFileAssetRepositroy } from '@/database/repositories/assets-media-file.repository';
@@ -10,7 +11,7 @@ import { WorkflowAssetRepositroy } from '@/database/repositories/assets-workflow
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class AssetsCommomService {
+export class AssetsMapperService {
   constructor(
     private readonly canvasAssetsRepository: CanvasAssetRepositroy,
     private readonly llmModelAssetsRepository: LlmModelAssetRepositroy,
@@ -18,6 +19,7 @@ export class AssetsCommomService {
     private readonly knowledgeBaseRepository: KnowledgeBaseAssetRepositroy,
     private readonly mediaFileAssetsRepository: MediaFileAssetRepositroy,
     private readonly workflowAssetRepositroy: WorkflowAssetRepositroy,
+    private readonly sqlKnowledgeBaseRepository: SqlKnowledgeBaseAssetRepositroy,
   ) {}
 
   public getRepositoryByAssetType(assetType: AssetType): AbstractAssetRepository<BaseAssetEntity> {
@@ -33,6 +35,8 @@ export class AssetsCommomService {
       return this.mediaFileAssetsRepository as AbstractAssetRepository<BaseAssetEntity>;
     } else if (assetType === 'workflow') {
       return this.workflowAssetRepositroy as AbstractAssetRepository<BaseAssetEntity>;
+    } else if (assetType === 'knowledge-base-sql') {
+      return this.sqlKnowledgeBaseRepository as AbstractAssetRepository<BaseAssetEntity>;
     } else {
       throw new Error('invalid assetType');
     }

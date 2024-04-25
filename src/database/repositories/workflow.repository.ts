@@ -57,9 +57,10 @@ export class WorkflowRepository {
       variables?: BlockDefProperties[];
       output: WorkflowOutputValue[];
       exposeOpenaiCompatibleInterface?: boolean;
+      rateLimiter?: WorkflowRateLimiter;
     },
   ) {
-    const { displayName, description, iconUrl, tasks, variables, output, exposeOpenaiCompatibleInterface } = data;
+    const { displayName, description, iconUrl, tasks, variables, output, exposeOpenaiCompatibleInterface, rateLimiter } = data;
     await this.workflowMetadataRepository.save({
       id: workflowId,
       createdTimestamp: Date.now(),
@@ -76,6 +77,7 @@ export class WorkflowRepository {
       variables,
       output,
       exposeOpenaiCompatibleInterface,
+      rateLimiter,
     });
     return await this.getWorkflowById(workflowId, version);
   }

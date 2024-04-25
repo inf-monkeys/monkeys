@@ -3,10 +3,10 @@ import React from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 
 import { preloadUgcApplicationStore, useUgcApplicationStore } from '@/apis/ugc';
-import { UgcView } from '@/components/layout/ugc/view';
-import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createApplicationStoreColumns } from '@/components/layout/ugc-pages/application-store/consts.tsx';
 import { OperateArea } from '@/components/layout/ugc-pages/application-store/operate-area';
+import { UgcView } from '@/components/layout/ugc/view';
+import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
@@ -15,7 +15,7 @@ export const ApplicationStore: React.FC = () => {
     <main className="size-full">
       <UgcView
         assetKey="application-store"
-        assetType="workflow-template"
+        assetType="workflow"
         assetName="应用市场"
         isMarket
         useUgcFetcher={useUgcApplicationStore}
@@ -24,7 +24,7 @@ export const ApplicationStore: React.FC = () => {
         renderOptions={{
           subtitle: (item) => (
             <span className="line-clamp-1">
-              {`${item.user?.name ?? '未知'} 创建于 ${formatTimeDiffPrevious(item.createdTimestamp)}`}
+              {`${item.user?.name ?? '系统内置'} 创建于 ${formatTimeDiffPrevious(item.createdTimestamp)}`}
             </span>
           ),
           cover: (item) => {

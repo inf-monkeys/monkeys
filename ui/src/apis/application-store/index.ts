@@ -6,4 +6,4 @@ export const forkApplicationFromTemplate = (id: string) =>
   vinesFetcher<MonkeyWorkflow>({
     method: 'POST',
     simple: true,
-  })(`/api/templates/${id}/fork`);
+  })(`/api/workflow/metadata/${id}/clone`);

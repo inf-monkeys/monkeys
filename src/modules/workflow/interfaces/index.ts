@@ -1,4 +1,4 @@
-import { WorkflowMetadataEntity, WorkflowOutputValue } from '@/database/entities/workflow/workflow-metadata';
+import { WorkflowMetadataEntity, WorkflowOutputValue, WorkflowRateLimiter } from '@/database/entities/workflow/workflow-metadata';
 import { PageInstanceType, PagePermission } from '@/database/entities/workflow/workflow-page';
 import { WebhookTriggerConfig, WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
 import { AssetType, BlockDefProperties, MonkeyTaskDefTypes, WorkflowValidationIssue } from '@inf-monkeys/vines';
@@ -183,6 +183,7 @@ export interface CreateWorkflowData {
   variables?: BlockDefProperties[];
   output?: WorkflowOutputValue[];
   exposeOpenaiCompatibleInterface?: boolean;
+  rateLimiter?: WorkflowRateLimiter;
 }
 
 export interface GenerateSubWorkflowsToSaveAtImportResult {

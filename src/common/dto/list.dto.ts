@@ -9,7 +9,7 @@ export type AssetFilter = {
   createdTimestamp?: (number | null)[];
   updatedTimestamp?: (number | null)[];
   tagIds?: string[];
-  categoryIds?: string[];
+  marketPlaceTagIds?: string[];
   ids?: string[];
   [key: string]: any;
 };

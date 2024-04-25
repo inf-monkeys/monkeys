@@ -1,8 +1,13 @@
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { TaskType } from '@inf-monkeys/conductor-javascript';
 
-export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Partial<WorkflowMetadataEntity>[] = [
+export interface WorkflowMarketplaceData extends WorkflowMetadataEntity {
+  tags: string[];
+}
+
+export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketplaceData>> = [
   {
+    tags: ['模型调用（AutoInfer）'],
     id: '662a1c620b9fd2739ab8d3a6',
     displayName: '大语言模型多轮对话',
     description: '基于大语言模型的多轮对话',

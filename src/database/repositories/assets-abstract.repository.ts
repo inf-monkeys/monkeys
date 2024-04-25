@@ -39,6 +39,12 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
         condition[assetIdField] = In(assetIds);
       }
     }
+    if (filter.marketPlaceTagIds?.length) {
+      const assetIds = await this.assetCommonRepository.findAssetIdsByMarketplaceTagIds(assetType, filter.marketPlaceTagIds);
+      if (assetIds.length) {
+        condition[assetIdField] = In(assetIds);
+      }
+    }
     if (filter.userIds?.length) {
       condition.creatorUserId = In(filter.userIds);
     }
@@ -124,6 +130,61 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     };
   }
 
+  public async listPublishedAssets(
+    assetType: AssetType,
+    dto: ListDto,
+    options?: AssetsFillAdditionalInfoOptions,
+  ): Promise<{
+    list: E[];
+    totalCount: number;
+  }> {
+    const [DEFAULT_PAGE, DEFAULT_LIMIT] = [1, 24];
+    const { page = DEFAULT_PAGE, limit = DEFAULT_LIMIT, filter, orderBy = 'DESC', orderColumn = 'createdTimestamp' } = dto ?? {};
+    let idsConstraints = [];
+    if (filter) {
+      idsConstraints = await this.findAssetIdsByCommonFilter(assetType, filter);
+      if (!idsConstraints.length) {
+        return {
+          totalCount: 0,
+          list: [],
+        };
+      }
+    }
+
+    const list = await this.repository.find({
+      where: [
+        {
+          isDeleted: false,
+          id: idsConstraints.length ? In(idsConstraints) : undefined,
+          isPublished: true,
+        },
+      ] as FindOptionsWhere<E>[],
+      order: {
+        [orderColumn]: orderBy,
+      } as FindOptionsOrder<E>,
+      take: +limit,
+      skip: (+page - 1) * +limit,
+    });
+    const totalCount = await this.repository.count({
+      where: [
+        {
+          isDeleted: false,
+          isPublished: true,
+        },
+      ] as FindOptionsWhere<E>[],
+      order: {
+        createdTimestamp: -1,
+      } as FindOptionsOrder<E>,
+      take: +limit,
+      skip: (+page - 1) * +limit,
+    });
+
+    return {
+      list: await this.assetCommonRepository.fillAdditionalInfoList(list, options),
+      totalCount,
+    };
+  }
+
   public async publishAsset(teamId: string, assetId: string, publishConfig: AssetPublishConfig) {
     const asset = await this.getAssetById(assetId);
     if (!asset) {
@@ -154,7 +215,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     if (asset.teamId === teamId) {
       throw new Error('此资产由此团队发布，不能克隆');
     }
-    const { policy } = publishConfig;
+    const { policy = AssetPublishPolicy.clone } = publishConfig || {};
     switch (policy) {
       case AssetPublishPolicy.authorize:
         break;

@@ -20,13 +20,13 @@ export class AssetsPublishController {
   })
   public async publishAsset(@Req() req: IRequest, @Param('assetType') assetType: AssetType, @Param('assetId') assetId: string, @Body() body: PublishAssetDto) {
     const { teamId } = req;
-    const data = await this.service.publicAsset(teamId, assetType, assetId, body.publishConfig);
+    const data = await this.service.publishAsset(teamId, assetType, assetId, body.publishConfig);
     return new SuccessResponse({ data });
   }
 
   @ApiOperation({
-    description: '发布资产',
-    summary: '发布资产',
+    description: '克隆资产',
+    summary: '克隆资产',
   })
   @Post('/:assetType/fork/:assetId')
   public async forkAsset(@Req() req: IRequest, @Param('assetType') assetType: AssetType, @Param('assetId') assetId: string) {

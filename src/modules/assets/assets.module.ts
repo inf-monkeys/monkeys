@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { AssetsCommomService } from './assets.common.service';
+import { AssetsMapperService } from './assets.common.service';
 import { AssetsFiltersController } from './assets.filter.controller';
 import { AssetsFilterService } from './assets.filter.service';
 import { AssetsMarketplaceController } from './assets.marketplace.controller';
@@ -19,7 +19,7 @@ import { SdModelModule } from './sd-model/sd-model.module';
 
 @Module({
   controllers: [AssetsFiltersController, AssetsPublishController, AssetsTagController, AssetsReferenceController, AssetsMarketplaceController],
-  providers: [AssetsFilterService, AssetsPublishService, AssetsTagService, AssetsCommomService, AssetsReferenceService, AssetsMarketplaceService],
+  providers: [AssetsFilterService, AssetsPublishService, AssetsTagService, AssetsMapperService, AssetsReferenceService, AssetsMarketplaceService],
   imports: [CanvasModule, MediaModule, KnowledgeBaseModule, KnowledgeBaseSqlModule, LlmModelModule, SdModelModule],
   exports: [AssetsMarketplaceService],
 })

@@ -10,8 +10,10 @@ import { pinyin } from 'pinyin-pro';
 import { DeepPartial, In, Repository } from 'typeorm';
 import { AssetsAuthorizationEntity } from '../entities/assets/asset-authorization';
 import { AssetFilterEntity } from '../entities/assets/asset-filter';
+import { AssetsMarketPlaceTagEntity } from '../entities/assets/asset-marketplace-tag';
+import { AssetsMarketplaceTagRelationsEntity } from '../entities/assets/asset-marketplace-tag-relations';
 import { AssetsTagEntity } from '../entities/assets/asset-tag-definitions';
-import { AssetsTagRelationsEntity } from '../entities/assets/asset-tags';
+import { AssetsTagRelationsEntity } from '../entities/assets/asset-tag-relations';
 import { BaseAssetEntity } from '../entities/assets/base-asset';
 import { TeamRepository } from './team.repository';
 import { UserRepository } from './user.repository';
@@ -31,6 +33,10 @@ export class AssetsCommonRepository {
     private readonly assetTagRepo: Repository<AssetsTagEntity>,
     @InjectRepository(AssetsTagRelationsEntity)
     private readonly assetsTagRelationsRepo: Repository<AssetsTagRelationsEntity>,
+    @InjectRepository(AssetsMarketPlaceTagEntity)
+    private readonly assetMarketPlaceTagRepo: Repository<AssetsMarketPlaceTagEntity>,
+    @InjectRepository(AssetsMarketplaceTagRelationsEntity)
+    private readonly assetsMarketPlaceTagRelationsRepo: Repository<AssetsMarketplaceTagRelationsEntity>,
     @InjectRepository(AssetsAuthorizationEntity)
     private readonly assetsAuthorizationRepository: Repository<AssetsAuthorizationEntity>,
     private readonly userRepository: UserRepository,
@@ -259,6 +265,22 @@ export class AssetsCommonRepository {
     ).map((x) => x.assetId);
   }
 
+  public async findAssetIdsByMarketplaceTagIds(assetType: AssetType, tagIds: string[]) {
+    if (!tagIds.length) {
+      return [];
+    }
+    return (
+      await this.assetsMarketPlaceTagRelationsRepo.find({
+        where: {
+          assetType,
+          tagId: In(tagIds),
+          isDeleted: false,
+        },
+        select: ['assetId'],
+      })
+    ).map((x) => x.assetId);
+  }
+
   public async fillAdditionalInfo<E extends BaseAssetEntity>(item: E, options?: AssetsFillAdditionalInfoOptions): Promise<AssetWithAdditionalInfo<E>> {
     const { withTeam = false, withUser = false, withTags = false } = options || {};
     const result: AssetWithAdditionalInfo<E> = {
@@ -375,5 +397,49 @@ export class AssetsCommonRepository {
         select: ['assetId'],
       })
     ).map((x) => x.assetId);
+  }
+
+  public async createMarketplaceTag(assetType: AssetType, name: string) {
+    if (typeof name !== 'string' || !name.trim()) {
+      throw new Error('请输入标签名称');
+    }
+    const exists = await this.assetMarketPlaceTagRepo.findOne({
+      where: {
+        name,
+        isDeleted: false,
+      },
+    });
+    if (exists) {
+      return exists;
+    }
+    const entity = {
+      id: generateDbId(),
+      isDeleted: false,
+      assetType,
+      createdTimestamp: Date.now(),
+      updatedTimestamp: Date.now(),
+      name,
+      _pinyin: pinyin(name, { toneType: 'none' }).replace(/\s/g, ''),
+    };
+    await this.assetMarketPlaceTagRepo.save(entity);
+    return entity;
+  }
+
+  public async createMarketplaceTagBatch(assetType: AssetType, tags: string[]) {
+    const result: AssetsMarketPlaceTagEntity[] = [];
+    for (const tag of tags) {
+      const item = await this.createMarketplaceTag(assetType, tag);
+      result.push(item);
+    }
+    return result;
+  }
+
+  public async listMarketplaceTags(assetType: AssetType) {
+    return await this.assetMarketPlaceTagRepo.find({
+      where: {
+        assetType,
+        isDeleted: false,
+      },
+    });
   }
 }
