@@ -1,0 +1,157 @@
+import { CodeGroup } from '../code.tsx'
+import { Col, Heading, Properties, Property, Row, SubProperty } from '../md.tsx'
+
+# 对话 API
+
+对话应用支持会话持久化，可将之前的聊天记录作为上下进行回答，可适用于聊天/客服/知识库问答 AI 等。此 API 兼容 OpenAI 标准。
+
+<div>
+  ### 基础 URL
+  <CodeGroup title="Code" targetCode={props.apiBaseUrl}>
+    ```javascript
+    ```
+  </CodeGroup>
+
+  ### 鉴权
+
+  此 API 使用 `API-Key` 进行鉴权。
+  <i>**强烈建议开发者把 `API-Key` 放在后端存储，而非分享或者放在客户端存储，以免 `API-Key` 泄露，导致财产损失。**</i>
+  所有 API 请求都应在 **`Authorization`** HTTP Header 中包含您的 `API-Key`，如下所示：
+
+  <CodeGroup title="Code">
+    ```javascript
+      Authorization: Bearer {YOUR_MONKEYS_APIKEY}
+    ```
+  </CodeGroup>
+</div>
+
+---
+
+<Heading
+  url='/chat/completions'
+  method='POST'
+  title='多轮对话'
+  name='#Create-Chat-Completions'
+/>
+<Row>
+  <Col>
+    多轮对话。
+
+    ### Request Body
+
+    <Properties>
+      <Property name='model' type='string' key='model'>
+        模型，为当前工作流 ID。
+      </Property>
+      <Property name='messages' type='array' key='messages'>
+        历史消息记录
+      </Property>
+      <Property name='stream' type='boolean' key='stream'>
+        是否开启 Stream 模式。
+        默认 `false`
+      </Property>
+      <Property name='temperature' type='number' key='temperature'>
+        填写 0-1 的浮点数，用于生成文本时，模型输出的随机性程度。较高的温度会导致更多的随机性，可能产生更有创意的回应。而较低的温度会使模型的输出更加确定，更倾向于选择高概率的词语。
+      </Property>
+      <Property name='presence_penalty' type='number' key='presence_penalty'>
+        填写 0-1 的浮点数，用于惩罚模型生成重复的词语，从而使生成的文本更加多样化。
+      </Property>
+      <Property name='frequency_penalty' type='array[object]' key='frequency_penalty'>
+        填写 0-1 的浮点数，用于惩罚模型生成低频词语，从而使生成的文本更加多样化。
+      </Property>
+      <Property name='auto_generate_name' type='bool' key='auto_generate_name'>
+      （选填）自动生成标题，默认 `true`。 若设置为 `false`，则可通过调用会话重命名接口并设置 `auto_generate` 为 `true` 实现异步生成标题。
+      </Property>
+    </Properties>
+
+    ### Response
+    <Properties>
+    当 `stream` 为 `true` 时，返回 OpenAI 标准的流式数据。
+    当 `stream` 为 `false`时，返回 OpenAI 标准的响应数据。
+
+    </Properties>
+  </Col>
+  <Col sticky>
+
+    <CodeGroup title="Request" tag="POST" label="/chat/completions" targetCode={`curl -X POST '${props.apiBaseUrl}/chat/completions' \\\n--header 'Authorization: Bearer ${props.apiKey}' \\\n--header 'Content-Type: application/json' \\\n--data-raw '{\n    "model": "${props.workflowId}",\n    "messages": [{"role": "user", "content": "Hello"}],\n    "stream": false\n}'`}>
+
+    ```bash {{ title: 'cURL' }}
+    curl -X POST '/chat/completions' \
+    -H 'Authorization: Bearer {YOUR_MONKEYS_APIKEY}' \
+    -H 'Content-Type: application/json' \
+    --data-raw '{
+        "inputs": {
+            "name": "dify"
+        },
+        "query": "What are the specs of the iPhone 13 Pro Max?",
+        "conversation_id": "101b4c97-fc2e-463c-90b1-5261a4cdcafb",
+        "response_mode": "streaming",
+        "user": "abc-123",
+        "files": [
+          {
+            "type": "image",
+            "transfer_method": "remote_url",
+            "url": "https://cloud.dify.ai/logo/logo-site.png"
+          }
+        ]
+    }'
+    ```
+
+    </CodeGroup>
+    ### 非流式模式
+    <CodeGroup title="Response">
+    ```json {{ title: 'Response' }}
+    {
+      "id": "chatcmpl-9HqxYuHyifu1YVxUA55v5D5ejRaJK",
+      "object": "chat.completion",
+      "created": 1714042180,
+      "model": "gpt-4-0613",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "Hello! How can I assist you today?"
+          },
+          "logprobs": null,
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 8,
+        "completion_tokens": 9,
+        "total_tokens": 17
+      },
+      "system_fingerprint": null
+    }
+    ```
+    </CodeGroup>
+    ### 流式模式（基础助手）
+    <CodeGroup title="Response">
+    ```streaming {{ title: 'Response' }}
+    data: {"id":"chatcmpl-bogm8zejn37","object":"chat.completion.chunk","created":1714042298,"model":"gpt-4-0613","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"Hello"},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-bogm8zejn37","object":"chat.completion.chunk","created":1714042298,"model":"gpt-4-0613","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"!"},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-bogm8zejn37","object":"chat.completion.chunk","created":1714042298,"model":"gpt-4-0613","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" How"},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-bogm8zejn37","object":"chat.completion.chunk","created":1714042299,"model":"gpt-4-0613","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" can"},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-bogm8zejn37","object":"chat.completion.chunk","created":1714042299,"model":"gpt-4-0613","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" I"},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-bogm8zejn37","object":"chat.completion.chunk","created":1714042299,"model":"gpt-4-0613","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" assist"},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-bogm8zejn37","object":"chat.completion.chunk","created":1714042299,"model":"gpt-4-0613","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" you"},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-bogm8zejn37","object":"chat.completion.chunk","created":1714042299,"model":"gpt-4-0613","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":" today"},"logprobs":null,"finish_reason":null}]}
+
+    data: {"id":"chatcmpl-bogm8zejn37","object":"chat.completion.chunk","created":1714042299,"model":"gpt-4-0613","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"?"},"logprobs":null,"finish_reason":null}]}
+
+    data: [DONE]
+
+    ```
+    </CodeGroup>
+
+  </Col>
+</Row>
+
