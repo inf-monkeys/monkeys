@@ -19,15 +19,12 @@ import { StringInput } from '@/components/layout/vines-view/flow/headless-modal/
 import { InputPropertyWrapper } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/wrapper';
 import { IVinesEditorRefProps } from '@/components/ui/code-editor';
 import { Label } from '@/components/ui/label.tsx';
+import { Separator } from '@/components/ui/separator.tsx';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { IVinesVariableMap, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
 export interface IVinesInputPropertyProps {
-  toolName?: string;
-  context?: {
-    [x: string]: any;
-  };
   def: VinesToolDefProperties;
   value: unknown;
   onChange: (value: unknown) => void;
@@ -93,15 +90,17 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
     return isBooleanType ? hasBoolean : isNumberType ? hasNumber : !isEmpty(value);
   }, [value, type, isPureCollection]);
 
-  const useSimpleInput = !enableEditor && !isMultiFieldObject && !assetType;
-  const hasCollectionInput = useSimpleInput && isPureCollection && componentMode === 'component';
+  const useInputComponent = componentMode === 'input';
+
+  const useSimpleInput = (useInputComponent ? true : !enableEditor) && !isMultiFieldObject && !assetType;
+  const hasCollectionInput = useSimpleInput && isPureCollection && !useInputComponent;
   const hasStringInput =
     useSimpleInput &&
-    (componentMode === 'input' ? isPureCollection || isManualComponentMode : type === 'string' && !hasCollectionInput);
-  const hasBooleanInput = useSimpleInput && type === 'boolean' && (componentMode === 'input' || !isPureCollection);
-  const hasNumberInput = useSimpleInput && type === 'number' && (componentMode === 'input' || !isPureCollection);
-  const hasOptionsInput = useSimpleInput && type === 'options' && (componentMode === 'input' || !isPureCollection);
-  const hasFileInput = useSimpleInput && componentMode === 'component' && type === 'file';
+    (useInputComponent ? isPureCollection || isManualComponentMode : type === 'string' && !hasCollectionInput);
+  const hasBooleanInput = useSimpleInput && type === 'boolean' && (useInputComponent || !isPureCollection);
+  const hasNumberInput = useSimpleInput && type === 'number' && (useInputComponent || !isPureCollection);
+  const hasOptionsInput = useSimpleInput && type === 'options' && (useInputComponent || !isPureCollection);
+  const hasFileInput = useSimpleInput && !useInputComponent && type === 'file';
   const hasPresetOptions = assetType;
   const hasNotice = type === 'notice';
   const isBlankInput =
@@ -141,7 +140,7 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
 
   useEffect(() => {
     if (type !== 'file' && (!isPureCollection || !assetType) && typeof tempValue === 'string') {
-      if (/\$\{.*}/.test(tempValue)) {
+      if (/\$\{.*}/.test(tempValue) && (enableEditor ? tempValue.startsWith('$') && tempValue.endsWith('}') : true)) {
         setIsManualComponentMode(true);
         setComponentMode('input');
       }
@@ -185,7 +184,7 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
           <div className="flex items-center space-x-2">
             <Switch
               size="small"
-              checked={componentMode === 'input'}
+              checked={useInputComponent}
               onCheckedChange={(enable) => {
                 handleOnRadioChange(enable ? 'input' : 'component');
                 setIsManualComponentMode(enable);
@@ -194,11 +193,29 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
             <Label className="text-xs font-medium text-muted-foreground">变量输入</Label>
           </div>
         ) : enableEditor ? (
-          <InsertVariable insertVariablesFn={editorRef.current.insertText} />
+          <div className="flex items-center gap-1">
+            <div className="flex items-center space-x-2">
+              <Switch
+                size="small"
+                checked={useInputComponent}
+                onCheckedChange={(enable) => {
+                  handleOnRadioChange(enable ? 'input' : 'component');
+                  setIsManualComponentMode(enable);
+                }}
+              />
+              <Label className="text-xs font-medium text-muted-foreground">变量输入</Label>
+            </div>
+            {!isManualComponentMode && (
+              <>
+                <Separator orientation="vertical" className="ml-2 h-4" />
+                <InsertVariable insertVariablesFn={editorRef.current.insertText} />
+              </>
+            )}
+          </div>
         ) : null
       }
     >
-      {enableEditor && (
+      {enableEditor && !useInputComponent && (
         <EditorInput editorRef={editorRef} disabled={disabled} onInitial={forceUpdate} {...finalProps} />
       )}
       {isMultiFieldObject && <MultiFieldObjectInput {...finalProps} />}
