@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import data from '@emoji-mart/data';
+import i18n from '@emoji-mart/data/i18n/zh.json';
 import Picker from '@emoji-mart/react';
 
 import { Button } from '@/components/ui/button';
@@ -44,7 +45,13 @@ export const VinesIconSelector: React.FC<IVinesIconSelectorProps> = ({ children,
     <Popover open={visible} onOpenChange={setVisible}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent className="h-[512px] w-[352px] scale-75 overflow-clip rounded-xl bg-slate-2 p-0" sideOffset={-55}>
-        <Picker data={data} onEmojiSelect={(e: any) => setSelectedEmoji(e.native)} locale="zh" previewPosition="none" />
+        <Picker
+          i18n={i18n}
+          data={data}
+          onEmojiSelect={(e: any) => setSelectedEmoji(e.native)}
+          locale="zh"
+          previewPosition="none"
+        />
         <div className="flex h-20 w-full items-center justify-between gap-2 px-5 pb-1">
           <div>
             <p className="mb-2 text-sm">背景颜色</p>
