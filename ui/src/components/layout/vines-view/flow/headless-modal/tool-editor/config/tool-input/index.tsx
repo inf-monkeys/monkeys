@@ -88,7 +88,6 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
         ) : null}
         {finalInputs?.map((def, index) => (
           <VinesInputProperty
-            toolName={tool?.name || ''}
             key={def.name + index}
             def={def}
             nodeId={nodeId}
