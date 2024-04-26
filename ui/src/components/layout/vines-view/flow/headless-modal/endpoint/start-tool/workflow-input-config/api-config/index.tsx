@@ -6,7 +6,8 @@ import { Save } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
-import { updateWorkflow, WorkflowRateLimiter } from '@/apis/workflow';
+import { updateWorkflow } from '@/apis/workflow';
+import { IVinesWorkflowRateLimiter } from '@/apis/workflow/typings.ts';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -25,7 +26,7 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
   const { vines } = useVinesFlow();
   const { workflow, apikey } = useVinesPage();
 
-  const rateLimiter: WorkflowRateLimiter | undefined = workflow?.rateLimiter;
+  const rateLimiter: IVinesWorkflowRateLimiter | undefined = workflow?.rateLimiter;
   const exposeOpenaiCompatibleInterface = workflow?.exposeOpenaiCompatibleInterface;
   const [isLoading, setIsLoading] = useState(false);
 

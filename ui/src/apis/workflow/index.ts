@@ -75,10 +75,3 @@ export const exportWorkflow = async (workflowId: string, name: string, version?:
       ? `/api/workflow/metadata/${workflowId}/export?version=${version}&exportAssets=1`
       : `/api/workflow/metadata/${workflowId}/export?exportAssets=1`,
   );
-
-export interface WorkflowRateLimiter {
-  version?: number;
-  enabled?: boolean;
-  windowMs?: number;
-  max?: number;
-}
