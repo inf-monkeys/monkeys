@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Checkbox, NumberInput } from '@mantine/core';
+import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import { Save } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -10,15 +10,17 @@ import { updateWorkflow, WorkflowRateLimiter } from '@/apis/workflow';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { Switch } from '@/components/ui/switch';
 import { useVinesFlow } from '@/package/vines-flow';
 import { IWorkflowApiConfigInfo, workflowApiConfigInfoSchema } from '@/schema/workspace/workflow-api-config';
 import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
 
-interface IWorkflowApiConfigProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface IWorkflowApiConfigProps {}
 
-export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = ({ className }) => {
+export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
   const { isLatestWorkflowVersion, workflowId } = useFlowStore();
   const { vines } = useVinesFlow();
   const { workflow, apikey } = useVinesPage();
@@ -66,68 +68,70 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = ({ className
   });
 
   return (
-    <div className={cn('relative flex h-80 w-full flex-col', className)}>
+    <div className="relative flex h-80 w-full flex-col py-2">
       <Form {...form}>
-        <form onSubmit={handleSubmit} className="flex flex-col">
-          <FormField
-            name="exposeOpenaiCompatibleInterface"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>启用 OpenAI 兼容的接口</FormLabel>
-                <FormControl>
-                  <Checkbox className="h-10 resize-none" {...field} checked={field.value} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+        <form onSubmit={handleSubmit} className="flex flex-col justify-between gap-4">
+          <ScrollArea className="h-64">
+            <FormField
+              name="exposeOpenaiCompatibleInterface"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-2">
+                  <FormLabel>启用 OpenAI 兼容的接口</FormLabel>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              name="rateLimiter.enabled"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-2">
+                  <FormLabel>开启限流</FormLabel>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {form.getValues().rateLimiter?.enabled && (
+              <>
+                <FormField
+                  name="rateLimiter.windowMs"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>时间窗口大小（毫秒）</FormLabel>
+                      <FormControl>
+                        <Input placeholder="请输入时间窗口大小（毫秒）" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  name="rateLimiter.max"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>单位时间窗口内运行最大并发</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
             )}
-          />
-
-          <FormField
-            name="rateLimiter.enabled"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>开启限流</FormLabel>
-                <FormControl>
-                  <Checkbox className="h-10 resize-none" {...field} checked={field.value} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {form.getValues().rateLimiter?.enabled && (
-            <>
-              <FormField
-                name="rateLimiter.windowMs"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>时间窗口大小（毫秒）</FormLabel>
-                    <FormControl>
-                      <NumberInput placeholder="请输入时间窗口大小（毫秒）" className="h-10 resize-none" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                name="rateLimiter.max"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>单位时间窗口内运行最大并发</FormLabel>
-                    <FormControl>
-                      <NumberInput value={field.value} defaultValue={workflow?.iconUrl} onChange={field.onChange} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </>
-          )}
+          </ScrollArea>
 
           <Button
             loading={isLoading}
