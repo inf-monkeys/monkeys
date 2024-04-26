@@ -27,3 +27,10 @@ export const IAppCategoryNameMap = {
   bio: '生命科学',
   human: '用户交互',
 };
+
+export interface IVinesWorkflowRateLimiter {
+  version?: number;
+  enabled?: boolean;
+  windowMs?: number;
+  max?: number;
+}
