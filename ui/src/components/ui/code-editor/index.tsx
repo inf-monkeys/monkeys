@@ -1,6 +1,10 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 
-import MonacoEditor, { EditorProps, OnMount } from '@monaco-editor/react';
+import MonacoEditor, { EditorProps, loader, OnMount } from '@monaco-editor/react';
+import * as monaco from 'monaco-editor';
+
+loader.config({ monaco });
+
 import { debounce, merge } from 'lodash';
 import { IRange } from 'monaco-editor';
 

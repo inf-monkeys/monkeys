@@ -86,7 +86,6 @@ export const CustomTrigger: React.FC<ICustomTriggerProps> = () => {
             <DialogDescription>{triggerType.description}</DialogDescription>
             {triggerType.properties?.map((def, index) => (
               <VinesInputProperty
-                toolName={triggerType.type.split('__')[0]}
                 key={def.name + index}
                 def={def}
                 nodeId={''}
@@ -98,9 +97,6 @@ export const CustomTrigger: React.FC<ICustomTriggerProps> = () => {
                   }));
                 }}
                 variableMapper={{}}
-                context={{
-                  workflowId,
-                }}
               />
             ))}
             <DialogFooter>
