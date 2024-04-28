@@ -137,7 +137,10 @@ export class LlmService {
     return parameters;
   }
 
-  public async resolveTools(tools: string[]): Promise<Array<ChatCompletionTool>> {
+  public async resolveTools(tools: string[] | string): Promise<Array<ChatCompletionTool>> {
+    if (typeof tools === 'string') {
+      tools = [tools];
+    }
     const toolEntities = await this.toolsReopsitory.getToolsByNames(tools);
     return toolEntities.map((x) => {
       const parameters = this.resolveToolParameter(x.input);
