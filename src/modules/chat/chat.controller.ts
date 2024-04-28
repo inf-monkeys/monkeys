@@ -59,7 +59,7 @@ export class WorkflowOpenAICompatibleController {
   public async createChatComplitions(@Req() req: IRequest, @Body() body: CreateChatCompletionsDto, @Res() res: Response) {
     const { teamId, userId } = req;
     const { model: workflowId, stream = false } = body;
-    const sessionId = (req.headers['x-monkeys-session-id'] as string) || 'default';
+    const conversationId = req.headers['x-monkeys-conversation-id'] as string;
     if (stream && !this.mq.canuse) {
       throw new Error('Stream output is not supported without redis');
     }
@@ -69,9 +69,11 @@ export class WorkflowOpenAICompatibleController {
       workflowId,
       inputData: body,
       triggerType: WorkflowTriggerType.API,
-      chatSessionId: sessionId,
+      chatSessionId: conversationId,
     });
-    await this.workflowRepository.updateChatSessionMessages(workflowInstanceId, sessionId, body.messages);
+    if (conversationId) {
+      await this.workflowRepository.updateChatSessionMessages(workflowInstanceId, conversationId, body.messages);
+    }
     if (stream === false) {
       const result = await this.workflowExecutionService.waitForWorkflowResult(teamId, workflowInstanceId);
       return res.json(result);
