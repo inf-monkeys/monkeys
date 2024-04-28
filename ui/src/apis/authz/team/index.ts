@@ -33,7 +33,7 @@ export const removeTeamMember = (teamId: string, userId: string) =>
   vinesFetcher<IVinesTeam>({ method: 'POST', simple: true })(`/api/teams/${teamId}/members/remove`, { userId });
 
 export const createTeam = (teamData: ITeamCreate) =>
-  vinesFetcher<boolean, ITeamCreate>({ method: 'POST', simple: true })(`/api/teams/create`, teamData);
+  vinesFetcher<boolean, ITeamCreate>({ method: 'POST', simple: true })(`/api/teams`, teamData);
 
 export const deleteTeam = (teamId: string) => vinesFetcher({ method: 'DELETE' })(`/api/teams/${teamId}`);
 
