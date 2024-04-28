@@ -73,7 +73,7 @@ import { Col, Heading, Properties, Property, Row, SubProperty } from '../md.tsx'
   </Col>
   <Col sticky>
 
-    <CodeGroup title="Request" tag="POST" label="/chat/completions" targetCode={`curl -X POST '${props.apiBaseUrl}/chat/completions' \\\n--header 'Authorization: Bearer ${props.apiKey}' \\\n--header 'Content-Type: application/json' \\\n--data-raw '{\n    "model": "${props.workflowId}",\n    "messages": [{"role": "user", "content": "Hello"}],\n    "stream": false\n}'`}>
+    <CodeGroup title="Request" tag="POST" label="/chat/completions" targetCode={`curl -X POST '${props.apiBaseUrl}/chat/completions' \\\n--header 'Authorization: Bearer ${props.apiKey}' \\\n--header 'Content-Type: application/json' \\\n--data-raw '{\n    "model": "${props.workflowId}",\n    "messages": [{"role": "user", "content": "Hello"}],\n    "stream": true\n}'`}>
 
     ```bash {{ title: 'cURL' }}
     curl -X POST '/chat/completions' \
