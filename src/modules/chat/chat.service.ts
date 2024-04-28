@@ -155,7 +155,6 @@ export class ChatService {
   private async executeTool(name: string, data: any) {
     logger.info(`Start to call tool call: ${name} with arguments: ${JSON.stringify(data)}`);
     name = name.replaceAll('__', ':');
-    console.log(name);
     const tool = await this.toolsReopsitory.getToolByName(name);
     const server = await this.toolsReopsitory.getServerByNamespace(tool.namespace);
     const apiInfo = tool.extra?.apiInfo;
@@ -216,9 +215,8 @@ When answer to user:
 
     const { apiKey, baseURL, defaultParams } = this.getModelConfig(model);
     const openai = new OpenAI({
-      apiKey: apiKey,
+      apiKey: apiKey || 'mock-apikey',
       baseURL: baseURL,
-      ...defaultParams,
     });
     const tools: Array<ChatCompletionTool> = await this.resolveTools(params.tools);
 
@@ -227,13 +225,14 @@ When answer to user:
       response = await openai.chat.completions.create({
         model,
         stream: stream,
-        temperature: params.temperature,
-        frequency_penalty: params.frequency_penalty,
-        presence_penalty: params.presence_penalty,
-        max_tokens: params.max_tokens,
+        temperature: params.temperature ?? undefined,
+        frequency_penalty: params.frequency_penalty ?? undefined,
+        presence_penalty: params.presence_penalty ?? undefined,
+        max_tokens: params.max_tokens ?? undefined,
         messages,
         tools: tools?.length ? tools : undefined,
         tool_choice: tools?.length ? 'auto' : undefined,
+        ...defaultParams,
       });
       if (stream) {
         const data = new StreamData();
