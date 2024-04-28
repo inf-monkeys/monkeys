@@ -16,7 +16,9 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { VinesHighlighter } from '@/components/ui/highlighter';
 import { ScrollArea } from '@/components/ui/scroll-area';
+// @ts-ignore
 import ChatCompletionsTemplateZH from './templates/chat-completions.mdx';
+// @ts-ignore
 import CompletionsTemplateZH from './templates/completions.mdx';
 
 interface IIntegrationCenterProps extends React.ComponentPropsWithoutRef<'div'> {}
