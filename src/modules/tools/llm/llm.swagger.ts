@@ -1,15 +1,15 @@
 import { config } from '@/common/config';
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ChatModule } from './chat.module';
+import { LLMToolsModule } from './llm.module';
 
 export const CHAT_TOOL_OPENAPI_PATH = '/api/chat/openapi';
-export const CHAT_TOOL_OPENAPI_MENIFEST_URL = `http://127.0.0.1:${config.server.port}/api/chat/manifest.json`;
+export const CHAT_TOOL_OPENAPI_MENIFEST_URL = `http://127.0.0.1:${config.server.port}/api/llm-tool/manifest.json`;
 
-export const setupChatToolSwagger = (app: INestApplication) => {
-  const builder = new DocumentBuilder().setTitle('LLM').setDescription('Chat endpoints').setVersion('1.0').addServer(`${config.server.appUrl}`, 'Chat API SERVER');
+export const setupLlmToolSwagger = (app: INestApplication) => {
+  const builder = new DocumentBuilder().setTitle('LLM').setDescription('LLM endpoints').setVersion('1.0').addServer(`${config.server.appUrl}`, 'LLM API SERVER');
   const document = SwaggerModule.createDocument(app, builder.build(), {
-    include: [ChatModule],
+    include: [LLMToolsModule],
     deepScanRoutes: true,
   });
   for (const path in document.paths) {

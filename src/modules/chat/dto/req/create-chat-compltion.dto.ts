@@ -1,12 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ChatCompletionMessageParam, ChatCompletionRole } from 'openai/resources';
+import { ChatCompletionMessageParam } from 'openai/resources';
 
-export class ChatCompletionMessageDto {
-  role: ChatCompletionRole;
-  content: string;
-}
-
-export class CreateChatCompletionsDto {
+export class ChatCompletionsDto {
   @ApiProperty({
     description: '使用的模型名称，例如"chatgpt"',
     example: 'chatgpt',
@@ -16,11 +11,10 @@ export class CreateChatCompletionsDto {
   @ApiProperty({
     description: '系统预设 prompt',
   })
-  systemPrompt: string;
+  prompt: string;
 
   @ApiProperty({
     description: 'Messages',
-    type: ChatCompletionMessageDto,
     isArray: true,
   })
   messages: Array<ChatCompletionMessageParam>;
@@ -54,23 +48,31 @@ export class CreateChatCompletionsDto {
   presence_penalty?: number;
 
   @ApiProperty({
-    description: '工具列表',
-    required: false,
-    isArray: true,
-    type: String,
-  })
-  tools?: string[];
-
-  @ApiProperty({
-    description: '知识库上下文',
-    required: false,
-  })
-  knowledgeBase?: string;
-
-  @ApiProperty({
     description: '指示API是否应以流的形式返回生成的回复',
     example: false,
     required: false,
   })
   stream?: boolean;
+
+  @ApiProperty({
+    description: '在采样时保留的最高置信度令牌的累积概率',
+    example: 1,
+    required: false,
+  })
+  top_p?: number;
+
+  @ApiProperty({
+    description: '要生成的完成数',
+    example: 1,
+    required: false,
+  })
+  n?: number;
+
+  @ApiProperty({
+    description: '用于表示响应应在何处停止的字符串数组',
+    example: ['\n'],
+    required: false,
+    type: [String],
+  })
+  stop?: string[];
 }

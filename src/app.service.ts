@@ -5,8 +5,8 @@ import { config } from './common/config';
 import { logger } from './common/logger';
 import { sleep } from './common/utils/utils';
 import { ToolsRepository } from './database/repositories/tools.repository';
-import { CHAT_TOOL_OPENAPI_MENIFEST_URL } from './modules/chat/chat.swagger';
 import { EXAMPLE_TOOL_OPENAPI_MENIFEST_URL } from './modules/tools/example/example.swagger';
+import { CHAT_TOOL_OPENAPI_MENIFEST_URL } from './modules/tools/llm/llm.swagger';
 import { ToolsRegistryService } from './modules/tools/tools.registry.service';
 
 @Injectable()
