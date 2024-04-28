@@ -10,8 +10,8 @@ import OpenAI from 'openai';
 import { ChatCompletion, ChatCompletionChunk, ChatCompletionMessageParam, ChatCompletionTool } from 'openai/resources';
 import { Stream } from 'openai/streaming';
 import { Readable } from 'stream';
-import { KnowledgeBaseService } from '../assets/knowledge-base/knowledge-base.service';
-import { ToolsForwardService } from '../tools/tools.forward.service';
+import { KnowledgeBaseService } from '../../assets/knowledge-base/knowledge-base.service';
+import { ToolsForwardService } from '../tools.forward.service';
 
 export interface CreateChatCompelitionsParams {
   messages: Array<ChatCompletionMessageParam>;
@@ -73,7 +73,7 @@ export const getModels = (
 };
 
 @Injectable()
-export class ChatService {
+export class LlmService {
   constructor(
     private readonly toolsReopsitory: ToolsRepository,
     private readonly toolForwardServie: ToolsForwardService,
