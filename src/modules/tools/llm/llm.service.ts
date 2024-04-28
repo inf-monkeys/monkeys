@@ -108,11 +108,11 @@ export class LlmService {
       ...(defaultParams || {}),
       prompt: params.prompt,
       model: model,
-      temperature: params.temperature,
-      frequency_penalty: params.frequency_penalty,
-      presence_penalty: params.presence_penalty,
+      temperature: params.temperature ?? undefined,
+      frequency_penalty: params.frequency_penalty ?? undefined,
+      presence_penalty: params.presence_penalty ?? undefined,
       stream: stream,
-      max_tokens: params.max_tokens,
+      max_tokens: params.max_tokens ?? undefined,
     };
     const res = await axios.post(`${baseURL}/completions`, reqBody, {
       responseType: stream ? 'stream' : 'json',

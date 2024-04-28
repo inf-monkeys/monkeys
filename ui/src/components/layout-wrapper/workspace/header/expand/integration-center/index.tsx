@@ -16,9 +16,8 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { VinesHighlighter } from '@/components/ui/highlighter';
 import { ScrollArea } from '@/components/ui/scroll-area';
-
-// @ts-ignore
-import TemplateChatZH from './templates/zh.mdx';
+import ChatCompletionsTemplateZH from './templates/chat-completions.mdx';
+import CompletionsTemplateZH from './templates/completions.mdx';
 
 interface IIntegrationCenterProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -109,12 +108,21 @@ export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
           <DialogTitle>集成中心</DialogTitle>
           <DialogDescription>你可以通过 API 与其他应用集成，以实现更多功能</DialogDescription>
           <ScrollArea className="h-[calc(100vh-20rem)]">
-            <TemplateChatZH
-              // @ts-ignore
-              apiBaseUrl={apiBaseUrl}
-              apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
-              workflowId={workflowId}
-            />
+            {workflow.variables?.find((variable) => variable.name === 'messages') ? (
+              <ChatCompletionsTemplateZH
+                // @ts-ignore
+                apiBaseUrl={apiBaseUrl}
+                apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
+                workflowId={workflowId}
+              />
+            ) : (
+              <CompletionsTemplateZH
+                // @ts-ignore
+                apiBaseUrl={apiBaseUrl}
+                apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
+                workflowId={workflowId}
+              />
+            )}
           </ScrollArea>
         </DialogContent>
       ) : (

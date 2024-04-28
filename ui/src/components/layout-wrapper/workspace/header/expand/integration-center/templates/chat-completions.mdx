@@ -3,7 +3,7 @@ import { Col, Heading, Properties, Property, Row, SubProperty } from '../md.tsx'
 
 # 对话 API
 
-对话应用支持会话持久化，可将之前的聊天记录作为上下进行回答，可适用于聊天/客服/知识库问答 AI 等。此 API 兼容 OpenAI 标准。
+此接口支持会话持久化，可将之前的聊天记录作为上下进行回答，可适用于聊天/客服/知识库问答 AI 等。此 API 兼容 OpenAI 标准。
 
 <div>
   ### 基础 URL
@@ -58,9 +58,6 @@ import { Col, Heading, Properties, Property, Row, SubProperty } from '../md.tsx'
       </Property>
       <Property name='frequency_penalty' type='array[object]' key='frequency_penalty'>
         填写 0-1 的浮点数，用于惩罚模型生成低频词语，从而使生成的文本更加多样化。
-      </Property>
-      <Property name='auto_generate_name' type='bool' key='auto_generate_name'>
-      （选填）自动生成标题，默认 `true`。 若设置为 `false`，则可通过调用会话重命名接口并设置 `auto_generate` 为 `true` 实现异步生成标题。
       </Property>
     </Properties>
 
