@@ -65,4 +65,60 @@ export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketpla
     ],
     exposeOpenaiCompatibleInterface: true,
   },
+  {
+    tags: ['模型调用（AutoInfer）'],
+    id: '662a1c620b9fd2739ab8d3a7',
+    displayName: '大语言模型单轮对话',
+    description: '基于大语言模型的单轮对话',
+    iconUrl: 'emoji:🤖:#f2c1be',
+    isPreset: true,
+    isPublished: true,
+    version: 1,
+    variables: [
+      {
+        displayName: 'prompt',
+        name: 'prompt',
+        type: 'string',
+      },
+      {
+        default: false,
+        displayName: 'stream',
+        name: 'stream',
+        type: 'boolean',
+      },
+      {
+        default: '0.7',
+        displayName: 'temperature',
+        name: 'temperature',
+        type: 'number',
+      },
+      {
+        default: '0.5',
+        displayName: 'presence_penalty',
+        name: 'presence_penalty',
+        type: 'number',
+      },
+      {
+        displayName: 'frequency_penalty',
+        name: 'frequency_penalty',
+        type: 'number',
+        default: '0.5',
+      },
+    ],
+    tasks: [
+      {
+        inputParameters: {
+          frequency_penalty: '${workflow.input.frequency_penalty}',
+          presence_penalty: '${workflow.input.presence_penalty}',
+          prompt: '${workflow.input.prompt}',
+          stream: '${workflow.input.stream}',
+          temperature: '${workflow.input.temperature}',
+        },
+        name: 'llm:completions',
+        taskReferenceName: 'llm:completions_KBDmHJNk',
+        type: TaskType.SIMPLE,
+      },
+    ],
+    exposeOpenaiCompatibleInterface: true,
+  },
 ];

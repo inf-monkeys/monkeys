@@ -1,0 +1,154 @@
+import { CodeGroup } from '../code.tsx'
+import { Col, Heading, Properties, Property, Row, SubProperty } from '../md.tsx'
+
+# 文本补全 API
+
+此 API 适用于和大预言模型单轮对话。此 API 兼容 OpenAI 标准。
+
+<div>
+  ### 基础 URL
+  <CodeGroup title="Code" targetCode={props.apiBaseUrl}>
+    ```javascript
+    ```
+  </CodeGroup>
+
+  ### 鉴权
+
+  此 API 使用 `API-Key` 进行鉴权。
+  <i>**强烈建议开发者把 `API-Key` 放在后端存储，而非分享或者放在客户端存储，以免 `API-Key` 泄露，导致财产损失。**</i>
+  所有 API 请求都应在 **`Authorization`** HTTP Header 中包含您的 `API-Key`，如下所示：
+
+  <CodeGroup title="Code">
+    ```javascript
+      Authorization: Bearer {YOUR_MONKEYS_APIKEY}
+    ```
+  </CodeGroup>
+</div>
+
+---
+
+<Heading
+  url='/completions'
+  method='POST'
+  title='单对话'
+  name='#Create-Completions'
+/>
+<Row>
+  <Col>
+    单轮对话。
+
+    ### Request Body
+
+    <Properties>
+      <Property name='model' type='string' key='model'>
+        模型，为当前工作流 ID。
+      </Property>
+      <Property name='messages' type='array' key='prompt'>
+        Prompt
+      </Property>
+      <Property name='stream' type='boolean' key='stream'>
+        是否开启 Stream 模式。
+        默认 `false`
+      </Property>
+      <Property name='temperature' type='number' key='temperature'>
+        填写 0-1 的浮点数，用于生成文本时，模型输出的随机性程度。较高的温度会导致更多的随机性，可能产生更有创意的回应。而较低的温度会使模型的输出更加确定，更倾向于选择高概率的词语。
+      </Property>
+      <Property name='presence_penalty' type='number' key='presence_penalty'>
+        填写 0-1 的浮点数，用于惩罚模型生成重复的词语，从而使生成的文本更加多样化。
+      </Property>
+      <Property name='frequency_penalty' type='array[object]' key='frequency_penalty'>
+        填写 0-1 的浮点数，用于惩罚模型生成低频词语，从而使生成的文本更加多样化。
+      </Property>
+    </Properties>
+
+    ### Response
+    <Properties>
+    当 `stream` 为 `true` 时，返回 OpenAI 标准的流式数据。
+    当 `stream` 为 `false`时，返回 OpenAI 标准的响应数据。
+
+    </Properties>
+  </Col>
+  <Col sticky>
+
+    <CodeGroup title="Request" tag="POST" label="/completions" targetCode={`curl -X POST '${props.apiBaseUrl}/completions' \\\n--header 'Authorization: Bearer ${props.apiKey}' \\\n--header 'Content-Type: application/json' \\\n--data-raw '{\n    "model": "${props.workflowId}",\n    "prompt": "Hello",\n    "stream": true\n}'`}>
+
+    ```bash {{ title: 'cURL' }}
+    curl -X POST '/chat/completions' \
+    -H 'Authorization: Bearer {YOUR_MONKEYS_APIKEY}' \
+    -H 'Content-Type: application/json' \
+    --data-raw '{
+        "model": "{props.workflowId}",
+        "prompt": "Hello",
+        "stream": true
+    }'
+    ```
+
+    </CodeGroup>
+    ### 非流式模式
+    <CodeGroup title="Response">
+    ```json {{ title: 'Response' }}
+    {
+      "id": "cmpl-e893a095e1374df7b621d52fbee18f7a",
+      "object": "text_completion",
+      "created": 1714295770,
+      "model": "/root/.cache/LLM-Repo/model/c4ai-command-r-plus-GPTQ",
+      "choices": [
+        {
+          "index": 0,
+          "text": " singles if you are not involved, and not wanting to be involved with watchman",
+          "logprobs": null,
+          "finish_reason": "length",
+          "stop_reason": null
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 2,
+        "total_tokens": 18,
+        "completion_tokens": 16
+      }
+    }
+    ```
+    </CodeGroup>
+    ### 流式模式（基础助手）
+    <CodeGroup title="Response">
+    ```streaming {{ title: 'Response' }}
+data: {"id":"cmpl-874cd75500a44afeba9f05eba1ee4ef0","created":1714295700,"model":"/root/.cache/LLM-Repo/model/c4ai-command-r-plus-GPTQ","choices":[{"index":0,"text":"","logprobs":null,"finish_reason":null,"stop_reason":null}],"usage":null}
+
+data: {"id":"cmpl-874cd75500a44afeba9f05eba1ee4ef0","created":1714295700,"model":"/root/.cache/LLM-Repo/model/c4ai-command-r-plus-GPTQ","choices":[{"index":0,"text":"","logprobs":null,"finish_reason":null,"stop_reason":null}],"usage":null}
+
+data: {"id":"cmpl-874cd75500a44afeba9f05eba1ee4ef0","created":1714295700,"model":"/root/.cache/LLM-Repo/model/c4ai-command-r-plus-GPTQ","choices":[{"index":0,"text":"","logprobs":null,"finish_reason":null,"stop_reason":null}],"usage":null}
+
+data: {"id":"cmpl-874cd75500a44afeba9f05eba1ee4ef0","created":1714295700,"model":"/root/.cache/LLM-Repo/model/c4ai-command-r-plus-GPTQ","choices":[{"index":0,"text":"","logprobs":null,"finish_reason":null,"stop_reason":null}],"usage":null}
+
+data: {"id":"cmpl-874cd75500a44afeba9f05eba1ee4ef0","created":1714295700,"model":"/root/.cache/LLM-Repo/model/c4ai-command-r-plus-GPTQ","choices":[{"index":0,"text":", I","logprobs":null,"finish_reason":null,"stop_reason":null}],"usage":null}
+
+data: {"id":"cmpl-874cd75500a44afeba9f05eba1ee4ef0","created":1714295700,"model":"/root/.cache/LLM-Repo/model/c4ai-command-r-plus-GPTQ","choices":[{"index":0,"text":"m.Jo","logprobs":null,"finish_reason":null,"stop_reason":null}],"usage":null}
+
+data: {"id":"cmpl-874cd75500a44afeba9f05eba1ee4ef0","created":1714295700,"model":"/root/.cache/LLM-Repo/model/c4ai-command-r-plus-GPTQ","choices":[{"index":0,"text":"e","logprobs":null,"finish_reason":null,"stop_reason":null}],"usage":null}
+
+data: {"id":"cmpl-874cd75500a44afeba9f05eba1ee4ef0","created":1714295700,"model":"/root/.cache/LLM-Repo/model/c4ai-command-r-plus-GPTQ","choices":[{"index":0,"text":" ","logprobs":null,"finish_reason":null,"stop_reason":null}],"usage":null}
+
+data: {"id":"cmpl-874cd75500a44afeba9f05eba1ee4ef0","created":1714295700,"model":"/root/.cache/LLM-Repo/model/c4ai-command-r-plus-GPTQ","choices":[{"index":0,"text":"There a","logprobs":null,"finish_reason":null,"stop_reason":null}],"usage":null}
+
+data: {"id":"cmpl-874cd75500a44afeba9f05eba1ee4ef0","created":1714295700,"model":"/root/.cache/LLM-Repo/model/c4ai-command-r-plus-GPTQ","choices":[{"index":0,"text":"re ","logprobs":null,"finish_reason":null,"stop_reason":null}],"usage":null}
+
+data: {"id":"cmpl-874cd75500a44afeba9f05eba1ee4ef0","created":1714295700,"model":"/root/.cache/LLM-Repo/model/c4ai-command-r-plus-GPTQ","choices":[{"index":0,"text":"2 th","logprobs":null,"finish_reason":null,"stop_reason":null}],"usage":null}
+
+data: {"id":"cmpl-874cd75500a44afeba9f05eba1ee4ef0","created":1714295700,"model":"/root/.cache/LLM-Repo/model/c4ai-command-r-plus-GPTQ","choices":[{"index":0,"text":"ing","logprobs":null,"finish_reason":null,"stop_reason":null}],"usage":null}
+
+data: {"id":"cmpl-874cd75500a44afeba9f05eba1ee4ef0","created":1714295700,"model":"/root/.cache/LLM-Repo/model/c4ai-command-r-plus-GPTQ","choices":[{"index":0,"text":"s","logprobs":null,"finish_reason":null,"stop_reason":null}],"usage":null}
+
+data: {"id":"cmpl-874cd75500a44afeba9f05eba1ee4ef0","created":1714295700,"model":"/root/.cache/LLM-Repo/model/c4ai-command-r-plus-GPTQ","choices":[{"index":0,"text":" ","logprobs":null,"finish_reason":null,"stop_reason":null}],"usage":null}
+
+data: {"id":"cmpl-874cd75500a44afeba9f05eba1ee4ef0","created":1714295700,"model":"/root/.cache/LLM-Repo/model/c4ai-command-r-plus-GPTQ","choices":[{"index":0,"text":"w","logprobs":null,"finish_reason":null,"stop_reason":null}],"usage":null}
+
+data: {"id":"cmpl-874cd75500a44afeba9f05eba1ee4ef0","created":1714295700,"model":"/root/.cache/LLM-Repo/model/c4ai-command-r-plus-GPTQ","choices":[{"index":0,"text":"e can do 1. run","logprobs":null,"finish_reason":"length","stop_reason":null}],"usage":{"prompt_tokens":2,"total_tokens":18,"completion_tokens":16}}
+
+data: [DONE]
+
+    ```
+    </CodeGroup>
+
+  </Col>
+</Row>
+
