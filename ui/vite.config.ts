@@ -11,8 +11,6 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 
 dotenv.config();
 
-console.log(mdx);
-
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
