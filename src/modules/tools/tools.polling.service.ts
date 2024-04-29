@@ -281,16 +281,35 @@ export class ToolsPollingService {
         };
       } else {
         // const statusCode = error.response?.status;
-        const errData = error.response?.data;
-        let errorMsg = errData || error.message;
-        errorMsg = typeof errorMsg == 'object' && errorMsg != null ? JSON.stringify(errData) : errorMsg;
-        return {
-          outputData: {
-            success: false,
-            errMsg: `Execution failed: ${errorMsg}`,
-          },
-          status: 'FAILED',
-        };
+        if (outputAs === 'stream') {
+          const data = error?.response?.data as IncomingMessage;
+          let realData = '';
+          await this.readIncomingMessage(data, {
+            onEndCallback(result) {
+              realData = result;
+            },
+          });
+          await this.mq.publish(TOOL_STREAM_RESPONSE_TOPIC(task.workflowInstanceId), realData);
+          await this.mq.publish(TOOL_STREAM_RESPONSE_TOPIC(task.workflowInstanceId), '[DONE]');
+          return {
+            outputData: {
+              success: false,
+              errMsg: `Execution failed: ${realData}`,
+            },
+            status: 'FAILED',
+          };
+        } else if (outputAs === 'json') {
+          const errData = error.response?.data;
+          let errorMsg = errData || error.message;
+          errorMsg = typeof errorMsg == 'object' && errorMsg != null ? JSON.stringify(errData) : errorMsg;
+          return {
+            outputData: {
+              success: false,
+              errMsg: `Execution failed: ${errorMsg}`,
+            },
+            status: 'FAILED',
+          };
+        }
       }
     } finally {
       if (server.rateLimiter) {
