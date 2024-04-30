@@ -1,4 +1,3 @@
-import { config } from '@/common/config';
 import { ListDto } from '@/common/dto/list.dto';
 import { generateDbId } from '@/common/utils';
 import { getNextCronTimestamp } from '@/common/utils/cron';
@@ -486,104 +485,46 @@ export class WorkflowRepository {
     list: WorkflowMetadataEntity[];
   }> {
     const { page = 1, limit = 24, orderBy = 'DESC', orderColumn = 'createdTimestamp', filter } = dto;
-    let workflowIdsConstraints = [];
+
+    // Prepare a subquery to find the latest version for each workflow.
+    const latestVersionSubquery = this.workflowMetadataRepository
+      .createQueryBuilder('w')
+      .select('w.workflow_id', 'workflow_id')
+      .addSelect('MAX(w.version)', 'max_version')
+      .where('w.team_id = :teamId', { teamId })
+      .groupBy('w.workflow_id');
+
     if (filter) {
-      workflowIdsConstraints = await this.workflowAssetRepositroy.findAssetIdsByCommonFilter('workflow', filter, 'workflowId');
-      if (!workflowIdsConstraints.length) {
-        return {
-          totalCount: 0,
-          list: [],
-        };
+      // Apply any additional filters here using your `findAssetIdsByCommonFilter` logic.
+      const workflowIds = await this.workflowAssetRepositroy.findAssetIdsByCommonFilter('workflow', filter, 'workflowId');
+      if (workflowIds.length === 0) {
+        return { totalCount: 0, list: [] };
       }
+      latestVersionSubquery.andWhere('w.workflow_id IN (:...workflowIds)', { workflowIds });
     }
 
-    let orderColumnName = '';
-    switch (orderColumn) {
-      case 'createdTimestamp':
-        orderColumnName = 'created_timestamp';
-        break;
-      case 'updatedTimestamp':
-        orderColumnName = 'updated_timestamp';
-        break;
-      default:
-        orderColumnName = 'created_timestamp';
-        break;
-    }
-    let orderByName = 'DESC';
-    let orderByNumber = -1;
-    switch (orderBy) {
-      case 'DESC':
-        orderByName = 'DESC';
-        orderByNumber = -1;
-        break;
-      case 'ASC':
-        orderByName = 'ASC';
-        orderByNumber = 1;
-        break;
-      default:
-        orderByName = 'DESC';
-        orderByNumber = -1;
-        break;
-    }
-    const where = workflowIdsConstraints.length
-      ? `
-is_deleted = false
-AND team_id = $1
-AND workflow_id in (${workflowIdsConstraints.map((x) => `'${x}'`)})
-    `
-      : `
-is_deleted = false
-AND team_id = $1
-      `;
-    const totalCountSql = `
-SELECT 
-    COUNT(iw.workflow_id)
-FROM 
-    public.${config.server.appId}_workflow_metadatas iw
-INNER JOIN (
-    SELECT 
-        workflow_id, 
-        MAX(version) AS max_version
-    FROM 
-        public.${config.server.appId}_workflow_metadatas
-    WHERE 
-        ${where}
-    GROUP BY 
-        workflow_id
-) mv ON iw.workflow_id = mv.workflow_id AND iw.version = mv.max_version;
-    `;
-    const totalCountRes = await this.workflowMetadataRepository.query(totalCountSql, [teamId]);
-    const totalCount = Number(totalCountRes[0]['count']);
-    const sql = `
-SELECT 
-    iw.workflow_id
-FROM 
-    public.${config.server.appId}_workflow_metadatas iw
-INNER JOIN (
-    SELECT 
-        workflow_id, 
-        MAX(version) AS max_version
-    FROM 
-        public.${config.server.appId}_workflow_metadatas
-    WHERE 
-        ${where}
-    GROUP BY 
-        workflow_id
-) mv ON iw.workflow_id = mv.workflow_id AND iw.version = mv.max_version
-ORDER BY 
-    iw.${orderColumnName} ${orderByName}
-LIMIT $2 OFFSET $3;
-    `;
-    const res = await this.workflowMetadataRepository.query(sql, [teamId, limit, (page - 1) * limit]);
-    const workflowIds: string[] = res.map((x) => x.workflow_id);
-    const workflows = await this.workflowMetadataRepository.find({
-      where: {
-        workflowId: In(workflowIds),
-      },
-      order: {
-        [orderColumn]: orderByNumber,
-      },
-    });
+    const workflowsQueryBuilder = this.workflowMetadataRepository
+      .createQueryBuilder('w')
+      .innerJoin(`(${latestVersionSubquery.getQuery()})`, 'latest', 'w.workflow_id = latest.workflow_id AND w.version = latest.max_version')
+      .setParameters(latestVersionSubquery.getParameters());
+
+    // Count total number of workflows
+    const totalCount = await workflowsQueryBuilder.getCount();
+
+    // Apply ordering
+    const validOrderColumns = {
+      createdTimestamp: 'w.created_timestamp',
+      updatedTimestamp: 'w.updated_timestamp',
+    };
+    const orderColumnSql = validOrderColumns[orderColumn] || 'w.created_timestamp';
+
+    // Apply pagination
+    const workflows = await workflowsQueryBuilder
+      .orderBy(orderColumnSql, orderBy.toUpperCase() === 'ASC' ? 'ASC' : 'DESC')
+      .limit(limit)
+      .offset((page - 1) * limit)
+      .getMany();
+
     return {
       totalCount,
       list: workflows,
