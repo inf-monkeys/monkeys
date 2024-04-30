@@ -10,7 +10,7 @@ import {
 } from '@/common/decorators/monkey-block-api-extensions.decorator';
 import { ApiType, AuthType, ManifestJson, SchemaVersion } from '@/common/typings/tools';
 import { Body, Controller, Get, Post, Res } from '@nestjs/common';
-import { ApiExcludeEndpoint, ApiOperation } from '@nestjs/swagger';
+import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { CreateChatCompletionsDto } from './dto/req/create-chat-compltion.dto';
 import { CreateCompletionsDto } from './dto/req/create-compltions.dto';
@@ -33,6 +33,7 @@ export const LLM_COMPLETION_TOOL = 'completions';
 export const LLM_CHAT_COMPLETION_TOOL = 'chat_completions';
 
 @Controller('/llm-tool')
+@ApiTags('大语言模型')
 export class LlmController {
   constructor(private readonly service: LlmService) {}
 
@@ -65,8 +66,8 @@ export class LlmController {
 
   @Post('/completions')
   @ApiOperation({
-    summary: 'Completion',
-    description: 'Completion',
+    summary: '文本补全',
+    description: '文本补全',
   })
   @MonkeyToolName(LLM_COMPLETION_TOOL)
   @MonkeyToolDisplayName('大语言模型单轮对话')
@@ -272,8 +273,8 @@ export class LlmController {
 
   @Post('/chat/completions')
   @ApiOperation({
-    summary: 'Chat Completion',
-    description: 'Chat Completion',
+    summary: '多轮对话',
+    description: '多轮对话',
   })
   @MonkeyToolName(LLM_CHAT_COMPLETION_TOOL)
   @MonkeyToolDisplayName('大语言模型多轮对话')

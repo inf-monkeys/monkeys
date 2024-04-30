@@ -10,7 +10,7 @@ export const setupLlmToolSwagger = (app: INestApplication) => {
   const builder = new DocumentBuilder().setTitle('LLM').setDescription('LLM endpoints').setVersion('1.0').addServer(`${config.server.appUrl}`, 'LLM API SERVER');
   const document = SwaggerModule.createDocument(app, builder.build(), {
     include: [LLMToolsModule],
-    deepScanRoutes: true,
+    deepScanRoutes: false,
   });
   for (const path in document.paths) {
     for (const method in document.paths[path]) {
