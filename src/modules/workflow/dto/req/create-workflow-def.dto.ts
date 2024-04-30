@@ -24,6 +24,16 @@ export class CreateWorkflowDefDto {
   description?: string;
 
   @ApiProperty({
+    description: '工作流版本号',
+    name: 'version',
+    type: Number,
+    required: false,
+    default: 1,
+  })
+  @Joiful.number().optional()
+  version?: number;
+
+  @ApiProperty({
     description: '工作流 LOGO',
     name: 'logo',
     type: String,

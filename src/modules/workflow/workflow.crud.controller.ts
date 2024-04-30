@@ -64,6 +64,21 @@ export class WorkflowCrudController {
     });
   }
 
+  @Post('/:workflowId/versions')
+  @ApiOperation({
+    summary: '创建工作流版本',
+    description: '创建工作流版本',
+  })
+  public async createWorkflowVersion(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Body() body: CreateWorkflowDefDto) {
+    const { teamId, userId } = req;
+    const result = await this.service.createWorkflowDef(teamId, userId, body, {
+      useExistId: workflowId,
+    });
+    return new SuccessResponse({
+      data: result,
+    });
+  }
+
   @Get('/:workflowId/validation-issues')
   @ApiOperation({
     summary: '获取工作流的所有版本',
