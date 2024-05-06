@@ -79,7 +79,7 @@ export interface ManifestJson {
     type: ApiType;
     url: string;
   };
-  contact_email: string;
+  contact_email?: string;
   healthCheck?: string;
   triggerEndpoints?: TriggerEndpointConfig[];
   triggers?: TriggerDefinition[];
