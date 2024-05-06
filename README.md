@@ -6,13 +6,9 @@
 [![GitHub stars](https://img.shields.io/github/stars/inf-monkeys/monkeys?style=social&label=Star&maxAge=2592000)](https://GitHub.com/inf-monkeys/monkeys/stargazers/)
 [![GitHub forks](https://img.shields.io/github/forks/inf-monkeys/monkeys?style=social&label=Fork&maxAge=2592000)](https://github.com/inf-monkeys/monkeys)
 
-</div>
-
-## Description
-
 Monkeys is an open source tool for build workflow-centric AI applications.
 
-![](./docs/images/dashboard.png)
+</div>
 
 ## Documentation
 
@@ -85,6 +81,10 @@ We provide a helm chart, check the [docs](https://inf-monkeys.github.io/docs/zh-
 
 
 ## Tools
+
+### Awesome Monkey Tools
+
+Here is a detailed list of existing awesome monkey tools: [https://github.com/inf-monkeys/awesome-monkey-tools](https://github.com/inf-monkeys/awesome-monkey-tools).
 
 ### Write Your Own Monkey Tool
 
