@@ -115,7 +115,9 @@ export const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
               accept={['image/png', 'image/jpeg']}
               maxSize={10}
               limit={1}
-              onFinished={(urls) => setTempImage(urls[0])}
+              onFinished={(urls) => {
+                setTempImage(urls[0]);
+              }}
             >
               <Button variant="outline" disabled={loading}>
                 上传其他图片
