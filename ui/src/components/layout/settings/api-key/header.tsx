@@ -49,7 +49,7 @@ export const ApiKeyHeader: React.FC<IApiKeyHeaderProps> = ({ mutate }) => {
     <Card>
       <CardContent className="flex justify-between gap-4 p-3">
         <Avatar className="size-10">
-          <AvatarImage className="aspect-auto" src={team?.logoUrl} alt={team?.name ?? '未知团队'} />
+          <AvatarImage className="aspect-auto" src={team?.iconUrl} alt={team?.name ?? '未知团队'} />
           <AvatarFallback className="rounded-none p-2 text-xs">
             {(team?.name ?? '未知团队').substring(0, 2)}
           </AvatarFallback>
@@ -91,7 +91,7 @@ export const ApiKeyHeader: React.FC<IApiKeyHeaderProps> = ({ mutate }) => {
                           <span>团队</span>
                           <div className="col-span-3 flex gap-1">
                             <Avatar className="size-6">
-                              <AvatarImage className="aspect-auto" src={team?.logoUrl} alt={team?.name ?? '未知团队'} />
+                              <AvatarImage className="aspect-auto" src={team?.iconUrl} alt={team?.name ?? '未知团队'} />
                               <AvatarFallback className="rounded-none p-2 text-xs">
                                 {(team?.name ?? '未知团队').substring(0, 2)}
                               </AvatarFallback>

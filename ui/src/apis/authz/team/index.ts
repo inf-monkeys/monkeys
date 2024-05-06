@@ -24,7 +24,7 @@ export const useTeams = (enable = true) =>
   });
 
 export const updateTeam = (team: ITeamUpdate) =>
-  vinesFetcher<IVinesTeam, ITeamUpdate>({ method: 'POST', simple: true })('/api/teams/update', team);
+  vinesFetcher<IVinesTeam, ITeamUpdate>({ method: 'PUT', simple: true })('/api/teams', team);
 
 export const useTeamUsers = (teamId?: string) =>
   useSWR<ITeamMember | undefined>(teamId ? `/api/teams/${teamId}/members` : null, vinesFetcher());

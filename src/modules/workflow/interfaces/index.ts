@@ -12,7 +12,7 @@ export interface BaseAsset {
 export interface TeamInfoJson {
   name: string;
   description: string;
-  logoUrl: string;
+  iconUrl: string;
   workflowTaskNamePrefix: string;
   // TODO
   customTheme: any;

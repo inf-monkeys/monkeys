@@ -17,7 +17,7 @@ export const JoinPublicTeamItem: React.FC<IJoinPublicTeamItemProps> = ({ team, i
       <CardContent className="flex items-center justify-between gap-4 p-3">
         <div className="flex items-center gap-4">
           <Avatar className="size-10">
-            <AvatarImage className="aspect-auto" src={team.logoUrl} alt={team.name} />
+            <AvatarImage className="aspect-auto" src={team.iconUrl} alt={team.name} />
             <AvatarFallback className="rounded-none p-2 text-xs">{team.name.substring(0, 2)}</AvatarFallback>
           </Avatar>
           <div>

@@ -51,7 +51,7 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
     toast.promise(
       new Promise((resolve) => {
         updateTeam({
-          logoUrl: val,
+          iconUrl: val,
         } as unknown as ITeamUpdate).then(async () => {
           await mutate('/api/teams');
           resolve('');
@@ -65,7 +65,7 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
     );
   };
 
-  const teamLogo = team?.logoUrl;
+  const teamLogo = team?.iconUrl;
 
   return (
     <Card>
@@ -76,7 +76,7 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
       <CardContent className="flex items-center justify-between">
         <VinesImageEditor value={teamLogo} onChange={handleUpdateTeamLogo}>
           <Avatar className="size-10 cursor-pointer">
-            <AvatarImage className="aspect-auto" src={team?.logoUrl} alt={teamName} />
+            <AvatarImage className="aspect-auto" src={team?.iconUrl} alt={teamName} />
             <AvatarFallback className="rounded-none p-2 text-xs">{teamName.substring(0, 2)}</AvatarFallback>
           </Avatar>
         </VinesImageEditor>

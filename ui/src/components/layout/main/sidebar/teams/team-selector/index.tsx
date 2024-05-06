@@ -58,7 +58,7 @@ export const TeamSelector: React.FC = () => {
         >
           <Team
             className="w-32"
-            logo={currentTeam?.logoUrl}
+            logo={currentTeam?.iconUrl}
             name={currentTeam?.name}
             description={currentTeam?.description}
           />
@@ -74,7 +74,7 @@ export const TeamSelector: React.FC = () => {
           <CommandSeparator />
           <CommandList>
             <CommandGroup>
-              {teams?.map(({ id, logoUrl, name, description }) => (
+              {teams?.map(({ id, iconUrl, name, description }) => (
                 <CommandItem
                   key={id}
                   className="cursor-pointer"
@@ -83,7 +83,7 @@ export const TeamSelector: React.FC = () => {
                     setOpen(false);
                   }}
                 >
-                  <Team logo={logoUrl} name={name} description={description} />
+                  <Team logo={iconUrl} name={name} description={description} />
                   <CheckIcon className={cn('ml-auto', teamId === id ? 'opacity-100' : 'opacity-0')} size={18} />
                 </CommandItem>
               ))}

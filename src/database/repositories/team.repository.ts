@@ -4,7 +4,7 @@ import { TeamEntity } from '@/database/entities/identity/team';
 import { TeamMembersEntity } from '@/database/entities/identity/user-team-relationship';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { uniq } from 'lodash';
+import _, { uniq } from 'lodash';
 import { In, Repository } from 'typeorm';
 import { TeamJoinRequestStatus, TeamJoinRequestsEntity } from '../entities/identity/team-join-request';
 import { UserEntity } from '../entities/identity/user';
@@ -75,7 +75,7 @@ export class TeamRepository {
     return !!team;
   }
 
-  async createTeam(userId: string, teamName: string, description?: string, logoUrl?: string, isBuiltIn = false, workflowTaskNamePrefix?: string) {
+  async createTeam(userId: string, teamName: string, description?: string, iconUrl?: string, isBuiltIn = false, workflowTaskNamePrefix?: string) {
     if (await this.checkNameConflict(userId, teamName)) {
       throw new Error('同名团队已经存在，请更换名称');
     }
@@ -84,7 +84,7 @@ export class TeamRepository {
       id: generateDbId(),
       name: teamName,
       description,
-      iconUrl: logoUrl,
+      iconUrl,
       isBuiltIn,
       createdTimestamp: now,
       updatedTimestamp: now,
@@ -106,6 +106,50 @@ export class TeamRepository {
     await this.apiKeyRepository.initApiKeyIfNotExists(teamId, userId);
 
     return newTeam;
+  }
+
+  public async updateTeam(
+    teamId: string,
+    updates?: {
+      name?: string;
+      description?: string;
+      iconUrl?: string;
+    },
+  ) {
+    if (!updates || !Object.keys(updates).length) {
+      return;
+    }
+    const { name, description, iconUrl } = updates || {};
+    const team = await this.teamRepository.findOne({
+      where: {
+        id: teamId,
+        isDeleted: false,
+      },
+    });
+    if (!team) {
+      throw new Error('团队不存在');
+    }
+    if (name) {
+      const conflict = await this.checkNameConflict(team.ownerUserId, name);
+      if (conflict) {
+        throw new Error('同名团队已经存在，请更换名称');
+      }
+    }
+    const now = Date.now();
+    await this.teamRepository.update(
+      {
+        id: teamId,
+      },
+      _.pickBy(
+        {
+          name,
+          description,
+          iconUrl,
+          updatedTimestamp: now,
+        },
+        (v) => !_.isNil(v),
+      ),
+    );
   }
 
   public async isUserInTeam(userId: string, teamId: string) {

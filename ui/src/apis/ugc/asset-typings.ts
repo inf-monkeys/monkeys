@@ -28,7 +28,7 @@ export interface ITeamCustomTheme {
 export interface ITeamInfoJson {
   name: string;
   description: string;
-  logoUrl: string;
+  iconUrl: string;
   workflowTaskNamePrefix: string;
   customTheme: ITeamCustomTheme;
 }
