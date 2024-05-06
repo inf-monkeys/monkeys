@@ -58,12 +58,16 @@ export const escapeFileName = (filename: string) =>
 export const uploadFile = async (file: File, filename: string, onProgress: (progress: number) => void) => {
   const filesize = file.size;
 
-  const { baseUrl } = await simpleGet<{ baseUrl: string }>('/api/medias/s3/configs');
+  const { baseUrl, isPrivate } = await simpleGet<{ baseUrl: string; isPrivate: boolean }>('/api/medias/s3/configs');
 
   if (filesize < 1 << 30) {
     const url = await simpleGet<string>(`/api/medias/s3/presign?key=${filename}`);
     await simpleFilePut(url, file, onProgress);
-    return baseUrl + filename;
+    if (isPrivate) {
+      return simpleGet<string>(`/api/medias/s3/sign?key=${filename}`);
+    } else {
+      return baseUrl + filename;
+    }
   }
 
   const { UploadId } = await simplePost<{ UploadId: string }, Record<string, string>>(
