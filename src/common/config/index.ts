@@ -136,6 +136,7 @@ export interface AuthConfig {
 }
 
 export interface S3Config {
+  isPrivate: boolean;
   endpoint: string;
   accessKeyId: string;
   secretAccessKey: string;
