@@ -55,27 +55,62 @@ Monkeys Consists of the following key components:
 - [Redis](https://redis.io/)(Optional): We use inmemory cache as default, for test purpose, you can just skip this.
 - Postgres/MySQL(Optional): We use sqlite as default storage engine, for test purpose, you can just skip this.
 
-### Setup
+### 👨‍💻 Developer
 
-#### 👨‍💻 Developer
+#### Backend
 
 1. Clone the repo
    ```sh
    git clone https://github.com/inf-monkeys/monkeys.git
    ```
-2. Install NPM packages
+2. Go to `monkeys` folder
+
+   ```sh
+   cd monkeys
+   ```
+
+3. Install Node Modules
    ```sh
    yarn
    ```
-3. Run the server:
+4. Run the server:
 
    ```sh
    yarn start
    ```
 
+#### Frontend 
+
+1. Go to `ui` folder
+
+   ```sh
+   cd ui
+   ```
+
+2. Install Node Modules
+
+   ```sh
+   pnpm install
+   ```
+
+3. Update `.env`
+
+   ```sh
+   cp .env.example .env
+   ```
+
+   Set `SERVER_ENDPOINT` to your local server, `http://localhost:3000` for example.
+
+4. Start UI
+
+   ```sh
+   pnpm dev
+   ```
+
 That's all, you are ready to go!
 
-#### 🐳 Docker
+
+### 🐳 Docker
 
 We provide a helm chart, check the [docs](https://inf-monkeys.github.io/docs/zh-cn/installation/helm/).
 
