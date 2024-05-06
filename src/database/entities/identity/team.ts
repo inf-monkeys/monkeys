@@ -25,12 +25,6 @@ export class TeamEntity extends BaseEntity {
   iconUrl?: string;
 
   @Column({
-    name: 'logo_url',
-    nullable: true,
-  })
-  logoUrl?: string;
-
-  @Column({
     name: 'owner_user_id',
   })
   ownerUserId: string;

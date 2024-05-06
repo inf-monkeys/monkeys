@@ -17,10 +17,21 @@ export class TeamsService {
     return await this.teamRepository.getUserTeams(userId);
   }
 
-  public async createTeam(userId: string, teamName: string, description?: string, logoUrl?: string, isBuiltIn = false, workflowTaskNamePrefix?: string, createMethod: 'self' | 'import' = 'self') {
-    const team = await this.teamRepository.createTeam(userId, teamName, description, logoUrl, isBuiltIn, createMethod);
+  public async createTeam(userId: string, teamName: string, description?: string, iconUrl?: string, isBuiltIn = false, workflowTaskNamePrefix?: string, createMethod: 'self' | 'import' = 'self') {
+    const team = await this.teamRepository.createTeam(userId, teamName, description, iconUrl, isBuiltIn, createMethod);
     // Init assets from built-in marketplace
     this.marketPlaceRepository.forkFromMarketPlaceWhenTeamCreate(team.id, userId);
+  }
+
+  public async updateTeam(
+    teamId: string,
+    updates?: {
+      name?: string;
+      description?: string;
+      iconUrl?: string;
+    },
+  ) {
+    return await this.teamRepository.updateTeam(teamId, updates);
   }
 
   public async getTeamMembers(teamId: string) {

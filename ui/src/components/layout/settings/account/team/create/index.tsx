@@ -12,7 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { Tooltip } from '@/components/ui/tooltip';
-import { createTeamSchema, ICreateTeam } from '@/schema/settings/team.ts';
+import { ICreateTeam, createTeamSchema } from '@/schema/settings/team.ts';
 
 interface ICreateTeamProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -26,19 +26,19 @@ export const CreateTeam: React.FC<ICreateTeamProps> = () => {
     defaultValues: {
       name: '',
       description: '',
-      logoUrl: '',
+      iconUrl: '',
     },
   });
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = form.handleSubmit(({ name, description, logoUrl }) => {
+  const handleSubmit = form.handleSubmit(({ name, description, iconUrl }) => {
     setIsLoading(true);
     toast.promise(
       createTeam({
         name,
         description,
-        logoUrl,
+        iconUrl,
       }),
       {
         loading: '正在创建中...',

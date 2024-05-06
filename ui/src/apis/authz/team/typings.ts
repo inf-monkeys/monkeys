@@ -3,7 +3,7 @@ import { IVinesUser } from '@/apis/authz/user/typings.ts';
 export interface IVinesTeam {
   id: string;
   name: string;
-  logoUrl?: string;
+  iconUrl?: string;
   description?: string;
   ownerUserId?: string;
   customTheme?: {
@@ -14,14 +14,14 @@ export interface IVinesTeam {
   };
 }
 
-export type ITeamUpdate = Partial<Pick<IVinesTeam, 'name' | 'description' | 'logoUrl' | 'customTheme'>>;
+export type ITeamUpdate = Partial<Pick<IVinesTeam, 'name' | 'description' | 'iconUrl' | 'customTheme'>>;
 
 export type ITeamMember = {
   list: Array<IVinesUser>;
   listTotal: number;
 };
 
-export type ITeamCreate = Pick<IVinesTeam, 'name' | 'description' | 'logoUrl'>;
+export type ITeamCreate = Pick<IVinesTeam, 'name' | 'description' | 'iconUrl'>;
 
 export interface ITeamApplyListData {
   id: string;

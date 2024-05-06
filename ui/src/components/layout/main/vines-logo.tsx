@@ -32,10 +32,10 @@ export const VinesLogo: React.FC<Omit<ILogoProps, 'url'> & { disableInitialHeigh
           url={
             !oem || oem.theme.logoUrl.endsWith('vines.svg')
               ? enabledCustomIcon
-                ? team?.logoUrl
+                ? team?.iconUrl
                 : void 0
               : enabledCustomIcon
-                ? team?.logoUrl
+                ? team?.iconUrl
                 : oem.theme.logoUrl
           }
           description={description}

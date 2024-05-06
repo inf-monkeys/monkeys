@@ -2,6 +2,7 @@ import React from 'react';
 
 import { setWith } from 'lodash';
 
+import { updateUserInfo } from '@/apis/authz/user';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { UserAccount } from '@/components/layout/settings/account/user/user-account';
 import { UserName } from '@/components/layout/settings/account/user/user-name';
@@ -25,6 +26,7 @@ export const User: React.FC<IUserProps> = () => {
     if (!users[userId]) return;
     const newUsers = setWith(users, `${userId}.data.${key}`, val);
     setUsers(newUsers);
+    updateUserInfo({ [key]: val });
   };
 
   const userName = user.name || 'AI';

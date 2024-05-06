@@ -1,7 +1,7 @@
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DEFAULT_TEAM_DESCRIPTION, DEFAULT_TEAM_PHOTO, TeamsService } from './teams.service';
 
@@ -35,13 +35,20 @@ export class TeamsController {
   }
 
   @Post('/')
-  public async createTeam(@Req() req: IRequest, @Body('') body: { name: string; description?: string; logoUrl?: string }) {
+  public async createTeam(@Req() req: IRequest, @Body('') body: { name: string; description?: string; iconUrl?: string }) {
     const { userId } = req;
-    const { name, description, logoUrl } = body;
-    const team = await this.service.createTeam(userId, name, description, logoUrl);
+    const { name, description, iconUrl } = body;
+    const team = await this.service.createTeam(userId, name, description, iconUrl);
     return new SuccessResponse({
       data: team,
     });
+  }
+
+  @Put('/')
+  public async updateTeam(@Req() req: IRequest, @Body() body: { name?: string; description?: string; iconUrl?: string }) {
+    const { teamId } = req;
+    const data = await this.service.updateTeam(teamId, body);
+    return new SuccessResponse({ data });
   }
 
   @Get('/:teamId/members')
