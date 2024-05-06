@@ -83,4 +83,11 @@ export class TeamsController {
       data,
     });
   }
+
+  @Get('/invites/manage/:teamId')
+  public async manageInvites() {
+    return new SuccessResponse({
+      data: [],
+    });
+  }
 }
