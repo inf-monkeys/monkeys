@@ -26,7 +26,7 @@ const Login: React.FC = () => {
   const appName = get(oem, 'theme.name', '');
 
   const loginMethods: AuthMethod[] = get(oem, 'auth.enabled', [] as AuthMethod[]);
-  const loginMethodsLength = loginMethods.length;
+  const loginMethodsLength = loginMethods?.filter((it: string) => it !== 'apikey').length;
 
   const isPhoneEnable = loginMethods.includes(AuthMethod.phone);
   const isPasswordEnable = loginMethods.includes(AuthMethod.password);
@@ -55,7 +55,7 @@ const Login: React.FC = () => {
               animate={{ opacity: 1, height: 28 }}
               exit={{ opacity: 0, height: 0 }}
             >
-              <h1 className="animate-pulse text-lg font-bold text-vines-500">系统维护中</h1>
+              <h1 className="animate-pulse text-lg font-bold text-vines-500">系统已禁止登录</h1>
             </motion.div>
           ) : swap !== 'login' && hasTokens ? (
             <SmoothTransition initialHeight={201}>
