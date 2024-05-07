@@ -3,17 +3,18 @@ export type OemModule = 'payment' | 'vines-ai';
 
 export interface ISystemConfig {
   theme: {
-    name: string;
+    title: string;
     favicon: {
-      url: string;
-      type: string;
+      light: string;
+      dark: string;
+    };
+    logo: {
+      light: string;
+      dark: string;
     };
     colors: {
       primaryColor: string;
-      secondaryBackgroundColor: string;
-      backgroundColor: string;
     };
-    logoUrl: string;
   };
   auth: {
     enabled: AuthMethod[];

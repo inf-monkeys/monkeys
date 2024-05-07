@@ -115,7 +115,7 @@ That's all, you are ready to go!
 
 #### Docker Compose
 
-Read more [here](./docker/README.md)
+We provide a docker-compose yaml, check the [docs](./docker/README.md).
 
 #### Helm
 
@@ -133,7 +133,11 @@ Here is a detailed list of existing awesome monkey tools: [https://github.com/in
 We provided detailed information on how to write your own monkey tool, it's as simple as writing standard RESTFul APIs. You can read more on this topic at [Write your own tools](https://inf-monkeys.github.io/docs/zh-cn/build-tools/introduction/)
 
 
-### OpenAPI Documentation
+## Configuration
+
+See all configuration values [here](./CONFIGURATION.md).
+
+## OpenAPI Documentation
 
 After you start the project, you can visit the following OpenAPI documentations:
 
