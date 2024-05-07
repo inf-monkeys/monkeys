@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { createRootRoute, Outlet, ScrollRestoration } from '@tanstack/react-router';
 
 import { NextUIProvider } from '@nextui-org/system';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import { OEM } from '@/components/layout/oem';
 import { MainWrapper } from '@/components/layout-wrapper/main';
@@ -32,22 +32,24 @@ const RootComponent: React.FC = () => {
       <NextUIProvider>
         <TooltipProvider delayDuration={100}>
           <main className="vines-ui h-screen w-screen">
-            <motion.div
-              key={isUseOutside ? 'vines-outside' : isUseWorkSpace ? 'vines-workspace' : 'vines-main'}
-              className="vines-center relative size-full flex-col"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              {isUseOutside ? (
-                <Outlet />
-              ) : isUseWorkSpace ? (
-                <WorkspaceWrapper />
-              ) : (
-                <MainWrapper layoutId={'vines-' + routeIds?.join('-')} />
-              )}
-            </motion.div>
+            <AnimatePresence mode="popLayout">
+              <motion.div
+                key={isUseOutside ? 'vines-outside' : isUseWorkSpace ? 'vines-workspace' : 'vines-main'}
+                className="vines-center relative size-full flex-col"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {isUseOutside ? (
+                  <Outlet />
+                ) : isUseWorkSpace ? (
+                  <WorkspaceWrapper />
+                ) : (
+                  <MainWrapper layoutId={'vines-' + routeIds?.join('-')} />
+                )}
+              </motion.div>
+            </AnimatePresence>
           </main>
         </TooltipProvider>
       </NextUIProvider>
