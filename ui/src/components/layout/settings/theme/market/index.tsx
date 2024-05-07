@@ -14,8 +14,13 @@ interface IThemeMarketProps {}
 
 export const ThemeMarket: React.FC<IThemeMarketProps> = () => {
   const { mutate } = useSWRConfig();
-  const { data } = useThemeMarket();
+  const { data, error } = useThemeMarket();
   const { trigger, isMutating } = useCreateTheme();
+
+  if (error instanceof Error && error.message === '404 NOT FOUND') {
+    // 404 | Module not enabled
+    return null;
+  }
 
   const handleCreateTheme = (name: string, color: string) => {
     toast.promise(trigger({ name, primaryColor: color }), {
