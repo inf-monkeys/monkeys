@@ -10,15 +10,16 @@ export interface ISystemConfig {
   theme: {
     name: string;
     favicon: {
-      url: string;
-      type: string;
+      dark: string;
+      light: string;
+    };
+    logo: {
+      dark: string;
+      light: string;
     };
     colors: {
       primaryColor: string;
-      secondaryBackgroundColor: string;
-      backgroundColor: string;
     };
-    logoUrl: string;
   };
   auth: {
     enabled: AuthMethod[];
