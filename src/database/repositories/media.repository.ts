@@ -58,6 +58,7 @@ export class MediaFileRepository {
       where: {
         md5,
         teamId,
+        isDeleted: false,
       },
     });
     return data;
