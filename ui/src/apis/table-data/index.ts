@@ -42,13 +42,14 @@ export const deleteDatabase = (databaseId: string) =>
 export const deleteTable = (databaseId: string, tableId: string) =>
   vinesFetcher({ method: 'DELETE', simple: true })(`/api/sql-knowledge-bases/${databaseId}/tables/${tableId}`);
 
-export const importToDatabaseUseCSV = (databaseId: string, tableName: string, url: string) =>
+export const importToDatabaseUseCSV = (databaseId: string, table_name: string, csvfile: string, sep = ',') =>
   vinesFetcher({
     method: 'POST',
     simple: true,
-  })(`/api/tools/monkey_tools_knowledge_base/sql-knowledge-bases/${databaseId}/importFromCsv`, {
-    tableName,
-    url,
+  })(`/api/tools/monkey_tools_knowledge_base/sql-knowledge-bases/${databaseId}/csvs`, {
+    table_name,
+    csvfile,
+    sep,
   });
 
 export const createTableUseSQL = (databaseId: string, sql: string) =>

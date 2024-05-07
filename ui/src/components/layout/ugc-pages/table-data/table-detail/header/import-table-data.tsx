@@ -37,12 +37,13 @@ export const ImportTableData: React.FC<IImportTableDataProps> = ({ databaseId, c
     defaultValues: {
       tableName: '',
       url: '',
+      sep: ',',
     },
   });
 
   const handleSubmit = form.handleSubmit((data) => {
     setIsLoading(true);
-    toast.promise(importToDatabaseUseCSV(databaseId, data.tableName, data.url), {
+    toast.promise(importToDatabaseUseCSV(databaseId, data.tableName, data.url, data.sep), {
       loading: '正在导入数据',
       success: () => {
         setVisible(false);
@@ -97,6 +98,20 @@ export const ImportTableData: React.FC<IImportTableDataProps> = ({ databaseId, c
                     />
                   </FormControl>
                   <FormDescription>在此处上传文件将自动存入「富媒体数据」</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              name="sep"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input placeholder="请输入分隔符" {...field} />
+                  </FormControl>
+                  <FormDescription>请指定 CSV 的分隔符，默认为逗号</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
