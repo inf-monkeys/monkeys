@@ -8,7 +8,7 @@
 | ------------------------------------- | ------------------------------------------------------------------------- | -------------------------------------------------- |
 | `server.customization.title`          | Website Title                                                             | `Monkeys`                                          |
 | `server.customization.logo`           | Website logo, can sepecify light theme logo and dark theme logo.          | `https://static.aside.fun/static/vines.svg`        |
-| `server.customization.favcion`        | Website favicon, can sepecify light theme favicon and dark theme favicon. | `https://static.infmonkeys.com/upload/favicon.svg` |
+| `server.customization.favicon`        | Website favicon, can sepecify light theme favicon and dark theme favicon. | `https://static.infmonkeys.com/upload/favicon.svg` |
 | `server.customization.colors.primary` | Primary Color                                                             | `#52ad1f`                                          |
 
 
