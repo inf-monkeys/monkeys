@@ -29,12 +29,16 @@ export interface ServerConfig {
   };
   customization: {
     title: string;
-    logoUrl: string;
-    faviconUrl: string;
+    logo: {
+      light: string;
+      dark: string;
+    };
+    favicon: {
+      light: string;
+      dark: string;
+    };
     colors: {
       primary: string;
-      secondary: string;
-      secondaryBackground: string;
     };
   };
 }
@@ -178,6 +182,9 @@ export interface Config {
 const port = readConfig('server.port', 3000);
 const appUrl = readConfig('server.appUrl', `http://127.0.0.1:${port}`);
 
+const logoConfig = readConfig('server.customization.logo', 'https://static.aside.fun/static/vines.svg');
+const faviconConfig = readConfig('server.customization.favicon', 'https://static.infmonkeys.com/upload/favicon.svg');
+
 export const config: Config = {
   server: {
     port,
@@ -190,12 +197,10 @@ export const config: Config = {
     },
     customization: {
       title: readConfig('server.customization.title', '猴子无限'),
-      logoUrl: readConfig('server.customization.logoUrl', 'https://static.aside.fun/static/vines.svg'),
-      faviconUrl: readConfig('server.customization.faviconUrl', 'https://static.infmonkeys.com/upload/favicon.svg'),
+      logo: typeof logoConfig === 'string' ? { light: logoConfig, dark: logoConfig } : logoConfig,
+      favicon: typeof faviconConfig === 'string' ? { light: faviconConfig, dark: faviconConfig } : faviconConfig,
       colors: {
         primary: readConfig('server.customization.colors.primary', '#52ad1f'),
-        secondary: readConfig('server.customization.colors.secondary', '#16161a'),
-        secondaryBackground: readConfig('server.customization.colors.secondaryBackground', '#212121'),
       },
     },
   },
