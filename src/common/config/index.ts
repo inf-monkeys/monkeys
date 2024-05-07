@@ -67,11 +67,6 @@ export interface RedisConfig {
   options?: RedisOptions;
 }
 
-export interface VectorGatewayService {
-  enabled: boolean;
-  baseUrl: string;
-}
-
 export interface ToolServiceConfig {
   name: string;
   manifestUrl?: string;
@@ -170,7 +165,6 @@ export interface Config {
   conductor: ConductorConfig;
   database: DatabaseConfig;
   redis: RedisConfig;
-  vector: VectorGatewayService;
   tools: ToolServiceConfig[];
   cron: CronConfig;
   comfyui: ComfyUICofig;
@@ -230,10 +224,6 @@ export const config: Config = {
     // Common config
     prefix: readConfig('redis.prefix', 'monkeys:'),
     options: readConfig('redis.options', {}),
-  },
-  vector: {
-    enabled: readConfig('vector.enabled', false),
-    baseUrl: readConfig('vector.baseUrl', 'http://localhost:8899'),
   },
   tools: readConfig('tools', []),
   cron: {
