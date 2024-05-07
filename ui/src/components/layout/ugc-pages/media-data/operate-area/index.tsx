@@ -65,7 +65,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
           </DropdownMenuItem>
           <UgcDeleteDialog
             assetType={item?.assetType}
-            ugcId={item?._id}
+            ugcId={item?.id}
             afterOperate={() => {
               void mutate((key) => _.isArray(key) && key[0] === '/api/resources/list', undefined, {
                 revalidate: true,
