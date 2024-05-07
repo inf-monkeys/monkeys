@@ -2,7 +2,6 @@ version: '2.3'
 
 services:
   server:
-    image: monkeys
     build:
       context: ../
       dockerfile: docker/server/Dockerfile
@@ -24,12 +23,8 @@ services:
         condition: service_healthy
     logging:
       driver: 'json-file'
-      options:
-        max-size: '1k'
-        max-file: '3'
 
   ui:
-    image: monkeys-ui
     build:
       context: ../ui
       dockerfile: ../docker/ui/Dockerfile
@@ -37,9 +32,6 @@ services:
       - monkeys
     logging:
       driver: 'json-file'
-      options:
-        max-size: '1k'
-        max-file: '3'
 
   conductor-server:
     image: infmonkeys/conductor:1.0.0
@@ -54,9 +46,6 @@ services:
       retries: 12
     logging:
       driver: 'json-file'
-      options:
-        max-size: '1k'
-        max-file: '3'
 
   monkeys-redis:
     image: redis:6.2.3-alpine
@@ -84,9 +73,6 @@ services:
       retries: 12
     logging:
       driver: 'json-file'
-      options:
-        max-size: '1k'
-        max-file: '3'
 
   monkeys-postgres:
     image: postgres
@@ -105,9 +91,6 @@ services:
       retries: 12
     logging:
       driver: 'json-file'
-      options:
-        max-size: '1k'
-        max-file: '3'
 
   monkeys-nginx:
     image: nginx
@@ -118,12 +101,9 @@ services:
     networks:
       - monkeys
     ports:
-      - 81:80
+      - 80:80
     logging:
       driver: 'json-file'
-      options:
-        max-size: '1k'
-        max-file: '3'
     depends_on:
       - server
       - ui

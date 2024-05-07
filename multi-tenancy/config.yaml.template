@@ -1,0 +1,14 @@
+servers:
+  - appId: monkeys
+    host: infmonkeys.local.com
+    customization:
+      title: 猴子无限
+      logo: https://example.com/logo.png
+      favicon: https://example.com/favicon.ico
+
+  - appId: daocloud
+    host: daocloud.local.com
+    customization:
+      title: DaoCloud
+      logo: https://example.com/logo.png
+      favicon: https://example.com/favicon.ico
