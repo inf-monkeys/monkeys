@@ -24,6 +24,27 @@ export class MediaFileRepository {
     });
   }
 
+  public async deleteMedia(teamId: string, id: string) {
+    const data = await this.mediaFileEntity.findOne({
+      where: {
+        id,
+        teamId,
+      },
+    });
+    if (!data) {
+      return;
+    }
+    await this.mediaFileEntity.update(
+      {
+        id,
+        teamId,
+      },
+      {
+        isDeleted: true,
+      },
+    );
+  }
+
   public async getMediaById(id: string) {
     return await this.mediaFileEntity.findOne({
       where: {

@@ -2,7 +2,7 @@ import { ListDto } from '@/common/dto/list.dto';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { Body, Controller, Get, NotFoundException, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateRichMediaDto } from './dto/req/create-rich-media.dto';
 import { MediaFileService } from './media.service';
@@ -30,6 +30,17 @@ export class MediaFileCrudController {
     const { teamId, userId } = request;
     const data = await this.service.createMedia(teamId, userId, body);
     return new SuccessResponse({ data });
+  }
+
+  @Delete(':id')
+  public async deleteRichMedia(@Req() request: IRequest, @Param('id') id: string) {
+    const { teamId } = request;
+    await this.service.deleteMedia(teamId, id);
+    return new SuccessResponse({
+      data: {
+        success: true,
+      },
+    });
   }
 
   @Get('md5/:md5')
