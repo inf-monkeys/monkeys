@@ -3,8 +3,8 @@ import React from 'react';
 import { CircularProgress } from '@nextui-org/progress';
 import { CircleSlash } from 'lucide-react';
 
-import { useVectorRelationWorkflow } from '@/apis/vector';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
+import { useSearchReferenceWorkflows } from '@/apis/ugc';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
 import { VinesIcon } from '@/components/ui/vines-icon';
 
 interface IRelatedApplicationProps {
@@ -12,9 +12,10 @@ interface IRelatedApplicationProps {
 }
 
 export const RelatedApplication: React.FC<IRelatedApplicationProps> = ({ textId }) => {
-  const { data, isLoading } = useVectorRelationWorkflow(textId);
+  const { data, isLoading } = useSearchReferenceWorkflows('knowledge-base', textId);
 
   const isEmpty = !data || data.length === 0;
+  const teamId = localStorage.getItem('vines-team-id');
 
   return isEmpty || isLoading ? (
     <div className="vines-center size-full flex-col">
@@ -32,7 +33,6 @@ export const RelatedApplication: React.FC<IRelatedApplicationProps> = ({ textId 
     </div>
   ) : (
     <Table>
-      <TableCaption>A list of your recent invoices.</TableCaption>
       <TableHeader>
         <TableRow>
           <TableHead className="w-32">图标</TableHead>
@@ -41,12 +41,21 @@ export const RelatedApplication: React.FC<IRelatedApplicationProps> = ({ textId 
         </TableRow>
       </TableHeader>
       <TableBody>
-        {data?.map(({ iconUrl, displayName, description }, i) => (
+        {data?.map(({ iconUrl, displayName, workflowId, description }, i) => (
           <TableRow key={i}>
             <TableCell>
               <VinesIcon size="sm">{iconUrl || 'emoji:🍀:#ceefc5'}</VinesIcon>
             </TableCell>
-            <TableCell className="font-medium">{displayName}</TableCell>
+            <TableCell className="font-medium">
+              <a
+                className="transition-colors hover:text-primary-500"
+                href={`/${teamId}/workspace/${workflowId}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {displayName}
+              </a>
+            </TableCell>
             <TableCell>{description}</TableCell>
           </TableRow>
         ))}
