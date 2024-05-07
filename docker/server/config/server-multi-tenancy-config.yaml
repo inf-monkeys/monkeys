@@ -1,0 +1,58 @@
+servers:
+  - appId: monkeys
+    host: infmonkeys.local.com
+    customization:
+      title: 猴子无限
+      logo: https://static.aside.fun/static/vines.svg
+      favicon: https://static.infmonkeys.com/upload/favicon.svg
+
+  - appId: daocloud
+    host: daocloud.local.com
+    customization:
+      title: DaoCloud
+      logo: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQO2kvVfzoGINe15afHQTZRgLR786scC-zwv6p4kRDh&s
+      favicon: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQO2kvVfzoGINe15afHQTZRgLR786scC-zwv6p4kRDh&s
+
+database:
+  type: postgres
+  url: postgresql://monkeys:monkeys123@monkeys-postgres:5432/monkeys
+
+redis:
+  url: redis://monkeys-redis:6379/0
+
+auth:
+  enabled:
+    - password
+    - apikey
+
+conductor:
+  baseUrl: http://conductor-server:8080/api
+
+models:
+  - model:
+      - gpt-3.5-turbo
+      - gpt-4-0613
+    baseURL: https://api.openai.com/v1
+    apiKey: sk-xxxxxxxxxxxxxxxxxx
+    type:
+      - chat_completions
+  - model: davinci-002
+    baseURL: https://api.openai.com/v1
+    apiKey: sk-xxxxxxxxxxxxxxxxxx
+    type:
+      - completions
+  - model: Qwen/Qwen-7B-Chat-Int4
+    baseURL: http://127.0.0.1:8000/v1
+    apiKey: token-abc123
+    defaultParams:
+      stop:
+        - <|im_start|>
+        - <|im_end|>
+
+  - model: c4ai-command-r-plus-GPTQ
+    baseURL: http://172.24.0.51:30628/v1
+    displayName: c4ai-command-r-plus-GPTQ
+    defaultParams:
+      stop:
+        - <|im_start|>
+        - <|im_end|>

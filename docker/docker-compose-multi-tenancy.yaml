@@ -1,0 +1,9 @@
+version: '2.3'
+
+services:
+  server:
+    build:
+      context: ../
+      dockerfile: docker/server/Dockerfile-multi-tenancy
+    volumes:
+      - ./server/config/server-multi-tenancy-config.yaml:/usr/src/proxy/config.yaml
