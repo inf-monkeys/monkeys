@@ -1,8 +1,6 @@
 export interface ThemeCreate {
   name: string;
   primaryColor: string;
-  backgroundColor: string;
-  secondaryBackgroundColor: string;
 }
 
 export interface Theme extends ThemeCreate {

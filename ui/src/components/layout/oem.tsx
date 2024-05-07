@@ -17,7 +17,7 @@ export const OEM: React.FC = () => {
 
   const { data: oem } = useSystemConfig();
 
-  const { toggleDarkMode, setDarkMode, setDarkModeTrigger } = useAppStore();
+  const { darkMode, toggleDarkMode, setDarkMode, setDarkModeTrigger } = useAppStore();
 
   const { setValue } = usePaletteStore();
 
@@ -75,8 +75,8 @@ export const OEM: React.FC = () => {
     };
   }, []);
 
-  useDocumentTitle(title + get(oem, 'theme.name', 'AI'));
-  useFavicon(get(oem, 'theme.favicon.url', ''));
+  useDocumentTitle(title + get(oem, 'theme.title', 'AI'));
+  useFavicon(get(oem, `theme.favicon.${darkMode ? 'dark' : 'light'}`, ''));
 
   return null;
 };

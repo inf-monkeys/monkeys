@@ -49,7 +49,7 @@ export const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
 
     let ossUrl: string = tempImage ?? '';
 
-    const avatarB64 = cropperRef.current?.cropper.getCroppedCanvas().toDataURL();
+    const avatarB64 = cropperRef.current?.cropper.getCroppedCanvas()?.toDataURL();
     if (avatarB64) {
       const finalFileName = `${fileName ? fileName.split('.')[0] : nanoIdLowerCase(10)}.png`;
       const file = base64toFile(avatarB64, finalFileName);
@@ -94,7 +94,7 @@ export const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
             ready={() => {
               setTimeout(() => {
                 try {
-                  const avatarB64 = cropperRef.current?.cropper.getCroppedCanvas().toDataURL();
+                  const avatarB64 = cropperRef.current?.cropper.getCroppedCanvas()?.toDataURL();
                   if (avatarB64) {
                     const file = base64toFile(avatarB64, `temp.png`);
                     if (file) {
@@ -108,6 +108,8 @@ export const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
                 }
               });
             }}
+            checkCrossOrigin={false}
+            crossOrigin="anonymous"
           />
 
           <DialogFooter>
@@ -115,7 +117,9 @@ export const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
               accept={['image/png', 'image/jpeg']}
               maxSize={10}
               limit={1}
-              onFinished={(urls) => setTempImage(urls[0])}
+              onFinished={(urls) => {
+                setTempImage(urls[0]);
+              }}
             >
               <Button variant="outline" disabled={loading}>
                 上传其他图片

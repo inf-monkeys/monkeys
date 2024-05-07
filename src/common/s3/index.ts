@@ -53,7 +53,7 @@ export class S3Helpers {
     return res;
   }
 
-  public async getFileSignedUrl(fileKey: string) {
+  public async getSignedUrl(fileKey: string) {
     const command = new GetObjectCommand({
       Bucket: config.s3.bucket,
       Key: fileKey,
@@ -63,7 +63,7 @@ export class S3Helpers {
     return res;
   }
 
-  public async getUploadFileSignedUrl(fileKey: string) {
+  public async getSignedUrlForUpload(fileKey: string) {
     const command = new PutObjectCommand({
       Bucket: config.s3.bucket,
       Key: fileKey,
