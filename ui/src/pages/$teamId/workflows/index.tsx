@@ -13,9 +13,9 @@ import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { cloneWorkflow, deleteWorkflow } from '@/apis/workflow';
 import { ExportWorkflowDialog } from '@/components/dialog/export-workflow';
 import { IExportWorkflowWithAssetsContext } from '@/components/dialog/export-workflow/typings.ts';
+import { createWorkflowsColumns } from '@/components/layout/ugc-pages/workflows/consts.tsx';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
-import { createWorkflowsColumns } from '@/components/layout/ugc-pages/workflows/consts.tsx';
 import { WorkflowInfoEditor } from '@/components/layout/workspace/workflow/info-editor';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
@@ -184,7 +184,7 @@ export const Workflows: React.FC = () => {
                   onSelect={() => {
                     setExportAssetContext({
                       workflowId: item.workflowId,
-                      name: item.name,
+                      displayName: item.displayName,
                       version: item.version,
                     });
                     setExportDialogVisible(true);
@@ -197,7 +197,7 @@ export const Workflows: React.FC = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onSelect={() => {
-                    setExportAssetContext({ workflowId: item.workflowId, name: item.name });
+                    setExportAssetContext({ workflowId: item.workflowId, displayName: item.displayName });
                     setExportDialogVisible(true);
                   }}
                 >
