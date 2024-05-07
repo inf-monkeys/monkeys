@@ -80,6 +80,6 @@ async function bootstrap() {
   await bootstrapService.bootstrap();
 
   await app.listen(config.server.port, '0.0.0.0');
-  logger.info(`🚀: Start service at 0.0.0.0:${config.server.port} on port ${process.pid}`);
+  logger.info(`🚀: Start service at 0.0.0.0:${config.server.port} on pid ${process.pid}`);
 }
 bootstrap();
