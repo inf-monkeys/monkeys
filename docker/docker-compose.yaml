@@ -2,7 +2,6 @@ version: '2.3'
 
 services:
   server:
-    image: monkeys
     build:
       context: ../
       dockerfile: docker/server/Dockerfile
@@ -29,7 +28,6 @@ services:
         max-file: '3'
 
   ui:
-    image: monkeys-ui
     build:
       context: ../ui
       dockerfile: ../docker/ui/Dockerfile
@@ -118,7 +116,7 @@ services:
     networks:
       - monkeys
     ports:
-      - 81:80
+      - 80:80
     logging:
       driver: 'json-file'
       options:

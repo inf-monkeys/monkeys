@@ -1,0 +1,24 @@
+# Build Server
+FROM node:18-alpine as builder
+WORKDIR /usr/src/app
+COPY ["package.json", "yarn.lock", "./"]
+RUN yarn
+COPY . .
+RUN yarn build
+
+# Build Proxy
+FROM node:18-alpine as proxy
+# Copy source code of server to /usr/src/server
+WORKDIR /usr/src/server
+COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+
+# Copy source code of multi-tenancy to /usr/src/proxy
+WORKDIR /usr/src/proxy
+COPY ./multi-tenancy .
+RUN yarn
+
+ENV MONKEYS_DIST_FOLDER=/usr/src/server/dist
+
+EXPOSE 3000
+CMD ["node", "main.js"]
