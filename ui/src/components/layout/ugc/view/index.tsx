@@ -223,6 +223,8 @@ export const UgcView = <E extends object>({
     onPaginationChange,
   });
 
+  const rows = table.getRowModel().rows;
+
   return (
     <div className="flex size-full">
       <UgcSidebar
@@ -255,22 +257,24 @@ export const UgcView = <E extends object>({
           </AnimatePresence>
           <div className="flex flex-col">
             <ScrollArea className="relative h-[calc(100vh-9.5rem)] w-full rounded-r-lg px-4 py-2">
-              {table.getRowModel().rows.length === 0 ? (
-                <motion.div
-                  className="vines-center size-full h-[calc(100vh-12rem)] flex-col"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1, transition: { delay: 0.3 } }}
-                >
-                  <CircleSlash size={64} />
-                  <div className="mt-4 flex flex-col text-center">
-                    <h2 className="font-bold">暂无数据</h2>
-                  </div>
-                </motion.div>
+              {rows.length === 0 ? (
+                !isLoading && (
+                  <motion.div
+                    className="vines-center size-full h-[calc(100vh-12rem)] flex-col"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1, transition: { delay: 0.3 } }}
+                  >
+                    <CircleSlash size={64} />
+                    <div className="mt-4 flex flex-col text-center">
+                      <h2 className="font-bold">暂无数据</h2>
+                    </div>
+                  </motion.div>
+                )
               ) : (
                 <>
                   {displayMode === 'card' && (
                     <div className="grid w-full grid-cols-1 gap-6 overflow-y-auto lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-                      {table.getRowModel().rows.map((row, index) => (
+                      {rows.map((row, index) => (
                         <UgcViewCard
                           row={row}
                           key={index}
@@ -295,7 +299,7 @@ export const UgcView = <E extends object>({
                   )}
                   {displayMode === 'gallery' && (
                     <div className="flex flex-wrap gap-4">
-                      {table.getRowModel().rows.map((row, index) => (
+                      {rows.map((row, index) => (
                         <UgcViewGalleryItem
                           row={row}
                           columns={columns}
