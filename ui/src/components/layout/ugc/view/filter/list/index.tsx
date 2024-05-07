@@ -32,6 +32,7 @@ export interface IUgcViewFilterListProps extends IUgcCustomProps {
   filterButtonProps: Omit<IUgcViewFilterButtonProps, keyof IUgcCustomProps>;
 }
 
+// million-ignore
 export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
   assetType,
   assetKey,
@@ -106,7 +107,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
           <span>全部</span>
         </div>
       </div>
-      <ScrollArea className="h-[calc(100vh-14rem)]">
+      <ScrollArea className="h-[calc(100vh-15rem)]">
         <div className="flex flex-col gap-2">
           {(assetFilterRules || assetPublicCategories) &&
             (isMarket && assetPublicCategories
