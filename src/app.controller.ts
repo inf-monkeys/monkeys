@@ -108,16 +108,11 @@ export class AppController {
   public getConfigs() {
     const data: ISystemConfig = {
       theme: {
-        name: config.server.customization.title,
-        logoUrl: config.server.customization.logoUrl,
-        favicon: {
-          url: config.server.customization.faviconUrl,
-          type: 'image/svg+xml',
-        },
+        title: config.server.customization.title,
+        logo: config.server.customization.logo,
+        favicon: config.server.customization.favicon,
         colors: {
           primaryColor: config.server.customization.colors.primary,
-          backgroundColor: config.server.customization.colors.secondary,
-          secondaryBackgroundColor: config.server.customization.colors.secondaryBackground,
         },
       },
       auth: {

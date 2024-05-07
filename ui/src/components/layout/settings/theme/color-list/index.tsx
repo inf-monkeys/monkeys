@@ -20,7 +20,7 @@ interface IThemeColorListProps extends React.ComponentPropsWithoutRef<'div'> {}
 export const ThemeColorList: React.FC<IThemeColorListProps> = () => {
   const { team } = useVinesTeam();
   const { mutate } = useSWRConfig();
-  const { data } = useThemeList();
+  const { data, error } = useThemeList();
 
   const { setValue } = usePaletteStore();
 
@@ -46,6 +46,11 @@ export const ThemeColorList: React.FC<IThemeColorListProps> = () => {
       error: '主题色更新失败',
     });
   };
+
+  if (error instanceof Error && error.message === '404 NOT FOUND') {
+    // 404 | Module not enabled
+    return null;
+  }
 
   const finalData = data?.filter((theme, i, arr) => arr.findIndex((t) => t.primaryColor === theme.primaryColor) === i);
   const dataLength = finalData?.length;

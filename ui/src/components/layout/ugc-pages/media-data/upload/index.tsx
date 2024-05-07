@@ -2,7 +2,6 @@ import React from 'react';
 
 import { useSWRConfig } from 'swr';
 
-import _ from 'lodash';
 import { Upload } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -37,7 +36,7 @@ export const UploadMedia: React.FC<IUploadMediaProps> = () => {
             'application/zip',
           ]}
           onFinished={() => {
-            void mutate((key) => _.isArray(key) && key[0] === '/api/resources/list');
+            void mutate((key) => typeof key === 'string' && key.startsWith('/api/media-files'));
           }}
         />
       </DialogContent>
