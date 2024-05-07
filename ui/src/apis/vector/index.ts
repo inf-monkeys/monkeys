@@ -1,8 +1,6 @@
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
-
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import {
   ICreateVectorData,
@@ -137,12 +135,6 @@ export const useUploadDocumentToKnowledgeBase = (knowledgeBaseId: string) =>
   useSWRMutation<{ taskId: string } | undefined, unknown, string | null, IUploadDocument>(
     knowledgeBaseId ? `/api/tools/monkey_tools_knowledge_base/knowledge-bases/${knowledgeBaseId}/documents` : null,
     vinesFetcher({ method: 'POST' }),
-  );
-
-export const useVectorRelationWorkflow = (knowledgeBaseId: string) =>
-  useSWR<MonkeyWorkflow[] | undefined>(
-    knowledgeBaseId ? `/api/workflow/text-collection-related/${knowledgeBaseId}` : null,
-    vinesFetcher(),
   );
 
 export const useKnowledgeBaseTasks = (knowledgeBaseId: string) =>

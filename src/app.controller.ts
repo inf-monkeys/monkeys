@@ -108,16 +108,16 @@ export class AppController {
   public getConfigs() {
     const data: ISystemConfig = {
       theme: {
-        name: '猴子无限',
-        logoUrl: 'https://static.aside.fun/static/vines.svg',
+        name: config.server.customization.title,
+        logoUrl: config.server.customization.logoUrl,
         favicon: {
-          url: 'https://static.infmonkeys.com/upload/favicon.svg',
+          url: config.server.customization.faviconUrl,
           type: 'image/svg+xml',
         },
         colors: {
-          primaryColor: '#52ad1f',
-          backgroundColor: '#16161a',
-          secondaryBackgroundColor: '#212121',
+          primaryColor: config.server.customization.colors.primary,
+          backgroundColor: config.server.customization.colors.secondary,
+          secondaryBackgroundColor: config.server.customization.colors.secondaryBackground,
         },
       },
       auth: {

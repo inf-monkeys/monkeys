@@ -54,6 +54,7 @@ interface IUgcViewProps<E extends object> {
   onItemClick?: (item: IAssetItem<E>, e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   subtitle?: React.ReactNode;
   defaultPageSize?: number;
+  assetIdKey?: string;
 }
 
 export const UgcView = <E extends object>({
@@ -70,6 +71,7 @@ export const UgcView = <E extends object>({
   onItemClick,
   subtitle,
   defaultPageSize = 24,
+  assetIdKey = 'id',
 }: IUgcViewProps<E>): React.ReactNode => {
   const { ref } = useElementSize();
   const team = useVinesTeam();
@@ -189,7 +191,7 @@ export const UgcView = <E extends object>({
       cell: ({ row }) =>
         RenderTags({
           assetType,
-          assetId: row.original.id,
+          assetId: row.original[assetIdKey],
           assetTags: row.original.assetTags,
           mutate,
         }),

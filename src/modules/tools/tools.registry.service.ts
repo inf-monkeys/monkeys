@@ -74,9 +74,6 @@ export class ToolsRegistryService {
     if (!data.api.url) {
       throw new Error('Error import tool: api.url is missing');
     }
-    if (!data.contact_email) {
-      throw new Error('Error import tool: contact_email is missing');
-    }
     if (data.triggers?.length) {
       this.validateTriggerEndpoints(data.triggerEndpoints);
     }
