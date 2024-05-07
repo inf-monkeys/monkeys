@@ -49,6 +49,8 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  const rows = table.getRowModel().rows;
+
   return (
     <div>
       <div className="rounded-md border">
@@ -67,8 +69,8 @@ export function DataTable<TData, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+            {rows?.length ? (
+              rows.map((row) => (
                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
