@@ -142,7 +142,7 @@ export const ExportWorkflowDialog: React.FC<IExportWorkflowDialogProps> = ({ vis
       return;
     }
     setExporting(true);
-    toast.promise(exportWorkflow(context.workflowId, context.name, context.version), {
+    toast.promise(exportWorkflow(context.workflowId, context.displayName, context.version), {
       loading: '导出中...',
       success: () => {
         setVisible(false);

@@ -1,1 +1,1 @@
-export type IExportWorkflowWithAssetsContext = { workflowId: string; name: string; version?: number };
+export type IExportWorkflowWithAssetsContext = { workflowId: string; displayName: string; version?: number };
