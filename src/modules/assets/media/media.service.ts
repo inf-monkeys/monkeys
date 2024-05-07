@@ -11,6 +11,10 @@ export class MediaFileService {
     return await this.mediaRepository.listRichMedias(teamId, dto);
   }
 
+  public async deleteMedia(teamId: string, id: string) {
+    return await this.mediaRepository.deleteMedia(teamId, id);
+  }
+
   public async getMediaById(id: string) {
     return await this.mediaRepository.getMediaById(id);
   }
