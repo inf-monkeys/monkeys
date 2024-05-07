@@ -2,13 +2,13 @@ FROM node:18-alpine as builder
 
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml ./
+COPY ["package.json", "yarn.lock", "./"]
 
-RUN npm i -g pnpm && pnpm i
+RUN yarn
 
 COPY . .
 
-RUN npm run build
+RUN yarn build
 
 FROM node:18-alpine as runner
 

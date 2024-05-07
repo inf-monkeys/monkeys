@@ -4,13 +4,13 @@ import RedisStore from 'connect-redis';
 import cookieParser from 'cookie-parser';
 import { rateLimit } from 'express-rate-limit';
 import session, { MemoryStore } from 'express-session';
-import { Redis } from 'ioredis';
 import passport from 'passport';
 import { AppModule } from './app.module';
-import { config } from './common/config';
+import { config, isRedisConfigured } from './common/config';
 import { ExceptionsFilter } from './common/filters/exception.filter';
 import { logger } from './common/logger';
 import { ValidationPipe } from './common/pipes/validator.pipe';
+import { initRedisClient } from './common/redis';
 import { BootstrapService } from './modules/bootstrap/bootstrap.service';
 import { setupExampleToolSwagger } from './modules/tools/example/example.swagger';
 import { setupLlmToolSwagger } from './modules/tools/llm/llm.swagger';
@@ -48,10 +48,10 @@ async function bootstrap() {
   // Authentication & Session
   app.use(
     session({
-      store: config.redis.url
+      store: isRedisConfigured()
         ? new RedisStore({
-            client: new Redis(config.redis.url),
-            prefix: config.redis.prefix,
+            client: initRedisClient(config.redis),
+            prefix: config.redis.prefix || config.server.appId,
           })
         : new MemoryStore(),
       secret: config.auth.sessionSecret, // to sign session id

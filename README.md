@@ -6,13 +6,9 @@
 [![GitHub stars](https://img.shields.io/github/stars/inf-monkeys/monkeys?style=social&label=Star&maxAge=2592000)](https://GitHub.com/inf-monkeys/monkeys/stargazers/)
 [![GitHub forks](https://img.shields.io/github/forks/inf-monkeys/monkeys?style=social&label=Fork&maxAge=2592000)](https://github.com/inf-monkeys/monkeys)
 
-</div>
-
-## Description
-
 Monkeys is an open source tool for build workflow-centric AI applications.
 
-![](./docs/images/dashboard.png)
+</div>
 
 ## Documentation
 
@@ -30,7 +26,9 @@ Monkeys Consists of the following key components:
 
 ## Getting Started
 
-### Prerequisites
+### 👨‍💻 Developer
+
+#### Prerequisites
 
 - [Node 18](https://nodejs.org/en/download/current): This project requires node version at least 18.
 - [yarn](https://yarnpkg.com/): We use yarn as the Node Package Manager.
@@ -59,32 +57,76 @@ Monkeys Consists of the following key components:
 - [Redis](https://redis.io/)(Optional): We use inmemory cache as default, for test purpose, you can just skip this.
 - Postgres/MySQL(Optional): We use sqlite as default storage engine, for test purpose, you can just skip this.
 
-### Setup
 
-#### 👨‍💻 Developer
+#### Backend
 
 1. Clone the repo
    ```sh
    git clone https://github.com/inf-monkeys/monkeys.git
    ```
-2. Install NPM packages
+2. Go to `monkeys` folder
+
+   ```sh
+   cd monkeys
+   ```
+
+3. Install Node Modules
    ```sh
    yarn
    ```
-3. Run the server:
+4. Run the server:
 
    ```sh
    yarn start
    ```
 
+#### Frontend 
+
+1. Go to `ui` folder
+
+   ```sh
+   cd ui
+   ```
+
+2. Install Node Modules
+
+   ```sh
+   yarn
+   ```
+
+3. Update `.env`
+
+   ```sh
+   cp .env.example .env
+   ```
+
+   Set `SERVER_ENDPOINT` to your local server, `http://localhost:3000` for example.
+
+4. Start UI
+
+   ```sh
+   yarn dev
+   ```
+
 That's all, you are ready to go!
 
-#### 🐳 Docker
 
-We provide a helm chart, check the [docs](https://inf-monkeys.github.io/docs/zh-cn/installation/helm/).
+### 🐳 Docker
+
+#### Docker Compose
+
+Read more [here](./docker/README.md)
+
+#### Helm
+
+We provide a helm chart, check the [docs](https://inf-monkeys.github.io/docs/zh-cn/getting-started/helm/).
 
 
 ## Tools
+
+### Awesome Monkey Tools
+
+Here is a detailed list of existing awesome monkey tools: [https://github.com/inf-monkeys/awesome-monkey-tools](https://github.com/inf-monkeys/awesome-monkey-tools).
 
 ### Write Your Own Monkey Tool
 

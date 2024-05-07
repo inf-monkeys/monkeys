@@ -27,6 +27,16 @@ export interface ServerConfig {
     windowMs: number;
     max: number;
   };
+  customization: {
+    title: string;
+    logoUrl: string;
+    faviconUrl: string;
+    colors: {
+      primary: string;
+      secondary: string;
+      secondaryBackground: string;
+    };
+  };
 }
 
 export enum RedisMode {
@@ -177,6 +187,16 @@ export const config: Config = {
     rateLimit: {
       windowMs: readConfig('server.rateLimit.windowMs', 1000),
       max: readConfig('server.rateLimit.max', 100),
+    },
+    customization: {
+      title: readConfig('server.customization.title', '猴子无限'),
+      logoUrl: readConfig('server.customization.logoUrl', 'https://static.aside.fun/static/vines.svg'),
+      faviconUrl: readConfig('server.customization.faviconUrl', 'https://static.infmonkeys.com/upload/favicon.svg'),
+      colors: {
+        primary: readConfig('server.customization.colors.primary', '#52ad1f'),
+        secondary: readConfig('server.customization.colors.secondary', '#16161a'),
+        secondaryBackground: readConfig('server.customization.colors.secondaryBackground', '#212121'),
+      },
     },
   },
   conductor: {
