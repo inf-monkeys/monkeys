@@ -18,7 +18,7 @@ export const ThemeMarket: React.FC<IThemeMarketProps> = () => {
   const { trigger, isMutating } = useCreateTheme();
 
   const handleCreateTheme = (name: string, color: string) => {
-    toast.promise(trigger({ name, primaryColor: color, backgroundColor: '#fff', secondaryBackgroundColor: '#fff' }), {
+    toast.promise(trigger({ name, primaryColor: color }), {
       loading: '正在添加主题',
       success: '主题添加成功',
       error: '主题添加失败',
