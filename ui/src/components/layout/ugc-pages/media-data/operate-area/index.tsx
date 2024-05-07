@@ -1,12 +1,12 @@
 import React from 'react';
 
-import { mutate } from 'swr';
+import { useSWRConfig } from 'swr';
 
 import { useClipboard } from '@mantine/hooks';
-import _ from 'lodash';
 import { Copy, Trash } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { useDeleteMediaData } from '@/apis/media-data';
 import { IMediaData } from '@/apis/media-data/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { UgcDeleteDialog } from '@/components/layout/ugc/delete-dialog';
@@ -29,7 +29,10 @@ interface IOperateAreaProps {
 }
 
 export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, tooltipTriggerContent }) => {
+  const { mutate } = useSWRConfig();
   const clipboard = useClipboard({ timeout: 500 });
+
+  const { trigger: deleteTrigger } = useDeleteMediaData(item.id);
 
   return (
     <DropdownMenu>
@@ -64,11 +67,20 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
             复制文件直链
           </DropdownMenuItem>
           <UgcDeleteDialog
-            assetType={item?.assetType}
-            ugcId={item?.id}
-            afterOperate={() => {
-              void mutate((key) => _.isArray(key) && key[0] === '/api/resources/list', undefined, {
-                revalidate: true,
+            handleDelete={() => {
+              toast.promise(deleteTrigger, {
+                success: () => {
+                  setTimeout(
+                    () =>
+                      void mutate((key) => typeof key === 'string' && key.startsWith('/api/media-files'), undefined, {
+                        revalidate: true,
+                      }),
+                    1000,
+                  );
+                  return '删除成功';
+                },
+                error: '删除失败，请检查网络后重试',
+                loading: '删除中......',
               });
             }}
           >

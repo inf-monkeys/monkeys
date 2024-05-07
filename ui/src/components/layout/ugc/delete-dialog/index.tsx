@@ -21,12 +21,19 @@ interface IUgcDeleteDialogProps {
   assetType?: AssetType;
   afterOperate?: () => void;
   children?: React.ReactNode;
+  handleDelete?: () => void;
 }
 
-export const UgcDeleteDialog: React.FC<IUgcDeleteDialogProps> = ({ children, ugcId, assetType, afterOperate }) => {
+export const UgcDeleteDialog: React.FC<IUgcDeleteDialogProps> = ({
+  children,
+  handleDelete,
+  ugcId,
+  assetType,
+  afterOperate,
+}) => {
   const [visible, setVisible] = useState(false);
 
-  const handleDelete = async () => {
+  const _handleDelete = async () => {
     if (!ugcId || !assetType) {
       toast.error('请刷新页面后重试');
       return;
@@ -57,7 +64,7 @@ export const UgcDeleteDialog: React.FC<IUgcDeleteDialogProps> = ({ children, ugc
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>取消</AlertDialogCancel>
-          <AlertDialogAction onClick={() => handleDelete()}>确定</AlertDialogAction>
+          <AlertDialogAction onClick={() => (handleDelete ? handleDelete() : _handleDelete())}>确定</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
