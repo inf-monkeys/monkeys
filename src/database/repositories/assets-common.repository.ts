@@ -209,28 +209,38 @@ export class AssetsCommonRepository {
     );
   }
 
-  public async addTagsToAsset(teamId: string, assetType: AssetType, assetId: string, tagIds: string[]) {
-    for (const tagId of tagIds) {
-      const exists = await this.assetsTagRelationsRepo.findOne({
-        where: {
-          assetType,
-          assetId,
-          tagId,
-          isDeleted: false,
+  public async updateAssetTags(teamId: string, assetType: AssetType, assetId: string, tagIds: string[]) {
+    const originalTags = await this.assetsTagRelationsRepo.find({
+      where: {
+        isDeleted: false,
+        assetType,
+        assetId,
+      },
+    });
+    const originalTagIds = originalTags.map((x) => x.tagId);
+    const toDelete = originalTags.filter((x) => !tagIds.includes(x.tagId));
+    const toAdd = tagIds.filter((x) => !originalTagIds.includes(x));
+    for (const tag of toDelete) {
+      await this.assetsTagRelationsRepo.update(
+        {
+          id: tag.id,
         },
+        {
+          isDeleted: true,
+        },
+      );
+    }
+    for (const tagId of toAdd) {
+      await this.assetsTagRelationsRepo.save({
+        id: generateDbId(),
+        isDeleted: false,
+        createdTimestamp: Date.now(),
+        updatedTimestamp: Date.now(),
+        teamId,
+        assetType,
+        assetId,
+        tagId,
       });
-      if (!exists) {
-        await this.assetsTagRelationsRepo.save({
-          id: generateDbId(),
-          isDeleted: false,
-          createdTimestamp: Date.now(),
-          updatedTimestamp: Date.now(),
-          teamId,
-          assetType,
-          assetId,
-          tagId,
-        });
-      }
     }
   }
 

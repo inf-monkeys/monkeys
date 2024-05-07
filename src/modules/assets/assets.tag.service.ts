@@ -25,8 +25,8 @@ export class AssetsTagService {
     return await this.assetsCommonRepository.deleteTag(teamId, tagId);
   }
 
-  public async addTagsToAsset(teamId: string, assetType: AssetType, assetId: string, tagIds: string[]) {
-    return await this.assetsCommonRepository.addTagsToAsset(teamId, assetType, assetId, tagIds);
+  public async updateAssetTags(teamId: string, assetType: AssetType, assetId: string, tagIds: string[]) {
+    return await this.assetsCommonRepository.updateAssetTags(teamId, assetType, assetId, tagIds);
   }
 
   public async removeAssetTags(teamId: string, assetType: AssetType, assetId: string, tagIds: string[]) {

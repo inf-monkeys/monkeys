@@ -114,6 +114,7 @@ export const Workflows: React.FC = () => {
       <UgcView
         assetKey="workflow"
         assetType="workflow"
+        assetIdKey="workflowId"
         assetName="工作流"
         useUgcFetcher={useUgcWorkflows}
         preloadUgcFetcher={preloadUgcWorkflows}
