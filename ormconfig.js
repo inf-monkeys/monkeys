@@ -10,6 +10,7 @@ const entitiesDir = isProd ? __dirname + `/dist/database/entities/**/*.js` : __d
 
 let rawConfigs = [];
 if (process.env.MONKEYS_CONFIG_FILE) {
+  console.log('Using MONKEYS_CONFIG_FILE:', process.env.MONKEYS_CONFIG_FILE);
   rawConfigs = [path.resolve(process.env.MONKEYS_CONFIG_FILE)];
 } else {
   rawConfigs = [path.resolve('/etc/monkeys/config.yaml'), path.resolve('./config.yaml')];
@@ -23,11 +24,14 @@ const config = [...rawConfigs].reduce((prev, curr) => {
   return _.merge(prev, curr);
 });
 
+console.log('Run migration for appId: ', config.server.appId);
+const appId = config.server.appId;
 const dataSource = new DataSource({
   ...config.database,
-  entityPrefix: config.server.appId.concat('_'),
+  entityPrefix: appId.concat('_'),
   migrations: [migrationsDir],
   entities: [entitiesDir],
+  migrationsTableName: `${appId}_migrations`,
 });
 dataSource.initialize();
 

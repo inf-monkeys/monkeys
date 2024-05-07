@@ -23,9 +23,6 @@ services:
         condition: service_healthy
     logging:
       driver: 'json-file'
-      options:
-        max-size: '1k'
-        max-file: '3'
 
   ui:
     build:
@@ -35,9 +32,6 @@ services:
       - monkeys
     logging:
       driver: 'json-file'
-      options:
-        max-size: '1k'
-        max-file: '3'
 
   conductor-server:
     image: infmonkeys/conductor:1.0.0
@@ -52,9 +46,6 @@ services:
       retries: 12
     logging:
       driver: 'json-file'
-      options:
-        max-size: '1k'
-        max-file: '3'
 
   monkeys-redis:
     image: redis:6.2.3-alpine
@@ -82,9 +73,6 @@ services:
       retries: 12
     logging:
       driver: 'json-file'
-      options:
-        max-size: '1k'
-        max-file: '3'
 
   monkeys-postgres:
     image: postgres
@@ -103,9 +91,6 @@ services:
       retries: 12
     logging:
       driver: 'json-file'
-      options:
-        max-size: '1k'
-        max-file: '3'
 
   monkeys-nginx:
     image: nginx
@@ -119,9 +104,6 @@ services:
       - 80:80
     logging:
       driver: 'json-file'
-      options:
-        max-size: '1k'
-        max-file: '3'
     depends_on:
       - server
       - ui

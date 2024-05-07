@@ -4,9 +4,11 @@ const path = require('path');
 const { configure, getLogger } = require('log4js');
 const httpProxy = require('http-proxy');
 const http = require('http');
-const { fork } = require('child_process');
+const { fork, exec } = require('child_process');
+const util = require('util');
 
 const proxy = httpProxy.createProxyServer({});
+const execAsync = util.promisify(exec);
 
 configure({
   appenders: {
@@ -66,11 +68,41 @@ const status = {
   running: true,
 };
 
+async function runCommand(path, command, envVars = {}) {
+  try {
+    // 合并当前进程环境变量和传入的环境变量
+    const env = { ...process.env, ...envVars };
+
+    // 设置执行路径和环境变量，并执行命令行指令
+    const { stdout, stderr } = await execAsync(command, { cwd: path, env });
+
+    // 如果 stderr 不为空，则返回错误信息
+    if (stderr) {
+      return `Error: ${stderr}`;
+    }
+
+    // 返回正常输出结果
+    return stdout;
+  } catch (error) {
+    // 如果出现错误，返回错误信息
+    return `Execution Error: ${error.message}`;
+  }
+}
+
 // Start servers
 const startServers = async () => {
-  logger.info('Starting servers with config: %s', servers);
+  logger.info('Starting servers with config: %s', JSON.stringify(servers));
   for (let i = 0; i < serverConfigYamls.length; i++) {
+    // Get configuration file
     const configFile = path.resolve(__dirname, `./server-${i}.yaml`);
+
+    // Run migration
+    const migrationResult = await runCommand(MONKEYS_DIST_FOLDER, `yarn migration:run`, {
+      MONKEYS_CONFIG_FILE: configFile,
+    });
+    logger.info(`Migration result for app ${i}: ${migrationResult}`);
+
+    // Start server
     const script = `${MONKEYS_DIST_FOLDER}/main`;
     const args = ['--config', configFile];
     let child = fork(script, args, {});
@@ -121,7 +153,7 @@ const runPorxyServer = (port) => {
       res.end('');
     });
   });
-  httpServer.listen(3000);
+  httpServer.listen(port);
 };
 
 const main = async () => {
