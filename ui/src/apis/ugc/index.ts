@@ -72,11 +72,15 @@ export const useUgcApplicationStore = (dto: IListUgcDto) =>
 export const preloadUgcApplicationStore = (dto: IListUgcDto) =>
   preloadUgcItems<IApplicationStoreItemDetail>(dto, '/api/templates');
 
-export const useUgcTextModelStore = (dto: IListUgcDto) => useUgcItems<ILLMModel>(dto, '/api/llm-models/public');
-export const preloadUgcTextModelStore = (dto: IListUgcDto) => preloadUgcItems<ILLMModel>(dto, '/api/llm-models/public');
+export const useUgcTextModelStore = (dto: IListUgcDto) =>
+  useUgcItems<ILLMModel>(dto, '/api/assets/llm-model/marketplace');
+export const preloadUgcTextModelStore = (dto: IListUgcDto) =>
+  preloadUgcItems<ILLMModel>(dto, '/api/assets/llm-model/marketplace');
 
-export const useUgcImageModelStore = (dto: IListUgcDto) => useUgcItems<ISDModel>(dto, '/api/sd-models/public');
-export const preloadUgcImageModelStore = (dto: IListUgcDto) => preloadUgcItems<ISDModel>(dto, '/api/sd-models/public');
+export const useUgcImageModelStore = (dto: IListUgcDto) =>
+  useUgcItems<ISDModel>(dto, '/api/assets/sd-model/marketplace');
+export const preloadUgcImageModelStore = (dto: IListUgcDto) =>
+  preloadUgcItems<ISDModel>(dto, '/api/assets/sd-model/marketplace');
 
 export const useAssetTagList = () =>
   useSWR<IAssetTag[] | undefined>(`/api/assets/tags`, vinesFetcher(), {
