@@ -492,6 +492,7 @@ export class WorkflowRepository {
       .select('w.workflow_id', 'workflow_id')
       .addSelect('MAX(w.version)', 'max_version')
       .where('w.team_id = :teamId', { teamId })
+      .andWhere('w.is_deleted = false')
       .groupBy('w.workflow_id');
 
     if (filter) {
