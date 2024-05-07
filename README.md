@@ -90,7 +90,7 @@ Monkeys Consists of the following key components:
 2. Install Node Modules
 
    ```sh
-   pnpm install
+   yarn
    ```
 
 3. Update `.env`
@@ -104,13 +104,19 @@ Monkeys Consists of the following key components:
 4. Start UI
 
    ```sh
-   pnpm dev
+   yarn dev
    ```
 
 That's all, you are ready to go!
 
 
 ### 🐳 Docker
+
+#### Docker Compose
+
+Read more [here](./docker/README.md)
+
+#### Helm
 
 We provide a helm chart, check the [docs](https://inf-monkeys.github.io/docs/zh-cn/installation/helm/).
 

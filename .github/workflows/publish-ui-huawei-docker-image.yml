@@ -37,7 +37,7 @@ jobs:
         uses: docker/build-push-action@v4 # docker build & push
         with:
           context: ./ui
-          file: ./ui/Dockerfile
+          file: ./docker/ui/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
