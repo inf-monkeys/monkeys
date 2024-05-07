@@ -26,7 +26,9 @@ Monkeys Consists of the following key components:
 
 ## Getting Started
 
-### Prerequisites
+### 👨‍💻 Developer
+
+#### Prerequisites
 
 - [Node 18](https://nodejs.org/en/download/current): This project requires node version at least 18.
 - [yarn](https://yarnpkg.com/): We use yarn as the Node Package Manager.
@@ -55,7 +57,6 @@ Monkeys Consists of the following key components:
 - [Redis](https://redis.io/)(Optional): We use inmemory cache as default, for test purpose, you can just skip this.
 - Postgres/MySQL(Optional): We use sqlite as default storage engine, for test purpose, you can just skip this.
 
-### 👨‍💻 Developer
 
 #### Backend
 
@@ -118,7 +119,7 @@ Read more [here](./docker/README.md)
 
 #### Helm
 
-We provide a helm chart, check the [docs](https://inf-monkeys.github.io/docs/zh-cn/installation/helm/).
+We provide a helm chart, check the [docs](https://inf-monkeys.github.io/docs/zh-cn/getting-started/helm/).
 
 
 ## Tools
