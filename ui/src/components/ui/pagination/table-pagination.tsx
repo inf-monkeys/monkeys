@@ -2,6 +2,7 @@ import React from 'react';
 
 import { usePagination } from '@mantine/hooks';
 import { OnChangeFn, PaginationState } from '@tanstack/react-table';
+import { useTranslation } from 'react-i18next';
 
 import {
   Pagination,
@@ -43,6 +44,7 @@ export const TablePagination: React.FC<ITablePaginationProps> = ({
   className,
   isLoadAll = false,
 }) => {
+  const { t } = useTranslation();
   const total = Math.ceil(rowCount / pagination.pageSize);
   const paginationState = usePagination({
     total,
@@ -60,11 +62,14 @@ export const TablePagination: React.FC<ITablePaginationProps> = ({
     <div className={cn('flex h-[36px] justify-between py-1', className)}>
       <div className="ml-4 flex items-center gap-2 text-nowrap">
         <span>
-          共 {rowCount} 条{!isLoadAll && `，第 ${paginationState.active} 页`}
+          {t('components.ui.pagination.table-pagination.hint.count', { count: rowCount })}
+          {!isLoadAll &&
+            '  ' +
+              t('components.ui.pagination.table-pagination.hint.page-index', { pageIndex: paginationState.active })}
         </span>
         {!isLoadAll && (
           <>
-            <span>，每页</span>
+            <span>{'  ' + t('components.ui.pagination.table-pagination.hint.page-size')}</span>
             <Select
               value={pagination.pageSize.toString()}
               onValueChange={(v) =>
@@ -81,7 +86,7 @@ export const TablePagination: React.FC<ITablePaginationProps> = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectLabel>每页条目</SelectLabel>
+                  <SelectLabel>{t('components.ui.pagination.table-pagination.page-size')}</SelectLabel>
                   <SelectItem value="5">5</SelectItem>
                   <SelectItem value="10">10</SelectItem>
                   <SelectItem value="20">20</SelectItem>
@@ -90,7 +95,6 @@ export const TablePagination: React.FC<ITablePaginationProps> = ({
                 </SelectGroup>
               </SelectContent>
             </Select>
-            <span>条</span>
           </>
         )}
       </div>

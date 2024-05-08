@@ -17,6 +17,27 @@
     }
   },
 
+  "components": {
+    "ui": {
+      "pagination": {
+        "next": "下一页",
+        "previous": "上一页",
+        "more": "更多",
+        "table-pagination": {
+          "hint": {
+            "count": "共 {{count}} 条",
+            "page-index": "第 {{pageIndex}} 页",
+            "page-size": "每页"
+          },
+          "page-size": "每页条目"
+        }
+      },
+      "data-table": {
+        "empty": "暂无数据"
+      }
+    }
+  },
+
   "auth": {
     "oidc": {
       "auth-failed": "授权校验失败！请尝试重新登录n",

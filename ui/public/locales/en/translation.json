@@ -3,11 +3,9 @@
     "network-error": "System maintenance",
     "empty-auth-methods": "Login is not enabled"
   },
-
   "common": {
     "language-selector": {
       "tooltip": "Switch language",
-
       "switching": "Switching language...",
       "switched": "Language switched",
       "switch-failed": "Failed to switch language!"
@@ -16,29 +14,43 @@
       "loading": "Loading..."
     }
   },
-
+  "components": {
+    "ui": {
+      "pagination": {
+        "next": "Next",
+        "previous": "Previous",
+        "more": "More",
+        "table-pagination": {
+          "hint": {
+            "count": "Total {{count}}",
+            "page-index": "Page {{pageIndex}}",
+            "page-size": "Per page"
+          },
+          "page-size": "Max per page"
+        }
+      },
+      "data-table": {
+        "empty": "No data"
+      }
+    }
+  },
   "auth": {
     "oidc": {
       "auth-failed": "Authorization failed! Please try to login again",
       "logging-in": "Logging in via {{oidc}}"
     },
-
     "login": {
       "sms": "SMS",
       "email": "Email",
       "other": "OR",
-
       "only-oidc": "Only support OIDC login",
       "select-account": "Select logged in account",
-
       "success": "Login successful",
       "logging-in": "Logging in..."
     },
-
     "users": {
       "selector": {
         "title": "Select user",
-
         "switching": "Switching user...",
         "switched": "Switched to user: {{name}}",
         "switch-failed": "Failed to switch user!"
