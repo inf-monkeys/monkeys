@@ -29,6 +29,15 @@
           },
           "page-size": "每页条目"
         }
+      },
+      "icon-selector": {
+        "background-color": "背景颜色"
+      },
+      "image-editor": {
+        "title": "上传图像",
+        "confirm-tooltip": "点击更新",
+        "upload-others": "上传其他图像",
+        "save": "保存"
       }
     }
   },

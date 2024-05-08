@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import data from '@emoji-mart/data';
 import i18n from '@emoji-mart/data/i18n/zh.json';
 import Picker from '@emoji-mart/react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -17,6 +18,8 @@ interface IVinesIconSelectorProps extends Omit<React.ComponentPropsWithoutRef<'d
 const colors = ['#434343', '#f2c1be', '#fadebb', '#fef8a3', '#ceefc5', '#d1dcfb', '#d9caf8'];
 
 export const VinesIconSelector: React.FC<IVinesIconSelectorProps> = ({ children, onChange, emojiLink, onFinished }) => {
+  const { t } = useTranslation();
+
   const [selectedColor, setSelectedColor] = useState(colors[4]);
   const [selectedEmoji, setSelectedEmoji] = useState('🍀');
 
@@ -54,7 +57,7 @@ export const VinesIconSelector: React.FC<IVinesIconSelectorProps> = ({ children,
         />
         <div className="flex h-20 w-full items-center justify-between gap-2 px-5 pb-1">
           <div>
-            <p className="mb-2 text-sm">背景颜色</p>
+            <p className="mb-2 text-sm">{t('components.ui.icon-selector.background-color')}</p>
             <div className="flex items-center gap-1">
               {colors.map((color, index) => (
                 <div
