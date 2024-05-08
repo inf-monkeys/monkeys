@@ -11,6 +11,21 @@
       "switching": "切换中...",
       "switched": "已切换为「简体中文」",
       "switch-failed": "语言切换失败！"
+    },
+    "load": {
+      "loading": "加载中..."
+    }
+  },
+
+  "auth": {
+    "oidc": {
+      "auth-failed": "授权校验失败！请尝试重新登录n",
+      "logging-in": "正在通过 {{oidc}} 登录中"
+    },
+
+    "login": {
+      "success": "登录成功",
+      "logging-in": "登录中"
     }
   }
 }
