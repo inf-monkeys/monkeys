@@ -32,3 +32,21 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Save Docker image to a tar file
+        run: |
+          RELEASE_TAG=${GITHUB_REF#refs/tags/}
+          docker save infmonkeys/monkeys-multi-tenancy:$RELEASE_TAG -o monkeys-multi-tenancy-$RELEASE_TAG.tar.gz
+
+      - name: Install TOS CLI And Upload to Tos
+        env:
+          TOS_ACCESS_KEY_ID: ${{ secrets.TOS_ACCESS_KEY_ID }}
+          TOS_SECRET_ACCESS_KEY: ${{ secrets.TOS_SECRET_ACCESS_KEY }}
+          TOS_REGION: ${{ secrets.TOS_REGION }}
+          TOS_ENDPOINT_URL: ${{ secrets.TOS_ENDPOINT_URL }}
+          TOS_BUCKET: ${{ secrets.TOS_BUCKET }}
+        run: |
+          RELEASE_TAG=${GITHUB_REF#refs/tags/}
+          wget https://tos-tools.tos-cn-beijing.volces.com/linux/tosutil && chmod a+x tosutil
+          ./tosutil config -i "$TOS_ACCESS_KEY_ID" -k "$TOS_SECRET_ACCESS_KEY" -e "$TOS_ENDPOINT_URL" -re "$TOS_REGION" 
+          ./tosutil cp monkeys-multi-tenancy-$RELEASE_TAG.tar.gz tos://$TOS_BUCKET/docker/monkeys/monkeys/monkeys-multi-tenancy-$RELEASE_TAG.tar.gz
