@@ -1,7 +1,7 @@
 import { CacheManager } from '@/common/cache';
 import { CACHE_TOKEN, MQ_TOKEN } from '@/common/common.module';
 import { conductorClient } from '@/common/conductor';
-import { config, isRedisConfigured } from '@/common/config';
+import { config } from '@/common/config';
 import { logger } from '@/common/logger';
 import { Mq } from '@/common/mq';
 import { ExtendedToolDefinition } from '@/common/utils/define-tool';
@@ -17,7 +17,7 @@ import { ToolsRepository } from '../../database/repositories/tools.repository';
 import { LLM_CHAT_COMPLETION_TOOL, LLM_COMPLETION_TOOL, LLM_NAMESPACE } from './llm/llm.controller';
 import { ToolsRegistryService } from './tools.registry.service';
 
-export const CONDUCTOR_TASK_DEF_NAME = config.conductor.workerPrefix ? `${config.conductor.workerPrefix}monkeys` : 'monkeys';
+export const CONDUCTOR_TASK_DEF_NAME = config.conductor.workerPrefix ? `${config.conductor.workerPrefix}${config.server.appId}` : config.server.appId;
 export const TOOL_STREAM_RESPONSE_TOPIC = (workflowInstanceId: string) => {
   return `${config.server.appId}:workflow-execution:stream:${workflowInstanceId}`;
 };
@@ -158,9 +158,6 @@ export class ToolsPollingService {
       };
     }
     const outputAs = this.getToolOutputAsConfig(tool, inputData);
-    if (outputAs === 'stream' && !isRedisConfigured()) {
-      throw new Error('Stream output is not supported without redis');
-    }
 
     const { method, path } = apiInfo;
     const namespace = __toolName.split(':')[0];
