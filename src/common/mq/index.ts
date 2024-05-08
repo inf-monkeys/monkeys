@@ -1,5 +1,4 @@
 import { EventEmitter } from 'events';
-import { logger } from '../logger';
 
 export interface Mq {
   subscribe(channel: string, callback: (channel: string, message: string) => void): void;
@@ -16,7 +15,6 @@ export class EventEmitterMq implements Mq {
   }
 
   public async publish(channel: string, message: string) {
-    logger.debug(`Publishing message to channel ${channel}: ${message}`);
     this.emitter.emit(channel, message);
   }
 

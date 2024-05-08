@@ -46,6 +46,8 @@ try {
   process.exit(1);
 }
 
+const port = process.env.PORT || config.port || 3000;
+
 const servers = config.servers;
 if (!servers.length) {
   console.error('No servers found in configuration');
@@ -168,7 +170,7 @@ const runPorxyServer = (port) => {
 
 const main = async () => {
   startServers();
-  runPorxyServer(3000);
+  runPorxyServer(port);
 };
 
 main()
