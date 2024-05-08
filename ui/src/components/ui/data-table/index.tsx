@@ -83,7 +83,7 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  {t('components.ui.data-table.empty')}
+                  {t('common.load.empty')}
                 </TableCell>
               </TableRow>
             )}
