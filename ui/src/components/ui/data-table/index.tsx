@@ -9,6 +9,7 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -35,6 +36,8 @@ export function DataTable<TData, TValue>({
   enablePagination = false,
   defaultPageSize = 5,
 }: IDataTableProps<TData, TValue>) {
+  const { t } = useTranslation();
+
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
@@ -80,7 +83,7 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  暂无数据
+                  {t('components.ui.data-table.empty')}
                 </TableCell>
               </TableRow>
             )}
@@ -90,14 +93,14 @@ export function DataTable<TData, TValue>({
       {enablePagination && (
         <div className="flex items-center justify-between py-4">
           <div className="flex items-center gap-2 text-nowrap">
-            {`共 ${data.length} 条，第 ${(table.options.state.pagination?.pageIndex ?? 0) + 1} 页，`}每页
+            {`${t('components.ui.pagination.table-pagination.hint.count', { count: data.length })}    ${t('components.ui.pagination.table-pagination.hint.page-index', { pageIndex: (table.options.state.pagination?.pageIndex ?? 0) + 1 })}    ${t('components.ui.pagination.table-pagination.hint.page-size')}`}
             <Select defaultValue={defaultPageSize.toString()} onValueChange={(v) => table.setPageSize(parseInt(v))}>
               <SelectTrigger>
-                <SelectValue placeholder="选择" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectLabel>每页最大条目数</SelectLabel>
+                  <SelectLabel>{t('components.ui.pagination.table-pagination.page-size')}</SelectLabel>
                   <SelectItem value="1">1</SelectItem>
                   <SelectItem value="5">5</SelectItem>
                   <SelectItem value="10">10</SelectItem>
@@ -106,7 +109,6 @@ export function DataTable<TData, TValue>({
                 </SelectGroup>
               </SelectContent>
             </Select>
-            条
           </div>
           <div className="flex space-x-2">
             <Button
@@ -115,10 +117,10 @@ export function DataTable<TData, TValue>({
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
-              上一页
+              {t('components.ui.pagination.previous')}
             </Button>
             <Button variant="outline" size="small" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-              下一页
+              {t('components.ui.pagination.next')}
             </Button>
           </div>
         </div>
