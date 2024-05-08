@@ -2,6 +2,7 @@ import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } fro
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Readable } from 'stream';
 import { config } from '../config';
+import { logger } from '../logger';
 
 export class S3Helpers {
   client: S3Client;
@@ -71,5 +72,57 @@ export class S3Helpers {
     });
     const res = await getSignedUrl(this.client, command, { expiresIn: 3600 });
     return res;
+  }
+
+  private parseAmzDate(dateString: string) {
+    // 提取各个部分
+    const year = parseInt(dateString.substring(0, 4), 10);
+    const month = parseInt(dateString.substring(4, 6), 10) - 1; // JavaScript 的月份从 0 开始
+    const day = parseInt(dateString.substring(6, 8), 10);
+    const hour = parseInt(dateString.substring(9, 11), 10);
+    const minute = parseInt(dateString.substring(11, 13), 10);
+    const second = parseInt(dateString.substring(13, 15), 10);
+
+    // 创建 Date 对象并返回时间戳
+    const date = new Date(Date.UTC(year, month, day, hour, minute, second));
+    return Math.floor(date.getTime() / 1000);
+  }
+
+  private isSignedUrl(url: string) {
+    return url.includes('X-Amz-Signature');
+  }
+
+  public async refreshSignedUrl(signedUrl: string): Promise<{
+    refreshed: boolean;
+    refreshedUrl?: string;
+  }> {
+    if (!config.s3.isPrivate) {
+      return {
+        refreshed: false,
+      };
+    }
+    if (!this.isSignedUrl(signedUrl)) {
+      return {
+        refreshed: false,
+      };
+    }
+    const url = new URL(signedUrl);
+    const amzDate = url.searchParams.get('X-Amz-Date');
+    const expires = Number(url.searchParams.get('X-Amz-Expires'));
+    const signedTimestamp = this.parseAmzDate(amzDate);
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    const remainingTime = signedTimestamp + expires - currentTimestamp;
+    if (remainingTime > 300) {
+      return {
+        refreshed: false,
+      };
+    }
+    logger.info('Refreshing signed url', { signedUrl, remainingTime });
+    const fileKey = url.pathname.slice(1);
+    const refreshedUrl = await this.getSignedUrl(fileKey);
+    return {
+      refreshed: true,
+      refreshedUrl,
+    };
   }
 }

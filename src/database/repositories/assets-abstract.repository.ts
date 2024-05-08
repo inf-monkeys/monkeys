@@ -88,7 +88,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
       }
     }
 
-    const list = await this.repository.find({
+    let list = await this.repository.find({
       where: [
         {
           teamId,
@@ -124,8 +124,9 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
       skip: (+page - 1) * +limit,
     });
 
+    list = await this.assetCommonRepository.fillAdditionalInfoList(list, options);
     return {
-      list: await this.assetCommonRepository.fillAdditionalInfoList(list, options),
+      list,
       totalCount,
     };
   }
