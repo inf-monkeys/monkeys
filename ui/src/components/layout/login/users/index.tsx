@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { get } from 'lodash';
 import { UserRoundPlus, Users } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { IUser, UserList } from '@/components/layout/login/users/users.tsx';
 import { IUserTokens } from '@/components/router/guard/auth.ts';
@@ -15,6 +16,8 @@ interface IAuthzUsersProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const AuthzUsers: React.FC<IAuthzUsersProps> = ({ tokens, setSwap }) => {
+  const { t } = useTranslation();
+
   const users: IUser[] = useMemo(
     () =>
       Object.entries(tokens).map(([id, data]) => {
@@ -43,12 +46,12 @@ export const AuthzUsers: React.FC<IAuthzUsersProps> = ({ tokens, setSwap }) => {
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2">
           <Users size={18} strokeWidth={3} />
-          <h1 className="font-bold">选择身份</h1>
+          <h1 className="font-bold">{t('auth.users.selector.title')}</h1>
         </div>
         <UserList users={users} />
         <Separator className="my-2" />
         <Button icon={<UserRoundPlus />} onClick={() => setSwap('login')}>
-          登录其他账号
+          {t('auth.users.login-other')}
         </Button>
       </div>
     </motion.main>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { ShieldCheck, Users } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { handleOidcLogin } from '@/apis/authz/oidc';
 import { EmailAuth } from '@/components/layout/login/authz/email-auth.tsx';
@@ -33,6 +34,8 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
   setSwap,
   hasTokens,
 }) => {
+  const { t } = useTranslation();
+
   const [activeTab, setActiveTab] = useState('phone');
 
   const onlyOne = loginMethodsLength === 1;
@@ -63,8 +66,8 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
           onValueChange={setActiveTab}
         >
           <TabsList className={cn('grid w-full grid-cols-2', onlyOne && 'grid-cols-1')}>
-            {enablePhone && <TabsTrigger value="phone">手机号登录</TabsTrigger>}
-            {enablePassword && <TabsTrigger value="email">邮箱登录</TabsTrigger>}
+            {enablePhone && <TabsTrigger value="phone">{t('auth.login.sms')}</TabsTrigger>}
+            {enablePassword && <TabsTrigger value="email">{t('auth.login.email')}</TabsTrigger>}
           </TabsList>
           <AnimatePresence mode="wait">
             <motion.div
@@ -95,7 +98,7 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
             (enableOidc ? (
               <div className="flex items-center justify-center gap-4">
                 <Separator className="flex-1" />
-                <span className="text-xs text-opacity-70">其他登录方式</span>
+                <span className="text-xs text-opacity-70">{t('auth.login.other')}</span>
                 <Separator className="flex-1" />
               </div>
             ) : (
@@ -110,12 +113,12 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
               >
                 {oidcButtonText ?? 'OIDC'}
               </Button>
-              {!areValuesUsed && <span className="-mt-2 text-xs text-opacity-70">仅支持使用 OIDC 进行身份验证</span>}
+              {!areValuesUsed && <span className="-mt-2 text-xs text-opacity-70">{t('auth.login.only-oidc')}</span>}
             </>
           )}
           {hasTokens && (
             <Button icon={<Users />} onClick={handleSwapUsers}>
-              选择已登录的账号
+              {t('auth.login.select-account')}
             </Button>
           )}
         </div>

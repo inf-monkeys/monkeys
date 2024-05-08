@@ -24,8 +24,26 @@
     },
 
     "login": {
+      "sms": "SMS",
+      "email": "Email",
+      "other": "OR",
+
+      "only-oidc": "Only support OIDC login",
+      "select-account": "Select logged in account",
+
       "success": "Login successful",
       "logging-in": "Logging in..."
+    },
+
+    "users": {
+      "selector": {
+        "title": "Select user",
+
+        "switching": "Switching user...",
+        "switched": "Switched to user: {{name}}",
+        "switch-failed": "Failed to switch user!"
+      },
+      "login-other": "Login other account"
     }
   }
 }
