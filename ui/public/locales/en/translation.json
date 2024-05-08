@@ -38,6 +38,62 @@
         "confirm-tooltip": "Click to update",
         "upload-others": "Upload others",
         "save": "Save"
+      },
+      "updater": {
+        "title_one": "Upload file",
+        "title_other": "Upload files",
+        "click-or-drag-area_one": "Click or drag to upload file",
+        "click-or-drag-area_other": "Click or drag to upload files",
+        "hint": {
+          "accept": {
+            "custom_one": "Only {{acceptString}} file can be uploaded.",
+            "custom_other": "Only {{acceptString}} files can be uploaded.",
+            "any": "Any file can be uploaded."
+          },
+          "max-size": " Up to {{maxSize}}MB.",
+          "limit_one": "  Up to {{limit}} file.",
+          "limit_other": "  Up to {{limit}} files."
+        },
+        "file-list": {
+          "toast": {
+            "no-file": "No files to upload"
+          },
+          "info-table": {
+            "caption": {
+              "remaining_one": "Can upload {{remaining}} file",
+              "remaining_other": "Can upload {{remaining}} files",
+              "none": "-"
+            },
+            "column": {
+              "name": "Name",
+              "type": "Type",
+              "size": "Size",
+              "status": "Status",
+              "operate": "Operate"
+            }
+          },
+          "info-tooltip": {
+            "name": "Filename: ",
+            "md5": {
+              "index": "MD5: ",
+              "in-progress": "Calculating ({{progress}}%)",
+              "waiting": "Waiting for calculating"
+            }
+          },
+          "status": {
+            "waiting-for-file_one": "Waiting for file",
+            "waiting-for-file_other": "Waiting for files",
+            "waiting-for-uploading": "Waiting for uploading",
+            "upload-successful": "Upload successful",
+            "waiting-for-uploading-description": "(Click to upload)",
+            "status": {
+              "upload": "Uploading",
+              "calculate": "Calculating",
+              "hint_one": "{{operate}} file",
+              "hint_other": "{{operate}} files"
+            }
+          }
+        }
       }
     }
   },

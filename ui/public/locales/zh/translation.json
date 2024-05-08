@@ -38,6 +38,55 @@
         "confirm-tooltip": "点击更新",
         "upload-others": "上传其他图像",
         "save": "保存"
+      },
+      "updater": {
+        "title": "上传文件",
+        "click-or-drag-area": "点击或拖拽来上传文件",
+        "hint": {
+          "accept": {
+            "custom": "仅支持 {{acceptString}} 格式的文件",
+            "any": "支持上传任意格式的文件"
+          },
+          "max-size": "，不超过 {{maxSize}}MB",
+          "limit": "，最多可上传 {{limit}} 个文件"
+        },
+        "file-list": {
+          "toast": {
+            "no-file": "没有需要上传的文件"
+          },
+          "info-table": {
+            "caption": {
+              "remaining": "可继续上传 {{remaining}} 份文件",
+              "none": "到底了～"
+            },
+            "column": {
+              "name": "文件名",
+              "type": "类型",
+              "size": "大小",
+              "status": "状态",
+              "operate": "操作"
+            }
+          },
+          "info-tooltip": {
+            "name": "文件名：",
+            "md5": {
+              "index": "MD5：",
+              "in-progress": "正在计算中（{{progress}}%）",
+              "waiting": "正在等待计算中"
+            }
+          },
+          "status": {
+            "waiting-for-file": "等待文件中",
+            "waiting-for-uploading": "等待操作上传",
+            "upload-successful": "上传成功",
+            "waiting-for-uploading-description": "（点此上传）",
+            "status": {
+              "upload": "上传",
+              "calculate": "计算",
+              "hint": "正在{{operate}}文件"
+            }
+          }
+        }
       }
     }
   },

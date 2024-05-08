@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { Dropzone, FileWithPath } from '@mantine/dropzone';
 import { FileUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -30,6 +31,8 @@ export const Updater: React.FC<IUpdaterProps> = ({
   onFilesUpdate,
   saveToResource,
 }) => {
+  const { t } = useTranslation();
+
   const [files, setFiles] = useState<FileWithPath[]>(initialFiles);
 
   const [isInteracted, setIsInteracted] = useState(false);
@@ -71,12 +74,20 @@ export const Updater: React.FC<IUpdaterProps> = ({
         <div className="vines-center h-40 gap-4">
           <FileUp size={50} className="stroke-gold-12" />
           <div className="flex max-w-[70%] flex-col">
-            <h1 className="text-lg font-bold leading-tight">点击上传文件或拖拽任意文件到这里</h1>
+            <h1 className="text-lg font-bold leading-tight">
+              {t('components.ui.updater.click-or-drag-area', {
+                count: limit ?? 2,
+              })}
+            </h1>
             <p className="text-xs text-opacity-85">
               {accept
-                ? `仅支持 ${accept.map((it) => `.${it?.split('/')?.[1] ?? it}`).join('、')} 格式的文件`
-                : '支持上传任意格式的文件'}
-              ，不超过 {maxSize}MB{limit ? `，最多可上传 ${limit} 个文件` : ''}
+                ? t('components.ui.updater.hint.accept.custom', {
+                    acceptString: accept.map((it) => `.${it?.split('/')?.[1] ?? it}`).join('、'),
+                    count: limit ?? 2,
+                  })
+                : t('components.ui.updater.hint.accept.any')}
+              {t('components.ui.updater.hint.max-size', { maxSize })}
+              {limit ? t('components.ui.updater.hint.limit', { limit, count: limit }) : ''}
             </p>
           </div>
         </div>
@@ -103,7 +114,9 @@ export const VinesUpdater: React.FC<
   IUpdaterProps & {
     children: React.ReactNode;
   }
-> = ({ children, onBeforeUpload, onFinished, ...props }) => {
+> = ({ children, onBeforeUpload, onFinished, limit, ...props }) => {
+  const { t } = useTranslation();
+
   const [isUploading, setIsUploading] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -112,7 +125,7 @@ export const VinesUpdater: React.FC<
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[625px]">
         <DialogHeader>
-          <DialogTitle>上传文件</DialogTitle>
+          <DialogTitle>{t('components.ui.updater.title', { count: limit ?? 2 })}</DialogTitle>
         </DialogHeader>
         <Updater
           onBeforeUpload={() => {
@@ -124,6 +137,7 @@ export const VinesUpdater: React.FC<
             onFinished?.(urls);
             setIsUploading(false);
           }}
+          limit={limit}
           {...props}
         />
       </DialogContent>
