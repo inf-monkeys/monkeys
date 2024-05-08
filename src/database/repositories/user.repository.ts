@@ -1,4 +1,5 @@
 import { AuthMethod } from '@/common/config';
+import { S3Helpers } from '@/common/s3';
 import { generateDbId } from '@/common/utils';
 import { getMap } from '@/common/utils/map';
 import { UserEntity } from '@/database/entities/identity/user';
@@ -34,22 +35,42 @@ export class UserRepository {
     private readonly userRepository: Repository<UserEntity>,
   ) {}
 
+  private async refreshLogo(users: UserEntity[]) {
+    const s3Helpers = new S3Helpers();
+    const promises = users.map(async (user) => {
+      if (user.photo) {
+        try {
+          const { refreshed, refreshedUrl } = await s3Helpers.refreshSignedUrl(user.photo);
+          if (refreshed) {
+            user.photo = refreshedUrl;
+            await this.userRepository.save(user);
+          }
+        } catch (e) {}
+      }
+    });
+    await Promise.all(promises);
+  }
+
   public async findById(userId: string) {
-    return await this.userRepository.findOne({
+    const user = await this.userRepository.findOne({
       where: {
         id: userId,
         isDeleted: false,
       },
     });
+    await this.refreshLogo([user]);
+    return user;
   }
 
   public async findByIds(userIds: string[]) {
-    return await this.userRepository.find({
+    const users = await this.userRepository.find({
       where: {
         id: In(userIds),
         isDeleted: false,
       },
     });
+    await this.refreshLogo(users);
+    return users;
   }
 
   public async findByEmail(email: string) {
