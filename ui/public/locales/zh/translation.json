@@ -1,0 +1,16 @@
+{
+  "system": {
+    "network-error": "系统维护中",
+    "empty-auth-methods": "系统未启用身份验证"
+  },
+
+  "common": {
+    "language-selector": {
+      "tooltip": "切换语言",
+
+      "switching": "切换中...",
+      "switched": "已切换为「简体中文」",
+      "switch-failed": "语言切换失败！"
+    }
+  }
+}

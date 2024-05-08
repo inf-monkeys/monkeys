@@ -4,6 +4,7 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { get } from 'lodash';
+import { useTranslation } from 'react-i18next';
 
 import { handleOidcLogin } from '@/apis/authz/oidc';
 import { useSystemConfig } from '@/apis/common';
@@ -18,6 +19,8 @@ import { useAppStore } from '@/store/useAppStore';
 import { cn, useLocalStorage } from '@/utils';
 
 const Login: React.FC = () => {
+  const { t } = useTranslation();
+
   const { darkMode } = useAppStore();
   const { data: oem, error } = useSystemConfig();
 
@@ -60,7 +63,7 @@ const Login: React.FC = () => {
               exit={{ opacity: 0, height: 0 }}
             >
               <h1 className={cn('text-lg font-bold text-vines-500', isServerError && 'animate-pulse')}>
-                {isServerError ? '系统维护中' : '系统已禁止登录'}
+                {isServerError ? t('system.network-error') : t('system.empty-auth-methods')}
               </h1>
             </motion.div>
           ) : swap !== 'login' && hasTokens ? (

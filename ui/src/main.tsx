@@ -22,6 +22,10 @@ import { ErrorComponent } from '@/components/router/catch-boundary';
 dayjs.extend(duration);
 dayjs.extend(utc);
 
+import { Skeleton } from '@/components/ui/skeleton.tsx';
+
+import './i18n';
+
 const router = createRouter({
   routeTree,
   defaultPreload: 'intent',
@@ -35,7 +39,7 @@ declare module '@tanstack/react-router' {
 }
 
 ReactDOM.createRoot(document.getElementById('vines-ui')!).render(
-  <>
+  <Suspense fallback={<Skeleton className="h-screen w-screen" />}>
     <SWRConfig>
       <MantineProvider>
         <AnimatePresence mode="wait">
@@ -49,5 +53,5 @@ ReactDOM.createRoot(document.getElementById('vines-ui')!).render(
     <Portal.Root>
       <Toaster richColors visibleToasts={10} className="pointer-events-auto" />
     </Portal.Root>
-  </>,
+  </Suspense>,
 );

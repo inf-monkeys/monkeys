@@ -1,0 +1,16 @@
+{
+  "system": {
+    "network-error": "System maintenance",
+    "empty-auth-methods": "Login is not enabled"
+  },
+
+  "common": {
+    "language-selector": {
+      "tooltip": "Switch language",
+
+      "switching": "Switching language...",
+      "switched": "Language switched",
+      "switch-failed": "Failed to switch language!"
+    }
+  }
+}
