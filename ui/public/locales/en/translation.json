@@ -11,7 +11,8 @@
       "switch-failed": "Failed to switch language!"
     },
     "load": {
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "empty": "No data"
     }
   },
   "components": {
@@ -28,9 +29,6 @@
           },
           "page-size": "Max per page"
         }
-      },
-      "data-table": {
-        "empty": "No data"
       }
     }
   },

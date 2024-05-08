@@ -11,6 +11,7 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table';
+import { useTranslation } from 'react-i18next';
 
 import { TablePagination } from '@/components/ui/pagination/table-pagination.tsx';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -36,6 +37,8 @@ export function RemoteDataTable<TData, TValue>({
   preloadHover,
   showPagination = true,
 }: IRemoteDataTableProps<TData, TValue>) {
+  const { t } = useTranslation();
+
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
@@ -86,7 +89,7 @@ export function RemoteDataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  暂无数据
+                  {t('common.load.empty')}
                 </TableCell>
               </TableRow>
             )}
