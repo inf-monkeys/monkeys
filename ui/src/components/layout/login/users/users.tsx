@@ -3,6 +3,7 @@ import React from 'react';
 import { useNavigate } from '@tanstack/react-router';
 
 import { LogOut } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { logout, saveAuthToken } from '@/components/router/guard/auth.ts';
@@ -24,6 +25,8 @@ interface IUserListProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const UserList: React.FC<IUserListProps> = ({ users }) => {
+  const { t } = useTranslation();
+
   const navigate = useNavigate({ from: Route.fullPath });
   const { redirect_url } = Route.useSearch();
 
@@ -43,9 +46,9 @@ export const UserList: React.FC<IUserListProps> = ({ users }) => {
         }, 500),
       ),
       {
-        loading: '正在切换身份...',
-        success: '已切换到身份：' + name,
-        error: '切换身份失败',
+        loading: t('auth.users.selector.switching'),
+        success: t('auth.users.selector.switched', { name }),
+        error: t('auth.users.selector.switch-failed'),
       },
     );
   };
