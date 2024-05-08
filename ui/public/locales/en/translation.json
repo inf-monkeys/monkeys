@@ -11,6 +11,21 @@
       "switching": "Switching language...",
       "switched": "Language switched",
       "switch-failed": "Failed to switch language!"
+    },
+    "load": {
+      "loading": "Loading..."
+    }
+  },
+
+  "auth": {
+    "oidc": {
+      "auth-failed": "Authorization failed! Please try to login again",
+      "logging-in": "Logging in via {{oidc}}"
+    },
+
+    "login": {
+      "success": "Login successful",
+      "logging-in": "Logging in..."
     }
   }
 }
