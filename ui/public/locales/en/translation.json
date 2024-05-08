@@ -29,6 +29,15 @@
           },
           "page-size": "Max per page"
         }
+      },
+      "icon-selector": {
+        "background-color": "Background color"
+      },
+      "image-editor": {
+        "title": "Upload image",
+        "confirm-tooltip": "Click to update",
+        "upload-others": "Upload others",
+        "save": "Save"
       }
     }
   },

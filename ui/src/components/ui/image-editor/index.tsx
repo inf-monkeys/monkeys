@@ -1,6 +1,7 @@
 import React, { createRef, useEffect, useState } from 'react';
 
 import { Cropper, ReactCropperElement } from 'react-cropper';
+import { useTranslation } from 'react-i18next';
 
 import { getResourceByMd5 } from '@/apis/resources';
 import { Button } from '@/components/ui/button';
@@ -26,6 +27,8 @@ export const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
   onChange,
   children,
 }) => {
+  const { t } = useTranslation();
+
   const cropperRef = createRef<ReactCropperElement>();
 
   const [visible, setVisible] = useState(false);
@@ -81,7 +84,7 @@ export const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
           <TooltipTrigger asChild>{children}</TooltipTrigger>
         </DialogTrigger>
         <DialogContent>
-          <DialogTitle>上传图像</DialogTitle>
+          <DialogTitle>{t('components.ui.image-editor.title')}</DialogTitle>
           <Cropper
             width={width}
             ref={cropperRef}
@@ -122,16 +125,16 @@ export const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
               }}
             >
               <Button variant="outline" disabled={loading}>
-                上传其他图片
+                {t('components.ui.image-editor.upload-others')}
               </Button>
             </VinesUpdater>
             <Button variant="outline" onClick={handleSave} loading={loading}>
-              保存
+              {t('components.ui.image-editor.save')}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <TooltipContent>点击更新</TooltipContent>
+      <TooltipContent>{t('components.ui.image-editor.confirm-tooltip')}</TooltipContent>
     </Tooltip>
   );
 };
