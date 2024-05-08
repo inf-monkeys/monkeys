@@ -28,6 +28,16 @@ const logger = getLogger('default');
 const MONKEYS_DIST_FOLDER = process.env.MONKEYS_DIST_FOLDER || 'dist';
 
 // Read configuration from `config.yaml`
+let configFilePath = path.join(__dirname, './config.yaml');
+if (fs.existsSync(configFilePath)) {
+  configFilePath = path.join(__dirname, './config.yaml');
+} else if (fs.existsSync('/etc/monkeys/config.yaml')) {
+  configFilePath = '/etc/monkeys/config.yaml';
+} else {
+  console.error('Configuration file not found');
+  process.exit(1);
+}
+
 let config;
 try {
   config = yaml.parse(fs.readFileSync(path.join(__dirname, './config.yaml'), 'utf8'));
