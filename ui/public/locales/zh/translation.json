@@ -87,6 +87,12 @@
             }
           }
         }
+      },
+      "vines-variable-editor": {
+        "cannot-parse-toast": "VinesVariableEditor 无法解析文本！"
+      },
+      "date-range-picker": {
+        "select-date": "选择日期"
       }
     }
   },
