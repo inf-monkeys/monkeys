@@ -117,6 +117,7 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
             <DropdownMenuItem
               className="flex items-center gap-2"
               onClick={() => setVisibleCustomSetting(!visibleCustomSetting)}
+              disabled
             >
               <Settings2 strokeWidth={1.5} size={16} />
               <p>{visibleCustomSetting ? '关闭' : ''}偏好设置</p>

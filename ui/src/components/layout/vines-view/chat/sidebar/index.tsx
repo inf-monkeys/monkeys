@@ -44,7 +44,6 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
               active={activeSessionId === session.id}
               session={session}
               key={session.id}
-              disableDelete={!i}
               onDeleted={() => mutate()}
               onClick={() => {
                 if (!i) {
