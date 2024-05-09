@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 
 import { CheckIcon, ChevronsUpDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useTeams } from '@/apis/authz/team';
 import { Team } from '@/components/layout/main/sidebar/teams/team-selector/team.tsx';
@@ -21,6 +22,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn, useLocalStorage } from '@/utils';
 
 export const TeamSelector: React.FC = () => {
+  const { t } = useTranslation();
+
   const { routeId } = useVinesRoute();
   const navigate = useNavigate({ from: location.pathname });
 
@@ -68,8 +71,8 @@ export const TeamSelector: React.FC = () => {
       <PopoverContent className="w-[168px] p-0">
         <Command>
           <CommandList>
-            <CommandInput placeholder="搜索团队..." />
-            <CommandEmpty>找不到团队</CommandEmpty>
+            <CommandInput placeholder={t('components.layout.main.sidebar.teams.team-selector.search-team')} />
+            <CommandEmpty>{t('components.layout.main.sidebar.teams.team-selector.not-found')}</CommandEmpty>
           </CommandList>
           <CommandSeparator />
           <CommandList>
