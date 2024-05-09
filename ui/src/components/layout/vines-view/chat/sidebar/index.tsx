@@ -44,19 +44,12 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
               active={activeSessionId === session.id}
               session={session}
               key={session.id}
-              disableDelete={!i}
               onDeleted={() => mutate()}
               onClick={() => {
-                if (!i) {
-                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                  const { [workflowId]: _, ...rest } = chatSessions;
-                  setChatSessions(rest);
-                } else {
-                  setChatSessions({
-                    ...chatSessions,
-                    [workflowId]: session.id,
-                  });
-                }
+                setChatSessions({
+                  ...chatSessions,
+                  [workflowId]: session.id,
+                });
               }}
             />
           ))}
