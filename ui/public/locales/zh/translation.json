@@ -169,10 +169,6 @@
               "text-data-store": "文本数据市场"
             }
           },
-          "account": {
-            "login-others": "登录其他账号",
-            "logout": "退出登录"
-          },
           "toolbar": {
             "settings-tooltip": "配置中心"
           },
@@ -209,7 +205,8 @@
         "switched": "已切换到身份：{{name}}",
         "switch-failed": "切换身份失败！"
       },
-      "login-other": "登录其他账号"
+      "login-other": "登录其他账号",
+      "logout": "退出登录"
     }
   },
   "settings": {
@@ -223,7 +220,6 @@
       "user": {
         "title": "账号信息",
         "description": "点击即可编辑信息",
-        "logout": "退出登录",
         "user-name": {
           "info-editor": {
             "title": "编辑昵称",

@@ -54,7 +54,7 @@ export const User: React.FC<IUserProps> = () => {
         </div>
         <div className="flex flex-1 items-center justify-end">
           <Button theme="danger" size="small" onClick={() => VinesEvent.emit('vines-logout')}>
-            {t('settings.account.user.logout')}
+            {t('auth.users.logout')}
           </Button>
         </div>
       </CardContent>

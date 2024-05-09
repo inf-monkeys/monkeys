@@ -76,13 +76,13 @@ export const Account: React.FC = () => {
         <SelectItem className="cursor-pointer" value="login">
           <div className="flex items-center justify-center gap-2">
             <UserRoundPlus strokeWidth={1.5} size={16} />
-            <p>{t('components.layout.main.sidebar.account.login-others')}</p>
+            <p>{t('auth.users.login-other')}</p>
           </div>
         </SelectItem>
         <SelectItem className="cursor-pointer" value="logout">
           <div className="flex items-center justify-center gap-2 text-red-10">
             <LogOut strokeWidth={1.5} size={16} />
-            <p>{t('components.layout.main.sidebar.account.logout')}</p>
+            <p>{t('auth.users.logout')}</p>
           </div>
         </SelectItem>
       </SelectContent>

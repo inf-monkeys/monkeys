@@ -176,10 +176,6 @@
               "text-data-store": "Text Data Store"
             }
           },
-          "account": {
-            "login-others": "Login other account",
-            "logout": "Logout"
-          },
           "toolbar": {
             "settings-tooltip": "Settings"
           },
@@ -216,7 +212,8 @@
         "switched": "Switched to user: {{name}}",
         "switch-failed": "Failed to switch user!"
       },
-      "login-other": "Login other account"
+      "login-other": "Login other account",
+      "logout": "Logout"
     }
   },
   "settings": {
@@ -230,7 +227,6 @@
       "user": {
         "title": "User Profile",
         "description": "Click to edit",
-        "logout": "Logout",
         "user-name": {
           "info-editor": {
             "title": "Edit user name",
