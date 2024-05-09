@@ -1,6 +1,7 @@
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
+import { CustomTheme } from '@/database/entities/identity/team';
 import { Body, Controller, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DEFAULT_TEAM_DESCRIPTION, DEFAULT_TEAM_PHOTO, TeamsService } from './teams.service';
@@ -45,7 +46,7 @@ export class TeamsController {
   }
 
   @Put('/')
-  public async updateTeam(@Req() req: IRequest, @Body() body: { name?: string; description?: string; iconUrl?: string }) {
+  public async updateTeam(@Req() req: IRequest, @Body() body: { name?: string; description?: string; iconUrl?: string; customTheme: CustomTheme }) {
     const { teamId } = req;
     const data = await this.service.updateTeam(teamId, body);
     return new SuccessResponse({ data });

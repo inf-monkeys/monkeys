@@ -1,11 +1,9 @@
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
-export interface TeamCustomTheme {
-  primaryColor?: string;
-  backgroundColor?: string;
-  secondaryBackgroundColor?: string;
+export interface CustomTheme {
   enableTeamLogo?: boolean;
+  primaryColor?: string;
 }
 
 @Entity({ name: 'teams' })
@@ -54,7 +52,7 @@ export class TeamEntity extends BaseEntity {
     nullable: true,
     type: 'simple-json',
   })
-  customTheme?: TeamCustomTheme;
+  customTheme?: CustomTheme;
 
   @Column({
     name: 'enable_join_request',

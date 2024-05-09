@@ -1,4 +1,4 @@
-import { TeamEntity } from '@/database/entities/identity/team';
+import { CustomTheme, TeamEntity } from '@/database/entities/identity/team';
 import { AssetsMarketPlaceRepository } from '@/database/repositories/assets-marketplace.repository';
 import { TeamRepository } from '@/database/repositories/team.repository';
 import { Injectable } from '@nestjs/common';
@@ -29,6 +29,7 @@ export class TeamsService {
       name?: string;
       description?: string;
       iconUrl?: string;
+      customTheme?: CustomTheme;
     },
   ) {
     return await this.teamRepository.updateTeam(teamId, updates);
