@@ -29,7 +29,7 @@ export const WorkspaceCustomSetting: React.FC<IWorkspaceCustomSettingProps> = ()
     >
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">偏好设置</h2>
-        <Button icon={<XCircle />} onClick={() => setVisibleCustomSetting(false)}>
+        <Button icon={<XCircle />} onClick={() => setVisibleCustomSetting(false)} variant="outline">
           返回
         </Button>
       </div>
