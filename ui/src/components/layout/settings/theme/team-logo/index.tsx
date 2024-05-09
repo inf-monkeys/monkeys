@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useSWRConfig } from 'swr';
 
 import { get, set } from 'lodash';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { updateTeam } from '@/apis/authz/team';
@@ -16,6 +17,8 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 interface ITeamLogoProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const TeamLogo: React.FC<ITeamLogoProps> = () => {
+  const { t } = useTranslation();
+
   const { mutate } = useSWRConfig();
   const { team } = useVinesTeam();
 
@@ -38,12 +41,12 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
     }
     set(team, 'customTheme.enableTeamLogo', val === 'team');
     toast.promise(updateTeam({ customTheme: team.customTheme }), {
-      loading: '正在更新',
+      loading: t('common.update.loading'),
       success: () => {
         void mutate('/api/teams');
-        return '更新成功';
+        return t('common.update.success');
       },
-      error: '更新失败',
+      error: t('common.update.error'),
     });
   };
 
@@ -58,9 +61,9 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
         });
       }),
       {
-        loading: '更新中...',
-        success: '更新成功！',
-        error: '更新失败！请稍后再重试',
+        loading: t('common.update.loading'),
+        success: t('common.update.success'),
+        error: t('common.update.error'),
       },
     );
   };

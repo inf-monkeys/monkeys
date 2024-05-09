@@ -4,6 +4,7 @@ import { KeyedMutator } from 'swr/_internal';
 
 import { AssetType } from '@inf-monkeys/vines';
 import { CheckCircle, Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { createTag, updateAssetTag, useAssetTagList } from '@/apis/ugc';
@@ -24,6 +25,8 @@ export interface IUgcTagSelectorProps {
 }
 
 export const UgcTagSelector = ({ assetType, assetTags, assetId, mutate }: IUgcTagSelectorProps) => {
+  const { t } = useTranslation();
+
   const [visible, setVisible] = useState(false);
 
   const { data: tagsData } = useAssetTagList();
@@ -64,10 +67,10 @@ export const UgcTagSelector = ({ assetType, assetTags, assetId, mutate }: IUgcTa
       success: () => {
         setVisible(false);
         void mutate();
-        return '更新成功';
+        return t('common.update.success');
       },
-      loading: '更新中...',
-      error: '更新失败，请检查网络状况后重试',
+      loading: t('common.update.loading'),
+      error: t('common.update.error'),
     });
   };
 

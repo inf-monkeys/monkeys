@@ -4,6 +4,19 @@
     "empty-auth-methods": "Login is not enabled"
   },
   "common": {
+    "utils": {
+      "confirm": "Confirm",
+      "continue": "Continue",
+      "save": "Save",
+      "update": "Update",
+      "edit": "Edit",
+      "reset": "Reset",
+      "cancel": "Cancel",
+      "search": "Search"
+    },
+    "toast": {
+      "loading": "Please wait until the data is loaded."
+    },
     "language-selector": {
       "tooltip": "Switch language",
       "switching": "Switching language...",
@@ -18,6 +31,28 @@
     "load": {
       "loading": "Loading...",
       "empty": "No data"
+    },
+    "update": {
+      "loading": "Updating...",
+      "success": "Update successful!",
+      "error": "Update failed! Please try again later!"
+    },
+    "operate": {
+      "loading": "Operating...",
+      "success": "Operate successful!",
+      "error": "Operate failed! Please try again later!"
+    },
+    "delete": {
+      "confirm-content": "Confirm deletion? The operation cannot be undone.",
+      "success": "Delete successful",
+      "loading": "Deleting...",
+      "error": "Delete failed! Please try again later!"
+    },
+    "sms-verify": {
+      "send-button": "Send OTP",
+      "loading": "Sending...",
+      "success": "The code has been sent to {{phone}}, please check it.",
+      "error": "Sending failed! Please try again later."
     }
   },
   "components": {
@@ -41,8 +76,7 @@
       "image-editor": {
         "title": "Upload image",
         "confirm-tooltip": "Click to update",
-        "upload-others": "Upload others",
-        "save": "Save"
+        "upload-others": "Upload others"
       },
       "updater": {
         "title_one": "Upload file",
@@ -147,7 +181,7 @@
             "logout": "Logout"
           },
           "toolbar": {
-            "settings-tooltip": "User and team profile"
+            "settings-tooltip": "Settings"
           },
           "teams": {
             "balance": "Balance",
@@ -183,6 +217,126 @@
         "switch-failed": "Failed to switch user!"
       },
       "login-other": "Login other account"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "account": {
+      "title": "Account",
+      "payment-disabled-alert": "Payment module is disabled",
+      "info-editor": {
+        "invalid-toast": "Please enter valid content"
+      },
+      "user": {
+        "title": "User Profile",
+        "description": "Click to edit",
+        "logout": "Logout",
+        "user-name": {
+          "info-editor": {
+            "title": "Edit user name",
+            "placeholder": "Enter a user name, up to 16 characters"
+          }
+        },
+        "user-account": {
+          "not-phone-toast": "Only support editing phone for the time being",
+          "title": "Edit phone",
+          "old-phone": "Old phone",
+          "old-phone-code-placeholder": "Please enter OTP of your old phone",
+          "new-phone-placeholder": "Please enter new phone",
+          "new-phone-code-placeholder": "Please enter OTP of your new phone"
+        }
+      },
+      "team": {
+        "title": "My Team",
+        "description": "Manage your team info",
+        "team-name": {
+          "title": "Edit team name",
+          "placeholder": "Enter team name, up to 16 characters"
+        },
+        "team-description": {
+          "title": "Edit team description",
+          "placeholder": "Enter user description, up to 16 characters"
+        },
+        "apply-manage": {
+          "apply-item": {
+            "operate": {
+              "accept": "Accept",
+              "reject": "Reject"
+            },
+            "operate-toast": {
+              "index": "Request {{operate}}.",
+              "accept": "accepted",
+              "reject": "rejected"
+            }
+          },
+          "public-change": {
+            "index": "The team has been {{operate}}.",
+            "public": "public",
+            "private": "private"
+          },
+          "button": "Apply Manage",
+          "title": "Apply manage",
+          "public-tooltip-1": "When opened, the current team is made public on the platform and any user can search for it and apply to join.",
+          "public-tooltip-2": "When closed, users who have not joined a team will not be able to search for the current team or actively apply to join the team, but can still join via the invitation link.",
+          "public-span": "Set as a public team"
+        },
+        "create": {
+          "button-tooltip": "Create team",
+          "title": "Create team",
+          "name-placeholder": "Enter team name",
+          "description-placeholder": "Enter team description"
+        },
+        "delete": {
+          "button-tooltip": "Delete team",
+          "confirm-content-1": "Sure you want to delete the team?",
+          "confirm-content-2": "After deletion, all resources within this team will not be visible!",
+          "deleted": "Team deleted"
+        },
+        "import-export": {
+          "button": "Data Manage",
+          "dropdown-label": "Team Data Manage",
+          "import": {
+            "button": "Import Data",
+            "title": "Import team data"
+          },
+          "export": {
+            "button": "Export Data",
+            "title": "Export team data"
+          }
+        },
+        "join-public-team": {
+          "button-tooltip": "Join public team",
+          "title": "Join public team",
+          "search-placeholder": "Enter team name",
+          "team-item": {
+            "apply": "Apply"
+          }
+        }
+      },
+      "team-member": {
+        "title": "Team Member",
+        "description": {
+          "owner": "Invite your team members to collaborate",
+          "member": "Collaborate with team members"
+        },
+        "delete-member": "Delete member",
+        "invite": {
+          "button-tooltip": "Invite user",
+          "dropdown-label": "Invite User",
+          "invite-manage": {
+            "index": "Manage Invitation Links"
+          },
+          "invite-user": {
+            "index": "Generate Invitation Links"
+          }
+        }
+      }
+    },
+    "api-key": {
+      "title": "API Key"
+    },
+    "theme": {
+      "title": "Theme"
     }
   }
 }

@@ -4,6 +4,19 @@
     "empty-auth-methods": "系统未启用身份验证"
   },
   "common": {
+    "utils": {
+      "confirm": "确定",
+      "continue": "继续",
+      "save": "保存",
+      "update": "更新",
+      "edit": "编辑",
+      "reset": "重置",
+      "cancel": "取消",
+      "search": "搜索"
+    },
+    "toast": {
+      "loading": "请等待数据加载完毕"
+    },
     "language-selector": {
       "tooltip": "切换语言",
       "switching": "切换中...",
@@ -18,6 +31,28 @@
     "load": {
       "loading": "加载中...",
       "empty": "暂无数据"
+    },
+    "update": {
+      "loading": "更新中...",
+      "success": "更新成功！",
+      "error": "更新失败！请稍候重试！"
+    },
+    "operate": {
+      "loading": "操作中...",
+      "success": "操作成功！",
+      "error": "操作失败！请稍候重试！"
+    },
+    "delete": {
+      "confirm-content": "确认删除吗？该操作不可撤销",
+      "success": "删除成功！",
+      "loading": "正在删除中...",
+      "error": "删除失败！请稍候重试！"
+    },
+    "sms-verify": {
+      "send-button": "发送验证码",
+      "loading": "发送中...",
+      "success": "已发送短信验证码至 {{phone}} 请注意查收",
+      "error": "发送失败！请稍后再重试"
     }
   },
   "components": {
@@ -41,8 +76,7 @@
       "image-editor": {
         "title": "上传图像",
         "confirm-tooltip": "点击更新",
-        "upload-others": "上传其他图像",
-        "save": "保存"
+        "upload-others": "上传其他图像"
       },
       "updater": {
         "title": "上传文件",
@@ -140,7 +174,7 @@
             "logout": "退出登录"
           },
           "toolbar": {
-            "settings-tooltip": "用户与团队配置"
+            "settings-tooltip": "配置中心"
           },
           "teams": {
             "balance": "余额",
@@ -176,6 +210,126 @@
         "switch-failed": "切换身份失败！"
       },
       "login-other": "登录其他账号"
+    }
+  },
+  "settings": {
+    "title": "配置中心",
+    "account": {
+      "title": "账号中心",
+      "payment-disabled-alert": "支付模块已禁用",
+      "info-editor": {
+        "invalid-toast": "请输入有效内容"
+      },
+      "user": {
+        "title": "账号信息",
+        "description": "点击即可编辑信息",
+        "logout": "退出登录",
+        "user-name": {
+          "info-editor": {
+            "title": "编辑昵称",
+            "placeholder": "输入昵称，16 字以内"
+          }
+        },
+        "user-account": {
+          "not-phone-toast": "暂时仅支持修改手机号",
+          "title": "更改手机号",
+          "old-phone": "旧手机号",
+          "old-phone-code-placeholder": "请输入旧手机号短信验证码",
+          "new-phone-placeholder": "请输入新手机号",
+          "new-phone-code-placeholder": "请输入新手机号短信验证码"
+        }
+      },
+      "team": {
+        "title": "我的团队",
+        "description": "管理您的团队数据",
+        "team-name": {
+          "title": "编辑团队名称",
+          "placeholder": "输入昵称，16 字以内"
+        },
+        "team-description": {
+          "title": "编辑团队描述",
+          "placeholder": "输入描述，16 字以内"
+        },
+        "apply-manage": {
+          "apply-item": {
+            "operate": {
+              "accept": "同意",
+              "reject": "拒绝"
+            },
+            "operate-toast": {
+              "index": "已{{operate}}该请求",
+              "accept": "同意",
+              "reject": "拒绝"
+            }
+          },
+          "public-change": {
+            "index": "已{{operate}}该团队",
+            "public": "公开",
+            "private": "私有"
+          },
+          "button": "申请管理",
+          "title": "申请管理",
+          "public-tooltip-1": "开启时，当前团队会在平台公开，任何用户都可以搜索到并申请加入。",
+          "public-tooltip-2": "关闭时，未加入团队的用户无法搜索到当前团队，也无法主动申请加入团队，但仍可通过邀请链接加入。",
+          "public-span": "设为公开团队"
+        },
+        "create": {
+          "button-tooltip": "新建团队",
+          "title": "新建团队",
+          "name-placeholder": "请输入团队名称",
+          "description-placeholder": "请输入团队描述"
+        },
+        "delete": {
+          "button-tooltip": "删除团队",
+          "confirm-content-1": "确定要删除该团队吗？",
+          "confirm-content-2": "删除后，此团队内的所有资源将不可见！",
+          "deleted": "团队已删除"
+        },
+        "import-export": {
+          "button": "数据管理",
+          "dropdown-label": "团队数据管理",
+          "import": {
+            "button": "导入数据",
+            "title": "导入团队数据"
+          },
+          "export": {
+            "button": "导出数据",
+            "title": "导出团队数据"
+          }
+        },
+        "join-public-team": {
+          "button-tooltip": "加入公开团队",
+          "title": "加入公开团队",
+          "search-placeholder": "请输入团队名称",
+          "team-item": {
+            "apply": "申请加入"
+          }
+        }
+      },
+      "team-member": {
+        "title": "团队成员",
+        "description": {
+          "owner": "邀请您的团队成员进行协作",
+          "member": "与团队成员进行协作"
+        },
+        "delete-member": "删除用户",
+        "invite": {
+          "button-tooltip": "邀请用户",
+          "dropdown-label": "邀请用户",
+          "invite-manage": {
+            "index": "管理邀请链接"
+          },
+          "invite-user": {
+            "index": "生成邀请链接"
+          }
+        }
+      }
+    },
+    "api-key": {
+      "title": "API 密钥"
+    },
+    "theme": {
+      "title": "团队主题"
     }
   }
 }

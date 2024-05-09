@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useInterval, useTimeout } from '@mantine/hooks';
 import { Pencil } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { sendSmsVerifyCode } from '@/apis/authz';
@@ -23,6 +24,8 @@ interface IUserAccountProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const UserAccount: React.FC<IUserAccountProps> = ({ user, updateUser }) => {
+  const { t } = useTranslation();
+
   const [visible, setVisible] = useState(false);
 
   const form = useForm<IToggleAccountViaSms>({
@@ -78,9 +81,9 @@ export const UserAccount: React.FC<IUserAccountProps> = ({ user, updateUser }) =
     }
     const finalPhone = _phone ? _phone : phone;
     toast.promise(sendSmsVerifyCode(finalPhone), {
-      loading: '发送中...',
-      success: `已发送短信验证码至 ${finalPhone} 请注意查收`,
-      error: '发送失败！请稍后再重试',
+      loading: t('common.sms-verify.loading'),
+      success: t('common.sms-verify.success', { phone: finalPhone }),
+      error: t('common.sms-verify.error'),
     });
   };
 
@@ -96,14 +99,14 @@ export const UserAccount: React.FC<IUserAccountProps> = ({ user, updateUser }) =
         oldVerifyCode: Number(oldVerifyCode),
       }),
       {
-        loading: '正在修改中...',
+        loading: t('common.update.loading'),
         success: (data) => {
           data && updateUser('phone', phoneNumber);
           setIsLoading(false);
           setVisible(false);
-          return '修改成功！';
+          return t('common.update.success');
         },
-        error: '修改失败，请检查网络是否通畅',
+        error: t('common.update.error'),
         finally: () => setIsLoading(false),
       },
     );
@@ -114,7 +117,9 @@ export const UserAccount: React.FC<IUserAccountProps> = ({ user, updateUser }) =
   return (
     <Dialog
       open={visible}
-      onOpenChange={(val) => (user.phone ? setVisible(val) : toast.warning('暂时仅支持修改手机号'))}
+      onOpenChange={(val) =>
+        user.phone ? setVisible(val) : toast.warning(t('settings.account.user.user-account.not-phone-toast'))
+      }
     >
       <DialogTrigger>
         <div className="group flex cursor-pointer items-center gap-2 transition-opacity hover:opacity-75">
@@ -124,13 +129,18 @@ export const UserAccount: React.FC<IUserAccountProps> = ({ user, updateUser }) =
       </DialogTrigger>
       <DialogContent className="max-w-96">
         <DialogHeader>
-          <DialogTitle>更改手机号</DialogTitle>
+          <DialogTitle>{t('settings.account.user.user-account.title')}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={handleSubmit} className="flex flex-col gap-2">
             <div className="mb-2 space-y-2">
-              <Input placeholder="旧手机号" value={currentAccount} readOnly autoFocus={false} />
+              <Input
+                placeholder={t('settings.account.user.user-account.old-phone')}
+                value={currentAccount}
+                readOnly
+                autoFocus={false}
+              />
             </div>
 
             <FormField
@@ -141,7 +151,7 @@ export const UserAccount: React.FC<IUserAccountProps> = ({ user, updateUser }) =
                   <div className="flex w-full items-center gap-4">
                     <FormControl>
                       <Input
-                        placeholder="请输入旧手机号短信验证码"
+                        placeholder={t('settings.account.user.user-account.old-phone-code-placeholder')}
                         inputMode="numeric"
                         maxLength={6}
                         {...field}
@@ -151,7 +161,7 @@ export const UserAccount: React.FC<IUserAccountProps> = ({ user, updateUser }) =
                     </FormControl>
 
                     <Button onClick={(e) => handleSandSmsCode(e, user.phone)}>
-                      {originInterval.active ? `${originCountDownSeconds} s` : '发送验证码'}
+                      {originInterval.active ? `${originCountDownSeconds} s` : t('common.sms-verify.send-button')}
                     </Button>
                   </div>
 
@@ -166,7 +176,7 @@ export const UserAccount: React.FC<IUserAccountProps> = ({ user, updateUser }) =
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input placeholder="请输入新手机号" {...field} />
+                    <Input placeholder={t('settings.account.user.user-account.new-phone-placeholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -181,7 +191,7 @@ export const UserAccount: React.FC<IUserAccountProps> = ({ user, updateUser }) =
                   <div className="flex w-full items-center gap-4">
                     <FormControl>
                       <Input
-                        placeholder="请输入短信验证码"
+                        placeholder={t('settings.account.user.user-account.new-phone-code-placeholder')}
                         inputMode="numeric"
                         maxLength={6}
                         {...field}
@@ -190,7 +200,7 @@ export const UserAccount: React.FC<IUserAccountProps> = ({ user, updateUser }) =
                     </FormControl>
 
                     <Button disabled={disabledCodeInput || interval.active} onClick={handleSandSmsCode}>
-                      {interval.active ? `${countDownSeconds} s` : '发送验证码'}
+                      {interval.active ? `${countDownSeconds} s` : t('common.sms-verify.send-button')}
                     </Button>
                   </div>
 
@@ -200,7 +210,7 @@ export const UserAccount: React.FC<IUserAccountProps> = ({ user, updateUser }) =
             />
 
             <Button type="submit" loading={isLoading} variant="solid">
-              确定
+              {t('common.utils.confirm')}
             </Button>
           </form>
         </Form>

@@ -2,6 +2,8 @@ import React, { useLayoutEffect } from 'react';
 
 import { createFileRoute } from '@tanstack/react-router';
 
+import { useTranslation } from 'react-i18next';
+
 import { Account } from '@/components/layout/settings/account';
 import { ApiKey } from '@/components/layout/settings/api-key';
 import { VinesTheme } from '@/components/layout/settings/theme';
@@ -10,26 +12,28 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.t
 import VinesEvent from '@/utils/events.ts';
 
 export const Settings: React.FC = () => {
+  const { t } = useTranslation();
+
   useLayoutEffect(() => {
     VinesEvent.emit('vines-update-site-title', '配置中心');
   }, []);
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-bold">配置中心</h1>
+      <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
       <Tabs
         defaultValue="account"
         className="[&_[role='tabpanel']]:mt-4 [&_[role='tabpanel']]:h-[calc(100vh-11.5rem)] [&_[role='tabpanel']]:overflow-y-auto [&_[role='tabpanel']]:overflow-x-hidden"
       >
         <TabsList>
           <TabsTrigger value="account" className="text-xs">
-            账号中心
+            {t('settings.account.title')}
           </TabsTrigger>
           <TabsTrigger value="theme" className="text-xs">
-            团队主题
+            {t('settings.theme.title')}
           </TabsTrigger>
           <TabsTrigger value="api-key" className="text-xs">
-            API 密钥
+            {t('settings.api-key.title')}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="account">

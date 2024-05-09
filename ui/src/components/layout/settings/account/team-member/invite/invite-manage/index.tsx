@@ -3,6 +3,7 @@ import React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import dayjs from 'dayjs';
 import { MoreHorizontal, Pause, Pencil, Play, Settings } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { deleteTeamInvite, toggleTeamInviteStatus, updateTeamInviteRemark, useTeamInvites } from '@/apis/authz/team';
@@ -32,6 +33,7 @@ interface IInviteManageProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible }) => {
+  const { t } = useTranslation();
   const { team } = useVinesTeam();
   const { data: inviteList, isLoading, mutate: mutateInviteList } = useTeamInvites(team?.id);
 
@@ -40,13 +42,13 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
       toast.promise(updateTeamInviteRemark(team.id, inviteId, remark), {
         success: () => {
           void mutateInviteList();
-          return '更新备注成功';
+          return t('common.update.success');
         },
-        loading: '更新中......',
-        error: '更新失败，请检查网络后重试',
+        loading: t('common.update.loading'),
+        error: t('common.update.error'),
       });
     } else {
-      toast.warning('读取信息失败，请刷新页面重试');
+      toast.warning(t('common.toast.loading'));
     }
   };
 
@@ -55,35 +57,35 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
       toast.promise(toggleTeamInviteStatus(team.id, inviteId), {
         success: () => {
           mutateInviteList();
-          return '操作成功';
+          return t('common.operate.success');
         },
-        loading: '操作中......',
-        error: '操作失败，请检查网络状况后重试',
+        loading: t('common.operate.loading'),
+        error: t('common.operate.error'),
       });
     } else {
-      toast.warning('读取信息失败，请刷新页面重试');
+      toast.warning(t('common.toast.loading'));
     }
   };
 
   const handleDeleteLink = async (inviteId: string) => {
     if (inviteId && team && team.id) {
-      toast(`确定要删除吗？该操作不可恢复。`, {
+      toast(t('common.delete.confirm-content'), {
         action: {
-          label: '确定',
+          label: t('common.utils.confirm'),
           onClick: () => {
             toast.promise(deleteTeamInvite(team.id, inviteId), {
               success: () => {
                 mutateInviteList();
-                return '删除成功';
+                return t('common.delete.success');
               },
-              loading: '删除中......',
-              error: '删除失败，请检查网络状况后重试',
+              loading: t('common.delete.loading'),
+              error: t('common.delete.error'),
             });
           },
         },
       });
     } else {
-      toast.warning('读取信息失败，请刷新页面重试');
+      toast.warning(t('common.toast.loading'));
     }
   };
 

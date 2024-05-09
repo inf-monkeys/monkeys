@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Pencil } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { updateUserInfo } from '@/apis/authz/user';
@@ -13,18 +14,20 @@ interface IUserNameProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const UserName: React.FC<IUserNameProps> = ({ user, updateUser }) => {
+  const { t } = useTranslation();
+
   const handleUpdateUser = (key: string, val: string) => {
     toast.promise(
       updateUserInfo({
         [key]: val,
       } as unknown as IVinesUser),
       {
-        loading: '更新中...',
+        loading: t('common.update.loading'),
         success: () => {
           updateUser(key, val);
-          return '更新成功！';
+          return t('common.update.success');
         },
-        error: '更新失败！请稍后再重试',
+        error: t('common.update.error'),
       },
     );
   };
@@ -33,8 +36,8 @@ export const UserName: React.FC<IUserNameProps> = ({ user, updateUser }) => {
 
   return (
     <InfoEditor
-      title="编辑昵称"
-      placeholder="输入昵称，16 字以内"
+      title={t('settings.account.user.user-name.info-editor.title')}
+      placeholder={t('settings.account.user.user-name.info-editor.placeholder')}
       initialValue={userName}
       onFinished={(val) => handleUpdateUser('name', val)}
     >

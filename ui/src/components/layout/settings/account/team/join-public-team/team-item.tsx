@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Button } from '@/components/ui/button';
@@ -12,6 +14,7 @@ interface IJoinPublicTeamItemProps extends React.ComponentPropsWithoutRef<'div'>
 }
 
 export const JoinPublicTeamItem: React.FC<IJoinPublicTeamItemProps> = ({ team, isHandleAccept, handleApplyTeam }) => {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardContent className="flex items-center justify-between gap-4 p-3">
@@ -27,7 +30,7 @@ export const JoinPublicTeamItem: React.FC<IJoinPublicTeamItemProps> = ({ team, i
         </div>
         <div className="flex gap-2">
           <Button disabled={isHandleAccept} onClick={() => handleApplyTeam(team.id)}>
-            申请加入
+            {t('settings.account.team.join-public-team.team-item.apply')}
           </Button>
         </div>
       </CardContent>
