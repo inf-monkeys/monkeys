@@ -59,6 +59,9 @@ export class WorkflowOpenAICompatibleController {
   public async createChatComplitions(@Req() req: IRequest, @Body() body: CreateChatCompletionsDto, @Res() res: Response) {
     const { teamId, userId } = req;
     const { model: workflowId, stream = false } = body;
+    if (!workflowId) {
+      return res.status(400).json({ message: 'model is required' });
+    }
     const conversationId = req.headers['x-monkeys-conversation-id'] as string;
     const workflowInstanceId = await this.workflowExecutionService.startWorkflow({
       teamId,
