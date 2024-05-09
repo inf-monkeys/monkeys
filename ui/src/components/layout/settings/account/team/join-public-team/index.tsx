@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import { Inbox, PlusCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { makeJoinTeamRequest, searchTeams, useTeams } from '@/apis/authz/team';
@@ -16,6 +17,8 @@ import { Tooltip } from '@/components/ui/tooltip';
 interface IJoinPublicTeamProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const JoinPublicTeam: React.FC<IJoinPublicTeamProps> = () => {
+  const { t } = useTranslation();
+
   const [visible, setVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isHandleAccept, setIsHandleAccept] = useState<boolean>(false);
@@ -30,13 +33,13 @@ export const JoinPublicTeam: React.FC<IJoinPublicTeamProps> = () => {
       toast.promise(makeJoinTeamRequest(teamId), {
         success: () => {
           setVisible(false);
-          return '申请成功';
+          return t('common.operate.success');
         },
-        loading: '申请中......',
-        error: '申请错误，请检查网络后重试',
+        loading: t('common.operate.loading'),
+        error: t('common.operate.error'),
       });
     } else {
-      toast.warning('正在加载中，请稍后再尝试');
+      toast.warning(t('common.toast.loading'));
     }
     setIsHandleAccept(false);
   }
@@ -64,18 +67,18 @@ export const JoinPublicTeam: React.FC<IJoinPublicTeamProps> = () => {
         setVisible(v);
       }}
     >
-      <Tooltip content="加入公开团队">
+      <Tooltip content={t('settings.account.team.join-public-team.button-tooltip')}>
         <DialogTrigger asChild>
           <Button icon={<PlusCircle size={18} />} size="small" />
         </DialogTrigger>
       </Tooltip>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>加入公开团队</DialogTitle>
+          <DialogTitle>{t('settings.account.team.join-public-team.title')}</DialogTitle>
         </DialogHeader>
         <div className="flex items-center gap-2">
           <Input
-            placeholder="请输入团队名称"
+            placeholder={t('settings.account.team.join-public-team.search-placeholder')}
             value={keywords}
             onChange={setKeywords}
             onEnterPress={() => {
@@ -83,7 +86,7 @@ export const JoinPublicTeam: React.FC<IJoinPublicTeamProps> = () => {
             }}
           />
           <Button loading={isLoading} onClick={() => handleSearchTeams()}>
-            搜索
+            {t('common.utils.search')}
           </Button>
         </div>
         <ScrollArea className="h-72">
@@ -94,7 +97,7 @@ export const JoinPublicTeam: React.FC<IJoinPublicTeamProps> = () => {
               ) : (
                 <div className="flex flex-col items-center gap-2">
                   <Inbox size={24} />
-                  <p>暂无搜索结果</p>
+                  <p>{t('common.load.empty')}</p>
                 </div>
               )}
             </div>

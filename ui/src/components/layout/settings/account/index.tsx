@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import { useSystemConfig } from '@/apis/common';
 import { ConsumerDetails } from '@/components/layout/settings/account/consumer-details';
 import { RechargeDetails } from '@/components/layout/settings/account/recharge-details';
@@ -11,6 +13,8 @@ import { User } from '@/components/layout/settings/account/user';
 interface IAccountProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const Account: React.FC<IAccountProps> = () => {
+  const { t } = useTranslation();
+
   const { data: oem } = useSystemConfig();
 
   const hasPayment = (oem?.module || []).includes('payment');
@@ -34,7 +38,7 @@ export const Account: React.FC<IAccountProps> = () => {
         </div>
       ) : (
         <div className="vines-center size-full">
-          <h1 className="font-bold">支付模块已禁用</h1>
+          <h1 className="font-bold">{t('settings.account.payment-disabled-alert')}</h1>
         </div>
       )}
     </div>

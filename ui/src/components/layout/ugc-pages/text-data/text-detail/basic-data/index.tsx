@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { NumberInput } from '@mantine/core';
 import { Edit2Icon, Save } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useKnowledgeBase, useUpdateKnowledgeBase } from '@/apis/vector';
@@ -17,15 +21,14 @@ import {
   retrievalSettingsSchema,
 } from '@/schema/text-dataset/retrieval-settings';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { NumberInput } from '@mantine/core';
-import { useForm } from 'react-hook-form';
 
 interface IBasicInfoProps {
   textId: string;
 }
 
 export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
+  const { t } = useTranslation();
+
   const { data: detail, mutate } = useKnowledgeBase(textId);
   const { trigger } = useUpdateKnowledgeBase(detail?.uuid ?? '');
   const [isLoading, setIsLoading] = useState(false);
@@ -34,12 +37,12 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
     toast.promise(
       trigger({ [key]: val } as unknown as Pick<ICreateVectorDB, 'displayName' | 'description' | 'iconUrl'>),
       {
-        loading: '更新中...',
+        loading: t('common.update.loading'),
         success: () => {
           void mutate();
-          return '更新成功！';
+          return t('common.update.success');
         },
-        error: '更新失败！请稍后再重试',
+        error: t('common.update.error'),
       },
     );
   };
@@ -73,12 +76,12 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
         },
       } as any),
       {
-        loading: '更新中...',
+        loading: t('common.update.loading'),
         success: () => {
           void mutate();
-          return '更新成功！';
+          return t('common.update.success');
         },
-        error: '更新失败！请稍后再重试',
+        error: t('common.update.error'),
       },
     );
   });

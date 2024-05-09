@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { updateTeamApply } from '@/apis/authz/team';
@@ -16,6 +17,8 @@ interface IApplyItemProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const ApplyItem: React.FC<IApplyItemProps> = ({ user, teamId, afterOperate }) => {
+  const { t } = useTranslation();
+
   const [isHandleAccept, setIsHandleAccept] = useState(false);
   const handleAccept = (accept: boolean) => {
     if (teamId) {
@@ -27,9 +30,14 @@ export const ApplyItem: React.FC<IApplyItemProps> = ({ user, teamId, afterOperat
           apply: accept,
         }),
         {
-          success: `已${accept ? '同意' : '拒绝'}该请求`,
-          loading: '操作中......',
-          error: '操作失败，请检查网络后重试',
+          // success: `已${accept ? '同意' : '拒绝'}该请求`,
+          success: t('settings.account.team.apply-manage.apply-item.operate-toast.index', {
+            operate: accept
+              ? t('settings.account.team.apply-manage.apply-item.operate-toast.accept')
+              : t('settings.account.team.apply-manage.apply-item.operate-toast.reject'),
+          }),
+          loading: t('common.operate.loading'),
+          error: t('common.operate.error'),
           finally: () => {
             setIsHandleAccept(false);
             afterOperate?.();
@@ -37,7 +45,7 @@ export const ApplyItem: React.FC<IApplyItemProps> = ({ user, teamId, afterOperat
         },
       );
     } else {
-      toast.warning('请等待加载完毕');
+      toast.warning(t('common.toast.loading'));
     }
   };
   return (
@@ -55,10 +63,10 @@ export const ApplyItem: React.FC<IApplyItemProps> = ({ user, teamId, afterOperat
         </div>
         <div className="flex gap-2">
           <Button disabled={isHandleAccept} theme="danger" onClick={() => handleAccept(false)}>
-            拒绝
+            {t('settings.account.team.apply-manage.apply-item.operate.reject')}
           </Button>
           <Button disabled={isHandleAccept} onClick={() => handleAccept(true)}>
-            同意
+            {t('settings.account.team.apply-manage.apply-item.operate.accept')}
           </Button>
         </div>
       </CardContent>

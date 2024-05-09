@@ -129,7 +129,7 @@ export const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
               </Button>
             </VinesUpdater>
             <Button variant="outline" onClick={handleSave} loading={loading}>
-              {t('components.ui.image-editor.save')}
+              {t('common.utils.save')}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useGetWorkflow, useUpdateWorkflow } from '@/apis/workflow';
@@ -14,6 +15,8 @@ import VinesEvent from '@/utils/events.ts';
 interface IWorkflowRawDataEditorProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const WorkflowRawDataEditor: React.FC<IWorkflowRawDataEditorProps> = () => {
+  const { t } = useTranslation();
+
   const { isLatestWorkflowVersion, workflowId } = useFlowStore();
 
   const apikey = readLocalStorageValue('vines-apikey', '', false);
@@ -52,9 +55,9 @@ export const WorkflowRawDataEditor: React.FC<IWorkflowRawDataEditorProps> = () =
     setOpen(false);
 
     toast.promise(trigger(draft as unknown as MonkeyWorkflow), {
-      loading: '更新中...',
-      success: '更新成功',
-      error: '更新失败',
+      loading: t('common.update.loading'),
+      success: t('common.update.success'),
+      error: t('common.update.error'),
     });
   };
 

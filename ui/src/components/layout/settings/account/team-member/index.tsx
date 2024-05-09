@@ -2,6 +2,7 @@ import React from 'react';
 
 import { ScrollShadow } from '@nextui-org/scroll-shadow';
 import { Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { removeTeamMember, useTeamUsers } from '@/apis/authz/team';
@@ -18,23 +19,25 @@ import { maskEmail, maskPhone } from '@/utils/maskdata.ts';
 interface ITeamMemberProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const TeamMember: React.FC<ITeamMemberProps> = () => {
+  const { t } = useTranslation();
+
   const [user] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
   const { team, isTeamOwner } = useVinesTeam();
   const { data, mutate } = useTeamUsers(team?.id);
 
   const handleRemoveTeamMember = (userId: string) => {
     if (team) {
-      toast('确认删除吗？该操作不可撤销', {
+      toast(t('common.delete.confirm-content'), {
         action: {
-          label: '确认',
+          label: t('common.utils.confirm'),
           onClick: () => {
             toast.promise(removeTeamMember(team.id, userId), {
               success: () => {
                 void mutate();
-                return '删除成功';
+                return t('common.delete.success');
               },
-              loading: '正在删除中',
-              error: '删除失败',
+              loading: t('common.delete.loading'),
+              error: t('common.delete.error'),
             });
           },
         },
@@ -50,8 +53,12 @@ export const TeamMember: React.FC<ITeamMemberProps> = () => {
   return (
     <Card>
       <CardHeader className="relative">
-        <CardTitle>团队成员</CardTitle>
-        <CardDescription>{isOwner ? '邀请您的团队成员进行协作' : '与团队成员进行协作'}</CardDescription>
+        <CardTitle>{t('settings.account.team-member.title')}</CardTitle>
+        <CardDescription>
+          {isOwner
+            ? t('settings.account.team-member.description.owner')
+            : t('settings.account.team-member.description.member')}
+        </CardDescription>
         <div className="absolute left-0 top-0 !mt-0 flex size-full items-center justify-end gap-2 p-6">
           <Invite />
         </div>
@@ -79,7 +86,7 @@ export const TeamMember: React.FC<ITeamMemberProps> = () => {
                         onClick={() => handleRemoveTeamMember(id)}
                       />
                     </TooltipTrigger>
-                    <TooltipContent>删除用户</TooltipContent>
+                    <TooltipContent>{t('settings.account.team-member.delete-member')}</TooltipContent>
                   </Tooltip>
                 </div>
               )}

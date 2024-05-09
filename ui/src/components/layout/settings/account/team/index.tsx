@@ -3,6 +3,7 @@ import React from 'react';
 import { useSWRConfig } from 'swr';
 
 import { Pencil } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { updateTeam } from '@/apis/authz/team';
@@ -23,6 +24,8 @@ import { cn, useLocalStorage } from '@/utils';
 interface ITeamProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const Team: React.FC<ITeamProps> = () => {
+  const { t } = useTranslation();
+
   const { mutate } = useSWRConfig();
   const { team } = useVinesTeam();
   const [user] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
@@ -38,9 +41,9 @@ export const Team: React.FC<ITeamProps> = () => {
         });
       }),
       {
-        loading: '更新中...',
-        success: '更新成功！',
-        error: '更新失败！请稍后再重试',
+        loading: t('common.update.loading'),
+        success: t('common.update.success'),
+        error: t('common.update.error'),
       },
     );
   };
@@ -53,8 +56,8 @@ export const Team: React.FC<ITeamProps> = () => {
   return (
     <Card>
       <CardHeader className="relative">
-        <CardTitle>我的团队</CardTitle>
-        {isOwner && <CardDescription>管理您的团队数据</CardDescription>}
+        <CardTitle>{t('settings.account.team.title')}</CardTitle>
+        {isOwner && <CardDescription>{t('settings.account.team.description')}</CardDescription>}
         <div className="absolute left-0 top-0 !mt-0 flex size-full items-center justify-end gap-2 p-6">
           <CreateTeam />
           <JoinPublicTeam />
@@ -70,8 +73,8 @@ export const Team: React.FC<ITeamProps> = () => {
         <div className="flex flex-col justify-center">
           <InfoEditor
             disabled={!isOwner}
-            title="编辑团队名称"
-            placeholder="输入昵称，16 字以内"
+            title={t('settings.account.team.team-name.title')}
+            placeholder={t('settings.account.team.team-name.placeholder')}
             initialValue={teamName}
             onFinished={(val) => handleUpdateTeam('name', val)}
           >
@@ -82,8 +85,8 @@ export const Team: React.FC<ITeamProps> = () => {
           </InfoEditor>
           <InfoEditor
             disabled={!isOwner}
-            title="编辑团队描述"
-            placeholder="输入描述，16 字以内"
+            title={t('settings.account.team.team-description.title')}
+            placeholder={t('settings.account.team.team-description.placeholder')}
             initialValue={teamDescription}
             onFinished={(val) => handleUpdateTeam('description', val)}
           >

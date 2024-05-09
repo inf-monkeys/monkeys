@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { deleteTeam, useTeams } from '@/apis/authz/team';
@@ -12,25 +13,27 @@ interface IDeleteTeamProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const DeleteTeam: React.FC<IDeleteTeamProps> = ({ teamId }) => {
+  const { t } = useTranslation();
+
   const { mutate: mutateTeams } = useTeams();
 
   const handleDeleteTeam = () => {
     if (teamId) {
-      toast('确定要删除该团队吗？', {
+      toast(t('settings.account.team.delete.confirm-content-1'), {
         action: {
-          label: '确定',
+          label: t('common.utils.confirm'),
           onClick: () =>
-            toast('删除后，此团队内的所有资源将不可见！', {
+            toast(t('settings.account.team.delete.confirm-content-2'), {
               action: {
-                label: '继续删除',
+                label: t('common.utils.continue'),
                 onClick: () => {
                   toast.promise(deleteTeam(teamId), {
                     success: () => {
                       void mutateTeams();
-                      return '团队已删除';
+                      return t('settings.account.team.delete.deleted');
                     },
-                    loading: '删除中......',
-                    error: '删除失败，请检查网络是否通畅',
+                    loading: t('common.delete.loading'),
+                    error: t('common.delete.error'),
                   });
                 },
               },
@@ -38,7 +41,7 @@ export const DeleteTeam: React.FC<IDeleteTeamProps> = ({ teamId }) => {
         },
       });
     } else {
-      toast.error('团队信息不完整，操作失败');
+      toast.warning(t('common.toast.loading'));
     }
   };
 
@@ -47,7 +50,7 @@ export const DeleteTeam: React.FC<IDeleteTeamProps> = ({ teamId }) => {
       <TooltipTrigger asChild>
         <Button size="small" theme="danger" icon={<Trash2 />} onClick={handleDeleteTeam} />
       </TooltipTrigger>
-      <TooltipContent>删除团队</TooltipContent>
+      <TooltipContent>{t('settings.account.team.delete.button-tooltip')}</TooltipContent>
     </Tooltip>
   );
 };

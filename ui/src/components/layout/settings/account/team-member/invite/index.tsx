@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import { Link, Settings, Share } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { InviteManage } from '@/components/layout/settings/account/team-member/invite/invite-manage';
 import { InviteUser } from '@/components/layout/settings/account/team-member/invite/invite-user';
@@ -18,32 +19,34 @@ import {
 import { Tooltip } from '@/components/ui/tooltip';
 
 export const Invite: React.FC = () => {
+  const { t } = useTranslation();
+
   const [inviteUserDialogVisible, setInviteUserDialogVisible] = useState(false);
   const [inviteManageDialogVisible, setInviteManageDialogVisible] = useState(false);
 
   return (
     <>
       <DropdownMenu>
-        <Tooltip content="邀请用户">
+        <Tooltip content={t('settings.account.team-member.invite.button-tooltip')}>
           <DropdownMenuTrigger asChild>
             <Button icon={<Share />} size="small" />
           </DropdownMenuTrigger>
         </Tooltip>
         <DropdownMenuContent>
-          <DropdownMenuLabel>邀请用户</DropdownMenuLabel>
+          <DropdownMenuLabel>{t('settings.account.team-member.invite.dropdown-label')}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem onSelect={() => setInviteUserDialogVisible(true)}>
               <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                 <Link size={15} />
               </DropdownMenuShortcut>
-              生成邀请链接
+              {t('settings.account.team-member.invite.invite-user.index')}
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => setInviteManageDialogVisible(true)}>
               <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                 <Settings size={15} />
               </DropdownMenuShortcut>
-              管理邀请链接
+              {t('settings.account.team-member.invite.invite-manage.index')}
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>

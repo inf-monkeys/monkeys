@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { isEmpty } from 'lodash';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,8 @@ export const InfoEditor: React.FC<IInfoEditorProps> = ({
   onFinished,
   disabled,
 }) => {
+  const { t } = useTranslation();
+
   const [visible, setVisible] = useState(false);
   const [value, setValue] = useState(initialValue || '');
 
@@ -56,7 +59,7 @@ export const InfoEditor: React.FC<IInfoEditorProps> = ({
             variant="solid"
             onClick={() => {
               if (isEmpty(value)) {
-                toast.error('请输入有效的内容');
+                toast.error(t('settings.account.info-editor.invalid-toast'));
                 return;
               } else {
                 value !== initialValue && onFinished?.(value);
@@ -64,7 +67,7 @@ export const InfoEditor: React.FC<IInfoEditorProps> = ({
               }
             }}
           >
-            保存
+            {t('common.utils.save')}
           </Button>
         </DialogFooter>
       </DialogContent>
