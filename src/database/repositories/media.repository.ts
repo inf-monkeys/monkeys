@@ -1,4 +1,5 @@
 import { ListDto } from '@/common/dto/list.dto';
+import { S3Helpers } from '@/common/s3';
 import { generateDbId } from '@/common/utils';
 import { MediaSource } from '@/database/entities/assets/media/media-file';
 import { CreateRichMediaDto } from '@/modules/assets/media/dto/req/create-rich-media.dto';
@@ -12,20 +13,41 @@ import { MediaFileAssetRepositroy } from './assets-media-file.repository';
 export class MediaFileRepository {
   constructor(
     @InjectRepository(MediaFileEntity)
-    private readonly mediaFileEntity: Repository<MediaFileEntity>,
+    private readonly mediaFileRepository: Repository<MediaFileEntity>,
     private readonly mediaFileAssetRepositroy: MediaFileAssetRepositroy,
   ) {}
 
+  private async refreshLogo(records: MediaFileEntity[]) {
+    const s3Helpers = new S3Helpers();
+    const promises = records.map(async (record) => {
+      if (record.iconUrl) {
+        try {
+          const { refreshed, refreshedUrl } = await s3Helpers.refreshSignedUrl(record.iconUrl);
+          if (refreshed) {
+            record.iconUrl = refreshedUrl;
+            await this.mediaFileRepository.save(record);
+          }
+        } catch (e) {}
+      }
+    });
+    await Promise.all(promises);
+  }
+
   public async listRichMedias(teamId: string, dto: ListDto) {
-    return await this.mediaFileAssetRepositroy.listAssets('media-file', teamId, dto, {
+    const { list, totalCount } = await this.mediaFileAssetRepositroy.listAssets('media-file', teamId, dto, {
       withTags: true,
       withTeam: true,
       withUser: true,
     });
+    await this.refreshLogo(list);
+    return {
+      list,
+      totalCount,
+    };
   }
 
   public async deleteMedia(teamId: string, id: string) {
-    const data = await this.mediaFileEntity.findOne({
+    const data = await this.mediaFileRepository.findOne({
       where: {
         id,
         teamId,
@@ -34,7 +56,7 @@ export class MediaFileRepository {
     if (!data) {
       return;
     }
-    await this.mediaFileEntity.update(
+    await this.mediaFileRepository.update(
       {
         id,
         teamId,
@@ -46,28 +68,31 @@ export class MediaFileRepository {
   }
 
   public async getMediaById(id: string) {
-    return await this.mediaFileEntity.findOne({
+    const data = await this.mediaFileRepository.findOne({
       where: {
         id: id,
       },
     });
+    await this.refreshLogo([data]);
+    return data;
   }
 
   public async getMediaByMd5(teamId: string, md5: string) {
-    const data = await this.mediaFileEntity.findOne({
+    const data = await this.mediaFileRepository.findOne({
       where: {
         md5,
         teamId,
         isDeleted: false,
       },
     });
+    await this.refreshLogo([data]);
     return data;
   }
 
   public async createMedia(teamId: string, userId: string, body: CreateRichMediaDto) {
     const { url, source = MediaSource.UPLOAD, displayName, params, type, size, md5 } = body;
     const mediaId = generateDbId();
-    await this.mediaFileEntity.save({
+    await this.mediaFileRepository.save({
       id: mediaId,
       iconUrl: '',
       description: '',

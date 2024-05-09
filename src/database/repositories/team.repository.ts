@@ -1,3 +1,4 @@
+import { S3Helpers } from '@/common/s3';
 import { generateDbId } from '@/common/utils';
 import { getMap } from '@/common/utils/map';
 import { TeamEntity } from '@/database/entities/identity/team';
@@ -24,25 +25,50 @@ export class TeamRepository {
     private readonly userRepository: UserRepository,
   ) {}
 
+  private async refreshLogo(teams: TeamEntity[]) {
+    const s3Helpers = new S3Helpers();
+    const promises = teams.map(async (team) => {
+      if (team.iconUrl) {
+        try {
+          const { refreshed, refreshedUrl } = await s3Helpers.refreshSignedUrl(team.iconUrl);
+          if (refreshed) {
+            team.iconUrl = refreshedUrl;
+            await this.teamRepository.save(team);
+          }
+        } catch (e) {}
+      }
+    });
+    await Promise.all(promises);
+  }
+
   public async getTeamById(id: string) {
-    return await this.teamRepository.findOne({
+    const team = await this.teamRepository.findOne({
       where: {
         id,
       },
     });
+    await this.refreshLogo([team]);
+    return team;
+  }
+
+  public async getTeamsByIds(ids: string[]) {
+    const teams = await this.teamRepository.find({
+      where: {
+        id: In(ids),
+        isDeleted: false,
+      },
+    });
+    await this.refreshLogo(teams);
+    return teams;
   }
 
   public async getTeamsByIdsAsMap(ids: string[]) {
-    let userHash: Record<string, TeamEntity> = {};
+    let teamHash: Record<string, TeamEntity> = {};
     if (ids?.length) {
-      const users = await this.teamRepository.find({
-        where: {
-          id: In(ids),
-        },
-      });
-      userHash = getMap(users, (u) => u.id);
+      const teams = await this.getTeamsByIds(ids);
+      teamHash = getMap(teams, (u) => u.id);
     }
-    return userHash;
+    return teamHash;
   }
 
   async getUserTeams(userId: string): Promise<TeamEntity[]> {
@@ -56,12 +82,14 @@ export class TeamRepository {
     if (!teamIds.length) {
       return [];
     }
-    return await this.teamRepository.find({
+    const teams = await this.teamRepository.find({
       where: {
         id: In(teamIds),
         isDeleted: false,
       },
     });
+    await this.refreshLogo(teams);
+    return teams;
   }
 
   public async checkNameConflict(userId: string, name: string) {
