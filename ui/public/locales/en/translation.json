@@ -94,6 +94,12 @@
             }
           }
         }
+      },
+      "vines-variable-editor": {
+        "cannot-parse-toast": "VinesVariableEditor can't parse text!"
+      },
+      "date-range-picker": {
+        "select-date": "Select date"
       }
     }
   },
