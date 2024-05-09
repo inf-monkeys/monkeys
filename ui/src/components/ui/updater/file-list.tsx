@@ -272,7 +272,7 @@ export const FileList: React.FC<IFilesProps> = ({
                       <TooltipContent align="start">
                         {t('components.ui.updater.file-list.info-tooltip.name') + name}
                         <br />
-                        {t('components.ui.updater.file-list.info-tooltip.md5') + !progress
+                        {t('components.ui.updater.file-list.info-tooltip.md5.index') + !progress
                           ? t('components.ui.updater.file-list.info-tooltip.md5.waiting')
                           : md5 ?? t('components.ui.updater.file-list.info-tooltip.md5.in-progress', { progress })}
                       </TooltipContent>

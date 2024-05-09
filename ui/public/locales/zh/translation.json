@@ -10,6 +10,11 @@
       "switched": "已切换为「简体中文」",
       "switch-failed": "语言切换失败！"
     },
+    "dark-mode-selector": {
+      "auto": "跟随系统",
+      "dark": "深色模式",
+      "light": "浅色模式"
+    },
     "load": {
       "loading": "加载中...",
       "empty": "暂无数据"
@@ -93,6 +98,59 @@
       },
       "date-range-picker": {
         "select-date": "选择日期"
+      }
+    },
+    "layout": {
+      "main": {
+        "sidebar": {
+          "list": {
+            "workspace": {
+              "index": "工作台"
+            },
+            "app": {
+              "index": "应用",
+              "workflows": "工作流"
+            },
+            "tool": {
+              "index": "工具",
+              "action-tools": "执行类工具",
+              "render-tools": "渲染类工具"
+            },
+            "model": {
+              "index": "模型",
+              "text-models": "语言模型",
+              "image-models": "图像模型"
+            },
+            "media": {
+              "index": "数据",
+              "text-data": "文本数据",
+              "table-data": "表格数据",
+              "media-data": "富媒体数据"
+            },
+            "application": {
+              "index": "市场",
+              "application-store": "应用市场",
+              "text-model-store": "语言模型市场",
+              "image-model-store": "图像模型市场",
+              "text-data-store": "文本数据市场"
+            }
+          },
+          "account": {
+            "login-others": "登录其他账号",
+            "logout": "退出登录"
+          },
+          "toolbar": {
+            "settings-tooltip": "用户与团队配置"
+          },
+          "teams": {
+            "balance": "余额",
+            "team-selector": {
+              "search-team": "搜索团队...",
+              "not-found": "找不到团队",
+              "avatar-fallback": "团队"
+            }
+          }
+        }
       }
     }
   },

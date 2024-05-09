@@ -3,6 +3,7 @@ import React from 'react';
 import { useNavigate } from '@tanstack/react-router';
 
 import { UserCog } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Route } from '@/pages/login';
 
 export const Toolbar: React.FC = () => {
+  const { t } = useTranslation();
+
   const navigate = useNavigate({ from: Route.fullPath });
 
   return (
@@ -32,7 +35,7 @@ export const Toolbar: React.FC = () => {
             }}
           />
         </TooltipTrigger>
-        <TooltipContent>用户与团队配置</TooltipContent>
+        <TooltipContent>{t('components.layout.main.sidebar.toolbar.settings-tooltip')}</TooltipContent>
       </Tooltip>
     </div>
   );

@@ -2,6 +2,7 @@ import React from 'react';
 
 import { ScrollShadow } from '@nextui-org/scroll-shadow';
 import { ChevronDownIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { NavButton } from '@/components/layout/main/sidebar/nav-button.tsx';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx';
@@ -11,6 +12,8 @@ import { useLocalStorage } from '@/utils';
 interface INavListProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const NavList: React.FC<INavListProps> = () => {
+  const { t } = useTranslation();
+
   const [activeIndex, setActiveIndex] = useLocalStorage<string[]>(
     'vines-ui-sidebar',
     SIDEBAR_MAP.map(({ name }) => name),
@@ -24,7 +27,7 @@ export const NavList: React.FC<INavListProps> = () => {
         value={activeIndex}
         onValueChange={setActiveIndex}
       >
-        {SIDEBAR_MAP.map(({ items, name, icon, label, path }, i) => (
+        {SIDEBAR_MAP.map(({ items, name, icon, path }, i) => (
           <AccordionItem key={i} value={name}>
             {items ? (
               <>
@@ -38,20 +41,20 @@ export const NavList: React.FC<INavListProps> = () => {
                       </div>
                     }
                   >
-                    {label}
+                    {t(`components.layout.main.sidebar.list.${name}.index`)}
                   </NavButton>
                 </AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-1 first:mt-1">
-                  {items.map(({ label: subLabel, path: subPath }, index) => (
+                  {items.map(({ name: subName, path: subPath }, index) => (
                     <NavButton key={index} to={subPath}>
-                      {subLabel}
+                      {t(`components.layout.main.sidebar.list.${name}.${subName}`)}
                     </NavButton>
                   ))}
                 </AccordionContent>
               </>
             ) : (
               <NavButton key={i} icon={icon} to={path}>
-                {label}
+                {t(`components.layout.main.sidebar.list.${name}.index`)}
               </NavButton>
             )}
           </AccordionItem>

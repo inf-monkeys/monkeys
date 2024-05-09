@@ -10,6 +10,11 @@
       "switched": "Language switched",
       "switch-failed": "Failed to switch language!"
     },
+    "dark-mode-selector": {
+      "auto": "Auto",
+      "dark": "Dark",
+      "light": "Light"
+    },
     "load": {
       "loading": "Loading...",
       "empty": "No data"
@@ -100,6 +105,59 @@
       },
       "date-range-picker": {
         "select-date": "Select date"
+      }
+    },
+    "layout": {
+      "main": {
+        "sidebar": {
+          "list": {
+            "workspace": {
+              "index": "Workspace"
+            },
+            "app": {
+              "index": "App",
+              "workflows": "Workflows"
+            },
+            "tool": {
+              "index": "Tools",
+              "action-tools": "Action Tools",
+              "render-tools": "Render Tools"
+            },
+            "model": {
+              "index": "Models",
+              "text-models": "Text Models",
+              "image-models": "Image Models"
+            },
+            "media": {
+              "index": "Data",
+              "text-data": "Text Data",
+              "table-data": "Table Data",
+              "media-data": "Media Data"
+            },
+            "application": {
+              "index": "Store",
+              "application-store": "App Store",
+              "text-model-store": "Text Model Store",
+              "image-model-store": "Image Model Store",
+              "text-data-store": "Text Data Store"
+            }
+          },
+          "account": {
+            "login-others": "Login other account",
+            "logout": "Logout"
+          },
+          "toolbar": {
+            "settings-tooltip": "User and team profile"
+          },
+          "teams": {
+            "balance": "Balance",
+            "team-selector": {
+              "search-team": "Search team...",
+              "not-found": "Not found",
+              "avatar-fallback": "Team"
+            }
+          }
+        }
       }
     }
   },
