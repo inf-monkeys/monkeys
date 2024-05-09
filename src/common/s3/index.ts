@@ -16,6 +16,7 @@ export class S3Helpers {
       },
       endpoint: config.s3.endpoint,
       region: config.s3.region,
+      forcePathStyle: config.s3.forcePathStyle,
     });
   }
 
