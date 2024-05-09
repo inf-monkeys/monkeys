@@ -323,6 +323,7 @@ When answer to user:
         }
       }
     } catch (error) {
+      logger.error(`Failed to create chat completions: `, error);
       return res.status(500).send(error.message);
     }
   }

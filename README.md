@@ -10,6 +10,8 @@ Monkeys is an open source tool for build workflow-centric AI applications.
 
 </div>
 
+> **Note: We are currently iterating rapidly, so backwards compatibility is not guaranteed until a stable version (1.0.0) is released.**
+
 ## Documentation
 
 You can read the documentation here: [https://inf-monkeys.github.io/docs/](https://inf-monkeys.github.io/docs/).

@@ -28,13 +28,25 @@ const logger = getLogger('default');
 const MONKEYS_DIST_FOLDER = process.env.MONKEYS_DIST_FOLDER || 'dist';
 
 // Read configuration from `config.yaml`
+let configFilePath = path.join(__dirname, './config.yaml');
+if (fs.existsSync(configFilePath)) {
+  configFilePath = configFilePath;
+} else if (fs.existsSync('/etc/monkeys/config.yaml')) {
+  configFilePath = '/etc/monkeys/config.yaml';
+} else {
+  console.error('Configuration file not found');
+  process.exit(1);
+}
+
 let config;
 try {
-  config = yaml.parse(fs.readFileSync(path.join(__dirname, './config.yaml'), 'utf8'));
+  config = yaml.parse(fs.readFileSync(configFilePath, 'utf8'));
 } catch (e) {
   console.error('Failed to load configuration:', e);
   process.exit(1);
 }
+
+const port = process.env.PORT || config.port || 3000;
 
 const servers = config.servers;
 if (!servers.length) {
@@ -158,7 +170,7 @@ const runPorxyServer = (port) => {
 
 const main = async () => {
   startServers();
-  runPorxyServer(3000);
+  runPorxyServer(port);
 };
 
 main()
