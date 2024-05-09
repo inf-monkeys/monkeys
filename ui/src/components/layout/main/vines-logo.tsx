@@ -12,7 +12,6 @@ import { useAppStore } from '@/store/useAppStore';
 import { cn } from '@/utils';
 
 export const VinesLogo: React.FC<Omit<ILogoProps, 'url'> & { disableInitialHeight?: boolean }> = ({
-  description = '构建流程为中心的 AI 应用',
   className,
   height = 40,
   onClick,
@@ -26,12 +25,10 @@ export const VinesLogo: React.FC<Omit<ILogoProps, 'url'> & { disableInitialHeigh
 
   const enabledCustomIcon = get(team, 'customTheme.enableTeamLogo', false);
 
-  const initialHeight = description ? height + 32 : height;
-
   const logoUrl = get(oem, `theme.logo.${darkMode ? 'dark' : 'light'}`, '');
 
   return (
-    <SmoothTransition className="relative" initialHeight={initialHeight} onClick={onClick}>
+    <SmoothTransition className="relative" initialHeight={height} onClick={onClick}>
       <AnimatePresence>
         {team && !isOemLoading ? (
           <motion.div
@@ -44,7 +41,6 @@ export const VinesLogo: React.FC<Omit<ILogoProps, 'url'> & { disableInitialHeigh
             <AppLogo
               className={cn('w-auto', className)}
               url={enabledCustomIcon ? team?.iconUrl : logoUrl}
-              description={description}
               height={disableInitialHeight ? void 0 : height}
               {...props}
             />
@@ -58,7 +54,7 @@ export const VinesLogo: React.FC<Omit<ILogoProps, 'url'> & { disableInitialHeigh
             transition={{ duration: 0.2 }}
             className="absolute left-0 top-0"
           >
-            <Skeleton className={cn('w-full', enabledCustomIcon && 'h-8')} style={{ height: initialHeight }} />
+            <Skeleton className={cn('w-full', enabledCustomIcon && 'h-8')} style={{ height }} />
           </motion.div>
         )}
       </AnimatePresence>
