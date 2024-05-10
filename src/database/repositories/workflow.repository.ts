@@ -100,13 +100,13 @@ export class WorkflowRepository {
     return await this.getWorkflowById(workflowId, maxVersion);
   }
 
-  public async findWorkflowByIds(ids: string[]) {
-    if (!ids?.length) {
+  public async findWorkflowByIds(workflowIds: string[]) {
+    if (!workflowIds?.length) {
       return [];
     }
     return await this.workflowMetadataRepository.find({
       where: {
-        id: In(ids),
+        workflowId: In(workflowIds),
         isDeleted: false,
       },
     });
