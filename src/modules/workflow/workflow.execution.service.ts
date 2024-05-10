@@ -9,7 +9,7 @@ import { RateLimiter } from '@/common/utils/rate-limiter';
 import { sleep } from '@/common/utils/utils';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
-import { Workflow } from '@inf-monkeys/conductor-javascript';
+import { Task, Workflow } from '@inf-monkeys/conductor-javascript';
 import { Inject, Injectable } from '@nestjs/common';
 import _ from 'lodash';
 import retry from 'retry-as-promised';
@@ -199,6 +199,10 @@ export class WorkflowExecutionService {
     }
 
     const executions = data?.results ?? [];
+    for (const execution of executions) {
+      this.conductorService.convertConductorTasksToVinesTasks(teamId, (execution.tasks || []) as Task[], execution.workflowDefinition);
+    }
+
     const executionsWithMetadata = await this.populateMetadataByForExecutions(executions);
     return {
       definitions,
