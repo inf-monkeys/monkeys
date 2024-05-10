@@ -73,7 +73,7 @@ export const useChat = (chatId: string, workflowId?: string, apiKey?: string, hi
         throw new Error('Request failed');
       }
 
-      const data = parseOpenAIStream(response).body;
+      const data = parseOpenAIStream(response)?.body;
       if (!data) {
         throw new Error('No data');
       }
