@@ -3,7 +3,7 @@ import React, { memo } from 'react';
 import { SyntaxHighlighter } from '@/components/ui/highlighter/SyntaxHighlighter.tsx';
 import { languageMap } from '@/components/ui/highlighter/useHighlight.ts';
 
-interface IVinesHighlighterProps extends React.ComponentPropsWithoutRef<'div'> {
+interface IVinesHighlighterProps extends React.ComponentPropsWithoutRef<'pre'> {
   children: string;
   language: (typeof languageMap)[number];
 }

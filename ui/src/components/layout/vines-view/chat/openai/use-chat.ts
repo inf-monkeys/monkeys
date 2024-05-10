@@ -3,19 +3,22 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import useSWR from 'swr';
 
 import { useForceUpdate } from '@mantine/hooks';
+import { isEmpty } from 'lodash';
 import { toast } from 'sonner';
 
-import { IMessage } from '@/components/layout/vines-view/chat/openai/chat-panel/index.tsx';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 import { parseOpenAIStream } from '@/utils/openai.ts';
+
+export interface IMessage {
+  content: string;
+  role: 'user' | 'assistant';
+}
 
 export const useChat = (chatId: string, workflowId?: string, apiKey?: string, history?: IMessage[]) => {
   const [input, setInput] = useState('');
   const [controller, setController] = useState<AbortController | null>(null);
 
-  const { data: messages, mutate } = useSWR<IMessage[]>([chatId, 'messages'], null, {
-    fallbackData: history ?? [],
-  });
+  const [messages, mutateMessages] = useState<IMessage[]>(history || []);
 
   const { data: isLoading = false, mutate: mutateLoading } = useSWR<boolean>([chatId, 'loading'], null);
 
@@ -26,30 +29,27 @@ export const useChat = (chatId: string, workflowId?: string, apiKey?: string, hi
 
   const setMessages = useCallback(
     async (messages: IMessage[]) => {
-      await mutate(messages, false);
+      mutateMessages(messages);
       messagesRef.current = messages;
     },
-    [mutate],
+    [mutateMessages],
   );
 
   const handleSubmit = () => {
-    void mutate(
-      [
-        ...messagesRef.current,
-        { content: input, role: 'user' },
-        {
-          content: '',
-          role: 'assistant',
-        },
-      ],
-      false,
-    );
+    mutateMessages([
+      ...messagesRef.current,
+      { content: input, role: 'user' },
+      {
+        content: '',
+        role: 'assistant',
+      },
+    ]);
     setInput('');
   };
 
   const forceUpdate = useForceUpdate();
 
-  const handleChat = async () => {
+  const handleChat = useCallback(async () => {
     await mutateLoading(true);
     try {
       const controller = new AbortController();
@@ -80,11 +80,11 @@ export const useChat = (chatId: string, workflowId?: string, apiKey?: string, hi
 
       const reader = data.getReader();
       const decoder = new TextDecoder('utf-8');
-      let done = false;
       let aiResult = '';
 
-      while (!done) {
-        const { value, done: readerDone } = await reader.read();
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { value, done } = await reader.read();
         if (value) {
           const char = decoder.decode(value);
 
@@ -92,10 +92,12 @@ export const useChat = (chatId: string, workflowId?: string, apiKey?: string, hi
           const lastMessage = messagesRef.current.at(-1);
           if (!lastMessage) return;
           lastMessage.content = aiResult;
-          void mutate(messagesRef.current);
+          mutateMessages(messagesRef.current);
           forceUpdate();
         }
-        done = readerDone;
+        if (done) {
+          break;
+        }
       }
 
       await mutateLoading(false);
@@ -103,9 +105,17 @@ export const useChat = (chatId: string, workflowId?: string, apiKey?: string, hi
       console.error(error);
       setController(null);
       void mutateLoading(false);
+      mutateMessages((prev) => {
+        const prevMessage = prev.at(-1);
+        if (prevMessage?.role === 'assistant' && isEmpty(prevMessage?.content?.trim() ?? '')) {
+          return prev.slice(0, -1);
+        }
+
+        return prev;
+      });
       toast.error('对话失败');
     }
-  };
+  }, [mutateMessages, chatId]);
 
   return {
     messages,

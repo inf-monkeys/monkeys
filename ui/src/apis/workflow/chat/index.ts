@@ -3,7 +3,7 @@ import useSWRMutation from 'swr/mutation';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { IVinesChatSession, IVinesCreateChatSessionParams } from '@/apis/workflow/chat/typings.ts';
-import { IMessage } from '@/components/layout/vines-view/chat/openai/chat-panel';
+import { IMessage } from '@/components/layout/vines-view/chat/openai/use-chat.ts';
 
 export const useWorkflowChatSessions = (workflowId: string) =>
   useSWR<IVinesChatSession[] | undefined>(
