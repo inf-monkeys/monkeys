@@ -3,6 +3,7 @@ import useSWRMutation from 'swr/mutation';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { IVinesChatSession, IVinesCreateChatSessionParams } from '@/apis/workflow/chat/typings.ts';
+import { IMessage } from '@/components/layout/vines-view/chat/openai/use-chat.ts';
 
 export const useWorkflowChatSessions = (workflowId: string) =>
   useSWR<IVinesChatSession[] | undefined>(
@@ -20,4 +21,10 @@ export const useDeleteWorkflowChatSession = (sessionId?: string) =>
   useSWRMutation<{ success: boolean } | undefined, unknown, string | null>(
     sessionId ? `/api/workflow/chat-sessions/${sessionId}` : null,
     vinesFetcher({ method: 'DELETE' }),
+  );
+
+export const useOpenAIInterfaceChatHistory = (sessionId?: string) =>
+  useSWR<IMessage[] | undefined>(
+    sessionId && sessionId !== 'default' ? `/api/workflow/chat-sessions/${sessionId}/messages` : null,
+    vinesFetcher(),
   );

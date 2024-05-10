@@ -19,7 +19,7 @@ export class MediaFileRepository {
 
   private async refreshLogo(records: MediaFileEntity[]) {
     const s3Helpers = new S3Helpers();
-    const promises = records.map(async (record) => {
+    const promises = records.filter(Boolean).map(async (record) => {
       if (record.iconUrl) {
         try {
           const { refreshed, refreshedUrl } = await s3Helpers.refreshSignedUrl(record.iconUrl);

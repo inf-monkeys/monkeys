@@ -70,7 +70,7 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ workflowId }) => 
 
     const vinesWorkflowInput = vines.workflowInput;
     const botPhoto = vines.workflowIcon;
-    for (const it of dirtyData.toReversed()) {
+    for (const it of dirtyData.slice().reverse()) {
       const originalInput = omit(it.input, ['__context']);
       const input = vinesWorkflowInput
         .map((it) => ({ ...it, default: originalInput[it.name] }))

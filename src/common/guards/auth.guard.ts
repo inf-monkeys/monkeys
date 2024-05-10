@@ -34,12 +34,14 @@ export class CompatibleAuthGuard implements CanActivate {
         }
         // password or phone
         else {
-          const result = JwtHelper.validateToken({
-            idToken: authorizationToken,
-          });
-          userId = result.id;
-          isAuthenticated = true;
-          teamId = request.headers['x-monkeys-teamid'];
+          try {
+            const result = JwtHelper.validateToken({
+              idToken: authorizationToken,
+            });
+            userId = result.id;
+            isAuthenticated = true;
+            teamId = request.headers['x-monkeys-teamid'];
+          } catch (error) {}
         }
       }
 
