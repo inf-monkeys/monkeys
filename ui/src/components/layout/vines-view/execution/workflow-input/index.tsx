@@ -49,7 +49,7 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
     if (!inputs) return;
     const defaultValues = fromPairs(
       inputs
-        .filter(({ default: v }) => v)
+        .filter(({ default: v }) => typeof v !== 'undefined')
         .map((it) => {
           const defValue = it.default;
           const type = it.type;
