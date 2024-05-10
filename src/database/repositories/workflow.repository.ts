@@ -405,6 +405,9 @@ export class WorkflowRepository {
         isDeleted: false,
       },
       select: ['id', 'displayName', 'createdTimestamp', 'updatedTimestamp', 'creatorUserId', 'isDeleted', 'teamId', 'workflowId'],
+      order: {
+        id: 'DESC',
+      },
     });
   }
 
