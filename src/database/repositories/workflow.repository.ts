@@ -419,7 +419,7 @@ export class WorkflowRepository {
     if (!session) {
       return [];
     }
-    return session.messages;
+    return session?.messages || [];
   }
 
   public async deleteChatSession(teamId: string, sessionId: string) {
