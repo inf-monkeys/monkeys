@@ -172,16 +172,9 @@ export class LlmService {
     return result;
   }
 
-  public async createChatCompelitions(res: Response, params: CreateChatCompelitionsParams) {
-    const { model, stream, systemPrompt, knowledgeBase } = params;
-    let { messages } = params;
-    if (systemPrompt) {
-      const systemMessage: ChatCompletionMessageParam = {
-        role: 'system',
-        content: systemPrompt,
-      };
-      messages = [systemMessage].concat(messages as any);
-    }
+  private async generateMessages(messages: Array<ChatCompletionMessageParam>, presetPrompt: string, knowledgeBase: string): Promise<Array<ChatCompletionMessageParam>> {
+    let systemPrompt = '';
+    let knowledgeBaseContext = '';
 
     if (knowledgeBase) {
       const lastMessage = messages[messages.length - 1];
@@ -193,7 +186,19 @@ export class LlmService {
         const retrieveResult = await this.knowledgeBaseService.retrieveKnowledgeBase(knowledgeBase, lastMessageContent as string);
         if (retrieveResult?.text) {
           logger.info(`Retrieved knowledge base: ${retrieveResult.text}`);
-          const basePrompt = `Use the following context as your learned knowledge, inside <context></context> XML tags.
+          knowledgeBaseContext = retrieveResult.text;
+        } else {
+          logger.info(`Not found any knowledge based on question: ${lastMessageContent}`);
+        }
+      } catch (error) {
+        logger.warn(`Failed to retrieve knowledge base: ${error.message}`);
+      }
+    }
+
+    if (presetPrompt && !knowledgeBaseContext) {
+      systemPrompt = presetPrompt;
+    } else if (knowledgeBaseContext && !presetPrompt) {
+      const basePrompt = `Use the following context as your learned knowledge, inside <context></context> XML tags.
 <context>
 {{#context#}}
 </context>
@@ -203,18 +208,38 @@ When answer to user:
 - If you don't know when you are not sure, ask for clarification.
 - Avoid mentioning that you obtained the information from the context.
 - And answer according to the language of the user's question.\n`;
-          const systemMessage: ChatCompletionMessageParam = {
-            role: 'system',
-            content: basePrompt.replace('{{#context#}}', retrieveResult.text),
-          };
-          messages = [systemMessage].concat(messages as any);
-        } else {
-          logger.info(`Not found any knowledge based on question: ${lastMessageContent}`);
-        }
-      } catch (error) {
-        logger.warn(`Failed to retrieve knowledge base: ${error.message}`);
-      }
+      systemPrompt = basePrompt.replace('{{#context#}}', knowledgeBaseContext);
+    } else if (presetPrompt && knowledgeBaseContext) {
+      const basePrompt = `{{#presetPrompt#}}
+
+Use the following context as your learned knowledge, inside <context></context> XML tags.
+<context>
+{{#context#}}
+</context>
+
+When answer to user:
+- If you don't know, just say that you don't know.
+- If you don't know when you are not sure, ask for clarification.
+- Avoid mentioning that you obtained the information from the context.
+- And answer according to the language of the user's question.\n`;
+      systemPrompt = basePrompt.replace('{{#context#}}', knowledgeBaseContext).replace('{{#presetPrompt#}}', presetPrompt);
     }
+    if (!systemPrompt) {
+      return messages;
+    }
+    messages = [
+      {
+        role: 'system',
+        content: systemPrompt,
+      } as ChatCompletionMessageParam,
+    ].concat(messages as any);
+    return messages;
+  }
+
+  public async createChatCompelitions(res: Response, params: CreateChatCompelitionsParams) {
+    const { model, stream, systemPrompt, knowledgeBase } = params;
+    let { messages } = params;
+    messages = await this.generateMessages(messages, systemPrompt, knowledgeBase);
 
     const { apiKey, baseURL, defaultParams } = this.getModelConfig(model);
     const openai = new OpenAI({

@@ -37,7 +37,7 @@ export class UserRepository {
 
   private async refreshLogo(users: UserEntity[]) {
     const s3Helpers = new S3Helpers();
-    const promises = users.map(async (user) => {
+    const promises = users.filter(Boolean).map(async (user) => {
       if (user.photo) {
         try {
           const { refreshed, refreshedUrl } = await s3Helpers.refreshSignedUrl(user.photo);

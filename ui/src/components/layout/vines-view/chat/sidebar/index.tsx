@@ -39,24 +39,30 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
       >
         <h1 className="text-2xl font-bold">对话列表</h1>
         <div className="grid gap-2 px-1">
-          {data?.map((session, i) => (
+          {data?.map((session) => (
             <ChatSession
               active={activeSessionId === session.id}
               session={session}
               key={session.id}
-              disableDelete={!i}
-              onDeleted={() => mutate()}
+              onDeleted={() => {
+                mutate().then((newData) => {
+                  if (!newData?.length) {
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    const { [workflowId]: _, ...rest } = chatSessions;
+                    setChatSessions(rest);
+                  } else {
+                    setChatSessions({
+                      ...chatSessions,
+                      [workflowId]: newData?.[0].id ?? '',
+                    });
+                  }
+                });
+              }}
               onClick={() => {
-                if (!i) {
-                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                  const { [workflowId]: _, ...rest } = chatSessions;
-                  setChatSessions(rest);
-                } else {
-                  setChatSessions({
-                    ...chatSessions,
-                    [workflowId]: session.id,
-                  });
-                }
+                setChatSessions({
+                  ...chatSessions,
+                  [workflowId]: session.id,
+                });
               }}
             />
           ))}

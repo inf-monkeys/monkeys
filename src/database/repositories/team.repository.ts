@@ -1,7 +1,7 @@
 import { S3Helpers } from '@/common/s3';
 import { generateDbId } from '@/common/utils';
 import { getMap } from '@/common/utils/map';
-import { TeamEntity } from '@/database/entities/identity/team';
+import { CustomTheme, TeamEntity } from '@/database/entities/identity/team';
 import { TeamMembersEntity } from '@/database/entities/identity/user-team-relationship';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -27,7 +27,7 @@ export class TeamRepository {
 
   private async refreshLogo(teams: TeamEntity[]) {
     const s3Helpers = new S3Helpers();
-    const promises = teams.map(async (team) => {
+    const promises = teams.filter(Boolean).map(async (team) => {
       if (team.iconUrl) {
         try {
           const { refreshed, refreshedUrl } = await s3Helpers.refreshSignedUrl(team.iconUrl);
@@ -142,12 +142,13 @@ export class TeamRepository {
       name?: string;
       description?: string;
       iconUrl?: string;
+      customTheme?: CustomTheme;
     },
   ) {
     if (!updates || !Object.keys(updates).length) {
       return;
     }
-    const { name, description, iconUrl } = updates || {};
+    const { name, description, iconUrl, customTheme } = updates || {};
     const team = await this.teamRepository.findOne({
       where: {
         id: teamId,
@@ -173,6 +174,7 @@ export class TeamRepository {
           name,
           description,
           iconUrl,
+          customTheme,
           updatedTimestamp: now,
         },
         (v) => !_.isNil(v),

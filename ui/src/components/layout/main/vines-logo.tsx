@@ -30,7 +30,7 @@ export const VinesLogo: React.FC<Omit<ILogoProps, 'url'> & { disableInitialHeigh
   return (
     <SmoothTransition className="relative" initialHeight={height} onClick={onClick}>
       <AnimatePresence>
-        {team && !isOemLoading ? (
+        {!isOemLoading ? (
           <motion.div
             key="vines-app-logo"
             initial={{ opacity: 0 }}

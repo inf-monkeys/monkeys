@@ -5,6 +5,7 @@ import { defineConfig } from 'vite';
 import { mdx } from '@cyco130/vite-plugin-mdx';
 import { TanStackRouterVite } from '@tanstack/router-vite-plugin';
 import react from '@vitejs/plugin-react-swc';
+import legacy from '@vitejs/plugin-legacy';
 import million from 'million/compiler';
 import svgr from 'vite-plugin-svgr';
 import tsconfigPaths from 'vite-tsconfig-paths';
@@ -14,6 +15,9 @@ dotenv.config();
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
+    legacy({
+      targets: ['defaults', 'not IE 11', 'chrome87'],
+    }),
     mdx({
       // See https://mdxjs.com/advanced/plugins
       remarkPlugins: [
@@ -44,6 +48,6 @@ export default defineConfig({
     },
   },
   build: {
-    target: 'esnext',
+    target: 'es2015',
   },
 });

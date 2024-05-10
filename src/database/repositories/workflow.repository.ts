@@ -417,9 +417,9 @@ export class WorkflowRepository {
       },
     });
     if (!session) {
-      throw new Error('会话不存在');
+      return [];
     }
-    return session.messages;
+    return session?.messages || [];
   }
 
   public async deleteChatSession(teamId: string, sessionId: string) {

@@ -11,6 +11,29 @@ import { Task, WorkflowTask } from '@inf-monkeys/conductor-javascript';
 import { BlockType } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 
+export interface WorkflowDefinition {
+  ownerApp?: string;
+  createTime?: number;
+  updateTime?: number;
+  createdBy?: string;
+  updatedBy?: string;
+  name: string;
+  description?: string;
+  version?: number;
+  tasks: Array<WorkflowTask>;
+  inputParameters?: Array<string>;
+  outputParameters?: Record<string, any>;
+  failureWorkflow?: string;
+  schemaVersion?: number;
+  restartable?: boolean;
+  workflowStatusListenerEnabled?: boolean;
+  ownerEmail?: string;
+  timeoutPolicy?: 'TIME_OUT_WF' | 'ALERT_ONLY';
+  timeoutSeconds: number;
+  variables?: Record<string, any>;
+  inputTemplate?: Record<string, any>;
+}
+
 @Injectable()
 export class ConductorService {
   TOOL_NAME_KEY = '__toolName';
@@ -18,7 +41,7 @@ export class ConductorService {
 
   constructor(private readonly toolsRepository: ToolsRepository) {}
 
-  private async convertConductorTasksToVinesTasks(teamId: string, tasks: Task[]) {
+  public convertConductorTasksToVinesTasks(teamId: string, tasks: Task[], workflowDefinition: WorkflowDefinition) {
     // const team = await this.teamService.getTeamById(teamId);
 
     for (const task of tasks) {
@@ -45,6 +68,27 @@ export class ConductorService {
 
       delete task.inputData[this.TOOL_NAME_KEY];
       delete task.inputData[this.CONTEXT_KEY];
+    }
+
+    for (const task of workflowDefinition?.tasks || []) {
+      const workflowTaskNamePrefix = config.conductor.workerPrefix;
+      if (workflowTaskNamePrefix) {
+        // 移除前缀
+        if (task.name.startsWith(workflowTaskNamePrefix)) {
+          task.name = task.name.replace(workflowTaskNamePrefix, '');
+          if (task.taskDefinition) {
+            task.taskDefinition.name = task.taskDefinition.name.replace(workflowTaskNamePrefix, '');
+          }
+        }
+      }
+      // 将 conductor 里面的 api 转换成真实的 name
+      if (task.inputParameters && task.inputParameters[this.TOOL_NAME_KEY]) {
+        const realBlockName = task.inputParameters[this.TOOL_NAME_KEY];
+        task.name = realBlockName;
+        if (task.taskDefinition) {
+          task.taskDefinition.name = realBlockName;
+        }
+      }
     }
   }
 
@@ -193,7 +237,7 @@ export class ConductorService {
 
   public async getWorkflowExecutionStatus(teamId: string, workflowInstanceId: string) {
     const data = await conductorClient.workflowResource.getExecutionStatus(workflowInstanceId, true, true);
-    await this.convertConductorTasksToVinesTasks(teamId, (data.tasks || []) as Task[]);
+    this.convertConductorTasksToVinesTasks(teamId, (data.tasks || []) as Task[], data.workflowDefinition);
     return data;
   }
 }
