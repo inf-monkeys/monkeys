@@ -115,7 +115,7 @@ export const useChat = (chatId: string, workflowId?: string, apiKey?: string, hi
       });
       toast.error('对话失败');
     }
-  }, [mutateMessages, chatId]);
+  }, [mutateMessages, chatId, apiKey]);
 
   return {
     messages,
