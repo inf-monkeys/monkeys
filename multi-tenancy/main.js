@@ -58,10 +58,10 @@ if (!servers.length) {
 const serverHostToPortMap = {};
 const startPort = 8000;
 const serverConfigYamls = servers.map((server, index) => {
-  const { appId, host, ...rest } = server;
+  const { appId, host, auth, ...rest } = server;
   const port = startPort + index;
   serverHostToPortMap[host] = port;
-  return yaml.stringify({
+  const serverConfig = {
     ...config,
     server: {
       appId,
@@ -69,7 +69,14 @@ const serverConfigYamls = servers.map((server, index) => {
       ...rest,
     },
     servers: undefined,
-  });
+  };
+
+  // Override auth configuration
+  if (auth) {
+    serverConfig.auth = auth;
+  }
+
+  return yaml.stringify(serverConfig);
 });
 serverConfigYamls.map((yaml, index) => {
   fs.writeFileSync(path.resolve(__dirname, `./server-${index}.yaml`), yaml);
