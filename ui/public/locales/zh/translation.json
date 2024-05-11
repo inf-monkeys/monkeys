@@ -6,22 +6,28 @@
   "common": {
     "utils": {
       "team": "团队",
+      "unknown-team": "未知团队",
       "user": "用户",
+      "unknown-user": "未知用户",
       "confirm": "确定",
       "continue": "继续",
       "save": "保存",
       "update": "更新",
+      "create": "创建",
       "edit": "编辑",
       "reset": "重置",
       "cancel": "取消",
       "search": "搜索",
       "switch": "切换",
-      "updated-at": "更新于 "
+      "copy": "复制",
+      "updated-at": "更新于 {{time}}",
+      "created-at": "创建于 {{time}}"
     },
     "toast": {
       "loading": "请等待数据加载完毕",
       "team-not-found": "团队不存在",
-      "user-not-found": "用户不存在"
+      "user-not-found": "用户不存在",
+      "copy-success": "复制成功"
     },
     "language-selector": {
       "tooltip": "切换语言",
@@ -328,7 +334,37 @@
       }
     },
     "api-key": {
-      "title": "API 密钥"
+      "title": "API 密钥",
+      "api-key-item": {
+        "revoked": "已废弃",
+        "operate": {
+          "revoke": {
+            "button": "废弃",
+            "alert": {
+              "title": "废弃前确认",
+              "description": "确认废弃该 API 密钥？正在使用该密钥的应用将无法访问 API。"
+            }
+          }
+        }
+      },
+      "header": {
+        "toast": {
+          "description-empty": "请输入用途描述"
+        },
+        "create": {
+          "button": "创建 API 密钥",
+          "title": "创建 API 密钥",
+          "belong": {
+            "label": "密钥归属",
+            "create-user": "创建者",
+            "create-team": "团队"
+          },
+          "description": {
+            "label": "用途描述",
+            "placeholder": "请输入用途描述，16 字内"
+          }
+        }
+      }
     },
     "theme": {
       "title": "团队主题",

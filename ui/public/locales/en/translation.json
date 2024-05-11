@@ -6,22 +6,28 @@
   "common": {
     "utils": {
       "team": "Team",
+      "unknown-team": "Unknown Team",
       "user": "User",
+      "unknown-user": "Unknown User",
       "confirm": "Confirm",
       "continue": "Continue",
       "save": "Save",
       "update": "Update",
+      "create": "Create",
       "edit": "Edit",
       "reset": "Reset",
       "cancel": "Cancel",
       "search": "Search",
       "switch": "Switch",
-      "updated-at": "Updated at "
+      "copy": "Copy",
+      "updated-at": "Updated at {{time}}",
+      "created-at": "Created at {{time}}"
     },
     "toast": {
       "loading": "Please wait until the data is loaded.",
       "team-not-found": "The team doesn't exist.",
-      "user-not-found": "The user doesn't exist."
+      "user-not-found": "The user doesn't exist.",
+      "copy-success": "Copy success."
     },
     "language-selector": {
       "tooltip": "Switch language",
@@ -335,7 +341,37 @@
       }
     },
     "api-key": {
-      "title": "API Key"
+      "title": "API Key",
+      "api-key-item": {
+        "revoked": "Revoked",
+        "operate": {
+          "revoke": {
+            "button": "Revoke",
+            "alert": {
+              "title": "Confirmation of revocation",
+              "description": "Confirm revoking this API key? Applications that are using this key will not be able to access the API."
+            }
+          }
+        }
+      },
+      "header": {
+        "toast": {
+          "description-empty": "Please enter description."
+        },
+        "create": {
+          "button": "Create an API Key",
+          "title": "Create an API key",
+          "belong": {
+            "label": "Ownership",
+            "create-user": "User",
+            "create-team": "Team"
+          },
+          "description": {
+            "label": "Description",
+            "placeholder": "Enter description, up to 16 characters"
+          }
+        }
+      }
     },
     "theme": {
       "title": "Theme",
