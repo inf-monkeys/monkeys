@@ -26,6 +26,7 @@ import { Card, CardContent } from '@/components/ui/card.tsx';
 import { Tag } from '@/components/ui/tag';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
+import { useTranslation } from 'react-i18next';
 
 interface IApiKeyItemProps extends React.ComponentPropsWithoutRef<'div'> {
   apiKey: IApiKey;
@@ -33,14 +34,16 @@ interface IApiKeyItemProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const ApiKeyItem: React.FC<IApiKeyItemProps> = ({ apiKey, mutate }) => {
+  const { t } = useTranslation();
+
   const [loading, setLoading] = useState(false);
   const clipboard = useClipboard();
   const handleRevokeApiKey = (apiKeyId: string) => {
     setLoading(true);
     toast.promise(revokeApiKey(apiKeyId), {
-      success: '操作成功',
-      loading: '废弃中......',
-      error: '操作失败',
+      success: t('common.operate.success'),
+      loading: t('common.operate.loading'),
+      error: t('common.operate.error'),
       finally: () => {
         setLoading(false);
         mutate();
@@ -49,7 +52,7 @@ export const ApiKeyItem: React.FC<IApiKeyItemProps> = ({ apiKey, mutate }) => {
   };
   const handleCopyApiKey = (apiKey: string) => {
     clipboard.copy(apiKey);
-    toast.success('复制成功');
+    toast.success(t('common.toast.copy-success'));
   };
   return (
     <Card>
@@ -70,13 +73,19 @@ export const ApiKeyItem: React.FC<IApiKeyItemProps> = ({ apiKey, mutate }) => {
         <div className="flex flex-1 flex-col">
           <span className="flex items-center gap-1 text-sm font-bold">
             {apiKey.desc}
-            {apiKey.status === IApiKeyStatus.Revoked && <Tag size="xs">已废弃</Tag>}
+            {apiKey.status === IApiKeyStatus.Revoked && (
+              <Tag size="xs">{t('settings.api-key.api-key-item.revoked')}</Tag>
+            )}
           </span>
           <span className="flex gap-1 text-xs [&_*]:text-opacity-70">
             <span>{apiKey.apiKey}</span>
             <Tooltip content={dayjs(apiKey.createdTimestamp).format('YYYY-MM-DD HH:mm:ss')}>
               <TooltipTrigger asChild>
-                <span>创建于 {formatTimeDiffPrevious(apiKey.createdTimestamp)}</span>
+                <span>
+                  {t('common.utils.created-at', {
+                    time: formatTimeDiffPrevious(apiKey.createdTimestamp),
+                  })}
+                </span>
               </TooltipTrigger>
             </Tooltip>
           </span>
@@ -86,24 +95,26 @@ export const ApiKeyItem: React.FC<IApiKeyItemProps> = ({ apiKey, mutate }) => {
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button theme="danger" disabled={loading}>
-                  废弃
+                  {t('settings.api-key.api-key-item.operate.revoke.button')}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>废弃前确认</AlertDialogTitle>
+                  <AlertDialogTitle>{t('settings.api-key.api-key-item.operate.revoke.alert.title')}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    确认废弃该 API 密钥？正在使用该密钥的应用将无法访问 API。
+                    {t('settings.api-key.api-key-item.operate.revoke.alert.description')}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>取消</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => handleRevokeApiKey(apiKey.id)}>确定</AlertDialogAction>
+                  <AlertDialogCancel>{t('common.utils.cancel')}</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => handleRevokeApiKey(apiKey.id)}>
+                    {t('common.utils.confirm')}
+                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
           )}
-          <Button onClick={() => handleCopyApiKey(apiKey.apiKey)}>复制</Button>
+          <Button onClick={() => handleCopyApiKey(apiKey.apiKey)}>{t('common.utils.copy')}</Button>
         </div>
       </CardContent>
     </Card>

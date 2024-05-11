@@ -72,7 +72,7 @@ export const ThemeColorList: React.FC<IThemeColorListProps> = () => {
                 <div className="flex flex-col">
                   <p className="font-bold leading-tight">{name}</p>
                   <span className="text-xs text-gray-10">
-                    {t('common.utils.updated-at') + dayjs(updatedTimestamp).format('YYYY-MM-DD HH:mm:ss')}
+                    {t('common.utils.updated-at', { time: dayjs(updatedTimestamp).format('YYYY-MM-DD HH:mm:ss') })}
                   </span>
                 </div>
                 <div className="flex flex-1 justify-end gap-2">
