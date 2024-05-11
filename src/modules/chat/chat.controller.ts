@@ -102,8 +102,8 @@ export class WorkflowOpenAICompatibleController {
           const cleanedMessageStr = message.replace('data: ', '').trim();
           try {
             const parsedMessage = JSON.parse(cleanedMessageStr);
-            const { choices } = parsedMessage;
-            const content = choices[0].delta.content;
+            const { choices = [] } = parsedMessage;
+            const content = choices[0]?.delta?.content;
             aiResponse += content;
           } catch (error) {
             logger.warn('error parsing message: ', error);

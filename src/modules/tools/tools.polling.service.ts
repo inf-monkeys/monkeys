@@ -267,12 +267,12 @@ export class ToolsPollingService {
         };
       }
     } catch (error) {
-      logger.error(`执行 tool ${server.displayName}(${server.namespace} 的 ${__toolName} 失败: `, error);
+      logger.error(`Execute tool ${server.displayName}(${server.namespace} ${__toolName} failed`, error.message);
       if (error.code === 'ECONNREFUSED') {
         return {
           outputData: {
             success: false,
-            errMsg: `${server.displayName}(${server.namespace}) 服务暂时不可用`,
+            errMsg: `${server.displayName}(${server.namespace}) Service is not available`,
           },
           status: 'FAILED',
         };
@@ -286,7 +286,7 @@ export class ToolsPollingService {
               realData = result;
             },
           });
-          await this.mq.publish(TOOL_STREAM_RESPONSE_TOPIC(task.workflowInstanceId), realData);
+          await this.mq.publish(TOOL_STREAM_RESPONSE_TOPIC(task.workflowInstanceId), `data: ${realData}\n\n`);
           await this.mq.publish(TOOL_STREAM_RESPONSE_TOPIC(task.workflowInstanceId), '[DONE]');
           return {
             outputData: {

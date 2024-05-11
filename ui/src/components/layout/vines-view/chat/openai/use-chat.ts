@@ -113,7 +113,7 @@ export const useChat = (chatId: string, workflowId?: string, apiKey?: string, hi
 
         return prev;
       });
-      toast.error('对话失败');
+      toast.error('对话失败，请检查工作流日志');
     }
   }, [mutateMessages, chatId, apiKey]);
 
