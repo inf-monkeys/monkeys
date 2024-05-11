@@ -76,7 +76,7 @@ export class WorkflowOpenAICompatibleController {
     }
     if (stream === false) {
       const result = await this.workflowExecutionService.waitForWorkflowResult(teamId, workflowInstanceId);
-      const aiResponse = result?.choices[0]?.message?.content;
+      const aiResponse = (result?.choices || [])[0]?.message?.content;
       if (aiResponse) {
         const newMessages = body.messages.concat({ role: 'assistant', content: aiResponse });
         if (conversationId) {
