@@ -57,9 +57,11 @@ export class WorkflowRepository {
       output: WorkflowOutputValue[];
       exposeOpenaiCompatibleInterface?: boolean;
       rateLimiter?: WorkflowRateLimiter;
+      validationIssues?: WorkflowValidationIssue[];
+      validated?: boolean;
     },
   ) {
-    const { displayName, description, iconUrl, tasks, variables, output, exposeOpenaiCompatibleInterface, rateLimiter } = data;
+    const { displayName, description, iconUrl, tasks, variables, output, exposeOpenaiCompatibleInterface, rateLimiter, validationIssues = [], validated = true } = data;
     await this.workflowMetadataRepository.save({
       id: workflowId,
       createdTimestamp: Date.now(),
@@ -77,6 +79,8 @@ export class WorkflowRepository {
       output,
       exposeOpenaiCompatibleInterface,
       rateLimiter,
+      validationIssues,
+      validated,
     });
     return await this.getWorkflowById(workflowId, version);
   }
