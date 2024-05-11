@@ -5,6 +5,7 @@ import { useSWRConfig } from 'swr';
 import dayjs from 'dayjs';
 import { set } from 'lodash';
 import { Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { updateTeam } from '@/apis/authz/team';
@@ -18,6 +19,8 @@ import usePaletteStore from '@/store/usePaletteStore.ts';
 interface IThemeColorListProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ThemeColorList: React.FC<IThemeColorListProps> = () => {
+  const { t } = useTranslation();
+
   const { team } = useVinesTeam();
   const { mutate } = useSWRConfig();
   const { data, error } = useThemeList();
@@ -26,24 +29,24 @@ export const ThemeColorList: React.FC<IThemeColorListProps> = () => {
 
   const handleDeleteTheme = (themeId: string) => {
     toast.promise(deleteTheme(themeId), {
-      loading: '正在删除主题',
-      success: '主题删除成功',
-      error: '主题删除失败',
+      loading: t('settings.theme.toast.delete.loading'),
+      success: t('settings.theme.toast.delete.success'),
+      error: t('settings.theme.toast.delete.error'),
       finally: () => void mutate('/api/theme'),
     });
   };
 
   const handleUpdate = (color: string) => {
     if (!team) {
-      toast.error('团队不存在');
+      toast.error(t('common.toast.team-not-found'));
       return;
     }
     setValue(color);
     set(team, 'customTheme.primaryColor', color);
     toast.promise(updateTeam({ customTheme: team.customTheme }), {
-      loading: '正在更新主题色',
-      success: '主题色更新成功',
-      error: '主题色更新失败',
+      loading: t('settings.theme.toast.update.loading'),
+      success: t('settings.theme.toast.update.success'),
+      error: t('settings.theme.toast.update.error'),
     });
   };
 
@@ -58,7 +61,7 @@ export const ThemeColorList: React.FC<IThemeColorListProps> = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>团队主题列表</CardTitle>
+        <CardTitle>{t('settings.theme.color-list.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-56">
@@ -69,12 +72,12 @@ export const ThemeColorList: React.FC<IThemeColorListProps> = () => {
                 <div className="flex flex-col">
                   <p className="font-bold leading-tight">{name}</p>
                   <span className="text-xs text-gray-10">
-                    更新于：{dayjs(updatedTimestamp).format('YYYY-MM-DD HH:mm:ss')}
+                    {t('common.utils.updated-at') + dayjs(updatedTimestamp).format('YYYY-MM-DD HH:mm:ss')}
                   </span>
                 </div>
                 <div className="flex flex-1 justify-end gap-2">
                   <Button size="small" variant="outline" onClick={() => handleUpdate(primaryColor)}>
-                    切换
+                    {t('common.utils.switch')}
                   </Button>
                   <Button
                     disabled={dataLength === 1}
@@ -84,7 +87,7 @@ export const ThemeColorList: React.FC<IThemeColorListProps> = () => {
                     className="text-red-10 [&_svg]:stroke-red-10"
                     onClick={() => handleDeleteTheme(id)}
                   >
-                    删除
+                    {t('common.utils.delete')}
                   </Button>
                 </div>
               </div>

@@ -9,10 +9,13 @@ import { useCreateTheme, useThemeMarket } from '@/apis/theme';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { useTranslation } from 'react-i18next';
 
 interface IThemeMarketProps {}
 
 export const ThemeMarket: React.FC<IThemeMarketProps> = () => {
+  const { t } = useTranslation();
+
   const { mutate } = useSWRConfig();
   const { data, error } = useThemeMarket();
   const { trigger, isMutating } = useCreateTheme();
@@ -24,9 +27,9 @@ export const ThemeMarket: React.FC<IThemeMarketProps> = () => {
 
   const handleCreateTheme = (name: string, color: string) => {
     toast.promise(trigger({ name, primaryColor: color }), {
-      loading: '正在添加主题',
-      success: '主题添加成功',
-      error: '主题添加失败',
+      loading: t('settings.theme.toast.create.loading'),
+      success: t('settings.theme.toast.create.success'),
+      error: t('settings.theme.toast.create.error'),
       finally: () => void mutate('/api/theme'),
     });
   };
@@ -34,7 +37,7 @@ export const ThemeMarket: React.FC<IThemeMarketProps> = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>主题市场</CardTitle>
+        <CardTitle>{t('settings.theme.market.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-56">
@@ -47,7 +50,7 @@ export const ThemeMarket: React.FC<IThemeMarketProps> = () => {
                   <div className="flex flex-col">
                     <p className="font-bold leading-tight">{name}</p>
                     <span className="text-xs text-gray-10">
-                      更新于：{dayjs(updatedTimestamp).format('YYYY-MM-DD HH:mm:ss')}
+                      {t('common.utils.updated-at') + dayjs(updatedTimestamp).format('YYYY-MM-DD HH:mm:ss')}
                     </span>
                   </div>
                   <div className="flex flex-1 justify-end">
@@ -57,7 +60,7 @@ export const ThemeMarket: React.FC<IThemeMarketProps> = () => {
                       loading={isMutating}
                       onClick={() => handleCreateTheme(name, primaryColor)}
                     >
-                      添加到团队
+                      {t('settings.theme.market.add-to-team')}
                     </Button>
                   </div>
                 </div>

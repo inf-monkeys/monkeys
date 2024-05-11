@@ -14,7 +14,9 @@
       "edit": "Edit",
       "reset": "Reset",
       "cancel": "Cancel",
-      "search": "Search"
+      "search": "Search",
+      "switch": "Switch",
+      "updated-at": "Updated at "
     },
     "toast": {
       "loading": "Please wait until the data is loaded.",
@@ -337,10 +339,7 @@
     },
     "theme": {
       "title": "Theme",
-      "team-primary-color": {
-        "title": "Team Primary Color",
-        "description": "You can set the team's theme color here, and the system will automatically generate the corresponding color scheme",
-        "tip": "Preview will not be saved",
+      "toast": {
         "update": {
           "loading": "Updating primary color...",
           "success": "Primary color update successful!",
@@ -351,6 +350,16 @@
           "success": "Theme create successful!",
           "error": "Theme create failed! Please try again later!"
         },
+        "delete": {
+          "loading": "Deleting theme...",
+          "success": "Theme delete successful!",
+          "error": "Theme delete failed! Please try again later!"
+        }
+      },
+      "team-primary-color": {
+        "title": "Team Primary Color",
+        "description": "You can set the team's theme color here, and the system will automatically generate the corresponding color scheme",
+        "tip": "Preview will not be saved",
         "operate": {
           "save": {
             "button": "Save to Theme List",
@@ -365,6 +374,12 @@
         "options": {
           "team": "Team Logo",
           "system": "System Preset"
+        }
+      },
+      "market": {
+        "title": "Theme Market",
+        "operate": {
+          "add-to-team": "Add to Team"
         }
       }
     }
