@@ -24,7 +24,7 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
 
   const [selected, setSelected] = useState<string>('');
 
-  const teamName = team?.name || '团队';
+  const teamName = team?.name || t('common.utils.team');
   const enableTeamLogo = get(team, 'customTheme.enableTeamLogo', void 0);
 
   useEffect(() => {
@@ -73,20 +73,20 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>系统图标</CardTitle>
-        <CardDescription>你可以在这里设置团队的系统图标</CardDescription>
+        <CardTitle>{t('settings.theme.team-logo.title')}</CardTitle>
+        <CardDescription>{t('settings.theme.team-logo.description')}</CardDescription>
       </CardHeader>
       <CardContent className="flex items-center justify-between">
         <VinesImageEditor value={teamLogo} onChange={handleUpdateTeamLogo}>
           <Avatar className="size-10 cursor-pointer">
             <AvatarImage className="aspect-auto" src={team?.iconUrl} alt={teamName} />
-            <AvatarFallback className="rounded-none p-2 text-xs">{teamName.substring(0, 2)}</AvatarFallback>
+            <AvatarFallback className="rounded-none p-2 text-xs">{teamName?.substring(0, 2)}</AvatarFallback>
           </Avatar>
         </VinesImageEditor>
         <Tabs value={selected} onValueChange={handleUpdate}>
           <TabsList>
-            <TabsTrigger value="team">团队图标</TabsTrigger>
-            <TabsTrigger value="system">系统预置</TabsTrigger>
+            <TabsTrigger value="team">{t('settings.theme.team-logo.options.team')}</TabsTrigger>
+            <TabsTrigger value="system">{t('settings.theme.team-logo.options.system')}</TabsTrigger>
           </TabsList>
         </Tabs>
       </CardContent>
