@@ -265,6 +265,8 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
         isDeleted: false,
         isPreset: false,
         isPublished: false,
+        createdTimestamp: Date.now(),
+        updatedTimestamp: Date.now(),
       });
       await this.repository.save(clonedAsset);
       clonedAssets.push(clonedAsset);
