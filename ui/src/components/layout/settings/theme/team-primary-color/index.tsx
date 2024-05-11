@@ -40,17 +40,17 @@ export const TeamPrimaryColor: React.FC<ITeamPrimaryColorProps> = () => {
     }
     set(team, 'customTheme.primaryColor', tempColor);
     toast.promise(updateTeam({ customTheme: team.customTheme }), {
-      loading: t('settings.theme.team-primary-color.update.loading'),
-      success: t('settings.theme.team-primary-color.update.success'),
-      error: t('settings.theme.team-primary-color.update.error'),
+      loading: t('settings.theme.toast.update.loading'),
+      success: t('settings.theme.toast.update.success'),
+      error: t('settings.theme.toast.update.error'),
     });
   };
 
   const handleCreateTheme = (name: string, color: string) => {
     toast.promise(trigger({ name, primaryColor: color }), {
-      loading: t('settings.theme.team-primary-color.create.loading'),
-      success: t('settings.theme.team-primary-color.create.success'),
-      error: t('settings.theme.team-primary-color.create.error'),
+      loading: t('settings.theme.toast.create.loading'),
+      success: t('settings.theme.toast.create.success'),
+      error: t('settings.theme.toast.create.error'),
       finally: () => void mutate('/api/theme'),
     });
   };

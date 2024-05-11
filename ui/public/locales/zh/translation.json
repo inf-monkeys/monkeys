@@ -14,7 +14,9 @@
       "edit": "编辑",
       "reset": "重置",
       "cancel": "取消",
-      "search": "搜索"
+      "search": "搜索",
+      "switch": "切换",
+      "updated-at": "更新于 "
     },
     "toast": {
       "loading": "请等待数据加载完毕",
@@ -330,10 +332,7 @@
     },
     "theme": {
       "title": "团队主题",
-      "team-primary-color": {
-        "title": "团队主题色",
-        "description": "你可以在这里设置团队的主题色，系统将自动生成对应的配色方案",
-        "tip": "预览状态下将不会保存",
+      "toast": {
         "update": {
           "loading": "正在更新主题色...",
           "success": "主题色更新成功！",
@@ -344,6 +343,16 @@
           "success": "主题添加成功！",
           "error": "主题添加失败！请稍候重试！"
         },
+        "delete": {
+          "loading": "正在删除主题...",
+          "success": "主题删除成功！",
+          "error": "主题删除失败！请稍候重试！"
+        }
+      },
+      "team-primary-color": {
+        "title": "团队主题色",
+        "description": "你可以在这里设置团队的主题色，系统将自动生成对应的配色方案",
+        "tip": "预览状态下将不会保存",
         "operate": {
           "save": {
             "button": "保存到列表",
@@ -359,6 +368,15 @@
           "team": "团队图标",
           "system": "系统预置"
         }
+      },
+      "market": {
+        "title": "主题市场",
+        "operate": {
+          "add-to-team": "添加到团队"
+        }
+      },
+      "color-list": {
+        "title": "团队主题列表"
       }
     }
   }
