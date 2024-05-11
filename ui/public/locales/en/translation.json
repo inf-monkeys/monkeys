@@ -5,6 +5,8 @@
   },
   "common": {
     "utils": {
+      "team": "Team",
+      "user": "User",
       "confirm": "Confirm",
       "continue": "Continue",
       "save": "Save",
@@ -15,7 +17,9 @@
       "search": "Search"
     },
     "toast": {
-      "loading": "Please wait until the data is loaded."
+      "loading": "Please wait until the data is loaded.",
+      "team-not-found": "The team doesn't exist.",
+      "user-not-found": "The user doesn't exist."
     },
     "language-selector": {
       "tooltip": "Switch language",
@@ -332,7 +336,37 @@
       "title": "API Key"
     },
     "theme": {
-      "title": "Theme"
+      "title": "Theme",
+      "team-primary-color": {
+        "title": "Team Primary Color",
+        "description": "You can set the team's theme color here, and the system will automatically generate the corresponding color scheme",
+        "tip": "Preview will not be saved",
+        "update": {
+          "loading": "Updating primary color...",
+          "success": "Primary color update successful!",
+          "error": "Primary color update failed! Please try again later!"
+        },
+        "create": {
+          "loading": "Creating theme...",
+          "success": "Theme create successful!",
+          "error": "Theme create failed! Please try again later!"
+        },
+        "operate": {
+          "save": {
+            "button": "Save to Theme List",
+            "title": "Save to theme list",
+            "placeholder": "Enter theme name, up to 16 characters"
+          }
+        }
+      },
+      "team-logo": {
+        "title": "System Logo",
+        "description": "You can set the team's system logo here",
+        "options": {
+          "team": "Team Logo",
+          "system": "System Preset"
+        }
+      }
     }
   }
 }

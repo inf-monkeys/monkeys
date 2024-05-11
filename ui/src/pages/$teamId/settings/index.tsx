@@ -15,7 +15,7 @@ export const Settings: React.FC = () => {
   const { t } = useTranslation();
 
   useLayoutEffect(() => {
-    VinesEvent.emit('vines-update-site-title', '配置中心');
+    VinesEvent.emit('vines-update-site-title', t('settings.title'));
   }, []);
 
   return (

@@ -5,6 +5,8 @@
   },
   "common": {
     "utils": {
+      "team": "团队",
+      "user": "用户",
       "confirm": "确定",
       "continue": "继续",
       "save": "保存",
@@ -15,7 +17,9 @@
       "search": "搜索"
     },
     "toast": {
-      "loading": "请等待数据加载完毕"
+      "loading": "请等待数据加载完毕",
+      "team-not-found": "团队不存在",
+      "user-not-found": "用户不存在"
     },
     "language-selector": {
       "tooltip": "切换语言",
@@ -325,7 +329,37 @@
       "title": "API 密钥"
     },
     "theme": {
-      "title": "团队主题"
+      "title": "团队主题",
+      "team-primary-color": {
+        "title": "团队主题色",
+        "description": "你可以在这里设置团队的主题色，系统将自动生成对应的配色方案",
+        "tip": "预览状态下将不会保存",
+        "update": {
+          "loading": "正在更新主题色...",
+          "success": "主题色更新成功！",
+          "error": "主题色更新失败！请稍候重试！"
+        },
+        "create": {
+          "loading": "正在添加主题...",
+          "success": "主题添加成功！",
+          "error": "主题添加失败！请稍候重试！"
+        },
+        "operate": {
+          "save": {
+            "button": "保存到列表",
+            "title": "保存到主题列表",
+            "placeholder": "输入主题名称，16 字以内"
+          }
+        }
+      },
+      "team-logo": {
+        "title": "系统图标",
+        "description": "你可以在这里设置团队的系统图标",
+        "options": {
+          "team": "团队图标",
+          "system": "系统预置"
+        }
+      }
     }
   }
 }
