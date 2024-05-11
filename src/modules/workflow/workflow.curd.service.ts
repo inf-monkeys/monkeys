@@ -213,6 +213,9 @@ export class WorkflowCrudService {
       }
     }
 
+    const validationIssues = await this.workflowValidateService.validateWorkflow(tasks || [], output || []);
+    const errors = validationIssues.filter((i) => i.issueType === ValidationIssueType.ERROR);
+    const validated = errors.length === 0;
     const workflowEntity = await this.workflowRepository.createWorkflow(teamId, userId, workflowId, version, {
       displayName,
       description,
@@ -222,6 +225,8 @@ export class WorkflowCrudService {
       variables,
       exposeOpenaiCompatibleInterface,
       rateLimiter,
+      validationIssues,
+      validated,
     });
     await this.conductorService.saveWorkflowInConductor(workflowEntity);
 
