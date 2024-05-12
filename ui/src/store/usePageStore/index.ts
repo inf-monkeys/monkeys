@@ -15,6 +15,9 @@ export interface PageSlice {
   visibleCustomSetting: boolean;
   setVisibleCustomSetting: (loading: boolean) => void;
 
+  workbenchVisible: boolean;
+  setWorkbenchVisible: (visible: boolean) => void;
+
   pageTitle: string;
 }
 
@@ -28,6 +31,10 @@ export const usePageStore = create<PageSlice>()(
     setContainerHeight: (containerHeight) => set({ containerHeight }),
     visibleCustomSetting: false,
     setVisibleCustomSetting: (visibleCustomSetting) => set({ visibleCustomSetting }),
+
+    workbenchVisible: false,
+    setWorkbenchVisible: (workbenchVisible) => set({ workbenchVisible }),
+
     pageTitle: '',
   })),
 );
