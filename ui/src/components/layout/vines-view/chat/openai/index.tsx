@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { useForceUpdate } from '@mantine/hooks';
 import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
-import { MessageSquareDashed, Trash2 } from 'lucide-react';
+import { isEmpty } from 'lodash';
+import { MessageSquareDashed, StopCircle, Trash2 } from 'lucide-react';
 
 import { useApiKeyList } from '@/apis/api-keys/api-key.ts';
 import { IApiKeyStatus } from '@/apis/api-keys/typings.ts';
@@ -74,7 +75,7 @@ export const OpenAIChat: React.FC<IOpenAIChatProps> = () => {
 
   const { data: history, error, isLoading: isHistoryLoading } = useOpenAIInterfaceChatHistory(chatId);
 
-  const { input, setInput, handleChat, handleSubmit, isLoading, setMessages, messages } = useChat(
+  const { input, setInput, handleChat, handleSubmit, isLoading, setMessages, messages, stop } = useChat(
     chatId,
     workflowId,
     finalApikey?.apiKey,
@@ -97,6 +98,8 @@ export const OpenAIChat: React.FC<IOpenAIChatProps> = () => {
     handleSubmit();
     void handleChat();
   };
+
+  const isInputEmpty = isEmpty(input.trim());
 
   return (
     <>
@@ -159,11 +162,13 @@ export const OpenAIChat: React.FC<IOpenAIChatProps> = () => {
       <div className="flex justify-between gap-2 py-2">
         <Tooltip>
           <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <TooltipTrigger asChild>
-                <Button variant="outline" icon={<Trash2 />} />
-              </TooltipTrigger>
-            </AlertDialogTrigger>
+            {messages?.length > 0 && (
+              <AlertDialogTrigger asChild>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" icon={<Trash2 />} />
+                </TooltipTrigger>
+              </AlertDialogTrigger>
+            )}
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>确定要清空当前对话吗？</AlertDialogTitle>
@@ -181,12 +186,20 @@ export const OpenAIChat: React.FC<IOpenAIChatProps> = () => {
           placeholder="聊些什么..."
           value={input}
           onChange={setInput}
-          onEnterPress={handleChatMessage}
+          onEnterPress={() => !isInputEmpty && handleChatMessage()}
           disabled={isLoading}
         />
-        <Button variant="outline" onClick={handleChatMessage} loading={isLoading}>
+        <Button variant="outline" onClick={handleChatMessage} loading={isLoading} disabled={isInputEmpty}>
           发送
         </Button>
+        {isLoading && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" className="[&_svg]:stroke-red-10" icon={<StopCircle />} onClick={stop} />
+            </TooltipTrigger>
+            <TooltipContent>停止生成</TooltipContent>
+          </Tooltip>
+        )}
       </div>
     </>
   );
