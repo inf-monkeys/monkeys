@@ -469,8 +469,8 @@ export class VinesCore extends VinesTools(VinesBase) {
   // endregion
 
   // region RUNNER
-  public checkWorkflowCanExec() {
-    return !(this.enableOpenAIInterface && this.workflowInput.find((variable) => variable.name === 'messages'));
+  public usedOpenAIInterface() {
+    return this.enableOpenAIInterface && this.workflowInput.find((variable) => variable.name === 'messages');
   }
 
   public async start({
@@ -479,7 +479,7 @@ export class VinesCore extends VinesTools(VinesBase) {
     version = this.version,
     debug = false,
   }: IVinesFlowRunParams): Promise<boolean> {
-    if (!this.checkWorkflowCanExec()) {
+    if (this.usedOpenAIInterface()) {
       toast.warning('启动运行失败！请先禁用 OpenAI 兼容接口');
       return false;
     }
