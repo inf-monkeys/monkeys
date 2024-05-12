@@ -60,7 +60,7 @@ export const OpenAIChat: React.FC<IOpenAIChatProps> = () => {
   const { data: apiKeys } = useApiKeyList();
   const finalApikey = apiKeys?.find((key) => key.status === IApiKeyStatus.Valid);
 
-  const { data: history, error } = useOpenAIInterfaceChatHistory(chatId);
+  const { data: history, error, isLoading: isHistoryLoading } = useOpenAIInterfaceChatHistory(chatId);
 
   const { input, setInput, handleChat, handleSubmit, isLoading, setMessages, messages } = useChat(
     chatId,
@@ -100,7 +100,7 @@ export const OpenAIChat: React.FC<IOpenAIChatProps> = () => {
       </header>
       <div className="size-full flex-1">
         <AnimatePresence>
-          {isLoading ? (
+          {isHistoryLoading ? (
             <motion.div
               key="vines-chat-loading"
               className="vines-center size-full"
