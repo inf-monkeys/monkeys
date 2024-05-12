@@ -33,6 +33,7 @@ export const VinesChatView: React.FC = () => {
   const handleExecutionWorkflow = (inputData: Record<string, any> = {}) => vines.start({ inputData });
 
   const useOpenAIInterface = vines.usedOpenAIInterface();
+  const openAIInterfaceEnabled = useOpenAIInterface.enable;
 
   const finalHeight = height - 68;
 
@@ -43,15 +44,15 @@ export const VinesChatView: React.FC = () => {
         key="vines-view-chat"
         className={cn(
           'flex flex-1 flex-col gap-4 overflow-hidden p-4 pb-0',
-          hasMoreThanOneInput && !useOpenAIInterface && 'flex-row',
+          hasMoreThanOneInput && !openAIInterfaceEnabled && 'flex-row',
         )}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
       >
-        {useOpenAIInterface ? (
-          <OpenAIChat />
+        {openAIInterfaceEnabled ? (
+          <OpenAIChat multipleChat={useOpenAIInterface.multipleChat} />
         ) : (
           <>
             <div className="size-full flex-1">
