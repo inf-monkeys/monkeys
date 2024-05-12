@@ -14,7 +14,7 @@ interface IExecutionRawDataDisplayProps {
 
 export const ExecutionRawDataDisplay: React.FC<IExecutionRawDataDisplayProps> = ({ data, externalStorageDataUrl }) => {
   return (
-    <div className="relative size-full overflow-clip">
+    <div className="relative size-full overflow-hidden">
       {externalStorageDataUrl ? (
         <div className="vines-center size-full flex-col gap-2">
           <p className="font-bold">内容过大，请到 OSS 下载查看</p>

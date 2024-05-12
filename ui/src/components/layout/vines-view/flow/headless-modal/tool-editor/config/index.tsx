@@ -25,7 +25,7 @@ export const ToolConfig: React.FC<INodeConfigProps> = ({ nodeId, task }) => {
   const variableMapper = Object.fromEntries(vines.variablesMapper.entries());
 
   return (
-    <main className="flex size-full overflow-clip">
+    <main className="flex size-full overflow-hidden">
       {isEmpty ? (
         <div className="vines-center size-full">
           <h1 className="text-base font-bold">暂无配置参数</h1>

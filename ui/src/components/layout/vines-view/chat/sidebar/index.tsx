@@ -31,7 +31,7 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
   return (
     <div className="flex h-full max-w-64">
       <motion.div
-        className="flex flex-col gap-4 overflow-clip [&_h1]:line-clamp-1 [&_span]:line-clamp-1"
+        className="flex flex-col gap-4 overflow-hidden [&_h1]:line-clamp-1 [&_span]:line-clamp-1"
         initial={{ width: visible ? 256 : 0, paddingRight: visible ? 16 : 0 }}
         animate={{
           width: visible ? 256 : 0,

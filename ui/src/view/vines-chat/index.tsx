@@ -42,7 +42,7 @@ export const VinesChatView: React.FC = () => {
       <motion.div
         key="vines-view-chat"
         className={cn(
-          'flex flex-1 flex-col gap-4 overflow-clip p-4 pb-0',
+          'flex flex-1 flex-col gap-4 overflow-hidden p-4 pb-0',
           hasMoreThanOneInput && !useOpenAIInterface && 'flex-row',
         )}
         initial={{ opacity: 0 }}
