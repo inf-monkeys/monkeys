@@ -1,6 +1,8 @@
 import type { ParsedEvent, ReconnectInterval } from 'eventsource-parser';
 import { createParser } from 'eventsource-parser';
 
+import '@/utils/polyfills/readable-stream-async-iterator-polyfill.ts';
+
 export const parseOpenAIStream = (rawResponse: Response) => {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();

@@ -112,7 +112,7 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                   render={({ field: { value, onChange, ...field } }) => (
                     <FormItem
                       className={cn(
-                        'overflow-clip rounded-lg border bg-card px-3 pb-1 pt-2 text-card-foreground shadow-sm',
+                        'overflow-hidden rounded-lg border bg-card px-3 pb-1 pt-2 text-card-foreground shadow-sm',
                         itemClassName,
                       )}
                     >

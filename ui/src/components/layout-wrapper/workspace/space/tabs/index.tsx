@@ -100,7 +100,7 @@ export const SpaceTabs: React.FC<ITabsProps> = () => {
       modifiers={[restrictToHorizontalAxis, restrictToFirstScrollableAncestor]}
       onDragEnd={handleDragEnd}
     >
-      <header ref={headerNode} className="relative mx-3 mt-2 flex h-10 overflow-x-clip scroll-smooth">
+      <header ref={headerNode} className="relative z-20 mx-3 mt-2 flex h-10 overflow-x-clip scroll-smooth">
         <div ref={tabsNode} className={cn('flex overflow-hidden', scrollToolVisible && 'pr-32')}>
           <SortableContext items={pageIds} strategy={horizontalListSortingStrategy} disabled={disableDND}>
             {pages?.map(({ id, displayName, instance }, index) => (

@@ -204,7 +204,7 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({
       </TabsContent>
       <TabsContent value="rawdata" className="h-80">
         <CodeEditor
-          className="overflow-clip rounded-md shadow-sm"
+          className="overflow-hidden rounded-md shadow-sm"
           data={outputRawData}
           onUpdate={handleUpdateRaw}
           lineNumbers={3}
