@@ -100,7 +100,7 @@ export const OpenAIChat: React.FC<IOpenAIChatProps> = () => {
       </header>
       <div className="size-full flex-1">
         <AnimatePresence>
-          {isLoading && !messages ? (
+          {isLoading ? (
             <motion.div
               key="vines-chat-loading"
               className="vines-center size-full"
@@ -111,10 +111,10 @@ export const OpenAIChat: React.FC<IOpenAIChatProps> = () => {
             >
               <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
             </motion.div>
-          ) : messages?.length ? (
+          ) : (
             <motion.div
               key="vines-chat-context"
-              className="size-full"
+              className="relative size-full"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -126,19 +126,20 @@ export const OpenAIChat: React.FC<IOpenAIChatProps> = () => {
                 botPhoto={vines.workflowIcon}
                 isLoading={isLoading}
               />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="vines-chat-empty"
-              className="vines-center size-full flex-col"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
-            >
-              <MessageSquareDashed size={64} />
-              <div className="mt-4 flex flex-col text-center">
-                <h2 className="font-bold">暂无对话</h2>
-              </div>
+              {!messages?.length && (
+                <motion.div
+                  key="vines-chat-empty"
+                  className="vines-center absolute left-0 top-0 size-full flex-col"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <MessageSquareDashed size={64} />
+                  <div className="mt-4 flex flex-col text-center">
+                    <h2 className="font-bold">暂无对话</h2>
+                  </div>
+                </motion.div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
