@@ -3,7 +3,7 @@ import { createParser } from 'eventsource-parser';
 
 import '@/utils/polyfills/readable-stream-async-iterator-polyfill.ts';
 
-export const parseOpenAIStream = (rawResponse: Response) => {
+export const parseOpenAIStream = (rawResponse: Response, multipleChat = true) => {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
   if (!rawResponse.ok) {
@@ -24,7 +24,7 @@ export const parseOpenAIStream = (rawResponse: Response) => {
           }
           try {
             const json = JSON.parse(data);
-            const text = json.choices[0].delta?.content || '';
+            const text = multipleChat ? json.choices[0].delta?.content : json.choices[0]?.text || '';
             const queue = encoder.encode(text);
             controller.enqueue(queue);
           } catch (e) {

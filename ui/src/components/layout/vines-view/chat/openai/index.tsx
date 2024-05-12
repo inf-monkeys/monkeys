@@ -33,10 +33,12 @@ import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
 import { cloneDeep, useLocalStorage } from '@/utils';
 
-interface IOpenAIChatProps {}
+interface IOpenAIChatProps {
+  multipleChat?: boolean;
+}
 
 // million-ignore
-export const OpenAIChat: React.FC<IOpenAIChatProps> = () => {
+export const OpenAIChat: React.FC<IOpenAIChatProps> = ({ multipleChat }) => {
   const { workflowId } = useFlowStore();
   const { userPhoto } = useVinesUser();
 
@@ -80,6 +82,7 @@ export const OpenAIChat: React.FC<IOpenAIChatProps> = () => {
     workflowId,
     finalApikey?.apiKey,
     history,
+    multipleChat,
   );
 
   useEffect(() => {
@@ -105,7 +108,7 @@ export const OpenAIChat: React.FC<IOpenAIChatProps> = () => {
     <>
       <header className="flex w-full justify-between pb-4 pl-4">
         <div className="flex flex-col">
-          <h1 className="text-xl font-bold">对话模式</h1>
+          <h1 className="text-xl font-bold">{!multipleChat && '单轮'}对话模式</h1>
           {chatId === 'default' && <span className="text-xs opacity-70">临时对话中，聊天记录将不会存储</span>}
         </div>
         <div className="hidden scale-80 items-center space-x-2">
@@ -162,7 +165,7 @@ export const OpenAIChat: React.FC<IOpenAIChatProps> = () => {
       <div className="flex justify-between gap-2 py-2">
         <Tooltip>
           <AlertDialog>
-            {messages?.length > 0 && (
+            {messages?.length > 0 && multipleChat && (
               <AlertDialogTrigger asChild>
                 <TooltipTrigger asChild>
                   <Button variant="outline" icon={<Trash2 />} />
