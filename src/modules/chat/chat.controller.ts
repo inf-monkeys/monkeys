@@ -45,7 +45,6 @@ export class WorkflowOpenAICompatibleController {
       const key = TOOL_STREAM_RESPONSE_TOPIC(workflowInstanceId);
       logger.info('subscribing to key: ', key);
       this.mq.subscribe(key, (_, message: string) => {
-        logger.info('message: ', message);
         res.write(message);
         // TODO: listen on workflow finished event
         if (message.includes('[DONE]')) {
