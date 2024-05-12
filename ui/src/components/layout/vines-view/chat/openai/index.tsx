@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useForceUpdate } from '@mantine/hooks';
 import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
-import { MessageSquareDashed } from 'lucide-react';
+import { MessageSquareDashed, Trash2 } from 'lucide-react';
 
 import { useApiKeyList } from '@/apis/api-keys/api-key.ts';
 import { IApiKeyStatus } from '@/apis/api-keys/typings.ts';
@@ -12,10 +12,22 @@ import { useOpenAIInterfaceChatHistory } from '@/apis/workflow/chat';
 import { VirtualizedList } from '@/components/layout/vines-view/chat/openai/messages';
 import { useChat } from '@/components/layout/vines-view/chat/openai/use-chat.ts';
 import { useVinesUser } from '@/components/router/guard/user.tsx';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog.tsx';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label.tsx';
 import { Switch } from '@/components/ui/switch';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
 import { cloneDeep, useLocalStorage } from '@/utils';
@@ -144,7 +156,27 @@ export const OpenAIChat: React.FC<IOpenAIChatProps> = () => {
           )}
         </AnimatePresence>
       </div>
-      <div className="flex justify-between gap-4 py-2">
+      <div className="flex justify-between gap-2 py-2">
+        <Tooltip>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <TooltipTrigger asChild>
+                <Button variant="outline" icon={<Trash2 />} />
+              </TooltipTrigger>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>确定要清空当前对话吗？</AlertDialogTitle>
+                <AlertDialogDescription>仅清空本地对话记录，刷新可恢复历史数据。</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>取消</AlertDialogCancel>
+                <AlertDialogAction onClick={() => setMessages([])}>确定</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <TooltipContent>清空对话（本地）</TooltipContent>
+        </Tooltip>
         <Input
           placeholder="聊些什么..."
           value={input}
