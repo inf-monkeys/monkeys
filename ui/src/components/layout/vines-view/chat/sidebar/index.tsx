@@ -11,18 +11,20 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useFlowStore } from '@/store/useFlowStore';
+import { usePageStore } from '@/store/usePageStore';
 import { cn, useLocalStorage } from '@/utils';
 
 interface IChatSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
+  const { workbenchVisible } = usePageStore();
   const { workflowId } = useFlowStore();
   const { data, mutate } = useWorkflowChatSessions(workflowId);
   const { trigger } = useCreateWorkflowChatSession();
 
   const [chatSessions, setChatSessions] = useLocalStorage<Record<string, string>>('vines-ui-chat-session', {});
 
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(!workbenchVisible);
 
   const activeSessionId = chatSessions[workflowId] ?? data?.[0]?.id;
 
