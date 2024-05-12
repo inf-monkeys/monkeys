@@ -36,7 +36,7 @@ export const ConsumerDetails: React.FC<IConsumerDetailsProps> = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <SmoothTransition className="relative overflow-clip">
+        <SmoothTransition className="relative overflow-hidden">
           <AnimatePresence>{!orderListData && <Loading motionKey="vines-consumer-details-loading" />}</AnimatePresence>
           <RemoteDataTable
             columns={columns}

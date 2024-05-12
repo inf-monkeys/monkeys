@@ -38,7 +38,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
   return (
     <div className="flex h-full max-w-64">
       <motion.div
-        className="flex flex-col gap-4 overflow-clip [&_h1]:line-clamp-1 [&_span]:line-clamp-1"
+        className="flex flex-col gap-4 overflow-hidden [&_h1]:line-clamp-1 [&_span]:line-clamp-1"
         initial={{ width: 256, paddingRight: 16 }}
         animate={{
           width: visible ? 256 : 0,

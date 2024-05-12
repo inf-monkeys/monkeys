@@ -37,7 +37,7 @@ export const RechargeDetails: React.FC<IRechargeDetailsProps> = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <SmoothTransition className="relative overflow-clip">
+        <SmoothTransition className="relative overflow-hidden">
           <AnimatePresence>{!orderListData && <Loading motionKey="vines-recharge-details-loading" />}</AnimatePresence>
           <RemoteDataTable
             columns={columns}

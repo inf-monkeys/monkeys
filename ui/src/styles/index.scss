@@ -30,7 +30,7 @@ html {
 
 body {
   background: linear-gradient(theme('colors.vines.100/0.35') 0%, theme('colors.gray.1') 50%);
-  @apply overflow-clip;
+  @apply overflow-hidden;
 }
 
 #vines-ui {

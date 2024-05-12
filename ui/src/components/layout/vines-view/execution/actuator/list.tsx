@@ -105,7 +105,7 @@ export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({ height, act
                 onClick={() => setActiveTool?.(node)}
               >
                 <div className="flex items-center gap-2">
-                  <div className="flex size-12 items-center justify-center overflow-clip rounded-lg border shadow-sm">
+                  <div className="flex size-12 items-center justify-center overflow-hidden rounded-lg border shadow-sm">
                     <VinesIcon src={icon} size="lg" />
                   </div>
                   <div className="flex max-w-[13rem] flex-col gap-1 leading-5">

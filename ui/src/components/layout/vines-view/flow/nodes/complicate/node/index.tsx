@@ -113,7 +113,7 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
         ) : (
           <>
             <motion.div
-              className="h-full w-full overflow-clip"
+              className="h-full w-full overflow-hidden"
               key={'vines-complicate-' + nodeId}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
