@@ -33,7 +33,7 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
     <div
       data-alt="icon"
       className={cn(
-        'flex select-none items-center justify-center overflow-clip font-bold',
+        'flex select-none items-center justify-center overflow-hidden font-bold',
         size !== 'auto' && size?.includes('l') && 'rounded-lg text-3xl',
         size !== 'auto' && !size?.includes('l') && 'rounded-md text-xl',
         size === 'auto' && 'h-full w-full',

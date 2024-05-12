@@ -16,7 +16,8 @@ dotenv.config();
 export default defineConfig({
   plugins: [
     legacy({
-      targets: ['defaults', 'not IE 11', 'chrome87'],
+      targets: ['defaults and fully supports es6-module', 'maintained node versions', 'not IE 11'],
+      modernPolyfills: ['es.array.at'],
     }),
     mdx({
       // See https://mdxjs.com/advanced/plugins

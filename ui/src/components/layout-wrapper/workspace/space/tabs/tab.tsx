@@ -77,7 +77,7 @@ export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon,
               initial={{ width: 0, paddingLeft: 0 }}
               animate={{ width: 40, paddingLeft: 8, transition: { duration: 0.15 } }}
               exit={{ width: 0, paddingLeft: 0 }}
-              className="overflow-clip"
+              className="overflow-hidden"
             >
               <TabMenu />
             </motion.div>

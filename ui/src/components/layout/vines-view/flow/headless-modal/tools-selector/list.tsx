@@ -38,7 +38,7 @@ export const ToolLists: React.FC<IToolListsProps> = ({ list, length, category, o
                 onClick={() => onClick?.(tool)}
                 onDoubleClick={() => onClick?.(tool)}
               >
-                <div className="relative flex h-12 w-12 flex-shrink-0 items-end justify-end overflow-clip rounded-lg border-input shadow-md">
+                <div className="relative flex h-12 w-12 flex-shrink-0 items-end justify-end overflow-hidden rounded-lg border-input shadow-md">
                   <div className="absolute">
                     <VinesIcon className="size-full" size="lg" src={tool.icon} />
                   </div>

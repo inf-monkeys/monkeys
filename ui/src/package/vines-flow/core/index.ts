@@ -53,6 +53,8 @@ export class VinesCore extends VinesTools(VinesBase) {
 
   public tasks: MonkeyTaskDefTypes[] = [];
 
+  public enableOpenAIInterface = false;
+
   public workflowInput: VinesWorkflowVariable[] = [];
 
   public variables: IVinesVariable[] = [];
@@ -109,6 +111,8 @@ export class VinesCore extends VinesTools(VinesBase) {
       if (isArray(workflow?.variables) && workflow?.variables?.length) {
         this.workflowInput = workflow.variables;
       }
+
+      this.enableOpenAIInterface = !!workflow?.exposeOpenaiCompatibleInterface;
     }
     workflowId && (this.workflowId = workflowId);
     version && (this.version = version);
@@ -465,12 +469,24 @@ export class VinesCore extends VinesTools(VinesBase) {
   // endregion
 
   // region RUNNER
+  public usedOpenAIInterface() {
+    return {
+      enable: this.enableOpenAIInterface,
+      multipleChat: !!this.workflowInput.find((variable) => variable.name === 'messages'),
+    };
+  }
+
   public async start({
     inputData = {},
     instanceId,
     version = this.version,
     debug = false,
   }: IVinesFlowRunParams): Promise<boolean> {
+    if (this.enableOpenAIInterface) {
+      toast.warning('启动运行失败！请先禁用 OpenAI 兼容接口');
+      return false;
+    }
+
     this.renderOptions.direction = 'vertical';
 
     if (!this.fillUpSubWorkflowChildren()) {

@@ -316,7 +316,7 @@ export const useVariableEditor = (opt: UseVariableEditorOptions) => {
             renderLeaf={renderLeaf}
             onKeyDown={handleKeyDown}
             onBlur={onBlur}
-            className="flex-initial overflow-clip whitespace-pre-wrap break-words px-2 py-1 outline-none transition-all"
+            className="flex-initial overflow-hidden whitespace-pre-wrap break-words px-2 py-1 outline-none transition-all"
             style={{ width }}
           />
         </Slate>

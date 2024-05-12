@@ -11,25 +11,27 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useFlowStore } from '@/store/useFlowStore';
+import { usePageStore } from '@/store/usePageStore';
 import { cn, useLocalStorage } from '@/utils';
 
 interface IChatSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
+  const { workbenchVisible } = usePageStore();
   const { workflowId } = useFlowStore();
   const { data, mutate } = useWorkflowChatSessions(workflowId);
   const { trigger } = useCreateWorkflowChatSession();
 
   const [chatSessions, setChatSessions] = useLocalStorage<Record<string, string>>('vines-ui-chat-session', {});
 
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(!workbenchVisible);
 
   const activeSessionId = chatSessions[workflowId] ?? data?.[0]?.id;
 
   return (
     <div className="flex h-full max-w-64">
       <motion.div
-        className="flex flex-col gap-4 overflow-clip [&_h1]:line-clamp-1 [&_span]:line-clamp-1"
+        className="flex flex-col gap-4 overflow-hidden [&_h1]:line-clamp-1 [&_span]:line-clamp-1"
         initial={{ width: visible ? 256 : 0, paddingRight: visible ? 16 : 0 }}
         animate={{
           width: visible ? 256 : 0,

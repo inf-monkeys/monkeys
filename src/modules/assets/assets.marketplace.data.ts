@@ -1,5 +1,6 @@
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { TaskType } from '@inf-monkeys/conductor-javascript';
+import { LLM_CHAT_COMPLETION_TOOL, LLM_COMPLETION_TOOL, LLM_NAMESPACE } from '../tools/llm/llm.controller';
 
 export interface WorkflowMarketplaceData extends WorkflowMetadataEntity {
   tags: string[];
@@ -58,7 +59,7 @@ export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketpla
           stream: '${workflow.input.stream}',
           temperature: '${workflow.input.temperature}',
         },
-        name: 'llm:chat_completions',
+        name: `${LLM_NAMESPACE}:${LLM_CHAT_COMPLETION_TOOL}`,
         taskReferenceName: 'llm:chat_completions_BtnrDqNN',
         type: TaskType.SIMPLE,
       },
@@ -114,7 +115,7 @@ export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketpla
           stream: '${workflow.input.stream}',
           temperature: '${workflow.input.temperature}',
         },
-        name: 'llm:completions',
+        name: `${LLM_NAMESPACE}:${LLM_COMPLETION_TOOL}`,
         taskReferenceName: 'llm:completions_KBDmHJNk',
         type: TaskType.SIMPLE,
       },

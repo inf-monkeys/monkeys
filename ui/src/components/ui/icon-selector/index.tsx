@@ -47,7 +47,10 @@ export const VinesIconSelector: React.FC<IVinesIconSelectorProps> = ({ children,
   return (
     <Popover open={visible} onOpenChange={setVisible}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className="h-[512px] w-[352px] scale-75 overflow-clip rounded-xl bg-slate-2 p-0" sideOffset={-55}>
+      <PopoverContent
+        className="h-[512px] w-[352px] scale-75 overflow-hidden rounded-xl bg-slate-2 p-0"
+        sideOffset={-55}
+      >
         <Picker
           i18n={i18n}
           data={data}
