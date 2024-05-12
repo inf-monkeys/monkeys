@@ -18,7 +18,7 @@ export const WorkspaceHeader: React.FC<IWorkspaceHeaderProps> = () => {
 
   return (
     <header className="flex h-14 w-full items-center justify-between bg-slate-1 px-6 shadow-sm">
-      <div className="flex h-full items-center gap-5">
+      <div className="z-20 flex h-full items-center gap-5">
         <VinesLogo
           description=""
           height={32}
@@ -28,7 +28,7 @@ export const WorkspaceHeader: React.FC<IWorkspaceHeaderProps> = () => {
         <Separator orientation="vertical" className="h-1/2" />
         <WorkflowInfoCard />
       </div>
-      <div className="flex items-center gap-6">
+      <div className="z-20 flex items-center gap-6">
         <IntegrationCenter />
         <VinesDarkMode className="scale-90" />
         <UserCard />

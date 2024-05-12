@@ -129,7 +129,7 @@ export const CodeEditor: React.FC<ICodeEditorProps> = ({
       height={height}
       className={cn(
         'h-full w-full',
-        !hideBorder && 'overflow-clip rounded border border-solid border-white border-opacity-20 shadow',
+        !hideBorder && 'overflow-hidden rounded border border-solid border-white border-opacity-20 shadow',
         className,
       )}
       options={finalOptions}

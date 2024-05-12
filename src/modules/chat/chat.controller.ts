@@ -45,7 +45,6 @@ export class WorkflowOpenAICompatibleController {
       const key = TOOL_STREAM_RESPONSE_TOPIC(workflowInstanceId);
       logger.info('subscribing to key: ', key);
       this.mq.subscribe(key, (_, message: string) => {
-        logger.info('message: ', message);
         res.write(message);
         // TODO: listen on workflow finished event
         if (message.includes('[DONE]')) {
@@ -76,7 +75,7 @@ export class WorkflowOpenAICompatibleController {
     }
     if (stream === false) {
       const result = await this.workflowExecutionService.waitForWorkflowResult(teamId, workflowInstanceId);
-      const aiResponse = result?.choices[0]?.message?.content;
+      const aiResponse = (result?.choices || [])[0]?.message?.content;
       if (aiResponse) {
         const newMessages = body.messages.concat({ role: 'assistant', content: aiResponse });
         if (conversationId) {
@@ -102,8 +101,8 @@ export class WorkflowOpenAICompatibleController {
           const cleanedMessageStr = message.replace('data: ', '').trim();
           try {
             const parsedMessage = JSON.parse(cleanedMessageStr);
-            const { choices } = parsedMessage;
-            const content = choices[0].delta.content;
+            const { choices = [] } = parsedMessage;
+            const content = choices[0]?.delta?.content;
             aiResponse += content;
           } catch (error) {
             logger.warn('error parsing message: ', error);

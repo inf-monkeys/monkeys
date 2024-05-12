@@ -57,9 +57,11 @@ export class WorkflowRepository {
       output: WorkflowOutputValue[];
       exposeOpenaiCompatibleInterface?: boolean;
       rateLimiter?: WorkflowRateLimiter;
+      validationIssues?: WorkflowValidationIssue[];
+      validated?: boolean;
     },
   ) {
-    const { displayName, description, iconUrl, tasks, variables, output, exposeOpenaiCompatibleInterface, rateLimiter } = data;
+    const { displayName, description, iconUrl, tasks, variables, output, exposeOpenaiCompatibleInterface, rateLimiter, validationIssues = [], validated = true } = data;
     await this.workflowMetadataRepository.save({
       id: workflowId,
       createdTimestamp: Date.now(),
@@ -77,6 +79,8 @@ export class WorkflowRepository {
       output,
       exposeOpenaiCompatibleInterface,
       rateLimiter,
+      validationIssues,
+      validated,
     });
     return await this.getWorkflowById(workflowId, version);
   }
@@ -100,13 +104,13 @@ export class WorkflowRepository {
     return await this.getWorkflowById(workflowId, maxVersion);
   }
 
-  public async findWorkflowByIds(ids: string[]) {
-    if (!ids?.length) {
+  public async findWorkflowByIds(workflowIds: string[]) {
+    if (!workflowIds?.length) {
       return [];
     }
     return await this.workflowMetadataRepository.find({
       where: {
-        id: In(ids),
+        workflowId: In(workflowIds),
         isDeleted: false,
       },
     });
@@ -405,6 +409,9 @@ export class WorkflowRepository {
         isDeleted: false,
       },
       select: ['id', 'displayName', 'createdTimestamp', 'updatedTimestamp', 'creatorUserId', 'isDeleted', 'teamId', 'workflowId'],
+      order: {
+        id: 'DESC',
+      },
     });
   }
 

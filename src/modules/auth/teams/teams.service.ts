@@ -1,6 +1,7 @@
 import { CustomTheme, TeamEntity } from '@/database/entities/identity/team';
 import { AssetsMarketPlaceRepository } from '@/database/repositories/assets-marketplace.repository';
 import { TeamRepository } from '@/database/repositories/team.repository';
+import { ConductorService } from '@/modules/workflow/conductor/conductor.service';
 import { Injectable } from '@nestjs/common';
 
 export const DEFAULT_TEAM_DESCRIPTION = '用户很懒，还没留下描述';
@@ -11,7 +12,19 @@ export class TeamsService {
   constructor(
     private readonly teamRepository: TeamRepository,
     private readonly marketPlaceRepository: AssetsMarketPlaceRepository,
+    private readonly conductorService: ConductorService,
   ) {}
+
+  private async forkAssetsFromMarketPlace(teamId: string, userId: string) {
+    const clonedWorfklows = await this.marketPlaceRepository.forkBuiltInWorkflowAssetsFromMarketPlace(teamId, userId);
+    for (const workflow of clonedWorfklows) {
+      try {
+        await this.conductorService.saveWorkflowInConductor(workflow);
+      } catch (e) {
+        console.error('Failed to save workflow in conductor', e);
+      }
+    }
+  }
 
   async getUserTeams(userId: string): Promise<TeamEntity[]> {
     return await this.teamRepository.getUserTeams(userId);
@@ -20,7 +33,7 @@ export class TeamsService {
   public async createTeam(userId: string, teamName: string, description?: string, iconUrl?: string, isBuiltIn = false, workflowTaskNamePrefix?: string, createMethod: 'self' | 'import' = 'self') {
     const team = await this.teamRepository.createTeam(userId, teamName, description, iconUrl, isBuiltIn, createMethod);
     // Init assets from built-in marketplace
-    this.marketPlaceRepository.forkFromMarketPlaceWhenTeamCreate(team.id, userId);
+    this.forkAssetsFromMarketPlace(team.id, userId);
   }
 
   public async updateTeam(

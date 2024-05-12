@@ -251,7 +251,7 @@ export const UgcView = <E extends object>({
             onChange: setFilter,
           }}
         />
-        <div className="relative overflow-clip">
+        <div className="relative overflow-hidden">
           <AnimatePresence>
             {(isLoading || isNull(displayMode)) && <Loading motionKey={`vines-assets-${assetKey}-loading`} />}
           </AnimatePresence>

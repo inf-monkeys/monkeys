@@ -81,6 +81,10 @@ export class LlmService {
   ) {}
 
   private getModelConfig(modelName: string) {
+    if (!modelName) {
+      throw new Error('Model is required, check your workflow configuration.');
+    }
+
     const model = config.models.find((x) => {
       if (typeof x.model === 'string') {
         const splittedModels = x.model.split(',');

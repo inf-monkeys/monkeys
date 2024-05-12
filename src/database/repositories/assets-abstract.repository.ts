@@ -244,13 +244,14 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     return asset;
   }
 
-  public async forkFromMarketPlaceWhenTeamCreate(teamId: string, creatorUserId: string, extraDataFunc?: (e: E) => { [x: string]: any }) {
+  public async forkBuiltInWorkflowAssetsFromMarketPlace(teamId: string, creatorUserId: string, extraDataFunc?: (e: E) => { [x: string]: any }) {
     const presetAssets = await this.repository.find({
       where: {
         isPreset: true,
       } as FindOptionsWhere<E>,
     });
 
+    const clonedAssets = [];
     for (const asset of presetAssets) {
       const { id } = asset;
       const extraData = extraDataFunc ? extraDataFunc(asset) : {};
@@ -264,8 +265,12 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
         isDeleted: false,
         isPreset: false,
         isPublished: false,
+        createdTimestamp: Date.now(),
+        updatedTimestamp: Date.now(),
       });
       await this.repository.save(clonedAsset);
+      clonedAssets.push(clonedAsset);
     }
+    return clonedAssets;
   }
 }
