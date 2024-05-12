@@ -83,7 +83,7 @@ export const TriggerSelector: React.FC<ITriggerSelectorProps> = () => {
                   onClick={() => handleCreateTrigger(triggerType)}
                   key={i}
                 >
-                  <div className="relative flex h-12 w-12 flex-shrink-0 items-end justify-end overflow-clip rounded-lg border-input shadow-md">
+                  <div className="relative flex h-12 w-12 flex-shrink-0 items-end justify-end overflow-hidden rounded-lg border-input shadow-md">
                     <div className="absolute">
                       <VinesIcon className="size-full" size="lg" src={icon} />
                     </div>

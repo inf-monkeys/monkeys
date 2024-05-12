@@ -48,7 +48,7 @@ export const ToolAdvancedConfig: React.FC<INodeConfigProps> = ({ nodeId, task })
   }, [nodeId]);
 
   return (
-    <main className="flex size-full flex-col gap-4 overflow-clip px-4">
+    <main className="flex size-full flex-col gap-4 overflow-hidden px-4">
       <Label>输出模式</Label>
       <Select
         value={outputAsSelect}

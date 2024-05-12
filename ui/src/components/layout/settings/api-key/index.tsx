@@ -24,7 +24,7 @@ export const ApiKey: React.FC<IApiKeyProps> = () => {
   return (
     <div className="flex flex-col gap-2">
       <ApiKeyHeader mutate={mutate} />
-      <SmoothTransition className="relative overflow-clip">
+      <SmoothTransition className="relative overflow-hidden">
         <AnimatePresence>{isLoading && <Loading motionKey="vines-api-key-list-loading" />}</AnimatePresence>
         <ScrollArea className="h-[calc(100vh-16.5rem)]">
           <div className="flex flex-col gap-2">

@@ -14,9 +14,15 @@ export interface IMessage {
   role: 'user' | 'assistant';
 }
 
-export const useChat = (chatId: string, workflowId?: string, apiKey?: string, history?: IMessage[]) => {
+export const useChat = (
+  chatId: string,
+  workflowId?: string,
+  apiKey?: string,
+  history?: IMessage[],
+  multipleChat?: boolean,
+) => {
   const [input, setInput] = useState('');
-  const [controller, setController] = useState<AbortController | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const [messages, mutateMessages] = useState<IMessage[]>(history || []);
 
@@ -37,7 +43,7 @@ export const useChat = (chatId: string, workflowId?: string, apiKey?: string, hi
 
   const handleSubmit = () => {
     mutateMessages([
-      ...messagesRef.current,
+      ...(multipleChat ? messagesRef.current : []),
       { content: input, role: 'user' },
       {
         content: '',
@@ -53,12 +59,14 @@ export const useChat = (chatId: string, workflowId?: string, apiKey?: string, hi
     await mutateLoading(true);
     try {
       const controller = new AbortController();
-      setController(controller);
-      const response = await fetch('/api/chat/completions', {
+      abortControllerRef.current = controller;
+      const response = await fetch(`/api/${multipleChat ? 'chat/' : ''}completions`, {
         method: 'POST',
         body: stringify({
           model: workflowId,
-          messages: messagesRef.current.filter((it) => it.content),
+          [multipleChat ? 'messages' : 'prompt']: multipleChat
+            ? messagesRef.current.filter((it) => it.content)
+            : messagesRef.current.find((it) => it.role === 'user')?.content ?? '',
           stream: true,
         }),
         headers: {
@@ -73,7 +81,7 @@ export const useChat = (chatId: string, workflowId?: string, apiKey?: string, hi
         throw new Error('Request failed');
       }
 
-      const data = parseOpenAIStream(response)?.body;
+      const data = parseOpenAIStream(response, multipleChat)?.body;
       if (!data) {
         throw new Error('No data');
       }
@@ -102,8 +110,6 @@ export const useChat = (chatId: string, workflowId?: string, apiKey?: string, hi
 
       await mutateLoading(false);
     } catch (error) {
-      console.error(error);
-      setController(null);
       void mutateLoading(false);
       mutateMessages((prev) => {
         const prevMessage = prev.at(-1);
@@ -113,13 +119,31 @@ export const useChat = (chatId: string, workflowId?: string, apiKey?: string, hi
 
         return prev;
       });
+
+      // Ignore abort errors as they are expected.
+      if ((error as any).name === 'AbortError') {
+        toast.success('对话已停止');
+        abortControllerRef.current = null;
+        return null;
+      }
+
+      console.error(error);
+      abortControllerRef.current?.abort();
+      abortControllerRef.current = null;
       toast.error('对话失败，请检查工作流日志');
     }
-  }, [mutateMessages, chatId, apiKey]);
+  }, [mutateMessages, chatId, apiKey, multipleChat]);
+
+  const stop = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+  }, []);
 
   return {
     messages,
-    controller,
+    stop,
 
     isLoading,
 

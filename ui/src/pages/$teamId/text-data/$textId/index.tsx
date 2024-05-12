@@ -32,7 +32,7 @@ const TextDataDetail: React.FC = () => {
     <Tabs className="size-full" value={activeTab} onValueChange={setActiveTab}>
       <main className="flex size-full">
         <motion.div
-          className="flex size-full max-w-64 flex-col gap-4 overflow-clip"
+          className="flex size-full max-w-64 flex-col gap-4 overflow-hidden"
           initial={{ width: 256, paddingRight: 16 }}
           animate={{
             width: visible ? 256 : 0,

@@ -194,7 +194,7 @@ export const GridView: React.FC<IGridViewProps> = ({ toggleMoveState, children }
       <main
         ref={node}
         className={cn(
-          'relative flex min-h-[800rem] min-w-[800rem] touch-none items-center justify-center overflow-clip overscroll-x-contain',
+          'relative flex min-h-[800rem] min-w-[800rem] touch-none items-center justify-center overflow-hidden overscroll-x-contain',
           isCanvasMoving && 'cursor-grab',
         )}
         onMouseDown={(e) => {
