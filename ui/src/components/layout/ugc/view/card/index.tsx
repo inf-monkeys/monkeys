@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 
 import { MoreHorizontal } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { IUgcViewItemProps } from '@/components/layout/ugc/typings.ts';
 import { getRenderNodeFn } from '@/components/layout/ugc/view/utils/node-renderer.tsx';
@@ -17,6 +18,8 @@ export const UgcViewCard = <E extends object>({
   operateArea,
   onItemClick,
 }: IUgcViewItemProps<E>) => {
+  const { t } = useTranslation();
+
   const getRenderNode = getRenderNodeFn({
     row,
     columns,
@@ -27,7 +30,10 @@ export const UgcViewCard = <E extends object>({
   const title = useMemo(() => getRenderNode('title'), [index, row]);
   const subtitle = useMemo(() => getRenderNode('subtitle'), [index, row]);
   const tags = useMemo(() => getRenderNode('assetTags'), [index, row]);
-  const description = useMemo(() => getRenderNode('description') || '暂无描述', [index, row]);
+  const description = useMemo(
+    () => getRenderNode('description') || t('components.layout.ugc.utils.no-description'),
+    [index, row],
+  );
   return (
     <Card
       className={cn('h-44', {
@@ -60,7 +66,7 @@ export const UgcViewCard = <E extends object>({
                 {operateArea(
                   row.original,
                   <Button icon={<MoreHorizontal />} size="small" variant="outline" className="-m-1 scale-80" />,
-                  '操作',
+                  t('common.utils.operate'),
                 )}
               </div>
             </>

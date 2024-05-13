@@ -1,6 +1,7 @@
 import React from 'react';
 
 import dayjs from 'dayjs';
+import { useTranslation } from 'react-i18next';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { IUgcTagSelectorProps, UgcTagSelector } from '@/components/layout/ugc/view/tag-selector';
@@ -10,9 +11,10 @@ import { IVinesIconSize, VinesIcon } from '@/components/ui/vines-icon';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const RenderTime: React.FC<{ time: number }> = ({ time: rawTime }) => {
+  const { i18n } = useTranslation();
   const time = rawTime >= 1000000000000 ? rawTime : rawTime * 1000;
   return (
-    <Tooltip content={dayjs(time).format('YYYY-MM-DD HH:mm:ss')}>
+    <Tooltip content={dayjs(time).format(i18n.language === 'zh' ? 'YYYY-MM-DD HH:mm:ss' : 'MM-DD-YYYY HH:mm:ss')}>
       <TooltipTrigger asChild>
         <span className="cursor-default">{formatTimeDiffPrevious(time)}</span>
       </TooltipTrigger>
@@ -23,22 +25,27 @@ export const RenderTime: React.FC<{ time: number }> = ({ time: rawTime }) => {
 export const RenderUser: React.FC<{
   user: Partial<IVinesUser>;
   fallbackName?: string;
-}> = ({ user, fallbackName = '未知用户' }) => (
-  <div className="flex items-center gap-1">
-    <Avatar className="size-5">
-      <AvatarImage className="aspect-auto" src={user?.photo} alt={user?.name ?? fallbackName} />
-      <AvatarFallback className="rounded-none p-2 text-xs">
-        {(user?.name ?? fallbackName).substring(0, 2)}
-      </AvatarFallback>
-    </Avatar>
-    <span>{user?.name ?? fallbackName}</span>
-  </div>
-);
+}> = ({ user, fallbackName }) => {
+  const { t } = useTranslation();
+  fallbackName = fallbackName ?? t('common.utils.unknown-user');
+  return (
+    <div className="flex items-center gap-1">
+      <Avatar className="size-5">
+        <AvatarImage className="aspect-auto" src={user?.photo} alt={user?.name ?? fallbackName} />
+        <AvatarFallback className="rounded-none p-2 text-xs">
+          {(user?.name ?? fallbackName).substring(0, 2)}
+        </AvatarFallback>
+      </Avatar>
+      <span>{user?.name ?? fallbackName}</span>
+    </div>
+  );
+};
 export const RenderDescription: React.FC<{
   description?: string;
-}> = ({ description }) =>
-  !description || description === '' ? (
-    <span className="line-clamp-3 text-opacity-70">暂无描述</span>
+}> = ({ description }) => {
+  const { t } = useTranslation();
+  return !description || description === '' ? (
+    <span className="line-clamp-3 text-opacity-70">{t('components.layout.ugc.utils.no-description')}</span>
   ) : (
     <Tooltip content={<span className="flex max-w-64 flex-wrap">{description}</span>} contentProps={{ side: 'bottom' }}>
       <TooltipTrigger asChild>
@@ -46,6 +53,7 @@ export const RenderDescription: React.FC<{
       </TooltipTrigger>
     </Tooltip>
   );
+};
 
 export const RenderIcon: React.FC<{
   iconUrl?: string;

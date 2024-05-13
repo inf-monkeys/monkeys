@@ -15,6 +15,7 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import _, { isNull } from 'lodash';
 import { CircleSlash, MoreHorizontal } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { IWorkflowBlock } from '@/apis/tools/typings.ts';
 import { IAssetItem, IListUgcDto, IListUgcItemsFnType, IPreloadUgcItemsFnType } from '@/apis/ugc/typings.ts';
@@ -73,6 +74,8 @@ export const UgcView = <E extends object>({
   defaultPageSize = 24,
   assetIdKey = 'id',
 }: IUgcViewProps<E>): React.ReactNode => {
+  const { t } = useTranslation();
+
   const { ref } = useElementSize();
   const team = useVinesTeam();
 
@@ -204,8 +207,9 @@ export const UgcView = <E extends object>({
       columnHelper.display({
         id: 'operate',
         size: 24,
-        header: '操作',
-        cell: ({ row }) => operateArea(row.original, <Button icon={<MoreHorizontal />} size="small" />, '操作'),
+        header: t('common.utils.operate'),
+        cell: ({ row }) =>
+          operateArea(row.original, <Button icon={<MoreHorizontal />} size="small" />, t('common.utils.operate')),
       }),
     );
   }
@@ -266,7 +270,7 @@ export const UgcView = <E extends object>({
                   >
                     <CircleSlash size={64} />
                     <div className="mt-4 flex flex-col text-center">
-                      <h2 className="font-bold">暂无数据</h2>
+                      <h2 className="font-bold">{t('common.load.empty')}</h2>
                     </div>
                   </motion.div>
                 )

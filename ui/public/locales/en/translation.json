@@ -10,23 +10,32 @@
       "unknown-team": "Unknown Team",
       "user": "User",
       "unknown-user": "Unknown User",
+      "all": "All",
+      "info": "Info",
       "confirm": "Confirm",
       "continue": "Continue",
       "save": "Save",
       "update": "Update",
       "create": "Create",
+      "delete": "Delete",
       "edit": "Edit",
+      "operate": "Operate",
       "reset": "Reset",
       "cancel": "Cancel",
       "search": "Search",
       "switch": "Switch",
       "copy": "Copy",
+      "filter": "Filter",
       "enable": "Enable",
       "disable": "Disable",
       "enabled": "Enabled",
       "disabled": "Disabled",
       "updated-at": "Updated at {{time}}",
-      "created-at": "Created at {{time}}"
+      "created-at": "Created at {{time}}",
+      "updated-time": "Updated Time",
+      "created-time": "Created Time",
+      "ascend": "Ascend",
+      "descend": "Descend"
     },
     "toast": {
       "loading": "Please wait until the data is loaded.",
@@ -58,6 +67,16 @@
       "loading": "Operating...",
       "success": "Operate successful!",
       "error": "Operate failed! Please try again later!"
+    },
+    "create": {
+      "loading": "Creating...",
+      "success": "Create successful!",
+      "error": "Create failed! Please try again later!"
+    },
+    "save": {
+      "loading": "Saving...",
+      "success": "Save successful!",
+      "error": "Save failed! Please try again later!"
     },
     "delete": {
       "confirm-content": "Confirm deletion? The operation cannot be undone.",
@@ -203,6 +222,72 @@
               "not-found": "Not found",
               "avatar-fallback": "Team"
             }
+          }
+        }
+      },
+      "ugc": {
+        "utils": {
+          "no-description": "No description"
+        },
+        "view": {
+          "filter": {
+            "button": {
+              "toast": {
+                "no-filter-group-name": "Please enter filter group name."
+              },
+              "creator": {
+                "label": "Creator",
+                "placeholder": "Select creator"
+              },
+              "tag": {
+                "label": "Tag",
+                "placeholder": "Select tag"
+              },
+              "created-time": {
+                "label": "Created Time",
+                "placeholder": "Select created time"
+              },
+              "updated-time": {
+                "label": "Updated Time",
+                "placeholder": "Select updated time"
+              },
+              "filter-group-name": {
+                "label": "Filter Group Name",
+                "placeholder": "Enter filter group name"
+              },
+              "save-filter-group": {
+                "label": "Save filtering as a group"
+              }
+            },
+            "list": {
+              "toast": {
+                "filter-group-not-found": "Filter group does not exist! Please refresh and try again later!"
+              },
+              "placeholder": "Enter filter group name",
+              "delete": {
+                "confirm-title": "Filter group delete confirmation",
+                "confirm-content": "Are you sure you want to delete the filter group \"{{name}}\"?\nThe operation cannot be undone."
+              }
+            }
+          },
+          "header": {
+            "display-mode": {
+              "button-tooltip": "Display mode",
+              "dropdown-label": "Display Mode",
+              "options": {
+                "table": "Table View",
+                "card": "Card View",
+                "gallery": "Gallery View"
+              }
+            },
+            "sort": {
+              "button-tooltip": "Sort",
+              "dropdown-label": "Sort Settings"
+            }
+          },
+          "tag-selector": {
+            "create-button": "Create Tag",
+            "placeholder": "Enter the label name and press Enter to create a new label"
           }
         }
       }
