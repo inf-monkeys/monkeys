@@ -1,6 +1,7 @@
 import { ClusterNode, RedisOptions, SentinelAddress } from 'ioredis';
 import { ClientAuthMethod } from 'openid-client';
 import { DataSourceOptions } from 'typeorm';
+import { getHostFromUrl, isValidUrl } from '../utils';
 import { readConfig } from './readYaml';
 
 export type DatabaseConfig = DataSourceOptions;
@@ -69,8 +70,8 @@ export interface RedisConfig {
 
 export interface ToolServiceConfig {
   name: string;
+  useProxy?: boolean;
   manifestUrl?: string;
-  baseUrl?: string;
 }
 
 export interface CronConfig {
@@ -161,6 +162,12 @@ export interface LlmModelConfig {
   promptTemplate?: string;
 }
 
+export interface ProxyConfig {
+  enabled: boolean;
+  url?: string;
+  exclude?: string[];
+}
+
 export interface Config {
   server: ServerConfig;
   conductor: ConductorConfig;
@@ -172,6 +179,7 @@ export interface Config {
   auth: AuthConfig;
   s3: S3Config;
   models: LlmModelConfig[];
+  proxy: ProxyConfig;
 }
 
 const port = readConfig('server.port', 3000);
@@ -264,6 +272,11 @@ export const config: Config = {
   },
   s3: readConfig('s3', {}),
   models: readConfig('models', []),
+  proxy: {
+    enabled: readConfig('proxy.enabled', false),
+    url: readConfig('proxy.url'),
+    exclude: readConfig('proxy.exclude', []),
+  },
 };
 
 export const isRedisConfigured = () => {
@@ -291,6 +304,39 @@ const validateConfig = () => {
       throw new Error('Redis sentinel mode requires a sentinel name');
     }
   }
+  if (!config.proxy.url) {
+    throw new Error('Proxy enabled but no url provided');
+  }
+  if (config.proxy.exclude && !Array.isArray(config.proxy.exclude)) {
+    throw new Error('Proxy exclude must be an array');
+  }
+  if (config.conductor.baseUrl) {
+    if (!isValidUrl(config.conductor.baseUrl)) {
+      throw new Error('Invalid conductor baseUrl: ' + config.conductor.baseUrl);
+    }
+  }
 };
 
 validateConfig();
+
+if (config.proxy.enabled) {
+  const { url, exclude } = config.proxy;
+  // Exclude localhost from proxy
+  exclude.push('localhost');
+  exclude.push('127.0.0.1');
+  // Exclude condcutor from proxy
+  exclude.push(getHostFromUrl(config.conductor.baseUrl));
+  // Exlcude tools from proxy
+  config.tools
+    .filter((tool) => !tool.useProxy)
+    .forEach((tool) => {
+      if (tool.manifestUrl) {
+        exclude.push(getHostFromUrl(tool.manifestUrl));
+      }
+    });
+  process.env.HTTP_PROXY = url;
+  process.env.HTTPS_PROXY = url;
+  process.env.http_proxy = url;
+  process.env.https_proxy = url;
+  process.env.NO_PROXY = exclude.join(',');
+}
