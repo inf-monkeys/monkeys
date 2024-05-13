@@ -4,6 +4,7 @@ import { mutate } from 'swr';
 
 import { format } from 'date-fns';
 import { CalendarIcon, Filter } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useTeamUsers } from '@/apis/authz/team';
@@ -33,6 +34,8 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
   defaultAddToFavourite = false,
   assetType,
 }) => {
+  const { t, i18n } = useTranslation();
+
   const [visible, setVisible] = useState(false);
 
   const { team } = useVinesTeam();
@@ -57,9 +60,11 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
     };
   });
 
+  const timeFormat = i18n.language === 'zh' ? 'yyyy-MM-dd' : 'MM-dd-yyyy';
+
   return (
     <Popover open={visible} onOpenChange={setVisible}>
-      <Tooltip content="筛选">
+      <Tooltip content={t('common.utils.filter')}>
         <PopoverTrigger asChild>
           <TooltipTrigger asChild>
             <Button icon={<Filter />} variant="outline" size="small" />
@@ -68,7 +73,7 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
       </Tooltip>
       <PopoverContent className="flex w-72 flex-col gap-2">
         <div className="flex flex-col gap-3">
-          <Label>创建者</Label>
+          <Label>{t('components.layout.ugc.view.filter.button.creator.label')}</Label>
           <MultipleSelector
             value={(filter?.userIds ?? []).map((userId) => {
               return {
@@ -83,11 +88,11 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
               });
             }}
             defaultOptions={defaultUsersOptions}
-            placeholder="请选择用户"
+            placeholder={t('components.layout.ugc.view.filter.button.creator.placeholder')}
           />
         </div>
         <div className="flex flex-col gap-3">
-          <Label>标签</Label>
+          <Label>{t('components.layout.ugc.view.filter.button.tag.label')}</Label>
           <MultipleSelector
             value={(filter?.tagIds ?? []).map((tagId) => {
               const tag = tagsData?.find((x) => x.id === tagId);
@@ -103,11 +108,11 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
               });
             }}
             defaultOptions={defaultTagsOptions}
-            placeholder="请选择标签"
+            placeholder={t('components.layout.ugc.view.filter.button.tag.placeholder')}
           />
         </div>
         <div className="mb-2 flex flex-col gap-3">
-          <Label>创建时间</Label>
+          <Label>{t('components.layout.ugc.view.filter.button.created-time.label')}</Label>
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -122,14 +127,14 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
                 {filter.createdTimestamp?.[0] ? (
                   filter.createdTimestamp?.[1] ? (
                     <>
-                      {format(filter.createdTimestamp[0], 'yyyy-MM-dd')} -{' '}
-                      {format(filter.createdTimestamp[1], 'yyyy-MM-dd')}
+                      {format(filter.createdTimestamp[0], timeFormat)} -{' '}
+                      {format(filter.createdTimestamp[1], timeFormat)}
                     </>
                   ) : (
-                    format(filter.createdTimestamp[0], 'yyyy-MM-dd')
+                    format(filter.createdTimestamp[0], timeFormat)
                   )
                 ) : (
-                  <span>请选择创建时间</span>
+                  <span>{t('components.layout.ugc.view.filter.button.created-time.placeholder')}</span>
                 )}
               </Button>
             </PopoverTrigger>
@@ -157,7 +162,7 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
           </Popover>
         </div>
         <div className="mb-2 flex flex-col gap-3 ">
-          <Label>更新时间</Label>
+          <Label>{t('components.layout.ugc.view.filter.button.updated-time.label')}</Label>
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -172,14 +177,14 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
                 {filter.updatedTimestamp?.[0] ? (
                   filter.updatedTimestamp?.[1] ? (
                     <>
-                      {format(filter.updatedTimestamp[0], 'yyyy-MM-dd')} -{' '}
-                      {format(filter.updatedTimestamp[1], 'yyyy-MM-dd')}
+                      {format(filter.updatedTimestamp[0], timeFormat)} -{' '}
+                      {format(filter.updatedTimestamp[1], timeFormat)}
                     </>
                   ) : (
-                    format(filter.updatedTimestamp[0], 'yyyy-MM-dd')
+                    format(filter.updatedTimestamp[0], timeFormat)
                   )
                 ) : (
-                  <span>请选择更新时间</span>
+                  <span>{t('components.layout.ugc.view.filter.button.updated-time.placeholder')}</span>
                 )}
               </Button>
             </PopoverTrigger>
@@ -208,12 +213,16 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
         </div>
         {addToFavourite && (
           <div className="flex flex-col gap-3">
-            <Label>分组名称</Label>
-            <Input placeholder="请输入分组名称" value={filterName} onChange={setFilterName} />
+            <Label>{t('components.layout.ugc.view.filter.button.filter-group-name.label')}</Label>
+            <Input
+              placeholder={t('components.layout.ugc.view.filter.button.filter-group-name.placeholder')}
+              value={filterName}
+              onChange={setFilterName}
+            />
           </div>
         )}
         <div className="flex items-center justify-between py-3">
-          <Label>将筛选条件保存为分组</Label>
+          <Label>{t('components.layout.ugc.view.filter.button.save-filter-group.label')}</Label>
           <Switch checked={addToFavourite} onCheckedChange={setAddToFavourite} />
         </div>
         <div className="mt-2 flex gap-2 self-end">
@@ -225,7 +234,7 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
               setVisible(false);
             }}
           >
-            重置
+            {t('common.utils.reset')}
           </Button>
           <Button
             variant="solid"
@@ -233,24 +242,24 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
             onClick={() => {
               if (addToFavourite) {
                 if (!filterName.trim()) {
-                  toast.warning('请输入分组名称');
+                  toast.warning(t('components.layout.ugc.view.filter.button.toast.no-filter-group-name'));
                   return;
                 }
                 toast.promise(createAssetFilterRules(filterName, filter, assetType), {
-                  loading: '保存中...',
+                  loading: t('common.save.loading'),
                   success: () => {
                     setVisible(false);
                     void mutate(`/api/assets/filters?type=${assetType}`);
-                    return '保存成功';
+                    return t('common.save.success');
                   },
-                  error: '保存失败，请检查网络后重试',
+                  error: t('common.save.error'),
                 });
               } else {
                 setVisible(false);
               }
             }}
           >
-            保存
+            {t('common.utils.save')}
           </Button>
         </div>
       </PopoverContent>

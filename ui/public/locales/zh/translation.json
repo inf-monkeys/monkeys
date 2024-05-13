@@ -10,23 +10,32 @@
       "unknown-team": "未知团队",
       "user": "用户",
       "unknown-user": "未知用户",
+      "all": "全部",
+      "info": "信息",
       "confirm": "确定",
       "continue": "继续",
       "save": "保存",
       "update": "更新",
       "create": "创建",
+      "delete": "删除",
       "edit": "编辑",
+      "operate": "操作",
       "reset": "重置",
       "cancel": "取消",
       "search": "搜索",
       "switch": "切换",
       "copy": "复制",
+      "filter": "筛选",
       "enable": "启用",
       "disable": "禁用",
       "enabled": "已启用",
       "disabled": "已禁用",
       "updated-at": "更新于 {{time}}",
-      "created-at": "创建于 {{time}}"
+      "created-at": "创建于 {{time}}",
+      "updated-time": "更新时间",
+      "created-time": "创建时间",
+      "ascend": "升序",
+      "descend": "降序"
     },
     "toast": {
       "loading": "请等待数据加载完毕",
@@ -59,10 +68,20 @@
       "success": "操作成功！",
       "error": "操作失败！请稍候重试！"
     },
+    "create": {
+      "loading": "创建中...",
+      "success": "创建成功！",
+      "error": "创建失败！请稍候重试！"
+    },
+    "save": {
+      "loading": "保存中...",
+      "success": "保存成功！",
+      "error": "保存失败！请稍候重试！"
+    },
     "delete": {
       "confirm-content": "确认删除吗？该操作不可撤销",
       "success": "删除成功！",
-      "loading": "正在删除中...",
+      "loading": "删除中...",
       "error": "删除失败！请稍候重试！"
     },
     "sms-verify": {
@@ -196,6 +215,72 @@
               "not-found": "找不到团队",
               "avatar-fallback": "团队"
             }
+          }
+        }
+      },
+      "ugc": {
+        "utils": {
+          "no-description": "暂无描述"
+        },
+        "view": {
+          "filter": {
+            "button": {
+              "toast": {
+                "no-filter-group-name": "请输入分组名称"
+              },
+              "creator": {
+                "label": "创建者",
+                "placeholder": "请选择用户"
+              },
+              "tag": {
+                "label": "标签",
+                "placeholder": "请选择标签"
+              },
+              "created-time": {
+                "label": "创建时间",
+                "placeholder": "请选择创建时间"
+              },
+              "updated-time": {
+                "label": "更新时间",
+                "placeholder": "请选择更新时间"
+              },
+              "filter-group-name": {
+                "label": "分组名称",
+                "placeholder": "请输入分组名称"
+              },
+              "save-filter-group": {
+                "label": "将筛选条件保存为分组"
+              }
+            },
+            "list": {
+              "toast": {
+                "filter-group-not-found": "分组不存在！请刷新后重试！"
+              },
+              "placeholder": "输入分组名称",
+              "delete": {
+                "confirm-title": "分组删除确认",
+                "confirm-content": "确定要删除分组「{{name}}」？\n该操作不可撤销。"
+              }
+            }
+          },
+          "header": {
+            "display-mode": {
+              "button-tooltip": "展示方式",
+              "dropdown-label": "展示方式",
+              "options": {
+                "table": "表格视图",
+                "card": "卡片视图",
+                "gallery": "画廊视图"
+              }
+            },
+            "sort": {
+              "button-tooltip": "排序",
+              "dropdown-label": "排序设置"
+            }
+          },
+          "tag-selector": {
+            "create-button": "添加标签",
+            "placeholder": "请输入标签名称，按 Enter 新建"
           }
         }
       }

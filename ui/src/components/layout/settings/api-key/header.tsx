@@ -3,6 +3,7 @@ import React, { useMemo, useState } from 'react';
 import { KeyedMutator } from 'swr';
 
 import { Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { createApiKey } from '@/apis/api-keys/api-key.ts';
@@ -15,7 +16,6 @@ import { Card, CardContent } from '@/components/ui/card.tsx';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label.tsx';
-import { useTranslation } from 'react-i18next';
 
 interface IApiKeyHeaderProps extends React.ComponentPropsWithoutRef<'div'> {
   mutate: KeyedMutator<IApiKey[] | undefined>;

@@ -24,10 +24,13 @@ import {
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalStorage } from '@/utils';
+import { useTranslation } from 'react-i18next';
 
 interface IUgcHeaderSortButtonProps extends IUgcCustomProps {}
 
 export const UgcHeaderSortButton: React.FC<IUgcHeaderSortButtonProps> = ({ assetKey }) => {
+  const { t } = useTranslation();
+
   const team = useVinesTeam();
   const teamId = team.teamId;
 
@@ -59,7 +62,7 @@ export const UgcHeaderSortButton: React.FC<IUgcHeaderSortButtonProps> = ({ asset
 
   return (
     <DropdownMenu>
-      <Tooltip content="排序">
+      <Tooltip content={t('components.layout.ugc.view.header.sort.button-tooltip')}>
         <TooltipTrigger asChild>
           <DropdownMenuTrigger asChild>
             <Button icon={sortConditionIcon} variant="outline" size="small" />
@@ -67,7 +70,7 @@ export const UgcHeaderSortButton: React.FC<IUgcHeaderSortButtonProps> = ({ asset
         </TooltipTrigger>
       </Tooltip>
       <DropdownMenuContent>
-        <DropdownMenuLabel>排序设置</DropdownMenuLabel>
+        <DropdownMenuLabel>{t('components.layout.ugc.view.header.sort.dropdown-label')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuRadioGroup
           value={sortCondition.orderBy}
@@ -86,8 +89,8 @@ export const UgcHeaderSortButton: React.FC<IUgcHeaderSortButtonProps> = ({ asset
             });
           }}
         >
-          <DropdownMenuRadioItem value="ASC">升序</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="DESC">降序</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="ASC">{t('common.utils.ascend')}</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="DESC">{t('common.utils.descend')}</DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
         <DropdownMenuSeparator />
         <DropdownMenuRadioGroup
@@ -107,8 +110,8 @@ export const UgcHeaderSortButton: React.FC<IUgcHeaderSortButtonProps> = ({ asset
             });
           }}
         >
-          <DropdownMenuRadioItem value="createdTimestamp">创建时间</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="updatedTimestamp">更新时间</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="createdTimestamp">{t('common.utils.created-time')}</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="updatedTimestamp">{t('common.utils.updated-time')}</DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>

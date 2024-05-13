@@ -44,15 +44,15 @@ export const CreateTeam: React.FC<ICreateTeamProps> = () => {
         iconUrl,
       }),
       {
-        loading: t('common.operate.loading'),
+        loading: t('common.create.loading'),
         success: (data) => {
           void mutateTeams();
           setIsLoading(false);
           setVisible(false);
           form.reset();
-          return t('common.operate.success');
+          return t('common.create.success');
         },
-        error: t('common.operate.error'),
+        error: t('common.create.error'),
         finally: () => setIsLoading(false),
       },
     );

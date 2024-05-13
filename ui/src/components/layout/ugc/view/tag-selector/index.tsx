@@ -126,7 +126,7 @@ export const UgcTagSelector = ({ assetType, assetTags, assetId, mutate }: IUgcTa
           ) : (
             <span className="flex flex-nowrap items-center gap-1 opacity-75 transition-opacity hover:opacity-90">
               <Plus size={15} />
-              添加标签
+              {t('components.layout.ugc.view.tag-selector.create-button')}
             </span>
           )}
         </div>
@@ -139,7 +139,7 @@ export const UgcTagSelector = ({ assetType, assetTags, assetId, mutate }: IUgcTa
         align="start"
       >
         <Input
-          placeholder="请输入标签名称，按 Enter 新建"
+          placeholder={t('components.layout.ugc.view.tag-selector.placeholder')}
           value={searchValue}
           onChange={setSearchValue}
           onEnterPress={() => handleSearchEnterPress()}
@@ -166,16 +166,16 @@ export const UgcTagSelector = ({ assetType, assetTags, assetId, mutate }: IUgcTa
                 );
               })
             ) : (
-              <span className="flex h-16 items-center justify-center">暂无标签</span>
+              <span className="flex h-16 items-center justify-center">{t('common.load.empty')}</span>
             )}
           </div>
         </ScrollArea>
         <div className="flex items-center justify-end gap-2">
           <Button theme="tertiary" onClick={() => setVisible(false)}>
-            取消
+            {t('common.utils.cancel')}
           </Button>
           <Button variant="solid" theme="primary" onClick={() => handleConfirmClick()}>
-            确认
+            {t('common.utils.confirm')}
           </Button>
         </div>
       </PopoverContent>
