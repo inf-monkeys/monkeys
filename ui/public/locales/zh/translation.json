@@ -5,6 +5,7 @@
   },
   "common": {
     "utils": {
+      "unknown": "未知",
       "team": "团队",
       "unknown-team": "未知团队",
       "user": "用户",
@@ -20,6 +21,10 @@
       "search": "搜索",
       "switch": "切换",
       "copy": "复制",
+      "enable": "启用",
+      "disable": "禁用",
+      "enabled": "已启用",
+      "disabled": "已禁用",
       "updated-at": "更新于 {{time}}",
       "created-at": "创建于 {{time}}"
     },
@@ -324,11 +329,56 @@
         "invite": {
           "button-tooltip": "邀请用户",
           "dropdown-label": "邀请用户",
+          "outdated-options": {
+            "7-day": "7 天有效",
+            "never": "永久有效"
+          },
           "invite-manage": {
-            "index": "管理邀请链接"
+            "button": "管理邀请链接",
+            "title": "邀请链接管理",
+            "column": {
+              "status": {
+                "label": "状态"
+              },
+              "remark": {
+                "label": "备注",
+                "info-editor": {
+                  "title": "编辑备注",
+                  "placeholder": "请输入备注"
+                }
+              },
+              "outdateTimestamp": {
+                "label": "失效时间"
+              },
+              "inviterUser": {
+                "label": "创建者"
+              },
+              "targetUser": {
+                "label": "邀请用户"
+              },
+              "acceptedUsers": {
+                "label": "接受邀请用户"
+              },
+              "operate": {
+                "label": "操作",
+                "dropdown-label": "邀请链接操作"
+              }
+            }
           },
           "invite-user": {
-            "index": "生成邀请链接"
+            "button": "生成邀请链接",
+            "title": "邀请用户",
+            "search": {
+              "placeholder": "请输入用户名或手机号"
+            },
+            "outdated": {
+              "content": "使用链接邀请",
+              "tip": "可以通过邀请链接成为团队成员"
+            },
+            "toast": {
+              "keywords-empty": "请输入用户名或手机号",
+              "keywords-less-than-4": "请至少输入 4 位"
+            }
           }
         }
       }

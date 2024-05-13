@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import { useClipboard } from '@mantine/hooks';
 import { ChevronDown, Inbox } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { createTeamInviteLink, useTeamInvites } from '@/apis/authz/team';
@@ -29,6 +30,8 @@ interface IInviteUserProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const InviteUser: React.FC<IInviteUserProps> = ({ visible, setVisible }) => {
+  const { t } = useTranslation();
+
   const [outdateType, setOutdateType] = useState<ITeamInviteLinkOutdateType>(ITeamInviteLinkOutdateType.SEVEN_DAYS);
   const [keywords, setKeywords] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -41,11 +44,11 @@ export const InviteUser: React.FC<IInviteUserProps> = ({ visible, setVisible }) 
 
   const handleSearchUsers = async () => {
     if (!keywords) {
-      toast.warning('请输入用户名或手机号');
+      toast.warning(t('settings.account.team-member.invite.invite-user.keywords-empty'));
       return;
     }
     if (keywords.length < 4) {
-      toast.warning('请至少输入 4 位');
+      toast.warning(t('settings.account.team-member.invite.invite-user.keywords-less-than-4'));
       return;
     }
     setSearchResult([]);
@@ -73,17 +76,17 @@ export const InviteUser: React.FC<IInviteUserProps> = ({ visible, setVisible }) 
           success: (link) => {
             void mutateInviteLinkList();
             clipboard.copy(link);
-            return '链接复制成功';
+            return t('common.toast.copy-success');
           },
-          error: '创建连接失败，请检查网络后重试',
-          loading: '请求中......',
+          error: t('common.operate.error'),
+          loading: t('common.operate.loading'),
           finally: () => {
             setIsHandleCreateInviteLink(false);
           },
         },
       );
     } else {
-      toast.warning('请等待加载完成后操作');
+      toast.warning(t('common.toast.loading'));
     }
   };
 
@@ -101,11 +104,11 @@ export const InviteUser: React.FC<IInviteUserProps> = ({ visible, setVisible }) 
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>邀请用户</DialogTitle>
+          <DialogTitle>{t('settings.account.team-member.invite.invite-user.title')}</DialogTitle>
         </DialogHeader>
         <div className="flex items-center gap-2">
           <Input
-            placeholder="请输入用户名或手机号"
+            placeholder={t('settings.account.team-member.invite.invite-user.search.placeholder')}
             value={keywords}
             onChange={setKeywords}
             onEnterPress={() => {
@@ -113,7 +116,7 @@ export const InviteUser: React.FC<IInviteUserProps> = ({ visible, setVisible }) 
             }}
           />
           <Button loading={isLoading} onClick={() => handleSearchUsers()}>
-            搜索
+            {t('common.utils.search')}
           </Button>
         </div>
         <ScrollArea className="h-72">
@@ -124,7 +127,7 @@ export const InviteUser: React.FC<IInviteUserProps> = ({ visible, setVisible }) 
               ) : (
                 <div className="flex flex-col items-center gap-2">
                   <Inbox size={24} />
-                  <p>暂无搜索结果</p>
+                  <p>{t('common.load.empty')}</p>
                 </div>
               )}
             </div>
@@ -138,13 +141,15 @@ export const InviteUser: React.FC<IInviteUserProps> = ({ visible, setVisible }) 
         <div className="flex items-center justify-between">
           <div className="mb-2">
             <h4 className="mb-2 flex items-center gap-2">
-              <span>使用链接邀请</span>
+              <span>{t('settings.account.team-member.invite.invite-user.outdated.content')}</span>
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   <div className="cursor-pointer border-b border-solid border-[var(--semi-color-border)]">
                     <span className="flex items-center gap-1">
-                      <span className="w-16">
-                        {outdateType === ITeamInviteLinkOutdateType.SEVEN_DAYS ? '7 天有效' : '永久有效'}
+                      <span className="min-w-16 max-w-32">
+                        {outdateType === ITeamInviteLinkOutdateType.SEVEN_DAYS
+                          ? t('settings.account.team-member.invite.outdated-options.7-day')
+                          : t('settings.account.team-member.invite.outdated-options.never')}
                       </span>
                       <ChevronDown size={15} />
                     </span>
@@ -152,8 +157,14 @@ export const InviteUser: React.FC<IInviteUserProps> = ({ visible, setVisible }) 
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   {[
-                    { label: '7 天有效', onSelect: () => setOutdateType(ITeamInviteLinkOutdateType.SEVEN_DAYS) },
-                    { label: '永久有效', onSelect: () => setOutdateType(ITeamInviteLinkOutdateType.NEVER) },
+                    {
+                      label: t('settings.account.team-member.invite.outdated-options.7-day'),
+                      onSelect: () => setOutdateType(ITeamInviteLinkOutdateType.SEVEN_DAYS),
+                    },
+                    {
+                      label: t('settings.account.team-member.invite.outdated-options.never'),
+                      onSelect: () => setOutdateType(ITeamInviteLinkOutdateType.NEVER),
+                    },
                   ].map((item, index) => (
                     <DropdownMenuItem key={index} onSelect={item.onSelect}>
                       {item.label}
@@ -162,11 +173,13 @@ export const InviteUser: React.FC<IInviteUserProps> = ({ visible, setVisible }) 
                 </DropdownMenuContent>
               </DropdownMenu>
             </h4>
-            <div className="text-xs opacity-70">可以通过邀请链接成为团队成员</div>
+            <div className="text-xs opacity-70">
+              {t('settings.account.team-member.invite.invite-user.outdated.tip')}
+            </div>
           </div>
 
           <Button size="large" variant="solid" loading={isHandleCreateInviteLink} onClick={handleCopyInviteLink}>
-            复制链接
+            {t('common.utils.copy')}
           </Button>
         </div>
       </DialogContent>

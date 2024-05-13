@@ -5,6 +5,7 @@
   },
   "common": {
     "utils": {
+      "unknown": "Unknown",
       "team": "Team",
       "unknown-team": "Unknown Team",
       "user": "User",
@@ -20,6 +21,10 @@
       "search": "Search",
       "switch": "Switch",
       "copy": "Copy",
+      "enable": "Enable",
+      "disable": "Disable",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
       "updated-at": "Updated at {{time}}",
       "created-at": "Created at {{time}}"
     },
@@ -331,11 +336,56 @@
         "invite": {
           "button-tooltip": "Invite user",
           "dropdown-label": "Invite User",
+          "outdated-options": {
+            "7-day": "valid for 7 days",
+            "never": "permanent"
+          },
           "invite-manage": {
-            "index": "Manage Invitation Links"
+            "button": "Manage Invitation Links",
+            "title": "Invitation Link Management",
+            "column": {
+              "status": {
+                "label": "Status"
+              },
+              "remark": {
+                "label": "Remarks",
+                "info-editor": {
+                  "title": "Edit remarks",
+                  "placeholder": "Enter remarks"
+                }
+              },
+              "outdateTimestamp": {
+                "label": "Outdated at"
+              },
+              "inviterUser": {
+                "label": "Inviter"
+              },
+              "targetUser": {
+                "label": "Invitees"
+              },
+              "acceptedUsers": {
+                "label": "Accepted Invitees"
+              },
+              "operate": {
+                "label": "Operate",
+                "dropdown-label": "Invitation Link Operation"
+              }
+            }
           },
           "invite-user": {
-            "index": "Generate Invitation Links"
+            "button": "Generate Invitation Links",
+            "title": "Invite users",
+            "search": {
+              "placeholder": "Enter username or phone"
+            },
+            "outdated": {
+              "content": "Invitation via link is",
+              "tip": "Become a team member via the invitation link"
+            },
+            "toast": {
+              "keywords-empty": "Please enter username or phone.",
+              "keywords-less-than-4": "Please enter more than 4 characters."
+            }
           }
         }
       }
