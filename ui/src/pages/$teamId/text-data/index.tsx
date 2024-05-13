@@ -3,11 +3,11 @@ import React from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { preloadKnowledgeBases, useUgcKnowledgeBases } from '@/apis/ugc';
+import { UgcView } from '@/components/layout/ugc/view';
+import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createTextDataColumns } from '@/components/layout/ugc-pages/text-data/consts.tsx';
 import { CreateDataset } from '@/components/layout/ugc-pages/text-data/create-dataset';
 import { OperateArea } from '@/components/layout/ugc-pages/text-data/operate-area';
-import { UgcView } from '@/components/layout/ugc/view';
-import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 

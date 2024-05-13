@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import { useClipboard } from '@mantine/hooks';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { createTeamInviteLink, useTeamInvites } from '@/apis/authz/team';
@@ -19,6 +20,8 @@ interface IUserItemProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const UserItem: React.FC<IUserItemProps> = ({ user, teamId, outdateType }) => {
+  const { t } = useTranslation();
+
   const { mutate: mutateInviteLinkList } = useTeamInvites(teamId);
   const [currentUser] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
   const [isHandleCopyLink, setIsHandleCopyLink] = useState(false);
@@ -37,17 +40,17 @@ export const UserItem: React.FC<IUserItemProps> = ({ user, teamId, outdateType }
           success: (link) => {
             void mutateInviteLinkList();
             clipboard.copy(link);
-            return '链接复制成功';
+            return t('common.toast.copy-success');
           },
-          loading: '生成链接中......',
-          error: '操作出现错误，请检查网络稍后再试',
+          loading: t('common.operate.loading'),
+          error: t('common.operate.error'),
           finally: () => {
             setIsHandleCopyLink(false);
           },
         },
       );
     } else {
-      toast.warning('请等待加载完毕后再试');
+      toast.warning(t('common.toast.loading'));
     }
   };
 
@@ -66,7 +69,7 @@ export const UserItem: React.FC<IUserItemProps> = ({ user, teamId, outdateType }
         </div>
         <div className="flex gap-2">
           <Button disabled={isHandleCopyLink} onClick={() => handleCopyLink()}>
-            复制链接
+            {t('common.utils.copy')}
           </Button>
         </div>
       </CardContent>

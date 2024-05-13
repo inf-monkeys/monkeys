@@ -40,13 +40,13 @@ export const Invite: React.FC = () => {
               <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                 <Link size={15} />
               </DropdownMenuShortcut>
-              {t('settings.account.team-member.invite.invite-user.index')}
+              {t('settings.account.team-member.invite.invite-user.button')}
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => setInviteManageDialogVisible(true)}>
               <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                 <Settings size={15} />
               </DropdownMenuShortcut>
-              {t('settings.account.team-member.invite.invite-manage.index')}
+              {t('settings.account.team-member.invite.invite-manage.button')}
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
