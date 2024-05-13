@@ -304,12 +304,15 @@ const validateConfig = () => {
       throw new Error('Redis sentinel mode requires a sentinel name');
     }
   }
-  if (!config.proxy.url) {
-    throw new Error('Proxy enabled but no url provided');
+  if (config.proxy.enabled) {
+    if (!config.proxy.url) {
+      throw new Error('Proxy enabled but no url provided');
+    }
+    if (config.proxy.exclude && !Array.isArray(config.proxy.exclude)) {
+      throw new Error('Proxy exclude must be an array');
+    }
   }
-  if (config.proxy.exclude && !Array.isArray(config.proxy.exclude)) {
-    throw new Error('Proxy exclude must be an array');
-  }
+
   if (config.conductor.baseUrl) {
     if (!isValidUrl(config.conductor.baseUrl)) {
       throw new Error('Invalid conductor baseUrl: ' + config.conductor.baseUrl);
