@@ -132,7 +132,7 @@ export const OpenAIChat: React.FC<IOpenAIChatProps> = ({ multipleChat }) => {
           ) : (
             <motion.div
               key="vines-chat-context"
-              className="relative size-full"
+              className="relative z-0 size-full"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -162,7 +162,7 @@ export const OpenAIChat: React.FC<IOpenAIChatProps> = ({ multipleChat }) => {
           )}
         </AnimatePresence>
       </div>
-      <div className="flex justify-between gap-2 py-2">
+      <div className="z-20 flex justify-between gap-2 py-2">
         <Tooltip>
           <AlertDialog>
             {messages?.length > 0 && multipleChat && (
