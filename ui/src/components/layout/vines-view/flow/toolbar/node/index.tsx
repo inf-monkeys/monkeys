@@ -61,7 +61,7 @@ export const NodeToolbar: React.FC<INodeToolbarProps> = ({ node }) => {
     <motion.div
       className={cn(
         'absolute z-20 flex w-16 flex-col items-start gap-2 rounded-md bg-card p-2 shadow-md transition-all',
-        !visible && '!opacity-0',
+        !visible && 'pointer-events-none !opacity-0',
       )}
       variants={{
         hide: {
