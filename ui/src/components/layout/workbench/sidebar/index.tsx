@@ -87,7 +87,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
               <ChevronRight className={cn(visible && 'scale-x-[-1]')} />
             </div>
           </TooltipTrigger>
-          <TooltipContent>{visible ? t('common.side-bar.hide') : t('common.side-bar.show')}</TooltipContent>
+          <TooltipContent>{visible ? t('common.sidebar.hide') : t('common.sidebar.show')}</TooltipContent>
         </Tooltip>
       </Separator>
     </div>
