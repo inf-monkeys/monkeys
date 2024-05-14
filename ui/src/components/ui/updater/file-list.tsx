@@ -229,12 +229,14 @@ export const FileList: React.FC<IFilesProps> = ({
             <TableHeader>
               <TableRow className="[&_th]:text-center">
                 <TableHead className="w-32 !text-left">
-                  {t('components.ui.updater.file-list.info-table.column.name')}
+                  {t('components.ui.updater.file-list.info-table.columns.name')}
                 </TableHead>
-                <TableHead className="w-11">{t('components.ui.updater.file-list.info-table.column.type')}</TableHead>
-                <TableHead className="w-11">{t('components.ui.updater.file-list.info-table.column.size')}</TableHead>
-                <TableHead className="w-11">{t('components.ui.updater.file-list.info-table.column.status')}</TableHead>
-                <TableHead className="w-11">{t('components.ui.updater.file-list.info-table.column.operate')}</TableHead>
+                <TableHead className="w-11">{t('components.ui.updater.file-list.info-table.columns.type')}</TableHead>
+                <TableHead className="w-11">{t('components.ui.updater.file-list.info-table.columns.size')}</TableHead>
+                <TableHead className="w-11">{t('components.ui.updater.file-list.info-table.columns.status')}</TableHead>
+                <TableHead className="w-11">
+                  {t('components.ui.updater.file-list.info-table.columns.operate')}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

@@ -92,19 +92,19 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
   const column: ColumnDef<ITeamInviteWithUserProfile>[] = [
     {
       accessorKey: 'status',
-      header: t('settings.account.team-member.invite.invite-manage.column.status.label'),
+      header: t('settings.account.team-member.invite.invite-manage.columns.status.label'),
       size: 60,
       cell: ({ cell }) => (cell.getValue() === ITeamInviteStatus.DISABLED ? <Pause size={15} /> : <Play size={15} />),
     },
     {
       accessorKey: 'remark',
-      header: t('settings.account.team-member.invite.invite-manage.column.remark.label'),
+      header: t('settings.account.team-member.invite.invite-manage.columns.remark.label'),
       minSize: 60,
       maxSize: 200,
       cell: ({ cell, row }) => (
         <InfoEditor
-          title={t('settings.account.team-member.invite.invite-manage.column.remark.info-editor.title')}
-          placeholder={t('settings.account.team-member.invite.invite-manage.column.remark.info-editor.placeholder')}
+          title={t('settings.account.team-member.invite.invite-manage.columns.remark.info-editor.title')}
+          placeholder={t('settings.account.team-member.invite.invite-manage.columns.remark.info-editor.placeholder')}
           initialValue={cell.getValue() as string}
           onFinished={(val) => handleEditRemark(row.original.id, val)}
         >
@@ -117,7 +117,7 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
     },
     {
       accessorKey: 'outdateTimestamp',
-      header: t('settings.account.team-member.invite.invite-manage.column.outdateTimestamp.label'),
+      header: t('settings.account.team-member.invite.invite-manage.columns.outdateTimestamp.label'),
       size: 200,
       cell: ({ cell }) =>
         cell.getValue()
@@ -126,7 +126,7 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
     },
     {
       accessorKey: 'inviterUser',
-      header: t('settings.account.team-member.invite.invite-manage.column.inviterUser.label'),
+      header: t('settings.account.team-member.invite.invite-manage.columns.inviterUser.label'),
       cell: ({ cell }) => {
         const user = cell.getValue() as IVinesUser | undefined;
         return user ? (
@@ -149,7 +149,7 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
     },
     {
       accessorKey: 'targetUser',
-      header: t('settings.account.team-member.invite.invite-manage.column.targetUser.label'),
+      header: t('settings.account.team-member.invite.invite-manage.columns.targetUser.label'),
       cell: ({ cell }) => {
         const user = cell.getValue() as IVinesUser | undefined;
         return user ? (
@@ -172,7 +172,7 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
     },
     {
       accessorKey: 'acceptedUsers',
-      header: t('settings.account.team-member.invite.invite-manage.column.acceptedUsers.label'),
+      header: t('settings.account.team-member.invite.invite-manage.columns.acceptedUsers.label'),
       cell: ({ cell }) => {
         const userList = (cell.getValue() ?? []) as IVinesUser[];
         return userList.length != 0 ? (
@@ -199,7 +199,7 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
     },
     {
       id: 'operate',
-      header: t('settings.account.team-member.invite.invite-manage.column.operate.label'),
+      header: t('settings.account.team-member.invite.invite-manage.columns.operate.label'),
       size: 60,
       cell: ({ row }) => {
         return (
@@ -209,7 +209,7 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>
-                {t('settings.account.team-member.invite.invite-manage.column.operate.dropdown-label')}
+                {t('settings.account.team-member.invite.invite-manage.columns.operate.dropdown-label')}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>

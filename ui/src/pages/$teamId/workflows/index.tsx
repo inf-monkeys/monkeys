@@ -148,7 +148,7 @@ export const Workflows: React.FC = () => {
                 e.preventDefault();
               }}
             >
-              <DropdownMenuLabel>{t('ugc-page.workflows.ugc-view.operate-area.dropdown-label')}</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('ugc-page.workflow.ugc-view.operate-area.dropdown-label')}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem
@@ -160,7 +160,7 @@ export const Workflows: React.FC = () => {
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <Link size={15} />
                   </DropdownMenuShortcut>
-                  {t('ugc-page.workflows.ugc-view.operate-area.options.copy-link')}
+                  {t('ugc-page.workflow.ugc-view.operate-area.options.copy-link')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -171,7 +171,7 @@ export const Workflows: React.FC = () => {
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <Copy size={15} />
                   </DropdownMenuShortcut>
-                  {t('ugc-page.workflows.ugc-view.operate-area.options.create-a-copy')}
+                  {t('ugc-page.workflow.ugc-view.operate-area.options.create-a-copy')}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onSelect={() => {
@@ -182,7 +182,7 @@ export const Workflows: React.FC = () => {
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <Pencil size={15} />
                   </DropdownMenuShortcut>
-                  {t('ugc-page.workflows.ugc-view.operate-area.options.edit-info')}
+                  {t('ugc-page.workflow.ugc-view.operate-area.options.edit-info')}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onSelect={() => {
@@ -197,7 +197,7 @@ export const Workflows: React.FC = () => {
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <FileUp size={15} />
                   </DropdownMenuShortcut>
-                  {t('ugc-page.workflows.ugc-view.operate-area.options.export-current-version')}
+                  {t('ugc-page.workflow.ugc-view.operate-area.options.export-current-version')}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onSelect={() => {
@@ -208,7 +208,7 @@ export const Workflows: React.FC = () => {
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <FolderUp size={15} />
                   </DropdownMenuShortcut>
-                  {t('ugc-page.workflows.ugc-view.operate-area.options.export-all-versions')}
+                  {t('ugc-page.workflow.ugc-view.operate-area.options.export-all-versions')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -244,7 +244,7 @@ export const Workflows: React.FC = () => {
               >
                 <DropdownMenuGroup>
                   <DropdownMenuItem onSelect={() => {}}>
-                    {t('ugc-page.workflows.ugc-view.subtitle.import.options.local-import')}
+                    {t('ugc-page.workflow.ugc-view.subtitle.import.options.local-import')}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onSelect={() => {
@@ -253,7 +253,7 @@ export const Workflows: React.FC = () => {
                       });
                     }}
                   >
-                    {t('ugc-page.workflows.ugc-view.subtitle.import.options.market-import')}
+                    {t('ugc-page.workflow.ugc-view.subtitle.import.options.market-import')}
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
@@ -280,7 +280,7 @@ export const Workflows: React.FC = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>
               {t('common.dialog.delete-confirm.title', {
-                type: t('ugc-page.workflows.type'),
+                type: t('ugc-page.workflow.type'),
               })}
             </AlertDialogTitle>
             <AlertDialogDescription>
