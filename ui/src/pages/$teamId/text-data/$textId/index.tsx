@@ -5,6 +5,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronRight, Undo2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useKnowledgeBase } from '@/apis/vector';
 import { BasicInfo } from '@/components/layout/ugc-pages/text-data/text-detail/basic-data';
@@ -20,6 +21,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { cn } from '@/utils';
 
 const TextDataDetail: React.FC = () => {
+  const { t } = useTranslation();
+
   const { textId } = Route.useParams();
   const { data: detail, isLoading } = useKnowledgeBase(textId);
 
@@ -94,7 +97,7 @@ const TextDataDetail: React.FC = () => {
                 <ChevronRight className={cn(visible && 'scale-x-[-1]')} />
               </div>
             </TooltipTrigger>
-            <TooltipContent>{visible ? '收起' : '展开'}</TooltipContent>
+            <TooltipContent>{visible ? t('common.side-bar.hide') : t('common.side-bar.show')}</TooltipContent>
           </Tooltip>
         </Separator>
         <div className="relative size-full flex-1">

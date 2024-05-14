@@ -4,6 +4,7 @@ import { Link } from '@tanstack/react-router';
 
 import { motion } from 'framer-motion';
 import { ChevronRight, Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
@@ -17,6 +18,8 @@ import { useRetimer } from '@/utils/use-retimer.ts';
 interface IWorkbenchSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
+  const { t } = useTranslation();
+
   const reTimer = useRetimer();
   const { data } = useWorkspacePages();
   const [visible, setVisible] = useState(true);
@@ -84,7 +87,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
               <ChevronRight className={cn(visible && 'scale-x-[-1]')} />
             </div>
           </TooltipTrigger>
-          <TooltipContent>{visible ? '收起' : '展开'}</TooltipContent>
+          <TooltipContent>{visible ? t('common.side-bar.hide') : t('common.side-bar.show')}</TooltipContent>
         </Tooltip>
       </Separator>
     </div>

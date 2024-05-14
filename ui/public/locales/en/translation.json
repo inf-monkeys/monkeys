@@ -26,6 +26,7 @@
       "switch": "Switch",
       "copy": "Copy",
       "filter": "Filter",
+      "back": "Back",
       "enable": "Enable",
       "disable": "Disable",
       "enabled": "Enabled",
@@ -42,6 +43,10 @@
       "team-not-found": "The team doesn't exist.",
       "user-not-found": "The user doesn't exist.",
       "copy-success": "Copy success."
+    },
+    "side-bar": {
+      "hide": "Hide",
+      "show": "Show"
     },
     "language-selector": {
       "tooltip": "Switch language",

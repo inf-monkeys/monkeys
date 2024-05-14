@@ -26,6 +26,7 @@
       "switch": "切换",
       "copy": "复制",
       "filter": "筛选",
+      "back": "返回",
       "enable": "启用",
       "disable": "禁用",
       "enabled": "已启用",
@@ -42,6 +43,10 @@
       "team-not-found": "团队不存在",
       "user-not-found": "用户不存在",
       "copy-success": "复制成功"
+    },
+    "side-bar": {
+      "hide": "收起",
+      "show": "展开"
     },
     "language-selector": {
       "tooltip": "切换语言",
