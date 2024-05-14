@@ -12,14 +12,14 @@ import useExternal from '@/utils/useExternal.ts';
 
 interface IVinesAbstractPDBProps {
   children: JSONValue;
+  height?: number;
 }
 
-export const VinesAbstractPDB: React.FC<IVinesAbstractPDBProps> = ({ children }) => {
+export const VinesAbstractPDB: React.FC<IVinesAbstractPDBProps> = ({ children, height }) => {
   const { darkMode } = useAppStore();
 
   const node = useRef<HTMLDivElement>(null);
 
-  // const molstarCss = useExternal('/pdbe/molstar.css');
   const molstarPlugin = useExternal('/pdbe/molstar-plugin.js');
 
   const [molstarInstance, setMolstarInstance] = useState<any>(null);
@@ -67,7 +67,10 @@ export const VinesAbstractPDB: React.FC<IVinesAbstractPDBProps> = ({ children })
   }, [molstarInstance, darkMode]);
 
   return (
-    <div className="relative m-2 max-h-full min-h-96 w-[calc(100%-1rem)] overflow-hidden rounded-md border border-input shadow">
+    <div
+      className="relative m-2 max-h-full min-h-96 w-[calc(100%-1rem)] overflow-hidden rounded-md border border-input shadow"
+      style={height ? { height: height - 60 } : {}}
+    >
       <AnimatePresence>
         {isLoading && !molstarInstance && (
           <motion.div
