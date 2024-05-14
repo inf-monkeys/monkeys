@@ -179,7 +179,7 @@
       "main": {
         "sidebar": {
           "list": {
-            "workspace": {
+            "workbench": {
               "index": "工作台"
             },
             "app": {
@@ -555,5 +555,8 @@
         "title": "团队主题列表"
       }
     }
+  },
+  "workbench": {
+
   }
 }

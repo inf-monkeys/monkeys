@@ -186,8 +186,8 @@
       "main": {
         "sidebar": {
           "list": {
-            "workspace": {
-              "index": "Workspace"
+            "workbench": {
+              "index": "Workbench"
             },
             "app": {
               "index": "App",
