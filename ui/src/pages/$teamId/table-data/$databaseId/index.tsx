@@ -5,6 +5,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronRight, Undo2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Virtuoso } from 'react-virtuoso';
 
 import { useDatabase, useDatabaseTables } from '@/apis/table-data';
@@ -17,6 +18,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { cn } from '@/utils';
 
 const TableDataDetail: React.FC = () => {
+  const { t } = useTranslation();
+
   const { databaseId } = Route.useParams();
 
   const { data: tableDetail } = useDatabase(databaseId);
@@ -69,14 +72,14 @@ const TableDataDetail: React.FC = () => {
                   }}
                 />
               </TooltipTrigger>
-              <TooltipContent>返回</TooltipContent>
+              <TooltipContent>{t('common.utils.back')}</TooltipContent>
             </Tooltip>
             <h1 className="line-clamp-1 text-2xl font-bold">{displayName ? displayName : '表格数据'}</h1>
           </header>
           <TabsList className="!h-auto bg-transparent">
             {isEmpty ? (
               <div className="vines-center size-full" style={{ height }}>
-                <p className="text-gray-500">暂无数据</p>
+                <p className="text-gray-500">{t('common.load.empty')}</p>
               </div>
             ) : height ? (
               <Virtuoso
@@ -105,7 +108,7 @@ const TableDataDetail: React.FC = () => {
                 <ChevronRight className={cn(visible && 'scale-x-[-1]')} />
               </div>
             </TooltipTrigger>
-            <TooltipContent>{visible ? '收起' : '展开'}</TooltipContent>
+            <TooltipContent>{visible ? t('common.side-bar.hide') : t('common.side-bar.show')}</TooltipContent>
           </Tooltip>
         </Separator>
         <div className="relative size-full flex-1">

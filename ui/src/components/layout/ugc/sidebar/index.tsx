@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import { motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { IUgcCustomProps } from '@/components/layout/ugc/typings.ts';
 import { IUgcViewFilterListProps, UgcViewFilterList } from '@/components/layout/ugc/view/filter/list';
@@ -15,6 +16,8 @@ interface IUgcSidebarProps extends IUgcCustomProps {
 }
 
 export const UgcSidebar: React.FC<IUgcSidebarProps> = ({ assetType, assetKey, isMarket, title, filterListProps }) => {
+  const { t } = useTranslation();
+
   const [visible, setVisible] = useState(true);
 
   return (
@@ -41,7 +44,7 @@ export const UgcSidebar: React.FC<IUgcSidebarProps> = ({ assetType, assetKey, is
               <ChevronRight className={cn(visible && 'scale-x-[-1]')} />
             </div>
           </TooltipTrigger>
-          <TooltipContent>{visible ? '收起' : '展开'}</TooltipContent>
+          <TooltipContent>{visible ? t('common.side-bar.hide') : t('common.side-bar.show')}</TooltipContent>
         </Tooltip>
       </Separator>
     </div>
