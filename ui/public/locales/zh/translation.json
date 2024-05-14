@@ -152,7 +152,7 @@
               "remaining": "可继续上传 {{remaining}} 份文件",
               "none": "到底了～"
             },
-            "column": {
+            "columns": {
               "name": "文件名",
               "type": "类型",
               "size": "大小",
@@ -459,7 +459,7 @@
           "invite-manage": {
             "button": "管理邀请链接",
             "title": "邀请链接管理",
-            "column": {
+            "columnss": {
               "status": {
                 "label": "状态"
               },
@@ -598,8 +598,17 @@
     }
   },
   "ugc-page": {
-    "workflows": {
+    "workflow": {
       "ugc-view": {
+        "columns": {
+          "logo": "图标",
+          "title": "名称",
+          "description": "描述",
+          "user": "用户",
+          "assetTags": "标签",
+          "createdTimestamp": "创建时间",
+          "updatedTimestamp": "更新时间"
+        },
         "operate-area": {
           "dropdown-label": "工作流操作",
           "options": {

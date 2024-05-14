@@ -185,6 +185,13 @@ export const UgcView = <E extends object>({
   const columnHelper = createColumnHelper<IAssetItem<E>>();
   const columns = createColumns();
 
+  // 添加 header
+  columns.forEach((col, index) => {
+    if (!col.header) {
+      columns[index].header = t(`ugc-page.${assetKey}.ugc-view.columns.${col.id}`);
+    }
+  });
+
   // 修改 tag 列
   const tagColumn = columns.find((c) => c.id === 'assetTags');
   if (tagColumn) {

@@ -157,7 +157,7 @@
               "remaining_other": "Can upload {{remaining}} files",
               "none": "-"
             },
-            "column": {
+            "columns": {
               "name": "Name",
               "type": "Type",
               "size": "Size",
@@ -466,7 +466,7 @@
           "invite-manage": {
             "button": "Manage Invitation Links",
             "title": "Invitation Link Management",
-            "column": {
+            "columns": {
               "status": {
                 "label": "Status"
               },
@@ -602,8 +602,17 @@
     }
   },
   "ugc-page": {
-    "workflows": {
+    "workflow": {
       "ugc-view": {
+        "columns": {
+          "logo": "Icon",
+          "title": "Name",
+          "description": "Description",
+          "user": "Creator",
+          "assetTags": "Tags",
+          "createdTimestamp": "Created Time",
+          "updatedTimestamp": "Updated Time"
+        },
         "operate-area": {
           "dropdown-label": "Workflow Operate",
           "options": {
