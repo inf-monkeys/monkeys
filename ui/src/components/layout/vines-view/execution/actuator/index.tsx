@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { BugPlay, RotateCcw, StopCircle } from 'lucide-react';
+import { BugPlay, Fullscreen, Minimize, RotateCcw, StopCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { VinesActuatorDetail } from '@/components/layout/vines-view/execution/actuator/detail';
@@ -11,6 +11,7 @@ import { VinesWorkflowInput } from '@/components/layout/vines-view/execution/wor
 import { ExecutionTimer } from '@/components/layout/vines-view/flow/toolbar/expand/execution/execution-timer.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
+import { Toggle } from '@/components/ui/toggle.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
@@ -25,7 +26,7 @@ interface IVinesActuatorProps {
 
 export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
   const { setCanvasMode } = useCanvasStore();
-  const { visible } = useViewStore();
+  const { visible, fullscreen, setFullscreen } = useViewStore();
 
   const { vines } = useVinesFlow();
 
@@ -61,6 +62,14 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
         >
           <ActuatorHeader workflowStatus={workflowStatus} instanceId={vines.executionInstanceId}>
             <div className="flex gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Toggle className="p-2" variant="outline" pressed={fullscreen} onPressedChange={setFullscreen}>
+                    {fullscreen ? <Minimize size={16} /> : <Fullscreen size={16} />}
+                  </Toggle>
+                </TooltipTrigger>
+                <TooltipContent>{fullscreen ? '还原视图' : '视图内全屏'}</TooltipContent>
+              </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
