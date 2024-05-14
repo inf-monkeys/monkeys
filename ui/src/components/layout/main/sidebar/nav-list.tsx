@@ -41,20 +41,20 @@ export const NavList: React.FC<INavListProps> = () => {
                       </div>
                     }
                   >
-                    {t(`components.layout.main.sidebar.list.${name}.index`)}
+                    {t(`components.layout.main.sidebar.list.${name}.label`)}
                   </NavButton>
                 </AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-1 first:mt-1">
                   {items.map(({ name: subName, path: subPath }, index) => (
                     <NavButton key={index} to={subPath}>
-                      {t(`components.layout.main.sidebar.list.${name}.${subName}`)}
+                      {t(`components.layout.main.sidebar.list.${name}.${subName}.label`)}
                     </NavButton>
                   ))}
                 </AccordionContent>
               </>
             ) : (
               <NavButton key={i} icon={icon} to={path}>
-                {t(`components.layout.main.sidebar.list.${name}.index`)}
+                {t(`components.layout.main.sidebar.list.${name}.label`)}
               </NavButton>
             )}
           </AccordionItem>

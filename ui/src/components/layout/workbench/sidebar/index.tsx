@@ -49,7 +49,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
           transition: { duration: 0.2 },
         }}
       >
-        <h1 className="text-2xl font-bold">工作台</h1>
+        <h1 className="text-2xl font-bold">{t('components.layout.main.sidebar.list.workbench.label')}</h1>
         <div className="grid gap-2">
           {data?.map((page) => (
             <div
@@ -63,7 +63,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
               <VinesIcon size="sm">{page.workflow?.iconUrl}</VinesIcon>
               <div className="flex flex-col gap-0.5">
                 <h1 className="font-bold leading-tight">{page.displayName}</h1>
-                <span className="text-xxs">{page.workflow?.displayName ?? '未命名应用'}</span>
+                <span className="text-xxs">{page.workflow?.displayName ?? t('common.utils.untitled')}</span>
               </div>
             </div>
           ))}
@@ -73,7 +73,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
                 <Button icon={<Plus />} className="w-full" variant="outline" />
               </Link>
             </TooltipTrigger>
-            <TooltipContent>标星视图</TooltipContent>
+            <TooltipContent>{t('workbench.sidebar.add')}</TooltipContent>
           </Tooltip>
         </div>
       </motion.div>
