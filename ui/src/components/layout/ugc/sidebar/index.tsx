@@ -44,7 +44,7 @@ export const UgcSidebar: React.FC<IUgcSidebarProps> = ({ assetType, assetKey, is
               <ChevronRight className={cn(visible && 'scale-x-[-1]')} />
             </div>
           </TooltipTrigger>
-          <TooltipContent>{visible ? t('common.side-bar.hide') : t('common.side-bar.show')}</TooltipContent>
+          <TooltipContent>{visible ? t('common.sidebar.hide') : t('common.sidebar.show')}</TooltipContent>
         </Tooltip>
       </Separator>
     </div>
