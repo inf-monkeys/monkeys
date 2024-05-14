@@ -19,10 +19,10 @@ export const previewDataGenerator = (data: JSONValue) => {
     if (isString(value)) {
       if (IMG_REGEXP.test(value)) {
         previewData.push({ value, type: 'image', name });
-      } else if (URL_REGEXP.test(value)) {
-        previewData.push({ value, type: 'url', name });
       } else if (PDB_REGEXP.test(value)) {
         previewData.push({ value, type: 'pdb', name });
+      } else if (URL_REGEXP.test(value)) {
+        previewData.push({ value, type: 'url', name });
       } else {
         previewData.push({ value, type: 'string', name });
       }
