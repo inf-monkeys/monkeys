@@ -5,6 +5,7 @@
   },
   "common": {
     "utils": {
+      "untitled": "Untitled",
       "unknown": "Unknown",
       "team": "Team",
       "unknown-team": "Unknown Team",
@@ -187,34 +188,58 @@
         "sidebar": {
           "list": {
             "workbench": {
-              "index": "Workbench"
+              "label": "Workbench"
             },
             "app": {
-              "index": "App",
-              "workflows": "Workflows"
+              "label": "App",
+              "workflows": {
+                "label": "Workflows"
+              }
             },
             "tool": {
-              "index": "Tools",
-              "action-tools": "Action Tools",
-              "render-tools": "Render Tools"
+              "label": "Tools",
+              "action-tools": {
+                "label": "Action Tools"
+              },
+              "render-tools": {
+                "label": "Render Tools"
+              }
             },
             "model": {
-              "index": "Models",
-              "text-models": "Text Models",
-              "image-models": "Image Models"
+              "label": "Models",
+              "text-models": {
+                "label": "Text Models"
+              },
+              "image-models": {
+                "label": "Image Models"
+              }
             },
             "media": {
-              "index": "Data",
-              "text-data": "Text Data",
-              "table-data": "Table Data",
-              "media-data": "Media Data"
+              "label": "Data",
+              "text-data": {
+                "label": "Text Data"
+              },
+              "table-data": {
+                "label": "Table Data"
+              },
+              "media-data": {
+                "label": "Media Data"
+              }
             },
             "application": {
-              "index": "Store",
-              "application-store": "App Store",
-              "text-model-store": "Text Model Store",
-              "image-model-store": "Image Model Store",
-              "text-data-store": "Text Data Store"
+              "label": "Store",
+              "application-store": {
+                "label": "App Store"
+              },
+              "text-model-store": {
+                "label": "Text Model Store"
+              },
+              "image-model-store": {
+                "label": "Image Model Store"
+              },
+              "text-data-store": {
+                "label": "Text Data Store"
+              }
             }
           },
           "toolbar": {
@@ -558,6 +583,14 @@
           "add-to-team": "Add to Team"
         }
       }
+    }
+  },
+  "workbench": {
+    "view": {
+      "no-starred-view": "No starred views"
+    },
+    "sidebar": {
+      "add": "Star a view"
     }
   }
 }

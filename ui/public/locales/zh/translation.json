@@ -5,6 +5,7 @@
   },
   "common": {
     "utils": {
+      "untitled": "未命名",
       "unknown": "未知",
       "team": "团队",
       "unknown-team": "未知团队",
@@ -180,34 +181,58 @@
         "sidebar": {
           "list": {
             "workbench": {
-              "index": "工作台"
+              "label": "工作台"
             },
             "app": {
-              "index": "应用",
-              "workflows": "工作流"
+              "label": "应用",
+              "workflows": {
+                "label": "工作流"
+              }
             },
             "tool": {
-              "index": "工具",
-              "action-tools": "执行类工具",
-              "render-tools": "渲染类工具"
+              "label": "工具",
+              "action-tools": {
+                "label": "执行类工具"
+              },
+              "render-tools": {
+                "label": "渲染类工具"
+              }
             },
             "model": {
-              "index": "模型",
-              "text-models": "语言模型",
-              "image-models": "图像模型"
+              "label": "模型",
+              "text-models": {
+                "label": "语言模型"
+              },
+              "image-models": {
+                "label": "图像模型"
+              }
             },
             "media": {
-              "index": "数据",
-              "text-data": "文本数据",
-              "table-data": "表格数据",
-              "media-data": "富媒体数据"
+              "label": "数据",
+              "text-data": {
+                "label": "文本数据"
+              },
+              "table-data": {
+                "label": "表格数据"
+              },
+              "media-data": {
+                "label": "富媒体数据"
+              }
             },
             "application": {
-              "index": "市场",
-              "application-store": "应用市场",
-              "text-model-store": "语言模型市场",
-              "image-model-store": "图像模型市场",
-              "text-data-store": "文本数据市场"
+              "label": "市场",
+              "application-store": {
+                "label": "应用市场"
+              },
+              "text-model-store": {
+                "label": "语言模型市场"
+              },
+              "image-model-store": {
+                "label": "图像模型市场"
+              },
+              "text-data-store": {
+                "label": "文本数据市场"
+              }
             }
           },
           "toolbar": {
@@ -557,6 +582,11 @@
     }
   },
   "workbench": {
-
+    "view": {
+      "no-starred-view": "暂无标星视图"
+    },
+    "sidebar": {
+      "add": "添加标星视图"
+    }
   }
 }
