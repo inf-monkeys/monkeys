@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 
 import _ from 'lodash';
 import { Trash } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { removeAssetFilterRules, useAssetFilterRuleList, useAssetPublicCategories } from '@/apis/ugc';
@@ -26,7 +27,6 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils';
-import { useTranslation } from 'react-i18next';
 
 export interface IUgcViewFilterListProps extends IUgcCustomProps {
   onChange: (filter: Partial<IListUgcDto['filter']>) => void;
@@ -159,11 +159,14 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                         >
                           <AlertDialogHeader>
                             <AlertDialogTitle>
-                              {t('components.layout.ugc.view.filter.list.delete.confirm-title')}
+                              {t('common.dialog.delete-confirm.title', {
+                                type: t('common.type.filter-group'),
+                              })}
                             </AlertDialogTitle>
                             <AlertDialogDescription>
-                              {t('components.layout.ugc.view.filter.list.delete.confirm-content', {
+                              {t('common.dialog.delete-confirm.content', {
                                 name: rule.name,
+                                type: t('common.type.filter-group'),
                               })}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
