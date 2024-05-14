@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 
 import { useElementSize } from '@mantine/hooks';
 
@@ -7,6 +7,7 @@ import { ExecutionRawDataDisplay } from '@/components/layout/vines-view/executio
 import { JSONValue } from '@/components/ui/code-editor';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
+import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 
 interface IVinesActuatorDetailContentProps {
@@ -26,9 +27,19 @@ export const VinesActuatorDetailContent: React.FC<IVinesActuatorDetailContentPro
 
     const finalHeight = height ? height - 14 - headerHeight : 320;
 
+    const { fullscreen } = useViewStore();
+
+    const [activeTab, setActiveTab] = useState('data');
+
+    useEffect(() => {
+      const prevActiveTab = activeTab;
+      setActiveTab('input');
+      setTimeout(() => setActiveTab(prevActiveTab));
+    }, [fullscreen]);
+
     return (
       <div className={cn('flex flex-col gap-3', className)}>
-        <Tabs defaultValue="data">
+        <Tabs defaultValue="data" value={activeTab} onValueChange={setActiveTab}>
           <TabsList ref={ref}>
             <TabsTrigger value="data">数据</TabsTrigger>
             <TabsTrigger value="input">输入</TabsTrigger>

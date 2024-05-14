@@ -6,20 +6,23 @@ import { VinesExecutionHistory } from 'src/components/layout/vines-view/executio
 
 import { VinesActuator } from '@/components/layout/vines-view/execution/actuator';
 import { Separator } from '@/components/ui/separator.tsx';
+import { useViewStore } from '@/store/useViewStore';
+import { cn } from '@/utils';
 
 // million-ignore
 export const VinesPreView: React.FC = () => {
+  const { fullscreen } = useViewStore();
   const { ref, height } = useElementSize();
 
-  const finalHeight = height - 108;
+  const finalHeight = height - (fullscreen ? 0 : 108);
 
   return (
-    <div ref={ref} className="h-full max-h-full space-y-6 p-6">
-      <div className="space-y-0.5">
+    <div ref={ref} className={cn('h-full max-h-full p-6', !fullscreen && 'space-y-6')}>
+      <div className={cn('space-y-0.5', fullscreen && 'hidden')}>
         <h2 className="text-2xl font-bold tracking-tight">预览工作流</h2>
         <p className="text-muted-foreground">运行工作流或查看历史运行记录</p>
       </div>
-      <Separator className="my-6" />
+      <Separator className={cn('my-6', fullscreen && 'hidden')} />
       <motion.div
         className="flex"
         style={{ height: finalHeight }}
@@ -28,11 +31,11 @@ export const VinesPreView: React.FC = () => {
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
       >
-        <aside className="relative w-3/5">
+        <aside className={cn('relative w-3/5', fullscreen && 'w-full')}>
           <VinesActuator height={finalHeight} />
         </aside>
-        <Separator orientation="vertical" className="mx-3" />
-        <div className="flex-1">
+        <Separator orientation="vertical" className={cn('mx-3', fullscreen && 'hidden')} />
+        <div className={cn('flex-1', fullscreen && 'hidden')}>
           <VinesExecutionHistory />
         </div>
       </motion.div>
