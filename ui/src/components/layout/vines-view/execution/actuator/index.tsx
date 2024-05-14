@@ -64,7 +64,7 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
             <div className="flex gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Toggle className="p-2" variant="outline" pressed={fullscreen} onPressedChange={setFullscreen}>
+                  <Toggle className="h-9 p-2" variant="outline" pressed={fullscreen} onPressedChange={setFullscreen}>
                     {fullscreen ? <Minimize size={16} /> : <Fullscreen size={16} />}
                   </Toggle>
                 </TooltipTrigger>
@@ -74,7 +74,7 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
                 <TooltipTrigger asChild>
                   <Button
                     variant="outline"
-                    icon={isExecutionRunning ? <StopCircle /> : <RotateCcw />}
+                    icon={isExecutionRunning ? <StopCircle size={16} /> : <RotateCcw size={16} />}
                     onClick={() => {
                       if (isExecutionRunning) {
                         vines.stop();
