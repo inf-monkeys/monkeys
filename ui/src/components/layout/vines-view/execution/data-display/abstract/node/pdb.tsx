@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import '@/styles/molstar.scss';
+
 import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -17,11 +19,11 @@ export const VinesAbstractPDB: React.FC<IVinesAbstractPDBProps> = ({ children })
 
   const node = useRef<HTMLDivElement>(null);
 
-  const molstarCss = useExternal('/pdbe/molstar.css');
+  // const molstarCss = useExternal('/pdbe/molstar.css');
   const molstarPlugin = useExternal('/pdbe/molstar-plugin.js');
 
   const [molstarInstance, setMolstarInstance] = useState<any>(null);
-  const isLoading = !(molstarCss === 'ready' && molstarPlugin === 'ready');
+  const isLoading = molstarPlugin !== 'ready';
 
   useEffect(() => {
     if (!isLoading && node.current) {
@@ -78,7 +80,6 @@ export const VinesAbstractPDB: React.FC<IVinesAbstractPDBProps> = ({ children })
           >
             <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
             <div className="space-y-1">
-              <p className="text-xxs opacity-70">Molstar CSS: {molstarCss}</p>
               <p className="text-xxs opacity-70">Molstar Plugin: {molstarPlugin}</p>
             </div>
           </motion.div>
@@ -88,7 +89,6 @@ export const VinesAbstractPDB: React.FC<IVinesAbstractPDBProps> = ({ children })
       <motion.div
         key="vines-molstar"
         ref={node}
-        className="overflow-hidden rounded-lg"
         animate={{ opacity: molstarInstance ? 1 : 0 }}
         transition={{ duration: 0.2 }}
         onTap={() => molstarInstance?.visual?.toggleSpin(false)}
