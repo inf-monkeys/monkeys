@@ -28,6 +28,8 @@
       "copy": "复制",
       "filter": "筛选",
       "back": "返回",
+      "import": "导入",
+      "export": "导出",
       "enable": "启用",
       "disable": "禁用",
       "enabled": "已启用",
@@ -39,11 +41,21 @@
       "ascend": "升序",
       "descend": "降序"
     },
+    "type": {
+      "workflow": "工作流",
+      "filter-group": "筛选分组"
+    },
     "toast": {
       "loading": "请等待数据加载完毕",
       "team-not-found": "团队不存在",
       "user-not-found": "用户不存在",
       "copy-success": "复制成功"
+    },
+    "dialog": {
+      "delete-confirm": {
+        "title": "{{type}}删除确认",
+        "content": "确定要删除{{type}}「{{name}}」？此操作不可撤销。"
+      }
     },
     "sidebar": {
       "hide": "收起",
@@ -286,11 +298,7 @@
               "toast": {
                 "filter-group-not-found": "分组不存在！请刷新后重试！"
               },
-              "placeholder": "输入分组名称",
-              "delete": {
-                "confirm-title": "分组删除确认",
-                "confirm-content": "确定要删除分组「{{name}}」？\n该操作不可撤销。"
-              }
+              "placeholder": "输入分组名称"
             }
           },
           "header": {
@@ -587,6 +595,30 @@
     },
     "sidebar": {
       "add": "添加标星视图"
+    }
+  },
+  "ugc-page": {
+    "workflows": {
+      "ugc-view": {
+        "operate-area": {
+          "dropdown-label": "工作流操作",
+          "options": {
+            "copy-link": "复制链接",
+            "create-a-copy": "创建副本",
+            "edit-info": "编辑信息",
+            "export-current-version": "导出当前版本",
+            "export-all-versions": "导出全部版本"
+          }
+        },
+        "subtitle": {
+          "import": {
+            "options": {
+              "local-import": "本地导入",
+              "market-import": "市场导入"
+            }
+          }
+        }
+      }
     }
   }
 }

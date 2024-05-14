@@ -28,6 +28,8 @@
       "copy": "Copy",
       "filter": "Filter",
       "back": "Back",
+      "import": "Import",
+      "export": "Export",
       "enable": "Enable",
       "disable": "Disable",
       "enabled": "Enabled",
@@ -39,11 +41,21 @@
       "ascend": "Ascend",
       "descend": "Descend"
     },
+    "type": {
+      "workflow": "workflow",
+      "filter-group": "filter group"
+    },
     "toast": {
       "loading": "Please wait until the data is loaded.",
       "team-not-found": "The team doesn't exist.",
       "user-not-found": "The user doesn't exist.",
       "copy-success": "Copy success."
+    },
+    "dialog": {
+      "delete-confirm": {
+        "title": "Delete confirmation of {{type}}",
+        "content": "Are you sure you want to delete the {{type}} \"{{name}}\"?\nThe operation cannot be undone."
+      }
     },
     "sidebar": {
       "hide": "Hide",
@@ -293,11 +305,7 @@
               "toast": {
                 "filter-group-not-found": "Filter group does not exist! Please refresh and try again later!"
               },
-              "placeholder": "Enter filter group name",
-              "delete": {
-                "confirm-title": "Filter group delete confirmation",
-                "confirm-content": "Are you sure you want to delete the filter group \"{{name}}\"?\nThe operation cannot be undone."
-              }
+              "placeholder": "Enter filter group name"
             }
           },
           "header": {
@@ -591,6 +599,30 @@
     },
     "sidebar": {
       "add": "Star a view"
+    }
+  },
+  "ugc-page": {
+    "workflows": {
+      "ugc-view": {
+        "operate-area": {
+          "dropdown-label": "Workflow Operate",
+          "options": {
+            "copy-link": "Copy Link",
+            "create-a-copy": "Create a Copy",
+            "edit-info": "Edit Info",
+            "export-current-version": "Export Current Version",
+            "export-all-versions": "Export All Versions"
+          }
+        },
+        "subtitle": {
+          "import": {
+            "options": {
+              "local-import": "Local Import",
+              "market-import": "Market Import"
+            }
+          }
+        }
+      }
     }
   }
 }
