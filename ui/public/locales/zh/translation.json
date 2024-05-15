@@ -264,6 +264,47 @@
         "utils": {
           "no-description": "暂无描述"
         },
+        "detail": {
+          "info": {
+            "columns": {
+              "displayName": {
+                "label": "键"
+              },
+              "value": {
+                "label": "值"
+              }
+            }
+          },
+          "workflows": {
+            "columns": {
+              "icon": {
+                "label": "图标"
+              },
+              "displayName": {
+                "label": "名称"
+              },
+              "description": {
+                "label": "描述"
+              },
+              "user": {
+                "label": "创建者"
+              }
+            }
+          }
+        },
+        "import-dialog": {
+          "title": "导入前确认",
+          "content": "正在导入 {{name}} 导入您的团队下，是否继续？",
+          "utils": {
+            "this-project": "该项目"
+          }
+        },
+        "publish-dialog": {
+          "title": "发布到市场",
+          "name": {
+            "placeholder": "请输入名称"
+          }
+        },
         "view": {
           "filter": {
             "button": {

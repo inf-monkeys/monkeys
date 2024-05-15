@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { AssetType } from '@inf-monkeys/vines';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { publishAssetItem } from '@/apis/ugc';
@@ -21,6 +22,8 @@ interface IUgcPublishDialogProps {
 }
 
 export const UgcPublishDialog: React.FC<IUgcPublishDialogProps> = ({ children, ugcId, item }) => {
+  const { t } = useTranslation();
+
   const { name: rawName, description, assetType, iconUrl, prevName } = item;
 
   const [visible, setVisible] = useState(false);
@@ -34,7 +37,7 @@ export const UgcPublishDialog: React.FC<IUgcPublishDialogProps> = ({ children, u
 
   const handlePublish = async () => {
     if (!ugcId || !assetType) {
-      toast.error('请刷新页面后重试');
+      toast.error(t('common.load.empty'));
       return;
     }
     setIsLoading(true);
@@ -60,10 +63,10 @@ export const UgcPublishDialog: React.FC<IUgcPublishDialogProps> = ({ children, u
       {
         success: () => {
           setVisible(false);
-          return '发布成功';
+          return t('common.operate.success');
         },
-        error: '发布失败，请检查网络后重试',
-        loading: '发布中......',
+        error: t('common.operate.error'),
+        loading: t('common.operate.loading'),
       },
     );
     setIsLoading(false);
@@ -74,14 +77,20 @@ export const UgcPublishDialog: React.FC<IUgcPublishDialogProps> = ({ children, u
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>发布到市场</DialogTitle>
+          <DialogTitle>{t('components.layout.ugc.publish-dialog.title')}</DialogTitle>
         </DialogHeader>
         <div className="gap-4 py-4">
-          <Input placeholder="请输入名称" maxLength={50} value={name} onChange={setName} autoFocus />
+          <Input
+            placeholder={t('components.layout.ugc.publish-dialog.name.placeholder')}
+            maxLength={50}
+            value={name}
+            onChange={setName}
+            autoFocus
+          />
         </div>
         <DialogFooter>
           <Button loading={isLoading} variant="solid" onClick={handlePublish}>
-            确定
+            {t('common.utils.confirm')}
           </Button>
         </DialogFooter>
       </DialogContent>
