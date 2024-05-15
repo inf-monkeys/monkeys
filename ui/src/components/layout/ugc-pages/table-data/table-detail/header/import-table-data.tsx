@@ -21,6 +21,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Updater } from '@/components/ui/updater';
 import { IImportFile, importFileSchema } from '@/schema/table-database/import-file.ts';
+import { MIME_TYPES } from '@mantine/dropzone';
 
 interface IImportTableDataProps {
   databaseId: string;
@@ -91,7 +92,7 @@ export const ImportTableData: React.FC<IImportTableDataProps> = ({ databaseId, c
                 <FormItem>
                   <FormControl>
                     <Updater
-                      accept={['text/csv']}
+                      accept={[MIME_TYPES.csv, MIME_TYPES.xls, MIME_TYPES.xlsx]}
                       maxSize={10}
                       limit={1}
                       onFinished={(urls) => field.onChange(urls[0])}
