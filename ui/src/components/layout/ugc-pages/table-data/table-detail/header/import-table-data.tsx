@@ -112,7 +112,7 @@ export const ImportTableData: React.FC<IImportTableDataProps> = ({ databaseId, c
                   <FormControl>
                     <Input placeholder="请输入分隔符" {...field} />
                   </FormControl>
-                  <FormDescription>请指定 CSV 的分隔符，默认为逗号</FormDescription>
+                  <FormDescription>如果上传的是 csv 文件，请指定 CSV 的分隔符，默认为逗号</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
