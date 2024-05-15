@@ -37,7 +37,7 @@ const TableDataDetail: React.FC = () => {
   const isEmpty = !tableList?.length;
   useEffect(() => {
     if (tableList && !isEmpty) {
-      setTableId(tableList[0].uuid);
+      setTableId(tableList[0].name);
     }
     if (isEmpty) {
       setTableId('');
@@ -85,7 +85,7 @@ const TableDataDetail: React.FC = () => {
                 data={tableList}
                 itemContent={(_, table) => (
                   <TabsTrigger
-                    value={table.uuid}
+                    value={table.name}
                     className="mb-2 h-10 w-full justify-start data-[state=active]:border data-[state=active]:border-input data-[state=active]:font-normal"
                   >
                     {table.name}
