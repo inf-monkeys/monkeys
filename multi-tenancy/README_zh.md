@@ -12,6 +12,14 @@
 
 ![](../docs/images/architecture-docker-compose-multi-tenancy.png)
 
-## 运行
+## 快速开始
+
+### 使用 Docker
 
 请阅读[此文档](../docker/README.md)。
+
+### 本地开发
+
+```sh
+node multi-tenancy/main.js
+```
