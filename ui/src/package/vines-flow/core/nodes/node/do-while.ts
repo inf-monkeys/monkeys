@@ -1,14 +1,14 @@
-import { TaskType, type DoWhileTaskDef } from '@io-orkes/conductor-javascript';
+import { type DoWhileTaskDef, TaskType } from '@io-orkes/conductor-javascript';
 
 import { VinesCore } from '@/package/vines-flow/core';
 import { SubWorkflowNode } from '@/package/vines-flow/core/nodes';
 import { ControlFlowVinesNode, VinesNode } from '@/package/vines-flow/core/nodes/base.ts';
 import {
-  VinesSVGPosition,
   drawLine,
   drawPureLine,
   drawPureSmoothLine,
   drawSmoothLine,
+  VinesSVGPosition,
 } from '@/package/vines-flow/core/nodes/svg-utils.ts';
 import { IVinesCollectDoWhileOutputTaskDef, IVinesNodePosition } from '@/package/vines-flow/core/nodes/typings.ts';
 import { IVinesVariable, VinesVariableMapper } from '@/package/vines-flow/core/tools/typings.ts';
@@ -351,6 +351,27 @@ export class DoWhileNode extends ControlFlowVinesNode<DoWhileTaskDef> {
       ],
       '${{target}.output}',
       '$.{target}[*]',
+    );
+
+    extraVariables.push(
+      ...this._vinesCore.generateVariable(
+        {
+          id: this.id,
+          name: nodeTitle,
+          desc: nodeDesc,
+          icon: nodeIcon,
+        },
+        this.id + '_loopItemRef',
+        [
+          {
+            name: 'result',
+            type: 'json',
+            displayName: '当前循环元素',
+          },
+        ],
+        '${{target}.output.{variable}}',
+        '$.{target}[*]',
+      ),
     );
     const extraMapper = this._vinesCore.generateVariableMapper(extraVariables, this.customData?.title ?? '循环');
 
