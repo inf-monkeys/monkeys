@@ -45,6 +45,11 @@
       "workflow": "工作流",
       "filter-group": "筛选分组"
     },
+    "time": {
+      "second": "秒",
+      "minute": "分钟",
+      "hour": "小时"
+    },
     "toast": {
       "loading": "请等待数据加载完毕",
       "team-not-found": "团队不存在",
@@ -642,13 +647,27 @@
     "workflow": {
       "ugc-view": {
         "columns": {
-          "logo": "图标",
-          "title": "名称",
-          "description": "描述",
-          "user": "用户",
-          "assetTags": "标签",
-          "createdTimestamp": "创建时间",
-          "updatedTimestamp": "更新时间"
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "user": {
+            "label": "用户"
+          },
+          "assetTags": {
+            "label": "标签"
+          },
+          "createdTimestamp": {
+            "label": "创建时间"
+          },
+          "updatedTimestamp": {
+            "label": "更新时间"
+          }
         },
         "operate-area": {
           "dropdown-label": "工作流操作",
@@ -666,6 +685,53 @@
               "local-import": "本地导入",
               "market-import": "市场导入"
             }
+          }
+        }
+      }
+    },
+    "action-tools": {
+      "utils": {
+        "pricing-mode": {
+          "free": "免费",
+          "per-execute": "每次运行收费 {{amount}} 元",
+          "per-1k-token": "每 1K Token 收费 {{amount}} 元",
+          "per-1min": "每 1 分钟收费 {{amount}} 元",
+          "per-1mb-file": "每 1 MB 文件收费 {{amount}} "
+        },
+        "estimate": {
+          "estimate-time": "预计执行 {{time}}"
+        }
+      },
+      "detail": {
+        "title": "组件详情",
+        "tabs": {
+          "info": {
+            "label": "基本信息"
+          },
+          "workflows": {
+            "label": "关联工作流"
+          }
+        }
+      },
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "estimateTime": {
+            "label": "预估执行时间"
+          },
+          "pricing": {
+            "label": "费用"
+          },
+          "thirdPartyAccount": {
+            "label": "外部账号"
           }
         }
       }

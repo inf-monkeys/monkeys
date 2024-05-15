@@ -3,12 +3,13 @@ import React from 'react';
 import { UseNavigateResult } from '@tanstack/react-router';
 
 import { createColumnHelper } from '@tanstack/react-table';
+import { t } from 'i18next';
 
 import { BlockPricing, IWorkflowBlock } from '@/apis/tools/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { IUgcCreateColumnsProps } from '@/components/layout/ugc/typings.ts';
 import { RenderDescription, RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
-import { pricingText } from '@/components/layout/ugc-pages/action-tools/utils.ts';
+import { PricingText } from '@/components/layout/ugc-pages/action-tools/utils.tsx';
 import { formatTime } from '@/utils/time.ts';
 
 const columnHelper = createColumnHelper<IAssetItem<IWorkflowBlock>>();
@@ -23,13 +24,11 @@ export const createActionToolsColumns = ({ hooks }: ICreateActionToolsColumnsPro
   return [
     columnHelper.accessor('icon', {
       id: 'logo',
-      header: '图标',
       cell: ({ getValue }) => RenderIcon({ iconUrl: getValue() as string }),
       maxSize: 48,
     }),
     columnHelper.accessor('displayName', {
       id: 'title',
-      header: '名称',
       cell: ({ getValue, row }) => (
         <span
           className="cursor-pointer transition-colors hover:text-primary-500"
@@ -45,31 +44,33 @@ export const createActionToolsColumns = ({ hooks }: ICreateActionToolsColumnsPro
     }),
     columnHelper.accessor('description', {
       id: 'description',
-      header: '描述',
       cell: ({ getValue }) => RenderDescription({ description: getValue() as string }),
     }),
     columnHelper.display({
       id: 'estimateTime',
-      header: '预估执行时间',
       cell: ({ row }) => {
         return (
           <span>
-            预计执行 {row.original.extra?.estimateTime ? formatTime(row.original.extra.estimateTime) : '30 秒'}
+            {t('ugc-page.action-tools.utils.estimate.estimate-time', {
+              time: formatTime({ seconds: row?.original?.extra?.estimateTime, defaultSeconds: 30 }),
+            })}
           </span>
         );
       },
     }),
     columnHelper.accessor('pricing', {
       id: 'pricing',
-      header: '费用',
       cell: ({ getValue }) => {
         const pricing = getValue() as BlockPricing | undefined;
-        return <span className="text-text2">{pricing ? pricingText(pricing) : '免费'}</span>;
+        return (
+          <span className="text-text2">
+            {pricing ? PricingText({ pricing }) : t('ugc-page.action-tools.utils.pricing-mode.free')}
+          </span>
+        );
       },
     }),
     columnHelper.display({
       id: 'thirdPartyAccount',
-      header: '外部账号',
       // cell: ({ row }) => {
       //   const { required } = determinedCredentialVisible(row.original.credentials, credentialTypesHash);
       //   return required ? (

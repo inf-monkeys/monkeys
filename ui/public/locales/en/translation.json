@@ -45,6 +45,14 @@
       "workflow": "workflow",
       "filter-group": "filter group"
     },
+    "time": {
+      "second_one": "sec",
+      "second_other": "secs",
+      "minute_one": "min",
+      "minute_other": "mins",
+      "hour_one": "hour",
+      "hour_other": "hours"
+    },
     "toast": {
       "loading": "Please wait until the data is loaded.",
       "team-not-found": "The team doesn't exist.",
@@ -646,13 +654,27 @@
     "workflow": {
       "ugc-view": {
         "columns": {
-          "logo": "Icon",
-          "title": "Name",
-          "description": "Description",
-          "user": "Creator",
-          "assetTags": "Tags",
-          "createdTimestamp": "Created Time",
-          "updatedTimestamp": "Updated Time"
+          "logo": {
+            "label": "Icon"
+          },
+          "title": {
+            "label": "Name"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "user": {
+            "label": "Creator"
+          },
+          "assetTags": {
+            "label": "Tags"
+          },
+          "createdTimestamp": {
+            "label": "Created Time"
+          },
+          "updatedTimestamp": {
+            "label": "Updated Time"
+          }
         },
         "operate-area": {
           "dropdown-label": "Workflow Operate",
@@ -670,6 +692,53 @@
               "local-import": "Local Import",
               "market-import": "Market Import"
             }
+          }
+        }
+      }
+    },
+    "action-tools": {
+      "utils": {
+        "pricing-mode": {
+          "free": "Free",
+          "per-execute": "Per execution charged {{amount}} RMB",
+          "per-1k-token": "Per 1K Token charged {{amount}} RMB",
+          "per-1min": "Per 1 minute charged {{amount}} RMB",
+          "per-1mb-file": "Per 1 MB file charged {{amount}} RMB"
+        },
+        "estimate": {
+          "estimate-time": "Estimate {{time}}"
+        }
+      },
+      "detail": {
+        "title": "Action Tool Detail",
+        "tabs": {
+          "info": {
+            "label": "Basic Info"
+          },
+          "workflows": {
+            "label": "Related Workflows"
+          }
+        }
+      },
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "Icon"
+          },
+          "title": {
+            "label": "Name"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "estimateTime": {
+            "label": "Estimate Time"
+          },
+          "pricing": {
+            "label": "Pricing"
+          },
+          "thirdPartyAccount": {
+            "label": "Third Party Account"
           }
         }
       }

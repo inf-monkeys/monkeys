@@ -2,18 +2,23 @@ import React from 'react';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
+import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
+
 import { preloadUgcActionTools, useUgcActionTools } from '@/apis/ugc';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createActionToolsColumns } from '@/components/layout/ugc-pages/action-tools/consts.tsx';
 import { VinesExternalAccount } from '@/components/layout/ugc-pages/action-tools/external-account';
-import { pricingText } from '@/components/layout/ugc-pages/action-tools/utils.ts';
+import { PricingText } from '@/components/layout/ugc-pages/action-tools/utils.tsx';
 import { ImportToolModal } from '@/components/layout/workspace/tools/import-tool';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
 import { formatTime } from '@/utils/time.ts';
 
 export const ActionTools: React.FC = () => {
+  const { t: tHook } = useTranslation();
+
   const navigate = useNavigate();
 
   return (
@@ -21,7 +26,7 @@ export const ActionTools: React.FC = () => {
       <UgcView
         assetKey="action-tools"
         assetType="block"
-        assetName="执行类工具"
+        assetName={tHook('components.layout.main.sidebar.list.tool.action-tools.label')}
         isLoadAll
         useUgcFetcher={useUgcActionTools}
         preloadUgcFetcher={preloadUgcActionTools}
@@ -32,7 +37,11 @@ export const ActionTools: React.FC = () => {
             const pricing = item.pricing;
             return (
               <span className="line-clamp-1">
-                预计执行 {estimateTime ? formatTime(estimateTime) : '30 秒'}，{pricing ? pricingText(pricing) : '免费'}
+                {t('ugc-page.action-tools.utils.estimate.estimate-time', {
+                  time: formatTime({ seconds: estimateTime, defaultSeconds: 30 }),
+                })}
+                {' | '}
+                {pricing ? PricingText({ pricing }) : t('ugc-page.action-tools.utils.pricing-mode.free')}
               </span>
             );
           },
@@ -50,7 +59,7 @@ export const ActionTools: React.FC = () => {
             <VinesExternalAccount />
             <ImportToolModal>
               <Button variant="outline" size="small">
-                导入
+                {tHook('common.utils.import')}
               </Button>
             </ImportToolModal>
           </>
