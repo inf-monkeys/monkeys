@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { ColumnDef, flexRender, getCoreRowModel, Row, useReactTable } from '@tanstack/react-table';
+import { useTranslation } from 'react-i18next';
 
 import { DataTable } from '@/components/ui/data-table';
 
@@ -10,6 +11,8 @@ interface IUgcDetailInfoProps {
 }
 
 export const UgcDetailInfo: React.FC<IUgcDetailInfoProps> = ({ columns, data: rawData }) => {
+  const { t } = useTranslation();
+
   const [data, setData] = useState<any[]>([]);
 
   useEffect(() => {
@@ -43,12 +46,12 @@ export const UgcDetailInfo: React.FC<IUgcDetailInfoProps> = ({ columns, data: ra
           {
             id: 'displayName',
             accessorKey: 'displayName',
-            header: '键',
+            header: t('components.layout.ugc.detail.info.columns.displayName.label'),
           },
           {
             id: 'value',
             accessorKey: 'value',
-            header: '值',
+            header: t('components.layout.ugc.detail.info.columns.value.label'),
             cell: ({ cell }) => cell.renderValue(),
           },
         ]}

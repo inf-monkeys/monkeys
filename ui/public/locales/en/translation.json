@@ -271,6 +271,47 @@
         "utils": {
           "no-description": "No description"
         },
+        "detail": {
+          "info": {
+            "columns": {
+              "displayName": {
+                "label": "Key"
+              },
+              "value": {
+                "label": "Value"
+              }
+            }
+          },
+          "workflows": {
+            "columns": {
+              "icon": {
+                "label": "Icon"
+              },
+              "displayName": {
+                "label": "Name"
+              },
+              "description": {
+                "label": "Description"
+              },
+              "user": {
+                "label": "Creator"
+              }
+            }
+          }
+        },
+        "import-dialog": {
+          "title": "Confirmation of import",
+          "content": "Confirm importing {{name}} into your team?",
+          "utils": {
+            "this-project": "this project"
+          }
+        },
+        "publish-dialog": {
+          "title": "Publish to market",
+          "name": {
+            "placeholder": "Enter name"
+          }
+        },
         "view": {
           "filter": {
             "button": {

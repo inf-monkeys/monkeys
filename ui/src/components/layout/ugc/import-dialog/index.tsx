@@ -14,6 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog.tsx';
+import { useTranslation } from 'react-i18next';
 
 interface IUgcImportDialogProps {
   visible: boolean;
@@ -32,19 +33,21 @@ export const UgcImportDialog: React.FC<IUgcImportDialogProps> = ({
   name,
   afterOperate,
 }) => {
+  const { t } = useTranslation();
+
   const handleImport = async () => {
     if (!ugcId || !assetType) {
-      toast.error('请刷新页面后重试');
+      toast.error(t('common.load.empty'));
       return;
     }
     toast.promise(forkAssetItem(assetType, ugcId), {
       success: () => {
         setVisible(false);
         afterOperate?.();
-        return '导入成功';
+        return t('common.operate.success');
       },
-      error: '导入失败，请检查网络后重试',
-      loading: '导入中......',
+      error: t('common.operate.error'),
+      loading: t('common.operate.loading'),
     });
   };
 
@@ -52,14 +55,20 @@ export const UgcImportDialog: React.FC<IUgcImportDialogProps> = ({
     <AlertDialog open={visible} onOpenChange={setVisible}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>导入前确认</AlertDialogTitle>
+          <AlertDialogTitle>{t('components.layout.ugc.import-dialog.title')}</AlertDialogTitle>
           <AlertDialogDescription>
-            正在导入 <span className="text-primary">{name || '该项目'}</span> 导入您的团队下，是否继续？
+            {t('components.layout.ugc.import-dialog.content', {
+              name: (
+                <span className="text-primary">
+                  {name || t('components.layout.ugc.import-dialog.utils.this-project')}
+                </span>
+              ),
+            })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>取消</AlertDialogCancel>
-          <AlertDialogAction onClick={() => handleImport()}>确定</AlertDialogAction>
+          <AlertDialogCancel>{t('common.utils.cancel')}</AlertDialogCancel>
+          <AlertDialogAction onClick={() => handleImport()}>{t('common.utils.confirm')}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
