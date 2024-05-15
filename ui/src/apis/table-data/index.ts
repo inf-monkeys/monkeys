@@ -44,7 +44,9 @@ export const deleteDatabase = (databaseId: string) =>
   vinesFetcher({ method: 'DELETE', simple: true })(`/api/sql-knowledge-bases/${databaseId}`);
 
 export const deleteTable = (databaseId: string, tableId: string) =>
-  vinesFetcher({ method: 'DELETE', simple: true })(`/api/sql-knowledge-bases/${databaseId}/tables/${tableId}`);
+  vinesFetcher({ method: 'DELETE', simple: true })(
+    `/api/tools/monkey_tools_knowledge_base/sql-knowledge-bases/${databaseId}/tables/${tableId}`,
+  );
 
 export const importToDatabaseUseCSV = (databaseId: string, table_name: string, csvfile: string, sep = ',') =>
   vinesFetcher({

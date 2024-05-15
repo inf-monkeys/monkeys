@@ -63,6 +63,21 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
     },
   ];
 
+  const databaseTypeOptions = [
+    {
+      displayName: 'Postgres',
+      value: 'postgres',
+    },
+    {
+      displayName: 'Mysql',
+      value: 'mysql',
+    },
+    {
+      displayName: 'TiDB',
+      value: 'tidb',
+    },
+  ];
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -158,13 +173,26 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
             {createType === 'external' && (
               <>
                 <FormField
-                  name="displayName"
+                  name="databaseType"
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>数据库类型</FormLabel>
                       <FormControl>
-                        <Input placeholder="请输入数据库类型" {...field} className="grow" autoFocus />
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="请选择数据库类型" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {databaseTypeOptions.map((option) => (
+                              <SelectItem value={option.value} key={option.value}>
+                                {option.displayName}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -172,17 +200,13 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
                 />
 
                 <FormField
-                  name="description"
+                  name="host"
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>数据库简介</FormLabel>
+                      <FormLabel>Host</FormLabel>
                       <FormControl>
-                        <Textarea
-                          placeholder="请输入数据库简介，不超过 100 字"
-                          className="h-28 resize-none"
-                          {...field}
-                        />
+                        <Input placeholder="Host" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -190,17 +214,55 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
                 />
 
                 <FormField
-                  name="iconUrl"
+                  name="port"
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>图标</FormLabel>
+                      <FormLabel>Port</FormLabel>
                       <FormControl>
-                        <VinesIconEditor
-                          value={field.value}
-                          defaultValue="emoji:🍀:#ceefc5"
-                          onChange={field.onChange}
-                        />
+                        <Input placeholder="Port" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  name="database"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Database</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Database" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  name="username"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Username" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  name="password"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Password" type="password" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
