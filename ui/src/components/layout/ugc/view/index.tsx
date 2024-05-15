@@ -188,7 +188,7 @@ export const UgcView = <E extends object>({
   // 添加 header
   columns.forEach((col, index) => {
     if (!col.header) {
-      columns[index].header = t(`ugc-page.${assetKey}.ugc-view.columns.${col.id}`);
+      columns[index].header = t(`ugc-page.${assetKey}.ugc-view.columns.${col.id}.label`);
     }
   });
 

@@ -3,6 +3,7 @@ import React from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { Undo2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useTool } from '@/apis/tools';
 import { useSearchReferenceWorkflows } from '@/apis/ugc';
@@ -17,6 +18,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 interface IActionToolDetailProps {}
 
 export const ActionToolDetail: React.FC<IActionToolDetailProps> = () => {
+  const { t } = useTranslation();
+
   const navigate = useNavigate();
 
   const { actionToolName } = Route.useParams();
@@ -39,9 +42,9 @@ export const ActionToolDetail: React.FC<IActionToolDetailProps> = () => {
               }}
             />
           </TooltipTrigger>
-          <TooltipContent>返回</TooltipContent>
+          <TooltipContent>{t('common.utils.back')}</TooltipContent>
         </Tooltip>
-        <h1 className="line-clamp-1 text-2xl font-bold">组件详情</h1>
+        <h1 className="line-clamp-1 text-2xl font-bold">{t('ugc-page.action-tools.detail.title')}</h1>
       </header>
       <Tabs
         defaultValue="info"
@@ -49,10 +52,10 @@ export const ActionToolDetail: React.FC<IActionToolDetailProps> = () => {
       >
         <TabsList>
           <TabsTrigger value="info" className="text-xs">
-            基本信息
+            {t('ugc-page.action-tools.detail.tabs.info.label')}
           </TabsTrigger>
           <TabsTrigger value="workflows" className="text-xs">
-            关联工作流
+            {t('ugc-page.action-tools.detail.tabs.workflows.label')}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="info">

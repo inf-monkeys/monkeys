@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { t } from 'i18next';
 
 export const formatTimeDiff = (diffValue: number) => {
   const duration = dayjs.duration(diffValue);
@@ -54,8 +55,10 @@ export const formatTimeGap = (timestamp: dayjs.ConfigType, prevTimestamp: dayjs.
   }
 };
 
-export const formatTime = (seconds: number) => {
-  if (isNaN(seconds) || seconds < 0) {
+export const formatTime = ({ seconds, defaultSeconds }: { seconds?: number; defaultSeconds?: number }) => {
+  seconds = seconds ?? defaultSeconds;
+
+  if (!seconds || isNaN(seconds) || seconds < 0) {
     return 'Invalid input';
   }
 
@@ -66,15 +69,21 @@ export const formatTime = (seconds: number) => {
   let result = '';
 
   if (hours > 0) {
-    result += `${hours} 小时 `;
+    result += `${hours} ${t('common.time.hour', {
+      count: hours,
+    })} `;
   }
 
   if (minutes > 0) {
-    result += `${minutes} 分钟 `;
+    result += `${minutes} ${t('common.time.minute', {
+      count: minutes,
+    })} `;
   }
 
   if (remainingSeconds > 0) {
-    result += `${remainingSeconds} 秒`;
+    result += `${remainingSeconds} ${t('common.time.second', {
+      count: seconds,
+    })}`;
   }
 
   return result.trim();
