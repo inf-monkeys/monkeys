@@ -79,7 +79,8 @@
     },
     "load": {
       "loading": "加载中...",
-      "empty": "暂无数据"
+      "empty": "暂无数据",
+      "no-more": "没有更多了"
     },
     "update": {
       "loading": "更新中...",
@@ -732,6 +733,39 @@
           },
           "thirdPartyAccount": {
             "label": "外部账号"
+          }
+        },
+        "subtitle": {
+          "external-account": {
+            "button": "管理外部账号",
+            "title": "管理外部账号",
+            "manage": {
+              "content": "所有账号信息都将被加密储存，不会泄露您的关键信息（如密钥），也不会回传至前台",
+              "columns": {
+                "name": "名称",
+                "operate": "操作"
+              },
+              "delete": {
+                "title": "外部账号删除确认",
+                "content": "确定删除该外部账号吗？删除后工作流中将无法正常使用此账号，此操作不可撤销。"
+              },
+              "create": {
+                "title": "创建新{{name}}",
+                "columns": {
+                  "displayName": "账号名称"
+                },
+                "utils": {
+                  "name": "{{name}}账号"
+                }
+              }
+            },
+            "list": {
+              "create": "创建账号",
+              "count": {
+                "total": "共 {{count}} 个账号，点击管理",
+                "none": "暂无账号，点击创建"
+              }
+            }
           }
         }
       }

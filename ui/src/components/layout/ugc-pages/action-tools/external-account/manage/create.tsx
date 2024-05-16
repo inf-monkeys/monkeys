@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useCreateCredential, useCredentials } from '@/apis/credential';
@@ -15,11 +16,13 @@ interface ICreateExternalAccountProps extends React.ComponentPropsWithoutRef<'di
 }
 
 export const CreateExternalAccount: React.FC<ICreateExternalAccountProps> = ({ children, detail }) => {
+  const { t } = useTranslation();
+
   const { trigger } = useCreateCredential();
   const finalInputs = [
     {
       name: 'displayName',
-      displayName: '账号名称',
+      displayName: t('ugc-page.action-tools.ugc-view.subtitle.external-account.manage.create.columns.displayName'),
       type: 'string',
       required: true,
     },
@@ -34,12 +37,19 @@ export const CreateExternalAccount: React.FC<ICreateExternalAccountProps> = ({ c
     <Dialog open={visible} onOpenChange={setVisible}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
-        <DialogTitle>创建新{detail?.displayName}</DialogTitle>
+        <DialogTitle>
+          {t('ugc-page.action-tools.ugc-view.subtitle.external-account.manage.create.title', {
+            name: detail?.displayName,
+          })}
+        </DialogTitle>
         <VinesWorkflowInput
           inputs={finalInputs}
           height={400}
           onSubmit={(data) => {
-            const displayName = (data.displayName || `${detail?.name}账号`) as string;
+            const displayName = (data.displayName ||
+              t('ugc-page.action-tools.ugc-view.subtitle.external-account.manage.create.utils.name', {
+                name: detail?.displayName,
+              })) as string;
             toast.promise(
               trigger({
                 displayName,
@@ -47,19 +57,19 @@ export const CreateExternalAccount: React.FC<ICreateExternalAccountProps> = ({ c
                 data,
               }),
               {
-                loading: '正在创建',
+                loading: t('common.create.loading'),
                 success: () => {
                   setVisible(false);
                   void mutate();
-                  return '创建成功';
+                  return t('common.create.success');
                 },
-                error: '创建失败',
+                error: t('common.create.error'),
               },
             );
           }}
         >
           <Button className="mb-1 min-h-10" variant="outline" type="submit">
-            创建
+            {t('common.utils.create')}
           </Button>
         </VinesWorkflowInput>
       </DialogContent>

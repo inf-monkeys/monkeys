@@ -8,9 +8,10 @@ import { DataTable } from '@/components/ui/data-table';
 interface IUgcDetailInfoProps {
   columns: ColumnDef<any, any>[];
   data?: any;
+  assetKey?: string;
 }
 
-export const UgcDetailInfo: React.FC<IUgcDetailInfoProps> = ({ columns, data: rawData }) => {
+export const UgcDetailInfo: React.FC<IUgcDetailInfoProps> = ({ columns, data: rawData, assetKey }) => {
   const { t } = useTranslation();
 
   const [data, setData] = useState<any[]>([]);
@@ -32,7 +33,9 @@ export const UgcDetailInfo: React.FC<IUgcDetailInfoProps> = ({ columns, data: ra
       row?.getAllCells().map((cell) => {
         return {
           key: cell.column.columnDef.id,
-          displayName: cell.column.columnDef.header?.toString() ?? '未知',
+          displayName: assetKey
+            ? t(`ugc-page.${assetKey}.ugc-view.columns.${cell.column.columnDef.id}.label`)
+            : cell.column.columnDef.header?.toString() ?? t('common.utils.unknown'),
           value: flexRender(cell.column.columnDef.cell, cell.getContext()),
         };
       }) ?? []

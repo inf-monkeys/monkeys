@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { deleteCredential, useCredentials } from '@/apis/credential';
@@ -25,15 +26,17 @@ interface IExternalAccountManageProps {
 }
 
 export const ExternalAccountManage: React.FC<IExternalAccountManageProps> = ({ detail }) => {
+  const { t } = useTranslation();
+
   const { data: credentials, mutate } = useCredentials(detail?.name);
 
   const rows = detail?.properties?.filter((p) => p.type !== 'notice');
 
   const handleDelete = (id: string) => {
     toast.promise(deleteCredential(id), {
-      loading: '正在删除',
-      success: '删除成功',
-      error: '删除失败',
+      loading: t('common.delete.loading'),
+      success: t('common.delete.success'),
+      error: t('common.delete.error'),
       finally: () => void mutate(),
     });
   };
@@ -42,16 +45,20 @@ export const ExternalAccountManage: React.FC<IExternalAccountManageProps> = ({ d
     <>
       <DialogTitle>{detail?.displayName}</DialogTitle>
       <DialogDescription>
-        所有账号信息都将被加密储存，不会泄露您的关键信息（如密钥），也不会回传至前台
+        {t('ugc-page.action-tools.ugc-view.subtitle.external-account.manage.content')}
       </DialogDescription>
       <div className="relative w-full overflow-auto">
         <Table className="w-full">
-          <TableCaption>没有更多了</TableCaption>
+          <TableCaption>{t('common.load.no-more')}</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead className="sticky left-0 bg-background">名称</TableHead>
+              <TableHead className="sticky left-0 bg-background">
+                {t('ugc-page.action-tools.ugc-view.subtitle.external-account.manage.columns.name')}
+              </TableHead>
               {rows?.map(({ name, displayName }, i) => <TableHead key={i}>{displayName ?? name}</TableHead>)}
-              <TableHead className="sticky right-0 bg-background">操作</TableHead>
+              <TableHead className="sticky right-0 bg-background">
+                {t('ugc-page.action-tools.ugc-view.subtitle.external-account.manage.columns.operate')}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -72,14 +79,18 @@ export const ExternalAccountManage: React.FC<IExternalAccountManageProps> = ({ d
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>即将删除外部账号</AlertDialogTitle>
+                        <AlertDialogTitle>
+                          {t('ugc-page.action-tools.ugc-view.subtitle.external-account.manage.delete.title')}
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
-                          确认删除该外部账号吗，删除后工作流中将无法正常使用此账号。
+                          {t('ugc-page.action-tools.ugc-view.subtitle.external-account.manage.delete.content')}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>取消</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => id && handleDelete(id)}>删除</AlertDialogAction>
+                        <AlertDialogCancel>{t('common.utils.cancel')}</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => id && handleDelete(id)}>
+                          {t('common.utils.confirm')}
+                        </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
