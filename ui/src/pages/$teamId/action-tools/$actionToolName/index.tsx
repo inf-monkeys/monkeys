@@ -59,7 +59,11 @@ export const ActionToolDetail: React.FC<IActionToolDetailProps> = () => {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="info">
-          <UgcDetailInfo columns={createActionToolsColumns({ hooks: { navigate } })} data={blockData} />
+          <UgcDetailInfo
+            columns={createActionToolsColumns({ hooks: { navigate } })}
+            data={blockData}
+            assetKey="action-tools"
+          />
         </TabsContent>
         <TabsContent value="workflows">
           <UgcDetailWorkflows data={blockWorkflowRefData ?? []} />

@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { CircularProgress } from '@nextui-org/progress';
+import { useTranslation } from 'react-i18next';
 
 import { useCredentials, useCredentialTypes } from '@/apis/credential';
 import { IVinesCredentialType } from '@/apis/credential/typings.ts';
@@ -16,6 +17,8 @@ import { VinesIcon } from '@/components/ui/vines-icon';
 interface IAccountTypesProps {}
 
 export const AccountTypes: React.FC<IAccountTypesProps> = () => {
+  const { t } = useTranslation();
+
   const { data: credentials } = useCredentials();
   const { data } = useCredentialTypes();
 
@@ -49,7 +52,11 @@ export const AccountTypes: React.FC<IAccountTypesProps> = () => {
                       <TooltipContent>{it.displayName}</TooltipContent>
                     </Tooltip>
                     <div className="mt-1 line-clamp-1 text-xs opacity-50">
-                      {length ? `共 ${length} 个账号，点击管理` : '暂无账号，点击创建'}
+                      {length
+                        ? t('ugc-page.action-tools.ugc-view.subtitle.external-account.list.count.total', {
+                            count: length,
+                          })
+                        : t('ugc-page.action-tools.ugc-view.subtitle.external-account.list.count.none')}
                     </div>
                   </div>
                 </Card>
@@ -63,7 +70,9 @@ export const AccountTypes: React.FC<IAccountTypesProps> = () => {
           {active && <ExternalAccountManage detail={active} />}
           <DialogFooter>
             <CreateExternalAccount detail={active}>
-              <Button variant="outline">创建账号</Button>
+              <Button variant="outline">
+                {t('ugc-page.action-tools.ugc-view.subtitle.external-account.list.create')}
+              </Button>
             </CreateExternalAccount>
           </DialogFooter>
         </DialogContent>

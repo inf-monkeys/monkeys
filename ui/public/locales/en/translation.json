@@ -82,7 +82,8 @@
     },
     "load": {
       "loading": "Loading...",
-      "empty": "No data"
+      "empty": "No data",
+      "no-more": "No more"
     },
     "update": {
       "loading": "Updating...",
@@ -739,6 +740,40 @@
           },
           "thirdPartyAccount": {
             "label": "Third Party Account"
+          }
+        },
+        "subtitle": {
+          "external-account": {
+            "button": "Third Party Account Manage",
+            "title": "Third party account manage",
+            "manage": {
+              "content": "All account information will be encrypted and stored without disclosing your key information (e.g. keys) and will not be sent back to the page",
+              "columns": {
+                "name": "Name",
+                "operate": "Operate"
+              },
+              "delete": {
+                "title": "Delete confirmation of third party account",
+                "content": "Are you sure you want to delete the third party account?\nDeleting this account will prevent it from being used properly in the workflow.\nThe operation cannot be undone."
+              },
+              "create": {
+                "title": "Add {{name}}",
+                "columns": {
+                  "displayName": "Account Name"
+                },
+                "utils": {
+                  "name": "{{name}} account"
+                }
+              }
+            },
+            "list": {
+              "create": "Add Account",
+              "count": {
+                "total_one": "Total {{count}} account, click to manage",
+                "total_other": "Total {{count}} accounts, click to manage",
+                "none": "No account, click to add one"
+              }
+            }
           }
         }
       }
