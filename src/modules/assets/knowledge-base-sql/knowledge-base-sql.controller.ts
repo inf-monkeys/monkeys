@@ -30,6 +30,13 @@ export class SqlKnowledgeBaseController {
       displayName: body.displayName,
       description: body.description,
       iconUrl: body.iconUrl,
+      createType: body.createType,
+      host: body.host,
+      port: body.port,
+      username: body.username,
+      password: body.password,
+      database: body.database,
+      schema: body.schema,
     });
   }
 

@@ -24,6 +24,15 @@ export class SqlKnowledgeBaseService {
     }>(this.KNOWLEDGE_BASE_NAMESPACE, {
       url: '/sql-knowledge-bases',
       method: 'POST',
+      data: {
+        createType: params.createType,
+        host: params.host,
+        port: params.port,
+        username: params.username,
+        password: params.password,
+        database: params.database,
+        schema: params.schema,
+      },
     });
     // Create knowledge base in database
     const { id } = data;

@@ -10,6 +10,14 @@ export interface CreateSqlKnowledgeBaseParams {
   displayName: string;
   description?: string;
   iconUrl?: string;
+
+  createType: string;
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+  database: string;
+  schema: string;
 }
 
 @Injectable()
