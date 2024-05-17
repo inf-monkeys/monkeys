@@ -20,7 +20,7 @@ export interface IComfyuiWorkflow {
   creatorUserId: string;
   workflowType: ComfyuiWorkflowSourceType;
   originalData: { [x: string]: any };
-  wofkflow?: { [x: string]: any };
+  workflow?: { [x: string]: any };
   prompt: { [x: string]: any };
   toolName: string;
   toolInput: BlockDefProperties[];
