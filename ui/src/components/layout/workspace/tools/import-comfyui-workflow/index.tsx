@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { MIME_TYPES } from '@mantine/dropzone';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -21,7 +22,6 @@ import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Updater } from '@/components/ui/updater';
 import { IImportComfyUIWorkflow, importComfyUIWorkflowSchema } from '@/schema/workspace/import-comfyui-workflow';
-import { MIME_TYPES } from '@mantine/dropzone';
 
 interface IImportToolModalProps {
   children?: React.ReactNode;
@@ -30,7 +30,6 @@ interface IImportToolModalProps {
 export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ children }) => {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [filename, setFilename] = useState('');
 
   const form = useForm<IImportComfyUIWorkflow>({
     resolver: zodResolver(importComfyUIWorkflowSchema),
@@ -59,7 +58,7 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
     },
     {
       value: 'json',
-      displayName: '工作流 json 文件',
+      displayName: '工作流 JSON 文件',
     },
   ];
 
@@ -68,13 +67,13 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className='h-200'>
+      <DialogContent className="sm:max-w-[625px]">
         <DialogHeader>
           <DialogTitle>导入 ComfyUI 工作流</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-            <ScrollArea className="h-72">
+            <ScrollArea className="h-96 [&>div]:p-2">
               <FormField
                 name="workflowType"
                 control={form.control}
@@ -117,9 +116,6 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
                             onFinished={(urls) => {
                               field.onChange(urls[0]);
                             }}
-                            onFilesUpdate={(files) => {
-                              setFilename(files[0]?.name ?? '');
-                            }}
                           />
                         </FormControl>
                         <FormDescription>在此处上传文件将自动存入「富媒体数据」</FormDescription>
@@ -146,9 +142,6 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
                             onFinished={(urls) => {
                               field.onChange(urls[0]);
                             }}
-                            onFilesUpdate={(files) => {
-                              setFilename(files[0]?.name ?? '');
-                            }}
                           />
                         </FormControl>
                         <FormDescription>在此处上传文件将自动存入「富媒体数据」</FormDescription>
@@ -169,9 +162,6 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
                             limit={1}
                             onFinished={(urls) => {
                               field.onChange(urls[0]);
-                            }}
-                            onFilesUpdate={(files) => {
-                              setFilename(files[0]?.name ?? '');
                             }}
                           />
                         </FormControl>
