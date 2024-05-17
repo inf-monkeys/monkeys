@@ -8,6 +8,7 @@ import { useCreateWorkflowChatSession, useWorkflowChatSessions } from '@/apis/wo
 import { InfoEditor } from '@/components/layout/settings/account/info-editor.tsx';
 import { ChatSession } from '@/components/layout/vines-view/chat/sidebar/chat-session.tsx';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useFlowStore } from '@/store/useFlowStore';
@@ -32,66 +33,69 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
     <div className="flex h-full max-w-64">
       <motion.div
         className="flex flex-col gap-4 overflow-hidden [&_h1]:line-clamp-1 [&_span]:line-clamp-1"
-        initial={{ width: visible ? 256 : 0, paddingRight: visible ? 16 : 0 }}
+        initial={{ width: visible ? 256 : 0, paddingRight: visible ? 4 : 0 }}
         animate={{
           width: visible ? 256 : 0,
-          paddingRight: visible ? 16 : 0,
+          paddingRight: visible ? 6 : 0,
           transition: { duration: 0.2 },
         }}
       >
         <h1 className="text-2xl font-bold">对话列表</h1>
-        <div className="grid gap-2 px-1">
-          {data?.map((session) => (
-            <ChatSession
-              active={activeSessionId === session.id}
-              session={session}
-              key={session.id}
-              onDeleted={() => {
-                mutate().then((newData) => {
-                  if (!newData?.length) {
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    const { [workflowId]: _, ...rest } = chatSessions;
-                    setChatSessions(rest);
-                  } else {
-                    setChatSessions({
-                      ...chatSessions,
-                      [workflowId]: newData?.[0].id ?? '',
-                    });
-                  }
-                });
-              }}
-              onClick={() => {
-                setChatSessions({
-                  ...chatSessions,
-                  [workflowId]: session.id,
-                });
-              }}
-            />
-          ))}
-          <InfoEditor
-            title="新建会话"
-            placeholder="输入会话名称，16 字以内"
-            onFinished={(displayName) =>
-              toast.promise(trigger({ displayName, workflowId }), {
-                loading: '新建中...',
-                success: (session) => {
-                  session &&
-                    setChatSessions({
-                      ...chatSessions,
-                      [workflowId]: session.id,
-                    });
-                  return '新建成功';
-                },
-                error: '新建失败',
-                finally: () => void mutate(),
-              })
-            }
-          >
-            <Button variant="outline" icon={<Plus />}>
-              新建会话
-            </Button>
-          </InfoEditor>
-        </div>
+        <ScrollArea className="h-full max-h-[calc(100%-3rem)]">
+          <div className="grid gap-2 py-1 pl-1 pr-3">
+            {data?.map((session) => (
+              <ChatSession
+                active={activeSessionId === session.id}
+                session={session}
+                key={session.id}
+                onDeleted={() => {
+                  mutate().then((newData) => {
+                    if (!newData?.length) {
+                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                      const { [workflowId]: _, ...rest } = chatSessions;
+                      setChatSessions(rest);
+                    } else {
+                      setChatSessions({
+                        ...chatSessions,
+                        [workflowId]: newData?.[0].id ?? '',
+                      });
+                    }
+                  });
+                }}
+                onClick={() => {
+                  setChatSessions({
+                    ...chatSessions,
+                    [workflowId]: session.id,
+                  });
+                }}
+              />
+            ))}
+
+            <InfoEditor
+              title="新建会话"
+              placeholder="输入会话名称，16 字以内"
+              onFinished={(displayName) =>
+                toast.promise(trigger({ displayName, workflowId }), {
+                  loading: '新建中...',
+                  success: (session) => {
+                    session &&
+                      setChatSessions({
+                        ...chatSessions,
+                        [workflowId]: session.id,
+                      });
+                    return '新建成功';
+                  },
+                  error: '新建失败',
+                  finally: () => void mutate(),
+                })
+              }
+            >
+              <Button variant="outline" icon={<Plus />}>
+                新建会话
+              </Button>
+            </InfoEditor>
+          </div>
+        </ScrollArea>
       </motion.div>
       <Separator orientation="vertical" className="vines-center">
         <Tooltip>

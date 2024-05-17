@@ -132,7 +132,7 @@ export const useChat = (
       abortControllerRef.current = null;
       toast.error('对话失败，请检查工作流日志');
     }
-  }, [mutateMessages, chatId, apiKey, multipleChat]);
+  }, [mutateMessages, chatId, apiKey, multipleChat, workflowId]);
 
   const stop = useCallback(() => {
     if (abortControllerRef.current) {

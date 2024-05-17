@@ -123,8 +123,9 @@ JSONPath                      | 描述
     estimateTime: 3,
   },
 
-  handler: async (inputs: { [x: string]: any }) => {
-    const { doWhileTaskReferenceName, jsonPathExpression, workflowInstanceId } = inputs;
+  handler: async (inputs: { [x: string]: any }, context) => {
+    const { doWhileTaskReferenceName, jsonPathExpression } = inputs;
+    const { workflowInstanceId } = context;
     const collectDoWhileOutputInSubworkflow = async (workflowInstanceId: string, collectData: (taskReferenceName: string, data: any) => void) => {
       const data = await conductorClient.workflowResource.getExecutionStatus(workflowInstanceId, true, true, true);
       const { tasks } = data;

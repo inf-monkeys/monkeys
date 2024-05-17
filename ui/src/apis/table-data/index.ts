@@ -28,9 +28,13 @@ export const useDatabaseTables = (databaseId: string) =>
 export const useDatabaseData = (databaseId: string, tableId: string, page = 1, limit = 10) =>
   useSWR<IDatabaseData[] | undefined>(
     databaseId && tableId
-      ? `/api/sql-knowledge-bases/${databaseId}/tables/${tableId}?${qs.stringify({ page, limit })}`
+      ? `/api/tools/monkey_tools_knowledge_base/sql-knowledge-bases/${databaseId}/tables/${tableId}?${qs.stringify({ page, limit })}`
       : null,
-    vinesFetcher(),
+    vinesFetcher({
+      responseResolver: async (response) => {
+        return ((await response.json()) as any).records as IDatabaseData[];
+      },
+    }),
   );
 
 export const createDatabase = (parma: { displayName: string; description: string; iconUrl: string }) =>
@@ -40,7 +44,9 @@ export const deleteDatabase = (databaseId: string) =>
   vinesFetcher({ method: 'DELETE', simple: true })(`/api/sql-knowledge-bases/${databaseId}`);
 
 export const deleteTable = (databaseId: string, tableId: string) =>
-  vinesFetcher({ method: 'DELETE', simple: true })(`/api/sql-knowledge-bases/${databaseId}/tables/${tableId}`);
+  vinesFetcher({ method: 'DELETE', simple: true })(
+    `/api/tools/monkey_tools_knowledge_base/sql-knowledge-bases/${databaseId}/tables/${tableId}`,
+  );
 
 export const importToDatabaseUseCSV = (databaseId: string, table_name: string, csvfile: string, sep = ',') =>
   vinesFetcher({

@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
 import { IDatabaseInfo, databaseInfoSchema } from '@/schema/table-database/create-database.ts';
@@ -24,6 +25,7 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
   const form = useForm<IDatabaseInfo>({
     resolver: zodResolver(databaseInfoSchema),
     defaultValues: {
+      createType: 'builtIn',
       displayName: '',
       description: '',
       iconUrl: 'emoji:🍀:#ceefc5',
@@ -48,59 +50,226 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
       },
     });
   });
+  const { createType } = form.getValues();
+
+  const createTypeOptions = [
+    {
+      displayName: '内建 Sqlite 数据库',
+      value: 'builtIn',
+    },
+    {
+      displayName: '外置数据库',
+      value: 'external',
+    },
+  ];
+
+  const databaseTypeOptions = [
+    {
+      displayName: 'Postgres',
+      value: 'postgres',
+    },
+    {
+      displayName: 'Mysql',
+      value: 'mysql',
+    },
+    {
+      displayName: 'TiDB',
+      value: 'tidb',
+    },
+  ];
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="small" icon={<Plus />}>
-          创建表格
+          创建表格数据库
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogTitle>创建表格数据</DialogTitle>
+        <DialogTitle>创建表格数据库</DialogTitle>
         <Form {...form}>
           <form onSubmit={handleSubmit} className="flex flex-col gap-2">
             <FormField
-              name="displayName"
+              name="createType"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>表格名称</FormLabel>
+                  <FormLabel>创建类型</FormLabel>
                   <FormControl>
-                    <Input placeholder="请输入表格名称" {...field} className="grow" autoFocus />
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="请选择一个创建类型" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {createTypeOptions.map((option) => (
+                          <SelectItem value={option.value} key={option.value}>
+                            {option.displayName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <FormField
-              name="description"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>表格简介</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="请输入表格简介，不超过 100 字" className="h-28 resize-none" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {createType === 'builtIn' && (
+              <>
+                <FormField
+                  name="displayName"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>数据库名称</FormLabel>
+                      <FormControl>
+                        <Input placeholder="请输入数据库名称" {...field} className="grow" autoFocus />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <FormField
-              name="iconUrl"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>表格图标</FormLabel>
-                  <FormControl>
-                    <VinesIconEditor value={field.value} defaultValue="emoji:🍀:#ceefc5" onChange={field.onChange} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  name="description"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>数据库简介</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="请输入数据库简介，不超过 100 字"
+                          className="h-28 resize-none"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  name="iconUrl"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>图标</FormLabel>
+                      <FormControl>
+                        <VinesIconEditor
+                          value={field.value}
+                          defaultValue="emoji:🍀:#ceefc5"
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
+
+            {createType === 'external' && (
+              <>
+                <FormField
+                  name="databaseType"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>数据库类型</FormLabel>
+                      <FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="请选择数据库类型" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {databaseTypeOptions.map((option) => (
+                              <SelectItem value={option.value} key={option.value}>
+                                {option.displayName}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  name="host"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Host</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Host" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  name="port"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Port</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Port" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  name="database"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Database</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Database" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  name="username"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Username" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  name="password"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Password" type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
 
             <DialogFooter>
               <Button type="submit" loading={isLoading} variant="solid">
