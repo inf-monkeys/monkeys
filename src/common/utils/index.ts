@@ -11,3 +11,22 @@ export function isValidNamespace(str: string) {
 export function isValidToolName(str: string) {
   return /^(?!.*__.*$)[a-zA-Z0-9_]*$/.test(str);
 }
+
+export function isValidUrl(url: string) {
+  const urlPattern = new RegExp(
+    '^(https?:\\/\\/)?' + // protocol
+      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|' + // domain name and extension
+      '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+      '(\\:\\d+)?' + // port
+      '(\\/[-a-z\\d%@_.~+&:]*)*' + // path
+      '(\\?[;&a-z\\d%@_.,~+&:=-]*)?' + // query string
+      '(\\#[-a-z\\d_]*)?$',
+    'i',
+  ); // fragment locator
+  return !!urlPattern.test(url);
+}
+
+export function getHostFromUrl(url: string): string {
+  const parsedUrl = new URL(url);
+  return parsedUrl.host;
+}

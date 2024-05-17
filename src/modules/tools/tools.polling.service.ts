@@ -121,7 +121,10 @@ export class ToolsPollingService {
     const builtInTool = await this.isBuiltInTool(__toolName);
     if (builtInTool) {
       try {
-        const result = await builtInTool.handler(rest);
+        const result = await builtInTool.handler(rest, {
+          taskId: task.taskId,
+          workflowInstanceId: task.workflowInstanceId,
+        });
         return {
           outputData: result,
           status: 'COMPLETED',

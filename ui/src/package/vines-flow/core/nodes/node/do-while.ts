@@ -352,6 +352,27 @@ export class DoWhileNode extends ControlFlowVinesNode<DoWhileTaskDef> {
       '${{target}.output}',
       '$.{target}[*]',
     );
+
+    extraVariables.push(
+      ...this._vinesCore.generateVariable(
+        {
+          id: this.id,
+          name: nodeTitle,
+          desc: nodeDesc,
+          icon: nodeIcon,
+        },
+        this.id + '_loopItemRef',
+        [
+          {
+            name: 'result',
+            type: 'json',
+            displayName: '当前循环元素',
+          },
+        ],
+        '${{target}.output.{variable}}',
+        '$.{target}[*]',
+      ),
+    );
     const extraMapper = this._vinesCore.generateVariableMapper(extraVariables, this.customData?.title ?? '循环');
 
     return {

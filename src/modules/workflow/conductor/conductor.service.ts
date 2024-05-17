@@ -135,7 +135,7 @@ export class ConductorService {
         continue;
       }
 
-      if (tool.namespace !== SYSTEM_NAMESPACE) {
+      if (tool.namespace !== SYSTEM_NAMESPACE || task.type === BlockType.SIMPLE) {
         // use CUSTOM_BLOCK_NAME_KEY to store real task_name
         task.inputParameters[this.TOOL_NAME_KEY] = task.name;
         task.inputParameters[this.CONTEXT_KEY] = '${workflow.input.__context}';

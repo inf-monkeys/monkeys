@@ -5,6 +5,9 @@ import { createContext } from 'zustand-utils';
 export interface ViewStore {
   visible: boolean;
   setVisible: (visible: boolean) => void;
+
+  fullscreen: boolean;
+  setFullscreen: (fullscreen: boolean) => void;
 }
 
 const createViewStore = () =>
@@ -12,6 +15,9 @@ const createViewStore = () =>
     immer((set) => ({
       visible: false,
       setVisible: (visible) => set({ visible }),
+
+      fullscreen: false,
+      setFullscreen: (fullscreen) => set({ fullscreen }),
     })),
   );
 

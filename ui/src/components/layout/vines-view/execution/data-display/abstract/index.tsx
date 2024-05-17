@@ -35,7 +35,9 @@ export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
                 {type === 'boolean' && <VinesAbstractBoolean>{value}</VinesAbstractBoolean>}
                 {type === 'url' && <VinesAbstractUrl>{value}</VinesAbstractUrl>}
                 {type === 'image' && <VinesAbstractImage>{value}</VinesAbstractImage>}
-                {type === 'pdb' && <VinesAbstractPDB>{value}</VinesAbstractPDB>}
+                {type === 'pdb' && (
+                  <VinesAbstractPDB height={(style?.height as number) ?? void 0}>{value}</VinesAbstractPDB>
+                )}
                 {i !== previewDataLength - 1 && <Separator className="mt-3" />}
               </div>
             );
