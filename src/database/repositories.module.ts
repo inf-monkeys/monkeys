@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { entities } from './database.module';
 import { ApikeyRepository } from './repositories/apikey.repository';
 import { CanvasAssetRepositroy } from './repositories/assets-canvas.repository';
+import { ComfyuiWorkflowAssetRepositroy } from './repositories/assets-comfyui-workflow.respository';
 import { AssetsCommonRepository } from './repositories/assets-common.repository';
 import { SqlKnowledgeBaseAssetRepositroy } from './repositories/assets-knowledge-base-sql.repository';
 import { KnowledgeBaseAssetRepositroy } from './repositories/assets-knowledge-base.repository';
@@ -11,6 +12,7 @@ import { AssetsMarketPlaceRepository } from './repositories/assets-marketplace.r
 import { MediaFileAssetRepositroy } from './repositories/assets-media-file.repository';
 import { SdModelAssetRepositroy } from './repositories/assets-sd-model.repository';
 import { WorkflowAssetRepositroy } from './repositories/assets-workflow.respository';
+import { ComfyuiWorkflowRepository } from './repositories/comfyui-workflow.repository';
 import { CredentialsRepository } from './repositories/credential.repository';
 import { SqlKnowledgeBaseRepository } from './repositories/knowledge-base-sql.repository';
 import { KnowledgeBaseRepository } from './repositories/knowledge-base.repository';
@@ -49,6 +51,8 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     LlmModelRepository,
     SdModelRepository,
     AssetsMarketPlaceRepository,
+    ComfyuiWorkflowRepository,
+    ComfyuiWorkflowAssetRepositroy,
   ],
   exports: [
     ToolsRepository,
@@ -73,6 +77,8 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     LlmModelRepository,
     SdModelRepository,
     AssetsMarketPlaceRepository,
+    ComfyuiWorkflowRepository,
+    ComfyuiWorkflowAssetRepositroy,
   ],
   imports: [TypeOrmModule.forFeature(entities)],
 })

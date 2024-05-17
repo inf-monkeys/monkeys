@@ -29,11 +29,13 @@ import { Route as TeamIdMediaDataIndexImport } from './pages/$teamId/media-data/
 import { Route as TeamIdJoinTeamIndexImport } from './pages/$teamId/join-team/index'
 import { Route as TeamIdImageModelsIndexImport } from './pages/$teamId/image-models/index'
 import { Route as TeamIdImageModelStoreIndexImport } from './pages/$teamId/image-model-store/index'
+import { Route as TeamIdComfyuiIndexImport } from './pages/$teamId/comfyui/index'
 import { Route as TeamIdApplicationStoreIndexImport } from './pages/$teamId/application-store/index'
 import { Route as TeamIdActionToolsIndexImport } from './pages/$teamId/action-tools/index'
 import { Route as TeamIdWorkspaceWorkflowIdIndexImport } from './pages/$teamId/workspace/$workflowId/index'
 import { Route as TeamIdTextDataTextIdIndexImport } from './pages/$teamId/text-data/$textId/index'
 import { Route as TeamIdTableDataDatabaseIdIndexImport } from './pages/$teamId/table-data/$databaseId/index'
+import { Route as TeamIdComfyuiComfyuiWorkflowIdIndexImport } from './pages/$teamId/comfyui/$comfyuiWorkflowId/index'
 import { Route as TeamIdActionToolsActionToolNameIndexImport } from './pages/$teamId/action-tools/$actionToolName/index'
 import { Route as TeamIdWorkspaceWorkflowIdPageIdIndexImport } from './pages/$teamId/workspace/$workflowId/$pageId/index'
 
@@ -131,6 +133,11 @@ const TeamIdImageModelStoreIndexRoute = TeamIdImageModelStoreIndexImport.update(
   } as any,
 )
 
+const TeamIdComfyuiIndexRoute = TeamIdComfyuiIndexImport.update({
+  path: '/$teamId/comfyui/',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const TeamIdApplicationStoreIndexRoute =
   TeamIdApplicationStoreIndexImport.update({
     path: '/$teamId/application-store/',
@@ -156,6 +163,12 @@ const TeamIdTextDataTextIdIndexRoute = TeamIdTextDataTextIdIndexImport.update({
 const TeamIdTableDataDatabaseIdIndexRoute =
   TeamIdTableDataDatabaseIdIndexImport.update({
     path: '/$teamId/table-data/$databaseId/',
+    getParentRoute: () => rootRoute,
+  } as any)
+
+const TeamIdComfyuiComfyuiWorkflowIdIndexRoute =
+  TeamIdComfyuiComfyuiWorkflowIdIndexImport.update({
+    path: '/$teamId/comfyui/$comfyuiWorkflowId/',
     getParentRoute: () => rootRoute,
   } as any)
 
@@ -197,6 +210,10 @@ declare module '@tanstack/react-router' {
     }
     '/$teamId/application-store/': {
       preLoaderRoute: typeof TeamIdApplicationStoreIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/comfyui/': {
+      preLoaderRoute: typeof TeamIdComfyuiIndexImport
       parentRoute: typeof rootRoute
     }
     '/$teamId/image-model-store/': {
@@ -259,6 +276,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdActionToolsActionToolNameIndexImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/comfyui/$comfyuiWorkflowId/': {
+      preLoaderRoute: typeof TeamIdComfyuiComfyuiWorkflowIdIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/table-data/$databaseId/': {
       preLoaderRoute: typeof TeamIdTableDataDatabaseIdIndexImport
       parentRoute: typeof rootRoute
@@ -287,6 +308,7 @@ export const routeTree = rootRoute.addChildren([
   LoginIndexRoute,
   TeamIdActionToolsIndexRoute,
   TeamIdApplicationStoreIndexRoute,
+  TeamIdComfyuiIndexRoute,
   TeamIdImageModelStoreIndexRoute,
   TeamIdImageModelsIndexRoute,
   TeamIdJoinTeamIndexRoute,
@@ -302,6 +324,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdWorkflowsIndexRoute,
   TeamIdWorkspaceIndexRoute,
   TeamIdActionToolsActionToolNameIndexRoute,
+  TeamIdComfyuiComfyuiWorkflowIdIndexRoute,
   TeamIdTableDataDatabaseIdIndexRoute,
   TeamIdTextDataTextIdIndexRoute,
   TeamIdWorkspaceWorkflowIdIndexRoute,

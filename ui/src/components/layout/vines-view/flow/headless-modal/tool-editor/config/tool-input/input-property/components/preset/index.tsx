@@ -11,6 +11,7 @@ import { LlmModelPresets } from '@/components/layout/vines-view/flow/headless-mo
 import { SdModelPresets } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/sd-model.tsx';
 import { WorkflowVersionPresets } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/workflow-version.tsx';
 import { WorkflowPresets } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/workflow.tsx';
+import { ComfyuiWorkflowsSelector } from './comfyui-workflow';
 import { ToolSelector } from './tool';
 
 export interface IVinesInputPresetProps {
@@ -28,6 +29,7 @@ export const PresetInput: React.FC<IVinesInputPropertyProps & IVinesInputPresetP
         {assetType === 'sd-model' && <SdModelPresets {...childProps} />}
         {assetType === 'llm-model' && <LlmModelPresets {...childProps} />}
         {assetType === 'knowledge-base' && <KnowledgeBaseSelector {...childProps} />}
+        {assetType === 'comfyui-workflow' && <ComfyuiWorkflowsSelector {...childProps} />}
         {assetType === 'tools' && <ToolSelector {...childProps} />}
         {assetType === 'workflow-version' && <WorkflowVersionPresets {...childProps} />}
         {assetType === 'fork-join-branch' && <ForkJoinBranchPresets {...childProps} />}

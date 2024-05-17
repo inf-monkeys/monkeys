@@ -25,6 +25,7 @@ import { KnowLedgeBaseEntity } from './entities/assets/knowledge-base/knowledge-
 import { MediaFileEntity } from './entities/assets/media/media-file';
 import { LlmModelEntity } from './entities/assets/model/llm-model/llm-model';
 import { SdModelEntity } from './entities/assets/model/sd-model/sd-model';
+import { ComfyuiWorkflowEntity } from './entities/comfyui/comfyui-workflow.entity';
 import { TeamEntity } from './entities/identity/team';
 import { TeamJoinRequestsEntity } from './entities/identity/team-join-request';
 import { UserEntity } from './entities/identity/user';
@@ -63,6 +64,7 @@ export const entities: EntityClassOrSchema[] = [
   SqlKnowLedgeBaseEntity,
   AssetsMarketPlaceTagEntity,
   AssetsMarketplaceTagRelationsEntity,
+  ComfyuiWorkflowEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({

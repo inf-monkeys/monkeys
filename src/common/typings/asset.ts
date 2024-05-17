@@ -2,7 +2,19 @@ import { AssetsTagEntity } from '@/database/entities/assets/asset-tag-definition
 import { TeamEntity } from '@/database/entities/identity/team';
 import { UserEntity } from '@/database/entities/identity/user';
 
-export type AssetType = 'llm-model' | 'sd-model' | 'workflow' | 'workflow-view' | 'workflow-template' | 'media-file' | 'canvas' | 'knowledge-base' | 'tools' | 'block' | 'knowledge-base-sql';
+export type AssetType =
+  | 'llm-model'
+  | 'sd-model'
+  | 'workflow'
+  | 'workflow-view'
+  | 'workflow-template'
+  | 'media-file'
+  | 'canvas'
+  | 'knowledge-base'
+  | 'tools'
+  | 'block'
+  | 'knowledge-base-sql'
+  | 'comfyui-workflow';
 
 export const ALLOW_ASSET_TYPES: AssetType[] = ['canvas', 'llm-model', 'media-file', 'sd-model', 'workflow', 'workflow-view', 'workflow-template', 'knowledge-base'];
 
