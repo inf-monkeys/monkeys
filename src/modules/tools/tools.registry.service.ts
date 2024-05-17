@@ -2,6 +2,7 @@ import { logger } from '@/common/logger';
 import { enumToList, isValidNamespace } from '@/common/utils';
 import { ExtendedToolDefinition } from '@/common/utils/define-tool';
 import { SYSTEM_NAMESPACE } from '@/database/entities/tools/tools-server.entity';
+import { ComfyuiWorkflowRepository } from '@/database/repositories/comfyui-workflow.repository';
 import { TriggerTypeRepository } from '@/database/repositories/trigger-type.repository';
 import { BlockDefinition } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
@@ -24,12 +25,14 @@ import {
 } from '../../common/typings/tools';
 import { CredentialsRepository } from '../../database/repositories/credential.repository';
 import { ToolsRepository } from '../../database/repositories/tools.repository';
+import { COMFYUI_INFER_TOOL } from './consts';
 import { parseOpenApiSpecAsTools } from './utils/openapi-parser';
 
 @Injectable()
 export class ToolsRegistryService {
   constructor(
     private readonly toolsRepository: ToolsRepository,
+    private readonly comfyuiWorkflowRepository: ComfyuiWorkflowRepository,
     private readonly credentialsRepository: CredentialsRepository,
     private readonly triggerTypesRepository: TriggerTypeRepository,
   ) {}
@@ -221,8 +224,28 @@ export class ToolsRegistryService {
     );
   }
 
-  public async listTools() {
-    return await this.toolsRepository.listTools();
+  public async listTools(teamId: string) {
+    const tools = await this.toolsRepository.listTools();
+    // Handle Special comfyui tool
+    const comfyuiInferTool = tools.find((x) => x.name === COMFYUI_INFER_TOOL);
+    if (comfyuiInferTool) {
+      const comfyuiWorkflowsInThisTeam = await this.comfyuiWorkflowRepository.getAllComfyuiWorkflows(teamId);
+      let input = comfyuiInferTool.input || [];
+      for (const comfyuiWorkflow of comfyuiWorkflowsInThisTeam) {
+        if (comfyuiWorkflow.toolInput?.length) {
+          input = input.concat(
+            comfyuiWorkflow.toolInput.map((item) => {
+              item.displayOptions = item.displayOptions || {};
+              item.displayOptions.show = item.displayOptions.show || {};
+              item.displayOptions.show.workflow = [comfyuiWorkflow.id];
+              return item;
+            }),
+          );
+        }
+      }
+      comfyuiInferTool.input = input;
+    }
+    return tools;
   }
 
   public async getToolByName(name: string) {
