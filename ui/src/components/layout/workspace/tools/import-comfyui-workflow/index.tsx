@@ -58,8 +58,8 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
       displayName: '图片',
     },
     {
-      value: 'workflow_api_json',
-      displayName: 'workflow_api.json',
+      value: 'json',
+      displayName: '工作流 json 文件',
     },
   ];
 
@@ -68,13 +68,13 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent>
+      <DialogContent className='h-200'>
         <DialogHeader>
           <DialogTitle>导入 ComfyUI 工作流</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-            <ScrollArea className="h-200 px-2 [&>div>div]:p-1">
+            <ScrollArea className="h-72">
               <FormField
                 name="workflowType"
                 control={form.control}
@@ -112,6 +112,59 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
                         <FormControl>
                           <Updater
                             accept={[MIME_TYPES.png, MIME_TYPES.jpeg, MIME_TYPES.gif]}
+                            maxSize={20}
+                            limit={1}
+                            onFinished={(urls) => {
+                              field.onChange(urls[0]);
+                            }}
+                            onFilesUpdate={(files) => {
+                              setFilename(files[0]?.name ?? '');
+                            }}
+                          />
+                        </FormControl>
+                        <FormDescription>在此处上传文件将自动存入「富媒体数据」</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
+
+              {workflowType === 'json' && (
+                <>
+                  <FormField
+                    name="workflowJsonUrl"
+                    control={form.control}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Workflow JSON</FormLabel>
+                        <FormControl>
+                          <Updater
+                            accept={['application/json']}
+                            maxSize={20}
+                            limit={1}
+                            onFinished={(urls) => {
+                              field.onChange(urls[0]);
+                            }}
+                            onFilesUpdate={(files) => {
+                              setFilename(files[0]?.name ?? '');
+                            }}
+                          />
+                        </FormControl>
+                        <FormDescription>在此处上传文件将自动存入「富媒体数据」</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    name="workflowApiJsonUrl"
+                    control={form.control}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Workflow API JSON</FormLabel>
+                        <FormControl>
+                          <Updater
+                            accept={['application/json']}
                             maxSize={20}
                             limit={1}
                             onFinished={(urls) => {

@@ -5,7 +5,7 @@ import { BaseAssetEntity } from '../assets/base-asset';
 
 export enum ComfyuiWorkflowSourceType {
   Image = 'image',
-  WorkflowApiJson = 'workflow_api_json',
+  WorkflowApiJson = 'json',
 }
 
 @Entity({ name: 'comfyui_workflows' })
