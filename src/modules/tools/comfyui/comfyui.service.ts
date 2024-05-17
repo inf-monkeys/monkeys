@@ -1,5 +1,5 @@
 import { ListDto } from '@/common/dto/list.dto';
-import { readComfyuiWorkflowFromImage } from '@/common/utils/comfyui';
+import { readComfyuiWorkflowFromImage, readComfyuiWorkflowFromJsonFile, readComfyuiWorkflowPromptFromJsonFile } from '@/common/utils/comfyui';
 import { ComfyuiWorkflowSourceType } from '@/database/entities/comfyui/comfyui-workflow.entity';
 import { ComfyuiWorkflowRepository } from '@/database/repositories/comfyui-workflow.repository';
 import { BlockDefProperties } from '@inf-monkeys/vines';
@@ -9,7 +9,8 @@ export interface ImportComfyuiWorkflowParams {
   displayName?: string;
   workflowType: ComfyuiWorkflowSourceType;
   imageUrl?: string;
-  workflowApiJson?: any;
+  workflowApiJsonUrl?: string;
+  workflowJsonUrl?: string;
 }
 
 @Injectable()
@@ -29,13 +30,30 @@ export class ComfyUIService {
   }
 
   public async importComfyuiWorkflow(teamId: string, userId: string, params: ImportComfyuiWorkflowParams) {
-    const { workflowType, imageUrl, displayName, workflowApiJson } = params;
+    const { workflowType, imageUrl, displayName, workflowApiJsonUrl, workflowJsonUrl } = params;
     if (workflowType === 'image') {
       const { workflow, prompt } = await readComfyuiWorkflowFromImage(imageUrl);
       const comfyuiWorkflow = await this.comfyuiWorkflowRepository.createComfyuiWorkflow(teamId, userId, {
         workflowType,
         originalData: { imageUrl },
-        wofkflow: workflow,
+        workflow: workflow,
+        prompt,
+        displayName,
+      });
+      return comfyuiWorkflow;
+    } else if (workflowType === 'json') {
+      const workflowJson = await readComfyuiWorkflowFromJsonFile(workflowJsonUrl);
+      if (!workflowJson?.links || !workflowJson?.nodes) {
+        throw new Error('Invalid ComfyUI JSON file');
+      }
+      const prompt = await readComfyuiWorkflowPromptFromJsonFile(workflowApiJsonUrl);
+      if (!prompt || typeof prompt !== 'object') {
+        throw new Error('Invalid ComfyUI API JSON file');
+      }
+      const comfyuiWorkflow = await this.comfyuiWorkflowRepository.createComfyuiWorkflow(teamId, userId, {
+        workflowType,
+        originalData: { workflowJsonUrl, workflowApiJsonUrl },
+        workflow: workflowJson,
         prompt,
         displayName,
       });

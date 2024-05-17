@@ -11,7 +11,7 @@ import { ComfyuiWorkflowAssetRepositroy } from './assets-comfyui-workflow.respos
 export interface CreateComfyuiWorkflowParams {
   workflowType: ComfyuiWorkflowSourceType;
   originalData: { [x: string]: any };
-  wofkflow?: ComfyuiWorkflow;
+  workflow?: ComfyuiWorkflow;
   prompt: ComfyuiPrompt;
   displayName: string;
 }
@@ -66,7 +66,7 @@ export class ComfyuiWorkflowRepository {
     entity.creatorUserId = userId;
     entity.workflowType = comfyuiWorkflow.workflowType;
     entity.originalData = comfyuiWorkflow.originalData;
-    entity.workflow = comfyuiWorkflow.wofkflow;
+    entity.workflow = comfyuiWorkflow.workflow;
     entity.prompt = comfyuiWorkflow.prompt;
     entity.displayName = comfyuiWorkflow.displayName;
 

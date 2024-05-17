@@ -7,7 +7,8 @@ import { BlockDefProperties } from '@inf-monkeys/vines';
 export interface ImportComfyuiWorkflowParams {
   workflowType: string;
   imageUrl?: string;
-  workflowApiJson?: any;
+  workflowApiJsonUrl?: string;
+  workflowJsonUrl?: string;
 
   [x: string]: any;
 }
