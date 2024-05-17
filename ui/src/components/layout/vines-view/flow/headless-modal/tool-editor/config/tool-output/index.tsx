@@ -4,12 +4,13 @@ import { useClipboard } from '@mantine/hooks';
 import { Copy } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Tree, TreeDataItem } from '@/components/ui/tree.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VINES_VARIABLE_TAG } from '@/package/vines-flow/core/tools/consts.ts';
 import { IVinesVariable } from '@/package/vines-flow/core/tools/typings.ts';
+import { cn } from '@/utils';
 
 interface IToolOutputProps {
   nodeId?: string;
@@ -73,19 +74,22 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
               {isMultiple ? '列表' : ''}
             </span>
             <span className="line-clamp-1 break-normal">{it.label}</span>
-            <div className="flex-1">
+            <div className="relative flex-1">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    icon={<Copy />}
-                    variant="outline"
-                    className="absolute -mt-4 ml-2 scale-75"
+                  <div
+                    className={cn(
+                      buttonVariants({ variant: 'outline' }),
+                      'absolute right-0 top-1/2 -translate-y-1/2 scale-75 px-2',
+                    )}
                     onClick={(e) => {
                       e.preventDefault();
                       clipboard.copy(it.jsonpath);
                       toast.success('变量已复制');
                     }}
-                  />
+                  >
+                    <Copy className="size-4" />
+                  </div>
                 </TooltipTrigger>
                 <TooltipContent>{it.jsonpath}</TooltipContent>
               </Tooltip>
