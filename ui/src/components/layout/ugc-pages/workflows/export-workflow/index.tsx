@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 
 import { IBaseAsset } from '@/apis/ugc/asset-typings.ts';
 import { exportWorkflow, useWorkflowRelatedAssets } from '@/apis/workflow';
-import { IExportWorkflowWithAssetsContext } from '@/components/dialog/export-workflow/typings.ts';
+import { IExportWorkflowWithAssetsContext } from '@/components/layout/ugc-pages/workflows/export-workflow/typings.ts';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
