@@ -1,16 +1,18 @@
 import React, { useEffect } from 'react';
 
+import { useDebouncedState } from '@mantine/hooks';
+import { toast } from 'sonner';
+
 import { updateComfyuiWorkflowToolInput } from '@/apis/comfyui';
 import { IComfyuiWorkflow } from '@/apis/comfyui/typings';
 import { Button } from '@/components/ui/button';
 import { CodeEditor } from '@/components/ui/code-editor';
-import { useDebouncedState } from '@mantine/hooks';
-import { toast } from 'sonner';
 
 interface IComfyuiWofrkflowToolInputProps {
   data: IComfyuiWorkflow;
 }
 
+// million-ignore
 export const ComfyuiWorkflowToolInput: React.FC<IComfyuiWofrkflowToolInputProps> = ({ data }) => {
   const { toolInput } = data;
 
