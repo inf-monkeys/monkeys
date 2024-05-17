@@ -45,7 +45,7 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
                 <span
                   className="text-xxs line-clamp-1 cursor-default select-none whitespace-nowrap break-all rounded-sm px-1 py-1 font-medium leading-none shadow-inner"
                   style={{
-                    backgroundColor: (isMultiple ? tag?.multipleColor : tag?.color) ?? '#2b2e35',
+                    backgroundColor: (isMultiple ? tag?.multipleColor : tag?.color) ?? 'hsl(var(--muted-foreground))',
                   }}
                 >
                   {tag?.name ?? it.type}
@@ -66,7 +66,7 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
             <span
               className="text-xxs line-clamp-1 cursor-default select-none whitespace-nowrap break-all rounded-sm px-1 py-1 font-medium leading-none shadow-inner"
               style={{
-                backgroundColor: (isMultiple ? tag?.multipleColor : tag?.color) ?? '#2b2e35',
+                backgroundColor: (isMultiple ? tag?.multipleColor : tag?.color) ?? 'hsl(var(--muted-foreground))',
               }}
             >
               {tag?.name ?? it.type}
