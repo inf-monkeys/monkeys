@@ -44,6 +44,7 @@ export const VinesLogo: React.FC<Omit<ILogoProps, 'url'> & { disableInitialHeigh
             <AppLogo
               className={cn('w-auto', className)}
               url={enabledCustomIcon ? team?.iconUrl : logoUrl}
+              alt="AI"
               description={description}
               height={disableInitialHeight ? void 0 : height}
               {...props}
