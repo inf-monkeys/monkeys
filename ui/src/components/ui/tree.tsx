@@ -62,22 +62,20 @@ const Tree = forwardRef<HTMLDivElement, TreeProps>(
     }, [data, initialSelectedItemId]);
 
     return (
-      <div className={cn('overflow-hidden', className)}>
-        <ScrollArea>
-          <div className="relative p-2">
-            <TreeItem
-              data={data}
-              ref={ref}
-              selectedItemId={selectedItemId}
-              handleSelectChange={handleSelectChange}
-              expandedItemIds={expandedItemIds}
-              FolderIcon={folderIcon}
-              ItemIcon={itemIcon}
-              {...props}
-            />
-          </div>
-        </ScrollArea>
-      </div>
+      <ScrollArea className={cn('overflow-hidden', className)}>
+        <div className="relative p-2">
+          <TreeItem
+            data={data}
+            ref={ref}
+            selectedItemId={selectedItemId}
+            handleSelectChange={handleSelectChange}
+            expandedItemIds={expandedItemIds}
+            FolderIcon={folderIcon}
+            ItemIcon={itemIcon}
+            {...props}
+          />
+        </div>
+      </ScrollArea>
     );
   },
 );
@@ -112,8 +110,8 @@ const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
       <div ref={ref} role="tree" className={className} {...props}>
         <ul className="flex flex-col gap-1">
           {data instanceof Array ? (
-            data.map((item) => (
-              <li key={item.id}>
+            data.map((item, i) => (
+              <li key={item.id + i}>
                 {item.children?.length ? (
                   <AccordionPrimitive.Root type="multiple" defaultValue={expandedItemIds}>
                     <AccordionPrimitive.Item value={item.id}>

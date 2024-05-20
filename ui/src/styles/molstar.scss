@@ -547,6 +547,7 @@
 }
 .msp-plugin .msp-layout-expanded {
   position: fixed;
+  z-index: 1000;
 }
 @media (orientation: landscape) {
   .msp-plugin .msp-layout-expanded .msp-layout-main {
