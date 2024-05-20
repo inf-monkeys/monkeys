@@ -41,6 +41,7 @@ export const saveAuthToken = async (token: string): Promise<number> => {
     return 0;
   }
 
+  localStorage.removeItem('vines-team-id');
   setLocalStorage('vines-token', token);
 
   const localData = readLocalStorageValue<IUserTokens>(TOKEN_KEY, {});

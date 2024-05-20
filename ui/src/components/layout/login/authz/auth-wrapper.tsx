@@ -38,6 +38,8 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
 
     setIsLoggingIn(true);
 
+    localStorage.removeItem('vines-team-id');
+
     toast.promise((method === AuthMethod.phone ? triggerPhone : triggerPassword)(params), {
       loading: '登录中...',
       finally: () => setIsLoggingIn(false),
