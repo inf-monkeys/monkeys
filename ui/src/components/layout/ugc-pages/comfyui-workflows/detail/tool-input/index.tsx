@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { useDebouncedState } from '@mantine/hooks';
 import { toast } from 'sonner';
 
-import { updateComfyuiWorkflowToolInput } from '@/apis/comfyui';
+import { autoGenerateComfyuiWorkflowToolInput, updateComfyuiWorkflowToolInput } from '@/apis/comfyui';
 import { IComfyuiWorkflow } from '@/apis/comfyui/typings';
 import { Button } from '@/components/ui/button';
 import { CodeEditor } from '@/components/ui/code-editor';
@@ -29,6 +29,14 @@ export const ComfyuiWorkflowToolInput: React.FC<IComfyuiWofrkflowToolInputProps>
     toast.success('保存成功');
   };
 
+  const onAutoGenerate = async () => {
+    const newInput = await autoGenerateComfyuiWorkflowToolInput(data.id);
+    if (newInput) {
+      setUpdatedToolInput(JSON.stringify(newInput, null, 4));
+      toast.success('保存成功');
+    }
+  };
+
   useEffect(() => {
     setUpdatedToolInput(JSON.stringify(toolInput || [], null, 4));
   }, []);
@@ -41,6 +49,15 @@ export const ComfyuiWorkflowToolInput: React.FC<IComfyuiWofrkflowToolInputProps>
       <br></br>
       <Button type="submit" onClick={onSubmit}>
         保存配置
+      </Button>
+      <Button
+        type="submit"
+        onClick={onAutoGenerate}
+        style={{
+          marginLeft: 20,
+        }}
+      >
+        重新生成
       </Button>
     </div>
   );

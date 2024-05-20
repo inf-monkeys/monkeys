@@ -23,6 +23,9 @@ export const updateComfyuiWorkflowToolInput = (id: string, toolInput: BlockDefPr
     toolInput,
   });
 
+export const autoGenerateComfyuiWorkflowToolInput = (id: string) =>
+  vinesFetcher({ method: 'POST', simple: true })(`/api/comfyui/workflows/${id}/gene-input`, {});
+
 export const useComfyuiWorkflow = (id?: string) =>
   useSWR<IComfyuiWorkflow | undefined>(id ? `/api/comfyui/workflows/${id}` : null, vinesFetcher(), {
     refreshInterval: 600000,

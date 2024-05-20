@@ -14,6 +14,7 @@ export interface CreateComfyuiWorkflowParams {
   workflow?: ComfyuiWorkflow;
   prompt: ComfyuiPrompt;
   displayName: string;
+  toolInput?: BlockDefProperties[];
 }
 
 @Injectable()
@@ -44,7 +45,7 @@ export class ComfyuiWorkflowRepository {
     );
   }
 
-  public async updateComfyuiWorkflow(id: string, toolInput: BlockDefProperties[]) {
+  public async updateComfyuiWorkflowToolInput(id: string, toolInput: BlockDefProperties[]) {
     await this.comfyuiWorkflowRepository.update(
       {
         id,
@@ -69,6 +70,7 @@ export class ComfyuiWorkflowRepository {
     entity.workflow = comfyuiWorkflow.workflow;
     entity.prompt = comfyuiWorkflow.prompt;
     entity.displayName = comfyuiWorkflow.displayName;
+    entity.toolInput = comfyuiWorkflow.toolInput || [];
 
     await this.comfyuiWorkflowRepository.save(entity);
   }
