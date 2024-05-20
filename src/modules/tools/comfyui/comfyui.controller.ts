@@ -50,7 +50,15 @@ export class ComfyUIController {
       toolInput: BlockDefProperties[];
     },
   ) {
-    const data = await this.comfyuiService.updateComfyuiWorkflow(id, body.toolInput);
+    const data = await this.comfyuiService.updateComfyuiWorkflowToolInput(id, body.toolInput);
+    return new SuccessResponse({
+      data,
+    });
+  }
+
+  @Post('/workflows/:id/gene-input')
+  public async autoGenerateToolInput(@Req() req: IRequest, @Param('id') id: string) {
+    const data = await this.comfyuiService.autoGenerateToolInput(id);
     return new SuccessResponse({
       data,
     });

@@ -12,6 +12,7 @@ import { Task, TaskDef, TaskManager } from '@inf-monkeys/conductor-javascript';
 import { Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { IncomingMessage } from 'http';
+import _ from 'lodash';
 import os from 'os';
 import { AuthType, WorkerInputData } from '../../common/typings/tools';
 import { ToolsRepository } from '../../database/repositories/tools.repository';
@@ -108,8 +109,20 @@ export class ToolsPollingService {
       if (!result[nodeId]) {
         result[nodeId] = {};
       }
-      result[nodeId][nodeKey] = originalData[key];
+      let value = originalData[key];
+      if (
+        Array.isArray(value) &&
+        _.every(
+          value.map((item) => {
+            return item.startsWith('http://') || item.startsWith('https://');
+          }),
+        )
+      ) {
+        value = value[0];
+      }
+      result[nodeId][nodeKey] = value;
     }
+    return result;
   }
 
   private async resolvePostBody(tool: ToolsEntity, originalData: { [x: string]: any }) {

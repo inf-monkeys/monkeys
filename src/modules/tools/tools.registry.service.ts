@@ -232,15 +232,19 @@ export class ToolsRegistryService {
       const comfyuiWorkflowsInThisTeam = await this.comfyuiWorkflowRepository.getAllComfyuiWorkflows(teamId);
       let input = comfyuiInferTool.input || [];
       for (const comfyuiWorkflow of comfyuiWorkflowsInThisTeam) {
-        if (comfyuiWorkflow.toolInput?.length) {
-          input = input.concat(
-            comfyuiWorkflow.toolInput.map((item) => {
-              item.displayOptions = item.displayOptions || {};
-              item.displayOptions.show = item.displayOptions.show || {};
-              item.displayOptions.show.workflow = [comfyuiWorkflow.id];
-              return item;
-            }),
-          );
+        try {
+          if (comfyuiWorkflow.toolInput?.length) {
+            input = input.concat(
+              comfyuiWorkflow.toolInput.map((item) => {
+                item.displayOptions = item.displayOptions || {};
+                item.displayOptions.show = item.displayOptions.show || {};
+                item.displayOptions.show.workflow = [comfyuiWorkflow.id];
+                return item;
+              }),
+            );
+          }
+        } catch (error) {
+          logger.error('Error when handle comfyui workflow', error);
         }
       }
       comfyuiInferTool.input = input;

@@ -180,7 +180,7 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
                   <FormItem>
                     <FormLabel>显示名称</FormLabel>
                     <FormControl>
-                      <Input placeholder="请输入知识库名称" {...field} className="grow" autoFocus />
+                      <Input placeholder="请输入工作流名称" {...field} className="grow" autoFocus />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
