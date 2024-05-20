@@ -20,8 +20,10 @@ export class ToolsController {
     summary: 'List All tools',
     description: 'List All tools',
   })
-  public async listTools() {
-    const result = await this.toolRegistryService.listTools();
+  @UseGuards(CompatibleAuthGuard)
+  public async listTools(@Req() req: IRequest) {
+    const { teamId } = req;
+    const result = await this.toolRegistryService.listTools(teamId);
     return new SuccessResponse({
       data: result,
     });

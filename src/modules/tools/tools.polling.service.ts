@@ -7,13 +7,16 @@ import { Mq } from '@/common/mq';
 import { ExtendedToolDefinition } from '@/common/utils/define-tool';
 import { sleep } from '@/common/utils/utils';
 import { ToolsEntity } from '@/database/entities/tools/tools.entity';
+import { ComfyuiWorkflowRepository } from '@/database/repositories/comfyui-workflow.repository';
 import { Task, TaskDef, TaskManager } from '@inf-monkeys/conductor-javascript';
 import { Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { IncomingMessage } from 'http';
+import _ from 'lodash';
 import os from 'os';
 import { AuthType, WorkerInputData } from '../../common/typings/tools';
 import { ToolsRepository } from '../../database/repositories/tools.repository';
+import { COMFYUI_INFER_TOOL } from './consts';
 import { LLM_CHAT_COMPLETION_TOOL, LLM_COMPLETION_TOOL, LLM_NAMESPACE } from './llm/llm.controller';
 import { ToolsRegistryService } from './tools.registry.service';
 
@@ -28,6 +31,7 @@ export class ToolsPollingService {
   constructor(
     private readonly toolsRepository: ToolsRepository,
     private readonly toolsRegistryService: ToolsRegistryService,
+    private readonly comfyuiWorkflowRepository: ComfyuiWorkflowRepository,
     @Inject(CACHE_TOKEN) private readonly cache: CacheManager,
     @Inject(MQ_TOKEN) private readonly mq: Mq,
   ) {}
@@ -90,6 +94,55 @@ export class ToolsPollingService {
         reject(error);
       });
     });
+  }
+
+  private convertToComfyuiInputData(originalData: { [x: string]: any }) {
+    const result: { [x: string]: { [x: string]: any } } = {};
+    for (const key in originalData) {
+      const [nodeId, nodeKey] = key.split('_');
+      if (!nodeId || !nodeKey) {
+        continue;
+      }
+      if (isNaN(parseInt(nodeId))) {
+        continue;
+      }
+      if (!result[nodeId]) {
+        result[nodeId] = {};
+      }
+      let value = originalData[key];
+      if (
+        Array.isArray(value) &&
+        _.every(
+          value.map((item) => {
+            return item.startsWith('http://') || item.startsWith('https://');
+          }),
+        )
+      ) {
+        value = value[0];
+      }
+      result[nodeId][nodeKey] = value;
+    }
+    return result;
+  }
+
+  private async resolvePostBody(tool: ToolsEntity, originalData: { [x: string]: any }) {
+    if (tool.name === COMFYUI_INFER_TOOL) {
+      const { workflow: comfyuiWorkflowId } = originalData;
+      const result = { ...originalData };
+      const comfyuiWorkflow = await this.comfyuiWorkflowRepository.getComfyuiWorkflowById(comfyuiWorkflowId);
+      if (!comfyuiWorkflow) {
+        throw new Error(`Comfyui workflow not found: ${comfyuiWorkflowId}`);
+      }
+      const prompt = comfyuiWorkflow.prompt;
+      if (!prompt) {
+        throw new Error(`Comfyui workflow prompt not found: ${comfyuiWorkflowId}`);
+      }
+      return {
+        workflow: prompt,
+        input_data: this.convertToComfyuiInputData(result),
+      };
+    }
+    return originalData;
   }
 
   private getToolOutputAsConfig(tool: ToolsEntity, inputData: WorkerInputData): 'json' | 'stream' {
@@ -237,7 +290,7 @@ export class ToolsPollingService {
         method,
         baseURL: server.baseUrl,
         url: this.replaceUrlParams(path, rest || {}),
-        data: rest,
+        data: await this.resolvePostBody(tool, rest),
         headers: headers,
         responseType,
       });
