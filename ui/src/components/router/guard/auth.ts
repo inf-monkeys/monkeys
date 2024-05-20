@@ -79,9 +79,10 @@ export const saveAuthToken = async (token: string): Promise<number> => {
   return userCount;
 };
 
-export const logout = (id: string) =>
+export const logout = (id: string): Promise<number> =>
   new Promise((resolve) => {
     const users = readLocalStorageValue<IUserTokens>(TOKEN_KEY, {});
+    const userLength = Object.keys(users).length;
     if (has(users, id)) {
       const {
         data: { name },
@@ -98,15 +99,15 @@ export const logout = (id: string) =>
               localStorage.removeItem('vines-teams');
             }
             setLocalStorage(TOKEN_KEY, users);
-            resolve(true);
+            resolve(userLength);
             toast.success(`已登出成功登出「${name}」`);
           },
         },
-        onDismiss: () => resolve(false),
+        onDismiss: () => resolve(userLength),
       });
     } else {
-      toast.error('用户已登出');
-      resolve(false);
+      toast.error('已登出');
+      resolve(userLength);
     }
   });
 
@@ -117,7 +118,9 @@ export const swapAccount = (id: string) => {
     setLocalStorage('vines-token', targetUser.token);
     setLocalStorage('vines-account', targetUser.data);
     toast.success(`已切换到「${targetUser.data.name}」`);
+    return true;
   } else {
     toast.error('切换失败，用户不存在');
+    return false;
   }
 };
