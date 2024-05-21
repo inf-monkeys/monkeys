@@ -2,6 +2,8 @@ import React from 'react';
 
 import { createFileRoute } from '@tanstack/react-router';
 
+import { useTranslation } from 'react-i18next';
+
 import { preloadUgcTextModels, useUgcTextModels } from '@/apis/ugc';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
@@ -11,12 +13,14 @@ import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const TextModels: React.FC = () => {
+  const { t: tHook } = useTranslation();
+
   return (
     <main className="size-full">
       <UgcView
         assetKey="text-models"
         assetType="llm-model"
-        assetName="语言模型"
+        assetName={tHook('components.layout.main.sidebar.list.model.text-models.label')}
         useUgcFetcher={useUgcTextModels}
         preloadUgcFetcher={preloadUgcTextModels}
         createColumns={() => createTextModelsColumns()}
@@ -24,9 +28,12 @@ export const TextModels: React.FC = () => {
           subtitle: (item) => {
             return (
               <div className="flex gap-1">
-                <span>{item.user?.name ?? '未知'}</span>
-                <span>创建于</span>
-                <span>{formatTimeDiffPrevious(item.createdTimestamp)}</span>
+                <span>{item.user?.name ?? tHook('unknown')}</span>
+                <span>
+                  {tHook('common.utils.created-at', {
+                    time: formatTimeDiffPrevious(item.createdTimestamp),
+                  })}
+                </span>
               </div>
             );
           },

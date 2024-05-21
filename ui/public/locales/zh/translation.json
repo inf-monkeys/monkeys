@@ -769,6 +769,66 @@
           }
         }
       }
+    },
+    "text-models": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "assetTags": {
+            "label": "标签"
+          },
+          "createdTimestamp": {
+            "label": "创建时间"
+          },
+          "updatedTimestamp": {
+            "label": "更新时间"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "语言模型操作",
+          "options": {
+            "publish": "发布到市场"
+          }
+        }
+      }
+    },
+    "image-models": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "assetTags": {
+            "label": "标签"
+          },
+          "createdTimestamp": {
+            "label": "创建时间"
+          },
+          "updatedTimestamp": {
+            "label": "更新时间"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "图像模型操作",
+          "options": {
+            "publish": "发布到市场"
+          }
+        }
+      }
     }
   }
 }
