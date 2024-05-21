@@ -777,6 +777,66 @@
           }
         }
       }
+    },
+    "text-models": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "Icon"
+          },
+          "title": {
+            "label": "Name"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "assetTags": {
+            "label": "Tags"
+          },
+          "createdTimestamp": {
+            "label": "Created Time"
+          },
+          "updatedTimestamp": {
+            "label": "Updated Time"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "Text Model Operate",
+          "options": {
+            "publish": "Publish to Market"
+          }
+        }
+      }
+    },
+    "image-models": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "Icon"
+          },
+          "title": {
+            "label": "Name"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "assetTags": {
+            "label": "Tags"
+          },
+          "createdTimestamp": {
+            "label": "Created Time"
+          },
+          "updatedTimestamp": {
+            "label": "Updated Time"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "Image Model Operate",
+          "options": {
+            "publish": "Publish to Market"
+          }
+        }
+      }
     }
   }
 }
