@@ -348,6 +348,24 @@ export class LlmController {
       description: '填写 0-1 的浮点数\n用于惩罚模型生成低频词语，从而使生成的文本更加多样化。',
     },
     {
+      displayName: '数据响应格式',
+      name: 'response_format',
+      type: 'options',
+      default: 'text',
+      description:
+        '当设置为 json_object 时，必须在 system 或者 user message 中手动要求大语言模型返回 json 格式数据，详情请见：https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format',
+      options: [
+        {
+          name: 'text',
+          value: 'text',
+        },
+        {
+          name: 'json_object',
+          value: 'json_object',
+        },
+      ],
+    },
+    {
       name: 'stream',
       displayName: '是否流式输出',
       type: 'boolean',
@@ -488,6 +506,7 @@ export class LlmController {
       systemPrompt: body.systemPrompt,
       tools: body.tools,
       knowledgeBase: body.knowledgeBase,
+      response_format: body.response_format,
     });
   }
 }
