@@ -43,7 +43,8 @@
     },
     "type": {
       "workflow": "工作流",
-      "filter-group": "筛选分组"
+      "filter-group": "筛选分组",
+      "text-data": "文本数据"
     },
     "time": {
       "second": "秒",
@@ -827,6 +828,33 @@
           "options": {
             "publish": "发布到市场"
           }
+        }
+      }
+    },
+    "text-data": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "user": {
+            "label": "创建者"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "assetTags": {
+            "label": "标签"
+          },
+          "createdTimestamp": {
+            "label": "创建时间"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "文本数据操作"
         }
       }
     }

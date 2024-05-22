@@ -43,7 +43,8 @@
     },
     "type": {
       "workflow": "workflow",
-      "filter-group": "filter group"
+      "filter-group": "filter group",
+      "text-data": "text data"
     },
     "time": {
       "second_one": "sec",
@@ -717,7 +718,7 @@
             "label": "Basic Info"
           },
           "workflows": {
-            "label": "Related Workflows"
+            "label": "Associated Workflows"
           }
         }
       },
@@ -834,6 +835,50 @@
           "dropdown-label": "Image Model Operate",
           "options": {
             "publish": "Publish to Market"
+          }
+        }
+      }
+    },
+    "text-data": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "Icon"
+          },
+          "title": {
+            "label": "Name"
+          },
+          "user": {
+            "label": "Creator"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "assetTags": {
+            "label": "Tags"
+          },
+          "createdTimestamp": {
+            "label": "Created Time"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "Text Data Operate"
+        }
+      },
+      "detail": {
+        "title": "Text Data Detail",
+        "tabs": {
+          "documents": {
+            "label": "Documents"
+          },
+          "segments": {
+            "label": "Segments"
+          },
+          "settings": {
+            "label": "Settings"
+          },
+          "associated-workflows": {
+            "label": "Associated Workflows"
           }
         }
       }
