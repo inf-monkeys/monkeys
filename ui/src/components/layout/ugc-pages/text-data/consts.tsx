@@ -19,13 +19,11 @@ interface ICreateTextDataColumnsProps extends IUgcCreateColumnsProps {
 export const createTextDataColumns = ({ hooks }: ICreateTextDataColumnsProps) => [
   columnHelper.accessor('iconUrl', {
     id: 'logo',
-    header: '图标',
     cell: ({ getValue }) => RenderIcon({ iconUrl: getValue() as string }),
     maxSize: 48,
   }),
   columnHelper.accessor('displayName', {
     id: 'title',
-    header: '名称',
     cell: ({ getValue, row }) => (
       <span
         className="cursor-pointer transition-colors hover:text-primary-500"
@@ -41,23 +39,19 @@ export const createTextDataColumns = ({ hooks }: ICreateTextDataColumnsProps) =>
   }),
   columnHelper.accessor('user', {
     id: 'user',
-    header: '用户',
     cell: ({ getValue }) => RenderUser({ user: getValue() as IVinesUser }),
     maxSize: 48,
   }),
   columnHelper.accessor('description', {
     id: 'description',
-    header: '描述',
     cell: ({ getValue }) => RenderDescription({ description: getValue() as string }),
   }),
   columnHelper.accessor('assetTags', {
     id: 'assetTags',
-    header: '标签',
     maxSize: 96,
   }),
   columnHelper.accessor('createdTimestamp', {
     id: 'createdTimestamp',
-    header: '创建时间',
     cell: ({ getValue }) => RenderTime({ time: getValue() as number }),
     maxSize: 72,
   }),

@@ -280,7 +280,7 @@ export const Workflows: React.FC = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>
               {t('common.dialog.delete-confirm.title', {
-                type: t('ugc-page.workflow.type'),
+                type: t('common.type.workflow'),
               })}
             </AlertDialogTitle>
             <AlertDialogDescription>
