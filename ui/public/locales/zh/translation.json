@@ -639,7 +639,11 @@
   },
   "workbench": {
     "view": {
-      "no-starred-view": "暂无标星视图"
+      "no-starred-view": "暂无标星视图",
+      "header": {
+        "enter": "进入视图",
+        "delete": "取消标星"
+      }
     },
     "sidebar": {
       "add": "添加标星视图"

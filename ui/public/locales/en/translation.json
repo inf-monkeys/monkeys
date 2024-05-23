@@ -646,7 +646,11 @@
   },
   "workbench": {
     "view": {
-      "no-starred-view": "No starred views"
+      "no-starred-view": "No starred views",
+      "header": {
+        "enter": "Enter the View",
+        "delete": "Unstar the view"
+      }
     },
     "sidebar": {
       "add": "Star a view"
