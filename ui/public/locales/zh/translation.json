@@ -45,7 +45,8 @@
     "type": {
       "workflow": "工作流",
       "filter-group": "筛选分组",
-      "text-data": "文本数据"
+      "text-data": "文本数据",
+      "table-data": "表格数据"
     },
     "time": {
       "second": "秒",
@@ -860,6 +861,149 @@
         },
         "operate-area": {
           "dropdown-label": "文本数据操作"
+        },
+        "subtitle": {
+          "create-dataset": {
+            "button": "创建数据集",
+            "title": "创建文本数据集",
+            "form": {
+              "displayName": {
+                "label": "知识库名称",
+                "placeholder": "请输入知识库名称"
+              },
+              "embeddingModel": {
+                "label": "Embedding 模型",
+                "placeholder": "请选择一个模型"
+              },
+              "description": {
+                "label": "数据集简介",
+                "placeholder": "请输入数据集简介，不超过 100 字"
+              },
+              "iconUrl": {
+                "label": "数据集图标"
+              }
+            }
+          }
+        }
+      },
+      "detail": {
+        "title": "文本数据详情",
+        "tabs": {
+          "documents": {
+            "label": "文档"
+          },
+          "segments": {
+            "label": "段落"
+          },
+          "settings": {
+            "label": "设置"
+          },
+          "associated-workflows": {
+            "label": "关联工作流"
+          }
+        }
+      }
+    },
+    "table-data": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "user": {
+            "label": "创建者"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "assetTags": {
+            "label": "标签"
+          },
+          "createdTimestamp": {
+            "label": "创建时间"
+          },
+          "updatedTimestamp": {
+            "label": " 更新时间"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "表格数据操作",
+          "options": {
+            "publish": "发布到市场"
+          }
+        },
+        "subtitle": {
+          "create-database": {
+            "button": "创建表格数据库",
+            "title": "创建表格数据库",
+            "form": {
+              "type": {
+                "label": "创建类型",
+                "placeholder": "请选择一个创建类型",
+                "options": {
+                  "builtIn": "内建 Sqlite 数据库",
+                  "external": "外置数据库"
+                }
+              },
+              "displayName": {
+                "label": "数据库名称",
+                "placeholder": "请输入数据库名称"
+              },
+              "description": {
+                "label": "数据集简介",
+                "placeholder": "请输入数据集简介，不超过 100 字"
+              },
+              "iconUrl": {
+                "label": "数据集图标"
+              },
+              "databaseType": {
+                "label": "数据库类型",
+                "placeholder": "请选择数据库类型"
+              }
+            }
+          }
+        }
+      }
+    },
+    "media-data": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "user": {
+            "label": "创建者"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "assetTags": {
+            "label": "标签"
+          },
+          "createdTimestamp": {
+            "label": "创建时间"
+          },
+          "updatedTimestamp": {
+            "label": " 更新时间"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "富媒体数据操作",
+          "options": {
+            "copy-link": "复制文件直链"
+          }
+        },
+        "subtitle": {
+          "upload": {
+            "button": "上传文件",
+            "title": "上传文件"
+          }
         }
       }
     }

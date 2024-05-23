@@ -868,6 +868,29 @@
         },
         "operate-area": {
           "dropdown-label": "Text Data Operate"
+        },
+        "subtitle": {
+          "create-dataset": {
+            "button": "Create Dataset",
+            "title": "Create text dataset",
+            "form": {
+              "displayName": {
+                "label": "Name",
+                "placeholder": "Enter name"
+              },
+              "embeddingModel": {
+                "label": "Embedding Model",
+                "placeholder": "Select a model"
+              },
+              "description": {
+                "label": "Description",
+                "placeholder": "Enter description. Up to 100 characters"
+              },
+              "iconUrl": {
+                "label": "Icon"
+              }
+            }
+          }
         }
       },
       "detail": {
@@ -884,6 +907,106 @@
           },
           "associated-workflows": {
             "label": "Associated Workflows"
+          }
+        }
+      }
+    },
+    "table-data": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "Icon"
+          },
+          "title": {
+            "label": "Name"
+          },
+          "user": {
+            "label": "Creator"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "assetTags": {
+            "label": "Tags"
+          },
+          "createdTimestamp": {
+            "label": "Created Time"
+          },
+          "updatedTimestamp": {
+            "label": "Updated Time"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "Table Data Operate"
+        },
+        "subtitle": {
+          "create-database": {
+            "button": "Create Table Database",
+            "title": "Create table database",
+            "form": {
+              "type": {
+                "label": "Create Type",
+                "placeholder": "Select a create type",
+                "options": {
+                  "builtIn": "Built-in Sqlite",
+                  "external": "External database"
+                }
+              },
+              "displayName": {
+                "label": "Name",
+                "placeholder": "Enter name"
+              },
+              "description": {
+                "label": "Description",
+                "placeholder": "Enter description. Up to 100 characters"
+              },
+              "iconUrl": {
+                "label": "Icon"
+              },
+              "databaseType": {
+                "label": "Database Type",
+                "placeholder": "Select a database type"
+              }
+            }
+          }
+        }
+      }
+    },
+    "media-data": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "Icon"
+          },
+          "title": {
+            "label": "Name"
+          },
+          "user": {
+            "label": "Creator"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "assetTags": {
+            "label": "Tags"
+          },
+          "createdTimestamp": {
+            "label": "Created Time"
+          },
+          "updatedTimestamp": {
+            "label": "Updated Time"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "Media Data Operate",
+          "options": {
+            "copy-link": "Copy File Link"
+          }
+        },
+        "subtitle": {
+          "upload": {
+            "button": "Upload Files",
+            "title": "Upload files"
           }
         }
       }
