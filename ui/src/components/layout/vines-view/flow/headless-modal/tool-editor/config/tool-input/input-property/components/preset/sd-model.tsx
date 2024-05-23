@@ -57,6 +57,8 @@ export const SdModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInpu
     [onChange, setComponentMode],
   );
 
+  const isEmptyOptions = !options.length;
+
   return (
     <AnimatePresence>
       {!loading && Object.keys(optionsVariableMapper).length ? (
@@ -69,9 +71,13 @@ export const SdModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInpu
             exit={{ opacity: 0 }}
             transition={{ duration: 0.1 }}
           >
-            <Select onValueChange={handleOnSelectChange} defaultValue={isString(value) ? value : ''}>
+            <Select
+              onValueChange={handleOnSelectChange}
+              defaultValue={isString(value) ? value : ''}
+              disabled={isEmptyOptions}
+            >
               <SelectTrigger>
-                <SelectValue placeholder="您也可以选择预置选项" />
+                <SelectValue placeholder={isEmptyOptions ? '暂无选项' : '您也可以选择预置选项'} />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
