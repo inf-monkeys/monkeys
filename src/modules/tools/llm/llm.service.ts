@@ -38,6 +38,10 @@ export interface CreateCompelitionsParams {
   max_tokens?: number;
 }
 
+export interface CreateChatCompelitionsResponseOptions {
+  apiResponseType: 'simple' | 'full';
+}
+
 export const getModels = (
   type?: LlmModelEndpointType,
 ): Array<{
@@ -242,7 +246,11 @@ When answer to user:
     return messages;
   }
 
-  public async createChatCompelitions(res: Response, params: CreateChatCompelitionsParams) {
+  public async createChatCompelitions(res: Response, params: CreateChatCompelitionsParams, options: CreateChatCompelitionsResponseOptions) {
+    const { apiResponseType = 'full' } = options;
+    if (apiResponseType === 'simple' && params.stream) {
+      throw new Error('Stream is not supported in simple api response type');
+    }
     const { model, stream, systemPrompt, knowledgeBase, response_format = ResponseFormat.text } = params;
     let { messages } = params;
     messages = await this.generateMessages(messages, systemPrompt, knowledgeBase);
@@ -356,9 +364,23 @@ When answer to user:
             tools,
             tool_choice: 'auto',
           });
-          return res.status(200).send(result);
+          return res.status(200).send(
+            apiResponseType === 'full'
+              ? result
+              : {
+                  messages: result.choices[0].message?.content,
+                  usage: result.usage,
+                },
+          );
         } else {
-          return res.status(200).send(response);
+          return res.status(200).send(
+            apiResponseType === 'full'
+              ? response
+              : {
+                  message: (response as ChatCompletion).choices[0].message?.content,
+                  usage: (response as ChatCompletion).usage,
+                },
+          );
         }
       }
     } catch (error) {
