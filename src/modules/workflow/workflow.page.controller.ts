@@ -1,11 +1,12 @@
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
+import { BUILT_IN_PAGE_INSTANCES } from '@/database/repositories/workflow.repository';
 import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreatePageDto } from './dto/req/create-page.dto';
 import { UpdatePagesDto } from './dto/req/update-pages.dto';
-import { BUILT_IN_PAGE_INSTANCES, WorkflowPageService } from './workflow.page.service';
+import { WorkflowPageService } from './workflow.page.service';
 
 @ApiTags('Workflows/Pages')
 @Controller('/workflow')
