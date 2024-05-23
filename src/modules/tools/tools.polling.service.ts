@@ -89,7 +89,7 @@ export class ToolsPollingService {
         resolve(responseData);
       });
       message.on('error', (error) => {
-        console.error('Error receiving response data:', error);
+        logger.error('Error receiving response data:', error);
         reject(error);
       });
     });

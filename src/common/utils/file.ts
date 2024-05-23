@@ -1,12 +1,13 @@
 import fs from 'fs';
 import path from 'path';
+import { logger } from '../logger';
 
 export function findFilesInDir(startPath: string, filter: string) {
   let results = [];
 
   // 检查起始路径是否存在
   if (!fs.existsSync(startPath)) {
-    console.log('Directory not found:', startPath);
+    logger.info('Directory not found:', startPath);
     return results;
   }
 

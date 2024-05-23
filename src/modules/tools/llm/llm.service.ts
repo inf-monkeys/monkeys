@@ -323,7 +323,6 @@ When answer to user:
           let chunkString = decoder.decode(chunk);
           // Original String: 0:"你", contains the beginning 0: and the first and last double quotes
           chunkString = chunkString.slice(2, -1).slice(1, -1);
-          console.log('chunkString: ', chunkString);
           const chunkObject = {
             id: randomChatCmplId,
             object: 'chat.completion.chunk',

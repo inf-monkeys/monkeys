@@ -2,6 +2,7 @@ import axios from 'axios';
 import fs from 'fs';
 import JSZip from 'jszip';
 import path from 'path';
+import { logger } from '../logger';
 
 export async function downloadAndUnzip(url: string, folder: string) {
   try {
@@ -31,8 +32,8 @@ export async function downloadAndUnzip(url: string, folder: string) {
     });
     await Promise.all(promises);
 
-    console.log('Unzipping completed.');
+    logger.info('Unzipping completed.');
   } catch (error) {
-    console.error(`An error occurred: ${error.message}`);
+    logger.error(`An error occurred: ${error.message}`);
   }
 }
