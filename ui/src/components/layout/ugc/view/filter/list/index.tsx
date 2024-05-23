@@ -179,7 +179,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                                   loading: t('common.delete.loading'),
                                   success: () => {
                                     void mutateAssetFilterRules();
-                                    current === rule.id && setCurrent('all');
+                                    (current === rule._id || current === rule.id) && setCurrent('all');
                                     return t('common.delete.success');
                                   },
                                   error: t('common.delete.error'),
