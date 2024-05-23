@@ -63,6 +63,8 @@ export const ComfyuiModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVine
     }
   }, [optionsVariableMapper, comfyuiModels]);
 
+  const isEmptyOptions = !options.length;
+
   return (
     <AnimatePresence>
       {isLoading ? (
@@ -85,9 +87,13 @@ export const ComfyuiModelPresets: React.FC<IVinesInputPropertyProps & Omit<IVine
           exit={{ opacity: 0 }}
           transition={{ duration: 0.1 }}
         >
-          <Select onValueChange={handleOnSelectChange} defaultValue={isString(value) ? value : ''}>
+          <Select
+            onValueChange={handleOnSelectChange}
+            defaultValue={isString(value) ? value : ''}
+            disabled={isEmptyOptions}
+          >
             <SelectTrigger>
-              <SelectValue placeholder="您也可以选择预置选项" />
+              <SelectValue placeholder={isEmptyOptions ? '暂无选项' : '您也可以选择预置选项'} />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
