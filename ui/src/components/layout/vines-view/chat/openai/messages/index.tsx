@@ -8,6 +8,7 @@ import { VinesRealTimeChatMessage } from '@/components/layout/vines-view/chat/me
 import { IMessage } from '@/components/layout/vines-view/chat/openai/use-chat.ts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Card } from '@/components/ui/card.tsx';
+import { VinesMarkdown } from '@/components/ui/markdown';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { cn } from '@/utils';
 
@@ -71,7 +72,10 @@ export const VirtualizedList: React.FC<IVirtualizedListProps> = ({ data, isLoadi
                       isLoading && LastItemIndex === index && 'vines-result-streaming',
                     )}
                   >
-                    <Card className="p-4 text-sm">{content + (isEmptyMessage ? EMPTY_CONTENT : '')}</Card>
+                    <Card className="p-4 text-sm">
+                      <VinesMarkdown allowHtml>{content}</VinesMarkdown>
+                      {isEmptyMessage ? EMPTY_CONTENT : ''}
+                    </Card>
                   </div>
                 </div>
               )}

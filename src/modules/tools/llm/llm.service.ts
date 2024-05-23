@@ -334,7 +334,7 @@ When answer to user:
           };
           function replacer(key: string, value: any) {
             if (typeof value === 'string') {
-              return value.replace(/\\n/g, '\n');
+              return value.replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\"/g, '"').replace(/\\'/g, "'").replace(/\\\\/g, '\\');
             }
             return value;
           }
