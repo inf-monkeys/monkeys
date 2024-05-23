@@ -26,12 +26,12 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page 
   const handleUnPin = () => {
     if (!page?.id) return;
     toast.promise(toggleWorkspacePagePin(page.id, false), {
-      loading: `正在取消标星中...`,
+      loading: t('common.operate.loading'),
       success: () => {
         void mutate('/api/pages');
-        return `取消标星成功`;
+        return t('common.operate.success');
       },
-      error: `取消标星失败`,
+      error: t('common.operate.error'),
     });
   };
 
@@ -41,7 +41,7 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page 
         <VinesIcon size="sm">{workflow?.iconUrl}</VinesIcon>
         <div className="flex flex-col gap-0.5">
           <h1 className="font-bold leading-tight">{page?.displayName}</h1>
-          <span className="text-xxs">{workflow?.displayName ?? '未命名应用'}</span>
+          <span className="text-xxs">{workflow?.displayName ?? t('common.utils.untitled')}</span>
         </div>
       </div>
       <div className="flex gap-4">
