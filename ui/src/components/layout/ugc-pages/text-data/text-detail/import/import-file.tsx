@@ -236,7 +236,7 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                     render={() => (
                       <FormItem>
                         <div className="mb-4">
-                          <FormLabel>{t('ugc-page.text-data.detail.import.file.form.preProcessRules.label')}</FormLabel>
+                          <FormLabel>{t('ugc-page.text-data.detail.import.utils.pre-process.rules.label')}</FormLabel>
                         </div>
                         {PRE_PROCESS_RULES.map((value) => (
                           <FormField
@@ -257,7 +257,7 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                                     />
                                   </FormControl>
                                   <FormLabel className="text-sm font-normal">
-                                    {t(`ugc-page.text-data.detail.import.file.form.preProcessRules.rules.${value}`)}
+                                    {t(`ugc-page.text-data.detail.import.utils.pre-process.rules.rules.${value}`)}
                                   </FormLabel>
                                 </FormItem>
                               );
