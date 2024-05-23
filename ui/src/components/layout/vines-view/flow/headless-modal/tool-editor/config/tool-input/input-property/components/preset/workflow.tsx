@@ -10,7 +10,7 @@ import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/he
 import { IVinesInputPresetProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/index.tsx';
 import { StringInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/string.tsx';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
-import { IVinesToolPropertiesOptions, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
+import { IVinesToolPropertiesOption, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
 export const WorkflowPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInputPresetProps, 'typeOptions'>> = (
   props,
@@ -19,7 +19,7 @@ export const WorkflowPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInp
 
   const { data: workflowList, isLoading } = useWorkflowList();
 
-  const [options, setOptions] = useState<IVinesToolPropertiesOptions[]>([]);
+  const [options, setOptions] = useState<IVinesToolPropertiesOption[]>([]);
   const [optionsVariableMapper, setOptionsVariableMapper] = useState<Record<string, VinesToolDefProperties>>({});
 
   useEffect(() => {
@@ -59,6 +59,8 @@ export const WorkflowPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInp
     }
   }, [optionsVariableMapper, workflowList]);
 
+  const isEmptyOptions = !options.length;
+
   return (
     <AnimatePresence>
       {isLoading ? (
@@ -81,9 +83,13 @@ export const WorkflowPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInp
           exit={{ opacity: 0 }}
           transition={{ duration: 0.1 }}
         >
-          <Select onValueChange={handleOnSelectChange} defaultValue={isString(value) ? value : ''}>
+          <Select
+            onValueChange={handleOnSelectChange}
+            defaultValue={isString(value) ? value : ''}
+            disabled={isEmptyOptions}
+          >
             <SelectTrigger>
-              <SelectValue placeholder="您也可以选择预置选项" />
+              <SelectValue placeholder={isEmptyOptions ? '暂无选项' : '您也可以选择预置选项'} />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>

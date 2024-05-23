@@ -1,6 +1,7 @@
 import { LOCK_TOKEN } from '@/common/common.module';
 import { config } from '@/common/config';
 import { logger } from '@/common/logger';
+import { ToolImportType } from '@/common/typings/tools';
 import { LockManager } from '@/common/utils/lock';
 import { ToolsRegistryService } from '@/modules/tools/tools.registry.service';
 import { Inject, Injectable } from '@nestjs/common';
@@ -31,6 +32,7 @@ export class ToolsRegistryCronService {
         for (const registry of registries) {
           try {
             await this.toolsRegistryService.registerToolsServer({
+              importType: ToolImportType.manifest,
               manifestUrl: registry.manifestUrl,
             });
           } catch (error) {

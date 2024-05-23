@@ -151,22 +151,34 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
       return defs.map(({ name, displayName, type, properties, typeOptions }) => {
         const isMultipleValues = prev && prevIsMultipleValues;
         const finalPrevOriginName = isMultipleValues ? prev.slice(0, -1) + '[0].' : prev;
-        const finalName = format(nameTemplate, { target: targetId, variable: finalPrevOriginName + name });
-        const finalJsonpath = format(jsonpathTemplate, { target: targetId, variable: finalPrevOriginName + name });
+
+        const finalVariable = finalPrevOriginName + name;
+
+        const finalName = format(nameTemplate, { target: targetId, variable: finalVariable });
+        const finalJsonpath = format(jsonpathTemplate, { target: targetId, variable: finalVariable });
         const isMultiple = get(typeOptions, 'multipleValues', false);
 
         return {
           group,
           id: finalName,
           jsonpath: finalJsonpath,
-          originalName: finalPrevOriginName + name,
+          originalName: finalVariable,
           label: displayName,
           type,
           targetId,
           isMultiple,
           children: properties
-            ? this.generateVariable(group, targetId, properties, nameTemplate, jsonpathTemplate, `${name}.`, isMultiple)
+            ? this.generateVariable(
+                group,
+                targetId,
+                properties,
+                nameTemplate,
+                jsonpathTemplate,
+                `${finalVariable}.`,
+                isMultiple,
+              )
             : [],
+          pathLabel: prev ? finalVariable : void 0,
         } as IVinesVariable;
       });
     }
@@ -174,10 +186,14 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
     public generateVariableMapper(defs: IVinesVariable[], nodeName: string): VinesVariableMapper {
       const mapper: VinesVariableMapper = new Map();
 
-      for (const def of defs.flatMap((it) => [it, it.children]).flat()) {
+      const flatVariables = (vars: IVinesVariable[] | undefined): IVinesVariable[] => {
+        return vars?.flatMap((it) => [it, ...flatVariables(it.children)]) ?? [];
+      };
+
+      for (const def of flatVariables(defs)) {
         if (!def) continue;
-        const { id, type, label, jsonpath, originalName } = def;
-        const variableDisplayName = `${nodeName}的${label}`;
+        const { id, type, label, pathLabel, jsonpath, originalName } = def;
+        const variableDisplayName = `${nodeName} 的 ${pathLabel || label}`;
         mapper.set(id, {
           name: originalName,
           displayName: variableDisplayName,
