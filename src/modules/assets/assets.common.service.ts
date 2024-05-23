@@ -2,6 +2,7 @@ import { AssetType } from '@/common/typings/asset';
 import { BaseAssetEntity } from '@/database/entities/assets/base-asset';
 import { AbstractAssetRepository } from '@/database/repositories/assets-abstract.repository';
 import { CanvasAssetRepositroy } from '@/database/repositories/assets-canvas.repository';
+import { ComfyuiWorkflowAssetRepositroy } from '@/database/repositories/assets-comfyui-workflow.respository';
 import { SqlKnowledgeBaseAssetRepositroy } from '@/database/repositories/assets-knowledge-base-sql.repository';
 import { KnowledgeBaseAssetRepositroy } from '@/database/repositories/assets-knowledge-base.repository';
 import { LlmModelAssetRepositroy } from '@/database/repositories/assets-llm-model.respository';
@@ -20,6 +21,7 @@ export class AssetsMapperService {
     private readonly mediaFileAssetsRepository: MediaFileAssetRepositroy,
     private readonly workflowAssetRepositroy: WorkflowAssetRepositroy,
     private readonly sqlKnowledgeBaseRepository: SqlKnowledgeBaseAssetRepositroy,
+    private readonly comfyuiWorkflowAssetsRepository: ComfyuiWorkflowAssetRepositroy,
   ) {}
 
   public getRepositoryByAssetType(assetType: AssetType): AbstractAssetRepository<BaseAssetEntity> {
@@ -37,6 +39,8 @@ export class AssetsMapperService {
       return this.workflowAssetRepositroy as AbstractAssetRepository<BaseAssetEntity>;
     } else if (assetType === 'knowledge-base-sql') {
       return this.sqlKnowledgeBaseRepository as AbstractAssetRepository<BaseAssetEntity>;
+    } else if (assetType === 'comfyui-workflow') {
+      return this.comfyuiWorkflowAssetsRepository as AbstractAssetRepository<BaseAssetEntity>;
     } else {
       throw new Error('invalid assetType');
     }

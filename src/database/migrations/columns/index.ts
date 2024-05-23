@@ -1,5 +1,45 @@
 const CURRENT_TIMESTAMP = +new Date();
 
+export const NOT_NULL = {
+  isNullable: false,
+};
+
+export const NULLABLE = {
+  isNullable: true,
+};
+
+export const VARCHAR = {
+  type: 'varchar',
+};
+
+export const BOOL = {
+  type: 'bool',
+};
+
+export const TEXT = {
+  type: 'text',
+};
+
+export const SMALL_INT = {
+  type: 'smallint',
+};
+
+export const INT = {
+  type: 'int',
+};
+
+export const LONG_INT = {
+  type: 'bigint',
+};
+
+export const TIMESTAMP = {
+  type: 'timestamp',
+};
+
+export const JSON = {
+  type: 'json',
+};
+
 export const ID = {
   name: 'id',
   type: 'varchar',
