@@ -7,6 +7,7 @@
     "utils": {
       "untitled": "Untitled",
       "unknown": "Unknown",
+      "system": "System",
       "team": "Team",
       "unknown-team": "Unknown Team",
       "user": "User",
@@ -248,7 +249,7 @@
                 "label": "Media Data"
               }
             },
-            "application": {
+            "store": {
               "label": "Store",
               "application-store": {
                 "label": "App Store"
@@ -886,6 +887,11 @@
           }
         }
       }
+    }
+  },
+  "workspace": {
+    "404": {
+      "description": "Pages under construction"
     }
   }
 }

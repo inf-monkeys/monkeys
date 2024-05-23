@@ -78,7 +78,7 @@ export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
     ],
   },
   {
-    name: 'application',
+    name: 'store',
     icon: <ShoppingCart />,
     items: [
       {

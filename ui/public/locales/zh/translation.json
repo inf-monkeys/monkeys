@@ -7,6 +7,7 @@
     "utils": {
       "untitled": "未命名",
       "unknown": "未知",
+      "system": "系统内置",
       "team": "团队",
       "unknown-team": "未知团队",
       "user": "用户",
@@ -238,7 +239,7 @@
                 "label": "富媒体数据"
               }
             },
-            "application": {
+            "store": {
               "label": "市场",
               "application-store": {
                 "label": "应用市场"
@@ -861,6 +862,11 @@
           "dropdown-label": "文本数据操作"
         }
       }
+    }
+  },
+  "workspace": {
+    "404": {
+      "description": "页面正在建设中"
     }
   }
 }
