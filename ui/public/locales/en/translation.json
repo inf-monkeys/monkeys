@@ -917,6 +917,15 @@
           }
         },
         "import": {
+          "utils": {
+            "pre-process-rules": {
+              "label": "Text Pre-processing Rules",
+              "rules": {
+                "replace-space-n-tab": "Replacing consecutive spaces, line breaks and tabs",
+                "delete-url-and-email": "Delete all URL addresses and e-mail addresses"
+              }
+            }
+          },
           "toast": {
             "create-task": {
               "loading": "Creating import task...",
@@ -955,13 +964,6 @@
                 "chunk_overlap": {
                   "label": "Segment Chunk Overlap",
                   "tip": "Please enter segment chunk overlap"
-                }
-              },
-              "preProcessRules": {
-                "label": "Text Pre-processing Rules",
-                "rules": {
-                  "replace-space-n-tab": "Replacing consecutive spaces, line breaks and tabs",
-                  "delete-url-and-email": "Delete all URL addresses and e-mail addresses"
                 }
               }
             }

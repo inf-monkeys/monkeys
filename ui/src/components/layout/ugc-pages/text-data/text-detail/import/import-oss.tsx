@@ -389,9 +389,9 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                     render={() => (
                       <FormItem>
                         <div className="mb-4">
-                          <FormLabel>文本预处理规则</FormLabel>
+                          <FormLabel>{t('ugc-page.text-data.detail.import.utils.pre-process.rules.label')}</FormLabel>
                         </div>
-                        {PRE_PROCESS_RULES.map(({ value, label }) => (
+                        {PRE_PROCESS_RULES.map((value) => (
                           <FormField
                             key={value}
                             control={form.control}
@@ -409,7 +409,9 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                                       }}
                                     />
                                   </FormControl>
-                                  <FormLabel className="text-sm font-normal">{label}</FormLabel>
+                                  <FormLabel className="text-sm font-normal">
+                                    {t(`ugc-page.text-data.detail.import.utils.pre-process.rules.rules.${value}`)}
+                                  </FormLabel>
                                 </FormItem>
                               );
                             }}

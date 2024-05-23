@@ -910,6 +910,15 @@
           }
         },
         "import": {
+          "utils": {
+            "pre-process-rules": {
+              "label": "文本预处理规则",
+              "rules": {
+                "replace-space-n-tab": "替换掉连续的空格、换行符和制表符",
+                "delete-url-and-email": "删除所有 URL 地址和电子邮件地址"
+              }
+            }
+          },
           "toast": {
             "create-task": {
               "loading": "创建导入任务中...",
@@ -948,13 +957,6 @@
                 "chunk_overlap": {
                   "label": "文本重叠量",
                   "tip": "请输入文本重叠量"
-                }
-              },
-              "preProcessRules": {
-                "label": "文本预处理规则",
-                "rules": {
-                  "replace-space-n-tab": "替换掉连续的空格、换行符和制表符",
-                  "delete-url-and-email": "删除所有 URL 地址和电子邮件地址"
                 }
               }
             }
