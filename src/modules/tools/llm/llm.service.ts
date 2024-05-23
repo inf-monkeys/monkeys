@@ -323,6 +323,7 @@ When answer to user:
           let chunkString = decoder.decode(chunk);
           // Original String: 0:"你", contains the beginning 0: and the first and last double quotes
           chunkString = chunkString.slice(2, -1).slice(1, -1);
+          console.log('chunkString: ', chunkString);
           const chunkObject = {
             id: randomChatCmplId,
             object: 'chat.completion.chunk',
@@ -331,7 +332,13 @@ When answer to user:
             system_fingerprint: null,
             choices: [{ index: 0, delta: { content: chunkString }, logprobs: null, finish_reason: null }],
           };
-          res.write(`data: ${JSON.stringify(chunkObject, null, 0)}\n\n`);
+          function replacer(key: string, value: any) {
+            if (typeof value === 'string') {
+              return value.replace(/\\n/g, '\n');
+            }
+            return value;
+          }
+          res.write(`data: ${JSON.stringify(chunkObject, replacer, 0)}\n\n`);
         });
       } else {
         const data = response as ChatCompletion;

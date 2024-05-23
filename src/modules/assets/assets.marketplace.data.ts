@@ -4,6 +4,7 @@ import { LLM_CHAT_COMPLETION_TOOL, LLM_COMPLETION_TOOL, LLM_NAMESPACE } from '..
 
 export interface WorkflowMarketplaceData extends WorkflowMetadataEntity {
   tags: string[];
+  autoPinPage?: string[];
 }
 
 export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketplaceData>> = [
