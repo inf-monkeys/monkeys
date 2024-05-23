@@ -2,17 +2,24 @@ import { isValidToolName } from '@/common/utils';
 import { BlockCredentialItem, BlockDefPropertyTypes, BlockDefinition, BlockType } from '@inf-monkeys/vines';
 import { OpenAPIObject, OperationObject, ParameterObject, ReferenceObject, RequestBodyObject, SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 
-export const parseOpenApiSpecAsTools = (namespace: string, specData: OpenAPIObject): BlockDefinition[] => {
-  const blocks: BlockDefinition[] = [];
+export interface OpenAPIParserOptions {
+  filterByXMonkeyToolNameTag?: boolean;
+}
+
+export const parseOpenApiSpecAsTools = (namespace: string, specData: OpenAPIObject, options?: OpenAPIParserOptions): BlockDefinition[] => {
+  const { filterByXMonkeyToolNameTag = true } = options || {};
+  const tools: BlockDefinition[] = [];
   for (const path in specData.paths) {
     const pathItemObject = specData.paths[path];
     for (const method in pathItemObject) {
       if (['get', 'post', 'delete', 'put', 'patch', 'options', 'head', 'trace'].includes(method)) {
         const apiContent = pathItemObject[method] as OperationObject;
-        if (!apiContent['x-monkey-tool-name']) {
-          continue;
+        if (filterByXMonkeyToolNameTag) {
+          if (!apiContent['x-monkey-tool-name']) {
+            continue;
+          }
         }
-        const name = apiContent['x-monkey-tool-name'];
+        const name = apiContent['x-monkey-tool-name'] || apiContent.operationId;
         if (!isValidToolName(name)) {
           throw new Error(`Error when parse tool: For tool name, only numbers, letters, and underscores are allowed, and two consecutive underscores are not permitted.`);
         }
@@ -31,10 +38,10 @@ export const parseOpenApiSpecAsTools = (namespace: string, specData: OpenAPIObje
         const block: BlockDefinition = {
           type: BlockType.SIMPLE,
           name: `${namespace}:${name}`,
-          displayName: apiContent['x-monkey-tool-display-name'] || apiContent.summary,
-          description: apiContent['x-monkey-tool-description'] || apiContent.description,
+          displayName: apiContent['x-monkey-tool-display-name'] || apiContent.summary || apiContent.description || name,
+          description: apiContent['x-monkey-tool-description'] || apiContent.description || apiContent.summary || name,
           categories: apiContent['x-monkey-tool-categories'] || [],
-          icon: apiContent['x-monkey-tool-icon'] || '',
+          icon: apiContent['x-monkey-tool-icon'] || 'emoji:🍀:#ceefc5',
           input: [],
           output: [],
           extra: extra,
@@ -150,7 +157,7 @@ export const parseOpenApiSpecAsTools = (namespace: string, specData: OpenAPIObje
           // parameters 是 query 里面的参数
           if (parameters?.length) {
             for (const parameter of parameters) {
-              const { name, schema, description, example, required, in: placeIn = 'query' } = parameter as ParameterObject;
+              const { name, schema, description, example, required } = parameter as ParameterObject;
               if (!schema) {
                 continue;
               }
@@ -193,10 +200,10 @@ export const parseOpenApiSpecAsTools = (namespace: string, specData: OpenAPIObje
         if (outputInSpec) {
           block.output = outputInSpec;
         }
-        blocks.push(block);
+        tools.push(block);
       }
     }
   }
 
-  return blocks;
+  return tools;
 };

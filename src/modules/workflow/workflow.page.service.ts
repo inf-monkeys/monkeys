@@ -1,6 +1,6 @@
 import { generateDbId } from '@/common/utils';
-import { PageInstance, WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
-import { WorkflowRepository } from '@/database/repositories/workflow.repository';
+import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
+import { BUILT_IN_PAGE_INSTANCES, WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { keyBy, uniq } from 'lodash';
@@ -8,33 +8,6 @@ import { Repository } from 'typeorm';
 import { CreatePageDto } from './dto/req/create-page.dto';
 import { UpdatePagesDto } from './dto/req/update-pages.dto';
 import { WorkflowPageJson } from './interfaces';
-
-export const BUILT_IN_PAGE_INSTANCES: PageInstance[] = [
-  {
-    name: '流程视图',
-    type: 'process',
-    allowedPermissions: ['read', 'write', 'exec', 'permission'],
-    icon: '🚀',
-  },
-  {
-    name: '日志视图',
-    type: 'log',
-    allowedPermissions: ['read', 'write'],
-    icon: '📃',
-  },
-  {
-    name: '预览视图',
-    type: 'preview',
-    allowedPermissions: ['read', 'write', 'exec', 'permission'],
-    icon: '📷',
-  },
-  {
-    name: '对话视图',
-    type: 'chat',
-    allowedPermissions: ['read', 'write', 'exec', 'permission'],
-    icon: '💬',
-  },
-];
 
 @Injectable()
 export class WorkflowPageService {
@@ -45,41 +18,7 @@ export class WorkflowPageService {
   ) {}
 
   async listWorkflowPages(workflowId: string) {
-    const workflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(workflowId);
-    let pages: WorkflowPageEntity[] = [];
-    const existsPages = await this.pageRepository.find({
-      where: {
-        workflowId,
-        isDeleted: false,
-      },
-      order: {
-        sortIndex: 1,
-      },
-    });
-    if (existsPages.length > 0) {
-      pages = existsPages;
-    } else {
-      let sortIndex = 0;
-      pages = BUILT_IN_PAGE_INSTANCES.map((item) => ({
-        id: generateDbId(),
-        type: item.type,
-        displayName: item.name,
-        workflowId,
-        isBuiltIn: true,
-        teamId: workflow.teamId,
-        permissions: item.allowedPermissions, // 默认授予全部权限
-        sortIndex: ++sortIndex,
-        createdTimestamp: Date.now(),
-        updatedTimestamp: Date.now(),
-        isDeleted: false,
-      }));
-      await this.pageRepository.save(pages);
-    }
-    const pageInstanceTypeMapper = keyBy(BUILT_IN_PAGE_INSTANCES, 'type');
-    return pages.map((page) => ({
-      ...page,
-      instance: pageInstanceTypeMapper[page.type],
-    }));
+    return await this.workflowRepository.listWorkflowPagesAndCreateIfNotExists(workflowId);
   }
 
   async listWorkflowPagesBrief(workflowId: string): Promise<WorkflowPageJson[]> {
@@ -219,24 +158,7 @@ export class WorkflowPageService {
     }));
   }
 
-  async pinPage(teamId: string, _: string, pageId: string, pin: boolean) {
-    const page = await this.pageRepository.findOne({
-      where: {
-        id: pageId,
-        teamId,
-        isDeleted: false,
-      },
-    });
-    if (!page) {
-      throw new Error('page not exists');
-    }
-    await this.pageRepository.update(
-      {
-        id: page.id,
-      },
-      {
-        pinned: pin,
-      },
-    );
+  async updatePagePinStatus(teamId: string, pageId: string, pin: boolean) {
+    return await this.workflowRepository.updatePagePinStatus(teamId, pageId, pin);
   }
 }
