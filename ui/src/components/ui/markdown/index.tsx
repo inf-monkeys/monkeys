@@ -1,6 +1,7 @@
 import React, { FC, memo, useMemo } from 'react';
 
-import { ExternalLink } from 'lucide-react';
+import { useClipboard } from '@mantine/hooks';
+import { Copy, CopyCheck, ExternalLink } from 'lucide-react';
 import ReactMarkdown, { Components, Options } from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
@@ -9,6 +10,11 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card.tsx';
+import { VinesHighlighter } from '@/components/ui/highlighter';
+import { FALLBACK_LANG } from '@/components/ui/highlighter/useHighlight.ts';
+import { isSingleLine } from '@/components/ui/highlighter/utils.ts';
 import { Label } from '@/components/ui/label.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils';
@@ -49,6 +55,37 @@ export const VinesMarkdown: React.FC<IVinesMarkdownProps> = ({ allowHtml, classN
           <AvatarFallback className="rounded-none p-2 text-xs">{alt}</AvatarFallback>
         </Avatar>
       ),
+      pre: (props: any) => {
+        const codeProps = props?.children?.props;
+        const language = codeProps?.className?.replace('language-', '') || FALLBACK_LANG;
+        const codeChild = codeProps?.children;
+
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const clipboard = useClipboard();
+
+        const code = (Array.isArray(codeChild) ? (codeChild[0] as string) : codeChild)?.trim() ?? '';
+        const showLanguage = !isSingleLine(code) && language;
+
+        return (
+          <Card className="group/codeblock relative my-2">
+            <VinesHighlighter className="px-3 [&>pre]:m-2 [&>pre]:text-start" language={language}>
+              {code}
+            </VinesHighlighter>
+            <Button
+              icon={clipboard.copied ? <CopyCheck /> : <Copy />}
+              variant="outline"
+              size="small"
+              className="absolute right-1 top-1 scale-80 opacity-0 group-hover/codeblock:opacity-75"
+              onClick={() => clipboard.copy(code)}
+            />
+            {showLanguage && (
+              <Label className="pointer-events-none absolute bottom-2 right-2 opacity-0 transition-opacity group-hover/codeblock:opacity-70">
+                {language}
+              </Label>
+            )}
+          </Card>
+        );
+      },
     }),
     [],
   );
