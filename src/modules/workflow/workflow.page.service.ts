@@ -158,24 +158,7 @@ export class WorkflowPageService {
     }));
   }
 
-  async pinPage(teamId: string, _: string, pageId: string, pin: boolean) {
-    const page = await this.pageRepository.findOne({
-      where: {
-        id: pageId,
-        teamId,
-        isDeleted: false,
-      },
-    });
-    if (!page) {
-      throw new Error('page not exists');
-    }
-    await this.pageRepository.update(
-      {
-        id: page.id,
-      },
-      {
-        pinned: pin,
-      },
-    );
+  async updatePagePinStatus(teamId: string, pageId: string, pin: boolean) {
+    return await this.workflowRepository.updatePagePinStatus(teamId, pageId, pin);
   }
 }

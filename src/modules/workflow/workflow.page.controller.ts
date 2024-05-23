@@ -96,12 +96,12 @@ export class WorkflowPageController {
    */
   @UseGuards(CompatibleAuthGuard)
   @Post('/pages/:pageId/pin')
-  async pinPage(@Param('pageId') pageId: string, @Req() request: IRequest, @Body('pin') pin: boolean) {
+  async updatePagePinStatus(@Param('pageId') pageId: string, @Req() request: IRequest, @Body('pin') pin: boolean) {
     if (typeof pin !== 'boolean') {
       throw new BadRequestException('pin must be a boolean');
     }
-    const { teamId, userId } = request;
-    const data = await this.pageService.pinPage(teamId, userId, pageId, pin);
+    const { teamId } = request;
+    const data = await this.pageService.updatePagePinStatus(teamId, pageId, pin);
     return new SuccessResponse({ data });
   }
 }
