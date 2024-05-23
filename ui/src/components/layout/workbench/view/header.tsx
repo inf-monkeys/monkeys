@@ -1,9 +1,10 @@
 import React from 'react';
 
-import { Link } from '@tanstack/react-router';
 import { useSWRConfig } from 'swr';
+import { Link } from '@tanstack/react-router';
 
 import { Star } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { toggleWorkspacePagePin } from '@/apis/pages';
@@ -17,6 +18,8 @@ interface IWorkbenchViewHeaderProps extends React.ComponentPropsWithoutRef<'div'
 }
 
 export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page }) => {
+  const { t } = useTranslation();
+
   const { mutate } = useSWRConfig();
   const workflow = page?.workflow;
 
@@ -52,13 +55,13 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page 
               onClick={handleUnPin}
             />
           </TooltipTrigger>
-          <TooltipContent>取消标星</TooltipContent>
+          <TooltipContent>{t('workbench.view.header.delete')}</TooltipContent>
         </Tooltip>
         <Link
           to="/$teamId/workspace/$workflowId/$pageId"
           params={{ workflowId: workflow?.workflowId, pageId: page?.id }}
         >
-          <Button variant="outline">进入视图</Button>
+          <Button variant="outline">{t('workbench.view.header.enter')}</Button>
         </Link>
       </div>
     </header>
