@@ -15,6 +15,7 @@ import { IApplicationStoreItemDetail } from '@/apis/ugc/asset-typings.ts';
 import { IKnowledgeBaseFrontEnd } from '@/apis/vector/typings.ts';
 import { paginationWrapper } from '@/apis/wrapper.ts';
 
+import { IComfyuiWorkflow } from '../comfyui/typings';
 import { IAssetItem, IAssetPublicCategory, IAssetTag, IListUgcDto, IUgcFilterRules } from './typings';
 
 export const useUgcItems = <T extends object>(dto: IListUgcDto, url: string, method: 'GET' | 'POST' = 'GET') => {
@@ -48,6 +49,11 @@ export const preloadUgcWorkflows = (dto: IListUgcDto) => preloadUgcItems<MonkeyW
 
 export const useUgcActionTools = (dto: IListUgcDto) => useUgcItems<IWorkflowBlock>(dto, '/api/tools');
 export const preloadUgcActionTools = (dto: IListUgcDto) => preloadUgcItems<IWorkflowBlock>(dto, '/api/tools');
+
+export const useUgcComfyuiWorkflows = (dto: IListUgcDto) =>
+  useUgcItems<IComfyuiWorkflow>(dto, '/api/comfyui/workflows');
+export const preloadUgcComfyuiWorkflows = (dto: IListUgcDto) =>
+  preloadUgcItems<IComfyuiWorkflow>(dto, '/api/comfyui/workflows');
 
 export const useUgcTextModels = (dto: IListUgcDto) => useUgcItems<ILLMModel>(dto, '/api/llm-models');
 export const preloadUgcTextModels = (dto: IListUgcDto) => preloadUgcItems<ILLMModel>(dto, '/api/llm-models');

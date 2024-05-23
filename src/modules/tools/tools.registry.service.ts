@@ -2,6 +2,7 @@ import { logger } from '@/common/logger';
 import { enumToList, isValidNamespace } from '@/common/utils';
 import { ExtendedToolDefinition } from '@/common/utils/define-tool';
 import { SYSTEM_NAMESPACE } from '@/database/entities/tools/tools-server.entity';
+import { ComfyuiWorkflowRepository } from '@/database/repositories/comfyui-workflow.repository';
 import { TriggerTypeRepository } from '@/database/repositories/trigger-type.repository';
 import { BlockDefinition } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
@@ -17,19 +18,22 @@ import {
   CredentialEndpointConfig,
   CredentialEndpointType,
   ManifestJson,
-  RegisterWorkerParams,
+  RegisterToolParams,
   SchemaVersion,
+  ToolImportType,
   TriggerEndpointConfig,
   TriggerEndpointType,
 } from '../../common/typings/tools';
 import { CredentialsRepository } from '../../database/repositories/credential.repository';
 import { ToolsRepository } from '../../database/repositories/tools.repository';
-import { parseOpenApiSpecAsTools } from './utils/openapi-parser';
+import { COMFYUI_INFER_TOOL } from './consts';
+import { OpenAPIParserOptions, parseOpenApiSpecAsTools } from './utils/openapi-parser';
 
 @Injectable()
 export class ToolsRegistryService {
   constructor(
     private readonly toolsRepository: ToolsRepository,
+    private readonly comfyuiWorkflowRepository: ComfyuiWorkflowRepository,
     private readonly credentialsRepository: CredentialsRepository,
     private readonly triggerTypesRepository: TriggerTypeRepository,
   ) {}
@@ -125,12 +129,13 @@ export class ToolsRegistryService {
   private async parseOpenapiAsTools(
     namespace: string,
     specUrl: string,
+    options?: OpenAPIParserOptions,
   ): Promise<{
     servers: ServerObject[];
     tools: BlockDefinition[];
   }> {
     const { data: specData } = await axios.get<OpenAPIObject>(specUrl);
-    const tools = parseOpenApiSpecAsTools(namespace, specData);
+    const tools = parseOpenApiSpecAsTools(namespace, specData, options);
     return {
       servers: specData.servers,
       tools,
@@ -146,8 +151,7 @@ export class ToolsRegistryService {
     }
   }
 
-  public async registerToolsServer(params: RegisterWorkerParams) {
-    const { manifestUrl } = params;
+  private async registerToolsServerByManifest(manifestUrl: string) {
     const { data: manifestData } = await axios.get<ManifestJson>(manifestUrl);
     await this.validateManifestJson(manifestData);
 
@@ -192,6 +196,29 @@ export class ToolsRegistryService {
     return tools;
   }
 
+  private async regsieterToolsServerByOpenapiSpec(namespace: string, openapiSpecUrl: string) {
+    const { tools } = await this.parseOpenapiAsTools(namespace, openapiSpecUrl, {
+      filterByXMonkeyToolNameTag: false,
+    });
+    await this.validateToolsParsed(tools);
+
+    await this.toolsRepository.createOrUpdateTools(namespace, tools);
+    return tools;
+  }
+
+  public async registerToolsServer(params: RegisterToolParams) {
+    const { importType } = params;
+    if (importType === ToolImportType.manifest) {
+      const { manifestUrl } = params;
+      return await this.registerToolsServerByManifest(manifestUrl);
+    } else if (importType === ToolImportType.openapiSpec) {
+      const { namespace, openapiSpecUrl } = params;
+      return await this.regsieterToolsServerByOpenapiSpec(namespace, openapiSpecUrl);
+    } else {
+      throw new Error(`Error when import block: invalid importType "${importType}", must in any one of ${enumToList(ToolImportType).join(',')}`);
+    }
+  }
+
   public async getBuiltInTools(): Promise<ExtendedToolDefinition[]> {
     const folder = path.resolve(__dirname, `./conductor-system-tools/`);
     if (!fs.existsSync(folder)) {
@@ -221,8 +248,32 @@ export class ToolsRegistryService {
     );
   }
 
-  public async listTools() {
-    return await this.toolsRepository.listTools();
+  public async listTools(teamId: string) {
+    const tools = await this.toolsRepository.listTools();
+    // Handle Special comfyui tool
+    const comfyuiInferTool = tools.find((x) => x.name === COMFYUI_INFER_TOOL);
+    if (comfyuiInferTool) {
+      const comfyuiWorkflowsInThisTeam = await this.comfyuiWorkflowRepository.getAllComfyuiWorkflows(teamId);
+      let input = comfyuiInferTool.input || [];
+      for (const comfyuiWorkflow of comfyuiWorkflowsInThisTeam) {
+        try {
+          if (comfyuiWorkflow.toolInput?.length) {
+            input = input.concat(
+              comfyuiWorkflow.toolInput.map((item) => {
+                item.displayOptions = item.displayOptions || {};
+                item.displayOptions.show = item.displayOptions.show || {};
+                item.displayOptions.show.workflow = [comfyuiWorkflow.id];
+                return item;
+              }),
+            );
+          }
+        } catch (error) {
+          logger.error('Error when handle comfyui workflow', error);
+        }
+      }
+      comfyuiInferTool.input = input;
+    }
+    return tools;
   }
 
   public async getToolByName(name: string) {

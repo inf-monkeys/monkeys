@@ -53,7 +53,11 @@ export const UserList: React.FC<IUserListProps> = ({ users }) => {
     );
   };
 
-  const handleLogout = (id: string) => logout(id);
+  const handleLogout = async (id: string) => {
+    if (!(await logout(id))) {
+      await navigate({ to: '/login' });
+    }
+  };
 
   return users.map(({ id, name, shortName, user, photo, token }) => (
     <div

@@ -130,9 +130,10 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                   key={index}
                   className={cn(
                     'group flex h-10 cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
-                    current === rule.id && 'border border-input bg-background text-accent-foreground shadow-sm',
+                    (current === rule.id || current === rule._id) &&
+                      'border border-input bg-background text-accent-foreground shadow-sm',
                   )}
-                  onClick={() => setCurrent(rule.id)}
+                  onClick={() => setCurrent(rule.id || rule._id)}
                 >
                   <div className="flex w-full items-center justify-between px-4 text-xs">
                     <span>{rule.name}</span>

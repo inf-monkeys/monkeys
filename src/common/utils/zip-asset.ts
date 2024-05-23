@@ -2,6 +2,7 @@ import { LlmModelJson, RichMediaJson, SdModelJson, TableCollectionsJson, TeamInf
 import fs from 'fs';
 import JSZip from 'jszip';
 import path from 'path';
+import { logger } from '../logger';
 import { findFilesInDir } from './file';
 import { generateRandomString, getAndEnsureTempDataFolder } from './utils';
 import { downloadAndUnzip } from './zip';
@@ -87,7 +88,7 @@ export const extractAssetFromZip = async (zipUrl: string) => {
   const rootTmpFolder = getAndEnsureTempDataFolder();
   const tmpFolder = path.join(rootTmpFolder, 'team-import', generateRandomString(20));
   await downloadAndUnzip(zipUrl, tmpFolder);
-  console.log('下载 zip 并解压到：', tmpFolder);
+  logger.info('下载 zip 并解压到：', tmpFolder);
   // 导入团队基本信息
   const teamJsonFile = path.join(tmpFolder, 'team.json');
   let teamJson: TeamInfoJson;

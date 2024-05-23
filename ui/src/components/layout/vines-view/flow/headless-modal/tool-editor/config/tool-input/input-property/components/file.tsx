@@ -47,11 +47,19 @@ export const FileInput: React.FC<IVinesInputPropertyProps> = ({ def, value, onCh
     <>
       <Updater
         files={files}
-        onFilesUpdate={(_files) => _files.length < files.length && onChange(_files.map((it) => it.path))}
+        onFilesUpdate={(_files) =>
+          _files.length < files.length && multipleValues
+            ? onChange(_files.map((it) => it.path))
+            : onChange(_files.map((it) => it.path)[0])
+        }
         accept={finalAccept}
         maxSize={finalMaxSize}
         limit={multipleValues ? void 0 : 1}
-        onFinished={(urls) => onChange([...files.map((it) => it.path), ...urls])}
+        onFinished={(urls) =>
+          onChange(
+            multipleValues ? [...files.map((it) => it.path), ...urls] : [...files.map((it) => it.path), ...urls][0],
+          )
+        }
       />
     </>
   );

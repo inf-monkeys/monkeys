@@ -88,8 +88,16 @@ export interface ManifestJson {
   rateLimiter?: ToolRateLimiterConfig;
 }
 
-export interface RegisterWorkerParams {
-  manifestUrl: string;
+export enum ToolImportType {
+  manifest = 'manifest',
+  openapiSpec = 'openapiSpec',
+}
+
+export interface RegisterToolParams {
+  importType: ToolImportType;
+  manifestUrl?: string;
+  openapiSpecUrl?: string;
+  namespace?: string;
 }
 
 export interface WorkerInputData {

@@ -8,8 +8,12 @@ interface IVinesHighlighterProps extends React.ComponentPropsWithoutRef<'pre'> {
   language: (typeof languageMap)[number];
 }
 
-export const VinesHighlighter = memo<IVinesHighlighterProps>(({ children, language }) => {
-  return <SyntaxHighlighter language={language?.toLowerCase()}>{children}</SyntaxHighlighter>;
+export const VinesHighlighter = memo<IVinesHighlighterProps>(({ children, language, ...rest }) => {
+  return (
+    <SyntaxHighlighter language={language?.toLowerCase()} {...rest}>
+      {children}
+    </SyntaxHighlighter>
+  );
 });
 
 VinesHighlighter.displayName = 'VinesHighlighter';

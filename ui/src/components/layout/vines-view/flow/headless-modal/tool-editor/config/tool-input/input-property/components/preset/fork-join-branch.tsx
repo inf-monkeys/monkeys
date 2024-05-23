@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { ForkJoinNode } from '@/package/vines-flow/core/nodes';
-import { IVinesToolPropertiesOptions } from '@/package/vines-flow/core/tools/typings.ts';
+import { IVinesToolPropertiesOption } from '@/package/vines-flow/core/tools/typings.ts';
 
 export const ForkJoinBranchPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInputPresetProps, 'typeOptions'>> = (
   props,
@@ -23,7 +23,7 @@ export const ForkJoinBranchPresets: React.FC<IVinesInputPropertyProps & Omit<IVi
   const { vines } = useVinesFlow();
   const node = vines.getNodeById(nodeId) as ForkJoinNode | undefined;
 
-  const [options, setOptions] = useState<IVinesToolPropertiesOptions[]>([]);
+  const [options, setOptions] = useState<IVinesToolPropertiesOption[]>([]);
 
   useEffect(() => {
     if (node) {

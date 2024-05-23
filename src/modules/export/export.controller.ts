@@ -1,4 +1,5 @@
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
+import { logger } from '@/common/logger';
 import { IRequest } from '@/common/typings/request';
 import { generateDbId } from '@/common/utils';
 import { extractAssetFromZip, generateZip } from '@/common/utils/zip-asset';
@@ -75,9 +76,9 @@ export class ExportController {
         },
         (error) => {
           if (error) {
-            console.error(`Error: ${error.message}`);
+            logger.error(`Error: ${error.message}`);
           } else {
-            console.log(`Folder ${tmpFolder} deleted successfully!`);
+            logger.info(`Folder ${tmpFolder} deleted successfully!`);
           }
         },
       );

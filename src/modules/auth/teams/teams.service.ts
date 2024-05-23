@@ -1,3 +1,4 @@
+import { logger } from '@/common/logger';
 import { CustomTheme, TeamEntity } from '@/database/entities/identity/team';
 import { AssetsMarketPlaceRepository } from '@/database/repositories/assets-marketplace.repository';
 import { TeamRepository } from '@/database/repositories/team.repository';
@@ -21,7 +22,7 @@ export class TeamsService {
       try {
         await this.conductorService.saveWorkflowInConductor(workflow);
       } catch (e) {
-        console.error('Failed to save workflow in conductor', e);
+        logger.error('Failed to save workflow in conductor', e);
       }
     }
   }

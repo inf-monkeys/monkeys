@@ -251,7 +251,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
       } as FindOptionsWhere<E>,
     });
 
-    const clonedAssets = [];
+    const clonedAssets: E[] = [];
     for (const asset of presetAssets) {
       const { id } = asset;
       const extraData = extraDataFunc ? extraDataFunc(asset) : {};
@@ -261,7 +261,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
         id: generateDbId(),
         teamId,
         creatorUserId,
-        forkedFrom: id,
+        forkFromId: id,
         isDeleted: false,
         isPreset: false,
         isPublished: false,

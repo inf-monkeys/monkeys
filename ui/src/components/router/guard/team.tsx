@@ -7,11 +7,9 @@ import { useNavigate } from '@tanstack/react-router';
 import { useTeams } from '@/apis/authz/team';
 import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { useSystemConfig } from '@/apis/common';
-import { useVinesRoute } from '@/components/router/useVinesRoute.ts';
 import { useLocalStorage } from '@/utils';
 
 export const TeamsGuard: React.FC = () => {
-  const { routeAppId } = useVinesRoute();
   const { mutate } = useSWRConfig();
   const navigate = useNavigate();
 

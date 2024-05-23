@@ -123,6 +123,7 @@ export class WorkflowTriggerService {
       if (!webhookConfig) {
         throw new Error(`${triggerType} 类型的触发器必须设置 webhookConfig 参数`);
       }
+    } else if (triggerType === WorkflowTriggerType.MANUALLY) {
     } else {
       // 否则是插件提供的触发器，需要调用插件的触发器接口
       isCustomTrigger = true;

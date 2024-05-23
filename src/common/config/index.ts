@@ -185,8 +185,11 @@ export interface Config {
 const port = readConfig('server.port', 3000);
 const appUrl = readConfig('server.appUrl', `http://127.0.0.1:${port}`);
 
-const logoConfig = readConfig('server.customization.logo', 'https://static.aside.fun/static/vines.svg');
-const faviconConfig = readConfig('server.customization.favicon', 'https://static.infmonkeys.com/upload/favicon.svg');
+const logoConfig = readConfig('server.customization.logo', {
+  light: 'https://static.infmonkeys.com/logo/InfMonkeys-logo-light.svg',
+  dark: 'https://static.infmonkeys.com/logo/InfMonkeys-logo-dark.svg',
+});
+const faviconConfig = readConfig('server.customization.favicon', 'https://static.infmonkeys.com/logo/InfMonkeys-ICO.svg');
 
 export const config: Config = {
   server: {

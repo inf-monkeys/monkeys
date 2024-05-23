@@ -1,5 +1,6 @@
 import { config } from '@/common/config';
 import { ListDto } from '@/common/dto/list.dto';
+import { logger } from '@/common/logger';
 import { generateDbId } from '@/common/utils';
 import { flatTasks } from '@/common/utils/conductor';
 import { extractAssetFromZip } from '@/common/utils/zip-asset';
@@ -261,18 +262,18 @@ export class WorkflowCrudService {
     try {
       // 导入表格数据
       const replaceSqlDatabaseMap = {};
-      console.log('开始导入表格数据集：', tableCollections.length);
+      logger.log('开始导入表格数据集：', tableCollections.length);
       for (const infoJson of tableCollections) {
         try {
           // const sqlDatabaseId = await this.tableCollectionService.importDatabase(teamId, userId, infoJson);
           // replaceSqlDatabaseMap[infoJson.originalId] = sqlDatabaseId;
         } catch (error) {
-          console.error('导入表格数据失败：', infoJson, error);
+          logger.error('导入表格数据失败：', infoJson, error);
         }
       }
 
       // 导入向量数据库
-      console.log('开始导入文本数据集：', textCollections.length);
+      logger.log('开始导入文本数据集：', textCollections.length);
       const replaceVectorDatabaseMap = {};
       if (textCollections.length) {
         for (const infoJson of textCollections) {
@@ -280,14 +281,14 @@ export class WorkflowCrudService {
             // const collectionName = await this.vectorService.importCollection(teamId, userId, infoJson);
             // replaceVectorDatabaseMap[infoJson.originalId] = collectionName;
           } catch (error) {
-            console.error('导入文本数据失败：', infoJson, error);
+            logger.error('导入文本数据失败：', infoJson, error);
           }
         }
       }
 
       // 导入 llm model
       const replaceLlmModelMap = {};
-      console.log('开始导入文本模型：', llmModels.length);
+      logger.log('开始导入文本模型：', llmModels.length);
       const llmModelsChunks = _.chunk(llmModels, 10);
       for (const chunk of llmModelsChunks) {
         await Promise.all(
@@ -299,14 +300,14 @@ export class WorkflowCrudService {
               // });
               // replaceLlmModelMap[c.originalId] = newLlmModel._id.toHexString();
             } catch (error) {
-              console.error('导入文本模型失败：', c, error);
+              logger.error('导入文本模型失败：', c, error);
             }
           }),
         );
       }
 
       // 导入 sd model
-      console.log('开始导入图像模型：', sdModels.length);
+      logger.log('开始导入图像模型：', sdModels.length);
       const replaceSdModelMap = {};
       const sdModelsChunks = _.chunk(sdModels, 10);
       for (const chunk of sdModelsChunks) {
@@ -316,7 +317,7 @@ export class WorkflowCrudService {
               // const newSdModel = await this.sdModelAssetSvc.createAsset('sd-model', c, { teamId, userId });
               // replaceSdModelMap[c.originalId] = newSdModel._id.toHexString();
             } catch (error) {
-              console.error('导入图像模型失败：', c, error);
+              logger.error('导入图像模型失败：', c, error);
             }
           }),
         );
@@ -340,9 +341,9 @@ export class WorkflowCrudService {
         },
         (error) => {
           if (error) {
-            console.error(`Error: ${error.message}`);
+            logger.error(`Error: ${error.message}`);
           } else {
-            console.log(`Folder ${tmpFolder} deleted successfully!`);
+            logger.info(`Folder ${tmpFolder} deleted successfully!`);
           }
         },
       );

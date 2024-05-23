@@ -3,6 +3,7 @@ import { OpenAPIObject } from '@nestjs/swagger';
 import axios from 'axios';
 import { config } from './common/config';
 import { logger } from './common/logger';
+import { ToolImportType } from './common/typings/tools';
 import { sleep } from './common/utils/utils';
 import { ToolsRepository } from './database/repositories/tools.repository';
 import { EXAMPLE_TOOL_OPENAPI_MENIFEST_URL } from './modules/tools/example/example.swagger';
@@ -52,12 +53,14 @@ export class AppService implements OnApplicationBootstrap {
     if (config.server.loadExample) {
       logger.info(`Load example tools of ${EXAMPLE_TOOL_OPENAPI_MENIFEST_URL}`);
       this.workerRegistryService.registerToolsServer({
+        importType: ToolImportType.manifest,
         manifestUrl: EXAMPLE_TOOL_OPENAPI_MENIFEST_URL,
       });
     }
 
     logger.info(`Load chat tool of ${CHAT_TOOL_OPENAPI_MENIFEST_URL}`);
     this.workerRegistryService.registerToolsServer({
+      importType: ToolImportType.manifest,
       manifestUrl: CHAT_TOOL_OPENAPI_MENIFEST_URL,
     });
 
@@ -65,6 +68,7 @@ export class AppService implements OnApplicationBootstrap {
       logger.info(`Load ${name} tools of ${manifestUrl}`);
       this.workerRegistryService
         .registerToolsServer({
+          importType: ToolImportType.manifest,
           manifestUrl: manifestUrl,
         })
         .catch((error) => {

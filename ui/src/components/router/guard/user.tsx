@@ -29,8 +29,9 @@ export const UserGuard: React.FC = () => {
 
   const userIds = Object.keys(users);
   const handleLogout = async (id?: string) => {
-    if (await logout(id ?? localUser.id ?? '')) {
-      const filtered = userIds.filter((it) => it !== id);
+    const finalUserId = id ?? localUser.id ?? '';
+    if (await logout(finalUserId)) {
+      const filtered = userIds.filter((it) => it !== finalUserId);
       if (!filtered.length) {
         if (user?.lastAuthMethod === AuthMethod.oidc) {
           handleOidcLogout();
@@ -41,6 +42,8 @@ export const UserGuard: React.FC = () => {
         swapAccount(filtered[0]);
         setTimeout(() => teamsMutate());
       }
+    } else {
+      await navigate({ to: '/login' });
     }
   };
 

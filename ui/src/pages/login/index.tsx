@@ -28,7 +28,7 @@ const Login: React.FC = () => {
   const [swap, setSwap] = useLocalStorage('vines-authz-swap', 'users', false);
 
   const logoUrl = get(oem, `theme.logo.${darkMode ? 'dark' : 'light'}`, '');
-  const appName = get(oem, 'theme.name', '');
+  const appName = get(oem, 'theme.name', 'AI');
 
   const loginMethods: AuthMethod[] = get(oem, 'auth.enabled', [] as AuthMethod[]);
   const loginMethodsLength = loginMethods?.filter((it: string) => it !== 'apikey').length;

@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useSetState } from '@mantine/hooks';
 import { groupBy } from 'lodash';
 
+import { VariableChildren } from '@/components/layout/vines-view/flow/headless-modal/variable-selector/children.tsx';
 import {
   Command,
   CommandEmpty,
@@ -50,16 +51,7 @@ export const VinesVariableSelector: React.FC<IVinesVariableSelectorProps> = () =
       const { clientX, clientY } = e;
       setPosition({ x: clientX, y: clientY });
 
-      setVariables(
-        Object.values(
-          groupBy(
-            (vines.generateWorkflowVariables().variables || [])
-              .flatMap((it) => [it, it.children])
-              .flat() as IVinesVariable[],
-            (it) => it.group.id,
-          ),
-        ),
-      );
+      setVariables(Object.values(groupBy(vines.generateWorkflowVariables().variables || [], (it) => it.group.id)));
       setInsertVariablesFnRef.current = setVariablesFn;
       insertTypeRef.current = insertType;
 
@@ -71,6 +63,18 @@ export const VinesVariableSelector: React.FC<IVinesVariableSelectorProps> = () =
       VinesEvent.off('flow-variable-selector', handleOpen);
     };
   }, [workflowId]);
+
+  const handleOnSelected = (id: string, jsonpath: string, targetId: string) => {
+    if (insertTypeRef.current === 'jsonpath') {
+      setInsertVariablesFnRef.current(jsonpath);
+    } else if (insertTypeRef.current === 'taskReferenceName') {
+      setInsertVariablesFnRef.current(targetId);
+    } else {
+      setInsertVariablesFnRef.current(id);
+    }
+    setOpen(false);
+    setDisableDialogClose(false);
+  };
 
   return (
     <Popover
@@ -98,25 +102,22 @@ export const VinesVariableSelector: React.FC<IVinesVariableSelectorProps> = () =
           <CommandList>
             {variables.map((it, index) => (
               <CommandGroup key={index} heading={it[0].group.name}>
-                {it.map(({ label, originalName, id, jsonpath, targetId }, i) => (
-                  <CommandItem
-                    key={i}
-                    onSelect={() => {
-                      if (insertTypeRef.current === 'jsonpath') {
-                        setInsertVariablesFnRef.current(jsonpath);
-                      } else if (insertTypeRef.current === 'taskReferenceName') {
-                        setInsertVariablesFnRef.current(targetId);
-                      } else {
-                        setInsertVariablesFnRef.current(id);
-                      }
-                      setOpen(false);
-                      setDisableDialogClose(false);
-                    }}
-                  >
+                {it.map(({ label, originalName, id, jsonpath, targetId, children }, i) => (
+                  <CommandItem key={i} onSelect={() => handleOnSelected(id, jsonpath, targetId)}>
                     {label}
                     <CommandShortcut>
                       {originalName.length > 20 ? `${originalName.slice(0, 20)}...` : originalName}
                     </CommandShortcut>
+                    {children && children.length > 0 && (
+                      <VariableChildren
+                        name={label}
+                        onSelected={(childId, childJsonpath, childTargetId) =>
+                          handleOnSelected(childId, childJsonpath, childTargetId)
+                        }
+                      >
+                        {children}
+                      </VariableChildren>
+                    )}
                   </CommandItem>
                 ))}
               </CommandGroup>

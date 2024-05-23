@@ -12,6 +12,7 @@ import { Stream } from 'openai/streaming';
 import { Readable } from 'stream';
 import { KnowledgeBaseService } from '../../assets/knowledge-base/knowledge-base.service';
 import { ToolsForwardService } from '../tools.forward.service';
+import { ResponseFormat } from './dto/req/create-chat-compltion.dto';
 
 export interface CreateChatCompelitionsParams {
   messages: Array<ChatCompletionMessageParam>;
@@ -24,6 +25,7 @@ export interface CreateChatCompelitionsParams {
   systemPrompt?: string;
   tools?: string[];
   knowledgeBase?: string;
+  response_format?: ResponseFormat;
 }
 
 export interface CreateCompelitionsParams {
@@ -34,6 +36,10 @@ export interface CreateCompelitionsParams {
   presence_penalty?: number;
   stream?: boolean;
   max_tokens?: number;
+}
+
+export interface CreateChatCompelitionsResponseOptions {
+  apiResponseType: 'simple' | 'full';
 }
 
 export const getModels = (
@@ -240,8 +246,12 @@ When answer to user:
     return messages;
   }
 
-  public async createChatCompelitions(res: Response, params: CreateChatCompelitionsParams) {
-    const { model, stream, systemPrompt, knowledgeBase } = params;
+  public async createChatCompelitions(res: Response, params: CreateChatCompelitionsParams, options: CreateChatCompelitionsResponseOptions) {
+    const { apiResponseType = 'full' } = options;
+    if (apiResponseType === 'simple' && params.stream) {
+      throw new Error('Stream is not supported in simple api response type');
+    }
+    const { model, stream, systemPrompt, knowledgeBase, response_format = ResponseFormat.text } = params;
     let { messages } = params;
     messages = await this.generateMessages(messages, systemPrompt, knowledgeBase);
 
@@ -264,6 +274,13 @@ When answer to user:
         messages,
         tools: tools?.length ? tools : undefined,
         tool_choice: tools?.length ? 'auto' : undefined,
+        // Only pass response_format if it's json_object, in case some llm not spport this feature results in error
+        response_format:
+          response_format === ResponseFormat.jsonObject
+            ? {
+                type: response_format,
+              }
+            : undefined,
         ...defaultParams,
       });
       if (stream) {
@@ -304,7 +321,8 @@ When answer to user:
         readableStream.on('data', (chunk) => {
           const decoder = new TextDecoder();
           let chunkString = decoder.decode(chunk);
-          chunkString = chunkString.split(':')[chunkString.split(':').length - 1].trimEnd().slice(1, -1);
+          // Original String: 0:"你", contains the beginning 0: and the first and last double quotes
+          chunkString = chunkString.slice(2, -1).slice(1, -1);
           const chunkObject = {
             id: randomChatCmplId,
             object: 'chat.completion.chunk',
@@ -313,7 +331,13 @@ When answer to user:
             system_fingerprint: null,
             choices: [{ index: 0, delta: { content: chunkString }, logprobs: null, finish_reason: null }],
           };
-          res.write(`data: ${JSON.stringify(chunkObject, null, 0)}\n\n`);
+          function replacer(key: string, value: any) {
+            if (typeof value === 'string') {
+              return value.replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\"/g, '"').replace(/\\'/g, "'").replace(/\\\\/g, '\\');
+            }
+            return value;
+          }
+          res.write(`data: ${JSON.stringify(chunkObject, replacer, 0)}\n\n`);
         });
       } else {
         const data = response as ChatCompletion;
@@ -346,9 +370,23 @@ When answer to user:
             tools,
             tool_choice: 'auto',
           });
-          return res.status(200).send(result);
+          return res.status(200).send(
+            apiResponseType === 'full'
+              ? result
+              : {
+                  messages: result.choices[0].message?.content,
+                  usage: result.usage,
+                },
+          );
         } else {
-          return res.status(200).send(response);
+          return res.status(200).send(
+            apiResponseType === 'full'
+              ? response
+              : {
+                  message: (response as ChatCompletion).choices[0].message?.content,
+                  usage: (response as ChatCompletion).usage,
+                },
+          );
         }
       }
     } catch (error) {
