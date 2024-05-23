@@ -2,6 +2,7 @@ import React from 'react';
 
 import { CircularProgress } from '@nextui-org/progress';
 import { CheckCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useKnowledgeBaseTasks } from '@/apis/vector';
 import { KnowledgebaseTaskStatus } from '@/apis/vector/typings';
@@ -16,6 +17,8 @@ interface ITaskListProps {
 }
 
 export const TaskList: React.FC<ITaskListProps> = ({ knowledgeBaseId }) => {
+  const { t } = useTranslation();
+
   const { data, isLoading } = useKnowledgeBaseTasks(knowledgeBaseId);
   const isActiveTask = data?.list?.filter(
     (task) => task.status !== KnowledgebaseTaskStatus.COMPLETED && KnowledgebaseTaskStatus.FAILED,
@@ -55,7 +58,7 @@ export const TaskList: React.FC<ITaskListProps> = ({ knowledgeBaseId }) => {
               ) : (
                 <>
                   <CheckCircle size={16} />
-                  <span className="text-xs">所有任务已完成</span>
+                  <span className="text-xs">{t('ugc-page.text-data.detail.header.task-list.all-done')}</span>
                 </>
               )}
             </Card>
@@ -86,12 +89,20 @@ export const TaskList: React.FC<ITaskListProps> = ({ knowledgeBaseId }) => {
                   </Card>
                 );
               })}
-              <p className="mt-2 w-full text-center text-xs text-muted-foreground">没有更多了</p>
+              <p className="mt-2 w-full text-center text-xs text-muted-foreground">{t('common.load.no-more')}</p>
             </div>
           </ScrollArea>
         </PopoverContent>
       </Popover>
-      <TooltipContent>任务列表{isLoading ? '（加载中）' : isActiveTask ? '（正在处理文件）' : ''}</TooltipContent>
+      <TooltipContent>
+        {t('ugc-page.text-data.detail.header.task-list.tooltip.label', {
+          status: isLoading
+            ? t('ugc-page.text-data.detail.header.task-list.tooltip.loading')
+            : isActiveTask
+              ? t('ugc-page.text-data.detail.header.task-list.tooltip.processing')
+              : '',
+        })}
+      </TooltipContent>
     </Tooltip>
   );
 };

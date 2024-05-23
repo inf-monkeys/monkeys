@@ -23,6 +23,7 @@
       "edit": "编辑",
       "operate": "操作",
       "reset": "重置",
+      "submit": "提交",
       "cancel": "取消",
       "search": "搜索",
       "switch": "切换",
@@ -889,6 +890,76 @@
       },
       "detail": {
         "title": "文本数据详情",
+        "header": {
+          "task-list": {
+            "all-done": "所有任务已完成",
+            "tooltip": {
+              "label": "任务列表{{status}}",
+              "loading": "（加载中）",
+              "processing": "（处理文件中）"
+            }
+          },
+          "import": {
+            "button": "导入数据",
+            "options": {
+              "file": "导入文档",
+              "oss": "从 OSS 导入",
+              "paragraph": "导入段落",
+              "paragraph-batch": "批量导入段落"
+            }
+          }
+        },
+        "import": {
+          "toast": {
+            "create-task": {
+              "loading": "创建导入任务中...",
+              "success": "导入任务创建成功！",
+              "error": "导入任务创建失败！请稍后重试！"
+            }
+          },
+          "file": {
+            "title": "导入文档",
+            "form": {
+              "fileURL": {
+                "description": "在此处上传文件将自动存入「富媒体数据」"
+              },
+              "splitterType": {
+                "label": "分段清洗配置",
+                "placeholder": "选择一个分段清洗模式",
+                "options": {
+                  "auto-segment": "自动分段清洗",
+                  "custom-segment": "自定义分段清洗"
+                },
+                "description": {
+                  "auto-segment": "自动设置分段规则与预处理规则，如果不了解这些参数建议选择此项",
+                  "custom-segment": "自定义分段规则、分段长度以及预处理规则等参数"
+                }
+              },
+              "splitterConfig": {
+                "separator": {
+                  "label": "分段标识符",
+                  "placeholder": "请输入分段标识符，如：「，」、「。」、「,」、「\n」",
+                  "tip": "请输入分段标识符"
+                },
+                "chunk_size": {
+                  "label": "分段最大长度",
+                  "tip": "请输入分段最大长度"
+                },
+                "chunk_overlap": {
+                  "label": "文本重叠量",
+                  "tip": "请输入文本重叠量"
+                }
+              },
+              "preProcessRules": {
+                "label": "文本预处理规则",
+                "rules": {
+                  "replace-space-n-tab": "替换掉连续的空格、换行符和制表符",
+                  "delete-url-and-email": "删除所有 URL 地址和电子邮件地址"
+                }
+              }
+            }
+          }
+        },
         "tabs": {
           "documents": {
             "label": "文档",

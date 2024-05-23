@@ -1,6 +1,8 @@
 import React from 'react';
 
+import { t } from 'i18next';
 import { FileText, FileType, FileUp, Import, UploadCloud } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { TaskList } from '@/components/layout/ugc-pages/text-data/text-detail/header/task-list.tsx';
 import { ImportFile } from '@/components/layout/ugc-pages/text-data/text-detail/import/import-file.tsx';
@@ -20,39 +22,41 @@ interface ITextDetailHeaderProps {
 }
 
 export const TextDetailHeader: React.FC<ITextDetailHeaderProps> = ({ textId }) => {
+  const { t } = useTranslation();
   return (
     <header className="flex w-full items-center justify-end gap-4 px-4 py-2">
       <TaskList knowledgeBaseId={textId} />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="small" icon={<Import />}>
-            导入数据
+            {t('ugc-page.text-data.detail.header.import.button')}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <ImportFile textId={textId}>
             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
               <FileUp size={16} className="mr-1.5 mt-0.5" />
-              导入文档
+              {t('ugc-page.text-data.detail.header.import.options.file')}
             </DropdownMenuItem>
           </ImportFile>
           <DropdownMenuSeparator />
           <ImportOSS textId={textId}>
             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-              <UploadCloud size={16} className="mr-1.5 mt-0.5" />从 OSS 导入
+              <UploadCloud size={16} className="mr-1.5 mt-0.5" />
+              {t('ugc-page.text-data.detail.header.import.options.oss')}
             </DropdownMenuItem>
           </ImportOSS>
           <DropdownMenuSeparator />
           <ImportParagraph textId={textId}>
             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
               <FileType size={16} className="mr-1.5 mt-0.5" />
-              导入段落
+              {t('ugc-page.text-data.detail.header.import.options.paragraph')}
             </DropdownMenuItem>
           </ImportParagraph>
           <ImportParagraph textId={textId} batch>
             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
               <FileText size={16} className="mr-1.5 mt-0.5" />
-              批量导入段落
+              {t('ugc-page.text-data.detail.header.import.options.paragraph-batch')}
             </DropdownMenuItem>
           </ImportParagraph>
         </DropdownMenuContent>

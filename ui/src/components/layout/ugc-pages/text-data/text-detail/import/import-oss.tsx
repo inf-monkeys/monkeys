@@ -4,6 +4,7 @@ import { useSWRConfig } from 'swr';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useUploadDocumentToKnowledgeBase } from '@/apis/vector';
@@ -33,6 +34,8 @@ interface IImportOSSProps {
 }
 
 export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
+  const { t } = useTranslation();
+
   const { mutate } = useSWRConfig();
   const { trigger } = useUploadDocumentToKnowledgeBase(textId);
 
@@ -58,13 +61,13 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
         splitterType,
       } as IUploadDocument),
       {
-        loading: '正在创建导入文档任务...',
+        loading: t('ugc-page.text-data.detail.import.toast.create-task.loading'),
         success: () => {
           void mutate(`/api/vector/collections/${textId}/tasks`);
           setVisible(false);
-          return '文档导入任务创建成功';
+          return t('ugc-page.text-data.detail.import.toast.create-task.success');
         },
-        error: '文档导入任务创建失败',
+        error: t('ugc-page.text-data.detail.import.toast.create-task.error'),
       },
     );
   });
