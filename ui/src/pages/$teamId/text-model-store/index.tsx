@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 
 import { FileDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { preloadUgcTextModelStore, useUgcTextModelStore } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
@@ -25,6 +26,8 @@ import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const TextModelStore: React.FC = () => {
+  const { t: tHook } = useTranslation();
+
   const [importVisible, setImportVisible] = useState(false);
 
   const [current, setCurrent] = useState<IAssetItem>();
@@ -34,7 +37,7 @@ export const TextModelStore: React.FC = () => {
       <UgcView
         assetKey="text-model-store"
         assetType="llm-model"
-        assetName="语言模型市场"
+        assetName={tHook('components.layout.main.sidebar.list.store.text-model-store.label')}
         isMarket
         useUgcFetcher={useUgcTextModelStore}
         preloadUgcFetcher={preloadUgcTextModelStore}
@@ -42,7 +45,9 @@ export const TextModelStore: React.FC = () => {
         renderOptions={{
           subtitle: (item) => (
             <span className="line-clamp-1">
-              {`${item.user?.name ?? '未知'} 创建于 ${formatTimeDiffPrevious(item.createdTimestamp)}`}
+              {`${item.user?.name ?? tHook('common.utils.unknown')} ${tHook('common.utils.created-at', {
+                time: formatTimeDiffPrevious(item.createdTimestamp),
+              })}`}
             </span>
           ),
           cover: (item) => {

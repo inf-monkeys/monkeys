@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 
 import { FileDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { preloadUgcImageModelStore, useUgcImageModelStore } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
@@ -25,6 +26,8 @@ import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const ImageModelStore: React.FC = () => {
+  const { t: tHook } = useTranslation();
+
   const [importVisible, setImportVisible] = useState(false);
 
   const [current, setCurrent] = useState<IAssetItem>();
@@ -34,7 +37,7 @@ export const ImageModelStore: React.FC = () => {
       <UgcView
         assetKey="image-model-store"
         assetType="sd-model"
-        assetName="图像模型市场"
+        assetName={tHook('components.layout.main.sidebar.list.store.image-model-store.label')}
         isMarket
         useUgcFetcher={useUgcImageModelStore}
         preloadUgcFetcher={preloadUgcImageModelStore}
@@ -42,7 +45,9 @@ export const ImageModelStore: React.FC = () => {
         renderOptions={{
           subtitle: (item) => (
             <span className="line-clamp-1">
-              {`${item.user?.name ?? '未知'} 创建于 ${formatTimeDiffPrevious(item.createdTimestamp)}`}
+              {`${item.user?.name ?? tHook('common.utils.system')} ${tHook('common.utils.created-at', {
+                time: formatTimeDiffPrevious(item.createdTimestamp),
+              })}`}
             </span>
           ),
           cover: (item) => {
