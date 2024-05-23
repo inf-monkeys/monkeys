@@ -219,6 +219,9 @@
               },
               "render-tools": {
                 "label": "渲染类工具"
+              },
+              "comfyui": {
+                "label": "ComfyUI"
               }
             },
             "model": {

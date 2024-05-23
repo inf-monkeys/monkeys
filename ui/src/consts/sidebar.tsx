@@ -42,7 +42,6 @@ export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
       {
         path: '/$teamId/comfyui',
         name: 'comfyui',
-        label: 'ComfyUI',
       },
       // {
       //   path: '/$teamId/render-tools',

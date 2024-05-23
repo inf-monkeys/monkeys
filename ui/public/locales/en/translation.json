@@ -228,6 +228,9 @@
               },
               "render-tools": {
                 "label": "Render Tools"
+              },
+              "comfyui": {
+                "label": "ComfyUI"
               }
             },
             "model": {
