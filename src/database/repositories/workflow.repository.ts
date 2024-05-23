@@ -606,4 +606,25 @@ export class WorkflowRepository {
       instance: pageInstanceTypeMapper[page.type],
     }));
   }
+
+  async updatePagePinStatus(teamId: string, pageId: string, pin: boolean) {
+    const page = await this.pageRepository.findOne({
+      where: {
+        id: pageId,
+        teamId,
+        isDeleted: false,
+      },
+    });
+    if (!page) {
+      throw new Error('page not exists');
+    }
+    await this.pageRepository.update(
+      {
+        id: page.id,
+      },
+      {
+        pinned: pin,
+      },
+    );
+  }
 }

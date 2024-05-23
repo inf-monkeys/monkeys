@@ -2,7 +2,6 @@ import { ListDto } from '@/common/dto/list.dto';
 import { AssetType } from '@/common/typings/asset';
 import { AssetsCommonRepository } from '@/database/repositories/assets-common.repository';
 import { WorkflowAssetRepositroy } from '@/database/repositories/assets-workflow.respository';
-import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Injectable } from '@nestjs/common';
 import { AssetsMapperService } from './assets.common.service';
 import { BUILT_IN_WORKFLOW_MARKETPLACE_LIST } from './assets.marketplace.data';
@@ -13,7 +12,6 @@ export class AssetsMarketplaceService {
     private readonly workflowAssetRepository: WorkflowAssetRepositroy,
     private readonly assetsMapperService: AssetsMapperService,
     private readonly assetsCommonRepository: AssetsCommonRepository,
-    private readonly worfklowRepository: WorkflowRepository,
   ) {}
 
   public async initWorfklowMarketplace() {
