@@ -83,6 +83,11 @@ export const useUgcTextModelStore = (dto: IListUgcDto) =>
 export const preloadUgcTextModelStore = (dto: IListUgcDto) =>
   preloadUgcItems<ILLMModel>(dto, '/api/assets/llm-model/marketplace');
 
+export const useUgcComfyUIWorkflowStore = (dto: IListUgcDto) =>
+  useUgcItems<IComfyuiWorkflow>(dto, '/api/assets/comfyui-workflow/marketplace');
+export const preloadComfyUIWorkflowStore = (dto: IListUgcDto) =>
+  preloadUgcItems<IComfyuiWorkflow>(dto, '/api/assets/comfyui-workflow/marketplace');
+
 export const useUgcImageModelStore = (dto: IListUgcDto) =>
   useUgcItems<ISDModel>(dto, '/api/assets/sd-model/marketplace');
 export const preloadUgcImageModelStore = (dto: IListUgcDto) =>

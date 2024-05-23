@@ -117,6 +117,11 @@ export const SIDEBAR_MAP: NavItem[] = [
         name: 'text-data-store',
         label: '文本数据市场',
       },
+      {
+        path: '/$teamId/comfyui-store',
+        name: 'comfyui-store',
+        label: 'ComfyUI 市场',
+      },
     ],
   },
 ];

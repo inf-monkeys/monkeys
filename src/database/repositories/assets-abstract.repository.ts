@@ -2,7 +2,7 @@ import { AssetFilter, ListDto } from '@/common/dto/list.dto';
 import { AssetType } from '@/common/typings/asset';
 import { generateDbId } from '@/common/utils';
 import { Between, FindOptionsOrder, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
-import { AssetPublishConfig, AssetPublishPolicy, BaseAssetEntity } from '../entities/assets/base-asset';
+import { AssetPublishConfig, BaseAssetEntity } from '../entities/assets/base-asset';
 import { AssetsCommonRepository, AssetsFillAdditionalInfoOptions } from './assets-common.repository';
 
 export class AbstractAssetRepository<E extends BaseAssetEntity> {
@@ -209,24 +209,37 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     if (!asset) {
       throw new Error('资产不存在');
     }
-    const { isPublished, publishConfig } = asset;
+    const { isPublished } = asset;
     if (!isPublished) {
       throw new Error('此资产未发布');
     }
     if (asset.teamId === teamId) {
       throw new Error('此资产由此团队发布，不能克隆');
     }
-    const { policy = AssetPublishPolicy.clone } = publishConfig || {};
-    switch (policy) {
-      case AssetPublishPolicy.authorize:
-        break;
-      case AssetPublishPolicy.clone:
-        break;
-      case AssetPublishPolicy.createNew:
-        break;
-      default:
-        break;
-    }
+    const clonedAsset = this.repository.create({
+      ...asset,
+      id: generateDbId(),
+      teamId,
+      forkedFrom: assetId,
+      isDeleted: false,
+      isPreset: false,
+      isPublished: false,
+      createdTimestamp: Date.now(),
+      updatedTimestamp: Date.now(),
+    });
+    await this.repository.save(clonedAsset);
+    return clonedAsset;
+    // const { policy = AssetPublishPolicy.clone } = publishConfig || {};
+    // switch (policy) {
+    //   case AssetPublishPolicy.authorize:
+    //     break;
+    //   case AssetPublishPolicy.clone:
+    //     break;
+    //   case AssetPublishPolicy.createNew:
+    //     break;
+    //   default:
+    //     break;
+    // }
   }
 
   public async initBuiltInMarketPlace(assetType: AssetType, data: Partial<E>) {

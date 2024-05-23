@@ -4,20 +4,22 @@ export interface ComfyuiNodeOutput {
   links?: Array<number>;
   shape?: number;
   slot_index?: number;
-  label: string;
+  label?: string;
 }
 
 export interface ComfyuiNodeInput {
   name: string;
   type: string;
   link?: number;
-  label: string;
+  label?: string;
+  slot_index?: number;
 }
 
 export interface ComfyuiNode {
   id?: number;
   type: string;
   pos: [number, number];
+  size?: any;
   flags: { [x: string]: number };
   order: number;
   mode: number;
@@ -51,6 +53,7 @@ export interface ComfyuiPrompt {
   [x: string]: {
     inputs: { [x: string]: any };
     class_type: string;
+    _meta?: any;
   };
 }
 
@@ -63,8 +66,14 @@ export interface KSamplerInput {
 }
 
 export interface ComfyuiWorkflow {
+  last_node_id?: number;
+  last_link_id?: number;
   nodes: ComfyuiNode[];
   links: ComfyuiLink[];
+  groups?: any[];
+  config?: any;
+  extra?: any;
+  version?: number;
 }
 
 export interface ComfyuiWorkflowWithPrompt {

@@ -127,6 +127,8 @@ export class ToolsPollingService {
       }
       return {
         workflow: prompt,
+        addtional_model_list: comfyuiWorkflow.additionalModelList || [],
+        addtional_node_list: comfyuiWorkflow.additionalNodeList || [],
         input_data: this.convertToComfyuiInputData(result),
       };
     }

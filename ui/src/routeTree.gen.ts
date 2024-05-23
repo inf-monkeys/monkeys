@@ -30,6 +30,7 @@ import { Route as TeamIdJoinTeamIndexImport } from './pages/$teamId/join-team/in
 import { Route as TeamIdImageModelsIndexImport } from './pages/$teamId/image-models/index'
 import { Route as TeamIdImageModelStoreIndexImport } from './pages/$teamId/image-model-store/index'
 import { Route as TeamIdComfyuiIndexImport } from './pages/$teamId/comfyui/index'
+import { Route as TeamIdComfyuiStoreIndexImport } from './pages/$teamId/comfyui-store/index'
 import { Route as TeamIdApplicationStoreIndexImport } from './pages/$teamId/application-store/index'
 import { Route as TeamIdActionToolsIndexImport } from './pages/$teamId/action-tools/index'
 import { Route as TeamIdWorkspaceWorkflowIdIndexImport } from './pages/$teamId/workspace/$workflowId/index'
@@ -138,6 +139,11 @@ const TeamIdComfyuiIndexRoute = TeamIdComfyuiIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const TeamIdComfyuiStoreIndexRoute = TeamIdComfyuiStoreIndexImport.update({
+  path: '/$teamId/comfyui-store/',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const TeamIdApplicationStoreIndexRoute =
   TeamIdApplicationStoreIndexImport.update({
     path: '/$teamId/application-store/',
@@ -210,6 +216,10 @@ declare module '@tanstack/react-router' {
     }
     '/$teamId/application-store/': {
       preLoaderRoute: typeof TeamIdApplicationStoreIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/comfyui-store/': {
+      preLoaderRoute: typeof TeamIdComfyuiStoreIndexImport
       parentRoute: typeof rootRoute
     }
     '/$teamId/comfyui/': {
@@ -308,6 +318,7 @@ export const routeTree = rootRoute.addChildren([
   LoginIndexRoute,
   TeamIdActionToolsIndexRoute,
   TeamIdApplicationStoreIndexRoute,
+  TeamIdComfyuiStoreIndexRoute,
   TeamIdComfyuiIndexRoute,
   TeamIdImageModelStoreIndexRoute,
   TeamIdImageModelsIndexRoute,
