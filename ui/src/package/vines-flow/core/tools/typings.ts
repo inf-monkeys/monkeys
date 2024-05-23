@@ -39,6 +39,7 @@ export interface IVinesVariable {
   id: string;
   jsonpath: string;
   label: string;
+  pathLabel?: string;
   originalName: string;
   type: BlockDefPropertyTypes;
   isMultiple: boolean;
