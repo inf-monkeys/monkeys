@@ -65,7 +65,7 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
   const disabled = !isLatestWorkflowVersion;
 
   return (
-    <Dialog open={open} onOpenChange={(val) => !disableDialogClose && setOpen(val)}>
+    <Dialog modal={false} open={open} onOpenChange={(val) => !disableDialogClose && setOpen(val)}>
       <DialogContent className="max-h-[calc(100vh-5%)] min-w-[55rem] max-w-[calc(100vw-40%)]">
         <DialogTitle asChild>
           <Header node={node} />
