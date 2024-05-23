@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { Waypoints } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useKnowledgeBaseDocuments } from '@/apis/vector';
 import { IKnowledgeBaseDocument } from '@/apis/vector/typings.ts';
@@ -13,6 +14,8 @@ interface IParagraphListProps {
 }
 
 export const DocumentsList: React.FC<IParagraphListProps> = ({ knowledgeBaseId }) => {
+  const { t } = useTranslation();
+
   const { data, isLoading } = useKnowledgeBaseDocuments(knowledgeBaseId);
 
   const [list, setList] = useState<IKnowledgeBaseDocument[]>([]);
@@ -26,7 +29,11 @@ export const DocumentsList: React.FC<IParagraphListProps> = ({ knowledgeBaseId }
       <div className="mt-2 flex w-full items-center gap-4">
         <div className="flex items-center gap-2">
           <Waypoints className="stroke-muted-foreground" size={14} />
-          <span className="text-xs text-muted-foreground">文件数: {list?.length ?? 0}</span>
+          <span className="text-xs text-muted-foreground">
+            {t('ugc-page.text-data.detail.tabs.documents.stats.file-count', {
+              count: list?.length ?? 0,
+            })}
+          </span>
         </div>
       </div>
     </>

@@ -40,7 +40,8 @@
       "updated-time": "Updated Time",
       "created-time": "Created Time",
       "ascend": "Ascend",
-      "descend": "Descend"
+      "descend": "Descend",
+      "load-more": "Load More"
     },
     "type": {
       "workflow": "workflow",
@@ -897,10 +898,39 @@
         "title": "Text Data Detail",
         "tabs": {
           "documents": {
-            "label": "Documents"
+            "label": "Documents",
+            "stats": {
+              "file-count": "Documents: {{count}}"
+            }
           },
           "segments": {
-            "label": "Segments"
+            "label": "Segments",
+            "toast": {
+              "searched": "Searched",
+              "searched-after-re-sorting": "Searched after re-sorting"
+            },
+            "load-tip": "Vector mode only shows the first 10 items",
+            "search": {
+              "mode": {
+                "placeholder": "Search mode",
+                "options": {
+                  "fulltext": "Full-text",
+                  "vector": "Vector"
+                }
+              },
+              "value": {
+                "placeholder": "Enter text to sort by similarity. Press Enter to search.",
+                "sort-button": {
+                  "clear": "Clear",
+                  "re-sort": "Re-sort"
+                }
+              }
+            },
+            "stats": {
+              "dimension": "Vector Dimension: {{dimensionCount}}",
+              "model": "Embedding Model: {{model}}",
+              "id": "Vector Database ID: {{id}}"
+            }
           },
           "settings": {
             "label": "Settings"
