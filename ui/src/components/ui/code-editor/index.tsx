@@ -106,8 +106,6 @@ export const CodeEditor: React.FC<ICodeEditorProps> = ({
 
       if (editorRef?.current) {
         editorRef.current.insertText = (text: string) => {
-          console.log('insertText', text);
-
           const selection = editor.getSelection();
 
           editor.executeEdits('my-source', [

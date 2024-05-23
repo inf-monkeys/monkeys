@@ -259,7 +259,6 @@ export class LlmController {
       res.setHeader('content-type', answer.headers['content-type']);
       res.status(200);
       answer.data.on('data', (chunk: any) => {
-        console.log(chunk.toString());
         res.write(chunk);
       });
       answer.data.on('end', () => {
