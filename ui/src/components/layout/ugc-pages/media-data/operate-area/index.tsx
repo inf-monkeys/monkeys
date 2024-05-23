@@ -4,6 +4,7 @@ import { useSWRConfig } from 'swr';
 
 import { useClipboard } from '@mantine/hooks';
 import { Copy, Trash } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useDeleteMediaData } from '@/apis/media-data';
@@ -29,6 +30,8 @@ interface IOperateAreaProps {
 }
 
 export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, tooltipTriggerContent }) => {
+  const { t } = useTranslation();
+
   const { mutate } = useSWRConfig();
   const clipboard = useClipboard({ timeout: 500 });
 
@@ -52,19 +55,19 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
           e.preventDefault();
         }}
       >
-        <DropdownMenuLabel>富媒体数据操作</DropdownMenuLabel>
+        <DropdownMenuLabel>{t('ugc-page.media-data.ugc-view.operate-area.dropdown-label')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem
             onClick={() => {
               clipboard.copy(item.url);
-              toast.success('文件直链已复制');
+              toast.success(t('common.toast.copy-success'));
             }}
           >
             <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
               <Copy size={15} />
             </DropdownMenuShortcut>
-            复制文件直链
+            {t('ugc-page.media-data.ugc-view.operate-area.options.copy-link')}
           </DropdownMenuItem>
           <UgcDeleteDialog
             handleDelete={() => {
@@ -77,10 +80,10 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
                       }),
                     1000,
                   );
-                  return '删除成功';
+                  return t('common.delete.success');
                 },
-                error: '删除失败，请检查网络后重试',
-                loading: '删除中......',
+                error: t('common.delete.error'),
+                loading: t('common.delete.loading'),
               });
             }}
           >
@@ -94,7 +97,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
               <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                 <Trash size={15} />
               </DropdownMenuShortcut>
-              删除
+              {t('common.utils.delete')}
             </DropdownMenuItem>
           </UgcDeleteDialog>
         </DropdownMenuGroup>

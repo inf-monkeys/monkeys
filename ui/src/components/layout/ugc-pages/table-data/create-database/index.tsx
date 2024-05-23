@@ -5,6 +5,7 @@ import { useSWRConfig } from 'swr';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { createDatabase } from '@/apis/table-data';
@@ -15,11 +16,13 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
-import { IDatabaseInfo, databaseInfoSchema } from '@/schema/table-database/create-database.ts';
+import { databaseInfoSchema, IDatabaseInfo } from '@/schema/table-database/create-database.ts';
 
 interface ICreateDatabaseProps {}
 
 export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
+  const { t } = useTranslation();
+
   const { mutate } = useSWRConfig();
 
   const form = useForm<IDatabaseInfo>({
@@ -38,12 +41,12 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
   const handleSubmit = form.handleSubmit((data) => {
     setIsLoading(true);
     toast.promise(createDatabase(data), {
-      loading: '正在创建表格...',
+      loading: t('common.create.loading'),
       success: () => {
         void mutate((key) => typeof key === 'string' && key.startsWith('/api/sql-knowledge-bases'));
-        return '表格创建成功';
+        return t('common.create.success');
       },
-      error: '表格创建失败',
+      error: t('common.create.error'),
       finally: () => {
         setIsLoading(false);
         setOpen(false);
@@ -54,11 +57,9 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
 
   const createTypeOptions = [
     {
-      displayName: '内建 Sqlite 数据库',
       value: 'builtIn',
     },
     {
-      displayName: '外置数据库',
       value: 'external',
     },
   ];
@@ -82,11 +83,11 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="small" icon={<Plus />}>
-          创建表格数据库
+          {t('ugc-page.table-data.ugc-view.subtitle.create-database.button')}
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogTitle>创建表格数据库</DialogTitle>
+        <DialogTitle>{t('ugc-page.table-data.ugc-view.subtitle.create-database.title')}</DialogTitle>
         <Form {...form}>
           <form onSubmit={handleSubmit} className="flex flex-col gap-2">
             <FormField
@@ -94,18 +95,24 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>创建类型</FormLabel>
+                  <FormLabel>{t('ugc-page.table-data.ugc-view.subtitle.create-database.form.type.label')}</FormLabel>
                   <FormControl>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="请选择一个创建类型" />
+                          <SelectValue
+                            placeholder={t(
+                              'ugc-page.table-data.ugc-view.subtitle.create-database.form.type.placeholder',
+                            )}
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {createTypeOptions.map((option) => (
                           <SelectItem value={option.value} key={option.value}>
-                            {option.displayName}
+                            {t(
+                              `ugc-page.table-data.ugc-view.subtitle.create-database.form.type.options.${option.value}`,
+                            )}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -123,9 +130,18 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>数据库名称</FormLabel>
+                      <FormLabel>
+                        {t('ugc-page.table-data.ugc-view.subtitle.create-database.form.displayName.label')}
+                      </FormLabel>
                       <FormControl>
-                        <Input placeholder="请输入数据库名称" {...field} className="grow" autoFocus />
+                        <Input
+                          placeholder={t(
+                            'ugc-page.table-data.ugc-view.subtitle.create-database.form.displayName.placeholder',
+                          )}
+                          {...field}
+                          className="grow"
+                          autoFocus
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -137,10 +153,14 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>数据库简介</FormLabel>
+                      <FormLabel>
+                        {t('ugc-page.table-data.ugc-view.subtitle.create-database.form.description.label')}
+                      </FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="请输入数据库简介，不超过 100 字"
+                          placeholder={t(
+                            'ugc-page.table-data.ugc-view.subtitle.create-database.form.description.placeholder',
+                          )}
                           className="h-28 resize-none"
                           {...field}
                         />
@@ -155,7 +175,9 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>图标</FormLabel>
+                      <FormLabel>
+                        {t('ugc-page.table-data.ugc-view.subtitle.create-database.form.iconUrl.label')}
+                      </FormLabel>
                       <FormControl>
                         <VinesIconEditor
                           value={field.value}
@@ -177,12 +199,18 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>数据库类型</FormLabel>
+                      <FormLabel>
+                        {t('ugc-page.table-data.ugc-view.subtitle.create-database.form.databaseType.label')}
+                      </FormLabel>
                       <FormControl>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="请选择数据库类型" />
+                              <SelectValue
+                                placeholder={t(
+                                  'ugc-page.table-data.ugc-view.subtitle.create-database.form.databaseType.placeholder',
+                                )}
+                              />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -273,7 +301,7 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
 
             <DialogFooter>
               <Button type="submit" loading={isLoading} variant="solid">
-                确定
+                {t('common.utils.confirm')}
               </Button>
             </DialogFooter>
           </form>

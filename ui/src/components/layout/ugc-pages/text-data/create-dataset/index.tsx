@@ -5,6 +5,7 @@ import { useSWRConfig } from 'swr';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useCreateKnowledgeBase, useVectorSupportedEmbeddingModels } from '@/apis/vector';
@@ -15,11 +16,13 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
-import { IDatasetInfo, datasetInfoSchema } from '@/schema/text-dataset';
+import { datasetInfoSchema, IDatasetInfo } from '@/schema/text-dataset';
 
 interface ICreateDatasetProps {}
 
 export const CreateDataset: React.FC<ICreateDatasetProps> = () => {
+  const { t } = useTranslation();
+
   const { mutate } = useSWRConfig();
 
   const { data: embeddingModels } = useVectorSupportedEmbeddingModels();
@@ -38,12 +41,12 @@ export const CreateDataset: React.FC<ICreateDatasetProps> = () => {
   const handleSubmit = form.handleSubmit((data) => {
     setIsLoading(true);
     toast.promise(trigger(data), {
-      loading: '正在创建数据集...',
+      loading: t('common.create.loading'),
       success: () => {
         void mutate((key) => typeof key === 'string' && key.startsWith('/api/vector/collections'));
-        return '数据集创建成功';
+        return t('common.create.success');
       },
-      error: '数据集创建失败',
+      error: t('common.create.error'),
       finally: () => {
         setIsLoading(false);
         setOpen(false);
@@ -55,11 +58,11 @@ export const CreateDataset: React.FC<ICreateDatasetProps> = () => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="small" icon={<Plus />}>
-          创建数据集
+          {t('ugc-page.text-data.ugc-view.subtitle.create-dataset.button')}
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogTitle>创建文本数据</DialogTitle>
+        <DialogTitle>{t('ugc-page.text-data.ugc-view.subtitle.create-dataset.title')}</DialogTitle>
         <Form {...form}>
           <form onSubmit={handleSubmit} className="flex flex-col gap-2">
             <FormField
@@ -67,9 +70,18 @@ export const CreateDataset: React.FC<ICreateDatasetProps> = () => {
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>知识库名称</FormLabel>
+                  <FormLabel>
+                    {t('ugc-page.text-data.ugc-view.subtitle.create-dataset.form.displayName.label')}
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="请输入知识库名称" {...field} className="grow" autoFocus />
+                    <Input
+                      placeholder={t(
+                        'ugc-page.text-data.ugc-view.subtitle.create-dataset.form.displayName.placeholder',
+                      )}
+                      {...field}
+                      className="grow"
+                      autoFocus
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -81,12 +93,18 @@ export const CreateDataset: React.FC<ICreateDatasetProps> = () => {
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Embedding 模型</FormLabel>
+                  <FormLabel>
+                    {t('ugc-page.text-data.ugc-view.subtitle.create-dataset.form.embeddingModel.label')}
+                  </FormLabel>
                   <FormControl>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="请选择一个模型" />
+                          <SelectValue
+                            placeholder={t(
+                              'ugc-page.text-data.ugc-view.subtitle.create-dataset.form.embeddingModel.placeholder',
+                            )}
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -108,9 +126,17 @@ export const CreateDataset: React.FC<ICreateDatasetProps> = () => {
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>数据集简介</FormLabel>
+                  <FormLabel>
+                    {t('ugc-page.text-data.ugc-view.subtitle.create-dataset.form.description.label')}
+                  </FormLabel>
                   <FormControl>
-                    <Textarea placeholder="请输入数据集简介，不超过 100 字" className="h-28 resize-none" {...field} />
+                    <Textarea
+                      placeholder={t(
+                        'ugc-page.text-data.ugc-view.subtitle.create-dataset.form.description.placeholder',
+                      )}
+                      className="h-28 resize-none"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -122,7 +148,7 @@ export const CreateDataset: React.FC<ICreateDatasetProps> = () => {
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>数据集图标</FormLabel>
+                  <FormLabel>{t('ugc-page.text-data.ugc-view.subtitle.create-dataset.form.iconUrl.label')}</FormLabel>
                   <FormControl>
                     <VinesIconEditor value={field.value} defaultValue="emoji:🍀:#ceefc5" onChange={field.onChange} />
                   </FormControl>
@@ -133,7 +159,7 @@ export const CreateDataset: React.FC<ICreateDatasetProps> = () => {
 
             <DialogFooter>
               <Button type="submit" loading={isLoading} variant="solid">
-                确定
+                {t('common.utils.confirm')}
               </Button>
             </DialogFooter>
           </form>
