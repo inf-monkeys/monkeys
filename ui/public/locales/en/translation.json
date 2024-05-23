@@ -23,6 +23,7 @@
       "edit": "Edit",
       "operate": "Operate",
       "reset": "Reset",
+      "submit": "Submit",
       "cancel": "Cancel",
       "search": "Search",
       "switch": "Switch",
@@ -896,6 +897,85 @@
       },
       "detail": {
         "title": "Text Data Detail",
+        "header": {
+          "task-list": {
+            "all-done": "All tasks have been done",
+            "tooltip": {
+              "label": "Task List{{status}}",
+              "loading": " (Loading)",
+              "processing": " (Processing files)"
+            }
+          },
+          "import": {
+            "button": "Import Data",
+            "options": {
+              "file": "Import From File",
+              "oss": "Import From OSS",
+              "paragraph": "Import Paragraph",
+              "paragraph-batch": "Batch Import Paragraph"
+            }
+          }
+        },
+        "import": {
+          "toast": {
+            "create-task": {
+              "loading": "Creating import task...",
+              "success": "Import task created successfully!",
+              "error": "Import task created failed! Please try again later!"
+            }
+          },
+          "file": {
+            "title": "Import file",
+            "form": {
+              "fileURL": {
+                "description": "Files uploaded here will be automatically stored in \"Media Data\"."
+              },
+              "splitterType": {
+                "label": "Segmented Cleaning Configuration",
+                "placeholder": "Select a segmented cleaning mode",
+                "options": {
+                  "auto-segment": "Automatic Segmental Cleaning",
+                  "custom-segment": "Custom Segmental Cleaning"
+                },
+                "description": {
+                  "auto-segment": "Segmentation rules and preprocessing rules are set automatically. If you don't know these parameters, it is recommended to select this item.",
+                  "custom-segment": "Customize parameters such as segmentation rules, segment lengths and preprocessing rules."
+                }
+              },
+              "splitterConfig": {
+                "separator": {
+                  "label": "Segment Identifier",
+                  "placeholder": "Enter segment identifier, e.g., \",\", \".\" , \",\", \"\\n\".",
+                  "tip": "Please enter segment identifier."
+                },
+                "chunk_size": {
+                  "label": "Segment Chunk Size",
+                  "tip": "Please enter segment chunk size"
+                },
+                "chunk_overlap": {
+                  "label": "Segment Chunk Overlap",
+                  "tip": "Please enter segment chunk overlap"
+                }
+              },
+              "preProcessRules": {
+                "label": "Text Pre-processing Rules",
+                "rules": {
+                  "replace-space-n-tab": "Replacing consecutive spaces, line breaks and tabs",
+                  "delete-url-and-email": "Delete all URL addresses and e-mail addresses"
+                }
+              }
+            }
+          },
+          "oss": {
+            "title": "Import from OSS",
+            "form": {
+              "ossType": {
+                "label": "OSS Type",
+                "placeholder": "Select OSS type"
+              }
+            }
+          }
+        },
         "tabs": {
           "documents": {
             "label": "Documents",
