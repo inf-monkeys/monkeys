@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { ArrowDownUp, Tag, Waypoints } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useKnowledgeBase, useKnowledgeBaseMetadataFields, useSearchKnowledgeBase } from '@/apis/vector';
@@ -19,6 +20,8 @@ interface IParagraphListProps {
 }
 
 export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
+  const { t } = useTranslation();
+
   const { data: detail } = useKnowledgeBase(textId);
   const { data: fields } = useKnowledgeBaseMetadataFields(textId);
 
@@ -63,22 +66,26 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
           }}
         >
           <SelectTrigger className="w-32">
-            <SelectValue placeholder="搜索模式" />
+            <SelectValue placeholder={t('ugc-page.text-data.detail.tabs.segments.search.mode.placeholder')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="fulltext">全文搜索</SelectItem>
-            <SelectItem value="vector">向量搜索</SelectItem>
+            <SelectItem value="fulltext">
+              {t('ugc-page.text-data.detail.tabs.segments.search.mode.options.fulltext')}
+            </SelectItem>
+            <SelectItem value="vector">
+              {t('ugc-page.text-data.detail.tabs.segments.search.mode.options.vector')}
+            </SelectItem>
           </SelectContent>
         </Select>
         <div className="relative flex flex-1 items-center">
           <Input
-            placeholder="输入文本进行相似度排序，回车搜索"
+            placeholder={t('ugc-page.text-data.detail.tabs.segments.search.value.placeholder')}
             value={inputData}
             onChange={setInputData}
             onEnterPress={() => {
               setForceClearHits(true);
               setQuery(inputData);
-              toast.info('已搜索');
+              toast.info(t('ugc-page.text-data.detail.tabs.segments.toast.searched'));
             }}
           />
           <Button
@@ -88,7 +95,7 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
               if (isQueryEmpty) {
                 setForceClearHits(true);
                 void mutate();
-                toast.info('已重新排序搜索');
+                toast.info(t('ugc-page.text-data.detail.tabs.segments.toast.searched-after-re-sorting'));
               } else {
                 setForceClearHits(false);
                 setHits([]);
@@ -98,7 +105,9 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
             }}
             loading={isLoading}
           >
-            {isQueryEmpty ? '重新排序搜索' : '清空'}
+            {isQueryEmpty
+              ? t('ugc-page.text-data.detail.tabs.segments.search.value.sort-button.re-sort')
+              : t('ugc-page.text-data.detail.tabs.segments.search.value.sort-button.clear')}
           </Button>
         </div>
         <MetadataFilter
@@ -125,11 +134,11 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
                     loading={isLoading}
                     onClick={() => setFrom((prev) => prev + 30)}
                   >
-                    加载更多
+                    {t('common.utils.load-more')}
                   </Button>
                 ) : (
                   <Button variant="outline" size="small">
-                    向量检索只显示前 10 条
+                    {t('ugc-page.text-data.detail.tabs.segments.load-tip')}
                   </Button>
                 )}
               </td>
@@ -140,17 +149,29 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
       <div className="mt-2 flex w-full items-center gap-4">
         <div className="flex items-center gap-2">
           <Waypoints className="stroke-muted-foreground" size={14} />
-          <span className="text-xs text-muted-foreground">向量维度：{detail?.dimension ?? '-'}</span>
+          <span className="text-xs text-muted-foreground">
+            {t('ugc-page.text-data.detail.tabs.segments.stats.dimension', {
+              dimensionCount: detail?.dimension ?? '-',
+            })}
+          </span>
         </div>
         <Separator orientation="vertical" className="h-4" />
         <div className="flex items-center gap-2">
           <ArrowDownUp className="stroke-muted-foreground" size={14} />
-          <span className="text-xs text-muted-foreground">Embedding 模型：{detail?.embeddingModel ?? '-'}</span>
+          <span className="text-xs text-muted-foreground">
+            {t('ugc-page.text-data.detail.tabs.segments.stats.model', {
+              model: detail?.embeddingModel ?? '-',
+            })}
+          </span>
         </div>
         <Separator orientation="vertical" className="h-4" />
         <div className="flex items-center gap-2">
           <Tag className="stroke-muted-foreground" size={14} />
-          <span className="text-xs text-muted-foreground">知识库 ID：{detail?.uuid ?? '-'}</span>
+          <span className="text-xs text-muted-foreground">
+            {t('ugc-page.text-data.detail.tabs.segments.stats.id', {
+              id: detail?.uuid ?? '-',
+            })}
+          </span>
         </div>
       </div>
     </>

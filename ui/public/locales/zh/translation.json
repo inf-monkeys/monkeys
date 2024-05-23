@@ -40,7 +40,8 @@
       "updated-time": "更新时间",
       "created-time": "创建时间",
       "ascend": "升序",
-      "descend": "降序"
+      "descend": "降序",
+      "load-more": "加载更多"
     },
     "type": {
       "workflow": "工作流",
@@ -890,10 +891,39 @@
         "title": "文本数据详情",
         "tabs": {
           "documents": {
-            "label": "文档"
+            "label": "文档",
+            "stats": {
+              "file-count": "文件数：{{count}}"
+            }
           },
           "segments": {
-            "label": "段落"
+            "label": "段落",
+            "toast": {
+              "searched": "已搜索",
+              "searched-after-re-sorting": "已重新排序搜索"
+            },
+            "load-tip": "向量检索只显示前 10 条",
+            "search": {
+              "mode": {
+                "placeholder": "搜索模式",
+                "options": {
+                  "fulltext": "全文搜索",
+                  "vector": "向量搜索"
+                }
+              },
+              "value": {
+                "placeholder": "输入文本进行相似度排序，回车搜索",
+                "sort-button": {
+                  "clear": "清空",
+                  "re-sort": "重新排序搜索"
+                }
+              }
+            },
+            "stats": {
+              "dimension": "向量维度：{{dimensionCount}}",
+              "model": "Embedding 模型：{{model}}",
+              "id": "知识库 ID：{{id}}"
+            }
           },
           "settings": {
             "label": "设置"
