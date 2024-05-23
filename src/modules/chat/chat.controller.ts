@@ -43,7 +43,6 @@ export class WorkflowOpenAICompatibleController {
       res.setHeader('content-type', 'text/event-stream');
       res.status(201);
       const key = TOOL_STREAM_RESPONSE_TOPIC(workflowInstanceId);
-      logger.info('subscribing to key: ', key);
       this.mq.subscribe(key, (_, message: string) => {
         res.write(message);
         // TODO: listen on workflow finished event
@@ -89,6 +88,7 @@ export class WorkflowOpenAICompatibleController {
       const key = TOOL_STREAM_RESPONSE_TOPIC(workflowInstanceId);
       let aiResponse = '';
       this.mq.subscribe(key, (_, message: string) => {
+        logger.info(`onmessage: ${message}`);
         res.write(message);
         // TODO: listen on workflow finished event
         if (message.includes('[DONE]')) {
@@ -104,9 +104,7 @@ export class WorkflowOpenAICompatibleController {
             const { choices = [] } = parsedMessage;
             const content = choices[0]?.delta?.content;
             aiResponse += content;
-          } catch (error) {
-            logger.warn('error parsing message: ', error);
-          }
+          } catch (error) {}
         }
       });
     }

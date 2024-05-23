@@ -6,6 +6,11 @@ export class ChatCompletionMessageDto {
   content: string;
 }
 
+export enum ResponseFormat {
+  text = 'text',
+  jsonObject = 'json_object',
+}
+
 export class CreateChatCompletionsDto {
   @ApiProperty({
     description: '使用的模型名称，例如"chatgpt"',
@@ -73,4 +78,12 @@ export class CreateChatCompletionsDto {
     required: false,
   })
   stream?: boolean;
+
+  @ApiProperty({
+    description: '指示API是否应返回调试信息',
+    example: ResponseFormat.text,
+    required: false,
+    default: ResponseFormat.text,
+  })
+  response_format?: ResponseFormat;
 }

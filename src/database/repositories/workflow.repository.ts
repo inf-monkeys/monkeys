@@ -9,10 +9,38 @@ import { WorkflowTriggerType, WorkflowTriggersEntity } from '@/database/entities
 import { BlockDefProperties, MonkeyTaskDefTypes } from '@inf-monkeys/vines';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import _ from 'lodash';
+import _, { keyBy } from 'lodash';
 import { ChatCompletionMessageParam } from 'openai/resources';
 import { In, Repository } from 'typeorm';
+import { PageInstance, WorkflowPageEntity } from '../entities/workflow/workflow-page';
 import { WorkflowAssetRepositroy } from './assets-workflow.respository';
+
+export const BUILT_IN_PAGE_INSTANCES: PageInstance[] = [
+  {
+    name: '流程视图',
+    type: 'process',
+    allowedPermissions: ['read', 'write', 'exec', 'permission'],
+    icon: '🚀',
+  },
+  {
+    name: '日志视图',
+    type: 'log',
+    allowedPermissions: ['read', 'write'],
+    icon: '📃',
+  },
+  {
+    name: '预览视图',
+    type: 'preview',
+    allowedPermissions: ['read', 'write', 'exec', 'permission'],
+    icon: '📷',
+  },
+  {
+    name: '对话视图',
+    type: 'chat',
+    allowedPermissions: ['read', 'write', 'exec', 'permission'],
+    icon: '💬',
+  },
+];
 
 export interface FindWorkflowCondition {
   teamId: string;
@@ -32,6 +60,8 @@ export class WorkflowRepository {
     @InjectRepository(WorkflowChatSessionEntity)
     private readonly workflowChatSessionRepository: Repository<WorkflowChatSessionEntity>,
     private readonly workflowAssetRepositroy: WorkflowAssetRepositroy,
+    @InjectRepository(WorkflowPageEntity)
+    private readonly pageRepository: Repository<WorkflowPageEntity>,
   ) {}
 
   public async findWorkflowByCondition(condition: FindWorkflowCondition) {
@@ -537,5 +567,64 @@ export class WorkflowRepository {
       totalCount,
       list: workflows,
     };
+  }
+
+  async listWorkflowPagesAndCreateIfNotExists(workflowId: string) {
+    const workflow = await this.getWorkflowByIdWithoutVersion(workflowId);
+    let pages: WorkflowPageEntity[] = [];
+    const existsPages = await this.pageRepository.find({
+      where: {
+        workflowId,
+        isDeleted: false,
+      },
+      order: {
+        sortIndex: 1,
+      },
+    });
+    if (existsPages.length > 0) {
+      pages = existsPages;
+    } else {
+      let sortIndex = 0;
+      pages = BUILT_IN_PAGE_INSTANCES.map((item) => ({
+        id: generateDbId(),
+        type: item.type,
+        displayName: item.name,
+        workflowId,
+        isBuiltIn: true,
+        teamId: workflow.teamId,
+        permissions: item.allowedPermissions, // 默认授予全部权限
+        sortIndex: ++sortIndex,
+        createdTimestamp: Date.now(),
+        updatedTimestamp: Date.now(),
+        isDeleted: false,
+      }));
+      await this.pageRepository.save(pages);
+    }
+    const pageInstanceTypeMapper = keyBy(BUILT_IN_PAGE_INSTANCES, 'type');
+    return pages.map((page) => ({
+      ...page,
+      instance: pageInstanceTypeMapper[page.type],
+    }));
+  }
+
+  async updatePagePinStatus(teamId: string, pageId: string, pin: boolean) {
+    const page = await this.pageRepository.findOne({
+      where: {
+        id: pageId,
+        teamId,
+        isDeleted: false,
+      },
+    });
+    if (!page) {
+      throw new Error('page not exists');
+    }
+    await this.pageRepository.update(
+      {
+        id: page.id,
+      },
+      {
+        pinned: pin,
+      },
+    );
   }
 }

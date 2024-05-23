@@ -29,7 +29,6 @@ export const UgcApplicationStoreUseTemplateDialog: React.FC<IUgcApplicationStore
 
     toast.promise(
       forkApplicationFromTemplate(item.id).then((flow) => {
-        console.log('flow', flow);
         if (!flow) return;
         open(`/${teamId}/workspace/${flow.workflowId}`, '_blank');
       }),

@@ -75,7 +75,11 @@ export const callToolsApi = <T>(
   }
 };
 
-export const importTool = (manifestJsonUrl: string) =>
-  vinesFetcher({ method: 'POST', simple: true })(`/api/tools/register`, {
-    manifestJsonUrl,
-  });
+export interface IImportToolParams {
+  importType: string;
+  manifestUrl?: string;
+  openapiSpecUrl?: string;
+}
+
+export const importTool = (params: IImportToolParams) =>
+  vinesFetcher({ method: 'POST', simple: true })(`/api/tools/register`, params);

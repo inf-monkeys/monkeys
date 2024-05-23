@@ -110,14 +110,14 @@ export class ExportService {
     const { workflows, tableCollections, richMedias, textCollections, sdModels, llmModels } = data;
     // 导入表格数据
     const replaceSqlDatabaseMap = {};
-    console.log('开始导入表格数据集：', tableCollections.length);
+    logger.log('开始导入表格数据集：', tableCollections.length);
     for (const infoJson of tableCollections) {
       // const sqlDatabaseId = await this.tableCollectionService.importDatabase(teamId, userId, infoJson);
       // replaceSqlDatabaseMap[infoJson.originalId] = sqlDatabaseId;
     }
 
     // 导入向量数据库
-    console.log('开始导入文本数据集：', textCollections.length);
+    logger.log('开始导入文本数据集：', textCollections.length);
     const replaceVectorDatabaseMap = {};
     if (textCollections.length) {
       for (const infoJson of textCollections) {
@@ -128,7 +128,7 @@ export class ExportService {
 
     // 导入 llm model
     const replaceLlmModelMap = {};
-    console.log('开始导入文本模型：', llmModels.length);
+    logger.log('开始导入文本模型：', llmModels.length);
     const llmModelsChunks = _.chunk(llmModels, 10);
     for (const chunk of llmModelsChunks) {
       await Promise.all(
@@ -144,7 +144,7 @@ export class ExportService {
     }
 
     // 导入 sd model
-    console.log('开始导入图像模型：', sdModels.length);
+    logger.log('开始导入图像模型：', sdModels.length);
     const replaceSdModelMap = {};
     const sdModelsChunks = _.chunk(sdModels, 10);
     for (const chunk of sdModelsChunks) {

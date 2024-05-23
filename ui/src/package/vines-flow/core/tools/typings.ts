@@ -39,6 +39,7 @@ export interface IVinesVariable {
   id: string;
   jsonpath: string;
   label: string;
+  pathLabel?: string;
   originalName: string;
   type: BlockDefPropertyTypes;
   isMultiple: boolean;
@@ -55,7 +56,7 @@ export interface IVinesVariableTag {
 }
 
 export type JSONValue = null | string | number | boolean | { [x: string]: JSONValue } | Array<JSONValue>;
-export interface IVinesToolPropertiesOptions {
+export interface IVinesToolPropertiesOption {
   name: string;
   value: JSONValue;
 }

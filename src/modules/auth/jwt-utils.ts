@@ -1,4 +1,5 @@
 import { config } from '@/common/config';
+import { logger } from '@/common/logger';
 import { UserEntity } from '@/database/entities/identity/user';
 import { ForbiddenException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
@@ -39,7 +40,7 @@ export class JwtHelper {
       return decoded;
     } catch (error) {
       // 处理解码过程中可能发生的错误
-      console.error('Error decoding JWT:', error.message);
+      logger.error('Error decoding JWT:', error.message);
       return null;
     }
   }

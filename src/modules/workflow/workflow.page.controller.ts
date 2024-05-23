@@ -1,11 +1,12 @@
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
+import { BUILT_IN_PAGE_INSTANCES } from '@/database/repositories/workflow.repository';
 import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreatePageDto } from './dto/req/create-page.dto';
 import { UpdatePagesDto } from './dto/req/update-pages.dto';
-import { BUILT_IN_PAGE_INSTANCES, WorkflowPageService } from './workflow.page.service';
+import { WorkflowPageService } from './workflow.page.service';
 
 @ApiTags('Workflows/Pages')
 @Controller('/workflow')
@@ -95,12 +96,12 @@ export class WorkflowPageController {
    */
   @UseGuards(CompatibleAuthGuard)
   @Post('/pages/:pageId/pin')
-  async pinPage(@Param('pageId') pageId: string, @Req() request: IRequest, @Body('pin') pin: boolean) {
+  async updatePagePinStatus(@Param('pageId') pageId: string, @Req() request: IRequest, @Body('pin') pin: boolean) {
     if (typeof pin !== 'boolean') {
       throw new BadRequestException('pin must be a boolean');
     }
-    const { teamId, userId } = request;
-    const data = await this.pageService.pinPage(teamId, userId, pageId, pin);
+    const { teamId } = request;
+    const data = await this.pageService.updatePagePinStatus(teamId, pageId, pin);
     return new SuccessResponse({ data });
   }
 }
