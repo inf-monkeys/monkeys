@@ -15,7 +15,7 @@ export const createMediaDataColumns = () => [
     cell: ({ row }) => RenderIcon({ iconUrl: row.original.type.startsWith('image') ? row.original.url : '' }),
     maxSize: 48,
   }),
-  columnHelper.accessor('name', {
+  columnHelper.accessor('displayName', {
     id: 'title',
     cell: ({ getValue }) => (
       <a className="transition-colors hover:text-primary-500" target="_blank" rel="noreferrer">
