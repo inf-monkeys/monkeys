@@ -5,7 +5,18 @@ import { BaseAssetEntity } from '../assets/base-asset';
 
 export enum ComfyuiWorkflowSourceType {
   Image = 'image',
-  WorkflowApiJson = 'json',
+  Json = 'json',
+}
+
+export interface ComfyUIWorkflowAddtionalModel {
+  name: string;
+  url: string;
+  dest: string;
+}
+
+export interface ComfyUIWorkflowAddtionalNode {
+  name: string;
+  url: string;
 }
 
 @Entity({ name: 'comfyui_workflows' })
@@ -42,4 +53,18 @@ export class ComfyuiWorkflowEntity extends BaseAssetEntity {
     type: 'simple-json',
   })
   toolInput: BlockDefProperties[];
+
+  @Column({
+    name: 'additional_model_list',
+    type: 'simple-json',
+    nullable: true,
+  })
+  additionalModelList?: ComfyUIWorkflowAddtionalModel[];
+
+  @Column({
+    name: 'additional_node_list',
+    type: 'simple-json',
+    nullable: true,
+  })
+  additionalNodeList?: ComfyUIWorkflowAddtionalNode[];
 }
