@@ -316,6 +316,7 @@ export class LlmController {
       type: 'string',
       typeOptions: {
         assetType: 'tools',
+        multipleValues: true,
       },
     },
     {
@@ -473,6 +474,7 @@ export class LlmController {
       type: 'string',
       typeOptions: {
         assetType: 'tools',
+        multipleValues: true,
       },
     },
     {
