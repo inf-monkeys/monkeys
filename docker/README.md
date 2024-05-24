@@ -34,6 +34,26 @@
     docker-compose down
     ```
 
+## 🚀 Only Middleware
+
+1. Go to `docker` folder
+
+    ```sh
+    cd docker
+    ```
+
+2. Start docker-compose
+
+    ```sh
+    docker-compose -f docker-compose-middleware.yaml up -d
+    ```
+
+3. Stop
+
+    ```sh
+    docker-compose down
+    ```
+
 ## 🚀 Multi tenancy Version
 
 ### Confuguration
