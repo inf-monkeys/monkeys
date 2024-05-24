@@ -77,7 +77,7 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
     <Dialog open={visible} onOpenChange={setVisible}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="w-[40rem] max-w-[40rem]">
-        <DialogTitle>从 OSS 导入</DialogTitle>
+        <DialogTitle>{t('ugc-page.text-data.detail.import.oss.title')}</DialogTitle>
         <Form {...form}>
           <form
             onSubmit={handleSubmit}
@@ -90,7 +90,7 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>OSS 类型</FormLabel>
+                    <FormLabel>{t('ugc-page.text-data.detail.import.oss.form.ossType.label')}</FormLabel>
                     <FormControl>
                       <Select
                         onValueChange={(val) => {
@@ -101,12 +101,18 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="请选择 OSS 类型" />
+                            <SelectValue
+                              placeholder={t('ugc-page.text-data.detail.import.oss.form.ossType.placeholder')}
+                            />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="TOS">火山云 TOS</SelectItem>
-                          <SelectItem value="ALIYUNOSS">阿里云对象存储</SelectItem>
+                          <SelectItem value="TOS">
+                            {t('ugc-page.text-data.detail.import.oss.form.ossType.options.TOS')}
+                          </SelectItem>
+                          <SelectItem value="ALIYUNOSS">
+                            {t('ugc-page.text-data.detail.import.oss.form.ossType.options.ALIYUNOSS')}
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -119,12 +125,17 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                 <FormField
                   name="ossConfig.region"
                   control={form.control}
-                  rules={{ required: '请输入 TOS 区域' }}
+                  rules={{ required: t('ugc-page.text-data.detail.import.oss.form.ossConfig.region.tip') }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>TOS 区域</FormLabel>
+                      <FormLabel>{t('ugc-page.text-data.detail.import.oss.form.ossConfig.region.label')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="请输入 TOS 区域，如 cn-beijing" {...field} className="grow" autoFocus />
+                        <Input
+                          placeholder={t('ugc-page.text-data.detail.import.oss.form.ossConfig.region.placeholder')}
+                          {...field}
+                          className="grow"
+                          autoFocus
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -137,18 +148,27 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>OSS 端点</FormLabel>
+                    <FormLabel>{t('ugc-page.text-data.detail.import.oss.form.ossConfig.endpoint.label')}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="请输入 OSS 端点，如 https://tos-cn-beijing.volces.com"
+                        placeholder={t('ugc-page.text-data.detail.import.oss.form.ossConfig.endpoint.placeholder', {
+                          endpoint:
+                            ossType === 'TOS'
+                              ? t('ugc-page.text-data.detail.import.oss.form.ossConfig.endpoint.description.TOS')
+                              : t('ugc-page.text-data.detail.import.oss.form.ossConfig.endpoint.description.OSS'),
+                        })}
                         {...field}
                         className="grow"
                         autoFocus
                       />
                     </FormControl>
                     <FormDescription>
-                      示例端点：
-                      {ossType === 'TOS' ? 'https://tos-cn-beijing.volces.com' : 'https://oss-cn-beijing.aliyuncs.com'}
+                      {t('ugc-page.text-data.detail.import.oss.form.ossConfig.endpoint.description.content', {
+                        endpoint:
+                          ossType === 'TOS'
+                            ? t('ugc-page.text-data.detail.import.oss.form.ossConfig.endpoint.description.TOS')
+                            : t('ugc-page.text-data.detail.import.oss.form.ossConfig.endpoint.description.OSS'),
+                      })}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -160,9 +180,14 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Bucket Name</FormLabel>
+                    <FormLabel>{t('ugc-page.text-data.detail.import.oss.form.ossConfig.bucketName.label')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="请输入 Bucket Name" {...field} className="grow" autoFocus />
+                      <Input
+                        placeholder={t('ugc-page.text-data.detail.import.oss.form.ossConfig.bucketName.placeholder')}
+                        {...field}
+                        className="grow"
+                        autoFocus
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -174,7 +199,7 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Bucket 类型</FormLabel>
+                    <FormLabel>{t('ugc-page.text-data.detail.import.oss.form.ossConfig.bucketType.label')}</FormLabel>
                     <FormControl>
                       <Select
                         onValueChange={(val) => {
@@ -185,12 +210,20 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="请选择 OSS 类型" />
+                            <SelectValue
+                              placeholder={t(
+                                'ugc-page.text-data.detail.import.oss.form.ossConfig.bucketType.placeholder',
+                              )}
+                            />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="private">私有</SelectItem>
-                          <SelectItem value="public">公开</SelectItem>
+                          <SelectItem value="private">
+                            {t('ugc-page.text-data.detail.import.oss.form.ossConfig.bucketType.options.private')}
+                          </SelectItem>
+                          <SelectItem value="public">
+                            {t('ugc-page.text-data.detail.import.oss.form.ossConfig.bucketType.options.public')}
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -204,9 +237,14 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Access Key ID</FormLabel>
+                    <FormLabel>{t('ugc-page.text-data.detail.import.oss.form.ossConfig.accessKeyId.label')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="请输入 Access Key ID" {...field} className="grow" autoFocus />
+                      <Input
+                        placeholder={t('ugc-page.text-data.detail.import.oss.form.ossConfig.accessKeyId.placeholder')}
+                        {...field}
+                        className="grow"
+                        autoFocus
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -218,9 +256,18 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Access Key Secret</FormLabel>
+                    <FormLabel>
+                      {t('ugc-page.text-data.detail.import.oss.form.ossConfig.accessKeySecret.label')}
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="请输入 Access Key Secret" {...field} className="grow" autoFocus />
+                      <Input
+                        placeholder={t(
+                          'ugc-page.text-data.detail.import.oss.form.ossConfig.accessKeySecret.placeholder',
+                        )}
+                        {...field}
+                        className="grow"
+                        autoFocus
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -232,10 +279,10 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>文件所在目录路径</FormLabel>
+                    <FormLabel>{t('ugc-page.text-data.detail.import.oss.form.ossConfig.baseFolder.label')}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="请输入文件所在目录路径，如 folder/subfolder/"
+                        placeholder={t('ugc-page.text-data.detail.import.oss.form.ossConfig.baseFolder.placeholder')}
                         {...field}
                         className="grow"
                         autoFocus
@@ -251,12 +298,21 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>文件后缀</FormLabel>
+                    <FormLabel>
+                      {t('ugc-page.text-data.detail.import.oss.form.ossConfig.fileExtensions.label')}
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="请输入文件后缀" {...field} className="grow" autoFocus />
+                      <Input
+                        placeholder={t(
+                          'ugc-page.text-data.detail.import.oss.form.ossConfig.fileExtensions.placeholder',
+                        )}
+                        {...field}
+                        className="grow"
+                        autoFocus
+                      />
                     </FormControl>
                     <FormDescription>
-                      如果有多种类型，使用逗号分割，如 .txt .pdf。不传则表示导入所有类型的文件
+                      {t('ugc-page.text-data.detail.import.oss.form.ossConfig.fileExtensions.description')}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -268,11 +324,22 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>过滤文件正则表达式</FormLabel>
+                    <FormLabel>
+                      {t('ugc-page.text-data.detail.import.oss.form.ossConfig.excludeFileRegex.label')}
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="请输入过滤文件正则表达式" {...field} className="grow" autoFocus />
+                      <Input
+                        placeholder={t(
+                          'ugc-page.text-data.detail.import.oss.form.ossConfig.excludeFileRegex.placeholder',
+                        )}
+                        {...field}
+                        className="grow"
+                        autoFocus
+                      />
                     </FormControl>
-                    <FormDescription>根据正则表达式过滤特定的文件，如 \(已取消\)|（已取消）|（更新前）</FormDescription>
+                    <FormDescription>
+                      {t('ugc-page.text-data.detail.import.oss.form.ossConfig.excludeFileRegex.description')}
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -285,7 +352,7 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>分段清洗配置</FormLabel>
+                    <FormLabel>{t('ugc-page.text-data.detail.import.common-form.splitterType.label')}</FormLabel>
                     <FormControl>
                       <Select
                         onValueChange={(val) => {
@@ -296,26 +363,32 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                             form.setValue('splitterConfig.chunk_overlap', 50);
                             form.setValue('preProcessRules', []);
                           } else {
-                            form.setValue('splitterConfig', {});
+                            form.setValue('splitterConfig.separator', '\n\n');
                           }
                         }}
                         defaultValue={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="选择一个分段清洗模式" />
+                            <SelectValue
+                              placeholder={t('ugc-page.text-data.detail.import.common-form.splitterType.placeholder')}
+                            />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="auto-segment">自动分段清洗</SelectItem>
-                          <SelectItem value="custom-segment">自定义分段清洗</SelectItem>
+                          <SelectItem value="auto-segment">
+                            {t('ugc-page.text-data.detail.import.common-form.splitterType.options.auto-segment')}
+                          </SelectItem>
+                          <SelectItem value="custom-segment">
+                            {t('ugc-page.text-data.detail.import.common-form.splitterType.options.custom-segment')}
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>
                     <FormDescription>
                       {splitterType === 'auto-segment'
-                        ? '自动设置分段规则与预处理规则，如果不了解这些参数建议选择此项'
-                        : '自定义分段规则、分段长度以及预处理规则等参数'}
+                        ? t('ugc-page.text-data.detail.import.common-form.splitterType.description.auto-segment')
+                        : t('ugc-page.text-data.detail.import.common-form.splitterType.description.custom-segment')}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -327,13 +400,19 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                   <FormField
                     name="splitterConfig.separator"
                     control={form.control}
-                    rules={{ required: '请输入分段标识符' }}
+                    rules={{
+                      required: t('ugc-page.text-data.detail.import.common-form.splitterConfig.separator.tip'),
+                    }}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>分段标识符</FormLabel>
+                        <FormLabel>
+                          {t('ugc-page.text-data.detail.import.common-form.splitterConfig.separator.label')}
+                        </FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="请输入分段标识符，如：「，」、「。」、「,」、「\n」"
+                            placeholder={t(
+                              'ugc-page.text-data.detail.import.common-form.splitterConfig.separator.placeholder',
+                            )}
                             {...field}
                             className="grow"
                             autoFocus
@@ -346,10 +425,14 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                   <FormField
                     name="splitterConfig.chunk_size"
                     control={form.control}
-                    rules={{ required: '请输入分段最大长度' }}
+                    rules={{
+                      required: t('ugc-page.text-data.detail.import.common-form.splitterConfig.chunk_size.tip'),
+                    }}
                     render={({ field: { value, onChange } }) => (
                       <FormItem>
-                        <FormLabel>分段最大长度</FormLabel>
+                        <FormLabel>
+                          {t('ugc-page.text-data.detail.import.common-form.splitterConfig.chunk_size.label')}
+                        </FormLabel>
                         <FormControl>
                           <Input
                             placeholder="500"
@@ -366,10 +449,14 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                   <FormField
                     name="splitterConfig.chunk_overlap"
                     control={form.control}
-                    rules={{ required: '请输入文本重叠量' }}
+                    rules={{
+                      required: t('ugc-page.text-data.detail.import.common-form.splitterConfig.chunk_overlap.tip'),
+                    }}
                     render={({ field: { value, onChange } }) => (
                       <FormItem>
-                        <FormLabel>文本重叠量</FormLabel>
+                        <FormLabel>
+                          {t('ugc-page.text-data.detail.import.common-form.splitterConfig.chunk_overlap.label')}
+                        </FormLabel>
                         <FormControl>
                           <Input
                             placeholder="50"
@@ -389,7 +476,9 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                     render={() => (
                       <FormItem>
                         <div className="mb-4">
-                          <FormLabel>{t('ugc-page.text-data.detail.import.utils.pre-process.rules.label')}</FormLabel>
+                          <FormLabel>
+                            {t('ugc-page.text-data.detail.import.common-form.pre-process-rules.label')}
+                          </FormLabel>
                         </div>
                         {PRE_PROCESS_RULES.map((value) => (
                           <FormField
@@ -410,7 +499,7 @@ export const ImportOSS: React.FC<IImportOSSProps> = ({ children, textId }) => {
                                     />
                                   </FormControl>
                                   <FormLabel className="text-sm font-normal">
-                                    {t(`ugc-page.text-data.detail.import.utils.pre-process.rules.rules.${value}`)}
+                                    {t(`ugc-page.text-data.detail.import.common-form.pre-process-rules.rules.${value}`)}
                                   </FormLabel>
                                 </FormItem>
                               );

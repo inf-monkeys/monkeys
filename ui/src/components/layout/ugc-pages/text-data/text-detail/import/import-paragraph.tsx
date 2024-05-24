@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import { useSWRConfig } from 'swr';
 
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useAddKnowledgeBaseSegment } from '@/apis/vector';
@@ -15,6 +16,8 @@ interface IImportParagraphProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const ImportParagraph: React.FC<IImportParagraphProps> = ({ textId, children, batch = false }) => {
+  const { t } = useTranslation();
+
   const { mutate } = useSWRConfig();
   const { trigger } = useAddKnowledgeBaseSegment(textId);
 
@@ -23,7 +26,7 @@ export const ImportParagraph: React.FC<IImportParagraphProps> = ({ textId, child
 
   const onConfirm = (paragraph: string, metadata: Record<string, unknown>) => {
     toast.promise(trigger({ text: paragraph, metadata, collectionName: textId, ...(batch ? { delimiter } : {}) }), {
-      loading: '正在导入段落',
+      loading: t('ugc-page.text-data.detail.import.toast.import-paragraph.loading'),
       success: () => {
         setVisible(false);
         setTimeout(
@@ -41,9 +44,9 @@ export const ImportParagraph: React.FC<IImportParagraphProps> = ({ textId, child
             ),
           2000,
         );
-        return '导入成功，后台向量化时数据更新可能会有延迟';
+        return t('ugc-page.text-data.detail.import.toast.import-paragraph.success');
       },
-      error: '导入失败',
+      error: t('ugc-page.text-data.detail.import.toast.import-paragraph.error'),
     });
   };
 
@@ -51,14 +54,22 @@ export const ImportParagraph: React.FC<IImportParagraphProps> = ({ textId, child
     <ParagraphEditor
       visible={visible}
       setVisibility={setVisible}
-      title={batch ? '批量导入段落' : '导入段落'}
+      title={
+        batch
+          ? t('ugc-page.text-data.detail.import.paragraph.title.batch')
+          : t('ugc-page.text-data.detail.import.paragraph.title.single')
+      }
       extra={
         batch && (
           <div className="mt-2 flex flex-col gap-2">
-            <Label>批量导入段落分割符</Label>
-            <Input placeholder="请输入段落分隔符" value={delimiter} onChange={setDelimiter} />
+            <Label>{t('ugc-page.text-data.detail.import.paragraph.extra.label')}</Label>
+            <Input
+              placeholder={t('ugc-page.text-data.detail.import.paragraph.extra.placeholder')}
+              value={delimiter}
+              onChange={setDelimiter}
+            />
             <p className="text-xs text-muted-foreground">
-              将段落内容按照指定分隔符分割，每个段落将被视为一个独立的段落
+              {t('ugc-page.text-data.detail.import.paragraph.extra.description')}
             </p>
           </div>
         )
