@@ -53,6 +53,12 @@ export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketpla
         name: 'frequency_penalty',
         type: 'number',
       },
+      {
+        default: false,
+        displayName: 'show_logs',
+        name: 'show_logs',
+        type: 'boolean',
+      },
     ],
     tasks: [
       {
@@ -62,6 +68,7 @@ export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketpla
           presence_penalty: '${workflow.input.presence_penalty}',
           stream: '${workflow.input.stream}',
           temperature: '${workflow.input.temperature}',
+          show_logs: '${workflow.input.show_logs}',
         },
         name: `${LLM_NAMESPACE}:${LLM_CHAT_COMPLETION_TOOL}`,
         taskReferenceName: 'llm:chat_completions_BtnrDqNN',

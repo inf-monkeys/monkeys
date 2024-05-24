@@ -532,6 +532,13 @@ export class LlmController {
       required: false,
       default: false,
     },
+    {
+      name: 'show_logs',
+      displayName: '是否输出日志',
+      type: 'boolean',
+      required: false,
+      default: false,
+    },
   ])
   @MonkeyToolOutput([
     {
@@ -655,7 +662,7 @@ export class LlmController {
     }
    */
   public async createChatCompletions(@Res() res: Response, @Body() body: CreateChatCompletionsDto) {
-    const { stream = false } = body;
+    const { stream = false, show_logs = false } = body;
     await this.service.createChatCompelitions(
       res,
       {
@@ -672,6 +679,7 @@ export class LlmController {
       },
       {
         apiResponseType: 'full',
+        showLogs: show_logs,
       },
     );
   }

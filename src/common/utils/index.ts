@@ -30,3 +30,10 @@ export function getHostFromUrl(url: string): string {
   const parsedUrl = new URL(url);
   return parsedUrl.host;
 }
+
+export function replacerNoEscape(key: string, value: any) {
+  if (typeof value === 'string') {
+    return value.replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\"/g, '"').replace(/\\'/g, "'").replace(/\\\\/g, '\\');
+  }
+  return value;
+}

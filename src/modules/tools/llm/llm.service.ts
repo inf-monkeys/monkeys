@@ -1,5 +1,6 @@
 import { LlmModelEndpointType, config } from '@/common/config';
-import { logger } from '@/common/logger';
+import { LogLevel, logger } from '@/common/logger';
+import { replacerNoEscape } from '@/common/utils';
 import { ToolsRepository } from '@/database/repositories/tools.repository';
 import { BlockDefProperties } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
@@ -40,6 +41,7 @@ export interface CreateCompelitionsParams {
 
 export interface CreateChatCompelitionsResponseOptions {
   apiResponseType: 'simple' | 'full';
+  showLogs?: boolean;
 }
 
 export const getModels = (
@@ -214,10 +216,17 @@ export class LlmService {
     return result;
   }
 
-  private async generateSystemMessages(messages: Array<ChatCompletionMessageParam>, presetPrompt: string, knowledgeBase: string): Promise<Array<ChatCompletionMessageParam>> {
+  private async generateSystemMessages(
+    messages: Array<ChatCompletionMessageParam>,
+    presetPrompt: string,
+    knowledgeBase: string,
+  ): Promise<{
+    systemMessages: Array<ChatCompletionMessageParam>;
+    generatedByKnowledgeBase: string;
+  }> {
     let systemPrompt = '';
     let knowledgeBaseContext = '';
-
+    let generatedByKnowledgeBase: string = null;
     if (knowledgeBase) {
       const lastMessage = messages[messages.length - 1];
       const { role, content: lastMessageContent } = lastMessage;
@@ -229,6 +238,7 @@ export class LlmService {
         if (retrieveResult?.text) {
           logger.info(`Retrieved knowledge base: ${retrieveResult.text}`);
           knowledgeBaseContext = retrieveResult.text;
+          generatedByKnowledgeBase = knowledgeBase;
         } else {
           logger.info(`Not found any knowledge based on question: ${lastMessageContent}`);
         }
@@ -267,25 +277,78 @@ When answer to user:
       systemPrompt = basePrompt.replace('{{#context#}}', knowledgeBaseContext).replace('{{#presetPrompt#}}', presetPrompt);
     }
     if (!systemPrompt) {
-      return [];
+      return {
+        generatedByKnowledgeBase: null,
+        systemMessages: [],
+      };
     }
-    return [
-      {
-        role: 'system',
-        content: systemPrompt,
+    return {
+      generatedByKnowledgeBase: generatedByKnowledgeBase,
+      systemMessages: [
+        {
+          role: 'system',
+          content: systemPrompt,
+        },
+      ],
+    };
+  }
+
+  private geneChunkLine(chatCmplId: string, model: string, chunkString: string) {
+    const chunkObject = {
+      id: chatCmplId,
+      object: 'chat.completion.chunk',
+      created: Math.floor(Date.now() / 1000),
+      model: model,
+      system_fingerprint: null,
+      choices: [{ index: 0, delta: { content: chunkString }, logprobs: null, finish_reason: null }],
+    };
+    return `data: ${JSON.stringify(chunkObject, replacerNoEscape, 0)}\n\n`;
+  }
+
+  private geneLogLine(loglId: string, type: 'retrive_knowledge_base' | 'tool_call', level: LogLevel, message: string, detailedInfo: { [x: string]: any }) {
+    const logObject = {
+      id: loglId,
+      object: 'chat.completion.log',
+      created: Math.floor(Date.now() / 1000),
+      system_fingerprint: null,
+      data: {
+        type,
+        level: level,
+        message: message,
+        detailedInfo,
       },
-    ];
+    };
+    return {
+      obj: logObject,
+      str: `data: ${JSON.stringify(logObject, replacerNoEscape, 0)}\n\n`,
+    };
   }
 
   public async createChatCompelitions(res: Response, params: CreateChatCompelitionsParams, options: CreateChatCompelitionsResponseOptions) {
-    const { apiResponseType = 'full' } = options;
+    const { apiResponseType = 'full', showLogs = false } = options;
     if (apiResponseType === 'simple' && params.stream) {
       throw new Error('Stream is not supported in simple api response type');
     }
     const { model, stream, systemPrompt, knowledgeBase, response_format = ResponseFormat.text } = params;
     let { messages } = params;
     const historyMessages = this.sanitizeMessages(messages);
-    const systemMessages = await this.generateSystemMessages(messages, systemPrompt, knowledgeBase);
+    const { generatedByKnowledgeBase, systemMessages } = await this.generateSystemMessages(messages, systemPrompt, knowledgeBase);
+    const randomChatCmplId = Math.random().toString(36).substr(2, 16);
+
+    const logs = [];
+    const sendAndCollectLogs = (level: LogLevel, type: 'retrive_knowledge_base' | 'tool_call', message: string, detailedInfo: { [x: string]: any }) => {
+      if (showLogs) {
+        const { str, obj } = this.geneLogLine('chatlog-' + randomChatCmplId, type, level, message, detailedInfo);
+        res.write(str);
+        logs.push(obj);
+      }
+    };
+
+    if (systemMessages.length && generatedByKnowledgeBase) {
+      sendAndCollectLogs('info', 'retrive_knowledge_base', 'Generated system message: ' + systemMessages[0].content, {
+        knowledgeBaseId: generatedByKnowledgeBase,
+      });
+    }
 
     const { apiKey, baseURL, defaultParams } = this.getModelConfig(model);
     messages = await this.capMessages(systemMessages, historyMessages);
@@ -323,8 +386,28 @@ When answer to user:
             for (const toolCall of call.tools) {
               let toolResult: any;
               try {
+                sendAndCollectLogs('info', 'tool_call', `Start to execute tool call ${toolCall.func.name} with arguments: ${JSON.stringify(toolCall.func.arguments)}`, {
+                  toolCallId: toolCall.id,
+                  toolName: toolCall.func.name.replace('__', ':'),
+                  arguments: toolCall.func.arguments,
+                  status: 'inprogress',
+                });
                 toolResult = await this.executeTool(toolCall.func.name, toolCall.func.arguments);
+                sendAndCollectLogs('info', 'tool_call', `Tool call ${toolCall.func.name} result: ${JSON.stringify(toolResult)}`, {
+                  toolCallId: toolCall.id,
+                  toolName: toolCall.func.name.replace('__', ':'),
+                  arguments: toolCall.func.arguments,
+                  result: toolResult,
+                  status: 'success',
+                });
               } catch (error) {
+                sendAndCollectLogs('error', 'tool_call', `Failed to execute tool call: ${toolCall.func.name}, error: ${error.message}`, {
+                  toolCallId: toolCall.id,
+                  toolName: toolCall.func.name.replace('__', ':'),
+                  arguments: toolCall.func.arguments,
+                  error: error.message,
+                  status: 'failed',
+                });
                 logger.error(`Failed to execute tool call: ${toolCall.func.name}`, error);
                 toolResult = `Can't find anything related`;
               }
@@ -361,27 +444,13 @@ When answer to user:
         res.status(200);
         const body = streamingTextResponse.body;
         const readableStream = Readable.from(body as any);
-        const randomChatCmplId = 'chatcmpl-' + Math.random().toString(36).substr(2, 16);
         readableStream.on('data', (chunk) => {
           const decoder = new TextDecoder();
           let chunkString = decoder.decode(chunk);
           // Original String: 0:"你", contains the beginning 0: and the first and last double quotes
           chunkString = chunkString.slice(2, -1).slice(1, -1);
-          const chunkObject = {
-            id: randomChatCmplId,
-            object: 'chat.completion.chunk',
-            created: Math.floor(Date.now() / 1000),
-            model: model,
-            system_fingerprint: null,
-            choices: [{ index: 0, delta: { content: chunkString }, logprobs: null, finish_reason: null }],
-          };
-          function replacer(key: string, value: any) {
-            if (typeof value === 'string') {
-              return value.replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\"/g, '"').replace(/\\'/g, "'").replace(/\\\\/g, '\\');
-            }
-            return value;
-          }
-          res.write(`data: ${JSON.stringify(chunkObject, replacer, 0)}\n\n`);
+          const chunkLine = this.geneChunkLine('chatcmpl-' + randomChatCmplId, model, chunkString);
+          res.write(chunkLine);
         });
       } else {
         const data = response as ChatCompletion;
@@ -394,8 +463,28 @@ When answer to user:
             } = toolCall;
             let toolResult: any;
             try {
+              sendAndCollectLogs('info', 'tool_call', `Start to execute tool call ${name} with arguments: ${JSON.stringify(argumentsData)}`, {
+                toolCallId: toolCall.id,
+                toolName: name.replace('__', ':'),
+                arguments: argumentsData,
+                status: 'inprogress',
+              });
               toolResult = await this.executeTool(name, argumentsData);
+              sendAndCollectLogs('info', 'tool_call', `Tool call ${name} result: ${JSON.stringify(toolResult)}`, {
+                toolCallId: toolCall.id,
+                toolName: name.replace('__', ':'),
+                arguments: argumentsData,
+                result: toolResult,
+                status: 'success',
+              });
             } catch (error) {
+              sendAndCollectLogs('error', 'tool_call', `Failed to execute tool call: ${name}, error: ${error.message}`, {
+                toolCallId: toolCall.id,
+                toolName: name.replace('__', ':'),
+                arguments: argumentsData,
+                error: error.message,
+                status: 'failed',
+              });
               logger.error(`Failed to execute tool call: ${name}`, error);
               toolResult = `Can't find anything related`;
             }
@@ -424,6 +513,11 @@ When answer to user:
             tools,
             tool_choice: 'auto',
           });
+
+          if (showLogs) {
+            (result as any).logs = logs;
+          }
+
           return res.status(200).send(
             apiResponseType === 'full'
               ? result
@@ -433,6 +527,9 @@ When answer to user:
                 },
           );
         } else {
+          if (showLogs) {
+            (response as any).logs = logs;
+          }
           return res.status(200).send(
             apiResponseType === 'full'
               ? response

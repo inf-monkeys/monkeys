@@ -1,5 +1,5 @@
-import { CodeGroup } from '../code.tsx'
-import { Col, Heading, Properties, Property, Row, SubProperty } from '../md.tsx'
+import { CodeGroup } from '../code.tsx';
+import { Col, Heading, Properties, Property, Row, SubProperty } from '../md.tsx';
 
 # 文本补全 API
 
@@ -12,11 +12,14 @@ import { Col, Heading, Properties, Property, Row, SubProperty } from '../md.tsx'
     ```
   </CodeGroup>
 
-  ### 鉴权
+### 鉴权
 
-  此 API 使用 `API-Key` 进行鉴权。
-  <i>**强烈建议开发者把 `API-Key` 放在后端存储，而非分享或者放在客户端存储，以免 `API-Key` 泄露，导致财产损失。**</i>
-  所有 API 请求都应在 **`Authorization`** HTTP Header 中包含您的 `API-Key`，如下所示：
+此 API 使用 `API-Key` 进行鉴权。
+
+{' '}
+
+<i>**强烈建议开发者把 `API-Key` 放在后端存储，而非分享或者放在客户端存储，以免 `API-Key` 泄露，导致财产损失。**</i>
+所有 API 请求都应在 **`Authorization`** HTTP Header 中包含您的 `API-Key`，如下所示：
 
   <CodeGroup title="Code">
     ```javascript
@@ -67,19 +70,21 @@ import { Col, Heading, Properties, Property, Row, SubProperty } from '../md.tsx'
     当 `stream` 为 `false`时，返回 OpenAI 标准的响应数据。
 
     </Properties>
+
   </Col>
   <Col sticky>
 
-    <CodeGroup title="Request" tag="POST" label="/completions" targetCode={`curl -X POST '${props.apiBaseUrl}/completions' \\\n--header 'Authorization: Bearer ${props.apiKey}' \\\n--header 'Content-Type: application/json' \\\n--data-raw '{\n    "model": "${props.workflowId}",\n    "prompt": "Hello",\n    "stream": true\n}'`}>
+    <CodeGroup title="Request" tag="POST" label="/completions" targetCode={`curl -X POST '${props.apiBaseUrl}/completions' \\\n--header 'Authorization: Bearer ${props.apiKey}' \\\n--header 'Content-Type: application/json' \\\n--data '{\n    "model": "${props.workflowId}",\n    "prompt": "Hello",\n    "stream": true\n}'`}>
 
     ```bash {{ title: 'cURL' }}
     curl -X POST '/chat/completions' \
     -H 'Authorization: Bearer {YOUR_MONKEYS_APIKEY}' \
     -H 'Content-Type: application/json' \
-    --data-raw '{
+    --data '{
         "model": "{props.workflowId}",
         "prompt": "Hello",
-        "stream": true
+        "stream": true,
+        "show_logs": true
     }'
     ```
 
@@ -112,6 +117,7 @@ import { Col, Heading, Properties, Property, Row, SubProperty } from '../md.tsx'
     ### 流式模式（基础助手）
     <CodeGroup title="Response">
     ```streaming {{ title: 'Response' }}
+
 data: {"id":"cmpl-874cd75500a44afeba9f05eba1ee4ef0","created":1714295700,"model":"/root/.cache/LLM-Repo/model/c4ai-command-r-plus-GPTQ","choices":[{"index":0,"text":"","logprobs":null,"finish_reason":null,"stop_reason":null}],"usage":null}
 
 data: {"id":"cmpl-874cd75500a44afeba9f05eba1ee4ef0","created":1714295700,"model":"/root/.cache/LLM-Repo/model/c4ai-command-r-plus-GPTQ","choices":[{"index":0,"text":"","logprobs":null,"finish_reason":null,"stop_reason":null}],"usage":null}
@@ -151,4 +157,3 @@ data: [DONE]
 
   </Col>
 </Row>
-
