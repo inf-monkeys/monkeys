@@ -84,6 +84,11 @@ export class ToolsRegistryService {
     if (data.credentials?.length) {
       this.validateCredentialEndpoints(data.credentialEndpoints);
     }
+    if (data.logEndpoint) {
+      if (!data.logEndpoint.includes('{taskId}')) {
+        throw new Error('Error import tool: logEndpoint must include {taskId}');
+      }
+    }
   }
 
   private validateTriggerEndpoints(triggerEndpoints: TriggerEndpointConfig[]) {
@@ -238,6 +243,11 @@ export class ToolsRegistryService {
       )
     ).map((x) => x.default);
     return builtInTools;
+  }
+
+  public async isBuiltInTool(toolName: string) {
+    const tools = await this.getBuiltInTools();
+    return tools.find((tool) => tool.name === toolName);
   }
 
   public async initBuiltInTools() {

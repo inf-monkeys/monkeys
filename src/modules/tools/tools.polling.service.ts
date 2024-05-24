@@ -4,7 +4,7 @@ import { conductorClient } from '@/common/conductor';
 import { LlmModelEndpointType, config } from '@/common/config';
 import { logger } from '@/common/logger';
 import { Mq } from '@/common/mq';
-import { ExtendedToolDefinition } from '@/common/utils/define-tool';
+import { readIncomingMessage } from '@/common/utils/stream';
 import { sleep } from '@/common/utils/utils';
 import { ToolsEntity } from '@/database/entities/tools/tools.entity';
 import { ComfyuiWorkflowRepository } from '@/database/repositories/comfyui-workflow.repository';
@@ -26,7 +26,6 @@ export const TOOL_STREAM_RESPONSE_TOPIC = (workflowInstanceId: string) => {
 
 @Injectable()
 export class ToolsPollingService {
-  BUILT_IN_TOOLS: ExtendedToolDefinition[] = [];
   constructor(
     private readonly toolsRepository: ToolsRepository,
     private readonly toolsRegistryService: ToolsRegistryService,
@@ -49,50 +48,6 @@ export class ToolsPollingService {
     }
 
     return resultUrl;
-  }
-
-  private async getBuiltInTools() {
-    if (this.BUILT_IN_TOOLS.length > 0) {
-      return this.BUILT_IN_TOOLS;
-    } else {
-      const tools = await this.toolsRegistryService.getBuiltInTools();
-      this.BUILT_IN_TOOLS = tools;
-      return tools;
-    }
-  }
-
-  private async isBuiltInTool(toolName: string) {
-    const tools = await this.getBuiltInTools();
-    return tools.find((tool) => tool.name === toolName);
-  }
-
-  private readIncomingMessage(
-    message: IncomingMessage,
-    callbacks?: {
-      onDataCallback?: (chunk: any) => void;
-      onEndCallback?: (result: any) => void;
-    },
-  ) {
-    const { onDataCallback, onEndCallback } = callbacks || {};
-    return new Promise<string>((resolve, reject) => {
-      let responseData: string = '';
-      message.on('data', (chunk) => {
-        responseData += chunk;
-        if (onDataCallback) {
-          onDataCallback(chunk);
-        }
-      });
-      message.on('end', () => {
-        if (onEndCallback) {
-          onEndCallback(responseData);
-        }
-        resolve(responseData);
-      });
-      message.on('error', (error) => {
-        logger.error('Error receiving response data:', error);
-        reject(error);
-      });
-    });
   }
 
   private convertToComfyuiInputData(originalData: { [x: string]: any }) {
@@ -171,7 +126,7 @@ export class ToolsPollingService {
       };
     }
 
-    const builtInTool = await this.isBuiltInTool(__toolName);
+    const builtInTool = await this.toolsRegistryService.isBuiltInTool(__toolName);
     if (builtInTool) {
       try {
         const result = await builtInTool.handler(rest, {
@@ -255,6 +210,8 @@ export class ToolsPollingService {
       'x-monkeys-appid': __context?.appId,
       'x-monkeys-userid': __context?.userId,
       'x-monkeys-teamid': __context?.teamId,
+      'x-monkeys-workflow-instanceid': task.workflowInstanceId,
+      'x-monkeys-workflow-taskid': task.taskId,
     };
     switch (authType) {
       case AuthType.none:
@@ -310,7 +267,7 @@ export class ToolsPollingService {
       } else if (responseType === 'stream') {
         let llmOutput = '';
         const data = res.data as IncomingMessage;
-        await this.readIncomingMessage(data, {
+        await readIncomingMessage(data, {
           onDataCallback: (chunk) => {
             chunk = chunk.toString();
             this.mq.publish(TOOL_STREAM_RESPONSE_TOPIC(task.workflowInstanceId), chunk);
@@ -383,7 +340,7 @@ export class ToolsPollingService {
         if (outputAs === 'stream') {
           const data = error?.response?.data as IncomingMessage;
           let realData = '';
-          await this.readIncomingMessage(data, {
+          await readIncomingMessage(data, {
             onEndCallback(result) {
               realData = result;
             },
