@@ -55,6 +55,7 @@ export class ToolsRepository {
     entity.credentialEndpoints = data.credentialEndpoints;
     entity.rateLimiter = data.rateLimiter;
     entity.heatlhCheck = data.healthCheck;
+    entity.logEndpoint = data.logEndpoint;
     await this.toolsServerRepository.save(entity);
   }
 

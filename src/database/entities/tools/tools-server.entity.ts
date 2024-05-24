@@ -100,6 +100,12 @@ export class ToolsServerEntity extends BaseEntity {
   })
   healthCheckStatus?: HealthCheckStatus;
 
+  @Column({
+    name: 'log_endpoint',
+    nullable: true,
+  })
+  logEndpoint?: string;
+
   public getSpecUrl() {
     const {
       manifestUrl,
