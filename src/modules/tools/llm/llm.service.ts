@@ -105,6 +105,38 @@ export class LlmService {
     return model;
   }
 
+  async capMessages(systemMessages: ChatCompletionMessageParam[], historyMessages: ChatCompletionMessageParam[]) {
+    // Todo: Implement this function
+    // const cappedHistoryMessages = [];
+    // let totalTokenCount = 0;
+    // for (const message of historyMessages.reverse()) {
+    //   const messageTokenCount = countTokens(message.content as string);
+    //   if (totalTokenCount + messageTokenCount > maxTokens) {
+    //     break;
+    //   }
+    //   cappedHistoryMessages.push(message);
+    //   totalTokenCount += messageTokenCount;
+    // }
+    // logger.info(`Total token count: ${totalTokenCount}`);
+    return [...systemMessages, ...historyMessages];
+  }
+
+  private sanitizeMessages(messages: Array<ChatCompletionMessageParam>) {
+    const messageHistory: Array<ChatCompletionMessageParam> = messages
+      .map(({ role, content }) => {
+        if (role !== 'user' && role !== 'assistant' && role !== 'system') {
+          throw new Error(`Invalid message role '${role}'`);
+        }
+
+        return {
+          role,
+          content: (content as string).trim(),
+        };
+      })
+      .filter(({ content }) => !!content);
+    return messageHistory;
+  }
+
   public async createCompelitions(params: CreateCompelitionsParams) {
     const { model, stream = false } = params;
     const { apiKey, baseURL, defaultParams, promptTemplate } = this.getModelConfig(model);
@@ -182,7 +214,7 @@ export class LlmService {
     return result;
   }
 
-  private async generateMessages(messages: Array<ChatCompletionMessageParam>, presetPrompt: string, knowledgeBase: string): Promise<Array<ChatCompletionMessageParam>> {
+  private async generateSystemMessages(messages: Array<ChatCompletionMessageParam>, presetPrompt: string, knowledgeBase: string): Promise<Array<ChatCompletionMessageParam>> {
     let systemPrompt = '';
     let knowledgeBaseContext = '';
 
@@ -235,15 +267,14 @@ When answer to user:
       systemPrompt = basePrompt.replace('{{#context#}}', knowledgeBaseContext).replace('{{#presetPrompt#}}', presetPrompt);
     }
     if (!systemPrompt) {
-      return messages;
+      return [];
     }
-    messages = [
+    return [
       {
         role: 'system',
         content: systemPrompt,
-      } as ChatCompletionMessageParam,
-    ].concat(messages as any);
-    return messages;
+      },
+    ];
   }
 
   public async createChatCompelitions(res: Response, params: CreateChatCompelitionsParams, options: CreateChatCompelitionsResponseOptions) {
@@ -253,9 +284,11 @@ When answer to user:
     }
     const { model, stream, systemPrompt, knowledgeBase, response_format = ResponseFormat.text } = params;
     let { messages } = params;
-    messages = await this.generateMessages(messages, systemPrompt, knowledgeBase);
+    const historyMessages = this.sanitizeMessages(messages);
+    const systemMessages = await this.generateSystemMessages(messages, systemPrompt, knowledgeBase);
 
     const { apiKey, baseURL, defaultParams } = this.getModelConfig(model);
+    messages = await this.capMessages(systemMessages, historyMessages);
     const openai = new OpenAI({
       apiKey: apiKey || 'mock-apikey',
       baseURL: baseURL,
@@ -288,14 +321,25 @@ When answer to user:
         const streamResponse = OpenAIStream(response as Stream<ChatCompletionChunk>, {
           experimental_onToolCall: async (call: ToolCallPayload, appendToolCallMessage) => {
             for (const toolCall of call.tools) {
-              const result = await this.executeTool(toolCall.func.name, toolCall.func.arguments);
-              const newMessages = appendToolCallMessage({
+              let toolResult: any;
+              try {
+                toolResult = await this.executeTool(toolCall.func.name, toolCall.func.arguments);
+              } catch (error) {
+                logger.error(`Failed to execute tool call: ${toolCall.func.name}`, error);
+                toolResult = `Can't find anything related`;
+              }
+              const toolMessages = appendToolCallMessage({
                 tool_call_id: toolCall.id,
                 function_name: toolCall.func.name,
-                tool_call_result: result,
+                tool_call_result: toolResult,
               });
+              for (const toolMessage of toolMessages) {
+                if (toolMessage.content?.length > config.llm.toolResultMaxLength) {
+                  toolMessage.content = toolMessage.content.slice(0, config.llm.toolResultMaxLength) + '...';
+                }
+              }
               return openai.chat.completions.create({
-                messages: [...messages, ...newMessages] as any,
+                messages: [...messages, ...toolMessages] as any,
                 model,
                 stream: true,
                 tools,
@@ -342,14 +386,20 @@ When answer to user:
       } else {
         const data = response as ChatCompletion;
         if (data.choices[0].message.tool_calls) {
-          let newMessages: Array<ChatCompletionMessageParam> = [];
+          let toolMessages: Array<ChatCompletionMessageParam> = [];
           const toolCalls = data.choices[0].message.tool_calls;
           for (const toolCall of toolCalls) {
             const {
               function: { name, arguments: argumentsData },
             } = toolCall;
-            const toolResult = await this.executeTool(name, argumentsData);
-            newMessages = newMessages.concat([
+            let toolResult: any;
+            try {
+              toolResult = await this.executeTool(name, argumentsData);
+            } catch (error) {
+              logger.error(`Failed to execute tool call: ${name}`, error);
+              toolResult = `Can't find anything related`;
+            }
+            toolMessages = toolMessages.concat([
               {
                 role: 'assistant',
                 content: '',
@@ -361,10 +411,14 @@ When answer to user:
                 content: JSON.stringify(toolResult),
               },
             ]);
+            for (const toolMessage of toolMessages) {
+              if (toolMessage.content?.length > config.llm.toolResultMaxLength) {
+                toolMessage.content = toolMessage.content.slice(0, config.llm.toolResultMaxLength) + '...';
+              }
+            }
           }
-
           const result = await openai.chat.completions.create({
-            messages: [...messages, ...newMessages] as any,
+            messages: [...messages, ...toolMessages] as any,
             model,
             stream: false,
             tools,

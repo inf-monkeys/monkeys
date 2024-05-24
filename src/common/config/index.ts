@@ -160,6 +160,11 @@ export interface LlmModelConfig {
   defaultParams?: { [x: string]: any };
   type: LlmModelEndpointType[];
   promptTemplate?: string;
+  max_tokens?: number;
+}
+
+export interface LLmConfig {
+  toolResultMaxLength: number;
 }
 
 export interface ProxyConfig {
@@ -180,6 +185,7 @@ export interface Config {
   s3: S3Config;
   models: LlmModelConfig[];
   proxy: ProxyConfig;
+  llm: LLmConfig;
 }
 
 const port = readConfig('server.port', 3000);
@@ -279,6 +285,9 @@ export const config: Config = {
     enabled: readConfig('proxy.enabled', false),
     url: readConfig('proxy.url'),
     exclude: readConfig('proxy.exclude', []),
+  },
+  llm: {
+    toolResultMaxLength: readConfig('llm.tools.maxReultLength', 4096),
   },
 };
 
