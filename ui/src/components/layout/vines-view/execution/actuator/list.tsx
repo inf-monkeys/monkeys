@@ -66,6 +66,8 @@ export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({ height, act
         .sort((a) => (['SUB_WORKFLOW', 'DO_WHILE'].includes(a.type) ? 1 : -1));
       if (activeNode?.[0]) {
         setActiveTool(activeNode[0]);
+      } else if (nodes?.[1]) {
+        setActiveTool(nodes[1]);
       }
     }
 
