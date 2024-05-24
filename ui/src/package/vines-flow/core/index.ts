@@ -112,7 +112,9 @@ export class VinesCore extends VinesTools(VinesBase) {
         this.workflowInput = workflow.variables;
       }
 
-      this.enableOpenAIInterface = !!workflow?.exposeOpenaiCompatibleInterface;
+      if (workflow?.exposeOpenaiCompatibleInterface) {
+        this.enableOpenAIInterface = workflow.exposeOpenaiCompatibleInterface;
+      }
     }
     workflowId && (this.workflowId = workflowId);
     version && (this.version = version);
