@@ -258,6 +258,9 @@
               },
               "text-data-store": {
                 "label": "文本数据市场"
+              },
+              "comfyui-store": {
+                "label": "ComfyUI 市场"
               }
             }
           },

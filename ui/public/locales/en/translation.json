@@ -267,6 +267,9 @@
               },
               "text-data-store": {
                 "label": "Text Data Store"
+              },
+              "comfyui-store": {
+                "label": "ComfyUI Store"
               }
             }
           },
