@@ -86,13 +86,13 @@ export const OpenAIChat: React.FC<IOpenAIChatProps> = ({ multipleChat }) => {
   );
 
   useEffect(() => {
-    if (!(error instanceof Error)) {
-      void setMessages(history ?? []);
+    if (!(error instanceof Error) && !isLoading) {
+      void setMessages((history ?? []).filter((it) => !(it.role === 'assistant' && isEmpty(it.content))));
     }
   }, [history, error]);
 
   useEffect(() => {
-    if (chatId === 'default') {
+    if (chatId === 'default' && !isLoading) {
       void setMessages([]);
     }
   }, [chatId]);
