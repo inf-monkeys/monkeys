@@ -86,6 +86,7 @@ export interface ManifestJson {
   credentialEndpoints?: CredentialEndpointConfig[];
   credentials?: CredentialDefinition[];
   rateLimiter?: ToolRateLimiterConfig;
+  logEndpoint?: string;
 }
 
 export enum ToolImportType {
