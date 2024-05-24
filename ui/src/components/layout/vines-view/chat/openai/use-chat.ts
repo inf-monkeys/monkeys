@@ -108,6 +108,13 @@ export const useChat = (
         }
       }
 
+      // check if the bot message is empty
+      const botMessage = messagesRef.current.at(-1);
+      if (isEmpty(botMessage?.content?.trim() ?? '')) {
+        mutateMessages((prev) => prev.slice(0, -1));
+        toast.warning('对话未回应！');
+      }
+
       await mutateLoading(false);
     } catch (error) {
       void mutateLoading(false);
