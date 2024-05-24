@@ -1,5 +1,5 @@
-import { CodeGroup } from '../code.tsx'
-import { Col, Heading, Properties, Property, Row, SubProperty } from '../md.tsx'
+import { CodeGroup } from '../code.tsx';
+import { Col, Heading, Properties, Property, Row, SubProperty } from '../md.tsx';
 
 # 对话 API
 
@@ -12,11 +12,14 @@ import { Col, Heading, Properties, Property, Row, SubProperty } from '../md.tsx'
     ```
   </CodeGroup>
 
-  ### 鉴权
+### 鉴权
 
-  此 API 使用 `API-Key` 进行鉴权。
-  <i>**强烈建议开发者把 `API-Key` 放在后端存储，而非分享或者放在客户端存储，以免 `API-Key` 泄露，导致财产损失。**</i>
-  所有 API 请求都应在 **`Authorization`** HTTP Header 中包含您的 `API-Key`，如下所示：
+此 API 使用 `API-Key` 进行鉴权。
+
+{' '}
+
+<i>**强烈建议开发者把 `API-Key` 放在后端存储，而非分享或者放在客户端存储，以免 `API-Key` 泄露，导致财产损失。**</i>
+所有 API 请求都应在 **`Authorization`** HTTP Header 中包含您的 `API-Key`，如下所示：
 
   <CodeGroup title="Code">
     ```javascript
@@ -67,30 +70,21 @@ import { Col, Heading, Properties, Property, Row, SubProperty } from '../md.tsx'
     当 `stream` 为 `false`时，返回 OpenAI 标准的响应数据。
 
     </Properties>
+
   </Col>
   <Col sticky>
 
-    <CodeGroup title="Request" tag="POST" label="/chat/completions" targetCode={`curl -X POST '${props.apiBaseUrl}/chat/completions' \\\n--header 'Authorization: Bearer ${props.apiKey}' \\\n--header 'Content-Type: application/json' \\\n--data-raw '{\n    "model": "${props.workflowId}",\n    "messages": [{"role": "user", "content": "Hello"}],\n    "stream": true\n}'`}>
+    <CodeGroup title="Request" tag="POST" label="/chat/completions" targetCode={`curl -X POST '${props.apiBaseUrl}/chat/completions' \\\n--header 'Authorization: Bearer ${props.apiKey}' \\\n--header 'Content-Type: application/json' \\\n--data '{\n    "model": "${props.workflowId}",\n    "messages": [{"role": "user", "content": "Hello"}],\n    "stream": true,\n    "show_logs": true\n}'`}>
 
     ```bash {{ title: 'cURL' }}
     curl -X POST '/chat/completions' \
     -H 'Authorization: Bearer {YOUR_MONKEYS_APIKEY}' \
     -H 'Content-Type: application/json' \
-    --data-raw '{
-        "inputs": {
-            "name": "dify"
-        },
-        "query": "What are the specs of the iPhone 13 Pro Max?",
-        "conversation_id": "101b4c97-fc2e-463c-90b1-5261a4cdcafb",
-        "response_mode": "streaming",
-        "user": "abc-123",
-        "files": [
-          {
-            "type": "image",
-            "transfer_method": "remote_url",
-            "url": "https://cloud.dify.ai/logo/logo-site.png"
-          }
-        ]
+    --data '{
+      "model": "6650798ae4b77ab99d073767",
+      "messages": [{"role": "user", "content": "Hello"}],
+      "stream": true
+      "show_logs": true
     }'
     ```
 
@@ -151,4 +145,3 @@ import { Col, Heading, Properties, Property, Row, SubProperty } from '../md.tsx'
 
   </Col>
 </Row>
-

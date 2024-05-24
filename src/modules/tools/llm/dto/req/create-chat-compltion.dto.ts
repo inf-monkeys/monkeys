@@ -86,4 +86,11 @@ export class CreateChatCompletionsDto {
     default: ResponseFormat.text,
   })
   response_format?: ResponseFormat;
+
+  @ApiProperty({
+    description: '指示API是否应返回调试信息',
+    example: false,
+    required: false,
+  })
+  show_logs?: boolean;
 }
