@@ -920,12 +920,39 @@
           }
         },
         "import": {
-          "utils": {
+          "common-form": {
             "pre-process-rules": {
               "label": "Text Pre-processing Rules",
               "rules": {
                 "replace-space-n-tab": "Replacing consecutive spaces, line breaks and tabs",
                 "delete-url-and-email": "Delete all URL addresses and e-mail addresses"
+              }
+            },
+            "splitterType": {
+              "label": "Segmented Cleaning Configuration",
+              "placeholder": "Select a segmented cleaning mode",
+              "options": {
+                "auto-segment": "Automatic Segmental Cleaning",
+                "custom-segment": "Custom Segmental Cleaning"
+              },
+              "description": {
+                "auto-segment": "Segmentation rules and preprocessing rules are set automatically. If you don't know these parameters, it is recommended to select this item.",
+                "custom-segment": "Customize parameters such as segmentation rules, segment lengths and preprocessing rules."
+              }
+            },
+            "splitterConfig": {
+              "separator": {
+                "label": "Segment Identifier",
+                "placeholder": "Enter segment identifier, e.g., \",\", \".\" , \",\", \"\\n\".",
+                "tip": "Please enter segment identifier."
+              },
+              "chunk_size": {
+                "label": "Segment Chunk Size",
+                "tip": "Please enter segment chunk size"
+              },
+              "chunk_overlap": {
+                "label": "Segment Chunk Overlap",
+                "tip": "Please enter segment chunk overlap"
               }
             }
           },
@@ -934,6 +961,11 @@
               "loading": "Creating import task...",
               "success": "Import task created successfully!",
               "error": "Import task created failed! Please try again later!"
+            },
+            "import-paragraph": {
+              "loading": "Importing paragraphs...",
+              "success": "Imported successfully! There may be a delay in updating data when vectorizing in the backend.",
+              "error": "Imported failed! Please try again later!"
             }
           },
           "file": {
@@ -941,33 +973,6 @@
             "form": {
               "fileURL": {
                 "description": "Files uploaded here will be automatically stored in \"Media Data\"."
-              },
-              "splitterType": {
-                "label": "Segmented Cleaning Configuration",
-                "placeholder": "Select a segmented cleaning mode",
-                "options": {
-                  "auto-segment": "Automatic Segmental Cleaning",
-                  "custom-segment": "Custom Segmental Cleaning"
-                },
-                "description": {
-                  "auto-segment": "Segmentation rules and preprocessing rules are set automatically. If you don't know these parameters, it is recommended to select this item.",
-                  "custom-segment": "Customize parameters such as segmentation rules, segment lengths and preprocessing rules."
-                }
-              },
-              "splitterConfig": {
-                "separator": {
-                  "label": "Segment Identifier",
-                  "placeholder": "Enter segment identifier, e.g., \",\", \".\" , \",\", \"\\n\".",
-                  "tip": "Please enter segment identifier."
-                },
-                "chunk_size": {
-                  "label": "Segment Chunk Size",
-                  "tip": "Please enter segment chunk size"
-                },
-                "chunk_overlap": {
-                  "label": "Segment Chunk Overlap",
-                  "tip": "Please enter segment chunk overlap"
-                }
               }
             }
           },
@@ -976,8 +981,73 @@
             "form": {
               "ossType": {
                 "label": "OSS Type",
-                "placeholder": "Select OSS type"
+                "placeholder": "Select OSS type",
+                "options": {
+                  "TOS": "Volcengine TOS",
+                  "ALIYUNOSS": "Aliyun OSS"
+                }
+              },
+              "ossConfig": {
+                "region": {
+                  "label": "TOS Region",
+                  "placeholder": "Enter TOS region, e.g. \"cn-beijing\"",
+                  "tip": "Please enter TOS region"
+                },
+                "endpoint": {
+                  "label": "OSS Endpoint",
+                  "placeholder": "Enter OSS endpoint, e.g. \"{{endpoint}}\"",
+                  "description": {
+                    "content": "Sample endpoint: \"{{endpoint}}\"",
+                    "TOS": "https://tos-cn-beijing.volces.com",
+                    "OSS": "https://oss-cn-beijing.aliyuncs.com"
+                  }
+                },
+                "bucketName": {
+                  "label": "Bucket Name",
+                  "placeholder": "Enter bucket name"
+                },
+                "bucketType": {
+                  "label": "Bucket Type",
+                  "placeholder": "Select OSS type",
+                  "options": {
+                    "private": "Private",
+                    "public": "Public"
+                  }
+                },
+                "accessKeyId": {
+                  "label": "Access Key ID",
+                  "placeholder": "Enter Access Key ID"
+                },
+                "accessKeySecret": {
+                  "label": "Access Key Secret",
+                  "placeholder": "Enter Access Key Secret"
+                },
+                "baseFolder": {
+                  "label": "Base Folder",
+                  "placeholder": "Enter base folder, e.g. \"path/to/files/\""
+                },
+                "fileExtensions": {
+                  "label": "File Extensions",
+                  "placeholder": "Enter file extensions",
+                  "description": "If there are multiple types, use \",\" to split, such as \".txt,.pdf\". Empty means import all types of files."
+                },
+                "excludeFileRegex": {
+                  "label": "Exclude File Regex",
+                  "placeholder": "Enter exclude file regex",
+                  "description": "Filter specific files based on regex such as \"(canceled)|(canceled)|(before update)\""
+                }
               }
+            }
+          },
+          "paragraph": {
+            "title": {
+              "single": "Import paragraphs",
+              "batch": "Batch import paragraphs"
+            },
+            "extra": {
+              "label": "Batch Import Paragraphs Separator",
+              "placeholder": "Enter paragraphs separator",
+              "description": "Split the content of paragraphs according to the specified separator, and each paragraph will be treated as a separate paragraph."
             }
           }
         },
