@@ -5,6 +5,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronRight, Undo2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useKnowledgeBase } from '@/apis/vector';
 import { BasicInfo } from '@/components/layout/ugc-pages/text-data/text-detail/basic-data';
@@ -20,6 +21,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { cn } from '@/utils';
 
 const TextDataDetail: React.FC = () => {
+  const { t } = useTranslation();
+
   const { textId } = Route.useParams();
   const { data: detail, isLoading } = useKnowledgeBase(textId);
 
@@ -53,34 +56,36 @@ const TextDataDetail: React.FC = () => {
                   }}
                 />
               </TooltipTrigger>
-              <TooltipContent>返回</TooltipContent>
+              <TooltipContent>{t('common.utils.back')}</TooltipContent>
             </Tooltip>
-            <h1 className="line-clamp-1 text-2xl font-bold">{displayName ? displayName : '文本数据'}</h1>
+            <h1 className="line-clamp-1 text-2xl font-bold">
+              {displayName ? displayName : t('ugc-page.text-data.detail.title')}
+            </h1>
           </header>
           <TabsList className="flex !h-auto flex-col gap-2 bg-transparent">
             <TabsTrigger
               value="documents"
               className="h-10 w-full justify-start data-[state=active]:border data-[state=active]:border-input data-[state=active]:font-normal"
             >
-              文档
+              {t('ugc-page.text-data.detail.tabs.documents.label')}
             </TabsTrigger>
             <TabsTrigger
               value="segments"
               className="h-10 w-full justify-start data-[state=active]:border data-[state=active]:border-input data-[state=active]:font-normal"
             >
-              段落
+              {t('ugc-page.text-data.detail.tabs.segments.label')}
             </TabsTrigger>
             <TabsTrigger
               value="settings"
               className="h-10 w-full justify-start data-[state=active]:border data-[state=active]:border-input data-[state=active]:font-normal"
             >
-              设置
+              {t('ugc-page.text-data.detail.tabs.settings.label')}
             </TabsTrigger>
             <TabsTrigger
               value="associated-workflows"
               className="h-10 w-full justify-start data-[state=active]:border data-[state=active]:border-input data-[state=active]:font-normal"
             >
-              关联工作流
+              {t('ugc-page.text-data.detail.tabs.associated-workflows.label')}
             </TabsTrigger>
           </TabsList>
         </motion.div>
@@ -94,7 +99,7 @@ const TextDataDetail: React.FC = () => {
                 <ChevronRight className={cn(visible && 'scale-x-[-1]')} />
               </div>
             </TooltipTrigger>
-            <TooltipContent>{visible ? '收起' : '展开'}</TooltipContent>
+            <TooltipContent>{visible ? t('common.sidebar.hide') : t('common.sidebar.show')}</TooltipContent>
           </Tooltip>
         </Separator>
         <div className="relative size-full flex-1">
@@ -111,7 +116,7 @@ const TextDataDetail: React.FC = () => {
                 <CircularProgress
                   className="[&_circle:last-child]:stroke-vines-500"
                   size="lg"
-                  aria-label="Loading..."
+                  aria-label={t('common.load.loading')}
                 />
               </motion.div>
             ) : (

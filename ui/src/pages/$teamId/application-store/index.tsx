@@ -2,21 +2,25 @@ import React from 'react';
 
 import { createFileRoute } from '@tanstack/react-router';
 
+import { useTranslation } from 'react-i18next';
+
 import { preloadUgcApplicationStore, useUgcApplicationStore } from '@/apis/ugc';
-import { createApplicationStoreColumns } from '@/components/layout/ugc-pages/application-store/consts.tsx';
-import { OperateArea } from '@/components/layout/ugc-pages/application-store/operate-area';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { createApplicationStoreColumns } from '@/components/layout/ugc-pages/application-store/consts.tsx';
+import { OperateArea } from '@/components/layout/ugc-pages/application-store/operate-area';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const ApplicationStore: React.FC = () => {
+  const { t: tHook } = useTranslation();
+
   return (
     <main className="size-full">
       <UgcView
         assetKey="application-store"
         assetType="workflow"
-        assetName="应用市场"
+        assetName={tHook('components.layout.main.sidebar.list.store.application-store.label')}
         isMarket
         useUgcFetcher={useUgcApplicationStore}
         preloadUgcFetcher={preloadUgcApplicationStore}
@@ -24,7 +28,9 @@ export const ApplicationStore: React.FC = () => {
         renderOptions={{
           subtitle: (item) => (
             <span className="line-clamp-1">
-              {`${item.user?.name ?? '系统内置'} 创建于 ${formatTimeDiffPrevious(item.createdTimestamp)}`}
+              {`${item.user?.name ?? tHook('common.utils.system')} ${tHook('common.utils.created-at', {
+                time: formatTimeDiffPrevious(item.createdTimestamp),
+              })}`}
             </span>
           ),
           cover: (item) => {

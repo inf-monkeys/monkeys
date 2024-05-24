@@ -2,6 +2,8 @@ import React from 'react';
 
 import { createFileRoute } from '@tanstack/react-router';
 
+import { useTranslation } from 'react-i18next';
+
 import { preloadUgcImageModels, useUgcImageModels } from '@/apis/ugc';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
@@ -11,19 +13,23 @@ import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const ImageModels: React.FC = () => {
+  const { t: tHook } = useTranslation();
+
   return (
     <main className="size-full">
       <UgcView
         assetKey="image-models"
         assetType="sd-model"
-        assetName="图像模型"
+        assetName={tHook('components.layout.main.sidebar.list.model.image-models.label')}
         useUgcFetcher={useUgcImageModels}
         preloadUgcFetcher={preloadUgcImageModels}
         createColumns={() => createImageModelsColumns()}
         renderOptions={{
           subtitle: (item) => (
             <span className="line-clamp-1">
-              {`${item.user?.name ?? '未知'} 创建于 ${formatTimeDiffPrevious(item.createdTimestamp)}`}
+              {`${item.user?.name ?? tHook('common.utils.unknown')} ${tHook('common.utils.created-at', {
+                time: formatTimeDiffPrevious(item.createdTimestamp),
+              })}`}
             </span>
           ),
           cover: (item) => {

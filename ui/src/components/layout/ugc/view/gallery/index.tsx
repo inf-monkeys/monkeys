@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 
 import { flexRender } from '@tanstack/react-table';
 import { CircleEllipsis, Info } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { IUgcViewItemProps } from '@/components/layout/ugc/typings.ts';
 import { getRenderNodeFn } from '@/components/layout/ugc/view/utils/node-renderer.tsx';
@@ -17,6 +18,8 @@ export const UgcViewGalleryItem = <E extends object>({
   operateArea,
   onItemClick,
 }: IUgcViewItemProps<E>) => {
+  const { t } = useTranslation();
+
   const getRenderNode = getRenderNodeFn({
     row,
     columns,
@@ -45,7 +48,7 @@ export const UgcViewGalleryItem = <E extends object>({
         {cover}
         <div className="absolute flex translate-x-[-0.5rem] translate-y-[-0.5rem] cursor-pointer gap-1 opacity-0 transition-all group-hover:opacity-100">
           <Popover>
-            <Tooltip content="信息">
+            <Tooltip content={t('common.utils.info')}>
               <TooltipTrigger asChild>
                 <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
                   <Info className="stroke-vines-500 opacity-80 drop-shadow-[0_1px_1px_rgb(var(--vines-500)/0.7)]" />
@@ -82,7 +85,7 @@ export const UgcViewGalleryItem = <E extends object>({
             operateArea(
               row.original,
               <CircleEllipsis className="stroke-vines-500 opacity-80 drop-shadow-[0_1px_1px_rgb(var(--vines-500)/0.7)]" />,
-              '操作',
+              t('common.utils.operate'),
             )}
         </div>
       </div>

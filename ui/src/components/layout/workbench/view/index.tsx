@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { useElementSize } from '@mantine/hooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { GitBranchPlus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
@@ -14,6 +15,8 @@ import { useLocalStorage } from '@/utils';
 interface IWorkbenchViewProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const WorkbenchView: React.FC<IWorkbenchViewProps> = () => {
+  const { t } = useTranslation();
+
   const { data: pages } = useWorkspacePages();
 
   const { ref, width, height } = useElementSize();
@@ -61,7 +64,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = () => {
           >
             <GitBranchPlus size={64} />
             <div className="flex flex-col text-center">
-              <h2 className="font-bold">暂无标星视图</h2>
+              <h2 className="font-bold">{t('workbench.view.no-starred-view')}</h2>
             </div>
           </motion.div>
         )}

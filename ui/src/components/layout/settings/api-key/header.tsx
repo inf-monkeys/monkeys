@@ -3,6 +3,7 @@ import React, { useMemo, useState } from 'react';
 import { KeyedMutator } from 'swr';
 
 import { Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { createApiKey } from '@/apis/api-keys/api-key.ts';
@@ -21,6 +22,8 @@ interface IApiKeyHeaderProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const ApiKeyHeader: React.FC<IApiKeyHeaderProps> = ({ mutate }) => {
+  const { t } = useTranslation();
+
   const { team } = useVinesTeam();
   const { user } = useVinesUser();
 
@@ -32,14 +35,14 @@ export const ApiKeyHeader: React.FC<IApiKeyHeaderProps> = ({ mutate }) => {
   }, [visible]);
   const handleCreateApiKey = () => {
     if (desc.trim() === '') {
-      toast.warning('请输入用途描述');
+      toast.warning('settings.api-key.header.toast.description-empty');
       return;
     }
     setVisible(false);
     toast.promise(createApiKey(desc), {
-      success: '创建成功',
-      loading: '创建中......',
-      error: '创建失败',
+      success: t('common.create.success'),
+      loading: t('common.create.loading'),
+      error: t('common.create.error'),
       finally: () => {
         mutate();
       },
@@ -49,54 +52,62 @@ export const ApiKeyHeader: React.FC<IApiKeyHeaderProps> = ({ mutate }) => {
     <Card>
       <CardContent className="flex justify-between gap-4 p-3">
         <Avatar className="size-10">
-          <AvatarImage className="aspect-auto" src={team?.iconUrl} alt={team?.name ?? '未知团队'} />
+          <AvatarImage className="aspect-auto" src={team?.iconUrl} alt={team?.name ?? t('common.utils.unknown-team')} />
           <AvatarFallback className="rounded-none p-2 text-xs">
-            {(team?.name ?? '未知团队').substring(0, 2)}
+            {(team?.name ?? t('common.utils.unknown-team')).substring(0, 2)}
           </AvatarFallback>
         </Avatar>
         <div className="flex flex-1 flex-col justify-center">
-          <h3 className="line-clamp-1 font-semibold leading-tight">{team?.name ?? '未知团队'}</h3>
+          <h3 className="line-clamp-1 font-semibold leading-tight">{team?.name ?? t('common.utils.unknown-team')}</h3>
           <h3 className="line-clamp-1 text-xs">{team?.description ?? ''}</h3>
         </div>
         <div>
           <Dialog open={visible} onOpenChange={(val) => setVisible(val)}>
             <DialogTrigger asChild>
               <Button variant="solid" icon={<Plus />}>
-                创建 API 密钥
+                {t('settings.api-key.header.create.button')}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
-                <DialogTitle>创建 API 密钥</DialogTitle>
+                <DialogTitle>{t('settings.api-key.header.create.title')}</DialogTitle>
               </DialogHeader>
               <div className="grid gap-2">
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label>密钥归属</Label>
+                  <Label>{t('settings.api-key.header.create.belong.label')}</Label>
                   <Card className="col-span-3">
                     <CardContent className="p-3">
                       <div className="flex flex-col gap-2 text-sm">
                         <div className="grid grid-cols-4">
-                          <span>创建者</span>
+                          <span>{t('settings.api-key.header.create.belong.create-user')}</span>
                           <div className="col-span-3 flex gap-1">
                             <Avatar className="size-6">
-                              <AvatarImage className="aspect-auto" src={user?.photo} alt={user?.name ?? '未知用户'} />
+                              <AvatarImage
+                                className="aspect-auto"
+                                src={user?.photo}
+                                alt={user?.name ?? t('common.utils.unknown-user')}
+                              />
                               <AvatarFallback className="rounded-none p-2 text-xs">
-                                {(user?.name ?? '未知用户').substring(0, 2)}
+                                {(user?.name ?? t('common.utils.unknown-user')).substring(0, 2)}
                               </AvatarFallback>
                             </Avatar>
-                            <span>{user?.name ?? '未知用户'}</span>
+                            <span>{user?.name ?? t('common.utils.unknown-user')}</span>
                           </div>
                         </div>
                         <div className="grid grid-cols-4">
-                          <span>团队</span>
+                          <span>{t('settings.api-key.header.create.belong.create-team')}</span>
                           <div className="col-span-3 flex gap-1">
                             <Avatar className="size-6">
-                              <AvatarImage className="aspect-auto" src={team?.iconUrl} alt={team?.name ?? '未知团队'} />
+                              <AvatarImage
+                                className="aspect-auto"
+                                src={team?.iconUrl}
+                                alt={team?.name ?? t('common.utils.unknown-team')}
+                              />
                               <AvatarFallback className="rounded-none p-2 text-xs">
-                                {(team?.name ?? '未知团队').substring(0, 2)}
+                                {(team?.name ?? t('common.utils.unknown-team')).substring(0, 2)}
                               </AvatarFallback>
                             </Avatar>
-                            <span>{team?.name ?? '未知团队'}</span>
+                            <span>{team?.name ?? t('common.utils.unknown-team')}</span>
                           </div>
                         </div>
                       </div>
@@ -104,14 +115,19 @@ export const ApiKeyHeader: React.FC<IApiKeyHeaderProps> = ({ mutate }) => {
                   </Card>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label>用途描述</Label>
-                  <Input placeholder="请输入用途描述，16 字内" className="col-span-3" value={desc} onChange={setDesc} />
+                  <Label>{t('settings.api-key.header.create.description.label')}</Label>
+                  <Input
+                    placeholder={t('settings.api-key.header.create.description.placeholder')}
+                    className="col-span-3"
+                    value={desc}
+                    onChange={setDesc}
+                  />
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={() => setVisible(false)}>取消</Button>
+                <Button onClick={() => setVisible(false)}>{t('common.utils.cancel')}</Button>
                 <Button variant="solid" onClick={handleCreateApiKey}>
-                  创建密钥
+                  {t('common.utils.create')}
                 </Button>
               </DialogFooter>
             </DialogContent>

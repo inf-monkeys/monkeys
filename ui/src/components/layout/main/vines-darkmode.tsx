@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Moon, Sun, SunMoon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -16,6 +17,8 @@ import { useLocalStorage } from '@/utils';
 interface IVinesDarkModeProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const VinesDarkMode: React.FC<IVinesDarkModeProps> = ({ className }) => {
+  const { t } = useTranslation();
+
   const [mode, setLocalDarkMode] = useLocalStorage<string>('vines-ui-dark-mode', 'auto', false);
 
   const isAutoMode = mode === 'auto';
@@ -52,7 +55,7 @@ export const VinesDarkMode: React.FC<IVinesDarkModeProps> = ({ className }) => {
               className="flex gap-2"
             >
               <SunMoon size={16} strokeWidth={1.5} />
-              <span>跟随系统</span>
+              <span>{t('common.dark-mode-selector.auto')}</span>
             </DropdownMenuCheckboxItem>
             <DropdownMenuCheckboxItem
               checked={isLightMode}
@@ -61,7 +64,7 @@ export const VinesDarkMode: React.FC<IVinesDarkModeProps> = ({ className }) => {
               className="flex gap-2"
             >
               <Sun size={16} strokeWidth={1.5} />
-              <span>浅色模式</span>
+              <span>{t('common.dark-mode-selector.light')}</span>
             </DropdownMenuCheckboxItem>
             <DropdownMenuCheckboxItem
               checked={isDarkMode}
@@ -70,12 +73,18 @@ export const VinesDarkMode: React.FC<IVinesDarkModeProps> = ({ className }) => {
               className="flex gap-2"
             >
               <Moon size={16} strokeWidth={1.5} />
-              <span>深色模式</span>
+              <span>{t('common.dark-mode-selector.dark')}</span>
             </DropdownMenuCheckboxItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
-      <TooltipContent>{isAutoMode ? '跟随系统' : isDarkMode ? '深色模式' : '浅色模式'}</TooltipContent>
+      <TooltipContent>
+        {isAutoMode
+          ? t('common.dark-mode-selector.auto')
+          : isDarkMode
+            ? t('common.dark-mode-selector.dark')
+            : t('common.dark-mode-selector.light')}
+      </TooltipContent>
     </Tooltip>
   );
 };

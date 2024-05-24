@@ -4,6 +4,7 @@ import { useSWRConfig } from 'swr';
 
 import { ColorPicker } from '@mantine/core';
 import { set } from 'lodash';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { updateTeam } from '@/apis/authz/team';
@@ -17,6 +18,8 @@ import usePaletteStore from '@/store/usePaletteStore.ts';
 interface ITeamPrimaryColorProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const TeamPrimaryColor: React.FC<ITeamPrimaryColorProps> = () => {
+  const { t } = useTranslation();
+
   const { mutate } = useSWRConfig();
   const { team } = useVinesTeam();
 
@@ -32,22 +35,22 @@ export const TeamPrimaryColor: React.FC<ITeamPrimaryColorProps> = () => {
 
   const handleUpdate = () => {
     if (!team) {
-      toast.error('团队不存在');
+      toast.error(t('common.toast.team-not-found'));
       return;
     }
     set(team, 'customTheme.primaryColor', tempColor);
     toast.promise(updateTeam({ customTheme: team.customTheme }), {
-      loading: '正在更新主题色',
-      success: '主题色更新成功',
-      error: '主题色更新失败',
+      loading: t('settings.theme.toast.update.loading'),
+      success: t('settings.theme.toast.update.success'),
+      error: t('settings.theme.toast.update.error'),
     });
   };
 
   const handleCreateTheme = (name: string, color: string) => {
     toast.promise(trigger({ name, primaryColor: color }), {
-      loading: '正在添加主题',
-      success: '主题添加成功',
-      error: '主题添加失败',
+      loading: t('settings.theme.toast.create.loading'),
+      success: t('settings.theme.toast.create.success'),
+      error: t('settings.theme.toast.create.error'),
       finally: () => void mutate('/api/theme'),
     });
   };
@@ -55,8 +58,8 @@ export const TeamPrimaryColor: React.FC<ITeamPrimaryColorProps> = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>团队主题色</CardTitle>
-        <CardDescription>你可以在这里设置团队的主题色，系统将自动生成对应的配色方案</CardDescription>
+        <CardTitle>{t('settings.theme.team-primary-color.title')}</CardTitle>
+        <CardDescription>{t('settings.theme.team-primary-color.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         <ColorPicker
@@ -70,19 +73,19 @@ export const TeamPrimaryColor: React.FC<ITeamPrimaryColorProps> = () => {
         />
       </CardContent>
       <CardFooter className="flex items-center justify-between">
-        <span className="text-xs text-gray-10">预览状态下将不会保存</span>
+        <span className="text-xs text-gray-10">{t('settings.theme.team-primary-color.tip')}</span>
         <div className="flex gap-2">
           <InfoEditor
-            title="保存到主题列表"
-            placeholder="输入主题名称，16 字以内"
+            title={t('settings.theme.team-primary-color.operate.save.title')}
+            placeholder={t('settings.theme.team-primary-color.operate.save.placeholder')}
             onFinished={(val) => handleCreateTheme(val, value)}
           >
             <Button variant="outline" size="small">
-              保存到列表
+              {t('settings.theme.team-primary-color.operate.save.button')}
             </Button>
           </InfoEditor>
           <Button variant="outline" size="small" onClick={handleUpdate}>
-            更新
+            {t('common.utils.update')}
           </Button>
         </div>
       </CardFooter>

@@ -14,6 +14,8 @@ import { WorkflowCustomTriggerInvokeController } from './workflow.custom-trigger
 import { WorkflowCustomTriggerInvokeService } from './workflow.custom-trigger-invoke.service';
 import { WorkflowExecutionController } from './workflow.execution.controller';
 import { WorkflowExecutionService } from './workflow.execution.service';
+import { WorkflowLogsController } from './workflow.log.controller';
+import { WorkflowLogService } from './workflow.log.service';
 import { WorkflowPageController } from './workflow.page.controller';
 import { WorkflowPageService } from './workflow.page.service';
 import { WorkflowTriggerController } from './workflow.trigger.controller';
@@ -34,6 +36,7 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     WorkflowChatSessionController,
     WorkflowPageController,
     WorkflowCustomTriggerInvokeController,
+    WorkflowLogsController,
   ],
   providers: [
     WorkflowCrudService,
@@ -46,6 +49,7 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     WorkflowChatSessionService,
     WorkflowPageService,
     WorkflowCustomTriggerInvokeService,
+    WorkflowLogService,
   ],
   imports: [ConductorModule, TypeOrmModule.forFeature([WorkflowPageEntity]), ToolsModule],
   exports: [WorkflowCrudService, WorkflowExecutionService],

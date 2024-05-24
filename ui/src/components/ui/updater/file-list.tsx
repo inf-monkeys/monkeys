@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { FileWithPath } from '@mantine/dropzone';
 import { set } from 'lodash';
 import { CheckCircle2, FileCheck, FileClock, FileSearch, FileX2, Loader2, UploadCloud, XCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { createMediaFile, getResourceByMd5 } from '@/apis/resources';
@@ -55,6 +56,8 @@ export const FileList: React.FC<IFilesProps> = ({
   onFinished,
   saveToResource = true,
 }) => {
+  const { t } = useTranslation();
+
   const [list, setList] = useState<IFile[]>([]);
   const [hiddenList, setHiddenList] = useState<string[]>([]);
 
@@ -130,7 +133,7 @@ export const FileList: React.FC<IFilesProps> = ({
     if (!isWaitToUpload) return;
     const filteredList = finalLists.filter((it) => !/(https|http):\/\/[^\s/]+\.[^\s/]+\/\S+\.\w{2,5}/g.test(it.path));
     if (!filteredList.length) {
-      toast.error('没有需要上传的文件');
+      toast.error(t('components.ui.updater.file-list.toast.no-file'));
       return;
     }
     setIsUploading(true);
@@ -215,14 +218,25 @@ export const FileList: React.FC<IFilesProps> = ({
       <div className="flex max-h-36 w-full">
         <ScrollArea className="grow pr-4" ref={node}>
           <Table>
-            <TableCaption className="text-xs">{remaining ? `可继续上传 ${remaining} 份文件` : '到底了~'}</TableCaption>
+            <TableCaption className="text-xs">
+              {remaining
+                ? t('components.ui.updater.file-list.info-table.caption.remaining', {
+                    remaining,
+                    count: remaining,
+                  })
+                : t('components.ui.updater.file-list.info-table.caption.none')}
+            </TableCaption>
             <TableHeader>
               <TableRow className="[&_th]:text-center">
-                <TableHead className="w-32 !text-left">文件名</TableHead>
-                <TableHead className="w-11">类型</TableHead>
-                <TableHead className="w-11">大小</TableHead>
-                <TableHead className="w-11">状态</TableHead>
-                <TableHead className="w-11">操作</TableHead>
+                <TableHead className="w-32 !text-left">
+                  {t('components.ui.updater.file-list.info-table.columns.name')}
+                </TableHead>
+                <TableHead className="w-11">{t('components.ui.updater.file-list.info-table.columns.type')}</TableHead>
+                <TableHead className="w-11">{t('components.ui.updater.file-list.info-table.columns.size')}</TableHead>
+                <TableHead className="w-11">{t('components.ui.updater.file-list.info-table.columns.status')}</TableHead>
+                <TableHead className="w-11">
+                  {t('components.ui.updater.file-list.info-table.columns.operate')}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -258,9 +272,11 @@ export const FileList: React.FC<IFilesProps> = ({
                   <tr>
                     <td>
                       <TooltipContent align="start">
-                        文件名：{name}
+                        {t('components.ui.updater.file-list.info-tooltip.name') + name}
                         <br />
-                        MD5: {!progress ? '正在等待计算中' : md5 ?? `正在计算中（${progress}%）`}
+                        {t('components.ui.updater.file-list.info-tooltip.md5.index') + !progress
+                          ? t('components.ui.updater.file-list.info-tooltip.md5.waiting')
+                          : md5 ?? t('components.ui.updater.file-list.info-tooltip.md5.in-progress', { progress })}
                       </TooltipContent>
                     </td>
                   </tr>
@@ -282,26 +298,36 @@ export const FileList: React.FC<IFilesProps> = ({
           {!hasFile ? (
             <>
               <FileClock size={32} />
-              <p className="text-xs">等待文件中</p>
+              <p className="text-xs">
+                {t('components.ui.updater.file-list.status.waiting-for-file', { count: limit ?? 2 })}
+              </p>
             </>
           ) : finalLists
               .filter((it) => !/(https|http):\/\/[^\s/]+\.[^\s/]+\/\S+\.\w{2,5}/g.test(it.path))
               .every((it) => it.status === 'success') ? (
             <>
               <FileCheck size={32} />
-              <p className="text-xs">上传成功</p>
+              <p className="text-xs">{t('components.ui.updater.file-list.status.upload-successful')}</p>
             </>
           ) : isWaitToUpload && !isUploading ? (
             <>
               <UploadCloud size={32} />
-              <p className="text-xs">等待操作上传</p>
-              <p className="text-xxs -mt-1.5 opacity-50">（点此上传）</p>
+              <p className="text-xs">{t('components.ui.updater.file-list.status.waiting-for-uploading')}</p>
+              <p className="text-xxs -mt-1.5 opacity-50">
+                {t('components.ui.updater.file-list.status.waiting-for-uploading-description')}
+              </p>
             </>
           ) : (
             <>
               <Loader2 size={32} className="animate-spin" />
               <p className="text-xs">
-                正在{finalLists.some((it) => it.status === 'uploading') || isUploading ? '上传' : '计算'}文件
+                {t('components.ui.updater.file-list.status.status.hint', {
+                  operate:
+                    finalLists.some((it) => it.status === 'uploading') || isUploading
+                      ? t('components.ui.updater.file-list.status.status.upload')
+                      : t('components.ui.updater.file-list.status.status.calculate'),
+                  count: limit ?? 2,
+                })}
               </p>
             </>
           )}

@@ -4,6 +4,7 @@ import { useNavigate } from '@tanstack/react-router';
 
 import { get } from 'lodash';
 import { LogOut, UserRoundPlus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { IUserProps, User } from '@/components/layout/main/sidebar/account/user.tsx';
@@ -23,6 +24,8 @@ import VinesEvent from '@/utils/events.ts';
 import { maskEmail, maskPhone } from '@/utils/maskdata.ts';
 
 export const Account: React.FC = () => {
+  const { t } = useTranslation();
+
   const navigate = useNavigate({ from: Route.fullPath });
 
   const [tokens] = useLocalStorage<IUserTokens>('vines-tokens', {});
@@ -73,13 +76,13 @@ export const Account: React.FC = () => {
         <SelectItem className="cursor-pointer" value="login">
           <div className="flex items-center justify-center gap-2">
             <UserRoundPlus strokeWidth={1.5} size={16} />
-            <p>登录其他账号</p>
+            <p>{t('auth.users.login-other')}</p>
           </div>
         </SelectItem>
         <SelectItem className="cursor-pointer" value="logout">
           <div className="flex items-center justify-center gap-2 text-red-10">
             <LogOut strokeWidth={1.5} size={16} />
-            <p>退出登录</p>
+            <p>{t('auth.users.logout')}</p>
           </div>
         </SelectItem>
       </SelectContent>

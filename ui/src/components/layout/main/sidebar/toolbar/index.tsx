@@ -3,18 +3,25 @@ import React from 'react';
 import { useNavigate } from '@tanstack/react-router';
 
 import { UserCog } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { Button } from '@/components/ui/button';
+import { I18nSelector } from '@/components/ui/i18n-selector';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Route } from '@/pages/login';
 
 export const Toolbar: React.FC = () => {
+  const { t } = useTranslation();
+
   const navigate = useNavigate({ from: Route.fullPath });
 
   return (
     <div className="flex justify-between">
-      <VinesDarkMode />
+      <div className="flex items-center gap-2">
+        <VinesDarkMode />
+        <I18nSelector />
+      </div>
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
@@ -28,7 +35,7 @@ export const Toolbar: React.FC = () => {
             }}
           />
         </TooltipTrigger>
-        <TooltipContent>用户与团队配置</TooltipContent>
+        <TooltipContent>{t('components.layout.main.sidebar.toolbar.settings-tooltip')}</TooltipContent>
       </Tooltip>
     </div>
   );

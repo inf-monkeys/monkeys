@@ -1,6 +1,5 @@
 import { MQ_TOKEN } from '@/common/common.module';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
-import { logger } from '@/common/logger';
 import { Mq } from '@/common/mq';
 import { IRequest } from '@/common/typings/request';
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
@@ -43,7 +42,6 @@ export class WorkflowOpenAICompatibleController {
       res.setHeader('content-type', 'text/event-stream');
       res.status(201);
       const key = TOOL_STREAM_RESPONSE_TOPIC(workflowInstanceId);
-      logger.info('subscribing to key: ', key);
       this.mq.subscribe(key, (_, message: string) => {
         res.write(message);
         // TODO: listen on workflow finished event

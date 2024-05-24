@@ -1,9 +1,10 @@
 import React from 'react';
 
-import { Link } from '@tanstack/react-router';
 import { useSWRConfig } from 'swr';
+import { Link } from '@tanstack/react-router';
 
 import { Star } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { toggleWorkspacePagePin } from '@/apis/pages';
@@ -17,18 +18,20 @@ interface IWorkbenchViewHeaderProps extends React.ComponentPropsWithoutRef<'div'
 }
 
 export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page }) => {
+  const { t } = useTranslation();
+
   const { mutate } = useSWRConfig();
   const workflow = page?.workflow;
 
   const handleUnPin = () => {
     if (!page?.id) return;
     toast.promise(toggleWorkspacePagePin(page.id, false), {
-      loading: `正在取消标星中...`,
+      loading: t('common.operate.loading'),
       success: () => {
         void mutate('/api/pages');
-        return `取消标星成功`;
+        return t('common.operate.success');
       },
-      error: `取消标星失败`,
+      error: t('common.operate.error'),
     });
   };
 
@@ -38,7 +41,7 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page 
         <VinesIcon size="sm">{workflow?.iconUrl}</VinesIcon>
         <div className="flex flex-col gap-0.5">
           <h1 className="font-bold leading-tight">{page?.displayName}</h1>
-          <span className="text-xxs">{workflow?.displayName ?? '未命名应用'}</span>
+          <span className="text-xxs">{workflow?.displayName ?? t('common.utils.untitled')}</span>
         </div>
       </div>
       <div className="flex gap-4">
@@ -52,13 +55,13 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page 
               onClick={handleUnPin}
             />
           </TooltipTrigger>
-          <TooltipContent>取消标星</TooltipContent>
+          <TooltipContent>{t('workbench.view.header.delete')}</TooltipContent>
         </Tooltip>
         <Link
           to="/$teamId/workspace/$workflowId/$pageId"
           params={{ workflowId: workflow?.workflowId, pageId: page?.id }}
         >
-          <Button variant="outline">进入视图</Button>
+          <Button variant="outline">{t('workbench.view.header.enter')}</Button>
         </Link>
       </div>
     </header>

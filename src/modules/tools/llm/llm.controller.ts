@@ -14,6 +14,7 @@ import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { CreateChatCompletionsDto } from './dto/req/create-chat-compltion.dto';
 import { CreateCompletionsDto } from './dto/req/create-compltions.dto';
+import { GenerateTextByLlmDto } from './dto/req/generate-text-by-llm.dto';
 import { LlmService, getModels } from './llm.service';
 import { CHAT_TOOL_OPENAPI_PATH } from './llm.swagger';
 
@@ -31,6 +32,7 @@ const ErrorMessage: { [key: string]: string } = {
 export const LLM_NAMESPACE = 'llm';
 export const LLM_COMPLETION_TOOL = 'completions';
 export const LLM_CHAT_COMPLETION_TOOL = 'chat_completions';
+export const LLM_GENERATE_TEXT_TOOL = 'generate_text';
 
 @Controller('/llm-tool')
 @ApiTags('大语言模型')
@@ -70,7 +72,7 @@ export class LlmController {
     description: '文本补全',
   })
   @MonkeyToolName(LLM_COMPLETION_TOOL)
-  @MonkeyToolDisplayName('大语言模型单轮对话')
+  @MonkeyToolDisplayName('单轮对话（大语言模型）')
   @MonkeyToolCategories(['gen-text'])
   @MonkeyToolIcon('emoji:💬:#c15048')
   @MonkeyToolInput([
@@ -257,7 +259,6 @@ export class LlmController {
       res.setHeader('content-type', answer.headers['content-type']);
       res.status(200);
       answer.data.on('data', (chunk: any) => {
-        console.log(chunk.toString());
         res.write(chunk);
       });
       answer.data.on('end', () => {
@@ -271,13 +272,171 @@ export class LlmController {
     }
   }
 
+  @Post('/chat/generate-text')
+  @ApiOperation({
+    summary: '文本生成',
+    description: '文本生成',
+  })
+  @MonkeyToolName(LLM_GENERATE_TEXT_TOOL)
+  @MonkeyToolDisplayName('文本生成（大语言模型）')
+  @MonkeyToolCategories(['gen-text'])
+  @MonkeyToolIcon('emoji:💬:#c15048')
+  @MonkeyToolInput([
+    {
+      displayName: '大语言模型',
+      name: 'model',
+      type: 'options',
+      options: getModels(LlmModelEndpointType.CHAT_COMPLETIONS),
+      required: true,
+    },
+    {
+      displayName: '系统预制 Prompt',
+      name: 'systemPrompt',
+      type: 'string',
+      required: false,
+    },
+    {
+      displayName: '用户消息',
+      name: 'userMessage',
+      type: 'string',
+      required: true,
+    },
+    {
+      displayName: '知识库上下文',
+      name: 'knowledgeBase',
+      type: 'string',
+      typeOptions: {
+        assetType: 'knowledge-base',
+      },
+    },
+    {
+      displayName: '工具列表',
+      name: 'tools',
+      type: 'string',
+      typeOptions: {
+        assetType: 'tools',
+        multipleValues: true,
+      },
+    },
+    {
+      displayName: '最大 Token 数',
+      name: 'max_tokens',
+      type: 'number',
+      required: false,
+      description: '设置最大 Token 数，如果消息 Token 数超过 max_tokens，将会被截断',
+    },
+    {
+      displayName: 'temperature（随机性程度）',
+      name: 'temperature',
+      type: 'number',
+      default: 0.7,
+      required: false,
+      description: '填写 0-1 的浮点数\n用于生成文本时，模型输出的随机性程度。较高的温度会导致更多的随机性，可能产生更有创意的回应。而较低的温度会使模型的输出更加确定，更倾向于选择高概率的词语。',
+    },
+    {
+      displayName: 'presence_penalty（重复惩罚）',
+      name: 'presence_penalty',
+      type: 'number',
+      default: 0.5,
+      required: false,
+      description: '填写 0-1 的浮点数\n用于惩罚模型生成重复的词语，从而使生成的文本更加多样化。',
+    },
+    {
+      displayName: 'frequency_penalty（频率惩罚）',
+      name: 'frequency_penalty',
+      type: 'number',
+      default: 0.5,
+      required: false,
+      description: '填写 0-1 的浮点数\n用于惩罚模型生成低频词语，从而使生成的文本更加多样化。',
+    },
+    {
+      displayName: '数据响应格式',
+      name: 'response_format',
+      type: 'options',
+      default: 'text',
+      description:
+        '当设置为 json_object 时，必须在 system 或者 user message 中手动要求大语言模型返回 json 格式数据，详情请见：https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format',
+      options: [
+        {
+          name: 'text',
+          value: 'text',
+        },
+        {
+          name: 'json_object',
+          value: 'json_object',
+        },
+      ],
+    },
+  ])
+  @MonkeyToolOutput([
+    {
+      name: 'message',
+      displayName: '大语言模型返回消息',
+      type: 'string',
+      required: true,
+    },
+    {
+      name: 'usage',
+      displayName: 'Token Usage',
+      type: 'json',
+      properties: [
+        {
+          name: 'prompt_tokens',
+          displayName: 'Prompt Tokens',
+          type: 'number',
+        },
+        {
+          name: 'completion_tokens',
+          displayName: 'Completion Tokens',
+          type: 'number',
+        },
+        {
+          name: 'total_tokens',
+          displayName: 'Total Tokens',
+          type: 'number',
+        },
+      ],
+    },
+  ])
+  @MonkeyToolExtra({
+    estimateTime: 3,
+  })
+  public async generateTextByLlm(@Res() res: Response, @Body() body: GenerateTextByLlmDto) {
+    if (!body.userMessage) {
+      return res.status(400).send('userMessage is required');
+    }
+    await this.service.createChatCompelitions(
+      res,
+      {
+        messages: [
+          {
+            role: 'user',
+            content: body.userMessage,
+          },
+        ],
+        model: body.model,
+        temperature: body.temperature,
+        frequency_penalty: body.frequency_penalty,
+        presence_penalty: body.presence_penalty,
+        stream: false,
+        systemPrompt: body.systemPrompt,
+        tools: body.tools,
+        knowledgeBase: body.knowledgeBase,
+        response_format: body.response_format,
+      },
+      {
+        apiResponseType: 'simple',
+      },
+    );
+  }
+
   @Post('/chat/completions')
   @ApiOperation({
     summary: '多轮对话',
     description: '多轮对话',
   })
   @MonkeyToolName(LLM_CHAT_COMPLETION_TOOL)
-  @MonkeyToolDisplayName('大语言模型多轮对话')
+  @MonkeyToolDisplayName('多轮对话（大语言模型）')
   @MonkeyToolCategories(['gen-text'])
   @MonkeyToolIcon('emoji:💬:#c15048')
   @MonkeyToolInput([
@@ -314,6 +473,7 @@ export class LlmController {
       type: 'string',
       typeOptions: {
         assetType: 'tools',
+        multipleValues: true,
       },
     },
     {
@@ -496,17 +656,23 @@ export class LlmController {
    */
   public async createChatCompletions(@Res() res: Response, @Body() body: CreateChatCompletionsDto) {
     const { stream = false } = body;
-    await this.service.createChatCompelitions(res, {
-      messages: body.messages,
-      model: body.model,
-      temperature: body.temperature,
-      frequency_penalty: body.frequency_penalty,
-      presence_penalty: body.presence_penalty,
-      stream,
-      systemPrompt: body.systemPrompt,
-      tools: body.tools,
-      knowledgeBase: body.knowledgeBase,
-      response_format: body.response_format,
-    });
+    await this.service.createChatCompelitions(
+      res,
+      {
+        messages: body.messages,
+        model: body.model,
+        temperature: body.temperature,
+        frequency_penalty: body.frequency_penalty,
+        presence_penalty: body.presence_penalty,
+        stream,
+        systemPrompt: body.systemPrompt,
+        tools: body.tools,
+        knowledgeBase: body.knowledgeBase,
+        response_format: body.response_format,
+      },
+      {
+        apiResponseType: 'full',
+      },
+    );
   }
 }

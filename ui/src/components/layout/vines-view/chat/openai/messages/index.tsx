@@ -1,15 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import { useClipboard } from '@mantine/hooks';
 import { isEmpty } from 'lodash';
+import { Copy, CopyCheck } from 'lucide-react';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 
 import { AutoScroll } from '@/components/layout/vines-view/chat/messages/virtualized/auto-scroll.tsx';
 import { VinesRealTimeChatMessage } from '@/components/layout/vines-view/chat/messages/virtualized/chat-message/real-time.tsx';
 import { IMessage } from '@/components/layout/vines-view/chat/openai/use-chat.ts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card.tsx';
+import { VinesMarkdown } from '@/components/ui/markdown';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
-import { cn } from '@/utils';
 
 interface IVirtualizedListProps {
   data: IMessage[];
@@ -33,6 +37,8 @@ export const VirtualizedList: React.FC<IVirtualizedListProps> = ({ data, isLoadi
   const overScan = window.innerHeight;
 
   const LastItemIndex = data.length - 1;
+
+  const clipboard = useClipboard();
 
   return (
     <main className="relative flex h-full flex-col">
@@ -65,14 +71,26 @@ export const VirtualizedList: React.FC<IVirtualizedListProps> = ({ data, isLoadi
               ) : (
                 <div className="group flex flex-row items-start gap-4">
                   <VinesIcon size="sm">{botPhoto}</VinesIcon>
-                  <div
-                    className={cn(
-                      'flex max-w-[calc(100%-3rem)] flex-col gap-1',
-                      isLoading && LastItemIndex === index && 'vines-result-streaming',
-                    )}
-                  >
-                    <Card className="p-4 text-sm">{content + (isEmptyMessage ? EMPTY_CONTENT : '')}</Card>
-                  </div>
+                  <Card className="relative max-w-[calc(100%-3rem)] p-4 text-sm">
+                    <VinesMarkdown
+                      className={isLoading && LastItemIndex === index ? 'vines-result-streaming' : ''}
+                      allowHtml
+                    >
+                      {content + (isEmptyMessage ? EMPTY_CONTENT : '')}
+                    </VinesMarkdown>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          icon={clipboard.copied ? <CopyCheck /> : <Copy />}
+                          variant="outline"
+                          size="small"
+                          className="absolute -bottom-1 -right-9 flex scale-80 gap-2 p-1 opacity-0 transition-opacity group-hover:opacity-100"
+                          onClick={() => clipboard.copy(content)}
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent>复制</TooltipContent>
+                    </Tooltip>
+                  </Card>
                 </div>
               )}
             </div>

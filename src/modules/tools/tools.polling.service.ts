@@ -1,10 +1,10 @@
 import { CacheManager } from '@/common/cache';
 import { CACHE_TOKEN, MQ_TOKEN } from '@/common/common.module';
 import { conductorClient } from '@/common/conductor';
-import { config } from '@/common/config';
+import { LlmModelEndpointType, config } from '@/common/config';
 import { logger } from '@/common/logger';
 import { Mq } from '@/common/mq';
-import { ExtendedToolDefinition } from '@/common/utils/define-tool';
+import { readIncomingMessage } from '@/common/utils/stream';
 import { sleep } from '@/common/utils/utils';
 import { ToolsEntity } from '@/database/entities/tools/tools.entity';
 import { ComfyuiWorkflowRepository } from '@/database/repositories/comfyui-workflow.repository';
@@ -26,7 +26,6 @@ export const TOOL_STREAM_RESPONSE_TOPIC = (workflowInstanceId: string) => {
 
 @Injectable()
 export class ToolsPollingService {
-  BUILT_IN_TOOLS: ExtendedToolDefinition[] = [];
   constructor(
     private readonly toolsRepository: ToolsRepository,
     private readonly toolsRegistryService: ToolsRegistryService,
@@ -49,50 +48,6 @@ export class ToolsPollingService {
     }
 
     return resultUrl;
-  }
-
-  private async getBuiltInTools() {
-    if (this.BUILT_IN_TOOLS.length > 0) {
-      return this.BUILT_IN_TOOLS;
-    } else {
-      const tools = await this.toolsRegistryService.getBuiltInTools();
-      this.BUILT_IN_TOOLS = tools;
-      return tools;
-    }
-  }
-
-  private async isBuiltInTool(toolName: string) {
-    const tools = await this.getBuiltInTools();
-    return tools.find((tool) => tool.name === toolName);
-  }
-
-  private readIncomingMessage(
-    message: IncomingMessage,
-    callbacks?: {
-      onDataCallback?: (chunk: any) => void;
-      onEndCallback?: (result: any) => void;
-    },
-  ) {
-    const { onDataCallback, onEndCallback } = callbacks || {};
-    return new Promise<string>((resolve, reject) => {
-      let responseData: string = '';
-      message.on('data', (chunk) => {
-        responseData += chunk;
-        if (onDataCallback) {
-          onDataCallback(chunk);
-        }
-      });
-      message.on('end', () => {
-        if (onEndCallback) {
-          onEndCallback(responseData);
-        }
-        resolve(responseData);
-      });
-      message.on('error', (error) => {
-        console.error('Error receiving response data:', error);
-        reject(error);
-      });
-    });
   }
 
   private convertToComfyuiInputData(originalData: { [x: string]: any }) {
@@ -135,8 +90,18 @@ export class ToolsPollingService {
     return originalData;
   }
 
+  private isLlmChatTool(toolName: string): LlmModelEndpointType {
+    if (toolName === `${LLM_NAMESPACE}:${LLM_CHAT_COMPLETION_TOOL}`) {
+      return LlmModelEndpointType.CHAT_COMPLETIONS;
+    }
+    if (toolName === `${LLM_NAMESPACE}:${LLM_COMPLETION_TOOL}`) {
+      return LlmModelEndpointType.COMPLITIONS;
+    }
+    return null;
+  }
+
   private getToolOutputAsConfig(tool: ToolsEntity, inputData: WorkerInputData): 'json' | 'stream' {
-    if (tool.name === `${LLM_NAMESPACE}:${LLM_COMPLETION_TOOL}` || tool.name === `${LLM_NAMESPACE}:${LLM_CHAT_COMPLETION_TOOL}`) {
+    if (this.isLlmChatTool(tool.name)) {
       const { stream } = inputData;
       return stream ? 'stream' : 'json';
     }
@@ -161,7 +126,7 @@ export class ToolsPollingService {
       };
     }
 
-    const builtInTool = await this.isBuiltInTool(__toolName);
+    const builtInTool = await this.toolsRegistryService.isBuiltInTool(__toolName);
     if (builtInTool) {
       try {
         const result = await builtInTool.handler(rest, {
@@ -203,6 +168,7 @@ export class ToolsPollingService {
         status: 'FAILED',
       };
     }
+    const llmChatTool = this.isLlmChatTool(__toolName);
     const outputAs = this.getToolOutputAsConfig(tool, inputData);
 
     const { method, path } = apiInfo;
@@ -244,6 +210,8 @@ export class ToolsPollingService {
       'x-monkeys-appid': __context?.appId,
       'x-monkeys-userid': __context?.userId,
       'x-monkeys-teamid': __context?.teamId,
+      'x-monkeys-workflow-instanceid': task.workflowInstanceId,
+      'x-monkeys-workflow-taskid': task.taskId,
     };
     switch (authType) {
       case AuthType.none:
@@ -297,18 +265,63 @@ export class ToolsPollingService {
           status: 'COMPLETED',
         };
       } else if (responseType === 'stream') {
+        let llmOutput = '';
         const data = res.data as IncomingMessage;
-        await this.readIncomingMessage(data, {
+        await readIncomingMessage(data, {
           onDataCallback: (chunk) => {
-            this.mq.publish(TOOL_STREAM_RESPONSE_TOPIC(task.workflowInstanceId), chunk.toString());
+            chunk = chunk.toString();
+            this.mq.publish(TOOL_STREAM_RESPONSE_TOPIC(task.workflowInstanceId), chunk);
+            if (llmChatTool === LlmModelEndpointType.CHAT_COMPLETIONS) {
+              const cleanedMessageStr = chunk.replace('data: ', '').trim();
+              try {
+                const parsedMessage = JSON.parse(cleanedMessageStr);
+                const { choices = [] } = parsedMessage;
+                const content = choices[0]?.delta?.content;
+                llmOutput += content;
+              } catch (error) {}
+            } else if (llmChatTool === LlmModelEndpointType.COMPLITIONS) {
+              const chunks = chunk.split('\n\n');
+              for (const chunkItem of chunks) {
+                try {
+                  const cleanedMessageStr = chunkItem.replace('data: ', '').trim();
+                  const parsedMessage = JSON.parse(cleanedMessageStr);
+                  const { choices = [] } = parsedMessage;
+                  const content = choices[0]?.text;
+                  llmOutput += content;
+                } catch (error) {}
+              }
+            }
           },
         });
         logger.info(`Execute worker success: ${__toolName}`);
+        let outputData: { [x: string]: any } = {
+          stream: true,
+          message: 'This tool outputs stream data, can not displayed',
+        };
+        if (llmChatTool === LlmModelEndpointType.CHAT_COMPLETIONS) {
+          const randomChatCmplId = 'chatcmpl-' + Math.random().toString(36).substr(2, 16);
+          outputData = {
+            id: randomChatCmplId,
+            object: 'chat.completion',
+            created: Math.floor(Date.now() / 1000),
+            model: inputData.model,
+            choices: [{ index: 0, message: { role: 'assistant', content: llmOutput }, logprobs: null, finish_reason: 'stop' }],
+            usage: { prompt_tokens: undefined, completion_tokens: undefined, total_tokens: undefined },
+            system_fingerprint: null,
+          };
+        } else if (llmChatTool === LlmModelEndpointType.COMPLITIONS) {
+          const randomCmplId = 'cmpl-' + Math.random().toString(36).substr(2, 16);
+          outputData = {
+            id: randomCmplId,
+            object: 'text_completion',
+            created: Math.floor(Date.now() / 1000),
+            model: inputData.model,
+            choices: [{ text: llmOutput, index: 0, logprobs: null, finish_reason: 'length' }],
+            usage: { prompt_tokens: 1, completion_tokens: 16, total_tokens: 17 },
+          };
+        }
         return {
-          outputData: {
-            stream: true,
-            message: 'This tool outputs stream data, can not displayed',
-          },
+          outputData: outputData,
           status: 'COMPLETED',
         };
       }
@@ -327,7 +340,7 @@ export class ToolsPollingService {
         if (outputAs === 'stream') {
           const data = error?.response?.data as IncomingMessage;
           let realData = '';
-          await this.readIncomingMessage(data, {
+          await readIncomingMessage(data, {
             onEndCallback(result) {
               realData = result;
             },

@@ -18,15 +18,16 @@ import {
   CredentialEndpointConfig,
   CredentialEndpointType,
   ManifestJson,
-  RegisterWorkerParams,
+  RegisterToolParams,
   SchemaVersion,
+  ToolImportType,
   TriggerEndpointConfig,
   TriggerEndpointType,
 } from '../../common/typings/tools';
 import { CredentialsRepository } from '../../database/repositories/credential.repository';
 import { ToolsRepository } from '../../database/repositories/tools.repository';
 import { COMFYUI_INFER_TOOL } from './consts';
-import { parseOpenApiSpecAsTools } from './utils/openapi-parser';
+import { OpenAPIParserOptions, parseOpenApiSpecAsTools } from './utils/openapi-parser';
 
 @Injectable()
 export class ToolsRegistryService {
@@ -83,6 +84,11 @@ export class ToolsRegistryService {
     if (data.credentials?.length) {
       this.validateCredentialEndpoints(data.credentialEndpoints);
     }
+    if (data.logEndpoint) {
+      if (!data.logEndpoint.includes('{taskId}')) {
+        throw new Error('Error import tool: logEndpoint must include {taskId}');
+      }
+    }
   }
 
   private validateTriggerEndpoints(triggerEndpoints: TriggerEndpointConfig[]) {
@@ -128,12 +134,13 @@ export class ToolsRegistryService {
   private async parseOpenapiAsTools(
     namespace: string,
     specUrl: string,
+    options?: OpenAPIParserOptions,
   ): Promise<{
     servers: ServerObject[];
     tools: BlockDefinition[];
   }> {
     const { data: specData } = await axios.get<OpenAPIObject>(specUrl);
-    const tools = parseOpenApiSpecAsTools(namespace, specData);
+    const tools = parseOpenApiSpecAsTools(namespace, specData, options);
     return {
       servers: specData.servers,
       tools,
@@ -149,8 +156,7 @@ export class ToolsRegistryService {
     }
   }
 
-  public async registerToolsServer(params: RegisterWorkerParams) {
-    const { manifestUrl } = params;
+  private async registerToolsServerByManifest(manifestUrl: string) {
     const { data: manifestData } = await axios.get<ManifestJson>(manifestUrl);
     await this.validateManifestJson(manifestData);
 
@@ -195,6 +201,29 @@ export class ToolsRegistryService {
     return tools;
   }
 
+  private async regsieterToolsServerByOpenapiSpec(namespace: string, openapiSpecUrl: string) {
+    const { tools } = await this.parseOpenapiAsTools(namespace, openapiSpecUrl, {
+      filterByXMonkeyToolNameTag: false,
+    });
+    await this.validateToolsParsed(tools);
+
+    await this.toolsRepository.createOrUpdateTools(namespace, tools);
+    return tools;
+  }
+
+  public async registerToolsServer(params: RegisterToolParams) {
+    const { importType } = params;
+    if (importType === ToolImportType.manifest) {
+      const { manifestUrl } = params;
+      return await this.registerToolsServerByManifest(manifestUrl);
+    } else if (importType === ToolImportType.openapiSpec) {
+      const { namespace, openapiSpecUrl } = params;
+      return await this.regsieterToolsServerByOpenapiSpec(namespace, openapiSpecUrl);
+    } else {
+      throw new Error(`Error when import block: invalid importType "${importType}", must in any one of ${enumToList(ToolImportType).join(',')}`);
+    }
+  }
+
   public async getBuiltInTools(): Promise<ExtendedToolDefinition[]> {
     const folder = path.resolve(__dirname, `./conductor-system-tools/`);
     if (!fs.existsSync(folder)) {
@@ -214,6 +243,11 @@ export class ToolsRegistryService {
       )
     ).map((x) => x.default);
     return builtInTools;
+  }
+
+  public async isBuiltInTool(toolName: string) {
+    const tools = await this.getBuiltInTools();
+    return tools.find((tool) => tool.name === toolName);
   }
 
   public async initBuiltInTools() {

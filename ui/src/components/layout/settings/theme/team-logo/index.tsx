@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useSWRConfig } from 'swr';
 
 import { get, set } from 'lodash';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { updateTeam } from '@/apis/authz/team';
@@ -16,12 +17,14 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 interface ITeamLogoProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const TeamLogo: React.FC<ITeamLogoProps> = () => {
+  const { t } = useTranslation();
+
   const { mutate } = useSWRConfig();
   const { team } = useVinesTeam();
 
   const [selected, setSelected] = useState<string>('');
 
-  const teamName = team?.name || '团队';
+  const teamName = team?.name || t('common.utils.team');
   const enableTeamLogo = get(team, 'customTheme.enableTeamLogo', void 0);
 
   useEffect(() => {
@@ -38,12 +41,12 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
     }
     set(team, 'customTheme.enableTeamLogo', val === 'team');
     toast.promise(updateTeam({ customTheme: team.customTheme }), {
-      loading: '正在更新',
+      loading: t('common.update.loading'),
       success: () => {
         void mutate('/api/teams');
-        return '更新成功';
+        return t('common.update.success');
       },
-      error: '更新失败',
+      error: t('common.update.error'),
     });
   };
 
@@ -58,9 +61,9 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
         });
       }),
       {
-        loading: '更新中...',
-        success: '更新成功！',
-        error: '更新失败！请稍后再重试',
+        loading: t('common.update.loading'),
+        success: t('common.update.success'),
+        error: t('common.update.error'),
       },
     );
   };
@@ -70,20 +73,20 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>系统图标</CardTitle>
-        <CardDescription>你可以在这里设置团队的系统图标</CardDescription>
+        <CardTitle>{t('settings.theme.team-logo.title')}</CardTitle>
+        <CardDescription>{t('settings.theme.team-logo.description')}</CardDescription>
       </CardHeader>
       <CardContent className="flex items-center justify-between">
         <VinesImageEditor value={teamLogo} onChange={handleUpdateTeamLogo}>
           <Avatar className="size-10 cursor-pointer">
             <AvatarImage className="aspect-auto" src={team?.iconUrl} alt={teamName} />
-            <AvatarFallback className="rounded-none p-2 text-xs">{teamName.substring(0, 2)}</AvatarFallback>
+            <AvatarFallback className="rounded-none p-2 text-xs">{teamName?.substring(0, 2)}</AvatarFallback>
           </Avatar>
         </VinesImageEditor>
         <Tabs value={selected} onValueChange={handleUpdate}>
           <TabsList>
-            <TabsTrigger value="team">团队图标</TabsTrigger>
-            <TabsTrigger value="system">系统预置</TabsTrigger>
+            <TabsTrigger value="team">{t('settings.theme.team-logo.options.team')}</TabsTrigger>
+            <TabsTrigger value="system">{t('settings.theme.team-logo.options.system')}</TabsTrigger>
           </TabsList>
         </Tabs>
       </CardContent>

@@ -3,6 +3,7 @@ import React from 'react';
 import { useSWRConfig } from 'swr';
 
 import { Trash } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { IAssetItem } from '@/apis/ugc/typings.ts';
@@ -37,16 +38,18 @@ interface IOperateAreaProps {
 }
 
 export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, tooltipTriggerContent }) => {
+  const { t } = useTranslation();
+
   const { mutate } = useSWRConfig();
 
   const handelDelete = () => {
     toast.promise(deleteKnowledgeBase(item.uuid), {
-      loading: '正在删除数据集...',
+      loading: t('common.delete.loading'),
       success: () => {
         void mutate((key) => typeof key === 'string' && key.startsWith('/api/vector/collections'));
-        return '数据集删除成功';
+        return t('common.delete.success');
       },
-      error: '数据集删除失败',
+      error: t('common.delete.error'),
     });
   };
 
@@ -69,7 +72,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
             e.preventDefault();
           }}
         >
-          <DropdownMenuLabel>数据集操作</DropdownMenuLabel>
+          <DropdownMenuLabel>{t('ugc-page.text-data.ugc-view.operate-area.dropdown-label')}</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
           <AlertDialogTrigger asChild>
@@ -77,7 +80,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
               <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                 <Trash size={15} />
               </DropdownMenuShortcut>
-              删除数据集
+              {t('common.utils.delete')}
             </DropdownMenuItem>
           </AlertDialogTrigger>
         </DropdownMenuContent>
@@ -89,12 +92,19 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
         }}
       >
         <AlertDialogHeader>
-          <AlertDialogTitle>确定要删除该文本数据集吗？</AlertDialogTitle>
-          <AlertDialogDescription>删除后，该数据集将无法恢复，其中的数据也将被永久删除。</AlertDialogDescription>
+          <AlertDialogTitle>
+            {t('common.dialog.delete-confirm.title', { type: t('common.type.text-data') })}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            {t('common.dialog.delete-confirm.content', {
+              type: t('common.type.text-data'),
+              name: item.displayName,
+            })}
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>取消</AlertDialogCancel>
-          <AlertDialogAction onClick={handelDelete}>删除</AlertDialogAction>
+          <AlertDialogCancel>{t('common.utils.cancel')}</AlertDialogCancel>
+          <AlertDialogAction onClick={handelDelete}>{t('common.utils.confirm')}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

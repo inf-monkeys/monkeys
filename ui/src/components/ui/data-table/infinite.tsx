@@ -10,6 +10,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { CircleSlash } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { TableVirtuoso } from 'react-virtuoso';
 
 import { TableCell, TableHead, TableRow } from '@/components/ui/table.tsx';
@@ -43,6 +44,8 @@ export function InfiniteScrollingDataTable<TData, TValue>({
 
   tfoot,
 }: IInfiniteScrollingDataTableProps<TData, TValue>) {
+  const { t } = useTranslation();
+
   const table = useReactTable({
     data,
     columns,
@@ -99,7 +102,7 @@ export function InfiniteScrollingDataTable<TData, TValue>({
             <CircleSlash size={64} />
           )}
 
-          <h1>{loading ? '正在加载数据...' : '暂无数据'}</h1>
+          <h1>{loading ? t('common.load.loading') : t('common.load.empty')}</h1>
         </div>
       )}
     </div>

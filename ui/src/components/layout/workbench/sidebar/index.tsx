@@ -4,6 +4,7 @@ import { Link } from '@tanstack/react-router';
 
 import { motion } from 'framer-motion';
 import { ChevronRight, Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
@@ -17,6 +18,8 @@ import { useRetimer } from '@/utils/use-retimer.ts';
 interface IWorkbenchSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
+  const { t } = useTranslation();
+
   const reTimer = useRetimer();
   const { data } = useWorkspacePages();
   const [visible, setVisible] = useState(true);
@@ -46,7 +49,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
           transition: { duration: 0.2 },
         }}
       >
-        <h1 className="text-2xl font-bold">工作台</h1>
+        <h1 className="text-2xl font-bold">{t('components.layout.main.sidebar.list.workbench.label')}</h1>
         <div className="grid gap-2">
           {data?.map((page) => (
             <div
@@ -60,7 +63,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
               <VinesIcon size="sm">{page.workflow?.iconUrl}</VinesIcon>
               <div className="flex flex-col gap-0.5">
                 <h1 className="font-bold leading-tight">{page.displayName}</h1>
-                <span className="text-xxs">{page.workflow?.displayName ?? '未命名应用'}</span>
+                <span className="text-xxs">{page.workflow?.displayName ?? t('common.utils.untitled')}</span>
               </div>
             </div>
           ))}
@@ -70,7 +73,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
                 <Button icon={<Plus />} className="w-full" variant="outline" />
               </Link>
             </TooltipTrigger>
-            <TooltipContent>标星视图</TooltipContent>
+            <TooltipContent>{t('workbench.sidebar.add')}</TooltipContent>
           </Tooltip>
         </div>
       </motion.div>
@@ -84,7 +87,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
               <ChevronRight className={cn(visible && 'scale-x-[-1]')} />
             </div>
           </TooltipTrigger>
-          <TooltipContent>{visible ? '收起' : '展开'}</TooltipContent>
+          <TooltipContent>{visible ? t('common.sidebar.hide') : t('common.sidebar.show')}</TooltipContent>
         </Tooltip>
       </Separator>
     </div>

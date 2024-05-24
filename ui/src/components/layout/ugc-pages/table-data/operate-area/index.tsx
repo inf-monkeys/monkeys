@@ -3,6 +3,7 @@ import React from 'react';
 import { useSWRConfig } from 'swr';
 
 import { FileUp, Trash } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { deleteDatabase } from '@/apis/table-data';
@@ -39,16 +40,18 @@ interface IOperateAreaProps {
 }
 
 export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, tooltipTriggerContent }) => {
+  const { t } = useTranslation();
+
   const { mutate } = useSWRConfig();
 
   const handelDelete = () => {
     toast.promise(deleteDatabase(item.uuid), {
-      loading: '正在删除表格数据...',
+      loading: t('common.delete.loading'),
       success: () => {
         void mutate((key) => typeof key === 'string' && key.startsWith('/api/sql-knowledge-bases'));
-        return '表格数据删除成功';
+        return t('common.delete.success');
       },
-      error: '表格数据删除失败',
+      error: t('common.delete.error'),
     });
   };
 
@@ -72,7 +75,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
               e.preventDefault();
             }}
           >
-            <DropdownMenuLabel>表格数据操作</DropdownMenuLabel>
+            <DropdownMenuLabel>{t('table-data.ugc-view.operate-area.dropdown-label')}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <UgcPublishDialog ugcId={item?.id} item={item ?? {}}>
@@ -85,7 +88,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <FileUp size={15} />
                   </DropdownMenuShortcut>
-                  发布到市场
+                  {t('table-data.ugc-view.operate-area.options.publish')}
                 </DropdownMenuItem>
               </UgcPublishDialog>
               <DropdownMenuSeparator />
@@ -94,7 +97,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <Trash size={15} />
                   </DropdownMenuShortcut>
-                  删除
+                  {t('common.utils.delete')}
                 </DropdownMenuItem>
               </AlertDialogTrigger>
             </DropdownMenuGroup>
@@ -107,12 +110,16 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
           }}
         >
           <AlertDialogHeader>
-            <AlertDialogTitle>确定要删除该表格数据吗？</AlertDialogTitle>
-            <AlertDialogDescription>删除后，该表格数据将无法恢复，其中的数据也将被永久删除。</AlertDialogDescription>
+            <AlertDialogTitle>
+              {t('common.dialog.delete-confirm.title', { type: t('common.type.table-data') })}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('common.dialog.delete-confirm.content', { type: t('common.type.table-data'), name: item.name })}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>取消</AlertDialogCancel>
-            <AlertDialogAction onClick={handelDelete}>删除</AlertDialogAction>
+            <AlertDialogCancel>{t('common.utils.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handelDelete}>{t('common.utils.confirm')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -2,16 +2,20 @@ import React from 'react';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
+import { useTranslation } from 'react-i18next';
+
 import { preloadUgcTableData, useUgcTableData } from '@/apis/ugc';
+import { UgcView } from '@/components/layout/ugc/view';
+import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createTableDataColumns } from '@/components/layout/ugc-pages/table-data/consts.tsx';
 import { CreateDatabase } from '@/components/layout/ugc-pages/table-data/create-database';
 import { OperateArea } from '@/components/layout/ugc-pages/table-data/operate-area';
-import { UgcView } from '@/components/layout/ugc/view';
-import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const TableData: React.FC = () => {
+  const { t: tHook } = useTranslation();
+
   const navigate = useNavigate();
 
   return (
@@ -19,14 +23,16 @@ export const TableData: React.FC = () => {
       <UgcView
         assetKey="table-data"
         assetType="knowledge-base-table"
-        assetName="表格数据"
+        assetName={tHook('components.layout.main.sidebar.list.media.table-data.label')}
         useUgcFetcher={useUgcTableData}
         preloadUgcFetcher={preloadUgcTableData}
         createColumns={() => createTableDataColumns()}
         renderOptions={{
           subtitle: (item) => (
             <span className="line-clamp-1">
-              {`${item.user?.name ?? '未知'} 创建于 ${formatTimeDiffPrevious(item.createdTimestamp)}`}
+              {`${item.user?.name ?? tHook('common.utils.unknown')} ${tHook('common.utils.created-at', {
+                time: formatTimeDiffPrevious(item.createdTimestamp),
+              })}`}
             </span>
           ),
           cover: (item) => RenderIcon({ iconUrl: item.iconUrl, size: 'gallery' }),

@@ -1,0 +1,1125 @@
+{
+  "system": {
+    "network-error": "系统维护中",
+    "empty-auth-methods": "系统未启用身份验证"
+  },
+  "common": {
+    "utils": {
+      "untitled": "未命名",
+      "unknown": "未知",
+      "system": "系统内置",
+      "team": "团队",
+      "unknown-team": "未知团队",
+      "user": "用户",
+      "unknown-user": "未知用户",
+      "all": "全部",
+      "info": "信息",
+      "confirm": "确定",
+      "continue": "继续",
+      "save": "保存",
+      "update": "更新",
+      "create": "创建",
+      "delete": "删除",
+      "edit": "编辑",
+      "operate": "操作",
+      "reset": "重置",
+      "submit": "提交",
+      "cancel": "取消",
+      "search": "搜索",
+      "switch": "切换",
+      "copy": "复制",
+      "filter": "筛选",
+      "back": "返回",
+      "import": "导入",
+      "export": "导出",
+      "enable": "启用",
+      "disable": "禁用",
+      "enabled": "已启用",
+      "disabled": "已禁用",
+      "updated-at": "更新于 {{time}}",
+      "created-at": "创建于 {{time}}",
+      "updated-time": "更新时间",
+      "created-time": "创建时间",
+      "ascend": "升序",
+      "descend": "降序",
+      "load-more": "加载更多"
+    },
+    "type": {
+      "workflow": "工作流",
+      "filter-group": "筛选分组",
+      "text-data": "文本数据",
+      "table-data": "表格数据"
+    },
+    "time": {
+      "second": "秒",
+      "minute": "分钟",
+      "hour": "小时"
+    },
+    "toast": {
+      "loading": "请等待数据加载完毕",
+      "team-not-found": "团队不存在",
+      "user-not-found": "用户不存在",
+      "copy-success": "复制成功"
+    },
+    "dialog": {
+      "delete-confirm": {
+        "title": "{{type}}删除确认",
+        "content": "确定要删除{{type}}「{{name}}」？此操作不可撤销。"
+      }
+    },
+    "sidebar": {
+      "hide": "收起",
+      "show": "展开"
+    },
+    "language-selector": {
+      "tooltip": "切换语言",
+      "switching": "切换中...",
+      "switched": "已切换为「简体中文」",
+      "switch-failed": "语言切换失败！"
+    },
+    "dark-mode-selector": {
+      "auto": "跟随系统",
+      "dark": "深色模式",
+      "light": "浅色模式"
+    },
+    "load": {
+      "loading": "加载中...",
+      "empty": "暂无数据",
+      "no-more": "没有更多了"
+    },
+    "update": {
+      "loading": "更新中...",
+      "success": "更新成功！",
+      "error": "更新失败！请稍候重试！"
+    },
+    "operate": {
+      "loading": "操作中...",
+      "success": "操作成功！",
+      "error": "操作失败！请稍候重试！"
+    },
+    "create": {
+      "loading": "创建中...",
+      "success": "创建成功！",
+      "error": "创建失败！请稍候重试！"
+    },
+    "save": {
+      "loading": "保存中...",
+      "success": "保存成功！",
+      "error": "保存失败！请稍候重试！"
+    },
+    "delete": {
+      "confirm-content": "确认删除吗？该操作不可撤销",
+      "success": "删除成功！",
+      "loading": "删除中...",
+      "error": "删除失败！请稍候重试！"
+    },
+    "sms-verify": {
+      "send-button": "发送验证码",
+      "loading": "发送中...",
+      "success": "已发送短信验证码至 {{phone}} 请注意查收",
+      "error": "发送失败！请稍后再重试"
+    }
+  },
+  "components": {
+    "ui": {
+      "pagination": {
+        "next": "下一页",
+        "previous": "上一页",
+        "more": "更多",
+        "table-pagination": {
+          "hint": {
+            "count": "共 {{count}} 条",
+            "page-index": "第 {{pageIndex}} 页",
+            "page-size": "每页"
+          },
+          "page-size": "每页条目"
+        }
+      },
+      "icon-selector": {
+        "background-color": "背景颜色"
+      },
+      "image-editor": {
+        "title": "上传图像",
+        "confirm-tooltip": "点击更新",
+        "upload-others": "上传其他图像"
+      },
+      "updater": {
+        "title": "上传文件",
+        "click-or-drag-area": "点击或拖拽来上传文件",
+        "hint": {
+          "accept": {
+            "custom": "仅支持 {{acceptString}} 格式的文件",
+            "any": "支持上传任意格式的文件"
+          },
+          "max-size": "，不超过 {{maxSize}}MB",
+          "limit": "，最多可上传 {{limit}} 个文件"
+        },
+        "file-list": {
+          "toast": {
+            "no-file": "没有需要上传的文件"
+          },
+          "info-table": {
+            "caption": {
+              "remaining": "可继续上传 {{remaining}} 份文件",
+              "none": "到底了～"
+            },
+            "columns": {
+              "name": "文件名",
+              "type": "类型",
+              "size": "大小",
+              "status": "状态",
+              "operate": "操作"
+            }
+          },
+          "info-tooltip": {
+            "name": "文件名：",
+            "md5": {
+              "index": "MD5：",
+              "in-progress": "正在计算中（{{progress}}%）",
+              "waiting": "正在等待计算中"
+            }
+          },
+          "status": {
+            "waiting-for-file": "等待文件中",
+            "waiting-for-uploading": "等待操作上传",
+            "upload-successful": "上传成功",
+            "waiting-for-uploading-description": "（点此上传）",
+            "status": {
+              "upload": "上传",
+              "calculate": "计算",
+              "hint": "正在{{operate}}文件"
+            }
+          }
+        }
+      },
+      "vines-variable-editor": {
+        "cannot-parse-toast": "VinesVariableEditor 无法解析文本！"
+      },
+      "date-range-picker": {
+        "select-date": "选择日期"
+      }
+    },
+    "layout": {
+      "main": {
+        "sidebar": {
+          "list": {
+            "workbench": {
+              "label": "工作台"
+            },
+            "app": {
+              "label": "应用",
+              "workflows": {
+                "label": "工作流"
+              }
+            },
+            "tool": {
+              "label": "工具",
+              "action-tools": {
+                "label": "执行类工具"
+              },
+              "render-tools": {
+                "label": "渲染类工具"
+              },
+              "comfyui": {
+                "label": "ComfyUI"
+              }
+            },
+            "model": {
+              "label": "模型",
+              "text-models": {
+                "label": "语言模型"
+              },
+              "image-models": {
+                "label": "图像模型"
+              }
+            },
+            "media": {
+              "label": "数据",
+              "text-data": {
+                "label": "文本数据"
+              },
+              "table-data": {
+                "label": "表格数据"
+              },
+              "media-data": {
+                "label": "富媒体数据"
+              }
+            },
+            "store": {
+              "label": "市场",
+              "application-store": {
+                "label": "应用市场"
+              },
+              "text-model-store": {
+                "label": "语言模型市场"
+              },
+              "image-model-store": {
+                "label": "图像模型市场"
+              },
+              "comfyui-store": {
+                "label": "ComfyUI 市场"
+              },
+              "text-data-store": {
+                "label": "文本数据市场"
+              }
+            }
+          },
+          "toolbar": {
+            "settings-tooltip": "配置中心"
+          },
+          "teams": {
+            "balance": "余额",
+            "team-selector": {
+              "search-team": "搜索团队...",
+              "not-found": "找不到团队",
+              "avatar-fallback": "团队"
+            }
+          }
+        }
+      },
+      "ugc": {
+        "utils": {
+          "no-description": "暂无描述"
+        },
+        "detail": {
+          "info": {
+            "columns": {
+              "displayName": {
+                "label": "键"
+              },
+              "value": {
+                "label": "值"
+              }
+            }
+          },
+          "workflows": {
+            "columns": {
+              "icon": {
+                "label": "图标"
+              },
+              "displayName": {
+                "label": "名称"
+              },
+              "description": {
+                "label": "描述"
+              },
+              "user": {
+                "label": "创建者"
+              }
+            }
+          }
+        },
+        "import-dialog": {
+          "title": "导入前确认",
+          "content": "正在导入 {{name}} 导入您的团队下，是否继续？",
+          "utils": {
+            "this-project": "该项目"
+          }
+        },
+        "publish-dialog": {
+          "title": "发布到市场",
+          "name": {
+            "placeholder": "请输入名称"
+          }
+        },
+        "view": {
+          "filter": {
+            "button": {
+              "toast": {
+                "no-filter-group-name": "请输入分组名称"
+              },
+              "creator": {
+                "label": "创建者",
+                "placeholder": "请选择用户"
+              },
+              "tag": {
+                "label": "标签",
+                "placeholder": "请选择标签"
+              },
+              "created-time": {
+                "label": "创建时间",
+                "placeholder": "请选择创建时间"
+              },
+              "updated-time": {
+                "label": "更新时间",
+                "placeholder": "请选择更新时间"
+              },
+              "filter-group-name": {
+                "label": "分组名称",
+                "placeholder": "请输入分组名称"
+              },
+              "save-filter-group": {
+                "label": "将筛选条件保存为分组"
+              }
+            },
+            "list": {
+              "toast": {
+                "filter-group-not-found": "分组不存在！请刷新后重试！"
+              },
+              "placeholder": "输入分组名称"
+            }
+          },
+          "header": {
+            "display-mode": {
+              "button-tooltip": "展示方式",
+              "dropdown-label": "展示方式",
+              "options": {
+                "table": "表格视图",
+                "card": "卡片视图",
+                "gallery": "画廊视图"
+              }
+            },
+            "sort": {
+              "button-tooltip": "排序",
+              "dropdown-label": "排序设置"
+            }
+          },
+          "tag-selector": {
+            "create-button": "添加标签",
+            "placeholder": "请输入标签名称，按 Enter 新建"
+          }
+        }
+      }
+    }
+  },
+  "auth": {
+    "oidc": {
+      "auth-failed": "授权校验失败！请尝试重新登录n",
+      "logging-in": "正在通过 {{oidc}} 登录中"
+    },
+    "login": {
+      "sms": "手机号登录",
+      "email": "邮箱登录",
+      "other": "其他登录方式",
+      "only-oidc": "仅支持使用 OIDC 进行身份验证",
+      "select-account": "选择已登录的账号",
+      "success": "登录成功",
+      "logging-in": "登录中"
+    },
+    "users": {
+      "selector": {
+        "title": "选择身份",
+        "switching": "正在切换身份...",
+        "switched": "已切换到身份：{{name}}",
+        "switch-failed": "切换身份失败！"
+      },
+      "login-other": "登录其他账号",
+      "logout": "退出登录"
+    }
+  },
+  "settings": {
+    "title": "配置中心",
+    "account": {
+      "title": "账号中心",
+      "payment-disabled-alert": "支付模块已禁用",
+      "info-editor": {
+        "invalid-toast": "请输入有效内容"
+      },
+      "user": {
+        "title": "账号信息",
+        "description": "点击即可编辑信息",
+        "user-name": {
+          "info-editor": {
+            "title": "编辑昵称",
+            "placeholder": "输入昵称，16 字以内"
+          }
+        },
+        "user-account": {
+          "not-phone-toast": "暂时仅支持修改手机号",
+          "title": "更改手机号",
+          "old-phone": "旧手机号",
+          "old-phone-code-placeholder": "请输入旧手机号短信验证码",
+          "new-phone-placeholder": "请输入新手机号",
+          "new-phone-code-placeholder": "请输入新手机号短信验证码"
+        }
+      },
+      "team": {
+        "title": "我的团队",
+        "description": "管理您的团队数据",
+        "team-name": {
+          "title": "编辑团队名称",
+          "placeholder": "输入昵称，16 字以内"
+        },
+        "team-description": {
+          "title": "编辑团队描述",
+          "placeholder": "输入描述，16 字以内"
+        },
+        "apply-manage": {
+          "apply-item": {
+            "operate": {
+              "accept": "同意",
+              "reject": "拒绝"
+            },
+            "operate-toast": {
+              "index": "已{{operate}}该请求",
+              "accept": "同意",
+              "reject": "拒绝"
+            }
+          },
+          "public-change": {
+            "index": "已{{operate}}该团队",
+            "public": "公开",
+            "private": "私有"
+          },
+          "button": "申请管理",
+          "title": "申请管理",
+          "public-tooltip-1": "开启时，当前团队会在平台公开，任何用户都可以搜索到并申请加入。",
+          "public-tooltip-2": "关闭时，未加入团队的用户无法搜索到当前团队，也无法主动申请加入团队，但仍可通过邀请链接加入。",
+          "public-span": "设为公开团队"
+        },
+        "create": {
+          "button-tooltip": "新建团队",
+          "title": "新建团队",
+          "name-placeholder": "请输入团队名称",
+          "description-placeholder": "请输入团队描述"
+        },
+        "delete": {
+          "button-tooltip": "删除团队",
+          "confirm-content-1": "确定要删除该团队吗？",
+          "confirm-content-2": "删除后，此团队内的所有资源将不可见！",
+          "deleted": "团队已删除"
+        },
+        "import-export": {
+          "button": "数据管理",
+          "dropdown-label": "团队数据管理",
+          "import": {
+            "button": "导入数据",
+            "title": "导入团队数据"
+          },
+          "export": {
+            "button": "导出数据",
+            "title": "导出团队数据"
+          }
+        },
+        "join-public-team": {
+          "button-tooltip": "加入公开团队",
+          "title": "加入公开团队",
+          "search-placeholder": "请输入团队名称",
+          "team-item": {
+            "apply": "申请加入"
+          }
+        }
+      },
+      "team-member": {
+        "title": "团队成员",
+        "description": {
+          "owner": "邀请您的团队成员进行协作",
+          "member": "与团队成员进行协作"
+        },
+        "delete-member": "删除用户",
+        "invite": {
+          "button-tooltip": "邀请用户",
+          "dropdown-label": "邀请用户",
+          "outdated-options": {
+            "7-day": "7 天有效",
+            "never": "永久有效"
+          },
+          "invite-manage": {
+            "button": "管理邀请链接",
+            "title": "邀请链接管理",
+            "columnss": {
+              "status": {
+                "label": "状态"
+              },
+              "remark": {
+                "label": "备注",
+                "info-editor": {
+                  "title": "编辑备注",
+                  "placeholder": "请输入备注"
+                }
+              },
+              "outdateTimestamp": {
+                "label": "失效时间"
+              },
+              "inviterUser": {
+                "label": "创建者"
+              },
+              "targetUser": {
+                "label": "邀请用户"
+              },
+              "acceptedUsers": {
+                "label": "接受邀请用户"
+              },
+              "operate": {
+                "label": "操作",
+                "dropdown-label": "邀请链接操作"
+              }
+            }
+          },
+          "invite-user": {
+            "button": "生成邀请链接",
+            "title": "邀请用户",
+            "search": {
+              "placeholder": "请输入用户名或手机号"
+            },
+            "outdated": {
+              "content": "使用链接邀请",
+              "tip": "可以通过邀请链接成为团队成员"
+            },
+            "toast": {
+              "keywords-empty": "请输入用户名或手机号",
+              "keywords-less-than-4": "请至少输入 4 位"
+            }
+          }
+        }
+      }
+    },
+    "api-key": {
+      "title": "API 密钥",
+      "api-key-item": {
+        "revoked": "已废弃",
+        "operate": {
+          "revoke": {
+            "button": "废弃",
+            "alert": {
+              "title": "废弃前确认",
+              "description": "确认废弃该 API 密钥？正在使用该密钥的应用将无法访问 API。"
+            }
+          }
+        }
+      },
+      "header": {
+        "toast": {
+          "description-empty": "请输入用途描述"
+        },
+        "create": {
+          "button": "创建 API 密钥",
+          "title": "创建 API 密钥",
+          "belong": {
+            "label": "密钥归属",
+            "create-user": "创建者",
+            "create-team": "团队"
+          },
+          "description": {
+            "label": "用途描述",
+            "placeholder": "请输入用途描述，16 字内"
+          }
+        }
+      }
+    },
+    "theme": {
+      "title": "团队主题",
+      "toast": {
+        "update": {
+          "loading": "正在更新主题色...",
+          "success": "主题色更新成功！",
+          "error": "主题色更新失败！请稍候重试！"
+        },
+        "create": {
+          "loading": "正在添加主题...",
+          "success": "主题添加成功！",
+          "error": "主题添加失败！请稍候重试！"
+        },
+        "delete": {
+          "loading": "正在删除主题...",
+          "success": "主题删除成功！",
+          "error": "主题删除失败！请稍候重试！"
+        }
+      },
+      "team-primary-color": {
+        "title": "团队主题色",
+        "description": "你可以在这里设置团队的主题色，系统将自动生成对应的配色方案",
+        "tip": "预览状态下将不会保存",
+        "operate": {
+          "save": {
+            "button": "保存到列表",
+            "title": "保存到主题列表",
+            "placeholder": "输入主题名称，16 字以内"
+          }
+        }
+      },
+      "team-logo": {
+        "title": "系统图标",
+        "description": "你可以在这里设置团队的系统图标",
+        "options": {
+          "team": "团队图标",
+          "system": "系统预置"
+        }
+      },
+      "market": {
+        "title": "主题市场",
+        "operate": {
+          "add-to-team": "添加到团队"
+        }
+      },
+      "color-list": {
+        "title": "团队主题列表"
+      }
+    }
+  },
+  "workbench": {
+    "view": {
+      "no-starred-view": "暂无标星视图",
+      "header": {
+        "enter": "进入视图",
+        "delete": "取消标星"
+      }
+    },
+    "sidebar": {
+      "add": "添加标星视图"
+    }
+  },
+  "ugc-page": {
+    "workflow": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "user": {
+            "label": "用户"
+          },
+          "assetTags": {
+            "label": "标签"
+          },
+          "createdTimestamp": {
+            "label": "创建时间"
+          },
+          "updatedTimestamp": {
+            "label": "更新时间"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "工作流操作",
+          "options": {
+            "copy-link": "复制链接",
+            "create-a-copy": "创建副本",
+            "edit-info": "编辑信息",
+            "export-current-version": "导出当前版本",
+            "export-all-versions": "导出全部版本"
+          }
+        },
+        "subtitle": {
+          "import": {
+            "options": {
+              "local-import": "本地导入",
+              "market-import": "市场导入"
+            }
+          }
+        }
+      }
+    },
+    "action-tools": {
+      "utils": {
+        "pricing-mode": {
+          "free": "免费",
+          "per-execute": "每次运行收费 {{amount}} 元",
+          "per-1k-token": "每 1K Token 收费 {{amount}} 元",
+          "per-1min": "每 1 分钟收费 {{amount}} 元",
+          "per-1mb-file": "每 1 MB 文件收费 {{amount}} "
+        },
+        "estimate": {
+          "estimate-time": "预计执行 {{time}}"
+        }
+      },
+      "detail": {
+        "title": "组件详情",
+        "tabs": {
+          "info": {
+            "label": "基本信息"
+          },
+          "workflows": {
+            "label": "关联工作流"
+          }
+        }
+      },
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "estimateTime": {
+            "label": "预估执行时间"
+          },
+          "pricing": {
+            "label": "费用"
+          },
+          "thirdPartyAccount": {
+            "label": "外部账号"
+          }
+        },
+        "subtitle": {
+          "external-account": {
+            "button": "管理外部账号",
+            "title": "管理外部账号",
+            "manage": {
+              "content": "所有账号信息都将被加密储存，不会泄露您的关键信息（如密钥），也不会回传至前台",
+              "columns": {
+                "name": "名称",
+                "operate": "操作"
+              },
+              "delete": {
+                "title": "外部账号删除确认",
+                "content": "确定删除该外部账号吗？删除后工作流中将无法正常使用此账号，此操作不可撤销。"
+              },
+              "create": {
+                "title": "创建新{{name}}",
+                "columns": {
+                  "displayName": "账号名称"
+                },
+                "utils": {
+                  "name": "{{name}}账号"
+                }
+              }
+            },
+            "list": {
+              "create": "创建账号",
+              "count": {
+                "total": "共 {{count}} 个账号，点击管理",
+                "none": "暂无账号，点击创建"
+              }
+            }
+          }
+        }
+      }
+    },
+    "text-models": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "assetTags": {
+            "label": "标签"
+          },
+          "createdTimestamp": {
+            "label": "创建时间"
+          },
+          "updatedTimestamp": {
+            "label": "更新时间"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "语言模型操作",
+          "options": {
+            "publish": "发布到市场"
+          }
+        }
+      }
+    },
+    "image-models": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "assetTags": {
+            "label": "标签"
+          },
+          "createdTimestamp": {
+            "label": "创建时间"
+          },
+          "updatedTimestamp": {
+            "label": "更新时间"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "图像模型操作",
+          "options": {
+            "publish": "发布到市场"
+          }
+        }
+      }
+    },
+    "text-data": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "user": {
+            "label": "创建者"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "assetTags": {
+            "label": "标签"
+          },
+          "createdTimestamp": {
+            "label": "创建时间"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "文本数据操作"
+        },
+        "subtitle": {
+          "create-dataset": {
+            "button": "创建数据集",
+            "title": "创建文本数据集",
+            "form": {
+              "displayName": {
+                "label": "知识库名称",
+                "placeholder": "请输入知识库名称"
+              },
+              "embeddingModel": {
+                "label": "Embedding 模型",
+                "placeholder": "请选择一个模型"
+              },
+              "description": {
+                "label": "数据集简介",
+                "placeholder": "请输入数据集简介，不超过 100 字"
+              },
+              "iconUrl": {
+                "label": "数据集图标"
+              }
+            }
+          }
+        }
+      },
+      "detail": {
+        "title": "文本数据详情",
+        "header": {
+          "task-list": {
+            "all-done": "所有任务已完成",
+            "tooltip": {
+              "label": "任务列表{{status}}",
+              "loading": "（加载中）",
+              "processing": "（处理文件中）"
+            }
+          },
+          "import": {
+            "button": "导入数据",
+            "options": {
+              "file": "导入文档",
+              "oss": "从 OSS 导入",
+              "paragraph": "导入段落",
+              "paragraph-batch": "批量导入段落"
+            }
+          }
+        },
+        "import": {
+          "utils": {
+            "pre-process-rules": {
+              "label": "文本预处理规则",
+              "rules": {
+                "replace-space-n-tab": "替换掉连续的空格、换行符和制表符",
+                "delete-url-and-email": "删除所有 URL 地址和电子邮件地址"
+              }
+            }
+          },
+          "toast": {
+            "create-task": {
+              "loading": "创建导入任务中...",
+              "success": "导入任务创建成功！",
+              "error": "导入任务创建失败！请稍后重试！"
+            }
+          },
+          "file": {
+            "title": "导入文档",
+            "form": {
+              "fileURL": {
+                "description": "在此处上传文件将自动存入「富媒体数据」"
+              },
+              "splitterType": {
+                "label": "分段清洗配置",
+                "placeholder": "选择一个分段清洗模式",
+                "options": {
+                  "auto-segment": "自动分段清洗",
+                  "custom-segment": "自定义分段清洗"
+                },
+                "description": {
+                  "auto-segment": "自动设置分段规则与预处理规则，如果不了解这些参数建议选择此项",
+                  "custom-segment": "自定义分段规则、分段长度以及预处理规则等参数"
+                }
+              },
+              "splitterConfig": {
+                "separator": {
+                  "label": "分段标识符",
+                  "placeholder": "请输入分段标识符，如：「，」、「。」、「,」、「\n」",
+                  "tip": "请输入分段标识符"
+                },
+                "chunk_size": {
+                  "label": "分段最大长度",
+                  "tip": "请输入分段最大长度"
+                },
+                "chunk_overlap": {
+                  "label": "文本重叠量",
+                  "tip": "请输入文本重叠量"
+                }
+              }
+            }
+          }
+        },
+        "tabs": {
+          "documents": {
+            "label": "文档",
+            "stats": {
+              "file-count": "文件数：{{count}}"
+            }
+          },
+          "segments": {
+            "label": "段落",
+            "toast": {
+              "searched": "已搜索",
+              "searched-after-re-sorting": "已重新排序搜索"
+            },
+            "load-tip": "向量检索只显示前 10 条",
+            "search": {
+              "mode": {
+                "placeholder": "搜索模式",
+                "options": {
+                  "fulltext": "全文搜索",
+                  "vector": "向量搜索"
+                }
+              },
+              "value": {
+                "placeholder": "输入文本进行相似度排序，回车搜索",
+                "sort-button": {
+                  "clear": "清空",
+                  "re-sort": "重新排序搜索"
+                }
+              }
+            },
+            "stats": {
+              "dimension": "向量维度：{{dimensionCount}}",
+              "model": "Embedding 模型：{{model}}",
+              "id": "知识库 ID：{{id}}"
+            }
+          },
+          "settings": {
+            "label": "设置"
+          },
+          "associated-workflows": {
+            "label": "关联工作流"
+          }
+        }
+      }
+    },
+    "table-data": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "user": {
+            "label": "创建者"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "assetTags": {
+            "label": "标签"
+          },
+          "createdTimestamp": {
+            "label": "创建时间"
+          },
+          "updatedTimestamp": {
+            "label": " 更新时间"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "表格数据操作",
+          "options": {
+            "publish": "发布到市场"
+          }
+        },
+        "subtitle": {
+          "create-database": {
+            "button": "创建表格数据库",
+            "title": "创建表格数据库",
+            "form": {
+              "type": {
+                "label": "创建类型",
+                "placeholder": "请选择一个创建类型",
+                "options": {
+                  "builtIn": "内建 Sqlite 数据库",
+                  "external": "外置数据库"
+                }
+              },
+              "displayName": {
+                "label": "数据库名称",
+                "placeholder": "请输入数据库名称"
+              },
+              "description": {
+                "label": "数据集简介",
+                "placeholder": "请输入数据集简介，不超过 100 字"
+              },
+              "iconUrl": {
+                "label": "数据集图标"
+              },
+              "databaseType": {
+                "label": "数据库类型",
+                "placeholder": "请选择数据库类型"
+              }
+            }
+          }
+        }
+      }
+    },
+    "media-data": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "user": {
+            "label": "创建者"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "assetTags": {
+            "label": "标签"
+          },
+          "createdTimestamp": {
+            "label": "创建时间"
+          },
+          "updatedTimestamp": {
+            "label": " 更新时间"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "富媒体数据操作",
+          "options": {
+            "copy-link": "复制文件直链"
+          }
+        },
+        "subtitle": {
+          "upload": {
+            "button": "上传文件",
+            "title": "上传文件"
+          }
+        }
+      }
+    }
+  },
+  "workspace": {
+    "404": {
+      "description": "页面正在建设中"
+    }
+  }
+}

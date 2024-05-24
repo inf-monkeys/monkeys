@@ -1,0 +1,78 @@
+version: '2.3'
+
+services:
+  conductor-server:
+    image: infmonkeys/conductor:1.0.0
+    volumes:
+      - ./server/config/conductor-config.properties:/app/config/config-local.properties
+    networks:
+      - monkeys
+    ports:
+      - 8080:8080
+    healthcheck:
+      test: curl http://localhost:8080/health -o /dev/null
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    logging:
+      driver: 'json-file'
+
+  monkeys-redis:
+    image: redis:6.2.3-alpine
+    volumes:
+      - ./server/config/redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - monkeys
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+
+  monkeys-elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.11
+    environment:
+      - 'ES_JAVA_OPTS=-Xms512m -Xmx1024m'
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    ports:
+      - 9200:9200
+    volumes:
+      - esdata-monkeys:/usr/share/elasticsearch/data
+    networks:
+      - monkeys
+    healthcheck:
+      test: curl http://localhost:9200/_cluster/health -o /dev/null
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    logging:
+      driver: 'json-file'
+
+  monkeys-postgres:
+    image: postgres
+    environment:
+      - POSTGRES_USER=monkeys
+      - POSTGRES_PASSWORD=monkeys123
+      - POSTGRES_DATABASE=monkeys
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdata-monkeys:/var/lib/postgresql/data
+    networks:
+      - monkeys
+    healthcheck:
+      test: timeout 5 bash -c 'cat < /dev/null > /dev/tcp/localhost/5432'
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    logging:
+      driver: 'json-file'
+
+volumes:
+  esdata-monkeys:
+    driver: local
+  pgdata-monkeys:
+    driver: local
+
+networks:
+  monkeys:

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { createTeam, useTeams } from '@/apis/authz/team';
@@ -12,11 +13,13 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { Tooltip } from '@/components/ui/tooltip';
-import { ICreateTeam, createTeamSchema } from '@/schema/settings/team.ts';
+import { createTeamSchema, ICreateTeam } from '@/schema/settings/team.ts';
 
 interface ICreateTeamProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const CreateTeam: React.FC<ICreateTeamProps> = () => {
+  const { t } = useTranslation();
+
   const [visible, setVisible] = useState(false);
 
   const { mutate: mutateTeams } = useTeams();
@@ -41,15 +44,15 @@ export const CreateTeam: React.FC<ICreateTeamProps> = () => {
         iconUrl,
       }),
       {
-        loading: '正在创建中...',
+        loading: t('common.create.loading'),
         success: (data) => {
           void mutateTeams();
           setIsLoading(false);
           setVisible(false);
           form.reset();
-          return '创建成功！';
+          return t('common.create.success');
         },
-        error: '创建失败，请检查网络是否通畅',
+        error: t('common.create.error'),
         finally: () => setIsLoading(false),
       },
     );
@@ -57,14 +60,14 @@ export const CreateTeam: React.FC<ICreateTeamProps> = () => {
 
   return (
     <Dialog open={visible} onOpenChange={setVisible}>
-      <Tooltip content="新建团队">
+      <Tooltip content={t('settings.account.team.create.button-tooltip')}>
         <DialogTrigger asChild>
           <Button icon={<Plus />} size="small" />
         </DialogTrigger>
       </Tooltip>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>新建团队</DialogTitle>
+          <DialogTitle>{t('settings.account.team.create.title')}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form className="flex flex-col gap-2 space-y-1.5" onSubmit={handleSubmit}>
@@ -74,7 +77,7 @@ export const CreateTeam: React.FC<ICreateTeamProps> = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input placeholder="请输入团队名称" {...field} />
+                    <Input placeholder={t('settings.account.team.create.name-placeholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -86,7 +89,7 @@ export const CreateTeam: React.FC<ICreateTeamProps> = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Textarea placeholder="请输入团队描述" {...field} />
+                    <Textarea placeholder={t('settings.account.team.create.description-placeholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -94,7 +97,7 @@ export const CreateTeam: React.FC<ICreateTeamProps> = () => {
             />
 
             <Button type="submit" loading={isLoading} variant="solid">
-              确定
+              {t('common.utils.confirm')}
             </Button>
           </form>
         </Form>

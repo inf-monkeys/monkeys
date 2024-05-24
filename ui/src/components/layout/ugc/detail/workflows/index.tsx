@@ -5,22 +5,25 @@ import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { RenderDescription, RenderIcon, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { DataTable } from '@/components/ui/data-table';
+import { useTranslation } from 'react-i18next';
 
 interface IUgcDetailWorkflowsProps {
   data: MonkeyWorkflow[];
 }
 
 export const UgcDetailWorkflows: React.FC<IUgcDetailWorkflowsProps> = ({ data }) => {
+  const { t } = useTranslation();
+
   const columns = [
     {
       id: 'icon',
-      header: '图标',
+      header: t('components.layout.ugc.detail.workflows.columns.icon.label'),
       cell: ({ getValue }) => RenderIcon({ iconUrl: getValue() as string }),
     },
     {
       id: 'displayName',
       accessorKey: 'displayName',
-      header: '名称',
+      header: t('components.layout.ugc.detail.workflows.columns.displayName.label'),
       cell: ({ row, getValue }) => (
         <a
           className="transition-colors hover:text-primary-500"
@@ -35,12 +38,12 @@ export const UgcDetailWorkflows: React.FC<IUgcDetailWorkflowsProps> = ({ data })
     {
       id: 'description',
       accessorKey: 'description',
-      header: '描述',
+      header: t('components.layout.ugc.detail.workflows.columns.description.label'),
       cell: ({ getValue }) => RenderDescription({ description: getValue() as string }),
     },
     {
       id: 'user',
-      header: '创建者',
+      header: t('components.layout.ugc.detail.workflows.columns.user.label'),
       cell: ({ getValue }) => RenderUser({ user: getValue() as IVinesUser }),
     },
   ];

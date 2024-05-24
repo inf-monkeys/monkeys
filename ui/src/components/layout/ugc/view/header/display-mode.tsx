@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 
 import _ from 'lodash';
 import { CreditCard, Images, Table2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { IDisplayMode, IDisplayModeStorage } from '@/components/layout/ugc/typings.ts';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
@@ -23,6 +24,8 @@ interface IUgcHeaderDisplayModeButtonProps extends React.ComponentPropsWithoutRe
 }
 
 export const UgcHeaderDisplayModeButton: React.FC<IUgcHeaderDisplayModeButtonProps> = ({ assetKey }) => {
+  const { t } = useTranslation();
+
   const team = useVinesTeam();
 
   const [displayModeStorage, setDisplayModeStorage] = useLocalStorage<IDisplayModeStorage>(
@@ -53,7 +56,7 @@ export const UgcHeaderDisplayModeButton: React.FC<IUgcHeaderDisplayModeButtonPro
 
   return (
     <DropdownMenu>
-      <Tooltip content="展示方式">
+      <Tooltip content={t('components.layout.ugc.view.header.display-mode.button-tooltip')}>
         <TooltipTrigger asChild>
           <DropdownMenuTrigger asChild>
             <Button icon={displayModeIcon} variant="outline" size="small" />
@@ -61,7 +64,7 @@ export const UgcHeaderDisplayModeButton: React.FC<IUgcHeaderDisplayModeButtonPro
         </TooltipTrigger>
       </Tooltip>
       <DropdownMenuContent>
-        <DropdownMenuLabel>展示方式</DropdownMenuLabel>
+        <DropdownMenuLabel>{t('components.layout.ugc.view.header.display-mode.dropdown-label')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuRadioGroup
           value={displayMode ?? 'card'}
@@ -77,9 +80,15 @@ export const UgcHeaderDisplayModeButton: React.FC<IUgcHeaderDisplayModeButtonPro
             });
           }}
         >
-          <DropdownMenuRadioItem value="table">表格视图</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="gallery">画廊视图</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="card">卡片视图</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="table">
+            {t('components.layout.ugc.view.header.display-mode.options.table')}
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="gallery">
+            {t('components.layout.ugc.view.header.display-mode.options.gallery')}
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="card">
+            {t('components.layout.ugc.view.header.display-mode.options.card')}
+          </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>

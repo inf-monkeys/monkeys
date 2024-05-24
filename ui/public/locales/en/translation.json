@@ -1,0 +1,1138 @@
+{
+  "system": {
+    "network-error": "System maintenance",
+    "empty-auth-methods": "Login is not enabled"
+  },
+  "common": {
+    "utils": {
+      "untitled": "Untitled",
+      "unknown": "Unknown",
+      "system": "System",
+      "team": "Team",
+      "unknown-team": "Unknown Team",
+      "user": "User",
+      "unknown-user": "Unknown User",
+      "all": "All",
+      "info": "Info",
+      "confirm": "Confirm",
+      "continue": "Continue",
+      "save": "Save",
+      "update": "Update",
+      "create": "Create",
+      "delete": "Delete",
+      "edit": "Edit",
+      "operate": "Operate",
+      "reset": "Reset",
+      "submit": "Submit",
+      "cancel": "Cancel",
+      "search": "Search",
+      "switch": "Switch",
+      "copy": "Copy",
+      "filter": "Filter",
+      "back": "Back",
+      "import": "Import",
+      "export": "Export",
+      "enable": "Enable",
+      "disable": "Disable",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "updated-at": "Updated at {{time}}",
+      "created-at": "Created at {{time}}",
+      "updated-time": "Updated Time",
+      "created-time": "Created Time",
+      "ascend": "Ascend",
+      "descend": "Descend",
+      "load-more": "Load More"
+    },
+    "type": {
+      "workflow": "workflow",
+      "filter-group": "filter group",
+      "text-data": "text data"
+    },
+    "time": {
+      "second_one": "sec",
+      "second_other": "secs",
+      "minute_one": "min",
+      "minute_other": "mins",
+      "hour_one": "hour",
+      "hour_other": "hours"
+    },
+    "toast": {
+      "loading": "Please wait until the data is loaded.",
+      "team-not-found": "The team doesn't exist.",
+      "user-not-found": "The user doesn't exist.",
+      "copy-success": "Copy success."
+    },
+    "dialog": {
+      "delete-confirm": {
+        "title": "Delete confirmation of {{type}}",
+        "content": "Are you sure you want to delete the {{type}} \"{{name}}\"?\nThe operation cannot be undone."
+      }
+    },
+    "sidebar": {
+      "hide": "Hide",
+      "show": "Show"
+    },
+    "language-selector": {
+      "tooltip": "Switch language",
+      "switching": "Switching language...",
+      "switched": "Language switched",
+      "switch-failed": "Failed to switch language!"
+    },
+    "dark-mode-selector": {
+      "auto": "Auto",
+      "dark": "Dark",
+      "light": "Light"
+    },
+    "load": {
+      "loading": "Loading...",
+      "empty": "No data",
+      "no-more": "No more"
+    },
+    "update": {
+      "loading": "Updating...",
+      "success": "Update successful!",
+      "error": "Update failed! Please try again later!"
+    },
+    "operate": {
+      "loading": "Operating...",
+      "success": "Operate successful!",
+      "error": "Operate failed! Please try again later!"
+    },
+    "create": {
+      "loading": "Creating...",
+      "success": "Create successful!",
+      "error": "Create failed! Please try again later!"
+    },
+    "save": {
+      "loading": "Saving...",
+      "success": "Save successful!",
+      "error": "Save failed! Please try again later!"
+    },
+    "delete": {
+      "confirm-content": "Confirm deletion? The operation cannot be undone.",
+      "success": "Delete successful",
+      "loading": "Deleting...",
+      "error": "Delete failed! Please try again later!"
+    },
+    "sms-verify": {
+      "send-button": "Send OTP",
+      "loading": "Sending...",
+      "success": "The code has been sent to {{phone}}, please check it.",
+      "error": "Sending failed! Please try again later."
+    }
+  },
+  "components": {
+    "ui": {
+      "pagination": {
+        "next": "Next",
+        "previous": "Previous",
+        "more": "More",
+        "table-pagination": {
+          "hint": {
+            "count": "Total {{count}}",
+            "page-index": "Page {{pageIndex}}",
+            "page-size": "Per page"
+          },
+          "page-size": "Max per page"
+        }
+      },
+      "icon-selector": {
+        "background-color": "Background color"
+      },
+      "image-editor": {
+        "title": "Upload image",
+        "confirm-tooltip": "Click to update",
+        "upload-others": "Upload others"
+      },
+      "updater": {
+        "title_one": "Upload file",
+        "title_other": "Upload files",
+        "click-or-drag-area_one": "Click or drag to upload file",
+        "click-or-drag-area_other": "Click or drag to upload files",
+        "hint": {
+          "accept": {
+            "custom_one": "Only {{acceptString}} file can be uploaded.",
+            "custom_other": "Only {{acceptString}} files can be uploaded.",
+            "any": "Any file can be uploaded."
+          },
+          "max-size": " Up to {{maxSize}}MB.",
+          "limit_one": "  Up to {{limit}} file.",
+          "limit_other": "  Up to {{limit}} files."
+        },
+        "file-list": {
+          "toast": {
+            "no-file": "No files to upload"
+          },
+          "info-table": {
+            "caption": {
+              "remaining_one": "Can upload {{remaining}} file",
+              "remaining_other": "Can upload {{remaining}} files",
+              "none": "-"
+            },
+            "columns": {
+              "name": "Name",
+              "type": "Type",
+              "size": "Size",
+              "status": "Status",
+              "operate": "Operate"
+            }
+          },
+          "info-tooltip": {
+            "name": "Filename: ",
+            "md5": {
+              "index": "MD5: ",
+              "in-progress": "Calculating ({{progress}}%)",
+              "waiting": "Waiting for calculating"
+            }
+          },
+          "status": {
+            "waiting-for-file_one": "Waiting for file",
+            "waiting-for-file_other": "Waiting for files",
+            "waiting-for-uploading": "Waiting for uploading",
+            "upload-successful": "Upload successful",
+            "waiting-for-uploading-description": "(Click to upload)",
+            "status": {
+              "upload": "Uploading",
+              "calculate": "Calculating",
+              "hint_one": "{{operate}} file",
+              "hint_other": "{{operate}} files"
+            }
+          }
+        }
+      },
+      "vines-variable-editor": {
+        "cannot-parse-toast": "VinesVariableEditor can't parse text!"
+      },
+      "date-range-picker": {
+        "select-date": "Select date"
+      }
+    },
+    "layout": {
+      "main": {
+        "sidebar": {
+          "list": {
+            "workbench": {
+              "label": "Workbench"
+            },
+            "app": {
+              "label": "App",
+              "workflows": {
+                "label": "Workflows"
+              }
+            },
+            "tool": {
+              "label": "Tools",
+              "action-tools": {
+                "label": "Action Tools"
+              },
+              "render-tools": {
+                "label": "Render Tools"
+              },
+              "comfyui": {
+                "label": "ComfyUI"
+              }
+            },
+            "model": {
+              "label": "Models",
+              "text-models": {
+                "label": "Text Models"
+              },
+              "image-models": {
+                "label": "Image Models"
+              }
+            },
+            "media": {
+              "label": "Data",
+              "text-data": {
+                "label": "Text Data"
+              },
+              "table-data": {
+                "label": "Table Data"
+              },
+              "media-data": {
+                "label": "Media Data"
+              }
+            },
+            "store": {
+              "label": "Store",
+              "application-store": {
+                "label": "App Store"
+              },
+              "text-model-store": {
+                "label": "Text Model Store"
+              },
+              "image-model-store": {
+                "label": "Image Model Store"
+              },
+              "comfyui-store": {
+                "label": "ComfyUI Store"
+              },
+              "text-data-store": {
+                "label": "Text Data Store"
+              }
+            }
+          },
+          "toolbar": {
+            "settings-tooltip": "Settings"
+          },
+          "teams": {
+            "balance": "Balance",
+            "team-selector": {
+              "search-team": "Search team...",
+              "not-found": "Not found",
+              "avatar-fallback": "Team"
+            }
+          }
+        }
+      },
+      "ugc": {
+        "utils": {
+          "no-description": "No description"
+        },
+        "detail": {
+          "info": {
+            "columns": {
+              "displayName": {
+                "label": "Key"
+              },
+              "value": {
+                "label": "Value"
+              }
+            }
+          },
+          "workflows": {
+            "columns": {
+              "icon": {
+                "label": "Icon"
+              },
+              "displayName": {
+                "label": "Name"
+              },
+              "description": {
+                "label": "Description"
+              },
+              "user": {
+                "label": "Creator"
+              }
+            }
+          }
+        },
+        "import-dialog": {
+          "title": "Confirmation of import",
+          "content": "Confirm importing {{name}} into your team?",
+          "utils": {
+            "this-project": "this project"
+          }
+        },
+        "publish-dialog": {
+          "title": "Publish to market",
+          "name": {
+            "placeholder": "Enter name"
+          }
+        },
+        "view": {
+          "filter": {
+            "button": {
+              "toast": {
+                "no-filter-group-name": "Please enter filter group name."
+              },
+              "creator": {
+                "label": "Creator",
+                "placeholder": "Select creator"
+              },
+              "tag": {
+                "label": "Tag",
+                "placeholder": "Select tag"
+              },
+              "created-time": {
+                "label": "Created Time",
+                "placeholder": "Select created time"
+              },
+              "updated-time": {
+                "label": "Updated Time",
+                "placeholder": "Select updated time"
+              },
+              "filter-group-name": {
+                "label": "Filter Group Name",
+                "placeholder": "Enter filter group name"
+              },
+              "save-filter-group": {
+                "label": "Save filtering as a group"
+              }
+            },
+            "list": {
+              "toast": {
+                "filter-group-not-found": "Filter group does not exist! Please refresh and try again later!"
+              },
+              "placeholder": "Enter filter group name"
+            }
+          },
+          "header": {
+            "display-mode": {
+              "button-tooltip": "Display mode",
+              "dropdown-label": "Display Mode",
+              "options": {
+                "table": "Table View",
+                "card": "Card View",
+                "gallery": "Gallery View"
+              }
+            },
+            "sort": {
+              "button-tooltip": "Sort",
+              "dropdown-label": "Sort Settings"
+            }
+          },
+          "tag-selector": {
+            "create-button": "Create Tag",
+            "placeholder": "Enter the label name and press Enter to create a new label"
+          }
+        }
+      }
+    }
+  },
+  "auth": {
+    "oidc": {
+      "auth-failed": "Authorization failed! Please try to login again",
+      "logging-in": "Logging in via {{oidc}}"
+    },
+    "login": {
+      "sms": "SMS",
+      "email": "Email",
+      "other": "OR",
+      "only-oidc": "Only support OIDC login",
+      "select-account": "Select logged in account",
+      "success": "Login successful",
+      "logging-in": "Logging in..."
+    },
+    "users": {
+      "selector": {
+        "title": "Select user",
+        "switching": "Switching user...",
+        "switched": "Switched to user: {{name}}",
+        "switch-failed": "Failed to switch user!"
+      },
+      "login-other": "Login other account",
+      "logout": "Logout"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "account": {
+      "title": "Account",
+      "payment-disabled-alert": "Payment module is disabled",
+      "info-editor": {
+        "invalid-toast": "Please enter valid content"
+      },
+      "user": {
+        "title": "User Profile",
+        "description": "Click to edit",
+        "user-name": {
+          "info-editor": {
+            "title": "Edit user name",
+            "placeholder": "Enter a user name, up to 16 characters"
+          }
+        },
+        "user-account": {
+          "not-phone-toast": "Only support editing phone for the time being",
+          "title": "Edit phone",
+          "old-phone": "Old phone",
+          "old-phone-code-placeholder": "Please enter OTP of your old phone",
+          "new-phone-placeholder": "Please enter new phone",
+          "new-phone-code-placeholder": "Please enter OTP of your new phone"
+        }
+      },
+      "team": {
+        "title": "My Team",
+        "description": "Manage your team info",
+        "team-name": {
+          "title": "Edit team name",
+          "placeholder": "Enter team name, up to 16 characters"
+        },
+        "team-description": {
+          "title": "Edit team description",
+          "placeholder": "Enter user description, up to 16 characters"
+        },
+        "apply-manage": {
+          "apply-item": {
+            "operate": {
+              "accept": "Accept",
+              "reject": "Reject"
+            },
+            "operate-toast": {
+              "index": "Request {{operate}}.",
+              "accept": "accepted",
+              "reject": "rejected"
+            }
+          },
+          "public-change": {
+            "index": "The team has been {{operate}}.",
+            "public": "public",
+            "private": "private"
+          },
+          "button": "Apply Manage",
+          "title": "Apply manage",
+          "public-tooltip-1": "When opened, the current team is made public on the platform and any user can search for it and apply to join.",
+          "public-tooltip-2": "When closed, users who have not joined a team will not be able to search for the current team or actively apply to join the team, but can still join via the invitation link.",
+          "public-span": "Set as a public team"
+        },
+        "create": {
+          "button-tooltip": "Create team",
+          "title": "Create team",
+          "name-placeholder": "Enter team name",
+          "description-placeholder": "Enter team description"
+        },
+        "delete": {
+          "button-tooltip": "Delete team",
+          "confirm-content-1": "Sure you want to delete the team?",
+          "confirm-content-2": "After deletion, all resources within this team will not be visible!",
+          "deleted": "Team deleted"
+        },
+        "import-export": {
+          "button": "Data Manage",
+          "dropdown-label": "Team Data Manage",
+          "import": {
+            "button": "Import Data",
+            "title": "Import team data"
+          },
+          "export": {
+            "button": "Export Data",
+            "title": "Export team data"
+          }
+        },
+        "join-public-team": {
+          "button-tooltip": "Join public team",
+          "title": "Join public team",
+          "search-placeholder": "Enter team name",
+          "team-item": {
+            "apply": "Apply"
+          }
+        }
+      },
+      "team-member": {
+        "title": "Team Member",
+        "description": {
+          "owner": "Invite your team members to collaborate",
+          "member": "Collaborate with team members"
+        },
+        "delete-member": "Delete member",
+        "invite": {
+          "button-tooltip": "Invite user",
+          "dropdown-label": "Invite User",
+          "outdated-options": {
+            "7-day": "valid for 7 days",
+            "never": "permanent"
+          },
+          "invite-manage": {
+            "button": "Manage Invitation Links",
+            "title": "Invitation Link Management",
+            "columns": {
+              "status": {
+                "label": "Status"
+              },
+              "remark": {
+                "label": "Remarks",
+                "info-editor": {
+                  "title": "Edit remarks",
+                  "placeholder": "Enter remarks"
+                }
+              },
+              "outdateTimestamp": {
+                "label": "Outdated at"
+              },
+              "inviterUser": {
+                "label": "Inviter"
+              },
+              "targetUser": {
+                "label": "Invitees"
+              },
+              "acceptedUsers": {
+                "label": "Accepted Invitees"
+              },
+              "operate": {
+                "label": "Operate",
+                "dropdown-label": "Invitation Link Operation"
+              }
+            }
+          },
+          "invite-user": {
+            "button": "Generate Invitation Links",
+            "title": "Invite users",
+            "search": {
+              "placeholder": "Enter username or phone"
+            },
+            "outdated": {
+              "content": "Invitation via link is",
+              "tip": "Become a team member via the invitation link"
+            },
+            "toast": {
+              "keywords-empty": "Please enter username or phone.",
+              "keywords-less-than-4": "Please enter more than 4 characters."
+            }
+          }
+        }
+      }
+    },
+    "api-key": {
+      "title": "API Key",
+      "api-key-item": {
+        "revoked": "Revoked",
+        "operate": {
+          "revoke": {
+            "button": "Revoke",
+            "alert": {
+              "title": "Confirmation of revocation",
+              "description": "Confirm revoking this API key? Applications that are using this key will not be able to access the API."
+            }
+          }
+        }
+      },
+      "header": {
+        "toast": {
+          "description-empty": "Please enter description."
+        },
+        "create": {
+          "button": "Create an API Key",
+          "title": "Create an API key",
+          "belong": {
+            "label": "Ownership",
+            "create-user": "User",
+            "create-team": "Team"
+          },
+          "description": {
+            "label": "Description",
+            "placeholder": "Enter description, up to 16 characters"
+          }
+        }
+      }
+    },
+    "theme": {
+      "title": "Theme",
+      "toast": {
+        "update": {
+          "loading": "Updating primary color...",
+          "success": "Primary color update successful!",
+          "error": "Primary color update failed! Please try again later!"
+        },
+        "create": {
+          "loading": "Creating theme...",
+          "success": "Theme create successful!",
+          "error": "Theme create failed! Please try again later!"
+        },
+        "delete": {
+          "loading": "Deleting theme...",
+          "success": "Theme delete successful!",
+          "error": "Theme delete failed! Please try again later!"
+        }
+      },
+      "team-primary-color": {
+        "title": "Team Primary Color",
+        "description": "You can set the team's theme color here, and the system will automatically generate the corresponding color scheme",
+        "tip": "Preview will not be saved",
+        "operate": {
+          "save": {
+            "button": "Save to Theme List",
+            "title": "Save to theme list",
+            "placeholder": "Enter theme name, up to 16 characters"
+          }
+        }
+      },
+      "team-logo": {
+        "title": "System Logo",
+        "description": "You can set the team's system logo here",
+        "options": {
+          "team": "Team Logo",
+          "system": "System Preset"
+        }
+      },
+      "market": {
+        "title": "Theme Market",
+        "operate": {
+          "add-to-team": "Add to Team"
+        }
+      }
+    }
+  },
+  "workbench": {
+    "view": {
+      "no-starred-view": "No starred views",
+      "header": {
+        "enter": "Enter the View",
+        "delete": "Unstar the view"
+      }
+    },
+    "sidebar": {
+      "add": "Star a view"
+    }
+  },
+  "ugc-page": {
+    "workflow": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "Icon"
+          },
+          "title": {
+            "label": "Name"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "user": {
+            "label": "Creator"
+          },
+          "assetTags": {
+            "label": "Tags"
+          },
+          "createdTimestamp": {
+            "label": "Created Time"
+          },
+          "updatedTimestamp": {
+            "label": "Updated Time"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "Workflow Operate",
+          "options": {
+            "copy-link": "Copy Link",
+            "create-a-copy": "Create a Copy",
+            "edit-info": "Edit Info",
+            "export-current-version": "Export Current Version",
+            "export-all-versions": "Export All Versions"
+          }
+        },
+        "subtitle": {
+          "import": {
+            "options": {
+              "local-import": "Local Import",
+              "market-import": "Market Import"
+            }
+          }
+        }
+      }
+    },
+    "action-tools": {
+      "utils": {
+        "pricing-mode": {
+          "free": "Free",
+          "per-execute": "Per execution charged {{amount}} RMB",
+          "per-1k-token": "Per 1K Token charged {{amount}} RMB",
+          "per-1min": "Per 1 minute charged {{amount}} RMB",
+          "per-1mb-file": "Per 1 MB file charged {{amount}} RMB"
+        },
+        "estimate": {
+          "estimate-time": "Estimate {{time}}"
+        }
+      },
+      "detail": {
+        "title": "Action Tool Detail",
+        "tabs": {
+          "info": {
+            "label": "Basic Info"
+          },
+          "workflows": {
+            "label": "Associated Workflows"
+          }
+        }
+      },
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "Icon"
+          },
+          "title": {
+            "label": "Name"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "estimateTime": {
+            "label": "Estimate Time"
+          },
+          "pricing": {
+            "label": "Pricing"
+          },
+          "thirdPartyAccount": {
+            "label": "Third Party Account"
+          }
+        },
+        "subtitle": {
+          "external-account": {
+            "button": "Third Party Account Manage",
+            "title": "Third party account manage",
+            "manage": {
+              "content": "All account information will be encrypted and stored without disclosing your key information (e.g. keys) and will not be sent back to the page",
+              "columns": {
+                "name": "Name",
+                "operate": "Operate"
+              },
+              "delete": {
+                "title": "Delete confirmation of third party account",
+                "content": "Are you sure you want to delete the third party account?\nDeleting this account will prevent it from being used properly in the workflow.\nThe operation cannot be undone."
+              },
+              "create": {
+                "title": "Add {{name}}",
+                "columns": {
+                  "displayName": "Account Name"
+                },
+                "utils": {
+                  "name": "{{name}} account"
+                }
+              }
+            },
+            "list": {
+              "create": "Add Account",
+              "count": {
+                "total_one": "Total {{count}} account, click to manage",
+                "total_other": "Total {{count}} accounts, click to manage",
+                "none": "No account, click to add one"
+              }
+            }
+          }
+        }
+      }
+    },
+    "text-models": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "Icon"
+          },
+          "title": {
+            "label": "Name"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "assetTags": {
+            "label": "Tags"
+          },
+          "createdTimestamp": {
+            "label": "Created Time"
+          },
+          "updatedTimestamp": {
+            "label": "Updated Time"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "Text Model Operate",
+          "options": {
+            "publish": "Publish to Market"
+          }
+        }
+      }
+    },
+    "image-models": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "Icon"
+          },
+          "title": {
+            "label": "Name"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "assetTags": {
+            "label": "Tags"
+          },
+          "createdTimestamp": {
+            "label": "Created Time"
+          },
+          "updatedTimestamp": {
+            "label": "Updated Time"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "Image Model Operate",
+          "options": {
+            "publish": "Publish to Market"
+          }
+        }
+      }
+    },
+    "text-data": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "Icon"
+          },
+          "title": {
+            "label": "Name"
+          },
+          "user": {
+            "label": "Creator"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "assetTags": {
+            "label": "Tags"
+          },
+          "createdTimestamp": {
+            "label": "Created Time"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "Text Data Operate"
+        },
+        "subtitle": {
+          "create-dataset": {
+            "button": "Create Dataset",
+            "title": "Create text dataset",
+            "form": {
+              "displayName": {
+                "label": "Name",
+                "placeholder": "Enter name"
+              },
+              "embeddingModel": {
+                "label": "Embedding Model",
+                "placeholder": "Select a model"
+              },
+              "description": {
+                "label": "Description",
+                "placeholder": "Enter description. Up to 100 characters"
+              },
+              "iconUrl": {
+                "label": "Icon"
+              }
+            }
+          }
+        }
+      },
+      "detail": {
+        "title": "Text Data Detail",
+        "header": {
+          "task-list": {
+            "all-done": "All tasks have been done",
+            "tooltip": {
+              "label": "Task List{{status}}",
+              "loading": " (Loading)",
+              "processing": " (Processing files)"
+            }
+          },
+          "import": {
+            "button": "Import Data",
+            "options": {
+              "file": "Import From File",
+              "oss": "Import From OSS",
+              "paragraph": "Import Paragraph",
+              "paragraph-batch": "Batch Import Paragraph"
+            }
+          }
+        },
+        "import": {
+          "utils": {
+            "pre-process-rules": {
+              "label": "Text Pre-processing Rules",
+              "rules": {
+                "replace-space-n-tab": "Replacing consecutive spaces, line breaks and tabs",
+                "delete-url-and-email": "Delete all URL addresses and e-mail addresses"
+              }
+            }
+          },
+          "toast": {
+            "create-task": {
+              "loading": "Creating import task...",
+              "success": "Import task created successfully!",
+              "error": "Import task created failed! Please try again later!"
+            }
+          },
+          "file": {
+            "title": "Import file",
+            "form": {
+              "fileURL": {
+                "description": "Files uploaded here will be automatically stored in \"Media Data\"."
+              },
+              "splitterType": {
+                "label": "Segmented Cleaning Configuration",
+                "placeholder": "Select a segmented cleaning mode",
+                "options": {
+                  "auto-segment": "Automatic Segmental Cleaning",
+                  "custom-segment": "Custom Segmental Cleaning"
+                },
+                "description": {
+                  "auto-segment": "Segmentation rules and preprocessing rules are set automatically. If you don't know these parameters, it is recommended to select this item.",
+                  "custom-segment": "Customize parameters such as segmentation rules, segment lengths and preprocessing rules."
+                }
+              },
+              "splitterConfig": {
+                "separator": {
+                  "label": "Segment Identifier",
+                  "placeholder": "Enter segment identifier, e.g., \",\", \".\" , \",\", \"\\n\".",
+                  "tip": "Please enter segment identifier."
+                },
+                "chunk_size": {
+                  "label": "Segment Chunk Size",
+                  "tip": "Please enter segment chunk size"
+                },
+                "chunk_overlap": {
+                  "label": "Segment Chunk Overlap",
+                  "tip": "Please enter segment chunk overlap"
+                }
+              }
+            }
+          },
+          "oss": {
+            "title": "Import from OSS",
+            "form": {
+              "ossType": {
+                "label": "OSS Type",
+                "placeholder": "Select OSS type"
+              }
+            }
+          }
+        },
+        "tabs": {
+          "documents": {
+            "label": "Documents",
+            "stats": {
+              "file-count": "Documents: {{count}}"
+            }
+          },
+          "segments": {
+            "label": "Segments",
+            "toast": {
+              "searched": "Searched",
+              "searched-after-re-sorting": "Searched after re-sorting"
+            },
+            "load-tip": "Vector mode only shows the first 10 items",
+            "search": {
+              "mode": {
+                "placeholder": "Search mode",
+                "options": {
+                  "fulltext": "Full-text",
+                  "vector": "Vector"
+                }
+              },
+              "value": {
+                "placeholder": "Enter text to sort by similarity. Press Enter to search.",
+                "sort-button": {
+                  "clear": "Clear",
+                  "re-sort": "Re-sort"
+                }
+              }
+            },
+            "stats": {
+              "dimension": "Vector Dimension: {{dimensionCount}}",
+              "model": "Embedding Model: {{model}}",
+              "id": "Vector Database ID: {{id}}"
+            }
+          },
+          "settings": {
+            "label": "Settings"
+          },
+          "associated-workflows": {
+            "label": "Associated Workflows"
+          }
+        }
+      }
+    },
+    "table-data": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "Icon"
+          },
+          "title": {
+            "label": "Name"
+          },
+          "user": {
+            "label": "Creator"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "assetTags": {
+            "label": "Tags"
+          },
+          "createdTimestamp": {
+            "label": "Created Time"
+          },
+          "updatedTimestamp": {
+            "label": "Updated Time"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "Table Data Operate"
+        },
+        "subtitle": {
+          "create-database": {
+            "button": "Create Table Database",
+            "title": "Create table database",
+            "form": {
+              "type": {
+                "label": "Create Type",
+                "placeholder": "Select a create type",
+                "options": {
+                  "builtIn": "Built-in Sqlite",
+                  "external": "External database"
+                }
+              },
+              "displayName": {
+                "label": "Name",
+                "placeholder": "Enter name"
+              },
+              "description": {
+                "label": "Description",
+                "placeholder": "Enter description. Up to 100 characters"
+              },
+              "iconUrl": {
+                "label": "Icon"
+              },
+              "databaseType": {
+                "label": "Database Type",
+                "placeholder": "Select a database type"
+              }
+            }
+          }
+        }
+      }
+    },
+    "media-data": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "Icon"
+          },
+          "title": {
+            "label": "Name"
+          },
+          "user": {
+            "label": "Creator"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "assetTags": {
+            "label": "Tags"
+          },
+          "createdTimestamp": {
+            "label": "Created Time"
+          },
+          "updatedTimestamp": {
+            "label": "Updated Time"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "Media Data Operate",
+          "options": {
+            "copy-link": "Copy File Link"
+          }
+        },
+        "subtitle": {
+          "upload": {
+            "button": "Upload Files",
+            "title": "Upload files"
+          }
+        }
+      }
+    }
+  },
+  "workspace": {
+    "404": {
+      "description": "Pages under construction"
+    }
+  }
+}

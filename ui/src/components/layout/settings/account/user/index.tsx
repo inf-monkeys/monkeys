@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { setWith } from 'lodash';
+import { useTranslation } from 'react-i18next';
 
 import { updateUserInfo } from '@/apis/authz/user';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
@@ -17,6 +18,8 @@ import VinesEvent from '@/utils/events.ts';
 interface IUserProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const User: React.FC<IUserProps> = () => {
+  const { t } = useTranslation();
+
   const [user, setUser] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
   const [users, setUsers] = useLocalStorage<IUserTokens>('vines-tokens', {});
 
@@ -35,8 +38,8 @@ export const User: React.FC<IUserProps> = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>账号信息</CardTitle>
-        <CardDescription>点击即可编辑信息</CardDescription>
+        <CardTitle>{t('settings.account.user.title')}</CardTitle>
+        <CardDescription>{t('settings.account.user.description')}</CardDescription>
       </CardHeader>
       <CardContent className="flex gap-4">
         <VinesImageEditor value={userPhoto} onChange={(val) => handleUpdateUser('photo', val)}>
@@ -51,7 +54,7 @@ export const User: React.FC<IUserProps> = () => {
         </div>
         <div className="flex flex-1 items-center justify-end">
           <Button theme="danger" size="small" onClick={() => VinesEvent.emit('vines-logout')}>
-            退出登录
+            {t('auth.users.logout')}
           </Button>
         </div>
       </CardContent>

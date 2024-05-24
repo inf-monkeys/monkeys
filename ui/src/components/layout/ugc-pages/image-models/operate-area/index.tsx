@@ -3,6 +3,7 @@ import React from 'react';
 import { mutate } from 'swr';
 
 import { FileUp, Trash } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { ISDModel } from '@/apis/sd/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
@@ -27,6 +28,8 @@ interface IOperateAreaProps {
 }
 
 export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, tooltipTriggerContent }) => {
+  const { t } = useTranslation();
+
   const id = item?.id;
 
   return (
@@ -47,7 +50,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
           e.preventDefault();
         }}
       >
-        <DropdownMenuLabel>图像模型操作</DropdownMenuLabel>
+        <DropdownMenuLabel>{t('ugc-page.image-models.ugc-view.operate-area.dropdown-label')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <UgcPublishDialog ugcId={id} item={item ?? {}}>
@@ -60,7 +63,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
               <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                 <FileUp size={15} />
               </DropdownMenuShortcut>
-              发布到市场
+              {t('ugc-page.image-models.ugc-view.operate-area.options.publish')}
             </DropdownMenuItem>
           </UgcPublishDialog>
           <DropdownMenuSeparator />
@@ -83,7 +86,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
               <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                 <Trash size={15} />
               </DropdownMenuShortcut>
-              删除
+              {t('common.utils.delete')}
             </DropdownMenuItem>
           </UgcDeleteDialog>
         </DropdownMenuGroup>

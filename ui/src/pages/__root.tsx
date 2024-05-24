@@ -4,6 +4,7 @@ import { createRootRoute, Outlet, ScrollRestoration } from '@tanstack/react-rout
 
 import { NextUIProvider } from '@nextui-org/system';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 import { OEM } from '@/components/layout/oem';
 import { MainWrapper } from '@/components/layout-wrapper/main';
@@ -16,11 +17,29 @@ import { SIDEBAR_MAP } from '@/consts/sidebar.tsx';
 import VinesEvent from '@/utils/events.ts';
 
 const RootComponent: React.FC = () => {
+  const { t } = useTranslation();
+
   const { routeIds, routeAppId, isUseOutside, isUseWorkSpace } = useVinesRoute();
 
-  const routeSiteName =
-    SIDEBAR_MAP.flatMap((it) => it.items || []).find((it) => it.name === routeAppId)?.label ??
-    (routeIds?.length ? '工作台' : '');
+  const namePath = SIDEBAR_MAP.flatMap((it) =>
+    it.items
+      ? it.items.map((sub) => {
+          return {
+            ...sub,
+            namePath: it.name + '.' + sub.name,
+          };
+        })
+      : {
+          ...it,
+          namePath: it.name,
+        },
+  ).find((it) => it.name === routeAppId)?.namePath;
+
+  const routeSiteName = namePath
+    ? t(`components.layout.main.sidebar.list.${namePath}.label`)
+    : routeIds?.length
+      ? t(`components.layout.main.sidebar.list.workbench.label`)
+      : '';
 
   useEffect(() => {
     VinesEvent.emit('vines-update-site-title', routeSiteName);

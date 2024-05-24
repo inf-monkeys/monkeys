@@ -15,7 +15,4 @@ export const importFileSchema = z.object({
 
 export type IImportFile = z.infer<typeof importFileSchema>;
 
-export const PRE_PROCESS_RULES: { value: string; label: string }[] = [
-  { value: 'replace-space-n-tab', label: '替换掉连续的空格、换行符和制表符' },
-  { value: 'delete-url-and-email', label: '删除所有 URL 地址和电子邮件地址' },
-];
+export const PRE_PROCESS_RULES: string[] = ['replace-space-n-tab', 'delete-url-and-email'];

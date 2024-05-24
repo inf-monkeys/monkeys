@@ -1,6 +1,7 @@
 import React, { KeyboardEventHandler, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import _ from 'lodash';
+import { useTranslation } from 'react-i18next';
 import { createEditor, Editor, Element, Text, Transforms } from 'slate';
 import { HistoryEditor, withHistory } from 'slate-history';
 import { Editable, ReactEditor, RenderElementProps, Slate, useFocused, useSelected, withReact } from 'slate-react';
@@ -63,6 +64,7 @@ const withVariable = (editor: ReactEditor) => {
  */
 // eslint-disable-next-line react-refresh/only-export-components
 export const useVariableEditor = (opt: UseVariableEditorOptions) => {
+  const { t } = useTranslation();
   const { initialValue, initialPointMapper = {}, onChange, width, onBlur } = opt;
   const [editor] = useState(() => withVariable(withHistory(withReact(createEditor()))));
   const [pointerMapper, setPointerMapper] = useState(initialPointMapper);
@@ -82,7 +84,7 @@ export const useVariableEditor = (opt: UseVariableEditorOptions) => {
         pointerKeyMapper.sort((a, b) => (exactMatchRegex.test(b) ? 1 : exactMatchRegex.test(a) ? -1 : 0));
       } catch (e) {
         console.warn('[VinesEditor] 无法解析的文本', e);
-        toast.error('VinesVariableEditor 无法解析文本！');
+        toast.error(t('components.ui.vines-variable-editor.cannot-parse-toast'));
       }
 
       const finalTextArr: string[] = [];

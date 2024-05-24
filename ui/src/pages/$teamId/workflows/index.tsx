@@ -6,6 +6,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import { useClipboard } from '@mantine/hooks';
 import { Copy, FileUp, FolderUp, Import, Link, Pencil, Plus, Trash } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { preloadUgcWorkflows, useUgcWorkflows } from '@/apis/ugc';
@@ -45,6 +46,8 @@ import { useWorkflow } from '@/package/vines-flow';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const Workflows: React.FC = () => {
+  const { t } = useTranslation();
+
   const navigate = useNavigate();
   const clipboard = useClipboard({ timeout: 500 });
   const { teamId } = useVinesTeam();
@@ -61,14 +64,14 @@ export const Workflows: React.FC = () => {
 
   const handleCreateWorkflow = async () => {
     if (!teamId) {
-      toast.warning('请等待数据加载完毕');
+      toast.warning(t('common.toast.loading'));
       return;
     }
     setIsCreating(true);
-    const workflowId = await createWorkflow('未命名应用');
+    const workflowId = await createWorkflow(t('common.utils.untitled'));
     setIsCreating(false);
     if (!workflowId) {
-      toast.error('创建失败，请稍后再试');
+      toast.error(t('common.create.error'));
       return;
     }
     void mutateWorkflows();
@@ -81,12 +84,12 @@ export const Workflows: React.FC = () => {
 
   const handleCloneWorkflow = async (workflowId: string) => {
     if (!teamId) {
-      toast.warning('请等待数据加载完毕');
+      toast.warning(t('common.toast.loading'));
       return;
     }
     const newWorkflowInfo = await cloneWorkflow(workflowId);
     if (!newWorkflowInfo) {
-      toast.error('创建失败，请稍后再试');
+      toast.error(t('common.create.error'));
       return;
     }
     void mutateWorkflows();
@@ -95,17 +98,17 @@ export const Workflows: React.FC = () => {
 
   const handleDeleteWorkflow = (workflowId?: string) => {
     if (!workflowId) {
-      toast.error('数据加载失败，请稍后再试');
+      toast.warning(t('common.toast.loading'));
       return;
     }
 
     toast.promise(deleteWorkflow(workflowId), {
-      loading: '删除中',
+      loading: t('common.delete.loading'),
       success: () => {
         void mutateWorkflows();
-        return '删除成功';
+        return t('common.delete.success');
       },
-      error: '删除失败，请检查网络后重试',
+      error: t('common.delete.error'),
     });
   };
 
@@ -115,14 +118,14 @@ export const Workflows: React.FC = () => {
         assetKey="workflow"
         assetType="workflow"
         assetIdKey="workflowId"
-        assetName="工作流"
+        assetName={t('components.layout.main.sidebar.list.app.workflows.label')}
         useUgcFetcher={useUgcWorkflows}
         preloadUgcFetcher={preloadUgcWorkflows}
         createColumns={() => createWorkflowsColumns()}
         renderOptions={{
           subtitle: (item) => (
             <span className="line-clamp-1">
-              {`${item.user?.name ?? '未知'} 创建于 ${formatTimeDiffPrevious(item.createdTimestamp)}`}
+              {`${item.user?.name ?? t('common.utils.unknown-user') + ' ' + t('common.utils.created-at', { time: formatTimeDiffPrevious(item.createdTimestamp) })}`}
             </span>
           ),
           cover: (item) => RenderIcon({ iconUrl: item.iconUrl, size: 'gallery' }),
@@ -145,19 +148,19 @@ export const Workflows: React.FC = () => {
                 e.preventDefault();
               }}
             >
-              <DropdownMenuLabel>工作流操作</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('ugc-page.workflow.ugc-view.operate-area.dropdown-label')}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem
                   onSelect={() => {
                     clipboard.copy(location.origin.concat(`/${item.teamId}/workspace/${item.workflowId}`));
-                    toast.success('链接复制成功');
+                    toast.success(t('common.toast.copy-success'));
                   }}
                 >
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <Link size={15} />
                   </DropdownMenuShortcut>
-                  复制链接
+                  {t('ugc-page.workflow.ugc-view.operate-area.options.copy-link')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -168,7 +171,7 @@ export const Workflows: React.FC = () => {
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <Copy size={15} />
                   </DropdownMenuShortcut>
-                  创建副本
+                  {t('ugc-page.workflow.ugc-view.operate-area.options.create-a-copy')}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onSelect={() => {
@@ -179,7 +182,7 @@ export const Workflows: React.FC = () => {
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <Pencil size={15} />
                   </DropdownMenuShortcut>
-                  编辑信息
+                  {t('ugc-page.workflow.ugc-view.operate-area.options.edit-info')}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onSelect={() => {
@@ -194,7 +197,7 @@ export const Workflows: React.FC = () => {
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <FileUp size={15} />
                   </DropdownMenuShortcut>
-                  导出当前版本
+                  {t('ugc-page.workflow.ugc-view.operate-area.options.export-current-version')}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onSelect={() => {
@@ -205,7 +208,7 @@ export const Workflows: React.FC = () => {
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <FolderUp size={15} />
                   </DropdownMenuShortcut>
-                  导出全部版本
+                  {t('ugc-page.workflow.ugc-view.operate-area.options.export-all-versions')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -218,7 +221,7 @@ export const Workflows: React.FC = () => {
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <Trash size={15} />
                   </DropdownMenuShortcut>
-                  删除
+                  {t('common.utils.delete')}
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
@@ -230,7 +233,7 @@ export const Workflows: React.FC = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="small" icon={<Import />}>
-                  导入
+                  {t('common.utils.import')}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -240,7 +243,9 @@ export const Workflows: React.FC = () => {
                 }}
               >
                 <DropdownMenuGroup>
-                  <DropdownMenuItem onSelect={() => {}}>本地导入</DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => {}}>
+                    {t('ugc-page.workflow.ugc-view.subtitle.import.options.local-import')}
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     onSelect={() => {
                       void navigate({
@@ -248,13 +253,13 @@ export const Workflows: React.FC = () => {
                       });
                     }}
                   >
-                    市场导入
+                    {t('ugc-page.workflow.ugc-view.subtitle.import.options.market-import')}
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
             <Button variant="outline" size="small" icon={<Plus />} onClick={handleCreateWorkflow} loading={isCreating}>
-              新建
+              {t('common.utils.create')}
             </Button>
           </>
         }
@@ -273,15 +278,22 @@ export const Workflows: React.FC = () => {
           }}
         >
           <AlertDialogHeader>
-            <AlertDialogTitle>工作流删除确认</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t('common.dialog.delete-confirm.title', {
+                type: t('common.type.workflow'),
+              })}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              确定要删除工作流「{currentWorkflow?.name ?? '未知工作流'}」？此操作不可恢复。
+              {t('common.dialog.delete-confirm.content', {
+                type: t('common.type.workflow'),
+                name: currentWorkflow?.name ?? t('common.utils.unknown'),
+              })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.utils.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={() => handleDeleteWorkflow(currentWorkflow?.workflowId)}>
-              确认删除
+              {t('common.utils.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

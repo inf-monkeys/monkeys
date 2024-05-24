@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 
 import _ from 'lodash';
 import { Trash } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { removeAssetFilterRules, useAssetFilterRuleList, useAssetPublicCategories } from '@/apis/ugc';
@@ -40,6 +41,8 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
   onChange,
   filterButtonProps,
 }) => {
+  const { t } = useTranslation();
+
   const { data: assetFilterRules, mutate: mutateAssetFilterRules } = useAssetFilterRuleList(assetType, isMarket);
   const { data: assetPublicCategories } = useAssetPublicCategories(assetType, isMarket);
 
@@ -80,7 +83,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
       } else if (assetFilterRules) {
         const rule = assetFilterRules.find((r) => r.uuid === current);
         if (!rule) {
-          toast.error('分组不存在，请刷新后重试');
+          toast.error(t('components.layout.ugc.view.filter.list.toast.filter-group-not-found'));
         } else {
           onChange(rule.rules);
         }
@@ -92,7 +95,11 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
     <div className="flex flex-col gap-2 p-1">
       {filterAreaVisible && (
         <div className="flex gap-2">
-          <Input placeholder="搜索分组名称" value={searchValue} onChange={setSearchValue} />
+          <Input
+            placeholder={t('components.layout.ugc.view.filter.list.placeholder')}
+            value={searchValue}
+            onChange={setSearchValue}
+          />
           <UgcViewFilterButton assetType={assetType} assetKey={assetKey} {...filterButtonProps} defaultAddToFavourite />
         </div>
       )}
@@ -104,7 +111,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
         onClick={() => setCurrent('all')}
       >
         <div className="flex w-full items-center justify-between px-4 text-xs">
-          <span>全部</span>
+          <span>{t('common.utils.all')}</span>
         </div>
       </div>
       <ScrollArea className="h-[calc(100vh-15rem)]">
@@ -132,7 +139,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                     <span>{rule.name}</span>
                     {assetType != 'block' && !isMarket && (
                       <AlertDialog>
-                        <Tooltip content="删除">
+                        <Tooltip content={t('common.utils.delete')}>
                           <TooltipTrigger asChild>
                             <AlertDialogTrigger asChild>
                               <div
@@ -152,27 +159,34 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                           }}
                         >
                           <AlertDialogHeader>
-                            <AlertDialogTitle>分组删除确认</AlertDialogTitle>
+                            <AlertDialogTitle>
+                              {t('common.dialog.delete-confirm.title', {
+                                type: t('common.type.filter-group'),
+                              })}
+                            </AlertDialogTitle>
                             <AlertDialogDescription>
-                              确定要删除分组「{rule.name}」？此操作不可恢复。
+                              {t('common.dialog.delete-confirm.content', {
+                                name: rule.name,
+                                type: t('common.type.filter-group'),
+                              })}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>取消</AlertDialogCancel>
+                            <AlertDialogCancel>{t('common.utils.cancel')}</AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => {
                                 toast.promise(removeAssetFilterRules(rule.id), {
-                                  loading: '操作中...',
+                                  loading: t('common.delete.loading'),
                                   success: () => {
                                     void mutateAssetFilterRules();
-                                    (current === rule.id || current === rule._id) && setCurrent('all');
-                                    return '删除成功';
+                                    (current === rule._id || current === rule.id) && setCurrent('all');
+                                    return t('common.delete.success');
                                   },
-                                  error: '删除失败，请检查网络后重试',
+                                  error: t('common.delete.error'),
                                 });
                               }}
                             >
-                              确认删除
+                              {t('common.utils.confirm')}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
