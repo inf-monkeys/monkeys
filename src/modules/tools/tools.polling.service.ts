@@ -311,7 +311,6 @@ export class ToolsPollingService {
         await this.readIncomingMessage(data, {
           onDataCallback: (chunk) => {
             chunk = chunk.toString();
-            logger.info(`Stream data: ${chunk}`);
             this.mq.publish(TOOL_STREAM_RESPONSE_TOPIC(task.workflowInstanceId), chunk);
             if (llmChatTool === LlmModelEndpointType.CHAT_COMPLETIONS) {
               const cleanedMessageStr = chunk.replace('data: ', '').trim();
