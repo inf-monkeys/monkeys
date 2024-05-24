@@ -913,12 +913,39 @@
           }
         },
         "import": {
-          "utils": {
+          "common-form": {
             "pre-process-rules": {
               "label": "文本预处理规则",
               "rules": {
                 "replace-space-n-tab": "替换掉连续的空格、换行符和制表符",
                 "delete-url-and-email": "删除所有 URL 地址和电子邮件地址"
+              }
+            },
+            "splitterType": {
+              "label": "分段清洗配置",
+              "placeholder": "选择一个分段清洗模式",
+              "options": {
+                "auto-segment": "自动分段清洗",
+                "custom-segment": "自定义分段清洗"
+              },
+              "description": {
+                "auto-segment": "自动设置分段规则与预处理规则，如果不了解这些参数建议选择此项",
+                "custom-segment": "自定义分段规则、分段长度以及预处理规则等参数"
+              }
+            },
+            "splitterConfig": {
+              "separator": {
+                "label": "分段标识符",
+                "placeholder": "请输入分段标识符，如：「，」、「。」、「,」、「\n」",
+                "tip": "请输入分段标识符"
+              },
+              "chunk_size": {
+                "label": "分段最大长度",
+                "tip": "请输入分段最大长度"
+              },
+              "chunk_overlap": {
+                "label": "文本重叠量",
+                "tip": "请输入文本重叠量"
               }
             }
           },
@@ -927,6 +954,11 @@
               "loading": "创建导入任务中...",
               "success": "导入任务创建成功！",
               "error": "导入任务创建失败！请稍后重试！"
+            },
+            "import-paragraph": {
+              "loading": "导入段落中...",
+              "success": "导入成功！后台向量化时数据更新可能会有延迟",
+              "error": "导入失败！请稍后再试！"
             }
           },
           "file": {
@@ -934,34 +966,81 @@
             "form": {
               "fileURL": {
                 "description": "在此处上传文件将自动存入「富媒体数据」"
-              },
-              "splitterType": {
-                "label": "分段清洗配置",
-                "placeholder": "选择一个分段清洗模式",
+              }
+            }
+          },
+          "oss": {
+            "title": "从 OSS 导入",
+            "form": {
+              "ossType": {
+                "label": "OSS 类型",
+                "placeholder": "请选择 OSS 类型",
                 "options": {
-                  "auto-segment": "自动分段清洗",
-                  "custom-segment": "自定义分段清洗"
-                },
-                "description": {
-                  "auto-segment": "自动设置分段规则与预处理规则，如果不了解这些参数建议选择此项",
-                  "custom-segment": "自定义分段规则、分段长度以及预处理规则等参数"
+                  "TOS": "火山引擎 TOS",
+                  "ALIYUNOSS": "阿里云 OSS"
                 }
               },
-              "splitterConfig": {
-                "separator": {
-                  "label": "分段标识符",
-                  "placeholder": "请输入分段标识符，如：「，」、「。」、「,」、「\n」",
-                  "tip": "请输入分段标识符"
+              "ossConfig": {
+                "region": {
+                  "label": "TOS 区域",
+                  "placeholder": "请输入 TOS 区域，如 「cn-beijing」",
+                  "tip": "请输入 TOS 区域"
                 },
-                "chunk_size": {
-                  "label": "分段最大长度",
-                  "tip": "请输入分段最大长度"
+                "endpoint": {
+                  "label": "OSS 端点",
+                  "placeholder": "请输入 OSS 端点，如 「{{endpoint}}」",
+                  "description": {
+                    "content": "示例端点：「{{endpoint}}」",
+                    "TOS": "https://tos-cn-beijing.volces.com",
+                    "OSS": "https://oss-cn-beijing.aliyuncs.com"
+                  }
                 },
-                "chunk_overlap": {
-                  "label": "文本重叠量",
-                  "tip": "请输入文本重叠量"
+                "bucketName": {
+                  "label": "存储桶名称",
+                  "placeholder": "请输入存储桶名称"
+                },
+                "bucketType": {
+                  "label": "存储桶类型",
+                  "placeholder": "请选择存储桶类型",
+                  "options": {
+                    "private": "私有",
+                    "public": "公开"
+                  }
+                },
+                "accessKeyId": {
+                  "label": "Access Key ID",
+                  "placeholder": "请输入 Access Key ID"
+                },
+                "accessKeySecret": {
+                  "label": "Access Key Secret",
+                  "placeholder": "请输入 Access Key Secret"
+                },
+                "baseFolder": {
+                  "label": "文件所在目录路径",
+                  "placeholder": "请输入文件所在目录路径，如 「path/to/files/」"
+                },
+                "fileExtensions": {
+                  "label": "文件扩展名",
+                  "placeholder": "请输入文件扩展名",
+                  "description": "如果有多种类型，使用半角逗号「,」分割，如 「.txt,.pdf」。不传则表示导入所有类型的文件"
+                },
+                "excludeFileRegex": {
+                  "label": "过滤文件正则表达式",
+                  "placeholder": "请输入过滤文件正则表达式",
+                  "description": "根据正则表达式过滤特定的文件，如 「(已取消)|(已取消)|(更新前)」"
                 }
               }
+            }
+          },
+          "paragraph": {
+            "title": {
+              "single": "导入段落",
+              "batch": "批量导入段落"
+            },
+            "extra": {
+              "label": "批量导入段落分割符",
+              "placeholder": "请输入段落分隔符",
+              "description": "将段落内容按照指定分隔符分割，每个段落将被视为一个独立的段落"
             }
           }
         },

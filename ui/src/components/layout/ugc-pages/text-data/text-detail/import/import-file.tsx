@@ -114,7 +114,7 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('ugc-page.text-data.detail.import.file.form.splitterType.label')}</FormLabel>
+                    <FormLabel>{t('ugc-page.text-data.detail.import.common-form.splitterType.label')}</FormLabel>
                     <FormControl>
                       <Select
                         onValueChange={(val) => {
@@ -133,24 +133,24 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue
-                              placeholder={t('ugc-page.text-data.detail.import.file.form.splitterType.placeholder')}
+                              placeholder={t('ugc-page.text-data.detail.import.common-form.splitterType.placeholder')}
                             />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="auto-segment">
-                            {t('ugc-page.text-data.detail.import.file.form.splitterType.options.auto-segment')}
+                            {t('ugc-page.text-data.detail.import.common-form.splitterType.options.auto-segment')}
                           </SelectItem>
                           <SelectItem value="custom-segment">
-                            {t('ugc-page.text-data.detail.import.file.form.splitterType.options.custom-segment')}
+                            {t('ugc-page.text-data.detail.import.common-form.splitterType.options.custom-segment')}
                           </SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>
                     <FormDescription>
                       {splitterType === 'auto-segment'
-                        ? t('ugc-page.text-data.detail.import.file.form.splitterType.description.auto-segment')
-                        : t('ugc-page.text-data.detail.import.file.form.splitterType.description.custom-segment')}
+                        ? t('ugc-page.text-data.detail.import.common-form.splitterType.description.auto-segment')
+                        : t('ugc-page.text-data.detail.import.common-form.splitterType.description.custom-segment')}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -163,17 +163,17 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                     name="splitterConfig.separator"
                     control={form.control}
                     rules={{
-                      required: t('ugc-page.text-data.detail.import.file.form.splitterConfig.separator.tip'),
+                      required: t('ugc-page.text-data.detail.import.common-form.splitterConfig.separator.tip'),
                     }}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
-                          {t('ugc-page.text-data.detail.import.file.form.splitterConfig.separator.label')}
+                          {t('ugc-page.text-data.detail.import.common-form.splitterConfig.separator.label')}
                         </FormLabel>
                         <FormControl>
                           <Input
                             placeholder={t(
-                              'ugc-page.text-data.detail.import.file.form.splitterConfig.separator.placeholder',
+                              'ugc-page.text-data.detail.import.common-form.splitterConfig.separator.placeholder',
                             )}
                             {...field}
                             className="grow"
@@ -187,11 +187,13 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                   <FormField
                     name="splitterConfig.chunk_size"
                     control={form.control}
-                    rules={{ required: t('ugc-page.text-data.detail.import.file.form.splitterConfig.chunk_size.tip') }}
+                    rules={{
+                      required: t('ugc-page.text-data.detail.import.common-form.splitterConfig.chunk_size.tip'),
+                    }}
                     render={({ field: { value, onChange } }) => (
                       <FormItem>
                         <FormLabel>
-                          {t('ugc-page.text-data.detail.import.file.form.splitterConfig.chunk_size.label')}
+                          {t('ugc-page.text-data.detail.import.common-form.splitterConfig.chunk_size.label')}
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -210,12 +212,12 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                     name="splitterConfig.chunk_overlap"
                     control={form.control}
                     rules={{
-                      required: t('ugc-page.text-data.detail.import.file.form.splitterConfig.chunk_overlap.tip'),
+                      required: t('ugc-page.text-data.detail.import.common-form.splitterConfig.chunk_overlap.tip'),
                     }}
                     render={({ field: { value, onChange } }) => (
                       <FormItem>
                         <FormLabel>
-                          {t('ugc-page.text-data.detail.import.file.form.splitterConfig.chunk_overlap.label')}
+                          {t('ugc-page.text-data.detail.import.common-form.splitterConfig.chunk_overlap.label')}
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -236,7 +238,9 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                     render={() => (
                       <FormItem>
                         <div className="mb-4">
-                          <FormLabel>{t('ugc-page.text-data.detail.import.utils.pre-process.rules.label')}</FormLabel>
+                          <FormLabel>
+                            {t('ugc-page.text-data.detail.import.common-form.pre-process-rules.label')}
+                          </FormLabel>
                         </div>
                         {PRE_PROCESS_RULES.map((value) => (
                           <FormField
@@ -257,7 +261,7 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                                     />
                                   </FormControl>
                                   <FormLabel className="text-sm font-normal">
-                                    {t(`ugc-page.text-data.detail.import.utils.pre-process.rules.rules.${value}`)}
+                                    {t(`ugc-page.text-data.detail.import.common-form.pre-process-rules.rules.${value}`)}
                                   </FormLabel>
                                 </FormItem>
                               );
