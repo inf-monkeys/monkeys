@@ -50,7 +50,7 @@ export const VinesMarkdown: React.FC<IVinesMarkdownProps> = ({ allowHtml, classN
         </Tooltip>
       ),
       img: ({ src, alt }) => (
-        <Avatar className="w-auto select-none rounded">
+        <Avatar className="size-auto max-w-full select-none rounded">
           <AvatarImage className="aspect-auto w-auto rounded" src={src} alt={alt} />
           <AvatarFallback className="rounded-none p-2 text-xs">{alt}</AvatarFallback>
         </Avatar>
