@@ -80,7 +80,7 @@ export class WorkflowPageController {
     description: '删除视图，返回新的视图列表',
   })
   @UseGuards(CompatibleAuthGuard)
-  @Delete('/pages/:pageId')
+  @Delete('/:workflowId/pages/:pageId')
   async removeWorkflowPage(@Param('workflowId') workflowId: string, @Param('pageId') pageId: string, @Req() request: IRequest) {
     const { teamId, userId } = request;
     const data = await this.pageService.removeWorkflowPage(workflowId, teamId, userId, pageId);
