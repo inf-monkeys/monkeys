@@ -64,7 +64,7 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
     setIsLoading(true);
     if (!textId) {
       setIsLoading(false);
-      toast.error('知识库不存在');
+      toast.error(t('common.toast.vector-database-not-found'));
       return;
     }
 
@@ -94,19 +94,19 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
             padding: 10,
           }}
         >
-          <h1 className="text-xl font-bold">基本信息</h1>
+          <h1 className="text-xl font-bold">{t('ugc-page.text-data.detail.tabs.settings.basic-info.title')}</h1>
         </div>
 
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-32">类型</TableHead>
-              <TableHead>内容</TableHead>
+              <TableHead className="w-32">{t('components.layout.ugc.detail.info.columns.displayName.label')}</TableHead>
+              <TableHead>{t('components.layout.ugc.detail.info.columns.value.label')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <TableRow>
-              <TableCell>图标</TableCell>
+              <TableCell>{t('ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.icon.label')}</TableCell>
               <TableCell>
                 <VinesIconEditor
                   value={icon}
@@ -118,51 +118,63 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>名称</TableCell>
+              <TableCell>{t('ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.name.label')}</TableCell>
               <TableCell className="flex items-center gap-2">
                 <span>{detail?.displayName}</span>
                 <InfoEditor
-                  title="编辑名称"
-                  placeholder="输入名称，16 字以内"
+                  title={t('ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.name.info-editor.title')}
+                  placeholder={t(
+                    'ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.name.info-editor.placeholder',
+                  )}
                   initialValue={detail?.displayName || ''}
                   onFinished={(val) => handleUpdate('displayName', val)}
                 >
                   <Button variant="outline" size="small" icon={<Edit2Icon />} className="scale-80">
-                    编辑
+                    {t('common.utils.edit')}
                   </Button>
                 </InfoEditor>
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>描述</TableCell>
+              <TableCell>
+                {t('ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.description.label')}
+              </TableCell>
               <TableCell className="flex items-center gap-2">
-                <span>{detail?.description || '暂无描述'}</span>
+                <span>{detail?.description || t('components.layout.ugc.utils.no-description')}</span>
                 <InfoEditor
-                  title="编辑描述"
-                  placeholder="输入描述，120 字以内"
+                  title={t('ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.name.info-editor.title')}
+                  placeholder={t(
+                    'ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.name.info-editor.placeholder',
+                  )}
                   initialValue={detail?.description || ''}
                   onFinished={(val) => handleUpdate('description', val)}
                 >
                   <Button variant="outline" size="small" icon={<Edit2Icon />} className="scale-80">
-                    编辑
+                    {t('common.utils.edit')}
                   </Button>
                 </InfoEditor>
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>向量维度</TableCell>
+              <TableCell>
+                {t('ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.dimension.label')}
+              </TableCell>
               <TableCell>{detail?.dimension || '-'}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>Embedding 模型</TableCell>
+              <TableCell>{t('ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.model.label')}</TableCell>
               <TableCell>{detail?.embeddingModel || '-'}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>创建时间</TableCell>
+              <TableCell>
+                {t('ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.created-time.label')}
+              </TableCell>
               <TableCell>{formatTimeDiffPrevious(detail?.createdTimestamp ?? 0)}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>最后更新时间</TableCell>
+              <TableCell>
+                {t('ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.updated-time.label')}
+              </TableCell>
               <TableCell>{formatTimeDiffPrevious(detail?.updatedTimestamp ?? 0)}</TableCell>
             </TableRow>
           </TableBody>
@@ -173,7 +185,7 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
             padding: 10,
           }}
         >
-          <h1 className="text-xl font-bold">检索设置</h1>
+          <h1 className="text-xl font-bold">{t('ugc-page.text-data.detail.tabs.settings.search-settings.title')}</h1>
         </div>
 
         <Form {...form}>
@@ -183,18 +195,26 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>检索方式</FormLabel>
+                  <FormLabel>{t('ugc-page.text-data.detail.tabs.settings.search-settings.form.mode.label')}</FormLabel>
                   <FormControl>
                     <FormControl>
                       <Select defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="选择一个分段清洗模式" />
+                            <SelectValue
+                              placeholder={t(
+                                'ugc-page.text-data.detail.tabs.settings.search-settings.form.mode.placeholder',
+                              )}
+                            />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value={KnowledgeBaseRetrievalMode.VectorSearch}>向量检索</SelectItem>
-                          <SelectItem value={KnowledgeBaseRetrievalMode.FullTextSearch}>全文检索</SelectItem>
+                          <SelectItem value={KnowledgeBaseRetrievalMode.VectorSearch}>
+                            {t('ugc-page.text-data.detail.tabs.settings.search-settings.form.mode.options.vector')}
+                          </SelectItem>
+                          <SelectItem value={KnowledgeBaseRetrievalMode.FullTextSearch}>
+                            {t('ugc-page.text-data.detail.tabs.settings.search-settings.form.mode.options.full-text')}
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -208,16 +228,20 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Top K</FormLabel>
+                  <FormLabel>{t('ugc-page.text-data.detail.tabs.settings.search-settings.form.topK.label')}</FormLabel>
                   <FormControl>
-                    <NumberInput placeholder="TopK" className="h-10 resize-none" {...field} />
+                    <NumberInput
+                      placeholder={t('ugc-page.text-data.detail.tabs.settings.search-settings.form.topK.placeholder')}
+                      className="h-10 resize-none"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <Button variant="outline" icon={<Save />} type="submit">
-              保存检索配置
+              {t('common.utils.save')}
             </Button>
           </form>
         </Form>
