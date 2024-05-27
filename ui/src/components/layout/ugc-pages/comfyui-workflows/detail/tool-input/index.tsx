@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 
 import { useDebouncedState } from '@mantine/hooks';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { autoGenerateComfyuiWorkflowToolInput, updateComfyuiWorkflowToolInput } from '@/apis/comfyui';
@@ -14,6 +15,8 @@ interface IComfyuiWofrkflowToolInputProps {
 
 // million-ignore
 export const ComfyuiWorkflowToolInput: React.FC<IComfyuiWofrkflowToolInputProps> = ({ data }) => {
+  const { t } = useTranslation();
+
   const { toolInput } = data;
 
   const [updatedToolInput, setUpdatedToolInput] = useDebouncedState(JSON.stringify(toolInput || [], null, 4), 200);
@@ -22,18 +25,18 @@ export const ComfyuiWorkflowToolInput: React.FC<IComfyuiWofrkflowToolInputProps>
     try {
       parsedToolInput = JSON.parse(updatedToolInput);
     } catch {
-      toast.error('工具表单配置必须为 JSON');
+      toast.error(t('ugc-page.comfyui-workflow.detail.tabs.toolsInput.toast.not-json'));
       return;
     }
     await updateComfyuiWorkflowToolInput(data.id, parsedToolInput);
-    toast.success('保存成功');
+    toast.success(t('ugc-page.comfyui-workflow.detail.tabs.toolsInput.toast.save-success'));
   };
 
   const onAutoGenerate = async () => {
     const newInput = await autoGenerateComfyuiWorkflowToolInput(data.id);
     if (newInput) {
       setUpdatedToolInput(JSON.stringify(newInput, null, 4));
-      toast.success('保存成功');
+      toast.success(t('ugc-page.comfyui-workflow.detail.tabs.toolsInput.toast.save-success'));
     }
   };
 
@@ -43,12 +46,12 @@ export const ComfyuiWorkflowToolInput: React.FC<IComfyuiWofrkflowToolInputProps>
 
   return (
     <div>
-      <h1 className="text-xl font-bold">工具表单配置</h1>
+      <h1 className="text-xl font-bold">{t('ugc-page.comfyui-workflow.detail.tabs.toolsInput.title')}</h1>
       <br></br>
       <CodeEditor data={updatedToolInput} height={400} lineNumbers={2} onUpdate={setUpdatedToolInput} />
       <br></br>
       <Button type="submit" onClick={onSubmit}>
-        保存配置
+        {t('common.utils.save')}
       </Button>
       <Button
         type="submit"
@@ -57,7 +60,7 @@ export const ComfyuiWorkflowToolInput: React.FC<IComfyuiWofrkflowToolInputProps>
           marginLeft: 20,
         }}
       >
-        重新生成
+        {t('ugc-page.comfyui-workflow.detail.tabs.toolsInput.button.auto-generate')}
       </Button>
     </div>
   );

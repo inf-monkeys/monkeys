@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { MIME_TYPES } from '@mantine/dropzone';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { importComfyuiWorkflow } from '@/apis/comfyui';
@@ -28,6 +29,8 @@ interface IImportToolModalProps {
 }
 
 export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ children }) => {
+  const { t } = useTranslation();
+
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -41,26 +44,17 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
   const handleSubmit = form.handleSubmit((data) => {
     setIsLoading(true);
     toast.promise(importComfyuiWorkflow(data), {
-      loading: '导入中...',
+      loading: t('common.operate.loading'),
       success: () => {
         setOpen(false);
-        return '导入成功';
+        return t('common.operate.success');
       },
-      error: '导入失败',
+      error: t('common.operate.error'),
       finally: () => setIsLoading(false),
     });
   });
 
-  const comfyuiWorkflowTypeOptions = [
-    {
-      value: 'image',
-      displayName: '图片',
-    },
-    {
-      value: 'json',
-      displayName: '工作流 JSON 文件',
-    },
-  ];
+  const comfyuiWorkflowTypeOptions = ['image', 'json'];
 
   const { workflowType } = form.getValues();
 
@@ -69,7 +63,7 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[625px]">
         <DialogHeader>
-          <DialogTitle>导入 ComfyUI 工作流</DialogTitle>
+          <DialogTitle>{t('workspace.tools.import-comfyui-workflow.title')}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={handleSubmit} className="flex flex-col gap-2">
@@ -79,18 +73,20 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>ComfyUI 工作流类型</FormLabel>
+                    <FormLabel>{t('workspace.tools.import-comfyui-workflow.form.workflowType.label')}</FormLabel>
                     <FormControl>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="请选择一个创建类型" />
+                            <SelectValue
+                              placeholder={t('workspace.tools.import-comfyui-workflow.form.workflowType.placeholder')}
+                            />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {comfyuiWorkflowTypeOptions.map((option) => (
-                            <SelectItem value={option.value} key={option.value}>
-                              {option.displayName}
+                            <SelectItem value={option} key={option}>
+                              {t(`workspace.tools.import-comfyui-workflow.form.workflowType.options.${option}`)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -118,7 +114,7 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
                             }}
                           />
                         </FormControl>
-                        <FormDescription>在此处上传文件将自动存入「富媒体数据」</FormDescription>
+                        <FormDescription>{t('common.form.description.upload-file-auto-store')}</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -133,7 +129,7 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
                     control={form.control}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Workflow JSON</FormLabel>
+                        <FormLabel>{t('workspace.tools.import-comfyui-workflow.form..label')}</FormLabel>
                         <FormControl>
                           <Updater
                             accept={['application/json']}
@@ -144,7 +140,7 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
                             }}
                           />
                         </FormControl>
-                        <FormDescription>在此处上传文件将自动存入「富媒体数据」</FormDescription>
+                        <FormDescription>{t('common.form.description.upload-file-auto-store')}</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -154,7 +150,7 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
                     control={form.control}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Workflow API JSON</FormLabel>
+                        <FormLabel>{t('workspace.tools.import-comfyui-workflow.form..label')}</FormLabel>
                         <FormControl>
                           <Updater
                             accept={['application/json']}
@@ -165,7 +161,7 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
                             }}
                           />
                         </FormControl>
-                        <FormDescription>在此处上传文件将自动存入「富媒体数据」</FormDescription>
+                        <FormDescription>{t('common.form.description.upload-file-auto-store')}</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -178,9 +174,14 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>显示名称</FormLabel>
+                    <FormLabel>{t('workspace.tools.import-comfyui-workflow.form.displayName.label')}</FormLabel>
                     <FormControl>
-                      <Input placeholder="请输入工作流名称" {...field} className="grow" autoFocus />
+                      <Input
+                        placeholder={t('workspace.tools.import-comfyui-workflow.form.displayName.placeholder')}
+                        {...field}
+                        className="grow"
+                        autoFocus
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -190,7 +191,7 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
 
             <DialogFooter>
               <Button type="submit" loading={isLoading} variant="solid">
-                确定
+                {t('common.utils.confirm')}
               </Button>
             </DialogFooter>
           </form>

@@ -46,9 +46,15 @@
     },
     "type": {
       "workflow": "工作流",
+      "comfyui-workflow": "ComfyUI 工作流",
       "filter-group": "筛选分组",
       "text-data": "文本数据",
       "table-data": "表格数据"
+    },
+    "form": {
+      "description": {
+        "upload-file-auto-store": "在此处上传文件将自动存入「富媒体数据」"
+      }
     },
     "time": {
       "second": "秒",
@@ -783,6 +789,61 @@
         }
       }
     },
+    "comfyui-workflow": {
+      "utils": {},
+      "detail": {
+        "title": "ComfyUI 工作流详情",
+        "tabs": {
+          "info": {
+            "label": "基本信息"
+          },
+          "workflow": {
+            "label": "工作流定义",
+            "json": "工作流 JSON （workflow.json）",
+            "api-json": "工作流 API JSON （workflow_api.json）"
+          },
+          "toolsInput": {
+            "label": "工具输入配置",
+            "toast": {
+              "save-success": "保存成功",
+              "not-json": "工具表单配置必须为 JSON"
+            },
+            "title": "工具表单配置",
+            "button": {
+              "auto-generate": "重新生成"
+            }
+          }
+        }
+      },
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "user": {
+            "label": "创建者"
+          },
+          "assetTags": {
+            "label": "标签"
+          },
+          "createdTimestamp": {
+            "label": "创建时间"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "ComfyUI 工作流操作",
+          "options": {
+            "delete": "删除 ComfyUI 工作流"
+          }
+        }
+      }
+    },
     "text-models": {
       "ugc-view": {
         "columns": {
@@ -1269,6 +1330,31 @@
   "workspace": {
     "404": {
       "description": "页面正在建设中"
+    },
+    "tools": {
+      "import-comfyui-workflow": {
+        "title": "导入 ComfyUI 工作流",
+        "form": {
+          "workflowType": {
+            "label": "ComfyUI 工作流类型",
+            "placeholder": "请选择一个创建类型",
+            "options": {
+              "image": "图片",
+              "json": "工作流 JSON 文件"
+            }
+          },
+          "workflowJsonUrl": {
+            "label": "Workflow JSON"
+          },
+          "workflowApiJsonUrl": {
+            "label": "Workflow API JSON"
+          },
+          "displayName": {
+            "label": "显示名称",
+            "placeholder": "请输入工作流名称"
+          }
+        }
+      }
     }
   }
 }

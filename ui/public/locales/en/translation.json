@@ -46,8 +46,14 @@
     },
     "type": {
       "workflow": "workflow",
+      "comfyui-workflow": "ComfyUI workflow",
       "filter-group": "filter group",
       "text-data": "text data"
+    },
+    "form": {
+      "description": {
+        "upload-file-auto-store": "Files uploaded here will be automatically stored in \"Media Data\"."
+      }
     },
     "time": {
       "second_one": "sec",
@@ -790,6 +796,61 @@
         }
       }
     },
+    "comfyui-workflow": {
+      "utils": {},
+      "detail": {
+        "title": "ComfyUI Workflow Detail",
+        "tabs": {
+          "info": {
+            "label": "Basic Info"
+          },
+          "workflow": {
+            "label": "Workflow Definitions",
+            "json": "Workflow JSON (workflow.json)",
+            "api-json": "Workflow API JSON (workflow_api.json)"
+          },
+          "toolsInput": {
+            "label": "Tools Input Settings",
+            "toast": {
+              "save-success": "Save successfully!",
+              "not-json": "Tools input form must be JSON"
+            },
+            "title": "Tools input form",
+            "button": {
+              "auto-generate": "Regenerate"
+            }
+          }
+        }
+      },
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "Icon"
+          },
+          "title": {
+            "label": "Name"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "user": {
+            "label": "Creator"
+          },
+          "assetTags": {
+            "label": "Tags"
+          },
+          "createdTimestamp": {
+            "label": "Created Time"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "ComfyUI Workflow Operate",
+          "options": {
+            "delete": "Delete ComfyUI Workflow"
+          }
+        }
+      }
+    },
     "text-models": {
       "ugc-view": {
         "columns": {
@@ -1274,6 +1335,31 @@
   "workspace": {
     "404": {
       "description": "Pages under construction"
+    },
+    "tools": {
+      "import-comfyui-workflow": {
+        "title": "Import ComfyUI workflow",
+        "form": {
+          "workflowType": {
+            "label": "ComfyUI Workflow Type",
+            "placeholder": "Select a create type",
+            "options": {
+              "image": "Image",
+              "json": "Workflow JSON File"
+            }
+          },
+          "workflowJsonUrl": {
+            "label": "Workflow JSON"
+          },
+          "workflowApiJsonUrl": {
+            "label": "Workflow API JSON"
+          },
+          "displayName": {
+            "label": "Display Name",
+            "placeholder": "Enter workflow name"
+          }
+        }
+      }
     }
   }
 }
