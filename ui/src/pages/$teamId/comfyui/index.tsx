@@ -2,17 +2,22 @@ import React from 'react';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
+import { Import } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
 import { preloadUgcComfyuiWorkflows, useUgcComfyuiWorkflows } from '@/apis/ugc';
-import { createComfyuiWorkflowColumns } from '@/components/layout/ugc-pages/comfyui-workflows/consts';
-import { OperateArea } from '@/components/layout/ugc-pages/comfyui-workflows/operate-area';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer';
+import { createComfyuiWorkflowColumns } from '@/components/layout/ugc-pages/comfyui-workflows/consts';
+import { OperateArea } from '@/components/layout/ugc-pages/comfyui-workflows/operate-area';
 import { ImportComfyUIWorkflowModal } from '@/components/layout/workspace/tools/import-comfyui-workflow';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
 import { formatTimeDiffPrevious } from '@/utils/time';
 
 export const ActionTools: React.FC = () => {
+  const { t } = useTranslation();
+
   const navigate = useNavigate();
 
   return (
@@ -36,7 +41,9 @@ export const ActionTools: React.FC = () => {
         renderOptions={{
           subtitle: (item) => (
             <span className="line-clamp-1">
-              {`${item.user?.name ?? '未知'} 创建于 ${formatTimeDiffPrevious(item.createdTimestamp)}`}
+              {`${item.user?.name ?? t('common.utils.unknown')} ${t('common.utils.created-at', {
+                time: formatTimeDiffPrevious(item.createdTimestamp),
+              })}`}
             </span>
           ),
           cover: (item) => RenderIcon({ iconUrl: item.iconUrl, size: 'gallery' }),
@@ -44,8 +51,8 @@ export const ActionTools: React.FC = () => {
         subtitle={
           <>
             <ImportComfyUIWorkflowModal>
-              <Button variant="outline" size="small">
-                导入
+              <Button variant="outline" size="small" icon={<Import />}>
+                {t('common.utils.import')}
               </Button>
             </ImportComfyUIWorkflowModal>
           </>

@@ -3,6 +3,7 @@ import React from 'react';
 import { useSWRConfig } from 'swr';
 
 import { Trash } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { deleteComfyuiWorkflow } from '@/apis/comfyui';
@@ -37,16 +38,17 @@ interface IOperateAreaProps {
 }
 
 export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, tooltipTriggerContent }) => {
+  const { t } = useTranslation();
   const { mutate } = useSWRConfig();
 
   const handelDelete = () => {
     toast.promise(deleteComfyuiWorkflow(item.id), {
-      loading: '正在删除 ComfyUI 工作流...',
+      loading: t('common.delete.loading'),
       success: () => {
         void mutate((key) => typeof key === 'string' && key.startsWith('/api/comfyui/workflows'));
-        return 'ComfyUI 工作流删除成功';
+        return t('common.delete.success');
       },
-      error: 'ComfyUI 工作流删除失败',
+      error: t('common.delete.error'),
     });
   };
 
@@ -69,7 +71,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
             e.preventDefault();
           }}
         >
-          <DropdownMenuLabel>工作流操作</DropdownMenuLabel>
+          <DropdownMenuLabel>{t('ugc-page.comfyui-workflow.operate-area.dropdown-label')}</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
           <AlertDialogTrigger asChild>
@@ -77,7 +79,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
               <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                 <Trash size={15} />
               </DropdownMenuShortcut>
-              删除工作流
+              {t('ugc-page.comfyui-workflow.operate-area.options.delete')}
             </DropdownMenuItem>
           </AlertDialogTrigger>
         </DropdownMenuContent>
@@ -89,12 +91,21 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
         }}
       >
         <AlertDialogHeader>
-          <AlertDialogTitle>确定要删除该 ComfyUI 工作流吗？</AlertDialogTitle>
-          <AlertDialogDescription>删除后，该工作流将无法恢复。</AlertDialogDescription>
+          <AlertDialogTitle>
+            {t('common.dialog.delete-confirm.title', {
+              type: t('common.type.comfyui-workflow'),
+            })}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            {t('common.dialog.delete-confirm.content', {
+              type: t('common.type.comfyui-workflow'),
+              name: item.displayName,
+            })}
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>取消</AlertDialogCancel>
-          <AlertDialogAction onClick={handelDelete}>删除</AlertDialogAction>
+          <AlertDialogCancel>{t('common.utils.cancel')}</AlertDialogCancel>
+          <AlertDialogAction onClick={handelDelete}>{t('common.utils.confirm')}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

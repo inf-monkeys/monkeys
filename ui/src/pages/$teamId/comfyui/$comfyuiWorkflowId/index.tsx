@@ -3,12 +3,13 @@ import React from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { Undo2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useComfyuiWorkflow } from '@/apis/comfyui';
+import { UgcDetailInfo } from '@/components/layout/ugc/detail/info';
 import { createComfyuiWorkflowColumns } from '@/components/layout/ugc-pages/comfyui-workflows/consts';
 import { ComfyuiWorkflowToolInput } from '@/components/layout/ugc-pages/comfyui-workflows/detail/tool-input';
 import { ComfyuiWorkflowDetail } from '@/components/layout/ugc-pages/comfyui-workflows/detail/workflow';
-import { UgcDetailInfo } from '@/components/layout/ugc/detail/info';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
@@ -17,6 +18,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 interface IActionToolDetailProps {}
 
 export const ActionToolDetail: React.FC<IActionToolDetailProps> = () => {
+  const { t } = useTranslation();
+
   const navigate = useNavigate();
   const { comfyuiWorkflowId, teamId } = Route.useParams();
   const { data: comfyuiWorkflow } = useComfyuiWorkflow(comfyuiWorkflowId);
@@ -36,9 +39,9 @@ export const ActionToolDetail: React.FC<IActionToolDetailProps> = () => {
               }}
             />
           </TooltipTrigger>
-          <TooltipContent>返回</TooltipContent>
+          <TooltipContent>{t('common.utils.back')}</TooltipContent>
         </Tooltip>
-        <h1 className="line-clamp-1 text-2xl font-bold">ComfyUI 工作流详情</h1>
+        <h1 className="line-clamp-1 text-2xl font-bold">{t('ugc-page.comfyui-workflow.detail.title')}</h1>
       </header>
       <Tabs
         defaultValue="info"
@@ -46,13 +49,13 @@ export const ActionToolDetail: React.FC<IActionToolDetailProps> = () => {
       >
         <TabsList>
           <TabsTrigger value="info" className="text-xs">
-            基本信息
+            {t('ugc-page.comfyui-workflow.detail.tabs.info.label')}
           </TabsTrigger>
           <TabsTrigger value="workflow" className="text-xs">
-            工作流定义
+            {t('ugc-page.comfyui-workflow.detail.tabs.workflow.label')}
           </TabsTrigger>
           <TabsTrigger value="toolsInput" className="text-xs">
-            工具输入配置
+            {t('ugc-page.comfyui-workflow.detail.tabs.toolsInput.label')}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="info">
