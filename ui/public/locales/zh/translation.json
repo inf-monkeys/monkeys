@@ -1086,6 +1086,24 @@
           "associated-workflows": {
             "label": "关联工作流"
           }
+        },
+        "paragraph-editor": {
+          "toast": {
+            "not-json": "元数据必须为 JSON",
+            "empty": "段落内容不能为空"
+          },
+          "form": {
+            "content": {
+              "label": "段落内容",
+              "placeholder": "请输入段落内容",
+              "stats_one": "共计 {{count}} 字符"
+            },
+            "metadata": {
+              "label": "段落元数据",
+              "placeholder": "请输入段落元数据",
+              "stats": "为此段落设置任意元数据，可通过元数据对段落进行过滤"
+            }
+          }
         }
       }
     },
