@@ -1093,6 +1093,25 @@
           "associated-workflows": {
             "label": "Associated Workflows"
           }
+        },
+        "paragraph-editor": {
+          "toast": {
+            "not-json": "Metadata must be JSON",
+            "empty": "Paragraph content is empty"
+          },
+          "form": {
+            "content": {
+              "label": "Paragraph Content",
+              "placeholder": "Enter paragraph content",
+              "stats_one": "Total {{count}} character",
+              "stats_other": "Total {{count}} characters"
+            },
+            "metadata": {
+              "label": "Paragraph Metadata",
+              "placeholder": "Enter paragraph metadata",
+              "stats": "Metadata is used for this purpose and paragraphs can be filtered by metadata"
+            }
+          }
         }
       }
     },
