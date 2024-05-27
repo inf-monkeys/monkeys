@@ -61,6 +61,7 @@
       "loading": "Please wait until the data is loaded.",
       "team-not-found": "The team doesn't exist.",
       "user-not-found": "The user doesn't exist.",
+      "vector-database-not-found": "The vector database doesn't exist.",
       "copy-success": "Copy success."
     },
     "dialog": {
@@ -1088,10 +1089,64 @@
             }
           },
           "settings": {
-            "label": "Settings"
+            "label": "Settings",
+            "basic-info": {
+              "title": "Basic Info",
+              "table": {
+                "columns": {
+                  "icon": {
+                    "label": "Icon"
+                  },
+                  "name": {
+                    "label": "Name",
+                    "info-editor": {
+                      "title": "Edit name",
+                      "placeholder": "Enter name, up to 16 characters"
+                    }
+                  },
+                  "description": {
+                    "label": "Description",
+                    "info-editor": {
+                      "title": "Edit description",
+                      "placeholder": "Enter description, up to 120 characters"
+                    }
+                  },
+                  "dimension": {
+                    "label": "Vector Dimensions"
+                  },
+                  "model": {
+                    "label": "Embedding Model"
+                  },
+                  "created-time": {
+                    "label": "Created Time"
+                  },
+                  "updated-time": {
+                    "label": "Updated Time"
+                  }
+                }
+              }
+            },
+            "search-settings": {
+              "title": "Search Settings",
+              "form": {
+                "mode": {
+                  "label": "Search Type",
+                  "placeholder": "Select a search type",
+                  "options": {
+                    "vector": "Vector Search",
+                    "full-text": "Full-text Search"
+                  }
+                },
+                "topK": {
+                  "label": "Top K",
+                  "placeholder": "Enter Top K"
+                }
+              }
+            }
           },
           "associated-workflows": {
-            "label": "Associated Workflows"
+            "label": "Associated Workflows",
+            "description": "It can be associated with the \"Search Enhancement\" tool by using it in the workflow."
           }
         },
         "paragraph-editor": {

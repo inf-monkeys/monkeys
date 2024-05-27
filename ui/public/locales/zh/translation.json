@@ -59,6 +59,7 @@
       "loading": "请等待数据加载完毕",
       "team-not-found": "团队不存在",
       "user-not-found": "用户不存在",
+      "vector-database-not-found": "知识库不存在",
       "copy-success": "复制成功"
     },
     "dialog": {
@@ -1081,10 +1082,64 @@
             }
           },
           "settings": {
-            "label": "设置"
+            "label": "设置",
+            "basic-info": {
+              "title": "基本信息",
+              "table": {
+                "columns": {
+                  "icon": {
+                    "label": "图标"
+                  },
+                  "name": {
+                    "label": "名称",
+                    "info-editor": {
+                      "title": "编辑名称",
+                      "placeholder": "输入名称，16 字以内"
+                    }
+                  },
+                  "description": {
+                    "label": "描述",
+                    "info-editor": {
+                      "title": "编辑描述",
+                      "placeholder": "输入描述，120 字以内"
+                    }
+                  },
+                  "dimension": {
+                    "label": "向量维度"
+                  },
+                  "model": {
+                    "label": "Embedding 模型"
+                  },
+                  "created-time": {
+                    "label": "创建时间"
+                  },
+                  "updated-time": {
+                    "label": "最后更新时间"
+                  }
+                }
+              }
+            },
+            "search-settings": {
+              "title": "检索设置",
+              "form": {
+                "mode": {
+                  "label": "检索方式",
+                  "placeholder": "选择一个检索方式",
+                  "options": {
+                    "vector": "向量检索",
+                    "full-text": "全文检索"
+                  }
+                },
+                "topK": {
+                  "label": "Top K",
+                  "placeholder": "输入 Top K"
+                }
+              }
+            }
           },
           "associated-workflows": {
-            "label": "关联工作流"
+            "label": "关联工作流",
+            "description": "可通过在工作流中使用「搜索增强」工具与其关联"
           }
         },
         "paragraph-editor": {

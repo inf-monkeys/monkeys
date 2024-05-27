@@ -2,6 +2,7 @@ import React from 'react';
 
 import { CircularProgress } from '@nextui-org/progress';
 import { CircleSlash } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useSearchReferenceWorkflows } from '@/apis/ugc';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
@@ -12,6 +13,8 @@ interface IRelatedApplicationProps {
 }
 
 export const RelatedApplication: React.FC<IRelatedApplicationProps> = ({ textId }) => {
+  const { t } = useTranslation();
+
   const { data, isLoading } = useSearchReferenceWorkflows('knowledge-base', textId);
 
   const isEmpty = !data || data.length === 0;
@@ -25,8 +28,10 @@ export const RelatedApplication: React.FC<IRelatedApplicationProps> = ({ textId 
         <>
           <CircleSlash size={64} />
           <div className="mt-4 flex flex-col text-center">
-            <h2 className="font-bold">暂无已关联的工作流</h2>
-            <p className="mt-2 text-xs text-muted-foreground">可通过在工作流中使用「搜索增强」工具与其关联</p>
+            <h2 className="font-bold">{t('common.load.empty')}</h2>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {t('ugc-page.text-data.detail.tabs.associated-workflows.description')}
+            </p>
           </div>
         </>
       )}
@@ -35,9 +40,9 @@ export const RelatedApplication: React.FC<IRelatedApplicationProps> = ({ textId 
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-32">图标</TableHead>
-          <TableHead>工作流名称</TableHead>
-          <TableHead>工作流描述</TableHead>
+          <TableHead className="w-32">{t('components.layout.ugc.detail.workflows.columns.icon.label')}</TableHead>
+          <TableHead>{t('components.layout.ugc.detail.workflows.columns.displayName.label')}</TableHead>
+          <TableHead>{t('components.layout.ugc.detail.workflows.columns.description.label')}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
