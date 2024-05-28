@@ -232,7 +232,7 @@ export const BUILT_IN_COMFYUI_WORKFLOW_MARKETPLACE_LIST: Array<Partial<ComfyUIWo
     iconUrl: 'emoji:📷:#98ae36',
     displayName: '根据衣服生成模特穿衣图(ComfyUI_MagicClothing)',
     description: '基于 https://github.com/frankchieng/ComfyUI_MagicClothing 的 main workflow',
-    workflowType: ComfyuiWorkflowSourceType.Json,
+    workflowType: ComfyuiWorkflowSourceType.Comfyfile,
     originalData: {},
     workflow: {
       last_node_id: 23,
