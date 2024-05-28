@@ -44,11 +44,11 @@ export const InviteUser: React.FC<IInviteUserProps> = ({ visible, setVisible }) 
 
   const handleSearchUsers = async () => {
     if (!keywords) {
-      toast.warning(t('settings.account.team-member.invite.invite-user.keywords-empty'));
+      toast.warning(t('settings.account.team-member.invite.invite-user.toast.keywords-empty'));
       return;
     }
     if (keywords.length < 4) {
-      toast.warning(t('settings.account.team-member.invite.invite-user.keywords-less-than-4'));
+      toast.warning(t('settings.account.team-member.invite.invite-user.toast.keywords-less-than-4'));
       return;
     }
     setSearchResult([]);

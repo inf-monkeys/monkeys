@@ -6,7 +6,7 @@ import { UserEntity } from '@/database/entities/identity/user';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
-import { In, Repository } from 'typeorm';
+import { In, Like, Repository } from 'typeorm';
 
 const defaultAvatar = 'https://static.aside.fun/upload/frame/0XMWE1.jpg';
 export const OBJECT_ID_PATTERN = /[0-9][0-9a-z]{23}/;
@@ -79,6 +79,14 @@ export class UserRepository {
         email,
         isDeleted: false,
       },
+    });
+  }
+
+  public async findByKeyword(keyword: string) {
+    const regex = Like(`%${keyword}%`);
+    return await this.userRepository.find({
+      where: [{ name: regex }, { phone: regex }, { email: regex }, { nickname: regex }],
+      take: 50,
     });
   }
 

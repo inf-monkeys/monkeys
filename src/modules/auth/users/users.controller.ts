@@ -1,7 +1,7 @@
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { Body, Controller, Get, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UpdateUserProfileDto } from './dto';
 import { UsersService } from './users.service';
@@ -34,6 +34,14 @@ export class UsersController {
     const { userId } = req;
     const { name, photo } = body;
     const data = await this.userService.updateUserInfo(userId, { name, photo });
+    return new SuccessResponse({
+      data,
+    });
+  }
+
+  @Post('/search')
+  public async searchUser(@Body('keyword') keyword: string) {
+    const data = await this.userService.searchUsers(keyword);
     return new SuccessResponse({
       data,
     });

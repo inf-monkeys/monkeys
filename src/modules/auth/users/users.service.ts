@@ -32,4 +32,12 @@ export class UsersService {
     await this.userRepository.updateUserLastLogin(user.id, AuthMethod.oidc);
     return user;
   }
+
+  public async searchUsers(keyword: string) {
+    if (keyword?.length < 4) {
+      throw new Error('请输入至少 4 个字符');
+    }
+
+    return await this.userRepository.findByKeyword(keyword);
+  }
 }

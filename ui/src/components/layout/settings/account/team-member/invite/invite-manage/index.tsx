@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { ColumnDef } from '@tanstack/react-table';
 import dayjs from 'dayjs';
-import { MoreHorizontal, Pause, Pencil, Play, Settings } from 'lucide-react';
+import { MoreHorizontal, Pause, Pencil, Play, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -215,7 +215,7 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
               <DropdownMenuGroup>
                 <DropdownMenuItem
                   onSelect={() => handleToggleLinkPause(row.original.id)}
-                  disabled={Boolean(row.original.outdateTimestamp)}
+                  disabled={!row.original.outdateTimestamp}
                 >
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     {row.original.status === ITeamInviteStatus.DISABLED ? <Play size={15} /> : <Pause size={15} />}
@@ -226,7 +226,7 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => handleDeleteLink(row.original.id)}>
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
-                    <Settings size={15} />
+                    <Trash2 size={15} />
                   </DropdownMenuShortcut>
                   {t('common.utils.delete')}
                 </DropdownMenuItem>
@@ -237,6 +237,12 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
       },
     },
   ];
+
+  useEffect(() => {
+    if (visible) {
+      void mutateInviteList();
+    }
+  }, [visible]);
 
   return (
     <Dialog open={visible} onOpenChange={setVisible}>
