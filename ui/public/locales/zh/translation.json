@@ -46,9 +46,15 @@
     },
     "type": {
       "workflow": "工作流",
+      "comfyui-workflow": "ComfyUI 工作流",
       "filter-group": "筛选分组",
       "text-data": "文本数据",
       "table-data": "表格数据"
+    },
+    "form": {
+      "description": {
+        "upload-file-auto-store": "在此处上传文件将自动存入「富媒体数据」"
+      }
     },
     "time": {
       "second": "秒",
@@ -59,6 +65,7 @@
       "loading": "请等待数据加载完毕",
       "team-not-found": "团队不存在",
       "user-not-found": "用户不存在",
+      "vector-database-not-found": "知识库不存在",
       "copy-success": "复制成功"
     },
     "dialog": {
@@ -785,6 +792,61 @@
         }
       }
     },
+    "comfyui-workflow": {
+      "utils": {},
+      "detail": {
+        "title": "ComfyUI 工作流详情",
+        "tabs": {
+          "info": {
+            "label": "基本信息"
+          },
+          "workflow": {
+            "label": "工作流定义",
+            "json": "工作流 JSON （workflow.json）",
+            "api-json": "工作流 API JSON （workflow_api.json）"
+          },
+          "toolsInput": {
+            "label": "工具输入配置",
+            "toast": {
+              "save-success": "保存成功",
+              "not-json": "工具表单配置必须为 JSON"
+            },
+            "title": "工具表单配置",
+            "button": {
+              "auto-generate": "重新生成"
+            }
+          }
+        }
+      },
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "user": {
+            "label": "创建者"
+          },
+          "assetTags": {
+            "label": "标签"
+          },
+          "createdTimestamp": {
+            "label": "创建时间"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "ComfyUI 工作流操作",
+          "options": {
+            "delete": "删除 ComfyUI 工作流"
+          }
+        }
+      }
+    },
     "text-models": {
       "ugc-view": {
         "columns": {
@@ -1084,10 +1146,82 @@
             }
           },
           "settings": {
-            "label": "设置"
+            "label": "设置",
+            "basic-info": {
+              "title": "基本信息",
+              "table": {
+                "columns": {
+                  "icon": {
+                    "label": "图标"
+                  },
+                  "name": {
+                    "label": "名称",
+                    "info-editor": {
+                      "title": "编辑名称",
+                      "placeholder": "输入名称，16 字以内"
+                    }
+                  },
+                  "description": {
+                    "label": "描述",
+                    "info-editor": {
+                      "title": "编辑描述",
+                      "placeholder": "输入描述，120 字以内"
+                    }
+                  },
+                  "dimension": {
+                    "label": "向量维度"
+                  },
+                  "model": {
+                    "label": "Embedding 模型"
+                  },
+                  "created-time": {
+                    "label": "创建时间"
+                  },
+                  "updated-time": {
+                    "label": "最后更新时间"
+                  }
+                }
+              }
+            },
+            "search-settings": {
+              "title": "检索设置",
+              "form": {
+                "mode": {
+                  "label": "检索方式",
+                  "placeholder": "选择一个检索方式",
+                  "options": {
+                    "vector": "向量检索",
+                    "full-text": "全文检索"
+                  }
+                },
+                "topK": {
+                  "label": "Top K",
+                  "placeholder": "输入 Top K"
+                }
+              }
+            }
           },
           "associated-workflows": {
-            "label": "关联工作流"
+            "label": "关联工作流",
+            "description": "可通过在工作流中使用「搜索增强」工具与其关联"
+          }
+        },
+        "paragraph-editor": {
+          "toast": {
+            "not-json": "元数据必须为 JSON",
+            "empty": "段落内容不能为空"
+          },
+          "form": {
+            "content": {
+              "label": "段落内容",
+              "placeholder": "请输入段落内容",
+              "stats_one": "共计 {{count}} 字符"
+            },
+            "metadata": {
+              "label": "段落元数据",
+              "placeholder": "请输入段落元数据",
+              "stats": "为此段落设置任意元数据，可通过元数据对段落进行过滤"
+            }
           }
         }
       }
@@ -1199,6 +1333,31 @@
   "workspace": {
     "404": {
       "description": "页面正在建设中"
+    },
+    "tools": {
+      "import-comfyui-workflow": {
+        "title": "导入 ComfyUI 工作流",
+        "form": {
+          "workflowType": {
+            "label": "ComfyUI 工作流类型",
+            "placeholder": "请选择一个创建类型",
+            "options": {
+              "image": "图片",
+              "json": "工作流 JSON 文件"
+            }
+          },
+          "workflowJsonUrl": {
+            "label": "Workflow JSON"
+          },
+          "workflowApiJsonUrl": {
+            "label": "Workflow API JSON"
+          },
+          "displayName": {
+            "label": "显示名称",
+            "placeholder": "请输入工作流名称"
+          }
+        }
+      }
     }
   }
 }

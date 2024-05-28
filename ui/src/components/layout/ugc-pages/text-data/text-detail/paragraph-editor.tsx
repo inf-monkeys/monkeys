@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useDebouncedState } from '@mantine/hooks';
 import { isEmpty } from 'lodash';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,8 @@ export const ParagraphEditor: React.FC<IImportParagraphProps> = ({
   onConfirm,
   extra,
 }) => {
+  const { t } = useTranslation();
+
   const [value, setValue] = useState(paragraph);
   const [tempMetadata, setTempMetadata] = useDebouncedState(stringify(metadata), 200);
 
@@ -47,16 +50,16 @@ export const ParagraphEditor: React.FC<IImportParagraphProps> = ({
     try {
       const newMetadata = JSON.parse(tempMetadata);
       if (typeof newMetadata !== 'object') {
-        toast.error('元数据必须为 JSON');
+        toast.error(t('ugc-page.text-data.detail.paragraph-editor.toast.not-json'));
         return;
       }
       if (isEmpty(value)) {
-        toast.error('段落内容不能为空');
+        toast.error(t('ugc-page.text-data.detail.paragraph-editor.toast.empty'));
         return;
       }
       onConfirm?.(value, newMetadata);
     } catch {
-      toast.error('元数据必须为 JSON');
+      toast.error(t('ugc-page.text-data.detail.paragraph-editor.toast.not-json'));
       return;
     }
   };
@@ -67,22 +70,28 @@ export const ParagraphEditor: React.FC<IImportParagraphProps> = ({
       <DialogContent className="max-w-[50rem]">
         <DialogTitle>{title}</DialogTitle>
         <div className="flex flex-col gap-2">
-          <Label>段落内容</Label>
+          <Label>{t('ugc-page.text-data.detail.paragraph-editor.form.content.label')}</Label>
           <Textarea
-            placeholder="请在此键入段落"
+            placeholder={t('ugc-page.text-data.detail.paragraph-editor.form.content.placeholder')}
             className="min-h-40"
             value={value}
             onChange={(v) => setValue(v.target.value)}
           />
-          <p className="text-xs text-muted-foreground">共计 {value.length} 个字符</p>
-          <Label>段落元数据</Label>
+          <p className="text-xs text-muted-foreground">
+            {t('ugc-page.text-data.detail.paragraph-editor.form.content.stats', {
+              count: value.length,
+            })}
+          </p>
+          <Label>{t('ugc-page.text-data.detail.paragraph-editor.form.metadata.label')}</Label>
           <CodeEditor data={tempMetadata} onUpdate={setTempMetadata} height={200} lineNumbers={2} />
-          <p className="text-xs text-muted-foreground">为此段落设置任意元数据，可通过元数据对段落进行过滤</p>
+          <p className="text-xs text-muted-foreground">
+            {t('ugc-page.text-data.detail.paragraph-editor.form.metadata.stats')}
+          </p>
           {extra}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={handleOnConfirm}>
-            保存
+            {t('common.utils.save')}ƒ
           </Button>
         </DialogFooter>
       </DialogContent>
