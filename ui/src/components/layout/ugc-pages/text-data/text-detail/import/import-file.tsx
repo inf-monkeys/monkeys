@@ -101,9 +101,7 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                         }}
                       />
                     </FormControl>
-                    <FormDescription>
-                      {t('ugc-page.text-data.detail.import.file.form.fileURL.description')}
-                    </FormDescription>
+                    <FormDescription>{t('common.form.description.upload-file-auto-store')}</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

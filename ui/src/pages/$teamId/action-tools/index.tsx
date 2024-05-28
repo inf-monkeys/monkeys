@@ -15,6 +15,7 @@ import { ImportToolModal } from '@/components/layout/workspace/tools/import-tool
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
 import { formatTime } from '@/utils/time.ts';
+import { Import } from 'lucide-react';
 
 export const ActionTools: React.FC = () => {
   const { t: tHook } = useTranslation();
@@ -58,7 +59,7 @@ export const ActionTools: React.FC = () => {
           <>
             <VinesExternalAccount />
             <ImportToolModal>
-              <Button variant="outline" size="small">
+              <Button variant="outline" size="small" icon={<Import />}>
                 {tHook('common.utils.import')}
               </Button>
             </ImportToolModal>
