@@ -9,6 +9,7 @@ import { sleep } from '@/common/utils/utils';
 import { ToolsEntity } from '@/database/entities/tools/tools.entity';
 import { ComfyuiWorkflowRepository } from '@/database/repositories/comfyui-workflow.repository';
 import { Task, TaskDef, TaskManager } from '@inf-monkeys/conductor-javascript';
+import { BlockDefProperties } from '@inf-monkeys/vines';
 import { Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { IncomingMessage } from 'http';
@@ -50,20 +51,22 @@ export class ToolsPollingService {
     return resultUrl;
   }
 
-  private convertToComfyuiInputData(originalData: { [x: string]: any }) {
+  private convertToComfyuiInputData(originalData: { [x: string]: any }, toolInput: BlockDefProperties[]) {
     const result: { [x: string]: { [x: string]: any } } = {};
     for (const key in originalData) {
-      const [nodeId, nodeKey] = key.split('_');
-      if (!nodeId || !nodeKey) {
+      const inputItem: any = toolInput.find((item) => item.name === key);
+      if (!inputItem) {
         continue;
       }
-      if (isNaN(parseInt(nodeId))) {
+      const comfyOptions = inputItem.comfyOptions;
+      if (!comfyOptions) {
         continue;
       }
+      const { node: nodeId, key: comfyKey } = comfyOptions;
       if (!result[nodeId]) {
         result[nodeId] = {};
       }
-      result[nodeId][nodeKey] = originalData[key];
+      result[nodeId][comfyKey] = originalData[key];
     }
     return result;
   }
@@ -73,6 +76,7 @@ export class ToolsPollingService {
       const { workflow: comfyuiWorkflowId } = originalData;
       const result = { ...originalData };
       const comfyuiWorkflow = await this.comfyuiWorkflowRepository.getComfyuiWorkflowById(comfyuiWorkflowId);
+      const toolInput = comfyuiWorkflow.toolInput;
       if (!comfyuiWorkflow) {
         throw new Error(`Comfyui workflow not found: ${comfyuiWorkflowId}`);
       }
@@ -82,9 +86,7 @@ export class ToolsPollingService {
       }
       return {
         workflow: prompt,
-        addtional_model_list: comfyuiWorkflow.additionalModelList || [],
-        addtional_node_list: comfyuiWorkflow.additionalNodeList || [],
-        input_data: this.convertToComfyuiInputData(result),
+        input_data: this.convertToComfyuiInputData(result, toolInput),
       };
     }
     return originalData;

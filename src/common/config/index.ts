@@ -79,7 +79,9 @@ export interface CronConfig {
 }
 
 export interface ComfyUICofig {
+  comfyfileRepo: string;
   baseUrl: string;
+  githubToken: string;
 }
 
 export enum AuthMethod {
@@ -251,6 +253,8 @@ export const config: Config = {
   },
   comfyui: {
     baseUrl: readConfig('comfyui.baseUrl', 'http://127.0.0.1:8188'),
+    comfyfileRepo: readConfig('comfyui.comfyfileRepo', 'https://github.com/inf-monkeys/Comfyfile/tree/main/workflows'),
+    githubToken: readConfig('comfyui.githubToken'),
   },
   auth: {
     enabled: readConfig('auth.enabled', [AuthMethod.password, AuthMethod.apikey]),

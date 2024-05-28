@@ -6,6 +6,7 @@ import { BaseAssetEntity } from '../assets/base-asset';
 export enum ComfyuiWorkflowSourceType {
   Image = 'image',
   Json = 'json',
+  Comfyfile = 'comfyfile',
 }
 
 export interface ComfyUIWorkflowAddtionalModel {
@@ -45,8 +46,9 @@ export class ComfyuiWorkflowEntity extends BaseAssetEntity {
   @Column({
     name: 'prompt',
     type: 'simple-json',
+    nullable: true,
   })
-  prompt: ComfyuiPrompt;
+  prompt?: ComfyuiPrompt;
 
   @Column({
     name: 'tool_input',
