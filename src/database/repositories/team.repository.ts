@@ -7,10 +7,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _, { uniq } from 'lodash';
 import { In, Repository } from 'typeorm';
-import { TeamJoinRequestStatus, TeamJoinRequestsEntity } from '../entities/identity/team-join-request';
+import { TeamJoinRequestsEntity, TeamJoinRequestStatus } from '../entities/identity/team-join-request';
 import { UserEntity } from '../entities/identity/user';
 import { ApikeyRepository } from './apikey.repository';
 import { UserRepository } from './user.repository';
+import { TeamInviteLinkOutdateType, TeamInvitesRequestsEntity, TeamInviteStatus, TeamInviteType } from '@/database/entities/identity/team-invites';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class TeamRepository {
@@ -21,6 +23,8 @@ export class TeamRepository {
     private readonly teamMembersRepository: Repository<TeamMembersEntity>,
     @InjectRepository(TeamJoinRequestsEntity)
     private readonly teamJoinRequestRepository: Repository<TeamJoinRequestsEntity>,
+    @InjectRepository(TeamInvitesRequestsEntity)
+    private readonly teamInvitesRequestsRepository: Repository<TeamInvitesRequestsEntity>,
     private readonly apiKeyRepository: ApikeyRepository,
     private readonly userRepository: UserRepository,
   ) {}
@@ -136,6 +140,18 @@ export class TeamRepository {
     return newTeam;
   }
 
+  public async deleteTeam(teamId: string) {
+    const res = await this.teamRepository.update(
+      {
+        id: teamId,
+      },
+      {
+        isDeleted: true,
+      },
+    );
+    return !!res.affected;
+  }
+
   public async updateTeam(
     teamId: string,
     updates?: {
@@ -207,6 +223,19 @@ export class TeamRepository {
     return await this.userRepository.findByIds(userIds);
   }
 
+  public async removeTeamMember(teamId: string, userId: string) {
+    const res = await this.teamMembersRepository.update(
+      {
+        teamId,
+        userId,
+      },
+      {
+        isDeleted: true,
+      },
+    );
+    return !!res.affected;
+  }
+
   public async makeJoinTeamRequest(teamId: string, userId: string) {
     const team = await this.getTeamById(teamId);
     if (!team) {
@@ -260,5 +289,138 @@ export class TeamRepository {
       user: users.find((user) => user.id === record.userId),
     }));
     return result;
+  }
+
+  public async createTeamInviteId(teamId: string, inviterUserId: string, outdateType: number, targetUserId?: string) {
+    const outdateTimestamp = outdateType === TeamInviteLinkOutdateType.SEVEN_DAYS ? dayjs().add(7, 'd').valueOf() : 0;
+    const inviteId = generateDbId();
+    await this.teamInvitesRequestsRepository.save({
+      id: inviteId,
+      teamId,
+      inviterUserId,
+      targetUserId,
+      outdateType,
+      outdateTimestamp,
+      createdTimestamp: Date.now(),
+      updatedTimestamp: Date.now(),
+      type: Number(targetUserId ? TeamInviteType.INDIVIDUAL : TeamInviteType.PUBLIC),
+      status: Number(TeamInviteStatus.EFFECTIVE),
+      acceptedUserIds: [],
+    });
+    return inviteId;
+  }
+
+  public async getTeamInvites(teamId: string) {
+    const invites = await this.teamInvitesRequestsRepository.find({
+      where: {
+        teamId,
+      },
+    });
+    const userIds = uniq(invites.map((x) => x.targetUserId));
+    const users = await this.userRepository.findByIds(userIds);
+    return invites.map((invite) => ({
+      ...invite,
+      user: users.find((user) => user.id === invite.targetUserId),
+    }));
+  }
+
+  public async updateTeamInviteRemark(inviteId: string, remark: string) {
+    const res = await this.teamInvitesRequestsRepository.update(
+      {
+        id: inviteId,
+      },
+      {
+        remark,
+      },
+    );
+    return !!res.affected;
+  }
+
+  public async toggleForeverTeamInviteLinkStatus(inviteId: string) {
+    const invite = await this.teamInvitesRequestsRepository.findOne({
+      where: {
+        id: inviteId,
+      },
+    });
+    if (!invite) {
+      throw new Error('邀请链接不存在');
+    }
+    const res = await this.teamInvitesRequestsRepository.update(
+      {
+        id: inviteId,
+      },
+      {
+        status: Number(invite.status === TeamInviteStatus.DISABLED ? TeamInviteStatus.EFFECTIVE : TeamInviteStatus.DISABLED),
+      },
+    );
+
+    return !!res.affected;
+  }
+
+  public async deleteTeamInvite(inviteId: string) {
+    const res = await this.teamInvitesRequestsRepository.delete({
+      id: inviteId,
+    });
+    return !!res.affected;
+  }
+
+  public async getTeamInviteById(inviteId: string) {
+    const invite = await this.teamInvitesRequestsRepository.findOne({
+      where: {
+        id: inviteId,
+      },
+    });
+    if (!invite) {
+      throw new Error('邀请链接不存在');
+    }
+
+    const isForeverInvite = invite?.outdateTimestamp === 0;
+    const isIndicateInvite = invite?.outdateTimestamp > Date.now();
+    if (!isForeverInvite && !isIndicateInvite) {
+      throw new Error('邀请已经过期或无效');
+    }
+
+    return invite;
+  }
+
+  public async acceptTeamInvite(userId: string, inviteId: string) {
+    const invite = await this.getTeamInviteById(inviteId);
+    if (invite.status === TeamInviteStatus.DISABLED) {
+      throw new Error('邀请链接已被禁用');
+    }
+
+    if (invite.type === TeamInviteType.INDIVIDUAL && invite.targetUserId !== userId) {
+      throw new Error('邀请链接不适用于当前用户');
+    }
+
+    const team = await this.getTeamById(invite.teamId);
+    if (!team) {
+      throw new Error('团队不存在');
+    }
+
+    const isAccepted = await this.isUserInTeam(userId, team.id);
+    if (isAccepted) {
+      throw new Error('您已加入该团队，无需重复加入：'.concat(team.id));
+    }
+
+    const now = Date.now();
+    await this.teamMembersRepository.save({
+      id: generateDbId(),
+      userId,
+      teamId: team.id,
+      createdTimestamp: now,
+      updatedTimestamp: now,
+      isDeleted: false,
+    });
+
+    invite.acceptedUserIds.push(userId);
+    await this.teamInvitesRequestsRepository.update(
+      {
+        id: inviteId,
+      },
+      {
+        acceptedUserIds: invite.acceptedUserIds,
+      },
+    );
   }
 }

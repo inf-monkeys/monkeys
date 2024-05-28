@@ -69,7 +69,7 @@ export const JoinPublicTeam: React.FC<IJoinPublicTeamProps> = () => {
     >
       <Tooltip content={t('settings.account.team.join-public-team.button-tooltip')}>
         <DialogTrigger asChild>
-          <Button icon={<PlusCircle size={18} />} size="small" />
+          <Button icon={<PlusCircle size={18} />} size="small" className="hidden" />
         </DialogTrigger>
       </Tooltip>
       <DialogContent>

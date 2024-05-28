@@ -9,6 +9,7 @@ import { Team } from '@/components/layout/settings/account/team';
 import { TeamMember } from '@/components/layout/settings/account/team-member';
 import { TeamProperty } from '@/components/layout/settings/account/team-property';
 import { User } from '@/components/layout/settings/account/user';
+import { Card } from '@/components/ui/card.tsx';
 
 interface IAccountProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -37,9 +38,9 @@ export const Account: React.FC<IAccountProps> = () => {
           {/*<WorkflowComponentUsage />*/}
         </div>
       ) : (
-        <div className="vines-center size-full">
+        <Card className="vines-center size-full">
           <h1 className="font-bold">{t('settings.account.payment-disabled-alert')}</h1>
-        </div>
+        </Card>
       )}
     </div>
   );

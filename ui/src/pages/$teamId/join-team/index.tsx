@@ -6,6 +6,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 
 import { acceptTeamInvite, useInviteTeam } from '@/apis/authz/team';
+import { authGuard } from '@/components/router/guard/auth.ts';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { useLocalStorage } from '@/utils';
@@ -21,7 +22,7 @@ const JoinTeamPage: React.FC = () => {
   const { data, error } = useInviteTeam(inviteId);
 
   if (error instanceof Error) {
-    if (error.message.startsWith('您已加入该团队')) {
+    if (error.message.startsWith('您已加入该团队') || error.message.startsWith('邀请链接不存在')) {
       void navigate({ to: '/$teamId', params: { teamId } });
       return null;
     }
@@ -63,4 +64,5 @@ const JoinTeamPage: React.FC = () => {
 
 export const Route = createFileRoute('/$teamId/join-team/')({
   component: JoinTeamPage,
+  beforeLoad: authGuard,
 });
