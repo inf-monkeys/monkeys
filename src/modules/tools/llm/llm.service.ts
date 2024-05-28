@@ -50,8 +50,9 @@ export const getModels = (
   name: string;
   value: string;
   type: LlmModelEndpointType[];
+  isDefault?: boolean;
 }> => {
-  const result: Array<{ name: string; value: string; type: LlmModelEndpointType[] }> = [];
+  const result: Array<{ name: string; value: string; type: LlmModelEndpointType[]; isDefault?: boolean }> = [];
   for (const model of config.models) {
     if (type) {
       if (model.type && !model.type.includes(type)) {
@@ -65,6 +66,7 @@ export const getModels = (
           name: model.displayName || model.model,
           value: modelValue.trim(),
           type: model.type,
+          isDefault: model.use_as_default,
         });
       }
     } else if (Array.isArray(model.model)) {
@@ -73,11 +75,17 @@ export const getModels = (
           name: model.displayName || modelName,
           value: modelName.trim(),
           type: model.type,
+          isDefault: model.use_as_default,
         });
       }
     }
   }
   return result;
+};
+
+export const getDefaultModel = (type: LlmModelEndpointType) => {
+  const models = getModels(type);
+  return models.find((x) => x.isDefault)?.value || models[0]?.value;
 };
 
 @Injectable()

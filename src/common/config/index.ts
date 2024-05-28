@@ -161,6 +161,8 @@ export interface LlmModelConfig {
   type: LlmModelEndpointType[];
   promptTemplate?: string;
   max_tokens?: number;
+  // If true, this model will be used as default model when create workflow from marketplace
+  use_as_default?: boolean;
 }
 
 export interface LLmConfig {
