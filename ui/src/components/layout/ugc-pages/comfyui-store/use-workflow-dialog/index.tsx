@@ -45,7 +45,7 @@ export const UgcComfyUIWorkflowStoreUseWorkflowDialog: React.FC<IUgcComfyUIWorkf
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>使用该模板</DialogTitle>
+          <DialogTitle>导入此工作流</DialogTitle>
         </DialogHeader>
         <div className="flex gap-3">
           <div className="flex-shrink-0">

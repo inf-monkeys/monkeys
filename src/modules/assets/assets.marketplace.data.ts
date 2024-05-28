@@ -230,296 +230,363 @@ export const BUILT_IN_COMFYUI_WORKFLOW_MARKETPLACE_LIST: Array<Partial<ComfyUIWo
     id: '664e1fa3103d67fd8406a5f3',
     tags: ['图像处理'],
     iconUrl: 'emoji:📷:#98ae36',
-    displayName: '根据衣服生成模特穿衣图(ComfyUI_MagicClothing)',
-    description: '基于 https://github.com/frankchieng/ComfyUI_MagicClothing 的 main workflow',
-    workflowType: ComfyuiWorkflowSourceType.Comfyfile,
+    displayName: '文本生成图像',
+    description: '根据 prompt 和 negative prompt 文本生成图像，基于 https://comfyanonymous.github.io/ComfyUI_examples/2_pass_txt2img/ 官方示例。',
+    workflowType: ComfyuiWorkflowSourceType.Json,
     originalData: {},
-    workflow: {
-      last_node_id: 23,
-      last_link_id: 41,
-      nodes: [
-        {
-          id: 16,
-          type: 'PreviewImage',
-          pos: [726, 784],
-          size: {
-            '0': 210,
-            '1': 246,
-          },
-          flags: {},
-          order: 3,
-          mode: 0,
-          inputs: [
-            {
-              name: 'images',
-              type: 'IMAGE',
-              link: 41,
-              label: 'images',
-              slot_index: 0,
-            },
-          ],
-          properties: {
-            'Node name for S&R': 'PreviewImage',
-          },
+    prompt: {
+      '3': {
+        inputs: {
+          seed: 89848141647836,
+          steps: 12,
+          cfg: 8,
+          sampler_name: 'dpmpp_sde',
+          scheduler: 'normal',
+          denoise: 1,
+          model: ['16', 0],
+          positive: ['6', 0],
+          negative: ['7', 0],
+          latent_image: ['5', 0],
         },
-        {
-          id: 8,
-          type: 'PreviewImage',
-          pos: [705, 274],
-          size: {
-            '0': 543.2338256835938,
-            '1': 423.5530090332031,
-          },
-          flags: {},
-          order: 2,
-          mode: 0,
-          inputs: [
-            {
-              name: 'images',
-              type: 'IMAGE',
-              link: 40,
-              label: 'images',
-              slot_index: 0,
-            },
-          ],
-          properties: {
-            'Node name for S&R': 'PreviewImage',
-          },
-        },
-        {
-          id: 9,
-          type: 'LoadImage',
-          pos: [-371, 322],
-          size: {
-            '0': 315,
-            '1': 314,
-          },
-          flags: {},
-          order: 0,
-          mode: 0,
-          outputs: [
-            {
-              name: 'IMAGE',
-              type: 'IMAGE',
-              links: [39],
-              shape: 3,
-              label: 'IMAGE',
-              slot_index: 0,
-            },
-            {
-              name: 'MASK',
-              type: 'MASK',
-              links: null,
-              shape: 3,
-              label: 'MASK',
-            },
-          ],
-          properties: {
-            'Node name for S&R': 'LoadImage',
-          },
-          widgets_values: ['valid_cloth_t1 (1).png', 'image'],
-        },
-        {
-          id: 23,
-          type: 'MagicClothing_Generate',
-          pos: [132, 175],
-          size: {
-            '0': 418.1999816894531,
-            '1': 430,
-          },
-          flags: {},
-          order: 1,
-          mode: 0,
-          inputs: [
-            {
-              name: 'cloth_image',
-              type: 'IMAGE',
-              link: 39,
-            },
-            {
-              name: 'face_image',
-              type: 'IMAGE',
-              link: null,
-            },
-            {
-              name: 'pose_image',
-              type: 'IMAGE',
-              link: null,
-            },
-            {
-              name: 'cloth_mask_image',
-              type: 'IMAGE',
-              link: null,
-            },
-          ],
-          outputs: [
-            {
-              name: 'images',
-              type: 'IMAGE',
-              links: [40],
-              shape: 3,
-              slot_index: 0,
-            },
-            {
-              name: 'cloth_mask_image',
-              type: 'IMAGE',
-              links: [41],
-              shape: 3,
-              slot_index: 1,
-            },
-          ],
-          properties: {
-            'Node name for S&R': 'MagicClothing_Generate',
-          },
-          widgets_values: [
-            'a photography of a model',
-            'OMS_1024_VTHD+DressCode_200000.safetensors',
-            'SG161222/Realistic_Vision_V4.0_noVAE',
-            true,
-            1,
-            'bare, monochrome, lowres, bad anatomy, worst quality, low quality',
-            1999,
-            'randomize',
-            3,
-            3,
-            20,
-            768,
-            576,
-            'FaceID',
-          ],
-        },
-      ],
-      links: [
-        [39, 9, 0, 23, 0, 'IMAGE'],
-        [40, 23, 0, 8, 0, 'IMAGE'],
-        [41, 23, 1, 16, 0, 'IMAGE'],
-      ],
-      groups: [],
-      config: {},
-      extra: {
-        ds: {
-          scale: 0.7400249944258218,
-          offset: {
-            '0': 486.0008666350852,
-            '1': 61.887842562004096,
-          },
+        class_type: 'KSampler',
+        _meta: {
+          title: 'KSampler',
         },
       },
-      version: 0.4,
-    },
-    prompt: {
+      '5': {
+        inputs: {
+          width: 768,
+          height: 768,
+          batch_size: 1,
+        },
+        class_type: 'EmptyLatentImage',
+        _meta: {
+          title: 'Empty Latent Image',
+        },
+      },
+      '6': {
+        inputs: {
+          text: 'masterpiece HDR victorian portrait painting of a silver knight, blonde hair, mountain nature, blue sky\n',
+          clip: ['16', 1],
+        },
+        class_type: 'CLIPTextEncode',
+        _meta: {
+          title: 'CLIP Text Encode (Prompt)',
+        },
+      },
+      '7': {
+        inputs: {
+          text: 'bad hands, text, watermark\n',
+          clip: ['16', 1],
+        },
+        class_type: 'CLIPTextEncode',
+        _meta: {
+          title: 'CLIP Text Encode (Prompt)',
+        },
+      },
       '8': {
         inputs: {
-          images: ['23', 0],
+          samples: ['3', 0],
+          vae: ['16', 2],
         },
-        class_type: 'PreviewImage',
+        class_type: 'VAEDecode',
         _meta: {
-          title: 'Preview Image',
+          title: 'VAE Decode',
         },
       },
       '9': {
         inputs: {
-          image: 'valid_cloth_t1.png',
-          upload: 'image',
+          filename_prefix: 'ComfyUI',
+          images: ['8', 0],
         },
-        class_type: 'LoadImage',
+        class_type: 'SaveImage',
         _meta: {
-          title: 'Load Image',
+          title: 'Save Image',
+        },
+      },
+      '10': {
+        inputs: {
+          upscale_method: 'nearest-exact',
+          width: 1152,
+          height: 1152,
+          crop: 'disabled',
+          samples: ['3', 0],
+        },
+        class_type: 'LatentUpscale',
+        _meta: {
+          title: 'Upscale Latent',
+        },
+      },
+      '11': {
+        inputs: {
+          seed: 469771404043268,
+          steps: 14,
+          cfg: 8,
+          sampler_name: 'dpmpp_2m',
+          scheduler: 'simple',
+          denoise: 0.5,
+          model: ['16', 0],
+          positive: ['6', 0],
+          negative: ['7', 0],
+          latent_image: ['10', 0],
+        },
+        class_type: 'KSampler',
+        _meta: {
+          title: 'KSampler',
+        },
+      },
+      '12': {
+        inputs: {
+          filename_prefix: 'Text2Image',
+          images: ['13', 0],
+        },
+        class_type: 'SaveImage',
+        _meta: {
+          title: 'Save Image',
+        },
+      },
+      '13': {
+        inputs: {
+          samples: ['11', 0],
+          vae: ['16', 2],
+        },
+        class_type: 'VAEDecode',
+        _meta: {
+          title: 'VAE Decode',
         },
       },
       '16': {
         inputs: {
-          images: ['23', 1],
+          ckpt_name: 'v2-1_768-ema-pruned.ckpt',
         },
-        class_type: 'PreviewImage',
+        class_type: 'CheckpointLoaderSimple',
         _meta: {
-          title: 'Preview Image',
-        },
-      },
-      '23': {
-        inputs: {
-          prompt: 'a photography of a model',
-          model_path: 'OMS_1024_VTHD+DressCode_200000.safetensors',
-          pipe_path: 'SG161222/Realistic_Vision_V4.0_noVAE',
-          enable_cloth_guidance: true,
-          num_samples: 1,
-          n_prompt: 'bare, monochrome, lowres, bad anatomy, worst quality, low quality',
-          seed: 1999,
-          scale: 3,
-          cloth_guidance_scale: 3,
-          sample_steps: 20,
-          height: 768,
-          width: 576,
-          faceid_version: 'FaceID',
-          cloth_image: ['9', 0],
-        },
-        class_type: 'MagicClothing_Generate',
-        _meta: {
-          title: 'Human Garment Generation',
+          title: 'Load Checkpoint',
         },
       },
     },
     toolInput: [
       {
-        displayName: `衣服图片`,
-        name: `9_image`,
-        type: 'file',
-        default: '',
+        displayName: 'prompt',
+        name: 'prompt',
+        type: 'string',
+        default: 'masterpiece HDR victorian portrait painting of a silver knight, blonde hair, mountain nature, blue sky',
         required: true,
         typeOptions: {
-          multipleValues: false,
-          accept: '.jpg,.jpeg,.png,.webp',
-          minValue: 1,
-          maxValue: 1,
-          maxSize: 1024 * 1024 * 10,
+          comfyOptions: {
+            node: 6,
+            key: 'text',
+          },
         },
       },
       {
-        displayName: 'prompt',
-        name: '23_prompt',
-        type: 'string',
-        default: 'a photography of a model',
-        required: true,
-      },
-      {
         displayName: 'negative prompt',
-        name: '23_n_prompt',
+        name: 'negative_prompt',
         type: 'string',
-        default: 'bare, monochrome, lowres, bad anatomy, worst quality, low quality',
+        default: 'bad hands, text, watermark',
         required: true,
+        typeOptions: {
+          comfyOptions: {
+            node: 7,
+            key: 'text',
+          },
+        },
       },
     ],
-    additionalModelList: [
+  },
+  {
+    id: '664e1fa3103d67fd8406a5f4',
+    tags: ['图像处理'],
+    iconUrl: 'emoji:📷:#98ae36',
+    displayName: '2Pass 文本生成图像',
+    description: '文本生成图像（2Pass 模式），基于 https://comfyanonymous.github.io/ComfyUI_examples/2_pass_txt2img/ 官方示例。',
+    workflowType: ComfyuiWorkflowSourceType.Json,
+    originalData: {},
+    prompt: {
+      '4': {
+        inputs: {
+          ckpt_name: 'sd_xl_base_1.0.safetensors',
+        },
+        class_type: 'CheckpointLoaderSimple',
+        _meta: {
+          title: 'Load Checkpoint - BASE',
+        },
+      },
+      '5': {
+        inputs: {
+          width: 1024,
+          height: 1024,
+          batch_size: 1,
+        },
+        class_type: 'EmptyLatentImage',
+        _meta: {
+          title: 'Empty Latent Image',
+        },
+      },
+      '6': {
+        inputs: {
+          text: 'large beautiful black hole in the deep space',
+          clip: ['4', 1],
+        },
+        class_type: 'CLIPTextEncode',
+        _meta: {
+          title: 'CLIP Text Encode (Prompt)',
+        },
+      },
+      '7': {
+        inputs: {
+          text: 'text, watermark',
+          clip: ['4', 1],
+        },
+        class_type: 'CLIPTextEncode',
+        _meta: {
+          title: 'CLIP Text Encode (Prompt)',
+        },
+      },
+      '10': {
+        inputs: {
+          add_noise: 'enable',
+          noise_seed: 721897303308196,
+          steps: 25,
+          cfg: 8,
+          sampler_name: 'euler',
+          scheduler: 'normal',
+          start_at_step: 0,
+          end_at_step: 20,
+          return_with_leftover_noise: 'enable',
+          model: ['4', 0],
+          positive: ['6', 0],
+          negative: ['7', 0],
+          latent_image: ['5', 0],
+        },
+        class_type: 'KSamplerAdvanced',
+        _meta: {
+          title: 'KSampler (Advanced) - BASE',
+        },
+      },
+      '11': {
+        inputs: {
+          add_noise: 'disable',
+          noise_seed: 0,
+          steps: 25,
+          cfg: 8,
+          sampler_name: 'euler',
+          scheduler: 'normal',
+          start_at_step: 20,
+          end_at_step: 10000,
+          return_with_leftover_noise: 'disable',
+          model: ['12', 0],
+          positive: ['15', 0],
+          negative: ['16', 0],
+          latent_image: ['10', 0],
+        },
+        class_type: 'KSamplerAdvanced',
+        _meta: {
+          title: 'KSampler (Advanced) - REFINER',
+        },
+      },
+      '12': {
+        inputs: {
+          ckpt_name: 'sd_xl_refiner_1.0.safetensors',
+        },
+        class_type: 'CheckpointLoaderSimple',
+        _meta: {
+          title: 'Load Checkpoint - REFINER',
+        },
+      },
+      '15': {
+        inputs: {
+          text: 'evening sunset scenery blue sky nature, glass bottle with a galaxy in it',
+          clip: ['12', 1],
+        },
+        class_type: 'CLIPTextEncode',
+        _meta: {
+          title: 'CLIP Text Encode (Prompt)',
+        },
+      },
+      '16': {
+        inputs: {
+          text: 'text, watermark',
+          clip: ['12', 1],
+        },
+        class_type: 'CLIPTextEncode',
+        _meta: {
+          title: 'CLIP Text Encode (Prompt)',
+        },
+      },
+      '17': {
+        inputs: {
+          samples: ['11', 0],
+          vae: ['12', 2],
+        },
+        class_type: 'VAEDecode',
+        _meta: {
+          title: 'VAE Decode',
+        },
+      },
+      '19': {
+        inputs: {
+          filename_prefix: 'ComfyUI',
+          images: ['17', 0],
+        },
+        class_type: 'SaveImage',
+        _meta: {
+          title: 'Save Image',
+        },
+      },
+    },
+    toolInput: [
       {
-        name: 'magic_clothing_768_vitonhd_joint.safetensors',
-        url: 'https://huggingface.co/ShineChen1024/MagicClothing/resolve/main/magic_clothing_768_vitonhd_joint.safetensors?download=true',
-        dest: 'ComfyUI/custom_nodes/ComfyUI_MagicClothing/checkpoints',
+        displayName: 'Base Prompt',
+        name: 'base_prompt',
+        type: 'string',
+        default: 'large beautiful black hole in the deep space',
+        required: true,
+        typeOptions: {
+          comfyOptions: {
+            node: 6,
+            key: 'text',
+          },
+        },
       },
       {
-        name: 'cloth_segm.pth',
-        url: 'https://huggingface.co/ShineChen1024/MagicClothing/resolve/main/cloth_segm.pth?download=true',
-        dest: 'ComfyUI/custom_nodes/ComfyUI_MagicClothing/checkpoints',
+        displayName: 'Base Negative Prompt',
+        name: 'base_negative_prompt',
+        type: 'string',
+        default: 'text, watermark',
+        required: true,
+        typeOptions: {
+          comfyOptions: {
+            node: 7,
+            key: 'text',
+          },
+        },
       },
       {
-        name: 'OMS_1024_VTHD+DressCode_200000.safetensors',
-        url: 'https://huggingface.co/ShineChen1024/MagicClothing/resolve/main/OMS_1024_VTHD%2BDressCode_200000.safetensors?download=true',
-        dest: 'ComfyUI/custom_nodes/ComfyUI_MagicClothing/checkpoints',
+        displayName: 'REFINER Prompt',
+        name: 'refiner_base_prompt',
+        type: 'string',
+        default: 'evening sunset scenery blue sky nature, glass bottle with a galaxy in it',
+        required: true,
+        typeOptions: {
+          comfyOptions: {
+            node: 15,
+            key: 'text',
+          },
+        },
       },
       {
-        name: 'garment_extractor.safetensors',
-        url: 'https://huggingface.co/ShineChen1024/MagicClothing/resolve/main/stable_ckpt/garment_extractor.safetensors?download=true',
-        dest: 'ComfyUI/custom_nodes/ComfyUI_MagicClothing/checkpoints/stable_ckpt',
-      },
-      {
-        name: 'ip_layer.pth',
-        url: 'https://huggingface.co/ShineChen1024/MagicClothing/resolve/main/stable_ckpt/ip_layer.pth?download=true',
-        dest: 'ComfyUI/custom_nodes/ComfyUI_MagicClothing/checkpoints/stable_ckpt',
-      },
-    ],
-    additionalNodeList: [
-      {
-        url: 'https://static.infmonkeys.com/comfyui/custom_nodes/ComfyUI_MagicClothing.zip',
-        name: 'ComfyUI_MagicClothing',
+        displayName: 'REFINER Negative Prompt',
+        name: 'refiner_negative_prompt',
+        type: 'string',
+        default: 'text, watermark',
+        required: true,
+        typeOptions: {
+          comfyOptions: {
+            node: 16,
+            key: 'text',
+          },
+        },
       },
     ],
   },
