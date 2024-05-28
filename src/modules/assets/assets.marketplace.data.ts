@@ -174,6 +174,51 @@ export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketpla
       },
     ],
   },
+  {
+    tags: ['图像生成'],
+    autoPinPage: ['preview'],
+    id: '665569753c72460540612445',
+    displayName: '文本生成图像（MJ）',
+    description: '使用大语言模型构建 Prompt，再用 MJ 生成图片。',
+    iconUrl: 'emoji:📷:#98ae36',
+    isPreset: true,
+    isPublished: true,
+    version: 1,
+    variables: [
+      {
+        displayName: 'topic',
+        name: 'topic',
+        type: 'string',
+        default: 'a cat',
+      },
+    ],
+    tasks: [
+      {
+        inputParameters: {
+          frequency_penalty: 0.5,
+          presence_penalty: 0.5,
+          response_format: 'text',
+          systemPrompt: '根据用户的需求生成 Midjourney 的 prompt，除此之外不要返回任何其他内容。是有用户的语言作为回答的语言。',
+          temperature: 0.7,
+          userMessage: '${workflow.input.topic}',
+        },
+        name: 'llm:generate_text',
+        taskReferenceName: 'llm:generate_text_RtWLpB96',
+        type: TaskType.SIMPLE,
+      },
+      {
+        inputParameters: {
+          aspect_ratio: '1:1',
+          process_mode: 'relax',
+          prompt: '${llm:generate_text_RtWLpB96.output.message}',
+          skip_prompt_check: false,
+        },
+        name: 'midjourney:goapi_midjourney',
+        taskReferenceName: 'midjourney:goapi_midjourney_P8PPWFBN',
+        type: TaskType.SIMPLE,
+      },
+    ],
+  },
 ];
 
 export interface ComfyUIWorkflowWorkflowMarketplaceData extends ComfyuiWorkflowEntity {
