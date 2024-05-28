@@ -54,11 +54,11 @@ export class ToolsPollingService {
   private convertToComfyuiInputData(originalData: { [x: string]: any }, toolInput: BlockDefProperties[]) {
     const result: { [x: string]: { [x: string]: any } } = {};
     for (const key in originalData) {
-      const inputItem: any = toolInput.find((item) => item.name === key);
+      const inputItem = toolInput.find((item) => item.name === key);
       if (!inputItem) {
         continue;
       }
-      const comfyOptions = inputItem.comfyOptions;
+      const comfyOptions = inputItem.typeOptions?.comfyOptions;
       if (!comfyOptions) {
         continue;
       }

@@ -54,7 +54,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
               <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                 <FileDown size={15} />
               </DropdownMenuShortcut>
-              使用该模板
+              导入此工作流
             </DropdownMenuItem>
           </UgcComfyUIWorkflowStoreUseWorkflowDialog>
         </DropdownMenuGroup>
