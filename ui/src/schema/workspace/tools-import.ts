@@ -31,7 +31,7 @@ export const importToolSchema = z.object({
     credentialPlaceAt: z.string().optional(),
     credentialKey: z.string().optional(),
     credentialValue: z.string().optional(),
-    proprities: z.any().optional(),
+    properties: z.any().optional(),
     output: z.any().optional(),
   }),
 });

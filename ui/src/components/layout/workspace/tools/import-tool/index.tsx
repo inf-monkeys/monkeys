@@ -76,13 +76,13 @@ export const ImportToolModal: React.FC<IImportToolModalProps> = ({ children }) =
         toast.warning('鉴权方式不能为空');
         return;
       }
-      if (!data.apiInfo.proprities) {
+      if (!data.apiInfo.properties) {
         toast.warning('请求参数不能为空');
         return;
       }
 
       try {
-        data.apiInfo.proprities = JSON.parse(data.apiInfo.proprities);
+        data.apiInfo.properties = JSON.parse(data.apiInfo.properties);
       } catch (e) {
         toast.warning('请求参数必须为 JSON 格式');
         return;
@@ -451,7 +451,7 @@ export const ImportToolModal: React.FC<IImportToolModalProps> = ({ children }) =
                   )}
 
                   <FormField
-                    name="apiInfo.proprities"
+                    name="apiInfo.properties"
                     control={form.control}
                     render={({ field }) => (
                       <FormItem>
