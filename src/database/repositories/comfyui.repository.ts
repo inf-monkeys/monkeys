@@ -1,10 +1,12 @@
 import { ListDto } from '@/common/dto/list.dto';
 import { ComfyuiPrompt, ComfyuiWorkflow } from '@/common/typings/comfyui';
 import { generateDbId } from '@/common/utils';
+import { CreateComfyuiServerDto } from '@/modules/tools/comfyui/dto/req/create-comfyui-server';
 import { BlockDefProperties } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
+import { ComfyuiServerEntity, ComfyuiServerStatus } from '../entities/comfyui/comfyui-server.entity';
 import { ComfyuiWorkflowEntity, ComfyuiWorkflowSourceType } from '../entities/comfyui/comfyui-workflow.entity';
 import { ComfyuiWorkflowAssetRepositroy } from './assets-comfyui-workflow.respository';
 
@@ -18,10 +20,12 @@ export interface CreateComfyuiWorkflowParams {
 }
 
 @Injectable()
-export class ComfyuiWorkflowRepository {
+export class ComfyuiRepository {
   constructor(
     @InjectRepository(ComfyuiWorkflowEntity)
     private readonly comfyuiWorkflowRepository: Repository<ComfyuiWorkflowEntity>,
+    @InjectRepository(ComfyuiServerEntity)
+    private readonly comfyuiServerRepository: Repository<ComfyuiServerEntity>,
     private readonly comfyuiWorkflowAssetsRepository: ComfyuiWorkflowAssetRepositroy,
   ) {}
 
@@ -91,5 +95,72 @@ export class ComfyuiWorkflowRepository {
         teamId,
       },
     });
+  }
+
+  public async listServers(teamId: string) {
+    return await this.comfyuiServerRepository.find({
+      where: [
+        {
+          isDeleted: false,
+          teamId: IsNull(),
+        },
+        {
+          isDeleted: false,
+          teamId,
+        },
+      ],
+    });
+  }
+
+  public async createDefaultServer(address: string) {
+    const exists = await this.comfyuiServerRepository.findOne({
+      where: {
+        isDefault: true,
+        isDeleted: false,
+      },
+    });
+    if (!exists) {
+      const entity = new ComfyuiServerEntity();
+      entity.id = 'default';
+      entity.createdTimestamp = +new Date();
+      entity.updatedTimestamp = +new Date();
+      entity.isDeleted = false;
+      entity.address = address;
+      entity.status = ComfyuiServerStatus.Unkonwn;
+      entity.description = '默认 ComfyUI Server';
+      entity.isDefault = true;
+      await this.comfyuiServerRepository.save(entity);
+    } else {
+      exists.address = address;
+      await this.comfyuiServerRepository.save(exists);
+    }
+  }
+
+  public async createComfyuiServer(teamId: string, userId: string, data: CreateComfyuiServerDto) {
+    const entity = new ComfyuiServerEntity();
+    entity.id = generateDbId();
+    entity.createdTimestamp = +new Date();
+    entity.updatedTimestamp = +new Date();
+    entity.isDeleted = false;
+    entity.teamId = teamId;
+    entity.creatorUserId = userId;
+    entity.address = data.address;
+    entity.status = ComfyuiServerStatus.Unkonwn;
+    entity.description = data.description;
+    entity.isDefault = false;
+    await this.comfyuiServerRepository.save(entity);
+  }
+
+  public async deleteComfyuiServer(teamId: string, address: string) {
+    await this.comfyuiServerRepository.update(
+      {
+        teamId,
+        address,
+      },
+      {
+        isDeleted: true,
+        updatedTimestamp: +new Date(),
+      },
+    );
   }
 }

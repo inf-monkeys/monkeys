@@ -4,6 +4,19 @@ export interface IComfyuiModel {
   [x: string]: string[];
 }
 
+export enum ComfyuiServerStatus {
+  Unkonwn = 'UNKOWN',
+  UP = 'UP',
+  DOWN = 'DOWN',
+}
+
+export interface IComfyuiServer {
+  address: string;
+  status: ComfyuiServerStatus;
+  description: string;
+  isDefault: boolean;
+}
+
 export enum ComfyuiWorkflowSourceType {
   Image = 'image',
   WorkflowApiJson = 'workflow_api_json',

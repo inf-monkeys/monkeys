@@ -24,7 +24,7 @@ export class ComfyfileCronService {
     private readonly assetsCommonRepository: AssetsCommonRepository,
   ) {}
 
-  private async saveComfyfileApp(app: ComfyfileApp) {
+  private async saveComfyfileApp(subdirectory: string, app: ComfyfileApp) {
     const tags = app.tags;
     await this.comfyuiWorkflowAssetRepository.initBuiltInMarketPlace('comfyui-workflow', {
       isPreset: true,
@@ -39,6 +39,7 @@ export class ComfyfileCronService {
       toolInput: app.restEndpoint?.parameters || [],
       originalData: {
         homepage: app.homepage,
+        comfyfileRepo: `${config.comfyui.comfyfileRepo}/${subdirectory}`,
       },
     });
     if (tags.length > 0) {
@@ -55,7 +56,7 @@ export class ComfyfileCronService {
     }
     const comfyfileApps = parseComfyfile(comfyfilePath, tmpDir);
     for (const app of comfyfileApps) {
-      await this.saveComfyfileApp(app);
+      await this.saveComfyfileApp(subdirectory, app);
     }
   }
 

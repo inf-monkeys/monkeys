@@ -12,7 +12,7 @@ import { AssetsMarketPlaceRepository } from './repositories/assets-marketplace.r
 import { MediaFileAssetRepositroy } from './repositories/assets-media-file.repository';
 import { SdModelAssetRepositroy } from './repositories/assets-sd-model.repository';
 import { WorkflowAssetRepositroy } from './repositories/assets-workflow.respository';
-import { ComfyuiWorkflowRepository } from './repositories/comfyui-workflow.repository';
+import { ComfyuiRepository } from './repositories/comfyui.repository';
 import { CredentialsRepository } from './repositories/credential.repository';
 import { SqlKnowledgeBaseRepository } from './repositories/knowledge-base-sql.repository';
 import { KnowledgeBaseRepository } from './repositories/knowledge-base.repository';
@@ -51,7 +51,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     LlmModelRepository,
     SdModelRepository,
     AssetsMarketPlaceRepository,
-    ComfyuiWorkflowRepository,
+    ComfyuiRepository,
     ComfyuiWorkflowAssetRepositroy,
   ],
   exports: [
@@ -77,7 +77,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     LlmModelRepository,
     SdModelRepository,
     AssetsMarketPlaceRepository,
-    ComfyuiWorkflowRepository,
+    ComfyuiRepository,
     ComfyuiWorkflowAssetRepositroy,
   ],
   imports: [TypeOrmModule.forFeature(entities)],

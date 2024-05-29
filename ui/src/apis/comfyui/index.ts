@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 
-import { IComfyuiModel, IComfyuiWorkflow } from '@/apis/comfyui/typings.ts';
+import { IComfyuiModel, IComfyuiServer, IComfyuiWorkflow } from '@/apis/comfyui/typings.ts';
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { BlockDefProperties } from '@inf-monkeys/vines';
 
@@ -35,3 +35,18 @@ export const deleteComfyuiWorkflow = (id: string) => vinesFetcher({ method: 'DEL
 
 export const useComfyuiWorkflows = () =>
   useSWR<IComfyuiWorkflow[] | undefined>('/api/comfyui/workflows', vinesFetcher());
+
+export const useComfyuiServers = () => useSWR<IComfyuiServer[] | undefined>('/api/comfyui/servers', vinesFetcher());
+
+export interface ImportComfyuiServerParams {
+  address: string;
+  description: string;
+}
+
+export const importComfyuiServer = (params: ImportComfyuiServerParams) =>
+  vinesFetcher({ method: 'POST', simple: true })(`/api/comfyui/servers`, params);
+
+export const deleteComfyuiServer = (address: string) =>
+  vinesFetcher({ method: 'DELETE', simple: true })(`/api/comfyui/servers`, {
+    address,
+  });

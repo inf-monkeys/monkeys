@@ -7,16 +7,14 @@ import { Mq } from '@/common/mq';
 import { readIncomingMessage } from '@/common/utils/stream';
 import { sleep } from '@/common/utils/utils';
 import { ToolsEntity } from '@/database/entities/tools/tools.entity';
-import { ComfyuiWorkflowRepository } from '@/database/repositories/comfyui-workflow.repository';
+import { ComfyuiRepository } from '@/database/repositories/comfyui.repository';
 import { Task, TaskDef, TaskManager } from '@inf-monkeys/conductor-javascript';
-import { BlockDefProperties } from '@inf-monkeys/vines';
 import { Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { IncomingMessage } from 'http';
 import os from 'os';
 import { AuthType, WorkerInputData } from '../../common/typings/tools';
 import { ToolsRepository } from '../../database/repositories/tools.repository';
-import { COMFYUI_INFER_TOOL } from './consts';
 import { LLM_CHAT_COMPLETION_TOOL, LLM_COMPLETION_TOOL, LLM_NAMESPACE } from './llm/llm.controller';
 import { ToolsRegistryService } from './tools.registry.service';
 
@@ -30,7 +28,7 @@ export class ToolsPollingService {
   constructor(
     private readonly toolsRepository: ToolsRepository,
     private readonly toolsRegistryService: ToolsRegistryService,
-    private readonly comfyuiWorkflowRepository: ComfyuiWorkflowRepository,
+    private readonly comfyuiWorkflowRepository: ComfyuiRepository,
     @Inject(CACHE_TOKEN) private readonly cache: CacheManager,
     @Inject(MQ_TOKEN) private readonly mq: Mq,
   ) {}
@@ -49,47 +47,6 @@ export class ToolsPollingService {
     }
 
     return resultUrl;
-  }
-
-  private convertToComfyuiInputData(originalData: { [x: string]: any }, toolInput: BlockDefProperties[]) {
-    const result: { [x: string]: { [x: string]: any } } = {};
-    for (const key in originalData) {
-      const inputItem = toolInput.find((item) => item.name === key);
-      if (!inputItem) {
-        continue;
-      }
-      const comfyOptions = inputItem.typeOptions?.comfyOptions;
-      if (!comfyOptions) {
-        continue;
-      }
-      const { node: nodeId, key: comfyKey } = comfyOptions;
-      if (!result[nodeId]) {
-        result[nodeId] = {};
-      }
-      result[nodeId][comfyKey] = originalData[key];
-    }
-    return result;
-  }
-
-  private async resolvePostBody(tool: ToolsEntity, originalData: { [x: string]: any }) {
-    if (tool.name === COMFYUI_INFER_TOOL) {
-      const { workflow: comfyuiWorkflowId } = originalData;
-      const result = { ...originalData };
-      const comfyuiWorkflow = await this.comfyuiWorkflowRepository.getComfyuiWorkflowById(comfyuiWorkflowId);
-      const toolInput = comfyuiWorkflow.toolInput;
-      if (!comfyuiWorkflow) {
-        throw new Error(`Comfyui workflow not found: ${comfyuiWorkflowId}`);
-      }
-      const prompt = comfyuiWorkflow.prompt;
-      if (!prompt) {
-        throw new Error(`Comfyui workflow prompt not found: ${comfyuiWorkflowId}`);
-      }
-      return {
-        workflow: prompt,
-        input_data: this.convertToComfyuiInputData(result, toolInput),
-      };
-    }
-    return originalData;
   }
 
   private isLlmChatTool(toolName: string): LlmModelEndpointType {
@@ -250,7 +207,7 @@ export class ToolsPollingService {
         method,
         baseURL: server.baseUrl,
         url: this.replaceUrlParams(path, rest || {}),
-        data: await this.resolvePostBody(tool, rest),
+        data: rest,
         headers: headers,
         responseType,
       });

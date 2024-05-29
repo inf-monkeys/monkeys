@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ComfyUIController } from './comfyui.controller';
+import { ComfyuiExecutionController } from './comfyui.execution.controller';
+import { ComfyuiServerController } from './comfyui.server.controller';
 import { ComfyUIService } from './comfyui.service';
+import { ComfyuiWorkflowController } from './comfyui.workflow.controller';
 
 @Module({
   providers: [ComfyUIService],
-  controllers: [ComfyUIController],
+  controllers: [ComfyuiWorkflowController, ComfyuiServerController, ComfyuiExecutionController],
 })
 export class ComfyUIModule {}
