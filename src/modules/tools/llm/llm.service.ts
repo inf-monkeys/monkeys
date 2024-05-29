@@ -180,7 +180,7 @@ export class LlmService {
       switch (type) {
         case 'string':
           return 'string';
-        case 'nunber': // Assuming it's a typo, corrected to 'number'
+        case 'number':
           return 'number';
         case 'boolean':
           return 'boolean';
