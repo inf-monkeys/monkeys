@@ -1,4 +1,4 @@
-import { ToolImportType } from '@/common/typings/tools';
+import { ToolApiDef, ToolImportType } from '@/common/typings/tools';
 import { ApiProperty } from '@nestjs/swagger';
 import * as Joiful from 'joiful';
 
@@ -34,4 +34,12 @@ export class RegisterToolDto {
   })
   @Joiful.string().optional()
   namespace: string;
+
+  @ApiProperty({
+    required: true,
+    type: Object,
+    description: 'namespace',
+  })
+  @Joiful.object().optional()
+  apiInfo: ToolApiDef;
 }

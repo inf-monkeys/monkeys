@@ -166,7 +166,7 @@ export class ToolsRepository {
   }
 
   public async createTool(tool: ToolsEntity) {
-    await this.toolsRepository.save(tool);
+    return await this.toolsRepository.save(tool);
   }
 
   public async updateToolServer(namespace: string, updates: Partial<ToolsServerEntity>) {

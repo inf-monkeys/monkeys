@@ -21,6 +21,7 @@ export class ApiConfig {
 }
 
 export const SYSTEM_NAMESPACE = 'system';
+export const API_NAMESPACE = 'api';
 
 export enum HealthCheckStatus {
   UP = 'UP',

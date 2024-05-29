@@ -210,16 +210,7 @@ export class LlmService {
   private async executeTool(name: string, data: any) {
     logger.info(`Start to call tool call: ${name} with arguments: ${JSON.stringify(data)}`);
     name = name.replaceAll('__', ':');
-    const tool = await this.toolsReopsitory.getToolByName(name);
-    const server = await this.toolsReopsitory.getServerByNamespace(tool.namespace);
-    const apiInfo = tool.extra?.apiInfo;
-    const { method, path } = apiInfo;
-    const result = await this.toolForwardServie.request<{ [x: string]: any }>(server.namespace, {
-      method,
-      url: path,
-      data: method.toLowerCase() === 'get' ? undefined : data,
-      params: method.toLowerCase() === 'get' ? data : undefined,
-    });
+    const result = await this.toolForwardServie.invoke<{ [x: string]: any }>(name, data);
     logger.info(`Tool call ${name} result: ${JSON.stringify(result)}`);
     return result;
   }
