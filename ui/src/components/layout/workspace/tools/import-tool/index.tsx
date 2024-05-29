@@ -21,7 +21,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Updater } from '@/components/ui/updater';
-import { IImportTool, importToolSchema, ToolImportType, ToolOpenAPISpecType } from '@/schema/workspace/tools-import.ts';
+import { IImportTool, ToolImportType, ToolOpenAPISpecType, importToolSchema } from '@/schema/workspace/tools-import.ts';
 
 interface IImportToolModalProps {
   children?: React.ReactNode;
@@ -70,10 +70,6 @@ export const ImportToolModal: React.FC<IImportToolModalProps> = ({ children }) =
       }
       if (!data.apiInfo.method) {
         toast.warning('HTTP 请求方法不能为空');
-        return;
-      }
-      if (!data.apiInfo.credentialPlaceAt) {
-        toast.warning('鉴权方式不能为空');
         return;
       }
       if (!data.apiInfo.properties) {
