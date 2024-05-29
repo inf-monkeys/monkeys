@@ -5,9 +5,9 @@ import { isEmpty } from 'lodash';
 import { Copy, CopyCheck } from 'lucide-react';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 
-import { AutoScroll } from '@/components/layout/vines-view/chat/messages/virtualized/auto-scroll.tsx';
-import { VinesRealTimeChatMessage } from '@/components/layout/vines-view/chat/messages/virtualized/chat-message/real-time.tsx';
-import { IMessage } from '@/components/layout/vines-view/chat/openai/use-chat.ts';
+import { IVinesMessage } from '@/components/layout/vines-view/chat/chat-bot/use-chat.ts';
+import { AutoScroll } from '@/components/layout/vines-view/chat/workflow-mode/messages/virtualized/auto-scroll.tsx';
+import { VinesRealTimeChatMessage } from '@/components/layout/vines-view/chat/workflow-mode/messages/virtualized/chat-message/real-time.tsx';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card.tsx';
@@ -16,7 +16,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { VinesIcon } from '@/components/ui/vines-icon';
 
 interface IVirtualizedListProps {
-  data: IMessage[];
+  data: IVinesMessage[];
   isLoading: boolean;
   userPhoto: string;
   botPhoto: string;
@@ -49,7 +49,7 @@ export const VirtualizedList: React.FC<IVirtualizedListProps> = ({ data, isLoadi
         context={{ virtuosoRef }}
         followOutput={'auto'}
         initialTopMostItemIndex={LastItemIndex}
-        itemContent={(index: number, data: IMessage) => {
+        itemContent={(index: number, data: IVinesMessage) => {
           const isUser = data.role === 'user';
           const content = data.content ?? '';
           const isEmptyMessage = isEmpty(content.trim());

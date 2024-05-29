@@ -8,8 +8,8 @@ import { omit } from 'lodash';
 import { MessageSquareDashed } from 'lucide-react';
 
 import { useSearchWorkflowExecutions } from '@/apis/workflow/execution';
-import { IVinesChatListItem } from '@/components/layout/vines-view/chat/messages/typings.ts';
-import { VirtualizedList } from '@/components/layout/vines-view/chat/messages/virtualized';
+import { IVinesChatListItem } from '@/components/layout/vines-view/chat/workflow-mode/messages/typings.ts';
+import { VirtualizedList } from '@/components/layout/vines-view/chat/workflow-mode/messages/virtualized';
 import { useVinesUser } from '@/components/router/guard/user.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';

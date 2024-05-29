@@ -24,7 +24,7 @@ export const parseOpenAIStream = (rawResponse: Response, multipleChat = true) =>
           }
           try {
             const json = JSON.parse(data);
-            const text = multipleChat ? json.choices[0].delta?.content : json.choices[0]?.text || '';
+            const text = multipleChat ? json.choices[0]?.delta?.content : json.choices[0]?.text || '';
             const queue = encoder.encode(text);
             controller.enqueue(queue);
           } catch (e) {

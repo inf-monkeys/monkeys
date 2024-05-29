@@ -1,11 +1,11 @@
 import React, { memo } from 'react';
 
 import { isEmpty } from 'lodash';
-import { WorkflowInputList } from 'src/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-list';
 
-import { IVinesChatListItem } from '@/components/layout/vines-view/chat/messages/typings.ts';
-import { VinesBotChatMessage } from '@/components/layout/vines-view/chat/messages/virtualized/chat-message/bot.tsx';
+import { IVinesChatListItem } from '@/components/layout/vines-view/chat/workflow-mode/messages/typings.ts';
+import { VinesBotChatMessage } from '@/components/layout/vines-view/chat/workflow-mode/messages/virtualized/chat-message/bot.tsx';
 import { VinesAbstractDataPreview } from '@/components/layout/vines-view/execution/data-display/abstract';
+import { WorkflowInputList } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-list';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Card } from '@/components/ui/card.tsx';
 import { JSONValue } from '@/components/ui/code-editor';
