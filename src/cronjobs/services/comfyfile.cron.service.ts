@@ -8,7 +8,7 @@ import { ComfyuiWorkflowSourceType } from '@/database/entities/comfyui/comfyui-w
 import { ComfyuiWorkflowAssetRepositroy } from '@/database/repositories/assets-comfyui-workflow.respository';
 import { AssetsCommonRepository } from '@/database/repositories/assets-common.repository';
 import { Inject, Injectable } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import fs from 'fs';
 import _ from 'lodash';
 import os from 'os';
@@ -60,7 +60,7 @@ export class ComfyfileCronService {
     }
   }
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron(config.comfyui.refreshCron)
   public async runScheduler() {
     if (!config.cron.enabled) {
       return;
