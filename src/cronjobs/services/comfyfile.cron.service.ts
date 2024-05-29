@@ -60,7 +60,7 @@ export class ComfyfileCronService {
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   public async runScheduler() {
     if (!config.cron.enabled) {
       return;
