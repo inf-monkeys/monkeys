@@ -6,8 +6,8 @@ import { logger } from '@/common/logger';
 import { Mq } from '@/common/mq';
 import { readIncomingMessage } from '@/common/utils/stream';
 import { sleep } from '@/common/utils/utils';
+import { API_NAMESPACE } from '@/database/entities/tools/tools-server.entity';
 import { ToolsEntity } from '@/database/entities/tools/tools.entity';
-import { ComfyuiRepository } from '@/database/repositories/comfyui.repository';
 import { Task, TaskDef, TaskManager } from '@inf-monkeys/conductor-javascript';
 import { Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
@@ -28,7 +28,6 @@ export class ToolsPollingService {
   constructor(
     private readonly toolsRepository: ToolsRepository,
     private readonly toolsRegistryService: ToolsRegistryService,
-    private readonly comfyuiWorkflowRepository: ComfyuiRepository,
     @Inject(CACHE_TOKEN) private readonly cache: CacheManager,
     @Inject(MQ_TOKEN) private readonly mq: Mq,
   ) {}
@@ -130,83 +129,105 @@ export class ToolsPollingService {
     const llmChatTool = this.isLlmChatTool(__toolName);
     const outputAs = this.getToolOutputAsConfig(tool, inputData);
 
-    const { method, path } = apiInfo;
     const namespace = __toolName.split(':')[0];
-    const server = await this.toolsRepository.getServerByNamespace(namespace);
-    if (!server) {
-      return {
-        outputData: {
-          success: false,
-          errMsg: `Failed to execute tool "${__toolName}", may not exists or not functioning now.`,
-        },
-        status: 'FAILED',
-      };
-    }
-
-    // 根据 server 的 rate_limiter 配置，限制并发请求
-    if (server.rateLimiter) {
-      const { maxConcurrentRequests } = server.rateLimiter;
-      if (maxConcurrentRequests) {
-        // use cache manager to store the current requests count
-        const cacheKey = `${config.server.appId}:current_requests:${server.namespace}`;
-        const currentRequestsStr = await this.cache.get(cacheKey);
-        const currentRequests = parseInt(currentRequestsStr || '0');
-        if (currentRequests >= maxConcurrentRequests) {
-          return {
-            outputData: {
-              success: false,
-              errMsg: `Failed to execute tool "${__toolName}": Concurrent requests exceed the limit: ${maxConcurrentRequests}`,
-            },
-            status: 'FAILED',
-          };
-        }
-        await this.cache.set(cacheKey, currentRequests + 1);
+    let headers: { [x: string]: string } = {};
+    let baseURL = undefined;
+    let method = undefined;
+    let url = undefined;
+    let server = undefined;
+    if (namespace === API_NAMESPACE) {
+      method = apiInfo.method;
+      url = apiInfo.url;
+      if (apiInfo.credentialPlaceAt === 'header') {
+        headers[apiInfo.credentialKey] = apiInfo.credentialValue;
       }
-    }
+      if (apiInfo.credentialPlaceAt === 'query') {
+        url = `${url}?${apiInfo.credentialKey}=${apiInfo.credentialValue}`;
+      }
+      if (apiInfo.credentialPlaceAt === 'body') {
+        rest[apiInfo.credentialKey] = apiInfo.credentialValue;
+      }
+    } else {
+      server = await this.toolsRepository.getServerByNamespace(namespace);
+      if (!server) {
+        return {
+          outputData: {
+            success: false,
+            errMsg: `Failed to execute tool "${__toolName}", may not exists or not functioning now.`,
+          },
+          status: 'FAILED',
+        };
+      }
 
-    const { type: authType, authorization_type = 'bearer', verification_tokens = {} } = server.auth;
-    const headers: { [x: string]: string } = {
-      'x-monkeys-appid': __context?.appId,
-      'x-monkeys-userid': __context?.userId,
-      'x-monkeys-teamid': __context?.teamId,
-      'x-monkeys-workflow-instanceid': task.workflowInstanceId,
-      'x-monkeys-workflow-taskid': task.taskId,
-    };
-    switch (authType) {
-      case AuthType.none:
-        break;
-      case AuthType.service_http:
-        if (authorization_type !== 'bearer') {
-          return {
-            outputData: {
-              success: false,
-              errMsg: `Failed to execute tool "${__toolName}": Unsupported authorization_type: ${authorization_type}`,
-            },
-            status: 'FAILED',
-          };
+      baseURL = server.baseUrl;
+      method = apiInfo.method;
+      url = apiInfo.path;
+
+      // 根据 server 的 rate_limiter 配置，限制并发请求
+      if (server.rateLimiter) {
+        const { maxConcurrentRequests } = server.rateLimiter;
+        if (maxConcurrentRequests) {
+          // use cache manager to store the current requests count
+          const cacheKey = `${config.server.appId}:current_requests:${server.namespace}`;
+          const currentRequestsStr = await this.cache.get(cacheKey);
+          const currentRequests = parseInt(currentRequestsStr || '0');
+          if (currentRequests >= maxConcurrentRequests) {
+            return {
+              outputData: {
+                success: false,
+                errMsg: `Failed to execute tool "${__toolName}": Concurrent requests exceed the limit: ${maxConcurrentRequests}`,
+              },
+              status: 'FAILED',
+            };
+          }
+          await this.cache.set(cacheKey, currentRequests + 1);
         }
-        const token = verification_tokens['monkeys'];
-        if (!token) {
-          return {
-            outputData: {
-              success: false,
-              errMsg: `Failed to execute tool "${__toolName}": monkeys verification_token is empty`,
-            },
-            status: 'FAILED',
-          };
-        }
-        headers['authorization'] = `Bearer ${token}`;
-        break;
-      default:
-        break;
+      }
+
+      const { type: authType, authorization_type = 'bearer', verification_tokens = {} } = server.auth;
+      headers = {
+        'x-monkeys-appid': __context?.appId,
+        'x-monkeys-userid': __context?.userId,
+        'x-monkeys-teamid': __context?.teamId,
+        'x-monkeys-workflow-instanceid': task.workflowInstanceId,
+        'x-monkeys-workflow-taskid': task.taskId,
+      };
+      switch (authType) {
+        case AuthType.none:
+          break;
+        case AuthType.service_http:
+          if (authorization_type !== 'bearer') {
+            return {
+              outputData: {
+                success: false,
+                errMsg: `Failed to execute tool "${__toolName}": Unsupported authorization_type: ${authorization_type}`,
+              },
+              status: 'FAILED',
+            };
+          }
+          const token = verification_tokens['monkeys'];
+          if (!token) {
+            return {
+              outputData: {
+                success: false,
+                errMsg: `Failed to execute tool "${__toolName}": monkeys verification_token is empty`,
+              },
+              status: 'FAILED',
+            };
+          }
+          headers['authorization'] = `Bearer ${token}`;
+          break;
+        default:
+          break;
+      }
     }
 
     try {
       const responseType = outputAs === 'json' ? 'json' : 'stream';
       const res = await axios({
         method,
-        baseURL: server.baseUrl,
-        url: this.replaceUrlParams(path, rest || {}),
+        baseURL,
+        url: this.replaceUrlParams(url, rest || {}),
         data: rest,
         headers: headers,
         responseType,
@@ -285,12 +306,12 @@ export class ToolsPollingService {
         };
       }
     } catch (error) {
-      logger.error(`Execute tool ${server.displayName}(${server.namespace} ${__toolName} failed`, error.message);
+      logger.error(`Execute tool ${__toolName} failed`, error.message);
       if (error.code === 'ECONNREFUSED') {
         return {
           outputData: {
             success: false,
-            errMsg: `${server.displayName}(${server.namespace}) Service is not available`,
+            errMsg: `${__toolName} Service is not available`,
           },
           status: 'FAILED',
         };
@@ -327,7 +348,7 @@ export class ToolsPollingService {
         }
       }
     } finally {
-      if (server.rateLimiter) {
+      if (server?.rateLimiter) {
         const { maxConcurrentRequests } = server.rateLimiter;
         if (maxConcurrentRequests) {
           const cacheKey = `${config.server.appId}:current_requests:${server.namespace}`;

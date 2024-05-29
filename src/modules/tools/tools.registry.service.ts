@@ -1,10 +1,11 @@
 import { logger } from '@/common/logger';
-import { enumToList, isValidNamespace } from '@/common/utils';
+import { enumToList, generateDbId, isValidNamespace } from '@/common/utils';
 import { ExtendedToolDefinition } from '@/common/utils/define-tool';
-import { SYSTEM_NAMESPACE } from '@/database/entities/tools/tools-server.entity';
+import { generateRandomString } from '@/common/utils/utils';
+import { API_NAMESPACE, SYSTEM_NAMESPACE } from '@/database/entities/tools/tools-server.entity';
 import { ComfyuiRepository } from '@/database/repositories/comfyui.repository';
 import { TriggerTypeRepository } from '@/database/repositories/trigger-type.repository';
-import { BlockDefinition } from '@inf-monkeys/vines';
+import { BlockDefinition, BlockType } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 import { OpenAPIObject } from '@nestjs/swagger';
 import { ServerObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
@@ -20,6 +21,7 @@ import {
   ManifestJson,
   RegisterToolParams,
   SchemaVersion,
+  ToolApiDef,
   ToolImportType,
   TriggerEndpointConfig,
   TriggerEndpointType,
@@ -211,6 +213,36 @@ export class ToolsRegistryService {
     return tools;
   }
 
+  private async registerToolsServerByApi(apiInfo: ToolApiDef) {
+    const namespace = API_NAMESPACE;
+    const { method, displayName, description, url, credentialKey, credentialPlaceAt, credentialValue, proprities, output } = apiInfo;
+    const randomName = generateRandomString(10);
+    return await this.toolsRepository.createTool({
+      id: generateDbId(),
+      isDeleted: false,
+      createdTimestamp: +new Date(),
+      updatedTimestamp: +new Date(),
+      type: BlockType.SIMPLE,
+      name: `${namespace}:${randomName}`,
+      namespace: API_NAMESPACE,
+      displayName: displayName,
+      description: description,
+      categories: [],
+      icon: 'emoji:🍀:#ceefc5',
+      input: proprities,
+      output,
+      extra: {
+        apiInfo: {
+          method,
+          url,
+          credentialKey,
+          credentialPlaceAt,
+          credentialValue,
+        },
+      },
+    });
+  }
+
   public async registerToolsServer(params: RegisterToolParams) {
     const { importType } = params;
     if (importType === ToolImportType.manifest) {
@@ -219,6 +251,8 @@ export class ToolsRegistryService {
     } else if (importType === ToolImportType.openapiSpec) {
       const { namespace, openapiSpecUrl } = params;
       return await this.regsieterToolsServerByOpenapiSpec(namespace, openapiSpecUrl);
+    } else if (importType === ToolImportType.api) {
+      return await this.registerToolsServerByApi(params.apiInfo);
     } else {
       throw new Error(`Error when import block: invalid importType "${importType}", must in any one of ${enumToList(ToolImportType).join(',')}`);
     }
