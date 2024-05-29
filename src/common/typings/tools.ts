@@ -103,7 +103,7 @@ export interface ToolApiDef {
   credentialPlaceAt: string;
   credentialKey: string;
   credentialValue: string;
-  proprities: BlockDefProperties[];
+  properties: BlockDefProperties[];
   output: BlockDefProperties[];
 }
 

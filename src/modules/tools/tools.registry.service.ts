@@ -208,14 +208,13 @@ export class ToolsRegistryService {
       filterByXMonkeyToolNameTag: false,
     });
     await this.validateToolsParsed(tools);
-
     await this.toolsRepository.createOrUpdateTools(namespace, tools);
     return tools;
   }
 
   private async registerToolsServerByApi(apiInfo: ToolApiDef) {
     const namespace = API_NAMESPACE;
-    const { method, displayName, description, url, credentialKey, credentialPlaceAt, credentialValue, proprities, output } = apiInfo;
+    const { method, displayName, description, url, credentialKey, credentialPlaceAt, credentialValue, properties, output } = apiInfo;
     const randomName = generateRandomString(10);
     return await this.toolsRepository.createTool({
       id: generateDbId(),
@@ -229,7 +228,7 @@ export class ToolsRegistryService {
       description: description,
       categories: [],
       icon: 'emoji:🍀:#ceefc5',
-      input: proprities,
+      input: properties,
       output,
       extra: {
         apiInfo: {

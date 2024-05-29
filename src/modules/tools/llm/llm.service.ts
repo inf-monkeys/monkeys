@@ -176,17 +176,80 @@ export class LlmService {
   }
 
   private resolveToolParameter(input: BlockDefProperties[]): ChatCompletionTool['function']['parameters'] {
-    const parameters: ChatCompletionTool['function']['parameters'] = {
-      type: 'object',
-      properties: {},
-    };
-    for (const inputItem of input) {
-      parameters.properties[inputItem.name] = {
-        type: 'string',
-        description: inputItem.description || inputItem.displayName,
+    function convertType(type: string): string {
+      switch (type) {
+        case 'string':
+          return 'string';
+        case 'nunber': // Assuming it's a typo, corrected to 'number'
+          return 'number';
+        case 'boolean':
+          return 'boolean';
+        case 'options':
+          return 'string';
+        case 'json':
+          return 'object';
+        default:
+          return 'string';
+      }
+    }
+
+    function convertProperties(properties: any[]): any {
+      const propertiesSchema: any = {};
+      const requiredFields: string[] = [];
+
+      properties.forEach((prop) => {
+        propertiesSchema[prop.name] = {
+          type: convertType(prop.type),
+          description: prop.description,
+        };
+        if (prop.type === 'json' && prop.properties) {
+          const nestedSchema = convertProperties(prop.properties);
+          propertiesSchema[prop.name].properties = nestedSchema.properties;
+          if (nestedSchema.required.length > 0) {
+            propertiesSchema[prop.name].required = nestedSchema.required;
+          }
+        }
+        if (prop.type === 'options' && prop.options) {
+          propertiesSchema[prop.name].enum = prop.options.map((option: any) => option.value);
+        }
+        if (prop.required) {
+          requiredFields.push(prop.name);
+        }
+      });
+
+      return {
+        properties: propertiesSchema,
+        required: requiredFields,
       };
     }
-    return parameters;
+
+    const schema: any = {
+      type: 'object',
+      properties: {},
+      required: [],
+    };
+
+    input.forEach((item) => {
+      schema.properties[item.name] = {
+        type: convertType(item.type),
+        description: item.description,
+      };
+      if (item.type === 'json' && item.properties) {
+        const nestedSchema = convertProperties(item.properties);
+        schema.properties[item.name].properties = nestedSchema.properties;
+        if (nestedSchema.required.length > 0) {
+          schema.properties[item.name].required = nestedSchema.required;
+        }
+      }
+      if (item.type === 'options' && item.options) {
+        schema.properties[item.name].enum = item.options.map((option: any) => option.value);
+      }
+      if (item.required) {
+        schema.required.push(item.name);
+      }
+    });
+
+    return schema;
   }
 
   public async resolveTools(tools: string[] | string): Promise<Array<ChatCompletionTool>> {
