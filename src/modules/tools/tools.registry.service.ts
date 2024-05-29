@@ -2,7 +2,7 @@ import { logger } from '@/common/logger';
 import { enumToList, isValidNamespace } from '@/common/utils';
 import { ExtendedToolDefinition } from '@/common/utils/define-tool';
 import { SYSTEM_NAMESPACE } from '@/database/entities/tools/tools-server.entity';
-import { ComfyuiWorkflowRepository } from '@/database/repositories/comfyui-workflow.repository';
+import { ComfyuiRepository } from '@/database/repositories/comfyui.repository';
 import { TriggerTypeRepository } from '@/database/repositories/trigger-type.repository';
 import { BlockDefinition } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
@@ -26,14 +26,14 @@ import {
 } from '../../common/typings/tools';
 import { CredentialsRepository } from '../../database/repositories/credential.repository';
 import { ToolsRepository } from '../../database/repositories/tools.repository';
-import { COMFYUI_INFER_TOOL } from './consts';
+import { COMFYUI_NAMESPACE, COMFYUI_TOOL } from './comfyui/comfyui.execution.controller';
 import { OpenAPIParserOptions, parseOpenApiSpecAsTools } from './utils/openapi-parser';
 
 @Injectable()
 export class ToolsRegistryService {
   constructor(
     private readonly toolsRepository: ToolsRepository,
-    private readonly comfyuiWorkflowRepository: ComfyuiWorkflowRepository,
+    private readonly comfyuiWorkflowRepository: ComfyuiRepository,
     private readonly credentialsRepository: CredentialsRepository,
     private readonly triggerTypesRepository: TriggerTypeRepository,
   ) {}
@@ -261,7 +261,7 @@ export class ToolsRegistryService {
   public async listTools(teamId: string) {
     const tools = await this.toolsRepository.listTools();
     // Handle Special comfyui tool
-    const comfyuiInferTool = tools.find((x) => x.name === COMFYUI_INFER_TOOL);
+    const comfyuiInferTool = tools.find((x) => x.name === `${COMFYUI_NAMESPACE}:${COMFYUI_TOOL}`);
     if (comfyuiInferTool) {
       const comfyuiWorkflowsInThisTeam = await this.comfyuiWorkflowRepository.getAllComfyuiWorkflows(teamId);
       let input = comfyuiInferTool.input || [];

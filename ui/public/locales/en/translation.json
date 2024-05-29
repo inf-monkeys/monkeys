@@ -1362,6 +1362,35 @@
             "placeholder": "Enter workflow name"
           }
         }
+      },
+      "comfyui-server": {
+        "title": "ComfyUI Server",
+        "table": {
+          "columns": {
+            "address": {
+              "label": "Address"
+            },
+            "description": {
+              "label": "Description"
+            },
+            "status": {
+              "label": "Status"
+            },
+            "operate": {
+              "label": "Operations"
+            }
+          }
+        },
+        "form": {
+          "address": {
+            "label": "Address",
+            "placeholder": "Enter address"
+          },
+          "description": {
+            "label": "Description",
+            "placeholder": "Enter description"
+          }
+        }
       }
     }
   }

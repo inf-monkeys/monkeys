@@ -2,10 +2,12 @@ import { ListDto } from '@/common/dto/list.dto';
 import { ComfyuiNode, ComfyuiPrompt, ComfyuiWorkflowWithPrompt } from '@/common/typings/comfyui';
 import { readComfyuiWorkflowFromImage, readComfyuiWorkflowFromJsonFile, readComfyuiWorkflowPromptFromJsonFile } from '@/common/utils/comfyui';
 import { ComfyuiWorkflowSourceType } from '@/database/entities/comfyui/comfyui-workflow.entity';
-import { ComfyuiWorkflowRepository } from '@/database/repositories/comfyui-workflow.repository';
+import { ComfyuiRepository } from '@/database/repositories/comfyui.repository';
 import { BlockDefProperties, BlockDefPropertyTypes } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
+import axios from 'axios';
 import _ from 'lodash';
+import { CreateComfyuiServerDto } from './dto/req/create-comfyui-server';
 
 export interface ImportComfyuiWorkflowParams {
   displayName?: string;
@@ -17,7 +19,7 @@ export interface ImportComfyuiWorkflowParams {
 
 @Injectable()
 export class ComfyUIService {
-  constructor(private readonly comfyuiWorkflowRepository: ComfyuiWorkflowRepository) {}
+  constructor(private readonly comfyuiWorkflowRepository: ComfyuiRepository) {}
 
   public async listComfyuiWorkflows(teamId: string, dto: ListDto) {
     return await this.comfyuiWorkflowRepository.listComfyuiWorkflows(teamId, dto);
@@ -191,5 +193,87 @@ export class ComfyUIService {
 
   public async getComfyuiWorkflowById(id: string) {
     return await this.comfyuiWorkflowRepository.getComfyuiWorkflowById(id);
+  }
+
+  public async listServers(teamId: string) {
+    return await this.comfyuiWorkflowRepository.listServers(teamId);
+  }
+
+  private async testComfyuiServerConnection(address: string): Promise<{ success: boolean; errMsg: string }> {
+    try {
+      await axios({
+        method: 'GET',
+        url: '/comfyfile/healthz',
+        baseURL: address,
+        timeout: 5000,
+      });
+      return {
+        success: true,
+        errMsg: '',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        errMsg: error.message,
+      };
+    }
+  }
+
+  public async createComfyuiServer(teamId: string, userId: string, data: CreateComfyuiServerDto) {
+    const { success, errMsg } = await this.testComfyuiServerConnection(data.address);
+    if (!success) {
+      throw new Error(
+        `Failed to connect to ComfyUI server: ${errMsg}, have you installed the Comfyfile plugin (https://github.com/inf-monkeys/Comfyfile)? And make sure comfyui is listening on 0.0.0.0`,
+      );
+    }
+    return await this.comfyuiWorkflowRepository.createComfyuiServer(teamId, userId, data);
+  }
+
+  public async deleteComfyuiServer(teamId: string, address: string) {
+    return await this.comfyuiWorkflowRepository.deleteComfyuiServer(teamId, address);
+  }
+
+  private convertToComfyuiInputData(originalData: { [x: string]: any }, toolInput: BlockDefProperties[]) {
+    const result: { [x: string]: { [x: string]: any } } = {};
+    for (const key in originalData) {
+      const inputItem = toolInput.find((item) => item.name === key);
+      if (!inputItem) {
+        continue;
+      }
+      const comfyOptions = inputItem.typeOptions?.comfyOptions;
+      if (!comfyOptions) {
+        continue;
+      }
+      const { node: nodeId, key: comfyKey } = comfyOptions;
+      if (!result[nodeId]) {
+        result[nodeId] = {};
+      }
+      result[nodeId][comfyKey] = originalData[key];
+    }
+    return result;
+  }
+
+  public async runComfyuiWorkflow(serverAddress: string, worfklowId: string, inputData: { [x: string]: any }) {
+    const comfyuiWorkflow = await this.comfyuiWorkflowRepository.getComfyuiWorkflowById(worfklowId);
+    if (!comfyuiWorkflow) {
+      throw new Error(`Comfyui workflow not found: ${worfklowId}`);
+    }
+    const prompt = comfyuiWorkflow.prompt;
+    if (!prompt) {
+      throw new Error(`Comfyui workflow prompt not found: ${worfklowId}`);
+    }
+    const toolInput = comfyuiWorkflow.toolInput;
+    const comfyuiInputData = this.convertToComfyuiInputData(inputData, toolInput);
+    const { data } = await axios({
+      method: 'POST',
+      url: '/comfyfile/run',
+      baseURL: serverAddress,
+      data: {
+        workflow: prompt,
+        input_data: comfyuiInputData,
+        comfyfile_repo: comfyuiWorkflow.originalData?.comfyfileRepo,
+      },
+    });
+    return data;
   }
 }

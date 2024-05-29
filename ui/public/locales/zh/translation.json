@@ -1357,6 +1357,35 @@
             "placeholder": "请输入工作流名称"
           }
         }
+      },
+      "comfyui-server": {
+        "title": "ComfyUI 服务",
+        "table": {
+          "columns": {
+            "address": {
+              "label": "服务地址"
+            },
+            "description": {
+              "label": "描述"
+            },
+            "status": {
+              "label": "状态"
+            },
+            "operate": {
+              "label": "操作"
+            }
+          }
+        },
+        "form": {
+          "address": {
+            "label": "服务地址",
+            "placeholder": "请输入服务地址"
+          },
+          "description": {
+            "label": "描述",
+            "placeholder": "请输入描述"
+          }
+        }
       }
     }
   }
