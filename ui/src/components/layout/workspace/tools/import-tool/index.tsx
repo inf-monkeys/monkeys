@@ -21,7 +21,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Updater } from '@/components/ui/updater';
-import { IImportTool, ToolImportType, ToolOpenAPISpecType, importToolSchema } from '@/schema/workspace/tools-import.ts';
+import { IImportTool, importToolSchema, ToolImportType, ToolOpenAPISpecType } from '@/schema/workspace/tools-import.ts';
 
 interface IImportToolModalProps {
   children?: React.ReactNode;
@@ -179,9 +179,8 @@ export const ImportToolModal: React.FC<IImportToolModalProps> = ({ children }) =
     },
   ];
 
-  const { importType, openapiSpecType } = form.getValues();
+  const [importType, openapiSpecType, apiInfo = {}] = form.watch(['importType', 'openapiSpecType', 'apiInfo']);
 
-  const { apiInfo = {} } = form.getValues();
   const { credentialPlaceAt } = apiInfo;
 
   return (
