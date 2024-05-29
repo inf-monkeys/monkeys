@@ -82,6 +82,7 @@ export interface ComfyUICofig {
   comfyfileRepo: string;
   defaultServer: string;
   githubToken: string;
+  refreshCron: string;
 }
 
 export enum AuthMethod {
@@ -255,6 +256,8 @@ export const config: Config = {
     defaultServer: readConfig('comfyui.defaultServer'),
     comfyfileRepo: readConfig('comfyui.comfyfileRepo', 'https://github.com/inf-monkeys/Comfyfile/tree/main/workflows'),
     githubToken: readConfig('comfyui.githubToken'),
+    // Defaults to every 5 minutes
+    refreshCron: readConfig('comfyui.refreshCron', '0 */5 * * * *'),
   },
   auth: {
     enabled: readConfig('auth.enabled', [AuthMethod.password, AuthMethod.apikey]),
