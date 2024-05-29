@@ -3,8 +3,8 @@ import React, { memo } from 'react';
 import { useClipboard } from '@mantine/hooks';
 import { Copy, Workflow } from 'lucide-react';
 import { toast } from 'sonner';
-import { ExecutionStatusIcon } from 'src/components/layout/vines-view/execution/status-icon';
 
+import { ExecutionStatusIcon } from '@/components/layout/vines-view/execution/status-icon';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription } from '@/components/ui/card.tsx';
 import { Separator } from '@/components/ui/separator.tsx';

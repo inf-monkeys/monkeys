@@ -2,8 +2,8 @@ import React from 'react';
 
 import { useElementSize } from '@mantine/hooks';
 import { motion } from 'framer-motion';
-import { VinesWorkflowInput } from 'src/components/layout/vines-view/execution/workflow-input';
 
+import { VinesWorkflowInput } from '@/components/layout/vines-view/execution/workflow-input';
 import { Button } from '@/components/ui/button';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { cn } from '@/utils';

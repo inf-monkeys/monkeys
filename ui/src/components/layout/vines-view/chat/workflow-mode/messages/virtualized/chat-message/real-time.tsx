@@ -1,10 +1,10 @@
 import React, { memo, RefObject, useEffect, useState } from 'react';
 
 import { VirtuosoHandle } from 'react-virtuoso';
-import { ExecutionStatusIcon } from 'src/components/layout/vines-view/execution/status-icon';
 
-import { VinesBotChatMessage } from '@/components/layout/vines-view/chat/messages/virtualized/chat-message/bot.tsx';
+import { VinesBotChatMessage } from '@/components/layout/vines-view/chat/workflow-mode/messages/virtualized/chat-message/bot.tsx';
 import { VinesActuatorDetailData } from '@/components/layout/vines-view/execution/actuator/detail/content/data.tsx';
+import { ExecutionStatusIcon } from '@/components/layout/vines-view/execution/status-icon';
 import { Card, CardContent, CardHeader } from '@/components/ui/card.tsx';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
