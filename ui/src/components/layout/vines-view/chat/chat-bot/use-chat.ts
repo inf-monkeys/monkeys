@@ -5,6 +5,7 @@ import useSWR from 'swr';
 import { isEmpty, omit } from 'lodash';
 import { toast } from 'sonner';
 
+import { JSONValue } from '@/package/vines-flow/core/tools/typings.ts';
 import { nanoIdLowerCase } from '@/utils';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 import { parseOpenAIStream } from '@/utils/openai.ts';
@@ -13,7 +14,8 @@ export interface IVinesMessage {
   id?: string;
   content: string;
   role: 'user' | 'assistant';
-  createdAt: Date;
+  extra?: JSONValue[];
+  createdAt?: Date;
 }
 
 interface ChatOptions {
@@ -54,9 +56,9 @@ export const useChat = ({ chatId, history, workflowId, apiKey, multipleChat, ini
 
         // region handle chat request
         const previousMessages = messagesRef.current;
-        void mutate(messages, false);
+        void mutate([...messages, { role: 'assistant', content: '' }], false);
 
-        const finalMessages = messages.map((it) => omit(it, ['id', 'createdAt'])).filter((it) => it.content);
+        const finalMessages = messages.map((it) => omit(it, ['id', 'createdAt', 'extra'])).filter((it) => it.content);
 
         const response = await fetch(`/api/${multipleChat ? 'chat/' : ''}completions`, {
           method: 'POST',
@@ -66,6 +68,7 @@ export const useChat = ({ chatId, history, workflowId, apiKey, multipleChat, ini
               ? finalMessages
               : messages.find((it) => it.role === 'user')?.content ?? '',
             stream: true,
+            show_logs: true,
           }),
           headers: {
             Authorization: `Bearer ${apiKey}`,
@@ -94,29 +97,42 @@ export const useChat = ({ chatId, history, workflowId, apiKey, multipleChat, ini
 
         const reader = data.getReader();
         const decoder = new TextDecoder('utf-8');
-        let aiResult = '';
+
         const assistantChatId = nanoIdLowerCase();
         const createdAt = new Date();
+        let aiResult = '';
+        const aiResultExtra: JSONValue[] = [];
 
         // eslint-disable-next-line no-constant-condition
         while (true) {
           const { value, done } = await reader.read();
           if (value) {
             const char = decoder.decode(value);
+            try {
+              const { content, type } = JSON.parse(char);
 
-            aiResult += char;
-            void mutate(
-              [
-                ...messages,
-                {
-                  id: assistantChatId,
-                  content: aiResult,
-                  role: 'assistant',
-                  createdAt,
-                },
-              ],
-              false,
-            );
+              if (type === 'text') {
+                aiResult += content;
+              } else {
+                aiResultExtra.push(content);
+              }
+              void mutate(
+                [
+                  ...messages,
+                  {
+                    id: assistantChatId,
+                    content: aiResult,
+                    role: 'assistant',
+                    createdAt,
+                    extra: aiResultExtra,
+                  },
+                ],
+                false,
+              );
+            } catch (e) {
+              console.error(e);
+              break;
+            }
           }
           if (done) {
             break;
