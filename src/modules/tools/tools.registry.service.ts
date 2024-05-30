@@ -19,6 +19,7 @@ import {
   CredentialEndpointConfig,
   CredentialEndpointType,
   ManifestJson,
+  RegisterToolOptions,
   RegisterToolParams,
   SchemaVersion,
   ToolApiDef,
@@ -158,7 +159,7 @@ export class ToolsRegistryService {
     }
   }
 
-  private async registerToolsServerByManifest(manifestUrl: string) {
+  private async registerToolsServerByManifest(manifestUrl: string, options?: RegisterToolOptions) {
     const { data: manifestData } = await axios.get<ManifestJson>(manifestUrl);
     await this.validateManifestJson(manifestData);
 
@@ -199,22 +200,23 @@ export class ToolsRegistryService {
       await this.triggerTypesRepository.createOrUpdateTriggerTypes(namespace, manifestData.triggers);
     }
 
-    await this.toolsRepository.createOrUpdateTools(namespace, tools);
+    await this.toolsRepository.createOrUpdateTools(namespace, tools, options);
     return tools;
   }
 
-  private async regsieterToolsServerByOpenapiSpec(namespace: string, openapiSpecUrl: string) {
+  private async regsieterToolsServerByOpenapiSpec(namespace: string, openapiSpecUrl: string, options?: RegisterToolOptions) {
     const { tools } = await this.parseOpenapiAsTools(namespace, openapiSpecUrl, {
       filterByXMonkeyToolNameTag: false,
     });
     await this.validateToolsParsed(tools);
-    await this.toolsRepository.createOrUpdateTools(namespace, tools);
+    await this.toolsRepository.createOrUpdateTools(namespace, tools, options);
     return tools;
   }
 
-  private async registerToolsServerByApi(apiInfo: ToolApiDef) {
+  private async registerToolsServerByApi(apiInfo: ToolApiDef, options?: RegisterToolOptions) {
     const namespace = API_NAMESPACE;
     const { method, displayName, description, url, credentialKey, credentialPlaceAt, credentialValue, properties, output } = apiInfo;
+    const { isPublic, userId, teamId } = options || {};
     const randomName = generateRandomString(10);
     return await this.toolsRepository.createTool({
       id: generateDbId(),
@@ -230,6 +232,9 @@ export class ToolsRegistryService {
       icon: 'emoji:🍀:#ceefc5',
       input: properties,
       output,
+      public: isPublic,
+      creatorUserId: userId,
+      teamId: teamId,
       extra: {
         apiInfo: {
           method,
@@ -242,16 +247,16 @@ export class ToolsRegistryService {
     });
   }
 
-  public async registerToolsServer(params: RegisterToolParams) {
+  public async registerToolsServer(params: RegisterToolParams, options?: RegisterToolOptions) {
     const { importType } = params;
     if (importType === ToolImportType.manifest) {
       const { manifestUrl } = params;
-      return await this.registerToolsServerByManifest(manifestUrl);
+      return await this.registerToolsServerByManifest(manifestUrl, options);
     } else if (importType === ToolImportType.openapiSpec) {
       const { namespace, openapiSpecUrl } = params;
-      return await this.regsieterToolsServerByOpenapiSpec(namespace, openapiSpecUrl);
+      return await this.regsieterToolsServerByOpenapiSpec(namespace, openapiSpecUrl, options);
     } else if (importType === ToolImportType.api) {
-      return await this.registerToolsServerByApi(params.apiInfo);
+      return await this.registerToolsServerByApi(params.apiInfo, options);
     } else {
       throw new Error(`Error when import block: invalid importType "${importType}", must in any one of ${enumToList(ToolImportType).join(',')}`);
     }
@@ -288,11 +293,14 @@ export class ToolsRegistryService {
     await this.toolsRepository.createOrUpdateTools(
       SYSTEM_NAMESPACE,
       builtInTools.filter((x) => !x.hidden),
+      {
+        isPublic: true,
+      },
     );
   }
 
   public async listTools(teamId: string) {
-    const tools = await this.toolsRepository.listTools();
+    const tools = await this.toolsRepository.listTools(teamId);
     // Handle Special comfyui tool
     const comfyuiInferTool = tools.find((x) => x.name === `${COMFYUI_NAMESPACE}:${COMFYUI_TOOL}`);
     if (comfyuiInferTool) {

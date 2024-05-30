@@ -1,4 +1,4 @@
-import { ManifestJson } from '@/common/typings/tools';
+import { ManifestJson, RegisterToolOptions } from '@/common/typings/tools';
 import { generateDbId } from '@/common/utils';
 import { ToolsServerEntity } from '@/database/entities/tools/tools-server.entity';
 import { ToolsEntity } from '@/database/entities/tools/tools.entity';
@@ -59,7 +59,8 @@ export class ToolsRepository {
     await this.toolsServerRepository.save(entity);
   }
 
-  public async createOrUpdateTools(namespace: string, latestTools: BlockDefinition[]) {
+  public async createOrUpdateTools(namespace: string, latestTools: BlockDefinition[], options?: RegisterToolOptions) {
+    const { isPublic, teamId, userId } = options || {};
     const latestToolNames = latestTools.map((x) => x.name);
     const originalTools = await this.toolsRepository.find({
       where: {
@@ -90,6 +91,9 @@ export class ToolsRepository {
           output: x.output,
           rules: x.rules,
           extra: x.extra,
+          creatorUserId: userId,
+          teamId: teamId,
+          public: isPublic,
         }),
       );
       await this.toolsRepository.save(entitiesToCreate);
@@ -125,17 +129,27 @@ export class ToolsRepository {
           extra: latestDef.extra,
           type: latestDef.type,
           isDeleted: false,
+          teamId: teamId !== undefined ? teamId : x.teamId,
+          public: isPublic !== undefined ? isPublic : x.public,
+          creatorUserId: userId !== undefined ? userId : x.creatorUserId,
         };
       });
       await this.toolsRepository.save(entitiesToUpdate);
     }
   }
 
-  public async listTools() {
+  public async listTools(teamId: string) {
     return await this.toolsRepository.find({
-      where: {
-        isDeleted: false,
-      },
+      where: [
+        {
+          isDeleted: false,
+          public: true,
+        },
+        {
+          isDeleted: false,
+          teamId,
+        },
+      ],
     });
   }
 

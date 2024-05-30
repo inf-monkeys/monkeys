@@ -14,7 +14,7 @@ export class AssetsReferenceService {
 
   public async getWorkflowReference(teamId: string, assetType: AssetType, assetId: string) {
     const workflows = await this.workflowRepository.getAllWorkflows(teamId);
-    const tools = await this.toolsRepository.listTools();
+    const tools = await this.toolsRepository.listTools(teamId);
     return workflows.filter((workflow) => {
       const tasks: WorkflowTask[] = flatTasks(workflow.tasks);
 

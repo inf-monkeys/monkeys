@@ -114,10 +114,10 @@ export const ImportToolModal: React.FC<IImportToolModalProps> = ({ children }) =
       value: ToolImportType.manifest,
       displayName: 'Manifest 文件',
     },
-    {
-      value: ToolImportType.openapiSpec,
-      displayName: 'Swagger Spec 文件',
-    },
+    // {
+    //   value: ToolImportType.openapiSpec,
+    //   displayName: 'Swagger Spec 文件',
+    // },
     {
       value: ToolImportType.api,
       displayName: '手动构建',
