@@ -115,6 +115,12 @@ export interface RegisterToolParams {
   apiInfo?: ToolApiDef;
 }
 
+export interface RegisterToolOptions {
+  isPublic?: boolean;
+  userId?: string;
+  teamId?: string;
+}
+
 export interface WorkerInputData {
   __toolName: string;
   __apiInfo: {

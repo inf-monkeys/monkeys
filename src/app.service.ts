@@ -55,31 +55,51 @@ export class AppService implements OnApplicationBootstrap {
     await this.waitServerHttpServiceAvailable();
     if (config.server.loadExample) {
       logger.info(`Loading example tools of ${EXAMPLE_TOOL_OPENAPI_MENIFEST_URL}`);
-      this.workerRegistryService.registerToolsServer({
-        importType: ToolImportType.manifest,
-        manifestUrl: EXAMPLE_TOOL_OPENAPI_MENIFEST_URL,
-      });
+      this.workerRegistryService.registerToolsServer(
+        {
+          importType: ToolImportType.manifest,
+          manifestUrl: EXAMPLE_TOOL_OPENAPI_MENIFEST_URL,
+        },
+        {
+          isPublic: true,
+        },
+      );
     }
 
     logger.info(`Loading chat tool of ${CHAT_TOOL_OPENAPI_MENIFEST_URL}`);
-    this.workerRegistryService.registerToolsServer({
-      importType: ToolImportType.manifest,
-      manifestUrl: CHAT_TOOL_OPENAPI_MENIFEST_URL,
-    });
+    this.workerRegistryService.registerToolsServer(
+      {
+        importType: ToolImportType.manifest,
+        manifestUrl: CHAT_TOOL_OPENAPI_MENIFEST_URL,
+      },
+      {
+        isPublic: true,
+      },
+    );
 
     logger.info(`Loading comfyui tool of ${COMFYUI_TOOL_OPENAPI_MENIFEST_URL}`);
-    this.workerRegistryService.registerToolsServer({
-      importType: ToolImportType.manifest,
-      manifestUrl: COMFYUI_TOOL_OPENAPI_MENIFEST_URL,
-    });
+    this.workerRegistryService.registerToolsServer(
+      {
+        importType: ToolImportType.manifest,
+        manifestUrl: COMFYUI_TOOL_OPENAPI_MENIFEST_URL,
+      },
+      {
+        isPublic: true,
+      },
+    );
 
     for (const { name, manifestUrl } of config.tools) {
       logger.info(`Loading ${name} tools of ${manifestUrl}`);
       this.workerRegistryService
-        .registerToolsServer({
-          importType: ToolImportType.manifest,
-          manifestUrl: manifestUrl,
-        })
+        .registerToolsServer(
+          {
+            importType: ToolImportType.manifest,
+            manifestUrl: manifestUrl,
+          },
+          {
+            isPublic: true,
+          },
+        )
         .catch((error) => {
           logger.warn(`Load tool ${name}(${manifestUrl}) failed: ${error.message}`);
         });

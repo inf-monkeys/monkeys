@@ -43,8 +43,12 @@ export class ToolsController {
 
   @Post('/register')
   @UseGuards(CompatibleAuthGuard)
-  public async registerWorker(@Body() body: RegisterToolDto) {
-    await this.toolRegistryService.registerToolsServer(body);
+  public async registerWorker(@Body() body: RegisterToolDto, @Req() req: IRequest) {
+    const { userId, teamId } = req;
+    await this.toolRegistryService.registerToolsServer(body, {
+      userId,
+      teamId,
+    });
     return new SuccessResponse({
       data: true,
     });
