@@ -32,8 +32,14 @@ export const VinesChatInput: React.FC<IVinesChatInputProps> = ({ chatId, apiKey,
           <Button variant="outline" icon={<Trash2 />} />
         </CleanMessages>
       )}
-      <Input placeholder="聊些什么..." value={input} onChange={setInput} onEnterPress={handleEnterPress} />
-      <Button variant="outline" disabled={isInputEmpty} onClick={handleEnterPress}>
+      <Input
+        placeholder="聊些什么..."
+        disabled={isLoading}
+        value={input}
+        onChange={setInput}
+        onEnterPress={handleEnterPress}
+      />
+      <Button variant="outline" loading={isLoading} disabled={isInputEmpty} onClick={handleEnterPress}>
         发送
       </Button>
       {isLoading && (
