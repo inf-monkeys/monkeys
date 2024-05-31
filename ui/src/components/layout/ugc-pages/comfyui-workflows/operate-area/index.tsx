@@ -71,7 +71,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
             e.preventDefault();
           }}
         >
-          <DropdownMenuLabel>{t('ugc-page.comfyui-workflow.operate-area.dropdown-label')}</DropdownMenuLabel>
+          <DropdownMenuLabel>{t('ugc-page.comfyui-workflow.ugc-view.operate-area.dropdown-label')}</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
           <AlertDialogTrigger asChild>
@@ -79,7 +79,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
               <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                 <Trash size={15} />
               </DropdownMenuShortcut>
-              {t('ugc-page.comfyui-workflow.operate-area.options.delete')}
+              {t('ugc-page.comfyui-workflow.ugc-view.operate-area.options.delete')}
             </DropdownMenuItem>
           </AlertDialogTrigger>
         </DropdownMenuContent>
