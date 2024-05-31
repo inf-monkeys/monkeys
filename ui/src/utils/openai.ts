@@ -27,7 +27,7 @@ export const parseOpenAIStream = (rawResponse: Response, multipleChat = true) =>
           try {
             const json = JSON.parse(data);
 
-            const text = multipleChat ? json?.choices?.[0]?.delta?.content : json?.choices?.[0]?.text || '';
+            const text = (multipleChat ? json?.choices?.[0]?.delta?.content : json?.choices?.[0]?.text) || '';
 
             const streamObject = json?.object ?? 'chat.completion.chunk';
             let msgType: 'text' | 'tool' = 'text';

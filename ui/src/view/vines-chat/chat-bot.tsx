@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useForceUpdate } from '@mantine/hooks';
 import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
-import { isEmpty } from 'lodash';
+import { isEmpty, reduce, toNumber } from 'lodash';
 import { MessageSquareDashed } from 'lucide-react';
 import { VinesChatInput } from 'src/components/layout/vines-view/chat/chat-bot/input';
 import { VirtualizedList } from 'src/components/layout/vines-view/chat/chat-bot/messages';
@@ -48,12 +48,22 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) =
 
   const { data: history, error, isLoading: isHistoryLoading } = useChatBotHistory(chatId);
 
+  const extraBody = reduce(
+    vines.workflowInput.filter((it) => it.default !== void 0 && !['stream', 'messages'].includes(it.name)),
+    function (acc, curr) {
+      acc[curr.name] = curr.type === 'number' ? toNumber(curr?.default) : curr.default;
+      return acc;
+    },
+    {},
+  );
+
   const { isLoading, setMessages, messages } = useChat({
     chatId,
     workflowId,
     apiKey,
     history,
     multipleChat,
+    extraBody,
   });
 
   useEffect(() => {
@@ -124,7 +134,7 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) =
           )}
         </AnimatePresence>
       </div>
-      <VinesChatInput chatId={chatId} apiKey={apiKey} workflowId={workflowId} multipleChat={multipleChat} />
+      <VinesChatInput chatId={chatId} multipleChat={multipleChat} />
     </>
   );
 };
