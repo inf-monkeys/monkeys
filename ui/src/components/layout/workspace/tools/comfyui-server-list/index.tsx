@@ -17,7 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
-import { Import, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ImportComfyuiServerModal } from '../import-comfyui-server';
 
@@ -63,11 +63,12 @@ export const ComfyUIServerListModal: React.FC<IImportToolModalProps> = ({ childr
             <div
               style={{
                 float: 'right',
+                marginRight: '1rem',
               }}
             >
               <ImportComfyuiServerModal>
-                <Button variant="outline" size="small" icon={<Import />}>
-                  {t('common.utils.import')}
+                <Button variant="outline" size="small" icon={<Plus />}>
+                  {t('common.utils.add')}
                 </Button>
               </ImportComfyuiServerModal>
             </div>

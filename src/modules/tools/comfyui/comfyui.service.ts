@@ -1,4 +1,5 @@
 import { ListDto } from '@/common/dto/list.dto';
+import { logger } from '@/common/logger';
 import { ComfyuiNode, ComfyuiPrompt, ComfyuiWorkflowWithPrompt } from '@/common/typings/comfyui';
 import { readComfyuiWorkflowFromImage, readComfyuiWorkflowFromJsonFile, readComfyuiWorkflowPromptFromJsonFile } from '@/common/utils/comfyui';
 import { ComfyuiWorkflowSourceType } from '@/database/entities/comfyui/comfyui-workflow.entity';
@@ -15,6 +16,19 @@ export interface ImportComfyuiWorkflowParams {
   imageUrl?: string;
   workflowApiJsonUrl?: string;
   workflowJsonUrl?: string;
+}
+
+export interface IComfyuiWorkflowDependencyUninstalledNode {
+  author: string;
+  title: string;
+  id: string;
+  reference: string;
+  files: string[];
+  install_type: string;
+  description: string;
+  stars: number;
+  last_update: string;
+  installed: 'False';
 }
 
 @Injectable()
@@ -34,6 +48,10 @@ export class ComfyUIService {
   }
 
   private inferInput(node: ComfyuiNode, key: string, value: any): BlockDefProperties {
+    if (node.type === 'LoadImage' && key === 'upload') {
+      return;
+    }
+
     if (Array.isArray(value) && typeof value[0] === 'string' && typeof value[1] === 'number') {
       // Link, ignore
       return;
@@ -46,40 +64,41 @@ export class ComfyUIService {
         return {
           displayName: `${nodeName} - 图片`,
           // 格式：节点ID_输入index_类型
-          name: `${node.id}_image`,
+          name: `${node.id}_${key}`,
           type: 'file',
           default: '',
           required: true,
           typeOptions: {
-            // 是否支持多文件上传
             multipleValues: false,
-            // 文件类型限制，例如：'.jpg,.png,.gif'
             accept: '.jpg,.jpeg,.png,.webp',
-            // 文件数量限制
-            // multipleValues 为 false 时，下面两个的值不需要填，因为只能为 1
             minValue: 1,
             maxValue: 1,
             maxSize: 1024 * 1024 * 10,
+            comfyOptions: {
+              node: node.id,
+              key,
+            },
           },
         };
       } else if (value.endsWith('.mp4') || value.endsWith('.avi') || value.endsWith('.mov')) {
         return {
           displayName: `${nodeName} - 视频`,
           // 格式：节点ID_输入index_类型
-          name: `${node.id}_video`,
+          name: `${node.id}_${key}`,
           type: 'file',
           default: '',
           required: true,
           typeOptions: {
             // 是否支持多文件上传
             multipleValues: false,
-            // 文件类型限制，例如：'.jpg,.png,.gif'
             accept: '.mp4,.avi,.mov',
-            // 文件数量限制
-            // multipleValues 为 false 时，下面两个的值不需要填，因为只能为 1
             minValue: 1,
             maxValue: 1,
             maxSize: 1024 * 1024 * 100,
+            comfyOptions: {
+              node: node.id,
+              key,
+            },
           },
         };
       } else if (MODEL_FILETYPES.some((x) => value.endsWith(x))) {
@@ -91,6 +110,12 @@ export class ComfyUIService {
           type: 'string',
           default: value,
           required: true,
+          typeOptions: {
+            comfyOptions: {
+              node: node.id,
+              key,
+            },
+          },
         };
       }
     } else {
@@ -105,6 +130,12 @@ export class ComfyUIService {
         type: dataTypeMap[dataType] || 'string',
         default: value,
         required: true,
+        typeOptions: {
+          comfyOptions: {
+            node: node.id,
+            key,
+          },
+        },
       };
     }
   }
@@ -258,10 +289,6 @@ export class ComfyUIService {
     if (!comfyuiWorkflow) {
       throw new Error(`Comfyui workflow not found: ${worfklowId}`);
     }
-    const prompt = comfyuiWorkflow.prompt;
-    if (!prompt) {
-      throw new Error(`Comfyui workflow prompt not found: ${worfklowId}`);
-    }
     const toolInput = comfyuiWorkflow.toolInput;
     const comfyuiInputData = this.convertToComfyuiInputData(inputData, toolInput);
     const { data } = await axios({
@@ -269,11 +296,91 @@ export class ComfyUIService {
       url: '/comfyfile/run',
       baseURL: serverAddress,
       data: {
-        workflow: prompt,
+        workflow_api_json: comfyuiWorkflow.prompt,
+        workflow_json: comfyuiWorkflow.workflow,
         input_data: comfyuiInputData,
         comfyfile_repo: comfyuiWorkflow.originalData?.comfyfileRepo,
       },
     });
     return data;
+  }
+
+  public async checkComfyuiDependencies(id: string, serverAddress: string) {
+    const workflow = await this.getComfyuiWorkflowById(id);
+    if (!workflow) {
+      throw new Error(`Comfyui workflow not found: ${id}`);
+    }
+    const workflowJson = workflow.workflow;
+    if (!workflowJson) {
+      throw new Error(`Comfyui workflow json not found: ${id}`);
+    }
+    const { data } = await axios({
+      method: 'POST',
+      url: '/comfyfile/check-dependencies',
+      baseURL: serverAddress,
+      data: {
+        workflow: workflowJson,
+        comfyfile_repo: workflow.originalData?.comfyfileRepo,
+      },
+    });
+    return data;
+  }
+
+  private async waitForComfyuiServerStartup(serverAddress: string) {
+    let success = false;
+    let errMsg = '';
+    for (let i = 0; i < 10; i++) {
+      logger.info(`Waiting for ComfyUI server to start...`);
+      try {
+        await axios({
+          method: 'GET',
+          url: '/comfyfile/healthz',
+          baseURL: serverAddress,
+          timeout: 5000,
+        });
+        success = true;
+        break;
+      } catch (error) {
+        errMsg = error.message;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+    if (!success) {
+      throw new Error(`Failed to start ComfyUI server: ${errMsg}`);
+    }
+  }
+
+  private async rebootComfyuiServer(serverAddress: string) {
+    try {
+      await axios({
+        method: 'POST',
+        url: '/manager/reboot',
+        baseURL: serverAddress,
+      });
+    } catch (error) {}
+    await this.waitForComfyuiServerStartup(serverAddress);
+  }
+
+  public async installComfyuiDependencies(serverAddress: string, dependencies: { nodes: IComfyuiWorkflowDependencyUninstalledNode[] }) {
+    const succeededNodes: IComfyuiWorkflowDependencyUninstalledNode[] = [];
+    for (const node of dependencies.nodes || []) {
+      logger.info(`Installing node: ${node.title}(${node.reference})`);
+      try {
+        await axios({
+          method: 'POST',
+          url: 'customnode/install',
+          baseURL: serverAddress,
+          data: node,
+        });
+        succeededNodes.push(node);
+      } catch (error) {
+        logger.error(`Failed to install node: ${node.title}(${node.reference})`, error.message);
+      }
+    }
+
+    if (succeededNodes.length) {
+      logger.info(`Successfully installed nodes: ${succeededNodes.map((x) => x.title).join(',')}, rebooting ComfyUI server...`);
+      await this.rebootComfyuiServer(serverAddress);
+    }
   }
 }

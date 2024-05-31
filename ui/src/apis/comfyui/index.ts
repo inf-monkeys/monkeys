@@ -1,6 +1,12 @@
 import useSWR from 'swr';
 
-import { IComfyuiModel, IComfyuiServer, IComfyuiWorkflow } from '@/apis/comfyui/typings.ts';
+import {
+  IComfyuiModel,
+  IComfyuiServer,
+  IComfyuiWorkflow,
+  IComfyuiWorkflowDependency,
+  IComfyuiWorkflowDependencyUninstalledNode,
+} from '@/apis/comfyui/typings.ts';
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { BlockDefProperties } from '@inf-monkeys/vines';
 
@@ -29,6 +35,20 @@ export const autoGenerateComfyuiWorkflowToolInput = (id: string) =>
 export const useComfyuiWorkflow = (id?: string) =>
   useSWR<IComfyuiWorkflow | undefined>(id ? `/api/comfyui/workflows/${id}` : null, vinesFetcher(), {
     refreshInterval: 600000,
+  });
+
+export const checkComfyuiDependencies = (id: string, serverAddress: string) =>
+  vinesFetcher<IComfyuiWorkflowDependency>({ method: 'GET', simple: true })(
+    `/api/comfyui/workflows/${id}/dependencies?serverAddress=${serverAddress}`,
+  );
+
+export const installComfyuiDependencies = (
+  serverAddress: string,
+  dependencies: { nodes: IComfyuiWorkflowDependencyUninstalledNode[] },
+) =>
+  vinesFetcher({ method: 'POST', simple: true })(`/api/comfyui/dependencies`, {
+    serverAddress,
+    dependencies,
   });
 
 export const deleteComfyuiWorkflow = (id: string) => vinesFetcher({ method: 'DELETE' })(`/api/comfyui/workflows/${id}`);

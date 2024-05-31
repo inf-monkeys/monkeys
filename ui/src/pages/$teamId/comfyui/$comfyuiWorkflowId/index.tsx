@@ -6,10 +6,11 @@ import { Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useComfyuiWorkflow } from '@/apis/comfyui';
-import { UgcDetailInfo } from '@/components/layout/ugc/detail/info';
 import { createComfyuiWorkflowColumns } from '@/components/layout/ugc-pages/comfyui-workflows/consts';
+import { ComfyuiWorkflowDependency } from '@/components/layout/ugc-pages/comfyui-workflows/detail/dependency';
 import { ComfyuiWorkflowToolInput } from '@/components/layout/ugc-pages/comfyui-workflows/detail/tool-input';
 import { ComfyuiWorkflowDetail } from '@/components/layout/ugc-pages/comfyui-workflows/detail/workflow';
+import { UgcDetailInfo } from '@/components/layout/ugc/detail/info';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
@@ -54,6 +55,9 @@ export const ActionToolDetail: React.FC<IActionToolDetailProps> = () => {
           <TabsTrigger value="workflow" className="text-xs">
             {t('ugc-page.comfyui-workflow.detail.tabs.workflow.label')}
           </TabsTrigger>
+          <TabsTrigger value="dependency" className="text-xs">
+            {t('ugc-page.comfyui-workflow.detail.tabs.dependency.label')}
+          </TabsTrigger>
           <TabsTrigger value="toolsInput" className="text-xs">
             {t('ugc-page.comfyui-workflow.detail.tabs.toolsInput.label')}
           </TabsTrigger>
@@ -67,6 +71,9 @@ export const ActionToolDetail: React.FC<IActionToolDetailProps> = () => {
         </TabsContent>
         <TabsContent value="workflow">
           <ComfyuiWorkflowDetail data={comfyuiWorkflow!} />
+        </TabsContent>
+        <TabsContent value="dependency">
+          <ComfyuiWorkflowDependency comfyuiWorkflow={comfyuiWorkflow!} />
         </TabsContent>
         <TabsContent value="toolsInput">
           <ComfyuiWorkflowToolInput data={comfyuiWorkflow!} />

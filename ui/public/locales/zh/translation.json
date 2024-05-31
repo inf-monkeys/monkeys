@@ -42,7 +42,8 @@
       "created-time": "创建时间",
       "ascend": "升序",
       "descend": "降序",
-      "load-more": "加载更多"
+      "load-more": "加载更多",
+      "add": "添加"
     },
     "type": {
       "workflow": "工作流",
@@ -814,6 +815,12 @@
             "title": "工具表单配置",
             "button": {
               "auto-generate": "重新生成"
+            }
+          },
+          "dependency": {
+            "label": "工作流依赖",
+            "select": {
+              "placeholder": "选择一个 Comfyui Server 以展示"
             }
           }
         }

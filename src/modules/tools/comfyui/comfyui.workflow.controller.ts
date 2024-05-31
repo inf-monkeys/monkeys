@@ -33,6 +33,14 @@ export class ComfyuiWorkflowController {
     });
   }
 
+  @Get('/:id/dependencies')
+  public async checkComfyuiDependencies(@Req() req: IRequest, @Param('id') id: string, @Query('serverAddress') serverAddress: string) {
+    const data = await this.comfyuiService.checkComfyuiDependencies(id, serverAddress);
+    return new SuccessResponse({
+      data,
+    });
+  }
+
   @Delete('/:id')
   public async deleteComfyuiWorkflow(@Req() req: IRequest, @Param('id') id: string) {
     const data = await this.comfyuiService.deleteComfyuiWorkflow(id);
