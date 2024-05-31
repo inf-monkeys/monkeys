@@ -26,10 +26,20 @@ interface ChatOptions {
   history?: IVinesMessage[];
   multipleChat?: boolean;
 
+  extraBody?: Record<string, any>;
+
   initialInput?: string;
 }
 
-export const useChat = ({ chatId, history, workflowId, apiKey, multipleChat, initialInput = '' }: ChatOptions) => {
+export const useChat = ({
+  chatId,
+  history,
+  workflowId,
+  apiKey,
+  multipleChat,
+  initialInput = '',
+  extraBody,
+}: ChatOptions) => {
   const [initialMessagesFallback] = useState([]);
   const { data: messages, mutate } = useSWR<IVinesMessage[]>([chatId, 'messages'], null, {
     fallbackData: history ?? initialMessagesFallback,
@@ -37,6 +47,29 @@ export const useChat = ({ chatId, history, workflowId, apiKey, multipleChat, ini
   const { data: isLoading = false, mutate: mutateLoading } = useSWR<boolean>([chatId, 'loading'], null);
 
   const { data: error = undefined, mutate: setError } = useSWR<undefined | Error>([chatId, 'error'], null);
+
+  const { data: requestCredentials, mutate: mutateRequestCredentials } = useSWR<Record<string, any>>(
+    [chatId, 'requestCredentials'],
+    null,
+    {
+      fallbackData: {
+        apiKey,
+        workflowId,
+        multipleChat,
+        extraBody,
+      },
+    },
+  );
+
+  useEffect(() => {
+    const newCredentials: Record<string, any> = requestCredentials ?? {};
+    if (apiKey) newCredentials.apiKey = apiKey;
+    if (workflowId) newCredentials.workflowId = workflowId;
+    if (multipleChat) newCredentials.multipleChat = multipleChat;
+    if (extraBody) newCredentials.extraBody = extraBody;
+
+    void mutateRequestCredentials(newCredentials, false);
+  }, [apiKey, multipleChat, extraBody, workflowId]);
 
   const messagesRef = useRef<IVinesMessage[]>(messages || []);
   useEffect(() => {
@@ -60,18 +93,20 @@ export const useChat = ({ chatId, history, workflowId, apiKey, multipleChat, ini
 
         const finalMessages = messages.map((it) => omit(it, ['id', 'createdAt', 'extra'])).filter((it) => it.content);
 
-        const response = await fetch(`/api/${multipleChat ? 'chat/' : ''}completions`, {
+        const finalMultipleChat = multipleChat ?? requestCredentials?.workflowId;
+
+        const response = await fetch(`/api/${finalMultipleChat ? 'chat/' : ''}completions`, {
           method: 'POST',
           body: stringify({
-            model: workflowId,
-            [multipleChat ? 'messages' : 'prompt']: multipleChat
+            model: workflowId ?? requestCredentials?.workflowId,
+            [finalMultipleChat ? 'messages' : 'prompt']: finalMultipleChat
               ? finalMessages
               : messages.find((it) => it.role === 'user')?.content ?? '',
             stream: true,
-            show_logs: true,
+            ...(extraBody ?? requestCredentials?.extraBody ?? {}),
           }),
           headers: {
-            Authorization: `Bearer ${apiKey}`,
+            Authorization: `Bearer ${apiKey ?? requestCredentials?.apiKey ?? ''}`,
             'Content-Type': 'application/json',
             ...(chatId && { 'x-monkeys-conversation-id': chatId }),
           },
@@ -159,7 +194,18 @@ export const useChat = ({ chatId, history, workflowId, apiKey, multipleChat, ini
         }
       }
     },
-    [mutate, mutateLoading, setError, messagesRef, abortControllerRef, apiKey, workflowId, chatId, multipleChat],
+    [
+      mutate,
+      mutateLoading,
+      setError,
+      messagesRef,
+      abortControllerRef,
+      apiKey,
+      workflowId,
+      chatId,
+      multipleChat,
+      requestCredentials,
+    ],
   );
 
   const append = useCallback(

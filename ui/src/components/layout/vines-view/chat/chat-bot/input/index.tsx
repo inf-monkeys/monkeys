@@ -11,17 +11,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 interface IVinesChatInputProps {
   chatId: string;
-  workflowId?: string;
-  apiKey?: string;
   multipleChat?: boolean;
 }
 
-export const VinesChatInput: React.FC<IVinesChatInputProps> = ({ chatId, apiKey, workflowId, multipleChat = true }) => {
+export const VinesChatInput: React.FC<IVinesChatInputProps> = ({ chatId, multipleChat = true }) => {
   const { messages, setMessages, input, setInput, handleEnterPress, isLoading, stop } = useChat({
     chatId,
-    apiKey,
-    workflowId,
-    multipleChat,
   });
 
   const isInputEmpty = isEmpty(input.trim());
