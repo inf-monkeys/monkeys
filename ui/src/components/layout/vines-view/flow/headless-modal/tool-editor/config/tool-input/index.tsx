@@ -1,6 +1,7 @@
 import React, { memo, useEffect, useRef } from 'react';
 
 import { BlockCredentialItem } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
+import { useForceUpdate } from '@mantine/hooks';
 import { get, set } from 'lodash';
 import { toast } from 'sonner';
 
@@ -44,6 +45,7 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
       taskRef.current = newTask;
     }, [nodeId]);
 
+    const forceUpdate = useForceUpdate();
     const handleUpdate = (value: unknown, name: string) => {
       if (!taskRef.current) {
         toast.error('工具数据异常！');
@@ -73,6 +75,7 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
       }
 
       updateRaw?.(nodeId, taskRef.current, false);
+      forceUpdate();
     };
 
     const credentials = get(tool, 'credentials', []) as BlockCredentialItem[];
