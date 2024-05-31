@@ -5,7 +5,9 @@ import { config } from './common/config';
 import { logger } from './common/logger';
 import { ToolImportType } from './common/typings/tools';
 import { sleep } from './common/utils/utils';
+import { ComfyuiRepository } from './database/repositories/comfyui.repository';
 import { ToolsRepository } from './database/repositories/tools.repository';
+import { COMFYUI_TOOL_OPENAPI_MENIFEST_URL } from './modules/tools/comfyui/comfyui.swagger';
 import { EXAMPLE_TOOL_OPENAPI_MENIFEST_URL } from './modules/tools/example/example.swagger';
 import { CHAT_TOOL_OPENAPI_MENIFEST_URL } from './modules/tools/llm/llm.swagger';
 import { ToolsRegistryService } from './modules/tools/tools.registry.service';
@@ -15,6 +17,7 @@ export class AppService implements OnApplicationBootstrap {
   constructor(
     private readonly workerRegistryService: ToolsRegistryService,
     private readonly toolsRepository: ToolsRepository,
+    private readonly comfyuiRepository: ComfyuiRepository,
   ) {}
 
   public async getCombinedToolsSwagger() {
@@ -51,33 +54,66 @@ export class AppService implements OnApplicationBootstrap {
   private async registerTools() {
     await this.waitServerHttpServiceAvailable();
     if (config.server.loadExample) {
-      logger.info(`Load example tools of ${EXAMPLE_TOOL_OPENAPI_MENIFEST_URL}`);
-      this.workerRegistryService.registerToolsServer({
-        importType: ToolImportType.manifest,
-        manifestUrl: EXAMPLE_TOOL_OPENAPI_MENIFEST_URL,
-      });
+      logger.info(`Loading example tools of ${EXAMPLE_TOOL_OPENAPI_MENIFEST_URL}`);
+      this.workerRegistryService.registerToolsServer(
+        {
+          importType: ToolImportType.manifest,
+          manifestUrl: EXAMPLE_TOOL_OPENAPI_MENIFEST_URL,
+        },
+        {
+          isPublic: true,
+        },
+      );
     }
 
-    logger.info(`Load chat tool of ${CHAT_TOOL_OPENAPI_MENIFEST_URL}`);
-    this.workerRegistryService.registerToolsServer({
-      importType: ToolImportType.manifest,
-      manifestUrl: CHAT_TOOL_OPENAPI_MENIFEST_URL,
-    });
+    logger.info(`Loading chat tool of ${CHAT_TOOL_OPENAPI_MENIFEST_URL}`);
+    this.workerRegistryService.registerToolsServer(
+      {
+        importType: ToolImportType.manifest,
+        manifestUrl: CHAT_TOOL_OPENAPI_MENIFEST_URL,
+      },
+      {
+        isPublic: true,
+      },
+    );
+
+    logger.info(`Loading comfyui tool of ${COMFYUI_TOOL_OPENAPI_MENIFEST_URL}`);
+    this.workerRegistryService.registerToolsServer(
+      {
+        importType: ToolImportType.manifest,
+        manifestUrl: COMFYUI_TOOL_OPENAPI_MENIFEST_URL,
+      },
+      {
+        isPublic: true,
+      },
+    );
 
     for (const { name, manifestUrl } of config.tools) {
-      logger.info(`Load ${name} tools of ${manifestUrl}`);
+      logger.info(`Loading ${name} tools of ${manifestUrl}`);
       this.workerRegistryService
-        .registerToolsServer({
-          importType: ToolImportType.manifest,
-          manifestUrl: manifestUrl,
-        })
+        .registerToolsServer(
+          {
+            importType: ToolImportType.manifest,
+            manifestUrl: manifestUrl,
+          },
+          {
+            isPublic: true,
+          },
+        )
         .catch((error) => {
           logger.warn(`Load tool ${name}(${manifestUrl}) failed: ${error.message}`);
         });
     }
   }
 
+  private async registerDrfaultComfyuiServer() {
+    if (config.comfyui.defaultServer) {
+      await this.comfyuiRepository.createDefaultServer(config.comfyui.defaultServer);
+    }
+  }
+
   onApplicationBootstrap() {
     this.registerTools();
+    this.registerDrfaultComfyuiServer();
   }
 }

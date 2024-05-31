@@ -129,7 +129,7 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
                     control={form.control}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('workspace.tools.import-comfyui-workflow.form..label')}</FormLabel>
+                        <FormLabel>{t('workspace.tools.import-comfyui-workflow.form.workflowJsonUrl.label')}</FormLabel>
                         <FormControl>
                           <Updater
                             accept={['application/json']}
@@ -150,7 +150,9 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
                     control={form.control}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('workspace.tools.import-comfyui-workflow.form..label')}</FormLabel>
+                        <FormLabel>
+                          {t('workspace.tools.import-comfyui-workflow.form.workflowApiJsonUrl.label')}
+                        </FormLabel>
                         <FormControl>
                           <Updater
                             accept={['application/json']}

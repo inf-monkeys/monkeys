@@ -8,8 +8,8 @@ import { WorkflowValidator } from './workflow-validator';
 export class WorkflowValidateService {
   constructor(private readonly toolsRepository: ToolsRepository) {}
 
-  public async validateWorkflow(tasks: WorkflowTask[], output: WorkflowOutputValue[]) {
-    const tools = await this.toolsRepository.listTools();
+  public async validateWorkflow(teamId: string, tasks: WorkflowTask[], output: WorkflowOutputValue[]) {
+    const tools = await this.toolsRepository.listTools(teamId);
     const issues = WorkflowValidator.validateWorkflow(tasks, output, tools as any[]);
     return issues;
   }

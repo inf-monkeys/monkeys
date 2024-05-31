@@ -92,6 +92,19 @@ export interface ManifestJson {
 export enum ToolImportType {
   manifest = 'manifest',
   openapiSpec = 'openapiSpec',
+  api = 'api',
+}
+
+export interface ToolApiDef {
+  displayName: string;
+  description: string;
+  url: string;
+  method: string;
+  credentialPlaceAt: string;
+  credentialKey: string;
+  credentialValue: string;
+  properties: BlockDefProperties[];
+  output: BlockDefProperties[];
 }
 
 export interface RegisterToolParams {
@@ -99,6 +112,13 @@ export interface RegisterToolParams {
   manifestUrl?: string;
   openapiSpecUrl?: string;
   namespace?: string;
+  apiInfo?: ToolApiDef;
+}
+
+export interface RegisterToolOptions {
+  isPublic?: boolean;
+  userId?: string;
+  teamId?: string;
 }
 
 export interface WorkerInputData {

@@ -124,7 +124,7 @@ export class ConductorService {
 
     // 将一个嵌套的 task 拍平
     const flattedTasks: WorkflowTask[] = flatTasks(tasks);
-    const tools = await this.toolsRepository.listTools();
+    const tools = await this.toolsRepository.listTools(teamId);
     for (const task of flattedTasks) {
       if (!task.inputParameters) {
         task.inputParameters = {};

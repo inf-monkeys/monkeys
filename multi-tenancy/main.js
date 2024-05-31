@@ -164,7 +164,6 @@ const runPorxyServer = (port) => {
     }
 
     const serverUrl = `http://127.0.0.1:${targetServerPort}`;
-    logger.info(`Request for ${host} ${req.url} -> ${serverUrl}`);
     // 转发 http 请求
     proxy.web(req, res, { target: serverUrl }, (err, req, res) => {
       logger.warn(err);

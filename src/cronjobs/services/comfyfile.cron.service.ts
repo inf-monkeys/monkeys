@@ -8,7 +8,7 @@ import { ComfyuiWorkflowSourceType } from '@/database/entities/comfyui/comfyui-w
 import { ComfyuiWorkflowAssetRepositroy } from '@/database/repositories/assets-comfyui-workflow.respository';
 import { AssetsCommonRepository } from '@/database/repositories/assets-common.repository';
 import { Inject, Injectable } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import fs from 'fs';
 import _ from 'lodash';
 import os from 'os';
@@ -24,7 +24,7 @@ export class ComfyfileCronService {
     private readonly assetsCommonRepository: AssetsCommonRepository,
   ) {}
 
-  private async saveComfyfileApp(app: ComfyfileApp) {
+  private async saveComfyfileApp(subdirectory: string, app: ComfyfileApp) {
     const tags = app.tags;
     await this.comfyuiWorkflowAssetRepository.initBuiltInMarketPlace('comfyui-workflow', {
       isPreset: true,
@@ -39,6 +39,7 @@ export class ComfyfileCronService {
       toolInput: app.restEndpoint?.parameters || [],
       originalData: {
         homepage: app.homepage,
+        comfyfileRepo: `${config.comfyui.comfyfileRepo}/${subdirectory}`,
       },
     });
     if (tags.length > 0) {
@@ -55,11 +56,11 @@ export class ComfyfileCronService {
     }
     const comfyfileApps = parseComfyfile(comfyfilePath, tmpDir);
     for (const app of comfyfileApps) {
-      await this.saveComfyfileApp(app);
+      await this.saveComfyfileApp(subdirectory, app);
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(config.comfyui.refreshCron)
   public async runScheduler() {
     if (!config.cron.enabled) {
       return;

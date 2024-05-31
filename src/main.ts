@@ -12,6 +12,7 @@ import { logger } from './common/logger';
 import { ValidationPipe } from './common/pipes/validator.pipe';
 import { initRedisClient } from './common/redis';
 import { BootstrapService } from './modules/bootstrap/bootstrap.service';
+import { setupComfyuiToolSwagger } from './modules/tools/comfyui/comfyui.swagger';
 import { setupExampleToolSwagger } from './modules/tools/example/example.swagger';
 import { setupLlmToolSwagger } from './modules/tools/llm/llm.swagger';
 import { ToolsPollingService } from './modules/tools/tools.polling.service';
@@ -71,6 +72,7 @@ async function bootstrap() {
 
   setupExampleToolSwagger(app);
   setupLlmToolSwagger(app);
+  setupComfyuiToolSwagger(app);
   setupSwagger(app);
 
   // String polling for tasks

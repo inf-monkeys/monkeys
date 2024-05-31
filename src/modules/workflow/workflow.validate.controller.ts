@@ -19,8 +19,9 @@ export class WorkflowValidateController {
     description: '校验 workflow',
   })
   public async validateWorkflow(@Req() req: IRequest, @Body() body: ValidateWorkflowDto) {
+    const { teamId } = req;
     const { tasks, output = [] } = body;
-    const validationIssues = await this.service.validateWorkflow(tasks, output);
+    const validationIssues = await this.service.validateWorkflow(teamId, tasks, output);
     const errors = validationIssues.filter((i) => i.issueType === ValidationIssueType.ERROR);
     const validated = errors.length === 0;
     return new SuccessResponse({

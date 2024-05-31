@@ -256,9 +256,9 @@ export class WorkflowValidator {
   }
 
   private static validateBlockInputParameters(tasks: WorkflowTask[], task: WorkflowTask, block: BlockDefinition): WorkflowValidationIssue[] {
-    const proprities: BlockDefProperties[] = block.input;
+    const properties: BlockDefProperties[] = block.input;
     const issues: WorkflowValidationIssue[] = [];
-    for (const prop of proprities) {
+    for (const prop of properties) {
       const issue = this.validateBlockInputParameter(tasks, task, block, prop);
       if (issue) {
         issues.push(issue);
