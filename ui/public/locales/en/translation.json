@@ -42,7 +42,8 @@
       "created-time": "Created Time",
       "ascend": "Ascend",
       "descend": "Descend",
-      "load-more": "Load More"
+      "load-more": "Load More",
+      "add": "Add"
     },
     "type": {
       "workflow": "workflow",
@@ -821,6 +822,12 @@
             "title": "Tools input form",
             "button": {
               "auto-generate": "Regenerate"
+            }
+          },
+          "dependency": {
+            "label": "Dependency",
+            "select": {
+              "placeholder": "Select A Comfyui Server to display"
             }
           }
         }

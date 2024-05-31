@@ -38,3 +38,20 @@ export interface IComfyuiWorkflow {
   toolName: string;
   toolInput: BlockDefProperties[];
 }
+
+export interface IComfyuiWorkflowDependencyUninstalledNode {
+  author: string;
+  title: string;
+  id: string;
+  reference: string;
+  files: string[];
+  install_type: string;
+  description: string;
+  stars: number;
+  last_update: string;
+  installed: 'False';
+}
+
+export interface IComfyuiWorkflowDependency {
+  uninstalled_nodes: IComfyuiWorkflowDependencyUninstalledNode[];
+}
