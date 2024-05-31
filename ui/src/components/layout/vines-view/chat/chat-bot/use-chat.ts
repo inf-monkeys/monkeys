@@ -104,6 +104,7 @@ export const useChat = ({
               : messages.find((it) => it.role === 'user')?.content ?? '',
             stream: true,
             ...(extraBody ?? requestCredentials?.extraBody ?? {}),
+            show_logs: true,
           }),
           headers: {
             Authorization: `Bearer ${apiKey ?? requestCredentials?.apiKey ?? ''}`,
