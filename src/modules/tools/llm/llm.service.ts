@@ -14,6 +14,8 @@ import { Readable } from 'stream';
 import { KnowledgeBaseService } from '../../assets/knowledge-base/knowledge-base.service';
 import { ToolsForwardService } from '../tools.forward.service';
 import { ResponseFormat } from './dto/req/create-chat-compltion.dto';
+import { isArray } from 'lodash';
+import { ChatCompletionContentPart } from 'openai/src/resources/chat/completions';
 
 export interface CreateChatCompelitionsParams {
   messages: Array<ChatCompletionMessageParam>;
@@ -138,10 +140,17 @@ export class LlmService {
           throw new Error(`Invalid message role '${role}'`);
         }
 
-        return {
-          role,
-          content: (content as string).trim(),
-        };
+        if (isArray(content) && role === 'user') {
+          return {
+            role,
+            content,
+          };
+        } else {
+          return {
+            role,
+            content: (content as string).trim(),
+          };
+        }
       })
       .filter(({ content }) => !!content);
     return messageHistory;
