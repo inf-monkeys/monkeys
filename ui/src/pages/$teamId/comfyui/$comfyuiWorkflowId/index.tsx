@@ -59,7 +59,11 @@ export const ActionToolDetail: React.FC<IActionToolDetailProps> = () => {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="info">
-          <UgcDetailInfo columns={createComfyuiWorkflowColumns({ hooks: { navigate } })} data={comfyuiWorkflow} />
+          <UgcDetailInfo
+            columns={createComfyuiWorkflowColumns({ hooks: { navigate } })}
+            data={comfyuiWorkflow}
+            assetKey="comfyui-workflow"
+          />
         </TabsContent>
         <TabsContent value="workflow">
           <ComfyuiWorkflowDetail data={comfyuiWorkflow!} />
