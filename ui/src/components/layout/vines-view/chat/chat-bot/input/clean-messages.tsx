@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { IVinesMessage } from '@/components/layout/vines-view/chat/chat-bot/use-chat/use-chat.ts';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,6 +12,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { IVinesMessage } from '../use-chat';
 
 interface ICleanMessagesProps extends React.ComponentPropsWithoutRef<'div'> {
   setMessages: (messages: IVinesMessage[]) => void;
