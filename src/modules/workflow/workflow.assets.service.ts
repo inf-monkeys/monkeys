@@ -16,7 +16,7 @@ export class WorkflowAssetsService {
     private readonly workflowCommonService: WorkflowCommonService,
   ) {}
 
-  public async getWorkflowRelatedAssets(workflowId: string, version: number): Promise<WorkflowRelatedAssetResult> {
+  public async getWorkflowRelatedAssets(teamId: string, workflowId: string, version: number): Promise<WorkflowRelatedAssetResult> {
     // 当前流程
     const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
     // 子流程
@@ -26,7 +26,7 @@ export class WorkflowAssetsService {
       allTasks = allTasks.concat(subWorkflow.tasks);
     }
     const flattedTasks: WorkflowTask[] = flatTasks(allTasks);
-    const tools = await this.toolsRepository.listTools();
+    const tools = await this.toolsRepository.listTools(teamId);
     const result: WorkflowRelatedAssetResult = {
       sdModels: [],
       llmModels: [],
@@ -114,7 +114,7 @@ export class WorkflowAssetsService {
     return result;
   }
 
-  public async getWorkflowRelatedAssetsOfAllVersion(workflowId: string): Promise<WorkflowRelatedAssetResult> {
+  public async getWorkflowRelatedAssetsOfAllVersion(teamId: string, workflowId: string): Promise<WorkflowRelatedAssetResult> {
     const versions = (await this.workflowRepository.getWorklfowVersions(workflowId)).map((x) => x.version);
     const chunks = _.chunk(versions, 10);
     const assets: WorkflowRelatedAssetResult = {
@@ -126,7 +126,7 @@ export class WorkflowAssetsService {
     for (const chunk of chunks) {
       await Promise.all(
         chunk.map(async (version) => {
-          const assetsOfThisVersion = await this.getWorkflowRelatedAssets(workflowId, version);
+          const assetsOfThisVersion = await this.getWorkflowRelatedAssets(teamId, workflowId, version);
           assets.llmModels = assets.llmModels.concat(assetsOfThisVersion.llmModels);
           assets.sdModels = assets.sdModels.concat(assetsOfThisVersion.sdModels);
           assets.textCollections = assets.textCollections.concat(assetsOfThisVersion.textCollections);

@@ -64,7 +64,7 @@ export class WorkflowCrudService {
     const workflowId = options?.useExistId || generateDbId();
 
     // 从应用市场 clone 的时候，资产的授权策略
-    const tools = await this.toolsRepository.listTools();
+    const tools = await this.toolsRepository.listTools(teamId);
     if (assetsPolicy && !isTheSameTeam) {
       const flattedTasks: WorkflowTask[] = flatTasks(tasks);
       for (const task of flattedTasks.filter((x) => x.type === BlockType.SIMPLE)) {
@@ -214,7 +214,7 @@ export class WorkflowCrudService {
       }
     }
 
-    const validationIssues = await this.workflowValidateService.validateWorkflow(tasks || [], output || []);
+    const validationIssues = await this.workflowValidateService.validateWorkflow(teamId, tasks || [], output || []);
     const errors = validationIssues.filter((i) => i.issueType === ValidationIssueType.ERROR);
     const validated = errors.length === 0;
     const workflowEntity = await this.workflowRepository.createWorkflow(teamId, userId, workflowId, version, {
@@ -475,7 +475,7 @@ export class WorkflowCrudService {
     let validated = workflow.validated;
     let validationIssues: WorkflowValidationIssue[] = [];
     if (updates.tasks || updates.output) {
-      validationIssues = await this.workflowValidateService.validateWorkflow(updates.tasks || workflow.tasks, updates.output || workflow.output || []);
+      validationIssues = await this.workflowValidateService.validateWorkflow(teamId, updates.tasks || workflow.tasks, updates.output || workflow.output || []);
       const errors = validationIssues.filter((i) => i.issueType === ValidationIssueType.ERROR);
       validated = errors.length === 0;
       await this.workflowRepository.updateWorkflowDef(teamId, workflowId, version, {

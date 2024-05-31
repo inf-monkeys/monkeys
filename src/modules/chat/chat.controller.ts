@@ -101,7 +101,9 @@ export class WorkflowOpenAICompatibleController {
             const parsedMessage = JSON.parse(cleanedMessageStr);
             const { choices = [] } = parsedMessage;
             const content = choices[0]?.delta?.content;
-            aiResponse += content;
+            if (content) {
+              aiResponse += content;
+            }
           } catch (error) {}
         }
       });

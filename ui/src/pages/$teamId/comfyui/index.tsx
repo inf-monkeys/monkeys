@@ -2,14 +2,15 @@ import React from 'react';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
-import { Import } from 'lucide-react';
+import { Import, Server } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { preloadUgcComfyuiWorkflows, useUgcComfyuiWorkflows } from '@/apis/ugc';
-import { UgcView } from '@/components/layout/ugc/view';
-import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer';
 import { createComfyuiWorkflowColumns } from '@/components/layout/ugc-pages/comfyui-workflows/consts';
 import { OperateArea } from '@/components/layout/ugc-pages/comfyui-workflows/operate-area';
+import { UgcView } from '@/components/layout/ugc/view';
+import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer';
+import { ComfyUIServerListModal } from '@/components/layout/workspace/tools/comfyui-server-list';
 import { ImportComfyUIWorkflowModal } from '@/components/layout/workspace/tools/import-comfyui-workflow';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
@@ -55,6 +56,11 @@ export const ActionTools: React.FC = () => {
                 {t('common.utils.import')}
               </Button>
             </ImportComfyUIWorkflowModal>
+            <ComfyUIServerListModal>
+              <Button variant="outline" size="small" icon={<Server />}>
+                {t('workspace.tools.comfyui-server.title')}
+              </Button>
+            </ComfyUIServerListModal>
           </>
         }
       />
