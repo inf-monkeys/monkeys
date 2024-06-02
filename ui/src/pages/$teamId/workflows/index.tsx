@@ -243,7 +243,7 @@ export const Workflows: React.FC = () => {
                 }}
               >
                 <DropdownMenuGroup>
-                  <DropdownMenuItem onSelect={() => {}}>
+                  <DropdownMenuItem disabled onSelect={() => {}}>
                     {t('ugc-page.workflow.ugc-view.subtitle.import.options.local-import')}
                   </DropdownMenuItem>
                   <DropdownMenuItem
