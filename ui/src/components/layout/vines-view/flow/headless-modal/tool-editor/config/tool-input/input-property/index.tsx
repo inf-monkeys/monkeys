@@ -68,14 +68,14 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
       isNumberType && (Array.isArray(value) ? value.every((it) => typeof it === 'number') : isNumber(value));
 
     if (isPureCollection) {
-      const isFileType = type === 'file' && isString(value);
+      const isFileType = type === 'file';
 
-      if (isNumberType) {
-        setComponentMode(!hasNumber ? 'component' : 'input');
-      } else if (isBooleanType) {
-        setComponentMode(!hasBoolean ? 'component' : 'input');
-      } else if (isFileType) {
-        setComponentMode(/(https|http):\/\/[^\s/]+\.[^\s/]+\/\S+\.\w{2,5}/g.test(value) ? 'component' : 'input');
+      if (isNumberType && !hasNumber) {
+        setComponentMode('component');
+      } else if (isBooleanType && !hasBoolean) {
+        setComponentMode('component');
+      } else if (isFileType && isString(value) && /(https|http):\/\/[^\s/]+\.[^\s/]+\/\S+\.\w{2,5}/g.test(value)) {
+        setComponentMode('component');
       } else {
         const hasElement =
           Array.isArray(value) &&
@@ -83,7 +83,9 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
             .filter((it) => typeof it === type)
             .map((it) => it.toString())
             .every((it) => !isEmpty(it));
-        setComponentMode(hasElement ? 'component' : 'input');
+        if (hasElement) {
+          setComponentMode('component');
+        }
       }
     }
 

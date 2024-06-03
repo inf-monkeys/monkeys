@@ -7,7 +7,7 @@ import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/he
 import { Updater } from '@/components/ui/updater';
 import { getFileNameByOssUrl } from '@/components/ui/updater/utils.ts';
 
-export const FileInput: React.FC<IVinesInputPropertyProps> = ({ def, value, onChange, disabled }) => {
+export const FileInput: React.FC<IVinesInputPropertyProps> = ({ def, value, onChange }) => {
   const accept = get(def, 'typeOptions.accept', '');
   const multipleValues = get(def, 'typeOptions.multipleValues', isArray(value));
   const maxSize = get(def, 'typeOptions.maxSize', void 0);
