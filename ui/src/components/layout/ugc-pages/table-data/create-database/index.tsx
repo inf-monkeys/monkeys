@@ -102,10 +102,10 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
       displayName: 'Postgres',
       value: 'postgres',
     },
-    {
-      displayName: 'Mysql',
-      value: 'mysql',
-    },
+    // {
+    //   displayName: 'Mysql',
+    //   value: 'mysql',
+    // },
   ];
 
   return (
