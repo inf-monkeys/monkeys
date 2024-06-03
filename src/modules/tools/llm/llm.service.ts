@@ -449,7 +449,7 @@ When answer to user:
       apiKey: apiKey || 'mock-apikey',
       baseURL: baseURL,
     });
-    const tools: Array<ChatCompletionTool> = await this.resolveTools(params.tools, sqlKnowledgeBase);
+    const tools: Array<ChatCompletionTool> = await this.resolveTools(params.tools || [], sqlKnowledgeBase);
 
     let response: ChatCompletion | Stream<ChatCompletionChunk>;
     try {
