@@ -21,7 +21,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Updater } from '@/components/ui/updater';
-import { IImportTool, ToolImportType, ToolOpenAPISpecType, importToolSchema } from '@/schema/workspace/tools-import.ts';
+import { IImportTool, importToolSchema, ToolImportType, ToolOpenAPISpecType } from '@/schema/workspace/tools-import.ts';
 
 interface IImportToolModalProps {
   children?: React.ReactNode;
@@ -186,9 +186,9 @@ export const ImportToolModal: React.FC<IImportToolModalProps> = ({ children }) =
         <DialogHeader>
           <DialogTitle>导入工具</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="h-[calc(100vh-15rem)]">
+        <ScrollArea className="max-h-[calc(100vh-20rem)] pr-2">
           <Form {...form}>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+            <form onSubmit={handleSubmit} className="mx-1 flex flex-col gap-2">
               <FormField
                 name="importType"
                 control={form.control}
