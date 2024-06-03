@@ -20,7 +20,6 @@ export const UgcComfyUIWorkflowStoreUseWorkflowDialog: React.FC<IUgcComfyUIWorkf
 }) => {
   const [visible, setVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const teamId = localStorage.getItem('vines-team-id');
 
   const handleUse = async () => {
     if (!item.id) return;
@@ -49,11 +48,11 @@ export const UgcComfyUIWorkflowStoreUseWorkflowDialog: React.FC<IUgcComfyUIWorkf
         </DialogHeader>
         <div className="flex gap-3">
           <div className="flex-shrink-0">
-            <VinesIcon src={item.iconUrl} size="xl" />
+            <VinesIcon src={item.iconUrl} size="lg" />
           </div>
-          <div className="flex flex-col gap-1">
-            <span className="font-bold">{item.displayName}</span>
-            <span className="text-sm">{item.description}</span>
+          <div className="flex w-96 flex-col gap-1 overflow-hidden">
+            <p className="font-bold">{item.displayName}</p>
+            <p className="break-words text-sm">{item.description}</p>
           </div>
         </div>
         <DialogFooter>

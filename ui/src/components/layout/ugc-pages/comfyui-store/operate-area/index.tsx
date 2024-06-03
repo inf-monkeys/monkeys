@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { FileDown } from 'lucide-react';
+
 import { IComfyuiWorkflow } from '@/apis/comfyui/typings';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import {
@@ -13,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
-import { FileDown } from 'lucide-react';
+
 import { UgcComfyUIWorkflowStoreUseWorkflowDialog } from '../use-workflow-dialog';
 
 interface IOperateAreaProps {
