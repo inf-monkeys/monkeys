@@ -10,7 +10,7 @@ import { ToolsRepository } from '../../database/repositories/tools.repository';
 
 @Injectable()
 export class ToolsHealthCheckCronService {
-  private readonly lockResource = 'tools-health-check-cron';
+  private readonly lockResource = `${config.server.appId}:cron:lock:tools-health-check`;
 
   constructor(
     @Inject(LOCK_TOKEN) private readonly lockManager: LockManager,

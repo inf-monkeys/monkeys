@@ -10,7 +10,7 @@ import { ToolsRepository } from '../../database/repositories/tools.repository';
 
 @Injectable()
 export class ToolsRegistryCronService {
-  private readonly lockResource = 'tools-registry-cron';
+  private readonly lockResource = `${config.server.appId}:cron:lock:tools-registry`;
 
   constructor(
     @Inject(LOCK_TOKEN) private readonly lockManager: LockManager,
