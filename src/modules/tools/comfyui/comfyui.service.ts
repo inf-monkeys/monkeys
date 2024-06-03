@@ -353,7 +353,7 @@ export class ComfyUIService {
   private async rebootComfyuiServer(serverAddress: string) {
     try {
       await axios({
-        method: 'POST',
+        method: 'GET',
         url: '/manager/reboot',
         baseURL: serverAddress,
       });
