@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { createFileRoute } from '@tanstack/react-router';
 
 import { WorkbenchSidebar } from '@/components/layout/workbench/sidebar';
 import { WorkbenchView } from '@/components/layout/workbench/view';
+import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { usePageStore } from '@/store/usePageStore';
 
@@ -17,10 +18,24 @@ export const Workbench: React.FC = () => {
     };
   }, []);
 
+  const { teamId } = useVinesTeam();
+
+  const [refresh, setRefresh] = useState(false);
+  const currentTeamId = useRef<string>();
+  useEffect(() => {
+    if (!teamId) return;
+    const teamIdRef = currentTeamId.current;
+    if (teamIdRef && teamIdRef !== teamId) {
+      setRefresh(true);
+      setTimeout(() => setRefresh(false), 180);
+    }
+    currentTeamId.current = teamId;
+  }, [teamId]);
+
   return (
     <main className="flex size-full">
       <WorkbenchSidebar />
-      <WorkbenchView />
+      {!refresh && <WorkbenchView />}
     </main>
   );
 };
