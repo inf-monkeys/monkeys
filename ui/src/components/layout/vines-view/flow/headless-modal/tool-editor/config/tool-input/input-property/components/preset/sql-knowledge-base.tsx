@@ -14,6 +14,7 @@ export const SqlKnowledgeBaseSelector: React.FC<IVinesInputPropertyProps & IVine
   const { data: sqlKnowledgeBases, isLoading } = useUgcTableData({
     page: 1,
     limit: 99999,
+    filter: {},
   });
 
   const [options, setOptions] = useState<IVinesToolPropertiesOption[]>([]);
