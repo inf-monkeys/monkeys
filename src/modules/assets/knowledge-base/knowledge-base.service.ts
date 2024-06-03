@@ -4,12 +4,11 @@ import { KnowledgeBaseRetrievalMode, KnowledgeBaseRetrievalSettings } from '@/da
 import { KnowledgeBaseRepository } from '@/database/repositories/knowledge-base.repository';
 import { ToolsForwardService } from '@/modules/tools/tools.forward.service';
 import { Injectable } from '@nestjs/common';
+import { KNOWLEDGE_BASE_NAMESPACE } from '../consts';
 import { CreateKnowledgeBaseDto } from './dto/req/create-knowledge-base.req.dto';
 
 @Injectable()
 export class KnowledgeBaseService {
-  private KNOWLEDGE_BASE_NAMESPACE = 'monkey_tools_knowledge_base';
-
   constructor(
     private readonly knowledgeBaseRepository: KnowledgeBaseRepository,
     private readonly toolsForwardService: ToolsForwardService,
@@ -28,7 +27,7 @@ export class KnowledgeBaseService {
     const data = await this.toolsForwardService.request<{
       id: string;
       dimension: number;
-    }>(this.KNOWLEDGE_BASE_NAMESPACE, {
+    }>(KNOWLEDGE_BASE_NAMESPACE, {
       url: '/knowledge-bases',
       method: 'POST',
       data: body,
@@ -58,7 +57,7 @@ export class KnowledgeBaseService {
   public async deleteKnowledgeBase(teamId: string, knowledgeBaseId: string) {
     // Delete knowledge base in tools
     try {
-      await this.toolsForwardService.request(this.KNOWLEDGE_BASE_NAMESPACE, {
+      await this.toolsForwardService.request(KNOWLEDGE_BASE_NAMESPACE, {
         url: `/knowledge-bases/${knowledgeBaseId}`,
         method: 'DELETE',
       });
@@ -86,7 +85,7 @@ export class KnowledgeBaseService {
 
     switch (retrievalSettings.mode) {
       case KnowledgeBaseRetrievalMode.VectorSearch:
-        return await this.toolsForwardService.request(this.KNOWLEDGE_BASE_NAMESPACE, {
+        return await this.toolsForwardService.request(KNOWLEDGE_BASE_NAMESPACE, {
           url: `/knowledge-bases/${knowledgeBaseId}/vector-search`,
           method: 'POST',
           data: {
@@ -96,7 +95,7 @@ export class KnowledgeBaseService {
           },
         });
       case KnowledgeBaseRetrievalMode.FullTextSearch:
-        return await this.toolsForwardService.request(this.KNOWLEDGE_BASE_NAMESPACE, {
+        return await this.toolsForwardService.request(KNOWLEDGE_BASE_NAMESPACE, {
           url: `/knowledge-bases/${knowledgeBaseId}/fulltext-search`,
           method: 'POST',
           data: {

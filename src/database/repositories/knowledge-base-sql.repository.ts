@@ -3,14 +3,8 @@ import { generateDbId } from '@/common/utils';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SqlKnowLedgeBaseEntity } from '../entities/assets/knowledge-base/knowledge-base-sql.entity';
+import { CreateSqlKnowledgeBaseParams, SqlKnowLedgeBaseEntity } from '../entities/assets/knowledge-base/knowledge-base-sql.entity';
 import { SqlKnowledgeBaseAssetRepositroy } from './assets-knowledge-base-sql.repository';
-
-export interface CreateSqlKnowledgeBaseParams {
-  displayName: string;
-  description?: string;
-  iconUrl?: string;
-}
 
 @Injectable()
 export class SqlKnowledgeBaseRepository {
@@ -32,14 +26,15 @@ export class SqlKnowledgeBaseRepository {
     const sqlKnowledgeBase = new SqlKnowLedgeBaseEntity();
     sqlKnowledgeBase.id = generateDbId();
     sqlKnowledgeBase.uuid = uuid;
-    sqlKnowledgeBase.displayName = params.displayName;
-    sqlKnowledgeBase.description = params.description;
-    sqlKnowledgeBase.iconUrl = params.iconUrl;
+    sqlKnowledgeBase.displayName = params.displayName || params.externalDatabaseConnectionOptions?.database || 'Unknown';
+    sqlKnowledgeBase.description = params.description || '';
+    sqlKnowledgeBase.iconUrl = params.iconUrl || 'emoji:🍀:#ceefc5';
     sqlKnowledgeBase.teamId = teamId;
     sqlKnowledgeBase.creatorUserId = userId;
     sqlKnowledgeBase.createdTimestamp = +new Date();
     sqlKnowledgeBase.updatedTimestamp = +new Date();
     sqlKnowledgeBase.isDeleted = false;
+    sqlKnowledgeBase.createType = params.createType;
     return await this.sqlKnowledgeBaseRepository.save(sqlKnowledgeBase);
   }
 

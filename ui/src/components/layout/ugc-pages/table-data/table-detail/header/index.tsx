@@ -5,17 +5,20 @@ import { useSWRConfig } from 'swr';
 import { Import, Plus, RefreshCwIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { ITableData, SqlKnowledgeBaseCreateType } from '@/apis/table-data/typings';
 import { CreateTable } from '@/components/layout/ugc-pages/table-data/table-detail/header/create-table.tsx';
 import { ImportTableData } from '@/components/layout/ugc-pages/table-data/table-detail/header/import-table-data.tsx';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ITableDetailHeaderProps {
-  databaseId: string;
+  database: ITableData;
 }
 
-export const TableDetailHeader: React.FC<ITableDetailHeaderProps> = ({ databaseId }) => {
+export const TableDetailHeader: React.FC<ITableDetailHeaderProps> = ({ database }) => {
   const { mutate } = useSWRConfig();
+  const databaseId = database?.uuid;
+  const isExternalDatabase = database?.createType === SqlKnowledgeBaseCreateType.external;
 
   const handleRefresh = () => {
     toast.promise(
@@ -37,12 +40,12 @@ export const TableDetailHeader: React.FC<ITableDetailHeaderProps> = ({ databaseI
         <TooltipContent>刷新数据</TooltipContent>
       </Tooltip>
       <ImportTableData databaseId={databaseId}>
-        <Button variant="outline" icon={<Import />}>
+        <Button disabled={isExternalDatabase} variant="outline" icon={<Import />}>
           导入数据
         </Button>
       </ImportTableData>
       <CreateTable databaseId={databaseId}>
-        <Button variant="outline" icon={<Plus />}>
+        <Button disabled={isExternalDatabase} variant="outline" icon={<Plus />}>
           创建表
         </Button>
       </CreateTable>

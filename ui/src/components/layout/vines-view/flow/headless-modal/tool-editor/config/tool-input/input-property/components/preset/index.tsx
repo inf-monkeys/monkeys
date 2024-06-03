@@ -13,6 +13,7 @@ import { WorkflowPresets } from '@/components/layout/vines-view/flow/headless-mo
 
 import { ComfyuiServerSelector } from './comfyui-server';
 import { ComfyuiWorkflowsSelector } from './comfyui-workflow';
+import { SqlKnowledgeBaseSelector } from './sql-knowledge-base';
 import { ToolSelector } from './tool';
 
 export interface IVinesInputPresetProps {
@@ -29,6 +30,7 @@ export const PresetInput: React.FC<IVinesInputPropertyProps & IVinesInputPresetP
       {assetType === 'sd-model' && <SdModelPresets {...rest} />}
       {assetType === 'llm-model' && <LlmModelPresets {...rest} />}
       {assetType === 'knowledge-base' && <KnowledgeBaseSelector {...rest} />}
+      {assetType === 'sql-knowledge-base' && <SqlKnowledgeBaseSelector {...rest} />}
       {assetType === 'comfyui-workflow' && <ComfyuiWorkflowsSelector {...rest} />}
       {assetType === 'comfyui-server' && <ComfyuiServerSelector {...rest} />}
       {assetType === 'tools' && <ToolSelector {...rest} />}

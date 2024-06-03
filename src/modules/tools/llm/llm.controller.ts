@@ -468,6 +468,14 @@ export class LlmController {
       },
     },
     {
+      displayName: '关系型知识库上下文',
+      name: 'sqlKnowledgeBase',
+      type: 'string',
+      typeOptions: {
+        assetType: 'sql-knowledge-base',
+      },
+    },
+    {
       displayName: '工具列表',
       name: 'tools',
       type: 'string',
@@ -675,6 +683,7 @@ export class LlmController {
         systemPrompt: body.systemPrompt,
         tools: body.tools,
         knowledgeBase: body.knowledgeBase,
+        sqlKnowledgeBase: body.sqlKnowledgeBase,
         response_format: body.response_format,
       },
       {

@@ -116,7 +116,7 @@ export const ExportWorkflowDialog: React.FC<IExportWorkflowDialogProps> = ({ vis
                       case 'sd-model':
                         handleOpenSdModel();
                         break;
-                      case 'knowledge-base-table':
+                      case 'sql-knowledge-base':
                         handleOpenTableCollection(row.original.originalId);
                         break;
                       case 'knowledge-base':

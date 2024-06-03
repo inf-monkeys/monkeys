@@ -1,13 +1,13 @@
 import { ListDto } from '@/common/dto/list.dto';
 import { logger } from '@/common/logger';
-import { CreateSqlKnowledgeBaseParams, SqlKnowledgeBaseRepository } from '@/database/repositories/knowledge-base-sql.repository';
+import { CreateSqlKnowledgeBaseParams } from '@/database/entities/assets/knowledge-base/knowledge-base-sql.entity';
+import { SqlKnowledgeBaseRepository } from '@/database/repositories/knowledge-base-sql.repository';
 import { ToolsForwardService } from '@/modules/tools/tools.forward.service';
 import { Injectable } from '@nestjs/common';
+import { KNOWLEDGE_BASE_NAMESPACE } from '../consts';
 
 @Injectable()
 export class SqlKnowledgeBaseService {
-  private KNOWLEDGE_BASE_NAMESPACE = 'monkey_tools_knowledge_base';
-
   constructor(
     private readonly sqlKnowledgeBaseRepository: SqlKnowledgeBaseRepository,
     private readonly toolsForwardService: ToolsForwardService,
@@ -21,9 +21,10 @@ export class SqlKnowledgeBaseService {
     const data = await this.toolsForwardService.request<{
       id: string;
       dimension: number;
-    }>(this.KNOWLEDGE_BASE_NAMESPACE, {
-      url: '/sql-knowledge-bases',
+    }>(KNOWLEDGE_BASE_NAMESPACE, {
+      url: '/sql-knowledge-bases/',
       method: 'POST',
+      data: params,
     });
     // Create knowledge base in database
     const { id } = data;
@@ -32,7 +33,7 @@ export class SqlKnowledgeBaseService {
 
   public async deleteSqlKnowledgeBase(teamId: string, uuid: string) {
     try {
-      await this.toolsForwardService.request(this.KNOWLEDGE_BASE_NAMESPACE, {
+      await this.toolsForwardService.request(KNOWLEDGE_BASE_NAMESPACE, {
         url: `/sql-knowledge-bases/${uuid}`,
         method: 'DELETE',
       });
@@ -41,5 +42,22 @@ export class SqlKnowledgeBaseService {
     }
 
     return await this.sqlKnowledgeBaseRepository.deleteSqlKnowledgeBase(teamId, uuid);
+  }
+
+  public async getSqlKnowledgeBaseByUUID(teamId: string, uuid: string) {
+    return await this.sqlKnowledgeBaseRepository.getSqlKnowledgeBaseByUUID(teamId, uuid);
+  }
+
+  public async getCreateTableStatements(sqlKnowledgeBaseUuid: string) {
+    const { tables } = await this.toolsForwardService.request<{
+      tables: Array<{
+        name: string;
+        sql: string;
+      }>;
+    }>(KNOWLEDGE_BASE_NAMESPACE, {
+      url: `/sql-knowledge-bases/${sqlKnowledgeBaseUuid}/tables`,
+      method: 'GET',
+    });
+    return tables;
   }
 }

@@ -28,7 +28,7 @@ const TableDataDetail: React.FC = () => {
   const [tableId, setTableId] = useState('');
   const [visible, setVisible] = useState(true);
 
-  const displayName = tableDetail?.[0]?.name;
+  const displayName = tableDetail?.displayName;
 
   const [height, setHeight] = useState(0);
   const containerRef = useCallback((node: HTMLDivElement) => {
@@ -130,7 +130,7 @@ const TableDataDetail: React.FC = () => {
               </motion.div>
             ) : (
               <>
-                <TableDetailHeader databaseId={databaseId} />
+                <TableDetailHeader database={tableDetail!} />
                 <motion.div
                   key={tableId}
                   className="mt-2 size-full"
@@ -139,7 +139,7 @@ const TableDataDetail: React.FC = () => {
                   exit={{ y: -10, opacity: 0 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <TableDatabase databaseId={databaseId} tableId={tableId} />
+                  <TableDatabase database={tableDetail!} tableId={tableId} />
                 </motion.div>
               </>
             )}

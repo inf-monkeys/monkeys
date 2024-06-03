@@ -11,16 +11,16 @@ import { AssetsReferenceService } from './assets.reference.service';
 import { AssetsTagController } from './assets.tag.controller';
 import { AssetsTagService } from './assets.tag.service';
 import { CanvasModule } from './canvas/canvas.module';
-import { KnowledgeBaseSqlModule } from './knowledge-base-sql/knowledge-base-sql.module';
 import { KnowledgeBaseModule } from './knowledge-base/knowledge-base.module';
 import { LlmModelModule } from './llm-model/llm-model.module';
 import { MediaModule } from './media/media.module';
 import { SdModelModule } from './sd-model/sd-model.module';
+import { SqlKnowledgeBaseModule } from './sql-knowledge-base/sql-knowledge-base.module';
 
 @Module({
   controllers: [AssetsFiltersController, AssetsPublishController, AssetsTagController, AssetsReferenceController, AssetsMarketplaceController],
   providers: [AssetsFilterService, AssetsPublishService, AssetsTagService, AssetsMapperService, AssetsReferenceService, AssetsMarketplaceService],
-  imports: [CanvasModule, MediaModule, KnowledgeBaseModule, KnowledgeBaseSqlModule, LlmModelModule, SdModelModule],
+  imports: [CanvasModule, MediaModule, KnowledgeBaseModule, SqlKnowledgeBaseModule, LlmModelModule, SdModelModule],
   exports: [AssetsMarketplaceService],
 })
 export class AssetsModule {}

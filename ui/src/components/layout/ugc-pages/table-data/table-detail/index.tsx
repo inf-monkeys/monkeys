@@ -7,7 +7,7 @@ import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { deleteTable, useDatabaseData } from '@/apis/table-data';
-import { IDatabaseData } from '@/apis/table-data/typings.ts';
+import { IDatabaseData, ITableData, SqlKnowledgeBaseCreateType } from '@/apis/table-data/typings.ts';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,13 +24,14 @@ import { InfiniteScrollingDataTable } from '@/components/ui/data-table/infinite.
 import { Input } from '@/components/ui/input';
 
 interface ITableDatabaseProps {
-  databaseId: string;
+  database: ITableData;
   tableId: string;
 }
 
-export const TableDatabase: React.FC<ITableDatabaseProps> = ({ databaseId, tableId }) => {
+export const TableDatabase: React.FC<ITableDatabaseProps> = ({ database, tableId }) => {
   const { mutate } = useSWRConfig();
-
+  const isExternalDatabase = database?.createType === SqlKnowledgeBaseCreateType.external;
+  const databaseId = database?.uuid;
   const [page, setPage] = useState(1);
   const { data, isLoading } = useDatabaseData(databaseId, tableId, page);
 
@@ -83,7 +84,12 @@ export const TableDatabase: React.FC<ITableDatabaseProps> = ({ databaseId, table
         <Input placeholder="输入关键词基于当前已加载的数据搜索" value={query} onChange={setQuery} />
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button className="text-red-10 [&_svg]:stroke-red-10" variant="outline" icon={<Trash2 />}>
+            <Button
+              disabled={isExternalDatabase}
+              className="text-red-10 [&_svg]:stroke-red-10"
+              variant="outline"
+              icon={<Trash2 />}
+            >
               删除表格
             </Button>
           </AlertDialogTrigger>
