@@ -16,7 +16,7 @@ import path from 'path';
 
 @Injectable()
 export class ComfyfileCronService {
-  private readonly lockResource = 'comfyfile-cron';
+  private readonly lockResource = `${config.server.appId}:cron:lock:comfyfile`;
 
   constructor(
     @Inject(LOCK_TOKEN) private readonly lockManager: LockManager,

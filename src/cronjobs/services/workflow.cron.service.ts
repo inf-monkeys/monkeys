@@ -1,4 +1,5 @@
 import { LOCK_TOKEN } from '@/common/common.module';
+import { config } from '@/common/config';
 import { logger } from '@/common/logger';
 import { LockManager } from '@/common/utils/lock';
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
@@ -9,7 +10,7 @@ import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class WorkflowCronService {
-  private readonly lockResource = 'workflow-cron';
+  private readonly lockResource = `${config.server.appId}:cron:lock:workflow-trigger`;
 
   constructor(
     private readonly workflowRepository: WorkflowRepository,
