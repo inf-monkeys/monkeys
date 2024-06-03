@@ -1,10 +1,10 @@
 import { ListDto } from '@/common/dto/list.dto';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
-import { SuccessListResponse } from '@/common/response';
+import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
+import { CreateSqlKnowledgeBaseParams } from '@/database/entities/assets/knowledge-base/knowledge-base-sql.entity';
 import { Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
-import { CreateSqlKnowledgeBaseDto } from './dto/req/create-sql-knowledge-base.req.dto';
-import { SqlKnowledgeBaseService } from './knowledge-base-sql.service';
+import { SqlKnowledgeBaseService } from './sql-knowledge-base.service';
 
 @Controller('sql-knowledge-bases')
 @UseGuards(CompatibleAuthGuard)
@@ -23,14 +23,19 @@ export class SqlKnowledgeBaseController {
     });
   }
 
-  @Post()
-  public async createSqlKnowledgeBase(@Req() req: IRequest, @Body() body: CreateSqlKnowledgeBaseDto) {
-    const { teamId, userId } = req;
-    return this.service.createSqlKnowledgeBase(teamId, userId, {
-      displayName: body.displayName,
-      description: body.description,
-      iconUrl: body.iconUrl,
+  @Get('/:uuid')
+  public async getSqlKnowledgeBaseByUUID(@Req() req: IRequest, @Param('uuid') uuid: string) {
+    const { teamId } = req;
+    const data = await this.service.getSqlKnowledgeBaseByUUID(teamId, uuid);
+    return new SuccessResponse({
+      data: data,
     });
+  }
+
+  @Post()
+  public async createSqlKnowledgeBase(@Req() req: IRequest, @Body() body: CreateSqlKnowledgeBaseParams) {
+    const { teamId, userId } = req;
+    return this.service.createSqlKnowledgeBase(teamId, userId, body);
   }
 
   @Delete('/:uuid')

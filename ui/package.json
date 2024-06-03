@@ -18,7 +18,7 @@
     "@emoji-mart/react": "^1.1.1",
     "@headlessui/react": "^1.7.19",
     "@hookform/resolvers": "^3.3.4",
-    "@inf-monkeys/vines": "^0.0.70",
+    "@inf-monkeys/vines": "^0.0.71",
     "@mantine/core": "7.6.1",
     "@mantine/dropzone": "7.6.1",
     "@mantine/hooks": "7.6.1",

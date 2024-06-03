@@ -2,11 +2,14 @@ import { LlmModelEndpointType, config } from '@/common/config';
 import { LogLevel, logger } from '@/common/logger';
 import { replacerNoEscape } from '@/common/utils';
 import { ToolsRepository } from '@/database/repositories/tools.repository';
+import { SQL_KNOWLEDGE_BASE_QUERY_TABLE_TOOL } from '@/modules/assets/consts';
+import { SqlKnowledgeBaseService } from '@/modules/assets/sql-knowledge-base/sql-knowledge-base.service';
 import { BlockDefProperties } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 import { OpenAIStream, StreamData, StreamingTextResponse, ToolCallPayload } from 'ai';
 import axios from 'axios';
 import { Response } from 'express';
+import { isArray } from 'lodash';
 import OpenAI from 'openai';
 import { ChatCompletion, ChatCompletionChunk, ChatCompletionMessageParam, ChatCompletionTool } from 'openai/resources';
 import { Stream } from 'openai/streaming';
@@ -14,8 +17,6 @@ import { Readable } from 'stream';
 import { KnowledgeBaseService } from '../../assets/knowledge-base/knowledge-base.service';
 import { ToolsForwardService } from '../tools.forward.service';
 import { ResponseFormat } from './dto/req/create-chat-compltion.dto';
-import { isArray } from 'lodash';
-import { ChatCompletionContentPart } from 'openai/src/resources/chat/completions';
 
 export interface CreateChatCompelitionsParams {
   messages: Array<ChatCompletionMessageParam>;
@@ -28,6 +29,7 @@ export interface CreateChatCompelitionsParams {
   systemPrompt?: string;
   tools?: string[];
   knowledgeBase?: string;
+  sqlKnowledgeBase?: string;
   response_format?: ResponseFormat;
 }
 
@@ -96,6 +98,7 @@ export class LlmService {
     private readonly toolsReopsitory: ToolsRepository,
     private readonly toolForwardServie: ToolsForwardService,
     private readonly knowledgeBaseService: KnowledgeBaseService,
+    private readonly sqlKnowledgeBaseService: SqlKnowledgeBaseService,
   ) {}
 
   private getModelConfig(modelName: string) {
@@ -261,27 +264,45 @@ export class LlmService {
     return schema;
   }
 
-  public async resolveTools(tools: string[] | string): Promise<Array<ChatCompletionTool>> {
+  public async resolveTools(tools: string[] | string, sqlKnowledgeBase?: string): Promise<Array<ChatCompletionTool>> {
     if (typeof tools === 'string') {
       tools = [tools];
     }
+    if (sqlKnowledgeBase) {
+      tools.push(SQL_KNOWLEDGE_BASE_QUERY_TABLE_TOOL);
+    }
     const toolEntities = await this.toolsReopsitory.getToolsByNames(tools);
-    return toolEntities.map((x) => {
-      const parameters = this.resolveToolParameter(x.input);
-      return {
-        type: 'function',
-        function: {
-          name: x.name.replaceAll(':', '__'),
-          description: x.description || x.displayName,
-          parameters: parameters,
-        },
-      };
-    });
+    return await Promise.all(
+      toolEntities.map(async (tool): Promise<ChatCompletionTool> => {
+        const toolParams = this.resolveToolParameter(tool.input);
+        if (tool.name === SQL_KNOWLEDGE_BASE_QUERY_TABLE_TOOL) {
+          const tableStaements = await this.sqlKnowledgeBaseService.getCreateTableStatements(sqlKnowledgeBase);
+          if ((toolParams.properties as any).sql) {
+            (toolParams.properties as any).sql.description = `SQL query to get data from the table. Available tables: ${tableStaements.map((table) => {
+              return `Table Name：${table.name}\n Create Table Statements：${table.sql}`;
+            })}`;
+          }
+          if ((toolParams.properties as any).sql_knowledge_base_id) {
+            (toolParams.properties as any).sql_knowledge_base_id.enum = [sqlKnowledgeBase];
+          }
+        }
+        return {
+          type: 'function',
+          function: {
+            name: tool.name.replaceAll(':', '__'),
+            parameters: toolParams,
+          },
+        };
+      }),
+    );
   }
 
-  private async executeTool(name: string, data: any) {
+  private async executeTool(name: string, data: any, sqlKnowledgeBase?: string) {
     logger.info(`Start to call tool call: ${name} with arguments: ${JSON.stringify(data)}`);
     name = name.replaceAll('__', ':');
+    if (sqlKnowledgeBase && name === SQL_KNOWLEDGE_BASE_QUERY_TABLE_TOOL) {
+      data.sql_knowledge_base_id = sqlKnowledgeBase;
+    }
     const result = await this.toolForwardServie.invoke<{ [x: string]: any }>(name, data);
     logger.info(`Tool call ${name} result: ${JSON.stringify(result)}`);
     return result;
@@ -347,6 +368,7 @@ When answer to user:
 - And answer according to the language of the user's question.\n`;
       systemPrompt = basePrompt.replace('{{#context#}}', knowledgeBaseContext).replace('{{#presetPrompt#}}', presetPrompt);
     }
+
     if (!systemPrompt) {
       return {
         generatedByKnowledgeBase: null,
@@ -400,7 +422,7 @@ When answer to user:
     if (apiResponseType === 'simple' && params.stream) {
       throw new Error('Stream is not supported in simple api response type');
     }
-    const { model, stream, systemPrompt, knowledgeBase, response_format = ResponseFormat.text } = params;
+    const { model, stream, systemPrompt, knowledgeBase, sqlKnowledgeBase, response_format = ResponseFormat.text } = params;
     let { messages } = params;
     const historyMessages = this.sanitizeMessages(messages);
     const { generatedByKnowledgeBase, systemMessages } = await this.generateSystemMessages(messages, systemPrompt, knowledgeBase);
@@ -427,7 +449,7 @@ When answer to user:
       apiKey: apiKey || 'mock-apikey',
       baseURL: baseURL,
     });
-    const tools: Array<ChatCompletionTool> = await this.resolveTools(params.tools);
+    const tools: Array<ChatCompletionTool> = await this.resolveTools(params.tools, sqlKnowledgeBase);
 
     let response: ChatCompletion | Stream<ChatCompletionChunk>;
     try {
@@ -463,7 +485,7 @@ When answer to user:
                   arguments: toolCall.func.arguments,
                   status: 'inprogress',
                 });
-                toolResult = await this.executeTool(toolCall.func.name, toolCall.func.arguments);
+                toolResult = await this.executeTool(toolCall.func.name, toolCall.func.arguments, sqlKnowledgeBase);
                 sendAndCollectLogs('info', 'tool_call', `Tool call ${toolCall.func.name} result: ${JSON.stringify(toolResult)}`, {
                   toolCallId: toolCall.id,
                   toolName: toolCall.func.name.replace('__', ':'),
@@ -540,7 +562,7 @@ When answer to user:
                 arguments: argumentsData,
                 status: 'inprogress',
               });
-              toolResult = await this.executeTool(name, argumentsData);
+              toolResult = await this.executeTool(name, argumentsData, sqlKnowledgeBase);
               sendAndCollectLogs('info', 'tool_call', `Tool call ${name} result: ${JSON.stringify(toolResult)}`, {
                 toolCallId: toolCall.id,
                 toolName: name.replace('__', ':'),

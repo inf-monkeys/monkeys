@@ -23,7 +23,7 @@ export class WorkflowCrudService {
   ASSET_TYPE_SD_MODEL: AssetType = 'sd-model';
   ASSET_TYPE_LLM_MODEL: AssetType = 'llm-model';
   ASSET_TYPE_TEXT_COLLECTION: AssetType = 'knowledge-base';
-  ASSET_TYPE_TABLE_COLLECTION: AssetType = 'knowledge-base-table';
+  ASSET_TYPE_TABLE_COLLECTION: AssetType = 'sql-knowledge-base';
 
   constructor(
     private readonly toolsRepository: ToolsRepository,

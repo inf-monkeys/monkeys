@@ -16,13 +16,6 @@ export class CreateSqlKnowledgeBaseDto {
   description: string;
 
   @ApiProperty({
-    description: 'Embedding model of the sql knowledge base',
-    required: true,
-    type: String,
-  })
-  embeddingModel: string;
-
-  @ApiProperty({
     description: 'Icon url of the sql knowledge base',
     required: false,
     type: String,

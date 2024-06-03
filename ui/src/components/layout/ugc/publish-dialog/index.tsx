@@ -45,7 +45,7 @@ export const UgcPublishDialog: React.FC<IUgcPublishDialogProps> = ({ children, u
       publishAssetItem(
         assetType,
         ugcId,
-        assetType === 'knowledge-base-table'
+        assetType === 'sql-knowledge-base'
           ? {
               name: prevName,
               displayName: name,

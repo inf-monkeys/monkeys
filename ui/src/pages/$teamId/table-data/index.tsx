@@ -5,11 +5,11 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
 import { preloadUgcTableData, useUgcTableData } from '@/apis/ugc';
-import { UgcView } from '@/components/layout/ugc/view';
-import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createTableDataColumns } from '@/components/layout/ugc-pages/table-data/consts.tsx';
 import { CreateDatabase } from '@/components/layout/ugc-pages/table-data/create-database';
 import { OperateArea } from '@/components/layout/ugc-pages/table-data/operate-area';
+import { UgcView } from '@/components/layout/ugc/view';
+import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
@@ -22,7 +22,7 @@ export const TableData: React.FC = () => {
     <main className="size-full">
       <UgcView
         assetKey="table-data"
-        assetType="knowledge-base-table"
+        assetType="sql-knowledge-base"
         assetName={tHook('components.layout.main.sidebar.list.media.table-data.label')}
         useUgcFetcher={useUgcTableData}
         preloadUgcFetcher={preloadUgcTableData}

@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
-import { databaseInfoSchema, IDatabaseInfo } from '@/schema/table-database/create-database.ts';
+import { IDatabaseInfo, databaseInfoSchema } from '@/schema/table-database/create-database.ts';
 
 interface ICreateDatabaseProps {}
 
@@ -39,6 +39,38 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = form.handleSubmit((data) => {
+    if (data.createType === 'builtIn') {
+      if (!data.displayName) {
+        toast.error('请输入数据库名称');
+        return;
+      }
+    } else if (data.createType === 'external') {
+      if (!data.externalDatabaseType) {
+        toast.error('请选择数据库类型');
+        return;
+      }
+      if (!data.externalDatabaseConnectionOptions?.host) {
+        toast.error('请输入 Host');
+        return;
+      }
+      if (!data.externalDatabaseConnectionOptions?.port) {
+        toast.error('请输入 Port');
+        return;
+      }
+      if (!data.externalDatabaseConnectionOptions?.username) {
+        toast.error('请输入 Username');
+        return;
+      }
+      if (!data.externalDatabaseConnectionOptions?.password) {
+        toast.error('请输入 Password');
+        return;
+      }
+      if (!data.externalDatabaseConnectionOptions?.database) {
+        toast.error('请输入 Database');
+        return;
+      }
+    }
+
     setIsLoading(true);
     toast.promise(createDatabase(data), {
       loading: t('common.create.loading'),
@@ -53,7 +85,8 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
       },
     });
   });
-  const { createType } = form.getValues();
+
+  const [createType, externalDatabaseType] = form.watch(['createType', 'externalDatabaseType']);
 
   const createTypeOptions = [
     {
@@ -72,10 +105,6 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
     {
       displayName: 'Mysql',
       value: 'mysql',
-    },
-    {
-      displayName: 'TiDB',
-      value: 'tidb',
     },
   ];
 
@@ -180,7 +209,7 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
                       </FormLabel>
                       <FormControl>
                         <VinesIconEditor
-                          value={field.value}
+                          value={field.value!}
                           defaultValue="emoji:🍀:#ceefc5"
                           onChange={field.onChange}
                         />
@@ -195,7 +224,7 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
             {createType === 'external' && (
               <>
                 <FormField
-                  name="databaseType"
+                  name="externalDatabaseType"
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
@@ -228,7 +257,7 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
                 />
 
                 <FormField
-                  name="host"
+                  name="externalDatabaseConnectionOptions.host"
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
@@ -242,7 +271,7 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
                 />
 
                 <FormField
-                  name="port"
+                  name="externalDatabaseConnectionOptions.port"
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
@@ -255,8 +284,24 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
                   )}
                 />
 
+                {externalDatabaseType === 'postgres' && (
+                  <FormField
+                    name="externalDatabaseConnectionOptions.schema"
+                    control={form.control}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Schema</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Schema" defaultValue={'public'} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
                 <FormField
-                  name="database"
+                  name="externalDatabaseConnectionOptions.database"
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
@@ -270,7 +315,7 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
                 />
 
                 <FormField
-                  name="username"
+                  name="externalDatabaseConnectionOptions.username"
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
@@ -284,7 +329,7 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
                 />
 
                 <FormField
-                  name="password"
+                  name="externalDatabaseConnectionOptions.password"
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
