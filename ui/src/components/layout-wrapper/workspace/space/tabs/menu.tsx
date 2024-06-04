@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { useForceUpdate } from '@mantine/hooks';
 import { DialogTrigger } from '@radix-ui/react-dialog';
 import { get, isEmpty } from 'lodash';
-import { MoreVertical, Pencil, Settings2, Star, Trash2 } from 'lucide-react';
+import { MoreVertical, Pencil, Star, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { deleteWorkspacePage, toggleWorkspacePagePin } from '@/apis/pages';
@@ -19,15 +20,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { Input } from '@/components/ui/input';
-import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
 interface ITabMenuProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const TabMenu: React.FC<ITabMenuProps> = () => {
+  const { t } = useTranslation();
+
   const { workflowId, page, pages, pageId, navigateTo, pagesMutate, setPages } = useVinesPage();
 
-  const { visibleCustomSetting, setVisibleCustomSetting } = usePageStore();
+  // const { visibleCustomSetting, setVisibleCustomSetting } = usePageStore();
 
   const [toggleNameDialogVisible, setToggleNameDialogVisible] = useState(false);
   const [pageDisplayName, setPageDisplayName] = useState(page?.displayName ?? '');
@@ -35,22 +37,27 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
   const forceUpdate = useForceUpdate();
 
   const handleDeletePage = async () => {
-    toast(`确定要删除「${page?.displayName ?? '未知视图'}」吗？`, {
-      action: {
-        label: '确定',
-        onClick: async () => {
-          const newPages = await deleteWorkspacePage(workflowId, pageId);
+    toast(
+      t('workspace.wrapper.space.menu.del-view', {
+        view: page?.displayName ?? t('workspace.wrapper.space.unknown-view'),
+      }),
+      {
+        action: {
+          label: t('common.utils.confirm'),
+          onClick: async () => {
+            const newPages = await deleteWorkspacePage(workflowId, pageId);
 
-          if (newPages) {
-            await pagesMutate(newPages, { revalidate: false });
-            const newPageId = newPages.at(-1)?.id;
-            if (newPageId) {
-              await navigateTo(newPageId);
+            if (newPages) {
+              await pagesMutate(newPages, { revalidate: false });
+              const newPageId = newPages.at(-1)?.id;
+              if (newPageId) {
+                await navigateTo(newPageId);
+              }
             }
-          }
+          },
         },
       },
-    });
+    );
   };
 
   const handleRenamePage = async () => {
@@ -61,9 +68,9 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
     const newPages = [...pages];
     newPages[currentPage].displayName = pageDisplayName;
     toast.promise(setPages(newPages), {
-      loading: '正在保存...',
-      success: '保存成功',
-      error: '保存失败',
+      loading: t('common.save.loading'),
+      success: t('common.save.success'),
+      error: t('common.save.error'),
     });
   };
 
@@ -76,16 +83,23 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
     if (currentPage === -1) return;
 
     const newPin = !isPin;
+    const pinStatus = isPin ? t('workspace.wrapper.space.menu.pin-un') : '';
     toast.promise(toggleWorkspacePagePin(pageId, newPin), {
-      loading: `正在${isPin ? '取消' : ''}标星中...`,
+      loading: t('workspace.wrapper.space.menu.toggle-pin', {
+        status: pinStatus,
+      }),
       success: () => {
         const newPages = [...pages];
         newPages[currentPage].pinned = newPin;
         void setPages(newPages);
         forceUpdate();
-        return `${isPin ? '取消' : ''}标星成功`;
+        return t('workspace.wrapper.space.menu.toggle-pin-success', {
+          status: pinStatus,
+        });
       },
-      error: `${isPin ? '取消' : ''}标星失败`,
+      error: t('workspace.wrapper.space.menu.toggle-pin-failed', {
+        status: pinStatus,
+      }),
     });
   };
 
@@ -103,7 +117,7 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
                 onClick={() => setPageDisplayName(page?.displayName ?? '')}
               >
                 <Pencil strokeWidth={1.5} size={16} />
-                <p>重命名</p>
+                <p>{t('workspace.wrapper.space.menu.rename.trigger')}</p>
               </DropdownMenuItem>
             </DialogTrigger>
             <DropdownMenuItem
@@ -115,16 +129,20 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
                 strokeWidth={1.5}
                 size={16}
               />
-              <p>{isPin ? '取消' : ''}标星</p>
+              <p>
+                {t('workspace.wrapper.space.menu.pin', {
+                  status: isPin ? t('workspace.wrapper.space.menu.pin-un') : '',
+                })}
+              </p>
             </DropdownMenuItem>
-            <DropdownMenuItem
-              className="flex items-center gap-2"
-              onClick={() => setVisibleCustomSetting(!visibleCustomSetting)}
-              disabled
-            >
-              <Settings2 strokeWidth={1.5} size={16} />
-              <p>{visibleCustomSetting ? '关闭' : ''}偏好设置</p>
-            </DropdownMenuItem>
+            {/*<DropdownMenuItem*/}
+            {/*  className="flex items-center gap-2"*/}
+            {/*  onClick={() => setVisibleCustomSetting(!visibleCustomSetting)}*/}
+            {/*  disabled*/}
+            {/*>*/}
+            {/*  <Settings2 strokeWidth={1.5} size={16} />*/}
+            {/*  <p>{visibleCustomSetting ? '关闭' : ''}偏好设置</p>*/}
+            {/*</DropdownMenuItem>*/}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="flex items-center gap-2 text-red-10"
@@ -132,18 +150,18 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
               onClick={handleDeletePage}
             >
               <Trash2 strokeWidth={1.5} size={16} />
-              <p>删除视图</p>
+              <p>{t('workspace.wrapper.space.menu.del-view-button')}</p>
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>重命名视图</DialogTitle>
+          <DialogTitle>{t('workspace.wrapper.space.menu.rename.title')}</DialogTitle>
         </DialogHeader>
         <div className="gap-4 py-4">
           <Input
-            placeholder={page?.displayName ?? '请输入视图名称'}
+            placeholder={page?.displayName ?? t('workspace.wrapper.space.menu.rename.placeholder')}
             maxLength={16}
             value={pageDisplayName}
             onChange={setPageDisplayName}
@@ -154,7 +172,7 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
             variant="solid"
             onClick={() => {
               if (isEmpty(pageDisplayName)) {
-                toast.error('请输入有效的内容');
+                toast.error(t('workspace.wrapper.space.menu.rename.input-empty'));
                 return;
               } else if (pageDisplayName !== page?.displayName) {
                 void handleRenamePage();
@@ -162,7 +180,7 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
               setToggleNameDialogVisible(false);
             }}
           >
-            保存
+            {t('workspace.wrapper.space.menu.rename.submit')}
           </Button>
         </DialogFooter>
       </DialogContent>

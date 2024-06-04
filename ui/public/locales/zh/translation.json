@@ -1444,6 +1444,31 @@
       "user": {
         "user-center": "个人中心",
         "logout": "退出登录"
+      },
+
+      "space": {
+        "unknown-view": "未知视图",
+
+        "add-tab": "新建视图",
+
+        "menu": {
+          "del-view-button": "删除视图",
+          "del-view": "确定要删除「{{ view }}」吗？",
+
+          "pin": "{{ status }}标星",
+          "toggle-pin": "正在{{ status }}标星中...",
+          "pin-un": "取消",
+          "toggle-pin-success": "{{ status }}标星成功",
+          "toggle-pin-failed": "{{ status }}标星失败",
+
+          "rename": {
+            "trigger": "重命名",
+            "title": "重命名视图",
+            "placeholder": "请输入视图名称",
+            "input-empty": "请输入有效的内容",
+            "submit": "保存"
+          }
+        }
       }
     }
   }
