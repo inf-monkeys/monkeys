@@ -24,6 +24,7 @@ export type UseVariableEditorOptions = {
   initialPointMapper?: PointerMapper;
   onChange?: (text: string) => void;
   onBlur?: () => void;
+  onFocus?: () => void;
 };
 
 export const VariableSchemaTypeMark: React.FC<{ schema?: string; rounded?: boolean }> = ({
@@ -65,7 +66,7 @@ const withVariable = (editor: ReactEditor) => {
 // eslint-disable-next-line react-refresh/only-export-components
 export const useVariableEditor = (opt: UseVariableEditorOptions) => {
   const { t } = useTranslation();
-  const { initialValue, initialPointMapper = {}, onChange, width, onBlur } = opt;
+  const { initialValue, initialPointMapper = {}, onChange, width, onBlur, onFocus } = opt;
   const [editor] = useState(() => withVariable(withHistory(withReact(createEditor()))));
   const [pointerMapper, setPointerMapper] = useState(initialPointMapper);
   const editorStateRef = useRef({ updateLock: true });
@@ -316,6 +317,7 @@ export const useVariableEditor = (opt: UseVariableEditorOptions) => {
             renderLeaf={renderLeaf}
             onKeyDown={handleKeyDown}
             onBlur={onBlur}
+            onFocus={onFocus}
             className="flex-initial overflow-hidden whitespace-pre-wrap break-words px-2 py-1 outline-none transition-all"
             style={{ width }}
           />
