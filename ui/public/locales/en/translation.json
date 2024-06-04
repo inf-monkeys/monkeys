@@ -1421,6 +1421,11 @@
 
         "empty-apikey": "APIKEY is empty, please go to 'Configuration Centre' to create one.",
         "goto-config": "Go to Configuration Centre"
+      },
+
+      "user": {
+        "user-center": "Personal",
+        "logout": "Log out"
       }
     }
   }

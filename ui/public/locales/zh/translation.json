@@ -1416,6 +1416,11 @@
 
         "empty-apikey": "暂无 APIKEY，请先到「配置中心」创建",
         "goto-config": "前往配置中心"
+      },
+
+      "user": {
+        "user-center": "个人中心",
+        "logout": "退出登录"
       }
     }
   }
