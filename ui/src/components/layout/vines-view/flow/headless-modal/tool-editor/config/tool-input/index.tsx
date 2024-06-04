@@ -1,7 +1,8 @@
-import React, { memo, useEffect, useRef } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 
 import { BlockCredentialItem } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
 import { useForceUpdate } from '@mantine/hooks';
+import equal from 'fast-deep-equal/es6';
 import { get, set } from 'lodash';
 import { toast } from 'sonner';
 
@@ -12,7 +13,7 @@ import {
   getPropertyValueFromTask,
 } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/utils.ts';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
-import { IVinesVariableMap, VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
+import { IVinesVariableMap, VinesToolDef, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 import { VARIABLE_REGEXP } from '@/package/vines-flow/core/utils.ts';
 import { cloneDeep, cn } from '@/utils';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
@@ -78,6 +79,25 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
       forceUpdate();
     };
 
+    // 计算显隐更新时自动填充默认值
+    const [refresh, setRefresh] = useState(false);
+    const calculateInputsRef = useRef<VinesToolDefProperties[] | null>(null);
+    useEffect(() => {
+      const needMemoInputs = !equal(finalInputs, calculateInputsRef.current);
+
+      calculateInputsRef.current = finalInputs;
+      if (needMemoInputs) {
+        finalInputs?.forEach((def) => {
+          const { name, default: defaultValue } = def;
+          if (defaultValue !== void 0 && get(task, `inputParameters.${name}`) === void 0) {
+            handleUpdate(defaultValue, name);
+          }
+        });
+        setRefresh(true);
+        setTimeout(() => setRefresh(false), 16);
+      }
+    }, [finalInputs]);
+
     const credentials = get(tool, 'credentials', []) as BlockCredentialItem[];
 
     return (
@@ -89,16 +109,17 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
             onChange={(type, id) => handleUpdate({ type, id }, 'credential')}
           />
         ) : null}
-        {finalInputs?.map((def, index) => (
-          <VinesInputProperty
-            key={def.name + index}
-            def={def}
-            nodeId={nodeId}
-            value={getPropertyValueFromTask(def, task, !isSpecialNode)}
-            onChange={(value: unknown) => handleUpdate(value, def.name)}
-            variableMapper={variableMapper}
-          />
-        ))}
+        {!refresh &&
+          finalInputs?.map((def, index) => (
+            <VinesInputProperty
+              key={def.name + index}
+              def={def}
+              nodeId={nodeId}
+              value={getPropertyValueFromTask(def, task, !isSpecialNode)}
+              onChange={(value: unknown) => handleUpdate(value, def.name)}
+              variableMapper={variableMapper}
+            />
+          ))}
       </div>
     );
   },
