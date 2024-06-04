@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { updateWorkflow } from '@/apis/workflow';
@@ -30,6 +31,8 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
   setVisible,
   afterUpdate,
 }) => {
+  const { t } = useTranslation();
+
   const { workflow: vinesPageWorkflow, mutateWorkflow, apikey } = useVinesPage();
 
   const [open, setOpen] = useState(visible ?? false);
@@ -52,7 +55,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
   const form = useForm<IWorkflowInfo>({
     resolver: zodResolver(workflowInfoSchema),
     defaultValues: {
-      displayName: workflow?.displayName ?? '未命名应用',
+      displayName: workflow?.displayName ?? t('workspace.wrapper.workflow-info-card.default-workflow-name'),
       description: workflow?.description ?? '',
       iconUrl: workflow?.iconUrl ?? 'emoji:🍀:#ceefc5',
     },
@@ -60,7 +63,10 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
 
   useEffect(() => {
     if (!workflow) return;
-    form.setValue('displayName', workflow.displayName || '未命名应用');
+    form.setValue(
+      'displayName',
+      workflow.displayName || t('workspace.wrapper.workflow-info-card.default-workflow-name'),
+    );
     form.setValue('description', workflow.description || '');
     form.setValue('iconUrl', workflow.iconUrl || 'emoji:🍀:#ceefc5');
   }, [workflow]);
@@ -69,7 +75,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
     setIsLoading(true);
     if (!workflow?.workflowId) {
       setIsLoading(false);
-      toast.error('工作流 ID 不存在');
+      toast.error(t('workspace.wrapper.workflow-info-card.workflow-id-empty'));
       return;
     }
     const newWorkflow = await updateWorkflow(apikey, workflow?.workflowId, workflow?.version ?? 1, data);
@@ -77,9 +83,9 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
       afterUpdate ? afterUpdate() : await mutateWorkflow();
       setOpen(false);
       setIsLoading(false);
-      toast.success('工作流信息已更新');
+      toast.success(t('workspace.wrapper.workflow-info-card.workflow-updated'));
     } else {
-      toast.error('工作流信息更新失败');
+      toast.error(t('workspace.wrapper.workflow-info-card.workflow-update-failed'));
     }
   });
 
@@ -88,7 +94,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>工作流信息</DialogTitle>
+          <DialogTitle>{t('workspace.wrapper.workflow-info-card.title')}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={handleSubmit} className="flex flex-col gap-2">
@@ -97,9 +103,14 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>工作流名称</FormLabel>
+                  <FormLabel>{t('workspace.wrapper.workflow-info-card.form.workflow-name')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="请输入工作流名称" {...field} className="grow" autoFocus />
+                    <Input
+                      placeholder={t('workspace.wrapper.workflow-info-card.form.workflow-name-placeholder')}
+                      {...field}
+                      className="grow"
+                      autoFocus
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -111,9 +122,13 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>工作流描述</FormLabel>
+                  <FormLabel>{t('workspace.wrapper.workflow-info-card.form.workflow-desc')}</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="请输入工作流描述，不超过 200 字" className="h-28 resize-none" {...field} />
+                    <Textarea
+                      placeholder={t('workspace.wrapper.workflow-info-card.form.workflow-desc-placeholder')}
+                      className="h-28 resize-none"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -125,7 +140,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>工作流图标</FormLabel>
+                  <FormLabel>{t('workspace.wrapper.workflow-info-card.form.workflow-icon')}</FormLabel>
                   <FormControl>
                     <VinesIconEditor value={field.value} defaultValue={workflow?.iconUrl} onChange={field.onChange} />
                   </FormControl>
@@ -136,7 +151,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
 
             <DialogFooter>
               <Button type="submit" loading={isLoading} variant="solid">
-                确定
+                {t('workspace.wrapper.workflow-info-card.form.submit')}
               </Button>
             </DialogFooter>
           </form>

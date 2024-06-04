@@ -1403,6 +1403,29 @@
     },
 
     "wrapper": {
+      "workflow-info-card":  {
+        "title": "Workflow Information",
+        "tip": "Click to edit",
+
+        "default-workflow-name": "Unnamed workflow",
+
+        "form": {
+          "workflow-name": "Workflow name",
+          "workflow-name-placeholder": "Please enter a workflow name",
+
+          "workflow-desc": "Workflow description",
+          "workflow-desc-placeholder": "Please enter a description of the workflow in no more than 200 characters.",
+
+          "workflow-icon": "Workflow Icons",
+
+          "submit": "Submit"
+        },
+
+        "workflow-id-empty": "Workflow ID does not exist",
+        "workflow-updated": "Workflow information has been updated",
+        "workflow-update-failed": "Workflow information update failure"
+      },
+
       "integration-center": {
         "title": "Integration Centre",
         "desc": "You can integrate with other apps through APIs for more functionality",

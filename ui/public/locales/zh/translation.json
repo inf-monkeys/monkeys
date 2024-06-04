@@ -1398,6 +1398,29 @@
     },
 
     "wrapper": {
+      "workflow-info-card":  {
+        "title": "工作流信息",
+        "tip": "点击编辑",
+
+        "default-workflow-name": "未命名应用",
+
+        "form": {
+          "workflow-name": "工作流名称",
+          "workflow-name-placeholder": "请输入工作流名称",
+
+          "workflow-desc": "工作流描述",
+          "workflow-desc-placeholder": "请输入工作流描述，不超过 200 字",
+
+          "workflow-icon": "工作流图标",
+
+          "submit": "保存"
+        },
+
+        "workflow-id-empty": "工作流 ID 不存在",
+        "workflow-updated": "工作流信息已更新",
+        "workflow-update-failed": "工作流信息更新失败"
+      },
+
       "integration-center": {
         "title": "集成中心",
         "desc": "你可以通过 API 与其他应用集成，以实现更多功能",

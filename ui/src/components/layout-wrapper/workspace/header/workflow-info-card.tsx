@@ -1,15 +1,18 @@
 import React from 'react';
 
 import { Pencil } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { WorkflowInfoEditor } from '@/components/layout/workspace/workflow/info-editor';
+import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 
 interface IWorkflowInfoCardProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const WorkflowInfoCard: React.FC<IWorkflowInfoCardProps> = () => {
+  const { t } = useTranslation();
+
   const { workflow } = useVinesPage();
 
   return (
@@ -29,7 +32,7 @@ export const WorkflowInfoCard: React.FC<IWorkflowInfoCardProps> = () => {
           </div>
         </TooltipTrigger>
       </WorkflowInfoEditor>
-      <TooltipContent>点击编辑</TooltipContent>
+      <TooltipContent>{t('workspace.wrapper.workflow-info-card.tip')}</TooltipContent>
     </Tooltip>
   );
 };
