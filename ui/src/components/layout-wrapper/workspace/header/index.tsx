@@ -7,6 +7,7 @@ import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
 import { IntegrationCenter } from '@/components/layout-wrapper/workspace/header/expand/integration-center';
 import { UserCard } from '@/components/layout-wrapper/workspace/header/expand/user-card.tsx';
 import { WorkflowInfoCard } from '@/components/layout-wrapper/workspace/header/workflow-info-card.tsx';
+import { I18nSelector } from '@/components/ui/i18n-selector';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId';
 
@@ -30,7 +31,10 @@ export const WorkspaceHeader: React.FC<IWorkspaceHeaderProps> = () => {
       </div>
       <div className="z-20 flex items-center gap-6">
         <IntegrationCenter />
-        <VinesDarkMode className="scale-90" />
+        <div className="flex gap-3">
+          <VinesDarkMode className="-mx-0.5 scale-90" />
+          <I18nSelector className="-mx-0.5 scale-90" />
+        </div>
         <UserCard />
       </div>
     </header>
