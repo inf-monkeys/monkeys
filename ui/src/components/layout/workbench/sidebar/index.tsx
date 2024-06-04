@@ -62,8 +62,8 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
             >
               <VinesIcon size="sm">{page.workflow?.iconUrl}</VinesIcon>
               <div className="flex flex-col gap-0.5">
-                <h1 className="font-bold leading-tight">{page.displayName}</h1>
-                <span className="text-xxs">{page.workflow?.displayName ?? t('common.utils.untitled')}</span>
+                <h1 className="font-bold leading-tight">{page.workflow?.displayName ?? t('common.utils.untitled')}</h1>
+                <span className="text-xxs">{page.displayName}</span>
               </div>
             </div>
           ))}
