@@ -1,10 +1,13 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { get, isString } from 'lodash';
 import { Link2Icon } from 'lucide-react';
 
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
 import { Button } from '@/components/ui/button';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card.tsx';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VariableEditor, VariableEditorRefProps } from '@/components/ui/vines-variable-editor';
 import { VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
@@ -30,38 +33,75 @@ export const StringInput: React.FC<IVinesInputPropertyProps & IStringInputProps>
 
   const variableEditorRef = useRef<VariableEditorRefProps>({ insertVariable: () => {} });
 
+  const stringValue = isString(value) ? value : stringify(value);
+
+  const [previewVisible, setPreviewVisible] = useState<boolean>(false);
+  const [continuousDisplay, setContinuousDisplay] = useState<boolean>(true);
+  const [previewValue, setPreviewValue] = useState<string>(stringValue);
+
   return (
-    <div className={cn('relative', { 'pointer-events-none': disabled })}>
-      {!refresh && (
-        <VariableEditor
-          editorRef={variableEditorRef}
-          initialValue={isString(value) ? value : stringify(value)}
-          onChange={onChange}
-          placeholder={def?.placeholder ?? `请输入${def?.displayName}`}
-          initialPointMapper={{ ...variableMapper, ...extraVariableMapper }}
-        />
-      )}
-      {!disabled && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              className="absolute right-1 top-1 !scale-75 cursor-pointer opacity-50 hover:opacity-100"
-              variant="borderless"
-              icon={<Link2Icon />}
-              onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
-                VinesEvent.emit(
-                  'flow-variable-selector',
-                  workflowId,
-                  e,
-                  variableEditorRef.current.insertVariable,
-                  get(def, 'typeOptions.assemblyValueType', 'simple'),
-                )
-              }
+    <HoverCard
+      openDelay={200}
+      open={previewVisible}
+      onOpenChange={(status) => continuousDisplay && setPreviewVisible(status)}
+    >
+      <HoverCardTrigger asChild>
+        <div className={cn('relative', { 'pointer-events-none': disabled })}>
+          {!refresh && (
+            <VariableEditor
+              editorRef={variableEditorRef}
+              initialValue={stringValue}
+              onChange={(val) => {
+                onChange(val);
+                setPreviewValue(val);
+              }}
+              onBlur={() => {
+                setContinuousDisplay(true);
+                setPreviewVisible(false);
+              }}
+              onFocus={() => {
+                setContinuousDisplay(false);
+                setPreviewVisible(true);
+              }}
+              placeholder={def?.placeholder ?? `请输入${def?.displayName}`}
+              initialPointMapper={{ ...variableMapper, ...extraVariableMapper }}
             />
-          </TooltipTrigger>
-          <TooltipContent>插入变量</TooltipContent>
-        </Tooltip>
-      )}
-    </div>
+          )}
+
+          {!disabled && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="absolute right-1 top-1 !scale-75 cursor-pointer opacity-50 hover:opacity-100"
+                  variant="borderless"
+                  icon={<Link2Icon />}
+                  onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
+                    VinesEvent.emit(
+                      'flow-variable-selector',
+                      workflowId,
+                      e,
+                      variableEditorRef.current.insertVariable,
+                      get(def, 'typeOptions.assemblyValueType', 'simple'),
+                    )
+                  }
+                />
+              </TooltipTrigger>
+              <TooltipContent>插入变量</TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+      </HoverCardTrigger>
+      <HoverCardContent
+        side="left"
+        sideOffset={8}
+        className={cn('flex flex-col gap-1 p-2 transition-opacity', !previewValue && 'opacity-0')}
+      >
+        <h1 className="text-base font-bold">{`${def?.displayName ?? ''} 输入预览`}</h1>
+        <Separator />
+        <ScrollArea className="h-24">
+          <p className="max-w-60 break-words text-xs opacity-85">{previewValue}</p>
+        </ScrollArea>
+      </HoverCardContent>
+    </HoverCard>
   );
 };
