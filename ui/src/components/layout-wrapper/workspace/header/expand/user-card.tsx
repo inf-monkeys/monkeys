@@ -3,6 +3,7 @@ import React from 'react';
 import { useNavigate } from '@tanstack/react-router';
 
 import { LogOut, User2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { useVinesUser } from '@/components/router/guard/user.tsx';
@@ -22,6 +23,8 @@ import VinesEvent from '@/utils/events.ts';
 interface IUserCardProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const UserCard: React.FC<IUserCardProps> = () => {
+  const { t } = useTranslation();
+
   const navigate = useNavigate({ from: Route.fullPath });
   const { userPhoto, userName } = useVinesUser();
   const { teamId, team } = useVinesTeam();
@@ -47,11 +50,11 @@ export const UserCard: React.FC<IUserCardProps> = () => {
             onClick={() => navigate({ to: '/$teamId/settings', params: { teamId } })}
           >
             <User2 strokeWidth={1.5} size={16} />
-            <span>个人中心</span>
+            <span>{t('workspace.wrapper.user.user-center')}</span>
           </DropdownMenuItem>
           <DropdownMenuItem className="flex gap-2 text-red-10" onClick={() => VinesEvent.emit('vines-logout')}>
             <LogOut strokeWidth={1.5} size={16} />
-            <span>退出登录</span>
+            <span>{t('workspace.wrapper.user.logout')}</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
