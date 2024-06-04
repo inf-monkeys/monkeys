@@ -116,6 +116,7 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
         {!refresh &&
           finalInputs?.map((def, index) => (
             <VinesInputProperty
+              refresh={refresh}
               key={def.name + index}
               def={def}
               nodeId={nodeId}

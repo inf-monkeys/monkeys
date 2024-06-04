@@ -24,6 +24,7 @@ export const StringInput: React.FC<IVinesInputPropertyProps & IStringInputProps>
   disabled,
   variableMapper,
   extraVariableMapper = {},
+  refresh = false,
 }) => {
   const { workflowId } = useFlowStore();
 
@@ -31,13 +32,15 @@ export const StringInput: React.FC<IVinesInputPropertyProps & IStringInputProps>
 
   return (
     <div className={cn('relative', { 'pointer-events-none': disabled })}>
-      <VariableEditor
-        editorRef={variableEditorRef}
-        initialValue={isString(value) ? value : stringify(value)}
-        onChange={onChange}
-        placeholder={def?.placeholder ?? `请输入${def?.displayName}`}
-        initialPointMapper={{ ...variableMapper, ...extraVariableMapper }}
-      />
+      {!refresh && (
+        <VariableEditor
+          editorRef={variableEditorRef}
+          initialValue={isString(value) ? value : stringify(value)}
+          onChange={onChange}
+          placeholder={def?.placeholder ?? `请输入${def?.displayName}`}
+          initialPointMapper={{ ...variableMapper, ...extraVariableMapper }}
+        />
+      )}
       {!disabled && (
         <Tooltip>
           <TooltipTrigger asChild>
