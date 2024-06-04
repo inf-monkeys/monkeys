@@ -3,7 +3,7 @@ import React, { memo, useEffect, useRef, useState } from 'react';
 import { BlockCredentialItem } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
 import { useForceUpdate } from '@mantine/hooks';
 import equal from 'fast-deep-equal/es6';
-import { get, set } from 'lodash';
+import { get, isArray, set } from 'lodash';
 import { toast } from 'sonner';
 
 import { VinesInputCredentials } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-credentials';
@@ -47,7 +47,7 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
     }, [nodeId]);
 
     const forceUpdate = useForceUpdate();
-    const handleUpdate = (value: unknown, name: string) => {
+    const handleUpdate = (value: unknown, name: string, needForceUpdate = true) => {
       if (!taskRef.current) {
         toast.error('工具数据异常！');
         return;
@@ -76,7 +76,7 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
       }
 
       updateRaw?.(nodeId, taskRef.current, false);
-      forceUpdate();
+      needForceUpdate && forceUpdate();
     };
 
     // 计算显隐更新时自动填充默认值
@@ -88,9 +88,13 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
       calculateInputsRef.current = finalInputs;
       if (needMemoInputs) {
         finalInputs?.forEach((def) => {
-          const { name, default: defaultValue } = def;
+          const { name, typeOptions, default: defaultValue } = def;
           if (defaultValue !== void 0 && get(task, `inputParameters.${name}`) === void 0) {
-            handleUpdate(defaultValue, name);
+            if (typeOptions?.multipleValues) {
+              handleUpdate(isArray(defaultValue) ? defaultValue : [defaultValue], name, false);
+            } else {
+              handleUpdate(defaultValue, name, false);
+            }
           }
         });
         setRefresh(true);
