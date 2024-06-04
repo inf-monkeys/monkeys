@@ -28,6 +28,7 @@
       "search": "搜索",
       "switch": "切换",
       "copy": "复制",
+      "copy-success": "复制成功",
       "filter": "筛选",
       "back": "返回",
       "import": "导入",
@@ -1393,6 +1394,28 @@
             "placeholder": "请输入描述"
           }
         }
+      }
+    },
+
+    "wrapper": {
+      "integration-center": {
+        "title": "集成中心",
+        "desc": "你可以通过 API 与其他应用集成，以实现更多功能",
+
+        "content": {
+          "new-chat-session": "新的会话",
+          "execution-workflow": "直接运行工作流",
+          "execution-workflow-desc": "只需要关注核心参数",
+
+          "execution-workflow-from-session": "在特定会话中运行工作流",
+          "execution-workflow-from-session-desc": "除了核心参数外，需额外传入 SessionId，并可通过 SessionId 区分会话人，适用于多轮对话获取历史记录等场景",
+
+          "create-session": "创建新的会话",
+          "create-session-desc": "创建会话并得到特定的 SessionId"
+        },
+
+        "empty-apikey": "暂无 APIKEY，请先到「配置中心」创建",
+        "goto-config": "前往配置中心"
       }
     }
   }
