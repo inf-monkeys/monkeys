@@ -28,6 +28,7 @@
       "search": "Search",
       "switch": "Switch",
       "copy": "Copy",
+      "copy-success": "Copy success",
       "filter": "Filter",
       "back": "Back",
       "import": "Import",
@@ -1398,6 +1399,28 @@
             "placeholder": "Enter description"
           }
         }
+      }
+    },
+
+    "wrapper": {
+      "integration-center": {
+        "title": "Integration Centre",
+        "desc": "You can integrate with other apps through APIs for more functionality",
+
+        "content": {
+          "new-chat-session": "New session",
+          "execution-workflow": "Run the workflow directly",
+          "execution-workflow-desc": "Just focus on the core parameters",
+
+          "execution-workflow-from-session": "Running a workflow in a specific session",
+          "execution-workflow-from-session-desc": "In addition to the core parameters, you need to pass in the SessionId, and can distinguish the session person by SessionId, which is suitable for multiple rounds of dialogue to get the history and other scenarios.",
+
+          "create-session": "Creating a new session",
+          "create-session-desc": "Create a session and get a specific SessionId."
+        },
+
+        "empty-apikey": "APIKEY is empty, please go to 'Configuration Centre' to create one.",
+        "goto-config": "Go to Configuration Centre"
       }
     }
   }

@@ -3,8 +3,8 @@ import React, { useEffect } from 'react';
 import { Link } from '@tanstack/react-router';
 
 import { useClipboard } from '@mantine/hooks';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@radix-ui/react-tooltip';
 import { Blocks, Copy } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useApiKeyList } from '@/apis/api-keys/api-key.ts';
@@ -26,6 +26,8 @@ import CompletionsTemplateZH from './templates/completions.mdx';
 interface IIntegrationCenterProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
+  const { t } = useTranslation();
+
   const { teamId } = useVinesTeam();
   const clipboard = useClipboard({ timeout: 500 });
 
@@ -79,7 +81,7 @@ export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
           },
           body: {
             workflowId,
-            displayName: '新的会话',
+            displayName: t('workspace.wrapper.integration-center.content.new-chat-session'),
           },
         }),
       );
@@ -104,25 +106,23 @@ export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
     <Dialog>
       <DialogTrigger asChild>
         <Button variant="outline" className="-mx-4 scale-90" icon={<Blocks />}>
-          集成中心
+          {t('workspace.wrapper.integration-center.title')}
         </Button>
       </DialogTrigger>
       <DialogContent className={cn('max-h max-w-xl', enabledOpenAIInterface && 'max-w-7xl')}>
-        <DialogTitle>集成中心</DialogTitle>
-        <DialogDescription>你可以通过 API 与其他应用集成，以实现更多功能</DialogDescription>
+        <DialogTitle>{t('workspace.wrapper.integration-center.title')}</DialogTitle>
+        <DialogDescription>{t('workspace.wrapper.integration-center.desc')}</DialogDescription>
         {enabledOpenAIInterface ? (
           <ScrollArea className="h-[calc(100vh-20rem)]">
             <div className="prose max-w-full px-3 dark:prose-invert prose-p:leading-relaxed prose-pre:p-0">
               {workflow?.variables?.find((variable) => variable.name === 'messages') ? (
                 <ChatCompletionsTemplateZH
-                  // @ts-ignore
                   apiBaseUrl={apiBaseUrl}
                   apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
                   workflowId={workflowId}
                 />
               ) : (
                 <CompletionsTemplateZH
-                  // @ts-ignore
                   apiBaseUrl={apiBaseUrl}
                   apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
                   workflowId={workflowId}
@@ -137,85 +137,84 @@ export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
                 <div className="mb-4 flex w-full flex-col gap-2 rounded-md border border-input p-4">
                   <header className="flex items-start justify-between">
                     <div>
-                      <h1 className="font-semibold">直接运行工作流</h1>
-                      <span className="text-xs">只需要关注核心参数</span>
+                      <h1 className="font-semibold">
+                        {t('workspace.wrapper.integration-center.content.execution-workflow')}
+                      </h1>
+                      <span className="text-xs">
+                        {t('workspace.wrapper.integration-center.content.execution-workflow-desc')}
+                      </span>
                     </div>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="small"
-                          icon={<Copy />}
-                          onClick={() => {
-                            clipboard.copy(executionWorkflowCurl);
-                            toast.success('已复制');
-                          }}
-                        />
-                      </TooltipTrigger>
-                      <TooltipContent>点击复制</TooltipContent>
-                    </Tooltip>
+                    <Button
+                      className="scale-80"
+                      variant="outline"
+                      size="small"
+                      icon={<Copy />}
+                      onClick={() => {
+                        clipboard.copy(executionWorkflowCurl);
+                        toast.success(t('common.utils.copy-success'));
+                      }}
+                    />
                   </header>
-                  <div className="max-h-80 max-w-[26.5rem] overflow-auto rounded-md bg-muted p-2">
+                  <div className="max-h-80 max-w-[30.8rem] overflow-auto rounded-md bg-muted p-2">
                     <VinesHighlighter language="bash">{executionWorkflowCurl || ''}</VinesHighlighter>
                   </div>
                 </div>
                 <div className="mb-4 flex w-full flex-col gap-2 rounded-md border border-input p-4">
                   <header className="flex items-start justify-between">
                     <div>
-                      <h1 className="font-semibold">在特定会话中运行工作流</h1>
-                      <span className="text-xs">除了核心参数外，需额外传入 SessionId</span>
-                      <span className="text-xs">可通过 SessionId 区分会话人，适用于多轮对话获取历史记录等场景</span>
+                      <h1 className="font-semibold">
+                        {t('workspace.wrapper.integration-center.content.execution-workflow-from-session')}
+                      </h1>
+                      <span className="text-xs">
+                        {t('workspace.wrapper.integration-center.content.execution-workflow-from-session-desc')}
+                      </span>
                     </div>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="small"
-                          icon={<Copy />}
-                          onClick={() => {
-                            clipboard.copy(executionWorkflowWithChatSessionCurl);
-                            toast.success('已复制');
-                          }}
-                        />
-                      </TooltipTrigger>
-                      <TooltipContent>点击复制</TooltipContent>
-                    </Tooltip>
+                    <Button
+                      className="scale-80"
+                      variant="outline"
+                      size="small"
+                      icon={<Copy />}
+                      onClick={() => {
+                        clipboard.copy(executionWorkflowWithChatSessionCurl);
+                        toast.success(t('common.utils.copy-success'));
+                      }}
+                    />
                   </header>
-                  <div className="max-h-80 max-w-[26.5rem] overflow-auto rounded-md bg-muted p-2">
+                  <div className="max-h-80 max-w-[30.8rem] overflow-auto rounded-md bg-muted p-2">
                     <VinesHighlighter language="bash">{executionWorkflowWithChatSessionCurl || ''}</VinesHighlighter>
                   </div>
                 </div>
                 <div className="flex w-full flex-col gap-2 rounded-md border border-input p-4">
                   <header className="flex items-start justify-between">
                     <div>
-                      <h1 className="font-semibold">创建新的会话</h1>
-                      <span className="text-xs">创建会话并得到特定的 SessionId</span>
+                      <h1 className="font-semibold">
+                        {t('workspace.wrapper.integration-center.content.create-session')}
+                      </h1>
+                      <span className="text-xs">
+                        {t('workspace.wrapper.integration-center.content.create-session-desc')}
+                      </span>
                     </div>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="small"
-                          icon={<Copy />}
-                          onClick={() => {
-                            clipboard.copy(createChatSessionCurl);
-                            toast.success('已复制');
-                          }}
-                        />
-                      </TooltipTrigger>
-                      <TooltipContent>点击复制</TooltipContent>
-                    </Tooltip>
+                    <Button
+                      className="scale-80"
+                      variant="outline"
+                      size="small"
+                      icon={<Copy />}
+                      onClick={() => {
+                        clipboard.copy(createChatSessionCurl);
+                        toast.success(t('common.utils.copy-success'));
+                      }}
+                    />
                   </header>
-                  <div className="max-h-80 max-w-[26.5rem] overflow-auto rounded-md bg-muted p-2">
+                  <div className="max-h-80 max-w-[30.8rem] overflow-auto rounded-md bg-muted p-2">
                     <VinesHighlighter language="bash">{createChatSessionCurl || ''}</VinesHighlighter>
                   </div>
                 </div>
               </ScrollArea>
             ) : (
               <>
-                <h1 className="font-bold">暂无 APIKEY，请先到「配置中心」创建</h1>
+                <h1 className="font-bold">{t('workspace.wrapper.integration-center.empty-apikey')}</h1>
                 <Link to="/$teamId/settings" params={{ teamId }}>
-                  <Button variant="outline">前往配置中心</Button>
+                  <Button variant="outline">{t('workspace.wrapper.integration-center.goto-config')}</Button>
                 </Link>
               </>
             )}
