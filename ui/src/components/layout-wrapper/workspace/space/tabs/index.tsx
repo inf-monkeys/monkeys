@@ -18,6 +18,7 @@ import {
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import { debounce } from 'lodash';
+import { useTranslation } from 'react-i18next';
 
 import { IPageType } from '@/apis/pages/typings.ts';
 import { Expand } from '@/components/layout-wrapper/workspace/space/tabs/expand';
@@ -25,9 +26,11 @@ import { SpaceTab } from '@/components/layout-wrapper/workspace/space/tabs/tab.t
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { cn } from '@/utils';
 
-interface ITabsProps extends React.ComponentPropsWithoutRef<'header'> {}
+interface ITabsProps {}
 
 export const SpaceTabs: React.FC<ITabsProps> = () => {
+  const { t } = useTranslation();
+
   const { pages, setPages, page, pageId } = useVinesPage();
 
   const sensors = useSensors(
@@ -108,7 +111,7 @@ export const SpaceTabs: React.FC<ITabsProps> = () => {
                 key={id}
                 id={id}
                 icon={instance?.icon ?? '⚠️'}
-                displayName={displayName ?? '未知视图'}
+                displayName={displayName ?? t('workspace.wrapper.space.unknown-view')}
                 activeIndex={activeIndex}
                 isLastItem={pageNavLastIndex !== index}
                 index={index}

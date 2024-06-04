@@ -1449,6 +1449,27 @@
       "user": {
         "user-center": "Personal",
         "logout": "Log out"
+      },
+
+      "space": {
+        "unknown-view": "Unknown view",
+        "add-tab": "New View",
+        "menu": {
+          "del-view-button": "Delete View",
+          "del-view": "Are you sure you want to delete ‘{{ view }}’?",
+          "pin": "{{ status }}pin",
+          "toggle-pin": "{{ status }}pinning...",
+          "pin-un": "un",
+          "toggle-pin-success": "{{ status }}pin success",
+          "toggle-pin-failed": "{{ status }}pin failed",
+          "rename": {
+            "trigger": "rename",
+            "title": "Rename the view",
+            "placeholder": "Please enter a view name",
+            "input-empty": "Please enter valid content",
+            "submit": "submit"
+          }
+        }
       }
     }
   }

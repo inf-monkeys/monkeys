@@ -3,6 +3,7 @@ import React from 'react';
 import { CreatePageDto } from '@inf-monkeys/vines/lib/models/CreatePageDto';
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { createWorkspacePage, useWorkspacePageInstances } from '@/apis/pages';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
@@ -23,6 +24,8 @@ import { cn } from '@/utils';
 interface IAddSpaceTabProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const AddSpaceTab: React.FC<IAddSpaceTabProps> = ({ className }) => {
+  const { t } = useTranslation();
+
   const { workflowId, pagesMutate, navigateTo } = useVinesPage();
   const { data } = useWorkspacePageInstances();
 
@@ -59,10 +62,10 @@ export const AddSpaceTab: React.FC<IAddSpaceTabProps> = ({ className }) => {
               <Button icon={<Plus />} className="my-auto !scale-75" variant="outline" />
             </TooltipTrigger>
           </DropdownMenuTrigger>
-          <TooltipContent>新建视图</TooltipContent>
+          <TooltipContent>{t('workspace.wrapper.space.add-tab')}</TooltipContent>
         </Tooltip>
         <DropdownMenuContent>
-          <DropdownMenuLabel>新建视图</DropdownMenuLabel>
+          <DropdownMenuLabel>{t('workspace.wrapper.space.add-tab')}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             {data
