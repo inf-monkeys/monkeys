@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { useForceUpdate } from '@mantine/hooks';
 import { DialogTrigger } from '@radix-ui/react-dialog';
 import { get, isEmpty } from 'lodash';
 import { MoreVertical, Pencil, Settings2, Star, Trash2 } from 'lucide-react';
@@ -30,6 +31,8 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
 
   const [toggleNameDialogVisible, setToggleNameDialogVisible] = useState(false);
   const [pageDisplayName, setPageDisplayName] = useState(page?.displayName ?? '');
+
+  const forceUpdate = useForceUpdate();
 
   const handleDeletePage = async () => {
     toast(`确定要删除「${page?.displayName ?? '未知视图'}」吗？`, {
@@ -72,14 +75,14 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
     const currentPage = pages.findIndex(({ id }) => id === pageId);
     if (currentPage === -1) return;
 
-    toast.promise(toggleWorkspacePagePin(pageId, !isPin), {
+    const newPin = !isPin;
+    toast.promise(toggleWorkspacePagePin(pageId, newPin), {
       loading: `正在${isPin ? '取消' : ''}标星中...`,
-      success: (newPage) => {
-        if (newPage) {
-          const newPages = [...pages];
-          newPages[currentPage].pinned = newPage.pinned;
-          void setPages(newPages);
-        }
+      success: () => {
+        const newPages = [...pages];
+        newPages[currentPage].pinned = newPin;
+        void setPages(newPages);
+        forceUpdate();
         return `${isPin ? '取消' : ''}标星成功`;
       },
       error: `${isPin ? '取消' : ''}标星失败`,
@@ -90,7 +93,7 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
     <Dialog open={toggleNameDialogVisible} onOpenChange={setToggleNameDialogVisible}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="!scale-90 [&_svg]:stroke-gold-12" icon={<MoreVertical />} variant="borderless" />
+          <Button className="!scale-80 [&_svg]:stroke-gold-12" icon={<MoreVertical />} variant="borderless" />
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuGroup>
