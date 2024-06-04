@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { VinesHighlighter } from '@/components/ui/highlighter';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/utils';
 
 // @ts-ignore
 import ChatCompletionsTemplateZH from './templates/chat-completions.mdx';
@@ -97,6 +98,7 @@ export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
   }, [workflowInputs, workflowId, finalApikey, urlPrefix]);
 
   const apiBaseUrl = window.location.protocol + '//' + window.location.host + '/api';
+  const enabledOpenAIInterface = workflow?.exposeOpenaiCompatibleInterface ?? false;
 
   return (
     <Dialog>
@@ -105,33 +107,30 @@ export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
           集成中心
         </Button>
       </DialogTrigger>
-
-      {workflow?.exposeOpenaiCompatibleInterface ? (
-        <DialogContent className="max-h max-w-6xl">
-          <DialogTitle>集成中心</DialogTitle>
-          <DialogDescription>你可以通过 API 与其他应用集成，以实现更多功能</DialogDescription>
+      <DialogContent className={cn('max-h max-w-xl', enabledOpenAIInterface && 'max-w-7xl')}>
+        <DialogTitle>集成中心</DialogTitle>
+        <DialogDescription>你可以通过 API 与其他应用集成，以实现更多功能</DialogDescription>
+        {enabledOpenAIInterface ? (
           <ScrollArea className="h-[calc(100vh-20rem)]">
-            {workflow.variables?.find((variable) => variable.name === 'messages') ? (
-              <ChatCompletionsTemplateZH
-                // @ts-ignore
-                apiBaseUrl={apiBaseUrl}
-                apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
-                workflowId={workflowId}
-              />
-            ) : (
-              <CompletionsTemplateZH
-                // @ts-ignore
-                apiBaseUrl={apiBaseUrl}
-                apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
-                workflowId={workflowId}
-              />
-            )}
+            <div className="prose max-w-full px-3 dark:prose-invert prose-p:leading-relaxed prose-pre:p-0">
+              {workflow?.variables?.find((variable) => variable.name === 'messages') ? (
+                <ChatCompletionsTemplateZH
+                  // @ts-ignore
+                  apiBaseUrl={apiBaseUrl}
+                  apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
+                  workflowId={workflowId}
+                />
+              ) : (
+                <CompletionsTemplateZH
+                  // @ts-ignore
+                  apiBaseUrl={apiBaseUrl}
+                  apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
+                  workflowId={workflowId}
+                />
+              )}
+            </div>
           </ScrollArea>
-        </DialogContent>
-      ) : (
-        <DialogContent className="max-h max-w-xl">
-          <DialogTitle>集成中心</DialogTitle>
-          <DialogDescription>你可以通过 API 与其他应用集成，以实现更多功能</DialogDescription>
+        ) : (
           <div className="vines-center h-80 w-full flex-col gap-4">
             {finalApikey ? (
               <ScrollArea>
@@ -221,8 +220,8 @@ export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
               </>
             )}
           </div>
-        </DialogContent>
-      )}
+        )}
+      </DialogContent>
     </Dialog>
   );
 };
