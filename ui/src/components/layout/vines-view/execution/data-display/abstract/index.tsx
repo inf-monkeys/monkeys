@@ -5,6 +5,7 @@ import { VinesAbstractImage } from '@/components/layout/vines-view/execution/dat
 import { VinesAbstractPDB } from '@/components/layout/vines-view/execution/data-display/abstract/node/pdb.tsx';
 import { VinesAbstractString } from '@/components/layout/vines-view/execution/data-display/abstract/node/string.tsx';
 import { VinesAbstractUrl } from '@/components/layout/vines-view/execution/data-display/abstract/node/url.tsx';
+import { VinesAbstractVideo } from '@/components/layout/vines-view/execution/data-display/abstract/node/video.tsx';
 import { previewDataGenerator } from '@/components/layout/vines-view/execution/data-display/abstract/utils.ts';
 import { JSONValue } from '@/components/ui/code-editor';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
@@ -38,6 +39,7 @@ export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
                 {type === 'pdb' && (
                   <VinesAbstractPDB height={(style?.height as number) ?? void 0}>{value}</VinesAbstractPDB>
                 )}
+                {type === 'video' && <VinesAbstractVideo>{value?.toString() ?? ''}</VinesAbstractVideo>}
                 {i !== previewDataLength - 1 && <Separator className="mt-3" />}
               </div>
             );
