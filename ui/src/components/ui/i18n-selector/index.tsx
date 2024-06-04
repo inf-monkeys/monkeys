@@ -15,7 +15,11 @@ import {
 import { LANGUAGES_LIST } from '@/components/ui/i18n-selector/consts.ts';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
-export const I18nSelector: React.FC = () => {
+interface II18nSelectorProps {
+  className?: string;
+}
+
+export const I18nSelector: React.FC<II18nSelectorProps> = ({ className }) => {
   const { t, i18n } = useTranslation();
 
   const currentLanguage = i18n.language;
@@ -33,7 +37,7 @@ export const I18nSelector: React.FC = () => {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <TooltipTrigger asChild>
-            <Button variant="outline" icon={<Languages />} />
+            <Button className={className} variant="outline" icon={<Languages />} />
           </TooltipTrigger>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
