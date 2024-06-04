@@ -1471,6 +1471,18 @@
           }
         }
       }
+    },
+
+    "flow-view": {
+      "headless-modal": {
+        "context-menu": {
+          "add-tool": "Add Tools",
+          "insert-up-tool": "Insert Up Tool",
+          "edit-tool": "Edit Tools",
+          "insert-down-tool": "Insert Down Tool",
+          "del-tool": "Delete Tools"
+        }
+      }
     }
   }
 }
