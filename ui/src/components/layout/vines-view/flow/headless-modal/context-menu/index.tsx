@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useSetState } from '@mantine/hooks';
 import { ChevronDownSquare, ChevronUpSquare, PencilRuler, Workflow, XSquare } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import {
   DropdownMenu,
@@ -21,6 +22,8 @@ import VinesEvent from '@/utils/events.ts';
 interface IContextMenuProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ContextMenu: React.FC<IContextMenuProps> = () => {
+  const { t } = useTranslation();
+
   const { isLatestWorkflowVersion, workflowId } = useFlowStore();
   const { canvasMode } = useCanvasStore();
   const { canvasDisabled } = useCanvasInteractionStore();
@@ -87,7 +90,7 @@ export const ContextMenu: React.FC<IContextMenuProps> = () => {
               }
             >
               <Workflow strokeWidth={1.5} size={16} />
-              <span>添加工具</span>
+              <span>{t('workspace.flow-view.headless-modal.context-menu.add-tool')}</span>
             </DropdownMenuItem>
           ) : (
             <>
@@ -102,14 +105,14 @@ export const ContextMenu: React.FC<IContextMenuProps> = () => {
                 }
               >
                 <ChevronUpSquare strokeWidth={1.5} size={16} />
-                <span>向上插入工具</span>
+                <span>{t('workspace.flow-view.headless-modal.context-menu.insert-up-tool')}</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="flex gap-2"
                 onClick={() => VinesEvent.emit('flow-tool-editor', workflowId, currentNodeId)}
               >
                 <PencilRuler strokeWidth={1.5} size={16} />
-                <span>编辑工具</span>
+                <span>{t('workspace.flow-view.headless-modal.context-menu.edit-tool')}</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 className={cn('flex gap-2', disabled && 'hidden')}
@@ -121,7 +124,7 @@ export const ContextMenu: React.FC<IContextMenuProps> = () => {
                 }
               >
                 <ChevronDownSquare strokeWidth={1.5} size={16} />
-                <span>向下插入工具</span>
+                <span>{t('workspace.flow-view.headless-modal.context-menu.insert-down-tool')}</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -129,7 +132,7 @@ export const ContextMenu: React.FC<IContextMenuProps> = () => {
                 onClick={() => VinesEvent.emit('flow-delete-node', workflowId, currentNodeId)}
               >
                 <XSquare strokeWidth={1.5} size={16} />
-                <span>删除工具</span>
+                <span>{t('workspace.flow-view.headless-modal.context-menu.del-tool')}</span>
               </DropdownMenuItem>
             </>
           )}

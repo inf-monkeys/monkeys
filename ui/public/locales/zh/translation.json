@@ -1470,6 +1470,18 @@
           }
         }
       }
+    },
+
+    "flow-view": {
+      "headless-modal": {
+        "context-menu": {
+          "add-tool": "添加工具",
+          "insert-up-tool": "向上插入工具",
+          "edit-tool": "编辑工具",
+          "insert-down-tool": "向下插入工具",
+          "del-tool": "删除工具"
+        }
+      }
     }
   }
 }
