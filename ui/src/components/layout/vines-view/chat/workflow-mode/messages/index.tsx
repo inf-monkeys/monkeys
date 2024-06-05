@@ -13,6 +13,7 @@ import { VirtualizedList } from '@/components/layout/vines-view/chat/workflow-mo
 import { useVinesUser } from '@/components/router/guard/user.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
+import { useViewStore } from '@/store/useViewStore';
 import { useLocalStorage } from '@/utils';
 
 interface IVinesChatListProps {
@@ -21,13 +22,14 @@ interface IVinesChatListProps {
 }
 
 export const VinesChatList: React.FC<IVinesChatListProps> = ({ workflowId }) => {
+  const { visible } = useViewStore();
   const { userPhoto, userName } = useVinesUser();
   const { vines } = useVinesFlow();
 
   const [sessions] = useLocalStorage<Record<string, string>>('vines-ui-chat-session', {});
 
   const { data, isLoading } = useSearchWorkflowExecutions(
-    workflowId
+    workflowId && visible
       ? {
           orderBy: { filed: 'startTime', order: 'DESC' },
           pagination: { page: 1, limit: 100 },

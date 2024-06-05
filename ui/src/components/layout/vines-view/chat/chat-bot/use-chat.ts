@@ -109,7 +109,7 @@ export const useChat = ({
           headers: {
             Authorization: `Bearer ${apiKey ?? requestCredentials?.apiKey ?? ''}`,
             'Content-Type': 'application/json',
-            ...(chatId && { 'x-monkeys-conversation-id': chatId }),
+            ...(chatId && !chatId.startsWith('default-') && { 'x-monkeys-conversation-id': chatId }),
           },
           signal: abortController.signal,
         }).catch((err) => {
