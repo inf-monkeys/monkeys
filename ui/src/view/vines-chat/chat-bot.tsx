@@ -10,6 +10,7 @@ import { VirtualizedList } from 'src/components/layout/vines-view/chat/chat-bot/
 
 import { useApiKeyList } from '@/apis/api-keys/api-key.ts';
 import { IApiKeyStatus } from '@/apis/api-keys/typings.ts';
+import { getVinesToken } from '@/apis/utils.ts';
 import { useChatBotHistory } from '@/apis/workflow/chat';
 import { useChat } from '@/components/layout/vines-view/chat/chat-bot/use-chat.ts';
 import { useVinesUser } from '@/components/router/guard/user.tsx';
@@ -44,7 +45,8 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) =
   }, [currentSession]);
 
   const { data: apiKeys } = useApiKeyList();
-  const apiKey = apiKeys?.find((key) => key.status === IApiKeyStatus.Valid)?.apiKey;
+  const vinesToken = getVinesToken();
+  const apiKey = apiKeys?.find((key) => key.status === IApiKeyStatus.Valid)?.apiKey ?? vinesToken ?? '';
 
   const { data: history, error, isLoading: isHistoryLoading } = useChatBotHistory(chatId);
 
