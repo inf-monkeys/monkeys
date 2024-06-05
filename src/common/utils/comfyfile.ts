@@ -52,7 +52,7 @@ export const parseComfyfile = (comfyfilePath: string, contextDirectory: string):
     homepage: string;
   } => {
     const [, manifestRelativeFile] = line.split(' ');
-    const manifestFile = path.join(contextDirectory, manifestRelativeFile);
+    const manifestFile = path.join(contextDirectory, manifestRelativeFile.trim());
     const manifestStr = fs.readFileSync(manifestFile, 'utf-8');
     const manifest = JSON.parse(manifestStr);
     return manifest;
@@ -60,7 +60,7 @@ export const parseComfyfile = (comfyfilePath: string, contextDirectory: string):
 
   const parseWorkflowLine = (line: string) => {
     const [, workflowRelativeFile] = line.split(' ');
-    const workflowFile = path.join(contextDirectory, workflowRelativeFile);
+    const workflowFile = path.join(contextDirectory, workflowRelativeFile.trim());
     const workflowStr = fs.readFileSync(workflowFile, 'utf-8');
     const workflow = JSON.parse(workflowStr);
     return workflow;
@@ -68,7 +68,7 @@ export const parseComfyfile = (comfyfilePath: string, contextDirectory: string):
 
   const parseWorkflowApiLine = (line: string) => {
     const [, workflowApiRelativeFile] = line.split(' ');
-    const workflowApiFile = path.join(contextDirectory, workflowApiRelativeFile);
+    const workflowApiFile = path.join(contextDirectory, workflowApiRelativeFile.trim());
     const workflowApiStr = fs.readFileSync(workflowApiFile, 'utf-8');
     const workflowApi = JSON.parse(workflowApiStr);
     return workflowApi;
@@ -76,7 +76,7 @@ export const parseComfyfile = (comfyfilePath: string, contextDirectory: string):
 
   const parseRestEndpointLine = (line: string) => {
     const [, restEndpointRelativeFile] = line.split(' ');
-    const restEndpointFile = path.join(contextDirectory, restEndpointRelativeFile);
+    const restEndpointFile = path.join(contextDirectory, restEndpointRelativeFile.trim());
     const restEndpointStr = fs.readFileSync(restEndpointFile, 'utf-8');
     const restEndpoint = JSON.parse(restEndpointStr);
     return restEndpoint;
