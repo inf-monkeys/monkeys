@@ -87,6 +87,7 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
 
       calculateInputsRef.current = finalInputs;
       if (needMemoInputs) {
+        let needRefresh = false;
         finalInputs?.forEach((def) => {
           const { name, typeOptions, default: defaultValue } = def;
           if (defaultValue !== void 0 && get(task, `inputParameters.${name}`) === void 0) {
@@ -95,10 +96,13 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
             } else {
               handleUpdate(defaultValue, name, false);
             }
+            needRefresh = true;
           }
         });
-        setRefresh(true);
-        setTimeout(() => setRefresh(false), 16);
+        if (needRefresh) {
+          setRefresh(true);
+          setTimeout(() => setRefresh(false), 16);
+        }
       }
     }, [finalInputs]);
 

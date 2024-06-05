@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { BlockDefPropertyTypeOptions, BlockDefPropertyTypes } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
 import { useForceUpdate } from '@mantine/hooks';
@@ -34,7 +34,9 @@ export interface IVinesInputPropertyProps {
   refresh?: boolean;
 }
 
-export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) => {
+const isVariableValue = (value: unknown) => isString(value) && /\$\{[\w.:_]+}|\$\.[\w.]+/g.test(value);
+
+export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = memo((props) => {
   const { def, nodeId, disabled } = props;
   const { onChange, value, ...childProps } = props;
   const [type, typeOptions, isMultipleValues, enableEditor, isPureCollection, isMultiFieldObject, assetType] =
@@ -45,8 +47,7 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
       const isMultiFieldObject = get(options, 'multiFieldObject', false);
       const enableEditor = get(options, 'editor', null) === 'code' || (type === 'json' && !isMultiFieldObject);
 
-      const isPureCollection =
-        (['string', 'boolean', 'number', 'file'].includes(type) && isMultipleValues) || type === 'file';
+      const isPureCollection = ['string', 'boolean', 'number', 'file'].includes(type) && isMultipleValues;
       const assetType = get(options, 'assetType', null);
 
       return [type, options, isMultipleValues, enableEditor, isPureCollection, isMultiFieldObject, assetType];
@@ -68,28 +69,6 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
     const hasNumber =
       isNumberType && (Array.isArray(value) ? value.every((it) => typeof it === 'number') : isNumber(value));
 
-    if (isPureCollection) {
-      const isFileType = type === 'file';
-
-      if (isNumberType && !hasNumber) {
-        setComponentMode('component');
-      } else if (isBooleanType && !hasBoolean) {
-        setComponentMode('component');
-      } else if (isFileType && isString(value) && /(https|http):\/\/[^\s/]+\.[^\s/]+\/\S+\.\w{2,5}/g.test(value)) {
-        setComponentMode('component');
-      } else {
-        const hasElement =
-          Array.isArray(value) &&
-          value
-            .filter((it) => typeof it === type)
-            .map((it) => it.toString())
-            .every((it) => !isEmpty(it));
-        if (hasElement) {
-          setComponentMode('component');
-        }
-      }
-    }
-
     return isBooleanType ? hasBoolean : isNumberType ? hasNumber : !isEmpty(value);
   }, [value, type, isPureCollection]);
 
@@ -99,7 +78,9 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
   const hasCollectionInput = useSimpleInput && isPureCollection && !useInputComponent;
   const hasStringInput =
     useSimpleInput &&
-    (useInputComponent ? isPureCollection || isManualComponentMode : type === 'string' && !hasCollectionInput);
+    (useInputComponent
+      ? isPureCollection || isManualComponentMode || type === 'file'
+      : type === 'string' && !hasCollectionInput);
   const hasBooleanInput = useSimpleInput && type === 'boolean' && (useInputComponent || !isPureCollection);
   const hasNumberInput = useSimpleInput && type === 'number' && (useInputComponent || !isPureCollection);
   const hasOptionsInput = useSimpleInput && type === 'options' && (useInputComponent || !isPureCollection);
@@ -133,7 +114,7 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
 
   const handleOnRadioChange = useCallback(
     (it: string) => {
-      void (!assetType && onChange?.(null));
+      void (!assetType && onChange?.(void 0));
       setTimeout(() => setComponentMode(it as 'component' | 'input'));
     },
     [assetType],
@@ -142,8 +123,8 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
   const finalProps = { ...childProps, onChange: handleOnChange, value: tempValue };
 
   useEffect(() => {
-    if (type !== 'file' && (!isPureCollection || !assetType) && typeof tempValue === 'string') {
-      if (/\$\{.*}/.test(tempValue) && (enableEditor ? tempValue.startsWith('$') && tempValue.endsWith('}') : true)) {
+    if ((!isPureCollection || !assetType) && isString(tempValue)) {
+      if (isVariableValue(tempValue) && (enableEditor ? tempValue.startsWith('$') : true)) {
         setIsManualComponentMode(true);
         setComponentMode('input');
       }
@@ -248,4 +229,6 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = (props) =>
       {hasNotice && <NoticeInput {...finalProps} />}
     </InputPropertyWrapper>
   );
-};
+});
+
+VinesInputProperty.displayName = 'VinesInputProperty';
