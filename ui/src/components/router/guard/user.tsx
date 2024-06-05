@@ -80,14 +80,13 @@ export const UserGuard: React.FC = () => {
         if (errorMessage === '请先登录') {
           toast.error('登录已过期，请重新登录');
         } else {
-          toast.error('接口数据异常！建议重新登录');
-          return;
+          toast.error('接口数据异常！请重新登录');
         }
-      }
 
-      localStorage.removeItem('vines-token');
-      localStorage.removeItem('vines-team-id');
-      void navigate({ to: '/login' });
+        localStorage.removeItem('vines-token');
+        localStorage.removeItem('vines-team-id');
+        void navigate({ to: '/login' });
+      }
     }
   }, [error]);
 
