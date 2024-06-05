@@ -61,7 +61,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
               onClick={() => setCurrentPage(page)}
             >
               <VinesIcon size="sm">{page.workflow?.iconUrl}</VinesIcon>
-              <div className="flex flex-col gap-0.5">
+              <div className="flex max-w-44 flex-col gap-0.5">
                 <h1 className="font-bold leading-tight">{page.workflow?.displayName ?? t('common.utils.untitled')}</h1>
                 <span className="text-xxs">{page.displayName}</span>
               </div>
