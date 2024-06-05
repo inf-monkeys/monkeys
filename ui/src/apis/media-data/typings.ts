@@ -2,7 +2,7 @@ import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { IVinesDataset } from '@/apis/dataset/typings.ts';
 
 export interface IMediaDataCategory {
-  _id: string;
+  id: string;
   teamId: string;
   userId: string;
   name: string;
@@ -28,7 +28,7 @@ export type IMediaDataOrDataset = IMediaData | IVinesDataset;
 export type IMediaDataType = 'image' | 'text' | 'dataset';
 
 export interface IMediaData {
-  _id: string;
+  id: string;
   type: IMediaDataType;
   md5?: string;
   size?: number;
