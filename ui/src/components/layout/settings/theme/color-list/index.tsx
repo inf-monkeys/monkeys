@@ -66,7 +66,7 @@ export const ThemeColorList: React.FC<IThemeColorListProps> = () => {
       <CardContent>
         <ScrollArea className="h-56">
           <div className="flex flex-col gap-4">
-            {finalData?.map(({ _id: id, primaryColor, name, updatedTimestamp }, i) => (
+            {finalData?.map(({ id, primaryColor, name, updatedTimestamp }, i) => (
               <div key={i} className="flex items-center gap-4 border-b border-b-input p-4 pt-0">
                 <div style={{ backgroundColor: primaryColor }} className="size-8 rounded-full" />
                 <div className="flex flex-col">

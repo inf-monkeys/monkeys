@@ -55,7 +55,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
       ? (BLOCK_CATEGORY_SORT_INDEX_LIST.map((c) => {
           if (c === 'all' || c === 'human' || !_.get(IAppCategoryNameMap, c)) return null;
           return {
-            _id: c,
+            id: c,
             name: _.get(IAppCategoryNameMap, c),
             type: 'block',
             createdTimestamp: 0,
@@ -81,7 +81,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
           categoryIds: [current],
         });
       } else if (assetFilterRules) {
-        const rule = assetFilterRules.find((r) => r.uuid === current);
+        const rule = assetFilterRules.find((r) => r.id === current);
         if (!rule) {
           toast.error(t('components.layout.ugc.view.filter.list.toast.filter-group-not-found'));
         } else {
@@ -130,10 +130,10 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                   key={index}
                   className={cn(
                     'group flex h-10 cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
-                    (current === rule.id || current === rule._id) &&
+                    (current === rule.id || current === rule.id) &&
                       'border border-input bg-background text-accent-foreground shadow-sm',
                   )}
-                  onClick={() => setCurrent(rule.id || rule._id)}
+                  onClick={() => setCurrent(rule.id || rule.id)}
                 >
                   <div className="flex w-full items-center justify-between px-4 text-xs">
                     <span>{rule.name}</span>
@@ -179,7 +179,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                                   loading: t('common.delete.loading'),
                                   success: () => {
                                     void mutateAssetFilterRules();
-                                    (current === rule._id || current === rule.id) && setCurrent('all');
+                                    (current === rule.id || current === rule.id) && setCurrent('all');
                                     return t('common.delete.success');
                                   },
                                   error: t('common.delete.error'),
