@@ -72,7 +72,15 @@ export class ComfyfileCronService {
         const subdirectories = await getGithubSubdirectories(config.comfyui.comfyfileRepo);
         const chunks = _.chunk(subdirectories, 10);
         for (const chunk of chunks) {
-          await Promise.all(chunk.map((subdirectory) => this.processSubdirectory(subdirectory)));
+          await Promise.all(
+            chunk.map(async (subdirectory) => {
+              try {
+                await this.processSubdirectory(subdirectory);
+              } catch (error) {
+                logger.error(`Error processing comfyfile ${subdirectory}`, error);
+              }
+            }),
+          );
         }
         logger.info('Comfyfile cronjob finished');
       } finally {
