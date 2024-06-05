@@ -38,7 +38,7 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) =
     if (currentSession) {
       setChatId(currentSession);
     } else {
-      setChatId('default');
+      setChatId('default-' + workflowId);
     }
     forceUpdate();
   }, [currentSession]);
