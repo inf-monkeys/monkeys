@@ -80,8 +80,9 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = memo((prop
   const hasStringInput =
     useSimpleInput &&
     (useInputComponent
-      ? isPureCollection || isManualComponentMode || type === 'file'
+      ? isPureCollection || isManualComponentMode || ['file', 'string'].includes(type)
       : type === 'string' && !hasCollectionInput);
+
   const hasBooleanInput = useSimpleInput && type === 'boolean' && (useInputComponent || !isPureCollection);
   const hasNumberInput = useSimpleInput && type === 'number' && (useInputComponent || !isPureCollection);
   const hasOptionsInput = useSimpleInput && type === 'options' && (useInputComponent || !isPureCollection);
