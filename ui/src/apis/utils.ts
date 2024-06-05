@@ -5,13 +5,15 @@ export interface IVinesHeaderOptions {
   useToast?: boolean;
 }
 
+export const getVinesToken = () => localStorage.getItem('vines-token');
+
 export const vinesHeader = ({ apikey, useToast = false }: IVinesHeaderOptions) => {
   const teamId = localStorage.getItem('vines-team-id');
   if (apikey) {
     return { 'X-Vines-Apikey': apikey, ...(teamId && { 'x-monkeys-teamid': teamId }) };
   }
 
-  const token = localStorage.getItem('vines-token');
+  const token = getVinesToken();
 
   if (!token) {
     if (useToast) {
