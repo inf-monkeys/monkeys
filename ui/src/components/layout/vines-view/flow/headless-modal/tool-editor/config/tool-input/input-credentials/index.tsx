@@ -47,7 +47,7 @@ export const VinesInputCredentials: React.FC<IVinesInputCredentialsProps> = memo
 
   useEffect(() => {
     if (credentialList?.length) {
-      if (credentialList?.find(({ id: _id }) => _id === value)) {
+      if (credentialList?.find(({ id }) => id === value)) {
         return;
       }
     }
