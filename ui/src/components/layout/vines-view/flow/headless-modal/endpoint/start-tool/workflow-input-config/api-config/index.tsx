@@ -52,6 +52,8 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
       return;
     }
 
+    vines.enableOpenAIInterface = data.exposeOpenaiCompatibleInterface;
+
     toast.promise(
       updateWorkflow(apikey, workflowId, workflowVersion, {
         version: workflowVersion,

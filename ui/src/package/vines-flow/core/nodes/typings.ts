@@ -19,7 +19,7 @@ export type VinesTask = (
 ) & { __alias?: NodeCustomData };
 
 export interface IVinesWorkflowUpdate {
-  workflow?: MonkeyWorkflow;
+  workflow?: Partial<MonkeyWorkflow>;
   workflowId?: string;
   version?: number;
   tasks?: MonkeyTaskDefTypes[];
