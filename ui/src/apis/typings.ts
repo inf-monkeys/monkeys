@@ -6,6 +6,7 @@ export interface IOriginData<T> extends Omit<IPaginationListData<T>, 'data'> {
 }
 
 export interface IBaseEntity {
+  id: string;
   uuid: string;
   createdTimestamp: number;
   updatedTimestamp: number;

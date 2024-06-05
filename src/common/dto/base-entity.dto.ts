@@ -2,13 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class BaseEntityDto {
   @ApiProperty({
-    description: 'ID',
-    type: String,
-    required: true,
-  })
-  _id: string;
-
-  @ApiProperty({
     description: '创建时间（时间戳）',
     type: Number,
     required: true,

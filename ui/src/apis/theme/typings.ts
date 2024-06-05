@@ -4,7 +4,7 @@ export interface ThemeCreate {
 }
 
 export interface Theme extends ThemeCreate {
-  _id: string;
+  id: string;
   teamId: string;
   createdTimestamp: number;
   updatedTimestamp: number;
@@ -13,7 +13,7 @@ export interface Theme extends ThemeCreate {
 }
 
 export interface ThemeMarket extends ThemeCreate {
-  _id: string;
+  id: string;
   createdTimestamp: number;
   updatedTimestamp: number;
   isDeleted: boolean;
