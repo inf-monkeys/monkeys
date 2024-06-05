@@ -53,6 +53,7 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = memo((prop
       return [type, options, isMultipleValues, enableEditor, isPureCollection, isMultiFieldObject, assetType];
     }, [def]);
 
+  const forceUpdate = useForceUpdate();
   const [componentMode, setComponentMode] = useState<'component' | 'input'>('component');
   const [isManualComponentMode, setIsManualComponentMode] = useState(false);
 
@@ -112,26 +113,32 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = memo((prop
     handleUpdateChange(value);
   };
 
-  const handleOnRadioChange = useCallback(
-    (it: string) => {
-      void (!assetType && onChange?.(void 0));
-      setTimeout(() => setComponentMode(it as 'component' | 'input'));
-    },
-    [assetType],
-  );
+  const handleOnRadioChange = (it: string) => {
+    if (!assetType) {
+      onChange?.(void 0);
+      setTempValue(void 0);
+    }
+
+    setTimeout(() => setComponentMode(it as 'component' | 'input'));
+  };
 
   const finalProps = { ...childProps, onChange: handleOnChange, value: tempValue };
 
   useEffect(() => {
     if ((!isPureCollection || !assetType) && isString(tempValue)) {
-      if (isVariableValue(tempValue) && (enableEditor ? tempValue.startsWith('$') : true)) {
-        setIsManualComponentMode(true);
-        setComponentMode('input');
+      if (isVariableValue(tempValue)) {
+        if (enableEditor) {
+          if (tempValue.startsWith('$')) {
+            setIsManualComponentMode(true);
+            setComponentMode('input');
+          }
+        } else {
+          setComponentMode('input');
+        }
       }
     }
   }, []);
 
-  const forceUpdate = useForceUpdate();
   const editorRef = useRef<IVinesEditorRefProps>({ insertText: () => {} });
 
   return (
