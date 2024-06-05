@@ -8,11 +8,11 @@ import { useForm } from 'react-hook-form';
 import { NoticeInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/notice.tsx';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
-import { Input } from '@/components/ui/input';
 import { TagInput } from '@/components/ui/input/tag';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesUpdater } from '@/components/ui/updater';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
@@ -134,7 +134,7 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                                 placeholder={`请输入${displayName}`}
                               />
                             ) : (
-                              <Input
+                              <Textarea
                                 placeholder={`请输入${displayName}`}
                                 value={(value as string) ?? ''}
                                 onChange={(value) => {
