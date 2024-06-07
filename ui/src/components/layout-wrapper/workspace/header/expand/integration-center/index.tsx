@@ -1,11 +1,8 @@
 import React, { useEffect } from 'react';
 
-import { Link } from '@tanstack/react-router';
-
 import { useClipboard } from '@mantine/hooks';
-import { Blocks, Copy } from 'lucide-react';
+import { Blocks } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 
 import { useApiKeyList } from '@/apis/api-keys/api-key.ts';
 import { IApiKeyStatus } from '@/apis/api-keys/typings.ts';
@@ -14,7 +11,6 @@ import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { VinesHighlighter } from '@/components/ui/highlighter';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/utils';
 
@@ -22,6 +18,8 @@ import { cn } from '@/utils';
 import ChatCompletionsTemplateZH from './templates/chat-completions.mdx';
 // @ts-ignore
 import CompletionsTemplateZH from './templates/completions.mdx';
+// @ts-ignore
+import ExecuteWorkflowTemplateZH from './templates/execute-workflow.mdx';
 
 interface IIntegrationCenterProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -41,15 +39,12 @@ export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
   const workflowId = workflow?.workflowId;
   const workflowInputs = workflow?.variables;
 
-  const [executionWorkflowCurl, setExecutionWorkflowCurl] = React.useState<string | null>(null);
-  const [createChatSessionCurl, setCreateChatSessionCurl] = React.useState<string | null>(null);
-  const [executionWorkflowWithChatSessionCurl, setExecutionWorkflowWithChatSessionCurl] = React.useState<string | null>(
-    null,
-  );
+  const [executeWorkflowSyncCurl, setExecuteWorkflowSyncCurl] = React.useState<string | null>(null);
+  const [executeWorkflowCurl, setExecuteWorkflowCurl] = React.useState<string | null>(null);
+  const [getExecutionStatusCurl, setGetExecutionStatusCurl] = React.useState<string | null>(null);
 
   useEffect(() => {
     const data: { [x: string]: any } = {
-      waitForWorkflowFinished: true,
       inputData: {},
     };
     if (workflowInputs?.length) {
@@ -59,10 +54,21 @@ export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
       }
     }
     if (workflowId && urlPrefix) {
-      const apikey = finalApikey ? finalApikey.apiKey : '$VINES_API_KEY';
-      setExecutionWorkflowCurl(
+      const apikey = finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY';
+      setExecuteWorkflowSyncCurl(
         curl({
-          method: 'post',
+          method: 'POST',
+          url: `${urlPrefix}/api/workflow/executions/${workflowId}/start-sync`,
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${apikey}`,
+          },
+          body: data,
+        }),
+      );
+      setExecuteWorkflowCurl(
+        curl({
+          method: 'POST',
           url: `${urlPrefix}/api/workflow/executions/${workflowId}/start`,
           headers: {
             'Content-Type': 'application/json',
@@ -71,29 +77,14 @@ export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
           body: data,
         }),
       );
-      setCreateChatSessionCurl(
+      setGetExecutionStatusCurl(
         curl({
-          method: 'post',
-          url: `${urlPrefix}/api/workflow/chat-sessions`,
+          method: 'GET',
+          url: `${urlPrefix}/api/workflow/executions/{workflowInstanceId}`,
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${apikey}`,
           },
-          body: {
-            workflowId,
-            displayName: t('workspace.wrapper.integration-center.content.new-chat-session'),
-          },
-        }),
-      );
-      setExecutionWorkflowWithChatSessionCurl(
-        curl({
-          method: 'post',
-          url: `${urlPrefix}/api/workflow/executions/${workflowId}/start`,
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${apikey}`,
-          },
-          body: { ...data, chatSessionId: '$CHAT_SESSION_ID' },
         }),
       );
     }
@@ -109,117 +100,42 @@ export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
           {t('workspace.wrapper.integration-center.title')}
         </Button>
       </DialogTrigger>
-      <DialogContent className={cn('max-h max-w-xl', enabledOpenAIInterface && 'max-w-7xl')}>
+      <DialogContent className={cn('max-h max-w-xl', 'max-w-7xl')}>
         <DialogTitle>{t('workspace.wrapper.integration-center.title')}</DialogTitle>
         <DialogDescription>{t('workspace.wrapper.integration-center.desc')}</DialogDescription>
-        {enabledOpenAIInterface ? (
-          <ScrollArea className="h-[calc(100vh-20rem)]">
-            <div className="prose max-w-full px-3 dark:prose-invert prose-p:leading-relaxed prose-pre:p-0">
-              {workflow?.variables?.find((variable) => variable.name === 'messages') ? (
-                <ChatCompletionsTemplateZH
-                  apiBaseUrl={apiBaseUrl}
-                  apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
-                  workflowId={workflowId}
-                />
-              ) : (
-                <CompletionsTemplateZH
-                  apiBaseUrl={apiBaseUrl}
-                  apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
-                  workflowId={workflowId}
-                />
-              )}
-            </div>
-          </ScrollArea>
-        ) : (
-          <div className="vines-center h-80 w-full flex-col gap-4">
-            {finalApikey ? (
-              <ScrollArea>
-                <div className="mb-4 flex w-full flex-col gap-2 rounded-md border border-input p-4">
-                  <header className="flex items-start justify-between">
-                    <div>
-                      <h1 className="font-semibold">
-                        {t('workspace.wrapper.integration-center.content.execution-workflow')}
-                      </h1>
-                      <span className="text-xs">
-                        {t('workspace.wrapper.integration-center.content.execution-workflow-desc')}
-                      </span>
-                    </div>
-                    <Button
-                      className="scale-80"
-                      variant="outline"
-                      size="small"
-                      icon={<Copy />}
-                      onClick={() => {
-                        clipboard.copy(executionWorkflowCurl);
-                        toast.success(t('common.utils.copy-success'));
-                      }}
-                    />
-                  </header>
-                  <div className="max-h-80 max-w-[30.8rem] overflow-auto rounded-md bg-muted p-2">
-                    <VinesHighlighter language="bash">{executionWorkflowCurl || ''}</VinesHighlighter>
-                  </div>
-                </div>
-                <div className="mb-4 flex w-full flex-col gap-2 rounded-md border border-input p-4">
-                  <header className="flex items-start justify-between">
-                    <div>
-                      <h1 className="font-semibold">
-                        {t('workspace.wrapper.integration-center.content.execution-workflow-from-session')}
-                      </h1>
-                      <span className="text-xs">
-                        {t('workspace.wrapper.integration-center.content.execution-workflow-from-session-desc')}
-                      </span>
-                    </div>
-                    <Button
-                      className="scale-80"
-                      variant="outline"
-                      size="small"
-                      icon={<Copy />}
-                      onClick={() => {
-                        clipboard.copy(executionWorkflowWithChatSessionCurl);
-                        toast.success(t('common.utils.copy-success'));
-                      }}
-                    />
-                  </header>
-                  <div className="max-h-80 max-w-[30.8rem] overflow-auto rounded-md bg-muted p-2">
-                    <VinesHighlighter language="bash">{executionWorkflowWithChatSessionCurl || ''}</VinesHighlighter>
-                  </div>
-                </div>
-                <div className="flex w-full flex-col gap-2 rounded-md border border-input p-4">
-                  <header className="flex items-start justify-between">
-                    <div>
-                      <h1 className="font-semibold">
-                        {t('workspace.wrapper.integration-center.content.create-session')}
-                      </h1>
-                      <span className="text-xs">
-                        {t('workspace.wrapper.integration-center.content.create-session-desc')}
-                      </span>
-                    </div>
-                    <Button
-                      className="scale-80"
-                      variant="outline"
-                      size="small"
-                      icon={<Copy />}
-                      onClick={() => {
-                        clipboard.copy(createChatSessionCurl);
-                        toast.success(t('common.utils.copy-success'));
-                      }}
-                    />
-                  </header>
-                  <div className="max-h-80 max-w-[30.8rem] overflow-auto rounded-md bg-muted p-2">
-                    <VinesHighlighter language="bash">{createChatSessionCurl || ''}</VinesHighlighter>
-                  </div>
-                </div>
-              </ScrollArea>
+        <ScrollArea className="h-[calc(100vh-20rem)]">
+          <div className="prose max-w-full px-3 dark:prose-invert prose-p:leading-relaxed prose-pre:p-0">
+            {enabledOpenAIInterface ? (
+              <>
+                {workflow?.variables?.find((variable) => variable.name === 'messages') ? (
+                  <ChatCompletionsTemplateZH
+                    apiBaseUrl={apiBaseUrl}
+                    apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
+                    workflowId={workflowId}
+                  />
+                ) : (
+                  <CompletionsTemplateZH
+                    apiBaseUrl={apiBaseUrl}
+                    apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
+                    workflowId={workflowId}
+                  />
+                )}
+              </>
             ) : (
               <>
-                <h1 className="font-bold">{t('workspace.wrapper.integration-center.empty-apikey')}</h1>
-                <Link to="/$teamId/settings" params={{ teamId }}>
-                  <Button variant="outline">{t('workspace.wrapper.integration-center.goto-config')}</Button>
-                </Link>
+                <ExecuteWorkflowTemplateZH
+                  apiBaseUrl={apiBaseUrl}
+                  apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
+                  workflowId={workflowId}
+                  workflowInputs={workflowInputs}
+                  curlSync={executeWorkflowSyncCurl}
+                  curl={executeWorkflowCurl}
+                  curlExecutionStatus={getExecutionStatusCurl}
+                />
               </>
             )}
           </div>
-        )}
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

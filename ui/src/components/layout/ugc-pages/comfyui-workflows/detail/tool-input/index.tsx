@@ -4,7 +4,7 @@ import { useDebouncedState } from '@mantine/hooks';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { autoGenerateComfyuiWorkflowToolInput, updateComfyuiWorkflowToolInput } from '@/apis/comfyui';
+import { autoGenerateComfyuiWorkflowToolInput, updateComfyuiWorkflow } from '@/apis/comfyui';
 import { IComfyuiWorkflow } from '@/apis/comfyui/typings';
 import { Button } from '@/components/ui/button';
 import { CodeEditor } from '@/components/ui/code-editor';
@@ -17,10 +17,11 @@ interface IComfyuiWofrkflowToolInputProps {
 export const ComfyuiWorkflowToolInput: React.FC<IComfyuiWofrkflowToolInputProps> = ({ data }) => {
   const { t } = useTranslation();
 
-  const { toolInput } = data;
+  const { toolInput, toolOutput } = data;
 
   const [updatedToolInput, setUpdatedToolInput] = useDebouncedState(JSON.stringify(toolInput || [], null, 4), 200);
-  const onSubmit = async () => {
+  const [updatedToolOutput, setUpdatedToolOutput] = useDebouncedState(JSON.stringify(toolOutput || [], null, 4), 200);
+  const onUpdateToolInput = async () => {
     let parsedToolInput;
     try {
       parsedToolInput = JSON.parse(updatedToolInput);
@@ -28,8 +29,24 @@ export const ComfyuiWorkflowToolInput: React.FC<IComfyuiWofrkflowToolInputProps>
       toast.error(t('ugc-page.comfyui-workflow.detail.tabs.toolsInput.toast.not-json'));
       return;
     }
-    await updateComfyuiWorkflowToolInput(data.id, parsedToolInput);
+    await updateComfyuiWorkflow(data.id, {
+      toolInput: parsedToolInput,
+    });
     toast.success(t('ugc-page.comfyui-workflow.detail.tabs.toolsInput.toast.save-success'));
+  };
+
+  const onUpdateToolOutput = async () => {
+    let parsedToolOutput;
+    try {
+      parsedToolOutput = JSON.parse(updatedToolOutput);
+    } catch {
+      toast.error(t('ugc-page.comfyui-workflow.detail.tabs.toolsOutput.toast.not-json'));
+      return;
+    }
+    await updateComfyuiWorkflow(data.id, {
+      toolOutput: parsedToolOutput,
+    });
+    toast.success(t('ugc-page.comfyui-workflow.detail.tabs.toolsOutput.toast.save-success'));
   };
 
   const onAutoGenerate = async () => {
@@ -50,7 +67,7 @@ export const ComfyuiWorkflowToolInput: React.FC<IComfyuiWofrkflowToolInputProps>
       <br></br>
       <CodeEditor data={updatedToolInput} height={400} lineNumbers={2} onUpdate={setUpdatedToolInput} />
       <br></br>
-      <Button type="submit" onClick={onSubmit}>
+      <Button type="submit" onClick={onUpdateToolInput}>
         {t('common.utils.save')}
       </Button>
       <Button
@@ -61,6 +78,16 @@ export const ComfyuiWorkflowToolInput: React.FC<IComfyuiWofrkflowToolInputProps>
         }}
       >
         {t('ugc-page.comfyui-workflow.detail.tabs.toolsInput.button.auto-generate')}
+      </Button>
+      <br></br>
+      <br></br>
+
+      <h1 className="text-xl font-bold">{t('ugc-page.comfyui-workflow.detail.tabs.toolsOutput.title')}</h1>
+      <br></br>
+      <CodeEditor data={updatedToolOutput} height={400} lineNumbers={2} onUpdate={setUpdatedToolOutput} />
+      <br></br>
+      <Button type="submit" onClick={onUpdateToolOutput}>
+        {t('common.utils.save')}
       </Button>
     </div>
   );

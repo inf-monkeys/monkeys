@@ -16,6 +16,11 @@ services:
       retries: 12
     logging:
       driver: 'json-file'
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: '8G'
 
   monkeys-redis:
     image: redis:6.2.3-alpine

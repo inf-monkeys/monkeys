@@ -2,8 +2,13 @@ import React, { useEffect, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { checkComfyuiDependencies, installComfyuiDependencies, useComfyuiServers } from '@/apis/comfyui';
-import { IComfyuiWorkflow, IComfyuiWorkflowDependencyUninstalledNode } from '@/apis/comfyui/typings';
+import { checkComfyuiDependencies, installComfyfile, useComfyuiServers } from '@/apis/comfyui';
+import {
+  ComfyuiWorkflowSourceType,
+  IComfyuiWorkflow,
+  IComfyuiWorkflowDependencyModel,
+  IComfyuiWorkflowDependencyNode,
+} from '@/apis/comfyui/typings';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -15,29 +20,31 @@ interface IComfyuiWofrkflowDependencyProps {
 
 export const ComfyuiWorkflowDependency: React.FC<IComfyuiWofrkflowDependencyProps> = ({ comfyuiWorkflow }) => {
   const { t } = useTranslation();
-  const { id } = comfyuiWorkflow;
+  const { id, workflowType } = comfyuiWorkflow;
   const { data: servers = [] } = useComfyuiServers();
 
   const [installButtonLoading, setInstallButtonLoading] = useState<boolean>(false);
   const [selectedServer, setSelectedServer] = useState<string | null>(null);
-  const [uninstalledNodes, setUninstalledNodes] = useState<IComfyuiWorkflowDependencyUninstalledNode[]>([]);
+  const [nodes, setNodes] = useState<IComfyuiWorkflowDependencyNode[]>([]);
+  const [models, setModels] = useState<IComfyuiWorkflowDependencyModel[]>([]);
   const getDependencies = async (server: string) => {
     const data = await checkComfyuiDependencies(id, server);
-    if (data?.uninstalled_nodes.length) {
-      setUninstalledNodes(data.uninstalled_nodes);
+    if (data?.nodes.length) {
+      setNodes(data.nodes);
+    }
+    if (data?.models.length) {
+      setModels(data.models);
     }
   };
 
-  const handleInstallDependencies = async () => {
+  const handleInstallWorkflow = async () => {
     if (!selectedServer) {
       toast.error('请选择服务器');
       return;
     }
     setInstallButtonLoading(true);
     try {
-      await installComfyuiDependencies(selectedServer, {
-        nodes: uninstalledNodes,
-      });
+      await installComfyfile(selectedServer, id);
     } finally {
       setInstallButtonLoading(false);
     }
@@ -51,22 +58,42 @@ export const ComfyuiWorkflowDependency: React.FC<IComfyuiWofrkflowDependencyProp
 
   return (
     <div>
-      <Select
-        onValueChange={(val) => {
-          setSelectedServer(val);
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
         }}
       >
-        <SelectTrigger className="w-80">
-          <SelectValue placeholder={t('ugc-page.comfyui-workflow.detail.tabs.dependency.select.placeholder')} />
-        </SelectTrigger>
-        <SelectContent>
-          {servers.map((server) => (
-            <SelectItem key={server.address} value={server.address}>
-              {server.description}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        <Select
+          onValueChange={(val) => {
+            setSelectedServer(val);
+          }}
+        >
+          <SelectTrigger className="w-80">
+            <SelectValue placeholder={t('ugc-page.comfyui-workflow.detail.tabs.dependency.select.placeholder')} />
+          </SelectTrigger>
+          <SelectContent>
+            {servers.map((server) => (
+              <SelectItem key={server.address} value={server.address}>
+                {server.description}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Button
+          variant="solid"
+          style={{
+            marginRight: '1rem',
+          }}
+          loading={installButtonLoading}
+          disabled={!selectedServer || workflowType !== ComfyuiWorkflowSourceType.Comfyfile}
+          onClick={handleInstallWorkflow}
+        >
+          一键安装依赖
+        </Button>
+      </div>
 
       {selectedServer && (
         <div>
@@ -80,16 +107,6 @@ export const ComfyuiWorkflowDependency: React.FC<IComfyuiWofrkflowDependencyProp
             }}
           >
             自定义节点{' '}
-            <Button
-              variant="solid"
-              style={{
-                marginRight: '1rem',
-              }}
-              loading={installButtonLoading}
-              onClick={handleInstallDependencies}
-            >
-              一键安装依赖
-            </Button>
           </h1>
           <br></br>
           <Table>
@@ -140,7 +157,7 @@ export const ComfyuiWorkflowDependency: React.FC<IComfyuiWofrkflowDependencyProp
               </TableRow>
             </TableHeader>
             <TableBody>
-              {uninstalledNodes?.map(({ stars, author, reference, title, description }, i) => (
+              {nodes?.map(({ stars, author, reference, title, description, installed }, i) => (
                 <TableRow key={i}>
                   <TableCell className="font-medium">{title}</TableCell>
                   <TableCell>{description}</TableCell>
@@ -156,7 +173,52 @@ export const ComfyuiWorkflowDependency: React.FC<IComfyuiWofrkflowDependencyProp
                   </TableCell>
                   <TableCell>{author}</TableCell>
                   <TableCell>{stars}</TableCell>
-                  <TableCell>未安装</TableCell>
+                  <TableCell>{installed === 'True' ? '已安装' : '未安装'}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
+      {selectedServer && (
+        <div>
+          <br></br>
+          <h1
+            className="text-xl font-bold"
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignContent: 'center',
+            }}
+          >
+            模型{' '}
+          </h1>
+          <br></br>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead
+                  style={{
+                    width: '150px',
+                  }}
+                >
+                  名称
+                </TableHead>
+                <TableHead
+                  style={{
+                    width: '100px',
+                  }}
+                >
+                  是否已安装
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {models?.map(({ name, installed }, i) => (
+                <TableRow key={i}>
+                  <TableCell className="font-medium">{name}</TableCell>
+                  <TableCell>{installed === 'True' ? '已安装' : '未安装'}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

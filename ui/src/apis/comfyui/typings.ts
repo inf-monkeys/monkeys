@@ -19,7 +19,8 @@ export interface IComfyuiServer {
 
 export enum ComfyuiWorkflowSourceType {
   Image = 'image',
-  WorkflowApiJson = 'workflow_api_json',
+  Json = 'json',
+  Comfyfile = 'comfyfile',
 }
 
 export interface IComfyuiWorkflow {
@@ -37,9 +38,10 @@ export interface IComfyuiWorkflow {
   prompt: { [x: string]: any };
   toolName: string;
   toolInput: BlockDefProperties[];
+  toolOutput: BlockDefProperties[];
 }
 
-export interface IComfyuiWorkflowDependencyUninstalledNode {
+export interface IComfyuiWorkflowDependencyNode {
   author: string;
   title: string;
   id: string;
@@ -49,9 +51,15 @@ export interface IComfyuiWorkflowDependencyUninstalledNode {
   description: string;
   stars: number;
   last_update: string;
-  installed: 'False';
+  installed: 'False' | 'True';
+}
+
+export interface IComfyuiWorkflowDependencyModel {
+  name: string;
+  installed: 'False' | 'True';
 }
 
 export interface IComfyuiWorkflowDependency {
-  uninstalled_nodes: IComfyuiWorkflowDependencyUninstalledNode[];
+  nodes: IComfyuiWorkflowDependencyNode[];
+  models: IComfyuiWorkflowDependencyModel[];
 }

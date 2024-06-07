@@ -1,14 +1,16 @@
-import { MdxCode } from "@/components/ui/markdown/mdx/code";
-import { MdxCurlHeader } from "@/components/ui/markdown/mdx/header";
-import { MdxRow } from "@/components/ui/markdown/mdx/row";
-import { MdxCol } from "@/components/ui/markdown/mdx/col";
-import { MdxProperties } from "@/components/ui/markdown/mdx/properties";
-import { MdxProperty } from "@/components/ui/markdown/mdx/property";
+import { MdxCode } from '@/components/ui/markdown/mdx/code';
+import { MdxCol } from '@/components/ui/markdown/mdx/col';
+import { MdxCurlHeader } from '@/components/ui/markdown/mdx/header';
+import { MdxProperties } from '@/components/ui/markdown/mdx/properties';
+import { MdxProperty } from '@/components/ui/markdown/mdx/property';
+import { MdxRow } from '@/components/ui/markdown/mdx/row';
 
 ## 文本补全 API
+
 此 API 适用于和大预言模型单轮对话。此 API 兼容 OpenAI 标准。
 
-### 基础 URL
+### Base URL
+
 <MdxCode language="bash">{props.apiBaseUrl}</MdxCode>
 
 ### 鉴权
@@ -64,12 +66,12 @@ import { MdxProperty } from "@/components/ui/markdown/mdx/property";
 
   </MdxCol>
   <MdxCol sticky>
-    ### 流式模式
+    ### CURL 示例
     <MdxCode language="bash">
       {`curl -X POST '${props.apiBaseUrl}/completions' \\\n--header 'Authorization: Bearer ${props.apiKey}' \\\n--header 'Content-Type: application/json' \\\n--data '{\n    "model": "${props.workflowId}",\n    "prompt": "Hello",\n    "stream": true\n}'`}
     </MdxCode>
 
-    ### 非流式模式
+    ### 非流式模式返回数据示例
     <MdxCode language="bash">
       {`{
       "id": "cmpl-e893a095e1374df7b621d52fbee18f7a",
@@ -93,7 +95,7 @@ import { MdxProperty } from "@/components/ui/markdown/mdx/property";
     }`}
     </MdxCode>
 
-    ### 流式模式（基础助手）
+    ### 流式模式返回数据示例
     <MdxCode language="bash">
       {`data: {"id":"cmpl-874cd75500a44afeba9f05eba1ee4ef0","created":1714295700,"model":"/root/.cache/LLM-Repo/model/c4ai-command-r-plus-GPTQ","choices":[{"index":0,"text":"","logprobs":null,"finish_reason":null,"stop_reason":null}],"usage":null}
 
@@ -128,6 +130,8 @@ data: {"id":"cmpl-874cd75500a44afeba9f05eba1ee4ef0","created":1714295700,"model"
 data: {"id":"cmpl-874cd75500a44afeba9f05eba1ee4ef0","created":1714295700,"model":"/root/.cache/LLM-Repo/model/c4ai-command-r-plus-GPTQ","choices":[{"index":0,"text":"e can do 1. run","logprobs":null,"finish_reason":"length","stop_reason":null}],"usage":{"prompt_tokens":2,"total_tokens":18,"completion_tokens":16}}
 
 data: [DONE]`}
-    </MdxCode>
+
+</MdxCode>
+
   </MdxCol>
 </MdxRow>

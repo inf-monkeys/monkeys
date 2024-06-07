@@ -1,0 +1,123 @@
+import { MdxCode } from '@/components/ui/markdown/mdx/code';
+import { MdxCol } from '@/components/ui/markdown/mdx/col';
+import { MdxCurlHeader } from '@/components/ui/markdown/mdx/header';
+import { MdxProperties } from '@/components/ui/markdown/mdx/properties';
+import { MdxProperty } from '@/components/ui/markdown/mdx/property';
+import { MdxRow } from '@/components/ui/markdown/mdx/row';
+
+## 工作流执行 API
+
+### Base URL
+
+<MdxCode language="bash">{props.apiBaseUrl}</MdxCode>
+
+### 鉴权
+
+此 API 使用 `API-Key` 进行鉴权。
+
+<i>**强烈建议开发者把 `API-Key` 放在后端存储，而非分享或者放在客户端存储，以免 `API-Key` 泄露，导致财产损失。**</i>
+所有 API 请求都应在 **`Authorization`** HTTP Header 中包含您的 `API-Key`，如下所示：
+
+<MdxCode language="bash">{`Authorization: Bearer {YOUR_MONKEYS_APIKEY}`}</MdxCode>
+
+---
+
+<MdxCurlHeader
+  url={`/workflow/executions/${props.workflowId}/start-sync`}
+  method='POST'
+  title='同步执行接口'
+  name='#Workflow-Execute-Sync'
+/>
+<MdxRow>
+  <MdxCol>
+    同步方式执行工作流，工作流执行成功或失败时接口返回。
+
+    ### Request Body
+
+    <MdxProperties>
+      {
+        props.workflowInputs.map((input, index) => (
+          <MdxProperty key={index} name={input.name} type={input.type} key={input.name}>
+            {input.description || `默认值: ${input.default}`}
+          </MdxProperty>
+        ))
+      }
+    </MdxProperties>
+
+  </MdxCol>
+  <MdxCol sticky>
+
+    ### CURL 示例
+    <MdxCode language="bash">
+      {`${props.curlSync}`}
+    </MdxCode>
+
+  </MdxCol>
+</MdxRow>
+
+---
+
+<MdxCurlHeader
+  url={`/workflow/executions/${props.workflowId}/start`}
+  method="POST"
+  title="异步执行接口"
+  name="#Workflow-Execute"
+/>
+
+<MdxRow>
+  <MdxCol>
+    异步方式执行工作流，会立刻返回工作流执行实例 ID，你可以根据实例 ID 查询工作流执行状态。
+
+    ### Request Body
+
+    <MdxProperties>
+      {
+        props.workflowInputs.map((input, index) => (
+          <MdxProperty key={index} name={input.name} type={input.type} key={input.name}>
+            {input.description || `默认值: ${input.default}`}
+          </MdxProperty>
+        ))
+      }
+    </MdxProperties>
+
+    ### Response
+    <MdxProperties>
+      <MdxProperty name='workflowInstanceId' type='string' key='workflowInstanceId'>
+        工作流执行 ID，可根据此 ID 查询工作流执行状态。
+      </MdxProperty>
+
+    </MdxProperties>
+
+  </MdxCol>
+  <MdxCol sticky>
+
+    ### CURL 示例
+    <MdxCode language="bash">
+      {`${props.curl}`}
+    </MdxCode>
+
+  </MdxCol>
+</MdxRow>
+
+---
+
+<MdxCurlHeader
+  url={`/workflow/executions/{workflowInstanceId}`}
+  method="GET"
+  title="或者工作流执行状态"
+  name="#Workflow-Status"
+/>
+
+<MdxRow>
+  <MdxCol>
+    通过工作流执行 ID 查询工作流执行状态。
+  </MdxCol>
+  <MdxCol sticky>
+
+    ### CURL 示例
+    <MdxCode language="bash">
+      {`${props.curlExecutionStatus}`}
+    </MdxCode>
+
+  </MdxCol>
+</MdxRow>

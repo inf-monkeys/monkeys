@@ -5,6 +5,7 @@ import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigg
 import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SearchWorkflowExecutionsDto } from './dto/req/search-workflow-execution.dto';
+import { StartWorkflowSyncDto } from './dto/req/start-workflow-sync.dto';
 import { StartWorkflowDto } from './dto/req/start-workflow.dto';
 import { WorkflowExecutionService } from './workflow.execution.service';
 
@@ -38,6 +39,26 @@ export class WorkflowExecutionController {
     return new SuccessResponse({
       data: result,
     });
+  }
+
+  @Post('/executions/:workflowId/start-sync')
+  @ApiOperation({
+    summary: '运行 workflow',
+    description: '运行 workflow',
+  })
+  public async startWorkflowSync(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Body() body: StartWorkflowSyncDto) {
+    const { teamId, userId } = req;
+    const { inputData, version } = body;
+    const workflowInstanceId = await this.service.startWorkflow({
+      teamId,
+      userId,
+      workflowId,
+      inputData,
+      version,
+      triggerType: WorkflowTriggerType.MANUALLY,
+    });
+    const result = await this.service.waitForWorkflowResult(teamId, workflowInstanceId);
+    return result;
   }
 
   @Post('/executions/:workflowId/start')

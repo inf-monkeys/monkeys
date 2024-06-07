@@ -818,6 +818,17 @@
               "auto-generate": "重新生成"
             }
           },
+          "toolsOutput": {
+            "label": "工具输出配置",
+            "toast": {
+              "save-success": "保存成功",
+              "not-json": "工具表单配置必须为 JSON"
+            },
+            "title": "工具输出配置",
+            "button": {
+              "auto-generate": "重新生成"
+            }
+          },
           "dependency": {
             "label": "工作流依赖",
             "select": {
@@ -1396,71 +1407,53 @@
         }
       }
     },
-
     "wrapper": {
-      "workflow-info-card":  {
+      "workflow-info-card": {
         "title": "工作流信息",
         "tip": "点击编辑",
-
         "default-workflow-name": "未命名应用",
-
         "form": {
           "workflow-name": "工作流名称",
           "workflow-name-placeholder": "请输入工作流名称",
-
           "workflow-desc": "工作流描述",
           "workflow-desc-placeholder": "请输入工作流描述，不超过 200 字",
-
           "workflow-icon": "工作流图标",
-
           "submit": "保存"
         },
-
         "workflow-id-empty": "工作流 ID 不存在",
         "workflow-updated": "工作流信息已更新",
         "workflow-update-failed": "工作流信息更新失败"
       },
-
       "integration-center": {
         "title": "集成中心",
         "desc": "你可以通过 API 与其他应用集成，以实现更多功能",
-
         "content": {
           "new-chat-session": "新的会话",
           "execution-workflow": "直接运行工作流",
           "execution-workflow-desc": "只需要关注核心参数",
-
           "execution-workflow-from-session": "在特定会话中运行工作流",
           "execution-workflow-from-session-desc": "除了核心参数外，需额外传入 SessionId，并可通过 SessionId 区分会话人，适用于多轮对话获取历史记录等场景",
-
           "create-session": "创建新的会话",
           "create-session-desc": "创建会话并得到特定的 SessionId"
         },
-
         "empty-apikey": "暂无 APIKEY，请先到「配置中心」创建",
         "goto-config": "前往配置中心"
       },
-
       "user": {
         "user-center": "个人中心",
         "logout": "退出登录"
       },
-
       "space": {
         "unknown-view": "未知视图",
-
         "add-tab": "新建视图",
-
         "menu": {
           "del-view-button": "删除视图",
           "del-view": "确定要删除「{{ view }}」吗？",
-
           "pin": "{{ status }}标星",
           "toggle-pin": "正在{{ status }}标星中...",
           "pin-un": "取消",
           "toggle-pin-success": "{{ status }}标星成功",
           "toggle-pin-failed": "{{ status }}标星失败",
-
           "rename": {
             "trigger": "重命名",
             "title": "重命名视图",
@@ -1471,7 +1464,6 @@
         }
       }
     },
-
     "flow-view": {
       "headless-modal": {
         "context-menu": {

@@ -1,5 +1,3 @@
-import { stringify } from '@/utils/fast-stable-stringify.ts';
-
 interface CurlOptions {
   url: string;
   method: string;
@@ -13,16 +11,18 @@ export function curl({ url, method, headers, body }: CurlOptions): string {
   // 添加头部
   if (headers) {
     Object.keys(headers).forEach((header) => {
-      curl += ` -H '${header}: ${headers![header]}' \\\n`;
+      curl += `   --header '${header}: ${headers![header]}' \\\n`;
     });
   }
 
   // 添加数据
   if (body) {
     if (typeof body === 'object') {
-      body = stringify(body);
+      body = JSON.stringify(body, null, 4);
     }
-    curl += ` -d '${body}'\n`;
+    curl += `   --data '${body}'\n`;
+  } else {
+    curl = curl.slice(0, curl.length - 2) + '\n';
   }
 
   return curl;

@@ -39,7 +39,7 @@ Monkeys Consists of the following key components:
   ```bash
   docker pull infmonkeys/conductor:1.0.0
 
-  docker run --name conductor -p 8080:8080 -d infmonkeys/conductor:1.0.0
+  docker run -d --name conductor -p 8080:8080 -d infmonkeys/conductor:1.0.0
   ```
 
   You can verify whether conductor running corrctly by use the following command:

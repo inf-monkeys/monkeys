@@ -43,8 +43,14 @@ export class ComfyUIService {
     await this.comfyuiWorkflowRepository.deleteComfyuiWorkflow(id);
   }
 
-  public async updateComfyuiWorkflowToolInput(id: string, toolInput: BlockDefProperties[]) {
-    await this.comfyuiWorkflowRepository.updateComfyuiWorkflowToolInput(id, toolInput);
+  public async updateComfyuiWorkflowToolInput(
+    id: string,
+    updates: {
+      toolInput?: BlockDefProperties[];
+      toolOutput?: BlockDefProperties[];
+    },
+  ) {
+    await this.comfyuiWorkflowRepository.updateComfyuiWorkflow(id, updates);
   }
 
   private inferInput(node: ComfyuiNode, key: string, value: any): BlockDefProperties {
@@ -218,7 +224,9 @@ export class ComfyUIService {
     const comfyuiWorkflow = await this.getComfyuiWorkflowById(workflowId);
     const { workflow, prompt } = comfyuiWorkflow;
     const toolInput = await this.generateToolInputByComfyuiWorkflow({ workflow, prompt });
-    await this.updateComfyuiWorkflowToolInput(workflowId, toolInput);
+    await this.updateComfyuiWorkflowToolInput(workflowId, {
+      toolInput,
+    });
     return toolInput;
   }
 
@@ -264,33 +272,13 @@ export class ComfyUIService {
     return await this.comfyuiWorkflowRepository.deleteComfyuiServer(teamId, address);
   }
 
-  private convertToComfyuiInputData(originalData: { [x: string]: any }, toolInput: BlockDefProperties[]) {
-    const result: { [x: string]: { [x: string]: any } } = {};
-    for (const key in originalData) {
-      const inputItem = toolInput.find((item) => item.name === key);
-      if (!inputItem) {
-        continue;
-      }
-      const comfyOptions = inputItem.typeOptions?.comfyOptions;
-      if (!comfyOptions) {
-        continue;
-      }
-      const { node: nodeId, key: comfyKey } = comfyOptions;
-      if (!result[nodeId]) {
-        result[nodeId] = {};
-      }
-      result[nodeId][comfyKey] = originalData[key];
-    }
-    return result;
-  }
-
   public async runComfyuiWorkflow(serverAddress: string, worfklowId: string, inputData: { [x: string]: any }) {
     const comfyuiWorkflow = await this.comfyuiWorkflowRepository.getComfyuiWorkflowById(worfklowId);
     if (!comfyuiWorkflow) {
       throw new Error(`Comfyui workflow not found: ${worfklowId}`);
     }
     const toolInput = comfyuiWorkflow.toolInput;
-    const comfyuiInputData = this.convertToComfyuiInputData(inputData, toolInput);
+    const toolOutput = comfyuiWorkflow.toolOutput;
     const { data } = await axios({
       method: 'POST',
       url: '/comfyfile/run',
@@ -298,8 +286,10 @@ export class ComfyUIService {
       data: {
         workflow_api_json: comfyuiWorkflow.prompt,
         workflow_json: comfyuiWorkflow.workflow,
-        input_data: comfyuiInputData,
+        input_data: inputData,
         comfyfile_repo: comfyuiWorkflow.originalData?.comfyfileRepo,
+        input_config: toolInput,
+        output_config: toolOutput,
       },
     });
     return data;
@@ -310,17 +300,13 @@ export class ComfyUIService {
     if (!workflow) {
       throw new Error(`Comfyui workflow not found: ${id}`);
     }
-    const workflowJson = workflow.workflow;
-    if (!workflowJson) {
-      throw new Error(`Comfyui workflow json not found: ${id}`);
-    }
     const { data } = await axios({
       method: 'POST',
       url: '/comfyfile/check-dependencies',
       baseURL: serverAddress,
       data: {
-        workflow: workflowJson,
-        comfyfile_repo: workflow.originalData?.comfyfileRepo,
+        workflow_json: workflow.workflow,
+        workflow_api_json: workflow.prompt,
       },
     });
     return data;
@@ -382,5 +368,21 @@ export class ComfyUIService {
       logger.info(`Successfully installed nodes: ${succeededNodes.map((x) => x.title).join(',')}, rebooting ComfyUI server...`);
       await this.rebootComfyuiServer(serverAddress);
     }
+  }
+
+  public async installComfyfile(serverAddress: string, workflowId: string) {
+    const comfyuiWorkflow = await this.getComfyuiWorkflowById(workflowId);
+    if (!comfyuiWorkflow) {
+      throw new Error(`Comfyui workflow not found: ${workflowId}`);
+    }
+    const { data } = await axios({
+      method: 'POST',
+      url: '/comfyfile/apps',
+      baseURL: serverAddress,
+      data: {
+        comfyfile_repo: comfyuiWorkflow.originalData?.comfyfileRepo,
+      },
+    });
+    return data;
   }
 }
