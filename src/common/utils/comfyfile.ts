@@ -24,7 +24,8 @@ export interface ComfyfileApp {
   workflowApi: ComfyuiPrompt;
   tags: string[];
   restEndpoint: {
-    parameters: BlockDefProperties[];
+    parameters?: BlockDefProperties[];
+    output?: BlockDefProperties[];
   };
 }
 

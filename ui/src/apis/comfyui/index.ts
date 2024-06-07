@@ -5,7 +5,7 @@ import {
   IComfyuiServer,
   IComfyuiWorkflow,
   IComfyuiWorkflowDependency,
-  IComfyuiWorkflowDependencyUninstalledNode,
+  IComfyuiWorkflowDependencyNode,
 } from '@/apis/comfyui/typings.ts';
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { BlockDefProperties } from '@inf-monkeys/vines';
@@ -24,10 +24,13 @@ export const useComfyuiModels = () => useSWR<IComfyuiModel | undefined>('/api/co
 export const importComfyuiWorkflow = (params: ImportComfyuiWorkflowParams) =>
   vinesFetcher({ method: 'POST', simple: true })(`/api/comfyui/workflows`, params);
 
-export const updateComfyuiWorkflowToolInput = (id: string, toolInput: BlockDefProperties[]) =>
-  vinesFetcher({ method: 'PUT', simple: true })(`/api/comfyui/workflows/${id}`, {
-    toolInput,
-  });
+export const updateComfyuiWorkflow = (
+  id: string,
+  data: {
+    toolInput?: BlockDefProperties[];
+    toolOutput?: BlockDefProperties[];
+  },
+) => vinesFetcher({ method: 'PUT', simple: true })(`/api/comfyui/workflows/${id}`, data);
 
 export const autoGenerateComfyuiWorkflowToolInput = (id: string) =>
   vinesFetcher({ method: 'POST', simple: true })(`/api/comfyui/workflows/${id}/gene-input`, {});
@@ -44,11 +47,16 @@ export const checkComfyuiDependencies = (id: string, serverAddress: string) =>
 
 export const installComfyuiDependencies = (
   serverAddress: string,
-  dependencies: { nodes: IComfyuiWorkflowDependencyUninstalledNode[] },
+  dependencies: { nodes: IComfyuiWorkflowDependencyNode[] },
 ) =>
   vinesFetcher({ method: 'POST', simple: true })(`/api/comfyui/dependencies`, {
     serverAddress,
     dependencies,
+  });
+
+export const installComfyfile = (serverAddress: string, workflowId: string) =>
+  vinesFetcher({ method: 'POST', simple: true })(`/api/comfyui/workflows/${workflowId}/install`, {
+    serverAddress,
   });
 
 export const deleteComfyuiWorkflow = (id: string) => vinesFetcher({ method: 'DELETE' })(`/api/comfyui/workflows/${id}`);

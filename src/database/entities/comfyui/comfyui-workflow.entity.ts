@@ -57,6 +57,12 @@ export class ComfyuiWorkflowEntity extends BaseAssetEntity {
   toolInput: BlockDefProperties[];
 
   @Column({
+    name: 'tool_output',
+    type: 'simple-json',
+  })
+  toolOutput: BlockDefProperties[];
+
+  @Column({
     name: 'additional_model_list',
     type: 'simple-json',
     nullable: true,

@@ -56,9 +56,18 @@ export class ComfyuiWorkflowController {
     @Body()
     body: {
       toolInput: BlockDefProperties[];
+      toolOutput: BlockDefProperties[];
     },
   ) {
-    const data = await this.comfyuiService.updateComfyuiWorkflowToolInput(id, body.toolInput);
+    const data = await this.comfyuiService.updateComfyuiWorkflowToolInput(id, body);
+    return new SuccessResponse({
+      data,
+    });
+  }
+
+  @Post('/:id/install')
+  public async installComfyfile(@Req() req: IRequest, @Param('id') id: string, @Body('serverAddress') serverAddress: string) {
+    const data = await this.comfyuiService.installComfyfile(serverAddress, id);
     return new SuccessResponse({
       data,
     });

@@ -825,6 +825,17 @@
               "auto-generate": "Regenerate"
             }
           },
+          "toolsOutput": {
+            "label": "Tools Output Settings",
+            "toast": {
+              "save-success": "Save successfully!",
+              "not-json": "Tools input form must be JSON"
+            },
+            "title": "Tools output form",
+            "button": {
+              "auto-generate": "Regenerate"
+            }
+          },
           "dependency": {
             "label": "Dependency",
             "select": {
@@ -1401,56 +1412,42 @@
         }
       }
     },
-
     "wrapper": {
-      "workflow-info-card":  {
+      "workflow-info-card": {
         "title": "Workflow Information",
         "tip": "Click to edit",
-
         "default-workflow-name": "Unnamed workflow",
-
         "form": {
           "workflow-name": "Workflow name",
           "workflow-name-placeholder": "Please enter a workflow name",
-
           "workflow-desc": "Workflow description",
           "workflow-desc-placeholder": "Please enter a description of the workflow in no more than 200 characters.",
-
           "workflow-icon": "Workflow Icons",
-
           "submit": "Submit"
         },
-
         "workflow-id-empty": "Workflow ID does not exist",
         "workflow-updated": "Workflow information has been updated",
         "workflow-update-failed": "Workflow information update failure"
       },
-
       "integration-center": {
         "title": "Integration Centre",
         "desc": "You can integrate with other apps through APIs for more functionality",
-
         "content": {
           "new-chat-session": "New session",
           "execution-workflow": "Run the workflow directly",
           "execution-workflow-desc": "Just focus on the core parameters",
-
           "execution-workflow-from-session": "Running a workflow in a specific session",
           "execution-workflow-from-session-desc": "In addition to the core parameters, you need to pass in the SessionId, and can distinguish the session person by SessionId, which is suitable for multiple rounds of dialogue to get the history and other scenarios.",
-
           "create-session": "Creating a new session",
           "create-session-desc": "Create a session and get a specific SessionId."
         },
-
         "empty-apikey": "APIKEY is empty, please go to 'Configuration Centre' to create one.",
         "goto-config": "Go to Configuration Centre"
       },
-
       "user": {
         "user-center": "Personal",
         "logout": "Log out"
       },
-
       "space": {
         "unknown-view": "Unknown view",
         "add-tab": "New View",
@@ -1472,7 +1469,6 @@
         }
       }
     },
-
     "flow-view": {
       "headless-modal": {
         "context-menu": {

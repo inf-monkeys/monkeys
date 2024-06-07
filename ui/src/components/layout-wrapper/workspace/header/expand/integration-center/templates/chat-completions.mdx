@@ -1,18 +1,20 @@
-import { MdxCode } from "@/components/ui/markdown/mdx/code";
-import { MdxCurlHeader } from "@/components/ui/markdown/mdx/header";
-import { MdxRow } from "@/components/ui/markdown/mdx/row";
-import { MdxCol } from "@/components/ui/markdown/mdx/col";
-import { MdxProperties } from "@/components/ui/markdown/mdx/properties";
-import { MdxProperty } from "@/components/ui/markdown/mdx/property";
+import { MdxCode } from '@/components/ui/markdown/mdx/code';
+import { MdxCol } from '@/components/ui/markdown/mdx/col';
+import { MdxCurlHeader } from '@/components/ui/markdown/mdx/header';
+import { MdxProperties } from '@/components/ui/markdown/mdx/properties';
+import { MdxProperty } from '@/components/ui/markdown/mdx/property';
+import { MdxRow } from '@/components/ui/markdown/mdx/row';
 
 ## 对话 API
 
 此接口支持会话持久化，可将之前的聊天记录作为上下进行回答，可适用于聊天/客服/知识库问答 AI 等。此 API 兼容 OpenAI 标准。
 
-### 基础 URL
+### Base URL
+
 <MdxCode language="bash">{props.apiBaseUrl}</MdxCode>
 
 ### 鉴权
+
 此 API 使用 `API-Key` 进行鉴权。
 
 <i>**强烈建议开发者把 `API-Key` 放在后端存储，而非分享或者放在客户端存储，以免 `API-Key` 泄露，导致财产损失。**</i>
@@ -60,15 +62,16 @@ import { MdxProperty } from "@/components/ui/markdown/mdx/property";
     当 `stream` 为 `true` 时，返回 OpenAI 标准的流式数据。
     当 `stream` 为 `false`时，返回 OpenAI 标准的响应数据。
     </MdxProperties>
+
   </MdxCol>
   <MdxCol sticky>
 
-    ### 流式模式
+    ### CURL 示例
     <MdxCode language="bash">
       {`curl -X POST '${props.apiBaseUrl}/chat/completions' \\\n--header 'Authorization: Bearer ${props.apiKey}' \\\n--header 'Content-Type: application/json' \\\n--data '{\n    "model": "${props.workflowId}",\n    "messages": [{"role": "user", "content": "Hello"}],\n    "stream": true,\n    "show_logs": true\n}'`}
     </MdxCode>
 
-    ### 非流式模式
+    ### 非流式模式返回结果示例
     <MdxCode language="bash">
       {`{
       "id": "chatcmpl-9HqxYuHyifu1YVxUA55v5D5ejRaJK",
@@ -95,7 +98,7 @@ import { MdxProperty } from "@/components/ui/markdown/mdx/property";
     }`}
     </MdxCode>
 
-    ### 流式模式（基础助手）
+    ### 流式模式返回结果示例
     <MdxCode language="bash">
       {`data: {"id":"chatcmpl-bogm8zejn37","object":"chat.completion.chunk","created":1714042298,"model":"gpt-4-0613","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"Hello"},"logprobs":null,"finish_reason":null}]}
 
@@ -116,6 +119,8 @@ data: {"id":"chatcmpl-bogm8zejn37","object":"chat.completion.chunk","created":17
 data: {"id":"chatcmpl-bogm8zejn37","object":"chat.completion.chunk","created":1714042299,"model":"gpt-4-0613","system_fingerprint":null,"choices":[{"index":0,"delta":{"content":"?"},"logprobs":null,"finish_reason":null}]}
 
 data: [DONE]`}
-    </MdxCode>
+
+</MdxCode>
+
   </MdxCol>
 </MdxRow>

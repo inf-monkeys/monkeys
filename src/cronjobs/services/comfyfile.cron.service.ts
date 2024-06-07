@@ -37,6 +37,7 @@ export class ComfyfileCronService {
       workflow: app.workflow,
       prompt: app.workflowApi,
       toolInput: app.restEndpoint?.parameters || [],
+      toolOutput: app.restEndpoint?.output || [],
       originalData: {
         homepage: app.homepage,
         comfyfileRepo: `${config.comfyui.comfyfileRepo}/${subdirectory}`,

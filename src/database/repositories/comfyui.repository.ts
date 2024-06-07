@@ -5,6 +5,7 @@ import { CreateComfyuiServerDto } from '@/modules/tools/comfyui/dto/req/create-c
 import { BlockDefProperties } from '@inf-monkeys/vines';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import _ from 'lodash';
 import { IsNull, Repository } from 'typeorm';
 import { ComfyuiServerEntity, ComfyuiServerStatus } from '../entities/comfyui/comfyui-server.entity';
 import { ComfyuiWorkflowEntity, ComfyuiWorkflowSourceType } from '../entities/comfyui/comfyui-workflow.entity';
@@ -49,15 +50,25 @@ export class ComfyuiRepository {
     );
   }
 
-  public async updateComfyuiWorkflowToolInput(id: string, toolInput: BlockDefProperties[]) {
+  public async updateComfyuiWorkflow(
+    id: string,
+    updates: {
+      toolInput?: BlockDefProperties[];
+      toolOutput?: BlockDefProperties[];
+    },
+  ) {
     await this.comfyuiWorkflowRepository.update(
       {
         id,
       },
-      {
-        updatedTimestamp: +new Date(),
-        toolInput,
-      },
+      _.omitBy(
+        {
+          toolInput: updates.toolInput,
+          toolOutput: updates.toolOutput,
+          updatedTimestamp: +new Date(),
+        },
+        _.isNil,
+      ),
     );
   }
 
