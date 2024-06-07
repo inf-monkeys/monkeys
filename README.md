@@ -22,7 +22,7 @@ Monkeys Consists of the following key components:
 
 - Monkeys Server: The main entrypoint
 - [Conductor](https://github.com/inf-monkeys/conductor): A microservices orchestration engine.
-- Tools: HTTP Service exposes stanard RESTFul API that meet Monkeys standards, can be writen in any languages, deployed anywhere.
+- Tools: HTTP Service exposes standard RESTFul API that meet Monkeys standards, can be writen in any languages, deployed anywhere.
 
 ![](./docs/images/architecture.png)
 
