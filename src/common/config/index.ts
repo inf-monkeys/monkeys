@@ -178,6 +178,11 @@ export interface ProxyConfig {
   exclude?: string[];
 }
 
+export interface PaymentServerConfig {
+  enabled: boolean;
+  baseUrl: string;
+}
+
 export interface Config {
   server: ServerConfig;
   conductor: ConductorConfig;
@@ -191,6 +196,7 @@ export interface Config {
   models: LlmModelConfig[];
   proxy: ProxyConfig;
   llm: LLmConfig;
+  paymentServer: PaymentServerConfig;
 }
 
 const port = readConfig('server.port', 3000);
@@ -297,6 +303,10 @@ export const config: Config = {
   },
   llm: {
     toolResultMaxLength: readConfig('llm.tools.maxReultLength', 4096),
+  },
+  paymentServer: {
+    enabled: readConfig('paymentServer.enabled', false),
+    baseUrl: readConfig('paymentServer.baseUrl'),
   },
 };
 
