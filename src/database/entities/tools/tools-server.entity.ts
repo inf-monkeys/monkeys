@@ -1,4 +1,4 @@
-import { ApiType, AuthConfig, CredentialEndpointConfig, SchemaVersion, ToolRateLimiterConfig, TriggerEndpointConfig } from '@/common/typings/tools';
+import { ApiType, AuthConfig, SchemaVersion, ToolRateLimiterConfig, TriggerEndpointConfig } from '@/common/typings/tools';
 import { Column, Entity } from 'typeorm';
 import url from 'url';
 import { BaseEntity } from '../base/base';
@@ -77,13 +77,6 @@ export class ToolsServerEntity extends BaseEntity {
 
   @Column({
     type: 'simple-json',
-    name: 'credential_endpoints',
-    nullable: true,
-  })
-  credentialEndpoints: CredentialEndpointConfig[];
-
-  @Column({
-    type: 'simple-json',
     name: 'rate_limiter',
     nullable: true,
   })
@@ -106,6 +99,14 @@ export class ToolsServerEntity extends BaseEntity {
     nullable: true,
   })
   logEndpoint?: string;
+
+  @Column({
+    name: 'ras_public_key',
+    nullable: true,
+    type: 'varchar',
+    length: 4096,
+  })
+  rasPublicKey?: string;
 
   public getSpecUrl() {
     const {

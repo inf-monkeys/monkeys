@@ -23,4 +23,10 @@ export class ToolsCredentialEntity extends BaseEntity {
 
   @Column()
   type: string;
+
+  @Column({
+    name: 'encrypted_data',
+    type: 'text',
+  })
+  encryptedData: string;
 }

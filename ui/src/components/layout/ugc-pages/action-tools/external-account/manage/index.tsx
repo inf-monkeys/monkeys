@@ -55,7 +55,6 @@ export const ExternalAccountManage: React.FC<IExternalAccountManageProps> = ({ d
               <TableHead className="sticky left-0 bg-background">
                 {t('ugc-page.action-tools.ugc-view.subtitle.external-account.manage.columns.name')}
               </TableHead>
-              {rows?.map(({ name, displayName }, i) => <TableHead key={i}>{displayName ?? name}</TableHead>)}
               <TableHead className="sticky right-0 bg-background">
                 {t('ugc-page.action-tools.ugc-view.subtitle.external-account.manage.columns.operate')}
               </TableHead>
@@ -67,11 +66,6 @@ export const ExternalAccountManage: React.FC<IExternalAccountManageProps> = ({ d
                 <TableCell className="sticky left-0 w-full min-w-24 max-w-64 break-words bg-background">
                   {displayName}
                 </TableCell>
-                {rows?.map(({ name, default: propDef }, j) => (
-                  <TableCell key={j} className="w-full min-w-32 max-w-64 break-words">
-                    {/* {data[name] ?? propDef} */}
-                  </TableCell>
-                ))}
                 <TableCell className="sticky right-0 w-full min-w-16 max-w-64 bg-background">
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
