@@ -52,9 +52,11 @@ export class ToolsRepository {
     entity.baseUrl = baseUrl;
     entity.displayName = displayName;
     entity.triggerEndpoints = data.triggerEndpoints;
-    entity.credentialEndpoints = data.credentialEndpoints;
     entity.rateLimiter = data.rateLimiter;
     entity.heatlhCheck = data.healthCheck;
+    if (data.rsaPublicKey) {
+      entity.rasPublicKey = data.rsaPublicKey.trim();
+    }
     entity.logEndpoint = data.logEndpoint;
     await this.toolsServerRepository.save(entity);
   }

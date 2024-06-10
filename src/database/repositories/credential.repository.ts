@@ -17,7 +17,7 @@ export class CredentialsRepository {
 
   public async createOrUpdateCredentialTypes(namespace: string, latestCredentials: CredentialDefinition[]) {
     latestCredentials = latestCredentials.map((x) => {
-      x.name = `${namespace}__${x.name}`;
+      x.name = `${namespace}:${x.name}`;
       return x;
     });
     const latestCredentialNames = latestCredentials.map((x) => x.name);
@@ -109,10 +109,12 @@ export class CredentialsRepository {
     return list;
   }
 
-  public async getCredentialById(credentialId: string) {
+  public async getCredentialById(teamId: string, credentialId: string) {
     const entity = await this.toolsCredentialRepository.findOne({
       where: {
+        teamId,
         id: credentialId,
+        isDeleted: false,
       },
     });
     return entity;
@@ -157,7 +159,7 @@ export class CredentialsRepository {
     await this.toolsCredentialRepository.save(data);
   }
 
-  public async updateCredential(teamId: string, id: string, displayName: string) {
+  public async updateCredential(teamId: string, id: string, displayName: string, encryptedData: string) {
     const credential = await this.toolsCredentialRepository.findOne({
       where: {
         id,
@@ -166,11 +168,16 @@ export class CredentialsRepository {
       },
     });
     if (!credential) {
-      throw new Error(`密钥 ${id} 不存在`);
+      throw new Error(`Credential ${id} not exists`);
     }
-    const updates: DeepPartial<ToolsCredentialEntity> = {};
+    const updates: DeepPartial<ToolsCredentialEntity> = {
+      updatedTimestamp: +new Date(),
+    };
     if (displayName) {
       updates.displayName = displayName;
+    }
+    if (encryptedData) {
+      updates.encryptedData = encryptedData;
     }
     await this.toolsCredentialRepository.update(
       {
@@ -180,6 +187,6 @@ export class CredentialsRepository {
       },
       updates,
     );
-    return await this.getCredentialById(id);
+    return await this.getCredentialById(teamId, id);
   }
 }

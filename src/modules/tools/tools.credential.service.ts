@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
-import { CredentialEndpointType } from '@/common/typings/tools';
 import { generateDbId } from '@/common/utils';
+import { encryptWithPublicKey } from '@/common/utils/rsa';
 import { ToolsCredentialEntity } from '@/database/entities/tools/tools-credential.entity';
 import { ToolsRepository } from '@/database/repositories/tools.repository';
 import { CredentialsRepository } from '../../database/repositories/credential.repository';
@@ -14,21 +14,6 @@ export class ToolsCredentialsService {
     private readonly toolsRepository: ToolsRepository,
     private readonly toolsForwardService: ToolsForwardService,
   ) {}
-
-  private async getCredentialActionEndpint(toolNamespace: string, type: CredentialEndpointType) {
-    const toolServer = await this.toolsRepository.getServerByNamespace(toolNamespace);
-    if (!toolServer) {
-      throw new Error(`INTERNAL SERVER ERROR: tool server ${toolNamespace} not exists`);
-    }
-    if (!toolServer.credentialEndpoints) {
-      throw new Error(`INTERNAL SERVER ERROR: tool server ${toolNamespace} credentialEndpoints is missing`);
-    }
-    const credentialEndpoint = toolServer.credentialEndpoints.find((x) => x.type === type);
-    if (!credentialEndpoint) {
-      throw new Error(`INTERNAL SERVER ERROR: tool server ${toolNamespace} credentialEndpoint of ${type} is missing`);
-    }
-    return credentialEndpoint;
-  }
 
   public async getCredentialType(name: string) {
     return this.credentialsRepository.getCredentialType(name);
@@ -47,8 +32,21 @@ export class ToolsCredentialsService {
   }
 
   public async updateCredential(teamId: string, id: string, displayName: string, data: { [x: string]: any }) {
-    // Save credential in monkeys (**NOT INCLUDE DATA**)
-    return await this.credentialsRepository.updateCredential(teamId, id, displayName);
+    const credential = await this.credentialsRepository.getCredentialById(teamId, id);
+    if (!credential) {
+      throw new Error(`Credential ${id} not found`);
+    }
+    const toolNamespace = credential.type.split(':')[0];
+    const namespace = await this.toolsRepository.getServerByNamespace(toolNamespace);
+    if (!namespace) {
+      throw new Error(`Namespace ${toolNamespace} Not found`);
+    }
+    const rasPublicKey = namespace.rasPublicKey;
+    if (!rasPublicKey) {
+      throw new Error(`RSA public key for configured for namespace ${toolNamespace}`);
+    }
+    const encryptedData = encryptWithPublicKey(JSON.stringify(data), rasPublicKey);
+    return await this.credentialsRepository.updateCredential(teamId, id, displayName, encryptedData);
   }
 
   public async deleteCredential(teamId: string, id: string) {
@@ -57,24 +55,17 @@ export class ToolsCredentialsService {
 
   public async createCredentail(teamId: string, creatorUserId: string, displayName: string, type: string, data: { [x: string]: any }) {
     // Save credential in monkeys (**NOT INCLUDE DATA**)
-    const toolNamespace = type.split('__')[0];
-    const { method, url } = await this.getCredentialActionEndpint(toolNamespace, CredentialEndpointType.create);
+    const toolNamespace = type.split(':')[0];
+    const namespace = await this.toolsRepository.getServerByNamespace(toolNamespace);
+    if (!namespace) {
+      throw new Error(`Namespace ${toolNamespace} Not found`);
+    }
+    const rasPublicKey = namespace.rasPublicKey;
+    if (!rasPublicKey) {
+      throw new Error(`RSA public key for configured for namespace ${toolNamespace}`);
+    }
     const credentialId = generateDbId();
 
-    await this.toolsForwardService.request(toolNamespace, {
-      method,
-      url,
-      data: {
-        context: {
-          credentialId,
-          creatorUserId,
-          teamId,
-        },
-        type: type.split('__')[1],
-        displayName,
-        data,
-      },
-    });
     const entity: Partial<ToolsCredentialEntity> = {
       teamId,
       creatorUserId,
@@ -82,6 +73,7 @@ export class ToolsCredentialsService {
       id: credentialId,
       type,
       isDeleted: false,
+      encryptedData: encryptWithPublicKey(JSON.stringify(data), rasPublicKey),
     };
     return await this.credentialsRepository.createCredentail(entity);
   }
@@ -90,8 +82,8 @@ export class ToolsCredentialsService {
     return await this.credentialsRepository.listCredentials(teamId, credentialType);
   }
 
-  public async getCredentialById(credentialId: string) {
-    const entity = await this.credentialsRepository.getCredentialById(credentialId);
+  public async getCredentialById(teamId: string, credentialId: string) {
+    const entity = await this.credentialsRepository.getCredentialById(teamId, credentialId);
     return entity;
   }
 
