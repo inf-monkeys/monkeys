@@ -127,7 +127,7 @@ export class ToolsPollingService {
       logger.warn(`Check balance failed: ${error.message}`);
     }
     if (!success) {
-      throw new Error(message);
+      logger.warn(`Team ${context.teamId} balance is not enough: ${message}, but still execute tool ${toolName} for now`);
     }
   }
 

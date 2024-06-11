@@ -472,8 +472,6 @@ export class VinesCore extends VinesTools(VinesBase) {
 
   // region RUNNER
   public usedOpenAIInterface() {
-    const multipleChat = !!this.workflowInput.find((variable) => variable.name === 'messages');
-    console.log('multipleChat', multipleChat);
     return {
       enable: this.enableOpenAIInterface,
       multipleChat: !!this.workflowInput.find((variable) => variable.name === 'messages'),
