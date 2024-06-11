@@ -16,8 +16,6 @@ import url from 'url';
 import {
   ApiType,
   AuthType,
-  CredentialEndpointConfig,
-  CredentialEndpointType,
   ManifestJson,
   RegisterToolOptions,
   RegisterToolParams,
@@ -85,7 +83,9 @@ export class ToolsRegistryService {
       this.validateTriggerEndpoints(data.triggerEndpoints);
     }
     if (data.credentials?.length) {
-      this.validateCredentialEndpoints(data.credentialEndpoints);
+      if (!data.rsaPublicKey) {
+        throw new Error('Error import tool: rsaPublicKey is missing when credentials is not empty');
+      }
     }
     if (data.logEndpoint) {
       if (!data.logEndpoint.includes('{taskId}')) {
@@ -110,26 +110,6 @@ export class ToolsRegistryService {
       }
       if (!method) {
         throw new Error(`Error import tool: triggerEndpoint ${type} method is missing`);
-      }
-    }
-  }
-
-  private validateCredentialEndpoints(credentialEndpoints: CredentialEndpointConfig[]) {
-    if (!Array.isArray(credentialEndpoints)) {
-      throw new Error('Error import tool: credentialEndpoints is missing');
-    }
-    const types: CredentialEndpointType[] = [CredentialEndpointType.create, CredentialEndpointType.delete, CredentialEndpointType.update];
-    for (const type of types) {
-      const config = credentialEndpoints.find((x) => x.type === type);
-      if (!config) {
-        throw new Error(`Error import tool: credentialEndpoint ${type} is missing`);
-      }
-      const { url, method } = config;
-      if (!url) {
-        throw new Error(`Error import tool: credentialEndpoint ${type} url is missing`);
-      }
-      if (!method) {
-        throw new Error(`Error import tool: credentialEndpoint ${type} method is missing`);
       }
     }
   }

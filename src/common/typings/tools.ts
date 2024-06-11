@@ -83,8 +83,8 @@ export interface ManifestJson {
   healthCheck?: string;
   triggerEndpoints?: TriggerEndpointConfig[];
   triggers?: TriggerDefinition[];
-  credentialEndpoints?: CredentialEndpointConfig[];
   credentials?: CredentialDefinition[];
+  rsaPublicKey?: string;
   rateLimiter?: ToolRateLimiterConfig;
   logEndpoint?: string;
 }
@@ -135,6 +135,12 @@ export interface WorkerInputData {
   __advancedConfig: {
     outputAs?: 'json' | 'stream';
     timeout?: number;
+  };
+
+  credential?: {
+    id: string;
+    type: string;
+    encryptedData: string;
   };
 
   [x: string]: any;

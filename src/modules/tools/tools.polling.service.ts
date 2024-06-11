@@ -8,6 +8,7 @@ import { readIncomingMessage } from '@/common/utils/stream';
 import { sleep } from '@/common/utils/utils';
 import { API_NAMESPACE } from '@/database/entities/tools/tools-server.entity';
 import { ToolsEntity } from '@/database/entities/tools/tools.entity';
+import { CredentialsRepository } from '@/database/repositories/credential.repository';
 import { Task, TaskDef, TaskManager } from '@inf-monkeys/conductor-javascript';
 import { Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
@@ -29,6 +30,7 @@ export class ToolsPollingService {
   constructor(
     private readonly toolsRepository: ToolsRepository,
     private readonly toolsRegistryService: ToolsRegistryService,
+    private readonly credentialsRepository: CredentialsRepository,
     @Inject(CACHE_TOKEN) private readonly cache: CacheManager,
     @Inject(MQ_TOKEN) private readonly mq: Mq,
   ) {}
@@ -168,7 +170,7 @@ export class ToolsPollingService {
 
   private async monkeyToolHandler(task: Task) {
     const inputData = task.inputData as WorkerInputData;
-    const { __toolName, __context, ...rest } = inputData;
+    const { __toolName, __context, credential, ...rest } = inputData;
 
     logger.info(`Start to execute tool: ${__toolName}`);
 
@@ -225,6 +227,21 @@ export class ToolsPollingService {
         status: 'FAILED',
       };
     }
+
+    if (credential?.id) {
+      const credentialRecord = await this.credentialsRepository.getCredentialById(__context.teamId, credential.id);
+      if (!credentialRecord) {
+        return {
+          outputData: {
+            success: false,
+            errMsg: `Failed to execute tool "${__toolName}", credential ${credential.id} not found`,
+          },
+          status: 'FAILED',
+        };
+      }
+      credential.encryptedData = credentialRecord?.encryptedData;
+    }
+
     const llmChatTool = this.isLlmChatTool(__toolName);
     const outputAs = this.getToolOutputAsConfig(tool, inputData);
 
@@ -339,7 +356,10 @@ export class ToolsPollingService {
         method,
         baseURL,
         url: this.replaceUrlParams(url, rest || {}),
-        data: rest,
+        data: {
+          ...(rest || {}),
+          credential,
+        },
         headers: headers,
         responseType,
       });

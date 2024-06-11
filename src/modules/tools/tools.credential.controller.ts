@@ -72,7 +72,8 @@ export class ToolsCredentialsController {
     description: '获取密钥详情',
   })
   public async getCredential(@Req() req: IRequest, @Param('credentialId') credentialId: string) {
-    const result = await this.service.getCredentialById(credentialId);
+    const { teamId } = req;
+    const result = await this.service.getCredentialById(teamId, credentialId);
     return new SuccessResponse({
       data: result,
     });
