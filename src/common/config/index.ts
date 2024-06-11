@@ -360,6 +360,7 @@ if (config.proxy.enabled) {
   exclude.push('127.0.0.1');
   // Exclude condcutor from proxy
   exclude.push(getHostFromUrl(config.conductor.baseUrl));
+  exclude.push(getHostFromUrl(config.paymentServer.baseUrl));
   // Exlcude tools from proxy
   config.tools
     .filter((tool) => !tool.useProxy)
