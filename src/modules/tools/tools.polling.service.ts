@@ -16,6 +16,7 @@ import { IncomingMessage } from 'http';
 import os from 'os';
 import { AuthType, WorkerInputData } from '../../common/typings/tools';
 import { ToolsRepository } from '../../database/repositories/tools.repository';
+import { IContext } from './interfaces';
 import { LLM_CHAT_COMPLETION_TOOL, LLM_COMPLETION_TOOL, LLM_NAMESPACE } from './llm/llm.controller';
 import { ToolsRegistryService } from './tools.registry.service';
 
@@ -70,6 +71,103 @@ export class ToolsPollingService {
     return outputAs;
   }
 
+  private getTokenCount(requestData: any, outputData: any): number {
+    if (outputData?.total_tokens?.total_tokens) {
+      return outputData.total_tokens.total_tokens;
+    }
+
+    if (outputData?.choices?.length) {
+      if (outputData.choices[0].message) {
+        const { messages } = requestData;
+        const resultStrLength = outputData.choices[0].message?.content?.length;
+        const tokenCounts = messages
+          .map((message) => message?.content.length)
+          .concat([resultStrLength])
+          .filter(Boolean);
+        return tokenCounts.reduce((acc, cur) => acc + cur, 0);
+      } else if (outputData.choices[0].text) {
+        const resultStrLength = outputData.choices[0].text?.length;
+        const { prompt } = requestData;
+        const tokenCounts = [prompt?.length, resultStrLength].filter(Boolean);
+        return tokenCounts.reduce((acc, cur) => acc + cur, 0);
+      }
+    }
+
+    return 0;
+  }
+
+  private async checkBalance(toolName: string, context: IContext) {
+    const { enabled, baseUrl } = config.paymentServer;
+    if (!enabled || !baseUrl) {
+      return;
+    }
+    const api = '/payment/check-balance';
+    let success: boolean;
+    let message: string;
+    try {
+      const { data } = await axios<{ success: boolean; message: string }>({
+        method: 'POST',
+        url: api,
+        baseURL: baseUrl,
+        headers: {
+          'x-monkeys-appid': context.appId,
+          'x-monkeys-userid': context.userId,
+          'x-monkeys-teamid': context.teamId,
+          'x-monkeys-workflow-taskid': context.taskId,
+          'x-monkeys-workflow-instanceid': context.workflowInstanceId,
+          'x-monkeys-workflow-id': context.workflowId,
+        },
+        data: {
+          toolName,
+        },
+      });
+      success = data.success;
+      message = data.message;
+    } catch (error) {
+      logger.warn(`Check balance failed: ${error.message}`);
+    }
+    if (!success) {
+      logger.warn(`Team ${context.teamId} balance is not enough: ${message}, but still execute tool ${toolName} for now`);
+    }
+  }
+
+  private async reportUsage(
+    toolName: string,
+    context: IContext,
+    usage: {
+      success: boolean;
+      takes: number;
+      tokenCount: number;
+    },
+  ) {
+    const { enabled, baseUrl } = config.paymentServer;
+    if (!enabled || !baseUrl) {
+      return;
+    }
+    const api = '/payment/report-usage';
+    try {
+      await axios<{ success: boolean; message: string }>({
+        method: 'POST',
+        url: api,
+        baseURL: baseUrl,
+        headers: {
+          'x-monkeys-appid': context.appId,
+          'x-monkeys-userid': context.userId,
+          'x-monkeys-teamid': context.teamId,
+          'x-monkeys-workflow-taskid': context.taskId,
+          'x-monkeys-workflow-instanceid': context.workflowInstanceId,
+          'x-monkeys-workflow-id': context.workflowId,
+        },
+        data: {
+          toolName,
+          usage,
+        },
+      });
+    } catch (error) {
+      logger.warn(`Report usage failed: ${error.message}`);
+    }
+  }
+
   private async monkeyToolHandler(task: Task) {
     const inputData = task.inputData as WorkerInputData;
     const { __toolName, __context, credential, ...rest } = inputData;
@@ -118,6 +216,7 @@ export class ToolsPollingService {
         status: 'FAILED',
       };
     }
+
     const apiInfo = tool.extra?.apiInfo;
     if (!apiInfo) {
       return {
@@ -239,7 +338,19 @@ export class ToolsPollingService {
       }
     }
 
+    const startTimestamp = +new Date();
+    let tokenCount = 0;
+    let outputData: any = {};
+    let success: boolean;
     try {
+      // Check balance
+      await this.checkBalance(__toolName, {
+        ...__context,
+        taskId: task.taskId,
+        workflowInstanceId: task.workflowInstanceId,
+        workflowId: task.workflowType,
+      });
+
       const responseType = outputAs === 'json' ? 'json' : 'stream';
       const res = await axios({
         method,
@@ -252,9 +363,10 @@ export class ToolsPollingService {
         headers: headers,
         responseType,
       });
+      success = true;
       if (responseType === 'json') {
         logger.info(`Execute worker success: ${__toolName}`);
-        const outputData = res.data;
+        outputData = res.data;
         // 判断 outputData 是不是一个对象，否则报错
         if (typeof outputData !== 'object') {
           logger.warn(`Output data of tool ${__toolName} is not an object: `, outputData);
@@ -294,7 +406,7 @@ export class ToolsPollingService {
           },
         });
         logger.info(`Execute worker success: ${__toolName}`);
-        let outputData: { [x: string]: any } = {
+        outputData = {
           stream: true,
           message: 'This tool outputs stream data, can not displayed',
         };
@@ -368,6 +480,23 @@ export class ToolsPollingService {
         }
       }
     } finally {
+      const endTimestamp = +new Date();
+      tokenCount = this.getTokenCount(rest, outputData);
+      await this.reportUsage(
+        __toolName,
+        {
+          ...__context,
+          taskId: task.taskId,
+          workflowInstanceId: task.workflowInstanceId,
+          workflowId: task.workflowType,
+        },
+        {
+          success,
+          takes: endTimestamp - startTimestamp,
+          tokenCount: tokenCount,
+        },
+      );
+
       if (server?.rateLimiter) {
         const { maxConcurrentRequests } = server.rateLimiter;
         if (maxConcurrentRequests) {
