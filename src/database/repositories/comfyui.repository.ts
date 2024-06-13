@@ -55,6 +55,8 @@ export class ComfyuiRepository {
     updates: {
       toolInput?: BlockDefProperties[];
       toolOutput?: BlockDefProperties[];
+      workflow?: ComfyuiWorkflow;
+      workflowApi?: ComfyuiPrompt;
     },
   ) {
     await this.comfyuiWorkflowRepository.update(
@@ -65,6 +67,8 @@ export class ComfyuiRepository {
         {
           toolInput: updates.toolInput,
           toolOutput: updates.toolOutput,
+          workflow: updates.workflow,
+          prompt: updates.workflowApi,
           updatedTimestamp: +new Date(),
         },
         _.isNil,

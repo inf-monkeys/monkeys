@@ -29,6 +29,8 @@ export const updateComfyuiWorkflow = (
   data: {
     toolInput?: BlockDefProperties[];
     toolOutput?: BlockDefProperties[];
+    workflow?: any;
+    workflowApi?: any;
   },
 ) => vinesFetcher({ method: 'PUT', simple: true })(`/api/comfyui/workflows/${id}`, data);
 
