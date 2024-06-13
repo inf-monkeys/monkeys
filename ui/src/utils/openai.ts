@@ -1,9 +1,9 @@
 import type { ParsedEvent, ReconnectInterval } from 'eventsource-parser';
 import { createParser } from 'eventsource-parser';
 
-import '@/utils/polyfills/readable-stream-async-iterator-polyfill.ts';
 import { JSONValue } from '@/package/vines-flow/core/tools/typings.ts';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
+import '@/utils/polyfills/readable-stream-async-iterator-polyfill.ts';
 
 export const parseOpenAIStream = (rawResponse: Response, multipleChat = true) => {
   const encoder = new TextEncoder();
@@ -25,10 +25,9 @@ export const parseOpenAIStream = (rawResponse: Response, multipleChat = true) =>
             return;
           }
           try {
+            console.log('On chat message: ', data);
             const json = JSON.parse(data);
-
             const text = (multipleChat ? json?.choices?.[0]?.delta?.content : json?.choices?.[0]?.text) || '';
-
             const streamObject = json?.object ?? 'chat.completion.chunk';
             let msgType: 'text' | 'tool' = 'text';
             let msgContent: JSONValue = '';
@@ -40,6 +39,10 @@ export const parseOpenAIStream = (rawResponse: Response, multipleChat = true) =>
               case 'chat.completion.log':
                 msgType = 'tool';
                 msgContent = json?.data ?? {};
+                break;
+              case 'text_completion':
+                msgType = 'text';
+                msgContent = text;
                 break;
             }
 
