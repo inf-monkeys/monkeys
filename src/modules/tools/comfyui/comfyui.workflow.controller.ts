@@ -1,6 +1,7 @@
 import { ListDto } from '@/common/dto/list.dto';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessListResponse, SuccessResponse } from '@/common/response';
+import { ComfyuiPrompt, ComfyuiWorkflow } from '@/common/typings/comfyui';
 import { IRequest } from '@/common/typings/request';
 import { BlockDefProperties } from '@inf-monkeys/vines';
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
@@ -57,9 +58,11 @@ export class ComfyuiWorkflowController {
     body: {
       toolInput: BlockDefProperties[];
       toolOutput: BlockDefProperties[];
+      workflow: ComfyuiWorkflow;
+      workflowApi: ComfyuiPrompt;
     },
   ) {
-    const data = await this.comfyuiService.updateComfyuiWorkflowToolInput(id, body);
+    const data = await this.comfyuiService.updateComfyuiWorkflow(id, body);
     return new SuccessResponse({
       data,
     });

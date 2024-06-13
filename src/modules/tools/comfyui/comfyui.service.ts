@@ -1,6 +1,6 @@
 import { ListDto } from '@/common/dto/list.dto';
 import { logger } from '@/common/logger';
-import { ComfyuiNode, ComfyuiPrompt, ComfyuiWorkflowWithPrompt } from '@/common/typings/comfyui';
+import { ComfyuiNode, ComfyuiPrompt, ComfyuiWorkflow, ComfyuiWorkflowWithPrompt } from '@/common/typings/comfyui';
 import { readComfyuiWorkflowFromImage, readComfyuiWorkflowFromJsonFile, readComfyuiWorkflowPromptFromJsonFile } from '@/common/utils/comfyui';
 import { ComfyuiWorkflowSourceType } from '@/database/entities/comfyui/comfyui-workflow.entity';
 import { ComfyuiRepository } from '@/database/repositories/comfyui.repository';
@@ -43,11 +43,13 @@ export class ComfyUIService {
     await this.comfyuiWorkflowRepository.deleteComfyuiWorkflow(id);
   }
 
-  public async updateComfyuiWorkflowToolInput(
+  public async updateComfyuiWorkflow(
     id: string,
     updates: {
       toolInput?: BlockDefProperties[];
       toolOutput?: BlockDefProperties[];
+      workflow?: ComfyuiWorkflow;
+      workflowApi?: ComfyuiPrompt;
     },
   ) {
     await this.comfyuiWorkflowRepository.updateComfyuiWorkflow(id, updates);
@@ -224,7 +226,7 @@ export class ComfyUIService {
     const comfyuiWorkflow = await this.getComfyuiWorkflowById(workflowId);
     const { workflow, prompt } = comfyuiWorkflow;
     const toolInput = await this.generateToolInputByComfyuiWorkflow({ workflow, prompt });
-    await this.updateComfyuiWorkflowToolInput(workflowId, {
+    await this.updateComfyuiWorkflow(workflowId, {
       toolInput,
     });
     return toolInput;
