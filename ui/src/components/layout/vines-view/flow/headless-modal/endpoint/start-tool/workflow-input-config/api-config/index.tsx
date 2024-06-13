@@ -24,7 +24,7 @@ interface IWorkflowApiConfigProps {}
 export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
   const { isLatestWorkflowVersion, workflowId } = useFlowStore();
   const { vines } = useVinesFlow();
-  const { workflow, apikey } = useVinesPage();
+  const { workflow } = useVinesPage();
 
   const rateLimiter: IVinesWorkflowRateLimiter | undefined = workflow?.rateLimiter;
   const exposeOpenaiCompatibleInterface = workflow?.exposeOpenaiCompatibleInterface;
@@ -55,7 +55,7 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
     vines.enableOpenAIInterface = data.exposeOpenaiCompatibleInterface;
 
     toast.promise(
-      updateWorkflow(apikey, workflowId, workflowVersion, {
+      updateWorkflow(workflowId, workflowVersion, {
         version: workflowVersion,
         ...data,
       } as Partial<MonkeyWorkflow>),

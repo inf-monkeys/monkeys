@@ -33,10 +33,10 @@ export const executionWorkflowWithDebug = (
     version,
   });
 
-export const useWorkflowExecution = (instanceId: string, apikey?: string) =>
+export const useWorkflowExecution = (instanceId: string) =>
   useSWR<VinesWorkflowExecution | undefined>(
     instanceId ? `/api/workflow/executions/${instanceId}` : null,
-    vinesFetcher({ apikey }),
+    vinesFetcher(),
   );
 
 export const getWorkflowExecution = (instanceId: string) =>
