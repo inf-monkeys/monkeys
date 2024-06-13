@@ -13,7 +13,7 @@ import VinesEvent from '@/utils/events.ts';
 export const WorkspacePage: React.FC = () => {
   const navigate = useNavigate();
 
-  const { workflow, pages, page, pageId, teamId, setApikey, setPage } = useVinesPage();
+  const { workflow, pages, page, pageId, teamId, setPage } = useVinesPage();
 
   const { pageTitle } = usePageStore();
 
