@@ -5,14 +5,14 @@ import { IRequest } from '@/common/typings/request';
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
 import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Body, Controller, Inject, Post, Req, Res, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { TOOL_STREAM_RESPONSE_TOPIC } from '../tools/tools.polling.service';
 import { WorkflowExecutionService } from '../workflow/workflow.execution.service';
 import { CreateChatCompletionsDto } from './dto/req/create-chat-compltion.dto';
 import { CreateCompletionsDto } from './dto/req/create-compltion.dto';
 
-@Controller('/')
+@Controller('/v1')
 @ApiTags('Chat')
 @UseGuards(CompatibleAuthGuard)
 export class WorkflowOpenAICompatibleController {
@@ -23,6 +23,10 @@ export class WorkflowOpenAICompatibleController {
   ) {}
 
   @Post('/completions')
+  @ApiOperation({
+    summary: 'Create completions',
+    description: 'Create completions',
+  })
   public async createcCompletions(@Req() req: IRequest, @Body() body: CreateCompletionsDto, @Res() res: Response) {
     const { teamId, userId } = req;
     const { model: workflowId, stream = false } = body;
@@ -53,6 +57,10 @@ export class WorkflowOpenAICompatibleController {
   }
 
   @Post('/chat/completions')
+  @ApiOperation({
+    summary: 'Create chat completions',
+    description: 'Create chat completions',
+  })
   public async createChatComplitions(@Req() req: IRequest, @Body() body: CreateChatCompletionsDto, @Res() res: Response) {
     const { teamId, userId } = req;
     const { model: workflowId, stream = false } = body;
