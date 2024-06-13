@@ -7,10 +7,11 @@ import { PasswordModule } from './modules/auth/password/password.module';
 import { PhoneModule } from './modules/auth/phone/phone.module';
 import { TeamsModule } from './modules/auth/teams/teams.module';
 import { UsersModule } from './modules/auth/users/users.module';
+import { ChatModule } from './modules/chat/chat.module';
 import { ToolsModule } from './modules/tools/tools.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 
-const imports: Array<any> = [TeamsModule, UsersModule, WorkflowModule, ToolsModule, AssetsModule];
+const imports: Array<any> = [TeamsModule, UsersModule, WorkflowModule, ToolsModule, AssetsModule, ChatModule];
 if (config.auth.enabled.includes(AuthMethod.oidc)) {
   imports.push(OidcModule);
 }

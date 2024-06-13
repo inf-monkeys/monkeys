@@ -95,7 +95,7 @@ export const useChat = ({
 
         const finalMultipleChat = multipleChat ?? requestCredentials?.workflowId;
 
-        const response = await fetch(`/api/${finalMultipleChat ? 'chat/' : ''}completions`, {
+        const response = await fetch(`/v1/${finalMultipleChat ? 'chat/' : ''}completions`, {
           method: 'POST',
           body: stringify({
             model: workflowId ?? requestCredentials?.workflowId,

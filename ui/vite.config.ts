@@ -4,8 +4,8 @@ import { defineConfig } from 'vite';
 
 import { mdx } from '@cyco130/vite-plugin-mdx';
 import { TanStackRouterVite } from '@tanstack/router-vite-plugin';
-import react from '@vitejs/plugin-react-swc';
 import legacy from '@vitejs/plugin-legacy';
+import react from '@vitejs/plugin-react-swc';
 import million from 'million/compiler';
 import svgr from 'vite-plugin-svgr';
 import tsconfigPaths from 'vite-tsconfig-paths';
@@ -43,7 +43,11 @@ export default defineConfig({
     port: 2048,
     proxy: {
       '/api': {
-        target: process.env.SERVER_ENDPOINT || 'https://pioneer.infmonkeys.com',
+        target: process.env.SERVER_ENDPOINT || 'https://ai.infmonkeys.com',
+        changeOrigin: true,
+      },
+      '/v1': {
+        target: process.env.SERVER_ENDPOINT || 'https://ai.infmonkeys.com',
         changeOrigin: true,
       },
     },

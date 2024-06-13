@@ -90,6 +90,7 @@ export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
     }
   }, [workflowInputs, workflowId, finalApikey, urlPrefix]);
 
+  const chatApiBaseUrl = window.location.protocol + '//' + window.location.host + '/v1';
   const apiBaseUrl = window.location.protocol + '//' + window.location.host + '/api';
   const enabledOpenAIInterface = workflow?.exposeOpenaiCompatibleInterface ?? false;
 
@@ -109,13 +110,13 @@ export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
               <>
                 {workflow?.variables?.find((variable) => variable.name === 'messages') ? (
                   <ChatCompletionsTemplateZH
-                    apiBaseUrl={apiBaseUrl}
+                    apiBaseUrl={chatApiBaseUrl}
                     apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
                     workflowId={workflowId}
                   />
                 ) : (
                   <CompletionsTemplateZH
-                    apiBaseUrl={apiBaseUrl}
+                    apiBaseUrl={chatApiBaseUrl}
                     apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
                     workflowId={workflowId}
                   />
