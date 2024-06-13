@@ -16,7 +16,10 @@ interface IInputErrorsProps extends React.ComponentPropsWithoutRef<'div'> {
 export const InputErrors: React.FC<IInputErrorsProps> = ({ nodeId, toolDefName }) => {
   const { vines } = useVinesFlow();
 
-  const { data: validation, mutate } = useWorkflowValidation(vines.workflowId ?? '', vines.version);
+  const workflowId = vines.workflowId ?? '';
+  const workflowVersion = vines.version;
+
+  const { data: validation, mutate } = useWorkflowValidation(workflowId, workflowVersion);
   const { trigger, isMutating } = useWorkflowValidate();
 
   const errors =
@@ -25,7 +28,7 @@ export const InputErrors: React.FC<IInputErrorsProps> = ({ nodeId, toolDefName }
     ) ?? [];
 
   const handleReValidate = () => {
-    toast.promise(trigger({ tasks: vines.getRaw(), output: vines.workflowInput }), {
+    toast.promise(trigger({ tasks: vines.getRaw(), output: vines.workflowInput, workflowId, workflowVersion }), {
       loading: '正在重新验证...',
       success: (newValidation) => {
         newValidation && mutate(newValidation);
