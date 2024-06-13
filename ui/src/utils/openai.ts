@@ -29,18 +29,18 @@ export const parseOpenAIStream = (rawResponse: Response, multipleChat = true) =>
             const json = JSON.parse(data);
             const text = (multipleChat ? json?.choices?.[0]?.delta?.content : json?.choices?.[0]?.text) || '';
             const streamObject = json?.object ?? 'chat.completion.chunk';
-            let msgType: 'text' | 'tool' = 'text';
+            let msgType: 'text' | 'tool';
             let msgContent: JSONValue = '';
             switch (streamObject) {
-              case 'chat.completion.chunk':
-                msgType = 'text';
-                msgContent = text;
-                break;
               case 'chat.completion.log':
                 msgType = 'tool';
                 msgContent = json?.data ?? {};
                 break;
               case 'text_completion':
+                msgType = 'text';
+                msgContent = text;
+                break;
+              default:
                 msgType = 'text';
                 msgContent = text;
                 break;
