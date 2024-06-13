@@ -28,7 +28,7 @@ export const InputErrors: React.FC<IInputErrorsProps> = ({ nodeId, toolDefName }
     ) ?? [];
 
   const handleReValidate = () => {
-    toast.promise(trigger({ tasks: vines.getRaw(), output: vines.workflowInput, workflowId, workflowVersion }), {
+    toast.promise(trigger({ tasks: vines.getRaw(), output: vines.workflowOutput, workflowId, workflowVersion }), {
       loading: '正在重新验证...',
       success: (newValidation) => {
         newValidation && mutate(newValidation);

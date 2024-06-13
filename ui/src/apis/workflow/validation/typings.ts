@@ -1,5 +1,6 @@
+import { MonkeyWorkflow } from '@inf-monkeys/vines';
+
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
-import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 
 export enum ValidationIssueType {
   ERROR = 'ERROR',
@@ -34,7 +35,7 @@ export interface IWorkflowValidation {
 
 export interface IValidateWorkflowParams {
   tasks?: VinesTask[];
-  output?: VinesWorkflowVariable[];
+  output?: MonkeyWorkflow['output'];
   workflowId: string;
   workflowVersion: number;
 }

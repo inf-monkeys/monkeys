@@ -57,6 +57,8 @@ export class VinesCore extends VinesTools(VinesBase) {
 
   public workflowInput: VinesWorkflowVariable[] = [];
 
+  public workflowOutput: MonkeyWorkflow['output'] = [];
+
   public variables: IVinesVariable[] = [];
 
   public variablesMapper: VinesVariableMapper = new Map();
@@ -107,6 +109,7 @@ export class VinesCore extends VinesTools(VinesBase) {
       workflow?.displayName && (this.workflowName = workflow.displayName);
       workflow?.description && (this.workflowDesc = workflow.description);
       workflow?.iconUrl && (this.workflowIcon = workflow.iconUrl);
+      workflow?.output && (this.workflowOutput = workflow.output);
 
       if (isArray(workflow?.variables) && workflow?.variables?.length) {
         this.workflowInput = workflow.variables;
