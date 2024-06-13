@@ -93,9 +93,9 @@ export const useChat = ({
 
         const finalMessages = messages.map((it) => omit(it, ['id', 'createdAt', 'extra'])).filter((it) => it.content);
 
-        const finalMultipleChat = multipleChat ?? requestCredentials?.workflowId;
+        const finalMultipleChat = multipleChat ?? requestCredentials?.multipleChat;
 
-        const response = await fetch(`/v1/${multipleChat ? 'chat/' : ''}completions`, {
+        const response = await fetch(`/v1/${finalMultipleChat ? 'chat/' : ''}completions`, {
           method: 'POST',
           body: stringify({
             model: workflowId ?? requestCredentials?.workflowId,
@@ -126,7 +126,7 @@ export const useChat = ({
           throw new Error('The response body is empty.');
         }
 
-        const data = parseOpenAIStream(response, multipleChat)?.body;
+        const data = parseOpenAIStream(response, finalMultipleChat)?.body;
         if (!data) {
           throw new Error('No data');
         }
