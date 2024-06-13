@@ -35,4 +35,6 @@ export interface IWorkflowValidation {
 export interface IValidateWorkflowParams {
   tasks?: VinesTask[];
   output?: VinesWorkflowVariable[];
+  workflowId: string;
+  workflowVersion: number;
 }
