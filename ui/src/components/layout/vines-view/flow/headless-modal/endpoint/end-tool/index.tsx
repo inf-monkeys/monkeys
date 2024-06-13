@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/u
 import { useVinesFlow } from '@/package/vines-flow';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
-import { cn, readLocalStorageValue } from '@/utils';
+import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IEndToolProps {}
@@ -24,7 +24,7 @@ export const EndTool: React.FC<IEndToolProps> = () => {
   const [open, setOpen] = useState(false);
 
   const { vines } = useVinesFlow();
-  const { trigger } = useUpdateWorkflow(readLocalStorageValue('vines-apikey', '', false), workflowId ?? '');
+  const { trigger } = useUpdateWorkflow(workflowId ?? '');
 
   const [output, setOutput] = useState<IVinesOutputData[]>([]);
 

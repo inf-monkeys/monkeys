@@ -4,7 +4,6 @@ import { CircularProgress } from '@nextui-org/progress';
 import { motion } from 'framer-motion';
 
 import { useTriggers, useTriggerTypes } from '@/apis/workflow/trigger';
-import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
@@ -19,10 +18,9 @@ interface IVinesStartNodeProps {
 
 export const VinesStartNode: React.FC<IVinesStartNodeProps> = ({ isMiniNode, canvasMode, canvasDisabled }) => {
   const { vines } = useVinesFlow();
-  const { apikey } = useVinesPage();
 
-  const { data: triggerTypes, isLoading: triggerTypeLoading } = useTriggerTypes(apikey);
-  const { data: triggers, isLoading: triggersLoading } = useTriggers(vines.workflowId, vines.version, apikey);
+  const { data: triggerTypes, isLoading: triggerTypeLoading } = useTriggerTypes();
+  const { data: triggers, isLoading: triggersLoading } = useTriggers(vines.workflowId, vines.version);
 
   const trigger = triggers?.find(({ enabled }) => enabled);
   const triggerType = triggerTypes?.find(({ type }) => type === trigger?.type);

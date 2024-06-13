@@ -35,13 +35,8 @@ export const deleteWorkflow = (workflowId: string) =>
     method: 'DELETE',
   })(`/api/workflow/metadata/${workflowId}`);
 
-export const updateWorkflow = (
-  apikey: string,
-  workflowId: string,
-  workflowVersion: number,
-  workflow: Partial<MonkeyWorkflow>,
-) =>
-  vinesFetcher<MonkeyWorkflow, Partial<MonkeyWorkflow>>({ method: 'PUT', simple: true, apikey })(
+export const updateWorkflow = (workflowId: string, workflowVersion: number, workflow: Partial<MonkeyWorkflow>) =>
+  vinesFetcher<MonkeyWorkflow, Partial<MonkeyWorkflow>>({ method: 'PUT', simple: true })(
     `/api/workflow/metadata/${workflowId}`,
     {
       ...workflow,
@@ -49,13 +44,13 @@ export const updateWorkflow = (
     },
   );
 
-export const useUpdateWorkflow = (apikey: string, workflowId: string) =>
+export const useUpdateWorkflow = (workflowId: string) =>
   useSWRMutation<
     (IWorkflowValidation & { success: boolean }) | undefined,
     unknown,
     string | null,
     Partial<MonkeyWorkflow>
-  >(workflowId ? `/api/workflow/metadata/${workflowId}` : null, vinesFetcher({ method: 'PUT', apikey }));
+  >(workflowId ? `/api/workflow/metadata/${workflowId}` : null, vinesFetcher({ method: 'PUT' }));
 
 export const useWorkflowRelatedAssets = (workflowId?: string, version?: number) =>
   useSWR<IWorkflowRelatedAssetResult | undefined>(

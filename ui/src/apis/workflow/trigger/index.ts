@@ -9,14 +9,14 @@ import {
   IVinesTrigger,
 } from '@/apis/workflow/trigger/typings.ts';
 
-export const useTriggers = (workflowId?: string, version = 1, apikey?: string) =>
+export const useTriggers = (workflowId?: string, version = 1) =>
   useSWR<IVinesTrigger[] | undefined>(
     workflowId ? `/api/workflow/${workflowId}/triggers?version=${version}` : null,
-    vinesFetcher({ apikey }),
+    vinesFetcher(),
   );
 
-export const useTriggerTypes = (apikey?: string) =>
-  useSWR<ITriggerType[] | undefined>('/api/workflow/trigger-types', vinesFetcher({ apikey }), {
+export const useTriggerTypes = () =>
+  useSWR<ITriggerType[] | undefined>('/api/workflow/trigger-types', vinesFetcher(), {
     refreshInterval: 600000,
     revalidateOnFocus: false,
   });

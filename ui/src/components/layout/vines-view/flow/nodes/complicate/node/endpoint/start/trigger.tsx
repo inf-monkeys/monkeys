@@ -15,7 +15,6 @@ import { VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { useCanvasInteractionStore } from '@/store/useCanvasStore/interaction.ts';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
-import { readLocalStorageValue } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 export const ComplicateTriggerNode: React.FC = () => {
@@ -23,9 +22,8 @@ export const ComplicateTriggerNode: React.FC = () => {
   const { setIsUserInteraction } = useCanvasInteractionStore();
   const { vines } = useVinesFlow();
 
-  const apikey = readLocalStorageValue('vines-apikey', '', false);
-  const { data: triggerTypes } = useTriggerTypes(apikey);
-  const { data: triggers } = useTriggers(vines.workflowId, vines.version, apikey);
+  const { data: triggerTypes } = useTriggerTypes();
+  const { data: triggers } = useTriggers(vines.workflowId, vines.version);
 
   const trigger = triggers?.find(({ enabled }) => enabled);
   const triggerType = triggerTypes?.find(({ type }) => type === trigger?.type);

@@ -9,14 +9,13 @@ import { IPageType } from '@/apis/pages/typings.ts';
 import { useGetWorkflow } from '@/apis/workflow';
 import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId';
 import { usePageStore } from '@/store/usePageStore';
-import { cloneDeep, useLocalStorage } from '@/utils';
+import { cloneDeep } from '@/utils';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 export const useVinesPage = () => {
   const navigate = useNavigate({ from: Route.fullPath });
   const { workflowId, pageId, teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
   const { data: pages, mutate: pagesMutate } = useWorkspacePagesWithWorkflowId(workflowId);
-  const [apikey, setApikey] = useLocalStorage('vines-apikey', '', false);
 
   const { page, setPage } = usePageStore();
 
@@ -62,7 +61,7 @@ export const useVinesPage = () => {
       return;
     }
 
-    const newPages = await updateWorkspacePages(apikey, workflowId, finalPages);
+    const newPages = await updateWorkspacePages(workflowId, finalPages);
     setTimeout(() => (isUpdatePageLocker.current = false), 100);
     if (newPages) {
       await pagesMutate(newPages, {
@@ -113,8 +112,6 @@ export const useVinesPage = () => {
     updatePageData,
     pageId,
     teamId,
-    apikey,
-    setApikey,
     navigateTo,
   };
 };

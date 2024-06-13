@@ -33,7 +33,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const { workflow: vinesPageWorkflow, mutateWorkflow, apikey } = useVinesPage();
+  const { workflow: vinesPageWorkflow, mutateWorkflow } = useVinesPage();
 
   const [open, setOpen] = useState(visible ?? false);
   const [isLoading, setIsLoading] = useState(false);
@@ -78,7 +78,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
       toast.error(t('workspace.wrapper.workflow-info-card.workflow-id-empty'));
       return;
     }
-    const newWorkflow = await updateWorkflow(apikey, workflow?.workflowId, workflow?.version ?? 1, data);
+    const newWorkflow = await updateWorkflow(workflow?.workflowId, workflow?.version ?? 1, data);
     if (newWorkflow) {
       afterUpdate ? afterUpdate() : await mutateWorkflow();
       setOpen(false);
