@@ -11,7 +11,6 @@ import { useUpdateWorkflow, useWorkflowList } from '@/apis/workflow';
 import { VinesCore } from '@/package/vines-flow/core';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
-import { readLocalStorageValue } from '@/utils';
 import { useRetimer } from '@/utils/use-retimer.ts';
 
 interface VinesContext {
@@ -48,8 +47,7 @@ export const createVinesCore = (workflowId: string) => {
     const { mutate } = useSWRConfig();
     const [_refresher, forceUpdate] = useReducer(forceUpdateReducer, 0);
 
-    const apikey = readLocalStorageValue('vines-apikey', '', false);
-    const { trigger } = useUpdateWorkflow(apikey, _vines.workflowId ?? '');
+    const { trigger } = useUpdateWorkflow(_vines.workflowId ?? '');
 
     const reTimer = useRetimer();
     const handleUpdate = useCallback(

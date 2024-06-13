@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { CodeEditor, JSONValue } from '@/components/ui/code-editor';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from '@/components/ui/dialog';
 import { useFlowStore } from '@/store/useFlowStore';
-import { cn, readLocalStorageValue } from '@/utils';
+import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IWorkflowRawDataEditorProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -19,8 +19,7 @@ export const WorkflowRawDataEditor: React.FC<IWorkflowRawDataEditorProps> = () =
 
   const { isLatestWorkflowVersion, workflowId } = useFlowStore();
 
-  const apikey = readLocalStorageValue('vines-apikey', '', false);
-  const { trigger } = useUpdateWorkflow(apikey, workflowId);
+  const { trigger } = useUpdateWorkflow(workflowId);
 
   const { data: workflow } = useGetWorkflow(workflowId);
 

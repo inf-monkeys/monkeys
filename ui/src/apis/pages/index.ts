@@ -10,12 +10,8 @@ export const useWorkspacePages = () => useSWR<IPinPage[] | undefined>('/api/work
 export const useWorkspacePagesWithWorkflowId = (workflowId: string) =>
   useSWR<IPageType[] | undefined>(workflowId ? `/api/workflow/${workflowId}/pages` : null, vinesFetcher());
 
-export const updateWorkspacePages = (
-  apikey: string,
-  workflowId: string,
-  pages: (Partial<IPageType> & { pageId: string })[],
-) =>
-  vinesFetcher<IPageType[]>({ method: 'PUT', apikey, simple: true })(`/api/workflow/${workflowId}/pages`, {
+export const updateWorkspacePages = (workflowId: string, pages: (Partial<IPageType> & { pageId: string })[]) =>
+  vinesFetcher<IPageType[]>({ method: 'PUT', simple: true })(`/api/workflow/${workflowId}/pages`, {
     pages,
   });
 
