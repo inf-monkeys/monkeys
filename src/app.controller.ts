@@ -128,7 +128,7 @@ export class AppController {
       endpoints: {
         clientUrl: 'https://ai.infmonkeys.com',
       },
-      module: [],
+      module: ['payment'],
     };
     return new SuccessResponse({
       data,
