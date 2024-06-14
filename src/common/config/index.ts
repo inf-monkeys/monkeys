@@ -170,6 +170,10 @@ export interface LlmModelConfig {
 
 export interface LLmConfig {
   toolResultMaxLength: number;
+  templates: {
+    knowledgeBase: string;
+    knowledgeBaseWithPresetPrompt: string;
+  };
 }
 
 export interface ProxyConfig {
@@ -303,6 +307,36 @@ export const config: Config = {
   },
   llm: {
     toolResultMaxLength: readConfig('llm.tools.maxReultLength', 4096),
+    templates: {
+      knowledgeBase: readConfig(
+        'llm.templates.knowledgeBase',
+        `Use the following context as your learned knowledge, inside <context></context> XML tags.
+<context>
+{{#context#}}
+</context>
+
+When answer to user:
+- If you don't know, just say that you don't know.
+- If you don't know when you are not sure, ask for clarification.
+- Avoid mentioning that you obtained the information from the context.
+- And answer according to the language of the user's question.\n`,
+      ),
+      knowledgeBaseWithPresetPrompt: readConfig(
+        'llm.templates.knowledgeBaseWithPresetPrompt',
+        `{{#presetPrompt#}}
+
+Use the following context as your learned knowledge, inside <context></context> XML tags.
+<context>
+{{#context#}}
+</context>
+
+When answer to user:
+- If you don't know, just say that you don't know.
+- If you don't know when you are not sure, ask for clarification.
+- Avoid mentioning that you obtained the information from the context.
+- And answer according to the language of the user's question.\n`,
+      ),
+    },
   },
   paymentServer: {
     enabled: readConfig('paymentServer.enabled', false),
