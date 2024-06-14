@@ -10,7 +10,7 @@ import { updateWorkflow } from '@/apis/workflow';
 import { IVinesWorkflowRateLimiter } from '@/apis/workflow/typings.ts';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Switch } from '@/components/ui/switch';
@@ -41,6 +41,7 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
         windowMs: rateLimiter?.windowMs ?? 1000,
       },
       exposeOpenaiCompatibleInterface,
+      openaiModelName: workflow?.openaiModelName,
     },
   });
 
@@ -88,6 +89,28 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
                 </FormItem>
               )}
             />
+
+            {form.getValues().exposeOpenaiCompatibleInterface && (
+              <>
+                <FormField
+                  name="openaiModelName"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>模型名称</FormLabel>
+                      <FormDescription>
+                        模型名称默认为工作流 ID，你也可以设置自定义模型名称，在通过 API 调用接口时可以设置 model
+                        为此自定义名称（同一个团队内必须唯一）。
+                      </FormDescription>
+                      <FormControl>
+                        <Input placeholder="请输入模型名称" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
 
             <FormField
               name="rateLimiter.enabled"
