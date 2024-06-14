@@ -195,6 +195,15 @@ export class WorkflowRepository {
     if (output && !Array.isArray(output)) {
       throw new Error('output 字段必须为数组');
     }
+
+    // Check if openaiModelName is unique
+    if (openaiModelName) {
+      const existingWorkflow = await this.findWorkflowByOpenAIModelName(teamId, openaiModelName);
+      if (existingWorkflow && existingWorkflow.workflowId !== workflowId) {
+        throw new Error('openaiModelName must be unique');
+      }
+    }
+
     await this.workflowMetadataRepository.findOneOrFail({ where: { workflowId: workflowId, version, teamId, isDeleted: false } });
     const updateFields = {
       ..._.pickBy(
