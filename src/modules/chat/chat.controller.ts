@@ -54,7 +54,7 @@ export class WorkflowOpenAICompatibleController {
       if (!workflow) {
         return null;
       }
-      workflowId = workflow.id;
+      workflowId = workflow.workflowId;
     }
     return workflowId;
   }
