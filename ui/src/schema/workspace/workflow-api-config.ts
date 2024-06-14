@@ -7,6 +7,7 @@ export const workflowApiConfigInfoSchema = z.object({
     max: z.number().min(1, '单位时间窗口内运行最大并发最小为 1').max(1000, '单位时间窗口内运行最大并发最小为 1000'),
   }),
   exposeOpenaiCompatibleInterface: z.boolean(),
+  openaiModelName: z.string().optional(),
 });
 
 export type IWorkflowApiConfigInfo = z.infer<typeof workflowApiConfigInfoSchema>;
