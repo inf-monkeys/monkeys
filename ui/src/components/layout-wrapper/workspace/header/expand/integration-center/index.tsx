@@ -38,6 +38,8 @@ export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
 
   const workflowId = workflow?.workflowId;
   const workflowInputs = workflow?.variables;
+  const openaiModelName = workflow?.openaiModelName;
+  const model = openaiModelName || workflowId;
 
   const [executeWorkflowSyncCurl, setExecuteWorkflowSyncCurl] = React.useState<string | null>(null);
   const [executeWorkflowCurl, setExecuteWorkflowCurl] = React.useState<string | null>(null);
@@ -112,13 +114,13 @@ export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
                   <ChatCompletionsTemplateZH
                     apiBaseUrl={chatApiBaseUrl}
                     apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
-                    workflowId={workflowId}
+                    model={model}
                   />
                 ) : (
                   <CompletionsTemplateZH
                     apiBaseUrl={chatApiBaseUrl}
                     apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
-                    workflowId={workflowId}
+                    model={model}
                   />
                 )}
               </>
@@ -127,7 +129,7 @@ export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
                 <ExecuteWorkflowTemplateZH
                   apiBaseUrl={apiBaseUrl}
                   apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
-                  workflowId={workflowId}
+                  model={model}
                   workflowInputs={workflowInputs}
                   curlSync={executeWorkflowSyncCurl}
                   curl={executeWorkflowCurl}

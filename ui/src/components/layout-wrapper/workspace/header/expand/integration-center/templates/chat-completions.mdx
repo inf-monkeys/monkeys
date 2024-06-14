@@ -72,7 +72,7 @@ import { MdxRow } from '@/components/ui/markdown/mdx/row';
     单条消息。
 
     <MdxCode language="bash">
-      {`curl -X POST '${props.apiBaseUrl}/chat/completions' \\\n--header 'Authorization: Bearer ${props.apiKey}' \\\n--header 'Content-Type: application/json' \\\n--data '{\n    "model": "${props.workflowId}",\n    "messages": [{"role": "user", "content": "Hello"}],\n    "stream": true,\n    "show_logs": true\n}'`}
+      {`curl -X POST '${props.apiBaseUrl}/chat/completions' \\\n--header 'Authorization: Bearer ${props.apiKey}' \\\n--header 'Content-Type: application/json' \\\n--data '{\n    "model": "${props.model}",\n    "messages": [{"role": "user", "content": "Hello"}],\n    "stream": true,\n    "show_logs": true\n}'`}
     </MdxCode>
 
     ### CURL 示例二
@@ -80,7 +80,7 @@ import { MdxRow } from '@/components/ui/markdown/mdx/row';
     多条消息：role 可以是  ``system``, ``user``, ``assistant``, ``tool`` 或 ``function``。
 
     <MdxCode language="bash">
-      {`curl -X POST '${props.apiBaseUrl}/chat/completions' \\\n--header 'Authorization: Bearer ${props.apiKey}' \\\n--header 'Content-Type: application/json' \\\n--data '{\n    "model": "${props.workflowId}",\n    "messages": [\n        {"role": "system", "content": "You are a helpful assistant!"},\n        {"role": "user", "content": "Hello"},\n        {"role": "assistant", "content": "Hello, how can i help you today?"},\n        {"role": "user", "content": "I want to learn something about AI."}\n    ],\n    "stream": true,\n    "show_logs": true\n}'`}
+      {`curl -X POST '${props.apiBaseUrl}/chat/completions' \\\n--header 'Authorization: Bearer ${props.apiKey}' \\\n--header 'Content-Type: application/json' \\\n--data '{\n    "model": "${props.model}",\n    "messages": [\n        {"role": "system", "content": "You are a helpful assistant!"},\n        {"role": "user", "content": "Hello"},\n        {"role": "assistant", "content": "Hello, how can i help you today?"},\n        {"role": "user", "content": "I want to learn something about AI."}\n    ],\n    "stream": true,\n    "show_logs": true\n}'`}
     </MdxCode>
 
     ### 非流式模式返回结果示例
