@@ -143,6 +143,12 @@ export class WorkflowMetadataEntity extends BaseAssetEntity {
   })
   exposeOpenaiCompatibleInterface: boolean;
 
+  @Column({
+    name: 'openai_model_name',
+    nullable: true,
+  })
+  openaiModelName: string;
+
   public isRateLimitEnabled() {
     return this.rateLimiter?.enabled;
   }

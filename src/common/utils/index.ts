@@ -4,6 +4,11 @@ export const enumToList = (enumItem: any) => {
 
 export const generateDbId = (m = Math, d = Date, h = 16, s = (s) => m.floor(s).toString(h)) => s(d.now() / 1000) + ' '.repeat(h).replace(/./g, () => s(m.random() * h));
 
+export const isValidObjectId = (id: string) => {
+  // ObjectId 是一个 24 字符的十六进制字符串
+  return /^[a-fA-F0-9]{24}$/.test(id);
+};
+
 export function isValidNamespace(str: string) {
   return /^(?!.*__.*$)[a-zA-Z0-9_]*$/.test(str);
 }

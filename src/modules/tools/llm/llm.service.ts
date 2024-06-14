@@ -367,6 +367,21 @@ export class LlmService {
     };
   }
 
+  private async autoMergeSystemMessages(model: string, messages: Array<ChatCompletionMessageParam>) {
+    const { autoMergeSystemMessages } = this.getModelConfig(model);
+    if (!autoMergeSystemMessages) {
+      return messages;
+    }
+    const systemMessages = messages.filter((msg) => msg.role === 'system');
+    const otherMessages = messages.filter((msg) => msg.role !== 'system');
+    if (!systemMessages.length) {
+      return messages;
+    }
+
+    const mergedSystemMessage = systemMessages.join('\n\n');
+    return [{ role: 'system', content: mergedSystemMessage }, ...otherMessages];
+  }
+
   private geneChunkLine(chatCmplId: string, model: string, chunkString: string) {
     const chunkObject = {
       id: chatCmplId,
