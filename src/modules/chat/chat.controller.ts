@@ -8,7 +8,7 @@ import { isValidObjectId } from '@/common/utils';
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
 import { TeamRepository } from '@/database/repositories/team.repository';
 import { WorkflowRepository } from '@/database/repositories/workflow.repository';
-import { Body, Controller, Get, Inject, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Inject, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { TOOL_STREAM_RESPONSE_TOPIC } from '../tools/tools.polling.service';
@@ -66,6 +66,7 @@ export class WorkflowOpenAICompatibleController {
     summary: 'Create completions',
     description: 'Create completions',
   })
+  @HttpCode(200)
   public async createcCompletions(@Req() req: IRequest, @Body() body: CreateCompletionsDto, @Res() res: Response) {
     const { teamId, userId } = req;
     const { model, stream = false } = body;
@@ -85,7 +86,7 @@ export class WorkflowOpenAICompatibleController {
     });
     if (stream === false) {
       const result = await this.workflowExecutionService.waitForWorkflowResult(teamId, workflowInstanceId);
-      return res.json(result);
+      return res.status(200).json(result);
     } else {
       res.setHeader('content-type', 'text/event-stream');
       res.status(200);
@@ -105,6 +106,7 @@ export class WorkflowOpenAICompatibleController {
     summary: 'Create chat completions',
     description: 'Create chat completions',
   })
+  @HttpCode(200)
   public async createChatComplitions(@Req() req: IRequest, @Body() body: CreateChatCompletionsDto, @Res() res: Response) {
     const { teamId, userId } = req;
     const { model, stream = false } = body;
@@ -134,7 +136,7 @@ export class WorkflowOpenAICompatibleController {
           await this.workflowRepository.updateChatSessionMessages(teamId, conversationId, newMessages);
         }
       }
-      return res.json(result);
+      return res.status(200).json(result);
     } else {
       res.setHeader('content-type', 'text/event-stream');
       res.status(200);
