@@ -177,13 +177,14 @@ export class WorkflowRepository {
       tagIds?: string[];
       rateLimiter?: WorkflowRateLimiter;
       exposeOpenaiCompatibleInterface?: boolean;
+      openaiModelName?: string;
     },
   ) {
-    const { displayName, description, iconUrl, tasks, variables, activated, validationIssues, validated, output, tagIds, rateLimiter, exposeOpenaiCompatibleInterface } = updates;
+    const { displayName, description, iconUrl, tasks, variables, activated, validationIssues, validated, output, tagIds, rateLimiter, exposeOpenaiCompatibleInterface, openaiModelName } = updates;
 
     // 字段都为空，则跳过更新
     if (
-      [displayName, description, iconUrl, tasks, variables, activated, validated, validationIssues, output, tagIds, rateLimiter, exposeOpenaiCompatibleInterface].every(
+      [displayName, description, iconUrl, tasks, variables, activated, validated, validationIssues, output, tagIds, rateLimiter, exposeOpenaiCompatibleInterface, openaiModelName].every(
         (item) => typeof item === 'undefined',
       )
     )
@@ -194,10 +195,19 @@ export class WorkflowRepository {
     if (output && !Array.isArray(output)) {
       throw new Error('output 字段必须为数组');
     }
+
+    // Check if openaiModelName is unique
+    if (openaiModelName) {
+      const existingWorkflow = await this.findWorkflowByOpenAIModelName(teamId, openaiModelName);
+      if (existingWorkflow && existingWorkflow.workflowId !== workflowId) {
+        throw new Error('openaiModelName must be unique');
+      }
+    }
+
     await this.workflowMetadataRepository.findOneOrFail({ where: { workflowId: workflowId, version, teamId, isDeleted: false } });
     const updateFields = {
       ..._.pickBy(
-        { displayName, iconUrl, description, tasks, variables, activated, validationIssues, validated, output, tagIds, rateLimiter, exposeOpenaiCompatibleInterface },
+        { displayName, iconUrl, description, tasks, variables, activated, validationIssues, validated, output, tagIds, rateLimiter, exposeOpenaiCompatibleInterface, openaiModelName },
         (v) => typeof v !== 'undefined',
       ),
       updatedTimestamp: Date.now(),
@@ -626,5 +636,25 @@ export class WorkflowRepository {
         pinned: pin,
       },
     );
+  }
+
+  public async listAllOpenAICompatibleWorkflows(teamId: string) {
+    return await this.workflowMetadataRepository.find({
+      where: {
+        teamId,
+        exposeOpenaiCompatibleInterface: true,
+        isDeleted: false,
+      },
+    });
+  }
+
+  public async findWorkflowByOpenAIModelName(teamId: string, openaiModelName: string) {
+    return await this.workflowMetadataRepository.findOne({
+      where: {
+        teamId,
+        openaiModelName,
+        isDeleted: false,
+      },
+    });
   }
 }

@@ -21,7 +21,7 @@ import { MdxRow } from '@/components/ui/markdown/mdx/row';
 
 所有 API 请求都应在 **`Authorization`** HTTP Header 中包含您的 `API-Key`，如下所示：
 
-<MdxCode language="bash">{`Authorization: Bearer {YOUR_MONKEYS_APIKEY}`}</MdxCode>
+<MdxCode language="bash">{`Authorization: Bearer ${props.apiKey}`}</MdxCode>
 
 ---
 
@@ -68,7 +68,7 @@ import { MdxRow } from '@/components/ui/markdown/mdx/row';
   <MdxCol sticky>
     ### CURL 示例
     <MdxCode language="bash">
-      {`curl -X POST '${props.apiBaseUrl}/completions' \\\n--header 'Authorization: Bearer ${props.apiKey}' \\\n--header 'Content-Type: application/json' \\\n--data '{\n    "model": "${props.workflowId}",\n    "prompt": "Hello",\n    "stream": true\n}'`}
+      {`curl -X POST '${props.apiBaseUrl}/completions' \\\n--header 'Authorization: Bearer ${props.apiKey}' \\\n--header 'Content-Type: application/json' \\\n--data '{\n    "model": "${props.model}",\n    "prompt": "Hello",\n    "stream": true\n}'`}
     </MdxCode>
 
     ### 非流式模式返回数据示例
