@@ -12,6 +12,7 @@ import { Response } from 'express';
 import { isArray } from 'lodash';
 import OpenAI from 'openai';
 import { ChatCompletion, ChatCompletionChunk, ChatCompletionMessageParam, ChatCompletionTool } from 'openai/resources';
+import { ChatCompletionCreateParamsBase } from 'openai/resources/chat/completions';
 import { Stream } from 'openai/streaming';
 import { Readable } from 'stream';
 import { KnowledgeBaseService } from '../../assets/knowledge-base/knowledge-base.service';
@@ -367,7 +368,7 @@ export class LlmService {
     };
   }
 
-  private async autoMergeSystemMessages(model: string, messages: Array<ChatCompletionMessageParam>) {
+  private autoMergeSystemMessages(model: string, messages: Array<ChatCompletionMessageParam>): Array<ChatCompletionMessageParam> {
     const { autoMergeSystemMessages } = this.getModelConfig(model);
     if (!autoMergeSystemMessages) {
       return messages;
@@ -378,7 +379,7 @@ export class LlmService {
       return messages;
     }
 
-    const mergedSystemMessage = systemMessages.join('\n\n');
+    const mergedSystemMessage = systemMessages.map((x) => x.content).join('\n\n');
     return [{ role: 'system', content: mergedSystemMessage }, ...otherMessages];
   }
 
@@ -411,6 +412,21 @@ export class LlmService {
       obj: logObject,
       str: `data: ${JSON.stringify(logObject, replacerNoEscape, 0)}\n\n`,
     };
+  }
+
+  private setErrorResponse(res: Response, randomChatCmplId: string, model: string, stream: boolean, errorMsg: string) {
+    res.status(400);
+    errorMsg = 'An Unexpected Error Occurred: ' + errorMsg;
+    if (stream) {
+      for (const token of errorMsg.split('')) {
+        const chunkLine = this.geneChunkLine('chatcmpl-' + randomChatCmplId, model, token);
+        res.write(chunkLine);
+      }
+      res.write('data: [DONE]\n\n');
+      res.end();
+    } else {
+      return res.status(500).send(errorMsg);
+    }
   }
 
   public async createChatCompelitions(res: Response, params: CreateChatCompelitionsParams, options: CreateChatCompelitionsResponseOptions) {
@@ -448,6 +464,7 @@ export class LlmService {
 
     const { apiKey, baseURL, defaultParams } = this.getModelConfig(model);
     messages = await this.capMessages(systemMessages, historyMessages);
+    messages = this.autoMergeSystemMessages(model, messages);
     const openai = new OpenAI({
       apiKey: apiKey || 'mock-apikey',
       baseURL: baseURL,
@@ -455,26 +472,46 @@ export class LlmService {
     const tools: Array<ChatCompletionTool> = await this.resolveTools(params.tools || [], sqlKnowledgeBase);
 
     let response: ChatCompletion | Stream<ChatCompletionChunk>;
+    const createChatCompelitionsBody: ChatCompletionCreateParamsBase = {
+      model,
+      stream: stream,
+      temperature: params.temperature ?? undefined,
+      frequency_penalty: params.frequency_penalty ?? undefined,
+      presence_penalty: params.presence_penalty ?? undefined,
+      max_tokens: params.max_tokens ?? undefined,
+      messages,
+      tools: tools?.length ? tools : undefined,
+      tool_choice: tools?.length ? 'auto' : undefined,
+      // Only pass response_format if it's json_object, in case some llm not spport this feature results in error
+      response_format:
+        response_format === ResponseFormat.jsonObject
+          ? {
+              type: response_format,
+            }
+          : undefined,
+      ...defaultParams,
+    };
     try {
-      response = await openai.chat.completions.create({
-        model,
-        stream: stream,
-        temperature: params.temperature ?? undefined,
-        frequency_penalty: params.frequency_penalty ?? undefined,
-        presence_penalty: params.presence_penalty ?? undefined,
-        max_tokens: params.max_tokens ?? undefined,
-        messages,
-        tools: tools?.length ? tools : undefined,
-        tool_choice: tools?.length ? 'auto' : undefined,
-        // Only pass response_format if it's json_object, in case some llm not spport this feature results in error
-        response_format:
-          response_format === ResponseFormat.jsonObject
-            ? {
-                type: response_format,
-              }
-            : undefined,
-        ...defaultParams,
-      });
+      response = await openai.chat.completions.create(createChatCompelitionsBody);
+    } catch (error) {
+      let errorMsg: string = error.message;
+      // Can't get the error message when stream mode is on, make a anothier request to get the error message
+      if (stream) {
+        try {
+          await axios.post(`${baseURL}/chat/completions`, {
+            ...createChatCompelitionsBody,
+            stream: false,
+          });
+        } catch (error) {
+          errorMsg = error.response?.data?.message || error.message;
+        }
+      }
+      logger.error(`Failed to create chat completions: `, error);
+      logger.error(`Failed to create chat completions: `, errorMsg);
+      this.setErrorResponse(res, randomChatCmplId, model, stream, errorMsg);
+    }
+
+    try {
       if (stream) {
         const data = new StreamData();
         const streamResponse = OpenAIStream(response as Stream<ChatCompletionChunk>, {
@@ -636,7 +673,7 @@ export class LlmService {
       }
     } catch (error) {
       logger.error(`Failed to create chat completions: `, error);
-      return res.status(500).send(error.message);
+      this.setErrorResponse(res, randomChatCmplId, model, stream, error.message);
     }
   }
 }

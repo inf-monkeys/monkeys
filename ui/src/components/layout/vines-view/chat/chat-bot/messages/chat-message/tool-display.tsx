@@ -102,7 +102,11 @@ export const ToolDisplay: React.FC<IToolDisplayProps> = ({ data }) => {
 
         <div className="relative flex h-28 w-full">
           <ScrollArea>
-            <VinesHighlighter language="json">{JSON.stringify(result, null, 2) as string}</VinesHighlighter>
+            {type === 'tool_call' ? (
+              <VinesHighlighter language="json">{JSON.stringify(result, null, 2) as string}</VinesHighlighter>
+            ) : (
+              <VinesHighlighter language="markdown">{result as string}</VinesHighlighter>
+            )}
           </ScrollArea>
           <div className="absolute -bottom-1 -right-2 flex scale-80 items-center gap-2">
             <Tooltip>
