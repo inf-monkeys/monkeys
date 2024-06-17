@@ -134,6 +134,7 @@ export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
                   curlSync={executeWorkflowSyncCurl}
                   curl={executeWorkflowCurl}
                   curlExecutionStatus={getExecutionStatusCurl}
+                  workflowId={workflowId}
                 />
               </>
             )}
