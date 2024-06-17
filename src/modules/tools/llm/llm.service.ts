@@ -508,7 +508,7 @@ export class LlmService {
       }
       logger.error(`Failed to create chat completions: `, error);
       logger.error(`Failed to create chat completions: `, errorMsg);
-      this.setErrorResponse(res, randomChatCmplId, model, stream, errorMsg);
+      return this.setErrorResponse(res, randomChatCmplId, model, stream, errorMsg);
     }
 
     try {
@@ -673,7 +673,7 @@ export class LlmService {
       }
     } catch (error) {
       logger.error(`Failed to create chat completions: `, error);
-      this.setErrorResponse(res, randomChatCmplId, model, stream, error.message);
+      return this.setErrorResponse(res, randomChatCmplId, model, stream, error.message);
     }
   }
 }
