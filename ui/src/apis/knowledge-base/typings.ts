@@ -7,7 +7,6 @@ export interface IKnowledgeBaseMetadataField {
 }
 
 export interface IKnowledgeBase {
-  id: string;
   createTime: number;
   dimension: number;
   name: string;

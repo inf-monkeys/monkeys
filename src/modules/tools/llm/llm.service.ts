@@ -421,6 +421,13 @@ export class LlmService {
     const { model, stream, systemPrompt, knowledgeBase, sqlKnowledgeBase, response_format = ResponseFormat.text } = params;
     let { messages } = params;
     const historyMessages = this.sanitizeMessages(messages);
+
+    if (stream) {
+      // set the content type to text-stream
+      res.setHeader('content-type', 'text/event-stream;charset=utf-8');
+      res.status(200);
+    }
+
     const { generatedByKnowledgeBase, systemMessages } = await this.generateSystemMessages(messages, systemPrompt, knowledgeBase);
     const randomChatCmplId = Math.random().toString(36).substr(2, 16);
 
@@ -528,9 +535,7 @@ export class LlmService {
           },
         });
         const streamingTextResponse = new StreamingTextResponse(streamResponse, {}, data);
-        // set the content type to text-stream
-        res.setHeader('content-type', 'text/event-stream;charset=utf-8');
-        res.status(200);
+
         const body = streamingTextResponse.body;
         const readableStream = Readable.from(body as any);
         readableStream.on('data', (chunk) => {
