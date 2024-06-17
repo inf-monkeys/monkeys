@@ -2,7 +2,7 @@ import { config, isRedisConfigured } from '@/common/config';
 import { InMemoryLockManager, RedisLockManager } from '@/common/utils/lock';
 import { Global, Module } from '@nestjs/common';
 import { InMemoryCache, RedisCache } from './cache';
-import { EventEmitterMq } from './mq';
+import { EventEmitterMq, RedisMq } from './mq';
 import { InMemoryRateLimiter, RedisRateLimiter } from './utils/rate-limiter';
 
 export const LOCK_TOKEN = 'LOCK';
@@ -34,7 +34,7 @@ export const MQ_TOKEN = 'MQ';
     {
       provide: MQ_TOKEN,
       useFactory: () => {
-        return new EventEmitterMq();
+        return isRedisConfigured() ? new RedisMq(config.redis) : new EventEmitterMq();
       },
     },
   ],

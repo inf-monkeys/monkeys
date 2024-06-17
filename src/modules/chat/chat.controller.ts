@@ -1,5 +1,6 @@
 import { MQ_TOKEN } from '@/common/common.module';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
+import { logger } from '@/common/logger';
 import { Mq } from '@/common/mq';
 import { IRequest } from '@/common/typings/request';
 import { isValidObjectId } from '@/common/utils';
@@ -139,9 +140,10 @@ export class WorkflowOpenAICompatibleController {
       const key = TOOL_STREAM_RESPONSE_TOPIC(workflowInstanceId);
       let aiResponse = '';
       this.mq.subscribe(key, (_, message: string) => {
+        logger.info(`[Chat] teamId=${teamId}, model=${model}, workflowInstanceId=${workflowInstanceId} message=${message}`);
         res.write(message);
         // TODO: listen on workflow finished event
-        if (message.includes('[DONE]')) {
+        if (message.startsWith('[DONE]')) {
           const newMessages = body.messages.concat({ role: 'assistant', content: aiResponse });
           if (conversationId) {
             this.workflowRepository.updateChatSessionMessages(teamId, conversationId, newMessages);
