@@ -1,4 +1,5 @@
 import { MQ_TOKEN } from '@/common/common.module';
+import { config } from '@/common/config';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { logger } from '@/common/logger';
 import { Mq } from '@/common/mq';
@@ -137,10 +138,10 @@ export class WorkflowOpenAICompatibleController {
     } else {
       res.setHeader('content-type', 'text/event-stream');
       res.status(201);
-      const key = TOOL_STREAM_RESPONSE_TOPIC(workflowInstanceId);
+      const channel = TOOL_STREAM_RESPONSE_TOPIC(workflowInstanceId);
       let aiResponse = '';
-      this.mq.subscribe(key, (_, message: string) => {
-        logger.info(`[Chat] teamId=${teamId}, model=${model}, workflowInstanceId=${workflowInstanceId} message=${message}`);
+      this.mq.subscribe(channel, (channel, message: string) => {
+        logger.info(`[Chat] appId=${config.server.appId}, channel=${channel}, teamId=${teamId}, model=${model}, workflowInstanceId=${workflowInstanceId} message=${message}`);
         res.write(message);
         // TODO: listen on workflow finished event
         if (message.startsWith('[DONE]')) {
@@ -148,6 +149,7 @@ export class WorkflowOpenAICompatibleController {
           if (conversationId) {
             this.workflowRepository.updateChatSessionMessages(teamId, conversationId, newMessages);
           }
+          this.mq.unsubscribe(channel);
           res.end();
         } else {
           const cleanedMessageStr = message.replace('data: ', '').trim();
