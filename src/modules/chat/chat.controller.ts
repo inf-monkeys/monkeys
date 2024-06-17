@@ -144,7 +144,7 @@ export class WorkflowOpenAICompatibleController {
         logger.info(`[Chat] appId=${config.server.appId}, channel=${channel}, teamId=${teamId}, model=${model}, workflowInstanceId=${workflowInstanceId} message=${message}`);
         res.write(message);
         // TODO: listen on workflow finished event
-        if (message.startsWith('[DONE]')) {
+        if (message.startsWith('data: [DONE]')) {
           const newMessages = body.messages.concat({ role: 'assistant', content: aiResponse });
           if (conversationId) {
             this.workflowRepository.updateChatSessionMessages(teamId, conversationId, newMessages);
