@@ -77,4 +77,11 @@ export class UpdateWorkflowDefDto {
     type: Boolean,
   })
   exposeOpenaiCompatibleInterface: boolean;
+
+  @ApiProperty({
+    description: 'OpenAI 模型名称',
+    required: false,
+    type: String,
+  })
+  openaiModelName: string;
 }

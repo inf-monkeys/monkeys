@@ -20,7 +20,7 @@ import { MdxRow } from '@/components/ui/markdown/mdx/row';
 <i>**强烈建议开发者把 `API-Key` 放在后端存储，而非分享或者放在客户端存储，以免 `API-Key` 泄露，导致财产损失。**</i>
 所有 API 请求都应在 **`Authorization`** HTTP Header 中包含您的 `API-Key`，如下所示：
 
-<MdxCode language="bash">{`Authorization: Bearer {YOUR_MONKEYS_APIKEY}`}</MdxCode>
+<MdxCode language="bash">{`Authorization: Bearer ${props.apiKey}`}</MdxCode>
 
 ---
 
@@ -32,15 +32,16 @@ import { MdxRow } from '@/components/ui/markdown/mdx/row';
 />
 <MdxRow>
   <MdxCol>
-    多轮对话。
+    多轮对话。详细文档请见 [OpenAI 文档](https://beta.openai.com/docs/api-reference/chat/completions/create)。
 
     ### Request Body
+
     <MdxProperties>
       <MdxProperty name='model' type='string' key='model'>
         模型，为当前工作流 ID。
       </MdxProperty>
       <MdxProperty name='messages' type='array' key='messages'>
-        历史消息记录
+        历史消息记录。
       </MdxProperty>
       <MdxProperty name='stream' type='boolean' key='stream'>
         是否开启 Stream 模式。
@@ -66,9 +67,20 @@ import { MdxRow } from '@/components/ui/markdown/mdx/row';
   </MdxCol>
   <MdxCol sticky>
 
-    ### CURL 示例
+    ### CURL 示例一
+
+    单条消息。
+
     <MdxCode language="bash">
-      {`curl -X POST '${props.apiBaseUrl}/chat/completions' \\\n--header 'Authorization: Bearer ${props.apiKey}' \\\n--header 'Content-Type: application/json' \\\n--data '{\n    "model": "${props.workflowId}",\n    "messages": [{"role": "user", "content": "Hello"}],\n    "stream": true,\n    "show_logs": true\n}'`}
+      {`curl -X POST '${props.apiBaseUrl}/chat/completions' \\\n--header 'Authorization: Bearer ${props.apiKey}' \\\n--header 'Content-Type: application/json' \\\n--data '{\n    "model": "${props.model}",\n    "messages": [{"role": "user", "content": "Hello"}],\n    "stream": true,\n    "show_logs": true\n}'`}
+    </MdxCode>
+
+    ### CURL 示例二
+
+    多条消息：role 可以是  ``system``, ``user``, ``assistant``, ``tool`` 或 ``function``。
+
+    <MdxCode language="bash">
+      {`curl -X POST '${props.apiBaseUrl}/chat/completions' \\\n--header 'Authorization: Bearer ${props.apiKey}' \\\n--header 'Content-Type: application/json' \\\n--data '{\n    "model": "${props.model}",\n    "messages": [\n        {"role": "system", "content": "You are a helpful assistant!"},\n        {"role": "user", "content": "Hello"},\n        {"role": "assistant", "content": "Hello, how can i help you today?"},\n        {"role": "user", "content": "I want to learn something about AI."}\n    ],\n    "stream": true,\n    "show_logs": true\n}'`}
     </MdxCode>
 
     ### 非流式模式返回结果示例

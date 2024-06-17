@@ -5,16 +5,16 @@ import useSWR from 'swr';
 import { isEmpty, omit } from 'lodash';
 import { toast } from 'sonner';
 
-import { JSONValue } from '@/package/vines-flow/core/tools/typings.ts';
 import { nanoIdLowerCase } from '@/utils';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 import { parseOpenAIStream } from '@/utils/openai.ts';
+import { ChatCompelitionLog } from './messages/chat-message/tool-display';
 
 export interface IVinesMessage {
   id?: string;
   content: string;
   role: 'user' | 'assistant';
-  extra?: JSONValue[];
+  extra?: ChatCompelitionLog[];
   createdAt?: Date;
 }
 
@@ -137,7 +137,7 @@ export const useChat = ({
         const assistantChatId = nanoIdLowerCase();
         const createdAt = new Date();
         let aiResult = '';
-        const aiResultExtra: JSONValue[] = [];
+        const aiResultExtra: ChatCompelitionLog[] = [];
 
         // eslint-disable-next-line no-constant-condition
         while (true) {

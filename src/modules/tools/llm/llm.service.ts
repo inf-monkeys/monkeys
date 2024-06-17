@@ -316,60 +316,41 @@ export class LlmService {
     systemMessages: Array<ChatCompletionMessageParam>;
     generatedByKnowledgeBase: string;
   }> {
-    let systemPrompt = '';
+    let finalSystemPrompt = '';
     let knowledgeBaseContext = '';
     let generatedByKnowledgeBase: string = null;
+    // System messages set by API Call
     if (knowledgeBase) {
-      const lastMessage = messages[messages.length - 1];
-      const { role, content: lastMessageContent } = lastMessage;
-      if (role !== 'user') {
-        throw new Error('Last message must be user');
-      }
-      try {
-        const retrieveResult = await this.knowledgeBaseService.retrieveKnowledgeBase(knowledgeBase, lastMessageContent as string);
-        if (retrieveResult?.text) {
-          logger.info(`Retrieved knowledge base: ${retrieveResult.text}`);
-          knowledgeBaseContext = retrieveResult.text;
-          generatedByKnowledgeBase = knowledgeBase;
-        } else {
-          logger.info(`Not found any knowledge based on question: ${lastMessageContent}`);
+      const useMessages = messages.filter((msg) => msg.role === 'user');
+      if (useMessages.length > 0) {
+        const lastUserMessage = useMessages[useMessages.length - 1];
+        const { content: lastUserMessageContent } = lastUserMessage;
+        try {
+          const retrieveResult = await this.knowledgeBaseService.retrieveKnowledgeBase(knowledgeBase, lastUserMessageContent as string);
+          if (retrieveResult?.text) {
+            logger.info(`Retrieved knowledge base: ${retrieveResult.text}`);
+            knowledgeBaseContext = retrieveResult.text;
+            generatedByKnowledgeBase = knowledgeBase;
+          } else {
+            logger.info(`Not found any knowledge based on question: ${lastUserMessageContent}`);
+          }
+        } catch (error) {
+          logger.warn(`Failed to retrieve knowledge base: ${error.message}`);
         }
-      } catch (error) {
-        logger.warn(`Failed to retrieve knowledge base: ${error.message}`);
       }
     }
 
     if (presetPrompt && !knowledgeBaseContext) {
-      systemPrompt = presetPrompt;
+      finalSystemPrompt = presetPrompt;
     } else if (knowledgeBaseContext && !presetPrompt) {
-      const basePrompt = `Use the following context as your learned knowledge, inside <context></context> XML tags.
-<context>
-{{#context#}}
-</context>
-
-When answer to user:
-- If you don't know, just say that you don't know.
-- If you don't know when you are not sure, ask for clarification.
-- Avoid mentioning that you obtained the information from the context.
-- And answer according to the language of the user's question.\n`;
-      systemPrompt = basePrompt.replace('{{#context#}}', knowledgeBaseContext);
+      const basePrompt = config.llm.templates.knowledgeBase;
+      finalSystemPrompt = basePrompt.replace('{{#context#}}', knowledgeBaseContext);
     } else if (presetPrompt && knowledgeBaseContext) {
-      const basePrompt = `{{#presetPrompt#}}
-
-Use the following context as your learned knowledge, inside <context></context> XML tags.
-<context>
-{{#context#}}
-</context>
-
-When answer to user:
-- If you don't know, just say that you don't know.
-- If you don't know when you are not sure, ask for clarification.
-- Avoid mentioning that you obtained the information from the context.
-- And answer according to the language of the user's question.\n`;
-      systemPrompt = basePrompt.replace('{{#context#}}', knowledgeBaseContext).replace('{{#presetPrompt#}}', presetPrompt);
+      const basePrompt = config.llm.templates.knowledgeBaseWithPresetPrompt;
+      finalSystemPrompt = basePrompt.replace('{{#context#}}', knowledgeBaseContext).replace('{{#presetPrompt#}}', presetPrompt);
     }
 
-    if (!systemPrompt) {
+    if (!finalSystemPrompt) {
       return {
         generatedByKnowledgeBase: null,
         systemMessages: [],
@@ -380,10 +361,25 @@ When answer to user:
       systemMessages: [
         {
           role: 'system',
-          content: systemPrompt,
+          content: finalSystemPrompt,
         },
       ],
     };
+  }
+
+  private async autoMergeSystemMessages(model: string, messages: Array<ChatCompletionMessageParam>) {
+    const { autoMergeSystemMessages } = this.getModelConfig(model);
+    if (!autoMergeSystemMessages) {
+      return messages;
+    }
+    const systemMessages = messages.filter((msg) => msg.role === 'system');
+    const otherMessages = messages.filter((msg) => msg.role !== 'system');
+    if (!systemMessages.length) {
+      return messages;
+    }
+
+    const mergedSystemMessage = systemMessages.join('\n\n');
+    return [{ role: 'system', content: mergedSystemMessage }, ...otherMessages];
   }
 
   private geneChunkLine(chatCmplId: string, model: string, chunkString: string) {
@@ -425,6 +421,13 @@ When answer to user:
     const { model, stream, systemPrompt, knowledgeBase, sqlKnowledgeBase, response_format = ResponseFormat.text } = params;
     let { messages } = params;
     const historyMessages = this.sanitizeMessages(messages);
+
+    if (stream) {
+      // set the content type to text-stream
+      res.setHeader('content-type', 'text/event-stream;charset=utf-8');
+      res.status(200);
+    }
+
     const { generatedByKnowledgeBase, systemMessages } = await this.generateSystemMessages(messages, systemPrompt, knowledgeBase);
     const randomChatCmplId = Math.random().toString(36).substr(2, 16);
 
@@ -532,9 +535,7 @@ When answer to user:
           },
         });
         const streamingTextResponse = new StreamingTextResponse(streamResponse, {}, data);
-        // set the content type to text-stream
-        res.setHeader('content-type', 'text/event-stream;charset=utf-8');
-        res.status(200);
+
         const body = streamingTextResponse.body;
         const readableStream = Readable.from(body as any);
         readableStream.on('data', (chunk) => {

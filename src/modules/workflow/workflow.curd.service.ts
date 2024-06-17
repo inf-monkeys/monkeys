@@ -465,6 +465,7 @@ export class WorkflowCrudService {
       output?: WorkflowOutputValue[];
       exposeOpenaiCompatibleInterface?: boolean;
       rateLimiter?: WorkflowRateLimiter;
+      openaiModelName?: string;
     },
   ) {
     const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
