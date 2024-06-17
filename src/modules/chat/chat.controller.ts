@@ -88,7 +88,7 @@ export class WorkflowOpenAICompatibleController {
       return res.json(result);
     } else {
       res.setHeader('content-type', 'text/event-stream');
-      res.status(201);
+      res.status(200);
       const key = TOOL_STREAM_RESPONSE_TOPIC(workflowInstanceId);
       this.mq.subscribe(key, (_, message: string) => {
         res.write(message);
@@ -137,7 +137,7 @@ export class WorkflowOpenAICompatibleController {
       return res.json(result);
     } else {
       res.setHeader('content-type', 'text/event-stream');
-      res.status(201);
+      res.status(200);
       const channel = TOOL_STREAM_RESPONSE_TOPIC(workflowInstanceId);
       let aiResponse = '';
       this.mq.subscribe(channel, (channel, message: string) => {
