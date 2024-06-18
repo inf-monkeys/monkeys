@@ -90,9 +90,11 @@ You can read the documentation here: [https://inf-monkeys.github.io/docs/](https
 #### Backend
 
 1. Clone the repo
+
    ```sh
    git clone https://github.com/inf-monkeys/monkeys.git
    ```
+
 2. Go to `monkeys` folder
 
    ```sh
@@ -100,10 +102,24 @@ You can read the documentation here: [https://inf-monkeys.github.io/docs/](https
    ```
 
 3. Install Node Modules
+
    ```sh
    yarn
    ```
-4. Run the server:
+
+4. Create `config.yaml`
+
+   ```sh
+   cp config.yaml.example config.yaml
+   ```
+
+5. Run Migrations
+
+   ```sh
+   yarn migartions:run
+   ```
+    
+6. Run the server:
 
    ```sh
    yarn start
@@ -147,13 +163,12 @@ That's all, you are ready to go!
 
 ## 📦 Ecosystem
 
-Here is a detailed list of existing awesome monkey tools: [https://github.com/inf-monkeys/awesome-monkey-tools](https://github.com/inf-monkeys/awesome-monkey-tools).
-
-We provided detailed information on how to write your own monkey tool, it's as simple as writing standard RESTFul APIs. You can read more on this topic at [Write your own tools](https://inf-monkeys.github.io/docs/zh-cn/build-tools/introduction/)
+- Awesome Monkey Tools: [https://github.com/inf-monkeys/awesome-monkey-tools](https://github.com/inf-monkeys/awesome-monkey-tools).
+- Write your own tools: [https://inf-monkeys.github.io/docs/zh-cn/tools/build-custom-tools/](https://inf-monkeys.github.io/docs/zh-cn/tools/build-custom-tools/)
 
 ## 🤝 Contributing
 
-Contributions of all types are more than welcome; if you are interested in contributing code, feel free to check out our GitHub [Issues][https://github.com/inf-monkeys/monkeys/issues].
+Contributions of all types are more than welcome; if you are interested in contributing code, feel free to check out our GitHub [Issues](https://github.com/inf-monkeys/monkeys/issues).
 
 <a href="https://github.com/inf-monkeys/monkeys/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=inf-monkeys/monkeys" />
