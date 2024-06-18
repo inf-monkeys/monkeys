@@ -1,6 +1,6 @@
 <div align="center">
 
-# Build Workflow-Centric AI applications
+# Monkeys - Build Workflow-Centric AI applications
 
 [![License](https://img.shields.io/github/license/inf-monkeys/monkeys)](http://www.apache.org/licenses/LICENSE-2.0)
 [![GitHub stars](https://img.shields.io/github/stars/inf-monkeys/monkeys?style=social&label=Star&maxAge=2592000)](https://GitHub.com/inf-monkeys/monkeys/stargazers/)
@@ -8,15 +8,34 @@
 
 Monkeys is an open source tool for build workflow-centric AI applications.
 
+![](./images/dashboard.png)
+
+
 </div>
 
 > **Note: We are currently iterating rapidly, so backwards compatibility is not guaranteed until a stable version (1.0.0) is released.**
 
-## Documentation
+<details>
+<summary><kbd>Table of contents</kbd></summary>
 
-You can read the documentation here: [https://inf-monkeys.github.io/docs/](https://inf-monkeys.github.io/docs/).
+#### TOC
 
-## Architecture
+- [📚 Documentation](#-documentation)
+- [🏃‍♂️ Get Started](#️-get-started)
+  - [👨‍💻 Developer](#-developer)
+  - [🐳 Docker](#-docker)
+- [📦 Ecosystem](#-ecosystem)
+- [🤝 Contributing](#-contributing)
+
+####
+<br/>
+
+</details>
+
+## 📚 Documentation
+
+<details>
+<summary><kbd>Show brief Architecture</kbd></summary>
 
 Monkeys Consists of the following key components:
 
@@ -24,13 +43,18 @@ Monkeys Consists of the following key components:
 - [Conductor](https://github.com/inf-monkeys/conductor): A microservices orchestration engine.
 - Tools: HTTP Service exposes standard RESTFul API that meet Monkeys standards, can be writen in any languages, deployed anywhere.
 
-![](./docs/images/architecture.png)
+![](./images/architecture.png)
 
-## Getting Started
+</details>
+
+You can read the documentation here: [https://inf-monkeys.github.io/docs/](https://inf-monkeys.github.io/docs/).
+
+## 🏃‍♂️ Get Started
 
 ### 👨‍💻 Developer
 
-#### Prerequisites
+<details>
+<summary><kbd>Prerequisites</kbd></summary>
 
 - [Node 18](https://nodejs.org/en/download/current): This project requires node version at least 18.
 - [yarn](https://yarnpkg.com/): We use yarn as the Node Package Manager.
@@ -59,6 +83,9 @@ Monkeys Consists of the following key components:
 - [Redis](https://redis.io/)(Optional): We use inmemory cache as default, for test purpose, you can just skip this.
 - Postgres/MySQL(Optional): We use sqlite as default storage engine, for test purpose, you can just skip this.
 
+<br/>
+
+</details>
 
 #### Backend
 
@@ -124,44 +151,17 @@ We provide a docker-compose yaml, check the [docs](./docker/README.md).
 We provide a helm chart, check the [docs](https://inf-monkeys.github.io/docs/zh-cn/getting-started/helm/).
 
 
-## Tools
-
-### Awesome Monkey Tools
+## 📦 Ecosystem
 
 Here is a detailed list of existing awesome monkey tools: [https://github.com/inf-monkeys/awesome-monkey-tools](https://github.com/inf-monkeys/awesome-monkey-tools).
 
-### Write Your Own Monkey Tool
-
 We provided detailed information on how to write your own monkey tool, it's as simple as writing standard RESTFul APIs. You can read more on this topic at [Write your own tools](https://inf-monkeys.github.io/docs/zh-cn/build-tools/introduction/)
 
+## 🤝 Contributing
 
-## Configuration
-
-See all configuration values [here](./CONFIGURATION.md).
-
-## OpenAPI Documentation
-
-After you start the project, you can visit the following OpenAPI documentations:
-
-- [http://localhost:3000/openapi/server/](http://localhost:3000/openapi/server/)
-- [http://localhost:3000/openapi/tools/](http://localhost:3000/openapi/tools/)
-
-## Contributing
-
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-
-### Contributors
+Contributions of all types are more than welcome; if you are interested in contributing code, feel free to check out our GitHub [Issues][https://github.com/inf-monkeys/monkeys/issues].
 
 <a href="https://github.com/inf-monkeys/monkeys/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=inf-monkeys/monkeys" />
 </a>
 
-### How to Contribute
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feat/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
