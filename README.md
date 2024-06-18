@@ -142,14 +142,8 @@ That's all, you are ready to go!
 
 ### 🐳 Docker
 
-#### Docker Compose
-
-We provide a docker-compose yaml, check the [docs](./docker/README.md).
-
-#### Helm
-
-We provide a helm chart, check the [docs](https://inf-monkeys.github.io/docs/zh-cn/getting-started/helm/).
-
+- [Docker Compose](./docker/README.md)
+- [Helm Chart](https://github.com/inf-monkeys/helm-charts)
 
 ## 📦 Ecosystem
 
