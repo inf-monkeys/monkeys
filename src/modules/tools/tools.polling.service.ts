@@ -6,9 +6,11 @@ import { logger } from '@/common/logger';
 import { Mq } from '@/common/mq';
 import { readIncomingMessage } from '@/common/utils/stream';
 import { sleep } from '@/common/utils/utils';
+import { MediaSource } from '@/database/entities/assets/media/media-file';
 import { API_NAMESPACE } from '@/database/entities/tools/tools-server.entity';
 import { ToolsEntity } from '@/database/entities/tools/tools.entity';
 import { CredentialsRepository } from '@/database/repositories/credential.repository';
+import { MediaFileRepository } from '@/database/repositories/media.repository';
 import { Task, TaskDef, TaskManager } from '@inf-monkeys/conductor-javascript';
 import { Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
@@ -31,6 +33,7 @@ export class ToolsPollingService {
     private readonly toolsRepository: ToolsRepository,
     private readonly toolsRegistryService: ToolsRegistryService,
     private readonly credentialsRepository: CredentialsRepository,
+    private readonly richMediaRepository: MediaFileRepository,
     @Inject(CACHE_TOKEN) private readonly cache: CacheManager,
     @Inject(MQ_TOKEN) private readonly mq: Mq,
   ) {}
@@ -165,6 +168,37 @@ export class ToolsPollingService {
       });
     } catch (error) {
       logger.warn(`Report usage failed: ${error.message}`);
+    }
+  }
+
+  private async autoSaveRichMedia(teamId: string, userId: string, tool: ToolsEntity, outputData: { [x: string]: any }) {
+    const { output } = tool;
+    if (!output?.length) {
+      return;
+    }
+    for (const item of output) {
+      try {
+        if (item.typeOptions?.richMedia) {
+          const { name } = item;
+          const value = outputData[name];
+          if (value) {
+            logger.info(`Auto save rich media: tool=${tool.displayName}, field=${name}, url=${value}`);
+            await this.richMediaRepository.createMedia(teamId, userId, {
+              url: value,
+              source: MediaSource.AUTO_GENERATE,
+              displayName: `${tool.name} 自动生成于 ${new Date().toISOString()}`,
+              params: {
+                toolName: tool.name,
+                outputField: name,
+                createdAt: +new Date(),
+              },
+              type: item.typeOptions?.richMedia,
+            });
+          }
+        }
+      } catch (error) {
+        logger.warn(`Auto save rich media failed: ${error.message}`);
+      }
     }
   }
 
@@ -372,6 +406,7 @@ export class ToolsPollingService {
           logger.warn(`Output data of tool ${__toolName} is not an object: `, outputData);
           throw new Error('Output data must be an object');
         }
+        await this.autoSaveRichMedia(__context.teamId, __context.userId, tool, outputData);
         return {
           outputData,
           status: 'COMPLETED',
