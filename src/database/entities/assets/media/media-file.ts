@@ -8,7 +8,7 @@ export enum MediaSource {
   AUTO_GENERATE = 3,
 }
 
-export type MediaType = 'image' | 'text';
+export type MediaType = 'image' | 'text' | 'video' | 'audio';
 
 export type MediaImageParams = {
   width: number;
@@ -32,7 +32,9 @@ export class MediaFileEntity extends BaseAssetEntity {
   })
   source: MediaSource;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   size?: number;
 
   @Column({
