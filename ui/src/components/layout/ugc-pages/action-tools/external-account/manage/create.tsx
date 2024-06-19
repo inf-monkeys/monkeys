@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -17,17 +17,18 @@ interface ICreateExternalAccountProps extends React.ComponentPropsWithoutRef<'di
 
 export const CreateExternalAccount: React.FC<ICreateExternalAccountProps> = ({ children, detail }) => {
   const { t } = useTranslation();
-
   const { trigger } = useCreateCredential();
-  const finalInputs = [
-    {
-      name: 'displayName',
-      displayName: t('ugc-page.action-tools.ugc-view.subtitle.external-account.manage.create.columns.displayName'),
-      type: 'string',
-      required: true,
-    },
-    ...calculateDisplayInputs(detail?.properties ?? [], {}),
-  ] as VinesWorkflowVariable[];
+  const finalInputs = useMemo(() => {
+    return [
+      {
+        name: 'displayName',
+        displayName: t('ugc-page.action-tools.ugc-view.subtitle.external-account.manage.create.columns.displayName'),
+        type: 'string',
+        required: true,
+      },
+      ...calculateDisplayInputs(detail?.properties ?? [], {}),
+    ] as VinesWorkflowVariable[];
+  }, [detail?.properties]);
 
   const { mutate } = useCredentials(detail?.name);
 
