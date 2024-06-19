@@ -109,10 +109,27 @@ services:
     depends_on:
       - server
       - ui
+
+  minio:
+    image: docker.io/bitnami/minio:2022
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    networks:
+      - monkeys
+    volumes:
+      - 'miniodata-monkeys:/data'
+    environment:
+      - MINIO_ROOT_USER=monkeys
+      - MINIO_ROOT_PASSWORD=monkeys123
+      - MINIO_DEFAULT_BUCKETS=monkeys
+
 volumes:
   esdata-monkeys:
     driver: local
   pgdata-monkeys:
+    driver: local
+  miniodata-monkeys:
     driver: local
 
 networks:
