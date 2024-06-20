@@ -188,6 +188,13 @@ export interface PaymentServerConfig {
   baseUrl: string;
 }
 
+export interface OneApiConfig {
+  enabled: boolean;
+  baseURL: string;
+  username: string;
+  password: string;
+}
+
 export interface Config {
   server: ServerConfig;
   conductor: ConductorConfig;
@@ -202,6 +209,7 @@ export interface Config {
   proxy: ProxyConfig;
   llm: LLmConfig;
   paymentServer: PaymentServerConfig;
+  oneapi: OneApiConfig;
 }
 
 const port = readConfig('server.port', 3000);
@@ -342,6 +350,12 @@ When answer to user:
   paymentServer: {
     enabled: readConfig('paymentServer.enabled', false),
     baseUrl: readConfig('paymentServer.baseUrl'),
+  },
+  oneapi: {
+    enabled: readConfig('oneapi.enabled', false),
+    baseURL: readConfig('oneapi.baseURL'),
+    username: readConfig('oneapi.username'),
+    password: readConfig('oneapi.password'),
   },
 };
 
