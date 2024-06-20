@@ -1478,6 +1478,33 @@
           "insert-down-tool": "Insert Down Tool",
           "del-tool": "Delete Tools"
         }
+      },
+      "tooltip": {
+        "zoom-in": "Zoom In",
+        "zoom-out": "Zoom Out",
+        "reset": "Reset canvas",
+        "drag": "Drag canvas",
+        "mouse": "Mouse",
+        "only-read": "Read only mode",
+        "edit": "Edit mode",
+        "direction-of-alignment": "Direction of alignment：{{dir}}",
+        "horizontal": "Horizontal",
+        "vertically": "Vertically",
+        "display-mode": "Tool display mode：{{mode}}",
+        "simplicity": "Simplicity",
+        "full-display": "Full display",
+        "normal": "Normal",
+        "raw-data": "Edit raw data",
+        "more": {
+          "tip": "more options",
+          "del-workflow": {
+            "button": "Delete workflow",
+            "title": "Sure you want to delete the workflow?",
+            "desc": "Deletion cannot be recovered and all relevant data will be permanently deleted.",
+            "cancel": "cancel",
+            "action": "Delete"
+          }
+        }
       }
     }
   }

@@ -13,6 +13,7 @@ import {
   ZoomInIcon,
   ZoomOutIcon,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { MoreToolbar } from '@/components/layout/vines-view/flow/toolbar/more.tsx';
 import { ToolButton } from '@/components/layout/vines-view/flow/toolbar/tool-button.tsx';
@@ -30,6 +31,8 @@ import VinesEvent from '@/utils/events.ts';
 interface IVinesToolbarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
+  const { t } = useTranslation();
+
   const { updatePageData } = useVinesPage();
   const { vines } = useVinesFlow();
   const { isLatestWorkflowVersion, workflowId } = useFlowStore();
@@ -89,12 +92,27 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
 
   return (
     <Card className="absolute left-0 top-0 z-40 m-4 flex flex-col flex-nowrap gap-2 p-2">
-      <ToolButton icon={<ZoomInIcon />} tip="放大" keys={['ctrl', '+']} onClick={handleZoomIn} />
-      <ToolButton icon={<Fullscreen />} tip="适应屏幕" keys={['ctrl', '1']} onClick={handleFitScreen} />
-      <ToolButton icon={<ZoomOutIcon />} tip="缩小" keys={['ctrl', '-']} onClick={handleZoomOut} />
+      <ToolButton
+        icon={<ZoomInIcon />}
+        tip={t('workspace.flow-view.tooltip.zoom-in')}
+        keys={['ctrl', '+']}
+        onClick={handleZoomIn}
+      />
+      <ToolButton
+        icon={<Fullscreen />}
+        tip={t('workspace.flow-view.tooltip.reset')}
+        keys={['ctrl', '1']}
+        onClick={handleFitScreen}
+      />
+      <ToolButton
+        icon={<ZoomOutIcon />}
+        tip={t('workspace.flow-view.tooltip.zoom-out')}
+        keys={['ctrl', '-']}
+        onClick={handleZoomOut}
+      />
       <ToolButton
         icon={isCanvasMoving ? <Hand /> : <MousePointer2 />}
-        tip={isCanvasMoving ? '鼠标' : '移动视图'}
+        tip={isCanvasMoving ? t('workspace.flow-view.tooltip.mouse') : t('workspace.flow-view.tooltip.drag')}
         keys={['space']}
         onClick={handleCanvasMove}
       />
@@ -104,27 +122,35 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
           (isNotLatestWorkflowVersion || isWorkflowRUNNING) && 'hidden',
         )}
         icon={<Lock />}
-        tip={isEditMode ? '只读模式' : '编辑模式'}
+        tip={isEditMode ? t('workspace.flow-view.tooltip.only-read') : t('workspace.flow-view.tooltip.edit')}
         keys={['ctrl', 'L']}
         onClick={handleToggleMode}
       />
       <ToolButton
         className={cn(isWorkflowRUNNING && 'hidden')}
         icon={isHorizontal ? <BetweenHorizontalStart /> : <BetweenVerticalStart />}
-        tip={`排版方向：${isHorizontal ? '横向' : '纵向'}`}
+        tip={t('workspace.flow-view.tooltip.direction-of-alignment', {
+          dir: isHorizontal ? t('workspace.flow-view.tooltip.horizontal') : t('workspace.flow-view.tooltip.vertically'),
+        })}
         keys={['ctrl', 'D']}
         onClick={handleDirectionChange}
       />
       <ToolButton
         className={cn(isWorkflowRUNNING && 'hidden')}
         icon={<Workflow />}
-        tip={`工具显示：${isRenderMini ? '极简' : isRenderComplicate ? '全参数' : '普通'}模式`}
+        tip={t('workspace.flow-view.tooltip.display-mode', {
+          mode: isRenderMini
+            ? t('workspace.flow-view.tooltip.simplicity')
+            : isRenderComplicate
+              ? t('workspace.flow-view.tooltip.full-display')
+              : t('workspace.flow-view.tooltip.normal'),
+        })}
         onClick={handleRenderTypeChange}
       />
       <ToolButton
         className={cn(isWorkflowRUNNING && 'hidden')}
         icon={<Code />}
-        tip="开发者模式"
+        tip={t('workspace.flow-view.tooltip.raw-data')}
         onClick={() => VinesEvent.emit('flow-raw-data-editor', workflowId)}
       />
       <MoreToolbar />

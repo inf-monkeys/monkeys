@@ -1473,6 +1473,33 @@
           "insert-down-tool": "向下插入工具",
           "del-tool": "删除工具"
         }
+      },
+      "tooltip": {
+        "zoom-in": "放大",
+        "zoom-out": "缩小",
+        "reset": "适应屏幕",
+        "drag": "拖动画布",
+        "mouse": "鼠标",
+        "only-read": "只读模式",
+        "edit": "编辑模式",
+        "direction-of-alignment": "排列方向：{{dir}}",
+        "horizontal": "水平",
+        "vertically": "垂直",
+        "display-mode": "工具显示模式：{{mode}}",
+        "simplicity": "极简模式",
+        "full-display": "全参数模式",
+        "normal": "普通模式",
+        "raw-data": "编辑原始数据",
+        "more": {
+          "tip": "更多",
+          "del-workflow": {
+            "button": "删除工作流",
+            "title": "确定要删除工作流吗？",
+            "desc": "删除后无法恢复，且所有相关数据将被永久删除。",
+            "cancel": "取消",
+            "action": "继续"
+          }
+        }
       }
     }
   }
