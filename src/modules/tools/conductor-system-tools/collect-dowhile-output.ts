@@ -1,10 +1,10 @@
 import { conductorClient } from '@/common/conductor';
 import defineNode from '@/common/utils/define-tool';
-import { BlockType } from '@inf-monkeys/vines';
+import { ToolType } from '@inf-monkeys/monkeys';
 import jsonpath from 'jsonpath';
 
 export default defineNode({
-  type: BlockType.SIMPLE,
+  type: ToolType.SIMPLE,
   name: 'collect_dowhile_output',
   categories: ['process'],
   displayName: '收集循环结果',

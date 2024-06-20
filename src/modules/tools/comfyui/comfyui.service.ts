@@ -4,7 +4,7 @@ import { ComfyuiNode, ComfyuiPrompt, ComfyuiWorkflow, ComfyuiWorkflowWithPrompt 
 import { readComfyuiWorkflowFromImage, readComfyuiWorkflowFromJsonFile, readComfyuiWorkflowPromptFromJsonFile } from '@/common/utils/comfyui';
 import { ComfyuiWorkflowSourceType } from '@/database/entities/comfyui/comfyui-workflow.entity';
 import { ComfyuiRepository } from '@/database/repositories/comfyui.repository';
-import { BlockDefProperties, BlockDefPropertyTypes } from '@inf-monkeys/vines';
+import { ToolProperty, ToolPropertyTypes } from '@inf-monkeys/monkeys';
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import _ from 'lodash';
@@ -46,8 +46,8 @@ export class ComfyUIService {
   public async updateComfyuiWorkflow(
     id: string,
     updates: {
-      toolInput?: BlockDefProperties[];
-      toolOutput?: BlockDefProperties[];
+      toolInput?: ToolProperty[];
+      toolOutput?: ToolProperty[];
       workflow?: ComfyuiWorkflow;
       workflowApi?: ComfyuiPrompt;
     },
@@ -55,7 +55,7 @@ export class ComfyUIService {
     await this.comfyuiWorkflowRepository.updateComfyuiWorkflow(id, updates);
   }
 
-  private inferInput(node: ComfyuiNode, key: string, value: any): BlockDefProperties {
+  private inferInput(node: ComfyuiNode, key: string, value: any): ToolProperty {
     if (node.type === 'LoadImage' && key === 'upload') {
       return;
     }
@@ -127,7 +127,7 @@ export class ComfyUIService {
         };
       }
     } else {
-      const dataTypeMap: { [x: string]: BlockDefPropertyTypes } = {
+      const dataTypeMap: { [x: string]: ToolPropertyTypes } = {
         number: 'number',
         boolean: 'boolean',
         object: 'json',
@@ -149,7 +149,7 @@ export class ComfyUIService {
   }
 
   private async generateToolInputByComfyuiWorkflow(_workflow: ComfyuiWorkflowWithPrompt) {
-    let inputs: BlockDefProperties[] = [];
+    let inputs: ToolProperty[] = [];
     const newWorkflow = _.cloneDeep(_workflow);
     const prompt: ComfyuiPrompt = newWorkflow.prompt;
     for (const node of newWorkflow.workflow.nodes) {
@@ -164,7 +164,7 @@ export class ComfyUIService {
         }
       }
     }
-    const getScore = (input: BlockDefProperties) => {
+    const getScore = (input: ToolProperty) => {
       if (input.type === 'file') {
         return 2;
       }

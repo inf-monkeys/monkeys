@@ -1,8 +1,8 @@
 import defineNode from '@/common/utils/define-tool';
-import { BlockType } from '@inf-monkeys/vines';
+import { ToolType } from '@inf-monkeys/monkeys';
 
 export default defineNode({
-  type: BlockType.FORK_JOIN,
+  type: ToolType.FORK_JOIN,
   name: 'fork_task',
   categories: ['process'],
   displayName: '并行执行',

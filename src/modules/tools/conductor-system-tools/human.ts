@@ -1,5 +1,5 @@
 import defineNode from '@/common/utils/define-tool';
-import { BlockType } from '@inf-monkeys/vines';
+import { ToolType } from '@inf-monkeys/monkeys';
 
 export enum HumanMode {
   Array = 'array',
@@ -7,7 +7,7 @@ export enum HumanMode {
 }
 
 export default defineNode({
-  type: BlockType.HUMAN,
+  type: ToolType.HUMAN,
   name: 'human',
   categories: ['human'],
   displayName: '选择元素',

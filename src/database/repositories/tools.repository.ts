@@ -2,7 +2,7 @@ import { ManifestJson, RegisterToolOptions } from '@/common/typings/tools';
 import { generateDbId } from '@/common/utils';
 import { ToolsServerEntity } from '@/database/entities/tools/tools-server.entity';
 import { ToolsEntity } from '@/database/entities/tools/tools.entity';
-import { BlockDefinition } from '@inf-monkeys/vines';
+import { ToolDef } from '@inf-monkeys/monkeys';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, IsNull, Not, Repository } from 'typeorm';
@@ -61,7 +61,7 @@ export class ToolsRepository {
     await this.toolsServerRepository.save(entity);
   }
 
-  public async createOrUpdateTools(namespace: string, latestTools: BlockDefinition[], options?: RegisterToolOptions) {
+  public async createOrUpdateTools(namespace: string, latestTools: ToolDef[], options?: RegisterToolOptions) {
     const { isPublic, teamId, userId } = options || {};
     const latestToolNames = latestTools.map((x) => x.name);
     const originalTools = await this.toolsRepository.find({

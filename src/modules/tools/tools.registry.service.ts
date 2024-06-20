@@ -1,11 +1,11 @@
 import { logger } from '@/common/logger';
 import { enumToList, generateDbId, isValidNamespace } from '@/common/utils';
-import { ExtendedToolDefinition } from '@/common/utils/define-tool';
+import { ExtendedToolDef } from '@/common/utils/define-tool';
 import { generateRandomString } from '@/common/utils/utils';
 import { API_NAMESPACE, SYSTEM_NAMESPACE } from '@/database/entities/tools/tools-server.entity';
 import { ComfyuiRepository } from '@/database/repositories/comfyui.repository';
 import { TriggerTypeRepository } from '@/database/repositories/trigger-type.repository';
-import { BlockDefinition, BlockType } from '@inf-monkeys/vines';
+import { ToolDef, ToolType } from '@inf-monkeys/monkeys';
 import { Injectable } from '@nestjs/common';
 import { OpenAPIObject } from '@nestjs/swagger';
 import { ServerObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
@@ -120,7 +120,7 @@ export class ToolsRegistryService {
     options?: OpenAPIParserOptions,
   ): Promise<{
     servers: ServerObject[];
-    tools: BlockDefinition[];
+    tools: ToolDef[];
   }> {
     const { data: specData } = await axios.get<OpenAPIObject>(specUrl);
     const tools = parseOpenApiSpecAsTools(namespace, specData, options);
@@ -130,7 +130,7 @@ export class ToolsRegistryService {
     };
   }
 
-  private async validateToolsParsed(tools: BlockDefinition[]) {
+  private async validateToolsParsed(tools: ToolDef[]) {
     // Check if have duplicate tool
     const toolNames = tools.map((x) => x.name);
     const duplicateToolNames = toolNames.filter((x, i) => toolNames.indexOf(x) !== i);
@@ -160,7 +160,7 @@ export class ToolsRegistryService {
       baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
     }
 
-    let tools: BlockDefinition[] = [];
+    let tools: ToolDef[] = [];
     switch (apiType) {
       case ApiType.openapi:
         const res = await this.parseOpenapiAsTools(namespace, realSpecUrl);
@@ -203,7 +203,7 @@ export class ToolsRegistryService {
       isDeleted: false,
       createdTimestamp: +new Date(),
       updatedTimestamp: +new Date(),
-      type: BlockType.SIMPLE,
+      type: ToolType.SIMPLE,
       name: `${namespace}:${randomName}`,
       namespace: API_NAMESPACE,
       displayName: displayName,
@@ -242,12 +242,12 @@ export class ToolsRegistryService {
     }
   }
 
-  public async getBuiltInTools(): Promise<ExtendedToolDefinition[]> {
+  public async getBuiltInTools(): Promise<ExtendedToolDef[]> {
     const folder = path.resolve(__dirname, `./conductor-system-tools/`);
     if (!fs.existsSync(folder)) {
       logger.warn('Bulit in tools folder not found');
     }
-    const builtInTools: ExtendedToolDefinition[] = (
+    const builtInTools: ExtendedToolDef[] = (
       await Promise.all(
         fs.readdirSync(folder, { withFileTypes: true }).reduce(
           (result, file) => {

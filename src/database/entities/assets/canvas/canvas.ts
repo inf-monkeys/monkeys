@@ -1,5 +1,5 @@
-import { AssetType } from '@/common/typings/asset';
 import { CanvasApplication } from '@/common/typings/canvas';
+import { AssetType } from '@inf-monkeys/monkeys';
 import { Column, Entity } from 'typeorm';
 import { BaseAssetEntity } from '../base-asset';
 
