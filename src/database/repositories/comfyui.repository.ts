@@ -2,7 +2,7 @@ import { ListDto } from '@/common/dto/list.dto';
 import { ComfyuiPrompt, ComfyuiWorkflow } from '@/common/typings/comfyui';
 import { generateDbId } from '@/common/utils';
 import { CreateComfyuiServerDto } from '@/modules/tools/comfyui/dto/req/create-comfyui-server';
-import { BlockDefProperties } from '@inf-monkeys/vines';
+import { ToolProperty } from '@inf-monkeys/monkeys';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
@@ -17,7 +17,7 @@ export interface CreateComfyuiWorkflowParams {
   workflow?: ComfyuiWorkflow;
   prompt: ComfyuiPrompt;
   displayName: string;
-  toolInput?: BlockDefProperties[];
+  toolInput?: ToolProperty[];
 }
 
 @Injectable()
@@ -53,8 +53,8 @@ export class ComfyuiRepository {
   public async updateComfyuiWorkflow(
     id: string,
     updates: {
-      toolInput?: BlockDefProperties[];
-      toolOutput?: BlockDefProperties[];
+      toolInput?: ToolProperty[];
+      toolOutput?: ToolProperty[];
       workflow?: ComfyuiWorkflow;
       workflowApi?: ComfyuiPrompt;
     },

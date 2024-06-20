@@ -1,5 +1,5 @@
 import defineNode from '@/common/utils/define-tool';
-import { BlockType } from '@inf-monkeys/vines';
+import { ToolType } from '@inf-monkeys/monkeys';
 
 export enum DoWhileMode {
   // 表达式模式，conductor 官方提供的
@@ -10,7 +10,7 @@ export enum DoWhileMode {
 }
 
 export default defineNode({
-  type: BlockType.SET_VARIABLE,
+  type: ToolType.SET_VARIABLE,
   name: 'set_variable',
   categories: ['process'],
   displayName: '设置变量',

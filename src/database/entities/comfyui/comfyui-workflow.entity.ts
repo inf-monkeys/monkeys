@@ -1,5 +1,5 @@
 import { ComfyuiPrompt, ComfyuiWorkflow } from '@/common/typings/comfyui';
-import { BlockDefProperties } from '@inf-monkeys/vines';
+import { ToolProperty } from '@inf-monkeys/monkeys';
 import { Column, Entity } from 'typeorm';
 import { BaseAssetEntity } from '../assets/base-asset';
 
@@ -54,13 +54,13 @@ export class ComfyuiWorkflowEntity extends BaseAssetEntity {
     name: 'tool_input',
     type: 'simple-json',
   })
-  toolInput: BlockDefProperties[];
+  toolInput: ToolProperty[];
 
   @Column({
     name: 'tool_output',
     type: 'simple-json',
   })
-  toolOutput: BlockDefProperties[];
+  toolOutput: ToolProperty[];
 
   @Column({
     name: 'additional_model_list',

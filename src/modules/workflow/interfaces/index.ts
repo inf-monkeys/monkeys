@@ -1,7 +1,7 @@
 import { WorkflowMetadataEntity, WorkflowOutputValue, WorkflowRateLimiter } from '@/database/entities/workflow/workflow-metadata';
 import { PageInstanceType, PagePermission } from '@/database/entities/workflow/workflow-page';
 import { WebhookTriggerConfig, WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
-import { AssetType, BlockDefProperties, MonkeyTaskDefTypes, WorkflowValidationIssue } from '@inf-monkeys/vines';
+import { AssetType, MonkeyTaskDefTypes, ToolProperty, WorkflowValidationIssue } from '@inf-monkeys/monkeys';
 
 export interface BaseAsset {
   originalSite: string;
@@ -130,7 +130,7 @@ export interface WorkflowExportJson extends BaseAsset {
   version?: number;
   tasks: MonkeyTaskDefTypes[];
   triggers: WorkflowTriggerJson[];
-  variables: BlockDefProperties[];
+  variables: ToolProperty[];
   output: WorkflowOutputValue[];
   validationIssues?: WorkflowValidationIssue[];
 }
@@ -180,7 +180,7 @@ export interface CreateWorkflowData {
   version?: number;
   tasks: MonkeyTaskDefTypes[];
   triggers?: WorkflowTriggerJson[];
-  variables?: BlockDefProperties[];
+  variables?: ToolProperty[];
   output?: WorkflowOutputValue[];
   exposeOpenaiCompatibleInterface?: boolean;
   rateLimiter?: WorkflowRateLimiter;

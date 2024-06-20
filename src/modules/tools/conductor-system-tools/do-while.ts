@@ -1,5 +1,5 @@
 import defineNode from '@/common/utils/define-tool';
-import { BlockType } from '@inf-monkeys/vines';
+import { ToolType } from '@inf-monkeys/monkeys';
 
 export enum DoWhileMode {
   // 表达式模式，conductor 官方提供的
@@ -10,7 +10,7 @@ export enum DoWhileMode {
 }
 
 export default defineNode({
-  type: BlockType.DO_WHILE,
+  type: ToolType.DO_WHILE,
   name: 'do_while',
   categories: ['process'],
   displayName: '循环',

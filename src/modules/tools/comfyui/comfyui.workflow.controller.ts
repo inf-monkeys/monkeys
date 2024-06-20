@@ -3,7 +3,7 @@ import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { ComfyuiPrompt, ComfyuiWorkflow } from '@/common/typings/comfyui';
 import { IRequest } from '@/common/typings/request';
-import { BlockDefProperties } from '@inf-monkeys/vines';
+import { ToolProperty } from '@inf-monkeys/monkeys';
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ComfyUIService, ImportComfyuiWorkflowParams } from './comfyui.service';
@@ -56,8 +56,8 @@ export class ComfyuiWorkflowController {
     @Param('id') id: string,
     @Body()
     body: {
-      toolInput: BlockDefProperties[];
-      toolOutput: BlockDefProperties[];
+      toolInput: ToolProperty[];
+      toolOutput: ToolProperty[];
       workflow: ComfyuiWorkflow;
       workflowApi: ComfyuiPrompt;
     },

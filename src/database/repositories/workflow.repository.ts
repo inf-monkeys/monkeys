@@ -6,7 +6,7 @@ import { WorkflowChatSessionEntity } from '@/database/entities/workflow/workflow
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { WorkflowMetadataEntity, WorkflowOutputValue, WorkflowRateLimiter, WorkflowValidationIssue } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTriggerType, WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
-import { BlockDefProperties, MonkeyTaskDefTypes } from '@inf-monkeys/vines';
+import { MonkeyTaskDefTypes, ToolProperty } from '@inf-monkeys/monkeys';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _, { keyBy } from 'lodash';
@@ -83,7 +83,7 @@ export class WorkflowRepository {
       description?: string;
       iconUrl?: string;
       tasks: MonkeyTaskDefTypes[];
-      variables?: BlockDefProperties[];
+      variables?: ToolProperty[];
       output: WorkflowOutputValue[];
       exposeOpenaiCompatibleInterface?: boolean;
       rateLimiter?: WorkflowRateLimiter;
@@ -169,7 +169,7 @@ export class WorkflowRepository {
       description?: string;
       iconUrl?: string;
       tasks?: MonkeyTaskDefTypes[];
-      variables?: BlockDefProperties[];
+      variables?: ToolProperty[];
       activated?: boolean;
       validated?: boolean;
       validationIssues?: WorkflowValidationIssue[];

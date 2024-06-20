@@ -1,8 +1,8 @@
 import defineNode from '@/common/utils/define-tool';
-import { BlockType } from '@inf-monkeys/vines';
+import { ToolType } from '@inf-monkeys/monkeys';
 
 export default defineNode({
-  type: BlockType.SWITCH,
+  type: ToolType.SWITCH,
   name: 'switch',
   icon: 'emoji:🤖️:#7fa3f8',
   categories: ['process'],

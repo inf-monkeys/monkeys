@@ -1,14 +1,14 @@
 import { isValidToolName } from '@/common/utils';
-import { BlockCredentialItem, BlockDefPropertyTypes, BlockDefinition, BlockType } from '@inf-monkeys/vines';
+import { ToolCredentialItem, ToolDef, ToolPropertyTypes, ToolType } from '@inf-monkeys/monkeys';
 import { OpenAPIObject, OperationObject, ParameterObject, ReferenceObject, RequestBodyObject, SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 
 export interface OpenAPIParserOptions {
   filterByXMonkeyToolNameTag?: boolean;
 }
 
-export const parseOpenApiSpecAsTools = (namespace: string, specData: OpenAPIObject, options?: OpenAPIParserOptions): BlockDefinition[] => {
+export const parseOpenApiSpecAsTools = (namespace: string, specData: OpenAPIObject, options?: OpenAPIParserOptions): ToolDef[] => {
   const { filterByXMonkeyToolNameTag = true } = options || {};
-  const tools: BlockDefinition[] = [];
+  const tools: ToolDef[] = [];
   for (const path in specData.paths) {
     const pathItemObject = specData.paths[path];
     for (const method in pathItemObject) {
@@ -28,15 +28,15 @@ export const parseOpenApiSpecAsTools = (namespace: string, specData: OpenAPIObje
           method,
           path,
         };
-        let credentials: BlockCredentialItem[] = apiContent['x-monkey-tool-credentials'] || [];
+        let credentials: ToolCredentialItem[] = apiContent['x-monkey-tool-credentials'] || [];
         if (credentials?.length) {
           credentials = credentials.map((x) => {
             x.name = `${namespace}:${x.name}`;
             return x;
           });
         }
-        const block: BlockDefinition = {
-          type: BlockType.SIMPLE,
+        const tool: ToolDef = {
+          type: ToolType.SIMPLE,
           name: `${namespace}:${name}`,
           displayName: apiContent['x-monkey-tool-display-name'] || apiContent.summary || apiContent.description || name,
           description: apiContent['x-monkey-tool-description'] || apiContent.description || apiContent.summary || name,
@@ -50,11 +50,11 @@ export const parseOpenApiSpecAsTools = (namespace: string, specData: OpenAPIObje
 
         const inputInSpec = apiContent['x-monkey-tool-input'];
         if (inputInSpec) {
-          block.input = inputInSpec;
+          tool.input = inputInSpec;
         } else {
           const parameters = apiContent.parameters;
           const requestBody = apiContent.requestBody as RequestBodyObject;
-          const typeMap: { [x: string]: BlockDefPropertyTypes } = {
+          const typeMap: { [x: string]: ToolPropertyTypes } = {
             string: 'string',
             boolean: 'boolean',
             number: 'number',
@@ -118,7 +118,7 @@ export const parseOpenApiSpecAsTools = (namespace: string, specData: OpenAPIObje
                 }
                 parentFormItem.children.push(apiBodyFieldFormItem);
               } else {
-                block.input.push(apiBodyFieldFormItem);
+                tool.input.push(apiBodyFieldFormItem);
               }
 
               // 如果是嵌套结构，需要展开子选项
@@ -191,16 +191,16 @@ export const parseOpenApiSpecAsTools = (namespace: string, specData: OpenAPIObje
                 apiBodyFieldFormItem.type = 'options';
                 apiBodyFieldFormItem.options = options;
               }
-              block.input.push(apiBodyFieldFormItem);
+              tool.input.push(apiBodyFieldFormItem);
             }
           }
         }
 
         const outputInSpec = apiContent['x-monkey-tool-output'];
         if (outputInSpec) {
-          block.output = outputInSpec;
+          tool.output = outputInSpec;
         }
-        tools.push(block);
+        tools.push(tool);
       }
     }
   }

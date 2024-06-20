@@ -1,4 +1,4 @@
-import { AssetType } from '@/common/typings/asset';
+import { AssetType } from '@inf-monkeys/monkeys';
 import { Column, Entity } from 'typeorm';
 import { BaseAssetEntity } from '../base-asset';
 

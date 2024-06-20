@@ -1,4 +1,4 @@
-import { BlockDefProperties } from '@inf-monkeys/vines';
+import { ToolProperty } from '@inf-monkeys/monkeys';
 import { Column, Entity, Index } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
@@ -32,12 +32,12 @@ export class ToolsTriggerTypesEntity extends BaseEntity {
     type: 'simple-json',
     nullable: true,
   })
-  properties: BlockDefProperties[];
+  properties: ToolProperty[];
 
   @Column({
     type: 'simple-json',
     nullable: true,
     name: 'workflow_inputs',
   })
-  workflowInputs: BlockDefProperties[];
+  workflowInputs: ToolProperty[];
 }

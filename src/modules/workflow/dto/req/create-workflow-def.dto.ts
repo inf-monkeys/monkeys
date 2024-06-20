@@ -1,5 +1,5 @@
 import { WorkflowOutputValue } from '@/database/entities/workflow/workflow-metadata';
-import { BlockDefProperties, MonkeyTaskDefTypes } from '@inf-monkeys/vines';
+import { MonkeyTaskDefTypes, ToolProperty } from '@inf-monkeys/monkeys';
 import { ApiProperty } from '@nestjs/swagger';
 import * as Joiful from 'joiful';
 import { WorkflowTriggerJson } from '../../interfaces';
@@ -54,7 +54,7 @@ export class CreateWorkflowDefDto {
     required: false,
     name: 'variables',
   })
-  variables?: BlockDefProperties[];
+  variables?: ToolProperty[];
 
   @ApiProperty({
     description: '工作流输出配置',

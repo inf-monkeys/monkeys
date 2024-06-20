@@ -8,7 +8,7 @@ import { ToolsRepository } from '@/database/repositories/tools.repository';
 import { DoWhileMode } from '@/modules/tools/conductor-system-tools/do-while';
 import { CONDUCTOR_TASK_DEF_NAME } from '@/modules/tools/tools.polling.service';
 import { Task, WorkflowTask } from '@inf-monkeys/conductor-javascript';
-import { BlockType } from '@inf-monkeys/vines';
+import { ToolType } from '@inf-monkeys/monkeys';
 import { Injectable } from '@nestjs/common';
 
 export interface WorkflowDefinition {
@@ -117,7 +117,7 @@ export class ConductorService {
       tasks.push({
         name: CONDUCTOR_TASK_DEF_NAME,
         taskReferenceName: 'construct_workflow_output_ref',
-        type: BlockType.SIMPLE,
+        type: ToolType.SIMPLE,
         inputParameters,
       });
     }
@@ -135,7 +135,7 @@ export class ConductorService {
         continue;
       }
 
-      if (tool.namespace !== SYSTEM_NAMESPACE || task.type === BlockType.SIMPLE) {
+      if (tool.namespace !== SYSTEM_NAMESPACE || task.type === ToolType.SIMPLE) {
         // use CUSTOM_BLOCK_NAME_KEY to store real task_name
         task.inputParameters[this.TOOL_NAME_KEY] = task.name;
         task.inputParameters[this.CONTEXT_KEY] = '${workflow.input.__context}';
@@ -170,7 +170,7 @@ export class ConductorService {
           const inlineTask: WorkflowTask = {
             name: 'loopItemRef',
             taskReferenceName: `${task.taskReferenceName}_loopItemRef`,
-            type: BlockType.INLINE,
+            type: ToolType.INLINE,
             inputParameters: {
               evaluatorType: 'javascript',
               items: listToLoopOver,
