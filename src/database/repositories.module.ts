@@ -7,6 +7,7 @@ import { ComfyuiWorkflowAssetRepositroy } from './repositories/assets-comfyui-wo
 import { AssetsCommonRepository } from './repositories/assets-common.repository';
 import { SqlKnowledgeBaseAssetRepositroy } from './repositories/assets-knowledge-base-sql.repository';
 import { KnowledgeBaseAssetRepositroy } from './repositories/assets-knowledge-base.repository';
+import { LlmChannelAssetRepositroy } from './repositories/assets-llm-channel.respository';
 import { LlmModelAssetRepositroy } from './repositories/assets-llm-model.respository';
 import { AssetsMarketPlaceRepository } from './repositories/assets-marketplace.repository';
 import { MediaFileAssetRepositroy } from './repositories/assets-media-file.repository';
@@ -39,6 +40,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     AssetsCommonRepository,
     CanvasAssetRepositroy,
     LlmModelAssetRepositroy,
+    LlmChannelAssetRepositroy,
     SdModelAssetRepositroy,
     KnowledgeBaseAssetRepositroy,
     MediaFileAssetRepositroy,
@@ -65,6 +67,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     AssetsCommonRepository,
     CanvasAssetRepositroy,
     LlmModelAssetRepositroy,
+    LlmChannelAssetRepositroy,
     SdModelAssetRepositroy,
     KnowledgeBaseAssetRepositroy,
     MediaFileAssetRepositroy,

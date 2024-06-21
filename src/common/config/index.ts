@@ -193,6 +193,7 @@ export interface OneApiConfig {
   baseURL: string;
   username: string;
   password: string;
+  rootToken: string;
 }
 
 export interface Config {
@@ -356,6 +357,7 @@ When answer to user:
     baseURL: readConfig('oneapi.baseURL'),
     username: readConfig('oneapi.username'),
     password: readConfig('oneapi.password'),
+    rootToken: readConfig('oneapi.rootToken'),
   },
 };
 
@@ -396,6 +398,15 @@ const validateConfig = () => {
   if (config.conductor.baseUrl) {
     if (!isValidUrl(config.conductor.baseUrl)) {
       throw new Error('Invalid conductor baseUrl: ' + config.conductor.baseUrl);
+    }
+  }
+
+  if (config.oneapi.enabled) {
+    if (!config.oneapi.baseURL) {
+      throw new Error('OneAPI enabled but no baseURL provided');
+    }
+    if (!config.oneapi.rootToken) {
+      throw new Error('OneAPI enabled but no rootToken provided');
     }
   }
 };

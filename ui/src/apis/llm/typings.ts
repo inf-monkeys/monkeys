@@ -4,7 +4,7 @@ export interface ILLMModel extends IBaseEntity {
   uuid: string;
   origin: 'built-in' | 'user';
   teamId?: string;
-  name: string;
+  displayName: string;
   description: string;
   logo: string;
   baseModel: string;
