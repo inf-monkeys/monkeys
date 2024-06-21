@@ -1491,7 +1491,12 @@
         "simplicity": "极简模式",
         "full-display": "全参数模式",
         "normal": "普通模式",
-        "raw-data": "编辑原始数据",
+        "raw-data": {
+          "button": "编辑原始数据",
+          "desc": "请谨慎编辑工作流原始数据，错误的数据将会导致工作流损坏！",
+          "reset": "重置",
+          "save": "保存"
+        },
         "more": {
           "tip": "更多",
           "del-workflow": {

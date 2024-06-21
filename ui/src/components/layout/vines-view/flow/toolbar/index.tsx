@@ -150,7 +150,7 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
       <ToolButton
         className={cn(isWorkflowRUNNING && 'hidden')}
         icon={<Code />}
-        tip={t('workspace.flow-view.tooltip.raw-data')}
+        tip={t('workspace.flow-view.tooltip.raw-data.button')}
         onClick={() => VinesEvent.emit('flow-raw-data-editor', workflowId)}
       />
       <MoreToolbar />

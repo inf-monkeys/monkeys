@@ -1496,7 +1496,12 @@
         "simplicity": "Simplicity",
         "full-display": "Full display",
         "normal": "Normal",
-        "raw-data": "Edit raw data",
+        "raw-data": {
+          "button": "Edit raw data",
+          "desc": "Please edit the raw workflow data with care, incorrect data will result in a corrupted workflow!",
+          "reset": "reset",
+          "save": "save"
+        },
         "more": {
           "tip": "more options",
           "del-workflow": {
