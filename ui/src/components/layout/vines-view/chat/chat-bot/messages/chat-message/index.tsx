@@ -3,6 +3,8 @@ import React from 'react';
 import { useClipboard } from '@mantine/hooks';
 import { isEmpty } from 'lodash';
 import { Copy, CopyCheck } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 import { ToolDisplay } from '@/components/layout/vines-view/chat/chat-bot/messages/chat-message/tool-display.tsx';
 import { IVinesMessage } from '@/components/layout/vines-view/chat/chat-bot/use-chat.ts';
@@ -12,6 +14,7 @@ import { Card } from '@/components/ui/card.tsx';
 import { VinesMarkdown } from '@/components/ui/markdown';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { execCopy } from '@/utils';
 
 interface IVinesChatMessageProps {
   data: IVinesMessage;
@@ -33,6 +36,7 @@ export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
   botPhoto,
   userPhoto,
 }) => {
+  const { t } = useTranslation();
   const clipboard = useClipboard();
 
   const isUser = data.role === 'user';
@@ -68,7 +72,11 @@ export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
                   variant="outline"
                   size="small"
                   className="absolute -bottom-1 -right-9 flex scale-80 gap-2 p-1 opacity-0 transition-opacity group-hover:opacity-100"
-                  onClick={() => clipboard.copy(content)}
+                  onClick={() => {
+                    clipboard.copy(content);
+                    if (!clipboard.copied && !execCopy(content)) toast.error(t('common.toast.copy-failed'));
+                    else toast.success(t('common.toast.copy-success'));
+                  }}
                 />
               </TooltipTrigger>
               <TooltipContent>复制</TooltipContent>

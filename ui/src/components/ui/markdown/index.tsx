@@ -2,12 +2,14 @@ import React, { FC, memo, useMemo } from 'react';
 
 import { useClipboard } from '@mantine/hooks';
 import { Copy, CopyCheck, ExternalLink } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import ReactMarkdown, { Components, Options } from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
+import { toast } from 'sonner';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Button } from '@/components/ui/button';
@@ -17,7 +19,7 @@ import { FALLBACK_LANG } from '@/components/ui/highlighter/useHighlight.ts';
 import { isSingleLine } from '@/components/ui/highlighter/utils.ts';
 import { Label } from '@/components/ui/label.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn } from '@/utils';
+import { cn, execCopy } from '@/utils';
 
 export const MemoizedReactMarkdown: FC<Options> = memo(
   ReactMarkdown,
@@ -31,6 +33,7 @@ interface IVinesMarkdownProps extends Options {
 }
 
 export const VinesMarkdown: React.FC<IVinesMarkdownProps> = ({ allowHtml, className, children }) => {
+  const { t } = useTranslation();
   const components: Components = useMemo(
     () => ({
       a: ({ href, children }) => (
@@ -76,7 +79,11 @@ export const VinesMarkdown: React.FC<IVinesMarkdownProps> = ({ allowHtml, classN
               variant="outline"
               size="small"
               className="absolute right-1 top-1 scale-80 opacity-0 group-hover/codeblock:opacity-75"
-              onClick={() => clipboard.copy(code)}
+              onClick={() => {
+                clipboard.copy(code);
+                if (!clipboard.copied && !execCopy(code)) toast.error(t('common.toast.copy-failed'));
+                else toast.success(t('common.toast.copy-success'));
+              }}
             />
             {showLanguage && (
               <Label className="pointer-events-none absolute bottom-2 right-2 opacity-0 transition-opacity group-hover/codeblock:opacity-70">
