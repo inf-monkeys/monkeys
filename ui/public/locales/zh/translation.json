@@ -29,6 +29,7 @@
       "switch": "切换",
       "copy": "复制",
       "copy-success": "复制成功",
+      "copy-failed": "复制失败",
       "filter": "筛选",
       "back": "返回",
       "import": "导入",
@@ -68,7 +69,8 @@
       "team-not-found": "团队不存在",
       "user-not-found": "用户不存在",
       "vector-database-not-found": "知识库不存在",
-      "copy-success": "复制成功"
+      "copy-success": "复制成功",
+      "copy-failed": "复制失败"
     },
     "dialog": {
       "delete-confirm": {

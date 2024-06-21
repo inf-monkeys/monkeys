@@ -29,6 +29,7 @@
       "switch": "Switch",
       "copy": "Copy",
       "copy-success": "Copy success",
+      "copy-failed": "Copy failed",
       "filter": "Filter",
       "back": "Back",
       "import": "Import",
@@ -70,7 +71,8 @@
       "team-not-found": "The team doesn't exist.",
       "user-not-found": "The user doesn't exist.",
       "vector-database-not-found": "The vector database doesn't exist.",
-      "copy-success": "Copy success."
+      "copy-success": "Copy success.",
+      "copy-failed": "Copy failed."
     },
     "dialog": {
       "delete-confirm": {

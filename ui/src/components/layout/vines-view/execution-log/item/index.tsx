@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { MonkeyWorkflow } from '@inf-monkeys/vines';
 import { useClipboard } from '@mantine/hooks';
 import { Copy } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { getDescOfTriggerType } from '@/apis/workflow/trigger/utils.ts';
@@ -14,7 +15,7 @@ import { Tag } from '@/components/ui/tag';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
-import { cn } from '@/utils';
+import { cn, execCopy } from '@/utils';
 import { formatTimeDiffPrevious, formatTimeGap } from '@/utils/time.ts';
 
 interface IVinesLogItemProps {
@@ -24,6 +25,7 @@ interface IVinesLogItemProps {
 }
 
 export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition, workflowExecution, onClick }) => {
+  const { t } = useTranslation();
   const clipboard = useClipboard({ timeout: 500 });
 
   const statusMapper = useMemo(() => {
@@ -77,7 +79,8 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
                         onClick={(e) => {
                           e.stopPropagation();
                           clipboard.copy(instanceId);
-                          toast.success('已复制实例 ID');
+                          if (!clipboard.copied && !execCopy(instanceId)) toast.error(t('common.toast.copy-failed'));
+                          else toast.success(t('common.toast.copy-success'));
                         }}
                       />
                     </TooltipTrigger>
