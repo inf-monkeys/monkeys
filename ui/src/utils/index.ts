@@ -46,3 +46,18 @@ export const setLocalStorage = <T>(key: string, value: T) => {
 
 export const nanoIdLowerCase = customAlphabet('6789bcdfghjkmnpqrtwz', 8);
 export const nanoIdUpperCase = customAlphabet('6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz', 8);
+
+export const execCopy = (text: string): boolean => {
+  const tempTextArea = document.createElement('textarea');
+  tempTextArea.value = text;
+  document.body.appendChild(tempTextArea);
+  tempTextArea.select();
+  tempTextArea.setSelectionRange(0, 99999); // 对于移动设备
+  try {
+    return document.execCommand('copy');
+  } catch (err) {
+    return false;
+  } finally {
+    document.body.removeChild(tempTextArea);
+  }
+};

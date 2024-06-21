@@ -43,6 +43,7 @@ import {
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { useWorkflow } from '@/package/vines-flow';
+import { execCopy } from '@/utils';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const Workflows: React.FC = () => {
@@ -153,7 +154,10 @@ export const Workflows: React.FC = () => {
               <DropdownMenuGroup>
                 <DropdownMenuItem
                   onSelect={() => {
-                    clipboard.copy(location.origin.concat(`/${item.teamId}/workspace/${item.workflowId}`));
+                    const url = location.origin.concat(`/${item.teamId}/workspace/${item.workflowId}`);
+                    clipboard.copy(url);
+                    if (!clipboard.copied && !execCopy(url)) toast.error(t('common.toast.copy-failed'));
+                    else toast.success(t('common.toast.copy-success'));
                     toast.success(t('common.toast.copy-success'));
                   }}
                 >
