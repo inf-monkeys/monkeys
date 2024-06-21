@@ -6,7 +6,7 @@ import { WorkflowChatSessionEntity } from '@/database/entities/workflow/workflow
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { WorkflowMetadataEntity, WorkflowOutputValue, WorkflowRateLimiter, WorkflowValidationIssue } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTriggerType, WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
-import { MonkeyTaskDefTypes, ToolProperty } from '@inf-monkeys/monkeys';
+import { I18nValue, MonkeyTaskDefTypes, ToolProperty } from '@inf-monkeys/monkeys';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _, { keyBy } from 'lodash';
@@ -79,8 +79,8 @@ export class WorkflowRepository {
     workflowId: string,
     version: number,
     data: {
-      displayName: string;
-      description?: string;
+      displayName: string | I18nValue;
+      description?: string | I18nValue;
       iconUrl?: string;
       tasks: MonkeyTaskDefTypes[];
       variables?: ToolProperty[];

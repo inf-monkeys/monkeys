@@ -1,5 +1,5 @@
-import { AssetType } from '@inf-monkeys/monkeys';
-import { Column } from 'typeorm';
+import { AssetType, I18nValue } from '@inf-monkeys/monkeys';
+import { AfterLoad, Column } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
 export enum AssetPublishPolicy {
@@ -38,13 +38,15 @@ export class BaseAssetEntity extends BaseEntity {
 
   @Column({
     name: 'display_name',
+    type: 'varchar',
   })
-  displayName: string;
+  displayName: string | I18nValue;
 
   @Column({
     nullable: true,
+    type: 'varchar',
   })
-  description?: string;
+  description?: string | I18nValue;
 
   @Column({
     name: 'is_preset',
@@ -65,4 +67,25 @@ export class BaseAssetEntity extends BaseEntity {
     nullable: true,
   })
   publishConfig?: AssetPublishConfig;
+
+  @AfterLoad()
+  afterLoad?() {
+    try {
+      this.displayName = JSON.parse(this.displayName as string);
+    } catch (error) {}
+
+    try {
+      this.description = JSON.parse(this.description as string);
+    } catch (error) {}
+  }
+
+  getDisplayNameStr(defaultLocale = 'en-US') {
+    if (typeof this.displayName === 'string') {
+      return this.displayName;
+    } else if (typeof this.displayName === 'object' && this.displayName !== null) {
+      return this.displayName[defaultLocale] || this.displayName['en-US'] || this.displayName[Object.keys(this.displayName)[0]];
+    } else {
+      return '';
+    }
+  }
 }
