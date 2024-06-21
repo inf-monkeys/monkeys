@@ -1,7 +1,7 @@
 import { WorkflowMetadataEntity, WorkflowOutputValue, WorkflowRateLimiter } from '@/database/entities/workflow/workflow-metadata';
 import { PageInstanceType, PagePermission } from '@/database/entities/workflow/workflow-page';
 import { WebhookTriggerConfig, WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
-import { AssetType, MonkeyTaskDefTypes, ToolProperty, WorkflowValidationIssue } from '@inf-monkeys/monkeys';
+import { AssetType, I18nValue, MonkeyTaskDefTypes, ToolProperty, WorkflowValidationIssue } from '@inf-monkeys/monkeys';
 
 export interface BaseAsset {
   originalSite: string;
@@ -124,9 +124,9 @@ export interface WorkflowPageJson {
 }
 
 export interface WorkflowExportJson extends BaseAsset {
-  displayName: string;
+  displayName: string | I18nValue;
   iconUrl: string;
-  description: string;
+  description: string | I18nValue;
   version?: number;
   tasks: MonkeyTaskDefTypes[];
   triggers: WorkflowTriggerJson[];
@@ -174,9 +174,9 @@ export interface CreateWorkflowOptions {
 }
 
 export interface CreateWorkflowData {
-  displayName: string;
+  displayName: string | I18nValue;
   iconUrl?: string;
-  description?: string;
+  description?: string | I18nValue;
   version?: number;
   tasks: MonkeyTaskDefTypes[];
   triggers?: WorkflowTriggerJson[];

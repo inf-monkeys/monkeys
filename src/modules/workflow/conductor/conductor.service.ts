@@ -211,13 +211,13 @@ export class ConductorService {
   }
 
   public async saveWorkflowInConductor(workflowEntity: WorkflowMetadataEntity) {
-    const { tasks, teamId, workflowId, description, version, output } = workflowEntity;
+    const { tasks, teamId, workflowId, version, output } = workflowEntity;
     await this.convertVinesTasksToConductorTasks(teamId, output, tasks, {});
     const res = await conductorClient.metadataResource.update(
       [
         {
           name: workflowId,
-          description,
+          description: workflowEntity.getDisplayNameStr(),
           version: version,
           restartable: true,
           workflowStatusListenerEnabled: true,
