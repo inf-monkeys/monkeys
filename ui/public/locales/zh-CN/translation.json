@@ -67,6 +67,7 @@
       "loading": "请等待数据加载完毕",
       "team-not-found": "团队不存在",
       "user-not-found": "用户不存在",
+      "workflow-not-found": "工作流不存在",
       "vector-database-not-found": "知识库不存在",
       "copy-success": "复制成功"
     },

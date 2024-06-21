@@ -12,7 +12,7 @@ import { VinesIcon } from '@/components/ui/vines-icon';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
-import { cn } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 
 interface IRealTimeToolOutputs {
   status: VinesNodeExecutionTask['status'];
@@ -57,7 +57,7 @@ export const VinesRealTimeChatMessage = memo((props) => {
       toolOutputs.push({
         status: nodeStatus,
         icon: customData?.icon ?? tool?.icon ?? '',
-        name: tool?.displayName ?? toolName,
+        name: getI18nContent(tool?.displayName) ?? toolName,
         customName: customData?.title ?? '',
         description: customDesc ? `${customDesc} / ${toolDesc}` : `${toolDesc}`,
         execution,

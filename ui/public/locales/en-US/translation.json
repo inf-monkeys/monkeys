@@ -69,6 +69,7 @@
       "loading": "Please wait until the data is loaded.",
       "team-not-found": "The team doesn't exist.",
       "user-not-found": "The user doesn't exist.",
+      "workflow-not-found": "The workflow doesn't exist.",
       "vector-database-not-found": "The vector database doesn't exist.",
       "copy-success": "Copy success."
     },

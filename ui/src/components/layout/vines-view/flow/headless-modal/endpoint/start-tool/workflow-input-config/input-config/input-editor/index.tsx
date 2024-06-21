@@ -5,6 +5,7 @@ import { useForceUpdate } from '@mantine/hooks';
 import { get, isArray, isBoolean, isUndefined, omit, pick, set } from 'lodash';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 
 import { WORKFLOW_INPUT_TYPE_OPTION_LIST } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/consts.ts';
 import { Button } from '@/components/ui/button';
@@ -31,12 +32,13 @@ import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInput, workflowInputSchema } from '@/schema/workspace/workflow-input.ts';
 import { useFlowStore } from '@/store/useFlowStore';
-import { cn, nanoIdLowerCase } from '@/utils';
+import { cn, getI18nContent, nanoIdLowerCase } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IInputEditorProps {}
 
 export const InputEditor: React.FC<IInputEditorProps> = () => {
+  const { t } = useTranslation();
   const { isLatestWorkflowVersion, workflowId } = useFlowStore();
 
   const { vines } = useVinesFlow();
@@ -80,7 +82,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
   useEffect(() => {
     if (!currentVariable) return;
 
-    form.setValue('displayName', currentVariable.displayName);
+    form.setValue('displayName', getI18nContent(currentVariable.displayName) ?? t('common.utils.unknown'));
     form.setValue('name', currentVariable.name);
     form.setValue('type', currentVariable.type as IWorkflowInput['type']);
     form.setValue('default', currentVariable.default as IWorkflowInput['default']);

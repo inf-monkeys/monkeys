@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useState } from 'react';
 
-import { BlockCredentialItem } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
+import { ToolCredentialItem } from '@inf-monkeys/monkeys';
 import { KeySquare } from 'lucide-react';
 import { ExternalAccountManage } from 'src/components/layout/ugc-pages/action-tools/external-account/manage';
 
@@ -23,7 +23,7 @@ import {
 interface IVinesInputCredentialsProps {
   value: string;
   onChange: (type: string, id: string) => void;
-  credentials: BlockCredentialItem[];
+  credentials: ToolCredentialItem[];
 }
 
 export const VinesInputCredentials: React.FC<IVinesInputCredentialsProps> = memo(({ credentials, value, onChange }) => {

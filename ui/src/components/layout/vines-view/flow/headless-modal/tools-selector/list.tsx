@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
+import { getI18nContent } from '@/utils';
 
 interface IToolListsProps {
   onClick?: (tool: VinesToolDef) => void;
@@ -51,20 +52,20 @@ export const ToolLists: React.FC<IToolListsProps> = ({ list, length, category, o
                 <div className="leading-5">
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="line-clamp-1 font-bold">{toolName}</div>
+                      <div className="line-clamp-1 font-bold">{getI18nContent(toolName)}</div>
                     </TooltipTrigger>
-                    <TooltipContent>{toolName}</TooltipContent>
+                    <TooltipContent>{getI18nContent(toolName)}</TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="mt-1 line-clamp-1 text-xs opacity-50">{toolDesc}</div>
+                      <div className="mt-1 line-clamp-1 text-xs opacity-50">{getI18nContent(toolDesc)}</div>
                     </TooltipTrigger>
                     <TooltipContent
                       side="bottom"
                       align={columnIndex === 0 ? 'start' : columnIndex === 2 ? 'end' : 'center'}
                       className="max-w-64"
                     >
-                      {toolDesc}
+                      {getI18nContent(toolDesc)}
                     </TooltipContent>
                   </Tooltip>
                 </div>

@@ -1,4 +1,4 @@
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 
 export type IPagePermission = 'read' | 'write' | 'exec' | 'permission';
 
@@ -9,7 +9,7 @@ export interface IPageInstance {
   icon: string;
   type: IPageInstanceType;
   allowedPermissions: IPagePermission[];
-  // customOptionsProperties?: BlockDefPropertiesExtended[];
+  // customOptionsProperties?: ToolPropertyExtended[];
 }
 
 export interface IPageType {

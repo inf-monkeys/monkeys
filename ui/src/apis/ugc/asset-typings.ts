@@ -1,4 +1,4 @@
-import { AssetType, MonkeyWorkflow } from '@inf-monkeys/vines';
+import { AssetType, MonkeyWorkflow } from '@inf-monkeys/monkeys';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { SdModelType, SdWorkProcessStatus, XYZTestResult } from '@/apis/sd/typings.ts';

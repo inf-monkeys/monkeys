@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { BlockDefPropertyTypes } from '@inf-monkeys/vines';
+import { ToolPropertyTypes } from '@inf-monkeys/monkeys';
 
 import { useKnowledgeBases } from '@/apis/knowledge-base';
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
@@ -32,7 +32,7 @@ export const KnowledgeBaseSelector: React.FC<IVinesInputPropertyProps & IVinesIn
         (newOptionsVariableMapper[optValue] = {
           displayName: name,
           name: optValue,
-          type: '文本知识库' as BlockDefPropertyTypes,
+          type: '文本知识库' as ToolPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);

@@ -1,5 +1,5 @@
-import { BlockType, MonkeyWorkflow } from '@inf-monkeys/vines';
-import { BlockDefCategory } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
+import { MonkeyWorkflow, ToolType } from '@inf-monkeys/monkeys';
+import { ToolCategory } from '@inf-monkeys/monkeys';
 import { get, isArray, isBoolean, isNumber } from 'lodash';
 
 import { VinesBase } from '@/package/vines-flow/core/base';
@@ -19,6 +19,7 @@ import {
   VinesVariableMapper,
 } from '@/package/vines-flow/core/tools/typings.ts';
 import { Constructor, VINES_STATUS } from '@/package/vines-flow/core/typings.ts';
+import { I18nAllContent, getI18nContent } from '@/utils';
 import { format } from '@/utils/string-template.ts';
 
 export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
@@ -67,11 +68,11 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
           workflow.variables?.map((v) => ({ ...v, name: `parameters.${v.name}` })) || [];
 
         return {
-          type: BlockType.SUB_WORKFLOW,
+          type: ToolType.SUB_WORKFLOW,
           name: 'sub_workflow_'.concat(workflowId),
           displayName: workflow.displayName,
           input: [SUB_WORKFLOW_TOOL_CHOOSE_VERSION_PROP(workflowId), ...variablesToTools],
-          output: this.workflowOutputToBlockDefProperties(workflow),
+          output: this.workflowOutputToToolProperty(workflow),
           icon: workflow.iconUrl,
           description: workflow.description || '工作流暂无描述',
           extra: workflow,
@@ -81,7 +82,7 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
       this.checkoutData();
     }
 
-    private workflowOutputToBlockDefProperties(workflow: MonkeyWorkflow): VinesToolDefProperties[] {
+    private workflowOutputToToolProperty(workflow: MonkeyWorkflow): VinesToolDefProperties[] {
       if (workflow?.output?.length) {
         return workflow.output.map(({ key, value }) => ({
           name: key,
@@ -111,21 +112,21 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
         if (category === 'all') {
           const allApp = this.tools.filter(({ displayName, name, description }) => {
             if (IGNORE_TOOLS.some((n) => name.startsWith(n))) return false;
-            return !search ? true : [displayName, name, description].some((s) => s?.includes(search));
+            return !search ? true : [displayName, name, description].some((s) => getI18nContent(s)?.includes(search));
           });
           tools.push([allApp, allApp.length, category, categoryDisplayName]);
 
           const subWorkflowTools = this.vinesSubWorkflowTools.filter(({ displayName, name, description }) => {
             if (IGNORE_TOOLS.some((n) => name.startsWith(n))) return false;
-            return !search ? true : [displayName, name, description].some((s) => s?.includes(search));
+            return !search ? true : [displayName, name, description].some((s) => I18nAllContent(s)?.includes(search));
           });
           tools.push([subWorkflowTools, subWorkflowTools.length, 'block', '调用工作流']);
         } else {
           const appList = this.tools
-            .filter(({ categories }) => categories?.includes(category as BlockDefCategory))
+            .filter(({ categories }) => categories?.includes(category as ToolCategory))
             .filter(({ displayName, name, description }) => {
               if (IGNORE_TOOLS.some((n) => name.startsWith(n))) return false;
-              return !search ? true : [displayName, name, description].some((s) => s?.includes(search));
+              return !search ? true : [displayName, name, description].some((s) => I18nAllContent(s)?.includes(search));
             });
           const listLength = appList.length;
           if (listLength) {

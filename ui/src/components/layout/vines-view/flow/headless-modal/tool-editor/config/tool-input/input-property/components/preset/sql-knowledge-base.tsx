@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { BlockDefPropertyTypes } from '@inf-monkeys/vines';
+import { ToolPropertyTypes } from '@inf-monkeys/monkeys';
 
 import { useUgcTableData } from '@/apis/ugc';
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
@@ -36,7 +36,7 @@ export const SqlKnowledgeBaseSelector: React.FC<IVinesInputPropertyProps & IVine
         (newOptionsVariableMapper[optValue] = {
           displayName: name,
           name: optValue,
-          type: '关系型知识库' as BlockDefPropertyTypes,
+          type: '关系型知识库' as ToolPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);

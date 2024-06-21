@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { mutate } from 'swr';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import { useClipboard } from '@mantine/hooks';
 import { Copy, FileUp, FolderUp, Import, Link, Pencil, Plus, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -43,6 +43,7 @@ import {
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { useWorkflow } from '@/package/vines-flow';
+import { getI18nContent } from '@/utils';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const Workflows: React.FC = () => {
@@ -188,7 +189,7 @@ export const Workflows: React.FC = () => {
                   onSelect={() => {
                     setExportAssetContext({
                       workflowId: item.workflowId,
-                      displayName: item.displayName,
+                      displayName: getI18nContent(item.displayName) ?? t('common.utils.untitled'),
                       version: item.version,
                     });
                     setExportDialogVisible(true);
@@ -201,7 +202,10 @@ export const Workflows: React.FC = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onSelect={() => {
-                    setExportAssetContext({ workflowId: item.workflowId, displayName: item.displayName });
+                    setExportAssetContext({
+                      workflowId: item.workflowId,
+                      displayName: getI18nContent(item.displayName) ?? t('common.utils.untitled'),
+                    });
                     setExportDialogVisible(true);
                   }}
                 >

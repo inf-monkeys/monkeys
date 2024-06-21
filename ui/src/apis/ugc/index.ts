@@ -1,6 +1,6 @@
 import useSWR, { preload } from 'swr';
 
-import { AssetType, MonkeyWorkflow } from '@inf-monkeys/vines';
+import { AssetType, MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import _ from 'lodash';
 import qs from 'qs';
 
@@ -9,7 +9,7 @@ import { ILLMModel } from '@/apis/llm/typings.ts';
 import { IMediaData } from '@/apis/media-data/typings.ts';
 import { ISDModel } from '@/apis/sd/typings.ts';
 import { ITableData } from '@/apis/table-data/typings.ts';
-import { IWorkflowBlock } from '@/apis/tools/typings.ts';
+import { IWorkflowTool } from '@/apis/tools/typings.ts';
 import { IPaginationListData } from '@/apis/typings.ts';
 import { IApplicationStoreItemDetail } from '@/apis/ugc/asset-typings.ts';
 import { IKnowledgeBaseFrontEnd } from '@/apis/vector/typings.ts';
@@ -47,8 +47,8 @@ export const preloadUgcItems = <T extends object>(dto: IListUgcDto, url: string,
 export const useUgcWorkflows = (dto: IListUgcDto) => useUgcItems<MonkeyWorkflow>(dto, '/api/workflow/metadata');
 export const preloadUgcWorkflows = (dto: IListUgcDto) => preloadUgcItems<MonkeyWorkflow>(dto, '/api/workflow/metadata');
 
-export const useUgcActionTools = (dto: IListUgcDto) => useUgcItems<IWorkflowBlock>(dto, '/api/tools');
-export const preloadUgcActionTools = (dto: IListUgcDto) => preloadUgcItems<IWorkflowBlock>(dto, '/api/tools');
+export const useUgcActionTools = (dto: IListUgcDto) => useUgcItems<IWorkflowTool>(dto, '/api/tools');
+export const preloadUgcActionTools = (dto: IListUgcDto) => preloadUgcItems<IWorkflowTool>(dto, '/api/tools');
 
 export const useUgcComfyuiWorkflows = (dto: IListUgcDto) =>
   useUgcItems<IComfyuiWorkflow>(dto, '/api/comfyui/workflows');

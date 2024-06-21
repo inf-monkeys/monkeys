@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { BlockDefPropertyTypes } from '@inf-monkeys/vines';
+import { ToolPropertyTypes } from '@inf-monkeys/monkeys';
 
 import { useLLMModels } from '@/apis/llm';
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
@@ -27,7 +27,7 @@ export const LlmModelPresets: React.FC<IVinesInputPropertyProps & IVinesInputPre
         (newOptionsVariableMapper[optValue] = {
           displayName: name,
           name: optValue,
-          type: '文本模型' as BlockDefPropertyTypes,
+          type: '文本模型' as ToolPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { BlockDefPropertyTypes } from '@inf-monkeys/vines';
+import { ToolPropertyTypes } from '@inf-monkeys/monkeys';
 import { uniqBy } from 'lodash';
 import { useBuiltInModels, useSDModels } from 'src/apis/sd';
 
@@ -36,7 +36,7 @@ export const SdModelPresets: React.FC<IVinesInputPropertyProps & IVinesInputPres
         (newOptionsVariableMapper[optValue] = {
           displayName: name,
           name: optValue,
-          type: '图像模型' as BlockDefPropertyTypes,
+          type: '图像模型' as ToolPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);

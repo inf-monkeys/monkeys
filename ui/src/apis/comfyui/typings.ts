@@ -1,4 +1,4 @@
-import { BlockDefProperties } from '@inf-monkeys/vines';
+import { ToolProperty } from '@inf-monkeys/monkeys';
 
 export interface IComfyuiModel {
   [x: string]: string[];
@@ -37,8 +37,8 @@ export interface IComfyuiWorkflow {
   workflow?: { [x: string]: any };
   prompt: { [x: string]: any };
   toolName: string;
-  toolInput: BlockDefProperties[];
-  toolOutput: BlockDefProperties[];
+  toolInput: ToolProperty[];
+  toolOutput: ToolProperty[];
 }
 
 export interface IComfyuiWorkflowDependencyNode {

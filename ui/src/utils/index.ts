@@ -8,6 +8,10 @@ import { customAlphabet } from 'nanoid';
 import rfdc from 'rfdc';
 import { parse, stringify } from 'superjson';
 import { twMerge } from 'tailwind-merge';
+import { I18nValue } from '@inf-monkeys/monkeys';
+import { useTranslation } from 'react-i18next';
+import React from 'react';
+import i18n from '@/i18n';
 
 export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 
@@ -46,3 +50,35 @@ export const setLocalStorage = <T>(key: string, value: T) => {
 
 export const nanoIdLowerCase = customAlphabet('6789bcdfghjkmnpqrtwz', 8);
 export const nanoIdUpperCase = customAlphabet('6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz', 8);
+
+export const useI18nContent = (content: string | I18nValue | undefined): string | undefined => {
+  const { i18n } = useTranslation();
+  if (!content) return;
+  if (typeof content === 'string') return content;
+  return content[i18n.language] ? content[i18n.language] : content['en-US'];
+};
+
+export const I18nContent = (content: string | I18nValue | undefined): string | undefined => {
+  const { i18n } = useTranslation();
+  if (!content) return;
+  if (typeof content === 'string') return content;
+  return content[i18n.language] ? content[i18n.language] : content['en-US'];
+};
+
+export const getI18nContent = (content: string | I18nValue | undefined): string | undefined => {
+  if (!content) return;
+  if (typeof content === 'string') return content;
+  return content[i18n.language] ? content[i18n.language] : content['en-US'];
+};
+
+export const I18nAllContent = (content: string | I18nValue | undefined): string | undefined => {
+  if (!content) return;
+  if (typeof content === 'string') return content;
+  const result: string[] = [];
+  for (const key in content) {
+    if (content[key]) {
+      result.push(content[key]!);
+    }
+  }
+  return result.join(',');
+};

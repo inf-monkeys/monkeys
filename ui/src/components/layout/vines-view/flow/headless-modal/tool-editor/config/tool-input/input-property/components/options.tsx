@@ -1,17 +1,20 @@
 import React, { useCallback, useMemo } from 'react';
 
-import { BlockDefPropertyOptions } from '@inf-monkeys/vines';
+import { ToolPropertyOptions } from '@inf-monkeys/monkeys';
 import { isNumber, isString } from 'lodash';
 
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
+import { getI18nContent } from '@/utils';
+import { useTranslation } from 'react-i18next';
 
 export const OptionsInput: React.FC<IVinesInputPropertyProps> = ({ def, value, onChange, disabled }) => {
+  const { t } = useTranslation();
   const defaultValue = def.default || void 0;
 
   const [options, typesMapper] = useMemo(() => {
     const typesMapper: Map<string, string> = new Map();
-    const options = (def?.options as BlockDefPropertyOptions[]) ?? [];
+    const options = (def?.options as ToolPropertyOptions[]) ?? [];
 
     options.forEach((option) => {
       typesMapper.set(option.value?.toString(), typeof option.value);
@@ -46,7 +49,7 @@ export const OptionsInput: React.FC<IVinesInputPropertyProps> = ({ def, value, o
         <SelectGroup>
           {options.map((option, index) => (
             <SelectItem key={index} value={option.value?.toString() ?? ''}>
-              {option.name}
+              {getI18nContent(option.name) ?? t('common.utils.unknown')}
             </SelectItem>
           ))}
         </SelectGroup>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { BlockDefPropertyTypes } from '@inf-monkeys/vines';
+import { ToolPropertyTypes } from '@inf-monkeys/monkeys';
 import { get } from 'lodash';
 
 import { useWorkflowVersions } from '@/apis/workflow/version';
@@ -32,7 +32,7 @@ export const WorkflowVersionPresets: React.FC<IVinesInputPropertyProps & IVinesI
         (newOptionsVariableMapper[optValue] = {
           displayName: name,
           name: optValue.toString(),
-          type: '工作流版本' as BlockDefPropertyTypes,
+          type: '工作流版本' as ToolPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);
