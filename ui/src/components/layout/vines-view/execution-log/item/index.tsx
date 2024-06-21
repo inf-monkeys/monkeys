@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import { useClipboard } from '@mantine/hooks';
 import { Copy } from 'lucide-react';
 import { toast } from 'sonner';
@@ -14,7 +14,7 @@ import { Tag } from '@/components/ui/tag';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
-import { cn } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 import { formatTimeDiffPrevious, formatTimeGap } from '@/utils/time.ts';
 
 interface IVinesLogItemProps {
@@ -61,7 +61,7 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
               </div>
               <div>
                 <div className="line-clamp-1 flex items-center gap-2 font-bold">
-                  {workflowDefinition.displayName}
+                  {getI18nContent(workflowDefinition.displayName)}
                   <WorkflowVersionTag version={workflowExecution.workflowDefinition?.version ?? 1} />
                   <Tag size="xs" color="tertiary">
                     {getDescOfTriggerType(workflowExecution.triggerType)}

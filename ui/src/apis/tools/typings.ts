@@ -1,9 +1,8 @@
-import { BlockDefinition } from '@inf-monkeys/vines';
-import { BlockDefProperties } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
+import { ToolDef, ToolProperty } from '@inf-monkeys/monkeys';
 
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 
-export interface BlockDefPropertiesExtended extends BlockDefProperties {
+export interface ToolPropertyExtended extends ToolProperty {
   id: number;
   vinesNode?: VinesNode;
   extra?: {
@@ -13,17 +12,17 @@ export interface BlockDefPropertiesExtended extends BlockDefProperties {
 
 export type ChargeMode = 'free' | 'per-execute' | 'script' | 'per-1k-token' | 'per-1min' | 'per-1mb-file';
 
-export interface BlockPricing {
+export interface ToolPricing {
   mode: ChargeMode;
   unitPriceAmount: number;
 }
 
-export interface BlockDefinitionExtended extends BlockDefinition {
-  input: BlockDefPropertiesExtended[];
-  pricing?: BlockPricing;
+export interface ToolDefExtended extends ToolDef {
+  input: ToolPropertyExtended[];
+  pricing?: ToolPricing;
 }
 
-export interface IWorkflowBlock extends BlockDefinitionExtended {
+export interface IWorkflowTool extends ToolDefExtended {
   id: string;
   namespace: string;
 }

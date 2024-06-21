@@ -1,4 +1,4 @@
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';

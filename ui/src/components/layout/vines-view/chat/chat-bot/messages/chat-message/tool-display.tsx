@@ -13,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { useVinesFlow } from '@/package/vines-flow';
 import { JSONValue } from '@/package/vines-flow/core/tools/typings.ts';
+import { getI18nContent } from '@/utils';
 
 type LogLevel = 'error' | 'warn' | 'info' | 'debug';
 type Status = 'inprogress' | 'success' | 'failed';
@@ -72,8 +73,8 @@ export const ToolDisplay: React.FC<IToolDisplayProps> = ({ data }) => {
     result = (detailedInfo as ToolCallLogDetailedInfo).result || (detailedInfo as ToolCallLogDetailedInfo).arguments;
     const toolName = (detailedInfo as ToolCallLogDetailedInfo).toolName;
     const vinesTool = vines.getTool(toolName);
-    toolDisplayName = vinesTool?.displayName || toolName;
-    toolDesc = vinesTool?.description || '';
+    toolDisplayName = getI18nContent(vinesTool?.displayName) || toolName;
+    toolDesc = getI18nContent(vinesTool?.description) || '';
     toolIcon = vinesTool?.icon || 'emoji:🛠:#f0f0f0';
   }
 

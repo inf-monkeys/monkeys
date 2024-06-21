@@ -1,4 +1,4 @@
-import { MonkeyTaskDefTypes, MonkeyWorkflow } from '@inf-monkeys/vines';
+import { MonkeyTaskDefTypes, MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import type { ForkJoinTaskDef, JoinTaskDef, SimpleTaskDef, Task } from '@io-orkes/conductor-javascript';
 
 import { VinesForkJoinTaskDef } from '@/package/vines-flow/core/nodes/node/fork-join.ts';

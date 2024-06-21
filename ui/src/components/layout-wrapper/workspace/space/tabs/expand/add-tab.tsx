@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { CreatePageDto } from '@inf-monkeys/vines/lib/models/CreatePageDto';
+import { CreatePageDto } from '@inf-monkeys/vines';
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';

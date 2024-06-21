@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { AssetType } from '@inf-monkeys/vines';
+import { AssetType } from '@inf-monkeys/monkeys';
 import { CircularProgress } from '@nextui-org/progress';
 import { createColumnHelper } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';

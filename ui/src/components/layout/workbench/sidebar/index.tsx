@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
-import { cn, useLocalStorage } from '@/utils';
+import { cn, getI18nContent, useLocalStorage } from '@/utils';
 import { useRetimer } from '@/utils/use-retimer.ts';
 
 interface IWorkbenchSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -62,7 +62,9 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
             >
               <VinesIcon size="sm">{page.workflow?.iconUrl}</VinesIcon>
               <div className="flex max-w-44 flex-col gap-0.5">
-                <h1 className="font-bold leading-tight">{page.workflow?.displayName ?? t('common.utils.untitled')}</h1>
+                <h1 className="font-bold leading-tight">
+                  {getI18nContent(page.workflow?.displayName) ?? t('common.utils.untitled')}
+                </h1>
                 <span className="text-xxs">{page.displayName}</span>
               </div>
             </div>

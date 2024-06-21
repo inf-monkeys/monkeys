@@ -1,4 +1,4 @@
-import { WorkflowTriggerType } from '@inf-monkeys/vines';
+import { WorkflowTriggerType } from '@inf-monkeys/monkeys';
 import { Workflow } from '@io-orkes/conductor-javascript';
 
 export const EXECUTION_STATUS_LIST: { status: Workflow['status']; text: string }[] = [

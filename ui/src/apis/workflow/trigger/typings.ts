@@ -1,4 +1,4 @@
-import { BlockDefProperties } from '@inf-monkeys/vines';
+import { ToolProperty } from '@inf-monkeys/monkeys';
 
 export enum WorkflowTriggerType {
   // 手动
@@ -14,8 +14,8 @@ export interface ITriggerType {
   displayName: string;
   icon: string;
   description: string;
-  workflowInputs?: BlockDefProperties[];
-  properties?: BlockDefProperties[];
+  workflowInputs?: ToolProperty[];
+  properties?: ToolProperty[];
 }
 
 export enum WorkflowTriggerMethod {

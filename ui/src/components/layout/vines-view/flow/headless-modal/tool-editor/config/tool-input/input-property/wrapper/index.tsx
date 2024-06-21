@@ -7,6 +7,7 @@ import { Indicator } from '@/components/ui/indicator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VINES_VARIABLE_TAG } from '@/package/vines-flow/core/tools/consts.ts';
 import { VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
+import { getI18nContent } from '@/utils';
 
 interface IInputPropertyWrapperProps {
   def: VinesToolDefProperties;
@@ -53,7 +54,7 @@ export const InputPropertyWrapper: React.FC<IInputPropertyWrapperProps> = ({
               </TooltipTrigger>
               <TooltipContent>{tips}</TooltipContent>
             </Tooltip>
-            <span className="ml-1 line-clamp-1 text-sm font-bold leading-tight">{displayName}</span>
+            <span className="ml-1 line-clamp-1 text-sm font-bold leading-tight">{getI18nContent(displayName)}</span>
             <span className="pointer-events-none line-clamp-1 select-none text-xs leading-tight text-gray-500">
               {name}
             </span>
@@ -66,7 +67,7 @@ export const InputPropertyWrapper: React.FC<IInputPropertyWrapperProps> = ({
       {description && (
         <div className="flex gap-2 rounded-md border border-input p-2 shadow-sm">
           <Info size={14} />
-          <span className="-mt-0.5 w-[calc(100%-14px)] text-xs text-opacity-70">{description}</span>
+          <span className="-mt-0.5 w-[calc(100%-14px)] text-xs text-opacity-70">{getI18nContent(description)}</span>
         </div>
       )}
 

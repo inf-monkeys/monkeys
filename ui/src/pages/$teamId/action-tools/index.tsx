@@ -26,7 +26,7 @@ export const ActionTools: React.FC = () => {
     <main className="size-full">
       <UgcView
         assetKey="action-tools"
-        assetType="block"
+        assetType="tools"
         assetName={tHook('components.layout.main.sidebar.list.tool.action-tools.label')}
         isLoadAll
         useUgcFetcher={useUgcActionTools}

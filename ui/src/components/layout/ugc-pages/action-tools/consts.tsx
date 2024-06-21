@@ -5,14 +5,14 @@ import { UseNavigateResult } from '@tanstack/react-router';
 import { createColumnHelper } from '@tanstack/react-table';
 import { t } from 'i18next';
 
-import { BlockPricing, IWorkflowBlock } from '@/apis/tools/typings.ts';
+import { ToolPricing, IWorkflowTool } from '@/apis/tools/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { IUgcCreateColumnsProps } from '@/components/layout/ugc/typings.ts';
 import { RenderDescription, RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { PricingText } from '@/components/layout/ugc-pages/action-tools/utils.tsx';
 import { formatTime } from '@/utils/time.ts';
 
-const columnHelper = createColumnHelper<IAssetItem<IWorkflowBlock>>();
+const columnHelper = createColumnHelper<IAssetItem<IWorkflowTool>>();
 
 interface ICreateActionToolsColumnsProps extends IUgcCreateColumnsProps {
   hooks: {
@@ -61,7 +61,7 @@ export const createActionToolsColumns = ({ hooks }: ICreateActionToolsColumnsPro
     columnHelper.accessor('pricing', {
       id: 'pricing',
       cell: ({ getValue }) => {
-        const pricing = getValue() as BlockPricing | undefined;
+        const pricing = getValue() as ToolPricing | undefined;
         return (
           <span className="text-text2">
             {pricing ? PricingText({ pricing }) : t('ugc-page.action-tools.utils.pricing-mode.free')}

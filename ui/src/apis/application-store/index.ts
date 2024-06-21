@@ -1,4 +1,4 @@
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
 

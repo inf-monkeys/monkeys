@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { BlockDefProperties } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
+import { ToolProperty } from '@inf-monkeys/monkeys';
 import { fromPairs, isArray, isBoolean } from 'lodash';
 import { useForm } from 'react-hook-form';
 
@@ -16,7 +16,7 @@ import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesUpdater } from '@/components/ui/updater';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
-import { cn } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 
 interface IVinesWorkflowInputProps {
   inputs: VinesWorkflowVariable[];
@@ -116,7 +116,7 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                         itemClassName,
                       )}
                     >
-                      <FormLabel className="font-bold">{displayName}</FormLabel>
+                      <FormLabel className="font-bold">{getI18nContent(displayName)}</FormLabel>
                       <FormControl>
                         <>
                           {['string', 'number', 'file'].includes(type) &&
@@ -192,7 +192,7 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                               onValueChange={(val) =>
                                 onChange(
                                   (
-                                    (other as BlockDefProperties)?.options?.find((it) =>
+                                    (other as ToolProperty)?.options?.find((it) =>
                                       'value' in it ? it.value.toString() : '' === val,
                                     ) as any
                                   )?.value ?? '',
@@ -206,9 +206,9 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {(other as BlockDefProperties)?.options?.map((it, i) => (
+                                {(other as ToolProperty)?.options?.map((it, i) => (
                                   <SelectItem value={'value' in it ? it.value.toString() : ''} key={i}>
-                                    {it.name}
+                                    {getI18nContent(it.name)}
                                   </SelectItem>
                                 ))}
                               </SelectContent>

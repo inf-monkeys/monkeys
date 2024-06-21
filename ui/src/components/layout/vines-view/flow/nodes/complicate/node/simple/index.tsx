@@ -18,7 +18,7 @@ import { IVinesVariableMap, VinesToolDef } from '@/package/vines-flow/core/tools
 import { VinesWorkflowExecutionType } from '@/package/vines-flow/core/typings.ts';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
-import { cn } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IComplicateSimpleNodeProps {
@@ -149,9 +149,9 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
                   icon={customData.icon ?? tool?.icon ?? ''}
                   defaultIcon={tool?.icon}
                   name={customData.title ?? ''}
-                  defaultName={tool?.displayName ?? ''}
+                  defaultName={getI18nContent(tool?.displayName) ?? ''}
                   desc={customData?.description ?? ''}
-                  defaultDesc={tool?.description ?? ''}
+                  defaultDesc={getI18nContent(tool?.description) ?? ''}
                   task={task}
                   updateRaw={(newTask) => vinesUpdateRaw?.(nodeId, newTask, true)}
                 />

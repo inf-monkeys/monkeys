@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { BlockDefPropertyTypes } from '@inf-monkeys/vines';
+import { ToolPropertyTypes } from '@inf-monkeys/monkeys';
 import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { isString } from 'lodash';
@@ -11,6 +11,7 @@ import { IVinesInputPresetProps } from '@/components/layout/vines-view/flow/head
 import { StringInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/string.tsx';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { IVinesToolPropertiesOption, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
+import { getI18nContent } from '@/utils';
 
 export const WorkflowPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInputPresetProps, 'typeOptions'>> = (
   props,
@@ -25,7 +26,7 @@ export const WorkflowPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInp
   useEffect(() => {
     if (!workflowList) return;
 
-    const opts = workflowList.map((m) => ({ name: m.displayName, value: m.workflowId }));
+    const opts = workflowList.map((m) => ({ name: getI18nContent(m.displayName)!, value: m.workflowId }));
 
     setOptions(opts);
 
@@ -35,7 +36,7 @@ export const WorkflowPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInp
         (newOptionsVariableMapper[optValue] = {
           displayName: name,
           name: optValue,
-          type: '工作流' as BlockDefPropertyTypes,
+          type: '工作流' as ToolPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);

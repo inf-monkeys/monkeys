@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { RenderDescription, RenderIcon, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';

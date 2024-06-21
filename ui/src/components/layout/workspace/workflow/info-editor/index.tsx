@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
 import { IWorkflowInfo, workflowInfoSchema } from '@/schema/workspace/workflow-info.ts';
+import { getI18nContent } from '@/utils';
 
 interface IWorkflowInfoEditorProps {
   workflow?: MonkeyWorkflow;
@@ -55,8 +56,9 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
   const form = useForm<IWorkflowInfo>({
     resolver: zodResolver(workflowInfoSchema),
     defaultValues: {
-      displayName: workflow?.displayName ?? t('workspace.wrapper.workflow-info-card.default-workflow-name'),
-      description: workflow?.description ?? '',
+      displayName:
+        getI18nContent(workflow?.displayName) ?? t('workspace.wrapper.workflow-info-card.default-workflow-name'),
+      description: getI18nContent(workflow?.description) ?? '',
       iconUrl: workflow?.iconUrl ?? 'emoji:🍀:#ceefc5',
     },
   });
@@ -65,9 +67,9 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
     if (!workflow) return;
     form.setValue(
       'displayName',
-      workflow.displayName || t('workspace.wrapper.workflow-info-card.default-workflow-name'),
+      getI18nContent(workflow.displayName) || t('workspace.wrapper.workflow-info-card.default-workflow-name'),
     );
-    form.setValue('description', workflow.description || '');
+    form.setValue('description', getI18nContent(workflow.description) || '');
     form.setValue('iconUrl', workflow.iconUrl || 'emoji:🍀:#ceefc5');
   }, [workflow]);
 

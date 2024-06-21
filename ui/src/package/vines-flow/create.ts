@@ -2,7 +2,7 @@ import React, { createContext, createElement, useCallback, useContext, useEffect
 
 import { useSWRConfig } from 'swr';
 
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import { isArray } from 'lodash';
 import { toast } from 'sonner';
 

@@ -10,7 +10,7 @@ import { Tag } from '@/components/ui/tag';
 import { TagGroup } from '@/components/ui/tag/tag-group.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
-import { cn } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 interface IWorkflowInputListProps {
@@ -59,7 +59,7 @@ export const WorkflowInputList: React.FC<IWorkflowInputListProps> = ({
                     ]
                   }
                 </Tag>
-                <h1 className="font-bold">{displayName}</h1>
+                <h1 className="font-bold">{getI18nContent(displayName)}</h1>
               </div>
               {child}
             </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { AssetType } from '@inf-monkeys/vines';
+import { AssetType } from '@inf-monkeys/monkeys';
 import { toast } from 'sonner';
 
 import { updateAssetItem } from '@/apis/ugc';

@@ -1,6 +1,6 @@
 import { SWRResponse } from 'swr';
 
-import { AssetType } from '@inf-monkeys/vines';
+import { AssetType } from '@inf-monkeys/monkeys';
 
 import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
