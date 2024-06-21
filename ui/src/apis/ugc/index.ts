@@ -79,9 +79,9 @@ export const preloadUgcApplicationStore = (dto: IListUgcDto) =>
   preloadUgcItems<IApplicationStoreItemDetail>(dto, '/api/templates');
 
 export const useUgcTextModelStore = (dto: IListUgcDto) =>
-  useUgcItems<ILLMModel>(dto, '/api/assets/llm-model/marketplace');
+  useUgcItems<ILLMModel>(dto, '/api/assets/llm-channel/marketplace');
 export const preloadUgcTextModelStore = (dto: IListUgcDto) =>
-  preloadUgcItems<ILLMModel>(dto, '/api/assets/llm-model/marketplace');
+  preloadUgcItems<ILLMModel>(dto, '/api/assets/llm-channel/marketplace');
 
 export const useUgcComfyUIWorkflowStore = (dto: IListUgcDto) =>
   useUgcItems<IComfyuiWorkflow>(dto, '/api/assets/comfyui-workflow/marketplace');

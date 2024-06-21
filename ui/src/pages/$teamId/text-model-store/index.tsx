@@ -7,10 +7,10 @@ import { useTranslation } from 'react-i18next';
 
 import { preloadUgcTextModelStore, useUgcTextModelStore } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
+import { createTextModelStoreColumns } from '@/components/layout/ugc-pages/text-model-store/consts.tsx';
 import { UgcImportDialog } from '@/components/layout/ugc/import-dialog';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
-import { createTextModelStoreColumns } from '@/components/layout/ugc-pages/text-model-store/consts.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import {
   DropdownMenu,
@@ -45,7 +45,7 @@ export const TextModelStore: React.FC = () => {
         renderOptions={{
           subtitle: (item) => (
             <span className="line-clamp-1">
-              {`${item.user?.name ?? tHook('common.utils.unknown')} ${tHook('common.utils.created-at', {
+              {`${item.user?.name ?? tHook('common.utils.system')} ${tHook('common.utils.created-at', {
                 time: formatTimeDiffPrevious(item.createdTimestamp),
               })}`}
             </span>
@@ -72,7 +72,7 @@ export const TextModelStore: React.FC = () => {
                 e.preventDefault();
               }}
             >
-              <DropdownMenuLabel>文本模型市场操作</DropdownMenuLabel>
+              <DropdownMenuLabel>操作</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem
