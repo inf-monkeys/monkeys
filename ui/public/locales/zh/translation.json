@@ -1507,6 +1507,115 @@
             "action": "继续"
           }
         }
+      },
+
+      "endpoint": {
+        "start-tool": {
+          "title": "工作流配置",
+          "tabs": {
+            "input": "工作流输入",
+            "trigger": "触发器",
+            "api-config": "API 配置"
+          },
+          "trigger": {
+            "add": "添加触发器",
+            "update": {
+              "loading": "正在更新触发器...",
+              "success": "触发器更新成功",
+              "error": "触发器更新失败"
+            },
+            "delete": {
+              "button": "删除触发器",
+              "title": "确定要删除此触发器吗",
+              "desc": "删除后将无法恢复，请确认是否删除此触发器",
+              "cancel": "取消",
+              "action": "删除",
+
+              "loading": "正在删除触发器...",
+              "success": "触发器删除成功",
+              "error": "触发器删除失败"
+            },
+            "webhook-path-title": "API 请求地址：",
+            "create": {
+              "loading": "正在创建触发器...",
+              "success": "触发器创建成功",
+              "error": "触发器创建失败",
+
+              "title": "选择触发器",
+              "desc": "选择一个触发器，通过触发事件或定时任务来触发工作流的运行",
+
+              "schedule-trigger": {
+                "loading": "正在创建定时触发器...",
+                "success": "定时触发器创建成功",
+                "error": "定时触发器创建失败",
+
+                "title": "定时触发器",
+                "desc": "配置并启用定时触发器后，工作流将按照配置的时间周期性地触发",
+
+                "form": {
+                  "cron": {
+                    "label": "Cron 表达式",
+                    "placeholder": "请输入 Cron 定时任务表达式"
+                  },
+                  "submit": "创建"
+                }
+              },
+              "webhook-trigger": {
+                "loading": "正在创建 Webhook 触发器...",
+                "success": "Webhook 触发器创建成功",
+                "error": "Webhook 触发器创建失败",
+
+                "title": "Webhook 触发器",
+                "desc": "配置并启用 Webhook 触发器后，可以通过发送 HTTP 请求来触发工作流的运行",
+
+                "form": {
+                  "method": {
+                    "label": "请求方式",
+                    "placeholder": "选择 HTTP 请求方式",
+                    "search": "搜索 HTTP 请求方式...",
+                    "search-empty": "找不到 HTTP 请求方式"
+                  },
+                  "auth": {
+                    "label": "认证方式",
+                    "placeholder": "选择 HTTP 认证方式",
+                    "search": "搜索 HTTP 认证方式...",
+                    "search-empty": "找不到 HTTP 认证方式",
+
+                    "none": "无认证",
+                    "basic": "基础认证 (Basic Auth)",
+                    "custom-header": "自定义请求头"
+                  },
+                  "username": {
+                    "label": "用户名",
+                    "placeholder": "请输入用户名"
+                  },
+                  "password": {
+                    "label": "密码",
+                    "placeholder": "请输入密码"
+                  },
+                  "header-key": {
+                    "label": "请求头键",
+                    "placeholder": "请输入请求头键"
+                  },
+                  "header-value": {
+                    "label": "请求头值",
+                    "placeholder": "请输入请求头值"
+                  },
+                  "response-until": {
+                    "label": "HTTP 请求返回时机",
+                    "placeholder": "选择 HTTP 请求返回时机",
+                    "search": "搜索 HTTP 请求返回时机...",
+                    "search-empty": "找不到 HTTP 请求返回时机",
+
+                    "workflow-started": "工作流启动之后立即返回",
+                    "workflow-completed-or-finished": "工作流执行成功或者失败之后返回"
+                  },
+                  "submit": "创建"
+                }
+              }
+            }
+          }
+        }
       }
     }
   }

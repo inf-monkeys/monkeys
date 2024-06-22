@@ -1512,6 +1512,115 @@
             "action": "Delete"
           }
         }
+      },
+
+      "endpoint": {
+        "start-tool": {
+          "title": "Workflow Configuration",
+          "tabs": {
+            "input": "Workflow Input",
+            "trigger": "Trigger",
+            "api-config": "API Configuration"
+          },
+          "trigger": {
+            "add": "Add Trigger",
+            "update": {
+              "loading": "Updating trigger...",
+              "success": "Trigger updated successfully",
+              "error": "Trigger update failed"
+            },
+            "delete": {
+              "button": "Delete Trigger",
+              "title": "Sure you want to delete the trigger?",
+              "desc": "Deletion cannot be recovered and all relevant data will be permanently deleted.",
+              "cancel": "cancel",
+              "action": "Delete",
+
+              "loading": "Deleting trigger...",
+              "success": "Trigger deleted successfully",
+              "error": "Trigger deletion failed"
+            },
+            "webhook-path-title": "API Path: ",
+            "create": {
+              "loading": "Creating trigger...",
+              "success": "Trigger created successfully",
+              "error": "Trigger creation failed",
+
+              "title": "Select a trigger",
+              "desc": "Select a trigger to trigger the workflow to run by triggering an event or timed task",
+
+              "schedule-trigger": {
+                "loading": "Creating scheduled trigger...",
+                "success": "Scheduled trigger created successfully",
+                "error": "Scheduled trigger creation failed",
+
+                "title": "Scheduled Trigger",
+                "desc": "When timed triggers are configured and enabled, the workflow will periodically trigger at the configured time",
+
+                "form": {
+                  "cron": {
+                    "label": "Cron Expression",
+                    "placeholder": "Enter cron expression"
+                  },
+                  "submit": "Create"
+                }
+              },
+              "webhook-trigger": {
+                "loading": "Creating Webhook trigger...",
+                "success": "Webhook trigger created successfully",
+                "error": "Webhook trigger creation failed",
+
+                "title": "Webhook Trigger",
+                "desc": "Once you have configured and enabled Webhook triggers, you can send HTTP requests to trigger a workflow to run",
+
+                "form": {
+                  "method": {
+                    "label": "HTTP Request Method",
+                    "placeholder": "Select HTTP request method",
+                    "search": "Search HTTP request method...",
+                    "search-empty": "No HTTP request method found"
+                  },
+                  "auth": {
+                    "label": "HTTP Authentication",
+                    "placeholder": "Select HTTP authentication",
+                    "search": "Search HTTP authentication...",
+                    "search-empty": "No HTTP authentication found",
+
+                    "none": "None",
+                    "basic": "Basic",
+                    "custom-header": "Custom Header"
+                  },
+                  "username": {
+                    "label": "Username",
+                    "placeholder": "Enter username"
+                  },
+                  "password": {
+                    "label": "Password",
+                    "placeholder": "Enter password"
+                  },
+                  "header-key": {
+                    "label": "Header Key",
+                    "placeholder": "Enter header key"
+                  },
+                  "header-value": {
+                    "label": "Header Value",
+                    "placeholder": "Enter header value"
+                  },
+                  "response-until": {
+                    "label": "HTTP Response Timing",
+                    "placeholder": "Select HTTP response timing",
+                    "search": "Search HTTP response timing...",
+                    "search-empty": "No HTTP response timing found",
+
+                    "workflow-started": "Workflow started",
+                    "workflow-completed-or-finished": "Workflow completed or finished"
+                  },
+                  "submit": "Create"
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
