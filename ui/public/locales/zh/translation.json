@@ -1668,6 +1668,37 @@
                 }
               }
             }
+          },
+          "api-config": {
+            "form": {
+              "expose-openai-compatible-interface": {
+                "label": "启用 OpenAI 兼容的接口"
+              },
+              "openai-model-name": {
+                "label": "OpenAI 模型名称",
+                "placeholder": "请输入 OpenAI 模型名称",
+                "desc": "模型名称默认为工作流 ID，你也可以设置自定义模型名称，在通过 API 调用接口时可以设置 model 为此自定义名称（同一个团队内必须唯一）。"
+              },
+              "rate-limiter": {
+                "label": "启用接口速率限制",
+
+                "window-ms": {
+                  "label": "时间窗口大小（毫秒）",
+                  "placeholder": "请输入时间窗口大小（毫秒）"
+                },
+                "max": {
+                  "label": "单位时间窗口内运行最大并发"
+                }
+              },
+              "submit": {
+                "button": "保存",
+
+                "workflow-id-empty": "工作流 ID 不存在",
+                "loading": "正在保存 API 配置...",
+                "success": "API 配置保存成功",
+                "error": "API 配置保存失败，请检查网络后重试"
+              }
+            }
           }
         }
       }

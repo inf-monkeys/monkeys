@@ -1673,6 +1673,37 @@
                 }
               }
             }
+          },
+          "api-config": {
+            "form": {
+              "expose-openai-compatible-interface": {
+                "label": "Enabling OpenAI-compatible interfaces"
+              },
+              "openai-model-name": {
+                "label": "OpenAI model name",
+                "placeholder": "Enter OpenAI model name",
+                "desc": "The model name defaults to the workflow ID, you can also set a custom model name, and when calling the interface via the API you can set the model to this custom name (which must be unique within the same team)."
+              },
+              "rate-limiter": {
+                "label": "Enabling Interface Rate Limiting",
+
+                "window-ms": {
+                  "label": "Time window size (ms)",
+                  "placeholder": "Enter time window size (ms)"
+                },
+                "max": {
+                  "label": "Run maximum concurrency per time window"
+                }
+              },
+              "submit": {
+                "button": "Save API Configuration",
+
+                "workflow-id-empty": "Workflow ID does not exist",
+                "loading": "Saving API configuration...",
+                "success": "API configuration saved successfully",
+                "error": "API configuration save failed"
+              }
+            }
           }
         }
       }
