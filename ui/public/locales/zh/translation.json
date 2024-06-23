@@ -1508,6 +1508,36 @@
           }
         }
       },
+      "version": {
+        "label": "版本 {{version}}",
+        "placeholder": "选择版本",
+        "search": "搜索版本",
+        "search-empty": "找不到此版本",
+
+        "release": {
+          "button": "创建版本",
+          "error": {
+            "title": "检测到工作流配置存在错误",
+            "desc": "确定要继续创建版本吗？配置出错的工作流将无法运行！",
+            "cancel": "取消",
+            "action": "继续"
+          },
+          "recheck": {
+            "disable": "当前工作流配置与上一个版本相同，无需创建版本",
+
+            "loading": "正在检测工作流配置",
+            "success": "工作流配置检测完毕",
+            "error": "工作流配置检测失败"
+          },
+
+          "workflow-version-error": "创建版本失败！无法获取工作流版本信息",
+          "tips": "确定要为此工作流创建版本吗",
+          "action": "确定",
+          "loading": "正在创建版本...",
+          "success": "版本创建成功",
+          "failed": "版本创建失败"
+        }
+      },
 
       "endpoint": {
         "start-tool": {
