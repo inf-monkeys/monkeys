@@ -6,6 +6,7 @@ import { useHotkeys } from '@mantine/hooks';
 import equal from 'fast-deep-equal/es6';
 import { pick } from 'lodash';
 import { GitCommitHorizontal } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useWorkflowValidation } from '@/apis/workflow/validation';
@@ -32,6 +33,8 @@ interface IWorkflowReleaseProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const WorkflowRelease: React.FC<IWorkflowReleaseProps> = ({ version, onVersionChange }) => {
+  const { t } = useTranslation();
+
   const { mutate } = useSWRConfig();
 
   const { isLatestWorkflowVersion, workflowId } = useFlowStore();
@@ -46,11 +49,11 @@ export const WorkflowRelease: React.FC<IWorkflowReleaseProps> = ({ version, onVe
 
   const handleRelease = (ignore = false, validated?: boolean) => {
     if (disabled) {
-      toast.warning('当前工作流配置与上一个版本相同，无需创建版本');
+      toast.warning(t('workspace.flow-view.version.release.recheck.disable'));
       return;
     }
     if (!workflowVersions) {
-      toast.error('创建版本失败！无法获取工作流版本信息');
+      toast.error(t('workspace.flow-view.version.release.workflow-version-error'));
       return;
     }
 
@@ -59,9 +62,9 @@ export const WorkflowRelease: React.FC<IWorkflowReleaseProps> = ({ version, onVe
         setHasError(true);
         return;
       }
-      toast('确定要为此工作流创建版本吗', {
+      toast(t('workspace.flow-view.version.release.tips'), {
         action: {
-          label: '确定',
+          label: t('workspace.flow-view.version.release.action'),
           onClick: () => handleRelease(true),
         },
       });
@@ -71,7 +74,7 @@ export const WorkflowRelease: React.FC<IWorkflowReleaseProps> = ({ version, onVe
     const nextVersionNumber = Math.max(...workflowVersions.map((x) => x.version)) + 1;
     const finalWorkflow = { ...workflowVersions[0], version: nextVersionNumber };
     toast.promise(trigger(finalWorkflow), {
-      loading: '正在创建版本',
+      loading: t('workspace.flow-view.version.release.loading'),
       success: () => {
         setVisible(false);
         setTimeout(() => {
@@ -81,9 +84,9 @@ export const WorkflowRelease: React.FC<IWorkflowReleaseProps> = ({ version, onVe
 
           setTimeout(() => setVisible(true), 80);
         }, 164);
-        return '版本创建成功';
+        return t('workspace.flow-view.version.release.success');
       },
-      error: '版本创建失败',
+      error: t('workspace.flow-view.version.release.failed'),
     });
   };
 
@@ -106,16 +109,16 @@ export const WorkflowRelease: React.FC<IWorkflowReleaseProps> = ({ version, onVe
   const handleReCheck = () => {
     if (!isLatestWorkflowVersion) return;
     if (disabled) {
-      toast.warning('当前工作流配置与上一个版本相同，无需创建版本');
+      toast.warning(t('workspace.flow-view.version.release.recheck.disable'));
       return;
     }
     toast.promise(reValidation, {
-      loading: '正在检测工作流配置',
+      loading: t('workspace.flow-view.version.release.recheck.loading'),
       success: (it: IWorkflowValidation | undefined) => {
         handleRelease(false, it?.validated);
-        return '工作流配置检测完毕';
+        return t('workspace.flow-view.version.release.recheck.success');
       },
-      error: '工作流配置检测失败',
+      error: t('workspace.flow-view.version.release.recheck.error'),
     });
   };
 
@@ -127,7 +130,7 @@ export const WorkflowRelease: React.FC<IWorkflowReleaseProps> = ({ version, onVe
         className={cn(!isLatestWorkflowVersion && 'hidden')}
         icon={<GitCommitHorizontal />}
         side="bottom"
-        tip="创建版本"
+        tip={t('workspace.flow-view.version.release.button')}
         keys={['ctrl', 's']}
         disabled={disabled || !isLatestWorkflowVersion}
         onClick={handleReCheck}
@@ -135,12 +138,14 @@ export const WorkflowRelease: React.FC<IWorkflowReleaseProps> = ({ version, onVe
       <AlertDialog open={hasError} onOpenChange={setHasError}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>检测到工作流配置存在错误</AlertDialogTitle>
-            <AlertDialogDescription>确定要继续创建版本吗？配置出错的工作流将无法运行！</AlertDialogDescription>
+            <AlertDialogTitle>{t('workspace.flow-view.version.release.error.title')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('workspace.flow-view.version.release.error.desc')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>取消</AlertDialogCancel>
-            <AlertDialogAction onClick={() => handleRelease(true)}>继续创建版本</AlertDialogAction>
+            <AlertDialogCancel>{t('workspace.flow-view.version.release.error.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => handleRelease(true)}>
+              {t('workspace.flow-view.version.release.error.action')}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

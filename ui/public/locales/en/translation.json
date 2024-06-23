@@ -1514,6 +1514,37 @@
         }
       },
 
+      "version": {
+        "label": "Ver {{version}}",
+        "placeholder": "Select Version",
+        "search": "Search version",
+        "search-empty": "Can't find this version",
+
+        "release": {
+          "button": "Release",
+          "error": {
+            "title": "Error detected in workflow configuration",
+            "desc": "Sure you want to continue creating versions? Workflows with configuration errors will not run!",
+            "cancel": "cancel",
+            "action": "Confirm"
+          },
+          "recheck": {
+            "disable": "The current workflow configuration is the same as the previous version; there is no need to create a version",
+
+            "loading": "Detecting workflow configuration",
+            "success": "Workflow configuration detection successful",
+            "error": "Workflow configuration detection failed"
+          },
+
+          "workflow-version-error": "Failed to create version! Unable to get workflow version information",
+          "tips": "Are you sure you want to create a version of this workflow?",
+          "action": "Confirm",
+          "loading": "Creating version...",
+          "success": "Version created successfully",
+          "failed": "Version creation failed"
+        }
+      },
+
       "endpoint": {
         "start-tool": {
           "title": "Workflow Configuration",
