@@ -1517,6 +1517,60 @@
             "trigger": "触发器",
             "api-config": "API 配置"
           },
+          "input": {
+            "def": "默认值",
+            "add": "新建配置",
+            "delete": {
+              "title": "确定要删除此输入吗",
+              "desc": "删除后，此输入将不无法在工作流中使用，且无法恢复。",
+              "cancel": "取消",
+              "action": "确认删除"
+            },
+            "def-empty": "暂无默认值",
+            "def-true": "真",
+            "def-false": "假",
+
+            "config-form": {
+              "title": "输入配置",
+
+              "display-name": {
+                "label": "显示名称",
+                "placeholder": "请填写「输入配置」显示的名称"
+              },
+              "name": {
+                "label": "字段",
+                "placeholder": "请填写「输入配置」的字段名",
+                "desc": "输入字段用于在工作流中引用输入的数据，在工具装配项中填写「 ${workflow.input.{{name}}} 」来使用"
+              },
+              "type": {
+                "label": "数据类型",
+                "button": "选择数据类型",
+                "placeholder": "搜索类型...",
+                "search-empty": "找不到数据类型",
+
+                "list": "列表",
+
+                "string": "文本{{extra}}",
+                "number": "数字{{extra}}",
+                "boolean": "逻辑值{{extra}}",
+                "file": "文件{{extra}}",
+                "workflow": "工作流{{extra}}"
+              },
+              "default": {
+                "label": "默认值",
+                "placeholder": "请输入默认值",
+                "placeholder-list": "请输入列表项"
+              },
+              "file": {
+                "label": "默认文件{{extra}}",
+                "desc": "在此处上传文件将自动生成文件直链来覆盖左侧默认值",
+
+                "list": "列表"
+              },
+
+              "submit": "保存"
+            }
+          },
           "trigger": {
             "add": "添加触发器",
             "update": {

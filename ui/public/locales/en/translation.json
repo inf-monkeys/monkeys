@@ -1522,6 +1522,60 @@
             "trigger": "Trigger",
             "api-config": "API Configuration"
           },
+          "input": {
+            "def": "Default Value",
+            "add": "Create Input",
+            "delete": {
+              "title": "Are you sure you want to delete this input?",
+              "desc": "After deletion, this input will not be unavailable in the workflow and cannot be restored.",
+              "cancel": "cancel",
+              "action": "confirm"
+            },
+            "def-empty": "No default value",
+            "def-true": "T",
+            "def-false": "F",
+
+            "config-form": {
+              "title": "Input Configuration",
+
+              "display-name": {
+                "label": "Display Name",
+                "placeholder": "Enter display name"
+              },
+              "name": {
+                "label": "Key",
+                "placeholder": "Enter key",
+                "desc": "The input field is used to reference the input data in the workflow, fill in \"${workflow.input.{{name}}}\" in the tool assembly item to use the"
+              },
+              "type": {
+                "label": "Data Type",
+                "button": "Select data type",
+                "placeholder": "Search data type...",
+                "search-empty": "Data type not found",
+
+                "list": "list",
+
+                "string": "string {{extra}}",
+                "number": "number {{extra}}",
+                "boolean": "boolean {{extra}}",
+                "file": "file {{extra}}",
+                "workflow": "workflow {{extra}}"
+              },
+              "default": {
+                "label": "Default Value",
+                "placeholder": "Enter default value",
+                "placeholder-list": "Enter default value"
+              },
+              "file": {
+                "label": "File {{extra}} Default",
+                "desc": "Uploading a file here will automatically generate a direct file link to override the defaults on the left.",
+
+                "list": "list"
+              },
+
+              "submit": "Save"
+            }
+          },
           "trigger": {
             "add": "Add Trigger",
             "update": {
