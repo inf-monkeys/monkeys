@@ -1700,6 +1700,29 @@
               }
             }
           }
+        },
+        "end-tool": {
+          "title": "工作流输出配置",
+
+          "tabs": {
+            "output": "输出配置",
+            "raw-data": "原始数据"
+          },
+          "create": "新建输出配置",
+          "tip1": "在此处调整工作流输出",
+          "tip2": "工作流默认输出为最后一个节点的运行结果",
+          "error": {
+            "only-key-value": "JSON 只能为 key-value 对象数组",
+            "only-array": "JSON 只能为数组",
+            "json-format": "JSON 格式错误"
+          },
+
+          "save": {
+            "button": "保存",
+            "loading": "正在保存工作流输出配置...",
+            "success": "工作流输出配置保存成功",
+            "error": "工作流输出配置保存失败"
+          }
         }
       }
     }
