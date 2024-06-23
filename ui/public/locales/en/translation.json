@@ -1705,6 +1705,29 @@
               }
             }
           }
+        },
+        "end-tool": {
+          "title": "Workflow Output Configuration",
+
+          "tabs": {
+            "output": "Workflow Output",
+            "raw-data": "Raw Data"
+          },
+          "create": "Create Output",
+          "tip1": "Adjust workflow output here",
+          "tip2": "The default output of the workflow is the result of the last node run",
+          "error": {
+            "only-key-value": "JSON can only be an array of key-value objects.",
+            "only-array": "JSON can only be an array",
+            "json-format": "JSON formatting error"
+          },
+
+          "save": {
+            "button": "Save",
+            "loading": "Saving workflow output...",
+            "success": "Workflow output saved successfully",
+            "error": "Workflow output save failed"
+          }
         }
       }
     }
