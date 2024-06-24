@@ -1,12 +1,13 @@
 import { config } from '@/common/config';
-import { OneApiClient, OneApiSystemApiClient } from '@/common/oneapi';
-import { generatePassword } from '@/common/utils';
-import { TeamRepository } from '@/database/repositories/team.repository';
+import { logger } from '@/common/logger';
+import { OneApiClient, OneApiSystemApiClient, generateOneApiTokenByUsernamePassword } from '@/common/oneapi';
+import { generatePassword, generateShortId } from '@/common/utils';
+import { OneApiRepository } from '@/database/repositories/oneapi.respository';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class OneAPIService {
-  constructor(private readonly teamRepository: TeamRepository) {}
+  constructor(private readonly oneapiRepository: OneApiRepository) {}
 
   private getSystemClient() {
     const { enabled, baseURL, rootToken } = config.oneapi;
@@ -16,32 +17,28 @@ export class OneAPIService {
     return new OneApiSystemApiClient(baseURL, rootToken);
   }
 
-  private async getOneAPIToken(teamId: string) {
-    const team = await this.teamRepository.getTeamById(teamId);
-    if (!team) {
-      throw new Error('Team not found');
+  private async getOrCreateOneapiUser(teamId: string) {
+    const oneapiUser = await this.oneapiRepository.getOneapiUserByTeamId(teamId);
+    if (oneapiUser) {
+      return oneapiUser;
     }
-    let { oneAPIToken } = team;
-    if (!oneAPIToken) {
-      const password = generatePassword();
-      const systemClient = this.getSystemClient();
-      const oneapiUser = await systemClient.addUserIfNotExists(teamId, password, teamId);
-      oneAPIToken = oneapiUser.access_token;
-      await this.teamRepository.updateTeam(teamId, {
-        oneAPIToken,
-        oneAPIPassword: password,
-      });
-    }
-    return oneAPIToken;
+    const password = generatePassword();
+    const username = generateShortId();
+    const systemClient = this.getSystemClient();
+    logger.info(`Creating OneAPI user: ${username}`);
+    const newUser = await systemClient.addUserIfNotExists(username, password, username);
+    const oneAPIUserToken = await generateOneApiTokenByUsernamePassword(config.oneapi.baseURL, username, password);
+    const userClient = new OneApiClient(config.oneapi.baseURL, oneAPIUserToken);
+    const apikey = await userClient.getApiKey();
+    return await this.oneapiRepository.createOneapiUser(teamId, newUser.id, oneAPIUserToken, apikey, username, password);
   }
 
   public async createOneAPIChannel(teamId: string, userId: string, channelId: number, data: { [x: string]: any }) {
-    const team = await this.teamRepository.getTeamById(teamId);
-    if (!team) {
-      throw new Error('Team not found');
-    }
-    const oneAPIToken = await this.getOneAPIToken(teamId);
-    const apiClient = new OneApiClient(config.oneapi.baseURL, oneAPIToken);
-    const { success, message } = await apiClient.createChannel(channelId, data);
+    const oneapiUser = await this.getOrCreateOneapiUser(teamId);
+    const systemClient = this.getSystemClient();
+    const modelsCreated = await systemClient.createChannel(channelId, teamId, data);
+    const userClient = new OneApiClient(config.oneapi.baseURL, oneapiUser.userToken);
+    await userClient.updateTokenModelScope(modelsCreated);
+    return modelsCreated;
   }
 }

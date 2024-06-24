@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import { OneApiUser } from './interface';
+import { OneAPIToken, OneApiUser } from './interface';
 
 export class OneApiBaseClient {
   baseURL: string;
@@ -47,6 +47,21 @@ export class OneApiSystemApiClient extends OneApiBaseClient {
     return data.data?.find((user) => user.username === username);
   }
 
+  private async updateUserQuota(userId: number, quota: number) {
+    const { data } = await this.request<{ success: boolean; message: string }>({
+      method: 'PUT',
+      url: `/api/user/`,
+      data: {
+        id: userId,
+        quota,
+      },
+    });
+
+    if (!data.success) {
+      throw new Error(data.message);
+    }
+  }
+
   public async registerUser(username: string, password: string, displayName: string) {
     const { data } = await this.request<{ success: boolean; message: string }>({
       method: 'POST',
@@ -66,6 +81,7 @@ export class OneApiSystemApiClient extends OneApiBaseClient {
     if (!user) {
       throw new Error('Failed to create user');
     }
+    await this.updateUserQuota(user.id, 100000000000);
     return user;
   }
 
@@ -75,15 +91,6 @@ export class OneApiSystemApiClient extends OneApiBaseClient {
       return existUser;
     }
     return await this.registerUser(username, password, displayName);
-  }
-}
-
-export class OneApiClient extends OneApiBaseClient {
-  baseURL: string;
-  userToken: string;
-
-  constructor(baseURL: string, userToken: string) {
-    super(baseURL, userToken);
   }
 
   public async loadModels() {
@@ -103,19 +110,24 @@ export class OneApiClient extends OneApiBaseClient {
     return data.data;
   }
 
-  public async createChannel(type: number, data: { [x: string]: any }) {
+  public async createChannel(type: number, modelPrefix: string, data: { [x: string]: any }) {
     const allModels = await this.loadModels();
     const channelModels = allModels[type];
-
+    const channelModelsWithPrefix = channelModels.map((model) => `${modelPrefix}_${model}`);
+    const modelMappings = {};
+    channelModels.forEach((model) => {
+      modelMappings[`${modelPrefix}_${model}`] = model;
+    });
     const reqData = {
       ...data,
       groups: ['default'],
-      model_mapping: '',
-      models: channelModels.join(','),
-      type,
+      model_mapping: JSON.stringify(modelMappings),
+      models: [...channelModels, ...channelModelsWithPrefix].join(','),
+      type: parseInt(type.toString(), 10),
       other: '',
       group: 'default',
       config: '{"region":"","sk":"","ak":"","user_id":""}',
+      name: `${modelPrefix}_channel`,
     };
 
     const {
@@ -132,5 +144,104 @@ export class OneApiClient extends OneApiBaseClient {
     if (!success) {
       throw new Error(message);
     }
+
+    return channelModelsWithPrefix;
   }
 }
+
+export class OneApiClient extends OneApiBaseClient {
+  baseURL: string;
+  userToken: string;
+
+  constructor(baseURL: string, userToken: string) {
+    super(baseURL, userToken);
+  }
+
+  private async listTokens() {
+    const {
+      data: { success, message, data },
+    } = await this.request<{
+      success: boolean;
+      message: string;
+      data: OneAPIToken[];
+    }>({
+      method: 'GET',
+      url: '/api/token',
+      params: {
+        p: 0,
+        order: '',
+      },
+    });
+    if (!success) {
+      throw new Error(message);
+    }
+    return data;
+  }
+
+  public async getApiKey() {
+    const tokens = await this.listTokens();
+    if (tokens.length === 0) {
+      throw new Error('Unexpected error: no api key found');
+    }
+    return tokens[0].key;
+  }
+
+  public async updateTokenModelScope(modelsToAdd: string[]) {
+    const tokens = await this.listTokens();
+    if (tokens.length === 0) {
+      throw new Error('Unexpected error: no token found');
+    }
+    const token = tokens[0];
+    const originalModels = (token.models || '').split(',');
+    const models = Array.from(new Set([...originalModels, ...modelsToAdd]))
+      .filter(Boolean)
+      .join(',');
+    const { data } = await this.request<{
+      success: boolean;
+      message: string;
+    }>({
+      method: 'PUT',
+      url: `/api/token`,
+      data: {
+        ...token,
+        models,
+      },
+    });
+    const { success, message } = data;
+    if (!success) {
+      throw new Error(message);
+    }
+  }
+}
+
+export const generateOneApiTokenByUsernamePassword = async (baseURL: string, username: string, password: string) => {
+  // 1. Do login
+  const loginResponse = await axios.post(
+    `/api/user/login`,
+    {
+      username,
+      password,
+    },
+    {
+      baseURL,
+    },
+  );
+  const setCookieHeader = loginResponse.headers['set-cookie'];
+  const cookies = setCookieHeader.map((cookie) => cookie.split(';')[0]).join('; ');
+
+  const { data } = await axios.get<{
+    success: boolean;
+    message: string;
+    data: string;
+  }>('/api/user/token', {
+    baseURL,
+    headers: {
+      Cookie: cookies,
+    },
+  });
+  const { success, message, data: token } = data;
+  if (!success) {
+    throw new Error(message);
+  }
+  return token;
+};

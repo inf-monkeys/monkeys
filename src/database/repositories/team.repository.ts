@@ -161,12 +161,13 @@ export class TeamRepository {
       customTheme?: CustomTheme;
       oneAPIToken?: string;
       oneAPIPassword?: string;
+      oneAPIUsername?: string;
     },
   ) {
     if (!updates || !Object.keys(updates).length) {
       return;
     }
-    const { name, description, iconUrl, customTheme, oneAPIPassword, oneAPIToken } = updates || {};
+    const { name, description, iconUrl, customTheme, oneAPIPassword, oneAPIToken, oneAPIUsername } = updates || {};
     const team = await this.teamRepository.findOne({
       where: {
         id: teamId,
@@ -196,6 +197,7 @@ export class TeamRepository {
           updatedTimestamp: now,
           oneAPIToken,
           oneAPIPassword,
+          oneAPIUsername,
         },
         (v) => !_.isNil(v),
       ),

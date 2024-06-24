@@ -19,6 +19,7 @@ import { SqlKnowledgeBaseRepository } from './repositories/knowledge-base-sql.re
 import { KnowledgeBaseRepository } from './repositories/knowledge-base.repository';
 import { LlmModelRepository } from './repositories/llm-model.repository';
 import { MediaFileRepository } from './repositories/media.repository';
+import { OneApiRepository } from './repositories/oneapi.respository';
 import { SdModelRepository } from './repositories/sd-model.repository';
 import { SystemConfigurationRepository } from './repositories/system-configuration.repository';
 import { TeamRepository } from './repositories/team.repository';
@@ -55,6 +56,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     AssetsMarketPlaceRepository,
     ComfyuiRepository,
     ComfyuiWorkflowAssetRepositroy,
+    OneApiRepository,
   ],
   exports: [
     ToolsRepository,
@@ -82,6 +84,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     AssetsMarketPlaceRepository,
     ComfyuiRepository,
     ComfyuiWorkflowAssetRepositroy,
+    OneApiRepository,
   ],
   imports: [TypeOrmModule.forFeature(entities)],
 })
