@@ -1,6 +1,6 @@
 import { LlmModelEndpointType, config } from '@/common/config';
 import { LogLevel, logger } from '@/common/logger';
-import { replacerNoEscape } from '@/common/utils';
+import { maskString, replacerNoEscape } from '@/common/utils';
 import { ToolsRepository } from '@/database/repositories/tools.repository';
 import { SQL_KNOWLEDGE_BASE_QUERY_TABLE_TOOL } from '@/modules/assets/consts';
 import { SqlKnowledgeBaseService } from '@/modules/assets/sql-knowledge-base/sql-knowledge-base.service';
@@ -492,6 +492,7 @@ export class LlmService {
       ...defaultParams,
     };
     try {
+      logger.info(`Start to create chat completions: baseURL=${baseURL}, apiKey=${maskString(apiKey)}, model=${model}, stream=${stream}, messages=${JSON.stringify(messages)}`);
       response = await openai.chat.completions.create(createChatCompelitionsBody);
     } catch (error) {
       let errorMsg: string = error.message;
@@ -569,6 +570,9 @@ export class LlmService {
           onFinal() {
             res.write('data: [DONE]\n\n');
             res.end();
+          },
+          onToken(token) {
+            logger.info(`OnToken: ${token}`);
           },
         });
         const streamingTextResponse = new StreamingTextResponse(streamResponse, {}, data);

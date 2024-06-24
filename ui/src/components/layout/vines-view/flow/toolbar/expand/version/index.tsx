@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { Check, ChevronsUpDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useWorkflowVersions } from '@/apis/workflow/version';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,8 @@ interface IVinesVersionToolbarProps extends React.ComponentPropsWithoutRef<'div'
 }
 
 export const VinesVersionToolbar: React.FC<IVinesVersionToolbarProps> = ({ version = 1, onVersionChange }) => {
+  const { t } = useTranslation();
+
   const { setIsLatestWorkflowVersion, workflowId } = useFlowStore();
   const { setVisible } = useCanvasStore();
 
@@ -38,14 +41,16 @@ export const VinesVersionToolbar: React.FC<IVinesVersionToolbarProps> = ({ versi
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="outline" role="combobox" aria-expanded={open} className="w-28 justify-between">
-          {vinesVersion !== '0' ? `版本 ${vinesVersion}` : '选择版本'}
+          {vinesVersion !== '0'
+            ? t('workspace.flow-view.version.label', { version: vinesVersion })
+            : t('workspace.flow-view.version.placeholder')}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-28 p-0">
         <Command>
-          <CommandInput placeholder="搜索版本" />
-          <CommandEmpty>找不到此版本</CommandEmpty>
+          <CommandInput placeholder={t('workspace.flow-view.version.search')} />
+          <CommandEmpty>{t('workspace.flow-view.version.search-empty')}</CommandEmpty>
           <ScrollArea className="h-36">
             <CommandGroup>
               {workflowVersion.map((id) => {
@@ -66,7 +71,7 @@ export const VinesVersionToolbar: React.FC<IVinesVersionToolbarProps> = ({ versi
                     }}
                   >
                     <Check className={cn('mr-2 h-4 w-4', vinesVersion === finalId ? 'opacity-100' : 'opacity-0')} />
-                    版本 {finalId}
+                    {t('workspace.flow-view.version.label', { version: finalId })}
                   </CommandItem>
                 );
               })}

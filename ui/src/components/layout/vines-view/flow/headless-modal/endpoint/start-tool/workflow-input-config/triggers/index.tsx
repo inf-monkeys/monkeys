@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useTriggers } from '@/apis/workflow/trigger';
 import { Trigger } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/triggers/trigger.tsx';
@@ -15,6 +16,8 @@ import VinesEvent from '@/utils/events.ts';
 interface IWorkflowTriggerProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const WorkflowTrigger: React.FC<IWorkflowTriggerProps> = ({ className }) => {
+  const { t } = useTranslation();
+
   const { isLatestWorkflowVersion, workflowId } = useFlowStore();
   const { vines } = useVinesFlow();
 
@@ -36,7 +39,7 @@ export const WorkflowTrigger: React.FC<IWorkflowTriggerProps> = ({ className }) 
         icon={<Plus />}
         onClick={() => VinesEvent.emit('flow-trigger-selector', workflowId)}
       >
-        添加触发器
+        {t('workspace.flow-view.endpoint.start-tool.trigger.add')}
       </Button>
       <TriggerSelector />
     </div>

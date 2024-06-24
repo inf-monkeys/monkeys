@@ -7,6 +7,7 @@ import { useForceUpdate } from '@mantine/hooks';
 import { isUndefined, omitBy } from 'lodash';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useTriggerCreate } from '@/apis/workflow/trigger';
@@ -34,6 +35,8 @@ import VinesEvent from '@/utils/events.ts';
 interface IWebhookTriggerProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const WebhookTrigger: React.FC<IWebhookTriggerProps> = () => {
+  const { t } = useTranslation();
+
   const { mutate } = useSWRConfig();
   const { workflowId } = useFlowStore();
 
@@ -71,12 +74,12 @@ export const WebhookTrigger: React.FC<IWebhookTriggerProps> = () => {
         webhookConfig: payload as IVinesWebhookTriggerConfig,
       }),
       {
-        loading: '创建中...',
+        loading: t('workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.loading'),
         success: () => {
           void mutate(`/api/workflow/${workflowId}/triggers?version=${workflowVersion}`);
-          return '触发器创建成功';
+          return t('workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.success');
         },
-        error: '创建失败',
+        error: t('workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.error'),
       },
     );
     setOpen(false);
@@ -91,8 +94,10 @@ export const WebhookTrigger: React.FC<IWebhookTriggerProps> = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
-        <DialogTitle>Webhook 触发器配置</DialogTitle>
-        <DialogDescription>配置并启用 Webhook 触发器后，工作流将通过 HTTP 请求触发</DialogDescription>
+        <DialogTitle>{t('workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.title')}</DialogTitle>
+        <DialogDescription>
+          {t('workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.desc')}
+        </DialogDescription>
         <Form {...form}>
           <form onSubmit={handleSubmit} className="flex flex-col gap-2">
             <FormField
@@ -100,7 +105,9 @@ export const WebhookTrigger: React.FC<IWebhookTriggerProps> = () => {
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>请求方式</FormLabel>
+                  <FormLabel>
+                    {t('workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.method.label')}
+                  </FormLabel>
                   <FormControl>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -110,15 +117,27 @@ export const WebhookTrigger: React.FC<IWebhookTriggerProps> = () => {
                             role="combobox"
                             className={cn('w-full justify-between', !field.value && 'text-muted-foreground')}
                           >
-                            {field.value ? field.value : '选择 HTTP 请求方式'}
+                            {field.value
+                              ? field.value
+                              : t(
+                                  'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.method.placeholder',
+                                )}
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="p-0">
                         <Command>
-                          <CommandInput placeholder="搜索 HTTP 请求方式..." />
-                          <CommandEmpty>找不到 HTTP 请求方式</CommandEmpty>
+                          <CommandInput
+                            placeholder={t(
+                              'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.method.search',
+                            )}
+                          />
+                          <CommandEmpty>
+                            {t(
+                              'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.method.search-empty',
+                            )}
+                          </CommandEmpty>
                           <CommandGroup>
                             {MethodOptions.map((it, i) => (
                               <CommandItem
@@ -147,7 +166,9 @@ export const WebhookTrigger: React.FC<IWebhookTriggerProps> = () => {
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>认证方式</FormLabel>
+                  <FormLabel>
+                    {t('workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.auth.label')}
+                  </FormLabel>
                   <FormControl>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -157,15 +178,27 @@ export const WebhookTrigger: React.FC<IWebhookTriggerProps> = () => {
                             role="combobox"
                             className={cn('w-full justify-between', !field.value && 'text-muted-foreground')}
                           >
-                            {field.value ? AuthTypeLabelEnum[field.value] : '选择 HTTP 认证方式'}
+                            {field.value
+                              ? t(AuthTypeLabelEnum[field.value])
+                              : t(
+                                  'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.auth.label',
+                                )}
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="p-0">
                         <Command>
-                          <CommandInput placeholder="搜索 HTTP 认证方式..." />
-                          <CommandEmpty>找不到 HTTP 认证方式</CommandEmpty>
+                          <CommandInput
+                            placeholder={t(
+                              'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.auth.label',
+                            )}
+                          />
+                          <CommandEmpty>
+                            {t(
+                              'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.auth.label',
+                            )}
+                          </CommandEmpty>
                           <CommandGroup>
                             {AuthOptions.map((it, i) => (
                               <CommandItem
@@ -185,7 +218,7 @@ export const WebhookTrigger: React.FC<IWebhookTriggerProps> = () => {
                                 <Check
                                   className={cn('mr-2 h-4 w-4', it === field.value ? 'opacity-100' : 'opacity-0')}
                                 />
-                                {AuthTypeLabelEnum[it]}
+                                {t(AuthTypeLabelEnum[it])}
                               </CommandItem>
                             ))}
                           </CommandGroup>
@@ -205,9 +238,20 @@ export const WebhookTrigger: React.FC<IWebhookTriggerProps> = () => {
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>用户名</FormLabel>
+                      <FormLabel>
+                        {t(
+                          'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.username.label',
+                        )}
+                      </FormLabel>
                       <FormControl>
-                        <Input placeholder="请输入用户名" {...field} className="grow" autoFocus />
+                        <Input
+                          placeholder={t(
+                            'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.username.placeholder',
+                          )}
+                          {...field}
+                          className="grow"
+                          autoFocus
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -218,9 +262,20 @@ export const WebhookTrigger: React.FC<IWebhookTriggerProps> = () => {
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>密码</FormLabel>
+                      <FormLabel>
+                        {t(
+                          'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.password.label',
+                        )}
+                      </FormLabel>
                       <FormControl>
-                        <Input placeholder="请输入密码" {...field} className="grow" autoFocus />
+                        <Input
+                          placeholder={t(
+                            'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.password.placeholder',
+                          )}
+                          {...field}
+                          className="grow"
+                          autoFocus
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -236,9 +291,20 @@ export const WebhookTrigger: React.FC<IWebhookTriggerProps> = () => {
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>请求头键</FormLabel>
+                      <FormLabel>
+                        {t(
+                          'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.header-key.label',
+                        )}
+                      </FormLabel>
                       <FormControl>
-                        <Input placeholder="请输入请求头键" {...field} className="grow" autoFocus />
+                        <Input
+                          placeholder={t(
+                            'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.header-key.placeholder',
+                          )}
+                          {...field}
+                          className="grow"
+                          autoFocus
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -249,9 +315,20 @@ export const WebhookTrigger: React.FC<IWebhookTriggerProps> = () => {
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>请求头值</FormLabel>
+                      <FormLabel>
+                        {t(
+                          'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.header-value.label',
+                        )}
+                      </FormLabel>
                       <FormControl>
-                        <Input placeholder="请输入请求头值" {...field} className="grow" autoFocus />
+                        <Input
+                          placeholder={t(
+                            'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.header-value.placeholder',
+                          )}
+                          {...field}
+                          className="grow"
+                          autoFocus
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -265,7 +342,11 @@ export const WebhookTrigger: React.FC<IWebhookTriggerProps> = () => {
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>HTTP 请求返回时机</FormLabel>
+                  <FormLabel>
+                    {t(
+                      'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.response-until.label',
+                    )}
+                  </FormLabel>
                   <FormControl>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -275,15 +356,27 @@ export const WebhookTrigger: React.FC<IWebhookTriggerProps> = () => {
                             role="combobox"
                             className={cn('w-full justify-between', !field.value && 'text-muted-foreground')}
                           >
-                            {field.value ? ResponseUntilLabelEnum[field.value] : '选择 HTTP 请求返回时机'}
+                            {field.value
+                              ? t(ResponseUntilLabelEnum[field.value])
+                              : t(
+                                  'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.response-until.placeholder',
+                                )}
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="p-0">
                         <Command>
-                          <CommandInput placeholder="搜索 HTTP 请求返回时机..." />
-                          <CommandEmpty>找不到 HTTP 请求返回时机</CommandEmpty>
+                          <CommandInput
+                            placeholder={t(
+                              'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.response-until.search',
+                            )}
+                          />
+                          <CommandEmpty>
+                            {t(
+                              'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.response-until.search-empty',
+                            )}
+                          </CommandEmpty>
                           <CommandGroup>
                             {ResponseUntilOptions.map((it, i) => (
                               <CommandItem
@@ -294,7 +387,7 @@ export const WebhookTrigger: React.FC<IWebhookTriggerProps> = () => {
                                 <Check
                                   className={cn('mr-2 h-4 w-4', it === field.value ? 'opacity-100' : 'opacity-0')}
                                 />
-                                {ResponseUntilLabelEnum[it]}
+                                {t(ResponseUntilLabelEnum[it])}
                               </CommandItem>
                             ))}
                           </CommandGroup>
@@ -309,7 +402,7 @@ export const WebhookTrigger: React.FC<IWebhookTriggerProps> = () => {
 
             <DialogFooter>
               <Button variant="outline" type="submit">
-                创建
+                {t('workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.submit')}
               </Button>
             </DialogFooter>
           </form>

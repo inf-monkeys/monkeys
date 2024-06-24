@@ -10,6 +10,8 @@ import { StringInput } from '@/components/layout/vines-view/flow/headless-modal/
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tooltip } from '@/components/ui/tooltip';
+import { execCopy } from '@/utils';
+import { useTranslation } from 'react-i18next';
 
 interface InputGroupValue {
   id: number;
@@ -24,6 +26,7 @@ export const MultiFieldObjectInput: React.FC<IVinesInputPropertyProps> = ({
   disabled,
   ...props
 }) => {
+  const { t } = useTranslation();
   const { default: defaultValue } = def ?? {};
 
   const clipboard = useClipboard({ timeout: 500 });
@@ -94,8 +97,10 @@ export const MultiFieldObjectInput: React.FC<IVinesInputPropertyProps> = ({
                     icon={<ClipboardCopyIcon />}
                     disabled={!hasKey}
                     onClick={() => {
-                      clipboard.copy(`$.${it.key}`);
-                      toast.success('参数已复制');
+                      const text = `$.${it.key}`;
+                      clipboard.copy(text);
+                      if (!clipboard.copied && !execCopy(text)) toast.error(t('common.toast.copy-failed'));
+                      else toast.success(t('common.toast.copy-success'));
                     }}
                   />
                 </Tooltip>
