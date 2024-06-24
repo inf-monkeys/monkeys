@@ -252,6 +252,9 @@ export const generateOneApiTokenByUsernamePassword = async (baseURL: string, use
     },
   );
   const setCookieHeader = loginResponse.headers['set-cookie'];
+  if (!setCookieHeader) {
+    throw new Error(`Failed to login to ONEAPI: ${JSON.stringify(loginResponse.data)}`);
+  }
   const cookies = setCookieHeader.map((cookie) => cookie.split(';')[0]).join('; ');
 
   const { data } = await axios.get<{
