@@ -1479,6 +1479,43 @@
           "edit-tool": "Edit Tools",
           "insert-down-tool": "Insert Down Tool",
           "del-tool": "Delete Tools"
+        },
+        "tool-editor": {
+          "unknown-tool": "Unknown tool",
+
+          "tabs": {
+            "config": "Configuration",
+            "dev": "Raw Data",
+            "more-config": "Advanced Configuration"
+          },
+
+          "header": {
+            "quick-options": {
+              "del": {
+                "button-tips": "Delete this tool",
+                "tips": "Are you sure you want to delete this tool?",
+                "action": "Delete"
+              },
+              "toggle-prev-tool": "Switch to previous tool",
+              "toggle-next-tool": "Switch to next tool"
+            },
+
+            "info": {
+              "editor": {
+                "button": "Click to customise the tool information",
+                "title": "Customising tool information",
+                "desc": "Setting the tool display information",
+                "form": {
+                  "name": "Tool aliases",
+                  "desc": "Tool Description",
+                  "icon": "Tool Icon",
+                  "submit": "Save"
+                }
+              }
+            }
+          },
+
+          "save": "Save"
         }
       },
       "tooltip": {
@@ -1795,6 +1832,8 @@
       },
 
       "vines": {
+        "error": "Tool data anomalies!",
+
         "tools": {
           "start": {
             "name": "Start",

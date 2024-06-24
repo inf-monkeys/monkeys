@@ -1474,6 +1474,43 @@
           "edit-tool": "编辑工具",
           "insert-down-tool": "向下插入工具",
           "del-tool": "删除工具"
+        },
+        "tool-editor": {
+          "unknown-tool": "工具不存在",
+
+          "tabs": {
+            "config": "配置参数",
+            "dev": "原始数据",
+            "more-config": "高级配置"
+          },
+
+          "header": {
+            "quick-options": {
+              "del": {
+                "button-tips": "删除此工具",
+                "tips": "确定要删除此工具吗？操作将不可取消",
+                "action": "确定删除"
+              },
+              "toggle-prev-tool": "切换到上一工具",
+              "toggle-next-tool": "切换到下一工具"
+            },
+
+            "info": {
+              "editor": {
+                "button": "点击编辑工具自定义信息",
+                "title": "自定义工具信息",
+                "desc": "设置工具显示信息",
+                "form": {
+                  "name": "工具别名",
+                  "desc": "工具描述",
+                  "icon": "工具图标",
+                  "submit": "保存"
+                }
+              }
+            }
+          },
+
+          "save": "保存"
         }
       },
       "tooltip": {
@@ -1790,6 +1827,8 @@
 
       "vines": {
         "tools": {
+          "error": "工具数据异常！",
+
           "start": {
             "name": "开始",
             "desc": "点击配置工作流输入和触发器"
