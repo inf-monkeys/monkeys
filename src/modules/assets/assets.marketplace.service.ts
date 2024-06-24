@@ -1,7 +1,8 @@
 import { ListDto } from '@/common/dto/list.dto';
+import { ONEAPI_CHANNELS } from '@/common/oneapi/consts';
 import { AssetType } from '@/common/typings/asset';
-import { ComfyuiWorkflowAssetRepositroy } from '@/database/repositories/assets-comfyui-workflow.respository';
 import { AssetsCommonRepository } from '@/database/repositories/assets-common.repository';
+import { LlmChannelAssetRepositroy } from '@/database/repositories/assets-llm-channel.respository';
 import { WorkflowAssetRepositroy } from '@/database/repositories/assets-workflow.respository';
 import { Injectable } from '@nestjs/common';
 import { AssetsMapperService } from './assets.common.service';
@@ -11,7 +12,7 @@ import { BUILT_IN_WORKFLOW_MARKETPLACE_LIST } from './assets.marketplace.data';
 export class AssetsMarketplaceService {
   constructor(
     private readonly workflowAssetRepository: WorkflowAssetRepositroy,
-    private readonly comfyuiWorkflowAssetRepository: ComfyuiWorkflowAssetRepositroy,
+    private readonly llmChannelAssetRepository: LlmChannelAssetRepositroy,
     private readonly assetsMapperService: AssetsMapperService,
     private readonly assetsCommonRepository: AssetsCommonRepository,
   ) {}
@@ -27,8 +28,16 @@ export class AssetsMarketplaceService {
     await this.assetsCommonRepository.createMarketplaceTagBatch('workflow', allTags);
   }
 
+  public async initBuiltInLLMMarketplace() {
+    const data = ONEAPI_CHANNELS;
+    for (const item of data) {
+      await this.llmChannelAssetRepository.initBuiltInMarketPlace('llm-channel', item);
+    }
+  }
+
   public async initBuiltInMarketplace() {
     await this.initWorfklowMarketplace();
+    await this.initBuiltInLLMMarketplace();
   }
 
   public async listMarketplaceAssets(assetType: AssetType, dto: ListDto) {

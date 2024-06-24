@@ -16,8 +16,22 @@ export const LlmModelPresets: React.FC<IVinesInputPropertyProps & IVinesInputPre
 
   useEffect(() => {
     if (!llmModels) return;
-
-    const opts = llmModels.map((m) => ({ name: m.name, value: m.uuid }));
+    const realLLMModels: Array<{ displayName: string; channelId: number; model: string }> = [];
+    for (const item of llmModels) {
+      const models = item.models;
+      const modelNames = Object.values(models);
+      for (const model of modelNames) {
+        realLLMModels.push({
+          displayName: `${item.displayName} - ${model}`,
+          channelId: item.channelId,
+          model: model,
+        });
+      }
+    }
+    const opts = realLLMModels.map((m) => ({
+      name: m.displayName,
+      value: `${m.channelId}:${m.model}`,
+    }));
 
     setOptions(opts);
 
@@ -27,7 +41,7 @@ export const LlmModelPresets: React.FC<IVinesInputPropertyProps & IVinesInputPre
         (newOptionsVariableMapper[optValue] = {
           displayName: name,
           name: optValue,
-          type: '文本模型' as BlockDefPropertyTypes,
+          type: '大语言模型' as BlockDefPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);
@@ -36,7 +50,7 @@ export const LlmModelPresets: React.FC<IVinesInputPropertyProps & IVinesInputPre
   return (
     <PresetWrapper
       id="LlmModel"
-      name="文本模型"
+      name="大语言模型"
       isLoading={isLoading}
       options={options}
       optionsVariableMapper={optionsVariableMapper}

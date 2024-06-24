@@ -7,7 +7,15 @@ import { useForm } from 'react-hook-form';
 
 import { NoticeInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/notice.tsx';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form.tsx';
 import { TagInput } from '@/components/ui/input/tag';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
@@ -97,7 +105,7 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
       >
         <ScrollArea className={scrollAreaClassName} style={{ height }}>
           <div className={cn('flex flex-col gap-4', formClassName)}>
-            {inputs?.map(({ displayName, name, type, typeOptions, ...other }) => {
+            {inputs?.map(({ displayName, name, type, description, typeOptions, ...other }) => {
               if (type === 'notice') {
                 return <NoticeInput key={name} def={{ displayName }} />;
               }
@@ -117,6 +125,7 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                       )}
                     >
                       <FormLabel className="font-bold">{displayName}</FormLabel>
+
                       <FormControl>
                         <>
                           {['string', 'number', 'file'].includes(type) &&
@@ -166,7 +175,7 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                                 />
                               ) : (
                                 <Switch
-                                  checked={isBoolean(value) ? value : BOOLEAN_VALUES.includes(value?.toString())}
+                                  checked={isBoolean(value) ? value : BOOLEAN_VALUES.includes(value?.toString()!)}
                                   onCheckedChange={onChange}
                                 />
                               )}
@@ -216,6 +225,8 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                           )}
                         </>
                       </FormControl>
+                      <FormDescription className="font-bold">{description}</FormDescription>
+
                       <FormMessage />
                     </FormItem>
                   )}

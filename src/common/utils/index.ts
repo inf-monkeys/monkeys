@@ -1,8 +1,15 @@
+import crypto from 'crypto';
+import shortid from 'shortid';
+
 export const enumToList = (enumItem: any) => {
   return Object.keys(enumItem).map((key) => enumItem[key]);
 };
 
 export const generateDbId = (m = Math, d = Date, h = 16, s = (s) => m.floor(s).toString(h)) => s(d.now() / 1000) + ' '.repeat(h).replace(/./g, () => s(m.random() * h));
+
+export const generateShortId = () => {
+  return shortid.generate();
+};
 
 export const isValidObjectId = (id: string) => {
   // ObjectId 是一个 24 字符的十六进制字符串
@@ -41,6 +48,22 @@ export function replacerNoEscape(key: string, value: any) {
     return value.replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\"/g, '"').replace(/\\'/g, "'").replace(/\\\\/g, '\\');
   }
   return value;
+}
+
+export function generatePassword(length: number = 16) {
+  // 定义密码字符集
+  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=';
+
+  // 创建随机字节数组
+  const randomBytes = crypto.randomBytes(length);
+
+  // 转换随机字节为字符
+  let password = '';
+  for (let i = 0; i < randomBytes.length; i++) {
+    password += charset[randomBytes[i] % charset.length];
+  }
+
+  return password;
 }
 
 export function maskString(str: string) {
