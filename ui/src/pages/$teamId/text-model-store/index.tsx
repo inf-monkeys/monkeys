@@ -5,10 +5,11 @@ import { createFileRoute } from '@tanstack/react-router';
 import { FileDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { ILLMChannel } from '@/apis/llm/typings';
 import { preloadUgcTextModelStore, useUgcTextModelStore } from '@/apis/ugc';
-import { IAssetItem } from '@/apis/ugc/typings.ts';
+import { IAssetItem } from '@/apis/ugc/typings';
 import { createTextModelStoreColumns } from '@/components/layout/ugc-pages/text-model-store/consts.tsx';
-import { UgcImportDialog } from '@/components/layout/ugc/import-dialog';
+import { LLMChannelImportDialog } from '@/components/layout/ugc/import-dialog/llm-channel';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
@@ -30,13 +31,13 @@ export const TextModelStore: React.FC = () => {
 
   const [importVisible, setImportVisible] = useState(false);
 
-  const [current, setCurrent] = useState<IAssetItem>();
+  const [current, setCurrent] = useState<IAssetItem<ILLMChannel>>();
 
   return (
     <main className="size-full">
       <UgcView
         assetKey="text-model-store"
-        assetType="llm-model"
+        assetType="llm-channel"
         assetName={tHook('components.layout.main.sidebar.list.store.text-model-store.label')}
         isMarket
         useUgcFetcher={useUgcTextModelStore}
@@ -92,13 +93,7 @@ export const TextModelStore: React.FC = () => {
         )}
       />
 
-      <UgcImportDialog
-        visible={importVisible}
-        setVisible={setImportVisible}
-        ugcId={current?.id}
-        assetType={current?.assetType}
-        name={current?.name}
-      />
+      <LLMChannelImportDialog visible={importVisible} setVisible={setImportVisible} channel={current} />
     </main>
   );
 };

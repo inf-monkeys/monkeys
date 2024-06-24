@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 export const enumToList = (enumItem: any) => {
   return Object.keys(enumItem).map((key) => enumItem[key]);
 };
@@ -41,4 +43,20 @@ export function replacerNoEscape(key: string, value: any) {
     return value.replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\"/g, '"').replace(/\\'/g, "'").replace(/\\\\/g, '\\');
   }
   return value;
+}
+
+export function generatePassword(length: number = 16) {
+  // 定义密码字符集
+  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=';
+
+  // 创建随机字节数组
+  const randomBytes = crypto.randomBytes(length);
+
+  // 转换随机字节为字符
+  let password = '';
+  for (let i = 0; i < randomBytes.length; i++) {
+    password += charset[randomBytes[i] % charset.length];
+  }
+
+  return password;
 }

@@ -191,8 +191,6 @@ export interface PaymentServerConfig {
 export interface OneApiConfig {
   enabled: boolean;
   baseURL: string;
-  username: string;
-  password: string;
   rootToken: string;
 }
 
@@ -355,8 +353,6 @@ When answer to user:
   oneapi: {
     enabled: readConfig('oneapi.enabled', false),
     baseURL: readConfig('oneapi.baseURL'),
-    username: readConfig('oneapi.username'),
-    password: readConfig('oneapi.password'),
     rootToken: readConfig('oneapi.rootToken'),
   },
 };

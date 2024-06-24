@@ -1,4 +1,5 @@
 import { IBaseEntity } from '@/apis/typings.ts';
+import { BlockDefProperties } from '@inf-monkeys/vines';
 
 export interface ILLMModel extends IBaseEntity {
   uuid: string;
@@ -23,4 +24,10 @@ export interface ILLMModel extends IBaseEntity {
   ownerUserId?: string;
   isPublic?: boolean;
   forkedFromId?: string;
+}
+
+export interface ILLMChannel extends IBaseEntity {
+  properites: BlockDefProperties[];
+  displayName: string;
+  iconUrl: string;
 }
