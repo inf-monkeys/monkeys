@@ -29,6 +29,7 @@
       "switch": "切换",
       "copy": "复制",
       "copy-success": "复制成功",
+      "copy-failed": "复制失败",
       "filter": "筛选",
       "back": "返回",
       "import": "导入",
@@ -68,7 +69,8 @@
       "team-not-found": "团队不存在",
       "user-not-found": "用户不存在",
       "vector-database-not-found": "知识库不存在",
-      "copy-success": "复制成功"
+      "copy-success": "复制成功",
+      "copy-failed": "复制失败"
     },
     "dialog": {
       "delete-confirm": {
@@ -1472,7 +1474,409 @@
           "edit-tool": "编辑工具",
           "insert-down-tool": "向下插入工具",
           "del-tool": "删除工具"
+        },
+        "tool-editor": {
+          "unknown-tool": "工具不存在",
+
+          "tabs": {
+            "config": "配置参数",
+            "dev": "原始数据",
+            "more-config": "高级配置"
+          },
+
+          "header": {
+            "quick-options": {
+              "del": {
+                "button-tips": "删除此工具",
+                "tips": "确定要删除此工具吗？操作将不可取消",
+                "action": "确定删除"
+              },
+              "toggle-prev-tool": "切换到上一工具",
+              "toggle-next-tool": "切换到下一工具"
+            },
+
+            "info": {
+              "editor": {
+                "button": "点击编辑工具自定义信息",
+                "title": "自定义工具信息",
+                "desc": "设置工具显示信息",
+                "form": {
+                  "name": "工具别名",
+                  "desc": "工具描述",
+                  "icon": "工具图标",
+                  "submit": "保存"
+                }
+              }
+            }
+          },
+
+          "input": {
+            "title": "输入",
+            "empty": "暂无配置参数",
+
+            "file-upload": "文件上传",
+            "variable-input": "变量输入",
+            "collection-input": "列表",
+            "preset-options": "预设选项",
+
+            "type": {
+              "string": "文本{{extra}}",
+              "number": "数字{{extra}}",
+              "boolean": "逻辑值{{extra}}",
+              "file": "文件{{extra}}",
+              "json": "对象{{extra}}",
+              "qrcode": "二维码{{extra}}",
+              "options": "选项{{extra}}",
+
+              "multiple": "列表",
+
+              "unknown": "不受支持的类型",
+              "required": "必填项"
+            }
+          },
+          "output": {
+            "title": "输出"
+          },
+
+          "save": "保存"
         }
+      },
+      "tooltip": {
+        "zoom-in": "放大",
+        "zoom-out": "缩小",
+        "reset": "适应屏幕",
+        "drag": "拖动画布",
+        "mouse": "鼠标",
+        "only-read": "只读模式",
+        "edit": "编辑模式",
+        "direction-of-alignment": "排列方向：{{dir}}",
+        "horizontal": "水平",
+        "vertically": "垂直",
+        "display-mode": "工具显示模式：{{mode}}",
+        "simplicity": "极简模式",
+        "full-display": "全参数模式",
+        "normal": "普通模式",
+        "raw-data": {
+          "button": "编辑原始数据",
+          "desc": "请谨慎编辑工作流原始数据，错误的数据将会导致工作流损坏！",
+          "reset": "重置",
+          "save": "保存"
+        },
+        "more": {
+          "tip": "更多",
+          "del-workflow": {
+            "button": "删除工作流",
+            "title": "确定要删除工作流吗？",
+            "desc": "删除后无法恢复，且所有相关数据将被永久删除。",
+            "cancel": "取消",
+            "action": "继续"
+          }
+        }
+      },
+      "version": {
+        "label": "版本 {{version}}",
+        "placeholder": "选择版本",
+        "search": "搜索版本",
+        "search-empty": "找不到此版本",
+
+        "release": {
+          "button": "创建版本",
+          "error": {
+            "title": "检测到工作流配置存在错误",
+            "desc": "确定要继续创建版本吗？配置出错的工作流将无法运行！",
+            "cancel": "取消",
+            "action": "继续"
+          },
+          "recheck": {
+            "disable": "当前工作流配置与上一个版本相同，无需创建版本",
+
+            "loading": "正在检测工作流配置",
+            "success": "工作流配置检测完毕",
+            "error": "工作流配置检测失败"
+          },
+
+          "workflow-version-error": "创建版本失败！无法获取工作流版本信息",
+          "tips": "确定要为此工作流创建版本吗",
+          "action": "确定",
+          "loading": "正在创建版本...",
+          "success": "版本创建成功",
+          "failed": "版本创建失败"
+        }
+      },
+
+      "endpoint": {
+        "start-tool": {
+          "title": "工作流配置",
+          "tabs": {
+            "input": "工作流输入",
+            "trigger": "触发器",
+            "api-config": "API 配置"
+          },
+          "input": {
+            "def": "默认值",
+            "add": "新建配置",
+            "delete": {
+              "title": "确定要删除此输入吗",
+              "desc": "删除后，此输入将不无法在工作流中使用，且无法恢复。",
+              "cancel": "取消",
+              "action": "确认删除"
+            },
+            "def-empty": "暂无默认值",
+            "def-true": "真",
+            "def-false": "假",
+
+            "config-form": {
+              "title": "输入配置",
+
+              "display-name": {
+                "label": "显示名称",
+                "placeholder": "请填写「输入配置」显示的名称"
+              },
+              "name": {
+                "label": "字段",
+                "placeholder": "请填写「输入配置」的字段名",
+                "desc": "输入字段用于在工作流中引用输入的数据，在工具装配项中填写「 ${workflow.input.{{name}}} 」来使用"
+              },
+              "type": {
+                "label": "数据类型",
+                "button": "选择数据类型",
+                "placeholder": "搜索类型...",
+                "search-empty": "找不到数据类型",
+
+                "list": "列表",
+
+                "string": "文本{{extra}}",
+                "number": "数字{{extra}}",
+                "boolean": "逻辑值{{extra}}",
+                "file": "文件{{extra}}",
+                "workflow": "工作流{{extra}}"
+              },
+              "default": {
+                "label": "默认值",
+                "placeholder": "请输入默认值",
+                "placeholder-list": "请输入列表项"
+              },
+              "file": {
+                "label": "默认文件{{extra}}",
+                "desc": "在此处上传文件将自动生成文件直链来覆盖左侧默认值",
+
+                "list": "列表"
+              },
+
+              "submit": "保存"
+            }
+          },
+          "trigger": {
+            "add": "添加触发器",
+            "update": {
+              "loading": "正在更新触发器...",
+              "success": "触发器更新成功",
+              "error": "触发器更新失败"
+            },
+            "delete": {
+              "button": "删除触发器",
+              "title": "确定要删除此触发器吗",
+              "desc": "删除后将无法恢复，请确认是否删除此触发器",
+              "cancel": "取消",
+              "action": "删除",
+
+              "loading": "正在删除触发器...",
+              "success": "触发器删除成功",
+              "error": "触发器删除失败"
+            },
+            "webhook-path-title": "API 请求地址：",
+            "create": {
+              "loading": "正在创建触发器...",
+              "success": "触发器创建成功",
+              "error": "触发器创建失败",
+
+              "title": "选择触发器",
+              "desc": "选择一个触发器，通过触发事件或定时任务来触发工作流的运行",
+
+              "schedule-trigger": {
+                "loading": "正在创建定时触发器...",
+                "success": "定时触发器创建成功",
+                "error": "定时触发器创建失败",
+
+                "title": "定时触发器",
+                "desc": "配置并启用定时触发器后，工作流将按照配置的时间周期性地触发",
+
+                "form": {
+                  "cron": {
+                    "label": "Cron 表达式",
+                    "placeholder": "请输入 Cron 定时任务表达式"
+                  },
+                  "submit": "创建"
+                }
+              },
+              "webhook-trigger": {
+                "loading": "正在创建 Webhook 触发器...",
+                "success": "Webhook 触发器创建成功",
+                "error": "Webhook 触发器创建失败",
+
+                "title": "Webhook 触发器",
+                "desc": "配置并启用 Webhook 触发器后，可以通过发送 HTTP 请求来触发工作流的运行",
+
+                "form": {
+                  "method": {
+                    "label": "请求方式",
+                    "placeholder": "选择 HTTP 请求方式",
+                    "search": "搜索 HTTP 请求方式...",
+                    "search-empty": "找不到 HTTP 请求方式"
+                  },
+                  "auth": {
+                    "label": "认证方式",
+                    "placeholder": "选择 HTTP 认证方式",
+                    "search": "搜索 HTTP 认证方式...",
+                    "search-empty": "找不到 HTTP 认证方式",
+
+                    "none": "无认证",
+                    "basic": "基础认证 (Basic Auth)",
+                    "custom-header": "自定义请求头"
+                  },
+                  "username": {
+                    "label": "用户名",
+                    "placeholder": "请输入用户名"
+                  },
+                  "password": {
+                    "label": "密码",
+                    "placeholder": "请输入密码"
+                  },
+                  "header-key": {
+                    "label": "请求头键",
+                    "placeholder": "请输入请求头键"
+                  },
+                  "header-value": {
+                    "label": "请求头值",
+                    "placeholder": "请输入请求头值"
+                  },
+                  "response-until": {
+                    "label": "HTTP 请求返回时机",
+                    "placeholder": "选择 HTTP 请求返回时机",
+                    "search": "搜索 HTTP 请求返回时机...",
+                    "search-empty": "找不到 HTTP 请求返回时机",
+
+                    "workflow-started": "工作流启动之后立即返回",
+                    "workflow-completed-or-finished": "工作流执行成功或者失败之后返回"
+                  },
+                  "submit": "创建"
+                }
+              }
+            }
+          },
+          "api-config": {
+            "form": {
+              "expose-openai-compatible-interface": {
+                "label": "启用 OpenAI 兼容的接口"
+              },
+              "openai-model-name": {
+                "label": "OpenAI 模型名称",
+                "placeholder": "请输入 OpenAI 模型名称",
+                "desc": "模型名称默认为工作流 ID，你也可以设置自定义模型名称，在通过 API 调用接口时可以设置 model 为此自定义名称（同一个团队内必须唯一）。"
+              },
+              "rate-limiter": {
+                "label": "启用接口速率限制",
+
+                "window-ms": {
+                  "label": "时间窗口大小（毫秒）",
+                  "placeholder": "请输入时间窗口大小（毫秒）"
+                },
+                "max": {
+                  "label": "单位时间窗口内运行最大并发"
+                }
+              },
+              "submit": {
+                "button": "保存",
+
+                "workflow-id-empty": "工作流 ID 不存在",
+                "loading": "正在保存 API 配置...",
+                "success": "API 配置保存成功",
+                "error": "API 配置保存失败，请检查网络后重试"
+              }
+            }
+          }
+        },
+        "end-tool": {
+          "title": "工作流输出配置",
+
+          "tabs": {
+            "output": "输出配置",
+            "raw-data": "原始数据"
+          },
+          "create": "新建输出配置",
+          "tip1": "在此处调整工作流输出",
+          "tip2": "工作流默认输出为最后一个节点的运行结果",
+          "error": {
+            "only-key-value": "JSON 只能为 key-value 对象数组",
+            "only-array": "JSON 只能为数组",
+            "json-format": "JSON 格式错误"
+          },
+
+          "save": {
+            "button": "保存",
+            "loading": "正在保存工作流输出配置...",
+            "success": "工作流输出配置保存成功",
+            "error": "工作流输出配置保存失败"
+          }
+        }
+      },
+
+      "execution": {
+        "stop": "终止运行",
+        "re-run": "重新运行",
+        "start": "视图内运行",
+
+        "workflow-input-empty": "请先完善工作流表单",
+
+        "stop-and-edit": "返回编辑模式",
+
+        "timer": {
+          "workflow": "工作流 {{status}}",
+
+          "paused": "已暂停",
+          "completed": "已完成运行",
+          "terminated": "已终止运行",
+          "failed": "运行失败",
+          "canceled": "已取消运行",
+          "time-out": "运行超时",
+          "paused-and-restart": "已暂停（点击继续）",
+          "running": "运行中（点击暂停）",
+          "default": "上次运行时长"
+        },
+
+        "run-history": {
+          "select-placeholder": "选择一个运行记录",
+          "search": "搜索运行实例 ID...",
+          "search-empty": "找不到此运行实例",
+
+          "tips": "选择一个运行记录，恢复运行"
+        }
+      },
+
+      "vines": {
+        "tools": {
+          "error": "工具数据异常！",
+          "parsing-error": "工具数据解析失败！",
+
+          "start": {
+            "name": "开始",
+            "desc": "点击配置工作流输入和触发器"
+          },
+          "end": {
+            "name": "结束",
+            "desc": "点击配置工作流输出",
+
+            "save": "保存配置",
+            "empty-output": "暂无输出"
+          },
+          "fake": {
+            "name": "点击添加工具"
+          },
+
+          "unknown": "不受支持的工具，请尝试重新创建"
+        },
+
+        "execution": "运行工作流"
       }
     }
   }

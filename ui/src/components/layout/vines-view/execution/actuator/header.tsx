@@ -2,6 +2,7 @@ import React from 'react';
 
 import { useClipboard } from '@mantine/hooks';
 import { Copy } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { ExecutionStatusIcon } from '@/components/layout/vines-view/execution/status-icon';
@@ -10,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { CardDescription } from '@/components/ui/card.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
+import { execCopy } from '@/utils';
 
 interface IActuatorHeaderProps {
   instanceId: string;
@@ -18,6 +20,7 @@ interface IActuatorHeaderProps {
 }
 
 export const ActuatorHeader: React.FC<IActuatorHeaderProps> = ({ instanceId, workflowStatus, children }) => {
+  const { t } = useTranslation();
   const clipboard = useClipboard({ timeout: 500 });
 
   return (
@@ -42,7 +45,8 @@ export const ActuatorHeader: React.FC<IActuatorHeaderProps> = ({ instanceId, wor
                 onClick={(e) => {
                   e.stopPropagation();
                   clipboard.copy(instanceId);
-                  toast.success('已复制实例 ID');
+                  if (!clipboard.copied && !execCopy(instanceId)) toast.error(t('common.toast.copy-failed'));
+                  else toast.success(t('common.toast.copy-success'));
                 }}
                 variant="outline"
               />

@@ -4,18 +4,21 @@ export const inputType = z.enum(['string', 'number', 'boolean', 'file'], {
   errorMap: (issue) => {
     switch (issue.code) {
       case 'invalid_type':
-        return { message: '不受支持的类型' };
+        return { message: 'Unsupported type' };
       case 'invalid_enum_value':
-        return { message: '类型只能为「string」、「number」、「boolean」、「file」' };
+        return { message: 'Type must be one of string, number, boolean, file' };
       default:
-        return { message: '未知错误' };
+        return { message: 'Unknown error' };
     }
   },
 });
 
 export const workflowInputSchema = z.object({
-  displayName: z.string().min(1, '名称不能为空'),
-  name: z.string().min(2, '字段不能小于两位').max(20, '字段不能小于二十位'),
+  displayName: z.string().min(1, 'Display name cannot be empty'),
+  name: z
+    .string()
+    .min(2, 'Field cannot be less than two characters')
+    .max(20, 'Field cannot be more than twenty characters'),
   type: inputType,
   default: z
     .union([z.string(), z.number(), z.boolean(), z.array(z.string()), z.array(z.number()), z.array(z.boolean())])

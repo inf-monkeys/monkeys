@@ -29,6 +29,7 @@
       "switch": "Switch",
       "copy": "Copy",
       "copy-success": "Copy success",
+      "copy-failed": "Copy failed",
       "filter": "Filter",
       "back": "Back",
       "import": "Import",
@@ -70,7 +71,8 @@
       "team-not-found": "The team doesn't exist.",
       "user-not-found": "The user doesn't exist.",
       "vector-database-not-found": "The vector database doesn't exist.",
-      "copy-success": "Copy success."
+      "copy-success": "Copy success.",
+      "copy-failed": "Copy failed."
     },
     "dialog": {
       "delete-confirm": {
@@ -1477,7 +1479,411 @@
           "edit-tool": "Edit Tools",
           "insert-down-tool": "Insert Down Tool",
           "del-tool": "Delete Tools"
+        },
+        "tool-editor": {
+          "unknown-tool": "Unknown tool",
+
+          "tabs": {
+            "config": "Configuration",
+            "dev": "Raw Data",
+            "more-config": "Advanced Configuration"
+          },
+
+          "header": {
+            "quick-options": {
+              "del": {
+                "button-tips": "Delete this tool",
+                "tips": "Are you sure you want to delete this tool?",
+                "action": "Delete"
+              },
+              "toggle-prev-tool": "Switch to previous tool",
+              "toggle-next-tool": "Switch to next tool"
+            },
+
+            "info": {
+              "editor": {
+                "button": "Click to customise the tool information",
+                "title": "Customising tool information",
+                "desc": "Setting the tool display information",
+                "form": {
+                  "name": "Tool aliases",
+                  "desc": "Tool Description",
+                  "icon": "Tool Icon",
+                  "submit": "Save"
+                }
+              }
+            }
+          },
+
+
+          "input": {
+            "title": "Input",
+            "empty": "No configuration parameters",
+
+            "file-upload": "File",
+            "variable-input": "Variable",
+            "collection-input": "List",
+            "preset-options": "Preset",
+
+            "type": {
+              "string": "string {{extra}}",
+              "number": "number {{extra}}",
+              "boolean": "boolean {{extra}}",
+              "file": "file {{extra}}",
+              "json": "json {{extra}}",
+              "qrcode": "qrcode {{extra}}",
+              "options": "options {{extra}}",
+
+              "multiple": "list",
+
+              "unknown": "Unsupported types",
+              "required": "Required"
+            }
+          },
+          "output": {
+            "title": "Output"
+          },
+
+          "save": "Save"
         }
+      },
+      "tooltip": {
+        "zoom-in": "Zoom In",
+        "zoom-out": "Zoom Out",
+        "reset": "Reset canvas",
+        "drag": "Drag canvas",
+        "mouse": "Mouse",
+        "only-read": "Read only mode",
+        "edit": "Edit mode",
+        "direction-of-alignment": "Direction of alignment：{{dir}}",
+        "horizontal": "Horizontal",
+        "vertically": "Vertically",
+        "display-mode": "Tool display mode：{{mode}}",
+        "simplicity": "Simplicity",
+        "full-display": "Full display",
+        "normal": "Normal",
+        "raw-data": {
+          "button": "Edit raw data",
+          "desc": "Please edit the raw workflow data with care, incorrect data will result in a corrupted workflow!",
+          "reset": "reset",
+          "save": "save"
+        },
+        "more": {
+          "tip": "more options",
+          "del-workflow": {
+            "button": "Delete workflow",
+            "title": "Sure you want to delete the workflow?",
+            "desc": "Deletion cannot be recovered and all relevant data will be permanently deleted.",
+            "cancel": "cancel",
+            "action": "Delete"
+          }
+        }
+      },
+
+      "version": {
+        "label": "Ver {{version}}",
+        "placeholder": "Select Version",
+        "search": "Search version",
+        "search-empty": "Can't find this version",
+
+        "release": {
+          "button": "Release",
+          "error": {
+            "title": "Error detected in workflow configuration",
+            "desc": "Sure you want to continue creating versions? Workflows with configuration errors will not run!",
+            "cancel": "cancel",
+            "action": "Confirm"
+          },
+          "recheck": {
+            "disable": "The current workflow configuration is the same as the previous version; there is no need to create a version",
+
+            "loading": "Detecting workflow configuration",
+            "success": "Workflow configuration detection successful",
+            "error": "Workflow configuration detection failed"
+          },
+
+          "workflow-version-error": "Failed to create version! Unable to get workflow version information",
+          "tips": "Are you sure you want to create a version of this workflow?",
+          "action": "Confirm",
+          "loading": "Creating version...",
+          "success": "Version created successfully",
+          "failed": "Version creation failed"
+        }
+      },
+
+      "endpoint": {
+        "start-tool": {
+          "title": "Workflow Configuration",
+          "tabs": {
+            "input": "Workflow Input",
+            "trigger": "Trigger",
+            "api-config": "API Configuration"
+          },
+          "input": {
+            "def": "Default Value",
+            "add": "Create Input",
+            "delete": {
+              "title": "Are you sure you want to delete this input?",
+              "desc": "After deletion, this input will not be unavailable in the workflow and cannot be restored.",
+              "cancel": "cancel",
+              "action": "confirm"
+            },
+            "def-empty": "No default value",
+            "def-true": "T",
+            "def-false": "F",
+
+            "config-form": {
+              "title": "Input Configuration",
+
+              "display-name": {
+                "label": "Display Name",
+                "placeholder": "Enter display name"
+              },
+              "name": {
+                "label": "Key",
+                "placeholder": "Enter key",
+                "desc": "The input field is used to reference the input data in the workflow, fill in \"${workflow.input.{{name}}}\" in the tool assembly item to use the"
+              },
+              "type": {
+                "label": "Data Type",
+                "button": "Select data type",
+                "placeholder": "Search data type...",
+                "search-empty": "Data type not found",
+
+                "list": "list",
+
+                "string": "string {{extra}}",
+                "number": "number {{extra}}",
+                "boolean": "boolean {{extra}}",
+                "file": "file {{extra}}",
+                "workflow": "workflow {{extra}}"
+              },
+              "default": {
+                "label": "Default Value",
+                "placeholder": "Enter default value",
+                "placeholder-list": "Enter default value"
+              },
+              "file": {
+                "label": "File {{extra}} Default",
+                "desc": "Uploading a file here will automatically generate a direct file link to override the defaults on the left.",
+
+                "list": "list"
+              },
+
+              "submit": "Save"
+            }
+          },
+          "trigger": {
+            "add": "Add Trigger",
+            "update": {
+              "loading": "Updating trigger...",
+              "success": "Trigger updated successfully",
+              "error": "Trigger update failed"
+            },
+            "delete": {
+              "button": "Delete Trigger",
+              "title": "Sure you want to delete the trigger?",
+              "desc": "Deletion cannot be recovered and all relevant data will be permanently deleted.",
+              "cancel": "cancel",
+              "action": "Delete",
+
+              "loading": "Deleting trigger...",
+              "success": "Trigger deleted successfully",
+              "error": "Trigger deletion failed"
+            },
+            "webhook-path-title": "API Path: ",
+            "create": {
+              "loading": "Creating trigger...",
+              "success": "Trigger created successfully",
+              "error": "Trigger creation failed",
+
+              "title": "Select a trigger",
+              "desc": "Select a trigger to trigger the workflow to run by triggering an event or timed task",
+
+              "schedule-trigger": {
+                "loading": "Creating scheduled trigger...",
+                "success": "Scheduled trigger created successfully",
+                "error": "Scheduled trigger creation failed",
+
+                "title": "Scheduled Trigger",
+                "desc": "When timed triggers are configured and enabled, the workflow will periodically trigger at the configured time",
+
+                "form": {
+                  "cron": {
+                    "label": "Cron Expression",
+                    "placeholder": "Enter cron expression"
+                  },
+                  "submit": "Create"
+                }
+              },
+              "webhook-trigger": {
+                "loading": "Creating Webhook trigger...",
+                "success": "Webhook trigger created successfully",
+                "error": "Webhook trigger creation failed",
+
+                "title": "Webhook Trigger",
+                "desc": "Once you have configured and enabled Webhook triggers, you can send HTTP requests to trigger a workflow to run",
+
+                "form": {
+                  "method": {
+                    "label": "HTTP Request Method",
+                    "placeholder": "Select HTTP request method",
+                    "search": "Search HTTP request method...",
+                    "search-empty": "No HTTP request method found"
+                  },
+                  "auth": {
+                    "label": "HTTP Authentication",
+                    "placeholder": "Select HTTP authentication",
+                    "search": "Search HTTP authentication...",
+                    "search-empty": "No HTTP authentication found",
+
+                    "none": "None",
+                    "basic": "Basic",
+                    "custom-header": "Custom Header"
+                  },
+                  "username": {
+                    "label": "Username",
+                    "placeholder": "Enter username"
+                  },
+                  "password": {
+                    "label": "Password",
+                    "placeholder": "Enter password"
+                  },
+                  "header-key": {
+                    "label": "Header Key",
+                    "placeholder": "Enter header key"
+                  },
+                  "header-value": {
+                    "label": "Header Value",
+                    "placeholder": "Enter header value"
+                  },
+                  "response-until": {
+                    "label": "HTTP Response Timing",
+                    "placeholder": "Select HTTP response timing",
+                    "search": "Search HTTP response timing...",
+                    "search-empty": "No HTTP response timing found",
+
+                    "workflow-started": "Workflow started",
+                    "workflow-completed-or-finished": "Workflow completed or finished"
+                  },
+                  "submit": "Create"
+                }
+              }
+            }
+          },
+          "api-config": {
+            "form": {
+              "expose-openai-compatible-interface": {
+                "label": "Enabling OpenAI-compatible interfaces"
+              },
+              "openai-model-name": {
+                "label": "OpenAI model name",
+                "placeholder": "Enter OpenAI model name",
+                "desc": "The model name defaults to the workflow ID, you can also set a custom model name, and when calling the interface via the API you can set the model to this custom name (which must be unique within the same team)."
+              },
+              "rate-limiter": {
+                "label": "Enabling Interface Rate Limiting",
+
+                "window-ms": {
+                  "label": "Time window size (ms)",
+                  "placeholder": "Enter time window size (ms)"
+                },
+                "max": {
+                  "label": "Run maximum concurrency per time window"
+                }
+              },
+              "submit": {
+                "button": "Save API Configuration",
+
+                "workflow-id-empty": "Workflow ID does not exist",
+                "loading": "Saving API configuration...",
+                "success": "API configuration saved successfully",
+                "error": "API configuration save failed"
+              }
+            }
+          }
+        },
+        "end-tool": {
+          "title": "Workflow Output Configuration",
+
+          "tabs": {
+            "output": "Workflow Output",
+            "raw-data": "Raw Data"
+          },
+          "create": "Create Output",
+          "tip1": "Adjust workflow output here",
+          "tip2": "The default output of the workflow is the result of the last node run",
+          "error": {
+            "only-key-value": "JSON can only be an array of key-value objects.",
+            "only-array": "JSON can only be an array",
+            "json-format": "JSON formatting error"
+          },
+
+          "save": {
+            "button": "Save",
+            "loading": "Saving workflow output...",
+            "success": "Workflow output saved successfully",
+            "error": "Workflow output save failed"
+          }
+        }
+      },
+
+      "execution": {
+        "stop": "Stop",
+        "re-run": "Restart",
+        "start": "Start",
+
+        "workflow-input-empty": "Please enter the workflow input",
+
+        "stop-and-edit": "Stop and Edit",
+
+        "timer": {
+          "workflow": "Workflow {{status}}",
+
+          "paused": "Paused",
+          "completed": "Completed",
+          "terminated": "Terminated",
+          "failed": "Failed",
+          "canceled": "Canceled",
+          "time-out": "Time out",
+          "paused-and-restart": "Paused (click to restart)",
+          "running": "Running (click to pause)",
+          "default": "Last running time"
+        },
+
+        "run-history": {
+          "select-placeholder": "Select a run history",
+          "search": "Search workflow instance ID ...",
+          "search-empty": "Can't find this workflow instance ID",
+
+          "tips": "Select a run record to resume running"
+        }
+      },
+
+      "vines": {
+        "error": "Tool data anomalies!",
+        "parsing-error": "Failed to parse the tool data!",
+
+        "tools": {
+          "start": {
+            "name": "Start",
+            "desc": "Click to configure workflow Inputs"
+          },
+          "end": {
+            "name": "End",
+            "desc": "Click Configure Workflow Output",
+
+            "save": "Save",
+            "empty-output": "Empty output"
+          },
+          "fake": {
+            "name": "Click to add a tool"
+          },
+
+          "unknown": "Unsupported tools, try recreating"
+        },
+
+        "execution": "Execution Workflow"
       }
     }
   }

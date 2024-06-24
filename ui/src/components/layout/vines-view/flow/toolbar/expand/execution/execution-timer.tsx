@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useInterval } from '@mantine/hooks';
 import dayjs from 'dayjs';
 import { CheckCircle, CircleDashed, CircleSlash, PauseCircle, PlayCircle, TimerOff, XCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -18,6 +19,8 @@ interface IExecutionTimerProps {
 }
 
 export const ExecutionTimer: React.FC<IExecutionTimerProps> = ({ status, startTime, endTime, onClick, className }) => {
+  const { t } = useTranslation();
+
   const [execTime, setExecTime] = useState<string>('--:--:--');
 
   const handleUpdateTimeUseStartTime = () => {
@@ -63,26 +66,28 @@ export const ExecutionTimer: React.FC<IExecutionTimerProps> = ({ status, startTi
             )
           }
         >
-          {isPaused ? '已暂停' : execTime}
+          {isPaused ? t('workspace.flow-view.execution.timer.paused') : execTime}
         </Button>
       </TooltipTrigger>
       <TooltipContent side="bottom">
-        工作流
-        {status === 'COMPLETED'
-          ? '已完成运行'
-          : status === 'TERMINATED'
-            ? '已终止运行'
-            : status === 'FAILED'
-              ? '运行失败'
-              : status === 'CANCELED'
-                ? '已取消运行'
-                : status === 'TIMED_OUT'
-                  ? '运行超时'
-                  : status === 'PAUSED'
-                    ? '已暂停（点击继续）'
-                    : status === 'RUNNING'
-                      ? '运行中（点击暂停）'
-                      : '上次运行时长'}
+        {t('workspace.flow-view.execution.timer.workflow', {
+          status:
+            status === 'COMPLETED'
+              ? t('workspace.flow-view.execution.timer.completed')
+              : status === 'TERMINATED'
+                ? t('workspace.flow-view.execution.timer.terminated')
+                : status === 'FAILED'
+                  ? t('workspace.flow-view.execution.timer.failed')
+                  : status === 'CANCELED'
+                    ? t('workspace.flow-view.execution.timer.canceled')
+                    : status === 'TIMED_OUT'
+                      ? t('workspace.flow-view.execution.timer.timed-out')
+                      : status === 'PAUSED'
+                        ? t('workspace.flow-view.execution.timer.paused-and-restart')
+                        : status === 'RUNNING'
+                          ? t('workspace.flow-view.execution.timer.running')
+                          : t('workspace.flow-view.execution.timer.default'),
+        })}
       </TooltipContent>
     </Tooltip>
   );

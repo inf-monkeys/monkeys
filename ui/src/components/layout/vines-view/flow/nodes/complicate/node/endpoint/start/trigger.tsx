@@ -1,9 +1,11 @@
 import React from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 import { useTriggers, useTriggerTypes } from '@/apis/workflow/trigger';
 import { VinesWorkflowInput } from '@/components/layout/vines-view/execution/workflow-input';
+import { WorkflowApiConfig } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/api-config';
 import { InputConfig } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config';
 import { WorkflowTrigger } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/triggers';
 import { InputPreview } from '@/components/layout/vines-view/flow/nodes/complicate/node/endpoint/start/input-preview.tsx';
@@ -18,6 +20,8 @@ import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import VinesEvent from '@/utils/events.ts';
 
 export const ComplicateTriggerNode: React.FC = () => {
+  const { t } = useTranslation();
+
   const { canvasMode, setCanvasMode } = useCanvasStore();
   const { setIsUserInteraction } = useCanvasInteractionStore();
   const { vines } = useVinesFlow();
@@ -35,7 +39,7 @@ export const ComplicateTriggerNode: React.FC = () => {
         toolName=""
         customData={{
           icon: triggerType?.icon ?? '🚀',
-          title: triggerType?.displayName ?? '开始',
+          title: triggerType?.displayName ?? t('workspace.flow-view.vines.tools.start.name'),
           description: triggerType?.description ?? '',
         }}
       />
@@ -61,7 +65,7 @@ export const ComplicateTriggerNode: React.FC = () => {
                 }}
               >
                 <Button variant="outline" type="submit" size="small">
-                  运行工作流
+                  {t('workspace.flow-view.vines.execution')}
                 </Button>
               </VinesWorkflowInput>
             </motion.div>
@@ -78,14 +82,20 @@ export const ComplicateTriggerNode: React.FC = () => {
             >
               <Tabs defaultValue="input">
                 <TabsList>
-                  <TabsTrigger value="input">输入配置</TabsTrigger>
-                  <TabsTrigger value="trigger">触发器</TabsTrigger>
+                  <TabsTrigger value="input">{t('workspace.flow-view.endpoint.start-tool.tabs.input')}</TabsTrigger>
+                  <TabsTrigger value="trigger">{t('workspace.flow-view.endpoint.start-tool.tabs.trigger')}</TabsTrigger>
+                  <TabsTrigger value="api-config">
+                    {t('workspace.flow-view.endpoint.start-tool.tabs.api-config')}
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="input">
                   <InputConfig className="h-[21rem]" contentWidth={308} />
                 </TabsContent>
                 <TabsContent value="trigger">
                   <WorkflowTrigger className="h-[21rem]" />
+                </TabsContent>
+                <TabsContent value="api-config">
+                  <WorkflowApiConfig />
                 </TabsContent>
               </Tabs>
             </motion.div>

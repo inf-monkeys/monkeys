@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import { WorkflowInputConfig } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { useFlowStore } from '@/store/useFlowStore';
@@ -8,6 +10,8 @@ import VinesEvent from '@/utils/events.ts';
 interface IStartToolProps {}
 
 export const StartTool: React.FC<IStartToolProps> = () => {
+  const { t } = useTranslation();
+
   const { workflowId } = useFlowStore();
 
   const [open, setOpen] = useState(false);
@@ -26,7 +30,7 @@ export const StartTool: React.FC<IStartToolProps> = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
-        <DialogTitle>工作流配置</DialogTitle>
+        <DialogTitle>{t('workspace.flow-view.endpoint.start-tool.title')}</DialogTitle>
         <WorkflowInputConfig />
       </DialogContent>
     </Dialog>

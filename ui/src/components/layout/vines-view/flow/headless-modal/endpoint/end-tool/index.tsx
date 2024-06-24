@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useUpdateWorkflow } from '@/apis/workflow';
@@ -18,6 +19,8 @@ import VinesEvent from '@/utils/events.ts';
 interface IEndToolProps {}
 
 export const EndTool: React.FC<IEndToolProps> = () => {
+  const { t } = useTranslation();
+
   const { isLatestWorkflowVersion, workflowId } = useFlowStore();
   const { disableDialogClose } = useCanvasStore();
 
@@ -42,20 +45,20 @@ export const EndTool: React.FC<IEndToolProps> = () => {
 
   const handleUpdate = () => {
     toast.promise(trigger({ output, version: vines.version }), {
-      loading: '保存中...',
-      success: '保存成功',
-      error: '保存失败',
+      loading: t('workspace.flow-view.endpoint.end-tool.save.loading'),
+      success: t('workspace.flow-view.endpoint.end-tool.save.success'),
+      error: t('workspace.flow-view.endpoint.end-tool.save.error'),
     });
   };
 
   return (
     <Dialog open={open} onOpenChange={(val) => !disableDialogClose && setOpen(val)}>
       <DialogContent>
-        <DialogTitle>工作流输出配置</DialogTitle>
+        <DialogTitle>{t('workspace.flow-view.endpoint.end-tool.title')}</DialogTitle>
         <WorkflowOutputConfig output={output} setOutput={setOutput} />
         <DialogFooter className={cn(!isLatestWorkflowVersion && 'hidden')}>
           <Button variant="outline" onClick={handleUpdate}>
-            保存
+            {t('workspace.flow-view.endpoint.end-tool.save.button')}
           </Button>
         </DialogFooter>
       </DialogContent>

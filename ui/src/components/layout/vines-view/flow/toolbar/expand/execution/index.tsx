@@ -2,6 +2,7 @@ import React from 'react';
 
 import { get } from 'lodash';
 import { LogOut, Play, RotateCcw, StopCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { ExecutionRecover } from '@/components/layout/vines-view/flow/toolbar/expand/execution/execution-recover.tsx';
@@ -20,6 +21,8 @@ import VinesEvent from '@/utils/events.ts';
 interface IVinesRunInsideToolbarProps {}
 
 export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () => {
+  const { t } = useTranslation();
+
   const { isLatestWorkflowVersion } = useFlowStore();
   const { isWorkflowRUNNING, setCanvasMode } = useCanvasStore();
   const { setIsUserInteraction } = useCanvasInteractionStore();
@@ -44,7 +47,13 @@ export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () =
       <ToolButton
         icon={isExecutionRunning ? <StopCircle /> : isReExecution ? <RotateCcw /> : <Play />}
         side="bottom"
-        tip={isExecutionRunning ? '终止运行' : isReExecution ? '重新运行' : '视图内运行'}
+        tip={
+          isExecutionRunning
+            ? t('workspace.flow-view.execution.stop')
+            : isReExecution
+              ? t('workspace.flow-view.execution.re-run')
+              : t('workspace.flow-view.execution.start')
+        }
         keys={['ctrl', 'F5']}
         onClick={() => {
           if (isExecutionRunning) {
@@ -53,7 +62,7 @@ export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () =
             const hasWorkflowVariables = vines.workflowInput.length > 0;
             if (hasWorkflowVariables) {
               setTimeout(() => VinesEvent.emit('canvas-zoom-to-node', 'complicate-workflow_start'));
-              toast.info('请先完善工作流表单');
+              toast.info(t('workspace.flow-view.execution.workflow-input-empty'));
             } else {
               vines.start({});
               setIsUserInteraction(null);
@@ -75,7 +84,7 @@ export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () =
         <ToolButton
           className={cn(isWorkflowRUNNING ? '' : 'hidden')}
           icon={<LogOut />}
-          tip="返回编辑模式"
+          tip={t('workspace.flow-view.execution.stop-and-edit')}
           side="bottom"
           onClick={() => {
             setCanvasMode(CanvasStatus.EDIT);

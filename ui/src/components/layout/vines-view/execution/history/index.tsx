@@ -4,6 +4,7 @@ import { useClipboard } from '@mantine/hooks';
 import { CircularProgress } from '@nextui-org/progress';
 import { Command as CommandPrimitive, CommandLoading } from 'cmdk';
 import { Copy, MousePointerSquareDashed, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useSearchWorkflowExecutions } from '@/apis/workflow/execution';
@@ -19,7 +20,7 @@ import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { useViewStore } from '@/store/useViewStore';
-import { cn } from '@/utils';
+import { cn, execCopy } from '@/utils';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 interface IVinesExecutionHistoryProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -30,6 +31,7 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
   const { setCanvasMode } = useCanvasStore();
   const { workflowId } = useFlowStore();
 
+  const { t } = useTranslation();
   const clipboard = useClipboard({ timeout: 500 });
 
   const { vines } = useVinesFlow();
@@ -119,8 +121,14 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
                             icon={<Copy />}
                             onClick={(e) => {
                               e.stopPropagation();
+                              if (!instanceId) {
+                                toast.error(t('common.toast.loading'));
+                                return;
+                              }
                               clipboard.copy(instanceId);
-                              toast.success('已复制实例 ID');
+                              if (!clipboard.copied && !execCopy(instanceId))
+                                toast.error(t('common.toast.copy-failed'));
+                              else toast.success(t('common.toast.copy-success'));
                             }}
                           />
                         </TooltipTrigger>

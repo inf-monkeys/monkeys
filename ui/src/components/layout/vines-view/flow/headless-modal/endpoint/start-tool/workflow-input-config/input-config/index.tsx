@@ -2,6 +2,7 @@ import React from 'react';
 
 import { isBoolean } from 'lodash';
 import { Edit, Plus, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { InputEditor } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor';
 import { WorkflowInputList } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-list';
@@ -28,6 +29,8 @@ interface IInputConfigProps {
 }
 
 export const InputConfig: React.FC<IInputConfigProps> = ({ className, contentWidth }) => {
+  const { t } = useTranslation();
+
   const { isLatestWorkflowVersion } = useFlowStore();
 
   const { vines } = useVinesFlow();
@@ -47,7 +50,12 @@ export const InputConfig: React.FC<IInputConfigProps> = ({ className, contentWid
 
   return (
     <div className={cn('relative flex h-80 w-full flex-col gap-4 py-2', className)}>
-      <WorkflowInputList inputs={inputs} className="px-2" contentWidth={contentWidth}>
+      <WorkflowInputList
+        inputs={inputs}
+        className="px-2"
+        contentWidth={contentWidth}
+        defaultValueText={t('workspace.flow-view.endpoint.start-tool.input.def')}
+      >
         {(variableId) => (
           <div className="flex items-center gap-1">
             <Button
@@ -66,12 +74,18 @@ export const InputConfig: React.FC<IInputConfigProps> = ({ className, contentWid
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>确定要删除此输入吗</AlertDialogTitle>
-                  <AlertDialogDescription>删除后，此输入将不无法在工作流中使用，且无法恢复。</AlertDialogDescription>
+                  <AlertDialogTitle>{t('workspace.flow-view.endpoint.start-tool.input.delete.title')}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t('workspace.flow-view.endpoint.start-tool.input.delete.desc')}
+                  </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>取消</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => handleRemoveInput(variableId)}>确认删除</AlertDialogAction>
+                  <AlertDialogCancel>
+                    {t('workspace.flow-view.endpoint.start-tool.input.delete.cancel')}
+                  </AlertDialogCancel>
+                  <AlertDialogAction onClick={() => handleRemoveInput(variableId)}>
+                    {t('workspace.flow-view.endpoint.start-tool.input.delete.action')}
+                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -84,7 +98,7 @@ export const InputConfig: React.FC<IInputConfigProps> = ({ className, contentWid
         icon={<Plus />}
         onClick={() => VinesEvent.emit('flow-input-editor', vines.workflowId)}
       >
-        新建配置
+        {t('workspace.flow-view.endpoint.start-tool.input.add')}
       </Button>
       <InputEditor />
     </div>

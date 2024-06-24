@@ -2,6 +2,7 @@ import React from 'react';
 
 import { useClipboard } from '@mantine/hooks';
 import { Copy } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { buttonVariants } from '@/components/ui/button';
@@ -10,13 +11,14 @@ import { Tree, TreeDataItem } from '@/components/ui/tree.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VINES_VARIABLE_TAG } from '@/package/vines-flow/core/tools/consts.ts';
 import { IVinesVariable } from '@/package/vines-flow/core/tools/typings.ts';
-import { cn } from '@/utils';
+import { cn, execCopy } from '@/utils';
 
 interface IToolOutputProps {
   nodeId?: string;
 }
 
 export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
+  const { t } = useTranslation();
   const clipboard = useClipboard({ timeout: 500 });
   const { vines } = useVinesFlow();
 
@@ -40,7 +42,8 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
                 className="flex size-full items-center gap-2 p-2 text-sm"
                 onClick={() => {
                   clipboard.copy(it.id);
-                  toast.success('变量已复制');
+                  if (!clipboard.copied && !execCopy(it.id)) toast.error(t('common.toast.copy-failed'));
+                  else toast.success(t('common.toast.copy-success'));
                 }}
               >
                 <span
@@ -85,7 +88,8 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
                     onClick={(e) => {
                       e.preventDefault();
                       clipboard.copy(it.jsonpath);
-                      toast.success('变量已复制');
+                      if (!clipboard.copied && !execCopy(it.jsonpath)) toast.error(t('common.toast.copy-failed'));
+                      else toast.success(t('common.toast.copy-success'));
                     }}
                   >
                     <Copy className="size-4" />

@@ -3,6 +3,7 @@ import React from 'react';
 import { useSWRConfig } from 'swr';
 
 import { Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useTriggerRemove, useTriggerTypes, useTriggerUpdate } from '@/apis/workflow/trigger';
@@ -32,6 +33,8 @@ interface ITriggerProps {
 }
 
 export const Trigger: React.FC<ITriggerProps> = ({ trigger, workflowVersion, workflowId }) => {
+  const { t } = useTranslation();
+
   const { type, id, enabled } = trigger;
 
   const { isLatestWorkflowVersion } = useFlowStore();
@@ -45,23 +48,23 @@ export const Trigger: React.FC<ITriggerProps> = ({ trigger, workflowVersion, wor
 
   const handleEnableChange = (val: boolean) => {
     toast.promise(updateTrigger({ enabled: val }), {
-      loading: '正在更新触发器...',
+      loading: t('workspace.flow-view.endpoint.start-tool.trigger.update.loading'),
       success: () => {
         void mutate(`/api/workflow/${workflowId}/triggers?version=${workflowVersion}`);
-        return '触发器更新成功';
+        return t('workspace.flow-view.endpoint.start-tool.trigger.update.success');
       },
-      error: '触发器更新失败',
+      error: t('workspace.flow-view.endpoint.start-tool.trigger.update.error'),
     });
   };
 
   const handleRemove = () => {
     toast.promise(removeTrigger(), {
-      loading: '正在删除触发器...',
+      loading: t('workspace.flow-view.endpoint.start-tool.trigger.delete.loading'),
       success: () => {
         void mutate(`/api/workflow/${workflowId}/triggers?version=${workflowVersion}`);
-        return '触发器删除成功';
+        return t('workspace.flow-view.endpoint.start-tool.trigger.delete.success');
       },
-      error: '触发器删除失败',
+      error: t('workspace.flow-view.endpoint.start-tool.trigger.delete.error'),
     });
   };
 
@@ -81,7 +84,7 @@ export const Trigger: React.FC<ITriggerProps> = ({ trigger, workflowVersion, wor
       </CardHeader>
       {webhookPath && (
         <CardContent>
-          <p className="text-sm">请求地址：</p>
+          <p className="text-sm">{t('workspace.flow-view.endpoint.start-tool.trigger.webhook-path-title')}</p>
           <span className="text-xs text-gray-11">{`${new URL(window.location.href).origin}/api/workflow/webhook/${trigger.webhookPath}`}</span>
         </CardContent>
       )}
@@ -94,17 +97,23 @@ export const Trigger: React.FC<ITriggerProps> = ({ trigger, workflowVersion, wor
               icon={<Trash2 />}
               size="small"
             >
-              删除触发器
+              {t('workspace.flow-view.endpoint.start-tool.trigger.delete.button')}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>确定要删除此触发器吗</AlertDialogTitle>
-              <AlertDialogDescription>删除后将无法恢复，请确认是否删除此触发器</AlertDialogDescription>
+              <AlertDialogTitle>{t('workspace.flow-view.endpoint.start-tool.trigger.delete.title')}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t('workspace.flow-view.endpoint.start-tool.trigger.delete.desc')}
+              </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>取消</AlertDialogCancel>
-              <AlertDialogAction onClick={handleRemove}>确认删除</AlertDialogAction>
+              <AlertDialogCancel>
+                {t('workspace.flow-view.endpoint.start-tool.trigger.delete.cancel')}
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={handleRemove}>
+                {t('workspace.flow-view.endpoint.start-tool.trigger.delete.action')}
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
