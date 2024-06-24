@@ -428,7 +428,13 @@ if (config.proxy.enabled) {
   exclude.push('127.0.0.1');
   // Exclude condcutor from proxy
   exclude.push(getHostFromUrl(config.conductor.baseUrl));
-  exclude.push(getHostFromUrl(config.paymentServer.baseUrl));
+
+  if (config.paymentServer.baseUrl) {
+    exclude.push(getHostFromUrl(config.paymentServer.baseUrl));
+  }
+  if (config.oneapi.baseURL) {
+    exclude.push(getHostFromUrl(config.oneapi.baseURL));
+  }
   // Exlcude tools from proxy
   config.tools
     .filter((tool) => !tool.useProxy)
