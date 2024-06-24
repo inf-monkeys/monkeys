@@ -78,15 +78,25 @@ export class SystemConfigurationRepository {
     // If set rootToken in config, allways update it to db
     if (config.oneapi.rootToken) {
       const token = config.oneapi.rootToken;
-      const entity: SystemConfigurationEntity = {
-        id: generateDbId(),
-        createdTimestamp: +new Date(),
-        updatedTimestamp: +new Date(),
-        isDeleted: false,
-        key: this.ONEAPI_ROOT_USER_TOKEN_KEY,
-        value: token,
-      };
-      await this.systemConfigurationEntity.save(entity);
+      const configuration = await this.systemConfigurationEntity.findOne({
+        where: {
+          key: this.ONEAPI_ROOT_USER_TOKEN_KEY,
+        },
+      });
+      if (configuration) {
+        configuration.value = token;
+        await this.systemConfigurationEntity.save(configuration);
+      } else {
+        const entity: SystemConfigurationEntity = {
+          id: generateDbId(),
+          createdTimestamp: +new Date(),
+          updatedTimestamp: +new Date(),
+          isDeleted: false,
+          key: this.ONEAPI_ROOT_USER_TOKEN_KEY,
+          value: token,
+        };
+        await this.systemConfigurationEntity.save(entity);
+      }
     } else {
       // Else, auto generate token first time and save to db
       const configuration = await this.systemConfigurationEntity.findOne({
