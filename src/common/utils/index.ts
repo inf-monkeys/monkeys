@@ -42,3 +42,17 @@ export function replacerNoEscape(key: string, value: any) {
   }
   return value;
 }
+
+export function maskString(str: string) {
+  if (!str) return str; // 如果字符串为空，直接返回原字符串
+  if (str.length <= 2) return str; // 如果字符串长度小于等于2，直接返回原字符串
+
+  const half = Math.floor(str.length / 2); // 找到字符串的中间点
+  const start = Math.floor(half / 2); // 找到起始位置
+  const end = str.length - start; // 找到结束位置
+
+  // 构建新的字符串
+  const maskedString = str.substring(0, start) + '*'.repeat(end - start) + str.substring(end);
+
+  return maskedString;
+}
