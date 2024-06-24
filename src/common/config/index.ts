@@ -162,7 +162,7 @@ export interface LlmModelConfig {
   iconUrl?: string;
   defaultParams?: { [x: string]: any };
   autoMergeSystemMessages?: boolean;
-  type: LlmModelEndpointType[];
+  type?: LlmModelEndpointType[];
   promptTemplate?: string;
   max_tokens?: number;
   // If true, this model will be used as default model when create workflow from marketplace
@@ -188,6 +188,12 @@ export interface PaymentServerConfig {
   baseUrl: string;
 }
 
+export interface OneApiConfig {
+  enabled: boolean;
+  baseURL: string;
+  rootToken: string;
+}
+
 export interface Config {
   server: ServerConfig;
   conductor: ConductorConfig;
@@ -202,6 +208,7 @@ export interface Config {
   proxy: ProxyConfig;
   llm: LLmConfig;
   paymentServer: PaymentServerConfig;
+  oneapi: OneApiConfig;
 }
 
 const port = readConfig('server.port', 3000);
@@ -343,6 +350,11 @@ When answer to user:
     enabled: readConfig('paymentServer.enabled', false),
     baseUrl: readConfig('paymentServer.baseUrl'),
   },
+  oneapi: {
+    enabled: readConfig('oneapi.enabled', false),
+    baseURL: readConfig('oneapi.baseURL'),
+    rootToken: readConfig('oneapi.rootToken'),
+  },
 };
 
 export const isRedisConfigured = () => {
@@ -382,6 +394,19 @@ const validateConfig = () => {
   if (config.conductor.baseUrl) {
     if (!isValidUrl(config.conductor.baseUrl)) {
       throw new Error('Invalid conductor baseUrl: ' + config.conductor.baseUrl);
+    }
+  }
+
+  if (config.oneapi.enabled) {
+    if (!config.oneapi.baseURL) {
+      throw new Error('OneAPI enabled but no baseURL provided');
+    }
+    if (!config.oneapi.rootToken) {
+      throw new Error('OneAPI enabled but no rootToken provided');
+    }
+
+    if (config.oneapi.baseURL.endsWith('/')) {
+      config.oneapi.baseURL = config.oneapi.baseURL.slice(0, -1);
     }
   }
 };

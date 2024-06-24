@@ -5,7 +5,7 @@ import _ from 'lodash';
 import qs from 'qs';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
-import { ILLMModel } from '@/apis/llm/typings.ts';
+import { ILLMChannel, ILLMModel } from '@/apis/llm/typings.ts';
 import { IMediaData } from '@/apis/media-data/typings.ts';
 import { ISDModel } from '@/apis/sd/typings.ts';
 import { ITableData } from '@/apis/table-data/typings.ts';
@@ -79,9 +79,9 @@ export const preloadUgcApplicationStore = (dto: IListUgcDto) =>
   preloadUgcItems<IApplicationStoreItemDetail>(dto, '/api/templates');
 
 export const useUgcTextModelStore = (dto: IListUgcDto) =>
-  useUgcItems<ILLMModel>(dto, '/api/assets/llm-model/marketplace');
+  useUgcItems<ILLMChannel>(dto, '/api/assets/llm-channel/marketplace');
 export const preloadUgcTextModelStore = (dto: IListUgcDto) =>
-  preloadUgcItems<ILLMModel>(dto, '/api/assets/llm-model/marketplace');
+  preloadUgcItems<ILLMChannel>(dto, '/api/assets/llm-channel/marketplace');
 
 export const useUgcComfyUIWorkflowStore = (dto: IListUgcDto) =>
   useUgcItems<IComfyuiWorkflow>(dto, '/api/assets/comfyui-workflow/marketplace');

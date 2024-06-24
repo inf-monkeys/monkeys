@@ -7,6 +7,7 @@ import { ComfyuiWorkflowAssetRepositroy } from './repositories/assets-comfyui-wo
 import { AssetsCommonRepository } from './repositories/assets-common.repository';
 import { SqlKnowledgeBaseAssetRepositroy } from './repositories/assets-knowledge-base-sql.repository';
 import { KnowledgeBaseAssetRepositroy } from './repositories/assets-knowledge-base.repository';
+import { LlmChannelAssetRepositroy } from './repositories/assets-llm-channel.respository';
 import { LlmModelAssetRepositroy } from './repositories/assets-llm-model.respository';
 import { AssetsMarketPlaceRepository } from './repositories/assets-marketplace.repository';
 import { MediaFileAssetRepositroy } from './repositories/assets-media-file.repository';
@@ -18,6 +19,7 @@ import { SqlKnowledgeBaseRepository } from './repositories/knowledge-base-sql.re
 import { KnowledgeBaseRepository } from './repositories/knowledge-base.repository';
 import { LlmModelRepository } from './repositories/llm-model.repository';
 import { MediaFileRepository } from './repositories/media.repository';
+import { OneApiRepository } from './repositories/oneapi.respository';
 import { SdModelRepository } from './repositories/sd-model.repository';
 import { SystemConfigurationRepository } from './repositories/system-configuration.repository';
 import { TeamRepository } from './repositories/team.repository';
@@ -39,6 +41,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     AssetsCommonRepository,
     CanvasAssetRepositroy,
     LlmModelAssetRepositroy,
+    LlmChannelAssetRepositroy,
     SdModelAssetRepositroy,
     KnowledgeBaseAssetRepositroy,
     MediaFileAssetRepositroy,
@@ -53,6 +56,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     AssetsMarketPlaceRepository,
     ComfyuiRepository,
     ComfyuiWorkflowAssetRepositroy,
+    OneApiRepository,
   ],
   exports: [
     ToolsRepository,
@@ -65,6 +69,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     AssetsCommonRepository,
     CanvasAssetRepositroy,
     LlmModelAssetRepositroy,
+    LlmChannelAssetRepositroy,
     SdModelAssetRepositroy,
     KnowledgeBaseAssetRepositroy,
     MediaFileAssetRepositroy,
@@ -79,6 +84,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     AssetsMarketPlaceRepository,
     ComfyuiRepository,
     ComfyuiWorkflowAssetRepositroy,
+    OneApiRepository,
   ],
   imports: [TypeOrmModule.forFeature(entities)],
 })

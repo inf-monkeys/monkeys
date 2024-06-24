@@ -14,7 +14,8 @@ export type AssetType =
   | 'tools'
   | 'block'
   | 'knowledge-base-sql'
-  | 'comfyui-workflow';
+  | 'comfyui-workflow'
+  | 'llm-channel';
 
 export const ALLOW_ASSET_TYPES: AssetType[] = ['canvas', 'llm-model', 'media-file', 'sd-model', 'workflow', 'workflow-view', 'workflow-template', 'knowledge-base'];
 
