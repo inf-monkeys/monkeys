@@ -1754,6 +1754,38 @@
             "error": "工作流输出配置保存失败"
           }
         }
+      },
+
+      "execution": {
+        "stop": "终止运行",
+        "re-run": "重新运行",
+        "start": "视图内运行",
+
+        "workflow-input-empty": "请先完善工作流表单",
+
+        "stop-and-edit": "返回编辑模式",
+
+        "timer": {
+          "workflow": "工作流 {{status}}",
+
+          "paused": "已暂停",
+          "completed": "已完成运行",
+          "terminated": "已终止运行",
+          "failed": "运行失败",
+          "canceled": "已取消运行",
+          "time-out": "运行超时",
+          "paused-and-restart": "已暂停（点击继续）",
+          "running": "运行中（点击暂停）",
+          "default": "上次运行时长"
+        },
+
+        "run-history": {
+          "select-placeholder": "选择一个运行记录",
+          "search": "搜索运行实例 ID...",
+          "search-empty": "找不到此运行实例",
+
+          "tips": "选择一个运行记录，恢复运行"
+        }
       }
     }
   }
