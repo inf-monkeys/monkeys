@@ -2,12 +2,16 @@ import { config } from '@/common/config';
 import { logger } from '@/common/logger';
 import { OneApiClient, OneApiSystemApiClient, generateOneApiTokenByUsernamePassword } from '@/common/oneapi';
 import { generatePassword, generateShortId } from '@/common/utils';
+import { LlmModelRepository } from '@/database/repositories/llm-model.repository';
 import { OneApiRepository } from '@/database/repositories/oneapi.respository';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class OneAPIService {
-  constructor(private readonly oneapiRepository: OneApiRepository) {}
+  constructor(
+    private readonly oneapiRepository: OneApiRepository,
+    private readonly llmModelRepository: LlmModelRepository,
+  ) {}
 
   private getSystemClient() {
     const { enabled, baseURL, rootToken } = config.oneapi;
@@ -33,12 +37,18 @@ export class OneAPIService {
     return await this.oneapiRepository.createOneapiUser(teamId, newUser.id, oneAPIUserToken, apikey, username, password);
   }
 
-  public async createOneAPIChannel(teamId: string, userId: string, channelId: number, data: { [x: string]: any }) {
+  public async createOneAPIChannel(teamId: string, userId: string, channelType: number, data: { [x: string]: any }) {
+    const existsModel = await this.llmModelRepository.getLLMModelByChannelType(teamId, channelType);
+    if (existsModel) {
+      throw new Error('One team can only have one LLM channel of the same type');
+    }
+
     const oneapiUser = await this.getOrCreateOneapiUser(teamId);
     const systemClient = this.getSystemClient();
-    const modelsCreated = await systemClient.createChannel(channelId, teamId, data);
+    const channel = await systemClient.createChannel(channelType, teamId, data);
     const userClient = new OneApiClient(config.oneapi.baseURL, oneapiUser.userToken);
-    await userClient.updateTokenModelScope(modelsCreated);
-    return modelsCreated;
+    await userClient.updateTokenModelScope(channel.models.split(','));
+    await this.llmModelRepository.createLLMModel(teamId, userId, channelType, channel.id, JSON.parse(channel.model_mapping));
+    return channel;
   }
 }
