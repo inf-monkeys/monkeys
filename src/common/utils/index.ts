@@ -1,10 +1,15 @@
 import crypto from 'crypto';
+import shortid from 'shortid';
 
 export const enumToList = (enumItem: any) => {
   return Object.keys(enumItem).map((key) => enumItem[key]);
 };
 
 export const generateDbId = (m = Math, d = Date, h = 16, s = (s) => m.floor(s).toString(h)) => s(d.now() / 1000) + ' '.repeat(h).replace(/./g, () => s(m.random() * h));
+
+export const generateShortId = () => {
+  return shortid.generate();
+};
 
 export const isValidObjectId = (id: string) => {
   // ObjectId 是一个 24 字符的十六进制字符串

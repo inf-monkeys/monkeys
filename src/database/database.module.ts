@@ -33,6 +33,7 @@ import { TeamEntity } from './entities/identity/team';
 import { TeamJoinRequestsEntity } from './entities/identity/team-join-request';
 import { UserEntity } from './entities/identity/user';
 import { TeamMembersEntity } from './entities/identity/user-team-relationship';
+import { OneApiUsersEntity } from './entities/oneapi/oneapi-user.entity';
 import { ToolsTriggerTypesEntity } from './entities/tools/tools-trigger-types';
 import { WorkflowPageEntity } from './entities/workflow/workflow-page';
 
@@ -71,6 +72,7 @@ export const entities: EntityClassOrSchema[] = [
   AssetsMarketplaceTagRelationsEntity,
   ComfyuiWorkflowEntity,
   ComfyuiServerEntity,
+  OneApiUsersEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({

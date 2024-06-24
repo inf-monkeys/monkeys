@@ -41,3 +41,19 @@ export interface OneAPIModel {
   }>;
   root: string;
 }
+
+export interface OneAPIToken {
+  accessed_time: number;
+  created_time: number;
+  expired_time: number;
+  id: number;
+  key: string;
+  models: string;
+  name: string;
+  remain_quota: string;
+  status: string;
+  subnet: string;
+  unlimited_quota: boolean;
+  used_quota: number;
+  user_id: number;
+}
