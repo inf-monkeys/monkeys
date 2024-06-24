@@ -13,14 +13,14 @@ export interface OneAPIChannel {
 export const DEFAULT_ONEAPI_CHANNEL_PROPERITIES: BlockDefProperties[] = [
   {
     displayName: 'API Key',
-    name: 'apiKey',
+    name: 'key',
     type: 'string',
     required: true,
     description: 'API Key',
   },
   {
     displayName: 'Base URL',
-    name: 'baseUrl',
+    name: 'base_url',
     type: 'string',
     required: false,
     description: '可选，不填默认使用官方的默认地址',

@@ -60,4 +60,18 @@ export class TeamEntity extends BaseEntity {
     default: false,
   })
   enableJoinRequest?: boolean;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    name: 'oneapi_token',
+  })
+  oneAPIToken?: string;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    name: 'oneapi_password',
+  })
+  oneAPIPassword?: string;
 }

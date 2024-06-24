@@ -1,10 +1,10 @@
 import { createColumnHelper } from '@tanstack/react-table';
 
-import { ILLMModel } from '@/apis/llm/typings.ts';
+import { ILLMChannel } from '@/apis/llm/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { RenderDescription, RenderIcon, RenderTime } from '@/components/layout/ugc/view/utils/renderer.tsx';
 
-const columnHelper = createColumnHelper<IAssetItem<ILLMModel>>();
+const columnHelper = createColumnHelper<IAssetItem<ILLMChannel>>();
 
 export const createTextModelStoreColumns = () => [
   columnHelper.accessor('iconUrl', {
