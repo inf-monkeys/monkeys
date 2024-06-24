@@ -4,6 +4,7 @@ import { OneApiClient, OneApiSystemApiClient, generateOneApiTokenByUsernamePassw
 import { generatePassword, generateShortId } from '@/common/utils';
 import { LlmModelRepository } from '@/database/repositories/llm-model.repository';
 import { OneApiRepository } from '@/database/repositories/oneapi.respository';
+import { SystemConfigurationRepository } from '@/database/repositories/system-configuration.repository';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -11,13 +12,15 @@ export class OneAPIService {
   constructor(
     private readonly oneapiRepository: OneApiRepository,
     private readonly llmModelRepository: LlmModelRepository,
+    private readonly systemConfigurationRepository: SystemConfigurationRepository,
   ) {}
 
-  private getSystemClient() {
-    const { enabled, baseURL, rootToken } = config.oneapi;
+  private async getSystemClient() {
+    const { enabled, baseURL } = config.oneapi;
     if (!enabled) {
       throw new Error('OneAPI Service is not enabled');
     }
+    const rootToken = await this.systemConfigurationRepository.getOneApiRootUserToken();
     return new OneApiSystemApiClient(baseURL, rootToken);
   }
 
@@ -28,7 +31,7 @@ export class OneAPIService {
     }
     const password = generatePassword();
     const username = generateShortId();
-    const systemClient = this.getSystemClient();
+    const systemClient = await this.getSystemClient();
     logger.info(`Creating OneAPI user: ${username}`);
     const newUser = await systemClient.addUserIfNotExists(username, password, username);
     const oneAPIUserToken = await generateOneApiTokenByUsernamePassword(config.oneapi.baseURL, username, password);
@@ -44,7 +47,7 @@ export class OneAPIService {
     }
 
     const oneapiUser = await this.getOrCreateOneapiUser(teamId);
-    const systemClient = this.getSystemClient();
+    const systemClient = await this.getSystemClient();
     const channel = await systemClient.createChannel(channelType, teamId, data);
     const userClient = new OneApiClient(config.oneapi.baseURL, oneapiUser.userToken);
     await userClient.updateTokenModelScope(channel.models.split(','));

@@ -191,7 +191,9 @@ export interface PaymentServerConfig {
 export interface OneApiConfig {
   enabled: boolean;
   baseURL: string;
-  rootToken: string;
+  rootToken?: string;
+  rootUsername?: string;
+  rootPassword?: string;
 }
 
 export interface Config {
@@ -354,6 +356,8 @@ When answer to user:
     enabled: readConfig('oneapi.enabled', false),
     baseURL: readConfig('oneapi.baseURL'),
     rootToken: readConfig('oneapi.rootToken'),
+    rootPassword: readConfig('oneapi.rootPassword'),
+    rootUsername: readConfig('oneapi.rootUsername'),
   },
 };
 
@@ -401,8 +405,12 @@ const validateConfig = () => {
     if (!config.oneapi.baseURL) {
       throw new Error('OneAPI enabled but no baseURL provided');
     }
-    if (!config.oneapi.rootToken) {
-      throw new Error('OneAPI enabled but no rootToken provided');
+    if (!config.oneapi.rootToken && (!config.oneapi.rootUsername || !config.oneapi.rootPassword)) {
+      throw new Error('OneAPI enabled but no rootToken or rootUsername/rootPassword provided');
+    }
+
+    if (config.oneapi.rootPassword) {
+      config.oneapi.rootPassword = config.oneapi.rootPassword.toString();
     }
 
     if (config.oneapi.baseURL.endsWith('/')) {
