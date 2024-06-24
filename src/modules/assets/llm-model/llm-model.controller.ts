@@ -17,20 +17,24 @@ export class LlmModelController {
     const { teamId } = req;
     let { list } = await this.service.listLlmModels(teamId, dto);
     const systemModels = getModels();
-    const systemModesValue = {};
-    for (const model of systemModels) {
-      systemModesValue[model.value] = model.value;
+
+    if (systemModels.length) {
+      const systemModesValue = {};
+      for (const model of systemModels) {
+        systemModesValue[model.value] = model.value;
+      }
+      const systemChannel = {
+        id: '0',
+        assetType: 'llm-model',
+        channelId: 0,
+        channelType: 1,
+        displayName: '系统内置',
+        models: systemModesValue,
+        iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/OpenAI_Logo.svg/2560px-OpenAI_Logo.svg.png',
+      } as LlmModelEntity;
+      list = [systemChannel, ...list];
     }
-    const systemChannel = {
-      id: '0',
-      assetType: 'llm-model',
-      channelId: 0,
-      channelType: 1,
-      displayName: '系统内置',
-      models: systemModesValue,
-      iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/OpenAI_Logo.svg/2560px-OpenAI_Logo.svg.png',
-    } as LlmModelEntity;
-    list = [systemChannel, ...list];
+
     return new SuccessListResponse({
       data: list,
       total: list.length,
