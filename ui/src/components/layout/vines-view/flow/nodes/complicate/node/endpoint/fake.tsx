@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { useFlowStore } from '@/store/useFlowStore';
 import VinesEvent from '@/utils/events.ts';
@@ -8,6 +10,7 @@ interface IComplicateFakeNodeProps {
 }
 
 export const ComplicateFakeNode: React.FC<IComplicateFakeNodeProps> = ({ insertFromNodeId }) => {
+  const { t } = useTranslation();
   const { workflowId } = useFlowStore();
 
   const handleOnClick = () => {
@@ -23,7 +26,7 @@ export const ComplicateFakeNode: React.FC<IComplicateFakeNodeProps> = ({ insertF
       onClick={handleOnClick}
     >
       <VinesIcon src="emoji:⛔:#35363b" size="xl" />
-      <h1 className="font-bold">点击添加节点</h1>
+      <h1 className="font-bold">{t('workspace.flow-view.vines.tools.fake.name')}</h1>
     </div>
   );
 };

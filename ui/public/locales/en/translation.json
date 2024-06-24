@@ -1792,6 +1792,29 @@
 
           "tips": "Select a run record to resume running"
         }
+      },
+
+      "vines": {
+        "tools": {
+          "start": {
+            "name": "Start",
+            "desc": "Click to configure workflow Inputs"
+          },
+          "end": {
+            "name": "End",
+            "desc": "Click Configure Workflow Output",
+
+            "save": "Save",
+            "empty-output": "Empty output"
+          },
+          "fake": {
+            "name": "Click to add a tool"
+          },
+
+          "unknown": "Unsupported tools, try recreating"
+        },
+
+        "execution": "Execution Workflow"
       }
     }
   }
