@@ -1515,6 +1515,35 @@
             }
           },
 
+
+          "input": {
+            "title": "Input",
+            "empty": "No configuration parameters",
+
+            "file-upload": "File",
+            "variable-input": "Variable",
+            "collection-input": "List",
+            "preset-options": "Preset",
+
+            "type": {
+              "string": "string {{extra}}",
+              "number": "number {{extra}}",
+              "boolean": "boolean {{extra}}",
+              "file": "file {{extra}}",
+              "json": "json {{extra}}",
+              "qrcode": "qrcode {{extra}}",
+              "options": "options {{extra}}",
+
+              "multiple": "list",
+
+              "unknown": "Unsupported types",
+              "required": "Required"
+            }
+          },
+          "output": {
+            "title": "Output"
+          },
+
           "save": "Save"
         }
       },
@@ -1833,6 +1862,7 @@
 
       "vines": {
         "error": "Tool data anomalies!",
+        "parsing-error": "Failed to parse the tool data!",
 
         "tools": {
           "start": {

@@ -1510,6 +1510,34 @@
             }
           },
 
+          "input": {
+            "title": "输入",
+            "empty": "暂无配置参数",
+
+            "file-upload": "文件上传",
+            "variable-input": "变量输入",
+            "collection-input": "列表",
+            "preset-options": "预设选项",
+
+            "type": {
+              "string": "文本{{extra}}",
+              "number": "数字{{extra}}",
+              "boolean": "逻辑值{{extra}}",
+              "file": "文件{{extra}}",
+              "json": "对象{{extra}}",
+              "qrcode": "二维码{{extra}}",
+              "options": "选项{{extra}}",
+
+              "multiple": "列表",
+
+              "unknown": "不受支持的类型",
+              "required": "必填项"
+            }
+          },
+          "output": {
+            "title": "输出"
+          },
+
           "save": "保存"
         }
       },
@@ -1828,6 +1856,7 @@
       "vines": {
         "tools": {
           "error": "工具数据异常！",
+          "parsing-error": "工具数据解析失败！",
 
           "start": {
             "name": "开始",
