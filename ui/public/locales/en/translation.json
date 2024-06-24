@@ -1760,6 +1760,38 @@
             "error": "Workflow output save failed"
           }
         }
+      },
+
+      "execution": {
+        "stop": "Stop",
+        "re-run": "Restart",
+        "start": "Start",
+
+        "workflow-input-empty": "Please enter the workflow input",
+
+        "stop-and-edit": "Stop and Edit",
+
+        "timer": {
+          "workflow": "Workflow {{status}}",
+
+          "paused": "Paused",
+          "completed": "Completed",
+          "terminated": "Terminated",
+          "failed": "Failed",
+          "canceled": "Canceled",
+          "time-out": "Time out",
+          "paused-and-restart": "Paused (click to restart)",
+          "running": "Running (click to pause)",
+          "default": "Last running time"
+        },
+
+        "run-history": {
+          "select-placeholder": "Select a run history",
+          "search": "Search workflow instance ID ...",
+          "search-empty": "Can't find this workflow instance ID",
+
+          "tips": "Select a run record to resume running"
+        }
       }
     }
   }
