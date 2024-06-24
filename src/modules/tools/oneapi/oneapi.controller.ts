@@ -1,4 +1,5 @@
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
+import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { Body, Controller, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { OneAPIService } from './oneapi.service';
@@ -12,6 +13,8 @@ export class OneAPIController {
   public async createOneAPIChannel(@Req() req: IRequest, @Param('channelId') channelId: number, @Body() body: { [x: string]: any }) {
     const { teamId, userId } = req;
     const result = await this.oneAPIService.createOneAPIChannel(teamId, userId, channelId, body);
-    return result;
+    return new SuccessResponse({
+      data: result,
+    });
   }
 }

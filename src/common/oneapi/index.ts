@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import { OneAPIToken, OneApiUser } from './interface';
+import { OneAPIToken, OneApiUser, OneapiChannel } from './interface';
 
 export class OneApiBaseClient {
   baseURL: string;
@@ -110,7 +110,27 @@ export class OneApiSystemApiClient extends OneApiBaseClient {
     return data.data;
   }
 
-  public async createChannel(type: number, modelPrefix: string, data: { [x: string]: any }) {
+  private async listChannels() {
+    const { data } = await this.request<{
+      data: OneapiChannel[];
+      message: string;
+      success: boolean;
+    }>({
+      method: 'GET',
+      url: '/api/channel',
+      params: {
+        p: 0,
+      },
+    });
+
+    if (!data.success) {
+      throw new Error(data.message);
+    }
+
+    return data.data;
+  }
+
+  public async createChannel(type: number, modelPrefix: string, data: { [x: string]: any }): Promise<OneapiChannel> {
     const allModels = await this.loadModels();
     const channelModels = allModels[type];
     const channelModelsWithPrefix = channelModels.map((model) => `${modelPrefix}_${model}`);
@@ -122,7 +142,7 @@ export class OneApiSystemApiClient extends OneApiBaseClient {
       ...data,
       groups: ['default'],
       model_mapping: JSON.stringify(modelMappings),
-      models: [...channelModels, ...channelModelsWithPrefix].join(','),
+      models: [...channelModelsWithPrefix].join(','),
       type: parseInt(type.toString(), 10),
       other: '',
       group: 'default',
@@ -145,7 +165,12 @@ export class OneApiSystemApiClient extends OneApiBaseClient {
       throw new Error(message);
     }
 
-    return channelModelsWithPrefix;
+    const channels = await this.listChannels();
+    const channel = channels.find((channel) => channel.name === reqData.name);
+    if (!channel) {
+      throw new Error('Failed to create channel');
+    }
+    return channel;
   }
 }
 

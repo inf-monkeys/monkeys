@@ -12,12 +12,12 @@ import { RepositoryMoule } from './database/repositories.module';
 import { AssetsModule } from './modules/assets/assets.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
+import { ChatModule } from './modules/chat/chat.module';
 import { ExportModule } from './modules/export/export.module';
 import { LLMToolsModule } from './modules/tools/llm/llm.module';
 import { ToolsModule } from './modules/tools/tools.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { OpenapiModule } from './openapi.module';
-import { ChatModule } from './modules/chat/chat.module';
 
 @Module({
   imports: [
@@ -45,5 +45,6 @@ import { ChatModule } from './modules/chat/chat.module';
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(ToolsMiddleware).forRoutes({ path: '/api/system-tools', method: RequestMethod.ALL });
+    consumer.apply(ToolsMiddleware).forRoutes({ path: '/api/llm-tool', method: RequestMethod.ALL });
   }
 }

@@ -57,3 +57,26 @@ export interface OneAPIToken {
   used_quota: number;
   user_id: number;
 }
+
+export interface OneapiChannel {
+  balance: number;
+  balance_updated_time: number;
+  base_url: '';
+  config: string;
+  created_time: number;
+  group: string;
+  groups: string[];
+  id: number;
+  key: string;
+  model_mapping: string;
+  models: string;
+  name: string;
+  other: string;
+  priority: number;
+  response_time: number;
+  status: number;
+  test_time: number;
+  type: number;
+  used_quota: number;
+  weight: number;
+}

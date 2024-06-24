@@ -1,6 +1,8 @@
 import { LlmModelEndpointType, config } from '@/common/config';
 import { LogLevel, logger } from '@/common/logger';
 import { maskString, replacerNoEscape } from '@/common/utils';
+import { LlmModelRepository } from '@/database/repositories/llm-model.repository';
+import { OneApiRepository } from '@/database/repositories/oneapi.respository';
 import { ToolsRepository } from '@/database/repositories/tools.repository';
 import { SQL_KNOWLEDGE_BASE_QUERY_TABLE_TOOL } from '@/modules/assets/consts';
 import { SqlKnowledgeBaseService } from '@/modules/assets/sql-knowledge-base/sql-knowledge-base.service';
@@ -100,25 +102,74 @@ export class LlmService {
     private readonly toolForwardServie: ToolsForwardService,
     private readonly knowledgeBaseService: KnowledgeBaseService,
     private readonly sqlKnowledgeBaseService: SqlKnowledgeBaseService,
+    private readonly llmModelRepository: LlmModelRepository,
+    private readonly oneApiRepository: OneApiRepository,
   ) {}
 
-  private getModelConfig(modelName: string) {
+  private getModelNameByModelMappings(modelMappings: { [x: string]: string }, modelName: string): string {
+    for (const key in modelMappings) {
+      if (modelMappings[key] === modelName) {
+        return key;
+      }
+    }
+    return modelName;
+  }
+
+  private async getModelConfig(
+    teamId: string,
+    modelName: string,
+  ): Promise<{
+    realModelName?: string;
+    baseURL: string;
+    apiKey: string;
+    defaultParams?: any;
+    promptTemplate?: string;
+    autoMergeSystemMessages?: boolean;
+  }> {
     if (!modelName) {
       throw new Error('Model is required, check your workflow configuration.');
     }
 
-    const model = config.models.find((x) => {
-      if (typeof x.model === 'string') {
-        const splittedModels = x.model.split(',');
-        return splittedModels.includes(modelName);
-      } else if (Array.isArray(x.model)) {
-        return x.model.includes(modelName);
+    const checkIsSystemModel = () => {
+      if (!modelName.includes(':')) {
+        return true;
       }
-    });
-    if (!model) {
-      throw new Error(`Model ${modelName} not exists`);
+      const [channelIdStr] = modelName.split(':');
+      return channelIdStr === '0';
+    };
+
+    const isSystemModel = checkIsSystemModel();
+    if (!isSystemModel) {
+      const [channelIdStr, realModelName] = modelName.split(':');
+      const channelId = parseInt(channelIdStr);
+      const modelEntity = await this.llmModelRepository.getLLMModelByChannelId(channelId);
+      const modelMappings = modelEntity.models;
+      const oneApiUser = await this.oneApiRepository.getOneapiUserByTeamId(teamId);
+      return {
+        realModelName: this.getModelNameByModelMappings(modelMappings, realModelName),
+        baseURL: `${config.oneapi.baseURL}/v1`,
+        apiKey: `sk-${oneApiUser.apiKey}`,
+      };
+    } else {
+      const model = config.models.find((x) => {
+        if (typeof x.model === 'string') {
+          const splittedModels = x.model.split(',');
+          return splittedModels.includes(modelName);
+        } else if (Array.isArray(x.model)) {
+          return x.model.includes(modelName);
+        }
+      });
+      if (!model) {
+        throw new Error(`Model ${modelName} not exists`);
+      }
+      return {
+        baseURL: model.baseURL,
+        apiKey: model.apiKey,
+        defaultParams: model.defaultParams,
+        promptTemplate: model.promptTemplate,
+        autoMergeSystemMessages: model.autoMergeSystemMessages,
+      };
     }
-    return model;
   }
 
   async capMessages(systemMessages: ChatCompletionMessageParam[], historyMessages: ChatCompletionMessageParam[]) {
@@ -160,9 +211,9 @@ export class LlmService {
     return messageHistory;
   }
 
-  public async createCompelitions(params: CreateCompelitionsParams) {
+  public async createCompelitions(teamId: string, params: CreateCompelitionsParams) {
     const { model, stream = false } = params;
-    const { apiKey, baseURL, defaultParams, promptTemplate } = this.getModelConfig(model);
+    const { apiKey, baseURL, defaultParams, promptTemplate } = await this.getModelConfig(teamId, model);
 
     const prompt = params.prompt;
     if (promptTemplate) {
@@ -368,11 +419,7 @@ export class LlmService {
     };
   }
 
-  private autoMergeSystemMessages(model: string, messages: Array<ChatCompletionMessageParam>): Array<ChatCompletionMessageParam> {
-    const { autoMergeSystemMessages } = this.getModelConfig(model);
-    if (!autoMergeSystemMessages) {
-      return messages;
-    }
+  private async autoMergeSystemMessages(messages: Array<ChatCompletionMessageParam>): Promise<Array<ChatCompletionMessageParam>> {
     const systemMessages = messages.filter((msg) => msg.role === 'system');
     const otherMessages = messages.filter((msg) => msg.role !== 'system');
     if (!systemMessages.length) {
@@ -429,12 +476,13 @@ export class LlmService {
     }
   }
 
-  public async createChatCompelitions(res: Response, params: CreateChatCompelitionsParams, options: CreateChatCompelitionsResponseOptions) {
+  public async createChatCompelitions(res: Response, teamId: string, params: CreateChatCompelitionsParams, options: CreateChatCompelitionsResponseOptions) {
     const { apiResponseType = 'full', showLogs = false } = options;
     if (apiResponseType === 'simple' && params.stream) {
       throw new Error('Stream is not supported in simple api response type');
     }
-    const { model, stream, systemPrompt, knowledgeBase, sqlKnowledgeBase, response_format = ResponseFormat.text } = params;
+    let { model } = params;
+    const { stream, systemPrompt, knowledgeBase, sqlKnowledgeBase, response_format = ResponseFormat.text } = params;
     let { messages } = params;
     const historyMessages = this.sanitizeMessages(messages);
 
@@ -462,9 +510,14 @@ export class LlmService {
       });
     }
 
-    const { apiKey, baseURL, defaultParams } = this.getModelConfig(model);
+    const { apiKey, baseURL, defaultParams, realModelName, autoMergeSystemMessages = false } = await this.getModelConfig(teamId, model);
+    if (realModelName) {
+      model = realModelName as string;
+    }
     messages = await this.capMessages(systemMessages, historyMessages);
-    messages = this.autoMergeSystemMessages(model, messages);
+    if (autoMergeSystemMessages) {
+      messages = await this.autoMergeSystemMessages(messages);
+    }
     const openai = new OpenAI({
       apiKey: apiKey || 'mock-apikey',
       baseURL: baseURL,

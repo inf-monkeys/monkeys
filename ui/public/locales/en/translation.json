@@ -722,6 +722,33 @@
         }
       }
     },
+    "llm-model": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "Icon"
+          },
+          "title": {
+            "label": "Name"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "user": {
+            "label": "Creator"
+          },
+          "assetTags": {
+            "label": "Tags"
+          },
+          "createdTimestamp": {
+            "label": "Created Time"
+          },
+          "updatedTimestamp": {
+            "label": "Updated Time"
+          }
+        }
+      }
+    },
     "action-tools": {
       "utils": {
         "pricing-mode": {
@@ -1482,13 +1509,11 @@
         },
         "tool-editor": {
           "unknown-tool": "Unknown tool",
-
           "tabs": {
             "config": "Configuration",
             "dev": "Raw Data",
             "more-config": "Advanced Configuration"
           },
-
           "header": {
             "quick-options": {
               "del": {
@@ -1499,7 +1524,6 @@
               "toggle-prev-tool": "Switch to previous tool",
               "toggle-next-tool": "Switch to next tool"
             },
-
             "info": {
               "editor": {
                 "button": "Click to customise the tool information",
@@ -1514,17 +1538,13 @@
               }
             }
           },
-
-
           "input": {
             "title": "Input",
             "empty": "No configuration parameters",
-
             "file-upload": "File",
             "variable-input": "Variable",
             "collection-input": "List",
             "preset-options": "Preset",
-
             "type": {
               "string": "string {{extra}}",
               "number": "number {{extra}}",
@@ -1533,9 +1553,7 @@
               "json": "json {{extra}}",
               "qrcode": "qrcode {{extra}}",
               "options": "options {{extra}}",
-
               "multiple": "list",
-
               "unknown": "Unsupported types",
               "required": "Required"
             }
@@ -1543,7 +1561,6 @@
           "output": {
             "title": "Output"
           },
-
           "save": "Save"
         }
       },
@@ -1579,13 +1596,11 @@
           }
         }
       },
-
       "version": {
         "label": "Ver {{version}}",
         "placeholder": "Select Version",
         "search": "Search version",
         "search-empty": "Can't find this version",
-
         "release": {
           "button": "Release",
           "error": {
@@ -1596,12 +1611,10 @@
           },
           "recheck": {
             "disable": "The current workflow configuration is the same as the previous version; there is no need to create a version",
-
             "loading": "Detecting workflow configuration",
             "success": "Workflow configuration detection successful",
             "error": "Workflow configuration detection failed"
           },
-
           "workflow-version-error": "Failed to create version! Unable to get workflow version information",
           "tips": "Are you sure you want to create a version of this workflow?",
           "action": "Confirm",
@@ -1610,7 +1623,6 @@
           "failed": "Version creation failed"
         }
       },
-
       "endpoint": {
         "start-tool": {
           "title": "Workflow Configuration",
@@ -1631,10 +1643,8 @@
             "def-empty": "No default value",
             "def-true": "T",
             "def-false": "F",
-
             "config-form": {
               "title": "Input Configuration",
-
               "display-name": {
                 "label": "Display Name",
                 "placeholder": "Enter display name"
@@ -1649,9 +1659,7 @@
                 "button": "Select data type",
                 "placeholder": "Search data type...",
                 "search-empty": "Data type not found",
-
                 "list": "list",
-
                 "string": "string {{extra}}",
                 "number": "number {{extra}}",
                 "boolean": "boolean {{extra}}",
@@ -1666,10 +1674,8 @@
               "file": {
                 "label": "File {{extra}} Default",
                 "desc": "Uploading a file here will automatically generate a direct file link to override the defaults on the left.",
-
                 "list": "list"
               },
-
               "submit": "Save"
             }
           },
@@ -1686,7 +1692,6 @@
               "desc": "Deletion cannot be recovered and all relevant data will be permanently deleted.",
               "cancel": "cancel",
               "action": "Delete",
-
               "loading": "Deleting trigger...",
               "success": "Trigger deleted successfully",
               "error": "Trigger deletion failed"
@@ -1696,18 +1701,14 @@
               "loading": "Creating trigger...",
               "success": "Trigger created successfully",
               "error": "Trigger creation failed",
-
               "title": "Select a trigger",
               "desc": "Select a trigger to trigger the workflow to run by triggering an event or timed task",
-
               "schedule-trigger": {
                 "loading": "Creating scheduled trigger...",
                 "success": "Scheduled trigger created successfully",
                 "error": "Scheduled trigger creation failed",
-
                 "title": "Scheduled Trigger",
                 "desc": "When timed triggers are configured and enabled, the workflow will periodically trigger at the configured time",
-
                 "form": {
                   "cron": {
                     "label": "Cron Expression",
@@ -1720,10 +1721,8 @@
                 "loading": "Creating Webhook trigger...",
                 "success": "Webhook trigger created successfully",
                 "error": "Webhook trigger creation failed",
-
                 "title": "Webhook Trigger",
                 "desc": "Once you have configured and enabled Webhook triggers, you can send HTTP requests to trigger a workflow to run",
-
                 "form": {
                   "method": {
                     "label": "HTTP Request Method",
@@ -1736,7 +1735,6 @@
                     "placeholder": "Select HTTP authentication",
                     "search": "Search HTTP authentication...",
                     "search-empty": "No HTTP authentication found",
-
                     "none": "None",
                     "basic": "Basic",
                     "custom-header": "Custom Header"
@@ -1762,7 +1760,6 @@
                     "placeholder": "Select HTTP response timing",
                     "search": "Search HTTP response timing...",
                     "search-empty": "No HTTP response timing found",
-
                     "workflow-started": "Workflow started",
                     "workflow-completed-or-finished": "Workflow completed or finished"
                   },
@@ -1783,7 +1780,6 @@
               },
               "rate-limiter": {
                 "label": "Enabling Interface Rate Limiting",
-
                 "window-ms": {
                   "label": "Time window size (ms)",
                   "placeholder": "Enter time window size (ms)"
@@ -1794,7 +1790,6 @@
               },
               "submit": {
                 "button": "Save API Configuration",
-
                 "workflow-id-empty": "Workflow ID does not exist",
                 "loading": "Saving API configuration...",
                 "success": "API configuration saved successfully",
@@ -1805,7 +1800,6 @@
         },
         "end-tool": {
           "title": "Workflow Output Configuration",
-
           "tabs": {
             "output": "Workflow Output",
             "raw-data": "Raw Data"
@@ -1818,7 +1812,6 @@
             "only-array": "JSON can only be an array",
             "json-format": "JSON formatting error"
           },
-
           "save": {
             "button": "Save",
             "loading": "Saving workflow output...",
@@ -1827,19 +1820,14 @@
           }
         }
       },
-
       "execution": {
         "stop": "Stop",
         "re-run": "Restart",
         "start": "Start",
-
         "workflow-input-empty": "Please enter the workflow input",
-
         "stop-and-edit": "Stop and Edit",
-
         "timer": {
           "workflow": "Workflow {{status}}",
-
           "paused": "Paused",
           "completed": "Completed",
           "terminated": "Terminated",
@@ -1850,20 +1838,16 @@
           "running": "Running (click to pause)",
           "default": "Last running time"
         },
-
         "run-history": {
           "select-placeholder": "Select a run history",
           "search": "Search workflow instance ID ...",
           "search-empty": "Can't find this workflow instance ID",
-
           "tips": "Select a run record to resume running"
         }
       },
-
       "vines": {
         "error": "Tool data anomalies!",
         "parsing-error": "Failed to parse the tool data!",
-
         "tools": {
           "start": {
             "name": "Start",
@@ -1872,17 +1856,14 @@
           "end": {
             "name": "End",
             "desc": "Click Configure Workflow Output",
-
             "save": "Save",
             "empty-output": "Empty output"
           },
           "fake": {
             "name": "Click to add a tool"
           },
-
           "unknown": "Unsupported tools, try recreating"
         },
-
         "execution": "Execution Workflow"
       }
     }

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { ILLMModel } from '@/apis/llm/typings.ts';
@@ -14,7 +12,7 @@ export const createTextModelsColumns = () => [
     cell: ({ getValue }) => RenderIcon({ iconUrl: getValue() as string }),
     maxSize: 48,
   }),
-  columnHelper.accessor('name', {
+  columnHelper.accessor('displayName', {
     id: 'title',
     cell: ({ getValue }) => (
       <a className="transition-colors hover:text-primary-500" target="_blank" rel="noreferrer">

@@ -162,7 +162,7 @@ export interface LlmModelConfig {
   iconUrl?: string;
   defaultParams?: { [x: string]: any };
   autoMergeSystemMessages?: boolean;
-  type: LlmModelEndpointType[];
+  type?: LlmModelEndpointType[];
   promptTemplate?: string;
   max_tokens?: number;
   // If true, this model will be used as default model when create workflow from marketplace
@@ -403,6 +403,10 @@ const validateConfig = () => {
     }
     if (!config.oneapi.rootToken) {
       throw new Error('OneAPI enabled but no rootToken provided');
+    }
+
+    if (config.oneapi.baseURL.endsWith('/')) {
+      config.oneapi.baseURL = config.oneapi.baseURL.slice(0, -1);
     }
   }
 };

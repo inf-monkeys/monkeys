@@ -716,6 +716,33 @@
         }
       }
     },
+    "llm-model": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "user": {
+            "label": "用户"
+          },
+          "assetTags": {
+            "label": "标签"
+          },
+          "createdTimestamp": {
+            "label": "创建时间"
+          },
+          "updatedTimestamp": {
+            "label": "更新时间"
+          }
+        }
+      }
+    },
     "action-tools": {
       "utils": {
         "pricing-mode": {
@@ -1477,13 +1504,11 @@
         },
         "tool-editor": {
           "unknown-tool": "工具不存在",
-
           "tabs": {
             "config": "配置参数",
             "dev": "原始数据",
             "more-config": "高级配置"
           },
-
           "header": {
             "quick-options": {
               "del": {
@@ -1494,7 +1519,6 @@
               "toggle-prev-tool": "切换到上一工具",
               "toggle-next-tool": "切换到下一工具"
             },
-
             "info": {
               "editor": {
                 "button": "点击编辑工具自定义信息",
@@ -1509,16 +1533,13 @@
               }
             }
           },
-
           "input": {
             "title": "输入",
             "empty": "暂无配置参数",
-
             "file-upload": "文件上传",
             "variable-input": "变量输入",
             "collection-input": "列表",
             "preset-options": "预设选项",
-
             "type": {
               "string": "文本{{extra}}",
               "number": "数字{{extra}}",
@@ -1527,9 +1548,7 @@
               "json": "对象{{extra}}",
               "qrcode": "二维码{{extra}}",
               "options": "选项{{extra}}",
-
               "multiple": "列表",
-
               "unknown": "不受支持的类型",
               "required": "必填项"
             }
@@ -1537,7 +1556,6 @@
           "output": {
             "title": "输出"
           },
-
           "save": "保存"
         }
       },
@@ -1578,7 +1596,6 @@
         "placeholder": "选择版本",
         "search": "搜索版本",
         "search-empty": "找不到此版本",
-
         "release": {
           "button": "创建版本",
           "error": {
@@ -1589,12 +1606,10 @@
           },
           "recheck": {
             "disable": "当前工作流配置与上一个版本相同，无需创建版本",
-
             "loading": "正在检测工作流配置",
             "success": "工作流配置检测完毕",
             "error": "工作流配置检测失败"
           },
-
           "workflow-version-error": "创建版本失败！无法获取工作流版本信息",
           "tips": "确定要为此工作流创建版本吗",
           "action": "确定",
@@ -1603,7 +1618,6 @@
           "failed": "版本创建失败"
         }
       },
-
       "endpoint": {
         "start-tool": {
           "title": "工作流配置",
@@ -1624,10 +1638,8 @@
             "def-empty": "暂无默认值",
             "def-true": "真",
             "def-false": "假",
-
             "config-form": {
               "title": "输入配置",
-
               "display-name": {
                 "label": "显示名称",
                 "placeholder": "请填写「输入配置」显示的名称"
@@ -1642,9 +1654,7 @@
                 "button": "选择数据类型",
                 "placeholder": "搜索类型...",
                 "search-empty": "找不到数据类型",
-
                 "list": "列表",
-
                 "string": "文本{{extra}}",
                 "number": "数字{{extra}}",
                 "boolean": "逻辑值{{extra}}",
@@ -1659,10 +1669,8 @@
               "file": {
                 "label": "默认文件{{extra}}",
                 "desc": "在此处上传文件将自动生成文件直链来覆盖左侧默认值",
-
                 "list": "列表"
               },
-
               "submit": "保存"
             }
           },
@@ -1679,7 +1687,6 @@
               "desc": "删除后将无法恢复，请确认是否删除此触发器",
               "cancel": "取消",
               "action": "删除",
-
               "loading": "正在删除触发器...",
               "success": "触发器删除成功",
               "error": "触发器删除失败"
@@ -1689,18 +1696,14 @@
               "loading": "正在创建触发器...",
               "success": "触发器创建成功",
               "error": "触发器创建失败",
-
               "title": "选择触发器",
               "desc": "选择一个触发器，通过触发事件或定时任务来触发工作流的运行",
-
               "schedule-trigger": {
                 "loading": "正在创建定时触发器...",
                 "success": "定时触发器创建成功",
                 "error": "定时触发器创建失败",
-
                 "title": "定时触发器",
                 "desc": "配置并启用定时触发器后，工作流将按照配置的时间周期性地触发",
-
                 "form": {
                   "cron": {
                     "label": "Cron 表达式",
@@ -1713,10 +1716,8 @@
                 "loading": "正在创建 Webhook 触发器...",
                 "success": "Webhook 触发器创建成功",
                 "error": "Webhook 触发器创建失败",
-
                 "title": "Webhook 触发器",
                 "desc": "配置并启用 Webhook 触发器后，可以通过发送 HTTP 请求来触发工作流的运行",
-
                 "form": {
                   "method": {
                     "label": "请求方式",
@@ -1729,7 +1730,6 @@
                     "placeholder": "选择 HTTP 认证方式",
                     "search": "搜索 HTTP 认证方式...",
                     "search-empty": "找不到 HTTP 认证方式",
-
                     "none": "无认证",
                     "basic": "基础认证 (Basic Auth)",
                     "custom-header": "自定义请求头"
@@ -1755,7 +1755,6 @@
                     "placeholder": "选择 HTTP 请求返回时机",
                     "search": "搜索 HTTP 请求返回时机...",
                     "search-empty": "找不到 HTTP 请求返回时机",
-
                     "workflow-started": "工作流启动之后立即返回",
                     "workflow-completed-or-finished": "工作流执行成功或者失败之后返回"
                   },
@@ -1776,7 +1775,6 @@
               },
               "rate-limiter": {
                 "label": "启用接口速率限制",
-
                 "window-ms": {
                   "label": "时间窗口大小（毫秒）",
                   "placeholder": "请输入时间窗口大小（毫秒）"
@@ -1787,7 +1785,6 @@
               },
               "submit": {
                 "button": "保存",
-
                 "workflow-id-empty": "工作流 ID 不存在",
                 "loading": "正在保存 API 配置...",
                 "success": "API 配置保存成功",
@@ -1798,7 +1795,6 @@
         },
         "end-tool": {
           "title": "工作流输出配置",
-
           "tabs": {
             "output": "输出配置",
             "raw-data": "原始数据"
@@ -1811,7 +1807,6 @@
             "only-array": "JSON 只能为数组",
             "json-format": "JSON 格式错误"
           },
-
           "save": {
             "button": "保存",
             "loading": "正在保存工作流输出配置...",
@@ -1820,19 +1815,14 @@
           }
         }
       },
-
       "execution": {
         "stop": "终止运行",
         "re-run": "重新运行",
         "start": "视图内运行",
-
         "workflow-input-empty": "请先完善工作流表单",
-
         "stop-and-edit": "返回编辑模式",
-
         "timer": {
           "workflow": "工作流 {{status}}",
-
           "paused": "已暂停",
           "completed": "已完成运行",
           "terminated": "已终止运行",
@@ -1843,21 +1833,17 @@
           "running": "运行中（点击暂停）",
           "default": "上次运行时长"
         },
-
         "run-history": {
           "select-placeholder": "选择一个运行记录",
           "search": "搜索运行实例 ID...",
           "search-empty": "找不到此运行实例",
-
           "tips": "选择一个运行记录，恢复运行"
         }
       },
-
       "vines": {
         "tools": {
           "error": "工具数据异常！",
           "parsing-error": "工具数据解析失败！",
-
           "start": {
             "name": "开始",
             "desc": "点击配置工作流输入和触发器"
@@ -1865,17 +1851,14 @@
           "end": {
             "name": "结束",
             "desc": "点击配置工作流输出",
-
             "save": "保存配置",
             "empty-output": "暂无输出"
           },
           "fake": {
             "name": "点击添加工具"
           },
-
           "unknown": "不受支持的工具，请尝试重新创建"
         },
-
         "execution": "运行工作流"
       }
     }
