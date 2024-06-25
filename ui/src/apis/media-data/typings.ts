@@ -1,3 +1,5 @@
+import { I18nValue } from '@inf-monkeys/monkeys';
+
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { IVinesDataset } from '@/apis/dataset/typings.ts';
 
@@ -34,7 +36,7 @@ export interface IMediaData {
   size?: number;
   teamId: string;
   userId: string;
-  displayName: string;
+  displayName: string | I18nValue;
   url: string;
   tags: string[];
   categoryIds: string[];

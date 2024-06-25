@@ -1,5 +1,6 @@
 import { UseNavigateResult } from '@tanstack/react-router';
 
+import { I18nValue } from '@inf-monkeys/monkeys';
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
@@ -7,6 +8,7 @@ import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { IKnowledgeBaseFrontEnd } from '@/apis/vector/typings.ts';
 import { IUgcCreateColumnsProps } from '@/components/layout/ugc/typings.ts';
 import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { I18nContent } from '@/utils';
 
 const columnHelper = createColumnHelper<IAssetItem<IKnowledgeBaseFrontEnd>>();
 
@@ -33,7 +35,7 @@ export const createTextDataColumns = ({ hooks }: ICreateTextDataColumnsProps) =>
           });
         }}
       >
-        {getValue() as string}
+        {I18nContent(getValue() as string | I18nValue)}
       </span>
     ),
   }),
@@ -44,7 +46,7 @@ export const createTextDataColumns = ({ hooks }: ICreateTextDataColumnsProps) =>
   }),
   columnHelper.accessor('description', {
     id: 'description',
-    cell: ({ getValue }) => RenderDescription({ description: getValue() as string }),
+    cell: ({ getValue }) => RenderDescription({ description: I18nContent(getValue() as string | I18nValue) }),
   }),
   columnHelper.accessor('assetTags', {
     id: 'assetTags',

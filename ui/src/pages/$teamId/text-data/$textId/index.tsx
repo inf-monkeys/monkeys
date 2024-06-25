@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn } from '@/utils';
+import { cn, I18nContent } from '@/utils';
 
 const TextDataDetail: React.FC = () => {
   const { t } = useTranslation();
@@ -59,7 +59,7 @@ const TextDataDetail: React.FC = () => {
               <TooltipContent>{t('common.utils.back')}</TooltipContent>
             </Tooltip>
             <h1 className="line-clamp-1 text-2xl font-bold">
-              {displayName ? displayName : t('ugc-page.text-data.detail.title')}
+              {displayName ? I18nContent(displayName) : t('ugc-page.text-data.detail.title')}
             </h1>
           </header>
           <TabsList className="flex !h-auto flex-col gap-2 bg-transparent">

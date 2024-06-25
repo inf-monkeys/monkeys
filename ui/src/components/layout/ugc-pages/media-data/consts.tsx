@@ -1,11 +1,13 @@
 import React from 'react';
 
+import { I18nValue } from '@inf-monkeys/monkeys';
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { IMediaData } from '@/apis/media-data/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { I18nContent } from '@/utils';
 
 const columnHelper = createColumnHelper<IAssetItem<IMediaData>>();
 
@@ -19,7 +21,7 @@ export const createMediaDataColumns = () => [
     id: 'title',
     cell: ({ getValue }) => (
       <a className="transition-colors hover:text-primary-500" target="_blank" rel="noreferrer">
-        {getValue() as string}
+        {I18nContent(getValue() as string | I18nValue)}
       </a>
     ),
   }),

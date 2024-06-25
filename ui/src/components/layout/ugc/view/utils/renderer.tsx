@@ -9,6 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { IVinesIconSize, VinesIcon } from '@/components/ui/vines-icon';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
+import { I18nValue } from '@inf-monkeys/monkeys';
+import { I18nContent } from '@/utils';
 
 export const RenderTime: React.FC<{ time: number }> = ({ time: rawTime }) => {
   const { i18n } = useTranslation();
@@ -41,9 +43,10 @@ export const RenderUser: React.FC<{
   );
 };
 export const RenderDescription: React.FC<{
-  description?: string;
+  description?: string | I18nValue;
 }> = ({ description }) => {
   const { t } = useTranslation();
+  if (typeof description != 'string') description = I18nContent(description);
   return !description || description === '' ? (
     <span className="line-clamp-3 text-opacity-70">{t('components.layout.ugc.utils.no-description')}</span>
   ) : (

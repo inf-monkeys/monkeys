@@ -7,6 +7,7 @@ import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/he
 import { IVinesInputPresetProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/index.tsx';
 import { PresetWrapper } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/wrapper.tsx';
 import { IVinesToolPropertiesOption, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
+import { I18nContent } from '@/utils';
 
 export const LlmModelPresets: React.FC<IVinesInputPropertyProps & IVinesInputPresetProps> = (props) => {
   const { data: llmModels, isLoading } = useLLMModels();
@@ -17,7 +18,7 @@ export const LlmModelPresets: React.FC<IVinesInputPropertyProps & IVinesInputPre
   useEffect(() => {
     if (!llmModels) return;
 
-    const opts = llmModels.map((m) => ({ name: m.name, value: m.uuid }));
+    const opts = llmModels.map((m) => ({ name: I18nContent(m.name) ?? '', value: m.uuid }));
 
     setOptions(opts);
 

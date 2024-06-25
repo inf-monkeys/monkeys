@@ -1,3 +1,5 @@
+import { I18nValue } from '@inf-monkeys/monkeys';
+
 import { IBaseEntity } from '@/apis/typings.ts';
 
 export enum SqlKnowledgeBaseCreateType {
@@ -7,8 +9,8 @@ export enum SqlKnowledgeBaseCreateType {
 
 export interface ITableData extends IBaseEntity {
   uuid: string;
-  displayName: string;
-  description: string;
+  displayName: string | I18nValue;
+  description: string | I18nValue;
   iconUrl?: string;
   teamId: string;
   creatorUserId: string;

@@ -1,9 +1,11 @@
+import { I18nValue } from '@inf-monkeys/monkeys';
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { IApplicationStoreItemDetail } from '@/apis/ugc/asset-typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { I18nContent } from '@/utils';
 
 const columnHelper = createColumnHelper<IAssetItem<IApplicationStoreItemDetail>>();
 export const createApplicationStoreColumns = () => [
@@ -17,13 +19,13 @@ export const createApplicationStoreColumns = () => [
     id: 'title',
     header: '名称',
     cell: ({ row, getValue }) => (
-      <span className="transition-colors hover:text-primary-500">{getValue() as string}</span>
+      <span className="transition-colors hover:text-primary-500">{I18nContent(getValue() as string | I18nValue)}</span>
     ),
   }),
   columnHelper.accessor('description', {
     id: 'description',
     header: '描述',
-    cell: ({ getValue }) => RenderDescription({ description: getValue() as string }),
+    cell: ({ getValue }) => RenderDescription({ description: I18nContent(getValue() as string | I18nValue) }),
   }),
   columnHelper.accessor('user', {
     id: 'user',

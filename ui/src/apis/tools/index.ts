@@ -1,5 +1,7 @@
 import useSWR from 'swr';
 
+import { I18nValue } from '@inf-monkeys/monkeys';
+
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
 
@@ -22,7 +24,7 @@ export enum QRCodeStatus {
 }
 
 export interface QRCodeUserInfo {
-  displayName: string;
+  displayName: string | I18nValue;
   id: string;
   avatar: string;
 }
