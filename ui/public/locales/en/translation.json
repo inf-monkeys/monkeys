@@ -1675,6 +1675,10 @@
             "bio": "Bio",
             "human": "Human"
           }
+        },
+        "variable-selector": {
+          "search-placeholder": "Search variables...",
+          "search-empty": "No variables found"
         }
       },
       "tooltip": {

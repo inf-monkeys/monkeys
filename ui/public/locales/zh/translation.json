@@ -1674,6 +1674,10 @@
             "bio": "生命科学",
             "human": "用户交互"
           }
+        },
+        "variable-selector": {
+          "search-placeholder": "搜索变量...",
+          "search-empty": "找不到变量"
         }
       },
       "tooltip": {
