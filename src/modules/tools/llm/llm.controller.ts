@@ -77,6 +77,11 @@ export class LlmController {
   @MonkeyToolIcon('emoji:💬:#c15048')
   @MonkeyToolInput([
     {
+      displayName: '注意：此工具为单独对话（Completions 接口），所选的模型必须支持单轮对话（/v1/completions) 接口，否则会运行失败。大多数情况下，你应该使用的是多轮对话工具。',
+      type: 'notice',
+      name: 'docs',
+    },
+    {
       displayName: '大语言模型',
       name: 'model',
       type: 'string',
@@ -286,6 +291,11 @@ export class LlmController {
   @MonkeyToolIcon('emoji:💬:#c15048')
   @MonkeyToolInput([
     {
+      displayName: '注意：此工具为多轮对话（Chat Completions 接口），所选的模型必须支持多轮对话（/v1/chat/completions) 接口，否则会运行失败。',
+      type: 'notice',
+      name: 'docs',
+    },
+    {
       displayName: '大语言模型',
       name: 'model',
       type: 'string',
@@ -447,6 +457,11 @@ export class LlmController {
   @MonkeyToolCategories(['gen-text'])
   @MonkeyToolIcon('emoji:💬:#c15048')
   @MonkeyToolInput([
+    {
+      displayName: '注意：此工具为多轮对话（Chat Completions 接口），所选的模型必须支持多轮对话（/v1/chat/completions) 接口，否则会运行失败。',
+      type: 'notice',
+      name: 'docs',
+    },
     {
       displayName: '大语言模型',
       name: 'model',
