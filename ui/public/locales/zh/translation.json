@@ -1551,6 +1551,13 @@
               "multiple": "列表",
               "unknown": "不受支持的类型",
               "required": "必填项"
+            },
+
+            "validation": {
+              "loading": "正在重新验证...",
+              "success": "验证成功",
+              "success-with-error": "验证完成，但仍存在错误，请检查配置",
+              "error": "验证失败"
             }
           },
           "output": {
