@@ -33,8 +33,12 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
       expandAll
       initialSelectedItemId={data?.[0]?.id}
       leafRenderer={(it: IVinesVariable) => {
-        const tag = VINES_VARIABLE_TAG[it.type];
+        const type = it.type;
+        const tag = VINES_VARIABLE_TAG[type];
         const isMultiple = it.isMultiple;
+
+        const tagName = tag?.name;
+
         return (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -52,8 +56,13 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
                     backgroundColor: (isMultiple ? tag?.multipleColor : tag?.color) ?? 'hsl(var(--muted-foreground))',
                   }}
                 >
-                  {tag?.name ?? it.type}
-                  {isMultiple ? '列表' : ''}
+                  {tagName
+                    ? t(`workspace.flow-view.headless-modal.tool-editor.input.type.${tagName}`, {
+                        extra: isMultiple
+                          ? t('workspace.flow-view.headless-modal.tool-editor.input.type.multiple')
+                          : '',
+                      })
+                    : type + (isMultiple ? ' list' : '')}
                 </span>
                 <span className="line-clamp-1 break-normal">{it.label}</span>
               </div>
@@ -63,8 +72,12 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
         );
       }}
       labelRenderer={(it: IVinesVariable, onExpand) => {
-        const tag = VINES_VARIABLE_TAG[it.type];
+        const type = it.type;
+        const tag = VINES_VARIABLE_TAG[type];
         const isMultiple = it.isMultiple;
+
+        const tagName = tag?.name;
+
         return (
           <div className="flex size-full items-center gap-2 p-2 text-sm" onClick={onExpand}>
             <span
@@ -73,8 +86,11 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
                 backgroundColor: (isMultiple ? tag?.multipleColor : tag?.color) ?? 'hsl(var(--muted-foreground))',
               }}
             >
-              {tag?.name ?? it.type}
-              {isMultiple ? '列表' : ''}
+              {tagName
+                ? t(`workspace.flow-view.headless-modal.tool-editor.input.type.${tagName}`, {
+                    extra: isMultiple ? t('workspace.flow-view.headless-modal.tool-editor.input.type.multiple') : '',
+                  })
+                : type + (isMultiple ? ' list' : '')}
             </span>
             <span className="line-clamp-1 break-normal">{it.label}</span>
             <div className="relative flex-1">
