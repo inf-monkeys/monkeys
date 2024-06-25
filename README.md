@@ -22,8 +22,8 @@ Monkeys is an open source tool for build workflow-centric AI applications.
 
 - [📚 Documentation](#-documentation)
 - [🏃‍♂️ Get Started](#️-get-started)
-  - [👨‍💻 Developer](#-developer)
   - [🐳 Docker](#-docker)
+  - [👨‍💻 Developer](#-developer)
 - [📦 Ecosystem](#-ecosystem)
 - [🤝 Contributing](#-contributing)
 
@@ -50,6 +50,12 @@ Monkeys Consists of the following key components:
 You can read the documentation here: [https://inf-monkeys.github.io/docs/](https://inf-monkeys.github.io/docs/).
 
 ## 🏃‍♂️ Get Started
+
+### 🐳 Docker
+
+- [Docker Compose](./docker/README.md)
+- [Helm Chart](https://github.com/inf-monkeys/helm-charts)
+
 
 ### 👨‍💻 Developer
 
@@ -82,6 +88,8 @@ You can read the documentation here: [https://inf-monkeys.github.io/docs/](https
 
 - [Redis](https://redis.io/)(Optional): We use inmemory cache as default, for test purpose, you can just skip this.
 - Postgres/MySQL(Optional): We use sqlite as default storage engine, for test purpose, you can just skip this.
+
+> Use Sqlite may encounter some issues, your can report an issue.
 
 <br/>
 
@@ -155,11 +163,6 @@ You can read the documentation here: [https://inf-monkeys.github.io/docs/](https
 
 That's all, you are ready to go!
 
-
-### 🐳 Docker
-
-- [Docker Compose](./docker/README.md)
-- [Helm Chart](https://github.com/inf-monkeys/helm-charts)
 
 ## 📦 Ecosystem
 
