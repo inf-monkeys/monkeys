@@ -642,7 +642,7 @@ export class LlmService {
         });
       } else {
         const data = response as ChatCompletion;
-        if (data.choices[0].message.tool_calls) {
+        if (data.choices[0].message.tool_calls?.length) {
           let toolMessages: Array<ChatCompletionMessageParam> = [];
           const toolCalls = data.choices[0].message.tool_calls;
           for (const toolCall of toolCalls) {
