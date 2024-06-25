@@ -30,7 +30,7 @@ export const LlmModelPresets: React.FC<IVinesInputPropertyProps & IVinesInputPre
     }
     const opts = realLLMModels.map((m) => ({
       name: m.displayName,
-      value: `${m.channelId}:${m.model}`,
+      value: m.channelId === 0 ? m.model : `${m.channelId}:${m.model}`,
     }));
 
     setOptions(opts);

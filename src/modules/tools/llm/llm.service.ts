@@ -131,11 +131,7 @@ export class LlmService {
     }
 
     const checkIsSystemModel = () => {
-      if (!modelName.includes(':')) {
-        return true;
-      }
-      const [channelIdStr] = modelName.split(':');
-      return channelIdStr === '0';
+      return !modelName.includes(':');
     };
 
     const isSystemModel = checkIsSystemModel();
@@ -212,8 +208,12 @@ export class LlmService {
   }
 
   public async createCompelitions(teamId: string, params: CreateCompelitionsParams) {
-    const { model, stream = false } = params;
-    const { apiKey, baseURL, defaultParams, promptTemplate } = await this.getModelConfig(teamId, model);
+    const { stream = false } = params;
+    let { model } = params;
+    const { apiKey, baseURL, defaultParams, promptTemplate, realModelName } = await this.getModelConfig(teamId, model);
+    if (realModelName) {
+      model = realModelName as string;
+    }
 
     const prompt = params.prompt;
     if (promptTemplate) {
