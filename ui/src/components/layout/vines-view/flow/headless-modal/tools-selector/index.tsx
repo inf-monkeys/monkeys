@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { ToolLists } from '@/components/layout/vines-view/flow/headless-modal/tools-selector/list.tsx';
@@ -17,6 +18,8 @@ import VinesEvent from '@/utils/events.ts';
 interface IToolsSelectorProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
+  const { t } = useTranslation();
+
   const { workflowId } = useFlowStore();
   const { vines } = useVinesFlow();
 
@@ -50,7 +53,7 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
 
     const node = vines.createNode(tool);
     if (!node) {
-      toast.error('创建工具失败');
+      toast.error(t('workspace.flow-view.headless-modal.tool-selector.create-failed'));
       return;
     }
 
@@ -79,10 +82,14 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-[50rem]">
-        <DialogTitle>选择工具</DialogTitle>
+        <DialogTitle>{t('workspace.flow-view.headless-modal.tool-selector.title')}</DialogTitle>
         <div className="relative flex w-full items-center">
           <Search className="absolute ml-3 size-4 shrink-0 opacity-50" />
-          <Input className="pl-9" placeholder="输入关键词或类别来搜索工具" onChange={setSearchValue} />
+          <Input
+            className="pl-9"
+            placeholder={t('workspace.flow-view.headless-modal.tool-selector.placeholder')}
+            onChange={setSearchValue}
+          />
         </div>
         <Tabs defaultValue="all">
           <div className="flex justify-between">
@@ -90,7 +97,7 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
               <TabsList>
                 {list.map(([, , categoryKey, category], index) => (
                   <TabsTrigger value={categoryKey} key={index}>
-                    {category}
+                    {t(`workspace.flow-view.headless-modal.tool-selector.category.${category}`)}
                   </TabsTrigger>
                 ))}
               </TabsList>

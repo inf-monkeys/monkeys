@@ -46,20 +46,20 @@ export const TOOL_CATEGORY_SORT_INDEX_LIST = [
 ];
 
 export enum TOOL_CATEGORY {
-  all = '全部工具',
-  process = '流程控制',
-  image = '图像处理',
-  text = '文本处理',
-  file = '文件处理',
-  'gen-image' = '图像生成',
-  'gen-text' = '文本生成',
-  auto = '自动化',
-  db = '数据存储',
-  query = '搜索增强',
-  extra = '扩展能力',
-  'train-model' = '模型训练',
-  bio = '生命科学',
-  human = '用户交互',
+  all = 'all',
+  process = 'process',
+  image = 'image',
+  text = 'text',
+  file = 'file',
+  'gen-image' = 'gen-image',
+  'gen-text' = 'gen-text',
+  auto = 'auto',
+  db = 'db',
+  query = 'query',
+  extra = 'extra',
+  'train-model' = 'train-model',
+  bio = 'bio',
+  human = 'human',
 }
 
 export const IGNORE_TOOLS = ['fake_node', 'notification_join'];
