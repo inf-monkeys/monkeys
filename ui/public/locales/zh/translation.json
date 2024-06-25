@@ -1643,6 +1643,30 @@
             }
           },
           "save": "保存"
+        },
+        "tool-selector": {
+          "title": "选择工具",
+          "placeholder": "输入关键词或类别来搜索工具",
+
+          "create-failed": "创建工具失败",
+
+          "category": {
+            "all": "全部工具",
+            "sub-workflows": "调用工作流",
+            "process": "流程控制",
+            "image": "图像处理",
+            "text": "文本处理",
+            "file": "文件处理",
+            "gen-image": "图像生成",
+            "gen-text": "文本生成",
+            "auto": "自动化",
+            "db": "数据储存",
+            "query": "搜索增强",
+            "extra": "扩展能力",
+            "train-model": "模型训练",
+            "bio": "生命科学",
+            "human": "用户交互"
+          }
         }
       },
       "tooltip": {

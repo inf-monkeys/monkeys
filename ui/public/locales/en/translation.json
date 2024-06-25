@@ -1644,6 +1644,30 @@
             }
           },
           "save": "Save"
+        },
+        "tool-selector": {
+          "title": "Select a tool",
+          "placeholder": "Enter keywords or categories to search for tools",
+
+          "create-failed": "Failed to create tool",
+
+          "category": {
+            "all": "All",
+            "sub-workflows": "Invoking workflows",
+            "process": "Process Controls",
+            "image": "Image Processing",
+            "text": "Text Processing",
+            "file": "File Processing",
+            "gen-image": "Image Generation",
+            "gen-text": "Text Generation",
+            "auto": "Auto",
+            "db": "Database",
+            "query": "Query",
+            "extra": "Extra",
+            "train-model": "Training Model",
+            "bio": "Bio",
+            "human": "Human"
+          }
         }
       },
       "tooltip": {

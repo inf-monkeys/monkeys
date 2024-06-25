@@ -119,7 +119,7 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
             if (IGNORE_TOOLS.some((n) => name.startsWith(n))) return false;
             return !search ? true : [displayName, name, description].some((s) => s?.includes(search));
           });
-          tools.push([subWorkflowTools, subWorkflowTools.length, 'block', '调用工作流']);
+          tools.push([subWorkflowTools, subWorkflowTools.length, 'block', 'sub-workflows']);
         } else {
           const appList = this.tools
             .filter(({ categories }) => categories?.includes(category as BlockDefCategory))
