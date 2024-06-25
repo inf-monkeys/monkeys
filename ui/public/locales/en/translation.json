@@ -1616,6 +1616,13 @@
                 "comfyui-workflow": "ComfyUI Workflow",
                 "comfyui-server": "ComfyUI Server"
               }
+            },
+            "credentials": {
+              "label": "Configure account",
+              "placeholder": "Select or create an external account",
+              "empty": "No external account",
+              "manage": "Managing external accounts",
+              "create": "Create an external account"
             }
           },
           "output": {

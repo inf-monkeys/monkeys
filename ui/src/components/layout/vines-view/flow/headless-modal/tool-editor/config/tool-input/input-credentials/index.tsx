@@ -2,6 +2,7 @@ import React, { memo, useEffect, useState } from 'react';
 
 import { BlockCredentialItem } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
 import { KeySquare } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ExternalAccountManage } from 'src/components/layout/ugc-pages/action-tools/external-account/manage';
 
 import { useCredentials, useCredentialTypes } from '@/apis/credential';
@@ -27,6 +28,8 @@ interface IVinesInputCredentialsProps {
 }
 
 export const VinesInputCredentials: React.FC<IVinesInputCredentialsProps> = memo(({ credentials, value, onChange }) => {
+  const { t } = useTranslation();
+
   const currentCredential = credentials?.[0];
   const credentialName = currentCredential.name;
   const credentialRequired = currentCredential.required;
@@ -61,11 +64,18 @@ export const VinesInputCredentials: React.FC<IVinesInputCredentialsProps> = memo
     <>
       <InputPropertyWrapper
         nodeId={credentialName + '_credential'}
-        def={{ displayName: '配置账号', type: 'string', name: credentialName, required: credentialRequired }}
+        def={{
+          displayName: t('workspace.flow-view.headless-modal.tool-editor.input.credentials.label'),
+          type: 'string',
+          name: credentialName,
+          required: credentialRequired,
+        }}
       >
         <Select value={value} onValueChange={handleValueChange}>
           <SelectTrigger>
-            <SelectValue placeholder="选择或创建一个外部账号" />
+            <SelectValue
+              placeholder={t('workspace.flow-view.headless-modal.tool-editor.input.credentials.placeholder')}
+            />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
@@ -76,7 +86,7 @@ export const VinesInputCredentials: React.FC<IVinesInputCredentialsProps> = memo
               ))}
               {!credentialList?.length && (
                 <SelectItem value="_" disabled>
-                  暂无外部账号
+                  {t('workspace.flow-view.headless-modal.tool-editor.input.credentials.empty')}
                 </SelectItem>
               )}
             </SelectGroup>
@@ -85,7 +95,7 @@ export const VinesInputCredentials: React.FC<IVinesInputCredentialsProps> = memo
               <SelectItem value="manage" className="cursor-pointer">
                 <div className="flex items-center gap-2">
                   <KeySquare size={16} />
-                  管理外部账号
+                  {t('workspace.flow-view.headless-modal.tool-editor.input.credentials.manage')}
                 </div>
               </SelectItem>
             </SelectGroup>
@@ -97,7 +107,9 @@ export const VinesInputCredentials: React.FC<IVinesInputCredentialsProps> = memo
           {active && <ExternalAccountManage detail={active} />}
           <DialogFooter>
             <CreateExternalAccount detail={active}>
-              <Button variant="outline">创建账号</Button>
+              <Button variant="outline">
+                {t('workspace.flow-view.headless-modal.tool-editor.input.credentials.create')}
+              </Button>
             </CreateExternalAccount>
           </DialogFooter>
         </DialogContent>

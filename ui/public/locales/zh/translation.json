@@ -1615,6 +1615,13 @@
                 "comfyui-workflow": "ComfyUI 工作流",
                 "comfyui-server": "ComfyUI 服务"
               }
+            },
+            "credentials": {
+              "label": "配置账号",
+              "placeholder": "选择或创建一个外部账号",
+              "empty": "暂无外部账号",
+              "manage": "管理外部账号",
+              "create": "创建外部账号"
             }
           },
           "output": {
