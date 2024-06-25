@@ -1,11 +1,13 @@
+import { I18nValue } from '@inf-monkeys/monkeys';
+
 import { IBaseEntity } from '@/apis/typings.ts';
 
 export interface ILLMModel extends IBaseEntity {
   uuid: string;
   origin: 'built-in' | 'user';
   teamId?: string;
-  name: string;
-  description: string;
+  name: string | I18nValue;
+  description: string | I18nValue;
   logo: string;
   baseModel: string;
   loraModel?: string;

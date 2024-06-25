@@ -1,4 +1,4 @@
-import { AssetType, MonkeyWorkflow } from '@inf-monkeys/monkeys';
+import { AssetType, I18nValue, MonkeyWorkflow } from '@inf-monkeys/monkeys';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { SdModelType, SdWorkProcessStatus, XYZTestResult } from '@/apis/sd/typings.ts';
@@ -72,15 +72,15 @@ export interface IVectorCollectionFileJson {
 
 export type IVectorCollectionField = {
   name: string;
-  displayName: string;
-  description: string;
+  displayName: string | I18nValue;
+  description: string | I18nValue;
   builtIn: boolean;
   required: boolean;
 };
 
 export interface ITextCollectionJson extends IBaseAsset {
-  displayName: string;
-  description: string;
+  displayName: string | I18nValue;
+  description: string | I18nValue;
   iconUrl: string;
   embeddingModel: string;
   dimension: number;
@@ -138,8 +138,8 @@ export interface IWorkflowRelatedAssetResult {
 
 export interface IApplicationStoreItem {
   id: string;
-  displayName: string;
-  description: string;
+  displayName: string | I18nValue;
+  description: string | I18nValue;
   iconUrl: string;
   teamId: string;
   workflowId: string;
