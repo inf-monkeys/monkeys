@@ -38,7 +38,7 @@ export const QRCodeInput: React.FC<IVinesInputPropertyProps & IQrcodeInputProps>
       onChange(res.sessionId);
       setUserInfo(res.userinfo);
     } else {
-      fetchQrCodeStatus(res!.sessionId!);
+      await fetchQrCodeStatus(res!.sessionId!);
     }
     setLoading(false);
   };
@@ -66,9 +66,7 @@ export const QRCodeInput: React.FC<IVinesInputPropertyProps & IQrcodeInputProps>
     }
   };
 
-  useEffect(() => {
-    generateQRCode();
-  }, []);
+  useEffect(() => void generateQRCode(), []);
 
   return (
     <div className={cn('relative', { 'pointer-events-none': false })}>
@@ -90,14 +88,15 @@ export const QRCodeInput: React.FC<IVinesInputPropertyProps & IQrcodeInputProps>
               width={`${geneQrcodeResult.qrcode.width}px`}
               height={`${geneQrcodeResult.qrcode.height}px`}
               src={`${geneQrcodeResult.qrcode.src}`}
-            ></iframe>
+            />
           )}
           {geneQrcodeResult?.qrcode?.type === 'image' && (
             <img
               width={`${geneQrcodeResult.qrcode.width}px`}
               height={`${geneQrcodeResult.qrcode.height}px`}
               src={`${geneQrcodeResult.qrcode.src}`}
-            ></img>
+              alt="qrcode"
+            />
           )}
           {pollingForStatus && <>查询最新扫描状态中 ...</>}
         </>

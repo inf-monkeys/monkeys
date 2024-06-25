@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { BlockDefPropertyTypes } from '@inf-monkeys/vines';
+import { useTranslation } from 'react-i18next';
 
 import { useLLMModels } from '@/apis/llm';
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
@@ -9,6 +10,8 @@ import { PresetWrapper } from '@/components/layout/vines-view/flow/headless-moda
 import { IVinesToolPropertiesOption, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
 export const LlmModelPresets: React.FC<IVinesInputPropertyProps & IVinesInputPresetProps> = (props) => {
+  const { t } = useTranslation();
+
   const { data: llmModels, isLoading } = useLLMModels();
 
   const [options, setOptions] = useState<IVinesToolPropertiesOption[]>([]);
@@ -41,7 +44,9 @@ export const LlmModelPresets: React.FC<IVinesInputPropertyProps & IVinesInputPre
         (newOptionsVariableMapper[optValue] = {
           displayName: name,
           name: optValue,
-          type: '大语言模型' as BlockDefPropertyTypes,
+          type: t(
+            'workspace.flow-view.headless-modal.tool-editor.input.comps.preset.llm-model',
+          ) as BlockDefPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);
@@ -50,7 +55,7 @@ export const LlmModelPresets: React.FC<IVinesInputPropertyProps & IVinesInputPre
   return (
     <PresetWrapper
       id="LlmModel"
-      name="大语言模型"
+      name={t('workspace.flow-view.headless-modal.tool-editor.input.comps.preset.llm-model')}
       isLoading={isLoading}
       options={options}
       optionsVariableMapper={optionsVariableMapper}

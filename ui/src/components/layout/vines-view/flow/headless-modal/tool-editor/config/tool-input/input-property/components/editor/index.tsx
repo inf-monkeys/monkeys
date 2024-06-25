@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 
 import { get, isArray } from 'lodash';
+import { useTranslation } from 'react-i18next';
 
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
 import { CodeEditor, ICodeEditorProps } from '@/components/ui/code-editor';
@@ -13,6 +14,8 @@ export const EditorInput: React.FC<IVinesInputPropertyProps & Pick<ICodeEditorPr
   editorRef,
   onInitial,
 }) => {
+  const { t } = useTranslation();
+
   const { type, typeOptions } = def;
   const language = type === 'json' ? 'json' : get(typeOptions, 'editorLanguage', 'plaintext').toLowerCase();
   const isMultipleValues = get(typeOptions, 'multipleValues', false);
@@ -25,14 +28,14 @@ export const EditorInput: React.FC<IVinesInputPropertyProps & Pick<ICodeEditorPr
           const toJson = JSON.parse(value as string);
           if (isMultipleValues) {
             if (!isArray(toJson)) {
-              setError('必须为 JSON 数组');
+              setError(t('workspace.flow-view.headless-modal.tool-editor.input.comps.editor.check-json-failed'));
               return;
             }
           }
           onChange?.(toJson);
           setError(null);
         } catch (e) {
-          setError('JSON 解析失败！数据将不会保存，请检查');
+          setError(t('workspace.flow-view.headless-modal.tool-editor.input.comps.editor.parse-json-failed'));
         }
       } else {
         onChange?.(value);

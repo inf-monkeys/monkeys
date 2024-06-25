@@ -1558,6 +1558,63 @@
               "success": "验证成功",
               "success-with-error": "验证完成，但仍存在错误，请检查配置",
               "error": "验证失败"
+            },
+            "comps": {
+              "string": {
+                "placeholder": "请输入 {{name}}",
+                "insert-variable": "插入变量",
+                "preview": "{{title}} 输入预览"
+              },
+              "options": {
+                "placeholder": "选择一个选项"
+              },
+              "multi-field-object": {
+                "placeholder": "参数名",
+                "create-field": "新增参数"
+              },
+              "collection": {
+                "placeholder-name": "请输入 {{name}}，回车新增",
+                "placeholder": "{{name}}，回车新增"
+              },
+              "editor": {
+                "check-json-failed": "必须为 JSON 数组",
+                "parse-json-failed": "JSON 解析失败！数据将不会保存，请检查",
+
+                "insert-variable-tips": "在光标处插入变量"
+              },
+              "blank": {
+                "tips": "不受支持的配置项，建议使用「开发模式」编辑"
+              },
+              "preset": {
+                "placeholder-empty": "暂无{{name}}",
+                "placeholder-select": "选择预设{{name}}",
+
+                "workflow-version": "工作流版本",
+                "workflow": {
+                  "label": "工作流",
+                  "placeholder-empty": "暂无工作流",
+                  "placeholder-select": "选择工作流预置选项"
+                },
+                "tool": "工具",
+                "sql-knowledge-base": {
+                  "label": "关系型知识库",
+
+                  "display-name": "{{name}} （其他团队授权）"
+                },
+                "sd-model": "图像模型",
+                "llm-model": "大语言模型",
+                "knowledge-base": {
+                  "label": "文本知识库",
+
+                  "display-name": "{{name}} （其他团队授权）"
+                },
+                "fork-join-branch": {
+                  "button": "您也可以选择预置选项",
+                  "all-branch": "全部分支"
+                },
+                "comfyui-workflow": "ComfyUI 工作流",
+                "comfyui-server": "ComfyUI 服务"
+              }
             }
           },
           "output": {
