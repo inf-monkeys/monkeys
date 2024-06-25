@@ -1495,6 +1495,13 @@
             "input-empty": "Please enter valid content",
             "submit": "submit"
           }
+        },
+
+        "tabs": {
+          "流程视图": "Workflow",
+          "日志视图": "Logs",
+          "预览视图": "Preview",
+          "对话视图": "Chat"
         }
       }
     },
