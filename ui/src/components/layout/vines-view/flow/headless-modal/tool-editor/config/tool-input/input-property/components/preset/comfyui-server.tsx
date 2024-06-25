@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { BlockDefPropertyTypes } from '@inf-monkeys/vines';
+import { useTranslation } from 'react-i18next';
 
 import { useComfyuiServers } from '@/apis/comfyui';
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
@@ -9,6 +10,8 @@ import { PresetWrapper } from '@/components/layout/vines-view/flow/headless-moda
 import { IVinesToolPropertiesOption, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
 export const ComfyuiServerSelector: React.FC<IVinesInputPropertyProps & IVinesInputPresetProps> = (props) => {
+  const { t } = useTranslation();
+
   const { data: comfyuiServers, isLoading } = useComfyuiServers();
 
   const [options, setOptions] = useState<IVinesToolPropertiesOption[]>([]);
@@ -28,7 +31,9 @@ export const ComfyuiServerSelector: React.FC<IVinesInputPropertyProps & IVinesIn
         (newOptionsVariableMapper[optValue] = {
           displayName: name,
           name: optValue,
-          type: 'ComfyUI 工作流' as BlockDefPropertyTypes,
+          type: t(
+            'workspace.flow-view.headless-modal.tool-editor.input.comps.preset.comfyui-server',
+          ) as BlockDefPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);
@@ -37,7 +42,7 @@ export const ComfyuiServerSelector: React.FC<IVinesInputPropertyProps & IVinesIn
   return (
     <PresetWrapper
       id="ComfyuiServers"
-      name="ComfyUI 服务"
+      name={t('workspace.flow-view.headless-modal.tool-editor.input.comps.preset.comfyui-server')}
       isLoading={isLoading}
       options={options}
       optionsVariableMapper={optionsVariableMapper}

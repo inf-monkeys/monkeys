@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { get, isArray, isString } from 'lodash';
+import { useTranslation } from 'react-i18next';
 
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
 import { CollectionInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/collection.tsx';
@@ -21,7 +22,7 @@ interface IPresetWrapperProps<T extends Array<IVinesToolPropertiesOption>> {
 
 export const PresetWrapper = <T extends Array<IVinesToolPropertiesOption>>({
   id,
-  name = '选项',
+  name = 'Option',
   isLoading = false,
   disabled,
 
@@ -36,6 +37,8 @@ export const PresetWrapper = <T extends Array<IVinesToolPropertiesOption>>({
 
   ...rest
 }: IVinesInputPropertyProps & IVinesInputPresetProps & IPresetWrapperProps<T>): React.ReactNode => {
+  const { t } = useTranslation();
+
   const multipleValues = get(typeOptions, 'multipleValues', false);
 
   const isArrayValue = isArray(value);
@@ -88,7 +91,15 @@ export const PresetWrapper = <T extends Array<IVinesToolPropertiesOption>>({
             disabled={isEmptyOptions}
           >
             <SelectTrigger>
-              <SelectValue placeholder={isEmptyOptions ? `暂无${name}` : `选择预置${name}`} />
+              <SelectValue
+                placeholder={
+                  isEmptyOptions
+                    ? t('workspace.flow-view.headless-modal.tool-editor.input.comps.preset.placeholder-empty', { name })
+                    : t('workspace.flow-view.headless-modal.tool-editor.input.comps.preset.placeholder-select', {
+                        name,
+                      })
+                }
+              />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>

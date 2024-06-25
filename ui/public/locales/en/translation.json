@@ -1556,6 +1556,66 @@
               "multiple": "list",
               "unknown": "Unsupported types",
               "required": "Required"
+            },
+
+            "validation": {
+              "loading": "Re-validating...",
+              "success": "Validation successful",
+              "success-with-error": "Validation is complete, but an error still exists, check the configuration",
+              "error": "Validation failed, please check the configuration"
+            },
+            "comps": {
+              "string": {
+                "placeholder": "Enter {{name}}",
+                "insert-variable": "Insert variable",
+                "preview": "{{title}} Preview"
+              },
+              "options": {
+                "placeholder": "Select an option"
+              },
+              "multi-field-object": {
+                "placeholder": "parameter name",
+                "create-field": "New Parameter"
+              },
+              "collection": {
+                "placeholder-name": "Enter {{name}}, enter to add new",
+                "placeholder": "{{name}}, enter to add new"
+              },
+              "editor": {
+                "check-json-failed": "Must be a JSON array",
+                "parse-json-failed": "JSON parsing failed! The data will not be saved, please check the JSON format.",
+                "insert-variable-tips": "Insert variables at the cursor"
+              },
+              "blank": {
+                "tips": "For unsupported configuration items, it is recommended to edit them in \"Raw Data\"."
+              },
+              "preset": {
+                "placeholder-empty": "{{name}} is empty",
+                "placeholder-select": "Select preset {{name}}",
+                "workflow-version": "Workflow Version",
+                "workflow": {
+                  "label": "Workflow",
+                  "placeholder-empty": "Workflows is empty",
+                  "placeholder-select": "Select workflow"
+                },
+                "tool": "Tool",
+                "sql-knowledge-base": {
+                  "label": "SQL Knowledge Base",
+                  "display-name": "{{name}} (Other team authorisations)"
+                },
+                "sd-model": "SD Model",
+                "llm-model": "LLM Model",
+                "knowledge-base": {
+                  "label": "Knowledge Base",
+                  "display-name": "{{name}} (Other team authorisations)"
+                },
+                "fork-join-branch": {
+                  "button": "Select a branch",
+                  "all-branch": "All branches"
+                },
+                "comfyui-workflow": "ComfyUI Workflow",
+                "comfyui-server": "ComfyUI Server"
+              }
             }
           },
           "output": {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { BlockDefPropertyTypes } from '@inf-monkeys/vines';
+import { useTranslation } from 'react-i18next';
 
 import { useUgcTableData } from '@/apis/ugc';
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
@@ -10,6 +11,8 @@ import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { IVinesToolPropertiesOption, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
 export const SqlKnowledgeBaseSelector: React.FC<IVinesInputPropertyProps & IVinesInputPresetProps> = (props) => {
+  const { t } = useTranslation();
+
   const { teamId } = useVinesTeam();
   const { data: sqlKnowledgeBases, isLoading } = useUgcTableData({
     page: 1,
@@ -25,7 +28,11 @@ export const SqlKnowledgeBaseSelector: React.FC<IVinesInputPropertyProps & IVine
 
     const opts = sqlKnowledgeBases.data.map((m) => {
       const ownedByTeam = teamId === m.teamId;
-      const displayName = ownedByTeam ? m.displayName : `${m.displayName}（其他团队授权）`;
+      const displayName = ownedByTeam
+        ? m.displayName
+        : t('workspace.flow-view.headless-modal.tool-editor.input.comps.preset.sql-knowledge-base.display-name', {
+            name: m.displayName,
+          });
       return { name: displayName, value: m.uuid };
     });
     setOptions(opts);
@@ -36,7 +43,9 @@ export const SqlKnowledgeBaseSelector: React.FC<IVinesInputPropertyProps & IVine
         (newOptionsVariableMapper[optValue] = {
           displayName: name,
           name: optValue,
-          type: '关系型知识库' as BlockDefPropertyTypes,
+          type: t(
+            'workspace.flow-view.headless-modal.tool-editor.input.comps.preset.sql-knowledge-base.label',
+          ) as BlockDefPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);
@@ -45,7 +54,7 @@ export const SqlKnowledgeBaseSelector: React.FC<IVinesInputPropertyProps & IVine
   return (
     <PresetWrapper
       id="SqlKnowledgeBase"
-      name="关系型知识库"
+      name={t('workspace.flow-view.headless-modal.tool-editor.input.comps.preset.sql-knowledge-base.label')}
       isLoading={isLoading}
       options={options}
       optionsVariableMapper={optionsVariableMapper}
