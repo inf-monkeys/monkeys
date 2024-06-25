@@ -73,7 +73,7 @@ export const AddSpaceTab: React.FC<IAddSpaceTabProps> = ({ className }) => {
               ?.map(({ type, icon, name }) => (
                 <DropdownMenuItem key={type} className="flex items-center gap-2" onClick={() => handleAddPage(type)}>
                   <VinesIcon size="xs">{icon}</VinesIcon>
-                  <p>{name}</p>
+                  <p>{t([`workspace.wrapper.space.tabs.${name}`, name])}</p>
                 </DropdownMenuItem>
               ))}
           </DropdownMenuGroup>

@@ -4,6 +4,7 @@ import { useNavigate } from '@tanstack/react-router';
 
 import { useSortable } from '@dnd-kit/sortable';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 import { IPageType } from '@/apis/pages/typings.ts';
 import { TabMenu } from '@/components/layout-wrapper/workspace/space/tabs/menu.tsx';
@@ -23,6 +24,8 @@ interface ISpaceTabProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon, activeIndex, index, isLastItem }) => {
+  const { t } = useTranslation();
+
   const navigate = useNavigate({ from: Route.fullPath });
 
   const { setNodeRef, listeners, attributes, transform, isDragging } = useSortable({ id });
@@ -69,7 +72,9 @@ export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon,
     >
       <div className="flex h-full select-none items-center p-4" {...listeners}>
         <p className="mr-2">{icon}</p>
-        <h1 className="whitespace-nowrap text-sm font-bold">{displayName}</h1>
+        <h1 className="whitespace-nowrap text-sm font-bold">
+          {t([`workspace.wrapper.space.tabs.${displayName}`, displayName])}
+        </h1>
         <AnimatePresence>
           {isActive && (
             <motion.div
