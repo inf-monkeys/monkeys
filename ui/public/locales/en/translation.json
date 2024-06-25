@@ -1628,6 +1628,21 @@
           "output": {
             "title": "Output"
           },
+          "advanced-config": {
+            "error": "Tool data anomalies!",
+            "parse-error": "Tool data parsing failed!",
+
+            "output": {
+              "label": "Output Mode",
+              "placeholder": "Select output mode"
+            },
+            "timeout": {
+              "label": "Timeout (seconds)",
+              "placeholder": "Enter timeout (seconds)",
+              "number-error": "Please enter a valid number",
+              "zero-error": "Please enter a number greater than or equal to 0"
+            }
+          },
           "save": "Save"
         }
       },
