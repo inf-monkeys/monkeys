@@ -36,6 +36,7 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page 
   };
 
   const workflowDesc = workflow?.description ? ` - ${workflow.description}` : '';
+  const displayName = page?.displayName ?? '';
 
   return (
     <header className="z-50 flex w-full items-center justify-between px-4 pb-4">
@@ -43,7 +44,9 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page 
         <VinesIcon size="sm">{workflow?.iconUrl}</VinesIcon>
         <div className="flex flex-col gap-0.5">
           <h1 className="font-bold leading-tight">{workflow?.displayName ?? t('common.utils.untitled')}</h1>
-          <span className="text-xxs">{page?.displayName + workflowDesc}</span>
+          <span className="text-xxs">
+            {t([`workspace.wrapper.space.tabs.${displayName}`, displayName]) + workflowDesc}
+          </span>
         </div>
       </div>
       <div className="flex gap-4">
