@@ -79,7 +79,9 @@ export const VinesLogList: React.FC<IVinesLogListProps> = ({ searchWorkflowExecu
         : null}
       {workflowExecutions && workflowDefinitions && workflowTotal ? (
         workflowTotal - workflowExecutionLength <= 0 ? (
-          <div className="w-full cursor-default text-center opacity-75 text-sm">{t('workspace.logs-view.list.bottom')}</div>
+          <div className="w-full cursor-default text-center text-sm opacity-75">
+            {t('workspace.logs-view.list.bottom')}
+          </div>
         ) : (
           <div
             className="w-full cursor-pointer bg-opacity-0 py-2 text-center hover:bg-foreground-500 hover:bg-opacity-5"

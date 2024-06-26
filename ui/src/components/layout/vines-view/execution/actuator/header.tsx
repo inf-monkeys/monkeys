@@ -23,6 +23,8 @@ export const ActuatorHeader: React.FC<IActuatorHeaderProps> = ({ instanceId, wor
   const { t } = useTranslation();
   const clipboard = useClipboard({ timeout: 500 });
 
+  const status = getExecutionStatusText(workflowStatus as string, workflowStatus as string);
+
   return (
     <header className="flex w-full items-center gap-4 pl-2">
       <ExecutionStatusIcon
@@ -32,11 +34,11 @@ export const ActuatorHeader: React.FC<IActuatorHeaderProps> = ({ instanceId, wor
         spinClassName="scale-90 -ml-0"
       />
       <div>
-        <h1 className="text-xl font-bold">
-          工作流{getExecutionStatusText(workflowStatus as string, workflowStatus as string)}
-        </h1>
+        <h1 className="text-xl font-bold">{t([`workspace.pre-view.actuator.execution.status.${status}`, status])}</h1>
         <div className="flex items-center gap-2">
-          <CardDescription className="line-clamp-1">实例 ID: {instanceId}</CardDescription>
+          <CardDescription className="line-clamp-1">
+            {t('workspace.pre-view.actuator.execution.instance-id', { instanceId })}
+          </CardDescription>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -51,7 +53,7 @@ export const ActuatorHeader: React.FC<IActuatorHeaderProps> = ({ instanceId, wor
                 variant="outline"
               />
             </TooltipTrigger>
-            <TooltipContent>点击复制</TooltipContent>
+            <TooltipContent>{t('common.utils.click-to-copy')}</TooltipContent>
           </Tooltip>
         </div>
       </div>

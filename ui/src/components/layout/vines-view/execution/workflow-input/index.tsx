@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { BlockDefProperties } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
 import { fromPairs, isArray, isBoolean } from 'lodash';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 
 import { NoticeInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/notice.tsx';
 import { Button } from '@/components/ui/button';
@@ -49,6 +50,8 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
   scrollAreaClassName,
   itemClassName,
 }) => {
+  const { t } = useTranslation();
+
   const form = useForm<IWorkflowInputForm>({
     resolver: zodResolver(workflowInputFormSchema),
   });
@@ -140,11 +143,11 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                                     value.filter((it) => (isNumber ? !isNaN(Number(it)) : it)),
                                   )
                                 }
-                                placeholder={`请输入${displayName}`}
+                                placeholder={t('workspace.pre-view.actuator.execution-form.string', { displayName })}
                               />
                             ) : (
                               <Textarea
-                                placeholder={`请输入${displayName}`}
+                                placeholder={t('workspace.pre-view.actuator.execution-form.string', { displayName })}
                                 value={(value as string) ?? ''}
                                 onChange={(value) => {
                                   if (isNumber) {
@@ -171,7 +174,7 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                                       value.filter((it) => BOOLEAN_VALUES.includes(it)),
                                     )
                                   }
-                                  placeholder={`请输入${displayName}`}
+                                  placeholder={t('workspace.pre-view.actuator.execution-form.string', { displayName })}
                                 />
                               ) : (
                                 <Switch
@@ -184,13 +187,15 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
 
                           {type === 'file' && (
                             <div className="flex items-center justify-between">
-                              <span className="text-xs text-opacity-70">请输入文件直链</span>
+                              <span className="text-xs text-opacity-70">
+                                {t('workspace.pre-view.actuator.execution-form.file.label')}
+                              </span>
                               <VinesUpdater
                                 limit={isMultiple ? void 0 : 1}
                                 onFinished={(urls) => form.setValue(name, isMultiple ? urls : urls[0])}
                               >
                                 <Button variant="outline" size="small" className="-mr-1 scale-90">
-                                  点击上传文件
+                                  {t('workspace.pre-view.actuator.execution-form.file.click-to-upload')}
                                 </Button>
                               </VinesUpdater>
                             </div>
@@ -211,7 +216,7 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                             >
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="请选择一个选项" />
+                                  <SelectValue placeholder={t('workspace.pre-view.actuator.execution-form.options')} />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>

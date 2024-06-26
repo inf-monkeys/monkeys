@@ -1,6 +1,7 @@
 import React, { memo, useEffect, useState } from 'react';
 
 import { useElementSize } from '@mantine/hooks';
+import { useTranslation } from 'react-i18next';
 
 import { VinesActuatorDetailData } from '@/components/layout/vines-view/execution/actuator/detail/content/data.tsx';
 import { ExecutionRawDataDisplay } from '@/components/layout/vines-view/execution/data-display/raw';
@@ -18,6 +19,8 @@ interface IVinesActuatorDetailContentProps {
 
 export const VinesActuatorDetailContent: React.FC<IVinesActuatorDetailContentProps> = memo(
   ({ executionTask, className, height }) => {
+    const { t } = useTranslation();
+
     const { ref, height: headerHeight } = useElementSize();
 
     const executionOutputData = executionTask?.outputData ?? {};
@@ -41,10 +44,10 @@ export const VinesActuatorDetailContent: React.FC<IVinesActuatorDetailContentPro
       <div className={cn('flex flex-col gap-3', className)}>
         <Tabs defaultValue="data" value={activeTab} onValueChange={setActiveTab}>
           <TabsList ref={ref}>
-            <TabsTrigger value="data">数据</TabsTrigger>
-            <TabsTrigger value="input">输入</TabsTrigger>
-            <TabsTrigger value="output">输出</TabsTrigger>
-            <TabsTrigger value="raw">原始数据</TabsTrigger>
+            <TabsTrigger value="data">{t('workspace.pre-view.actuator.detail.tabs.data')}</TabsTrigger>
+            <TabsTrigger value="input">{t('workspace.pre-view.actuator.detail.tabs.input')}</TabsTrigger>
+            <TabsTrigger value="output">{t('workspace.pre-view.actuator.detail.tabs.output')}</TabsTrigger>
+            <TabsTrigger value="raw">{t('workspace.pre-view.actuator.detail.tabs.raw')}</TabsTrigger>
           </TabsList>
           <TabsContent value="data">
             <VinesActuatorDetailData height={finalHeight} executionTask={executionTask} />

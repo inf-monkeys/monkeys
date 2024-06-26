@@ -27,11 +27,12 @@ interface IVinesExecutionHistoryProps extends React.ComponentPropsWithoutRef<'di
 
 // million-ignore
 export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () => {
+  const { t } = useTranslation();
+
   const { visible } = useViewStore();
   const { setCanvasMode } = useCanvasStore();
   const { workflowId } = useFlowStore();
 
-  const { t } = useTranslation();
   const clipboard = useClipboard({ timeout: 500 });
 
   const { vines } = useVinesFlow();
@@ -75,14 +76,14 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
             'flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
             isEmpty && 'pointer-events-none opacity-85',
           )}
-          placeholder="搜索运行实例 ID"
+          placeholder={t('workspace.pre-view.history.search.placeholder')}
         />
       </div>
       {isEmpty && (
         <div className="vines-center size-full flex-1 flex-col">
           <MousePointerSquareDashed size={64} />
           <div className="mt-4 flex flex-col text-center">
-            <h2 className="font-bold">暂无运行实例</h2>
+            <h2 className="font-bold">{t('workspace.pre-view.history.search.empty')}</h2>
           </div>
         </div>
       )}
@@ -92,7 +93,7 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
             <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
           </CommandLoading>
         ) : !isEmpty ? (
-          <CommandEmpty>找不到此运行实例</CommandEmpty>
+          <CommandEmpty>{t('workspace.pre-view.history.search.search-empty')}</CommandEmpty>
         ) : null}
 
         <CommandGroup>
@@ -113,7 +114,7 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
                   <CardHeader className="p-0">
                     <CardTitle className="text-xl">{`${formatTimeDiffPrevious(startTime ?? 0)}${getDescOfTriggerType(triggerType ?? '')}`}</CardTitle>
                     <div className="flex items-center gap-2">
-                      <CardDescription>实例 ID: {instanceId}</CardDescription>
+                      <CardDescription>{t('workspace.pre-view.history.item.desc', { instanceId })}</CardDescription>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
@@ -132,7 +133,7 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
                             }}
                           />
                         </TooltipTrigger>
-                        <TooltipContent>点击复制</TooltipContent>
+                        <TooltipContent>{t('common.utils.click-to-copy')}</TooltipContent>
                       </Tooltip>
                     </div>
                   </CardHeader>

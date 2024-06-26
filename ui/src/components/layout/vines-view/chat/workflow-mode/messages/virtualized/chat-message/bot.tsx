@@ -63,7 +63,7 @@ export const VinesBotChatMessage = memo<IVinesBotChatMessageProps>(
                           }}
                         />
                       </TooltipTrigger>
-                      <TooltipContent>点击复制</TooltipContent>
+                      <TooltipContent>{t('common.utils.click-to-copy')}</TooltipContent>
                     </Tooltip>
                   </div>
                 </TooltipTrigger>
