@@ -5,6 +5,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
 import _ from 'lodash';
 import { BookDashed } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { VinesWorkflowExecutionLists } from '@/apis/workflow/execution/typings';
@@ -19,6 +20,8 @@ interface IVinesLogListProps {
 }
 
 export const VinesLogList: React.FC<IVinesLogListProps> = ({ searchWorkflowExecutionsData, handleSubmit }) => {
+  const { t } = useTranslation();
+
   const { vines } = useVinesFlow();
   const { pages } = useVinesPage();
   const navigate = useNavigate();
@@ -37,13 +40,14 @@ export const VinesLogList: React.FC<IVinesLogListProps> = ({ searchWorkflowExecu
       if (vines.swapExecutionInstance(execution)) {
         void navigate({
           to: '/$teamId/workspace/$workflowId/$pageId',
+          // @ts-ignore
           params: {
             pageId: previewPage.id,
           },
         });
       }
     } else {
-      toast.error('打开详情失败！找不到预览视图');
+      toast.error(t('workspace.logs-view.list.preview-page-not-found'));
     }
   };
 
@@ -59,7 +63,7 @@ export const VinesLogList: React.FC<IVinesLogListProps> = ({ searchWorkflowExecu
         >
           <BookDashed size={64} />
           <div className="mt-4 flex flex-col text-center">
-            <h2 className="font-bold">暂无执行记录</h2>
+            <h2 className="font-bold">{t('workspace.logs-view.list.empty')}</h2>
           </div>
         </motion.div>
       )}
@@ -75,13 +79,13 @@ export const VinesLogList: React.FC<IVinesLogListProps> = ({ searchWorkflowExecu
         : null}
       {workflowExecutions && workflowDefinitions && workflowTotal ? (
         workflowTotal - workflowExecutionLength <= 0 ? (
-          <div className="w-full cursor-default text-center">到底了</div>
+          <div className="w-full cursor-default text-center opacity-75 text-sm">{t('workspace.logs-view.list.bottom')}</div>
         ) : (
           <div
             className="w-full cursor-pointer bg-opacity-0 py-2 text-center hover:bg-foreground-500 hover:bg-opacity-5"
             onClick={() => handleSubmit(true)}
           >
-            剩余 {workflowTotal - workflowExecutionLength} 项，点击加载
+            {t('workspace.logs-view.list.more', { data: workflowTotal - workflowExecutionLength })}
           </div>
         )
       ) : null}
