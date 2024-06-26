@@ -46,7 +46,7 @@
       "descend": "Descend",
       "load-more": "Load More",
       "add": "Add",
-      "click-to-copy": "点击复制"
+      "click-to-copy": "Click to copy"
     },
     "type": {
       "workflow": "workflow",
@@ -2049,6 +2049,103 @@
       "loading": "Searching...",
       "error": "Query failed, please check whether the network is unobstructed",
       "workflow-id-error": "Please wait for the page to load"
+    },
+    "pre-view": {
+      "title": "Workflow Preview",
+      "desc": "Run a workflow or view historical run records",
+
+      "actuator": {
+        "scale": {
+          "min": "Restore View",
+          "max": "Full screen in view"
+        },
+        "execution": {
+          "label": "Execute workflow",
+          "button":{
+            "restart": "Restart",
+            "stop": "Stop"
+          },
+
+          "form-empty": "Please complete the workflow form first",
+
+          "status": {
+            "completed": "Workflow completed",
+            "canceled": "Workflow execution cancellation",
+            "skipped": "Workflow skipping execution",
+            "timeout": "Workflow execution timeout",
+            "failed": "Workflow execution failed",
+            "failed-with-terminal-error": "Workflow execution failed, please check the terminal output",
+            "in-progress": "Workflow executing",
+            "running": "Workflow executing",
+            "scheduled": "Workflow is scheduled or in progress",
+            "terminated": "Workflow execution has terminated",
+            "paused": "Workflow execution is paused",
+            "unknown": "Unknown workflow execution status"
+          },
+
+          "instance-id": "Instance ID: {{instanceId}}"
+        },
+
+        "execution-form": {
+          "string": "Enter {{displayName}}",
+          "file": {
+            "label": "Please enter the file url",
+            "click-to-upload": "Click to upload file"
+          },
+          "options": "Please select an option"
+        },
+        "detail": {
+          "tabs": {
+            "data": "Data",
+            "input": "Input",
+            "output": "Output",
+            "raw": "Raw Data"
+          },
+          "header": {
+            "days": "{{days}} d",
+            "hours": "{{hours}} h",
+            "minutes": "{{minutes}} m",
+            "seconds": "{{seconds}} s",
+            "milliseconds": "{{milliseconds}} ms",
+
+            "start-time": "Start Time: {{startTime}}",
+            "end-time": "End Time: {{endTime}}",
+            "duration": "Duration: {{currentDuration}}",
+            "iteration": "Iteration: {{iteration}}"
+          },
+
+          "abstract-data-preview": {
+            "url": "Click to jump to an external website, please pay attention to safety",
+            "empty": "There is no output after the tool is executed"
+          },
+          "human-interaction": {
+            "label": "Please interact",
+            "desc": "Task ID：{{taskId}}",
+            "cancel": "Continue execution",
+            "confirm": "Confirm ({{selectedLength}})",
+            "skip": "Skip",
+
+            "loading": "Waiting for human interaction...",
+            "success": "Human interaction completed",
+            "error": "Human interaction failed"
+          },
+          "raw-data-display": {
+            "label": "The content is too large, please go to OSS to download and view",
+            "open-external-storage": "Click to open external storage",
+            "preview": "Zoom in to see the code"
+          }
+        }
+      },
+      "history": {
+        "search": {
+          "placeholder": "Search for the running instance ID",
+          "search-empty": "Can't find this running instance ID",
+          "empty": "No running instance yet"
+        },
+        "item": {
+          "desc": "Instance ID: {{instanceId}}"
+        }
+      }
     }
   }
 }

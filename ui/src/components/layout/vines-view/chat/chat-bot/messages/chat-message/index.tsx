@@ -79,7 +79,7 @@ export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
                   }}
                 />
               </TooltipTrigger>
-              <TooltipContent>复制</TooltipContent>
+              <TooltipContent>{t('common.utils.click-to-copy')}</TooltipContent>
             </Tooltip>
           </Card>
         </div>

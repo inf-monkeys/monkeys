@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { ExternalLink } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { JSONValue } from '@/components/ui/code-editor';
 import { Label } from '@/components/ui/label.tsx';
@@ -11,6 +12,8 @@ interface IVinesAbstractUrlProps {
 }
 
 export const VinesAbstractUrl: React.FC<IVinesAbstractUrlProps> = ({ children }) => {
+  const { t } = useTranslation();
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -22,7 +25,7 @@ export const VinesAbstractUrl: React.FC<IVinesAbstractUrlProps> = ({ children })
           <Label>{children?.toString()}</Label>
         </div>
       </TooltipTrigger>
-      <TooltipContent>点击将跳转到外部网站，请注意安全</TooltipContent>
+      <TooltipContent>{t('workspace.pre-view.actuator.detail.abstract-data-preview.url')}</TooltipContent>
     </Tooltip>
   );
 };

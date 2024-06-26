@@ -2048,6 +2048,103 @@
       "loading": "查询中...",
       "error": "查询失败，请检查网络是否通畅",
       "workflow-id-error": "请等待页面加载完毕"
+    },
+    "pre-view": {
+      "title": "预览工作流",
+      "desc": "运行工作流或查看历史运行记录",
+
+      "actuator": {
+        "scale": {
+          "min": "还原视图",
+          "max": "视图内全屏"
+        },
+        "execution": {
+          "label": "运行工作流",
+          "button":{
+            "restart": "重新运行",
+            "stop": "终止运行"
+          },
+
+          "form-empty": "请先完善工作流表单",
+
+          "status": {
+            "completed": "工作流运行完毕",
+            "canceled": "工作流运行取消",
+            "skipped": "工作流跳过运行",
+            "timeout": "工作流运行超时",
+            "failed": "工作流运行失败",
+            "failed-with-terminal-error": "工作流运行失败，请检查终端输出",
+            "in-progress": "工作流正在运行中",
+            "running": "工作流正在运行",
+            "scheduled": "工作流已计划或正在运行中",
+            "terminated": "工作流已终止运行",
+            "paused": "工作流已暂停运行",
+            "unknown": "未知工作流运行状态"
+          },
+
+          "instance-id": "实例 ID: {{instanceId}}"
+        },
+
+        "execution-form": {
+          "string": "请输入{{displayName}}",
+          "file": {
+            "label": "请输入文件直链",
+            "click-to-upload": "点击上传文件"
+          },
+          "options": "请选择一个选项"
+        },
+        "detail": {
+          "tabs": {
+            "data": "数据",
+            "input": "输入",
+            "output": "输出",
+            "raw": "原始数据"
+          },
+          "header": {
+            "days": "{{days}} 天",
+            "hours": "{{hours}} 小时",
+            "minutes": "{{minutes}} 分钟",
+            "seconds": "{{seconds}} 秒",
+            "milliseconds": "{{milliseconds}} 毫秒",
+
+            "start-time": "开始时间：{{startTime}}",
+            "end-time": "结束时间：{{endTime}}",
+            "duration": "运行时长：{{currentDuration}}",
+            "iteration": "迭代轮次：{{iteration}}"
+          },
+
+          "abstract-data-preview": {
+            "url": "点击将跳转到外部网站，请注意安全",
+            "empty": "该工具执行后暂无输出"
+          },
+          "human-interaction": {
+            "label": "请进行交互",
+            "desc": "任务 ID：{{taskId}}",
+            "cancel": "继续执行",
+            "confirm": "确认 ({{selectedLength}})",
+            "skip": "跳过",
+
+            "loading": "正在提交...",
+            "success": "交互成功",
+            "error": "交互失败"
+          },
+          "raw-data-display": {
+            "label": "内容过大，请到 OSS 下载查看",
+            "open-external-storage": "点击查看",
+            "preview": "放大查看代码"
+          }
+        }
+      },
+      "history": {
+        "search": {
+          "placeholder": "搜索运行实例 ID",
+          "search-empty": "找不到此运行实例",
+          "empty": "暂无运行实例"
+        },
+        "item": {
+          "desc": "实例 ID: {{instanceId}}"
+        }
+      }
     }
   }
 }
