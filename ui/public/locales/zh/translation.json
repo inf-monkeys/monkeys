@@ -2145,6 +2145,62 @@
           "desc": "实例 ID: {{instanceId}}"
         }
       }
+    },
+    "chat-view": {
+      "sidebar":{
+        "title": "对话列表",
+        "create": {
+          "label": "新建对话",
+          "placeholder": "输入会话名称，16 字以内",
+          "loading": "正在创建会话...",
+          "success": "会话创建成功",
+          "error": "会话创建失败"
+        },
+        "expand": "展开会话列表",
+        "collapse": "收起会话列表",
+        "delete": {
+          "label": "删除会话",
+          "title": "确定要删除「{{sessionDisplayName}}」吗",
+          "action": "删除",
+          "loading": "正在删除会话...",
+          "success": "会话删除成功",
+          "error": "会话删除失败"
+        }
+      },
+      "chat-bot": {
+        "title": {
+          "multiple": "对话模式",
+          "single": "单聊模式"
+        },
+        "temporary-mode": "临时对话中，聊天记录将不会存储",
+        "tool-display": {
+          "raw-preview": "查看原始数据",
+          "scale-to-preview": "放大查看数据"
+        },
+        "clean-messages": {
+          "label": "清空对话（本地）",
+          "title": "确定要清空当前对话吗？",
+          "desc": "仅清空本地对话记录，刷新可恢复历史数据。",
+          "cancel": "取消",
+          "action": "清空"
+        },
+        "chat": {
+          "placeholder": "聊些什么...",
+          "send": "发送",
+          "stop": "停止生成"
+        }
+      },
+      "workflow-mode": {
+        "execution": "运行工作流",
+        "empty-input": {
+          "running": "正在运行中",
+          "completed": "暂未配置输入，可直接运行"
+        },
+        "instance-id-tips": "运行实例 ID",
+        "manually-trigger": "手动或自动执行触发"
+      },
+      "empty": "暂无对话",
+      "back-to-bottom": "回到底部"
     }
   }
 }

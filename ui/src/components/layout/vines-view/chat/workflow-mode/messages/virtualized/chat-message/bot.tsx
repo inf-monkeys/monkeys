@@ -67,7 +67,7 @@ export const VinesBotChatMessage = memo<IVinesBotChatMessageProps>(
                     </Tooltip>
                   </div>
                 </TooltipTrigger>
-                <TooltipContent>运行实例 ID</TooltipContent>
+                <TooltipContent>{t('workspace.chat-view.workflow-mode.instance-id-tips')}</TooltipContent>
               </Tooltip>
               <ExecutionStatusIcon
                 className="-m-1 scale-80"

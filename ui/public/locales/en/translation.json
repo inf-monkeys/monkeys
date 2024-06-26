@@ -2146,6 +2146,62 @@
           "desc": "Instance ID: {{instanceId}}"
         }
       }
+    },
+    "chat-view": {
+      "sidebar":{
+        "title": "Session List",
+        "create": {
+          "label": "New Session",
+          "placeholder": "Enter the session name within 16 characters.",
+          "loading": "Creating session...",
+          "success": "Create session successfully",
+          "error": "Create session failed"
+        },
+        "expand": "Expand the conversation list",
+        "collapse": "Close conversation list",
+        "delete": {
+          "label": "Delete Session",
+          "title": "Are you sure you want to delete \"{{sessionDisplayName}}\"",
+          "action": "Delete",
+          "loading": "Deleting session...",
+          "success": "Session deleted successfully",
+          "error": "Session deletion failed"
+        }
+      },
+      "chat-bot": {
+        "title": {
+          "multiple": "Chat Mode",
+          "single": "Single Chat Mode"
+        },
+        "temporary-mode": "In temporary conversations, chat history will not be stored",
+        "tool-display": {
+          "raw-preview": "View Raw Data",
+          "scale-to-preview": "Zoom in to view data"
+        },
+        "clean-messages": {
+          "label": "Clear conversation (local)",
+          "title": "Are you sure you want to clear the current conversation?",
+          "desc": "Only the local conversation history is cleared, and refreshing can restore historical data.",
+          "cancel": "Cancel",
+          "action": "Confirm"
+        },
+        "chat": {
+          "placeholder": "What to talk about...",
+          "send": "Send",
+          "stop": "Stop Generating"
+        }
+      },
+      "workflow-mode": {
+        "execution": "Execute workflow",
+        "empty-input": {
+          "running": "In progress",
+          "completed": "No input has been configured yet, you can execute it directly"
+        },
+        "instance-id-tips": "Instance ID",
+        "manually-trigger": "Manual or automatic execution trigger"
+      },
+      "empty": "No conversation yet",
+      "back-to-bottom": "Back to bottom"
     }
   }
 }

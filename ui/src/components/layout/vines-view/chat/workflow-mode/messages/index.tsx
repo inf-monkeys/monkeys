@@ -6,6 +6,7 @@ import equal from 'fast-deep-equal/es6';
 import { AnimatePresence, motion } from 'framer-motion';
 import { omit } from 'lodash';
 import { MessageSquareDashed } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useSearchWorkflowExecutions } from '@/apis/workflow/execution';
 import { IVinesChatListItem } from '@/components/layout/vines-view/chat/workflow-mode/messages/typings.ts';
@@ -22,6 +23,8 @@ interface IVinesChatListProps {
 }
 
 export const VinesChatList: React.FC<IVinesChatListProps> = ({ workflowId }) => {
+  const { t } = useTranslation();
+
   const { visible } = useViewStore();
   const { userPhoto, userName } = useVinesUser();
   const { vines } = useVinesFlow();
@@ -127,7 +130,7 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ workflowId }) => 
         >
           <MessageSquareDashed size={64} />
           <div className="mt-4 flex flex-col text-center">
-            <h2 className="font-bold">暂无对话</h2>
+            <h2 className="font-bold">{t('workspace.chat-view.empty')}</h2>
           </div>
         </motion.div>
       )}

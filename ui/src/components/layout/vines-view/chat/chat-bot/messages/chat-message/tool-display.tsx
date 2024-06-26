@@ -2,6 +2,7 @@ import React from 'react';
 
 import { CircularProgress } from '@nextui-org/progress';
 import { AlertCircle, CheckCircle, FullscreenIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useKnowledgeBases } from '@/apis/knowledge-base';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,8 @@ interface IToolDisplayProps {
 }
 
 export const ToolDisplay: React.FC<IToolDisplayProps> = ({ data }) => {
+  const { t } = useTranslation();
+
   const { vines } = useVinesFlow();
   const { data: knowledges } = useKnowledgeBases();
   const chatCompelitionLog = data?.at(-1);
@@ -117,7 +120,7 @@ export const ToolDisplay: React.FC<IToolDisplayProps> = ({ data }) => {
                   </Button>
                 </TooltipTrigger>
               </CodePreview>
-              <TooltipContent>查看原始数据</TooltipContent>
+              <TooltipContent>{t('workspace.chat-view.chat-bot.tool-display.raw-preview')}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <CodePreview data={result} lineNumbers={3} minimap>
@@ -125,7 +128,7 @@ export const ToolDisplay: React.FC<IToolDisplayProps> = ({ data }) => {
                   <Button icon={<FullscreenIcon />} variant="outline" size="small" />
                 </TooltipTrigger>
               </CodePreview>
-              <TooltipContent>放大查看数据</TooltipContent>
+              <TooltipContent>{t('workspace.chat-view.chat-bot.tool-display.scale-to-preview')}</TooltipContent>
             </Tooltip>
           </div>
         </div>

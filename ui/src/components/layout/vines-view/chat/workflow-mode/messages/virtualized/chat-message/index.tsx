@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 
 import { isEmpty } from 'lodash';
+import { useTranslation } from 'react-i18next';
 
 import { IVinesChatListItem } from '@/components/layout/vines-view/chat/workflow-mode/messages/typings.ts';
 import { VinesBotChatMessage } from '@/components/layout/vines-view/chat/workflow-mode/messages/virtualized/chat-message/bot.tsx';
@@ -13,6 +14,8 @@ import { VinesHighlighter } from '@/components/ui/highlighter';
 import { cn } from '@/utils';
 
 export const ChatMessage = memo<{ data: IVinesChatListItem; isLast?: boolean }>(({ data, isLast = false }) => {
+  const { t } = useTranslation();
+
   const status = data.status;
   const instanceId = data.instanceId;
   const inputs = data.input;
@@ -50,7 +53,7 @@ export const ChatMessage = memo<{ data: IVinesChatListItem; isLast?: boolean }>(
             ) : hasOriginalInput ? (
               <VinesHighlighter language="json">{JSON.stringify(originalInput, null, 2)}</VinesHighlighter>
             ) : (
-              '手动或自动执行触发'
+              t('workspace.chat-view.workflow-mode.manually-trigger')
             )}
           </Card>
         </div>

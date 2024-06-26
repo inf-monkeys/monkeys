@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Play } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 
@@ -10,13 +11,19 @@ interface IEmptyInputProps {
 }
 
 export const EmptyInput: React.FC<IEmptyInputProps> = ({ disabled, onClick }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="flex">
       <div className="vines-center flex-1">
-        <p className="text-sm text-gray-10">{disabled ? '正在运行中' : '暂未配置输入，可直接运行'}</p>
+        <p className="text-sm text-gray-10">
+          {disabled
+            ? t('workspace.chat-view.workflow-mode.empty-input.running')
+            : t('workspace.chat-view.workflow-mode.empty-input.completed')}
+        </p>
       </div>
       <Button disabled={disabled} variant="outline" icon={<Play />} onClick={() => onClick()} loading={disabled}>
-        运行
+        {t('workspace.chat-view.workflow-mode.execution')}
       </Button>
     </div>
   );

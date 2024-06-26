@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import { motion } from 'framer-motion';
 import { ChevronRight, Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useCreateWorkflowChatSession, useWorkflowChatSessions } from '@/apis/workflow/chat';
@@ -18,6 +19,8 @@ import { cn, useLocalStorage } from '@/utils';
 interface IChatSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
+  const { t } = useTranslation();
+
   const { workbenchVisible } = usePageStore();
   const { workflowId } = useFlowStore();
   const { data, mutate } = useWorkflowChatSessions(workflowId);
@@ -40,7 +43,7 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
           transition: { duration: 0.2 },
         }}
       >
-        <h1 className="text-2xl font-bold">对话列表</h1>
+        <h1 className="text-2xl font-bold">{t('workspace.chat-view.sidebar.title')}</h1>
         <ScrollArea className="h-full max-h-[calc(100%-3rem)]">
           <div className="grid gap-2 py-1 pl-1 pr-3">
             {data?.map((session) => (
@@ -72,26 +75,26 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
             ))}
 
             <InfoEditor
-              title="新建会话"
-              placeholder="输入会话名称，16 字以内"
+              title={t('workspace.chat-view.sidebar.create.label')}
+              placeholder={t('workspace.chat-view.sidebar.create.placeholder')}
               onFinished={(displayName) =>
                 toast.promise(trigger({ displayName, workflowId }), {
-                  loading: '新建中...',
+                  loading: t('workspace.chat-view.sidebar.create.loading'),
                   success: (session) => {
                     session &&
                       setChatSessions({
                         ...chatSessions,
                         [workflowId]: session.id,
                       });
-                    return '新建成功';
+                    return t('workspace.chat-view.sidebar.create.success');
                   },
-                  error: '新建失败',
+                  error: t('workspace.chat-view.sidebar.create.error'),
                   finally: () => void mutate(),
                 })
               }
             >
               <Button variant="outline" icon={<Plus />}>
-                新建会话
+                {t('workspace.chat-view.sidebar.create.label')}
               </Button>
             </InfoEditor>
           </div>
@@ -107,7 +110,9 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
               <ChevronRight className={cn(visible && 'scale-x-[-1]')} />
             </div>
           </TooltipTrigger>
-          <TooltipContent>{visible ? '收起会话列表' : '展开会话列表'}</TooltipContent>
+          <TooltipContent>
+            {visible ? t('workspace.chat-view.sidebar.collapse') : t('workspace.chat-view.sidebar.expand')}
+          </TooltipContent>
         </Tooltip>
       </Separator>
     </div>
