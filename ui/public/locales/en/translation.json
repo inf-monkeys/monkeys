@@ -1518,9 +1518,10 @@
         "tool-editor": {
           "unknown-tool": "Unknown tool",
           "tabs": {
-            "config": "Configuration",
+            "config": "Config",
             "dev": "Raw Data",
-            "more-config": "Advanced Configuration"
+            "more-config": "Advanced Config",
+            "custom-config": "Custom Config"
           },
           "header": {
             "quick-options": {
@@ -1544,7 +1545,9 @@
                   "submit": "Save"
                 }
               }
-            }
+            },
+            "save": "Save",
+            "more": "Advanced Config"
           },
           "input": {
             "title": "Input",
