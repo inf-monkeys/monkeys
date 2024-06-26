@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useElementSize } from '@mantine/hooks';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { VinesLogFilter } from 'src/components/layout/vines-view/execution-log/filter';
 import { VinesLogList } from 'src/components/layout/vines-view/execution-log/list';
@@ -18,6 +19,8 @@ import {
 import { useViewStore } from '@/store/useViewStore';
 
 export const VinesLogView: React.FC = () => {
+  const { t } = useTranslation();
+
   const { visible } = useViewStore();
   const { vines } = useVinesFlow();
 
@@ -57,12 +60,12 @@ export const VinesLogView: React.FC = () => {
       });
       form.handleSubmit((params) => {
         toast.promise(trigger(params), {
-          loading: '查询中...',
-          error: '查询失败，请检查网络是否通畅',
+          loading: t('workspace.logs-view.loading'),
+          error: t('workspace.logs-view.error'),
         });
       })();
     } else {
-      toast.warning('请等待页面加载完毕');
+      toast.warning(t('workspace.logs-view.workflow-id-error'));
     }
   };
 
@@ -71,9 +74,15 @@ export const VinesLogView: React.FC = () => {
   return (
     <main ref={ref} className="flex h-full max-h-full flex-col gap-2 p-6">
       <div className="space-y-0.5">
-        <h2 className="text-2xl font-bold tracking-tight">日志视图</h2>
+        <h2 className="text-2xl font-bold tracking-tight">{t('workspace.logs-view.title')}</h2>
         <p className="text-muted-foreground">
-          {`共 ${workflowTotal ?? '-'} 项${(workflowExecutions && workflowDefinitions && `，已加载 ${workflowExecutions.length ?? '-'} 项`) || ''}`}
+          {t('workspace.logs-view.desc', {
+            data: workflowTotal?.toString() ?? '-',
+            suffix:
+              workflowExecutions && workflowDefinitions
+                ? t('workspace.logs-view.desc-suffix', { loaded: workflowExecutions.length?.toString() ?? '-' })
+                : '',
+          })}
         </p>
       </div>
       <Separator className="my-4" />

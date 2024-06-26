@@ -31,7 +31,7 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
   const statusMapper = useMemo(() => {
     const mapper: Record<string, string> = {};
     EXECUTION_STATUS_LIST.forEach(({ status, text }) => {
-      if (status) mapper[status] = text;
+      if (status) mapper[status] = t([`workspace.logs-view.list.item.status.${text}`, text]);
     });
     return mapper;
   }, [EXECUTION_STATUS_LIST]);
@@ -70,7 +70,7 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
                   </Tag>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CardDescription>实例 ID: {instanceId}</CardDescription>
+                  <CardDescription>{t('workspace.logs-view.list.item.desc', { instanceId })}</CardDescription>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
@@ -84,7 +84,7 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
                         }}
                       />
                     </TooltipTrigger>
-                    <TooltipContent>点击复制</TooltipContent>
+                    <TooltipContent>{t('common.utils.click-to-copy')}</TooltipContent>
                   </Tooltip>
                 </div>
               </div>
@@ -107,11 +107,13 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
             </div>
 
             <span className="w-32 flex-shrink-0 opacity-50">
-              于 {formatTimeDiffPrevious(workflowExecution.startTime ?? 0)}
+              {t('workspace.logs-view.list.item.exec-time', {
+                time: formatTimeDiffPrevious(workflowExecution.startTime ?? 0),
+              })}
             </span>
           </CardContent>
         </TooltipTrigger>
-        <TooltipContent>点击查看实例详情</TooltipContent>
+        <TooltipContent>{t('workspace.logs-view.list.item.tips')}</TooltipContent>
       </Tooltip>
     </Card>
   );

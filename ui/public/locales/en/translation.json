@@ -45,7 +45,8 @@
       "ascend": "Ascend",
       "descend": "Descend",
       "load-more": "Load More",
-      "add": "Add"
+      "add": "Add",
+      "click-to-copy": "点击复制"
     },
     "type": {
       "workflow": "workflow",
@@ -1983,6 +1984,71 @@
         },
         "execution": "Execution Workflow"
       }
+    },
+    "logs-view": {
+      "title": "Logs",
+      "desc": "Total {{data}} items{{suffix}}",
+      "desc-suffix": ", {{loaded}} items loaded",
+
+      "filter": {
+        "form": {
+          "versions": {
+            "label": "Version",
+            "placeholder": "Select version",
+
+            "temp": "Temp"
+          },
+          "start-time": {
+            "label": "Execution Start Time",
+            "placeholder": "Select execution start time"
+          },
+          "status": {
+            "label": "Execution Status",
+            "placeholder": "Select execution status"
+          },
+          "trigger-types": {
+            "label": "Trigger execution mode",
+            "placeholder": "Select trigger execution mode"
+          },
+          "workflow-instance-id": {
+            "label": "Workflow execution instance ID",
+            "placeholder": "Enter workflow execution instance ID"
+          },
+          "order-by": {
+            "label": "Sort by oldest to newest"
+          },
+
+          "reset": "Reset",
+          "submit": "Filter"
+        }
+      },
+      "list": {
+        "empty": "Execution record is empty",
+        "bottom": "No more data",
+        "more": "Remaining {{data}} items, click to load more",
+
+        "preview-page-not-found": "Failed to open details! Preview view not found",
+
+        "item": {
+          "desc": "Instance ID: {{instanceId}}",
+          "exec-time": "at {{time}}",
+
+          "status": {
+            "Running": "Running",
+            "Completed": "Completed",
+            "Paused": "Paused",
+            "Failed": "Failed",
+            "Terminated": "Terminated",
+            "Timed Out": "Timed Out"
+          },
+
+          "tips": "Click to view instance details"
+        }
+      },
+
+      "loading": "Searching...",
+      "error": "Query failed, please check whether the network is unobstructed",
+      "workflow-id-error": "Please wait for the page to load"
     }
   }
 }
