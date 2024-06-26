@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { CircleEllipsisIcon, Save } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { ExecutionStatusIcon } from '@/components/layout/vines-view/execution/status-icon';
 import { ToolAdvancedConfig } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/advanced-config';
@@ -50,6 +51,8 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
   status,
   workflowStatus,
 }) => {
+  const { t } = useTranslation();
+
   const { isLatestWorkflowVersion } = useFlowStore();
   const { isWorkflowRUNNING } = useCanvasStore();
   const [activeTab, setActiveTab] = useState('config');
@@ -75,7 +78,7 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
                 onClick={onSaved}
               />
             </TooltipTrigger>
-            <TooltipContent>保存配置</TooltipContent>
+            <TooltipContent>{t('workspace.flow-view.headless-modal.tool-editor.header.save')}</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -87,7 +90,7 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
                 onClick={(e) => VinesEvent.emit('canvas-context-menu', workflowId, e, 'NODE', nodeId)}
               />
             </TooltipTrigger>
-            <TooltipContent>更多</TooltipContent>
+            <TooltipContent>{t('workspace.flow-view.headless-modal.tool-editor.header.more')}</TooltipContent>
           </Tooltip>
           {isWorkflowRUNNING && (
             <ExecutionStatusIcon className="mr-2" status={status} workflowStatus={workflowStatus} />
@@ -96,12 +99,18 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
       </ComplicateNodeHeader>
       <Tabs className="px-5" value={activeTab} onValueChange={setActiveTab}>
         <TabsList className={cn(isWorkflowRUNNING && 'hidden')}>
-          {tool && <TabsTrigger value="config">配置参数</TabsTrigger>}
-          <TabsTrigger value="dev">开发模式</TabsTrigger>
+          {tool && (
+            <TabsTrigger value="config">{t('workspace.flow-view.headless-modal.tool-editor.tabs.config')}</TabsTrigger>
+          )}
+          <TabsTrigger value="dev">{t('workspace.flow-view.headless-modal.tool-editor.tabs.dev')}</TabsTrigger>
           {tool && (
             <>
-              <TabsTrigger value="more-config">高级配置</TabsTrigger>
-              <TabsTrigger value="custom-config">自定义配置</TabsTrigger>
+              <TabsTrigger value="more-config">
+                {t('workspace.flow-view.headless-modal.tool-editor.tabs.more-config')}
+              </TabsTrigger>
+              <TabsTrigger value="custom-config">
+                {t('workspace.flow-view.headless-modal.tool-editor.tabs.custom-config')}
+              </TabsTrigger>
             </>
           )}
         </TabsList>

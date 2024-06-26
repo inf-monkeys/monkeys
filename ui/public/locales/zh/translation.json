@@ -1515,7 +1515,8 @@
           "tabs": {
             "config": "配置参数",
             "dev": "原始数据",
-            "more-config": "高级配置"
+            "more-config": "高级配置",
+            "custom-config": "自定义配置"
           },
           "header": {
             "quick-options": {
@@ -1539,7 +1540,9 @@
                   "submit": "保存"
                 }
               }
-            }
+            },
+            "save": "保存配置",
+            "more": "更多"
           },
           "input": {
             "title": "输入",
