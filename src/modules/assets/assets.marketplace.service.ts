@@ -1,3 +1,4 @@
+import { config } from '@/common/config';
 import { ListDto } from '@/common/dto/list.dto';
 import { ONEAPI_CHANNELS } from '@/common/oneapi/consts';
 import { AssetType } from '@/common/typings/asset';
@@ -37,7 +38,9 @@ export class AssetsMarketplaceService {
 
   public async initBuiltInMarketplace() {
     await this.initWorfklowMarketplace();
-    await this.initBuiltInLLMMarketplace();
+    if (config.oneapi.enabled) {
+      await this.initBuiltInLLMMarketplace();
+    }
   }
 
   public async listMarketplaceAssets(assetType: AssetType, dto: ListDto) {
