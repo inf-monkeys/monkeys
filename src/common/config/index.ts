@@ -90,6 +90,7 @@ export enum AuthMethod {
   phone = 'phone',
   oidc = 'oidc',
   apikey = 'apikey',
+  ldap = 'ldap',
 }
 
 export interface OIDCIdpConfig {
@@ -105,6 +106,14 @@ export interface OIDCIdpConfig {
   grant_type: string;
   response_type: string;
   button_text: string;
+}
+
+export interface LDAPIdpConfig {
+  url: string;
+  bindDN: string;
+  bindCredentials: string;
+  baseDN: string;
+  queryCriteria: string;
 }
 
 export interface PasswordConfig {
@@ -134,6 +143,7 @@ export interface AuthConfig {
   sessionSecret?: string;
   oidc?: OIDCIdpConfig;
   password?: PasswordConfig;
+  ldap?: LDAPIdpConfig;
   jwt: JwtConfig;
   sms: SMSConfig;
 }
@@ -308,6 +318,13 @@ export const config: Config = {
     sms: {
       provider: 'dysms',
       config: readConfig('auth.sms.config', {}),
+    },
+    ldap: {
+      url: readConfig('auth.ldap.url'),
+      bindDN: readConfig('auth.ldap.bindDN'),
+      bindCredentials: readConfig('auth.ldap.bindCredentials'),
+      baseDN: readConfig('auth.ldap.baseDN'),
+      queryCriteria: readConfig('auth.ldap.queryCriteria'),
     },
   },
   s3: readConfig('s3', {}),

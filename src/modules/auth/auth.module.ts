@@ -1,6 +1,7 @@
 import { AuthMethod, config } from '@/common/config';
 import { Module } from '@nestjs/common';
 import { ApikeyModule } from './apikey/apikey.module';
+import { LdapModule } from './ldap/ldap.module';
 import { OidcModule } from './oidc/oidc.module';
 import { PasswordModule } from './password/password.module';
 import { PhoneModule } from './phone/phone.module';
@@ -16,6 +17,9 @@ if (config.auth.enabled.includes(AuthMethod.password)) {
 }
 if (config.auth.enabled.includes(AuthMethod.phone)) {
   imports.push(PhoneModule);
+}
+if (config.auth.enabled.includes(AuthMethod.ldap)) {
+  imports.push(LdapModule);
 }
 
 @Module({
