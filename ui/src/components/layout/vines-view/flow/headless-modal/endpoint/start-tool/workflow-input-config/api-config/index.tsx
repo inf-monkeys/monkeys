@@ -153,6 +153,9 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
                             'workspace.flow-view.endpoint.start-tool.api-config.form.rate-limiter.window-ms.placeholder',
                           )}
                           {...field}
+                          onChange={(v) => {
+                            field.onChange(parseInt(v));
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -169,7 +172,12 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
                         {t('workspace.flow-view.endpoint.start-tool.api-config.form.rate-limiter.max.label')}
                       </FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input
+                          {...field}
+                          onChange={(v) => {
+                            field.onChange(parseInt(v));
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
