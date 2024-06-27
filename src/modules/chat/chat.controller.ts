@@ -5,6 +5,7 @@ import { logger } from '@/common/logger';
 import { Mq } from '@/common/mq';
 import { IRequest } from '@/common/typings/request';
 import { isValidObjectId } from '@/common/utils';
+import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
 import { TeamRepository } from '@/database/repositories/team.repository';
 import { WorkflowRepository } from '@/database/repositories/workflow.repository';
@@ -47,10 +48,12 @@ export class WorkflowOpenAICompatibleController {
     };
   }
 
-  private async getWorkflowIdByModel(teamId: string, model: string) {
-    let workflowId;
+  private async getWorkflowByModel(teamId: string, model: string): Promise<WorkflowMetadataEntity> {
+    let workflowId: string;
+    let workflow: WorkflowMetadataEntity;
     if (isValidObjectId(model)) {
       workflowId = model;
+      workflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(workflowId);
     } else {
       const workflow = await this.workflowRepository.findWorkflowByOpenAIModelName(teamId, model);
       if (!workflow) {
@@ -58,7 +61,7 @@ export class WorkflowOpenAICompatibleController {
       }
       workflowId = workflow.workflowId;
     }
-    return workflowId;
+    return workflow;
   }
 
   @Post('/completions')
@@ -70,11 +73,11 @@ export class WorkflowOpenAICompatibleController {
   public async createcCompletions(@Req() req: IRequest, @Body() body: CreateCompletionsDto, @Res() res: Response) {
     const { teamId, userId } = req;
     const { model, stream = false } = body;
-    const workflowId = await this.getWorkflowIdByModel(teamId, model);
-    if (!workflowId) {
+    const workflow = await this.getWorkflowByModel(teamId, model);
+    if (!workflow) {
       return res.status(404).json({ message: 'Model not found' });
     }
-
+    const { workflowId } = workflow;
     const sessionId = (req.headers['x-monkeys-session-id'] as string) || 'default';
     const workflowInstanceId = await this.workflowExecutionService.startWorkflow({
       teamId,
@@ -110,11 +113,11 @@ export class WorkflowOpenAICompatibleController {
   public async createChatComplitions(@Req() req: IRequest, @Body() body: CreateChatCompletionsDto, @Res() res: Response) {
     const { teamId, userId } = req;
     const { model, stream = false } = body;
-    const workflowId = await this.getWorkflowIdByModel(teamId, model);
-    if (!workflowId) {
+    const workflow = await this.getWorkflowByModel(teamId, model);
+    if (!workflow) {
       return res.status(404).json({ message: 'Model not found' });
     }
-
+    const { workflowId } = workflow;
     const conversationId = req.headers['x-monkeys-conversation-id'] as string;
     const workflowInstanceId = await this.workflowExecutionService.startWorkflow({
       teamId,
