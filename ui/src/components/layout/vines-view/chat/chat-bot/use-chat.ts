@@ -178,10 +178,16 @@ export const useChat = ({
         // endregion
 
         abortControllerRef.current = null;
-      } catch (err) {
+      } catch (err: any) {
         if ((err as any).name === 'AbortError') {
           toast.success('Conversation aborted by user');
           abortControllerRef.current = null;
+          return null;
+        }
+
+        if (err.message?.includes('429')) {
+          void setError(err as Error);
+          toast.error('Too many requests. Please try again later.');
           return null;
         }
 
