@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 
 import { get, isString } from 'lodash';
 import { Link2Icon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,8 @@ export const StringInput: React.FC<IVinesInputPropertyProps & IStringInputProps>
   extraVariableMapper = {},
   refresh = false,
 }) => {
+  const { t } = useTranslation();
+
   const { workflowId } = useFlowStore();
 
   const variableEditorRef = useRef<VariableEditorRefProps>({ insertVariable: () => {} });
@@ -63,7 +66,12 @@ export const StringInput: React.FC<IVinesInputPropertyProps & IStringInputProps>
                 setContinuousDisplay(false);
                 setPreviewVisible(true);
               }}
-              placeholder={getI18nContent(def?.placeholder) ?? `请输入${getI18nContent(def?.displayName)}`}
+              placeholder={
+                getI18nContent(def?.placeholder) ??
+                t('workspace.flow-view.headless-modal.tool-editor.input.comps.string.placeholder', {
+                  name: getI18nContent(def?.displayName),
+                })
+              }
               initialPointMapper={{ ...variableMapper, ...extraVariableMapper }}
             />
           )}
@@ -86,7 +94,9 @@ export const StringInput: React.FC<IVinesInputPropertyProps & IStringInputProps>
                   }
                 />
               </TooltipTrigger>
-              <TooltipContent>插入变量</TooltipContent>
+              <TooltipContent>
+                {t('workspace.flow-view.headless-modal.tool-editor.input.comps.string.insert-variable')}
+              </TooltipContent>
             </Tooltip>
           )}
         </div>
@@ -96,7 +106,11 @@ export const StringInput: React.FC<IVinesInputPropertyProps & IStringInputProps>
         sideOffset={8}
         className={cn('flex flex-col gap-1 p-2 transition-opacity', !previewValue && 'opacity-0')}
       >
-        <h1 className="text-base font-bold">{`${def?.displayName ?? ''} 输入预览`}</h1>
+        <h1 className="text-base font-bold">
+          {t('workspace.flow-view.headless-modal.tool-editor.input.comps.string.preview', {
+            title: def?.displayName ?? '',
+          })}
+        </h1>
         <Separator />
         <ScrollArea className="h-24">
           <p className="max-w-60 break-words text-xs opacity-85">{previewValue}</p>

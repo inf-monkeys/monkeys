@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 import { IVinesNodeCustomData } from '@/package/vines-flow/core/nodes/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
@@ -13,6 +14,8 @@ interface ISimplifyNodeExpandProps {
 }
 
 export const SimplifyNodeExpand: React.FC<ISimplifyNodeExpandProps> = ({ nodeId, customData, toolName }) => {
+  const { t } = useTranslation();
+
   const { vines } = useVinesFlow();
 
   const toolDef = vines.getTool(toolName);
@@ -21,11 +24,10 @@ export const SimplifyNodeExpand: React.FC<ISimplifyNodeExpandProps> = ({ nodeId,
 
   const displayName = customData?.title ?? toolDef?.displayName ?? toolName;
   const description =
-    customData?.description ?? toolDef?.description ?? (isErrorNode ? '不受支持的工具，请尝试重新创建' : '');
-  const displayDesc =
-    (getI18nContent(description) ?? '').length > 36
-      ? `${(getI18nContent(description) ?? '').slice(0, 36)}...`
-      : description;
+    getI18nContent(customData?.description) ??
+    getI18nContent(toolDef?.description) ??
+    (isErrorNode ? t('workspace.flow-view.vines.tools.unknown') : '');
+  const displayDesc = description.length > 36 ? `${description.slice(0, 36)}...` : description;
 
   const loading = vines.status === 'idle';
 

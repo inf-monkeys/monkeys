@@ -15,6 +15,7 @@ export class BootstrapService {
     // Register built in tools
     this.toolsRegistryService.initBuiltInTools();
     await this.systemConfigurationRepository.initAesKey();
+    await this.systemConfigurationRepository.initOneApiRootUserToken();
     await this.marketplaceService.initBuiltInMarketplace();
   }
 }

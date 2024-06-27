@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Info, RefreshCcw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useWorkflowValidate, useWorkflowValidation } from '@/apis/workflow/validation';
@@ -14,6 +15,8 @@ interface IInputErrorsProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const InputErrors: React.FC<IInputErrorsProps> = ({ nodeId, toolDefName }) => {
+  const { t, i18n } = useTranslation();
+
   const { vines } = useVinesFlow();
 
   const workflowId = vines.workflowId ?? '';
@@ -29,16 +32,18 @@ export const InputErrors: React.FC<IInputErrorsProps> = ({ nodeId, toolDefName }
 
   const handleReValidate = () => {
     toast.promise(trigger({ tasks: vines.getRaw(), output: vines.workflowOutput, workflowId, workflowVersion }), {
-      loading: '正在重新验证...',
+      loading: t('workspace.flow-view.headless-modal.tool-editor.input.validation.loading'),
       success: (newValidation) => {
         newValidation && mutate(newValidation);
         return !newValidation?.validated && newValidation?.validationIssues.length
-          ? '验证完成，但仍存在错误，请检查'
-          : '验证成功';
+          ? t('workspace.flow-view.headless-modal.tool-editor.input.validation.success')
+          : t('workspace.flow-view.headless-modal.tool-editor.input.validation.success-with-error');
       },
-      error: '验证失败',
+      error: t('workspace.flow-view.headless-modal.tool-editor.input.validation.error'),
     });
   };
+
+  const currentLanguage = i18n.language;
 
   return errors?.map((it, index) => (
     <div
@@ -48,7 +53,7 @@ export const InputErrors: React.FC<IInputErrorsProps> = ({ nodeId, toolDefName }
       <div className="mt-1 flex gap-2 text-red-10">
         <Info size={14} className="stroke-red-10" />
         <span className="-mt-0.5 w-[calc(100%-14px)] text-xs text-red-10 text-opacity-70 dark:text-gold-12/70">
-          {it.humanMessage.zh}
+          {it.humanMessage?.[currentLanguage] ?? it.humanMessage?.en ?? it.humanMessage.zh}
         </span>
       </div>
       <Tooltip>

@@ -65,7 +65,9 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
                 <h1 className="font-bold leading-tight">
                   {getI18nContent(page.workflow?.displayName) ?? t('common.utils.untitled')}
                 </h1>
-                <span className="text-xxs">{page.displayName}</span>
+                <span className="text-xxs">
+                  {t([`workspace.wrapper.space.tabs.${page.displayName}`, page.displayName])}
+                </span>
               </div>
             </div>
           ))}

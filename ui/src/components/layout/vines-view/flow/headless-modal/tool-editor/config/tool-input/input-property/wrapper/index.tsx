@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import { Info } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { InputErrors } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/wrapper/errors.tsx';
 import { Indicator } from '@/components/ui/indicator.tsx';
@@ -28,10 +29,18 @@ export const InputPropertyWrapper: React.FC<IInputPropertyWrapperProps> = ({
   isMultiple = false,
   headerVisible = true,
 }) => {
+  const { t } = useTranslation();
+
   const tag = VINES_VARIABLE_TAG[type];
 
   const [tipsOpen, setTipsOpen] = useState(false);
-  const tips = !tag ? '不受支持的类型' : required ? '必填项' : '';
+  const tips = !tag
+    ? t('workspace.flow-view.headless-modal.tool-editor.input.type.unknown')
+    : required
+      ? t('workspace.flow-view.headless-modal.tool-editor.input.type.required')
+      : '';
+
+  const tagName = tag?.name;
 
   return (
     <main className="flex flex-col gap-3">
@@ -47,8 +56,13 @@ export const InputPropertyWrapper: React.FC<IInputPropertyWrapperProps> = ({
                       backgroundColor: (isMultiple ? tag?.multipleColor : tag?.color) ?? '#2b2e35',
                     }}
                   >
-                    {tag?.name ?? type}
-                    {isMultiple ? '列表' : ''}
+                    {tagName
+                      ? t(`workspace.flow-view.headless-modal.tool-editor.input.type.${tagName}`, {
+                          extra: isMultiple
+                            ? t('workspace.flow-view.headless-modal.tool-editor.input.type.multiple')
+                            : '',
+                        })
+                      : type + (isMultiple ? ' list' : '')}
                   </div>
                 </Indicator>
               </TooltipTrigger>

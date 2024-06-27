@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { ToolPropertyTypes } from '@inf-monkeys/monkeys';
 import { get } from 'lodash';
+import { useTranslation } from 'react-i18next';
 
 import { useWorkflowVersions } from '@/apis/workflow/version';
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
@@ -10,6 +11,8 @@ import { PresetWrapper } from '@/components/layout/vines-view/flow/headless-moda
 import { IVinesToolPropertiesOption, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
 export const WorkflowVersionPresets: React.FC<IVinesInputPropertyProps & IVinesInputPresetProps> = (props) => {
+  const { t } = useTranslation();
+
   const workflowId = get(props, 'def.extra.workflowId', '');
   const { data: workflowVersions, isLoading } = useWorkflowVersions(workflowId);
 
@@ -32,7 +35,9 @@ export const WorkflowVersionPresets: React.FC<IVinesInputPropertyProps & IVinesI
         (newOptionsVariableMapper[optValue] = {
           displayName: name,
           name: optValue.toString(),
-          type: '工作流版本' as ToolPropertyTypes,
+          type: t(
+            'workspace.flow-view.headless-modal.tool-editor.input.comps.preset.workflow-version',
+          ) as ToolPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);
@@ -41,7 +46,7 @@ export const WorkflowVersionPresets: React.FC<IVinesInputPropertyProps & IVinesI
   return (
     <PresetWrapper
       id="WorkflowVersion"
-      name="工作流版本"
+      name={t('workspace.flow-view.headless-modal.tool-editor.input.comps.preset.workflow-version')}
       isLoading={isLoading}
       options={options}
       optionsVariableMapper={optionsVariableMapper}

@@ -18,8 +18,7 @@
     "@emoji-mart/react": "^1.1.1",
     "@headlessui/react": "^1.7.19",
     "@hookform/resolvers": "^3.3.4",
-    "@inf-monkeys/monkeys": "^0.0.2",
-    "@inf-monkeys/vines": "^0.0.72",
+    "@inf-monkeys/monkeys": "^0.0.3",
     "@mantine/core": "7.6.1",
     "@mantine/dropzone": "7.6.1",
     "@mantine/hooks": "7.6.1",
@@ -126,7 +125,7 @@
   "devDependencies": {
     "@io-orkes/conductor-javascript": "1.0.0",
     "@shikijs/transformers": "^1.2.4",
-    "@tanstack/router-vite-plugin": "^1.26.10",
+    "@tanstack/router-vite-plugin": "1.22.6",
     "@types/chroma-js": "^2.4.4",
     "@types/file-saver": "^2.0.7",
     "@types/keyboardjs": "^2.5.3",

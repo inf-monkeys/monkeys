@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { Check, ChevronsUpDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useSearchWorkflowExecutions } from '@/apis/workflow/execution';
 import { getDescOfTriggerType } from '@/apis/workflow/trigger/utils.ts';
@@ -20,6 +21,8 @@ interface IExecutionRecoverProps {
 }
 
 export const ExecutionRecover: React.FC<IExecutionRecoverProps> = ({ className }) => {
+  const { t } = useTranslation();
+
   const { setCanvasMode } = useCanvasStore();
   const { workflowId } = useFlowStore();
   const { data } = useSearchWorkflowExecutions(
@@ -71,7 +74,9 @@ export const ExecutionRecover: React.FC<IExecutionRecoverProps> = ({ className }
                 className={cn('w-60 justify-between', className)}
               >
                 <span className="line-clamp-1">
-                  {currentActiveExecution ? activeExecutionName : '选择一个运行记录'}
+                  {currentActiveExecution
+                    ? activeExecutionName
+                    : t('workspace.flow-view.execution.run-history.select-placeholder')}
                 </span>
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
@@ -79,8 +84,8 @@ export const ExecutionRecover: React.FC<IExecutionRecoverProps> = ({ className }
           </TooltipTrigger>
           <PopoverContent className="w-60 p-0">
             <Command>
-              <CommandInput placeholder="搜索运行实例 ID..." />
-              <CommandEmpty>找不到此运行实例</CommandEmpty>
+              <CommandInput placeholder={t('workspace.flow-view.execution.run-history.search')} />
+              <CommandEmpty>{t('workspace.flow-view.execution.run-history.search-empty')}</CommandEmpty>
               <CommandGroup>
                 {executions.map((it) => {
                   const { workflowId: instanceId, startTime, triggerType } = it;
@@ -108,7 +113,7 @@ export const ExecutionRecover: React.FC<IExecutionRecoverProps> = ({ className }
             </Command>
           </PopoverContent>
         </Popover>
-        <TooltipContent>选择一个运行记录，恢复运行</TooltipContent>
+        <TooltipContent>{t('workspace.flow-view.execution.run-history.tips')}</TooltipContent>
       </Tooltip>
     )
   );

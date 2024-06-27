@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useSWRConfig } from 'swr';
 
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useTriggerCreate, useTriggerTypes } from '@/apis/workflow/trigger';
@@ -21,6 +22,8 @@ import { CustomTrigger } from './custom-trigger';
 interface ITriggerSelectorProps {}
 
 export const TriggerSelector: React.FC<ITriggerSelectorProps> = () => {
+  const { t } = useTranslation();
+
   const { workflowId } = useFlowStore();
 
   const { mutate } = useSWRConfig();
@@ -50,12 +53,12 @@ export const TriggerSelector: React.FC<ITriggerSelectorProps> = () => {
 
     if (type === WorkflowTriggerType.MANUALLY) {
       toast.promise(createTrigger({ triggerType: type, enabled: true, version: workflowVersion }), {
-        loading: '正在创建触发器',
+        loading: t('workspace.flow-view.endpoint.start-tool.trigger.create.loading'),
         success: () => {
           void mutate(`/api/workflow/${workflowId}/triggers?version=${workflowVersion}`);
-          return '触发器创建成功';
+          return t('workspace.flow-view.endpoint.start-tool.trigger.create.success');
         },
-        error: '触发器创建失败',
+        error: t('workspace.flow-view.endpoint.start-tool.trigger.create.error'),
       });
     } else if (type === WorkflowTriggerType.SCHEDULER) {
       VinesEvent.emit('flow-trigger-schedule', workflowId);
@@ -72,8 +75,8 @@ export const TriggerSelector: React.FC<ITriggerSelectorProps> = () => {
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
-          <DialogTitle>选择触发器</DialogTitle>
-          <DialogDescription>选择一个触发器，通过触发事件或定时任务来触发工作流的运行</DialogDescription>
+          <DialogTitle>{t('workspace.flow-view.endpoint.start-tool.trigger.create.title')}</DialogTitle>
+          <DialogDescription>{t('workspace.flow-view.endpoint.start-tool.trigger.create.desc')}</DialogDescription>
           <div className="grid w-full grid-cols-2 gap-4">
             {triggerTypes?.map((triggerType, i) => {
               const { displayName, description, icon } = triggerType;

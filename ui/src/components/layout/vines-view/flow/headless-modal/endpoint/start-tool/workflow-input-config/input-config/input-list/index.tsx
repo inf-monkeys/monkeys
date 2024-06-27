@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { get, isArray, isBoolean } from 'lodash';
+import { useTranslation } from 'react-i18next';
 
 import { VINES_WORKFLOW_INPUT_TYPE_DISPLAY_MAPPER } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/consts.ts';
 import { Card } from '@/components/ui/card.tsx';
@@ -24,12 +25,14 @@ interface IWorkflowInputListProps {
 
 export const WorkflowInputList: React.FC<IWorkflowInputListProps> = ({
   inputs,
-  defaultValueText = '默认值',
+  defaultValueText = 'Default Value',
   children,
   className,
   cardClassName,
   contentWidth,
 }) => {
+  const { t } = useTranslation();
+
   const inputLength = inputs.length;
   const inputLastIndex = inputLength - 1;
 
@@ -66,22 +69,26 @@ export const WorkflowInputList: React.FC<IWorkflowInputListProps> = ({
             <Separator />
             <div className="break-word flex flex-col gap-2 px-2 text-xs" style={{ width: contentWidth }}>
               {defaultValueType === 'undefined' ? (
-                <p>暂无默认值</p>
+                <p>{t('workspace.flow-view.endpoint.start-tool.input.def-empty')}</p>
               ) : (
                 <>
                   {defaultValueText && <span className="-mt-1 text-xs text-gray-10">{defaultValueText}</span>}
                   {defaultValueType === 'boolean' ? (
                     defaultData ? (
-                      '真'
+                      t('workspace.flow-view.endpoint.start-tool.input.def-true')
                     ) : (
-                      '假'
+                      t('workspace.flow-view.endpoint.start-tool.input.def-false')
                     )
                   ) : isArray(defaultData) ? (
                     <TagGroup
                       className="bg-slate-1/80 shadow-sm"
                       maxTagCount={10}
                       tagList={(defaultData as string[]).map((v) => {
-                        const value = isBoolean(v) ? (v ? '真' : '假') : v;
+                        const value = isBoolean(v)
+                          ? v
+                            ? t('workspace.flow-view.endpoint.start-tool.input.def-true')
+                            : t('workspace.flow-view.endpoint.start-tool.input.def-false')
+                          : v;
                         return {
                           children: (
                             <Tooltip>

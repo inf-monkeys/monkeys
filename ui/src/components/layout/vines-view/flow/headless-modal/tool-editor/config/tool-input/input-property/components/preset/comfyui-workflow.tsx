@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { ToolPropertyTypes } from '@inf-monkeys/monkeys';
+import { useTranslation } from 'react-i18next';
 
 import { useComfyuiWorkflows } from '@/apis/comfyui';
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
@@ -10,6 +11,8 @@ import { IVinesToolPropertiesOption, VinesToolDefProperties } from '@/package/vi
 import { I18nContent } from '@/utils';
 
 export const ComfyuiWorkflowsSelector: React.FC<IVinesInputPropertyProps & IVinesInputPresetProps> = (props) => {
+  const { t } = useTranslation();
+
   const { data: comfyuiWorkflows, isLoading } = useComfyuiWorkflows();
 
   const [options, setOptions] = useState<IVinesToolPropertiesOption[]>([]);
@@ -29,7 +32,9 @@ export const ComfyuiWorkflowsSelector: React.FC<IVinesInputPropertyProps & IVine
         (newOptionsVariableMapper[optValue] = {
           displayName: name,
           name: optValue,
-          type: 'ComfyUI 工作流' as ToolPropertyTypes,
+          type: t(
+            'workspace.flow-view.headless-modal.tool-editor.input.comps.preset.comfyui-workflow',
+          ) as ToolPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);
@@ -38,7 +43,7 @@ export const ComfyuiWorkflowsSelector: React.FC<IVinesInputPropertyProps & IVine
   return (
     <PresetWrapper
       id="ComfyuiWorkflows"
-      name="ComfyUI 工作流"
+      name={t('workspace.flow-view.headless-modal.tool-editor.input.comps.preset.comfyui-workflow')}
       isLoading={isLoading}
       options={options}
       optionsVariableMapper={optionsVariableMapper}

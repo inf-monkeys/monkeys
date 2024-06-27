@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { useSWRConfig } from 'swr';
 import { Link } from '@tanstack/react-router';
+import { useSWRConfig } from 'swr';
 
 import { Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -37,6 +37,7 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page 
   };
 
   const workflowDesc = workflow?.description ? ` - ${workflow.description}` : '';
+  const displayName = page?.displayName ?? '';
 
   return (
     <header className="z-50 flex w-full items-center justify-between px-4 pb-4">
@@ -46,7 +47,9 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page 
           <h1 className="font-bold leading-tight">
             {getI18nContent(workflow?.displayName) ?? t('common.utils.untitled')}
           </h1>
-          <span className="text-xxs">{page?.displayName + workflowDesc}</span>
+          <span className="text-xxs">
+            {t([`workspace.wrapper.space.tabs.${displayName}`, displayName]) + workflowDesc}
+          </span>
         </div>
       </div>
       <div className="flex gap-4">

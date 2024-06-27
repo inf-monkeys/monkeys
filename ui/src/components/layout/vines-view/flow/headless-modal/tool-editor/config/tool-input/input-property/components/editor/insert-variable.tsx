@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Link2Icon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -13,6 +14,8 @@ interface IInsertVariableProps {
 }
 
 export const InsertVariable: React.FC<IInsertVariableProps> = ({ insertVariablesFn }) => {
+  const { t } = useTranslation();
+
   const { workflowId } = useFlowStore();
 
   return (
@@ -27,7 +30,9 @@ export const InsertVariable: React.FC<IInsertVariableProps> = ({ insertVariables
           }}
         />
       </TooltipTrigger>
-      <TooltipContent>在光标处插入变量</TooltipContent>
+      <TooltipContent>
+        {t('workspace.flow-view.headless-modal.tool-editor.input.comps.editor.insert-variable-tips')}
+      </TooltipContent>
     </Tooltip>
   );
 };

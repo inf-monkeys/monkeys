@@ -23,6 +23,11 @@ services:
         condition: service_healthy
     logging:
       driver: 'json-file'
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
 
   ui:
     build:
@@ -32,67 +37,11 @@ services:
       - monkeys
     logging:
       driver: 'json-file'
-
-  conductor-server:
-    image: infmonkeys/conductor:1.0.0
-    volumes:
-      - ./server/config/conductor-config.properties:/app/config/config-local.properties
-    networks:
-      - monkeys
-    ports:
-      - 18080:8080
-    healthcheck:
-      test: curl http://localhost:8080/health -o /dev/null
-      interval: 5s
-      timeout: 5s
-      retries: 12
-    logging:
-      driver: 'json-file'
-
-  monkeys-redis:
-    image: redis:6.2.3-alpine
-    volumes:
-      - ./server/config/redis.conf:/usr/local/etc/redis/redis.conf
-    networks:
-      - monkeys
-    healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
-
-  monkeys-elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.11
-    environment:
-      - 'ES_JAVA_OPTS=-Xms512m -Xmx1024m'
-      - xpack.security.enabled=false
-      - discovery.type=single-node
-    volumes:
-      - esdata-monkeys:/usr/share/elasticsearch/data
-    networks:
-      - monkeys
-    healthcheck:
-      test: curl http://localhost:9200/_cluster/health -o /dev/null
-      interval: 5s
-      timeout: 5s
-      retries: 12
-    logging:
-      driver: 'json-file'
-
-  monkeys-postgres:
-    image: postgres
-    environment:
-      - POSTGRES_USER=monkeys
-      - POSTGRES_PASSWORD=monkeys123
-      - POSTGRES_DATABASE=monkeys
-    volumes:
-      - pgdata-monkeys:/var/lib/postgresql/data
-    networks:
-      - monkeys
-    healthcheck:
-      test: timeout 5 bash -c 'cat < /dev/null > /dev/tcp/localhost/5432'
-      interval: 5s
-      timeout: 5s
-      retries: 12
-    logging:
-      driver: 'json-file'
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
 
   monkeys-nginx:
     image: nginx
@@ -109,28 +58,6 @@ services:
     depends_on:
       - server
       - ui
-
-  minio:
-    image: docker.io/bitnami/minio:2022
-    ports:
-      - '9000:9000'
-      - '9001:9001'
-    networks:
-      - monkeys
-    volumes:
-      - 'miniodata-monkeys:/data'
-    environment:
-      - MINIO_ROOT_USER=monkeys
-      - MINIO_ROOT_PASSWORD=monkeys123
-      - MINIO_DEFAULT_BUCKETS=monkeys
-
-volumes:
-  esdata-monkeys:
-    driver: local
-  pgdata-monkeys:
-    driver: local
-  miniodata-monkeys:
-    driver: local
 
 networks:
   monkeys:

@@ -2,61 +2,37 @@ import { BaseAssetEntity } from '@/database/entities/assets/base-asset';
 import { AssetType } from '@inf-monkeys/monkeys';
 import { Column, Entity } from 'typeorm';
 
+/** OneAPI Model Mapping, for example
+ 
+{
+  "66507989ff7d6e1d8b3f2517_moonshot-v1-8k": "moonshot-v1-8k",
+  "66507989ff7d6e1d8b3f2517_moonshot-v1-32k": "moonshot-v1-32k",
+  "66507989ff7d6e1d8b3f2517_moonshot-v1-128k": "moonshot-v1-128k"
+}
+ */
+
+export interface LlmOneapiModel {
+  [key: string]: string;
+}
+
 @Entity({ name: 'llm_models' })
 export class LlmModelEntity extends BaseAssetEntity {
   assetType: AssetType = 'llm-model';
 
-  @Column({
-    name: 'base_model',
-  })
-  baseModel: string;
+  @Column({ type: 'integer', nullable: true, comment: 'LLM Channel Type', name: 'oneapi_channel_type' })
+  channelType: number;
 
   @Column({
-    name: 'lora_model',
+    type: 'simple-json',
     nullable: true,
+    name: 'oneapi_channel_id',
   })
-  loraModel?: string;
+  channelId: number;
 
   @Column({
-    name: 'llm_type',
-  })
-  llmType: 'chatglm' | 'baichuan' | 'llama' | string;
-
-  @Column({
+    type: 'simple-json',
     nullable: true,
+    name: 'oneapi_models',
   })
-  // 量化方式，目前仅支持读取通过 gptq 量化的模型
-  quantization?: 'gptq';
-
-  @Column({
-    name: 'prompt_template',
-    nullable: true,
-  })
-  // 对话模版
-  // Baichuan2-13B-Chat 示例：<reserved_106>{query}<reserved_107>
-  promptTemplate: string;
-
-  @Column({
-    name: 'gpu_memory_limit',
-    nullable: true,
-    type: 'integer',
-  })
-  // 运行需要的显存，单位为 GB
-  gpuMemoryLimit: number;
-
-  @Column({
-    name: 'context_max_length',
-    nullable: true,
-    type: 'integer',
-  })
-  // 模型最大输入长度
-  contextMaxLength: number;
-
-  @Column({
-    name: 'stop',
-    nullable: true,
-    type: 'varchar',
-  })
-  // 模型输出默认停止符
-  stop: string;
+  models: LlmOneapiModel;
 }

@@ -8,8 +8,9 @@ import {
   MonkeyToolName,
   MonkeyToolOutput,
 } from '@/common/decorators/monkey-block-api-extensions.decorator';
+import { IRequest, IToolsRequest } from '@/common/typings/request';
 import { ApiType, AuthType, ManifestJson, SchemaVersion } from '@/common/typings/tools';
-import { Body, Controller, Get, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { CreateChatCompletionsDto } from './dto/req/create-chat-compltion.dto';
@@ -96,7 +97,20 @@ export class LlmController {
   })
   @MonkeyToolCategories(['gen-text'])
   @MonkeyToolIcon('emoji:💬:#c15048')
-  @MonkeyToolInput([MODEL_PROPERTY, USER_MESSAGE_PROPERTY, MAX_TOKEN_PROPERTY, TEMPERATURE_PROPERTY, PRESENCE_PENALTY_PROPERTY, FREQUENCY_PENALTY_PROPERTY, STREAM_PROPERTY])
+  @MonkeyToolInput([
+    {
+      displayName: '注意：此工具为单轮对话（Completions 接口），所选的模型必须支持单轮对话（/v1/completions) 接口，否则会运行失败。大多数情况下，你应该使用的是多轮对话工具。',
+      type: 'notice',
+      name: 'docs',
+    },
+    MODEL_PROPERTY,
+    USER_MESSAGE_PROPERTY,
+    MAX_TOKEN_PROPERTY,
+    TEMPERATURE_PROPERTY,
+    PRESENCE_PENALTY_PROPERTY,
+    FREQUENCY_PENALTY_PROPERTY,
+    STREAM_PROPERTY,
+  ])
   @MonkeyToolOutput([
     {
       name: 'id',
@@ -203,9 +217,10 @@ export class LlmController {
       "system_fingerprint": "fp_b28b39ffa8"
     }
    */
-  public async createCompletions(@Res() res: Response, @Body() body: CreateCompletionsDto) {
+  public async createCompletions(@Res() res: Response, @Req() req: IRequest, @Body() body: CreateCompletionsDto) {
+    const teamId = req.headers['x-monkeys-teamid'] as string;
     const { stream = false } = body;
-    const answer = await this.service.createCompelitions({
+    const answer = await this.service.createCompelitions(teamId, {
       prompt: body.prompt,
       model: body.model,
       temperature: body.temperature,
@@ -258,6 +273,11 @@ export class LlmController {
   @MonkeyToolCategories(['gen-text'])
   @MonkeyToolIcon('emoji:💬:#c15048')
   @MonkeyToolInput([
+    {
+      displayName: '注意：此工具为多轮对话（Chat Completions 接口），所选的模型必须支持多轮对话（/v1/chat/completions) 接口，否则会运行失败。',
+      type: 'notice',
+      name: 'docs',
+    },
     MODEL_PROPERTY,
     SYSTEM_PROMOT_PROPERTY,
     USER_MESSAGE_PROPERTY,
@@ -305,12 +325,14 @@ export class LlmController {
   @MonkeyToolExtra({
     estimateTime: 3,
   })
-  public async generateTextByLlm(@Res() res: Response, @Body() body: GenerateTextByLlmDto) {
+  public async generateTextByLlm(@Res() res: Response, @Req() req: IRequest, @Body() body: GenerateTextByLlmDto) {
     if (!body.userMessage) {
       return res.status(400).send('userMessage is required');
     }
+    const teamId = req.headers['x-monkeys-teamid'] as string;
     await this.service.createChatCompelitions(
       res,
+      teamId,
       {
         messages: [
           {
@@ -351,6 +373,11 @@ export class LlmController {
   @MonkeyToolCategories(['gen-text'])
   @MonkeyToolIcon('emoji:💬:#c15048')
   @MonkeyToolInput([
+    {
+      displayName: '注意：此工具为多轮对话（Chat Completions 接口），所选的模型必须支持多轮对话（/v1/chat/completions) 接口，否则会运行失败。',
+      type: 'notice',
+      name: 'docs',
+    },
     MODEL_PROPERTY,
     SYSTEM_PROMOT_PROPERTY,
     {
@@ -503,10 +530,12 @@ export class LlmController {
       "system_fingerprint": "fp_b28b39ffa8"
     }
    */
-  public async createChatCompletions(@Res() res: Response, @Body() body: CreateChatCompletionsDto) {
+  public async createChatCompletions(@Res() res: Response, @Req() req: IToolsRequest, @Body() body: CreateChatCompletionsDto) {
+    const teamId = req.headers['x-monkeys-teamid'] as string;
     const { stream = false, show_logs = false } = body;
     await this.service.createChatCompelitions(
       res,
+      teamId,
       {
         messages: body.messages,
         model: body.model,

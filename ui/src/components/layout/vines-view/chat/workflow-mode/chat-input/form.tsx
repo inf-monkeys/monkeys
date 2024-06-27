@@ -2,6 +2,7 @@ import React from 'react';
 
 import { useElementSize } from '@mantine/hooks';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 import { VinesWorkflowInput } from '@/components/layout/vines-view/execution/workflow-input';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,8 @@ interface IFormInputProps {
 }
 
 export const FormInput: React.FC<IFormInputProps> = ({ inputs, height, onClick, disabled }) => {
+  const { t } = useTranslation();
+
   const { ref, width } = useElementSize();
 
   return (
@@ -26,7 +29,7 @@ export const FormInput: React.FC<IFormInputProps> = ({ inputs, height, onClick, 
     >
       <VinesWorkflowInput inputs={inputs} height={height} onSubmit={onClick}>
         <Button variant="outline" type="submit" className="line-clamp-1" loading={disabled}>
-          运行工作流
+          {t('workspace.chat-view.workflow-mode.execution')}
         </Button>
       </VinesWorkflowInput>
     </motion.div>
