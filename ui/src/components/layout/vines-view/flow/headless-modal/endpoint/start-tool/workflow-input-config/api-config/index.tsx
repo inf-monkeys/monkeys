@@ -154,7 +154,8 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
                           )}
                           {...field}
                           onChange={(v) => {
-                            field.onChange(parseInt(v));
+                            const val = parseInt(v);
+                            field.onChange(isNaN(val) ? 0 : val);
                           }}
                         />
                       </FormControl>
@@ -175,7 +176,8 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
                         <Input
                           {...field}
                           onChange={(v) => {
-                            field.onChange(parseInt(v));
+                            const val = parseInt(v);
+                            field.onChange(isNaN(val) ? 0 : val);
                           }}
                         />
                       </FormControl>
