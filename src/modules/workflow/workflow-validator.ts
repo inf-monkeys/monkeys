@@ -33,7 +33,9 @@ export class WorkflowValidator {
       case 'boolean':
         return typeof value === 'boolean';
       case 'string':
-        if (!typeOptions?.multipleValues) {
+        if (proprity.name === 'model') {
+          return true;
+        } else if (!typeOptions?.multipleValues) {
           return typeof value === 'string';
         } else {
           return Array.isArray(value) && _.every(value, (item) => typeof item === 'string');

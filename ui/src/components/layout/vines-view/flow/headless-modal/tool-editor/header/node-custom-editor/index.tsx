@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import { ToolCustomDataEditor } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/header/node-custom-editor/editor.tsx';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -14,6 +16,8 @@ interface INodeCustomEditorProps {
 }
 
 export const NodeCustomEditor: React.FC<INodeCustomEditorProps> = ({ node }) => {
+  const { t } = useTranslation();
+
   const { isLatestWorkflowVersion } = useFlowStore();
   const { vines } = useVinesFlow();
 
@@ -38,7 +42,7 @@ export const NodeCustomEditor: React.FC<INodeCustomEditorProps> = ({ node }) => 
                 <div className="flex items-center gap-2">
                   <div className="flex items-end gap-2">
                     <p className="text-base font-bold leading-none">
-                      {getI18nContent(toolDisplayName) ?? '不受支持的工具'}
+                      {getI18nContent(toolDisplayName) ?? t('workspace.flow-view.vines.tools.unknown')}
                     </p>
                     {data?.title && (
                       <span className="text-text2 text-xs font-light">{getI18nContent(tool?.displayName)}</span>
@@ -65,7 +69,7 @@ export const NodeCustomEditor: React.FC<INodeCustomEditorProps> = ({ node }) => 
           />
         </PopoverContent>
       </Popover>
-      <TooltipContent>点击编辑工具自定义信息</TooltipContent>
+      <TooltipContent>{t('workspace.flow-view.headless-modal.tool-editor.header.info.editor.button')}</TooltipContent>
     </Tooltip>
   );
 };

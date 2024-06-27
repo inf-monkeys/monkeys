@@ -3,6 +3,7 @@ import React, { memo, useEffect, useState } from 'react';
 import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, ChevronLast, Files, LogOut } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useUpdateExecutionTask } from '@/apis/workflow/execution';
@@ -23,6 +24,8 @@ const IMG_REGEXP = /https?:\/\/\S+\.(?:png|webp|jpg|jpeg)/i;
 
 export const VinesExecutionHumanInteraction: React.FC<IVinesExecutionHumanInteractionProps> = memo(
   ({ height, instanceId, taskId, inputData, taskDefName, isCompleted }) => {
+    const { t } = useTranslation();
+
     const { trigger, isMutating } = useUpdateExecutionTask(instanceId, taskId);
 
     const [textInteracts, setTextInteracts] = useState<string[]>([]);
@@ -65,12 +68,12 @@ export const VinesExecutionHumanInteraction: React.FC<IVinesExecutionHumanIntera
             : selectedItems,
       };
       toast.promise(trigger({ status: 'COMPLETED', outputData }), {
-        loading: '正在提交...',
+        loading: t('workspace.pre-view.actuator.detail.human-interaction.loading'),
         success: () => {
           setDisableTaskId(taskId);
-          return '提交成功';
+          return t('workspace.pre-view.actuator.detail.human-interaction.success');
         },
-        error: '提交失败',
+        error: t('workspace.pre-view.actuator.detail.human-interaction.error'),
       });
     };
 
@@ -100,8 +103,12 @@ export const VinesExecutionHumanInteraction: React.FC<IVinesExecutionHumanIntera
               transition={{ duration: 0.2 }}
             >
               <div>
-                <h1 className="text-xl font-bold">请进行交互</h1>
-                {taskId && <span className="text-xs text-gray-500 opacity-70">任务 ID：{taskId}</span>}
+                <h1 className="text-xl font-bold">{t('workspace.pre-view.actuator.detail.human-interaction.label')}</h1>
+                {taskId && (
+                  <span className="text-xs text-gray-500 opacity-70">
+                    {t('workspace.pre-view.actuator.detail.human-interaction.desc', { taskId })}
+                  </span>
+                )}
               </div>
               {!isEmpty && (
                 <div className="flex max-h-[25rem] w-full shrink-0 grow-0 flex-wrap items-center justify-center gap-4 overflow-x-clip rounded-md border border-input bg-muted py-2">
@@ -148,7 +155,7 @@ export const VinesExecutionHumanInteraction: React.FC<IVinesExecutionHumanIntera
                   variant="outline"
                   size="small"
                 >
-                  继续执行
+                  {t('workspace.pre-view.actuator.detail.human-interaction.cancel')}
                 </Button>
                 <Button
                   icon={!selectedLength ? <ChevronLast /> : <Check />}
@@ -157,7 +164,9 @@ export const VinesExecutionHumanInteraction: React.FC<IVinesExecutionHumanIntera
                   variant="outline"
                   size="small"
                 >
-                  {selectedLength ? `确认 (${selectedLength})` : '跳过'}
+                  {selectedLength
+                    ? t('workspace.pre-view.actuator.detail.human-interaction.confirm', { selectedLength })
+                    : t('workspace.pre-view.actuator.detail.human-interaction.skip')}
                 </Button>
               </div>
             </motion.div>

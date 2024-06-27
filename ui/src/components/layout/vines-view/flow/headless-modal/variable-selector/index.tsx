@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { useSetState } from '@mantine/hooks';
 import { groupBy } from 'lodash';
+import { useTranslation } from 'react-i18next';
 
 import { VariableChildren } from '@/components/layout/vines-view/flow/headless-modal/variable-selector/children.tsx';
 import {
@@ -27,6 +28,8 @@ interface IVinesVariableSelectorProps {}
 export type VariableInsertType = 'simple' | 'jsonpath' | 'taskReferenceName';
 
 export const VinesVariableSelector: React.FC<IVinesVariableSelectorProps> = () => {
+  const { t } = useTranslation();
+
   const { setDisableDialogClose } = useCanvasStore();
   const { workflowId } = useFlowStore();
 
@@ -95,8 +98,8 @@ export const VinesVariableSelector: React.FC<IVinesVariableSelectorProps> = () =
       <PopoverContent className="p-0">
         <Command>
           <CommandList>
-            <CommandInput placeholder="搜索变量..." />
-            <CommandEmpty>找不到变量</CommandEmpty>
+            <CommandInput placeholder={t('workspace.flow-view.headless-modal.variable-selector.search-placeholder')} />
+            <CommandEmpty>{t('workspace.flow-view.headless-modal.variable-selector.search-empty')}</CommandEmpty>
           </CommandList>
           <CommandSeparator />
           <CommandList>

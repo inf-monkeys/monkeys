@@ -2,6 +2,7 @@ import React, { memo, useCallback } from 'react';
 
 import { motion } from 'framer-motion';
 import { Minus, Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,8 @@ interface INodeControllerProps {
 }
 
 export const NodeController: React.FC<INodeControllerProps> = memo(({ nodes, nodeStagger }) => {
+  const { t } = useTranslation();
+
   const { isLatestWorkflowVersion } = useFlowStore();
   const { canvasMode } = useCanvasStore();
   const { canvasDisabled } = useCanvasInteractionStore();
@@ -30,7 +33,7 @@ export const NodeController: React.FC<INodeControllerProps> = memo(({ nodes, nod
     if (confirmation) {
       toast(confirmation, {
         action: {
-          label: '确定',
+          label: t('common.utils.confirm'),
           onClick: onClick,
         },
       });

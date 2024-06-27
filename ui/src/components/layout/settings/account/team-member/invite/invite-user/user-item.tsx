@@ -10,7 +10,7 @@ import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card.tsx';
-import { useLocalStorage } from '@/utils';
+import { execCopy, useLocalStorage } from '@/utils';
 import { maskPhone } from '@/utils/maskdata.ts';
 
 interface IUserItemProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -35,13 +35,14 @@ export const UserItem: React.FC<IUserItemProps> = ({ user, teamId, outdateType }
           outdateType,
           targetUserId: user.id,
           inviterUserId: currentUser.id,
+        }).then((link) => {
+          void mutateInviteLinkList();
+          if (!link) throw new Error("Link doesn't exists.");
+          clipboard.copy(link);
+          if (!clipboard.copied && !execCopy(link)) throw new Error('Copy failed.');
         }),
         {
-          success: (link) => {
-            void mutateInviteLinkList();
-            clipboard.copy(link);
-            return t('common.toast.copy-success');
-          },
+          success: t('common.toast.copy-success'),
           loading: t('common.operate.loading'),
           error: t('common.operate.error'),
           finally: () => {

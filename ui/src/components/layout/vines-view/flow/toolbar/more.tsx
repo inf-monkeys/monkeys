@@ -3,6 +3,7 @@ import React from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 
 import { MoreHorizontal, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { deleteWorkflow } from '@/apis/workflow';
@@ -31,6 +32,8 @@ import { useFlowStore } from '@/store/useFlowStore';
 interface IMoreToolbarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const MoreToolbar: React.FC<IMoreToolbarProps> = () => {
+  const { t } = useTranslation();
+
   const { workflowId } = useFlowStore();
 
   const { teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
@@ -60,23 +63,25 @@ export const MoreToolbar: React.FC<IMoreToolbarProps> = () => {
             <AlertDialogTrigger asChild>
               <DropdownMenuItem className="flex items-center gap-2 text-red-10">
                 <Trash2 strokeWidth={1.5} size={16} />
-                <p>删除工作流</p>
+                <p>{t('workspace.flow-view.tooltip.more.del-workflow.button')}</p>
               </DropdownMenuItem>
             </AlertDialogTrigger>
           </DropdownMenuContent>
         </DropdownMenu>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>确定要删除工作流吗？</AlertDialogTitle>
-            <AlertDialogDescription>删除后无法恢复，且所有相关数据将被永久删除。</AlertDialogDescription>
+            <AlertDialogTitle>{t('workspace.flow-view.tooltip.more.del-workflow.title')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('workspace.flow-view.tooltip.more.del-workflow.desc')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>取消</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteWorkflow}>继续</AlertDialogAction>
+            <AlertDialogCancel>{t('workspace.flow-view.tooltip.more.del-workflow.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteWorkflow}>
+              {t('workspace.flow-view.tooltip.more.del-workflow.action')}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <TooltipContent>更多</TooltipContent>
+      <TooltipContent>{t('workspace.flow-view.tooltip.more.tip')}</TooltipContent>
     </Tooltip>
   );
 };

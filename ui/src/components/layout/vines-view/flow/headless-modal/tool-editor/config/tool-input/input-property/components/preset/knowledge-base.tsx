@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { ToolPropertyTypes } from '@inf-monkeys/monkeys';
+import { useTranslation } from 'react-i18next';
 
 import { useKnowledgeBases } from '@/apis/knowledge-base';
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
@@ -11,6 +12,8 @@ import { IVinesToolPropertiesOption, VinesToolDefProperties } from '@/package/vi
 import { I18nContent } from '@/utils';
 
 export const KnowledgeBaseSelector: React.FC<IVinesInputPropertyProps & IVinesInputPresetProps> = (props) => {
+  const { t } = useTranslation();
+
   const { teamId } = useVinesTeam();
   const { data: vectorCollections, isLoading } = useKnowledgeBases();
 
@@ -23,9 +26,11 @@ export const KnowledgeBaseSelector: React.FC<IVinesInputPropertyProps & IVinesIn
     const opts = vectorCollections.map((m) => {
       const ownedByTeam = teamId === m.teamId;
       const displayName = ownedByTeam
-        ? I18nContent(m.displayName) ?? ''
-        : `${I18nContent(m.displayName)}（其他团队授权）`;
-      return { name: displayName, value: m.uuid };
+        ? I18nContent(m.displayName)
+        : t('workspace.flow-view.headless-modal.tool-editor.input.comps.preset.knowledge-base.display-name', {
+            name: I18nContent(m.displayName),
+          });
+      return { name: displayName!, value: m.uuid };
     });
     setOptions(opts);
 
@@ -35,7 +40,9 @@ export const KnowledgeBaseSelector: React.FC<IVinesInputPropertyProps & IVinesIn
         (newOptionsVariableMapper[optValue] = {
           displayName: name,
           name: optValue,
-          type: '文本知识库' as ToolPropertyTypes,
+          type: t(
+            'workspace.flow-view.headless-modal.tool-editor.input.comps.preset.knowledge-base.label',
+          ) as ToolPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);
@@ -44,7 +51,7 @@ export const KnowledgeBaseSelector: React.FC<IVinesInputPropertyProps & IVinesIn
   return (
     <PresetWrapper
       id="KnowledgeBase"
-      name="文本知识库"
+      name={t('workspace.flow-view.headless-modal.tool-editor.input.comps.preset.knowledge-base.label')}
       isLoading={isLoading}
       options={options}
       optionsVariableMapper={optionsVariableMapper}

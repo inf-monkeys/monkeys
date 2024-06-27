@@ -4,6 +4,7 @@ import { useSWRConfig } from 'swr';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useTriggerCreate } from '@/apis/workflow/trigger';
@@ -23,6 +24,8 @@ import VinesEvent from '@/utils/events.ts';
 interface IScheduleTriggerProps {}
 
 export const ScheduleTrigger: React.FC<IScheduleTriggerProps> = () => {
+  const { t } = useTranslation();
+
   const { workflowId } = useFlowStore();
   const { mutate } = useSWRConfig();
 
@@ -60,12 +63,12 @@ export const ScheduleTrigger: React.FC<IScheduleTriggerProps> = () => {
         version: workflowVersion,
       }),
       {
-        loading: '创建中...',
+        loading: t('workspace.flow-view.endpoint.start-tool.trigger.create.schedule-trigger.loading'),
         success: () => {
           void mutate(`/api/workflow/${workflowId}/triggers?version=${workflowVersion}`);
-          return '触发器创建成功';
+          return t('workspace.flow-view.endpoint.start-tool.trigger.create.schedule-trigger.success');
         },
-        error: '创建失败',
+        error: t('workspace.flow-view.endpoint.start-tool.trigger.create.schedule-trigger.error'),
       },
     );
     setOpen(false);
@@ -74,8 +77,10 @@ export const ScheduleTrigger: React.FC<IScheduleTriggerProps> = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
-        <DialogTitle>定时触发器</DialogTitle>
-        <DialogDescription>配置并启用定时触发器后，工作流将按照配置的时间周期性地触发</DialogDescription>
+        <DialogTitle>{t('workspace.flow-view.endpoint.start-tool.trigger.create.schedule-trigger.title')}</DialogTitle>
+        <DialogDescription>
+          {t('workspace.flow-view.endpoint.start-tool.trigger.create.schedule-trigger.desc')}
+        </DialogDescription>
         <Form {...form}>
           <form onSubmit={handleSubmit} className="flex flex-col gap-2">
             <FormField
@@ -83,9 +88,18 @@ export const ScheduleTrigger: React.FC<IScheduleTriggerProps> = () => {
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>corn 表达式</FormLabel>
+                  <FormLabel>
+                    {t('workspace.flow-view.endpoint.start-tool.trigger.create.schedule-trigger.form.cron.label')}
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="请输入 cron 定时任务表达式" {...field} className="grow" autoFocus />
+                    <Input
+                      placeholder={t(
+                        'workspace.flow-view.endpoint.start-tool.trigger.create.schedule-trigger.form.cron.placeholder',
+                      )}
+                      {...field}
+                      className="grow"
+                      autoFocus
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -94,7 +108,7 @@ export const ScheduleTrigger: React.FC<IScheduleTriggerProps> = () => {
 
             <DialogFooter>
               <Button variant="outline" type="submit">
-                创建
+                {t('workspace.flow-view.endpoint.start-tool.trigger.create.schedule-trigger.form.submit')}
               </Button>
             </DialogFooter>
           </form>

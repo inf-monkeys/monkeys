@@ -87,6 +87,15 @@ services:
       - MINIO_ROOT_PASSWORD=monkeys123
       - MINIO_DEFAULT_BUCKETS=monkeys
 
+  oneapi:
+    image: docker.io/justsong/one-api:latest
+    ports:
+      - '23000:3000'
+    networks:
+      - monkeys
+    environment:
+      - SQL_DSN=postgres://monkeys:monkeys123@monkeys-postgres:5432/monkeys?sslmode=disable
+
 volumes:
   esdata-monkeys:
     driver: local

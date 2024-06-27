@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { FullscreenIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { CodeEditor, ICodeEditorProps } from '@/components/ui/code-editor';
@@ -13,13 +14,15 @@ interface IExecutionRawDataDisplayProps {
 }
 
 export const ExecutionRawDataDisplay: React.FC<IExecutionRawDataDisplayProps> = ({ data, externalStorageDataUrl }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="relative size-full overflow-hidden">
       {externalStorageDataUrl ? (
         <div className="vines-center size-full flex-col gap-2">
-          <p className="font-bold">内容过大，请到 OSS 下载查看</p>
+          <p className="font-bold">{t('workspace.pre-view.actuator.detail.raw-data-display.label')}</p>
           <Button variant="outline" size="small" onClick={() => open(externalStorageDataUrl, '_blank')}>
-            点击查看
+            {t('workspace.pre-view.actuator.detail.raw-data-display.open-external-storage')}
           </Button>
         </div>
       ) : (
@@ -32,7 +35,7 @@ export const ExecutionRawDataDisplay: React.FC<IExecutionRawDataDisplayProps> = 
                   <Button icon={<FullscreenIcon />} variant="outline" size="small" className="scale-80" />
                 </TooltipTrigger>
               </CodePreview>
-              <TooltipContent>放大查看代码</TooltipContent>
+              <TooltipContent>{t('workspace.pre-view.actuator.detail.raw-data-display.preview')}</TooltipContent>
             </Tooltip>
           </div>
         </>

@@ -19,5 +19,7 @@ RUN yarn build
 # Expose server port
 EXPOSE 3000
 
+ENV NODE_OPTIONS=--max_old_space_size=4096
+
 # Start the server using the production build
 CMD yarn migration:run; yarn start:prod

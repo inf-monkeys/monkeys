@@ -486,19 +486,57 @@ export class ToolsPollingService {
         // const statusCode = error.response?.status;
         if (outputAs === 'stream') {
           const data = error?.response?.data as IncomingMessage;
-          let realData = '';
           await readIncomingMessage(data, {
-            onEndCallback(result) {
-              realData = result;
+            onDataCallback: (chunk) => {
+              chunk = chunk.toString();
+              this.mq.publish(TOOL_STREAM_RESPONSE_TOPIC(task.workflowInstanceId), chunk);
+              if (llmChatTool === LlmModelEndpointType.CHAT_COMPLETIONS) {
+                const cleanedMessageStr = chunk.replace('data: ', '').trim();
+                try {
+                  const parsedMessage = JSON.parse(cleanedMessageStr);
+                  const { choices = [] } = parsedMessage;
+                  const content = choices[0]?.delta?.content;
+                  llmOutput += content;
+                } catch (error) {}
+              } else if (llmChatTool === LlmModelEndpointType.COMPLITIONS) {
+                const chunks = chunk.split('\n\n');
+                for (const chunkItem of chunks) {
+                  try {
+                    const cleanedMessageStr = chunkItem.replace('data: ', '').trim();
+                    const parsedMessage = JSON.parse(cleanedMessageStr);
+                    const { choices = [] } = parsedMessage;
+                    const content = choices[0]?.text;
+                    llmOutput += content;
+                  } catch (error) {}
+                }
+              }
             },
           });
-          await this.mq.publish(TOOL_STREAM_RESPONSE_TOPIC(task.workflowInstanceId), `data: ${realData}\n\n`);
-          await this.mq.publish(TOOL_STREAM_RESPONSE_TOPIC(task.workflowInstanceId), '[DONE]');
+          let llmOutput = '';
+          if (llmChatTool === LlmModelEndpointType.CHAT_COMPLETIONS) {
+            const randomChatCmplId = 'chatcmpl-' + Math.random().toString(36).substr(2, 16);
+            outputData = {
+              id: randomChatCmplId,
+              object: 'chat.completion',
+              created: Math.floor(Date.now() / 1000),
+              model: inputData.model,
+              choices: [{ index: 0, message: { role: 'assistant', content: llmOutput }, logprobs: null, finish_reason: 'stop' }],
+              usage: { prompt_tokens: undefined, completion_tokens: undefined, total_tokens: undefined },
+              system_fingerprint: null,
+            };
+          } else if (llmChatTool === LlmModelEndpointType.COMPLITIONS) {
+            const randomCmplId = 'cmpl-' + Math.random().toString(36).substr(2, 16);
+            outputData = {
+              id: randomCmplId,
+              object: 'text_completion',
+              created: Math.floor(Date.now() / 1000),
+              model: inputData.model,
+              choices: [{ text: llmOutput, index: 0, logprobs: null, finish_reason: 'length' }],
+              usage: { prompt_tokens: 1, completion_tokens: 16, total_tokens: 17 },
+            };
+          }
           return {
-            outputData: {
-              success: false,
-              errMsg: `Execution failed: ${realData}`,
-            },
+            outputData,
             status: 'FAILED',
           };
         } else if (outputAs === 'json') {

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { debounce, get, set } from 'lodash';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { Input } from '@/components/ui/input';
@@ -16,6 +17,8 @@ interface INodeConfigProps {
 }
 
 export const ToolAdvancedConfig: React.FC<INodeConfigProps> = ({ nodeId, task }) => {
+  const { t } = useTranslation();
+
   const { vines } = useVinesFlow();
 
   const taskRef = useRef<VinesTask | null>(null);
@@ -23,7 +26,7 @@ export const ToolAdvancedConfig: React.FC<INodeConfigProps> = ({ nodeId, task })
   const handleUpdate = useCallback(
     debounce((key: string, value: unknown) => {
       if (!taskRef.current) {
-        toast.error('工具数据异常！');
+        toast.error(t('workspace.flow-view.headless-modal.tool-editor.advanced-config.error'));
         return;
       }
       set(taskRef.current, `inputParameters.__advancedConfig.${key}`, value);
@@ -38,7 +41,7 @@ export const ToolAdvancedConfig: React.FC<INodeConfigProps> = ({ nodeId, task })
   useEffect(() => {
     const newTask = cloneDeep(task);
     if (!newTask) {
-      toast.error('工具数据解析失败！');
+      toast.error(t('workspace.flow-view.headless-modal.tool-editor.advanced-config.parse-error'));
       return;
     }
     taskRef.current = newTask;
@@ -49,7 +52,7 @@ export const ToolAdvancedConfig: React.FC<INodeConfigProps> = ({ nodeId, task })
 
   return (
     <main className="flex size-full flex-col gap-4 overflow-hidden px-4">
-      <Label>输出模式</Label>
+      <Label>{t('workspace.flow-view.headless-modal.tool-editor.advanced-config.output.label')}</Label>
       <Select
         value={outputAsSelect}
         onValueChange={(val) => {
@@ -58,7 +61,9 @@ export const ToolAdvancedConfig: React.FC<INodeConfigProps> = ({ nodeId, task })
         }}
       >
         <SelectTrigger>
-          <SelectValue placeholder="请选择一个输出模式" />
+          <SelectValue
+            placeholder={t('workspace.flow-view.headless-modal.tool-editor.advanced-config.output.placeholder')}
+          />
         </SelectTrigger>
         <SelectContent>
           {['json', 'stream'].map((it) => (
@@ -68,19 +73,19 @@ export const ToolAdvancedConfig: React.FC<INodeConfigProps> = ({ nodeId, task })
           ))}
         </SelectContent>
       </Select>
-      <Label>超时时间（秒）</Label>
+      <Label>{t('workspace.flow-view.headless-modal.tool-editor.advanced-config.timeout.label')}</Label>
       <Input
-        placeholder="请输入超时时间（秒）"
+        placeholder={t('workspace.flow-view.headless-modal.tool-editor.advanced-config.timeout.placeholder')}
         type="number"
         value={timeoutInput}
         onChange={(val) => {
           const number = Number(val);
           if (isNaN(number)) {
-            toast.error('请输入数字');
+            toast.error(t('workspace.flow-view.headless-modal.tool-editor.advanced-config.timeout.number-error'));
             return;
           }
           if (number < 0) {
-            toast.error('请输入大于等于 0 的数字');
+            toast.error(t('workspace.flow-view.headless-modal.tool-editor.advanced-config.timeout.zero-error'));
             return;
           }
           setTimeoutInput(val);

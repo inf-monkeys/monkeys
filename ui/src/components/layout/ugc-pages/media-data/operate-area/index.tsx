@@ -60,7 +60,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
         <DropdownMenuGroup>
           <DropdownMenuItem
             onClick={() => {
-              clipboard.copy(item.url);
+              item.url;
               toast.success(t('common.toast.copy-success'));
             }}
           >

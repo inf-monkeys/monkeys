@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { ToolAdvancedConfig } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/advanced-config';
@@ -20,6 +21,8 @@ import VinesEvent from '@/utils/events.ts';
 interface IToolEditorProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const ToolEditor: React.FC<IToolEditorProps> = () => {
+  const { t } = useTranslation();
+
   const { isLatestWorkflowVersion, workflowId } = useFlowStore();
   const { disableDialogClose } = useCanvasStore();
   const { vines } = useVinesFlow();
@@ -53,7 +56,7 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
       if (node) {
         vines.updateRaw(nodeIdRef.current, task, false);
       } else {
-        toast.error('工具不存在');
+        toast.error(t('workspace.flow-view.headless-modal.tool-editor.unknown-tool'));
       }
     } catch {
       /* empty */
@@ -72,9 +75,11 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
         </DialogTitle>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
-            <TabsTrigger value="config">配置参数</TabsTrigger>
-            <TabsTrigger value="dev">开发模式</TabsTrigger>
-            <TabsTrigger value="more-config">高级配置</TabsTrigger>
+            <TabsTrigger value="config">{t('workspace.flow-view.headless-modal.tool-editor.tabs.config')}</TabsTrigger>
+            <TabsTrigger value="dev">{t('workspace.flow-view.headless-modal.tool-editor.tabs.dev')}</TabsTrigger>
+            <TabsTrigger value="more-config">
+              {t('workspace.flow-view.headless-modal.tool-editor.tabs.more-config')}
+            </TabsTrigger>
           </TabsList>
           <AnimatePresence>
             <motion.div
@@ -110,7 +115,7 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
             variant="outline"
             onClick={() => vines.emit('update', vines.getRaw())}
           >
-            保存
+            {t('workspace.flow-view.headless-modal.tool-editor.save')}
           </Button>
         </DialogFooter>
       </DialogContent>

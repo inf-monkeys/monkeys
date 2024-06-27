@@ -7,30 +7,30 @@ export const getExecutionStatusText = (
 ) => {
   switch (status) {
     case 'COMPLETED':
-      return '运行完毕';
+      return 'completed';
     case 'CANCELED':
-      return '已取消';
+      return 'canceled';
     case 'SKIPPED':
-      return '已跳过';
+      return 'skipped';
     case 'TIMED_OUT':
-      return '超时';
+      return 'timeout';
     case 'FAILED':
-      return '失败';
+      return 'failed';
     case 'FAILED_WITH_TERMINAL_ERROR':
-      return '失败';
+      return 'failed-with-terminal-error';
     case 'IN_PROGRESS':
-      return '运行中';
+      return 'in-progress';
     case 'SCHEDULED':
-      return '已计划 / 正在运行中';
+      return 'scheduled';
     case 'RUNNING':
-      return '运行中';
+      return 'running';
     case 'TERMINATED':
-      return '已终止';
+      return 'terminated';
     default:
       return workflowStatus === 'PAUSED'
-        ? '工作流运行已暂停'
+        ? 'paused'
         : workflowStatus === 'SCHEDULED'
-          ? '已计划，等待工作流运行准备'
-          : '未知状态';
+          ? 'scheduled'
+          : 'unknown';
   }
 };

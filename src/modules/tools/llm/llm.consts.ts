@@ -1,6 +1,4 @@
-import { LlmModelEndpointType } from '@/common/config';
 import { ToolProperty } from '@inf-monkeys/monkeys';
-import { getModels } from './llm.service';
 
 export const MODEL_PROPERTY: ToolProperty = {
   displayName: {
@@ -8,9 +6,11 @@ export const MODEL_PROPERTY: ToolProperty = {
     'en-US': 'Large Language Model Name',
   },
   name: 'model',
-  type: 'options',
-  options: getModels(LlmModelEndpointType.COMPLITIONS),
+  type: 'string',
   required: true,
+  typeOptions: {
+    assetType: 'llm-model',
+  },
 };
 
 export const USER_MESSAGE_PROPERTY: ToolProperty = {

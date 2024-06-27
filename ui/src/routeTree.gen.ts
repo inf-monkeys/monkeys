@@ -34,6 +34,7 @@ import { Route as TeamIdComfyuiStoreIndexImport } from './pages/$teamId/comfyui-
 import { Route as TeamIdApplicationStoreIndexImport } from './pages/$teamId/application-store/index'
 import { Route as TeamIdActionToolsIndexImport } from './pages/$teamId/action-tools/index'
 import { Route as TeamIdWorkspaceWorkflowIdIndexImport } from './pages/$teamId/workspace/$workflowId/index'
+import { Route as TeamIdTextModelsLlmModelIdIndexImport } from './pages/$teamId/text-models/$llmModelId/index'
 import { Route as TeamIdTextDataTextIdIndexImport } from './pages/$teamId/text-data/$textId/index'
 import { Route as TeamIdTableDataDatabaseIdIndexImport } from './pages/$teamId/table-data/$databaseId/index'
 import { Route as TeamIdComfyuiComfyuiWorkflowIdIndexImport } from './pages/$teamId/comfyui/$comfyuiWorkflowId/index'
@@ -158,6 +159,12 @@ const TeamIdActionToolsIndexRoute = TeamIdActionToolsIndexImport.update({
 const TeamIdWorkspaceWorkflowIdIndexRoute =
   TeamIdWorkspaceWorkflowIdIndexImport.update({
     path: '/$teamId/workspace/$workflowId/',
+    getParentRoute: () => rootRoute,
+  } as any)
+
+const TeamIdTextModelsLlmModelIdIndexRoute =
+  TeamIdTextModelsLlmModelIdIndexImport.update({
+    path: '/$teamId/text-models/$llmModelId/',
     getParentRoute: () => rootRoute,
   } as any)
 
@@ -298,6 +305,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdTextDataTextIdIndexImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/text-models/$llmModelId/': {
+      preLoaderRoute: typeof TeamIdTextModelsLlmModelIdIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/workspace/$workflowId/': {
       preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdIndexImport
       parentRoute: typeof rootRoute
@@ -338,6 +349,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdComfyuiComfyuiWorkflowIdIndexRoute,
   TeamIdTableDataDatabaseIdIndexRoute,
   TeamIdTextDataTextIdIndexRoute,
+  TeamIdTextModelsLlmModelIdIndexRoute,
   TeamIdWorkspaceWorkflowIdIndexRoute,
   TeamIdWorkspaceWorkflowIdPageIdIndexRoute,
 ])

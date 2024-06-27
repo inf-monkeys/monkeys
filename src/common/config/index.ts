@@ -162,7 +162,7 @@ export interface LlmModelConfig {
   iconUrl?: string;
   defaultParams?: { [x: string]: any };
   autoMergeSystemMessages?: boolean;
-  type: LlmModelEndpointType[];
+  type?: LlmModelEndpointType[];
   promptTemplate?: string;
   max_tokens?: number;
   // If true, this model will be used as default model when create workflow from marketplace
@@ -175,6 +175,8 @@ export interface LLmConfig {
     knowledgeBase: string;
     knowledgeBaseWithPresetPrompt: string;
   };
+  maxRetries: number;
+  timeout: number;
 }
 
 export interface ProxyConfig {
@@ -186,6 +188,14 @@ export interface ProxyConfig {
 export interface PaymentServerConfig {
   enabled: boolean;
   baseUrl: string;
+}
+
+export interface OneApiConfig {
+  enabled: boolean;
+  baseURL: string;
+  rootToken?: string;
+  rootUsername?: string;
+  rootPassword?: string;
 }
 
 export interface Config {
@@ -202,6 +212,7 @@ export interface Config {
   proxy: ProxyConfig;
   llm: LLmConfig;
   paymentServer: PaymentServerConfig;
+  oneapi: OneApiConfig;
 }
 
 const port = readConfig('server.port', 3000);
@@ -338,10 +349,20 @@ When answer to user:
 - And answer according to the language of the user's question.\n`,
       ),
     },
+    maxRetries: readConfig('llm.maxRetries', 0),
+    // Defaults to 3 minutes
+    timeout: readConfig('llm.timeout', 1000 * 60 * 3),
   },
   paymentServer: {
     enabled: readConfig('paymentServer.enabled', false),
     baseUrl: readConfig('paymentServer.baseUrl'),
+  },
+  oneapi: {
+    enabled: readConfig('oneapi.enabled', false),
+    baseURL: readConfig('oneapi.baseURL'),
+    rootToken: readConfig('oneapi.rootToken'),
+    rootPassword: readConfig('oneapi.rootPassword'),
+    rootUsername: readConfig('oneapi.rootUsername'),
   },
 };
 
@@ -384,6 +405,23 @@ const validateConfig = () => {
       throw new Error('Invalid conductor baseUrl: ' + config.conductor.baseUrl);
     }
   }
+
+  if (config.oneapi.enabled) {
+    if (!config.oneapi.baseURL) {
+      throw new Error('OneAPI enabled but no baseURL provided');
+    }
+    if (!config.oneapi.rootToken && (!config.oneapi.rootUsername || !config.oneapi.rootPassword)) {
+      throw new Error('OneAPI enabled but no rootToken or rootUsername/rootPassword provided');
+    }
+
+    if (config.oneapi.rootPassword) {
+      config.oneapi.rootPassword = config.oneapi.rootPassword.toString();
+    }
+
+    if (config.oneapi.baseURL.endsWith('/')) {
+      config.oneapi.baseURL = config.oneapi.baseURL.slice(0, -1);
+    }
+  }
 };
 
 validateConfig();
@@ -395,7 +433,13 @@ if (config.proxy.enabled) {
   exclude.push('127.0.0.1');
   // Exclude condcutor from proxy
   exclude.push(getHostFromUrl(config.conductor.baseUrl));
-  exclude.push(getHostFromUrl(config.paymentServer.baseUrl));
+
+  if (config.paymentServer.baseUrl) {
+    exclude.push(getHostFromUrl(config.paymentServer.baseUrl));
+  }
+  if (config.oneapi.baseURL) {
+    exclude.push(getHostFromUrl(config.oneapi.baseURL));
+  }
   // Exlcude tools from proxy
   config.tools
     .filter((tool) => !tool.useProxy)

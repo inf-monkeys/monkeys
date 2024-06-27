@@ -1,5 +1,4 @@
-import { ToolDef, ToolPropertyTypes } from '@inf-monkeys/monkeys';
-import { ToolProperty } from '@inf-monkeys/monkeys';
+import { ToolDef, ToolProperty, ToolPropertyTypes } from '@inf-monkeys/monkeys';
 
 export type VinesToolDefProperties = ToolProperty & {
   extra?: {
@@ -14,7 +13,10 @@ export type VinesToolDef = Omit<ToolDef, 'input' | 'output'> & {
 
 export type VinesToolWithCategory = [VinesToolDef[], number, string, string];
 
-export type VinesWorkflowVariable = Pick<ToolProperty, 'name' | 'type' | 'displayName' | 'typeOptions' | 'default'>;
+export type VinesWorkflowVariable = Pick<
+  ToolProperty,
+  'name' | 'type' | 'displayName' | 'typeOptions' | 'default' | 'description'
+>;
 
 export interface IVinesVariableMap {
   name: string;

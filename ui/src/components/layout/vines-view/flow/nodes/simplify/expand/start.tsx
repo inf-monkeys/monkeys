@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 import { useTriggers, useTriggerTypes } from '@/apis/workflow/trigger';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
@@ -10,6 +11,8 @@ import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 interface ISimplifyStartNodeExpandProps {}
 
 export const SimplifyStartNodeExpand: React.FC<ISimplifyStartNodeExpandProps> = () => {
+  const { t } = useTranslation();
+
   const { vines } = useVinesFlow();
 
   const { data: triggerTypes } = useTriggerTypes();
@@ -23,7 +26,9 @@ export const SimplifyStartNodeExpand: React.FC<ISimplifyStartNodeExpandProps> = 
 
   return (
     <div className="absolute flex select-none flex-col gap-1">
-      <h1 className="text-xl font-bold leading-6">{triggerType?.displayName ?? '开始'}</h1>
+      <h1 className="text-xl font-bold leading-6">
+        {triggerType?.displayName ?? t('workspace.flow-view.vines.tools.start.name')}
+      </h1>
       <AnimatePresence>
         {visible && (
           <motion.div
@@ -32,7 +37,9 @@ export const SimplifyStartNodeExpand: React.FC<ISimplifyStartNodeExpandProps> = 
             animate={{ opacity: 1, marginTop: 0 }}
             exit={{ opacity: 0, marginTop: -24 }}
           >
-            <span className="text-sm text-opacity-70">{triggerType?.description ?? '点击配置工作流输入和触发器'}</span>
+            <span className="text-sm text-opacity-70">
+              {triggerType?.description ?? t('workspace.flow-view.vines.tools.start.desc')}
+            </span>
           </motion.div>
         )}
       </AnimatePresence>

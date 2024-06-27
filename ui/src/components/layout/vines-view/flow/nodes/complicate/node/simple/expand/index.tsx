@@ -2,6 +2,7 @@ import React from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { has } from 'lodash';
+import { useTranslation } from 'react-i18next';
 import { ToolOutput } from 'src/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-output';
 
 import { VinesActuatorDetail } from '@/components/layout/vines-view/execution/actuator/detail';
@@ -20,6 +21,8 @@ export const ComplicateSimpleNodeExpand: React.FC<IComplicateSimpleNodeExpandPro
   executionTask,
   isWorkflowRUNNING,
 }) => {
+  const { t } = useTranslation();
+
   const hasExecutionData = has(executionTask, 'workflowInstanceId');
 
   return (
@@ -38,7 +41,9 @@ export const ComplicateSimpleNodeExpand: React.FC<IComplicateSimpleNodeExpandPro
             </div>
           ) : (
             <div className="flex flex-1 flex-col overflow-y-auto p-5">
-              <h1 className="line-clamp-1 text-base font-bold">输出</h1>
+              <h1 className="line-clamp-1 text-base font-bold">
+                {t('workspace.flow-view.headless-modal.tool-editor.output.title')}
+              </h1>
               <div className="h-[calc(100%-1.5rem)]">
                 <ToolOutput nodeId={nodeId} />
               </div>

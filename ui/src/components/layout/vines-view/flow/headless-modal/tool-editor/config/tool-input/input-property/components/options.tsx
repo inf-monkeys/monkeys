@@ -2,14 +2,15 @@ import React, { useCallback, useMemo } from 'react';
 
 import { ToolPropertyOptions } from '@inf-monkeys/monkeys';
 import { isNumber, isString } from 'lodash';
+import { useTranslation } from 'react-i18next';
 
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { getI18nContent } from '@/utils';
-import { useTranslation } from 'react-i18next';
 
 export const OptionsInput: React.FC<IVinesInputPropertyProps> = ({ def, value, onChange, disabled }) => {
   const { t } = useTranslation();
+
   const defaultValue = def.default || void 0;
 
   const [options, typesMapper] = useMemo(() => {
@@ -43,7 +44,9 @@ export const OptionsInput: React.FC<IVinesInputPropertyProps> = ({ def, value, o
       disabled={disabled}
     >
       <SelectTrigger>
-        <SelectValue placeholder="选择一个选项" />
+        <SelectValue
+          placeholder={t('workspace.flow-view.headless-modal.tool-editor.input.comps.options.placeholder')}
+        />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>

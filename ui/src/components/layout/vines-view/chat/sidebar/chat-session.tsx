@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { MessageSquare, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useDeleteWorkflowChatSession } from '@/apis/workflow/chat';
@@ -19,6 +20,8 @@ interface IChatSessionProps {
 }
 
 export const ChatSession: React.FC<IChatSessionProps> = ({ session, active, onClick, disableDelete, onDeleted }) => {
+  const { t } = useTranslation();
+
   const { trigger } = useDeleteWorkflowChatSession(session.id);
 
   const sessionDisplayName = session.displayName;
@@ -49,14 +52,14 @@ export const ChatSession: React.FC<IChatSessionProps> = ({ session, active, onCl
               size="small"
               onClick={(e) => {
                 e.stopPropagation();
-                toast(`确定要删除「${sessionDisplayName}」吗`, {
+                toast(t('workspace.chat-view.sidebar.delete.title', { sessionDisplayName }), {
                   action: {
-                    label: '确定',
+                    label: t('workspace.chat-view.sidebar.delete.action'),
                     onClick: () =>
                       toast.promise(trigger, {
-                        loading: '正在删除...',
-                        success: '删除成功',
-                        error: '删除失败',
+                        loading: t('workspace.chat-view.sidebar.delete.loading'),
+                        success: t('workspace.chat-view.sidebar.delete.success'),
+                        error: t('workspace.chat-view.sidebar.delete.error'),
                         finally: () => onDeleted?.(),
                       }),
                   },
@@ -64,7 +67,7 @@ export const ChatSession: React.FC<IChatSessionProps> = ({ session, active, onCl
               }}
             />
           </TooltipTrigger>
-          <TooltipContent>删除会话</TooltipContent>
+          <TooltipContent>{t('workspace.chat-view.sidebar.delete.label')}</TooltipContent>
         </Tooltip>
       </div>
     </Card>

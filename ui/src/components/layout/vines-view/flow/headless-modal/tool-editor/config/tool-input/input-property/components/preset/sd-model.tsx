@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { ToolPropertyTypes } from '@inf-monkeys/monkeys';
 import { uniqBy } from 'lodash';
+import { useTranslation } from 'react-i18next';
 import { useBuiltInModels, useSDModels } from 'src/apis/sd';
 
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
@@ -10,6 +11,8 @@ import { PresetWrapper } from '@/components/layout/vines-view/flow/headless-moda
 import { IVinesToolPropertiesOption, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
 export const SdModelPresets: React.FC<IVinesInputPropertyProps & IVinesInputPresetProps> = (props) => {
+  const { t } = useTranslation();
+
   const { data: sdModels, isLoading: isSdModelsLoading } = useSDModels({ page: 1, limit: 9999 });
   const { data: builtInModels, isLoading: isBuiltInModelsLoading } = useBuiltInModels();
 
@@ -36,7 +39,7 @@ export const SdModelPresets: React.FC<IVinesInputPropertyProps & IVinesInputPres
         (newOptionsVariableMapper[optValue] = {
           displayName: name,
           name: optValue,
-          type: '图像模型' as ToolPropertyTypes,
+          type: t('workspace.flow-view.headless-modal.tool-editor.input.comps.preset.sd-model') as ToolPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);
@@ -45,7 +48,7 @@ export const SdModelPresets: React.FC<IVinesInputPropertyProps & IVinesInputPres
   return (
     <PresetWrapper
       id="SdModel"
-      name="图像模型"
+      name={t('workspace.flow-view.headless-modal.tool-editor.input.comps.preset.sd-model')}
       isLoading={loading && !Object.keys(optionsVariableMapper).length}
       options={options}
       optionsVariableMapper={optionsVariableMapper}

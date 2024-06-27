@@ -46,57 +46,57 @@ export const TOOL_CATEGORY_SORT_INDEX_LIST = [
 ];
 
 export enum TOOL_CATEGORY {
-  all = '全部工具',
-  process = '流程控制',
-  image = '图像处理',
-  text = '文本处理',
-  file = '文件处理',
-  'gen-image' = '图像生成',
-  'gen-text' = '文本生成',
-  auto = '自动化',
-  db = '数据存储',
-  query = '搜索增强',
-  extra = '扩展能力',
-  'train-model' = '模型训练',
-  bio = '生命科学',
-  human = '用户交互',
+  all = 'all',
+  process = 'process',
+  image = 'image',
+  text = 'text',
+  file = 'file',
+  'gen-image' = 'gen-image',
+  'gen-text' = 'gen-text',
+  auto = 'auto',
+  db = 'db',
+  query = 'query',
+  extra = 'extra',
+  'train-model' = 'train-model',
+  bio = 'bio',
+  human = 'human',
 }
 
 export const IGNORE_TOOLS = ['fake_node', 'notification_join'];
 
 export const VINES_VARIABLE_TAG: IVinesVariableTag = {
   string: {
-    name: '文本',
+    name: 'string',
     color: '#97cc60',
     multipleColor: '#7fa853',
   },
   file: {
-    name: '文件',
+    name: 'file',
     color: '#6facf5',
     multipleColor: '#5792d4',
   },
   number: {
-    name: '数字',
+    name: 'number',
     color: '#f4e05d',
     multipleColor: '#c8bb53',
   },
   boolean: {
-    name: '布尔值',
+    name: 'boolean',
     color: '#4a68e1',
     multipleColor: '#3951ab',
   },
   options: {
-    name: '选项',
+    name: 'options',
     color: '#8e56da',
     multipleColor: '#833ee0',
   },
   json: {
-    name: '对象',
+    name: 'json',
     color: '#e28352',
     multipleColor: '#d16e3e',
   },
   qrcode: {
-    name: '二维码',
+    name: 'qrcode',
     color: '#e28352',
     multipleColor: '#d16e3e',
   },

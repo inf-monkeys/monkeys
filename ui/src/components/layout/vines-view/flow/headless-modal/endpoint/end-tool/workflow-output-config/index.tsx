@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion';
 import { get } from 'lodash';
 import { Info, Plus, TrashIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useGetWorkflow } from '@/apis/workflow';
 import { WorkflowOutputVariableEditor } from '@/components/layout/vines-view/flow/headless-modal/endpoint/end-tool/workflow-output-config/variable-editor.tsx';
@@ -33,6 +34,8 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({
   output,
   setOutput,
 }) => {
+  const { t } = useTranslation();
+
   const { isLatestWorkflowVersion, workflowId } = useFlowStore();
   const { canvasMode } = useCanvasStore();
 
@@ -92,16 +95,16 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({
             return !(typeof it.key !== 'string' || typeof it.value !== 'string');
           });
           if (!isValid) {
-            setEditorError('JSON 只能为 key-value 对象数组');
+            setEditorError(t('workspace.flow-view.endpoint.end-tool.error.only-key-value'));
             return;
           }
           outputRef.current = json;
           setOutput(json);
         } else {
-          setEditorError('JSON 必须为数组');
+          setEditorError(t('workspace.flow-view.endpoint.end-tool.error.only-array'));
         }
       } catch {
-        setEditorError('JSON 格式错误');
+        setEditorError(t('workspace.flow-view.endpoint.end-tool.error.json-format'));
       }
     },
     [setOutput, outputRef.current],
@@ -112,8 +115,8 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({
   return (
     <Tabs defaultValue="output" className={className}>
       <TabsList>
-        <TabsTrigger value="output">输出配置</TabsTrigger>
-        <TabsTrigger value="rawdata">原始数据</TabsTrigger>
+        <TabsTrigger value="output">{t('workspace.flow-view.endpoint.end-tool.tabs.output')}</TabsTrigger>
+        <TabsTrigger value="rawdata">{t('workspace.flow-view.endpoint.end-tool.tabs.raw-data')}</TabsTrigger>
       </TabsList>
       <TabsContent value="output" className="relative h-80">
         <AnimatePresence>
@@ -135,10 +138,10 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({
                 disabled={disabled || !isLatestWorkflowVersion}
                 variant="outline"
               >
-                新建输出配置
+                {t('workspace.flow-view.endpoint.end-tool.create')}
               </Button>
-              <h1 className="text-xl font-bold">在此处调整工作流输出</h1>
-              <span className="text-xs text-gray-10">工作流默认输出为最后一个节点的运行结果</span>
+              <h1 className="text-xl font-bold">{t('workspace.flow-view.endpoint.end-tool.tip1')}</h1>
+              <span className="text-xs text-gray-10">{t('workspace.flow-view.endpoint.end-tool.tip2')}</span>
             </motion.div>
           ) : initial ? (
             <motion.div
@@ -194,7 +197,7 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({
                     disabled={disabled}
                     variant="outline"
                   >
-                    新建输出配置
+                    {t('workspace.flow-view.endpoint.end-tool.create')}
                   </Button>
                 </div>
               )}

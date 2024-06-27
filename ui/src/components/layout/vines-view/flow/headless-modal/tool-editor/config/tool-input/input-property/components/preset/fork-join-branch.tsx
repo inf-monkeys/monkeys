@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { isArray } from 'lodash';
+import { useTranslation } from 'react-i18next';
 
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
 import { IVinesInputPresetProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/index.tsx';
@@ -18,6 +19,8 @@ import { IVinesToolPropertiesOption } from '@/package/vines-flow/core/tools/typi
 export const ForkJoinBranchPresets: React.FC<IVinesInputPropertyProps & Omit<IVinesInputPresetProps, 'typeOptions'>> = (
   props,
 ) => {
+  const { t } = useTranslation();
+
   const { value, onChange, disabled, nodeId } = props;
 
   const { vines } = useVinesFlow();
@@ -63,7 +66,7 @@ export const ForkJoinBranchPresets: React.FC<IVinesInputPropertyProps & Omit<IVi
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" disabled={disabled}>
-            您也可以选择预置选项
+            {t('workspace.flow-view.headless-modal.tool-editor.input.comps.preset.fork-join-branch.button')}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56">
@@ -85,7 +88,7 @@ export const ForkJoinBranchPresets: React.FC<IVinesInputPropertyProps & Omit<IVi
         }}
         disabled={disabled}
       >
-        全部分支
+        {t('workspace.flow-view.headless-modal.tool-editor.input.comps.preset.fork-join-branch.all-branch')}
       </Button>
     </div>
   );

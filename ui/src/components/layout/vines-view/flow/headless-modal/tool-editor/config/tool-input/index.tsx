@@ -4,6 +4,7 @@ import { ToolCredentialItem } from '@inf-monkeys/monkeys';
 import { useForceUpdate } from '@mantine/hooks';
 import equal from 'fast-deep-equal/es6';
 import { get, isArray, set } from 'lodash';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { VinesInputCredentials } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-credentials';
@@ -29,6 +30,8 @@ interface IToolInputProps {
 
 export const ToolInput: React.FC<IToolInputProps> = memo(
   ({ nodeId, task, tool, updateRaw, variableMapper, className }) => {
+    const { t } = useTranslation();
+
     const input = tool?.input;
 
     const inputParams = get(task, 'inputParameters', {});
@@ -40,7 +43,7 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
     useEffect(() => {
       const newTask = cloneDeep(task);
       if (!newTask) {
-        toast.error('工具数据解析失败！');
+        toast.error(t('workspace.flow-view.vines.tools.parsing-error'));
         return;
       }
       taskRef.current = newTask;
@@ -49,7 +52,7 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
     const forceUpdate = useForceUpdate();
     const handleUpdate = (value: unknown, name: string, needForceUpdate = true) => {
       if (!taskRef.current) {
-        toast.error('工具数据异常！');
+        toast.error(t('workspace.flow-view.vines.tools.error'));
         return;
       }
 

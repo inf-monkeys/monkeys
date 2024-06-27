@@ -39,6 +39,7 @@ interface IInputEditorProps {}
 
 export const InputEditor: React.FC<IInputEditorProps> = () => {
   const { t } = useTranslation();
+
   const { isLatestWorkflowVersion, workflowId } = useFlowStore();
 
   const { vines } = useVinesFlow();
@@ -103,14 +104,14 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
           finalVariable,
           'default',
           ((Default || []) as (boolean | string)[])?.map((it) =>
-            isBoolean(it) ? it : ['true', '1', 'yes', '真'].includes(it.toString()),
+            isBoolean(it) ? it : ['true', '1', 'yes', '真', 't', 'T'].includes(it.toString()),
           ),
         );
       } else if (!isUndefined(Default)) {
         set(
           finalVariable,
           'default',
-          isBoolean(Default) ? Default : ['true', '1', 'yes', '真'].includes(Default.toString()),
+          isBoolean(Default) ? Default : ['true', '1', 'yes', '真', 't', 'T'].includes(Default.toString()),
         );
       }
     }
@@ -125,7 +126,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="w-auto max-w-5xl">
-        <DialogTitle>输入配置</DialogTitle>
+        <DialogTitle>{t('workspace.flow-view.endpoint.start-tool.input.config-form.title')}</DialogTitle>
         <Form {...form}>
           <form
             onSubmit={handleSubmit}
@@ -139,9 +140,18 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>显示名称</FormLabel>
+                      <FormLabel>
+                        {t('workspace.flow-view.endpoint.start-tool.input.config-form.display-name.label')}
+                      </FormLabel>
                       <FormControl>
-                        <Input placeholder="请输入输入配置显示的名称" {...field} className="grow" autoFocus />
+                        <Input
+                          placeholder={t(
+                            'workspace.flow-view.endpoint.start-tool.input.config-form.display-name.placeholder',
+                          )}
+                          {...field}
+                          className="grow"
+                          autoFocus
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -153,12 +163,18 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>字段</FormLabel>
+                      <FormLabel>{t('workspace.flow-view.endpoint.start-tool.input.config-form.name.label')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="请输入输入字段" {...field} className="grow" />
+                        <Input
+                          placeholder={t('workspace.flow-view.endpoint.start-tool.input.config-form.name.placeholder')}
+                          {...field}
+                          className="grow"
+                        />
                       </FormControl>
                       <FormDescription>
-                        {`输入字段用于在工作流中引用输入的数据，在工具装配项中填写「 $\{workflow.input.${field.value}} 」来使用`}
+                        {t('workspace.flow-view.endpoint.start-tool.input.config-form.name.desc', {
+                          name: field.value,
+                        })}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -170,7 +186,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>数据类型</FormLabel>
+                      <FormLabel>{t('workspace.flow-view.endpoint.start-tool.input.config-form.type.label')}</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
@@ -186,40 +202,56 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
                                       it.multipleValues === multipleValues &&
                                       it.assetType === assetType,
                                   )?.label
-                                : '选择数据类型'}
+                                : t('workspace.flow-view.endpoint.start-tool.input.config-form.type.button')}
                               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
                         <PopoverContent className="p-0">
                           <Command>
-                            <CommandInput placeholder="搜索类型..." />
-                            <CommandEmpty>找不到类型</CommandEmpty>
+                            <CommandInput
+                              placeholder={t(
+                                'workspace.flow-view.endpoint.start-tool.input.config-form.type.placeholder',
+                              )}
+                            />
+                            <CommandEmpty>
+                              {t('workspace.flow-view.endpoint.start-tool.input.config-form.type.search-empty')}
+                            </CommandEmpty>
                             <CommandGroup>
-                              {WORKFLOW_INPUT_TYPE_OPTION_LIST.map((it, i) => (
-                                <CommandItem
-                                  value={it.label}
-                                  key={i}
-                                  onSelect={() => {
-                                    form.setValue('type', it.value as IWorkflowInput['type']);
-                                    form.setValue('multipleValues', it.multipleValues);
-                                    form.setValue('assetType', it.assetType);
-                                    forceUpdate();
-                                  }}
-                                >
-                                  <Check
-                                    className={cn(
-                                      'mr-2 h-4 w-4',
-                                      it.value === field.value &&
-                                        it.multipleValues === multipleValues &&
-                                        it.assetType === assetType
-                                        ? 'opacity-100'
-                                        : 'opacity-0',
-                                    )}
-                                  />
-                                  {it.label}
-                                </CommandItem>
-                              ))}
+                              {WORKFLOW_INPUT_TYPE_OPTION_LIST.map((it, i) => {
+                                const labelVal = t(
+                                  'workspace.flow-view.endpoint.start-tool.input.config-form.type.' + it.label,
+                                  {
+                                    extra: it.multipleValues
+                                      ? t('workspace.flow-view.endpoint.start-tool.input.config-form.type.list')
+                                      : '',
+                                  },
+                                );
+                                return (
+                                  <CommandItem
+                                    value={labelVal}
+                                    key={i}
+                                    onSelect={() => {
+                                      form.setValue('type', it.value as IWorkflowInput['type']);
+                                      form.setValue('multipleValues', it.multipleValues);
+                                      form.setValue('assetType', it.assetType);
+                                      forceUpdate();
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        'mr-2 h-4 w-4',
+                                        it.value === field.value &&
+                                          it.multipleValues === multipleValues &&
+                                          it.assetType === assetType
+                                          ? 'opacity-100'
+                                          : 'opacity-0',
+                                      )}
+                                    />
+                                    {labelVal}
+                                  </CommandItem>
+                                );
+                              })}
                             </CommandGroup>
                           </Command>
                         </PopoverContent>
@@ -234,18 +266,24 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
                   control={form.control}
                   render={({ field: { value, ...field } }) => (
                     <FormItem>
-                      <FormLabel>默认值</FormLabel>
+                      <FormLabel>
+                        {t('workspace.flow-view.endpoint.start-tool.input.config-form.default.label')}
+                      </FormLabel>
                       <FormControl>
                         <SmoothTransition>
                           {multipleValues ? (
                             <TagInput
-                              placeholder="请输入默认值列表"
+                              placeholder={t(
+                                'workspace.flow-view.endpoint.start-tool.input.config-form.default.placeholder-list',
+                              )}
                               value={isArray(value) ? value.map((it: string | number | boolean) => it.toString()) : []}
                               onChange={(value) => form.setValue('default', value)}
                             />
                           ) : (
                             <Textarea
-                              placeholder="请输入默认值"
+                              placeholder={t(
+                                'workspace.flow-view.endpoint.start-tool.input.config-form.default.placeholder',
+                              )}
                               className="resize-none"
                               value={value?.toString()}
                               {...field}
@@ -262,12 +300,20 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
                 <>
                   <Separator orientation="vertical" className="mx-2" />
                   <div className="flex w-[40rem] flex-col gap-2">
-                    <Label>默认文件{multipleValues ? '列表' : ''}</Label>
+                    <Label>
+                      {t('workspace.flow-view.endpoint.start-tool.input.config-form.file.label', {
+                        extra: multipleValues
+                          ? t('workspace.flow-view.endpoint.start-tool.input.config-form.file.list')
+                          : '',
+                      })}
+                    </Label>
                     <Updater
                       limit={multipleValues ? void 0 : 1}
                       onFinished={(urls) => form.setValue('default', multipleValues ? urls : urls[0])}
                     />
-                    <p className="text-xs text-muted-foreground">在此处上传文件将自动生成文件直链来覆盖左侧默认值</p>
+                    <p className="text-xs text-muted-foreground">
+                      {t('workspace.flow-view.endpoint.start-tool.input.config-form.file.desc')}
+                    </p>
                   </div>
                 </>
               )}
@@ -275,7 +321,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
 
             <DialogFooter>
               <Button type="submit" variant="outline" className={cn(!isLatestWorkflowVersion && 'hidden')}>
-                确定
+                {t('workspace.flow-view.endpoint.start-tool.input.config-form.submit')}
               </Button>
             </DialogFooter>
           </form>
