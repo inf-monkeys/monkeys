@@ -55,7 +55,7 @@ export class WorkflowOpenAICompatibleController {
       workflowId = model;
       workflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(workflowId);
     } else {
-      const workflow = await this.workflowRepository.findWorkflowByOpenAIModelName(teamId, model);
+      workflow = await this.workflowRepository.findWorkflowByOpenAIModelName(teamId, model);
       if (!workflow) {
         return null;
       }
