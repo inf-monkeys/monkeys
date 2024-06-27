@@ -175,6 +175,8 @@ export interface LLmConfig {
     knowledgeBase: string;
     knowledgeBaseWithPresetPrompt: string;
   };
+  maxRetries: number;
+  timeout: number;
 }
 
 export interface ProxyConfig {
@@ -347,6 +349,9 @@ When answer to user:
 - And answer according to the language of the user's question.\n`,
       ),
     },
+    maxRetries: readConfig('llm.maxRetries', 0),
+    // Defaults to 3 minutes
+    timeout: readConfig('llm.timeout', 1000 * 60 * 3),
   },
   paymentServer: {
     enabled: readConfig('paymentServer.enabled', false),

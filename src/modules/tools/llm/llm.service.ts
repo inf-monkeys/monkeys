@@ -521,6 +521,8 @@ export class LlmService {
     const openai = new OpenAI({
       apiKey: apiKey || 'mock-apikey',
       baseURL: baseURL,
+      maxRetries: config.llm.maxRetries,
+      timeout: config.llm.timeout,
     });
     const tools: Array<ChatCompletionTool> = await this.resolveTools(params.tools || [], sqlKnowledgeBase);
 
