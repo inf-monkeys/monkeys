@@ -1456,7 +1456,7 @@
         "workflow-update-failed": "工作流信息更新失败"
       },
       "integration-center": {
-        "title": "集成中心",
+        "title": "API 文档",
         "desc": "你可以通过 API 与其他应用集成，以实现更多功能",
         "content": {
           "new-chat-session": "新的会话",
@@ -1493,7 +1493,6 @@
             "submit": "保存"
           }
         },
-
         "tabs": {
           "流程视图": "流程视图",
           "日志视图": "日志视图",
@@ -1564,7 +1563,6 @@
               "unknown": "不受支持的类型",
               "required": "必填项"
             },
-
             "validation": {
               "loading": "正在重新验证...",
               "success": "验证成功",
@@ -1591,7 +1589,6 @@
               "editor": {
                 "check-json-failed": "必须为 JSON 数组",
                 "parse-json-failed": "JSON 解析失败！数据将不会保存，请检查",
-
                 "insert-variable-tips": "在光标处插入变量"
               },
               "blank": {
@@ -1600,7 +1597,6 @@
               "preset": {
                 "placeholder-empty": "暂无{{name}}",
                 "placeholder-select": "选择预设{{name}}",
-
                 "workflow-version": "工作流版本",
                 "workflow": {
                   "label": "工作流",
@@ -1610,14 +1606,12 @@
                 "tool": "工具",
                 "sql-knowledge-base": {
                   "label": "关系型知识库",
-
                   "display-name": "{{name}} （其他团队授权）"
                 },
                 "sd-model": "图像模型",
                 "llm-model": "大语言模型",
                 "knowledge-base": {
                   "label": "文本知识库",
-
                   "display-name": "{{name}} （其他团队授权）"
                 },
                 "fork-join-branch": {
@@ -1642,7 +1636,6 @@
           "advanced-config": {
             "error": "工具数据异常！",
             "parse-error": "工具数据解析失败！",
-
             "output": {
               "label": "输出模式",
               "placeholder": "选择输出模式"
@@ -1659,9 +1652,7 @@
         "tool-selector": {
           "title": "选择工具",
           "placeholder": "输入关键词或类别来搜索工具",
-
           "create-failed": "创建工具失败",
-
           "category": {
             "all": "全部工具",
             "sub-workflows": "调用工作流",
@@ -1992,13 +1983,11 @@
       "title": "日志视图",
       "desc": "共 {{data}} 项{{suffix}}",
       "desc-suffix": "，已加载 {{loaded}} 项",
-
       "filter": {
         "form": {
           "versions": {
             "label": "版本号",
             "placeholder": "请选择版本号",
-
             "temp": "临时"
           },
           "start-time": {
@@ -2020,7 +2009,6 @@
           "order-by": {
             "label": "由旧到新排序"
           },
-
           "reset": "重置",
           "submit": "查询"
         }
@@ -2029,13 +2017,10 @@
         "empty": "暂无执行记录",
         "bottom": "到底了",
         "more": "剩余 {{data}} 项，点击加载",
-
         "preview-page-not-found": "打开详情失败！找不到预览视图",
-
         "item": {
           "desc": "实例 ID: {{instanceId}}",
           "exec-time": "于 {{time}}",
-
           "status": {
             "Running": "运行中",
             "Completed": "已完成",
@@ -2044,11 +2029,9 @@
             "Terminated": "已终止",
             "Timed Out": "运行超时"
           },
-
           "tips": "点击查看实例详情"
         }
       },
-
       "loading": "查询中...",
       "error": "查询失败，请检查网络是否通畅",
       "workflow-id-error": "请等待页面加载完毕"
@@ -2056,7 +2039,6 @@
     "pre-view": {
       "title": "预览工作流",
       "desc": "运行工作流或查看历史运行记录",
-
       "actuator": {
         "scale": {
           "min": "还原视图",
@@ -2064,13 +2046,11 @@
         },
         "execution": {
           "label": "运行工作流",
-          "button":{
+          "button": {
             "restart": "重新运行",
             "stop": "终止运行"
           },
-
           "form-empty": "请先完善工作流表单",
-
           "status": {
             "completed": "工作流运行完毕",
             "canceled": "工作流运行取消",
@@ -2085,10 +2065,8 @@
             "paused": "工作流已暂停运行",
             "unknown": "未知工作流运行状态"
           },
-
           "instance-id": "实例 ID: {{instanceId}}"
         },
-
         "execution-form": {
           "string": "请输入{{displayName}}",
           "file": {
@@ -2110,13 +2088,11 @@
             "minutes": "{{minutes}} 分钟",
             "seconds": "{{seconds}} 秒",
             "milliseconds": "{{milliseconds}} 毫秒",
-
             "start-time": "开始时间：{{startTime}}",
             "end-time": "结束时间：{{endTime}}",
             "duration": "运行时长：{{currentDuration}}",
             "iteration": "迭代轮次：{{iteration}}"
           },
-
           "abstract-data-preview": {
             "url": "点击将跳转到外部网站，请注意安全",
             "empty": "该工具执行后暂无输出"
@@ -2127,7 +2103,6 @@
             "cancel": "继续执行",
             "confirm": "确认 ({{selectedLength}})",
             "skip": "跳过",
-
             "loading": "正在提交...",
             "success": "交互成功",
             "error": "交互失败"
@@ -2151,7 +2126,7 @@
       }
     },
     "chat-view": {
-      "sidebar":{
+      "sidebar": {
         "title": "对话列表",
         "create": {
           "label": "新建对话",
