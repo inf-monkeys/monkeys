@@ -36,7 +36,7 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page 
     });
   };
 
-  const workflowDesc = workflow?.description ? ` - ${workflow.description}` : '';
+  const workflowDesc = getI18nContent(workflow?.description) ? ` - ${getI18nContent(workflow?.description)}` : '';
   const displayName = page?.displayName ?? '';
 
   return (
