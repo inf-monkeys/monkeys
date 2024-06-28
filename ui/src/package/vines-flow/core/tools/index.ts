@@ -18,7 +18,7 @@ import {
   VinesVariableMapper,
 } from '@/package/vines-flow/core/tools/typings.ts';
 import { Constructor, VINES_STATUS } from '@/package/vines-flow/core/typings.ts';
-import { I18nAllContent, getI18nContent } from '@/utils';
+import { getI18nContent, I18nAllContent } from '@/utils';
 import { format } from '@/utils/string-template.ts';
 
 export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
