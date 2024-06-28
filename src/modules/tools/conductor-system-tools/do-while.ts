@@ -13,34 +13,55 @@ export default defineNode({
   type: ToolType.DO_WHILE,
   name: 'do_while',
   categories: ['process'],
-  displayName: '循环',
-  description: 'Do-while 循环',
+  displayName: {
+    'zh-CN': '循环',
+    'en-US': 'Do-While',
+  },
+  description: {
+    'zh-CN': 'Do-while 循环',
+    'en-US': 'Do-while loop',
+  },
   icon: 'emoji:🤖️:#7fa3f8',
   input: [
     {
-      displayName: '循环模式',
+      displayName: {
+        'zh-CN': '循环模式',
+        'en-US': 'Loop Mode',
+      },
       name: 'mode',
       type: 'options',
       default: DoWhileMode.Fixed,
       options: [
         {
-          name: '循环列表模式',
+          name: {
+            'zh-CN': '循环列表模式',
+            'en-US': 'List Mode',
+          },
           value: DoWhileMode.List,
         },
         {
-          name: '固定次数模式',
+          name: {
+            'zh-CN': '固定次数模式',
+            'en-US': 'Fixed Mode',
+          },
           value: DoWhileMode.Fixed,
         },
 
         {
-          name: '表达式模式',
+          name: {
+            'zh-CN': '表达式模式',
+            'en-US': 'Expression Mode',
+          },
           value: DoWhileMode.Expression,
         },
       ],
       required: true,
     },
     {
-      displayName: '执行参数',
+      displayName: {
+        'zh-CN': '执行参数',
+        'en-US': 'Parameters',
+      },
       name: 'parameters',
       type: 'json',
       required: false,
@@ -54,7 +75,10 @@ export default defineNode({
       },
     },
     {
-      displayName: '循环表达式',
+      displayName: {
+        'zh-CN': '循环表达式',
+        'en-US': 'Loop Condition',
+      },
       name: 'loopCondition',
       type: 'string',
       required: true,
@@ -67,8 +91,14 @@ export default defineNode({
       },
     },
     {
-      displayName: '需要循环的列表',
-      description: '传入的数据必须为列表类型数据，你可以在循环内的节点通过 ${_TaskRefName__loopItemRef.output.result} 来获取当前循环的元素',
+      displayName: {
+        'zh-CN': '需要循环的列表',
+        'en-US': 'List to Loop Over',
+      },
+      description: {
+        'zh-CN': '传入的数据必须为列表类型数据，你可以在循环内的节点通过 ${_TaskRefName__loopItemRef.output.result} 来获取当前循环的元素',
+        'en-US': 'The input data must be a list type data, you can get the current loop element in the node inside the loop through ${_TaskRefName__loopItemRef.output.result}',
+      },
       name: 'listToLoopOver',
       type: 'string',
       required: true,
@@ -79,8 +109,14 @@ export default defineNode({
       },
     },
     {
-      displayName: '循环次数',
-      description: '输入需要循环的固定次数',
+      displayName: {
+        'zh-CN': '循环次数',
+        'en-US': 'Loop Count',
+      },
+      description: {
+        'zh-CN': '输入需要循环的固定次数',
+        'en-US': 'Input the fixed number of times to loop',
+      },
       name: 'loopCount',
       type: 'number',
       required: true,
@@ -95,7 +131,10 @@ export default defineNode({
   output: [
     {
       name: 'iteration',
-      displayName: '迭代次数',
+      displayName: {
+        'zh-CN': '迭代次数',
+        'en-US': 'Iteration Count',
+      },
       type: 'number',
     },
   ],
