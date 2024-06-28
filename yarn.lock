@@ -1149,10 +1149,10 @@
   resolved "https://registry.yarnpkg.com/@inf-monkeys/conductor-javascript/-/conductor-javascript-1.0.2.tgz#e3d527409125420c2042bebd981519d7c5baac70"
   integrity sha512-zMM20A5R5Gsy915uYboJa7j7XYx+Z8M1cQNlT2A1Q2XXRC2gfVFNo+74TtpoizTxQsUJsS7vU0q0uqd/VIciXA==
 
-"@inf-monkeys/monkeys@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@inf-monkeys/monkeys/-/monkeys-0.0.1.tgz#f0e92475a2e6df56c0d3f1c520d37c49406a00fb"
-  integrity sha512-od3h06atnyUBaWkf03gjrC3eALwcvOgesQlKkAGySnbnRNkWElWoLsNJpoclHGXtvqa2fdXZLSjyolFFXXoePg==
+"@inf-monkeys/monkeys@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@inf-monkeys/monkeys/-/monkeys-0.0.3.tgz#fb28d4d158ccd1efc268e6d42d06ee69622f43b0"
+  integrity sha512-1xpU8ZZsoZtn+uK5v17ClYU3Wprx4vasKa1yycEnzbawqXY+IBFwdEFlCdgMgRYgYqawNo1TC3wB837OlBnoeQ==
   dependencies:
     "@io-orkes/conductor-javascript" "^2.1.0"
 
