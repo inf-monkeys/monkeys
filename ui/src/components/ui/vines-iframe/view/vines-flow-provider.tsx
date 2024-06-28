@@ -10,10 +10,10 @@ interface IVinesFlowProviderProps {
 }
 
 export const VinesFlowProvider: React.FC<IVinesFlowProviderProps> = ({ workflowId, children }) => {
-  const { t } = useTranslation();
+  const { i18n } = useTranslation();
 
   const Wrapper = useMemo(() => {
-    const { VinesProvider } = createVinesCore(workflowId, t);
+    const { VinesProvider } = createVinesCore(workflowId, i18n);
 
     return VinesProvider;
   }, [workflowId]);
