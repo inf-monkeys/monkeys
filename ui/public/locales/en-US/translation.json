@@ -2132,9 +2132,9 @@
     },
     "chat-view": {
       "sidebar": {
-        "title": "Session List",
+        "title": "Conversations",
         "create": {
-          "label": "New Session",
+          "label": "New Conversation",
           "placeholder": "Enter the session name within 16 characters.",
           "loading": "Creating session...",
           "success": "Create session successfully",
