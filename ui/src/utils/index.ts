@@ -1,4 +1,3 @@
-import i18n from '@/i18n';
 import { I18nValue } from '@inf-monkeys/monkeys';
 import {
   readLocalStorageValue as mantineReadLocalStorageValue,
@@ -11,6 +10,8 @@ import { useTranslation } from 'react-i18next';
 import rfdc from 'rfdc';
 import { parse, stringify } from 'superjson';
 import { twMerge } from 'tailwind-merge';
+
+import i18n from '@/i18n';
 
 export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 

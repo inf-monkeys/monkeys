@@ -11,7 +11,7 @@ import { Tree, TreeDataItem } from '@/components/ui/tree.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VINES_VARIABLE_TAG } from '@/package/vines-flow/core/tools/consts.ts';
 import { IVinesVariable } from '@/package/vines-flow/core/tools/typings.ts';
-import { cn, execCopy } from '@/utils';
+import { cn, execCopy, getI18nContent } from '@/utils';
 
 interface IToolOutputProps {
   nodeId?: string;
@@ -64,7 +64,7 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
                       })
                     : type + (isMultiple ? ' list' : '')}
                 </span>
-                <span className="line-clamp-1 break-normal">{it.label}</span>
+                <span className="line-clamp-1 break-normal">{getI18nContent(it.label)}</span>
               </div>
             </TooltipTrigger>
             <TooltipContent>{it.id}</TooltipContent>
@@ -92,7 +92,7 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
                   })
                 : type + (isMultiple ? ' list' : '')}
             </span>
-            <span className="line-clamp-1 break-normal">{it.label}</span>
+            <span className="line-clamp-1 break-normal">{getI18nContent(it.label)}</span>
             <div className="relative flex-1">
               <Tooltip>
                 <TooltipTrigger asChild>
