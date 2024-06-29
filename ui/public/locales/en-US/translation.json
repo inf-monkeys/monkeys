@@ -414,19 +414,14 @@
       "email": "Email",
       "other": "OR",
       "only-oidc": "Only support OIDC login",
-      "select-account": "Select logged in account",
       "success": "Login successful",
       "logging-in": "Logging in..."
     },
     "users": {
-      "selector": {
-        "title": "Select user",
-        "switching": "Switching user...",
-        "switched": "Switched to user: {{name}}",
-        "switch-failed": "Failed to switch user!"
-      },
-      "login-other": "Login other account",
-      "logout": "Logout"
+      "logout": "Logout",
+      "logout-success": "Logout successful",
+      "logout-user": "Logged out Successfully logged out \"{{name}}\"",
+      "title": "Are you sure you want to log out?"
     }
   },
   "settings": {

@@ -27,7 +27,7 @@ export const ImportExportTeam: React.FC<IImportExportTeamProps> = () => {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button icon={<Database />} size="small" className="hidden">
+          <Button icon={<Database />} size="small" className="hidden" variant="outline">
             {t('settings.account.team.import-export.button')}
           </Button>
         </DropdownMenuTrigger>

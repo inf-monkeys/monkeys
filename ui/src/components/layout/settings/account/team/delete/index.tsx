@@ -48,7 +48,13 @@ export const DeleteTeam: React.FC<IDeleteTeamProps> = ({ teamId }) => {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button size="small" theme="danger" icon={<Trash2 />} onClick={handleDeleteTeam} />
+        <Button
+          size="small"
+          className="[&>div>svg]:stroke-red-10"
+          icon={<Trash2 />}
+          onClick={handleDeleteTeam}
+          variant="outline"
+        />
       </TooltipTrigger>
       <TooltipContent>{t('settings.account.team.delete.button-tooltip')}</TooltipContent>
     </Tooltip>

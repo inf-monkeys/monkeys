@@ -9,8 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { handleOidcLogin } from '@/apis/authz/oidc';
 import { useSystemConfig } from '@/apis/common';
 import { AuthMethod } from '@/apis/common/typings.ts';
-import { AuthContainer } from '@/components/layout/login/authz';
-import { AuthzUsers } from '@/components/layout/login/users';
+import { AuthContainer } from '@/components/layout/login';
 import { IUserTokens } from '@/components/router/guard/auth.ts';
 import { AppLogo } from '@/components/ui/logo';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
@@ -25,7 +24,6 @@ const Login: React.FC = () => {
   const { data: oem, error } = useSystemConfig();
 
   const [tokens] = useLocalStorage<IUserTokens>('vines-tokens', {});
-  const [swap, setSwap] = useLocalStorage('vines-authz-swap', 'users', false);
 
   const logoUrl = get(oem, `theme.logo.${darkMode ? 'dark' : 'light'}`, '');
   const appName = get(oem, 'theme.name', 'AI');
@@ -66,10 +64,6 @@ const Login: React.FC = () => {
                 {isServerError ? t('system.network-error') : t('system.empty-auth-methods')}
               </h1>
             </motion.div>
-          ) : swap !== 'login' && hasTokens ? (
-            <SmoothTransition initialHeight={201}>
-              <AuthzUsers tokens={tokens} setSwap={setSwap} />
-            </SmoothTransition>
           ) : (
             <SmoothTransition initialHeight={264}>
               <AuthContainer
@@ -78,7 +72,6 @@ const Login: React.FC = () => {
                 enablePassword={isPasswordEnable}
                 enablePhone={isPhoneEnable}
                 oidcButtonText={oidcButtonText}
-                setSwap={setSwap}
                 hasTokens={hasTokens}
               />
             </SmoothTransition>

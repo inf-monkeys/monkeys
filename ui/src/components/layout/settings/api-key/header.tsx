@@ -64,7 +64,7 @@ export const ApiKeyHeader: React.FC<IApiKeyHeaderProps> = ({ mutate }) => {
         <div>
           <Dialog open={visible} onOpenChange={(val) => setVisible(val)}>
             <DialogTrigger asChild>
-              <Button variant="solid" icon={<Plus />}>
+              <Button variant="outline" size="small" icon={<Plus />}>
                 {t('settings.api-key.header.create.button')}
               </Button>
             </DialogTrigger>
