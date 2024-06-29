@@ -415,7 +415,11 @@
       "other": "OR",
       "only-oidc": "Only support OIDC login",
       "success": "Login successful",
-      "logging-in": "Logging in..."
+      "logging-in": "Logging in...",
+      "login": "Login",
+      "login-desc": "Unregistered users will be automatically registered",
+      "unsupported-login-method": "Unsupported login method",
+      "loading": "Logging in..."
     },
     "users": {
       "logout": "Logout",
