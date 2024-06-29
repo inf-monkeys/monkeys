@@ -406,7 +406,11 @@
       "other": "其他登录方式",
       "only-oidc": "仅支持使用 OIDC 进行身份验证",
       "success": "登录成功",
-      "logging-in": "登录中"
+      "logging-in": "登录中",
+      "login": "登录",
+      "login-desc": "未注册用户将自动注册",
+      "unsupported-login-method": "不受支持的登录方式",
+      "loading": "登录中..."
     },
     "users": {
       "logout": "退出登录",
