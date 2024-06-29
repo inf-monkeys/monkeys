@@ -405,19 +405,14 @@
       "email": "邮箱登录",
       "other": "其他登录方式",
       "only-oidc": "仅支持使用 OIDC 进行身份验证",
-      "select-account": "选择已登录的账号",
       "success": "登录成功",
       "logging-in": "登录中"
     },
     "users": {
-      "selector": {
-        "title": "选择身份",
-        "switching": "正在切换身份...",
-        "switched": "已切换到身份：{{name}}",
-        "switch-failed": "切换身份失败！"
-      },
-      "login-other": "登录其他账号",
-      "logout": "退出登录"
+      "logout": "退出登录",
+      "logout-success": "退出登录成功",
+      "logout-user": "已登出成功登出「{{name}}」",
+      "title": "确定要退出登录吗？"
     }
   },
   "settings": {
