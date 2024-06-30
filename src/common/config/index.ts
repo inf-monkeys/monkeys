@@ -139,6 +139,7 @@ export interface AuthConfig {
 }
 
 export interface S3Config {
+  proxy: boolean;
   isPrivate: boolean;
   forcePathStyle: boolean;
   endpoint: string;
