@@ -291,6 +291,7 @@
           },
           "teams": {
             "balance": "Balance",
+            "默认团队": "Default Team",
             "team-selector": {
               "search-team": "Search team...",
               "not-found": "Not found",
