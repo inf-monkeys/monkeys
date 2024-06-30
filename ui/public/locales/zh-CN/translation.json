@@ -282,6 +282,7 @@
           },
           "teams": {
             "balance": "余额",
+            "默认团队": "默认团队",
             "team-selector": {
               "search-team": "搜索团队...",
               "not-found": "找不到团队",
