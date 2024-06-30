@@ -15,12 +15,17 @@ export const simpleFilePut = (
   url: string,
   file: File,
   process: (value: number, event: ProgressEvent<XMLHttpRequestEventTarget>) => void,
+  method = 'PUT',
+  headers: Record<string, string> = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+  },
+  params: Record<string, string> = {},
 ): Promise<XMLHttpRequest> =>
   new Promise((resolve, reject) => {
     const req = new XMLHttpRequest();
-    req.open('PUT', url);
+    req.open(method, url);
 
-    req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    Object.entries(headers).forEach(([key, value]) => req.setRequestHeader(key, value));
 
     req.upload.addEventListener('progress', (e) => {
       if (e.lengthComputable) {
@@ -29,7 +34,7 @@ export const simpleFilePut = (
     });
 
     req.onload = () => {
-      if (req.status === 200) {
+      if (req.status === 200 || req.status === 201) {
         resolve(req);
       } else {
         reject(new Error(`Request failed with status ${req.status}`));
@@ -40,5 +45,12 @@ export const simpleFilePut = (
       reject(new Error('Request error'));
     };
 
-    req.send(file);
+    if (method === 'POST') {
+      const formData = new FormData();
+      Object.entries(params).forEach(([key, value]) => formData.append(key, value));
+      formData.append('file', file);
+      req.send(formData);
+    } else {
+      req.send(file);
+    }
   });
