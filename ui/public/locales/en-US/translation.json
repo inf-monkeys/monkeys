@@ -339,14 +339,16 @@
             "this-project": "this project"
           },
 
+          "dropdown": "Application market",
+
           "use-template": {
-            "dropdown": "Application market",
             "title": "Use this template",
 
             "loading": "Creating...",
             "success": "Create successful!",
             "error": "Create failed! Please try again later!"
-          }
+          },
+          "import-to-team": "Import to team"
         },
         "publish-dialog": {
           "title": "Publish to market",
