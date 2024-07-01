@@ -1,4 +1,3 @@
-import { AssetType } from '@/common/typings/asset';
 import { BaseAssetEntity } from '@/database/entities/assets/base-asset';
 import { AbstractAssetRepository } from '@/database/repositories/assets-abstract.repository';
 import { CanvasAssetRepositroy } from '@/database/repositories/assets-canvas.repository';
@@ -10,6 +9,7 @@ import { LlmModelAssetRepositroy } from '@/database/repositories/assets-llm-mode
 import { MediaFileAssetRepositroy } from '@/database/repositories/assets-media-file.repository';
 import { SdModelAssetRepositroy } from '@/database/repositories/assets-sd-model.repository';
 import { WorkflowAssetRepositroy } from '@/database/repositories/assets-workflow.respository';
+import { AssetType } from '@inf-monkeys/monkeys';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -39,7 +39,7 @@ export class AssetsMapperService {
       return this.mediaFileAssetsRepository as AbstractAssetRepository<BaseAssetEntity>;
     } else if (assetType === 'workflow') {
       return this.workflowAssetRepositroy as AbstractAssetRepository<BaseAssetEntity>;
-    } else if (assetType === 'knowledge-base-sql') {
+    } else if (assetType === 'sql-knowledge-base') {
       return this.sqlKnowledgeBaseRepository as AbstractAssetRepository<BaseAssetEntity>;
     } else if (assetType === 'comfyui-workflow') {
       return this.comfyuiWorkflowAssetsRepository as AbstractAssetRepository<BaseAssetEntity>;

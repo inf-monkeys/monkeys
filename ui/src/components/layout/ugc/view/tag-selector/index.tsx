@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { KeyedMutator } from 'swr/_internal';
 
-import { AssetType } from '@inf-monkeys/vines';
+import { AssetType } from '@inf-monkeys/monkeys';
 import { CheckCircle, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';

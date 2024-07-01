@@ -67,8 +67,8 @@ export const ApiKeyItem: React.FC<IApiKeyItemProps> = ({ apiKey, mutate }) => {
           </Avatar>
         ) : (
           <Avatar className="flex-shrink-0">
-            <AvatarFallback className="bg-greenA-3">
-              <KeyRound />
+            <AvatarFallback>
+              <KeyRound size={20} />
             </AvatarFallback>
           </Avatar>
         )}
@@ -96,7 +96,7 @@ export const ApiKeyItem: React.FC<IApiKeyItemProps> = ({ apiKey, mutate }) => {
           {apiKey.status != IApiKeyStatus.Revoked && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button theme="danger" disabled={loading}>
+                <Button className="text-red-10" size="small" disabled={loading} variant="outline">
                   {t('settings.api-key.api-key-item.operate.revoke.button')}
                 </Button>
               </AlertDialogTrigger>
@@ -116,7 +116,9 @@ export const ApiKeyItem: React.FC<IApiKeyItemProps> = ({ apiKey, mutate }) => {
               </AlertDialogContent>
             </AlertDialog>
           )}
-          <Button onClick={() => handleCopyApiKey(apiKey.apiKey)}>{t('common.utils.copy')}</Button>
+          <Button onClick={() => handleCopyApiKey(apiKey.apiKey)} variant="outline" size="small">
+            {t('common.utils.copy')}
+          </Button>
         </div>
       </CardContent>
     </Card>

@@ -1,4 +1,4 @@
-import { WorkflowTriggerType } from '@inf-monkeys/vines/src/models/WorkflowDefDto.ts';
+import { WorkflowTriggerType } from '@inf-monkeys/monkeys';
 import z from 'zod';
 
 export const vinesSearchWorkflowExecutionsSchema = z.object({

@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useRef, useState } from 'react';
 
-import { BlockCredentialItem } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
+import { ToolCredentialItem } from '@inf-monkeys/monkeys';
 import { useForceUpdate } from '@mantine/hooks';
 import equal from 'fast-deep-equal/es6';
 import { get, isArray, set } from 'lodash';
@@ -109,7 +109,7 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
       }
     }, [finalInputs]);
 
-    const credentials = get(tool, 'credentials', []) as BlockCredentialItem[];
+    const credentials = get(tool, 'credentials', []) as ToolCredentialItem[];
 
     return (
       <div className={cn('flex flex-col gap-4 px-1 py-2', className)}>

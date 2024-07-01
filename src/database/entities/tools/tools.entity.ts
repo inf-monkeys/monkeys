@@ -1,5 +1,5 @@
-import { BlockCredentialItem, BlockDefProperties, BlockExtraInfo, BlockRuleItem, BlockType } from '@inf-monkeys/vines';
-import { Column, Entity } from 'typeorm';
+import { I18nValue, ToolCredentialItem, ToolExtraInfo, ToolProperty, ToolRuleItem, ToolType } from '@inf-monkeys/monkeys';
+import { AfterLoad, Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
 @Entity({ name: 'tools' })
@@ -21,10 +21,10 @@ export class ToolsEntity extends BaseEntity {
   public?: boolean;
 
   @Column({
-    default: BlockType.SIMPLE,
+    default: ToolType.SIMPLE,
     type: 'varchar',
   })
-  type: BlockType;
+  type: ToolType;
 
   @Column()
   namespace: string;
@@ -36,17 +36,19 @@ export class ToolsEntity extends BaseEntity {
     nullable: true,
     type: 'simple-json',
   })
-  credentials?: BlockCredentialItem[];
+  credentials?: ToolCredentialItem[];
 
   @Column({
     name: 'display_name',
+    type: 'varchar',
   })
-  displayName: string;
+  displayName: string | I18nValue;
 
   @Column({
     nullable: true,
+    type: 'varchar',
   })
-  description?: string;
+  description?: string | I18nValue;
 
   @Column({
     nullable: true,
@@ -64,24 +66,35 @@ export class ToolsEntity extends BaseEntity {
     comment: '表单配置',
     type: 'simple-json',
   })
-  input: BlockDefProperties[];
+  input: ToolProperty[];
 
   @Column({
     nullable: true,
     comment: '输出数据',
     type: 'simple-json',
   })
-  output: BlockDefProperties[];
+  output: ToolProperty[];
 
   @Column({
     type: 'simple-json',
     nullable: true,
   })
-  rules?: BlockRuleItem[];
+  rules?: ToolRuleItem[];
 
   @Column({
     type: 'simple-json',
     nullable: true,
   })
-  extra?: BlockExtraInfo;
+  extra?: ToolExtraInfo;
+
+  @AfterLoad()
+  afterLoad?() {
+    try {
+      this.displayName = JSON.parse(this.displayName as string);
+    } catch (error) {}
+
+    try {
+      this.description = JSON.parse(this.description as string);
+    } catch (error) {}
+  }
 }

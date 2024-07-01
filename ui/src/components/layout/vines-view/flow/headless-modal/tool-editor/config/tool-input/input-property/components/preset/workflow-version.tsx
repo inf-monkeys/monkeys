@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { BlockDefPropertyTypes } from '@inf-monkeys/vines';
+import { ToolPropertyTypes } from '@inf-monkeys/monkeys';
 import { get } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
@@ -37,7 +37,7 @@ export const WorkflowVersionPresets: React.FC<IVinesInputPropertyProps & IVinesI
           name: optValue.toString(),
           type: t(
             'workspace.flow-view.headless-modal.tool-editor.input.comps.preset.workflow-version',
-          ) as BlockDefPropertyTypes,
+          ) as ToolPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);

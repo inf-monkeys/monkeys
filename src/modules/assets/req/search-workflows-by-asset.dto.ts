@@ -1,4 +1,5 @@
-import { ALLOW_ASSET_TYPES, AssetType } from '@/common/typings/asset';
+import { ALLOW_ASSET_TYPES } from '@/common/typings/asset';
+import { AssetType } from '@inf-monkeys/monkeys';
 import * as joiful from 'joiful';
 
 export class SearchWorkflowsByAssetDto {
@@ -6,5 +7,5 @@ export class SearchWorkflowsByAssetDto {
   assetId: string;
 
   @joiful.string().allow([...ALLOW_ASSET_TYPES, 'block'])
-  assetType: AssetType | 'block';
+  assetType: AssetType;
 }

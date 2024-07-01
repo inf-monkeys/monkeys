@@ -1,4 +1,4 @@
-import { BlockType } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
+import { ToolType } from '@inf-monkeys/monkeys';
 
 import { IVinesVariableTag, VinesToolDef, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
@@ -7,7 +7,7 @@ export const BUILT_IN_TOOLS: VinesToolDef[] = [
     name: 'fake_node',
     displayName: '点击添加工具',
     icon: 'emoji:⛔:#35363b',
-    type: 'SIMPLE' as BlockType.SIMPLE,
+    type: 'SIMPLE' as ToolType.SIMPLE,
     categories: ['process'],
     input: [],
     output: [],

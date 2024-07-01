@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { useSWRConfig } from 'swr';
 import { Link } from '@tanstack/react-router';
+import { useSWRConfig } from 'swr';
 
 import { Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +12,7 @@ import { IPinPage } from '@/apis/pages/typings.ts';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { getI18nContent } from '@/utils';
 
 interface IWorkbenchViewHeaderProps extends React.ComponentPropsWithoutRef<'div'> {
   page?: Partial<IPinPage>;
@@ -35,7 +36,7 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page 
     });
   };
 
-  const workflowDesc = workflow?.description ? ` - ${workflow.description}` : '';
+  const workflowDesc = getI18nContent(workflow?.description) ? ` - ${getI18nContent(workflow?.description)}` : '';
   const displayName = page?.displayName ?? '';
 
   return (
@@ -43,7 +44,9 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page 
       <div className="flex gap-2">
         <VinesIcon size="sm">{workflow?.iconUrl}</VinesIcon>
         <div className="flex flex-col gap-0.5">
-          <h1 className="font-bold leading-tight">{workflow?.displayName ?? t('common.utils.untitled')}</h1>
+          <h1 className="font-bold leading-tight">
+            {getI18nContent(workflow?.displayName) ?? t('common.utils.untitled')}
+          </h1>
           <span className="text-xxs">
             {t([`workspace.wrapper.space.tabs.${displayName}`, displayName]) + workflowDesc}
           </span>

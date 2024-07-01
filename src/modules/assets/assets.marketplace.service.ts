@@ -1,10 +1,10 @@
 import { config } from '@/common/config';
 import { ListDto } from '@/common/dto/list.dto';
 import { ONEAPI_CHANNELS } from '@/common/oneapi/consts';
-import { AssetType } from '@/common/typings/asset';
 import { AssetsCommonRepository } from '@/database/repositories/assets-common.repository';
 import { LlmChannelAssetRepositroy } from '@/database/repositories/assets-llm-channel.respository';
 import { WorkflowAssetRepositroy } from '@/database/repositories/assets-workflow.respository';
+import { AssetType } from '@inf-monkeys/monkeys';
 import { Injectable } from '@nestjs/common';
 import { AssetsMapperService } from './assets.common.service';
 import { BUILT_IN_WORKFLOW_MARKETPLACE_LIST } from './assets.marketplace.data';

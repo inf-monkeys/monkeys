@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 

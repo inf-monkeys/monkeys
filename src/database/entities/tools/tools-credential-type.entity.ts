@@ -1,5 +1,5 @@
 import { CredentialAuthType } from '@/common/typings/tools';
-import { BlockDefProperties } from '@inf-monkeys/vines';
+import { ToolProperty } from '@inf-monkeys/monkeys';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
@@ -35,5 +35,5 @@ export class ToolsCredentialTypeEntity extends BaseEntity {
   @Column({
     type: 'simple-json',
   })
-  properties: BlockDefProperties[];
+  properties: ToolProperty[];
 }

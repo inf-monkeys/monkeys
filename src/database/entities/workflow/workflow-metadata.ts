@@ -1,5 +1,4 @@
-import { AssetType } from '@/common/typings/asset';
-import { BlockDefProperties, MonkeyTaskDefTypes } from '@inf-monkeys/vines';
+import { AssetType, MonkeyTaskDefTypes, ToolProperty } from '@inf-monkeys/monkeys';
 import { Column, Entity } from 'typeorm';
 import { BaseAssetEntity } from '../assets/base-asset';
 import { WorkflowTriggerType } from './workflow-trigger';
@@ -95,7 +94,7 @@ export class WorkflowMetadataEntity extends BaseAssetEntity {
     type: 'simple-json',
     nullable: true,
   })
-  variables?: BlockDefProperties[];
+  variables?: ToolProperty[];
 
   @Column({
     comment: 'workflow output 配置',

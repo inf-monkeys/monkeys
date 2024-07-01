@@ -1,4 +1,5 @@
-import { ALLOW_ASSET_TYPES, AssetType } from '@/common/typings/asset';
+import { ALLOW_ASSET_TYPES } from '@/common/typings/asset';
+import { AssetType } from '@inf-monkeys/monkeys';
 import * as joiful from 'joiful';
 
 export class ListAssetFilterDto {

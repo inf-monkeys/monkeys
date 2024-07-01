@@ -1,6 +1,5 @@
-import { AssetType } from '@/common/typings/asset';
 import { BaseAssetEntity } from '@/database/entities/assets/base-asset';
-import { BlockDefProperties } from '@inf-monkeys/vines';
+import { AssetType, ToolProperty } from '@inf-monkeys/monkeys';
 import { Column, Entity } from 'typeorm';
 
 @Entity({ name: 'llm_channels' })
@@ -11,5 +10,5 @@ export class LlmChannelEntity extends BaseAssetEntity {
     name: 'properites',
     type: 'simple-json',
   })
-  properites: BlockDefProperties[];
+  properites: ToolProperty[];
 }

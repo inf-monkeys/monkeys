@@ -1,5 +1,5 @@
 import { BaseEntityDto } from '@/common/dto/base-entity.dto';
-import { BlockDefProperties, IJSONObject, MonkeyWorkflowDef } from '@inf-monkeys/vines';
+import { IJSONObject, MonkeyWorkflowDef, ToolProperty } from '@inf-monkeys/monkeys';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
@@ -75,7 +75,7 @@ export class WorkflowDto extends BaseEntityDto {
     type: Object,
   })
   @Expose()
-  variables?: BlockDefProperties[];
+  variables?: ToolProperty[];
 
   @ApiProperty({
     description: '从其派生的流程 ID',

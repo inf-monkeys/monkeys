@@ -1,4 +1,4 @@
-import { AssetType } from '@/common/typings/asset';
+import { AssetType } from '@inf-monkeys/monkeys';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ListReferencedWorkflowsDto {

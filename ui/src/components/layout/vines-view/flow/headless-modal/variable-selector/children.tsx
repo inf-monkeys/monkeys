@@ -28,23 +28,23 @@ export const VariableChildren: React.FC<IVariableChildrenProps> = ({ name, child
         side="right"
         onClick={(e) => e.stopPropagation()}
       >
-        <span className="text-xs text-muted-foreground">{name}</span>
-        {children?.map(({ id, label, children, jsonpath, targetId }) => (
-          <div
-            key={id}
-            className="flex w-full cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm hover:bg-muted"
-            onClick={() => onSelected?.(id, jsonpath, targetId)}
-          >
-            {label}
-            {children && children.length > 0 && (
-              <div className="flex flex-1 justify-end">
-                <VariableChildren name={label} onSelected={onSelected}>
-                  {children}
-                </VariableChildren>
-              </div>
-            )}
-          </div>
-        ))}
+        {/*<span className="text-xs text-muted-foreground">{name}</span>*/}
+        {/*{children?.map(({ id, label, children, jsonpath, targetId }) => (*/}
+        {/*  <div*/}
+        {/*    key={id}*/}
+        {/*    className="flex w-full cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm hover:bg-muted"*/}
+        {/*    onClick={() => onSelected?.(id, jsonpath, targetId)}*/}
+        {/*  >*/}
+        {/*    {label}*/}
+        {/*    {children && children.length > 0 && (*/}
+        {/*      <div className="flex flex-1 justify-end">*/}
+        {/*        <VariableChildren name={label} onSelected={onSelected}>*/}
+        {/*          {children}*/}
+        {/*        </VariableChildren>*/}
+        {/*      </div>*/}
+        {/*    )}*/}
+        {/*  </div>*/}
+        {/*))}*/}
       </HoverCardContent>
     </HoverCard>
   );

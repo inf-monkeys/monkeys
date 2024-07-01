@@ -62,7 +62,7 @@ export const CreateTeam: React.FC<ICreateTeamProps> = () => {
     <Dialog open={visible} onOpenChange={setVisible}>
       <Tooltip content={t('settings.account.team.create.button-tooltip')}>
         <DialogTrigger asChild>
-          <Button icon={<Plus />} size="small" />
+          <Button icon={<Plus />} size="small" variant="outline" />
         </DialogTrigger>
       </Tooltip>
       <DialogContent>

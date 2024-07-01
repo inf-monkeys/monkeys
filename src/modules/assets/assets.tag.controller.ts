@@ -1,7 +1,7 @@
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
-import { AssetType } from '@/common/typings/asset';
 import { IRequest } from '@/common/typings/request';
+import { AssetType } from '@inf-monkeys/monkeys';
 import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AssetsTagService } from './assets.tag.service';

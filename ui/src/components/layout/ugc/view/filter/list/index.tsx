@@ -51,13 +51,13 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
   const [searchValue, setSearchValue] = useState('');
 
   const blockCate = useMemo(() => {
-    return assetType === 'block'
+    return assetType === 'tools'
       ? (BLOCK_CATEGORY_SORT_INDEX_LIST.map((c) => {
           if (c === 'all' || c === 'human' || !_.get(IAppCategoryNameMap, c)) return null;
           return {
             id: c,
             name: _.get(IAppCategoryNameMap, c),
-            type: 'block',
+            type: 'tools',
             createdTimestamp: 0,
             updatedTimestamp: 0,
             isDeleted: false,
@@ -72,7 +72,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
         onChange({});
         return;
       }
-      if (assetType === 'block') {
+      if (assetType === 'tools') {
         onChange({
           cate: current,
         });
@@ -119,7 +119,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
           {(assetFilterRules || assetPublicCategories) &&
             (isMarket && assetPublicCategories
               ? assetPublicCategories
-              : assetType === 'block'
+              : assetType === 'tools'
                 ? blockCate
                 : searchValue != '' && assetFilterRules
                   ? assetFilterRules.filter((r) => r.name.includes(searchValue))
@@ -137,7 +137,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                 >
                   <div className="flex w-full items-center justify-between px-4 text-xs">
                     <span>{rule.name}</span>
-                    {assetType != 'block' && !isMarket && (
+                    {assetType != 'tools' && !isMarket && (
                       <AlertDialog>
                         <Tooltip content={t('common.utils.delete')}>
                           <TooltipTrigger asChild>

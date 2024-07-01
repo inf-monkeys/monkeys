@@ -8,6 +8,7 @@ import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { I18nContent } from '@/utils';
 
 interface IUgcComfyUIWorkflowStoreUseWorkflowDialogProps {
   children?: React.ReactNode;
@@ -51,8 +52,8 @@ export const UgcComfyUIWorkflowStoreUseWorkflowDialog: React.FC<IUgcComfyUIWorkf
             <VinesIcon src={item.iconUrl} size="lg" />
           </div>
           <div className="flex w-96 flex-col gap-1 overflow-hidden">
-            <p className="font-bold">{item.displayName}</p>
-            <p className="break-words text-sm">{item.description}</p>
+            <p className="font-bold">{I18nContent(item.displayName)}</p>
+            <p className="break-words text-sm">{I18nContent(item.description)}</p>
           </div>
         </div>
         <DialogFooter>

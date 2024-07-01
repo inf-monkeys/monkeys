@@ -13,7 +13,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { VariableEditor, VariableEditorRefProps } from '@/components/ui/vines-variable-editor';
 import { VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 import { useFlowStore } from '@/store/useFlowStore';
-import { cn } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 
@@ -67,9 +67,9 @@ export const StringInput: React.FC<IVinesInputPropertyProps & IStringInputProps>
                 setPreviewVisible(true);
               }}
               placeholder={
-                def?.placeholder ??
+                getI18nContent(def?.placeholder) ??
                 t('workspace.flow-view.headless-modal.tool-editor.input.comps.string.placeholder', {
-                  name: def?.displayName,
+                  name: getI18nContent(def?.displayName),
                 })
               }
               initialPointMapper={{ ...variableMapper, ...extraVariableMapper }}

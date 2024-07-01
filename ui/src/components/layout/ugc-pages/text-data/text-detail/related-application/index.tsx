@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useSearchReferenceWorkflows } from '@/apis/ugc';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { getI18nContent } from '@/utils';
 
 interface IRelatedApplicationProps {
   textId: string;
@@ -58,10 +59,10 @@ export const RelatedApplication: React.FC<IRelatedApplicationProps> = ({ textId 
                 target="_blank"
                 rel="noreferrer"
               >
-                {displayName}
+                {getI18nContent(displayName)}
               </a>
             </TableCell>
-            <TableCell>{description}</TableCell>
+            <TableCell>{getI18nContent(displayName)}</TableCell>
           </TableRow>
         ))}
       </TableBody>

@@ -8,6 +8,7 @@ import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { I18nContent } from '@/utils';
 
 interface IUgcApplicationStoreUseTemplateDialogProps {
   children?: React.ReactNode;
@@ -58,7 +59,7 @@ export const UgcApplicationStoreUseTemplateDialog: React.FC<IUgcApplicationStore
             <VinesIcon src={item.iconUrl} size="xl" />
           </div>
           <div className="flex flex-col gap-1">
-            <span className="font-bold">{item.displayName}</span>
+            <span className="font-bold">{I18nContent(item.displayName)}</span>
             <span className="text-sm">{item.description}</span>
           </div>
         </div>

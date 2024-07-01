@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { IVinesNodeCustomData } from '@/package/vines-flow/core/nodes/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
-import { cn } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 
 interface ISimplifyNodeExpandProps {
   nodeId: string;
@@ -24,8 +24,8 @@ export const SimplifyNodeExpand: React.FC<ISimplifyNodeExpandProps> = ({ nodeId,
 
   const displayName = customData?.title ?? toolDef?.displayName ?? toolName;
   const description =
-    customData?.description ??
-    toolDef?.description ??
+    getI18nContent(customData?.description) ??
+    getI18nContent(toolDef?.description) ??
     (isErrorNode ? t('workspace.flow-view.vines.tools.unknown') : '');
   const displayDesc = description.length > 36 ? `${description.slice(0, 36)}...` : description;
 
@@ -68,7 +68,7 @@ export const SimplifyNodeExpand: React.FC<ISimplifyNodeExpandProps> = ({ nodeId,
                 }}
                 className="text-xl font-bold leading-none"
               >
-                {displayName}
+                {getI18nContent(displayName)}
               </motion.h1>
             )}
             {displayDesc && (
@@ -88,7 +88,7 @@ export const SimplifyNodeExpand: React.FC<ISimplifyNodeExpandProps> = ({ nodeId,
                 }}
                 className={cn('leading-2 text-xs text-opacity-70', isErrorNode && '!text-red-10')}
               >
-                {displayDesc}
+                {getI18nContent(displayDesc)}
               </motion.div>
             )}
           </AnimatePresence>

@@ -1,5 +1,5 @@
 import { LlmChannelEntity } from '@/database/entities/assets/model/llm-channel/llm-channel.entity';
-import { BlockDefProperties } from '@inf-monkeys/vines';
+import { ToolProperty } from '@inf-monkeys/monkeys';
 
 export interface OneAPIChannel {
   key: number;
@@ -7,10 +7,10 @@ export interface OneAPIChannel {
   value: number;
   color: string;
   icon: string;
-  properites: BlockDefProperties[];
+  properites: ToolProperty[];
 }
 
-export const DEFAULT_ONEAPI_CHANNEL_PROPERITIES: BlockDefProperties[] = [
+export const DEFAULT_ONEAPI_CHANNEL_PROPERITIES: ToolProperty[] = [
   {
     displayName: 'API Key',
     name: 'key',

@@ -7,6 +7,7 @@ import { isJWT } from 'validator';
 
 import { getUser } from '@/apis/authz/user';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
+import i18n from '@/i18n.ts';
 import { readLocalStorageValue, setLocalStorage } from '@/utils';
 
 export interface IUserToken {
@@ -88,26 +89,20 @@ export const logout = (id: string): Promise<number> =>
       const {
         data: { name },
       } = users[id];
-      toast(`确定要登出「${name}」吗`, {
-        action: {
-          label: '登出',
-          onClick: () => {
-            delete users[id];
-            if (Object.keys(users).length === 0) {
-              localStorage.removeItem('vines-token');
-              localStorage.removeItem('vines-account');
-              localStorage.removeItem('vines-team-id');
-              localStorage.removeItem('vines-teams');
-            }
-            setLocalStorage(TOKEN_KEY, users);
-            resolve(userLength);
-            toast.success(`已登出成功登出「${name}」`);
-          },
-        },
-        onDismiss: () => resolve(userLength),
-      });
+
+      delete users[id];
+      if (Object.keys(users).length === 0) {
+        localStorage.removeItem('vines-token');
+        localStorage.removeItem('vines-account');
+        localStorage.removeItem('vines-team-id');
+        localStorage.removeItem('vines-teams');
+      }
+      setLocalStorage(TOKEN_KEY, users);
+      resolve(userLength);
+
+      toast.success(i18n.t('auth.users.logout-user', { name }));
     } else {
-      toast.error('已登出');
+      toast.error(i18n.t('auth.users.logout-success'));
       resolve(userLength);
     }
   });

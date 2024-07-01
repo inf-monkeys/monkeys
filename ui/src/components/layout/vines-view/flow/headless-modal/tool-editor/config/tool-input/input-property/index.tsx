@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { BlockDefPropertyTypeOptions, BlockDefPropertyTypes } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
+import { ToolPropertyTypeOptions, ToolPropertyTypes } from '@inf-monkeys/monkeys';
 import { useForceUpdate } from '@mantine/hooks';
 import { debounce, get, isEmpty, isNumber, isString } from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -44,8 +44,8 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = memo((prop
   const { onChange, value, ...childProps } = props;
   const [type, typeOptions, isMultipleValues, enableEditor, isPureCollection, isMultiFieldObject, assetType] =
     useMemo(() => {
-      const options = get(def, 'typeOptions', {}) as BlockDefPropertyTypeOptions;
-      const type = get(def, 'type', 'string') as BlockDefPropertyTypes;
+      const options = get(def, 'typeOptions', {}) as ToolPropertyTypeOptions;
+      const type = get(def, 'type', 'string') as ToolPropertyTypes;
       const isMultipleValues = get(options, 'multipleValues', false);
       const isMultiFieldObject = get(options, 'multiFieldObject', false);
       const enableEditor = get(options, 'editor', null) === 'code' || (type === 'json' && !isMultiFieldObject);

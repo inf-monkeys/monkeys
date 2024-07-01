@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import { TaskType, WorkflowDef } from '@io-orkes/conductor-javascript';
 
 import { createWorkflow as createWorkflowFromAPI } from '@/apis/workflow';

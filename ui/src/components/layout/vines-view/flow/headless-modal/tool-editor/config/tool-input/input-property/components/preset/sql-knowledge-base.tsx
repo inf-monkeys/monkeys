@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { BlockDefPropertyTypes } from '@inf-monkeys/vines';
+import { ToolPropertyTypes } from '@inf-monkeys/monkeys';
 import { useTranslation } from 'react-i18next';
 
 import { useUgcTableData } from '@/apis/ugc';
@@ -9,6 +9,7 @@ import { IVinesInputPresetProps } from '@/components/layout/vines-view/flow/head
 import { PresetWrapper } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/wrapper.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { IVinesToolPropertiesOption, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
+import { I18nContent } from '@/utils';
 
 export const SqlKnowledgeBaseSelector: React.FC<IVinesInputPropertyProps & IVinesInputPresetProps> = (props) => {
   const { t } = useTranslation();
@@ -29,11 +30,11 @@ export const SqlKnowledgeBaseSelector: React.FC<IVinesInputPropertyProps & IVine
     const opts = sqlKnowledgeBases.data.map((m) => {
       const ownedByTeam = teamId === m.teamId;
       const displayName = ownedByTeam
-        ? m.displayName
+        ? I18nContent(m.displayName)
         : t('workspace.flow-view.headless-modal.tool-editor.input.comps.preset.sql-knowledge-base.display-name', {
-            name: m.displayName,
+            name: I18nContent(m.displayName),
           });
-      return { name: displayName, value: m.uuid };
+      return { name: displayName!, value: m.uuid };
     });
     setOptions(opts);
 
@@ -45,7 +46,7 @@ export const SqlKnowledgeBaseSelector: React.FC<IVinesInputPropertyProps & IVine
           name: optValue,
           type: t(
             'workspace.flow-view.headless-modal.tool-editor.input.comps.preset.sql-knowledge-base.label',
-          ) as BlockDefPropertyTypes,
+          ) as ToolPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);
