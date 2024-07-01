@@ -3,6 +3,7 @@ import { ListDto } from '@/common/dto/list.dto';
 import { logger } from '@/common/logger';
 import { generateDbId } from '@/common/utils';
 import { flatTasks } from '@/common/utils/conductor';
+import { getDisplayName } from '@/common/utils/i18n';
 import { extractAssetFromZip } from '@/common/utils/zip-asset';
 import { ValidationIssueType, WorkflowMetadataEntity, WorkflowOutputValue, WorkflowRateLimiter, WorkflowValidationIssue } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
@@ -368,7 +369,10 @@ export class WorkflowCrudService {
   public async cloneWorkflowOfVersion(teamId: string, userId: string, originalWorkflowId: string, originalWorkflowVersion: number) {
     const originalWorkflow = await this.workflowRepository.getWorkflowById(originalWorkflowId, originalWorkflowVersion);
     const workflowId = await this.createWorkflowDef(teamId, userId, {
-      displayName: originalWorkflow.displayName + ' - 副本',
+      displayName: {
+        'zh-CN': getDisplayName(originalWorkflow.displayName, 'zh-CN') + ' - 副本',
+        'en-US': getDisplayName(originalWorkflow.displayName, 'en-US') + ' - Copy',
+      },
       version: originalWorkflowVersion,
       tasks: originalWorkflow.tasks,
     });
@@ -384,7 +388,10 @@ export class WorkflowCrudService {
         teamId,
         userId,
         {
-          displayName: originalWorkflow.displayName + ' - 副本',
+          displayName: {
+            'zh-CN': getDisplayName(originalWorkflow.displayName, 'zh-CN') + ' - 副本',
+            'en-US': getDisplayName(originalWorkflow.displayName, 'en-US') + ' - Copy',
+          },
           version: version,
           tasks: originalWorkflow.tasks,
           iconUrl: originalWorkflow.iconUrl,
