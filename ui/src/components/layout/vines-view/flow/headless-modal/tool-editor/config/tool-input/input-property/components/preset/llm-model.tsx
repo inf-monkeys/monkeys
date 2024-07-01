@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { BlockDefPropertyTypes } from '@inf-monkeys/vines';
+import { ToolPropertyTypes } from '@inf-monkeys/monkeys';
 import { useTranslation } from 'react-i18next';
 
 import { useLLMModels } from '@/apis/llm';
@@ -8,6 +8,7 @@ import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/he
 import { IVinesInputPresetProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/index.tsx';
 import { PresetWrapper } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/wrapper.tsx';
 import { IVinesToolPropertiesOption, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
+import { I18nContent } from '@/utils';
 
 export const LlmModelPresets: React.FC<IVinesInputPropertyProps & IVinesInputPresetProps> = (props) => {
   const { t } = useTranslation();
@@ -25,7 +26,7 @@ export const LlmModelPresets: React.FC<IVinesInputPropertyProps & IVinesInputPre
       const modelNames = Object.values(models);
       for (const model of modelNames) {
         realLLMModels.push({
-          displayName: `${item.displayName} - ${model}`,
+          displayName: `${I18nContent(item.displayName)} - ${model}`,
           channelId: item.channelId,
           model: model,
         });
@@ -44,9 +45,7 @@ export const LlmModelPresets: React.FC<IVinesInputPropertyProps & IVinesInputPre
         (newOptionsVariableMapper[optValue] = {
           displayName: name,
           name: optValue,
-          type: t(
-            'workspace.flow-view.headless-modal.tool-editor.input.comps.preset.llm-model',
-          ) as BlockDefPropertyTypes,
+          type: t('workspace.flow-view.headless-modal.tool-editor.input.comps.preset.llm-model') as ToolPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);

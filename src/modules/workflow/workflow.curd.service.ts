@@ -8,7 +8,7 @@ import { ValidationIssueType, WorkflowMetadataEntity, WorkflowOutputValue, Workf
 import { WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
 import { AssetsCommonRepository } from '@/database/repositories/assets-common.repository';
 import { WorkflowTask } from '@inf-monkeys/conductor-javascript';
-import { AssetType, BlockDefProperties, BlockType, MonkeyTaskDefTypes } from '@inf-monkeys/vines';
+import { AssetType, MonkeyTaskDefTypes, ToolProperty, ToolType } from '@inf-monkeys/monkeys';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import fs from 'fs';
 import _ from 'lodash';
@@ -67,7 +67,7 @@ export class WorkflowCrudService {
     const tools = await this.toolsRepository.listTools(teamId);
     if (assetsPolicy && !isTheSameTeam) {
       const flattedTasks: WorkflowTask[] = flatTasks(tasks);
-      for (const task of flattedTasks.filter((x) => x.type === BlockType.SIMPLE)) {
+      for (const task of flattedTasks.filter((x) => x.type === ToolType.SIMPLE)) {
         const block = tools.find((x) => x.name === task.name);
         if (block?.input?.length) {
           for (const inputItem of block.input) {
@@ -156,7 +156,7 @@ export class WorkflowCrudService {
     // 导入工作流的时候替换想了数据库和表格数据
     if (replaceSqlDatabaseMap || replaceVectorDatabaseMap || replaceSdModelMap || replaceLlmModelMap) {
       const flattedTasks: WorkflowTask[] = flatTasks(tasks);
-      for (const task of flattedTasks.filter((x) => x.type === BlockType.SIMPLE)) {
+      for (const task of flattedTasks.filter((x) => x.type === ToolType.SIMPLE)) {
         const tool = tools.find((x) => x.name === task.name);
         if (tool?.input?.length) {
           for (const inputItem of tool.input) {
@@ -460,7 +460,7 @@ export class WorkflowCrudService {
       description?: string;
       iconUrl?: string;
       tasks?: MonkeyTaskDefTypes[];
-      variables?: BlockDefProperties[];
+      variables?: ToolProperty[];
       validationIssues?: WorkflowValidationIssue[];
       output?: WorkflowOutputValue[];
       exposeOpenaiCompatibleInterface?: boolean;

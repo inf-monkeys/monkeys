@@ -32,7 +32,7 @@ import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInput, workflowInputSchema } from '@/schema/workspace/workflow-input.ts';
 import { useFlowStore } from '@/store/useFlowStore';
-import { cn, nanoIdLowerCase } from '@/utils';
+import { cn, getI18nContent, nanoIdLowerCase } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IInputEditorProps {}
@@ -83,7 +83,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
   useEffect(() => {
     if (!currentVariable) return;
 
-    form.setValue('displayName', currentVariable.displayName);
+    form.setValue('displayName', getI18nContent(currentVariable.displayName) ?? t('common.utils.unknown'));
     form.setValue('name', currentVariable.name);
     form.setValue('type', currentVariable.type as IWorkflowInput['type']);
     form.setValue('default', currentVariable.default as IWorkflowInput['default']);

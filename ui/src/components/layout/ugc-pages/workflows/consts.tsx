@@ -1,9 +1,10 @@
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { I18nValue, MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { I18nContent } from '@/utils';
 
 const columnHelper = createColumnHelper<IAssetItem<MonkeyWorkflow>>();
 
@@ -22,13 +23,13 @@ export const createWorkflowsColumns = () => [
         target="_blank"
         rel="noreferrer"
       >
-        {getValue() as string}
+        {I18nContent(getValue() as string | I18nValue)}
       </a>
     ),
   }),
   columnHelper.accessor('description', {
     id: 'description',
-    cell: ({ getValue }) => RenderDescription({ description: getValue() as string }),
+    cell: ({ getValue }) => RenderDescription({ description: I18nContent(getValue() as string | I18nValue) }),
   }),
   columnHelper.accessor('user', {
     id: 'user',

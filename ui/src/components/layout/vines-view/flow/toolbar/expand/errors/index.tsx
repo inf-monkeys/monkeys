@@ -11,6 +11,7 @@ import { VinesIcon } from '@/components/ui/vines-icon';
 import { useVinesFlow } from '@/package/vines-flow';
 import { IVinesFlowRenderType, VINES_STATUS } from '@/package/vines-flow/core/typings.ts';
 import VinesEvent from '@/utils/events.ts';
+import { getI18nContent } from '@/utils';
 
 interface IVinesExpandToolErrorsProps {
   disabled?: boolean;
@@ -61,7 +62,7 @@ export const VinesExpandToolErrors: React.FC<IVinesExpandToolErrorsProps> = ({ d
           nodeName:
             isEndNodeName || isStartNodeName
               ? (isEndNodeName || isStartNodeName) ?? ''
-              : tool?.displayName ?? '' + (nodeCustomData?.title ? `（${nodeCustomData?.title}）` : ''),
+              : getI18nContent(tool?.displayName) ?? '' + (nodeCustomData?.title ? `（${nodeCustomData?.title}）` : ''),
           nodeIcon: isEndNodeIcon || isStartNodeIcon ? (isEndNodeIcon || isStartNodeIcon) ?? '' : tool?.icon ?? '',
         };
       }),

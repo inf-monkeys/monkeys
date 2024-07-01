@@ -25,7 +25,7 @@ export const ActionToolDetail: React.FC<IActionToolDetailProps> = () => {
   const { actionToolName } = Route.useParams();
 
   const { data: blockData } = useTool(actionToolName);
-  const { data: blockWorkflowRefData } = useSearchReferenceWorkflows('block', actionToolName);
+  const { data: blockWorkflowRefData } = useSearchReferenceWorkflows('tools', actionToolName);
 
   return (
     <main className="flex size-full flex-col gap-4">

@@ -14,8 +14,14 @@ export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketpla
     tags: ['模型调用（AutoInfer）'],
     autoPinPage: ['chat'],
     id: '662a1c620b9fd2739ab8d3a6',
-    displayName: '大语言模型多轮对话',
-    description: '基于大语言模型的多轮对话',
+    displayName: {
+      'zh-CN': '大语言模型多轮对话',
+      'en-US': 'Chat Completions (LLM)',
+    },
+    description: {
+      'zh-CN': '基于大语言模型的多轮对话',
+      'en-US': 'Multi-turn dialogues based on LLMs',
+    },
     iconUrl: 'emoji:🤖:#f2c1be',
     isPreset: true,
     isPublished: true,
@@ -81,8 +87,14 @@ export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketpla
     tags: ['模型调用（AutoInfer）'],
     autoPinPage: ['chat'],
     id: '662a1c620b9fd2739ab8d3a7',
-    displayName: '大语言模型单轮对话',
-    description: '基于大语言模型的单轮对话',
+    displayName: {
+      'zh-CN': '大语言模型单轮对话',
+      'en-US': 'Completions (LLM)',
+    },
+    description: {
+      'zh-CN': '基于大语言模型的单轮对话',
+      'en-US': 'Single-turn dialogues based on LLMs',
+    },
     iconUrl: 'emoji:🤖:#f2c1be',
     isPreset: true,
     isPublished: true,
@@ -138,8 +150,14 @@ export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketpla
     tags: ['模型调用（AutoInfer）'],
     autoPinPage: ['chat'],
     id: '664f1e0db10cb3ffc558437a',
-    displayName: '文本生成（大语言模型）',
-    description: '通过大语言模型生成文本',
+    displayName: {
+      'zh-CN': '文本生成（大语言模型）',
+      'en-US': 'Text Generation (LLM)',
+    },
+    description: {
+      'zh-CN': '通过大语言模型生成文本',
+      'en-US': 'Generate text by LLMs',
+    },
     iconUrl: 'emoji:🤖:#f2c1be',
     isPreset: true,
     isPublished: true,
@@ -147,13 +165,19 @@ export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketpla
     variables: [
       {
         default: 'Hello',
-        displayName: '用户消息',
+        displayName: {
+          'zh-CN': '用户消息',
+          'en-US': 'User Message',
+        },
         name: 'userMessage',
         type: 'string',
       },
       {
         default: 'You are a helpful assistant.',
-        displayName: '系统预置 Prompt',
+        displayName: {
+          'zh-CN': '系统预制 Prompt',
+          'en-US': 'System Prompt',
+        },
         name: 'systemPrompt',
         type: 'string',
       },
@@ -178,8 +202,14 @@ export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketpla
     tags: ['图像生成'],
     autoPinPage: ['preview'],
     id: '665569753c72460540612445',
-    displayName: '文本生成图像（MJ）',
-    description: '使用大语言模型构建 Prompt，再用 MJ 生成图片。',
+    displayName: {
+      'zh-CN': '文本生成图像（MJ）',
+      'en-US': 'Text to Image (MJ)',
+    },
+    description: {
+      'zh-CN': '根据用户输入的文本生成图像',
+      'en-US': 'Generate images based on user input text',
+    },
     iconUrl: 'emoji:📷:#98ae36',
     isPreset: true,
     isPublished: true,
@@ -198,7 +228,7 @@ export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketpla
           frequency_penalty: 0.5,
           presence_penalty: 0.5,
           response_format: 'text',
-          systemPrompt: '根据用户的需求生成 Midjourney 的 prompt，除此之外不要返回任何其他内容。是有用户的语言作为回答的语言。',
+          systemPrompt: 'Generate a valid Midjourney prompt based on user input text, and do not include any other information.',
           temperature: 0.7,
           userMessage: '${workflow.input.topic}',
         },

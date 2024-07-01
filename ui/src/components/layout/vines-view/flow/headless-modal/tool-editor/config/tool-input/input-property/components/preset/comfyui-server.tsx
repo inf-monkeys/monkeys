@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { BlockDefPropertyTypes } from '@inf-monkeys/vines';
+import { ToolPropertyTypes } from '@inf-monkeys/monkeys';
 import { useTranslation } from 'react-i18next';
 
 import { useComfyuiServers } from '@/apis/comfyui';
@@ -33,7 +33,7 @@ export const ComfyuiServerSelector: React.FC<IVinesInputPropertyProps & IVinesIn
           name: optValue,
           type: t(
             'workspace.flow-view.headless-modal.tool-editor.input.comps.preset.comfyui-server',
-          ) as BlockDefPropertyTypes,
+          ) as ToolPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);

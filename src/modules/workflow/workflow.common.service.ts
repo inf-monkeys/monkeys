@@ -1,4 +1,4 @@
-import { AssetType, MonkeyTaskDefTypes, MonkeyWorkflowDef } from '@inf-monkeys/vines';
+import { AssetType, MonkeyTaskDefTypes, MonkeyWorkflowDef } from '@inf-monkeys/monkeys';
 import { Injectable } from '@nestjs/common';
 import { WorkflowRepository } from '../../database/repositories/workflow.repository';
 

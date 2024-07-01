@@ -1,5 +1,6 @@
 import {
   MonkeyToolCategories,
+  MonkeyToolDescription,
   MonkeyToolDisplayName,
   MonkeyToolExtra,
   MonkeyToolIcon,
@@ -15,6 +16,20 @@ import { Response } from 'express';
 import { CreateChatCompletionsDto } from './dto/req/create-chat-compltion.dto';
 import { CreateCompletionsDto } from './dto/req/create-compltions.dto';
 import { GenerateTextByLlmDto } from './dto/req/generate-text-by-llm.dto';
+import {
+  FREQUENCY_PENALTY_PROPERTY,
+  KNOWLEDGE_BASE_PROPERTY,
+  MAX_TOKEN_PROPERTY,
+  MODEL_PROPERTY,
+  PRESENCE_PENALTY_PROPERTY,
+  RESPONSE_FORMAT_PROPERTY,
+  SQL_KNOWLEDGE_BASE_PROPERTY,
+  STREAM_PROPERTY,
+  SYSTEM_PROMOT_PROPERTY,
+  TEMPERATURE_PROPERTY,
+  TOOLS_PROPERTY,
+  USER_MESSAGE_PROPERTY,
+} from './llm.consts';
 import { LlmService, getModels } from './llm.service';
 import { CHAT_TOOL_OPENAPI_PATH } from './llm.swagger';
 
@@ -72,68 +87,29 @@ export class LlmController {
     description: '文本补全',
   })
   @MonkeyToolName(LLM_COMPLETION_TOOL)
-  @MonkeyToolDisplayName('单轮对话（大语言模型）')
+  @MonkeyToolDisplayName({
+    'zh-CN': '单轮对话（大语言模型）',
+    'en-US': 'Completions (LLM)',
+  })
+  @MonkeyToolDescription({
+    'zh-CN': '大语言模型单轮对话（文本补全）接口',
+    'en-US': 'Completions (LLM)',
+  })
   @MonkeyToolCategories(['gen-text'])
   @MonkeyToolIcon('emoji:💬:#c15048')
   @MonkeyToolInput([
     {
-      displayName: '注意：此工具为单独对话（Completions 接口），所选的模型必须支持单轮对话（/v1/completions) 接口，否则会运行失败。大多数情况下，你应该使用的是多轮对话工具。',
+      displayName: '注意：此工具为单轮对话（Completions 接口），所选的模型必须支持单轮对话（/v1/completions) 接口，否则会运行失败。大多数情况下，你应该使用的是多轮对话工具。',
       type: 'notice',
       name: 'docs',
     },
-    {
-      displayName: '大语言模型',
-      name: 'model',
-      type: 'string',
-      required: true,
-      typeOptions: {
-        assetType: 'llm-model',
-      },
-    },
-    {
-      displayName: '对话消息',
-      name: 'prompt',
-      type: 'string',
-      required: false,
-    },
-    {
-      displayName: '最大 Token 数',
-      name: 'max_tokens',
-      type: 'number',
-      required: false,
-      description: '设置最大 Token 数，如果消息 Token 数超过 max_tokens，将会被截断',
-    },
-    {
-      displayName: 'temperature（随机性程度）',
-      name: 'temperature',
-      type: 'number',
-      default: 0.7,
-      required: false,
-      description: '填写 0-1 的浮点数\n用于生成文本时，模型输出的随机性程度。较高的温度会导致更多的随机性，可能产生更有创意的回应。而较低的温度会使模型的输出更加确定，更倾向于选择高概率的词语。',
-    },
-    {
-      displayName: 'presence_penalty（重复惩罚）',
-      name: 'presence_penalty',
-      type: 'number',
-      default: 0.5,
-      required: false,
-      description: '填写 0-1 的浮点数\n用于惩罚模型生成重复的词语，从而使生成的文本更加多样化。',
-    },
-    {
-      displayName: 'frequency_penalty（频率惩罚）',
-      name: 'frequency_penalty',
-      type: 'number',
-      default: 0.5,
-      required: false,
-      description: '填写 0-1 的浮点数\n用于惩罚模型生成低频词语，从而使生成的文本更加多样化。',
-    },
-    {
-      name: 'stream',
-      displayName: '是否流式输出',
-      type: 'boolean',
-      required: false,
-      default: false,
-    },
+    MODEL_PROPERTY,
+    USER_MESSAGE_PROPERTY,
+    MAX_TOKEN_PROPERTY,
+    TEMPERATURE_PROPERTY,
+    PRESENCE_PENALTY_PROPERTY,
+    FREQUENCY_PENALTY_PROPERTY,
+    STREAM_PROPERTY,
   ])
   @MonkeyToolOutput([
     {
@@ -286,7 +262,14 @@ export class LlmController {
     description: '文本生成',
   })
   @MonkeyToolName(LLM_GENERATE_TEXT_TOOL)
-  @MonkeyToolDisplayName('文本生成（大语言模型）')
+  @MonkeyToolDisplayName({
+    'zh-CN': '文本生成（大语言模型）',
+    'en-US': 'Generate Text (LLM)',
+  })
+  @MonkeyToolDescription({
+    'zh-CN': '大语言模型文本生成',
+    'en-US': 'Generate Text (LLM)',
+  })
   @MonkeyToolCategories(['gen-text'])
   @MonkeyToolIcon('emoji:💬:#c15048')
   @MonkeyToolInput([
@@ -295,98 +278,24 @@ export class LlmController {
       type: 'notice',
       name: 'docs',
     },
-    {
-      displayName: '大语言模型',
-      name: 'model',
-      type: 'string',
-      required: true,
-      typeOptions: {
-        assetType: 'llm-model',
-      },
-    },
-    {
-      displayName: '系统预制 Prompt',
-      name: 'systemPrompt',
-      type: 'string',
-      required: false,
-    },
-    {
-      displayName: '用户消息',
-      name: 'userMessage',
-      type: 'string',
-      required: true,
-    },
-    {
-      displayName: '知识库上下文',
-      name: 'knowledgeBase',
-      type: 'string',
-      typeOptions: {
-        assetType: 'knowledge-base',
-      },
-    },
-    {
-      displayName: '工具列表',
-      name: 'tools',
-      type: 'string',
-      typeOptions: {
-        assetType: 'tools',
-        multipleValues: true,
-      },
-    },
-    {
-      displayName: '最大 Token 数',
-      name: 'max_tokens',
-      type: 'number',
-      required: false,
-      description: '设置最大 Token 数，如果消息 Token 数超过 max_tokens，将会被截断',
-    },
-    {
-      displayName: 'temperature（随机性程度）',
-      name: 'temperature',
-      type: 'number',
-      default: 0.7,
-      required: false,
-      description: '填写 0-1 的浮点数\n用于生成文本时，模型输出的随机性程度。较高的温度会导致更多的随机性，可能产生更有创意的回应。而较低的温度会使模型的输出更加确定，更倾向于选择高概率的词语。',
-    },
-    {
-      displayName: 'presence_penalty（重复惩罚）',
-      name: 'presence_penalty',
-      type: 'number',
-      default: 0.5,
-      required: false,
-      description: '填写 0-1 的浮点数\n用于惩罚模型生成重复的词语，从而使生成的文本更加多样化。',
-    },
-    {
-      displayName: 'frequency_penalty（频率惩罚）',
-      name: 'frequency_penalty',
-      type: 'number',
-      default: 0.5,
-      required: false,
-      description: '填写 0-1 的浮点数\n用于惩罚模型生成低频词语，从而使生成的文本更加多样化。',
-    },
-    {
-      displayName: '数据响应格式',
-      name: 'response_format',
-      type: 'options',
-      default: 'text',
-      description:
-        '当设置为 json_object 时，必须在 system 或者 user message 中手动要求大语言模型返回 json 格式数据，详情请见：https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format',
-      options: [
-        {
-          name: 'text',
-          value: 'text',
-        },
-        {
-          name: 'json_object',
-          value: 'json_object',
-        },
-      ],
-    },
+    MODEL_PROPERTY,
+    SYSTEM_PROMOT_PROPERTY,
+    USER_MESSAGE_PROPERTY,
+    KNOWLEDGE_BASE_PROPERTY,
+    TOOLS_PROPERTY,
+    MAX_TOKEN_PROPERTY,
+    TEMPERATURE_PROPERTY,
+    PRESENCE_PENALTY_PROPERTY,
+    FREQUENCY_PENALTY_PROPERTY,
+    RESPONSE_FORMAT_PROPERTY,
   ])
   @MonkeyToolOutput([
     {
       name: 'message',
-      displayName: '大语言模型返回消息',
+      displayName: {
+        'zh-CN': '消息',
+        'en-US': 'Message',
+      },
       type: 'string',
       required: true,
     },
@@ -453,7 +362,14 @@ export class LlmController {
     description: '多轮对话',
   })
   @MonkeyToolName(LLM_CHAT_COMPLETION_TOOL)
-  @MonkeyToolDisplayName('多轮对话（大语言模型）')
+  @MonkeyToolDisplayName({
+    'zh-CN': '多轮对话（大语言模型）',
+    'en-US': 'Chat Completions (LLM)',
+  })
+  @MonkeyToolDescription({
+    'zh-CN': '大语言模型多轮对话',
+    'en-US': 'Chat Completions (LLM)',
+  })
   @MonkeyToolCategories(['gen-text'])
   @MonkeyToolIcon('emoji:💬:#c15048')
   @MonkeyToolInput([
@@ -462,111 +378,32 @@ export class LlmController {
       type: 'notice',
       name: 'docs',
     },
+    MODEL_PROPERTY,
+    SYSTEM_PROMOT_PROPERTY,
     {
-      displayName: '大语言模型',
-      name: 'model',
-      type: 'string',
-      required: true,
-      typeOptions: {
-        assetType: 'llm-model',
+      displayName: {
+        'zh-CN': '历史会话记录',
+        'en-US': 'Messages',
       },
-    },
-    {
-      displayName: '预制 Prompt',
-      name: 'systemPrompt',
-      type: 'string',
-      required: false,
-    },
-    {
-      displayName: '历史会话记录',
       name: 'messages',
       type: 'json',
       required: true,
     },
-    {
-      displayName: '知识库上下文',
-      name: 'knowledgeBase',
-      type: 'string',
-      typeOptions: {
-        assetType: 'knowledge-base',
-      },
-    },
-    {
-      displayName: '关系型知识库上下文',
-      name: 'sqlKnowledgeBase',
-      type: 'string',
-      typeOptions: {
-        assetType: 'sql-knowledge-base',
-      },
-    },
-    {
-      displayName: '工具列表',
-      name: 'tools',
-      type: 'string',
-      typeOptions: {
-        assetType: 'tools',
-        multipleValues: true,
-      },
-    },
-    {
-      displayName: '最大 Token 数',
-      name: 'max_tokens',
-      type: 'number',
-      required: false,
-      description: '设置最大 Token 数，如果消息 Token 数超过 max_tokens，将会被截断',
-    },
-    {
-      displayName: 'temperature（随机性程度）',
-      name: 'temperature',
-      type: 'number',
-      default: 0.7,
-      required: false,
-      description: '填写 0-1 的浮点数\n用于生成文本时，模型输出的随机性程度。较高的温度会导致更多的随机性，可能产生更有创意的回应。而较低的温度会使模型的输出更加确定，更倾向于选择高概率的词语。',
-    },
-    {
-      displayName: 'presence_penalty（重复惩罚）',
-      name: 'presence_penalty',
-      type: 'number',
-      default: 0.5,
-      required: false,
-      description: '填写 0-1 的浮点数\n用于惩罚模型生成重复的词语，从而使生成的文本更加多样化。',
-    },
-    {
-      displayName: 'frequency_penalty（频率惩罚）',
-      name: 'frequency_penalty',
-      type: 'number',
-      default: 0.5,
-      required: false,
-      description: '填写 0-1 的浮点数\n用于惩罚模型生成低频词语，从而使生成的文本更加多样化。',
-    },
-    {
-      displayName: '数据响应格式',
-      name: 'response_format',
-      type: 'options',
-      default: 'text',
-      description:
-        '当设置为 json_object 时，必须在 system 或者 user message 中手动要求大语言模型返回 json 格式数据，详情请见：https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format',
-      options: [
-        {
-          name: 'text',
-          value: 'text',
-        },
-        {
-          name: 'json_object',
-          value: 'json_object',
-        },
-      ],
-    },
-    {
-      name: 'stream',
-      displayName: '是否流式输出',
-      type: 'boolean',
-      required: false,
-      default: false,
-    },
+    KNOWLEDGE_BASE_PROPERTY,
+    SQL_KNOWLEDGE_BASE_PROPERTY,
+    TOOLS_PROPERTY,
+    MAX_TOKEN_PROPERTY,
+    TEMPERATURE_PROPERTY,
+    PRESENCE_PENALTY_PROPERTY,
+    FREQUENCY_PENALTY_PROPERTY,
+    RESPONSE_FORMAT_PROPERTY,
+    STREAM_PROPERTY,
     {
       name: 'show_logs',
-      displayName: '是否输出日志',
+      displayName: {
+        'zh-CN': '是否显示日志',
+        'en-US': 'Show Logs',
+      },
       type: 'boolean',
       required: false,
       default: false,

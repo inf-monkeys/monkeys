@@ -9,6 +9,7 @@ import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { useFlowStore } from '@/store/useFlowStore';
+import { getI18nContent } from '@/utils';
 
 interface INodeCustomEditorProps {
   node?: VinesNode;
@@ -41,9 +42,11 @@ export const NodeCustomEditor: React.FC<INodeCustomEditorProps> = ({ node }) => 
                 <div className="flex items-center gap-2">
                   <div className="flex items-end gap-2">
                     <p className="text-base font-bold leading-none">
-                      {toolDisplayName ?? t('workspace.flow-view.vines.tools.unknown')}
+                      {getI18nContent(toolDisplayName) ?? t('workspace.flow-view.vines.tools.unknown')}
                     </p>
-                    {data?.title && <span className="text-text2 text-xs font-light">{tool?.displayName}</span>}
+                    {data?.title && (
+                      <span className="text-text2 text-xs font-light">{getI18nContent(tool?.displayName)}</span>
+                    )}
                   </div>
                 </div>
                 <div className="!text-xs font-normal opacity-50">
@@ -57,8 +60,8 @@ export const NodeCustomEditor: React.FC<INodeCustomEditorProps> = ({ node }) => 
           <ToolCustomDataEditor
             icon={icon}
             defaultIcon={tool?.icon}
-            name={toolDisplayName}
-            defaultName={tool?.displayName ?? ''}
+            name={getI18nContent(toolDisplayName)}
+            defaultName={getI18nContent(tool?.displayName) ?? ''}
             desc={data?.description ?? ''}
             defaultDesc={data?.description ?? ''}
             task={task}

@@ -1,4 +1,4 @@
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import type { Workflow as WorkflowExecution } from '@io-orkes/conductor-javascript';
 
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';

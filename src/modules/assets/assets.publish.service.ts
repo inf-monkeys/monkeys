@@ -1,5 +1,5 @@
-import { AssetType } from '@/common/typings/asset';
 import { AssetPublishConfig } from '@/database/entities/assets/base-asset';
+import { AssetType } from '@inf-monkeys/monkeys';
 import { Injectable } from '@nestjs/common';
 import { AssetsMapperService } from './assets.common.service';
 

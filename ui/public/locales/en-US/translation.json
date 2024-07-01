@@ -21,7 +21,7 @@
       "create": "Create",
       "delete": "Delete",
       "edit": "Edit",
-      "operate": "Operate",
+      "operate": "Operations",
       "reset": "Reset",
       "submit": "Submit",
       "cancel": "Cancel",
@@ -71,6 +71,7 @@
       "loading": "Please wait until the data is loaded.",
       "team-not-found": "The team doesn't exist.",
       "user-not-found": "The user doesn't exist.",
+      "workflow-not-found": "The workflow doesn't exist.",
       "vector-database-not-found": "The vector database doesn't exist.",
       "copy-success": "Copy success.",
       "copy-failed": "Copy failed."
@@ -108,8 +109,8 @@
     },
     "operate": {
       "loading": "Operating...",
-      "success": "Operate successful!",
-      "error": "Operate failed! Please try again later!"
+      "success": "Operations successful!",
+      "error": "Operations failed! Please try again later!"
     },
     "create": {
       "loading": "Creating...",
@@ -187,7 +188,7 @@
               "type": "Type",
               "size": "Size",
               "status": "Status",
-              "operate": "Operate"
+              "operate": "Operations"
             }
           },
           "info-tooltip": {
@@ -248,7 +249,7 @@
             "model": {
               "label": "Models",
               "text-models": {
-                "label": "Text Models"
+                "label": "LLM Models"
               },
               "image-models": {
                 "label": "Image Models"
@@ -272,7 +273,7 @@
                 "label": "App Store"
               },
               "text-model-store": {
-                "label": "Text Model Store"
+                "label": "LLM Model Store"
               },
               "image-model-store": {
                 "label": "Image Model Store"
@@ -290,6 +291,7 @@
           },
           "teams": {
             "balance": "Balance",
+            "默认团队": "Default Team",
             "team-selector": {
               "search-team": "Search team...",
               "not-found": "Not found",
@@ -413,19 +415,18 @@
       "email": "Email",
       "other": "OR",
       "only-oidc": "Only support OIDC login",
-      "select-account": "Select logged in account",
       "success": "Login successful",
-      "logging-in": "Logging in..."
+      "logging-in": "Logging in...",
+      "login": "Login",
+      "login-desc": "Unregistered users will be automatically registered",
+      "unsupported-login-method": "Unsupported login method",
+      "loading": "Logging in..."
     },
     "users": {
-      "selector": {
-        "title": "Select user",
-        "switching": "Switching user...",
-        "switched": "Switched to user: {{name}}",
-        "switch-failed": "Failed to switch user!"
-      },
-      "login-other": "Login other account",
-      "logout": "Logout"
+      "logout": "Logout",
+      "logout-success": "Logout successful",
+      "logout-user": "Logged out Successfully logged out \"{{name}}\"",
+      "title": "Are you sure you want to log out?"
     }
   },
   "settings": {
@@ -562,7 +563,7 @@
                 "label": "Accepted Invitees"
               },
               "operate": {
-                "label": "Operate",
+                "label": "Operations",
                 "dropdown-label": "Invitation Link Operation"
               }
             }
@@ -704,7 +705,7 @@
           }
         },
         "operate-area": {
-          "dropdown-label": "Workflow Operate",
+          "dropdown-label": "Operations",
           "options": {
             "copy-link": "Copy Link",
             "create-a-copy": "Create a Copy",
@@ -797,13 +798,13 @@
         },
         "subtitle": {
           "external-account": {
-            "button": "Third Party Account Manage",
-            "title": "Third party account manage",
+            "button": "Credentials",
+            "title": "Credentials",
             "manage": {
               "content": "All account information will be encrypted and stored without disclosing your key information (e.g. keys) and will not be sent back to the page",
               "columns": {
                 "name": "Name",
-                "operate": "Operate"
+                "operate": "Operations"
               },
               "delete": {
                 "title": "Delete confirmation of third party account",
@@ -896,7 +897,7 @@
           }
         },
         "operate-area": {
-          "dropdown-label": "ComfyUI Workflow Operate",
+          "dropdown-label": "Operations",
           "options": {
             "delete": "Delete ComfyUI Workflow"
           }
@@ -926,7 +927,7 @@
           }
         },
         "operate-area": {
-          "dropdown-label": "Text Model Operate",
+          "dropdown-label": "Operations",
           "options": {
             "publish": "Publish to Market"
           }
@@ -956,7 +957,7 @@
           }
         },
         "operate-area": {
-          "dropdown-label": "Image Model Operate",
+          "dropdown-label": "Operations",
           "options": {
             "publish": "Publish to Market"
           }
@@ -986,7 +987,7 @@
           }
         },
         "operate-area": {
-          "dropdown-label": "Text Data Operate"
+          "dropdown-label": "Operations"
         },
         "subtitle": {
           "create-dataset": {
@@ -1309,7 +1310,7 @@
           }
         },
         "operate-area": {
-          "dropdown-label": "Table Data Operate"
+          "dropdown-label": "Operations"
         },
         "subtitle": {
           "create-database": {
@@ -1370,7 +1371,7 @@
           }
         },
         "operate-area": {
-          "dropdown-label": "Media Data Operate",
+          "dropdown-label": "Operations",
           "options": {
             "copy-link": "Copy File Link"
           }
@@ -1460,7 +1461,7 @@
         "workflow-update-failed": "Workflow information update failure"
       },
       "integration-center": {
-        "title": "Integration Centre",
+        "title": "API Documentation",
         "desc": "You can integrate with other apps through APIs for more functionality",
         "content": {
           "new-chat-session": "New session",
@@ -1497,7 +1498,6 @@
             "submit": "submit"
           }
         },
-
         "tabs": {
           "流程视图": "Workflow",
           "日志视图": "Logs",
@@ -1568,7 +1568,6 @@
               "unknown": "Unsupported types",
               "required": "Required"
             },
-
             "validation": {
               "loading": "Re-validating...",
               "success": "Validation successful",
@@ -1642,7 +1641,6 @@
           "advanced-config": {
             "error": "Tool data anomalies!",
             "parse-error": "Tool data parsing failed!",
-
             "output": {
               "label": "Output Mode",
               "placeholder": "Select output mode"
@@ -1659,9 +1657,7 @@
         "tool-selector": {
           "title": "Select a tool",
           "placeholder": "Enter keywords or categories to search for tools",
-
           "create-failed": "Failed to create tool",
-
           "category": {
             "all": "All",
             "sub-workflows": "Invoking workflows",
@@ -1992,13 +1988,11 @@
       "title": "Logs",
       "desc": "Total {{data}} items{{suffix}}",
       "desc-suffix": ", {{loaded}} items loaded",
-
       "filter": {
         "form": {
           "versions": {
             "label": "Version",
             "placeholder": "Select version",
-
             "temp": "Temp"
           },
           "start-time": {
@@ -2020,7 +2014,6 @@
           "order-by": {
             "label": "Sort by oldest to newest"
           },
-
           "reset": "Reset",
           "submit": "Filter"
         }
@@ -2029,13 +2022,10 @@
         "empty": "Execution record is empty",
         "bottom": "No more data",
         "more": "Remaining {{data}} items, click to load more",
-
         "preview-page-not-found": "Failed to open details! Preview view not found",
-
         "item": {
           "desc": "Instance ID: {{instanceId}}",
           "exec-time": "at {{time}}",
-
           "status": {
             "Running": "Running",
             "Completed": "Completed",
@@ -2044,11 +2034,9 @@
             "Terminated": "Terminated",
             "Timed Out": "Timed Out"
           },
-
           "tips": "Click to view instance details"
         }
       },
-
       "loading": "Searching...",
       "error": "Query failed, please check whether the network is unobstructed",
       "workflow-id-error": "Please wait for the page to load"
@@ -2056,7 +2044,6 @@
     "pre-view": {
       "title": "Workflow Preview",
       "desc": "Run a workflow or view historical run records",
-
       "actuator": {
         "scale": {
           "min": "Restore View",
@@ -2064,13 +2051,11 @@
         },
         "execution": {
           "label": "Execute workflow",
-          "button":{
+          "button": {
             "restart": "Restart",
             "stop": "Stop"
           },
-
           "form-empty": "Please complete the workflow form first",
-
           "status": {
             "completed": "Workflow completed",
             "canceled": "Workflow execution cancellation",
@@ -2085,10 +2070,8 @@
             "paused": "Workflow execution is paused",
             "unknown": "Unknown workflow execution status"
           },
-
           "instance-id": "Instance ID: {{instanceId}}"
         },
-
         "execution-form": {
           "string": "Enter {{displayName}}",
           "file": {
@@ -2110,13 +2093,11 @@
             "minutes": "{{minutes}} m",
             "seconds": "{{seconds}} s",
             "milliseconds": "{{milliseconds}} ms",
-
             "start-time": "Start Time: {{startTime}}",
             "end-time": "End Time: {{endTime}}",
             "duration": "Duration: {{currentDuration}}",
             "iteration": "Iteration: {{iteration}}"
           },
-
           "abstract-data-preview": {
             "url": "Click to jump to an external website, please pay attention to safety",
             "empty": "There is no output after the tool is executed"
@@ -2127,7 +2108,6 @@
             "cancel": "Continue execution",
             "confirm": "Confirm ({{selectedLength}})",
             "skip": "Skip",
-
             "loading": "Waiting for human interaction...",
             "success": "Human interaction completed",
             "error": "Human interaction failed"
@@ -2151,10 +2131,10 @@
       }
     },
     "chat-view": {
-      "sidebar":{
-        "title": "Session List",
+      "sidebar": {
+        "title": "Conversations",
         "create": {
-          "label": "New Session",
+          "label": "New Conversation",
           "placeholder": "Enter the session name within 16 characters.",
           "loading": "Creating session...",
           "success": "Create session successfully",

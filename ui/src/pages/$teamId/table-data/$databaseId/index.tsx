@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn } from '@/utils';
+import { cn, I18nContent } from '@/utils';
 
 const TableDataDetail: React.FC = () => {
   const { t } = useTranslation();
@@ -74,7 +74,7 @@ const TableDataDetail: React.FC = () => {
               </TooltipTrigger>
               <TooltipContent>{t('common.utils.back')}</TooltipContent>
             </Tooltip>
-            <h1 className="line-clamp-1 text-2xl font-bold">{displayName ? displayName : '表格数据'}</h1>
+            <h1 className="line-clamp-1 text-2xl font-bold">{displayName ? I18nContent(displayName) : '表格数据'}</h1>
           </header>
           <TabsList className="!h-auto bg-transparent">
             {isEmpty ? (

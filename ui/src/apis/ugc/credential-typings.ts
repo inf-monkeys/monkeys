@@ -1,4 +1,4 @@
-import { BlockDefPropertiesExtended } from '@/apis/tools/typings.ts';
+import { ToolPropertyExtended } from '@/apis/tools/typings.ts';
 
 export enum ICredentialAuthType {
   AKSK = 'AKSK',
@@ -11,7 +11,7 @@ export interface ICredentialType {
   name: string;
   displayName: string;
   logo?: string;
-  properties: BlockDefPropertiesExtended[];
+  properties: ToolPropertyExtended[];
   tokenScript: string;
   testConnectionScript?: string;
   type: ICredentialAuthType;

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
 import { Input } from '@/components/ui/input';
 import { TagInput } from '@/components/ui/input/tag';
+import { getI18nContent } from '@/utils';
 
 export const BlankInput: React.FC<IVinesInputPropertyProps> = ({ def, value, onChange, disabled }) => {
   const { t } = useTranslation();
@@ -15,12 +16,12 @@ export const BlankInput: React.FC<IVinesInputPropertyProps> = ({ def, value, onC
       {Array.isArray(value) ? (
         <TagInput
           placeholder={
-            def?.placeholder
+            getI18nContent(def?.placeholder)
               ? t('workspace.flow-view.headless-modal.tool-editor.input.comps.collection.placeholder', {
-                  name: def.placeholder,
+                  name: getI18nContent(def.placeholder),
                 })
               : t('workspace.flow-view.headless-modal.tool-editor.input.comps.collection.placeholder-name', {
-                  name: def.displayName,
+                  name: getI18nContent(def.displayName),
                 })
           }
           value={typeof value !== 'object' ? (value as unknown)?.toString()?.split(',') : (value as string[])}

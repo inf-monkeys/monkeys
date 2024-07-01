@@ -6,7 +6,7 @@ import { OneApiRepository } from '@/database/repositories/oneapi.respository';
 import { ToolsRepository } from '@/database/repositories/tools.repository';
 import { SQL_KNOWLEDGE_BASE_QUERY_TABLE_TOOL } from '@/modules/assets/consts';
 import { SqlKnowledgeBaseService } from '@/modules/assets/sql-knowledge-base/sql-knowledge-base.service';
-import { BlockDefProperties } from '@inf-monkeys/vines';
+import { ToolProperty } from '@inf-monkeys/monkeys';
 import { Injectable } from '@nestjs/common';
 import { OpenAIStream, StreamData, StreamingTextResponse, ToolCallPayload } from 'ai';
 import axios from 'axios';
@@ -239,7 +239,7 @@ export class LlmService {
     return res;
   }
 
-  private resolveToolParameter(input: BlockDefProperties[]): ChatCompletionTool['function']['parameters'] {
+  private resolveToolParameter(input: ToolProperty[]): ChatCompletionTool['function']['parameters'] {
     function convertType(type: string): string {
       switch (type) {
         case 'string':

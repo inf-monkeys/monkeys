@@ -1,4 +1,4 @@
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 

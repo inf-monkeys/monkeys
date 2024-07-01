@@ -1149,19 +1149,17 @@
   resolved "https://registry.yarnpkg.com/@inf-monkeys/conductor-javascript/-/conductor-javascript-1.0.2.tgz#e3d527409125420c2042bebd981519d7c5baac70"
   integrity sha512-zMM20A5R5Gsy915uYboJa7j7XYx+Z8M1cQNlT2A1Q2XXRC2gfVFNo+74TtpoizTxQsUJsS7vU0q0uqd/VIciXA==
 
-"@inf-monkeys/vines@^0.0.71":
-  version "0.0.71"
-  resolved "https://registry.yarnpkg.com/@inf-monkeys/vines/-/vines-0.0.71.tgz#991978bac1860ae0b3e785af1bdbfc5f1dea0631"
-  integrity sha512-y6O9bNbaVXXGq8i2nssMW/fWg8idnUnKdkn0a8rXJMLPim2396ts2Om8evyjDTuhSle26RZ3ncTGTCgrDzLJJQ==
+"@inf-monkeys/monkeys@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@inf-monkeys/monkeys/-/monkeys-0.0.3.tgz#fb28d4d158ccd1efc268e6d42d06ee69622f43b0"
+  integrity sha512-1xpU8ZZsoZtn+uK5v17ClYU3Wprx4vasKa1yycEnzbawqXY+IBFwdEFlCdgMgRYgYqawNo1TC3wB837OlBnoeQ==
   dependencies:
-    "@io-orkes/conductor-javascript" "^2.0.0"
-    "@types/axios" "^0.14.0"
-    axios "^1.4.0"
+    "@io-orkes/conductor-javascript" "^2.1.0"
 
-"@io-orkes/conductor-javascript@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@io-orkes/conductor-javascript/-/conductor-javascript-2.0.0.tgz#dfce174a04f582feb51af37b9697f759a11458ee"
-  integrity sha512-JUCA3yepoCxrcLMB69SICoYzBxufhFoxVkA/URH9Q8K5P56xGCbeTjv7huNaEbsfYgL0S5HpV0YPowWQ9WHNLA==
+"@io-orkes/conductor-javascript@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@io-orkes/conductor-javascript/-/conductor-javascript-2.1.0.tgz#1dd61cf49fc537603b7d5213666ca38447305b82"
+  integrity sha512-rwXO3I2xRstKo+WRb/kvj927RLsX9k0ERSTfF22V9xK/SsujFJm4XM+rkxvz15dTEOtpr2gVQdgLT1CE5GeyjA==
 
 "@ioredis/commands@^1.1.1":
   version "1.2.0"
@@ -2146,13 +2144,6 @@
   resolved "https://registry.yarnpkg.com/@tsconfig/node16/-/node16-1.0.4.tgz#0b92dcc0cc1c81f6f306a381f28e31b1a56536e9"
   integrity sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==
 
-"@types/axios@^0.14.0":
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/@types/axios/-/axios-0.14.0.tgz#ec2300fbe7d7dddd7eb9d3abf87999964cafce46"
-  integrity sha512-KqQnQbdYE54D7oa/UmYVMZKq7CO4l8DEENzOKc4aBRwxCXSlJXGz83flFx5L7AWrOQnmuN3kVsRdt+GZPPjiVQ==
-  dependencies:
-    axios "*"
-
 "@types/babel__core@^7.1.14":
   version "7.20.5"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.20.5.tgz#3df15f27ba85319caa07ba08d0721889bb39c017"
@@ -2909,7 +2900,7 @@ atlassian-openapi@^1.0.8:
     jsonpointer "^5.0.0"
     urijs "^1.19.10"
 
-axios@*, axios@^1.4.0, axios@^1.6.7:
+axios@^1.6.7:
   version "1.6.7"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.6.7.tgz#7b48c2e27c96f9c68a2f8f31e2ab19f59b06b0a7"
   integrity sha512-/hDJGff6/c7u0hDkvkGxR/oy6CbCs8ziCsC7SqmhjfozqiJGc8Z11wrv9z9lYfY4K8l+H9TpjcMDX0xOZmx+RA==

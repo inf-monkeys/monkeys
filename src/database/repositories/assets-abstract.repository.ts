@@ -1,6 +1,6 @@
 import { AssetFilter, ListDto } from '@/common/dto/list.dto';
-import { AssetType } from '@/common/typings/asset';
 import { generateDbId } from '@/common/utils';
+import { AssetType } from '@inf-monkeys/monkeys';
 import { Between, FindOptionsOrder, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { AssetPublishConfig, BaseAssetEntity } from '../entities/assets/base-asset';
 import { AssetsCommonRepository, AssetsFillAdditionalInfoOptions } from './assets-common.repository';

@@ -1,4 +1,4 @@
-import { BlockDefProperties } from '@inf-monkeys/vines';
+import { ToolProperty } from '@inf-monkeys/monkeys';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 
@@ -11,7 +11,7 @@ export interface PageInstance {
   icon: string;
   type: PageInstanceType;
   allowedPermissions: PagePermission[];
-  customOptionsProperties?: BlockDefProperties[];
+  customOptionsProperties?: ToolProperty[];
 }
 
 @Entity({ name: 'workflow_pages' })

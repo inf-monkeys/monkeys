@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { useSetState } from '@mantine/hooks';
-import { groupBy } from 'lodash';
+import { groupBy, isObject } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { VariableChildren } from '@/components/layout/vines-view/flow/headless-modal/variable-selector/children.tsx';
@@ -21,6 +21,7 @@ import { useVinesFlow } from '@/package/vines-flow';
 import { IVinesVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
+import { getI18nContent } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IVinesVariableSelectorProps {}
@@ -54,7 +55,19 @@ export const VinesVariableSelector: React.FC<IVinesVariableSelectorProps> = () =
       const { clientX, clientY } = e;
       setPosition({ x: clientX, y: clientY });
 
-      setVariables(Object.values(groupBy(vines.generateWorkflowVariables().variables || [], (it) => it.group.id)));
+      setVariables(
+        Object.values(
+          groupBy(
+            (vines.generateWorkflowVariables().variables || []).map((it) => {
+              if (isObject(it.label)) {
+                it.label = getI18nContent(it.label) ?? '';
+              }
+              return it;
+            }),
+            (it) => it.group.id,
+          ),
+        ),
+      );
       setInsertVariablesFnRef.current = setVariablesFn;
       insertTypeRef.current = insertType;
 

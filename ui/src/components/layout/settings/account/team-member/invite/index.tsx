@@ -29,7 +29,7 @@ export const Invite: React.FC = () => {
       <DropdownMenu>
         <Tooltip content={t('settings.account.team-member.invite.button-tooltip')}>
           <DropdownMenuTrigger asChild>
-            <Button icon={<Share />} size="small" />
+            <Button icon={<Share />} size="small" variant="outline" />
           </DropdownMenuTrigger>
         </Tooltip>
         <DropdownMenuContent>

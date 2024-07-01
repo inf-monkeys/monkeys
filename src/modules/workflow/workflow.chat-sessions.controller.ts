@@ -1,11 +1,12 @@
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { CreateChatSessionDto, UpdateChatSessionDto } from '@inf-monkeys/vines';
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import _ from 'lodash';
+import { CreateChatSessionDto } from '../chat/dto/req/create-chat-session.dto';
 import { ListChatSessionsDto } from './dto/req/list-chat-sessions.dto';
+import { UpdateChatSessionDto } from './dto/req/update-chat-session.dto';
 import { WorkflowChatSessionService } from './workflow.chat-sessions.service';
 
 @Controller('/workflow/chat-sessions')

@@ -1,5 +1,5 @@
-import { AssetType } from '@/common/typings/asset';
 import { AssetsCommonRepository } from '@/database/repositories/assets-common.repository';
+import { AssetType } from '@inf-monkeys/monkeys';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

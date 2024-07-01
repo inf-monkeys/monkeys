@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { BlockDefPropertyTypes } from '@inf-monkeys/vines';
+import { ToolPropertyTypes } from '@inf-monkeys/monkeys';
 import { uniqBy } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { useBuiltInModels, useSDModels } from 'src/apis/sd';
@@ -39,9 +39,7 @@ export const SdModelPresets: React.FC<IVinesInputPropertyProps & IVinesInputPres
         (newOptionsVariableMapper[optValue] = {
           displayName: name,
           name: optValue,
-          type: t(
-            'workspace.flow-view.headless-modal.tool-editor.input.comps.preset.sd-model',
-          ) as BlockDefPropertyTypes,
+          type: t('workspace.flow-view.headless-modal.tool-editor.input.comps.preset.sd-model') as ToolPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);

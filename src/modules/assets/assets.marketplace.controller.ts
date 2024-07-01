@@ -1,6 +1,6 @@
 import { ListDto } from '@/common/dto/list.dto';
 import { SuccessListResponse, SuccessResponse } from '@/common/response';
-import { AssetType } from '@/common/typings/asset';
+import { AssetType } from '@inf-monkeys/monkeys';
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { AssetsMarketplaceService } from './assets.marketplace.service';
 

@@ -58,7 +58,33 @@ export const escapeFileName = (filename: string) =>
 export const uploadFile = async (file: File, filename: string, onProgress: (progress: number) => void) => {
   const filesize = file.size;
 
-  const { baseUrl, isPrivate } = await simpleGet<{ baseUrl: string; isPrivate: boolean }>('/api/medias/s3/configs');
+  const { baseUrl, isPrivate, proxy } = await simpleGet<{ baseUrl: string; isPrivate: boolean; proxy: boolean }>(
+    '/api/medias/s3/configs',
+  );
+
+  if (proxy) {
+    try {
+      const result = JSON.parse(
+        (
+          await simpleFilePut(
+            '/api/medias/s3/file',
+            file,
+            onProgress,
+            'POST',
+            {},
+            {
+              key: filename,
+            },
+          )
+        ).responseText,
+      );
+
+      return result?.data ?? baseUrl + filename;
+    } catch (e) {
+      console.error('上传失败', e);
+    }
+    return baseUrl + filename;
+  }
 
   if (filesize < 1 << 30) {
     const url = await simpleGet<string>(`/api/medias/s3/presign?key=${filename}`);

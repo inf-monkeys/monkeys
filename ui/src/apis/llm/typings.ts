@@ -1,12 +1,13 @@
+import { I18nValue, ToolProperty } from '@inf-monkeys/monkeys';
+
 import { IBaseEntity } from '@/apis/typings.ts';
-import { BlockDefProperties } from '@inf-monkeys/vines';
 
 export interface ILLMModel extends IBaseEntity {
   uuid: string;
   origin: 'built-in' | 'user';
   teamId?: string;
-  displayName: string;
-  description: string;
+  displayName: string | I18nValue;
+  description: string | I18nValue;
   logo: string;
   models: { [x: string]: any };
   channelId: number;
@@ -14,7 +15,7 @@ export interface ILLMModel extends IBaseEntity {
 }
 
 export interface ILLMChannel extends IBaseEntity {
-  properites: BlockDefProperties[];
+  properites: ToolProperty[];
   displayName: string;
   iconUrl: string;
 }

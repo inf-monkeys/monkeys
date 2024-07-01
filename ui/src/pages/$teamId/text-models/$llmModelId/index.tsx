@@ -12,6 +12,7 @@ import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { getI18nContent } from '@/utils';
 
 interface IComfyUIWorkflowDetailProps {}
 
@@ -37,7 +38,7 @@ export const IComfyUIWorkflowDetail: React.FC<IComfyUIWorkflowDetailProps> = () 
           </TooltipTrigger>
           <TooltipContent>{t('common.utils.back')}</TooltipContent>
         </Tooltip>
-        <h1 className="line-clamp-1 text-2xl font-bold">{llmModel?.displayName}</h1>
+        <h1 className="line-clamp-1 text-2xl font-bold">{getI18nContent(llmModel?.displayName)}</h1>
       </header>
       <Tabs
         defaultValue="info"

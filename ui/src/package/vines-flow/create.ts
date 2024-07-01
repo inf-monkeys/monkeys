@@ -2,8 +2,8 @@ import React, { createContext, createElement, useCallback, useContext, useEffect
 
 import { useSWRConfig } from 'swr';
 
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
-import type { TFunction } from 'i18next';
+import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
+import type { i18n } from 'i18next';
 import { isArray } from 'lodash';
 import { toast } from 'sonner';
 
@@ -24,7 +24,7 @@ const forceUpdateReducer = (value: number) => (value + 1) % 1000000;
 
 const VinesMap = new Map<string, VinesCore>();
 
-function getOrCreateVinesCore(workflowId: string, t?: TFunction): VinesCore {
+function getOrCreateVinesCore(workflowId: string, t?: i18n): VinesCore {
   if (VinesMap.has(workflowId)) {
     return VinesMap.get(workflowId)!;
   }
@@ -42,7 +42,7 @@ export const useVinesRefresher = () => {
   return context;
 };
 
-export const createVinesCore = (workflowId: string, t?: TFunction) => {
+export const createVinesCore = (workflowId: string, t?: i18n) => {
   const _vines = getOrCreateVinesCore(workflowId, t);
   const VinesProvider = ({ children }: { children: React.ReactNode }) => {
     const { mutate } = useSWRConfig();

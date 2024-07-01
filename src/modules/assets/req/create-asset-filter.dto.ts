@@ -1,5 +1,6 @@
-import { ALLOW_ASSET_TYPES, AssetType } from '@/common/typings/asset';
+import { ALLOW_ASSET_TYPES } from '@/common/typings/asset';
 import { AssetFilterRule } from '@/database/entities/assets/asset-filter';
+import { AssetType } from '@inf-monkeys/monkeys';
 import * as joiful from 'joiful';
 
 export class CreateAssetFilterDto {
