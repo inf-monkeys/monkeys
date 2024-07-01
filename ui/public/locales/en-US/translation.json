@@ -348,7 +348,14 @@
             "success": "Create successful!",
             "error": "Create failed! Please try again later!"
           },
-          "import-to-team": "Import to team"
+          "import-to-team": "Import to team",
+          "import-workflow": {
+            "title": "Import workflow",
+
+            "loading": "Creating...",
+            "success": "Create successful!",
+            "error": "Create failed! Please try again later!"
+          }
         },
         "publish-dialog": {
           "title": "Publish to market",
