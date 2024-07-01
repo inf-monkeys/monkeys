@@ -40,8 +40,8 @@ export class MediaUploadController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadFileStream(@UploadedFile() file: any, @Body('key') key: string) {
     const s3Helpers = new S3Helpers();
-    await s3Helpers.uploadFile(file.buffer, key);
-    const data = await s3Helpers.getSignedUrl(key);
+    const url = await s3Helpers.uploadFile(file.buffer, key);
+    const data = config.s3.isPrivate ? await s3Helpers.getSignedUrl(key) : url;
     return new SuccessResponse({
       data,
     });
