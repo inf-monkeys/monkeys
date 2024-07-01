@@ -59,7 +59,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
               <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                 <FileDown size={15} />
               </DropdownMenuShortcut>
-              {t('components.layout.ugc.import-dialog.import-workflow')}
+              {t('components.layout.ugc.import-dialog.import-workflow.title')}
             </DropdownMenuItem>
           </UgcComfyUIWorkflowStoreUseWorkflowDialog>
         </DropdownMenuGroup>
