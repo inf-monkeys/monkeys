@@ -197,6 +197,7 @@ export class LlmController {
   ])
   @MonkeyToolExtra({
     estimateTime: 3,
+    defaultTimeout: 180,
   })
   /**
    * Example output:
@@ -332,6 +333,7 @@ export class LlmController {
   ])
   @MonkeyToolExtra({
     estimateTime: 3,
+    defaultTimeout: 180,
   })
   public async generateTextByLlm(@Res() res: Response, @Req() req: IRequest, @Body() body: GenerateTextByLlmDto) {
     if (!body.userMessage) {
@@ -515,6 +517,7 @@ export class LlmController {
   ])
   @MonkeyToolExtra({
     estimateTime: 3,
+    defaultTimeout: 180,
   })
   /**
    * Example output:

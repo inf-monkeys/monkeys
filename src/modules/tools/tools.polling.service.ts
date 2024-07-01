@@ -29,6 +29,7 @@ export const TOOL_STREAM_RESPONSE_TOPIC = (workflowInstanceId: string) => {
 
 @Injectable()
 export class ToolsPollingService {
+  private DEFAULT_TIMEOUT = 30000;
   constructor(
     private readonly toolsRepository: ToolsRepository,
     private readonly toolsRegistryService: ToolsRegistryService,
@@ -396,6 +397,7 @@ export class ToolsPollingService {
         },
         headers: headers,
         responseType,
+        timeout: tool.extra?.defaultTimeout || this.DEFAULT_TIMEOUT,
       });
       success = true;
       if (responseType === 'json') {
