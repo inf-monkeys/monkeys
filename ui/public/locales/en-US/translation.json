@@ -337,6 +337,15 @@
           "content": "Confirm importing {{name}} into your team?",
           "utils": {
             "this-project": "this project"
+          },
+
+          "use-template": {
+            "dropdown": "Application market",
+            "title": "Use this template",
+
+            "loading": "Creating...",
+            "success": "Create successful!",
+            "error": "Create failed! Please try again later!"
           }
         },
         "publish-dialog": {
