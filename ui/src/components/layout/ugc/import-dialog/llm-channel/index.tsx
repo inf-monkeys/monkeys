@@ -7,28 +7,17 @@ import { createLLMChannel } from '@/apis/llm';
 import { ILLMChannel } from '@/apis/llm/typings';
 import { VinesWorkflowInput } from '@/components/layout/vines-view/execution/workflow-input';
 import { calculateDisplayInputs } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/utils';
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog.tsx';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { I18nContent } from '@/utils';
 
 interface IUgcImportDialogProps {
-  visible: boolean;
-  setVisible: (v: boolean) => void;
+  children?: React.ReactNode;
   channel?: ILLMChannel;
   afterOperate?: () => void;
 }
 
-export const LLMChannelImportDialog: React.FC<IUgcImportDialogProps> = ({
-  visible,
-  setVisible,
-  channel,
-  afterOperate,
-}) => {
+export const LLMChannelImportDialog: React.FC<IUgcImportDialogProps> = ({ children, channel, afterOperate }) => {
   const { t } = useTranslation();
 
   const handleImport = useCallback(
@@ -39,7 +28,6 @@ export const LLMChannelImportDialog: React.FC<IUgcImportDialogProps> = ({
       const { id } = channel;
       toast.promise(createLLMChannel(id, data), {
         success: () => {
-          setVisible(false);
           afterOperate?.();
           return t('common.operate.success');
         },
@@ -55,12 +43,12 @@ export const LLMChannelImportDialog: React.FC<IUgcImportDialogProps> = ({
   }, [channel?.properites]);
 
   return (
-    <AlertDialog open={visible} onOpenChange={setVisible}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{channel?.displayName}</AlertDialogTitle>
-          <AlertDialogDescription></AlertDialogDescription>
-        </AlertDialogHeader>
+    <Dialog>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{I18nContent(channel?.displayName)}</DialogTitle>
+        </DialogHeader>
         <VinesWorkflowInput
           inputs={finalInputs}
           height={400}
@@ -72,7 +60,7 @@ export const LLMChannelImportDialog: React.FC<IUgcImportDialogProps> = ({
             {t('common.utils.confirm')}
           </Button>
         </VinesWorkflowInput>
-      </AlertDialogContent>
-    </AlertDialog>
+      </DialogContent>
+    </Dialog>
   );
 };

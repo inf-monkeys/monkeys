@@ -45,7 +45,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
           e.preventDefault();
         }}
       >
-        <DropdownMenuLabel>{t('components.layout.ugc.import-dialog.use-template.dropdown')}</DropdownMenuLabel>
+        <DropdownMenuLabel>{t('components.layout.ugc.import-dialog.dropdown')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <UgcApplicationStoreUseTemplateDialog item={item}>
