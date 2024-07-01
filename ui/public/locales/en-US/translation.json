@@ -1982,6 +1982,9 @@
           "unknown": "Unsupported tools, try recreating"
         },
         "execution": "Execution Workflow"
+      },
+      "error": {
+        "tips": "Move canvas to tool"
       }
     },
     "logs-view": {
