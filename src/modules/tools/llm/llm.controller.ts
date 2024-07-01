@@ -99,7 +99,11 @@ export class LlmController {
   @MonkeyToolIcon('emoji:💬:#c15048')
   @MonkeyToolInput([
     {
-      displayName: '注意：此工具为单轮对话（Completions 接口），所选的模型必须支持单轮对话（/v1/completions) 接口，否则会运行失败。大多数情况下，你应该使用的是多轮对话工具。',
+      displayName: {
+        'zh-CN': '注意：此工具为单轮对话（Completions 接口），所选的模型必须支持单轮对话（/v1/completions) 接口，否则会运行失败。大多数情况下，你应该使用的是多轮对话工具。',
+        'en-US':
+          'Notice: This tool is for single-round dialogue (Completions interface), and the selected model must support single-round dialogue (/v1/completions) interface, otherwise it will fail. In most cases, you should use the multi-round dialogue tool.',
+      },
       type: 'notice',
       name: 'docs',
     },
@@ -274,7 +278,11 @@ export class LlmController {
   @MonkeyToolIcon('emoji:💬:#c15048')
   @MonkeyToolInput([
     {
-      displayName: '注意：此工具为多轮对话（Chat Completions 接口），所选的模型必须支持多轮对话（/v1/chat/completions) 接口，否则会运行失败。',
+      displayName: {
+        'zh-CN': '注意：此工具为多轮对话（Chat Completions 接口），所选的模型必须支持多轮对话（/v1/chat/completions) 接口，否则会运行失败。',
+        'en-US':
+          'Notice: This tool is for multi-round dialogue (Chat Completions interface), and the selected model must support multi-round dialogue (/v1/chat/completions) interface, otherwise it will fail.',
+      },
       type: 'notice',
       name: 'docs',
     },
@@ -374,7 +382,11 @@ export class LlmController {
   @MonkeyToolIcon('emoji:💬:#c15048')
   @MonkeyToolInput([
     {
-      displayName: '注意：此工具为多轮对话（Chat Completions 接口），所选的模型必须支持多轮对话（/v1/chat/completions) 接口，否则会运行失败。',
+      displayName: {
+        'zh-CN': '注意：此工具为多轮对话（Chat Completions 接口），所选的模型必须支持多轮对话（/v1/chat/completions) 接口，否则会运行失败。',
+        'en-US':
+          'Notice: This tool is for multi-round dialogue (Chat Completions interface), and the selected model must support multi-round dialogue (/v1/chat/completions) interface, otherwise it will fail.',
+      },
       type: 'notice',
       name: 'docs',
     },
