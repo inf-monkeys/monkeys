@@ -311,7 +311,17 @@ export const config: Config = {
       config: readConfig('auth.sms.config', {}),
     },
   },
-  s3: readConfig('s3', {}),
+  s3: {
+    proxy: readConfig('s3.proxy', true),
+    isPrivate: readConfig('s3.isPrivate', false),
+    forcePathStyle: readConfig('s3.forcePathStyle', false),
+    endpoint: readConfig('s3.endpoint'),
+    accessKeyId: readConfig('s3.accessKeyId'),
+    secretAccessKey: readConfig('s3.secretAccessKey'),
+    region: readConfig('s3.region'),
+    bucket: readConfig('s3.bucket'),
+    publicAccessUrl: readConfig('s3.publicAccessUrl'),
+  },
   models: readConfig('models', []),
   proxy: {
     enabled: readConfig('proxy.enabled', false),
