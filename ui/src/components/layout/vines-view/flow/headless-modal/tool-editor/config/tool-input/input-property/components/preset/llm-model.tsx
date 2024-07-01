@@ -8,7 +8,7 @@ import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/he
 import { IVinesInputPresetProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/index.tsx';
 import { PresetWrapper } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/wrapper.tsx';
 import { IVinesToolPropertiesOption, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
-import { I18nContent } from '@/utils';
+import { getI18nContent, I18nContent } from '@/utils';
 
 export const LlmModelPresets: React.FC<IVinesInputPropertyProps & IVinesInputPresetProps> = (props) => {
   const { t } = useTranslation();
@@ -26,7 +26,7 @@ export const LlmModelPresets: React.FC<IVinesInputPropertyProps & IVinesInputPre
       const modelNames = Object.values(models);
       for (const model of modelNames) {
         realLLMModels.push({
-          displayName: `${I18nContent(item.displayName)} - ${model}`,
+          displayName: `${getI18nContent(item.displayName)} - ${model}`,
           channelId: item.channelId,
           model: model,
         });

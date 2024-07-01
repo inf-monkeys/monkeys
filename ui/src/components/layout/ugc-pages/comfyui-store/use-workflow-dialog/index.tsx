@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { IComfyuiWorkflow } from '@/apis/comfyui/typings';
@@ -19,6 +20,8 @@ export const UgcComfyUIWorkflowStoreUseWorkflowDialog: React.FC<IUgcComfyUIWorkf
   children,
   item,
 }) => {
+  const { t } = useTranslation();
+
   const [visible, setVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -30,10 +33,10 @@ export const UgcComfyUIWorkflowStoreUseWorkflowDialog: React.FC<IUgcComfyUIWorkf
     toast.promise(forkAssetItem('comfyui-workflow', item.id), {
       success: () => {
         setVisible(false);
-        return '创建成功';
+        return t('components.layout.ugc.import-dialog.import-workflow.success');
       },
-      error: '创建失败，请检查网络后重试',
-      loading: '创建中......',
+      error: t('components.layout.ugc.import-dialog.import-workflow.error'),
+      loading: t('components.layout.ugc.import-dialog.import-workflow.loading'),
       finally: () => {
         setIsLoading(false);
       },
@@ -45,7 +48,7 @@ export const UgcComfyUIWorkflowStoreUseWorkflowDialog: React.FC<IUgcComfyUIWorkf
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>导入此工作流</DialogTitle>
+          <DialogTitle>{t('components.layout.ugc.import-dialog.import-workflow.title')}</DialogTitle>
         </DialogHeader>
         <div className="flex gap-3">
           <div className="flex-shrink-0">
@@ -58,7 +61,7 @@ export const UgcComfyUIWorkflowStoreUseWorkflowDialog: React.FC<IUgcComfyUIWorkf
         </div>
         <DialogFooter>
           <Button loading={isLoading} variant="solid" onClick={handleUse}>
-            确定
+            {t('common.utils.confirm')}
           </Button>
         </DialogFooter>
       </DialogContent>

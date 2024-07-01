@@ -28,7 +28,10 @@ export class LlmModelController {
         assetType: 'llm-model',
         channelId: 0,
         channelType: 1,
-        displayName: '系统内置',
+        displayName: {
+          'zh-CN': '系统内置',
+          'en-US': 'System Built-in',
+        },
         models: systemModesValue,
         iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/OpenAI_Logo.svg/2560px-OpenAI_Logo.svg.png',
       } as LlmModelEntity;

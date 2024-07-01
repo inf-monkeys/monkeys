@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { FileDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { IComfyuiWorkflow } from '@/apis/comfyui/typings';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
@@ -25,6 +26,8 @@ interface IOperateAreaProps {
 }
 
 export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, tooltipTriggerContent }) => {
+  const { t } = useTranslation();
+
   return (
     <DropdownMenu>
       {tooltipTriggerContent ? (
@@ -43,7 +46,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
           e.preventDefault();
         }}
       >
-        <DropdownMenuLabel>操作</DropdownMenuLabel>
+        <DropdownMenuLabel>{t('components.layout.ugc.import-dialog.dropdown')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <UgcComfyUIWorkflowStoreUseWorkflowDialog item={item}>
@@ -56,7 +59,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
               <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                 <FileDown size={15} />
               </DropdownMenuShortcut>
-              导入此工作流
+              {t('components.layout.ugc.import-dialog.import-workflow.title')}
             </DropdownMenuItem>
           </UgcComfyUIWorkflowStoreUseWorkflowDialog>
         </DropdownMenuGroup>

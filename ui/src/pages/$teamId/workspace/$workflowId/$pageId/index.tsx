@@ -2,15 +2,18 @@ import React, { useEffect } from 'react';
 
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 
+import { useTranslation } from 'react-i18next';
 import z from 'zod';
 
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { VinesIFrame } from '@/components/ui/vines-iframe';
 import { usePageStore } from '@/store/usePageStore';
+import { getI18nContent } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 export const WorkspacePage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const { workflow, pages, page, pageId, teamId, setPage } = useVinesPage();
@@ -36,8 +39,12 @@ export const WorkspacePage: React.FC = () => {
 
   useEffect(() => {
     if (!workflow) return;
-    const workflowName = workflow.displayName;
-    workflowName && VinesEvent.emit('vines-update-site-title', (pageTitle ? `${pageTitle} - ` : '') + workflowName);
+    const workflowName = getI18nContent(workflow.displayName);
+    workflowName &&
+      VinesEvent.emit(
+        'vines-update-site-title',
+        (pageTitle ? `${t([`workspace.wrapper.space.tabs.${pageTitle}`, pageTitle])} - ` : '') + workflowName,
+      );
   }, [workflow, pageTitle]);
 
   return <VinesIFrame pages={pages ?? []} page={page} />;

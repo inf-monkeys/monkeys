@@ -1,5 +1,6 @@
 import { extractDependencies } from '@/common/utils/code';
 import { flatTasks } from '@/common/utils/conductor';
+import { getDisplayName } from '@/common/utils/i18n';
 import { ValidationIssueType, ValidationReasonType, WorkflowOutputValue, WorkflowValidationIssue } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTask } from '@inf-monkeys/conductor-javascript';
 import { ToolDef, ToolProperty, ToolPropertyOptions, ToolPropertyTypes, ToolType } from '@inf-monkeys/monkeys';
@@ -190,8 +191,8 @@ export class WorkflowValidator {
           taskReferenceName,
           issueType: ValidationIssueType.ERROR,
           humanMessage: {
-            en: `Properity ${name} is required.`,
-            zh: `${displayName}必填参数未配置`,
+            en: `Properity ${getDisplayName(displayName, 'en-US')} is required.`,
+            zh: `${getDisplayName(displayName, 'zh-CN')}必填参数未配置`,
           },
           detailReason: {
             name: name,
@@ -215,8 +216,8 @@ export class WorkflowValidator {
                 taskReferenceName,
                 issueType: ValidationIssueType.ERROR,
                 humanMessage: {
-                  en: `Properity ${name} referenced a unknown block: ${referencedTaskName}`,
-                  zh: `${displayName}参数中引用了一个不存在的 Block：${referencedTaskName}`,
+                  en: `Properity ${getDisplayName(displayName, 'en-US')} referenced a unknown block: ${referencedTaskName}`,
+                  zh: `${getDisplayName(displayName, 'zh-CN')}参数中引用了一个不存在的 Block：${referencedTaskName}`,
                 },
                 detailReason: {
                   name: name,
