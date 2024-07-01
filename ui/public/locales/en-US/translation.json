@@ -337,6 +337,24 @@
           "content": "Confirm importing {{name}} into your team?",
           "utils": {
             "this-project": "this project"
+          },
+
+          "dropdown": "Application market",
+
+          "use-template": {
+            "title": "Use this template",
+
+            "loading": "Creating...",
+            "success": "Create successful!",
+            "error": "Create failed! Please try again later!"
+          },
+          "import-to-team": "Import to team",
+          "import-workflow": {
+            "title": "Import workflow",
+
+            "loading": "Creating...",
+            "success": "Create successful!",
+            "error": "Create failed! Please try again later!"
           }
         },
         "publish-dialog": {
@@ -1703,7 +1721,7 @@
           "save": "save"
         },
         "more": {
-          "tip": "more options",
+          "tip": "More",
           "del-workflow": {
             "button": "Delete workflow",
             "title": "Sure you want to delete the workflow?",
@@ -1982,6 +2000,9 @@
           "unknown": "Unsupported tools, try recreating"
         },
         "execution": "Execution Workflow"
+      },
+      "error": {
+        "tips": "Move canvas to tool"
       }
     },
     "logs-view": {

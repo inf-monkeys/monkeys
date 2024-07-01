@@ -328,6 +328,23 @@
           "content": "正在导入 {{name}} 导入您的团队下，是否继续？",
           "utils": {
             "this-project": "该项目"
+          },
+          "dropdown": "操作",
+
+          "use-template": {
+            "title": "使用该模板",
+
+            "loading": "创建中...",
+            "success": "创建成功",
+            "error": "创建失败，请检查网络后重试"
+          },
+          "import-to-team": "导入该团队",
+          "import-workflow": {
+            "title": "导入此工作流",
+
+            "loading": "创建中...",
+            "success": "创建成功",
+            "error": "创建失败，请检查网络后重试"
           }
         },
         "publish-dialog": {
@@ -1977,6 +1994,9 @@
           "unknown": "不受支持的工具，请尝试重新创建"
         },
         "execution": "运行工作流"
+      },
+      "error": {
+        "tips": "定位到工具"
       }
     },
     "logs-view": {

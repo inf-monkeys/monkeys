@@ -29,6 +29,7 @@ export const TOOL_STREAM_RESPONSE_TOPIC = (workflowInstanceId: string) => {
 
 @Injectable()
 export class ToolsPollingService {
+  private DEFAULT_TIMEOUT = 30000;
   constructor(
     private readonly toolsRepository: ToolsRepository,
     private readonly toolsRegistryService: ToolsRegistryService,
@@ -376,6 +377,7 @@ export class ToolsPollingService {
     let tokenCount = 0;
     let outputData: any = {};
     let success: boolean;
+    const timeoutSeconds = tool.extra?.defaultTimeout || this.DEFAULT_TIMEOUT;
     try {
       // Check balance
       await this.checkBalance(__toolName, {
@@ -396,6 +398,7 @@ export class ToolsPollingService {
         },
         headers: headers,
         responseType,
+        timeout: timeoutSeconds * 1000,
       });
       success = true;
       if (responseType === 'json') {
@@ -479,6 +482,14 @@ export class ToolsPollingService {
           outputData: {
             success: false,
             errMsg: `${__toolName} Service is not available`,
+          },
+          status: 'FAILED',
+        };
+      } else if (error.code === 'ECONNABORTED') {
+        return {
+          outputData: {
+            success: false,
+            errMsg: `${__toolName} Service request timeout in ${timeoutSeconds} seconds`,
           },
           status: 'FAILED',
         };

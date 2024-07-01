@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { FileDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { IApplicationStoreItemDetail } from '@/apis/ugc/asset-typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
@@ -24,6 +25,8 @@ interface IOperateAreaProps {
 }
 
 export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, tooltipTriggerContent }) => {
+  const { t } = useTranslation();
+
   return (
     <DropdownMenu>
       {tooltipTriggerContent ? (
@@ -42,7 +45,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
           e.preventDefault();
         }}
       >
-        <DropdownMenuLabel>应用市场操作</DropdownMenuLabel>
+        <DropdownMenuLabel>{t('components.layout.ugc.import-dialog.dropdown')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <UgcApplicationStoreUseTemplateDialog item={item}>
@@ -55,7 +58,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
               <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                 <FileDown size={15} />
               </DropdownMenuShortcut>
-              使用该模板
+              {t('components.layout.ugc.import-dialog.use-template.title')}
             </DropdownMenuItem>
           </UgcApplicationStoreUseTemplateDialog>
         </DropdownMenuGroup>
