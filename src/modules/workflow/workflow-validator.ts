@@ -2,7 +2,7 @@ import { extractDependencies } from '@/common/utils/code';
 import { flatTasks } from '@/common/utils/conductor';
 import { ValidationIssueType, ValidationReasonType, WorkflowOutputValue, WorkflowValidationIssue } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTask } from '@inf-monkeys/conductor-javascript';
-import { ToolDef, ToolProperty, ToolPropertyOptions, ToolPropertyTypes, ToolType } from '@inf-monkeys/monkeys';
+import { I18nValue, ToolDef, ToolProperty, ToolPropertyOptions, ToolPropertyTypes, ToolType } from '@inf-monkeys/monkeys';
 import _ from 'lodash';
 
 export const WORKFLOW_EXPRESSION_REGEX = /\$\{([a-zA-Z0-9_.\*\[\]\@\?\'\$\(\)\*]+)(?:\(\))?}/g;
@@ -173,6 +173,20 @@ export class WorkflowValidator {
     return issues;
   }
 
+  private static getDisplayName(displayName: I18nValue | string, defaultLocale: string = 'en-US') {
+    if (!displayName) {
+      return displayName;
+    }
+    if (typeof displayName === 'string') {
+      return displayName;
+    }
+    const localeValue = displayName[defaultLocale];
+    if (localeValue) {
+      return localeValue;
+    }
+    return displayName[Object.keys(displayName)[0]];
+  }
+
   private static validateToolInputParameter(tasks: WorkflowTask[], task: WorkflowTask, block: ToolDef, proprity: ToolProperty): WorkflowValidationIssue {
     const { name, type, displayName } = proprity;
     if (this.INGNORE_CHECK_PROP_TYPES.includes(type)) {
@@ -190,8 +204,8 @@ export class WorkflowValidator {
           taskReferenceName,
           issueType: ValidationIssueType.ERROR,
           humanMessage: {
-            en: `Properity ${name} is required.`,
-            zh: `${displayName}必填参数未配置`,
+            en: `Properity ${this.getDisplayName(displayName, 'en-US')} is required.`,
+            zh: `${this.getDisplayName(displayName, 'zh-CN')}必填参数未配置`,
           },
           detailReason: {
             name: name,
@@ -215,8 +229,8 @@ export class WorkflowValidator {
                 taskReferenceName,
                 issueType: ValidationIssueType.ERROR,
                 humanMessage: {
-                  en: `Properity ${name} referenced a unknown block: ${referencedTaskName}`,
-                  zh: `${displayName}参数中引用了一个不存在的 Block：${referencedTaskName}`,
+                  en: `Properity ${this.getDisplayName(displayName, 'en-US')} referenced a unknown block: ${referencedTaskName}`,
+                  zh: `${this.getDisplayName(displayName, 'zh-CN')}参数中引用了一个不存在的 Block：${referencedTaskName}`,
                 },
                 detailReason: {
                   name: name,
