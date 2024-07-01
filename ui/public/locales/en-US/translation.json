@@ -1703,7 +1703,7 @@
           "save": "save"
         },
         "more": {
-          "tip": "more options",
+          "tip": "More",
           "del-workflow": {
             "button": "Delete workflow",
             "title": "Sure you want to delete the workflow?",
