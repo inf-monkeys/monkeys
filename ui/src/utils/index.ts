@@ -51,13 +51,6 @@ export const setLocalStorage = <T>(key: string, value: T) => {
 export const nanoIdLowerCase = customAlphabet('6789bcdfghjkmnpqrtwz', 8);
 export const nanoIdUpperCase = customAlphabet('6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz', 8);
 
-export const useI18nContent = (content: string | I18nValue | undefined): string | undefined => {
-  const { i18n } = useTranslation();
-  if (!content) return;
-  if (typeof content === 'string') return content;
-  return content[i18n.language] ? content[i18n.language] : content['en-US'];
-};
-
 export const I18nContent = (content: string | I18nValue | undefined): string | undefined => {
   const { i18n } = useTranslation();
   if (!content) return;
