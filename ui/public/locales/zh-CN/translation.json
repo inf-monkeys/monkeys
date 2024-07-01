@@ -328,6 +328,15 @@
           "content": "正在导入 {{name}} 导入您的团队下，是否继续？",
           "utils": {
             "this-project": "该项目"
+          },
+
+          "use-template": {
+            "dropdown": "应用市场操作",
+            "title": "使用该模板",
+
+            "loading": "创建中...",
+            "success": "创建成功",
+            "error": "创建失败，请检查网络后重试"
           }
         },
         "publish-dialog": {
