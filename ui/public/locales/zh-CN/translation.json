@@ -338,7 +338,14 @@
             "success": "创建成功",
             "error": "创建失败，请检查网络后重试"
           },
-          "import-to-team": "导入该团队"
+          "import-to-team": "导入该团队",
+          "import-workflow": {
+            "title": "导入此工作流",
+
+            "loading": "创建中...",
+            "success": "创建成功",
+            "error": "创建失败，请检查网络后重试"
+          }
         },
         "publish-dialog": {
           "title": "发布到市场",
