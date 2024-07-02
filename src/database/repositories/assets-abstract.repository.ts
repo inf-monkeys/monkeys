@@ -250,7 +250,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
       throw new Error('displayName is required to init built-in asset');
     }
     const asset = this.repository.create(data as E);
-    asset.isPreset = true;
+    asset.isPreset = data.isPreset || false;
     asset.isPublished = true;
     asset.assetType = assetType;
     await this.repository.save(asset);
