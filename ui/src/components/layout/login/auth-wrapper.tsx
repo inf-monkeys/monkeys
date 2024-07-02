@@ -55,7 +55,7 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
     const finalToken = passwordData?.token ?? phoneData?.token ?? '';
 
     saveAuthToken(finalToken).then((result) => {
-      if (result === 1) {
+      if (result) {
         void mutate('/api/teams');
         // TODO: 似乎无法正常跳转
         void navigate({ to: redirect_url ?? '/' });
