@@ -35,12 +35,8 @@ const LoginCallback: React.FC = () => {
         return;
       }
 
-      if (usersCount === 1) {
-        void mutate('/api/teams');
-        void navigate({ to: '/' });
-      } else {
-        setSwap('users');
-      }
+      void mutate('/api/teams');
+      void navigate({ to: '/' });
       toast.success(t('auth.login.success'));
     });
   }, [access_token]);
