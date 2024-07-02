@@ -15,7 +15,7 @@ export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketpla
     autoPinPage: ['chat'],
     id: '662a1c620b9fd2739ab8d3a6',
     displayName: {
-      'zh-CN': '大语言模型多轮对话',
+      'zh-CN': '文本对话',
       'en-US': 'Chat Completions (LLM)',
     },
     description: {
@@ -88,11 +88,11 @@ export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketpla
     autoPinPage: ['chat'],
     id: '662a1c620b9fd2739ab8d3a7',
     displayName: {
-      'zh-CN': '大语言模型单轮对话',
+      'zh-CN': '文本补全',
       'en-US': 'Completions (LLM)',
     },
     description: {
-      'zh-CN': '基于大语言模型的单轮对话',
+      'zh-CN': '基于大语言模型的文本补全，不具备上下文记忆能力。',
       'en-US': 'Single-turn dialogues based on LLMs',
     },
     iconUrl: 'emoji:🤖:#f2c1be',
@@ -151,7 +151,7 @@ export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketpla
     autoPinPage: ['chat'],
     id: '664f1e0db10cb3ffc558437a',
     displayName: {
-      'zh-CN': '文本生成（大语言模型）',
+      'zh-CN': '文本生成',
       'en-US': 'Text Generation (LLM)',
     },
     description: {
@@ -203,7 +203,7 @@ export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketpla
     autoPinPage: ['preview'],
     id: '665569753c72460540612445',
     displayName: {
-      'zh-CN': '文本生成图像（MJ）',
+      'zh-CN': '图像生成',
       'en-US': 'Text to Image (MJ)',
     },
     description: {
