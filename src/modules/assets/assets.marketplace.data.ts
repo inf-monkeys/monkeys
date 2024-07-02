@@ -96,7 +96,7 @@ export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketpla
       'en-US': 'Single-turn dialogues based on LLMs',
     },
     iconUrl: 'emoji:🤖:#f2c1be',
-    isPreset: true,
+    isPreset: false,
     isPublished: true,
     version: 1,
     variables: [
@@ -159,7 +159,7 @@ export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketpla
       'en-US': 'Generate text by LLMs',
     },
     iconUrl: 'emoji:🤖:#f2c1be',
-    isPreset: true,
+    isPreset: false,
     isPublished: true,
     version: 1,
     variables: [
