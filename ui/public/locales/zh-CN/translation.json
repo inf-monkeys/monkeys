@@ -415,7 +415,7 @@
   },
   "auth": {
     "oidc": {
-      "auth-failed": "授权校验失败！请尝试重新登录n",
+      "auth-failed": "授权校验失败！请尝试重新登录",
       "logging-in": "正在通过 {{oidc}} 登录中"
     },
     "login": {
@@ -435,6 +435,15 @@
       "logout-success": "退出登录成功",
       "logout-user": "已登出成功登出「{{name}}」",
       "title": "确定要退出登录吗？"
+    },
+
+    "loading": "正在载入中",
+    "wait-to-long": {
+      "title": "检测到在此页面等待时间过长",
+      "desc": "请尝试重新登录或强制进入",
+
+      "force-enter": "强制进入",
+      "re-login": "强制重新登录"
     }
   },
   "settings": {
