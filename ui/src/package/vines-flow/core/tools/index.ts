@@ -193,7 +193,7 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
       for (const def of flatVariables(defs)) {
         if (!def) continue;
         const { id, type, label, pathLabel, jsonpath, originalName } = def;
-        const variableDisplayName = `${nodeName} 的 ${pathLabel || label}`;
+        const variableDisplayName = `${nodeName} ${getI18nContent(pathLabel || label)}`;
         mapper.set(id, {
           name: originalName,
           displayName: variableDisplayName,
