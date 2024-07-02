@@ -2143,6 +2143,11 @@
         "item": {
           "desc": "实例 ID: {{instanceId}}"
         }
+      },
+      "disable": {
+        "title": "视图已禁用",
+        "desc": "OpenAI 兼容接口已启用，可能会导致预览视图无法正常显示",
+        "button": "禁用 OpenAI 兼容接口并启用视图"
       }
     },
     "chat-view": {

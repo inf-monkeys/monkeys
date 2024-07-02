@@ -64,8 +64,8 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
         ...data,
       } as Partial<MonkeyWorkflow>),
       {
-        success: t('workspace.flow-view.endpoint.start-tool.api-config.form.submit.loading'),
-        loading: t('workspace.flow-view.endpoint.start-tool.api-config.form.submit.success'),
+        success: t('workspace.flow-view.endpoint.start-tool.api-config.form.submit.success'),
+        loading: t('workspace.flow-view.endpoint.start-tool.api-config.form.submit.loading'),
         error: t('workspace.flow-view.endpoint.start-tool.api-config.form.submit.error'),
         finally: () => setIsLoading(false),
       },
@@ -76,7 +76,7 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
     <div className="relative flex h-80 w-full flex-col py-2">
       <Form {...form}>
         <form onSubmit={handleSubmit} className="flex flex-col justify-between gap-4">
-          <ScrollArea className="h-64">
+          <ScrollArea className="h-64 [&>div]:px-2">
             <FormField
               name="exposeOpenaiCompatibleInterface"
               control={form.control}
