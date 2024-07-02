@@ -1,6 +1,5 @@
 import { MonkeyTaskDefTypes, MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import equal from 'fast-deep-equal/es6';
-import { t } from 'i18next';
 import { isArray, omit } from 'lodash';
 import { toast } from 'sonner';
 
@@ -490,7 +489,15 @@ export class VinesCore extends VinesTools(VinesBase) {
     debug = false,
   }: IVinesFlowRunParams): Promise<boolean> {
     if (this.enableOpenAIInterface) {
-      toast.warning('启动运行失败！请先禁用 OpenAI 兼容接口');
+      toast('运行失败：OpenAI 兼容接口已启用，请先禁用', {
+        action: {
+          label: '禁用',
+          onClick: () => {
+            this.enableOpenAIInterface = false;
+            this.emit('update-workflow', { exposeOpenaiCompatibleInterface: false });
+          },
+        },
+      });
       return false;
     }
 
