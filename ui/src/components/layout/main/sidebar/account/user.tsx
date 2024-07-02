@@ -21,12 +21,12 @@ export const User: React.FC<IUserProps> = ({ name, account, photo, isCollapsed }
       </Avatar>
       <div className="mt-0.5 flex flex-1 flex-col gap-1 [&_h1]:text-left [&_span]:text-left">
         {name ? (
-          <h1 className="line-clamp-1 text-sm font-bold leading-none">{name}</h1>
+          <h1 className="max-w-[5.5rem] truncate text-sm font-bold leading-none">{name}</h1>
         ) : (
           <Skeleton className="h-5 w-full" />
         )}
         {account ? (
-          <span className="text-xxs line-clamp-1 leading-none text-black text-opacity-60 dark:text-gold-12 dark:opacity-70">
+          <span className="text-xxs max-w-[5.5rem] truncate leading-none text-black text-opacity-60 dark:text-gold-12 dark:opacity-70">
             {account}
           </span>
         ) : (
