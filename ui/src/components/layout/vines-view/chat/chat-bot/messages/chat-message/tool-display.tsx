@@ -14,7 +14,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { useVinesFlow } from '@/package/vines-flow';
 import { JSONValue } from '@/package/vines-flow/core/tools/typings.ts';
-import { getI18nContent, I18nContent } from '@/utils';
+import { getI18nContent } from '@/utils';
 
 type LogLevel = 'error' | 'warn' | 'info' | 'debug';
 type Status = 'inprogress' | 'success' | 'failed';

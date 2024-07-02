@@ -9,7 +9,7 @@ import { IVinesInputPresetProps } from '@/components/layout/vines-view/flow/head
 import { PresetWrapper } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/wrapper.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { IVinesToolPropertiesOption, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
-import { I18nContent } from '@/utils';
+import { getI18nContent } from '@/utils';
 
 export const SqlKnowledgeBaseSelector: React.FC<IVinesInputPropertyProps & IVinesInputPresetProps> = (props) => {
   const { t } = useTranslation();
@@ -30,9 +30,9 @@ export const SqlKnowledgeBaseSelector: React.FC<IVinesInputPropertyProps & IVine
     const opts = sqlKnowledgeBases.data.map((m) => {
       const ownedByTeam = teamId === m.teamId;
       const displayName = ownedByTeam
-        ? I18nContent(m.displayName)
+        ? getI18nContent(m.displayName)
         : t('workspace.flow-view.headless-modal.tool-editor.input.comps.preset.sql-knowledge-base.display-name', {
-            name: I18nContent(m.displayName),
+            name: getI18nContent(m.displayName),
           });
       return { name: displayName!, value: m.uuid };
     });
