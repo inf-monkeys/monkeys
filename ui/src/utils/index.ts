@@ -75,6 +75,7 @@ export const I18nAllContent = (content: string | I18nValue | undefined): string 
   }
   return result.join(',');
 };
+
 export const execCopy = (text: string): boolean => {
   const tempTextArea = document.createElement('textarea');
   tempTextArea.value = text;
@@ -88,4 +89,11 @@ export const execCopy = (text: string): boolean => {
   } finally {
     document.body.removeChild(tempTextArea);
   }
+};
+
+export const clearAllLocalData = () => {
+  localStorage.clear();
+  document.cookie
+    .split(';')
+    .forEach((c) => (document.cookie = c.trim().split('=')[0] + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'));
 };

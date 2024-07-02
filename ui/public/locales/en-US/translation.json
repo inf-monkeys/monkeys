@@ -445,6 +445,14 @@
       "logout-success": "Logout successful",
       "logout-user": "Logged out Successfully logged out \"{{name}}\"",
       "title": "Are you sure you want to log out?"
+    },
+    "loading": "Loading...",
+    "wait-to-long": {
+      "title": "Detected that the waiting time on this page is too long",
+      "desc": "Please try to log in again or force login",
+
+      "force-enter": "Forced Entry",
+      "re-login": "Force re-login"
     }
   },
   "settings": {
