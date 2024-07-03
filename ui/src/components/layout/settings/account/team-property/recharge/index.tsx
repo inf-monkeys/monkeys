@@ -31,12 +31,7 @@ export const Recharge: React.FC<IRechargeProps> = ({ children }) => {
             />
             <div className="flex gap-2 [&>*]:flex-grow">
               {[1, 10, 100, 300].map((buttonAmount, index) => (
-                <Button
-                  key={index}
-                  onClick={() => {
-                    setAmount(buttonAmount);
-                  }}
-                >
+                <Button key={index} onClick={() => setAmount(buttonAmount)} variant="outline">
                   <span>{buttonAmount.toString()} 元</span>
                 </Button>
               ))}

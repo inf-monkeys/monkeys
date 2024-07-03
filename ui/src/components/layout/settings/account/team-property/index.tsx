@@ -32,7 +32,7 @@ export const TeamProperty: React.FC<ITeamPropertyProps> = () => {
         </div>
         <div className="flex flex-1 justify-end">
           <Recharge>
-            <Button size="small" icon={<CreditCard />}>
+            <Button size="small" icon={<CreditCard />} variant="outline">
               充值
             </Button>
           </Recharge>
