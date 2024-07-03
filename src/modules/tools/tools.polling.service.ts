@@ -205,7 +205,7 @@ export class ToolsPollingService {
 
   private async monkeyToolHandler(task: Task) {
     const inputData = task.inputData as WorkerInputData;
-    const { __toolName, __context, credential, ...rest } = inputData;
+    const { __toolName, __context, __advancedConfig, credential, ...rest } = inputData;
 
     logger.info(`Start to execute tool: ${__toolName}`);
 
@@ -377,7 +377,7 @@ export class ToolsPollingService {
     let tokenCount = 0;
     let outputData: any = {};
     let success: boolean;
-    const timeoutSeconds = tool.extra?.defaultTimeout || this.DEFAULT_TIMEOUT;
+    const timeoutSeconds = __advancedConfig?.timeout || tool.extra?.defaultTimeout || this.DEFAULT_TIMEOUT;
     try {
       // Check balance
       await this.checkBalance(__toolName, {

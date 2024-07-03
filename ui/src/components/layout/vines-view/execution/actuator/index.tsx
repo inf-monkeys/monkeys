@@ -52,6 +52,9 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
 
   const actuatorHeight = height - 64;
 
+  const useOpenAIInterface = vines.usedOpenAIInterface();
+  const openAIInterfaceEnabled = useOpenAIInterface.enable;
+
   return (
     <AnimatePresence>
       {hasExecution ? (
@@ -78,6 +81,7 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
+                    className={openAIInterfaceEnabled ? 'hidden' : ''}
                     variant="outline"
                     icon={isExecutionRunning ? <StopCircle size={16} /> : <RotateCcw size={16} />}
                     onClick={() => {
@@ -139,8 +143,12 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
                 setCanvasMode(CanvasStatus.RUNNING);
               }}
             >
-              <Button variant="outline" type="submit">
-                {t('workspace.pre-view.actuator.execution.label')}
+              <Button variant="outline" type="submit" disabled={openAIInterfaceEnabled}>
+                {t(
+                  openAIInterfaceEnabled
+                    ? 'workspace.pre-view.disable.exec-button-tips'
+                    : 'workspace.pre-view.actuator.execution.label',
+                )}
               </Button>
             </VinesWorkflowInput>
           ) : (
@@ -152,8 +160,13 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
                   vines.start({});
                   setCanvasMode(CanvasStatus.RUNNING);
                 }}
+                disabled={openAIInterfaceEnabled}
               >
-                {t('workspace.pre-view.actuator.execution.label')}
+                {t(
+                  openAIInterfaceEnabled
+                    ? 'workspace.pre-view.disable.exec-button-tips'
+                    : 'workspace.pre-view.actuator.execution.label',
+                )}
               </Button>
             </div>
           )}

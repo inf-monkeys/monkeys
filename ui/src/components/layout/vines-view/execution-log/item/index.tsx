@@ -22,9 +22,15 @@ interface IVinesLogItemProps {
   onClick?: (instanceId: string) => void;
   workflowExecution: VinesWorkflowExecution;
   workflowDefinition: MonkeyWorkflow;
+  disabled?: boolean;
 }
 
-export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition, workflowExecution, onClick }) => {
+export const VinesLogItem: React.FC<IVinesLogItemProps> = ({
+  workflowDefinition,
+  workflowExecution,
+  onClick,
+  disabled,
+}) => {
   const { t } = useTranslation();
   const clipboard = useClipboard({ timeout: 500 });
 
@@ -52,7 +58,7 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
   return (
     <Card>
       <Tooltip>
-        <TooltipTrigger asChild>
+        <TooltipTrigger asChild disabled={disabled}>
           <CardContent
             className="flex cursor-pointer items-center p-4 text-xs hover:bg-gray-10/5 active:bg-gray-10/10"
             onClick={() => onClick?.(instanceId)}

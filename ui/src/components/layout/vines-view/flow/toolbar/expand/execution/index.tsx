@@ -42,8 +42,16 @@ export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () =
 
   const isReExecution = hasExecution && isWorkflowRUNNING;
 
+  const useOpenAIInterface = vines.usedOpenAIInterface();
+  const openAIInterfaceEnabled = useOpenAIInterface.enable;
+
   return (
-    <Card className={cn('flex flex-nowrap gap-2 p-2', (!isLatestWorkflowVersion || disabled) && 'hidden')}>
+    <Card
+      className={cn(
+        'flex flex-nowrap gap-2 p-2',
+        (!isLatestWorkflowVersion || disabled || openAIInterfaceEnabled) && 'hidden',
+      )}
+    >
       <ToolButton
         icon={isExecutionRunning ? <StopCircle /> : isReExecution ? <RotateCcw /> : <Play />}
         side="bottom"
