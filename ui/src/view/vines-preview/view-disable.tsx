@@ -37,6 +37,7 @@ export const ViewDisable: React.FC<IViewDisableProps> = () => {
             <span className="text-xs text-gray-10">{t('workspace.pre-view.disable.desc')}</span>
           </div>
           <Button
+            className="hidden"
             size="small"
             variant="outline"
             onClick={() => {
