@@ -5,9 +5,10 @@ import { createFileRoute } from '@tanstack/react-router';
 import { FileDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { ILLMChannel } from '@/apis/llm/typings';
 import { preloadUgcTextModelStore, useUgcTextModelStore } from '@/apis/ugc';
-import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { UgcImportDialog } from '@/components/layout/ugc/import-dialog';
+import { IAssetItem } from '@/apis/ugc/typings';
+import { LLMChannelImportDialog } from '@/components/layout/ugc/import-dialog/llm-channel';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createTextModelStoreColumns } from '@/components/layout/ugc-pages/text-model-store/consts.tsx';
@@ -26,18 +27,16 @@ import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const TextModelStore: React.FC = () => {
-  const { t: tHook } = useTranslation();
+  const { t } = useTranslation();
 
-  const [importVisible, setImportVisible] = useState(false);
-
-  const [current, setCurrent] = useState<IAssetItem>();
+  const [current, setCurrent] = useState<IAssetItem<ILLMChannel>>();
 
   return (
     <main className="size-full">
       <UgcView
         assetKey="text-model-store"
-        assetType="llm-model"
-        assetName={tHook('components.layout.main.sidebar.list.store.text-model-store.label')}
+        assetType="llm-channel"
+        assetName={t('components.layout.main.sidebar.list.store.text-model-store.label')}
         isMarket
         useUgcFetcher={useUgcTextModelStore}
         preloadUgcFetcher={preloadUgcTextModelStore}
@@ -45,7 +44,7 @@ export const TextModelStore: React.FC = () => {
         renderOptions={{
           subtitle: (item) => (
             <span className="line-clamp-1">
-              {`${item.user?.name ?? tHook('common.utils.unknown')} ${tHook('common.utils.created-at', {
+              {`${item.user?.name ?? t('common.utils.system')} ${t('common.utils.created-at', {
                 time: formatTimeDiffPrevious(item.createdTimestamp),
               })}`}
             </span>
@@ -72,32 +71,27 @@ export const TextModelStore: React.FC = () => {
                 e.preventDefault();
               }}
             >
-              <DropdownMenuLabel>文本模型市场操作</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('components.layout.ugc.import-dialog.dropdown')}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem
-                  onSelect={() => {
-                    setCurrent(item);
-                    setImportVisible(true);
-                  }}
-                >
-                  <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
-                    <FileDown size={15} />
-                  </DropdownMenuShortcut>
-                  导入该团队
-                </DropdownMenuItem>
+                <LLMChannelImportDialog channel={current}>
+                  <DropdownMenuItem
+                    onSelect={(e) => {
+                      setCurrent(item);
+                      e.stopPropagation();
+                      e.preventDefault();
+                    }}
+                  >
+                    <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                      <FileDown size={15} />
+                    </DropdownMenuShortcut>
+                    {t('components.layout.ugc.import-dialog.import-to-team')}
+                  </DropdownMenuItem>
+                </LLMChannelImportDialog>
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-      />
-
-      <UgcImportDialog
-        visible={importVisible}
-        setVisible={setImportVisible}
-        ugcId={current?.id}
-        assetType={current?.assetType}
-        name={current?.name}
       />
     </main>
   );

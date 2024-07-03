@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { ArrowLeft, ArrowRight, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,8 @@ interface IQuickOptionsProps {
 }
 
 export const QuickOptions: React.FC<IQuickOptionsProps> = ({ nodeId }) => {
+  const { t } = useTranslation();
+
   const { isLatestWorkflowVersion } = useFlowStore();
   const { vines } = useVinesFlow();
 
@@ -30,12 +33,12 @@ export const QuickOptions: React.FC<IQuickOptionsProps> = ({ nodeId }) => {
 
   const handleDelete = () => {
     if (!nodeId) {
-      toast.error('工具数据异常！');
+      toast.error(t('workspace.flow-view.vines.tools.error'));
       return;
     }
-    toast('确定要删除此工具吗？操作将不可取消', {
+    toast(t('workspace.flow-view.headless-modal.tool-editor.header.quick-options.del.tips'), {
       action: {
-        label: '确定',
+        label: t('workspace.flow-view.headless-modal.tool-editor.header.quick-options.del.action'),
         onClick: () => vines.deleteNode(nodeId),
       },
     });
@@ -53,7 +56,9 @@ export const QuickOptions: React.FC<IQuickOptionsProps> = ({ nodeId }) => {
             onClick={() => handleToggle(lastNodeId)}
           />
         </TooltipTrigger>
-        <TooltipContent>切换到上一工具</TooltipContent>
+        <TooltipContent>
+          {t('workspace.flow-view.headless-modal.tool-editor.header.quick-options.toggle-prev-tool')}
+        </TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger asChild>
@@ -65,7 +70,9 @@ export const QuickOptions: React.FC<IQuickOptionsProps> = ({ nodeId }) => {
             onClick={() => handleToggle(nextNodeId)}
           />
         </TooltipTrigger>
-        <TooltipContent>切换到下一工具</TooltipContent>
+        <TooltipContent>
+          {t('workspace.flow-view.headless-modal.tool-editor.header.quick-options.toggle-next-tool')}
+        </TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger asChild>
@@ -76,7 +83,9 @@ export const QuickOptions: React.FC<IQuickOptionsProps> = ({ nodeId }) => {
             onClick={handleDelete}
           />
         </TooltipTrigger>
-        <TooltipContent>删除此工具</TooltipContent>
+        <TooltipContent>
+          {t('workspace.flow-view.headless-modal.tool-editor.header.quick-options.del.button-tips')}
+        </TooltipContent>
       </Tooltip>
     </div>
   );

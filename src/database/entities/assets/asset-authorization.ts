@@ -1,4 +1,5 @@
-import { AssetType, TargetType } from '@/common/typings/asset';
+import { TargetType } from '@/common/typings/asset';
+import { AssetType } from '@inf-monkeys/monkeys';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 

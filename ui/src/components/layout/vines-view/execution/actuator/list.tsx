@@ -10,7 +10,7 @@ import { VinesIcon } from '@/components/ui/vines-icon';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
-import { cn } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 
 export interface IActuatorToolList {
   id: string;
@@ -53,7 +53,7 @@ export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({ height, act
         id: node.id,
         status: node.executionStatus,
         icon: customData?.icon ?? tool?.icon ?? '',
-        name: tool?.displayName ?? toolName,
+        name: getI18nContent(tool?.displayName) ?? toolName,
         customName: customData?.title ?? '',
         description: customDesc ? `${customDesc} / ${toolDesc}` : `${toolDesc}`,
       });

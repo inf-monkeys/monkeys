@@ -6,7 +6,7 @@ import {
   TaskType,
   WorkflowTask,
 } from '@io-orkes/conductor-javascript';
-import { get, merge, setWith } from 'lodash';
+import { get, merge, set, setWith } from 'lodash';
 import { customAlphabet } from 'nanoid';
 
 import { VinesNode, VinesSubWorkflowTaskDef } from '@/package/vines-flow/core/nodes';
@@ -73,6 +73,8 @@ export const createTask = (tool: VinesToolDef, extendObject = {}) => {
     taskReferenceName: newTaskRefName,
     inputParameters,
   };
+
+  set(newTask, 'inputParameters.__advancedConfig.timeout', get(tool, 'extra.defaultTimeout', 3600));
 
   merge(newTask, extendObject);
 

@@ -1,4 +1,4 @@
-import { BlockDefProperties } from '@inf-monkeys/vines';
+import { ToolProperty } from '@inf-monkeys/monkeys';
 import fs from 'fs';
 import path from 'path';
 import { ComfyuiPrompt, ComfyuiWorkflow } from '../typings/comfyui';
@@ -24,8 +24,8 @@ export interface ComfyfileApp {
   workflowApi: ComfyuiPrompt;
   tags: string[];
   restEndpoint: {
-    parameters?: BlockDefProperties[];
-    output?: BlockDefProperties[];
+    parameters?: ToolProperty[];
+    output?: ToolProperty[];
   };
 }
 

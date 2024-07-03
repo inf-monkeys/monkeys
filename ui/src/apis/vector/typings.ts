@@ -1,3 +1,5 @@
+import { I18nValue } from '@inf-monkeys/monkeys';
+
 export interface IVectorMetadataField {
   displayName: string;
   name: string;
@@ -8,9 +10,9 @@ export interface IKnowledgeBase {
   createTime: number;
   dimension: number;
   uuid: string;
-  displayName: string;
+  displayName: string | I18nValue;
   embeddingModel: string;
-  description?: string;
+  description?: string | I18nValue;
   iconUrl?: string;
   engine: string;
   teamId: string;
@@ -26,7 +28,7 @@ export type IKnowledgeBaseFrontEnd = IKnowledgeBase & { paragraph_number: number
 
 export interface IVectorSupportedEmbeddingModel {
   name: string;
-  displayName: string;
+  displayName: string | I18nValue;
   dimension: number;
   enabled: boolean;
   link: string;

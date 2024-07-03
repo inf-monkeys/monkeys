@@ -2,17 +2,17 @@ import { S3Helpers } from '@/common/s3';
 import { generateDbId } from '@/common/utils';
 import { getMap } from '@/common/utils/map';
 import { CustomTheme, TeamEntity } from '@/database/entities/identity/team';
+import { TeamInviteLinkOutdateType, TeamInviteStatus, TeamInviteType, TeamInvitesRequestsEntity } from '@/database/entities/identity/team-invites';
 import { TeamMembersEntity } from '@/database/entities/identity/user-team-relationship';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import dayjs from 'dayjs';
 import _, { uniq } from 'lodash';
 import { In, Repository } from 'typeorm';
-import { TeamJoinRequestsEntity, TeamJoinRequestStatus } from '../entities/identity/team-join-request';
+import { TeamJoinRequestStatus, TeamJoinRequestsEntity } from '../entities/identity/team-join-request';
 import { UserEntity } from '../entities/identity/user';
 import { ApikeyRepository } from './apikey.repository';
 import { UserRepository } from './user.repository';
-import { TeamInviteLinkOutdateType, TeamInvitesRequestsEntity, TeamInviteStatus, TeamInviteType } from '@/database/entities/identity/team-invites';
-import dayjs from 'dayjs';
 
 @Injectable()
 export class TeamRepository {
@@ -159,12 +159,15 @@ export class TeamRepository {
       description?: string;
       iconUrl?: string;
       customTheme?: CustomTheme;
+      oneAPIToken?: string;
+      oneAPIPassword?: string;
+      oneAPIUsername?: string;
     },
   ) {
     if (!updates || !Object.keys(updates).length) {
       return;
     }
-    const { name, description, iconUrl, customTheme } = updates || {};
+    const { name, description, iconUrl, customTheme, oneAPIPassword, oneAPIToken, oneAPIUsername } = updates || {};
     const team = await this.teamRepository.findOne({
       where: {
         id: teamId,
@@ -192,6 +195,9 @@ export class TeamRepository {
           iconUrl,
           customTheme,
           updatedTimestamp: now,
+          oneAPIToken,
+          oneAPIPassword,
+          oneAPIUsername,
         },
         (v) => !_.isNil(v),
       ),

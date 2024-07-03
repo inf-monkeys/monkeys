@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
-import { BlockDefPropertyTypes, BlockType } from '@inf-monkeys/vines';
+import { ToolPropertyTypes, ToolType } from '@inf-monkeys/monkeys';
+import { useTranslation } from 'react-i18next';
 
 import { useToolLists } from '@/apis/tools';
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
@@ -8,8 +9,11 @@ import { IVinesInputPresetProps } from '@/components/layout/vines-view/flow/head
 import { PresetWrapper } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/wrapper.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { IVinesToolPropertiesOption, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
+import { getI18nContent } from '@/utils';
 
 export const ToolSelector: React.FC<IVinesInputPropertyProps & IVinesInputPresetProps> = (props) => {
+  const { t } = useTranslation();
+
   const { teamId } = useVinesTeam();
   const { data: tools, isLoading } = useToolLists();
 
@@ -20,10 +24,10 @@ export const ToolSelector: React.FC<IVinesInputPropertyProps & IVinesInputPreset
     if (!tools || !teamId) return;
 
     const opts = tools
-      .filter((x) => x.type === BlockType.SIMPLE)
+      .filter((x) => x.type === ToolType.SIMPLE)
       .filter((x) => !x.name.startsWith('llm:'))
       .map((m) => {
-        return { name: m.displayName, value: m.name };
+        return { name: getI18nContent(m.displayName) ?? '', value: m.name };
       });
     setOptions(opts);
 
@@ -33,7 +37,7 @@ export const ToolSelector: React.FC<IVinesInputPropertyProps & IVinesInputPreset
         (newOptionsVariableMapper[optValue] = {
           displayName: name,
           name: optValue,
-          type: '工具' as BlockDefPropertyTypes,
+          type: t('workspace.flow-view.headless-modal.tool-editor.input.comps.preset.tool') as ToolPropertyTypes,
         }),
     );
     setOptionsVariableMapper(newOptionsVariableMapper);
@@ -42,7 +46,7 @@ export const ToolSelector: React.FC<IVinesInputPropertyProps & IVinesInputPreset
   return (
     <PresetWrapper
       id="tool"
-      name="工具"
+      name={t('workspace.flow-view.headless-modal.tool-editor.input.comps.preset.tool')}
       isLoading={isLoading}
       options={options}
       optionsVariableMapper={optionsVariableMapper}

@@ -70,7 +70,7 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
       if (node) {
         vines.updateRaw(nodeId, task, false);
       } else {
-        toast.error('工具不存在');
+        toast.error('Tool not found!');
       }
     } catch {
       /* empty */

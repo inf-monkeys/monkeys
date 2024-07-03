@@ -22,7 +22,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Spinner } from '@/components/ui/spinner';
-import { useLocalStorage } from '@/utils';
+import { execCopy, useLocalStorage } from '@/utils';
 
 interface IInviteUserProps extends React.ComponentPropsWithoutRef<'div'> {
   visible: boolean;
@@ -71,13 +71,14 @@ export const InviteUser: React.FC<IInviteUserProps> = ({ visible, setVisible }) 
           teamId,
           inviterUserId,
           outdateType,
+        }).then((link) => {
+          void mutateInviteLinkList();
+          if (!link) throw new Error("Link doesn't exists.");
+          clipboard.copy(link);
+          if (!clipboard.copied && !execCopy(link)) throw new Error('Copy failed.');
         }),
         {
-          success: (link) => {
-            void mutateInviteLinkList();
-            clipboard.copy(link);
-            return t('common.toast.copy-success');
-          },
+          success: t('common.toast.copy-success'),
           error: t('common.operate.error'),
           loading: t('common.operate.loading'),
           finally: () => {

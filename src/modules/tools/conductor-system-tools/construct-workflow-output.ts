@@ -1,8 +1,8 @@
 import defineNode from '@/common/utils/define-tool';
-import { BlockType } from '@inf-monkeys/vines';
+import { ToolType } from '@inf-monkeys/monkeys';
 
 export default defineNode({
-  type: BlockType.SIMPLE,
+  type: ToolType.SIMPLE,
   name: 'construct_workflow_output',
   categories: ['process'],
   displayName: '组装数据',

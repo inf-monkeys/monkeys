@@ -5,6 +5,7 @@ import { KeyedMutator } from 'swr';
 import { useClipboard } from '@mantine/hooks';
 import dayjs from 'dayjs';
 import { KeyRound, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { revokeApiKey } from '@/apis/api-keys/api-key.ts';
@@ -25,8 +26,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { Tag } from '@/components/ui/tag';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
+import { execCopy } from '@/utils';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
-import { useTranslation } from 'react-i18next';
 
 interface IApiKeyItemProps extends React.ComponentPropsWithoutRef<'div'> {
   apiKey: IApiKey;
@@ -52,7 +53,8 @@ export const ApiKeyItem: React.FC<IApiKeyItemProps> = ({ apiKey, mutate }) => {
   };
   const handleCopyApiKey = (apiKey: string) => {
     clipboard.copy(apiKey);
-    toast.success(t('common.toast.copy-success'));
+    if (!clipboard.copied && !execCopy(apiKey)) toast.error(t('common.toast.copy-failed'));
+    else toast.success(t('common.toast.copy-success'));
   };
   return (
     <Card>
@@ -65,8 +67,8 @@ export const ApiKeyItem: React.FC<IApiKeyItemProps> = ({ apiKey, mutate }) => {
           </Avatar>
         ) : (
           <Avatar className="flex-shrink-0">
-            <AvatarFallback className="bg-greenA-3">
-              <KeyRound />
+            <AvatarFallback>
+              <KeyRound size={20} />
             </AvatarFallback>
           </Avatar>
         )}
@@ -94,7 +96,7 @@ export const ApiKeyItem: React.FC<IApiKeyItemProps> = ({ apiKey, mutate }) => {
           {apiKey.status != IApiKeyStatus.Revoked && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button theme="danger" disabled={loading}>
+                <Button className="text-red-10" size="small" disabled={loading} variant="outline">
                   {t('settings.api-key.api-key-item.operate.revoke.button')}
                 </Button>
               </AlertDialogTrigger>
@@ -114,7 +116,9 @@ export const ApiKeyItem: React.FC<IApiKeyItemProps> = ({ apiKey, mutate }) => {
               </AlertDialogContent>
             </AlertDialog>
           )}
-          <Button onClick={() => handleCopyApiKey(apiKey.apiKey)}>{t('common.utils.copy')}</Button>
+          <Button onClick={() => handleCopyApiKey(apiKey.apiKey)} variant="outline" size="small">
+            {t('common.utils.copy')}
+          </Button>
         </div>
       </CardContent>
     </Card>

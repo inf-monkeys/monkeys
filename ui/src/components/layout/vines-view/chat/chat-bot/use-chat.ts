@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { nanoIdLowerCase } from '@/utils';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 import { parseOpenAIStream } from '@/utils/openai.ts';
+
 import { ChatCompelitionLog } from './messages/chat-message/tool-display';
 
 export interface IVinesMessage {
@@ -177,21 +178,27 @@ export const useChat = ({
         // endregion
 
         abortControllerRef.current = null;
-      } catch (err) {
+      } catch (err: any) {
         if ((err as any).name === 'AbortError') {
-          toast.success('对话已停止');
+          toast.success('Conversation aborted by user');
           abortControllerRef.current = null;
           return null;
         }
 
+        if (err.message?.includes('429')) {
+          void setError(err as Error);
+          toast.error('Too many requests. Please try again later.');
+          return null;
+        }
+
         void setError(err as Error);
-        toast.error('对话失败，请检查工作流日志');
+        toast.error('Failed to fetch the chat response.Please check workflow logs.');
       } finally {
         void mutateLoading(false);
 
         const botMessage = messagesRef.current.at(-1);
         if (isEmpty(botMessage?.content?.trim() ?? '')) {
-          toast.warning('对话未回应！');
+          toast.warning('No response to the conversation!');
         }
       }
     },

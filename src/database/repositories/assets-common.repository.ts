@@ -1,8 +1,9 @@
-import { AssetType, AssetWithAdditionalInfo, TargetType } from '@/common/typings/asset';
+import { AssetWithAdditionalInfo, TargetType } from '@/common/typings/asset';
 import { generateDbId } from '@/common/utils';
 import { getPublicProfile } from '@/common/utils/user';
 import { CreateAssetFilterDto } from '@/modules/assets/req/create-asset-filter.dto';
 import { UpdateAssetFilterDto } from '@/modules/assets/req/update-asset-filter.dto';
+import { AssetType } from '@inf-monkeys/monkeys';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { isNil, pickBy, uniq } from 'lodash';

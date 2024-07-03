@@ -29,6 +29,7 @@
       "switch": "切换",
       "copy": "复制",
       "copy-success": "复制成功",
+      "copy-failed": "复制失败",
       "filter": "筛选",
       "back": "返回",
       "import": "导入",
@@ -44,7 +45,8 @@
       "ascend": "升序",
       "descend": "降序",
       "load-more": "加载更多",
-      "add": "添加"
+      "add": "添加",
+      "click-to-copy": "点击复制"
     },
     "type": {
       "workflow": "工作流",
@@ -67,8 +69,10 @@
       "loading": "请等待数据加载完毕",
       "team-not-found": "团队不存在",
       "user-not-found": "用户不存在",
+      "workflow-not-found": "工作流不存在",
       "vector-database-not-found": "知识库不存在",
-      "copy-success": "复制成功"
+      "copy-success": "复制成功",
+      "copy-failed": "复制失败"
     },
     "dialog": {
       "delete-confirm": {
@@ -278,6 +282,7 @@
           },
           "teams": {
             "balance": "余额",
+            "默认团队": "默认团队",
             "team-selector": {
               "search-team": "搜索团队...",
               "not-found": "找不到团队",
@@ -323,6 +328,23 @@
           "content": "正在导入 {{name}} 导入您的团队下，是否继续？",
           "utils": {
             "this-project": "该项目"
+          },
+          "dropdown": "操作",
+
+          "use-template": {
+            "title": "使用该模板",
+
+            "loading": "创建中...",
+            "success": "创建成功",
+            "error": "创建失败，请检查网络后重试"
+          },
+          "import-to-team": "导入该团队",
+          "import-workflow": {
+            "title": "导入此工作流",
+
+            "loading": "创建中...",
+            "success": "创建成功",
+            "error": "创建失败，请检查网络后重试"
           }
         },
         "publish-dialog": {
@@ -393,7 +415,7 @@
   },
   "auth": {
     "oidc": {
-      "auth-failed": "授权校验失败！请尝试重新登录n",
+      "auth-failed": "授权校验失败！请尝试重新登录",
       "logging-in": "正在通过 {{oidc}} 登录中"
     },
     "login": {
@@ -401,19 +423,27 @@
       "email": "邮箱登录",
       "other": "其他登录方式",
       "only-oidc": "仅支持使用 OIDC 进行身份验证",
-      "select-account": "选择已登录的账号",
       "success": "登录成功",
-      "logging-in": "登录中"
+      "logging-in": "登录中",
+      "login": "登录",
+      "login-desc": "未注册用户将自动注册",
+      "unsupported-login-method": "不受支持的登录方式",
+      "loading": "登录中..."
     },
     "users": {
-      "selector": {
-        "title": "选择身份",
-        "switching": "正在切换身份...",
-        "switched": "已切换到身份：{{name}}",
-        "switch-failed": "切换身份失败！"
-      },
-      "login-other": "登录其他账号",
-      "logout": "退出登录"
+      "logout": "退出登录",
+      "logout-success": "退出登录成功",
+      "logout-user": "已登出成功登出「{{name}}」",
+      "title": "确定要退出登录吗？"
+    },
+
+    "loading": "正在载入中",
+    "wait-to-long": {
+      "title": "检测到在此页面等待时间过长",
+      "desc": "请尝试重新登录或强制进入",
+
+      "force-enter": "强制进入",
+      "re-login": "强制重新登录"
     }
   },
   "settings": {
@@ -710,6 +740,33 @@
               "local-import": "本地导入",
               "market-import": "市场导入"
             }
+          }
+        }
+      }
+    },
+    "llm-model": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "user": {
+            "label": "用户"
+          },
+          "assetTags": {
+            "label": "标签"
+          },
+          "createdTimestamp": {
+            "label": "创建时间"
+          },
+          "updatedTimestamp": {
+            "label": "更新时间"
           }
         }
       }
@@ -1425,7 +1482,7 @@
         "workflow-update-failed": "工作流信息更新失败"
       },
       "integration-center": {
-        "title": "集成中心",
+        "title": "API 文档",
         "desc": "你可以通过 API 与其他应用集成，以实现更多功能",
         "content": {
           "new-chat-session": "新的会话",
@@ -1461,6 +1518,12 @@
             "input-empty": "请输入有效的内容",
             "submit": "保存"
           }
+        },
+        "tabs": {
+          "流程视图": "流程视图",
+          "日志视图": "日志视图",
+          "预览视图": "预览视图",
+          "对话视图": "对话视图"
         }
       }
     },
@@ -1472,8 +1535,685 @@
           "edit-tool": "编辑工具",
           "insert-down-tool": "向下插入工具",
           "del-tool": "删除工具"
+        },
+        "tool-editor": {
+          "unknown-tool": "工具不存在",
+          "tabs": {
+            "config": "配置参数",
+            "dev": "原始数据",
+            "more-config": "高级配置",
+            "custom-config": "自定义配置"
+          },
+          "header": {
+            "quick-options": {
+              "del": {
+                "button-tips": "删除此工具",
+                "tips": "确定要删除此工具吗？操作将不可取消",
+                "action": "确定删除"
+              },
+              "toggle-prev-tool": "切换到上一工具",
+              "toggle-next-tool": "切换到下一工具"
+            },
+            "info": {
+              "editor": {
+                "button": "点击编辑工具自定义信息",
+                "title": "自定义工具信息",
+                "desc": "设置工具显示信息",
+                "form": {
+                  "name": "工具别名",
+                  "desc": "工具描述",
+                  "icon": "工具图标",
+                  "submit": "保存"
+                }
+              }
+            },
+            "save": "保存配置",
+            "more": "更多"
+          },
+          "input": {
+            "title": "输入",
+            "empty": "暂无配置参数",
+            "file-upload": "文件上传",
+            "variable-input": "变量输入",
+            "collection-input": "列表",
+            "preset-options": "预设选项",
+            "type": {
+              "string": "文本{{extra}}",
+              "number": "数字{{extra}}",
+              "boolean": "逻辑值{{extra}}",
+              "file": "文件{{extra}}",
+              "json": "对象{{extra}}",
+              "qrcode": "二维码{{extra}}",
+              "options": "选项{{extra}}",
+              "multiple": "列表",
+              "unknown": "不受支持的类型",
+              "required": "必填项"
+            },
+            "validation": {
+              "loading": "正在重新验证...",
+              "success": "验证成功",
+              "success-with-error": "验证完成，但仍存在错误，请检查配置",
+              "error": "验证失败"
+            },
+            "comps": {
+              "string": {
+                "placeholder": "请输入 {{name}}",
+                "insert-variable": "插入变量",
+                "preview": "{{title}} 输入预览"
+              },
+              "options": {
+                "placeholder": "选择一个选项"
+              },
+              "multi-field-object": {
+                "placeholder": "参数名",
+                "create-field": "新增参数"
+              },
+              "collection": {
+                "placeholder-name": "请输入 {{name}}，回车新增",
+                "placeholder": "{{name}}，回车新增"
+              },
+              "editor": {
+                "check-json-failed": "必须为 JSON 数组",
+                "parse-json-failed": "JSON 解析失败！数据将不会保存，请检查",
+                "insert-variable-tips": "在光标处插入变量"
+              },
+              "blank": {
+                "tips": "不受支持的配置项，建议使用「开发模式」编辑"
+              },
+              "preset": {
+                "placeholder-empty": "暂无{{name}}",
+                "placeholder-select": "选择预设{{name}}",
+                "workflow-version": "工作流版本",
+                "workflow": {
+                  "label": "工作流",
+                  "placeholder-empty": "暂无工作流",
+                  "placeholder-select": "选择工作流预置选项"
+                },
+                "tool": "工具",
+                "sql-knowledge-base": {
+                  "label": "关系型知识库",
+                  "display-name": "{{name}} （其他团队授权）"
+                },
+                "sd-model": "图像模型",
+                "llm-model": "大语言模型",
+                "knowledge-base": {
+                  "label": "文本知识库",
+                  "display-name": "{{name}} （其他团队授权）"
+                },
+                "fork-join-branch": {
+                  "button": "您也可以选择预置选项",
+                  "all-branch": "全部分支"
+                },
+                "comfyui-workflow": "ComfyUI 工作流",
+                "comfyui-server": "ComfyUI 服务"
+              }
+            },
+            "credentials": {
+              "label": "配置账号",
+              "placeholder": "选择或创建一个外部账号",
+              "empty": "暂无外部账号",
+              "manage": "管理外部账号",
+              "create": "创建外部账号"
+            }
+          },
+          "output": {
+            "title": "输出"
+          },
+          "advanced-config": {
+            "error": "工具数据异常！",
+            "parse-error": "工具数据解析失败！",
+            "output": {
+              "label": "输出模式",
+              "placeholder": "选择输出模式"
+            },
+            "timeout": {
+              "label": "超时时间（秒）",
+              "placeholder": "请输入超时时间（秒）",
+              "number-error": "请输入数字",
+              "zero-error": "请输入大于等于 0 的数字"
+            }
+          },
+          "save": "保存"
+        },
+        "tool-selector": {
+          "title": "选择工具",
+          "placeholder": "输入关键词或类别来搜索工具",
+          "create-failed": "创建工具失败",
+          "category": {
+            "all": "全部工具",
+            "sub-workflows": "调用工作流",
+            "process": "流程控制",
+            "image": "图像处理",
+            "text": "文本处理",
+            "file": "文件处理",
+            "gen-image": "图像生成",
+            "gen-text": "文本生成",
+            "auto": "自动化",
+            "db": "数据储存",
+            "query": "搜索增强",
+            "extra": "扩展能力",
+            "train-model": "模型训练",
+            "bio": "生命科学",
+            "human": "用户交互"
+          }
+        },
+        "variable-selector": {
+          "search-placeholder": "搜索变量...",
+          "search-empty": "找不到变量"
         }
+      },
+      "tooltip": {
+        "zoom-in": "放大",
+        "zoom-out": "缩小",
+        "reset": "适应屏幕",
+        "drag": "拖动画布",
+        "mouse": "鼠标",
+        "only-read": "只读模式",
+        "edit": "编辑模式",
+        "direction-of-alignment": "排列方向：{{dir}}",
+        "horizontal": "水平",
+        "vertically": "垂直",
+        "display-mode": "工具显示模式：{{mode}}",
+        "simplicity": "极简模式",
+        "full-display": "全参数模式",
+        "normal": "普通模式",
+        "raw-data": {
+          "button": "编辑原始数据",
+          "desc": "请谨慎编辑工作流原始数据，错误的数据将会导致工作流损坏！",
+          "reset": "重置",
+          "save": "保存"
+        },
+        "more": {
+          "tip": "更多",
+          "del-workflow": {
+            "button": "删除工作流",
+            "title": "确定要删除工作流吗？",
+            "desc": "删除后无法恢复，且所有相关数据将被永久删除。",
+            "cancel": "取消",
+            "action": "继续"
+          }
+        }
+      },
+      "version": {
+        "label": "版本 {{version}}",
+        "placeholder": "选择版本",
+        "search": "搜索版本",
+        "search-empty": "找不到此版本",
+        "release": {
+          "button": "创建版本",
+          "error": {
+            "title": "检测到工作流配置存在错误",
+            "desc": "确定要继续创建版本吗？配置出错的工作流将无法运行！",
+            "cancel": "取消",
+            "action": "继续"
+          },
+          "recheck": {
+            "disable": "当前工作流配置与上一个版本相同，无需创建版本",
+            "loading": "正在检测工作流配置",
+            "success": "工作流配置检测完毕",
+            "error": "工作流配置检测失败"
+          },
+          "workflow-version-error": "创建版本失败！无法获取工作流版本信息",
+          "tips": "确定要为此工作流创建版本吗",
+          "action": "确定",
+          "loading": "正在创建版本...",
+          "success": "版本创建成功",
+          "failed": "版本创建失败"
+        }
+      },
+      "endpoint": {
+        "start-tool": {
+          "title": "工作流配置",
+          "tabs": {
+            "input": "工作流输入",
+            "trigger": "触发器",
+            "api-config": "API 配置"
+          },
+          "input": {
+            "def": "默认值",
+            "add": "新建配置",
+            "delete": {
+              "title": "确定要删除此输入吗",
+              "desc": "删除后，此输入将不无法在工作流中使用，且无法恢复。",
+              "cancel": "取消",
+              "action": "确认删除"
+            },
+            "def-empty": "暂无默认值",
+            "def-true": "真",
+            "def-false": "假",
+            "config-form": {
+              "title": "输入配置",
+              "display-name": {
+                "label": "显示名称",
+                "placeholder": "请填写「输入配置」显示的名称"
+              },
+              "name": {
+                "label": "字段",
+                "placeholder": "请填写「输入配置」的字段名",
+                "desc": "输入字段用于在工作流中引用输入的数据，在工具装配项中填写「 ${workflow.input.{{name}}} 」来使用"
+              },
+              "type": {
+                "label": "数据类型",
+                "button": "选择数据类型",
+                "placeholder": "搜索类型...",
+                "search-empty": "找不到数据类型",
+                "list": "列表",
+                "string": "文本{{extra}}",
+                "number": "数字{{extra}}",
+                "boolean": "逻辑值{{extra}}",
+                "file": "文件{{extra}}",
+                "workflow": "工作流{{extra}}"
+              },
+              "default": {
+                "label": "默认值",
+                "placeholder": "请输入默认值",
+                "placeholder-list": "请输入列表项"
+              },
+              "file": {
+                "label": "默认文件{{extra}}",
+                "desc": "在此处上传文件将自动生成文件直链来覆盖左侧默认值",
+                "list": "列表"
+              },
+              "submit": "保存"
+            }
+          },
+          "trigger": {
+            "add": "添加触发器",
+            "update": {
+              "loading": "正在更新触发器...",
+              "success": "触发器更新成功",
+              "error": "触发器更新失败"
+            },
+            "delete": {
+              "button": "删除触发器",
+              "title": "确定要删除此触发器吗",
+              "desc": "删除后将无法恢复，请确认是否删除此触发器",
+              "cancel": "取消",
+              "action": "删除",
+              "loading": "正在删除触发器...",
+              "success": "触发器删除成功",
+              "error": "触发器删除失败"
+            },
+            "webhook-path-title": "API 请求地址：",
+            "create": {
+              "loading": "正在创建触发器...",
+              "success": "触发器创建成功",
+              "error": "触发器创建失败",
+              "title": "选择触发器",
+              "desc": "选择一个触发器，通过触发事件或定时任务来触发工作流的运行",
+              "schedule-trigger": {
+                "loading": "正在创建定时触发器...",
+                "success": "定时触发器创建成功",
+                "error": "定时触发器创建失败",
+                "title": "定时触发器",
+                "desc": "配置并启用定时触发器后，工作流将按照配置的时间周期性地触发",
+                "form": {
+                  "cron": {
+                    "label": "Cron 表达式",
+                    "placeholder": "请输入 Cron 定时任务表达式"
+                  },
+                  "submit": "创建"
+                }
+              },
+              "webhook-trigger": {
+                "loading": "正在创建 Webhook 触发器...",
+                "success": "Webhook 触发器创建成功",
+                "error": "Webhook 触发器创建失败",
+                "title": "Webhook 触发器",
+                "desc": "配置并启用 Webhook 触发器后，可以通过发送 HTTP 请求来触发工作流的运行",
+                "form": {
+                  "method": {
+                    "label": "请求方式",
+                    "placeholder": "选择 HTTP 请求方式",
+                    "search": "搜索 HTTP 请求方式...",
+                    "search-empty": "找不到 HTTP 请求方式"
+                  },
+                  "auth": {
+                    "label": "认证方式",
+                    "placeholder": "选择 HTTP 认证方式",
+                    "search": "搜索 HTTP 认证方式...",
+                    "search-empty": "找不到 HTTP 认证方式",
+                    "none": "无认证",
+                    "basic": "基础认证 (Basic Auth)",
+                    "custom-header": "自定义请求头"
+                  },
+                  "username": {
+                    "label": "用户名",
+                    "placeholder": "请输入用户名"
+                  },
+                  "password": {
+                    "label": "密码",
+                    "placeholder": "请输入密码"
+                  },
+                  "header-key": {
+                    "label": "请求头键",
+                    "placeholder": "请输入请求头键"
+                  },
+                  "header-value": {
+                    "label": "请求头值",
+                    "placeholder": "请输入请求头值"
+                  },
+                  "response-until": {
+                    "label": "HTTP 请求返回时机",
+                    "placeholder": "选择 HTTP 请求返回时机",
+                    "search": "搜索 HTTP 请求返回时机...",
+                    "search-empty": "找不到 HTTP 请求返回时机",
+                    "workflow-started": "工作流启动之后立即返回",
+                    "workflow-completed-or-finished": "工作流执行成功或者失败之后返回"
+                  },
+                  "submit": "创建"
+                }
+              }
+            }
+          },
+          "api-config": {
+            "form": {
+              "expose-openai-compatible-interface": {
+                "label": "启用 OpenAI 兼容的接口"
+              },
+              "openai-model-name": {
+                "label": "OpenAI 模型名称",
+                "placeholder": "请输入 OpenAI 模型名称",
+                "desc": "模型名称默认为工作流 ID，你也可以设置自定义模型名称，在通过 API 调用接口时可以设置 model 为此自定义名称（同一个团队内必须唯一）。"
+              },
+              "rate-limiter": {
+                "label": "启用接口速率限制",
+                "window-ms": {
+                  "label": "时间窗口大小（毫秒）",
+                  "placeholder": "请输入时间窗口大小（毫秒）"
+                },
+                "max": {
+                  "label": "单位时间窗口内运行最大并发"
+                }
+              },
+              "submit": {
+                "button": "保存",
+                "workflow-id-empty": "工作流 ID 不存在",
+                "loading": "正在保存 API 配置...",
+                "success": "API 配置保存成功",
+                "error": "API 配置保存失败，请检查网络后重试"
+              }
+            }
+          }
+        },
+        "end-tool": {
+          "title": "工作流输出配置",
+          "tabs": {
+            "output": "输出配置",
+            "raw-data": "原始数据"
+          },
+          "create": "新建输出配置",
+          "tip1": "在此处调整工作流输出",
+          "tip2": "工作流默认输出为最后一个节点的运行结果",
+          "error": {
+            "only-key-value": "JSON 只能为 key-value 对象数组",
+            "only-array": "JSON 只能为数组",
+            "json-format": "JSON 格式错误"
+          },
+          "save": {
+            "button": "保存",
+            "loading": "正在保存工作流输出配置...",
+            "success": "工作流输出配置保存成功",
+            "error": "工作流输出配置保存失败"
+          }
+        }
+      },
+      "execution": {
+        "stop": "终止运行",
+        "re-run": "重新运行",
+        "start": "视图内运行",
+        "workflow-input-empty": "请先完善工作流表单",
+        "stop-and-edit": "返回编辑模式",
+        "timer": {
+          "workflow": "工作流 {{status}}",
+          "paused": "已暂停",
+          "completed": "已完成运行",
+          "terminated": "已终止运行",
+          "failed": "运行失败",
+          "canceled": "已取消运行",
+          "time-out": "运行超时",
+          "paused-and-restart": "已暂停（点击继续）",
+          "running": "运行中（点击暂停）",
+          "default": "上次运行时长"
+        },
+        "run-history": {
+          "select-placeholder": "选择一个运行记录",
+          "search": "搜索运行实例 ID...",
+          "search-empty": "找不到此运行实例",
+          "tips": "选择一个运行记录，恢复运行"
+        }
+      },
+      "vines": {
+        "tools": {
+          "error": "工具数据异常！",
+          "parsing-error": "工具数据解析失败！",
+          "start": {
+            "name": "开始",
+            "desc": "点击配置工作流输入和触发器"
+          },
+          "end": {
+            "name": "结束",
+            "desc": "点击配置工作流输出",
+            "save": "保存配置",
+            "empty-output": "暂无输出"
+          },
+          "fake": {
+            "name": "点击添加工具"
+          },
+          "unknown": "不受支持的工具，请尝试重新创建"
+        },
+        "execution": "运行工作流"
+      },
+      "error": {
+        "tips": "定位到工具"
       }
+    },
+    "logs-view": {
+      "title": "日志视图",
+      "desc": "共 {{data}} 项{{suffix}}",
+      "desc-suffix": "，已加载 {{loaded}} 项",
+      "filter": {
+        "form": {
+          "versions": {
+            "label": "版本号",
+            "placeholder": "请选择版本号",
+            "temp": "临时"
+          },
+          "start-time": {
+            "label": "开始运行时间",
+            "placeholder": "请选择开始时间"
+          },
+          "status": {
+            "label": "运行状态",
+            "placeholder": "请选择运行状态"
+          },
+          "trigger-types": {
+            "label": "触发方式",
+            "placeholder": "请选择触发方式"
+          },
+          "workflow-instance-id": {
+            "label": "工作流运行实例 ID",
+            "placeholder": "请输入工作流运行实例 ID"
+          },
+          "order-by": {
+            "label": "由旧到新排序"
+          },
+          "reset": "重置",
+          "submit": "查询"
+        }
+      },
+      "list": {
+        "empty": "暂无执行记录",
+        "bottom": "到底了",
+        "more": "剩余 {{data}} 项，点击加载",
+        "preview-page-not-found": "打开详情失败！找不到预览视图",
+        "item": {
+          "desc": "实例 ID: {{instanceId}}",
+          "exec-time": "于 {{time}}",
+          "status": {
+            "Running": "运行中",
+            "Completed": "已完成",
+            "Paused": "已暂停",
+            "Failed": "运行失败",
+            "Terminated": "已终止",
+            "Timed Out": "运行超时"
+          },
+          "tips": "点击查看实例详情"
+        }
+      },
+      "loading": "查询中...",
+      "error": "查询失败，请检查网络是否通畅",
+      "workflow-id-error": "请等待页面加载完毕"
+    },
+    "pre-view": {
+      "title": "预览工作流",
+      "desc": "运行工作流或查看历史运行记录",
+      "actuator": {
+        "scale": {
+          "min": "还原视图",
+          "max": "视图内全屏"
+        },
+        "execution": {
+          "label": "运行工作流",
+          "button": {
+            "restart": "重新运行",
+            "stop": "终止运行"
+          },
+          "form-empty": "请先完善工作流表单",
+          "status": {
+            "completed": "工作流运行完毕",
+            "canceled": "工作流运行取消",
+            "skipped": "工作流跳过运行",
+            "timeout": "工作流运行超时",
+            "failed": "工作流运行失败",
+            "failed-with-terminal-error": "工作流运行失败，请检查终端输出",
+            "in-progress": "工作流正在运行中",
+            "running": "工作流正在运行",
+            "scheduled": "工作流已计划或正在运行中",
+            "terminated": "工作流已终止运行",
+            "paused": "工作流已暂停运行",
+            "unknown": "未知工作流运行状态"
+          },
+          "instance-id": "实例 ID: {{instanceId}}"
+        },
+        "execution-form": {
+          "string": "请输入{{displayName}}",
+          "file": {
+            "label": "请输入文件直链",
+            "click-to-upload": "点击上传文件"
+          },
+          "options": "请选择一个选项"
+        },
+        "detail": {
+          "tabs": {
+            "data": "数据",
+            "input": "输入",
+            "output": "输出",
+            "raw": "原始数据"
+          },
+          "header": {
+            "days": "{{days}} 天",
+            "hours": "{{hours}} 小时",
+            "minutes": "{{minutes}} 分钟",
+            "seconds": "{{seconds}} 秒",
+            "milliseconds": "{{milliseconds}} 毫秒",
+            "start-time": "开始时间：{{startTime}}",
+            "end-time": "结束时间：{{endTime}}",
+            "duration": "运行时长：{{currentDuration}}",
+            "iteration": "迭代轮次：{{iteration}}"
+          },
+          "abstract-data-preview": {
+            "url": "点击将跳转到外部网站，请注意安全",
+            "empty": "该工具执行后暂无输出"
+          },
+          "human-interaction": {
+            "label": "请进行交互",
+            "desc": "任务 ID：{{taskId}}",
+            "cancel": "继续执行",
+            "confirm": "确认 ({{selectedLength}})",
+            "skip": "跳过",
+            "loading": "正在提交...",
+            "success": "交互成功",
+            "error": "交互失败"
+          },
+          "raw-data-display": {
+            "label": "内容过大，请到 OSS 下载查看",
+            "open-external-storage": "点击查看",
+            "preview": "放大查看代码"
+          }
+        }
+      },
+      "history": {
+        "search": {
+          "placeholder": "搜索运行实例 ID",
+          "search-empty": "找不到此运行实例",
+          "empty": "暂无运行实例"
+        },
+        "item": {
+          "desc": "实例 ID: {{instanceId}}"
+        }
+      },
+      "disable": {
+        "title": "视图已禁用",
+        "desc": "OpenAI 兼容接口已启用，可能会导致预览视图无法正常显示",
+        "button": "禁用 OpenAI 兼容接口并启用视图"
+      }
+    },
+    "chat-view": {
+      "sidebar": {
+        "title": "对话列表",
+        "create": {
+          "label": "新建对话",
+          "placeholder": "输入会话名称，16 字以内",
+          "loading": "正在创建会话...",
+          "success": "会话创建成功",
+          "error": "会话创建失败"
+        },
+        "expand": "展开会话列表",
+        "collapse": "收起会话列表",
+        "delete": {
+          "label": "删除会话",
+          "title": "确定要删除「{{sessionDisplayName}}」吗",
+          "action": "删除",
+          "loading": "正在删除会话...",
+          "success": "会话删除成功",
+          "error": "会话删除失败"
+        }
+      },
+      "chat-bot": {
+        "title": {
+          "multiple": "对话模式",
+          "single": "单聊模式"
+        },
+        "temporary-mode": "临时对话中，聊天记录将不会存储",
+        "tool-display": {
+          "raw-preview": "查看原始数据",
+          "scale-to-preview": "放大查看数据"
+        },
+        "clean-messages": {
+          "label": "清空对话（本地）",
+          "title": "确定要清空当前对话吗？",
+          "desc": "仅清空本地对话记录，刷新可恢复历史数据。",
+          "cancel": "取消",
+          "action": "清空"
+        },
+        "chat": {
+          "placeholder": "聊些什么...",
+          "send": "发送",
+          "stop": "停止生成"
+        }
+      },
+      "workflow-mode": {
+        "execution": "运行工作流",
+        "empty-input": {
+          "running": "正在运行中",
+          "completed": "暂未配置输入，可直接运行"
+        },
+        "instance-id-tips": "运行实例 ID",
+        "manually-trigger": "手动或自动执行触发"
+      },
+      "empty": "暂无对话",
+      "back-to-bottom": "回到底部"
     }
   }
 }

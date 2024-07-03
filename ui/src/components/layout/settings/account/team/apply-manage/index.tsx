@@ -63,7 +63,7 @@ export const ApplyManage: React.FC<IApplyManageProps> = ({ teamId }) => {
   return (
     <Dialog onOpenChange={(v) => v && handleInit()}>
       <DialogTrigger asChild>
-        <Button icon={<Inbox />} size="small" className="hidden">
+        <Button icon={<Inbox />} size="small" className="hidden" variant="outline">
           {t('settings.account.team.apply-manage.button')}
         </Button>
       </DialogTrigger>

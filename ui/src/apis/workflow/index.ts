@@ -1,7 +1,7 @@
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import FileSaver from 'file-saver';
 import qs from 'qs';
 

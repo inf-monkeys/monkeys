@@ -5,6 +5,7 @@ import { useNavigate } from '@tanstack/react-router';
 
 import { Info } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useLoginByPassword, useLoginByPhone } from '@/apis/authz';
@@ -21,6 +22,8 @@ interface IAuthWrapperProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, children, method }) => {
+  const { t } = useTranslation();
+
   const navigate = useNavigate({ from: Route.fullPath });
   const { redirect_url } = Route.useSearch();
   const { mutate } = useSWRConfig();
@@ -32,7 +35,7 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
 
   const handleSubmit = form.handleSubmit((params) => {
     if (!Object.values(AuthMethod).includes(method)) {
-      toast.error('不受支持的登录方式');
+      toast.error(t('auth.login.unsupported-login-method'));
       return;
     }
 
@@ -41,7 +44,7 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
     localStorage.removeItem('vines-team-id');
 
     toast.promise((method === AuthMethod.phone ? triggerPhone : triggerPassword)(params), {
-      loading: '登录中...',
+      loading: t('auth.login.loading'),
       finally: () => setIsLoggingIn(false),
     });
   });
@@ -52,13 +55,13 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
     const finalToken = passwordData?.token ?? phoneData?.token ?? '';
 
     saveAuthToken(finalToken).then((result) => {
-      if (result === 1) {
+      if (result) {
         void mutate('/api/teams');
         // TODO: 似乎无法正常跳转
         void navigate({ to: redirect_url ?? '/' });
       }
       onFinished?.();
-      toast.success('登录成功');
+      toast.success(t('auth.login.success'));
     });
   }, [passwordData, phoneData]);
 
@@ -70,12 +73,12 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
         <div className="my-1 flex justify-between text-xs">
           <span className="flex items-center gap-2 opacity-70">
             <Info size={14} />
-            <span>未注册用户将自动注册</span>
+            <span>{t('auth.login.login-desc')}</span>
           </span>
         </div>
 
         <Button type="submit" loading={isLoggingIn} variant="solid">
-          登录
+          {t('auth.login.login')}
         </Button>
       </form>
     </Form>

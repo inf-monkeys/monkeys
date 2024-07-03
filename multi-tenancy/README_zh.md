@@ -10,7 +10,7 @@
 
 ## 架构图
 
-![](../docs/images/architecture-docker-compose-multi-tenancy.png)
+![](../images/architecture-docker-compose-multi-tenancy.png)
 
 ## 快速开始
 

@@ -1,13 +1,22 @@
 import React, { useEffect } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { BlockDefProperties } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
+import { ToolProperty } from '@inf-monkeys/monkeys';
 import { fromPairs, isArray, isBoolean } from 'lodash';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 
 import { NoticeInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/notice.tsx';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form.tsx';
 import { TagInput } from '@/components/ui/input/tag';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
@@ -16,7 +25,7 @@ import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesUpdater } from '@/components/ui/updater';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
-import { cn } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 
 interface IVinesWorkflowInputProps {
   inputs: VinesWorkflowVariable[];
@@ -41,6 +50,8 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
   scrollAreaClassName,
   itemClassName,
 }) => {
+  const { t } = useTranslation();
+
   const form = useForm<IWorkflowInputForm>({
     resolver: zodResolver(workflowInputFormSchema),
   });
@@ -97,7 +108,7 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
       >
         <ScrollArea className={scrollAreaClassName} style={{ height }}>
           <div className={cn('flex flex-col gap-4', formClassName)}>
-            {inputs?.map(({ displayName, name, type, typeOptions, ...other }) => {
+            {inputs?.map(({ displayName, name, type, description, typeOptions, ...other }) => {
               if (type === 'notice') {
                 return <NoticeInput key={name} def={{ displayName }} />;
               }
@@ -116,7 +127,7 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                         itemClassName,
                       )}
                     >
-                      <FormLabel className="font-bold">{displayName}</FormLabel>
+                      <FormLabel className="font-bold">{getI18nContent(displayName)}</FormLabel>
                       <FormControl>
                         <>
                           {['string', 'number', 'file'].includes(type) &&
@@ -131,11 +142,11 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                                     value.filter((it) => (isNumber ? !isNaN(Number(it)) : it)),
                                   )
                                 }
-                                placeholder={`请输入${displayName}`}
+                                placeholder={t('workspace.pre-view.actuator.execution-form.string', { displayName })}
                               />
                             ) : (
                               <Textarea
-                                placeholder={`请输入${displayName}`}
+                                placeholder={t('workspace.pre-view.actuator.execution-form.string', { displayName })}
                                 value={(value as string) ?? ''}
                                 onChange={(value) => {
                                   if (isNumber) {
@@ -162,11 +173,11 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                                       value.filter((it) => BOOLEAN_VALUES.includes(it)),
                                     )
                                   }
-                                  placeholder={`请输入${displayName}`}
+                                  placeholder={t('workspace.pre-view.actuator.execution-form.string', { displayName })}
                                 />
                               ) : (
                                 <Switch
-                                  checked={isBoolean(value) ? value : BOOLEAN_VALUES.includes(value?.toString())}
+                                  checked={isBoolean(value) ? value : BOOLEAN_VALUES.includes(value?.toString()!)}
                                   onCheckedChange={onChange}
                                 />
                               )}
@@ -175,13 +186,15 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
 
                           {type === 'file' && (
                             <div className="flex items-center justify-between">
-                              <span className="text-xs text-opacity-70">请输入文件直链</span>
+                              <span className="text-xs text-opacity-70">
+                                {t('workspace.pre-view.actuator.execution-form.file.label')}
+                              </span>
                               <VinesUpdater
                                 limit={isMultiple ? void 0 : 1}
                                 onFinished={(urls) => form.setValue(name, isMultiple ? urls : urls[0])}
                               >
                                 <Button variant="outline" size="small" className="-mr-1 scale-90">
-                                  点击上传文件
+                                  {t('workspace.pre-view.actuator.execution-form.file.click-to-upload')}
                                 </Button>
                               </VinesUpdater>
                             </div>
@@ -192,7 +205,7 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                               onValueChange={(val) =>
                                 onChange(
                                   (
-                                    (other as BlockDefProperties)?.options?.find((it) =>
+                                    (other as ToolProperty)?.options?.find((it) =>
                                       'value' in it ? it.value.toString() : '' === val,
                                     ) as any
                                   )?.value ?? '',
@@ -202,13 +215,13 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                             >
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="请选择一个选项" />
+                                  <SelectValue placeholder={t('workspace.pre-view.actuator.execution-form.options')} />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {(other as BlockDefProperties)?.options?.map((it, i) => (
+                                {(other as ToolProperty)?.options?.map((it, i) => (
                                   <SelectItem value={'value' in it ? it.value.toString() : ''} key={i}>
-                                    {it.name}
+                                    {getI18nContent(it.name)}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -216,6 +229,8 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                           )}
                         </>
                       </FormControl>
+                      <FormDescription className="font-bold">{getI18nContent(description)}</FormDescription>
+
                       <FormMessage />
                     </FormItem>
                   )}

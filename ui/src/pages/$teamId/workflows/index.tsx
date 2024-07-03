@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 
-import { mutate } from 'swr';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { mutate } from 'swr';
 
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import { useClipboard } from '@mantine/hooks';
 import { Copy, FileUp, FolderUp, Import, Link, Pencil, Plus, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -12,14 +12,14 @@ import { toast } from 'sonner';
 import { preloadUgcWorkflows, useUgcWorkflows } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { cloneWorkflow, deleteWorkflow } from '@/apis/workflow';
-import { UgcView } from '@/components/layout/ugc/view';
-import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createWorkflowsColumns } from '@/components/layout/ugc-pages/workflows/consts.tsx';
 import { ExportWorkflowDialog } from '@/components/layout/ugc-pages/workflows/export-workflow';
 import { IExportWorkflowWithAssetsContext } from '@/components/layout/ugc-pages/workflows/export-workflow/typings.ts';
+import { UgcView } from '@/components/layout/ugc/view';
+import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { WorkflowInfoEditor } from '@/components/layout/workspace/workflow/info-editor';
-import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
+import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,6 +43,7 @@ import {
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { useWorkflow } from '@/package/vines-flow';
+import { execCopy, getI18nContent } from '@/utils';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const Workflows: React.FC = () => {
@@ -153,7 +154,10 @@ export const Workflows: React.FC = () => {
               <DropdownMenuGroup>
                 <DropdownMenuItem
                   onSelect={() => {
-                    clipboard.copy(location.origin.concat(`/${item.teamId}/workspace/${item.workflowId}`));
+                    const url = location.origin.concat(`/${item.teamId}/workspace/${item.workflowId}`);
+                    clipboard.copy(url);
+                    if (!clipboard.copied && !execCopy(url)) toast.error(t('common.toast.copy-failed'));
+                    else toast.success(t('common.toast.copy-success'));
                     toast.success(t('common.toast.copy-success'));
                   }}
                 >
@@ -188,7 +192,7 @@ export const Workflows: React.FC = () => {
                   onSelect={() => {
                     setExportAssetContext({
                       workflowId: item.workflowId,
-                      displayName: item.displayName,
+                      displayName: getI18nContent(item.displayName) ?? t('common.utils.untitled'),
                       version: item.version,
                     });
                     setExportDialogVisible(true);
@@ -201,7 +205,10 @@ export const Workflows: React.FC = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onSelect={() => {
-                    setExportAssetContext({ workflowId: item.workflowId, displayName: item.displayName });
+                    setExportAssetContext({
+                      workflowId: item.workflowId,
+                      displayName: getI18nContent(item.displayName) ?? t('common.utils.untitled'),
+                    });
                     setExportDialogVisible(true);
                   }}
                 >

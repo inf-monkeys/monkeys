@@ -6,9 +6,11 @@ import { logger } from '@/common/logger';
 import { Mq } from '@/common/mq';
 import { readIncomingMessage } from '@/common/utils/stream';
 import { sleep } from '@/common/utils/utils';
+import { MediaSource } from '@/database/entities/assets/media/media-file';
 import { API_NAMESPACE } from '@/database/entities/tools/tools-server.entity';
 import { ToolsEntity } from '@/database/entities/tools/tools.entity';
 import { CredentialsRepository } from '@/database/repositories/credential.repository';
+import { MediaFileRepository } from '@/database/repositories/media.repository';
 import { Task, TaskDef, TaskManager } from '@inf-monkeys/conductor-javascript';
 import { Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
@@ -27,10 +29,12 @@ export const TOOL_STREAM_RESPONSE_TOPIC = (workflowInstanceId: string) => {
 
 @Injectable()
 export class ToolsPollingService {
+  private DEFAULT_TIMEOUT = 30000;
   constructor(
     private readonly toolsRepository: ToolsRepository,
     private readonly toolsRegistryService: ToolsRegistryService,
     private readonly credentialsRepository: CredentialsRepository,
+    private readonly richMediaRepository: MediaFileRepository,
     @Inject(CACHE_TOKEN) private readonly cache: CacheManager,
     @Inject(MQ_TOKEN) private readonly mq: Mq,
   ) {}
@@ -165,6 +169,37 @@ export class ToolsPollingService {
       });
     } catch (error) {
       logger.warn(`Report usage failed: ${error.message}`);
+    }
+  }
+
+  private async autoSaveRichMedia(teamId: string, userId: string, tool: ToolsEntity, outputData: { [x: string]: any }) {
+    const { output } = tool;
+    if (!output?.length) {
+      return;
+    }
+    for (const item of output) {
+      try {
+        if (item.typeOptions?.richMedia) {
+          const { name } = item;
+          const value = outputData[name];
+          if (value) {
+            logger.info(`Auto save rich media: tool=${tool.displayName}, field=${name}, url=${value}`);
+            await this.richMediaRepository.createMedia(teamId, userId, {
+              url: value,
+              source: MediaSource.AUTO_GENERATE,
+              displayName: `${tool.name} 自动生成于 ${new Date().toISOString()}`,
+              params: {
+                toolName: tool.name,
+                outputField: name,
+                createdAt: +new Date(),
+              },
+              type: item.typeOptions?.richMedia,
+            });
+          }
+        }
+      } catch (error) {
+        logger.warn(`Auto save rich media failed: ${error.message}`);
+      }
     }
   }
 
@@ -342,6 +377,7 @@ export class ToolsPollingService {
     let tokenCount = 0;
     let outputData: any = {};
     let success: boolean;
+    const timeoutSeconds = tool.extra?.defaultTimeout || this.DEFAULT_TIMEOUT;
     try {
       // Check balance
       await this.checkBalance(__toolName, {
@@ -362,6 +398,7 @@ export class ToolsPollingService {
         },
         headers: headers,
         responseType,
+        timeout: timeoutSeconds * 1000,
       });
       success = true;
       if (responseType === 'json') {
@@ -372,6 +409,7 @@ export class ToolsPollingService {
           logger.warn(`Output data of tool ${__toolName} is not an object: `, outputData);
           throw new Error('Output data must be an object');
         }
+        await this.autoSaveRichMedia(__context.teamId, __context.userId, tool, outputData);
         return {
           outputData,
           status: 'COMPLETED',
@@ -447,23 +485,69 @@ export class ToolsPollingService {
           },
           status: 'FAILED',
         };
+      } else if (error.code === 'ECONNABORTED') {
+        return {
+          outputData: {
+            success: false,
+            errMsg: `${__toolName} Service request timeout in ${timeoutSeconds} seconds`,
+          },
+          status: 'FAILED',
+        };
       } else {
         // const statusCode = error.response?.status;
         if (outputAs === 'stream') {
           const data = error?.response?.data as IncomingMessage;
-          let realData = '';
           await readIncomingMessage(data, {
-            onEndCallback(result) {
-              realData = result;
+            onDataCallback: (chunk) => {
+              chunk = chunk.toString();
+              this.mq.publish(TOOL_STREAM_RESPONSE_TOPIC(task.workflowInstanceId), chunk);
+              if (llmChatTool === LlmModelEndpointType.CHAT_COMPLETIONS) {
+                const cleanedMessageStr = chunk.replace('data: ', '').trim();
+                try {
+                  const parsedMessage = JSON.parse(cleanedMessageStr);
+                  const { choices = [] } = parsedMessage;
+                  const content = choices[0]?.delta?.content;
+                  llmOutput += content;
+                } catch (error) {}
+              } else if (llmChatTool === LlmModelEndpointType.COMPLITIONS) {
+                const chunks = chunk.split('\n\n');
+                for (const chunkItem of chunks) {
+                  try {
+                    const cleanedMessageStr = chunkItem.replace('data: ', '').trim();
+                    const parsedMessage = JSON.parse(cleanedMessageStr);
+                    const { choices = [] } = parsedMessage;
+                    const content = choices[0]?.text;
+                    llmOutput += content;
+                  } catch (error) {}
+                }
+              }
             },
           });
-          await this.mq.publish(TOOL_STREAM_RESPONSE_TOPIC(task.workflowInstanceId), `data: ${realData}\n\n`);
-          await this.mq.publish(TOOL_STREAM_RESPONSE_TOPIC(task.workflowInstanceId), '[DONE]');
+          let llmOutput = '';
+          if (llmChatTool === LlmModelEndpointType.CHAT_COMPLETIONS) {
+            const randomChatCmplId = 'chatcmpl-' + Math.random().toString(36).substr(2, 16);
+            outputData = {
+              id: randomChatCmplId,
+              object: 'chat.completion',
+              created: Math.floor(Date.now() / 1000),
+              model: inputData.model,
+              choices: [{ index: 0, message: { role: 'assistant', content: llmOutput }, logprobs: null, finish_reason: 'stop' }],
+              usage: { prompt_tokens: undefined, completion_tokens: undefined, total_tokens: undefined },
+              system_fingerprint: null,
+            };
+          } else if (llmChatTool === LlmModelEndpointType.COMPLITIONS) {
+            const randomCmplId = 'cmpl-' + Math.random().toString(36).substr(2, 16);
+            outputData = {
+              id: randomCmplId,
+              object: 'text_completion',
+              created: Math.floor(Date.now() / 1000),
+              model: inputData.model,
+              choices: [{ text: llmOutput, index: 0, logprobs: null, finish_reason: 'length' }],
+              usage: { prompt_tokens: 1, completion_tokens: 16, total_tokens: 17 },
+            };
+          }
           return {
-            outputData: {
-              success: false,
-              errMsg: `Execution failed: ${realData}`,
-            },
+            outputData,
             status: 'FAILED',
           };
         } else if (outputAs === 'json') {

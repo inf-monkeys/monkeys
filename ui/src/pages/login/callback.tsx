@@ -4,13 +4,18 @@ import { useSWRConfig } from 'swr';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { CircularProgress } from '@nextui-org/progress';
+import { motion } from 'framer-motion';
+import { DoorOpen, LogIn } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useSystemConfig } from '@/apis/common';
+import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { saveAuthToken } from '@/components/router/guard/auth.ts';
+import { Button } from '@/components/ui/button';
+import { I18nSelector } from '@/components/ui/i18n-selector';
 import { loginCallbackPageSearchSchema } from '@/schema/common.ts';
-import { useLocalStorage } from '@/utils';
+import { clearAllLocalData } from '@/utils';
 
 const LoginCallback: React.FC = () => {
   const { t } = useTranslation();
@@ -21,26 +26,24 @@ const LoginCallback: React.FC = () => {
 
   const { data: oem } = useSystemConfig();
 
-  const [, setSwap] = useLocalStorage('vines-authz-swap', 'users', false);
-
   useEffect(() => {
-    if (!access_token) return;
+    if (!access_token) {
+      toast.warning(t('auth.oidc.auth-failed'));
+      void navigate({ to: '/login' });
+      return;
+    }
+
     saveAuthToken(access_token).then((usersCount) => {
       if (!usersCount) {
         toast.warning(t('auth.oidc.auth-failed'));
         localStorage.removeItem('vines-token');
         localStorage.removeItem('vines-team-id');
-        setSwap('login');
         void navigate({ to: '/login' });
         return;
       }
 
-      if (usersCount === 1) {
-        void mutate('/api/teams');
-        void navigate({ to: '/' });
-      } else {
-        setSwap('users');
-      }
+      void mutate('/api/teams');
+      void navigate({ to: '/' });
       toast.success(t('auth.login.success'));
     });
   }, [access_token]);
@@ -53,6 +56,41 @@ const LoginCallback: React.FC = () => {
       <h1 className="animate-pulse font-bold text-vines-500">
         {t(`auth.${oidcText ? 'oidc' : 'login'}.logging-in`, { oidc: oidcText })}
       </h1>
+      <motion.div
+        className="-mb-28 flex flex-col items-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1, transition: { delay: 3 } }}
+      >
+        <div className="flex items-center gap-4">
+          <Button
+            className="mb-2 mt-9"
+            size="small"
+            variant="outline"
+            icon={<LogIn />}
+            onClick={() => {
+              clearAllLocalData();
+              void navigate({ to: '/login' });
+            }}
+          >
+            {t('auth.wait-to-long.re-login')}
+          </Button>
+          <Button
+            className="mb-2 mt-9"
+            size="small"
+            variant="outline"
+            icon={<DoorOpen />}
+            onClick={() => navigate({ to: '/' })}
+          >
+            {t('auth.wait-to-long.force-enter')}
+          </Button>
+        </div>
+        <span className="text-xs text-opacity-70">{t('auth.wait-to-long.title')}</span>
+        <span className="text-xs text-opacity-70">{t('auth.wait-to-long.desc')}</span>
+      </motion.div>
+      <div className="absolute bottom-6 left-6 flex items-center gap-2">
+        <VinesDarkMode />
+        <I18nSelector />
+      </div>
     </>
   );
 };

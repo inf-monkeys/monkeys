@@ -1,8 +1,8 @@
-import { AssetType } from '@/common/typings/asset';
 import { flatTasks } from '@/common/utils/conductor';
 import { ToolsRepository } from '@/database/repositories/tools.repository';
 import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { WorkflowTask } from '@inf-monkeys/conductor-javascript';
+import { AssetType } from '@inf-monkeys/monkeys';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -18,7 +18,7 @@ export class AssetsReferenceService {
     return workflows.filter((workflow) => {
       const tasks: WorkflowTask[] = flatTasks(workflow.tasks);
 
-      if (assetType === 'tools' || assetType === 'block') {
+      if (assetType === 'tools') {
         return tasks.some((task) => {
           return task.name === assetId;
         });

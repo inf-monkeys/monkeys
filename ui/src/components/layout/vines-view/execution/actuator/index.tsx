@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { BugPlay, Fullscreen, Minimize, RotateCcw, StopCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { VinesActuatorDetail } from '@/components/layout/vines-view/execution/actuator/detail';
@@ -25,6 +26,8 @@ interface IVinesActuatorProps {
 }
 
 export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
+  const { t } = useTranslation();
+
   const { setCanvasMode } = useCanvasStore();
   const { visible, fullscreen, setFullscreen } = useViewStore();
 
@@ -68,7 +71,9 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
                     {fullscreen ? <Minimize size={16} /> : <Fullscreen size={16} />}
                   </Toggle>
                 </TooltipTrigger>
-                <TooltipContent>{fullscreen ? '还原视图' : '视图内全屏'}</TooltipContent>
+                <TooltipContent>
+                  {fullscreen ? t('workspace.pre-view.actuator.scale.min') : t('workspace.pre-view.actuator.scale.max')}
+                </TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -82,7 +87,7 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
                         const hasWorkflowVariables = vines.workflowInput.length > 0;
                         if (hasWorkflowVariables) {
                           vines.executionWorkflowExecution = null;
-                          toast.info('请先完善工作流表单');
+                          toast.info(t('workspace.pre-view.actuator.execution.form-empty'));
                         } else {
                           vines.start({});
                           setTimeout(() => VinesEvent.emit('canvas-auto-zoom'));
@@ -92,7 +97,11 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
                     }}
                   />
                 </TooltipTrigger>
-                <TooltipContent>{isExecutionRunning ? '终止运行' : '重新运行'}</TooltipContent>
+                <TooltipContent>
+                  {isExecutionRunning
+                    ? t('workspace.pre-view.actuator.execution.button.stop')
+                    : t('workspace.pre-view.actuator.execution.button.restart')}
+                </TooltipContent>
               </Tooltip>
               {workflowStatus && (
                 <ExecutionTimer
@@ -131,7 +140,7 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
               }}
             >
               <Button variant="outline" type="submit">
-                运行工作流
+                {t('workspace.pre-view.actuator.execution.label')}
               </Button>
             </VinesWorkflowInput>
           ) : (
@@ -144,7 +153,7 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height }) => {
                   setCanvasMode(CanvasStatus.RUNNING);
                 }}
               >
-                运行工作流
+                {t('workspace.pre-view.actuator.execution.label')}
               </Button>
             </div>
           )}

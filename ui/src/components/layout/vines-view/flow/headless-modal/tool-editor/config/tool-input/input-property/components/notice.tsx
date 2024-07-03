@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm';
 
 import { MemoizedReactMarkdown } from '@/components/ui/markdown';
 import { VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
+import { getI18nContent } from '@/utils';
 
 export const NoticeInput: React.FC<{ def: Pick<VinesToolDefProperties, 'displayName'> }> = ({ def }) => {
   return (
@@ -19,7 +20,7 @@ export const NoticeInput: React.FC<{ def: Pick<VinesToolDefProperties, 'displayN
           ),
         }}
       >
-        {def.displayName}
+        {getI18nContent(def.displayName)}
       </MemoizedReactMarkdown>
     </div>
   );

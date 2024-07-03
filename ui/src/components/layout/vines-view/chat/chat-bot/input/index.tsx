@@ -2,6 +2,7 @@ import React from 'react';
 
 import { isEmpty } from 'lodash';
 import { StopCircle, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { CleanMessages } from '@/components/layout/vines-view/chat/chat-bot/input/clean-messages.tsx';
 import { useChat } from '@/components/layout/vines-view/chat/chat-bot/use-chat.ts';
@@ -15,6 +16,8 @@ interface IVinesChatInputProps {
 }
 
 export const VinesChatInput: React.FC<IVinesChatInputProps> = ({ chatId, multipleChat = true }) => {
+  const { t } = useTranslation();
+
   const { messages, setMessages, input, setInput, handleEnterPress, isLoading, stop } = useChat({
     chatId,
   });
@@ -28,21 +31,21 @@ export const VinesChatInput: React.FC<IVinesChatInputProps> = ({ chatId, multipl
         </CleanMessages>
       )}
       <Input
-        placeholder="聊些什么..."
+        placeholder={t('workspace.chat-view.chat-bot.chat.placeholder')}
         disabled={isLoading}
         value={input}
         onChange={setInput}
         onEnterPress={handleEnterPress}
       />
       <Button variant="outline" loading={isLoading} disabled={isInputEmpty} onClick={handleEnterPress}>
-        发送
+        {t('workspace.chat-view.chat-bot.chat.send')}
       </Button>
       {isLoading && (
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="outline" className="[&_svg]:stroke-red-10" icon={<StopCircle />} onClick={stop} />
           </TooltipTrigger>
-          <TooltipContent>停止生成</TooltipContent>
+          <TooltipContent>{t('workspace.chat-view.chat-bot.chat.stop')}</TooltipContent>
         </Tooltip>
       )}
     </div>

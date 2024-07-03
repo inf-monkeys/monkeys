@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
 
-import { AssetType } from '@inf-monkeys/vines';
-import { BlockDefCategory } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
+import { AssetType, ToolCategory } from '@inf-monkeys/monkeys';
 import { useElementSize } from '@mantine/hooks';
 import {
   ColumnDef,
@@ -17,7 +16,7 @@ import _, { isNull } from 'lodash';
 import { CircleSlash, MoreHorizontal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { IWorkflowBlock } from '@/apis/tools/typings.ts';
+import { IWorkflowTool } from '@/apis/tools/typings.ts';
 import { IAssetItem, IListUgcDto, IListUgcItemsFnType, IPreloadUgcItemsFnType } from '@/apis/ugc/typings.ts';
 import { UgcSidebar } from '@/components/layout/ugc/sidebar';
 import {
@@ -136,10 +135,10 @@ export const UgcView = <E extends object>({
   const data = useMemo(
     () =>
       rawData && _.isArray(rawData.data)
-        ? assetType === 'block' && filter.cate
+        ? assetType === 'tools' && filter.cate
           ? rawData.data.filter((l) =>
               filter.cate
-                ? (l as unknown as IAssetItem<IWorkflowBlock>)?.categories?.includes(filter.cate as BlockDefCategory)
+                ? (l as unknown as IAssetItem<IWorkflowTool>)?.categories?.includes(filter.cate as ToolCategory)
                 : true,
             )
           : rawData.data

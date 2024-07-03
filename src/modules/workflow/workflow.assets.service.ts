@@ -1,6 +1,5 @@
 import { flatTasks } from '@/common/utils/conductor';
-import { WorkflowTask } from '@inf-monkeys/conductor-javascript';
-import { BlockType } from '@inf-monkeys/vines';
+import { TaskType, WorkflowTask } from '@inf-monkeys/conductor-javascript';
 import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
 import { ToolsRepository } from '../../database/repositories/tools.repository';
@@ -40,7 +39,7 @@ export class WorkflowAssetsService {
         continue;
       }
       const { type, name: taskName } = task;
-      if (type === BlockType.SIMPLE) {
+      if (type === TaskType.SIMPLE) {
         const tool = tools.find((x) => x.name === taskName);
         if (!tool) {
           continue;

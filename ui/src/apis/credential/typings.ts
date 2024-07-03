@@ -1,4 +1,4 @@
-import { BlockDefProperties } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
+import { ToolProperty } from '@inf-monkeys/monkeys';
 
 export enum CredentialAuthType {
   AKSK = 'AKSK',
@@ -11,7 +11,7 @@ export interface IVinesCredentialType {
   name: string;
   displayName: string;
   iconUrl?: string;
-  properties: BlockDefProperties[];
+  properties: ToolProperty[];
   tokenScript: string;
   testConnectionScript?: string;
   type: CredentialAuthType;

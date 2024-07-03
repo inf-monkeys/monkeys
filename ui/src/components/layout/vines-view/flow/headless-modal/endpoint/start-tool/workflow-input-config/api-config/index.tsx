@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import { Save } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { updateWorkflow } from '@/apis/workflow';
@@ -22,6 +23,8 @@ import { cn } from '@/utils';
 interface IWorkflowApiConfigProps {}
 
 export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
+  const { t } = useTranslation();
+
   const { isLatestWorkflowVersion, workflowId } = useFlowStore();
   const { vines } = useVinesFlow();
   const { workflow } = useVinesPage();
@@ -49,7 +52,7 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
     setIsLoading(true);
     if (!workflow?.workflowId) {
       setIsLoading(false);
-      toast.error('工作流 ID 不存在');
+      toast.error(t('workspace.flow-view.endpoint.start-tool.api-config.form.submit.workflow-id-empty'));
       return;
     }
 
@@ -61,12 +64,10 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
         ...data,
       } as Partial<MonkeyWorkflow>),
       {
-        success: '操作成功',
-        loading: '操作中......',
-        error: '操作失败，请检查网络后重试',
-        finally: () => {
-          setIsLoading(false);
-        },
+        success: t('workspace.flow-view.endpoint.start-tool.api-config.form.submit.success'),
+        loading: t('workspace.flow-view.endpoint.start-tool.api-config.form.submit.loading'),
+        error: t('workspace.flow-view.endpoint.start-tool.api-config.form.submit.error'),
+        finally: () => setIsLoading(false),
       },
     );
   });
@@ -75,13 +76,17 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
     <div className="relative flex h-80 w-full flex-col py-2">
       <Form {...form}>
         <form onSubmit={handleSubmit} className="flex flex-col justify-between gap-4">
-          <ScrollArea className="h-64">
+          <ScrollArea className="h-64 [&>div]:px-2">
             <FormField
               name="exposeOpenaiCompatibleInterface"
               control={form.control}
               render={({ field }) => (
                 <FormItem className="flex flex-col gap-2">
-                  <FormLabel>启用 OpenAI 兼容的接口</FormLabel>
+                  <FormLabel>
+                    {t(
+                      'workspace.flow-view.endpoint.start-tool.api-config.form.expose-openai-compatible-interface.label',
+                    )}
+                  </FormLabel>
                   <FormControl>
                     <Switch checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
@@ -91,25 +96,29 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
             />
 
             {form.getValues().exposeOpenaiCompatibleInterface && (
-              <>
-                <FormField
-                  name="openaiModelName"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>模型名称</FormLabel>
-                      <FormDescription>
-                        模型名称默认为工作流 ID，你也可以设置自定义模型名称，在通过 API 调用接口时可以设置 model
-                        为此自定义名称（同一个团队内必须唯一）。
-                      </FormDescription>
-                      <FormControl>
-                        <Input placeholder="请输入模型名称" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </>
+              <FormField
+                name="openaiModelName"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {t('workspace.flow-view.endpoint.start-tool.api-config.form.openai-model-name.label')}
+                    </FormLabel>
+                    <FormDescription>
+                      {t('workspace.flow-view.endpoint.start-tool.api-config.form.openai-model-name.desc')}
+                    </FormDescription>
+                    <FormControl>
+                      <Input
+                        placeholder={t(
+                          'workspace.flow-view.endpoint.start-tool.api-config.form.openai-model-name.placeholder',
+                        )}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
 
             <FormField
@@ -117,7 +126,9 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
               control={form.control}
               render={({ field }) => (
                 <FormItem className="flex flex-col gap-2">
-                  <FormLabel>开启限流</FormLabel>
+                  <FormLabel>
+                    {t('workspace.flow-view.endpoint.start-tool.api-config.form.rate-limiter.label')}
+                  </FormLabel>
                   <FormControl>
                     <Switch checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
@@ -133,9 +144,20 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>时间窗口大小（毫秒）</FormLabel>
+                      <FormLabel>
+                        {t('workspace.flow-view.endpoint.start-tool.api-config.form.rate-limiter.window-ms.label')}
+                      </FormLabel>
                       <FormControl>
-                        <Input placeholder="请输入时间窗口大小（毫秒）" {...field} />
+                        <Input
+                          placeholder={t(
+                            'workspace.flow-view.endpoint.start-tool.api-config.form.rate-limiter.window-ms.placeholder',
+                          )}
+                          {...field}
+                          onChange={(v) => {
+                            const val = parseInt(v);
+                            field.onChange(isNaN(val) ? 0 : val);
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -147,9 +169,17 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>单位时间窗口内运行最大并发</FormLabel>
+                      <FormLabel>
+                        {t('workspace.flow-view.endpoint.start-tool.api-config.form.rate-limiter.max.label')}
+                      </FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input
+                          {...field}
+                          onChange={(v) => {
+                            const val = parseInt(v);
+                            field.onChange(isNaN(val) ? 0 : val);
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -166,7 +196,7 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
             icon={<Save />}
             type="submit"
           >
-            保存 API 配置
+            {t('workspace.flow-view.endpoint.start-tool.api-config.form.submit.button')}
           </Button>
         </form>
       </Form>
