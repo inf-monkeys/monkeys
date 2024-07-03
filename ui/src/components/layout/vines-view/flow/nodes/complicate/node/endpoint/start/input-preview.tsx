@@ -2,6 +2,7 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 import { isBoolean } from 'lodash';
+import { useTranslation } from 'react-i18next';
 import { WorkflowInputList } from 'src/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-list';
 
 import { useVinesFlow } from '@/package/vines-flow';
@@ -9,6 +10,8 @@ import { useVinesFlow } from '@/package/vines-flow';
 interface IInputPreviewProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const InputPreview: React.FC<IInputPreviewProps> = () => {
+  const { t } = useTranslation();
+
   const { vines } = useVinesFlow();
 
   const inputs = vines.workflowInput.map((it) =>
@@ -28,7 +31,7 @@ export const InputPreview: React.FC<IInputPreviewProps> = () => {
         <WorkflowInputList inputs={inputs} />
       ) : (
         <div className="vines-center size-full">
-          <h1 className="font-bold">暂无输入</h1>
+          <h1 className="font-bold">{t('workspace.flow-view.endpoint.start-tool.input.def-empty')}</h1>
         </div>
       )}
     </motion.div>

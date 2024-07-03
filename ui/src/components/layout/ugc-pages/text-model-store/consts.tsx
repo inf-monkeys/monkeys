@@ -1,12 +1,12 @@
-import React from 'react';
-
+import { I18nValue } from '@inf-monkeys/monkeys';
 import { createColumnHelper } from '@tanstack/react-table';
 
-import { ILLMModel } from '@/apis/llm/typings.ts';
+import { ILLMChannel } from '@/apis/llm/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { RenderDescription, RenderIcon, RenderTime } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { I18nContent } from '@/utils';
 
-const columnHelper = createColumnHelper<IAssetItem<ILLMModel>>();
+const columnHelper = createColumnHelper<IAssetItem<ILLMChannel>>();
 
 export const createTextModelStoreColumns = () => [
   columnHelper.accessor('iconUrl', {
@@ -15,19 +15,19 @@ export const createTextModelStoreColumns = () => [
     cell: ({ getValue }) => RenderIcon({ iconUrl: getValue() as string }),
     maxSize: 48,
   }),
-  columnHelper.accessor('name', {
+  columnHelper.accessor('displayName', {
     id: 'title',
     header: '名称',
     cell: ({ getValue }) => (
       <a className="transition-colors hover:text-primary-500" target="_blank" rel="noreferrer">
-        {getValue() as string}
+        {I18nContent(getValue() as string | I18nValue)}
       </a>
     ),
   }),
   columnHelper.accessor('description', {
     id: 'description',
     header: '描述',
-    cell: ({ getValue }) => RenderDescription({ description: getValue() as string }),
+    cell: ({ getValue }) => RenderDescription({ description: I18nContent(getValue() as string | I18nValue) }),
   }),
   columnHelper.accessor('createdTimestamp', {
     id: 'createdTimestamp',

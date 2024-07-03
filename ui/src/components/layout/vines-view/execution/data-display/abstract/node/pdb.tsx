@@ -46,11 +46,11 @@ export const VinesAbstractPDB: React.FC<IVinesAbstractPDBProps> = ({ children, h
             viewerInstance?.visual?.toggleSpin(true);
           });
         } else {
-          toast.error('Molstar Plugin 加载失败！');
+          toast.error('Molstar Plugin Load Error!');
         }
       } catch (e) {
         console.error('[vines-molstar-pdbe]:', e);
-        toast.error('Molstar Plugin 发生错误！');
+        toast.error('Molstar Plugin Error!');
       }
     }
   }, [isLoading]);
@@ -61,7 +61,7 @@ export const VinesAbstractPDB: React.FC<IVinesAbstractPDBProps> = ({ children, h
         molstarInstance?.canvas?.setBgColor(darkMode ? { r: 17, g: 17, b: 19 } : { r: 252, g: 252, b: 253 });
       } catch (e) {
         console.error('[vines-molstar-pdbe]:', e);
-        toast.error('Molstar Plugin 发生错误！');
+        toast.error('Molstar Plugin Error!');
       }
     }
   }, [molstarInstance, darkMode]);

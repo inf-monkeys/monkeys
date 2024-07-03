@@ -4,16 +4,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useInterval, useTimeout } from '@mantine/hooks';
 import { useForm, UseFormReturn } from 'react-hook-form';
 import { toast } from 'sonner';
-import { ILoginViaSms, loginViaSmsSchema } from 'src/schema/authz';
 
 import { sendSmsVerifyCode } from '@/apis/authz';
 import { AuthMethod } from '@/apis/common/typings.ts';
-import { AuthWrapper } from '@/components/layout/login/authz/auth-wrapper.tsx';
+import { AuthWrapper } from '@/components/layout/login/auth-wrapper.tsx';
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp.tsx';
 import { PHONE_REGEX } from '@/consts/authz';
+import { ILoginViaSms, loginViaSmsSchema } from '@/schema/authz';
 
 interface IPhoneAuthProps extends React.ComponentPropsWithoutRef<'div'> {
   onFinished?: () => void;

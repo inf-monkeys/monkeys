@@ -2,6 +2,7 @@ import React from 'react';
 
 import { CircularProgress } from '@nextui-org/progress';
 import { AlertCircle, CheckCircle, FullscreenIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useKnowledgeBases } from '@/apis/knowledge-base';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { useVinesFlow } from '@/package/vines-flow';
 import { JSONValue } from '@/package/vines-flow/core/tools/typings.ts';
+import { getI18nContent } from '@/utils';
 
 type LogLevel = 'error' | 'warn' | 'info' | 'debug';
 type Status = 'inprogress' | 'success' | 'failed';
@@ -41,6 +43,8 @@ interface IToolDisplayProps {
 }
 
 export const ToolDisplay: React.FC<IToolDisplayProps> = ({ data }) => {
+  const { t } = useTranslation();
+
   const { vines } = useVinesFlow();
   const { data: knowledges } = useKnowledgeBases();
   const chatCompelitionLog = data?.at(-1);
@@ -63,8 +67,8 @@ export const ToolDisplay: React.FC<IToolDisplayProps> = ({ data }) => {
     const knowledgeBaseId = (detailedInfo as RetriveKnowledgeBaseDetailedInfo).knowledgeBaseId;
     const knowledgeBase = knowledges?.find((k) => k.uuid === knowledgeBaseId);
     if (knowledgeBase) {
-      toolDisplayName = knowledgeBase.displayName;
-      toolDesc = knowledgeBase.description || '';
+      toolDisplayName = getI18nContent(knowledgeBase.displayName) ?? '';
+      toolDesc = getI18nContent(knowledgeBase.description) ?? '';
       toolIcon = knowledgeBase.iconUrl || 'emoji:📚:#f0f0f0';
     }
   } else if (type === 'tool_call') {
@@ -72,8 +76,8 @@ export const ToolDisplay: React.FC<IToolDisplayProps> = ({ data }) => {
     result = (detailedInfo as ToolCallLogDetailedInfo).result || (detailedInfo as ToolCallLogDetailedInfo).arguments;
     const toolName = (detailedInfo as ToolCallLogDetailedInfo).toolName;
     const vinesTool = vines.getTool(toolName);
-    toolDisplayName = vinesTool?.displayName || toolName;
-    toolDesc = vinesTool?.description || '';
+    toolDisplayName = getI18nContent(vinesTool?.displayName) || toolName;
+    toolDesc = getI18nContent(vinesTool?.description) || '';
     toolIcon = vinesTool?.icon || 'emoji:🛠:#f0f0f0';
   }
 
@@ -102,7 +106,11 @@ export const ToolDisplay: React.FC<IToolDisplayProps> = ({ data }) => {
 
         <div className="relative flex h-28 w-full">
           <ScrollArea>
-            <VinesHighlighter language="json">{JSON.stringify(result, null, 2) as string}</VinesHighlighter>
+            {type === 'tool_call' ? (
+              <VinesHighlighter language="json">{JSON.stringify(result, null, 2) as string}</VinesHighlighter>
+            ) : (
+              <VinesHighlighter language="markdown">{result as string}</VinesHighlighter>
+            )}
           </ScrollArea>
           <div className="absolute -bottom-1 -right-2 flex scale-80 items-center gap-2">
             <Tooltip>
@@ -113,7 +121,7 @@ export const ToolDisplay: React.FC<IToolDisplayProps> = ({ data }) => {
                   </Button>
                 </TooltipTrigger>
               </CodePreview>
-              <TooltipContent>查看原始数据</TooltipContent>
+              <TooltipContent>{t('workspace.chat-view.chat-bot.tool-display.raw-preview')}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <CodePreview data={result} lineNumbers={3} minimap>
@@ -121,7 +129,7 @@ export const ToolDisplay: React.FC<IToolDisplayProps> = ({ data }) => {
                   <Button icon={<FullscreenIcon />} variant="outline" size="small" />
                 </TooltipTrigger>
               </CodePreview>
-              <TooltipContent>放大查看数据</TooltipContent>
+              <TooltipContent>{t('workspace.chat-view.chat-bot.tool-display.scale-to-preview')}</TooltipContent>
             </Tooltip>
           </div>
         </div>

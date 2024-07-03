@@ -1,13 +1,12 @@
-import { BlockDefinition, BlockDefPropertyTypes } from '@inf-monkeys/vines';
-import { BlockDefProperties } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
+import { ToolDef, ToolProperty, ToolPropertyTypes } from '@inf-monkeys/monkeys';
 
-export type VinesToolDefProperties = BlockDefProperties & {
+export type VinesToolDefProperties = ToolProperty & {
   extra?: {
     workflowId?: string;
   };
 };
 
-export type VinesToolDef = Omit<BlockDefinition, 'input' | 'output'> & {
+export type VinesToolDef = Omit<ToolDef, 'input' | 'output'> & {
   input: VinesToolDefProperties[];
   output: VinesToolDefProperties[];
 };
@@ -15,14 +14,14 @@ export type VinesToolDef = Omit<BlockDefinition, 'input' | 'output'> & {
 export type VinesToolWithCategory = [VinesToolDef[], number, string, string];
 
 export type VinesWorkflowVariable = Pick<
-  BlockDefProperties,
-  'name' | 'type' | 'displayName' | 'typeOptions' | 'default'
+  ToolProperty,
+  'name' | 'type' | 'displayName' | 'typeOptions' | 'default' | 'description'
 >;
 
 export interface IVinesVariableMap {
   name: string;
   displayName: string;
-  type: BlockDefPropertyTypes;
+  type: ToolPropertyTypes;
 }
 
 export type VinesVariableMapper = Map<string, IVinesVariableMap>;
@@ -41,7 +40,7 @@ export interface IVinesVariable {
   label: string;
   pathLabel?: string;
   originalName: string;
-  type: BlockDefPropertyTypes;
+  type: ToolPropertyTypes;
   isMultiple: boolean;
   group: IVinesVariableGroupInfo;
   children?: IVinesVariable[];

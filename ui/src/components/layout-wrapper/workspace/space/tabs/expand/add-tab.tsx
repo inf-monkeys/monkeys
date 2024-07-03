@@ -1,11 +1,10 @@
-import React from 'react';
-
-import { CreatePageDto } from '@inf-monkeys/vines/lib/models/CreatePageDto';
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { createWorkspacePage, useWorkspacePageInstances } from '@/apis/pages';
+import { CreatePageDto } from '@/apis/pages/typings';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Button } from '@/components/ui/button';
 import {
@@ -73,7 +72,7 @@ export const AddSpaceTab: React.FC<IAddSpaceTabProps> = ({ className }) => {
               ?.map(({ type, icon, name }) => (
                 <DropdownMenuItem key={type} className="flex items-center gap-2" onClick={() => handleAddPage(type)}>
                   <VinesIcon size="xs">{icon}</VinesIcon>
-                  <p>{name}</p>
+                  <p>{t([`workspace.wrapper.space.tabs.${name}`, name])}</p>
                 </DropdownMenuItem>
               ))}
           </DropdownMenuGroup>

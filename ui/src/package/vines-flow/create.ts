@@ -2,12 +2,13 @@ import React, { createContext, createElement, useCallback, useContext, useEffect
 
 import { useSWRConfig } from 'swr';
 
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
+import type { i18n } from 'i18next';
 import { isArray } from 'lodash';
 import { toast } from 'sonner';
 
 import { useToolLists } from '@/apis/tools';
-import { useUpdateWorkflow, useWorkflowList } from '@/apis/workflow';
+import { updateWorkflow, useUpdateWorkflow, useWorkflowList } from '@/apis/workflow';
 import { VinesCore } from '@/package/vines-flow/core';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
@@ -23,11 +24,11 @@ const forceUpdateReducer = (value: number) => (value + 1) % 1000000;
 
 const VinesMap = new Map<string, VinesCore>();
 
-function getOrCreateVinesCore(workflowId: string): VinesCore {
+function getOrCreateVinesCore(workflowId: string, t?: i18n): VinesCore {
   if (VinesMap.has(workflowId)) {
     return VinesMap.get(workflowId)!;
   }
-  const newVinesCore = new VinesCore();
+  const newVinesCore = new VinesCore(t);
   VinesMap.set(workflowId, newVinesCore);
   return newVinesCore;
 }
@@ -41,8 +42,8 @@ export const useVinesRefresher = () => {
   return context;
 };
 
-export const createVinesCore = (workflowId: string) => {
-  const _vines = getOrCreateVinesCore(workflowId);
+export const createVinesCore = (workflowId: string, t?: i18n) => {
+  const _vines = getOrCreateVinesCore(workflowId, t);
   const VinesProvider = ({ children }: { children: React.ReactNode }) => {
     const { mutate } = useSWRConfig();
     const [_refresher, forceUpdate] = useReducer(forceUpdateReducer, 0);
@@ -100,21 +101,48 @@ export const createVinesCore = (workflowId: string) => {
           }, 100) as unknown as number,
         );
       },
-      [reTimer],
+      [reTimer, _vines],
     );
 
     const handleUpdateExecutionDataToSWR = useCallback((instanceId: string, data: VinesWorkflowExecution) => {
       void mutate(`/api/workflow/executions/${instanceId}`, data, { revalidate: false });
     }, []);
 
+    const handleUpdateWorkflow = useCallback(
+      (data: Partial<MonkeyWorkflow>) => {
+        const workflowVersion = _vines.version;
+        const workflowId = _vines.workflowId;
+
+        if (!workflowId) {
+          toast.error('工作流 ID 不存在！');
+          return;
+        }
+
+        toast.promise(
+          updateWorkflow(workflowId, workflowVersion, {
+            version: workflowVersion,
+            ...data,
+          } as Partial<MonkeyWorkflow>),
+          {
+            success: '更新成功',
+            loading: '更新中...',
+            error: '更新失败',
+          },
+        );
+      },
+      [_vines],
+    );
+
     useEffect(() => {
       _vines.on('refresh', forceUpdate);
       _vines.on('update', handleUpdate);
       _vines.on('update-execution', handleUpdateExecutionDataToSWR);
+      _vines.on('update-workflow', handleUpdateWorkflow);
       return () => {
         _vines.off('refresh', forceUpdate);
         _vines.off('update', handleUpdate);
         _vines.off('update-execution', handleUpdateExecutionDataToSWR);
+        _vines.off('update-workflow', handleUpdateWorkflow);
       };
     }, []);
 

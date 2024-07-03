@@ -5,10 +5,11 @@ import { logger } from '@/common/logger';
 import { Mq } from '@/common/mq';
 import { IRequest } from '@/common/typings/request';
 import { isValidObjectId } from '@/common/utils';
+import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
 import { TeamRepository } from '@/database/repositories/team.repository';
 import { WorkflowRepository } from '@/database/repositories/workflow.repository';
-import { Body, Controller, Get, Inject, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Inject, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { TOOL_STREAM_RESPONSE_TOPIC } from '../tools/tools.polling.service';
@@ -47,18 +48,20 @@ export class WorkflowOpenAICompatibleController {
     };
   }
 
-  private async getWorkflowIdByModel(teamId: string, model: string) {
-    let workflowId;
+  private async getWorkflowByModel(teamId: string, model: string): Promise<WorkflowMetadataEntity> {
+    let workflowId: string;
+    let workflow: WorkflowMetadataEntity;
     if (isValidObjectId(model)) {
       workflowId = model;
+      workflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(workflowId);
     } else {
-      const workflow = await this.workflowRepository.findWorkflowByOpenAIModelName(teamId, model);
+      workflow = await this.workflowRepository.findWorkflowByOpenAIModelName(teamId, model);
       if (!workflow) {
         return null;
       }
       workflowId = workflow.workflowId;
     }
-    return workflowId;
+    return workflow;
   }
 
   @Post('/completions')
@@ -66,14 +69,15 @@ export class WorkflowOpenAICompatibleController {
     summary: 'Create completions',
     description: 'Create completions',
   })
+  @HttpCode(200)
   public async createcCompletions(@Req() req: IRequest, @Body() body: CreateCompletionsDto, @Res() res: Response) {
     const { teamId, userId } = req;
     const { model, stream = false } = body;
-    const workflowId = await this.getWorkflowIdByModel(teamId, model);
-    if (!workflowId) {
+    const workflow = await this.getWorkflowByModel(teamId, model);
+    if (!workflow) {
       return res.status(404).json({ message: 'Model not found' });
     }
-
+    const { workflowId } = workflow;
     const sessionId = (req.headers['x-monkeys-session-id'] as string) || 'default';
     const workflowInstanceId = await this.workflowExecutionService.startWorkflow({
       teamId,
@@ -85,10 +89,10 @@ export class WorkflowOpenAICompatibleController {
     });
     if (stream === false) {
       const result = await this.workflowExecutionService.waitForWorkflowResult(teamId, workflowInstanceId);
-      return res.json(result);
+      return res.status(200).json(result);
     } else {
       res.setHeader('content-type', 'text/event-stream');
-      res.status(201);
+      res.status(200);
       const key = TOOL_STREAM_RESPONSE_TOPIC(workflowInstanceId);
       this.mq.subscribe(key, (_, message: string) => {
         res.write(message);
@@ -105,14 +109,15 @@ export class WorkflowOpenAICompatibleController {
     summary: 'Create chat completions',
     description: 'Create chat completions',
   })
+  @HttpCode(200)
   public async createChatComplitions(@Req() req: IRequest, @Body() body: CreateChatCompletionsDto, @Res() res: Response) {
     const { teamId, userId } = req;
     const { model, stream = false } = body;
-    const workflowId = await this.getWorkflowIdByModel(teamId, model);
-    if (!workflowId) {
+    const workflow = await this.getWorkflowByModel(teamId, model);
+    if (!workflow) {
       return res.status(404).json({ message: 'Model not found' });
     }
-
+    const { workflowId } = workflow;
     const conversationId = req.headers['x-monkeys-conversation-id'] as string;
     const workflowInstanceId = await this.workflowExecutionService.startWorkflow({
       teamId,
@@ -134,10 +139,10 @@ export class WorkflowOpenAICompatibleController {
           await this.workflowRepository.updateChatSessionMessages(teamId, conversationId, newMessages);
         }
       }
-      return res.json(result);
+      return res.status(200).json(result);
     } else {
       res.setHeader('content-type', 'text/event-stream');
-      res.status(201);
+      res.status(200);
       const channel = TOOL_STREAM_RESPONSE_TOPIC(workflowInstanceId);
       let aiResponse = '';
       this.mq.subscribe(channel, (channel, message: string) => {

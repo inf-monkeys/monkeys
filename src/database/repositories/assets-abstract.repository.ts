@@ -1,6 +1,6 @@
 import { AssetFilter, ListDto } from '@/common/dto/list.dto';
-import { AssetType } from '@/common/typings/asset';
 import { generateDbId } from '@/common/utils';
+import { AssetType } from '@inf-monkeys/monkeys';
 import { Between, FindOptionsOrder, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { AssetPublishConfig, BaseAssetEntity } from '../entities/assets/base-asset';
 import { AssetsCommonRepository, AssetsFillAdditionalInfoOptions } from './assets-common.repository';
@@ -250,7 +250,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
       throw new Error('displayName is required to init built-in asset');
     }
     const asset = this.repository.create(data as E);
-    asset.isPreset = true;
+    asset.isPreset = data.isPreset || false;
     asset.isPublished = true;
     asset.assetType = assetType;
     await this.repository.save(asset);

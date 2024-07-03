@@ -1,6 +1,7 @@
 import React, { forwardRef, useMemo } from 'react';
 
 import dayjs from 'dayjs';
+import { useTranslation } from 'react-i18next';
 
 interface IVinesActuatorDetailHeaderProps {
   executionStartTime?: number;
@@ -10,6 +11,8 @@ interface IVinesActuatorDetailHeaderProps {
 
 export const VinesActuatorDetailHeader = forwardRef<HTMLHeadingElement, IVinesActuatorDetailHeaderProps>(
   ({ executionStartTime = 0, executionEndTime = 0, iteration = 0 }, ref) => {
+    const { t } = useTranslation();
+
     const startTime = executionStartTime ? dayjs(executionStartTime).format('YYYY-MM-DD HH:mm:ss') : '-';
     const endTime = executionEndTime ? dayjs(executionEndTime).format('YYYY-MM-DD HH:mm:ss') : '-';
     const currentDuration = useMemo(() => {
@@ -19,20 +22,22 @@ export const VinesActuatorDetailHeader = forwardRef<HTMLHeadingElement, IVinesAc
       const minutes = duration.minutes();
       const seconds = duration.seconds();
       const milliseconds = duration.milliseconds();
-      if (days > 0) return `${days} 天`;
-      if (hours > 0) return `${hours} 小时`;
-      if (minutes > 0) return `${minutes} 分钟`;
-      if (seconds > 0) return `${seconds} 秒`;
-      if (milliseconds > 0) return `${milliseconds} 毫秒`;
+      if (days > 0) return t('workspace.pre-view.actuator.detail.header.days', { days });
+      if (hours > 0) return t('workspace.pre-view.actuator.detail.header.hours', { hours });
+      if (minutes > 0) return t('workspace.pre-view.actuator.detail.header.minutes', { minutes });
+      if (seconds > 0) return t('workspace.pre-view.actuator.detail.header.seconds', { seconds });
+      if (milliseconds > 0) return t('workspace.pre-view.actuator.detail.header.milliseconds', { milliseconds });
       return '-';
     }, [executionStartTime, executionEndTime]);
 
     return (
       <header ref={ref} className="flex shrink-0 grow-0 flex-wrap text-xs text-gray-10">
-        <p className="mr-4">开始时间：{startTime}</p>
-        <p className="mr-4">结束时间：{endTime}</p>
-        <p className="mr-4">运行时长：{currentDuration}</p>
-        {iteration ? <p className="mr-4">迭代轮次：{iteration}</p> : null}
+        <p className="mr-4">{t('workspace.pre-view.actuator.detail.header.start-time', { startTime })}</p>
+        <p className="mr-4">{t('workspace.pre-view.actuator.detail.header.end-time', { endTime })}</p>
+        <p className="mr-4">{t('workspace.pre-view.actuator.detail.header.duration', { currentDuration })}</p>
+        {iteration ? (
+          <p className="mr-4">{t('workspace.pre-view.actuator.detail.header.iteration', { iteration })}</p>
+        ) : null}
       </header>
     );
   },

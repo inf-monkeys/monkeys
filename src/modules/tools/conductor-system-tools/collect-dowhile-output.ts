@@ -1,21 +1,30 @@
 import { conductorClient } from '@/common/conductor';
 import defineNode from '@/common/utils/define-tool';
-import { BlockType } from '@inf-monkeys/vines';
+import { ToolType } from '@inf-monkeys/monkeys';
 import jsonpath from 'jsonpath';
 
 export default defineNode({
-  type: BlockType.SIMPLE,
+  type: ToolType.SIMPLE,
   name: 'collect_dowhile_output',
   categories: ['process'],
-  displayName: '收集循环结果',
-  description: '收集循环节点的执行结果',
+  displayName: {
+    'zh-CN': '收集循环节点的执行结果',
+    'en-US': 'Collect Do-While Output',
+  },
+  description: {
+    'zh-CN': '收集循环节点的执行结果，支持 JSONPath 表达式。',
+    'en-US': 'Collect the execution results of the do-while node, and support JSONPath expressions.',
+  },
   icon: 'emoji:🤖️:#7fa3f8',
   input: [
     {
       name: 'doWhileTaskReferenceName',
       type: 'string',
       required: true,
-      displayName: '循环节点 Task Reference Name',
+      displayName: {
+        'zh-CN': '循环节点的任务引用名称',
+        'en-US': 'Task Reference Name of Do-While Node',
+      },
       typeOptions: {
         assemblyValueType: 'taskReferenceName',
       },
@@ -24,13 +33,17 @@ export default defineNode({
       name: 'jsonPathExpression',
       type: 'string',
       required: false,
-      displayName: 'Json Path 表达式',
+      displayName: {
+        'zh-CN': 'JSONPath 表达式',
+        'es-ES': 'JSONPath Expression',
+      },
       typeOptions: {
         assemblyValueType: 'jsonpath',
       },
     },
     {
-      displayName: `
+      displayName: {
+        'zh-CN': `
 ## JSONPath 语法说明
 
 JSON Path 是 Stefan Goessner 在他在 [http://goessner.net/articles/JsonPath/](http://goessner.net/articles/JsonPath/) 与 2027 年提出的，详细使用文档请见：[https://github.com/dchester/jsonpath](https://github.com/dchester/jsonpath)。以下是一些常见的用法：
@@ -108,6 +121,84 @@ JSONPath                      | 描述
 \`$..book[?(@.price<30 && @.category=="fiction")]\`        | Filter all fiction books cheaper than 30
 \`$..*\`                         | All members of JSON structure
       `,
+        'en-US': `
+## JSONPath Syntax Explanation
+
+JSONPath was introduced by Stefan Goessner in his article at [http://goessner.net/articles/JsonPath/](http://goessner.net/articles/JsonPath/) and in 2027. For detailed usage documentation, please see: [https://github.com/dchester/jsonpath](https://github.com/dchester/jsonpath). Below are some common usages:
+
+| JSONPath                  | Description                                                                 |
+|---------------------------|-----------------------------------------------------------------------------|
+| \`$\`                       | The root object/element                                                     |
+| \`@\`                       | The current object/element                                                  |
+| \`.\`                       | Child member operator                                                       |
+| \`..\`                      | Recursive descendant operator; JSONPath borrows this syntax from E4X        |
+| \`*\`                       | Wildcard matching all objects/elements regardless of their names            |
+| \`[]\`                      | Subscript operator                                                          |
+| \`[,]\`                     | Union operator for alternate names or array indices as a set                |
+| \`[start:end:step]\`        | Array slice operator borrowed from ES4 / Python                             |
+| \`?()\`                     | Applies a filter (script) expression via static evaluation                  |
+| \`()\`                      | Script expression via static evaluation                                     |
+
+## Specific Examples
+
+Suppose the input data is as follows:
+
+\`\`\`javascript
+{
+  "store": {
+    "book": [ 
+      {
+        "category": "reference",
+        "author": "Nigel Rees",
+        "title": "Sayings of the Century",
+        "price": 8.95
+      }, {
+        "category": "fiction",
+        "author": "Evelyn Waugh",
+        "title": "Sword of Honour",
+        "price": 12.99
+      }, {
+        "category": "fiction",
+        "author": "Herman Melville",
+        "title": "Moby Dick",
+        "isbn": "0-553-21311-3",
+        "price": 8.99
+      }, {
+          "category": "fiction",
+        "author": "J. R. R. Tolkien",
+        "title": "The Lord of the Rings",
+        "isbn": "0-395-19395-8",
+        "price": 22.99
+      }
+    ],
+    "bicycle": {
+      "color": "red",
+      "price": 19.95
+    }
+  }
+}
+\`\`\`
+
+Example JSONPath expressions:
+
+| JSONPath                      | Description                                              |
+|-------------------------------|----------------------------------------------------------|
+| \`$.store.book[*].author\`      | The authors of all books in the store                    |
+| \`$..author\`                   | All authors                                              |
+| \`$.store.*\`                   | All things in store, which are some books and a bicycle  |
+| \`$.store..price\`              | The price of everything in the store                     |
+| \`$..book[2]\`                  | The third book                                           |
+| \`$..book[(@.length-1)]\`       | The last book via script subscript                       |
+| \`$..book[-1:]\`                | The last book via slice                                  |
+| \`$..book[0,1]\`                | The first two books via subscript union                  |
+| \`$..book[:2]\`                 | The first two books via subscript array slice            |
+| \`$..book[?(@.isbn)]\`          | Filter all books with ISBN number                        |
+| \`$..book[?(@.price<10)]\`      | Filter all books cheaper than 10                         |
+| \`$..book[?(@.price==8.95)]\`   | Filter all books that cost 8.95                          |
+| \`$..book[?(@.price<30 && @.category=="fiction")]\` | Filter all fiction books cheaper than 30  |
+| \`$..*\`                        | All members of JSON structure                            |
+        `,
+      },
       name: 'docs',
       type: 'notice',
     },
@@ -116,7 +207,10 @@ JSONPath                      | 描述
     {
       name: 'data',
       type: 'json',
-      displayName: '输出结果，为一个对象',
+      displayName: {
+        'zh-CN': '输出结果，为一个对象',
+        'en-US': 'Output result, an object',
+      },
     },
   ],
   extra: {

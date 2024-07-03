@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import { ToolCustomDataEditor } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/header/node-custom-editor/editor.tsx';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -7,12 +9,15 @@ import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { useFlowStore } from '@/store/useFlowStore';
+import { getI18nContent } from '@/utils';
 
 interface INodeCustomEditorProps {
   node?: VinesNode;
 }
 
 export const NodeCustomEditor: React.FC<INodeCustomEditorProps> = ({ node }) => {
+  const { t } = useTranslation();
+
   const { isLatestWorkflowVersion } = useFlowStore();
   const { vines } = useVinesFlow();
 
@@ -36,8 +41,12 @@ export const NodeCustomEditor: React.FC<INodeCustomEditorProps> = ({ node }) => 
               <div className="flex flex-col gap-1 leading-5">
                 <div className="flex items-center gap-2">
                   <div className="flex items-end gap-2">
-                    <p className="text-base font-bold leading-none">{toolDisplayName ?? '不受支持的工具'}</p>
-                    {data?.title && <span className="text-text2 text-xs font-light">{tool?.displayName}</span>}
+                    <p className="text-base font-bold leading-none">
+                      {getI18nContent(toolDisplayName) ?? t('workspace.flow-view.vines.tools.unknown')}
+                    </p>
+                    {data?.title && (
+                      <span className="text-text2 text-xs font-light">{getI18nContent(tool?.displayName)}</span>
+                    )}
                   </div>
                 </div>
                 <div className="!text-xs font-normal opacity-50">
@@ -51,8 +60,8 @@ export const NodeCustomEditor: React.FC<INodeCustomEditorProps> = ({ node }) => 
           <ToolCustomDataEditor
             icon={icon}
             defaultIcon={tool?.icon}
-            name={toolDisplayName}
-            defaultName={tool?.displayName ?? ''}
+            name={getI18nContent(toolDisplayName)}
+            defaultName={getI18nContent(tool?.displayName) ?? ''}
             desc={data?.description ?? ''}
             defaultDesc={data?.description ?? ''}
             task={task}
@@ -60,7 +69,7 @@ export const NodeCustomEditor: React.FC<INodeCustomEditorProps> = ({ node }) => 
           />
         </PopoverContent>
       </Popover>
-      <TooltipContent>点击编辑工具自定义信息</TooltipContent>
+      <TooltipContent>{t('workspace.flow-view.headless-modal.tool-editor.header.info.editor.button')}</TooltipContent>
     </Tooltip>
   );
 };

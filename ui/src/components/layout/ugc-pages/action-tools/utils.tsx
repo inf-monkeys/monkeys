@@ -2,9 +2,9 @@ import React from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { BlockPricing } from '@/apis/tools/typings.ts';
+import { ToolPricing } from '@/apis/tools/typings.ts';
 
-export const PricingText: React.FC<{ pricing: BlockPricing }> = ({ pricing }) => {
+export const PricingText: React.FC<{ pricing: ToolPricing }> = ({ pricing }) => {
   const { t } = useTranslation();
 
   if (pricing.mode != 'free') pricing.unitPriceAmount = pricing.unitPriceAmount / 100;

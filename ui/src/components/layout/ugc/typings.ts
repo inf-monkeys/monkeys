@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { AssetType } from '@inf-monkeys/vines';
+import { AssetType } from '@inf-monkeys/monkeys';
 import { ColumnDef, Row } from '@tanstack/react-table';
 
 import { IAssetItem } from '@/apis/ugc/typings.ts';

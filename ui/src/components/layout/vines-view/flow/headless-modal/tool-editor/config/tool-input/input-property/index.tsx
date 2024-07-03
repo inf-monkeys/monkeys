@@ -1,8 +1,9 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { BlockDefPropertyTypeOptions, BlockDefPropertyTypes } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
+import { ToolPropertyTypeOptions, ToolPropertyTypes } from '@inf-monkeys/monkeys';
 import { useForceUpdate } from '@mantine/hooks';
 import { debounce, get, isEmpty, isNumber, isString } from 'lodash';
+import { useTranslation } from 'react-i18next';
 import { PresetInput } from 'src/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset';
 
 import { BlankInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/blank.tsx';
@@ -37,12 +38,14 @@ export interface IVinesInputPropertyProps {
 const isVariableValue = (value: unknown) => isString(value) && /\$\{[\w.:_]+}|\$\.[\w.]+/g.test(value);
 
 export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = memo((props) => {
+  const { t } = useTranslation();
+
   const { def, nodeId, disabled } = props;
   const { onChange, value, ...childProps } = props;
   const [type, typeOptions, isMultipleValues, enableEditor, isPureCollection, isMultiFieldObject, assetType] =
     useMemo(() => {
-      const options = get(def, 'typeOptions', {}) as BlockDefPropertyTypeOptions;
-      const type = get(def, 'type', 'string') as BlockDefPropertyTypes;
+      const options = get(def, 'typeOptions', {}) as ToolPropertyTypeOptions;
+      const type = get(def, 'type', 'string') as ToolPropertyTypes;
       const isMultipleValues = get(options, 'multipleValues', false);
       const isMultiFieldObject = get(options, 'multiFieldObject', false);
       const enableEditor = get(options, 'editor', null) === 'code' || (type === 'json' && !isMultiFieldObject);
@@ -154,10 +157,10 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = memo((prop
           <Tabs value={componentMode} onValueChange={handleOnRadioChange}>
             <TabsList className="!h-6">
               <TabsTrigger value="component" className="text-xxs !py-1">
-                文件上传
+                {t('workspace.flow-view.headless-modal.tool-editor.input.file-upload')}
               </TabsTrigger>
               <TabsTrigger value="input" className="text-xxs !py-1">
-                变量输入
+                {t('workspace.flow-view.headless-modal.tool-editor.input.variable-input')}
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -165,10 +168,14 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = memo((prop
           <Tabs value={componentMode} onValueChange={handleOnRadioChange}>
             <TabsList className="!h-6">
               <TabsTrigger value="component" className="text-xxs !py-1">
-                {assetType ? '变量输入' : '列表'}
+                {assetType
+                  ? t('workspace.flow-view.headless-modal.tool-editor.input.variable-input')
+                  : t('workspace.flow-view.headless-modal.tool-editor.input.collection-input')}
               </TabsTrigger>
               <TabsTrigger value="input" className="text-xxs !py-1">
-                {assetType ? '预置选项' : '变量输入'}
+                {assetType
+                  ? t('workspace.flow-view.headless-modal.tool-editor.input.preset-options')
+                  : t('workspace.flow-view.headless-modal.tool-editor.input.variable-input')}
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -182,7 +189,9 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = memo((prop
                 setIsManualComponentMode(enable);
               }}
             />
-            <Label className="text-xs font-medium text-muted-foreground">变量输入</Label>
+            <Label className="text-xs font-medium text-muted-foreground">
+              {t('workspace.flow-view.headless-modal.tool-editor.input.variable-input')}
+            </Label>
           </div>
         ) : enableEditor ? (
           <div className="flex items-center gap-1">
@@ -195,7 +204,9 @@ export const VinesInputProperty: React.FC<IVinesInputPropertyProps> = memo((prop
                   setIsManualComponentMode(enable);
                 }}
               />
-              <Label className="text-xs font-medium text-muted-foreground">变量输入</Label>
+              <Label className="text-xs font-medium text-muted-foreground">
+                {t('workspace.flow-view.headless-modal.tool-editor.input.variable-input')}
+              </Label>
             </div>
             {!isManualComponentMode && (
               <>

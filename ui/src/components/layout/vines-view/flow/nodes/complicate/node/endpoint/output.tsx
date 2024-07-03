@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import { Save } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
   IVinesOutputData,
@@ -19,6 +20,8 @@ import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
 
 export const ComplicateEndNode: React.FC = () => {
+  const { t } = useTranslation();
+
   const { isWorkflowRUNNING } = useCanvasStore();
   const { workflowId } = useFlowStore();
 
@@ -29,9 +32,9 @@ export const ComplicateEndNode: React.FC = () => {
 
   const handleUpdate = () => {
     toast.promise(trigger({ output, version: vines.version }), {
-      loading: '保存中...',
-      success: '保存成功',
-      error: '保存失败',
+      loading: t('workspace.flow-view.endpoint.end-tool.save.loading'),
+      success: t('workspace.flow-view.endpoint.end-tool.save.success'),
+      error: t('workspace.flow-view.endpoint.end-tool.save.error'),
     });
   };
 
@@ -45,7 +48,7 @@ export const ComplicateEndNode: React.FC = () => {
         toolName=""
         customData={{
           icon: '🏁',
-          title: '结束',
+          title: t('workspace.flow-view.vines.tools.end.name'),
           description: '',
         }}
       >
@@ -56,7 +59,7 @@ export const ComplicateEndNode: React.FC = () => {
           icon={<Save />}
           onClick={handleUpdate}
         >
-          保存配置
+          {t('workspace.flow-view.vines.tools.end.save')}
         </Button>
       </ComplicateNodeHeader>
       {isWorkflowRUNNING ? (
@@ -65,7 +68,7 @@ export const ComplicateEndNode: React.FC = () => {
             <CodeEditor data={executionOutput} readonly={true} lineNumbers={3} />
           ) : (
             <div className="vines-center size-full">
-              <h1 className="font-bold">暂无输出</h1>
+              <h1 className="font-bold">{t('workspace.flow-view.vines.tools.end.empty-output')}</h1>
             </div>
           )}
         </Card>

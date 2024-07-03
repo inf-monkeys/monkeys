@@ -1,4 +1,4 @@
-import { MonkeyTaskDefTypes, MonkeyWorkflow } from '@inf-monkeys/vines';
+import { MonkeyTaskDefTypes, MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import equal from 'fast-deep-equal/es6';
 import { isArray, omit } from 'lodash';
 import { toast } from 'sonner';
@@ -36,6 +36,7 @@ import {
   VinesWorkflowExecutionType,
 } from '@/package/vines-flow/core/typings.ts';
 import { createTask } from '@/package/vines-flow/core/utils.ts';
+import { getI18nContent } from '@/utils';
 import VinesEvent from '@/utils/events';
 
 export class VinesCore extends VinesTools(VinesBase) {
@@ -43,7 +44,7 @@ export class VinesCore extends VinesTools(VinesBase) {
 
   public workflowIcon = 'emoji:🍀:#ceefc5';
 
-  public workflowName = '未命名应用';
+  public workflowName = '未命名';
 
   public workflowDesc = '';
 
@@ -106,8 +107,8 @@ export class VinesCore extends VinesTools(VinesBase) {
       workflow?.tasks && (this.tasks = workflow.tasks.filter((task) => task)) && (needToInit = true);
       workflow?.workflowId && (this.workflowId = workflow.workflowId);
       workflow?.version && (this.version = workflow.version);
-      workflow?.displayName && (this.workflowName = workflow.displayName);
-      workflow?.description && (this.workflowDesc = workflow.description);
+      workflow?.displayName && (this.workflowName = getI18nContent(workflow.displayName) ?? '');
+      workflow?.description && (this.workflowDesc = getI18nContent(workflow.description) ?? '');
       workflow?.iconUrl && (this.workflowIcon = workflow.iconUrl);
       workflow?.output && (this.workflowOutput = workflow.output);
 
@@ -488,7 +489,15 @@ export class VinesCore extends VinesTools(VinesBase) {
     debug = false,
   }: IVinesFlowRunParams): Promise<boolean> {
     if (this.enableOpenAIInterface) {
-      toast.warning('启动运行失败！请先禁用 OpenAI 兼容接口');
+      toast('运行失败：OpenAI 兼容接口已启用，请先禁用', {
+        action: {
+          label: '禁用',
+          onClick: () => {
+            this.enableOpenAIInterface = false;
+            this.emit('update-workflow', { exposeOpenaiCompatibleInterface: false });
+          },
+        },
+      });
       return false;
     }
 

@@ -15,6 +15,7 @@ import { IVinesVariable, VinesVariableMapper } from '@/package/vines-flow/core/t
 import { IVinesInsertChildParams } from '@/package/vines-flow/core/typings.ts';
 import { createTask } from '@/package/vines-flow/core/utils.ts';
 import VinesEvent from '@/utils/events';
+import { getI18nContent } from '@/utils';
 
 export class DoWhileNode extends ControlFlowVinesNode<DoWhileTaskDef> {
   static {
@@ -262,6 +263,7 @@ export class DoWhileNode extends ControlFlowVinesNode<DoWhileTaskDef> {
       };
     }
   }
+
   // endregion
 
   // region CRUD
@@ -311,6 +313,7 @@ export class DoWhileNode extends ControlFlowVinesNode<DoWhileTaskDef> {
     }
     return false;
   }
+
   // endregion
 
   override destroy() {
@@ -337,8 +340,8 @@ export class DoWhileNode extends ControlFlowVinesNode<DoWhileTaskDef> {
     const extraVariables = this._vinesCore.generateVariable(
       {
         id: this.id,
-        name: nodeTitle,
-        desc: nodeDesc,
+        name: getI18nContent(nodeTitle) ?? '',
+        desc: getI18nContent(nodeDesc) ?? '',
         icon: nodeIcon,
       },
       this.id,
@@ -357,8 +360,8 @@ export class DoWhileNode extends ControlFlowVinesNode<DoWhileTaskDef> {
       ...this._vinesCore.generateVariable(
         {
           id: this.id,
-          name: nodeTitle,
-          desc: nodeDesc,
+          name: getI18nContent(nodeTitle) ?? '',
+          desc: getI18nContent(nodeDesc) ?? '',
           icon: nodeIcon,
         },
         this.id + '_loopItemRef',

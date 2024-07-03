@@ -1,4 +1,4 @@
-import { MonkeyTaskDefTypes } from '@inf-monkeys/vines';
+import { MonkeyTaskDefTypes } from '@inf-monkeys/monkeys';
 import { TaskDefTypes, TaskType } from '@io-orkes/conductor-javascript';
 import { isArray, max, min } from 'lodash';
 import { toast } from 'sonner';
@@ -23,6 +23,7 @@ import { IVinesVariable, VinesVariableMapper } from '@/package/vines-flow/core/t
 import { IVinesInsertChildParams } from '@/package/vines-flow/core/typings.ts';
 import { createNanoId, createSubWorkflowDef } from '@/package/vines-flow/core/utils.ts';
 import VinesEvent from '@/utils/events.ts';
+import { getI18nContent } from '@/utils';
 
 export type NodeClass = new (task: any, vinesCore: VinesCore) => VinesNode;
 
@@ -452,14 +453,14 @@ export class VinesNode<T extends VinesTask = VinesTask> {
     const variables = this._vinesCore.generateVariable(
       {
         id: this.id,
-        name: nodeTitle,
-        desc: nodeDesc,
+        name: getI18nContent(nodeTitle) ?? '',
+        desc: getI18nContent(nodeDesc) ?? '',
         icon: nodeIcon,
       },
       this.id,
       tool.output,
     );
-    const mapper = this._vinesCore.generateVariableMapper(variables, nodeTitle);
+    const mapper = this._vinesCore.generateVariableMapper(variables, getI18nContent(nodeTitle) ?? '');
 
     return { variables, mapper };
   }

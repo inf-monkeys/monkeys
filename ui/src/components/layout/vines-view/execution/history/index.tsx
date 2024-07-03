@@ -4,6 +4,7 @@ import { useClipboard } from '@mantine/hooks';
 import { CircularProgress } from '@nextui-org/progress';
 import { Command as CommandPrimitive, CommandLoading } from 'cmdk';
 import { Copy, MousePointerSquareDashed, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useSearchWorkflowExecutions } from '@/apis/workflow/execution';
@@ -19,13 +20,15 @@ import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { useViewStore } from '@/store/useViewStore';
-import { cn } from '@/utils';
+import { cn, execCopy } from '@/utils';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 interface IVinesExecutionHistoryProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 // million-ignore
 export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () => {
+  const { t } = useTranslation();
+
   const { visible } = useViewStore();
   const { setCanvasMode } = useCanvasStore();
   const { workflowId } = useFlowStore();
@@ -73,14 +76,14 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
             'flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
             isEmpty && 'pointer-events-none opacity-85',
           )}
-          placeholder="搜索运行实例 ID"
+          placeholder={t('workspace.pre-view.history.search.placeholder')}
         />
       </div>
       {isEmpty && (
         <div className="vines-center size-full flex-1 flex-col">
           <MousePointerSquareDashed size={64} />
           <div className="mt-4 flex flex-col text-center">
-            <h2 className="font-bold">暂无运行实例</h2>
+            <h2 className="font-bold">{t('workspace.pre-view.history.search.empty')}</h2>
           </div>
         </div>
       )}
@@ -90,7 +93,7 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
             <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
           </CommandLoading>
         ) : !isEmpty ? (
-          <CommandEmpty>找不到此运行实例</CommandEmpty>
+          <CommandEmpty>{t('workspace.pre-view.history.search.search-empty')}</CommandEmpty>
         ) : null}
 
         <CommandGroup>
@@ -111,7 +114,7 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
                   <CardHeader className="p-0">
                     <CardTitle className="text-xl">{`${formatTimeDiffPrevious(startTime ?? 0)}${getDescOfTriggerType(triggerType ?? '')}`}</CardTitle>
                     <div className="flex items-center gap-2">
-                      <CardDescription>实例 ID: {instanceId}</CardDescription>
+                      <CardDescription>{t('workspace.pre-view.history.item.desc', { instanceId })}</CardDescription>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
@@ -119,12 +122,18 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
                             icon={<Copy />}
                             onClick={(e) => {
                               e.stopPropagation();
+                              if (!instanceId) {
+                                toast.error(t('common.toast.loading'));
+                                return;
+                              }
                               clipboard.copy(instanceId);
-                              toast.success('已复制实例 ID');
+                              if (!clipboard.copied && !execCopy(instanceId))
+                                toast.error(t('common.toast.copy-failed'));
+                              else toast.success(t('common.toast.copy-success'));
                             }}
                           />
                         </TooltipTrigger>
-                        <TooltipContent>点击复制</TooltipContent>
+                        <TooltipContent>{t('common.utils.click-to-copy')}</TooltipContent>
                       </Tooltip>
                     </div>
                   </CardHeader>

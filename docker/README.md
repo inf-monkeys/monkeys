@@ -1,16 +1,10 @@
-# Docker Compose
+# 🐳 Docker Compose
 
-## Components
+This folder contains 3 `docker-compose` file:
 
-| Component          | Description                                                                                    | Image                                                   |
-| ------------------ | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| `server`           | Monkeys Server redis                                                                           | `monkeys`                                               |
-| `ui`               | Monkeys UI                                                                                     | `monkeys-ui`                                            |
-| `conductor-server` | [Conductor Server](https://github.com/inf-monkeys/conductor), A workflow orchestration engine. | `nfmonkeys/conductor`                                   |
-| `redis`            | Redis Cache                                                                                    | `redis:6.2.3-alpine`                                    |
-| `elasticsearch`    | Elasticsearch, to store conductor workflow executions.                                         | `docker.elastic.co/elasticsearch/elasticsearch:7.17.11` |
-| `postgres`         | Postgres Database                                                                              | `postgres`                                              |
-| `nginx`            | Nginx reverse proxy                                                                            | `nginx`                                                 |
+- `docker-compose.yaml`: Include `server`, `ui` and `nginx`,
+- `docker-compose-middleware.yaml`: All required middlewares, like `postgres`, `redis` and `conductor`.
+- `docker-compose-tenancy-config.yaml`: Multi tenancy version of `docker-compose.yaml`.
 
 ## 🚀 Quick Start
 
@@ -20,18 +14,20 @@
     cd docker
     ```
 
-2. Start docker-compose
+2. Modify `config.yaml` if you want at `docker/server/config/server-config.yaml`
+
+3. Start docker-compose
 
     ```sh
-    docker-compose up -d --build
+    docker-compose -f docker-compose.yaml -f docker-compose-middleware.yaml up -d
     ```
 
-3. By default `docker-compose.yaml` set `nginx` ports to `80:80`, so you can visit the service at `http://localhost`. Or you can change to any port you want.
+4. By default `docker-compose.yaml` set `nginx` ports to `80:80`, so you can visit the service at `http://localhost`. Or you can change to any port you want.
 
-4. Stop
+5. Stop
 
     ```sh
-    docker-compose down
+    docker-compose -f docker-compose.yaml -f docker-compose-middleware.yaml down
     ```
 
 ## 🚀 Only Middleware

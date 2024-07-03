@@ -1,8 +1,9 @@
 import { extractDependencies } from '@/common/utils/code';
 import { flatTasks } from '@/common/utils/conductor';
+import { getDisplayName } from '@/common/utils/i18n';
 import { ValidationIssueType, ValidationReasonType, WorkflowOutputValue, WorkflowValidationIssue } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTask } from '@inf-monkeys/conductor-javascript';
-import { BlockDefProperties, BlockDefPropertyOptions, BlockDefPropertyTypes, BlockDefinition, BlockType } from '@inf-monkeys/vines';
+import { ToolDef, ToolProperty, ToolPropertyOptions, ToolPropertyTypes, ToolType } from '@inf-monkeys/monkeys';
 import _ from 'lodash';
 
 export const WORKFLOW_EXPRESSION_REGEX = /\$\{([a-zA-Z0-9_.\*\[\]\@\?\'\$\(\)\*]+)(?:\(\))?}/g;
@@ -10,7 +11,7 @@ export const WORKFLOW_EXPRESSION_REGEX = /\$\{([a-zA-Z0-9_.\*\[\]\@\?\'\$\(\)\*]
 export class WorkflowValidator {
   private static WORKFLOW_NAME = 'workflow';
   private static LOOP_ITEM_REF = '_loopItemRef';
-  private static INGNORE_CHECK_PROP_TYPES: BlockDefPropertyTypes[] = ['notice'];
+  private static INGNORE_CHECK_PROP_TYPES: ToolPropertyTypes[] = ['notice'];
 
   private static isDateTime(value: any) {
     return value instanceof Date || !isNaN(Date.parse(value));
@@ -22,18 +23,20 @@ export class WorkflowValidator {
     return matches;
   }
 
-  private static isValidOption(options: BlockDefPropertyOptions[], value: string) {
+  private static isValidOption(options: ToolPropertyOptions[], value: string) {
     const validOptions = options?.map((x) => x.value) || [];
     return validOptions.includes(value);
   }
 
-  private static validateBlockInputParameterDataType(proprity: BlockDefProperties, value: any) {
+  private static validateToolInputParameterDataType(proprity: ToolProperty, value: any) {
     const { type, options, typeOptions } = proprity;
     switch (type) {
       case 'boolean':
         return typeof value === 'boolean';
       case 'string':
-        if (!typeOptions?.multipleValues) {
+        if (proprity.name === 'model') {
+          return true;
+        } else if (!typeOptions?.multipleValues) {
           return typeof value === 'string';
         } else {
           return Array.isArray(value) && _.every(value, (item) => typeof item === 'string');
@@ -43,18 +46,18 @@ export class WorkflowValidator {
       case 'json':
         return (typeof value === 'object' && value !== null) || Array.isArray(value);
       case 'options':
-        return this.isValidOption(options as BlockDefPropertyOptions[], value);
+        return this.isValidOption(options as ToolPropertyOptions[], value);
       default:
         return true;
     }
   }
 
-  private static getBlockPropValue(task: WorkflowTask, name: string) {
+  private static getToolPropValue(task: WorkflowTask, name: string) {
     const { inputParameters } = task;
     let value = undefined;
     switch (task.type) {
       // DO_WHILE 节点只需要配置了 loopCondition 就行，后面再做更细粒度的控制
-      case BlockType.DO_WHILE:
+      case ToolType.DO_WHILE:
         const { loopCondition } = task;
         if (name === 'loopCondition') {
           value = loopCondition;
@@ -62,7 +65,7 @@ export class WorkflowValidator {
           value = inputParameters[name];
         }
         break;
-      case BlockType.SIMPLE:
+      case ToolType.SIMPLE:
         value = inputParameters[name];
         break;
       default:
@@ -83,7 +86,7 @@ export class WorkflowValidator {
    */
   private static isPropRequiredAndCanSkipCheck(
     task: WorkflowTask,
-    proprity: BlockDefProperties,
+    proprity: ToolProperty,
   ): {
     required: boolean;
     canSkipCheck: boolean;
@@ -100,7 +103,7 @@ export class WorkflowValidator {
     if (hide) {
       const matched = _.every(Object.keys(hide), (key) => {
         const otherValues = hide[key];
-        const currentOtherValue = this.getBlockPropValue(task, key);
+        const currentOtherValue = this.getToolPropValue(task, key);
         return otherValues?.includes(currentOtherValue);
       });
       return {
@@ -111,7 +114,7 @@ export class WorkflowValidator {
       // 全部匹配 show 的条件
       const matched = _.every(Object.keys(show), (key) => {
         const otherValues = show[key];
-        const currentOtherValue = this.getBlockPropValue(task, key);
+        const currentOtherValue = this.getToolPropValue(task, key);
         return otherValues?.includes(currentOtherValue);
       });
       return {
@@ -126,10 +129,10 @@ export class WorkflowValidator {
     }
   }
 
-  private static validateBlockSpecificIssues(task: WorkflowTask, block: BlockDefinition) {
+  private static validateToolSpecificIssues(task: WorkflowTask, tool: ToolDef) {
     const issues: WorkflowValidationIssue[] = [];
 
-    const { rules = [] } = block;
+    const { rules = [] } = tool;
     if (!rules) {
       return issues;
     }
@@ -139,7 +142,7 @@ export class WorkflowValidator {
       switch (type) {
         case 'CHECK_SOURCE_CODE_DEPENDENCY':
           const { sourceCode } = task.inputParameters;
-          const avaliableModules = block.extra?.avaliableModules || [];
+          const avaliableModules = tool.extra?.avaliableModules || [];
           if (avaliableModules.length) {
             const usedDependencies = extractDependencies(sourceCode);
             const invalidDepencencies = _.filter(usedDependencies, (dep) => !avaliableModules.includes(dep));
@@ -171,14 +174,14 @@ export class WorkflowValidator {
     return issues;
   }
 
-  private static validateBlockInputParameter(tasks: WorkflowTask[], task: WorkflowTask, block: BlockDefinition, proprity: BlockDefProperties): WorkflowValidationIssue {
+  private static validateToolInputParameter(tasks: WorkflowTask[], task: WorkflowTask, block: ToolDef, proprity: ToolProperty): WorkflowValidationIssue {
     const { name, type, displayName } = proprity;
     if (this.INGNORE_CHECK_PROP_TYPES.includes(type)) {
       return null;
     }
     const { taskReferenceName } = task;
     let issue: WorkflowValidationIssue = null;
-    const value = this.getBlockPropValue(task, name);
+    const value = this.getToolPropValue(task, name);
 
     // 检测必填规则
     const { required, canSkipCheck } = this.isPropRequiredAndCanSkipCheck(task, proprity);
@@ -188,8 +191,8 @@ export class WorkflowValidator {
           taskReferenceName,
           issueType: ValidationIssueType.ERROR,
           humanMessage: {
-            en: `Properity ${name} is required.`,
-            zh: `${displayName}必填参数未配置`,
+            en: `Properity ${getDisplayName(displayName, 'en-US')} is required.`,
+            zh: `${getDisplayName(displayName, 'zh-CN')}必填参数未配置`,
           },
           detailReason: {
             name: name,
@@ -213,8 +216,8 @@ export class WorkflowValidator {
                 taskReferenceName,
                 issueType: ValidationIssueType.ERROR,
                 humanMessage: {
-                  en: `Properity ${name} referenced a unknown block: ${referencedTaskName}`,
-                  zh: `${displayName}参数中引用了一个不存在的 Block：${referencedTaskName}`,
+                  en: `Properity ${getDisplayName(displayName, 'en-US')} referenced a unknown block: ${referencedTaskName}`,
+                  zh: `${getDisplayName(displayName, 'zh-CN')}参数中引用了一个不存在的 Block：${referencedTaskName}`,
                 },
                 detailReason: {
                   name: name,
@@ -230,7 +233,7 @@ export class WorkflowValidator {
         }
       } else {
         // 校验数据类型
-        const isDataTypeValid = this.validateBlockInputParameterDataType(proprity, value);
+        const isDataTypeValid = this.validateToolInputParameterDataType(proprity, value);
         if (!isDataTypeValid) {
           issue = {
             taskReferenceName,
@@ -255,11 +258,11 @@ export class WorkflowValidator {
     return issue;
   }
 
-  private static validateBlockInputParameters(tasks: WorkflowTask[], task: WorkflowTask, block: BlockDefinition): WorkflowValidationIssue[] {
-    const properties: BlockDefProperties[] = block.input;
+  private static validateToolInputParameters(tasks: WorkflowTask[], task: WorkflowTask, tool: ToolDef): WorkflowValidationIssue[] {
+    const properties: ToolProperty[] = tool.input;
     const issues: WorkflowValidationIssue[] = [];
     for (const prop of properties) {
-      const issue = this.validateBlockInputParameter(tasks, task, block, prop);
+      const issue = this.validateToolInputParameter(tasks, task, tool, prop);
       if (issue) {
         issues.push(issue);
       }
@@ -267,7 +270,7 @@ export class WorkflowValidator {
     return issues;
   }
 
-  private static validateCredentialIssues(task: WorkflowTask, block: BlockDefinition) {
+  private static validateCredentialIssues(task: WorkflowTask, block: ToolDef) {
     const issues: WorkflowValidationIssue[] = [];
     if (block.credentials?.length) {
       for (const credential of block.credentials) {
@@ -291,10 +294,10 @@ export class WorkflowValidator {
     return issues;
   }
 
-  private static validateBlockStructure(task: WorkflowTask) {
+  private static validateToolStructure(task: WorkflowTask) {
     const issues: WorkflowValidationIssue[] = [];
     switch (task.type) {
-      case BlockType.DO_WHILE:
+      case ToolType.DO_WHILE:
         if (!task.loopOver?.length || task.loopOver[0].name === 'fake_node') {
           issues.push({
             taskReferenceName: task.taskReferenceName,
@@ -391,33 +394,33 @@ export class WorkflowValidator {
    * 2. 开放工作流 API 后，需要过滤危险输入，提升报错可读性
    * 3. Co-pilot 生成的数据结构需要校验
    */
-  public static validateWorkflow(tasks: WorkflowTask[], output: WorkflowOutputValue[], blocks: BlockDefinition[]) {
+  public static validateWorkflow(tasks: WorkflowTask[], output: WorkflowOutputValue[], blocks: ToolDef[]) {
     const flattedTasks: WorkflowTask[] = flatTasks(tasks);
     let issues: WorkflowValidationIssue[] = [];
     // 校验 tasks
     for (const task of flattedTasks) {
       // 单独校验子流程
-      if (task.type === BlockType.SUB_WORKFLOW) {
+      if (task.type === ToolType.SUB_WORKFLOW) {
         const subWorkflowIssues = this.validateSubWorkflow(task);
         issues = issues.concat(subWorkflowIssues);
-      } else if (task.type === BlockType.FORK_JOIN || task.type === BlockType.JOIN) {
+      } else if (task.type === ToolType.FORK_JOIN || task.type === ToolType.JOIN) {
         // TODO
       } else {
         const block = blocks.find((block) => block.name === task.name);
         if (block) {
-          if (task.type !== BlockType.SWITCH) {
-            const inputParameterIssues = this.validateBlockInputParameters(flattedTasks, task, block);
+          if (task.type !== ToolType.SWITCH) {
+            const inputParameterIssues = this.validateToolInputParameters(flattedTasks, task, block);
             issues = issues.concat(inputParameterIssues);
           }
 
-          const structureIssues = this.validateBlockStructure(task);
+          const structureIssues = this.validateToolStructure(task);
           issues = issues.concat(structureIssues);
 
           const credentalIssues = this.validateCredentialIssues(task, block);
           issues = issues.concat(credentalIssues);
 
           // 特殊类型的 block，可能还需要一些特殊的校验规则
-          const blockSpecificIssues = this.validateBlockSpecificIssues(task, block);
+          const blockSpecificIssues = this.validateToolSpecificIssues(task, block);
           issues = issues.concat(blockSpecificIssues);
         }
       }

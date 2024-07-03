@@ -35,7 +35,10 @@ export class ComfyuiExecutionController {
 
   @Post('/')
   @MonkeyToolName(COMFYUI_TOOL)
-  @MonkeyToolDisplayName('运行 ComfyUI 工作流')
+  @MonkeyToolDisplayName({
+    'zh-CN': '运行 ComfyUI 工作流',
+    'en-US': 'Run ComfyUI Workflow',
+  })
   @MonkeyToolCategories(['gen-image'])
   @MonkeyToolIcon('emoji:📷:#98ae36')
   @MonkeyToolInput([
@@ -47,7 +50,10 @@ export class ComfyuiExecutionController {
       typeOptions: { assetType: 'comfyui-server' },
     },
     {
-      displayName: '工作流',
+      displayName: {
+        'zh-CN': '工作流',
+        'en-US': 'Workflow',
+      },
       name: 'workflow',
       type: 'string',
       required: true,
@@ -57,7 +63,10 @@ export class ComfyuiExecutionController {
   @MonkeyToolOutput([
     {
       name: 'file_output',
-      displayName: '文件输出列表',
+      displayName: {
+        'zh-CN': '文件输出列表',
+        'en-US': 'File Output List',
+      },
       type: 'string',
       typeOptions: {
         multipleValues: true,
@@ -65,7 +74,10 @@ export class ComfyuiExecutionController {
     },
     {
       name: 'text_output',
-      displayName: '文本输出列表',
+      displayName: {
+        'zh-CN': '文本输出列表',
+        'en-US': 'Text Output List',
+      },
       type: 'string',
       typeOptions: {
         multipleValues: true,

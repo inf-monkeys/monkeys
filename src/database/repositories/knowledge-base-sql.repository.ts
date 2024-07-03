@@ -15,7 +15,7 @@ export class SqlKnowledgeBaseRepository {
   ) {}
 
   public async listSqlKnowledgeBases(teamId: string, dto: ListDto) {
-    return await this.sqlKnowledgeBaseAssetRepositroy.listAssets('knowledge-base-sql', teamId, dto, {
+    return await this.sqlKnowledgeBaseAssetRepositroy.listAssets('sql-knowledge-base', teamId, dto, {
       withTags: true,
       withTeam: true,
       withUser: true,

@@ -1,4 +1,4 @@
-import { BlockDefProperties } from '@inf-monkeys/vines';
+import { I18nValue, ToolProperty } from '@inf-monkeys/monkeys';
 
 export interface IComfyuiModel {
   [x: string]: string[];
@@ -25,10 +25,10 @@ export enum ComfyuiWorkflowSourceType {
 
 export interface IComfyuiWorkflow {
   id: string;
-  displayName: string;
+  displayName: string | I18nValue;
   createdTimestamp: number;
   updatedTimestamp: number;
-  description: string;
+  description: string | I18nValue;
   iconUrl?: string;
   teamId: string;
   creatorUserId: string;
@@ -37,8 +37,8 @@ export interface IComfyuiWorkflow {
   workflow?: { [x: string]: any };
   prompt: { [x: string]: any };
   toolName: string;
-  toolInput: BlockDefProperties[];
-  toolOutput: BlockDefProperties[];
+  toolInput: ToolProperty[];
+  toolOutput: ToolProperty[];
 }
 
 export interface IComfyuiWorkflowDependencyNode {

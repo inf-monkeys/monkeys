@@ -1,4 +1,4 @@
-import { BlockDefProperties } from '@inf-monkeys/vines';
+import { ToolProperty } from '@inf-monkeys/monkeys';
 
 export enum AuthType {
   none = 'none',
@@ -22,7 +22,7 @@ export interface CredentialDefinition {
   name: string;
   displayName: string;
   description?: string;
-  properties: BlockDefProperties[];
+  properties: ToolProperty[];
   iconUrl: string;
   type: CredentialAuthType;
 }
@@ -30,10 +30,10 @@ export interface CredentialDefinition {
 export interface TriggerDefinition {
   description?: string;
   displayName: string;
-  properties?: BlockDefProperties[];
+  properties?: ToolProperty[];
   icon?: string;
   type: string;
-  workflowInputs?: BlockDefProperties[];
+  workflowInputs?: ToolProperty[];
 }
 
 export interface AuthConfig {
@@ -103,8 +103,8 @@ export interface ToolApiDef {
   credentialPlaceAt: string;
   credentialKey: string;
   credentialValue: string;
-  properties: BlockDefProperties[];
-  output: BlockDefProperties[];
+  properties: ToolProperty[];
+  output: ToolProperty[];
 }
 
 export interface RegisterToolParams {

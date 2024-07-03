@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import _ from 'lodash';
 import { CalendarIcon } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 
 import { useWorkflowVersions } from '@/apis/workflow/version';
 import {
@@ -28,13 +29,15 @@ interface IVinesLogFilterProps {
 }
 
 export const VinesLogFilter: React.FC<IVinesLogFilterProps> = ({ form, handleSubmit, isMutating }) => {
+  const { t } = useTranslation();
+
   const { vines } = useVinesFlow();
   const { data: workflowMultiVersionData } = useWorkflowVersions(vines.workflowId ?? '');
 
   const workflowVersions = (workflowMultiVersionData ?? []).map((flow) => flow.version);
   const workflowVersionOptions = workflowVersions.map((ver) => {
     return {
-      label: ver === -1 ? '临时' : ver.toString(),
+      label: ver === -1 ? t('workspace.logs-view.filter.form.versions.temp') : ver.toString(),
       value: ver.toString(),
     };
   });
@@ -76,12 +79,12 @@ export const VinesLogFilter: React.FC<IVinesLogFilterProps> = ({ form, handleSub
             name="versions"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>版本号</FormLabel>
+                <FormLabel>{t('workspace.logs-view.filter.form.versions.label')}</FormLabel>
                 <FormControl>
                   <MultipleSelector
                     value={(field.value ?? []).map((ver) => {
                       return {
-                        label: ver === -1 ? '临时' : ver.toString(),
+                        label: ver === -1 ? t('workspace.logs-view.filter.form.versions.temp') : ver.toString(),
                         value: ver.toString(),
                       };
                     })}
@@ -89,7 +92,7 @@ export const VinesLogFilter: React.FC<IVinesLogFilterProps> = ({ form, handleSub
                       field.onChange(options.map((option) => parseInt(option.value)));
                     }}
                     defaultOptions={workflowVersionOptions}
-                    placeholder="请选择版本号"
+                    placeholder={t('workspace.logs-view.filter.form.versions.placeholder')}
                   />
                 </FormControl>
                 <FormMessage />
@@ -104,7 +107,7 @@ export const VinesLogFilter: React.FC<IVinesLogFilterProps> = ({ form, handleSub
               const endTimeTo = form.getValues('endTimeTo');
               return (
                 <FormItem>
-                  <FormLabel>开始运行时间</FormLabel>
+                  <FormLabel>{t('workspace.logs-view.filter.form.start-time.label')}</FormLabel>
                   <FormControl>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -119,14 +122,12 @@ export const VinesLogFilter: React.FC<IVinesLogFilterProps> = ({ form, handleSub
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {field.value ? (
                             endTimeTo ? (
-                              <>
-                                {format(field.value, 'yyyy-MM-dd')} - {format(endTimeTo, 'yyyy-MM-dd')}
-                              </>
+                              format(field.value, 'yyyy-MM-dd') + '—' + format(endTimeTo, 'yyyy-MM-dd')
                             ) : (
                               format(field.value, 'yyyy-MM-dd')
                             )
                           ) : (
-                            <span>请选择开始时间</span>
+                            <span>{t('workspace.logs-view.filter.form.start-time.placeholder')}</span>
                           )}
                         </Button>
                       </PopoverTrigger>
@@ -160,7 +161,7 @@ export const VinesLogFilter: React.FC<IVinesLogFilterProps> = ({ form, handleSub
             name="status"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>状态</FormLabel>
+                <FormLabel>{t('workspace.logs-view.filter.form.status.label')}</FormLabel>
                 <FormControl>
                   <MultipleSelector
                     value={(field.value ?? []).map((status) => {
@@ -173,7 +174,7 @@ export const VinesLogFilter: React.FC<IVinesLogFilterProps> = ({ form, handleSub
                       field.onChange(options.map((option) => option.value));
                     }}
                     defaultOptions={workflowStatusOptions}
-                    placeholder="请选择状态"
+                    placeholder={t('workspace.logs-view.filter.form.status.placeholder')}
                   />
                 </FormControl>
                 <FormMessage />
@@ -186,7 +187,7 @@ export const VinesLogFilter: React.FC<IVinesLogFilterProps> = ({ form, handleSub
             name="triggerTypes"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>触发方式</FormLabel>
+                <FormLabel>{t('workspace.logs-view.filter.form.trigger-types.label')}</FormLabel>
                 <FormControl>
                   <MultipleSelector
                     value={(field.value ?? []).map((value) => {
@@ -199,7 +200,7 @@ export const VinesLogFilter: React.FC<IVinesLogFilterProps> = ({ form, handleSub
                       field.onChange(options.map((option) => option.value));
                     }}
                     defaultOptions={workflowTriggerTypeOptions}
-                    placeholder="请选择触发方式"
+                    placeholder={t('workspace.logs-view.filter.form.trigger-types.placeholder')}
                   />
                 </FormControl>
                 <FormMessage />
@@ -212,9 +213,12 @@ export const VinesLogFilter: React.FC<IVinesLogFilterProps> = ({ form, handleSub
             control={form.control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>实例 ID</FormLabel>
+                <FormLabel>{t('workspace.logs-view.filter.form.workflow-instance-id.label')}</FormLabel>
                 <FormControl>
-                  <Input placeholder="请输入应用实例 ID" {...field} />
+                  <Input
+                    placeholder={t('workspace.logs-view.filter.form.workflow-instance-id.placeholder')}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -227,7 +231,7 @@ export const VinesLogFilter: React.FC<IVinesLogFilterProps> = ({ form, handleSub
             render={({ field }) => (
               <FormItem>
                 <div className="flex items-center justify-between py-3">
-                  <FormLabel>由旧到新排序</FormLabel>
+                  <FormLabel>{t('workspace.logs-view.filter.form.order-by.label')}</FormLabel>
                   <FormControl>
                     <Switch
                       checked={field.value === 'ASC'}
@@ -243,10 +247,10 @@ export const VinesLogFilter: React.FC<IVinesLogFilterProps> = ({ form, handleSub
 
           <div className="mt-2 flex w-full gap-2">
             <Button type="reset" theme="tertiary" className="flex-1" disabled={isMutating}>
-              重置
+              {t('workspace.logs-view.filter.form.reset')}
             </Button>
             <Button type="submit" variant="solid" className="flex-1" disabled={isMutating}>
-              查询
+              {t('workspace.logs-view.filter.form.submit')}
             </Button>
           </div>
         </form>

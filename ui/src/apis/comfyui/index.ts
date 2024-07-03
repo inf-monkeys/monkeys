@@ -1,5 +1,7 @@
 import useSWR from 'swr';
 
+import { ToolProperty } from '@inf-monkeys/monkeys';
+
 import {
   IComfyuiModel,
   IComfyuiServer,
@@ -8,7 +10,6 @@ import {
   IComfyuiWorkflowDependencyNode,
 } from '@/apis/comfyui/typings.ts';
 import { vinesFetcher } from '@/apis/fetcher.ts';
-import { BlockDefProperties } from '@inf-monkeys/vines';
 
 export interface ImportComfyuiWorkflowParams {
   workflowType: string;
@@ -27,8 +28,8 @@ export const importComfyuiWorkflow = (params: ImportComfyuiWorkflowParams) =>
 export const updateComfyuiWorkflow = (
   id: string,
   data: {
-    toolInput?: BlockDefProperties[];
-    toolOutput?: BlockDefProperties[];
+    toolInput?: ToolProperty[];
+    toolOutput?: ToolProperty[];
     workflow?: any;
     workflowApi?: any;
   },

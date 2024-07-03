@@ -4,11 +4,11 @@ const MethodEnum = z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPT
   errorMap: (issue) => {
     switch (issue.code) {
       case 'invalid_type':
-        return { message: '不受支持的类型' };
+        return { message: 'Unsupported type' };
       case 'invalid_enum_value':
-        return { message: '类型只能为「GET」、「POST」、「PUT」、「DELETE」、「PATCH」、「HEAD」、「OPTIONS」' };
+        return { message: 'Method can only be "GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"' };
       default:
-        return { message: '未知错误' };
+        return { message: 'Unknown error' };
     }
   },
 });
@@ -19,19 +19,19 @@ const AuthTypeEnum = z.enum(['NONE', 'BASIC', 'CUSTOM_HEADER'], {
   errorMap: (issue) => {
     switch (issue.code) {
       case 'invalid_type':
-        return { message: '不受支持的类型' };
+        return { message: 'Unsupported type' };
       case 'invalid_enum_value':
-        return { message: '类型只能为「NONE」、「BASIC」、「CUSTOM_HEADER」' };
+        return { message: 'Type can only be "NONE", "BASIC", "CUSTOM_HEADER"' };
       default:
-        return { message: '未知错误' };
+        return { message: 'Unknown error' };
     }
   },
 });
 
 export enum AuthTypeLabelEnum {
-  NONE = '不认证',
-  BASIC = '基础认证 (Basic Auth)',
-  CUSTOM_HEADER = '自定义请求头',
+  NONE = 'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.auth.none',
+  BASIC = 'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.auth.basic',
+  CUSTOM_HEADER = 'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.auth.custom-header',
 }
 
 export const EAuthTypeEnum = AuthTypeEnum.Enum;
@@ -40,18 +40,18 @@ const ResponseUntilEnum = z.enum(['WORKFLOW_STARTED', 'WORKFLOW_COMPLETED_OR_FIN
   errorMap: (issue) => {
     switch (issue.code) {
       case 'invalid_type':
-        return { message: '不受支持的类型' };
+        return { message: 'Unsupported type' };
       case 'invalid_enum_value':
-        return { message: '类型只能为「WORKFLOW_STARTED」、「WORKFLOW_COMPLETED_OR_FINISHED」' };
+        return { message: 'Response until can only be "WORKFLOW_STARTED", "WORKFLOW_COMPLETED_OR_FINISHED"' };
       default:
-        return { message: '未知错误' };
+        return { message: 'Unknown error' };
     }
   },
 });
 
 export enum ResponseUntilLabelEnum {
-  WORKFLOW_STARTED = '工作流启动之后立即返回',
-  WORKFLOW_COMPLETED_OR_FINISHED = '工作流执行成功或者失败之后返回',
+  WORKFLOW_STARTED = 'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.response-until.workflow-started',
+  WORKFLOW_COMPLETED_OR_FINISHED = 'workspace.flow-view.endpoint.start-tool.trigger.create.webhook-trigger.form.response-until.workflow-completed-or-finished',
 }
 
 export const EResponseUntilEnum = ResponseUntilEnum.Enum;
@@ -63,14 +63,14 @@ export const workflowTriggerWebhookSchema = z.object({
 
   basicAuthConfig: z
     .object({
-      username: z.string().min(1, '用户名不能为空'),
-      password: z.string().min(1, '密码不能为空'),
+      username: z.string().min(1, 'Username is required'),
+      password: z.string().min(1, 'Password is required'),
     })
     .optional(),
   headerAuthConfig: z
     .object({
-      headerKey: z.string().min(1, 'Header key 不能为空'),
-      headerValue: z.string().min(1, 'Header value 不能为空'),
+      headerKey: z.string().min(1, 'Header key is required'),
+      headerValue: z.string().min(1, 'Header value is required'),
     })
     .optional(),
 });

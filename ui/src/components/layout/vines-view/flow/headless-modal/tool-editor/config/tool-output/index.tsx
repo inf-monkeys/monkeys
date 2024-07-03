@@ -2,6 +2,7 @@ import React from 'react';
 
 import { useClipboard } from '@mantine/hooks';
 import { Copy } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { buttonVariants } from '@/components/ui/button';
@@ -10,13 +11,14 @@ import { Tree, TreeDataItem } from '@/components/ui/tree.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VINES_VARIABLE_TAG } from '@/package/vines-flow/core/tools/consts.ts';
 import { IVinesVariable } from '@/package/vines-flow/core/tools/typings.ts';
-import { cn } from '@/utils';
+import { cn, execCopy, getI18nContent } from '@/utils';
 
 interface IToolOutputProps {
   nodeId?: string;
 }
 
 export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
+  const { t } = useTranslation();
   const clipboard = useClipboard({ timeout: 500 });
   const { vines } = useVinesFlow();
 
@@ -31,8 +33,12 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
       expandAll
       initialSelectedItemId={data?.[0]?.id}
       leafRenderer={(it: IVinesVariable) => {
-        const tag = VINES_VARIABLE_TAG[it.type];
+        const type = it.type;
+        const tag = VINES_VARIABLE_TAG[type];
         const isMultiple = it.isMultiple;
+
+        const tagName = tag?.name;
+
         return (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -40,7 +46,8 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
                 className="flex size-full items-center gap-2 p-2 text-sm"
                 onClick={() => {
                   clipboard.copy(it.id);
-                  toast.success('变量已复制');
+                  if (!clipboard.copied && !execCopy(it.id)) toast.error(t('common.toast.copy-failed'));
+                  else toast.success(t('common.toast.copy-success'));
                 }}
               >
                 <span
@@ -49,10 +56,15 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
                     backgroundColor: (isMultiple ? tag?.multipleColor : tag?.color) ?? 'hsl(var(--muted-foreground))',
                   }}
                 >
-                  {tag?.name ?? it.type}
-                  {isMultiple ? '列表' : ''}
+                  {tagName
+                    ? t(`workspace.flow-view.headless-modal.tool-editor.input.type.${tagName}`, {
+                        extra: isMultiple
+                          ? t('workspace.flow-view.headless-modal.tool-editor.input.type.multiple')
+                          : '',
+                      })
+                    : type + (isMultiple ? ' list' : '')}
                 </span>
-                <span className="line-clamp-1 break-normal">{it.label}</span>
+                <span className="line-clamp-1 break-normal">{getI18nContent(it.label)}</span>
               </div>
             </TooltipTrigger>
             <TooltipContent>{it.id}</TooltipContent>
@@ -60,8 +72,12 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
         );
       }}
       labelRenderer={(it: IVinesVariable, onExpand) => {
-        const tag = VINES_VARIABLE_TAG[it.type];
+        const type = it.type;
+        const tag = VINES_VARIABLE_TAG[type];
         const isMultiple = it.isMultiple;
+
+        const tagName = tag?.name;
+
         return (
           <div className="flex size-full items-center gap-2 p-2 text-sm" onClick={onExpand}>
             <span
@@ -70,10 +86,13 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
                 backgroundColor: (isMultiple ? tag?.multipleColor : tag?.color) ?? 'hsl(var(--muted-foreground))',
               }}
             >
-              {tag?.name ?? it.type}
-              {isMultiple ? '列表' : ''}
+              {tagName
+                ? t(`workspace.flow-view.headless-modal.tool-editor.input.type.${tagName}`, {
+                    extra: isMultiple ? t('workspace.flow-view.headless-modal.tool-editor.input.type.multiple') : '',
+                  })
+                : type + (isMultiple ? ' list' : '')}
             </span>
-            <span className="line-clamp-1 break-normal">{it.label}</span>
+            <span className="line-clamp-1 break-normal">{getI18nContent(it.label)}</span>
             <div className="relative flex-1">
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -85,7 +104,8 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
                     onClick={(e) => {
                       e.preventDefault();
                       clipboard.copy(it.jsonpath);
-                      toast.success('变量已复制');
+                      if (!clipboard.copied && !execCopy(it.jsonpath)) toast.error(t('common.toast.copy-failed'));
+                      else toast.success(t('common.toast.copy-success'));
                     }}
                   >
                     <Copy className="size-4" />

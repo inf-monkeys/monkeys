@@ -3,7 +3,7 @@ import React from 'react';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { NodeCustomData } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
-import { cn } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 
 interface Props {
   tool?: VinesToolDef;
@@ -14,6 +14,7 @@ interface Props {
   className?: string;
   children?: React.ReactNode;
 }
+
 export const ComplicateNodeHeader: React.FC<Props> = ({
   tool,
   toolName,
@@ -42,9 +43,13 @@ export const ComplicateNodeHeader: React.FC<Props> = ({
         <div className="flex max-w-[13rem] flex-col gap-1 leading-5">
           <div className="flex items-center gap-2">
             <div className="flex items-end gap-2">
-              <p className="line-clamp-1 text-sm font-bold leading-tight">{customDisplayName ?? toolDisplayName}</p>
+              <p className="line-clamp-1 text-sm font-bold leading-tight">
+                {customDisplayName ?? getI18nContent(toolDisplayName)}
+              </p>
               {customDisplayName && customDisplayName !== toolDisplayName && (
-                <span className="line-clamp-1 min-w-[3rem] text-xs font-light text-gray-10">{toolDisplayName}</span>
+                <span className="line-clamp-1 min-w-[3rem] text-xs font-light text-gray-10">
+                  {getI18nContent(toolDisplayName)}
+                </span>
               )}
             </div>
           </div>
@@ -52,7 +57,7 @@ export const ComplicateNodeHeader: React.FC<Props> = ({
             className={cn('line-clamp-1 !text-xs font-normal opacity-50', isUnsupported && 'text-red-10 !opacity-100')}
           >
             {customDesc && `${customDesc}${toolDisplayDesc && ' / '}`}
-            {toolDisplayDesc}
+            {getI18nContent(toolDisplayDesc)}
             {isUnsupported ? '不受支持的节点，请尝试重新创建' : ''}
           </div>
         </div>

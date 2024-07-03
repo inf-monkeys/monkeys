@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { ShieldCheck, Users } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { handleOidcLogin } from '@/apis/authz/oidc';
-import { EmailAuth } from '@/components/layout/login/authz/email-auth.tsx';
-import { PhoneAuth } from '@/components/layout/login/authz/phone-auth.tsx';
+import { EmailAuth } from '@/components/layout/login/email-auth.tsx';
+import { PhoneAuth } from '@/components/layout/login/phone-auth.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
@@ -21,7 +21,6 @@ interface IAuthContainerProps extends React.ComponentPropsWithoutRef<'div'> {
 
   oidcButtonText?: string;
 
-  setSwap: (value: string) => void;
   hasTokens: boolean;
 }
 
@@ -31,7 +30,6 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
   enablePhone,
   enablePassword,
   oidcButtonText,
-  setSwap,
   hasTokens,
 }) => {
   const { t } = useTranslation();
@@ -44,8 +42,6 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
       setActiveTab(enablePhone ? 'phone' : 'email');
     }
   }, [onlyOne]);
-
-  const handleSwapUsers = () => setSwap('users');
 
   const areValuesUsed = enablePassword || enablePhone;
 
@@ -80,12 +76,12 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
             >
               {enablePhone && activeTab === 'phone' && (
                 <TabsContent value="phone" className="w-full" forceMount>
-                  <PhoneAuth onFinished={handleSwapUsers} />
+                  <PhoneAuth />
                 </TabsContent>
               )}
               {enablePassword && activeTab === 'email' && (
                 <TabsContent value="email" className="w-full" forceMount>
-                  <EmailAuth onFinished={handleSwapUsers} />
+                  <EmailAuth />
                 </TabsContent>
               )}
             </motion.div>
@@ -115,11 +111,6 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
               </Button>
               {!areValuesUsed && <span className="-mt-2 text-xs text-opacity-70">{t('auth.login.only-oidc')}</span>}
             </>
-          )}
-          {hasTokens && (
-            <Button icon={<Users />} onClick={handleSwapUsers}>
-              {t('auth.login.select-account')}
-            </Button>
           )}
         </div>
       ) : null}

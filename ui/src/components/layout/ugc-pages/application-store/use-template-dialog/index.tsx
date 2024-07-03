@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { forkApplicationFromTemplate } from '@/apis/application-store';
@@ -8,6 +9,7 @@ import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { I18nContent } from '@/utils';
 
 interface IUgcApplicationStoreUseTemplateDialogProps {
   children?: React.ReactNode;
@@ -18,6 +20,8 @@ export const UgcApplicationStoreUseTemplateDialog: React.FC<IUgcApplicationStore
   children,
   item,
 }) => {
+  const { t } = useTranslation();
+
   const [visible, setVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const teamId = localStorage.getItem('vines-team-id');
@@ -35,10 +39,10 @@ export const UgcApplicationStoreUseTemplateDialog: React.FC<IUgcApplicationStore
       {
         success: () => {
           setVisible(false);
-          return '创建成功';
+          return t('components.layout.ugc.import-dialog.use-template.success');
         },
-        error: '创建失败，请检查网络后重试',
-        loading: '创建中......',
+        error: t('components.layout.ugc.import-dialog.use-template.error'),
+        loading: t('components.layout.ugc.import-dialog.use-template.loading'),
         finally: () => {
           setIsLoading(false);
         },
@@ -51,20 +55,20 @@ export const UgcApplicationStoreUseTemplateDialog: React.FC<IUgcApplicationStore
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>使用该模板</DialogTitle>
+          <DialogTitle>{t('components.layout.ugc.import-dialog.use-template.title')}</DialogTitle>
         </DialogHeader>
         <div className="flex gap-3">
           <div className="flex-shrink-0">
             <VinesIcon src={item.iconUrl} size="xl" />
           </div>
           <div className="flex flex-col gap-1">
-            <span className="font-bold">{item.displayName}</span>
-            <span className="text-sm">{item.description}</span>
+            <span className="font-bold">{I18nContent(item.displayName)}</span>
+            <span className="text-sm">{I18nContent(item.description)}</span>
           </div>
         </div>
         <DialogFooter>
           <Button loading={isLoading} variant="solid" onClick={handleUse}>
-            确定
+            {t('common.utils.confirm')}
           </Button>
         </DialogFooter>
       </DialogContent>

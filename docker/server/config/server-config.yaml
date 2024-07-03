@@ -14,7 +14,6 @@ redis:
 auth:
   enabled:
     - password
-    - apikey
 
 conductor:
   baseUrl: http://conductor-server:8080/api
@@ -47,3 +46,9 @@ models:
       stop:
         - <|im_start|>
         - <|im_end|>
+
+oneapi:
+  enabled: true
+  baseURL: http://oneapi:3000
+  rootUsername: root
+  rootPassword: 123456

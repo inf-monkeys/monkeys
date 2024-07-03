@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { motion } from 'framer-motion';
 import { Crosshair } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useWorkflowValidation } from '@/apis/workflow/validation';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { useVinesFlow } from '@/package/vines-flow';
 import { IVinesFlowRenderType, VINES_STATUS } from '@/package/vines-flow/core/typings.ts';
+import { getI18nContent } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IVinesExpandToolErrorsProps {
@@ -24,6 +26,8 @@ interface VinesToolIssue {
 }
 
 export const VinesExpandToolErrors: React.FC<IVinesExpandToolErrorsProps> = ({ disabled }) => {
+  const { t, i18n } = useTranslation();
+
   const { vines } = useVinesFlow();
 
   const isVinesFlowLoading = vines.status === VINES_STATUS.IDLE;
@@ -40,7 +44,7 @@ export const VinesExpandToolErrors: React.FC<IVinesExpandToolErrorsProps> = ({ d
     const issuesMap = new Map<string, string[]>();
     data.validationIssues.forEach((issue) => {
       const messages = issuesMap.get(issue.taskReferenceName) ?? [];
-      issuesMap.set(issue.taskReferenceName, [...messages, issue.humanMessage.zh]);
+      issuesMap.set(issue.taskReferenceName, [...messages, issue.humanMessage[i18n.language === 'en-US' ? 'en' : 'zh']]);
     });
 
     setValidationIssues(
@@ -49,8 +53,8 @@ export const VinesExpandToolErrors: React.FC<IVinesExpandToolErrorsProps> = ({ d
         const nodeCustomData = node?.customData;
         const tool = vines.getTool(node?.getRaw()?.name ?? '');
 
-        const isEndNodeName = nodeId === 'workflow_end' ? '结束' : null;
-        const isStartNodeName = nodeId === 'workflow_start' ? '开始' : null;
+        const isEndNodeName = nodeId === 'workflow_end' ? t('workspace.flow-view.vines.tools.end.name') : null;
+        const isStartNodeName = nodeId === 'workflow_start' ? t('workspace.flow-view.vines.tools.start.name') : null;
 
         const isEndNodeIcon = nodeId === 'workflow_end' ? 'emoji:🏁:#fff' : null;
         const isStartNodeIcon = nodeId === 'workflow_start' ? 'emoji:🚀:#fff' : null;
@@ -61,12 +65,12 @@ export const VinesExpandToolErrors: React.FC<IVinesExpandToolErrorsProps> = ({ d
           nodeName:
             isEndNodeName || isStartNodeName
               ? (isEndNodeName || isStartNodeName) ?? ''
-              : tool?.displayName ?? '' + (nodeCustomData?.title ? `（${nodeCustomData?.title}）` : ''),
+              : getI18nContent(tool?.displayName) ?? '' + (nodeCustomData?.title ? `（${nodeCustomData?.title}）` : ''),
           nodeIcon: isEndNodeIcon || isStartNodeIcon ? (isEndNodeIcon || isStartNodeIcon) ?? '' : tool?.icon ?? '',
         };
       }),
     );
-  }, [data, vines.tools]);
+  }, [data, vines.tools, i18n.language]);
 
   const handleFocusNode = (nodeId: string) => {
     VinesEvent.emit('canvas-zoom-to-node', (isComplicate ? 'complicate-' : '') + nodeId);
@@ -91,7 +95,7 @@ export const VinesExpandToolErrors: React.FC<IVinesExpandToolErrorsProps> = ({ d
                     onClick={() => handleFocusNode(nodeId)}
                   />
                 </TooltipTrigger>
-                <TooltipContent>定位到工具</TooltipContent>
+                <TooltipContent>{t('workspace.flow-view.error.tips')}</TooltipContent>
               </Tooltip>
             </div>
             {messages.map((it, index) => (

@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { AssetType } from '@inf-monkeys/vines';
+import { AssetType } from '@inf-monkeys/monkeys';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { forkAssetItem } from '@/apis/ugc';
@@ -14,7 +15,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog.tsx';
-import { useTranslation } from 'react-i18next';
 
 interface IUgcImportDialogProps {
   visible: boolean;

@@ -1,5 +1,7 @@
 import React, { memo } from 'react';
 
+import { useTranslation } from 'react-i18next';
+
 import { VinesAbstractBoolean } from '@/components/layout/vines-view/execution/data-display/abstract/node/boolean.tsx';
 import { VinesAbstractImage } from '@/components/layout/vines-view/execution/data-display/abstract/node/image.tsx';
 import { VinesAbstractPDB } from '@/components/layout/vines-view/execution/data-display/abstract/node/pdb.tsx';
@@ -21,6 +23,8 @@ interface IVinesAbstractDataPreviewProps {
 
 export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
   ({ data, className, style }) => {
+    const { t } = useTranslation();
+
     const previewData = previewDataGenerator(data);
 
     const previewDataLength = previewData.length;
@@ -44,7 +48,11 @@ export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
               </div>
             );
           })}
-          {!previewDataLength && <h1 className="m-auto text-sm font-bold">该工具执行后暂无输出</h1>}
+          {!previewDataLength && (
+            <h1 className="m-auto text-sm font-bold">
+              {t('workspace.pre-view.actuator.detail.abstract-data-preview.empty')}
+            </h1>
+          )}
         </div>
       </ScrollArea>
     );

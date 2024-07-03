@@ -9,7 +9,3 @@ conductor:
 database:
   type: better-sqlite3
   database: data/db.sqlite
-
-tools:
-  - name: nodejs
-    manifestUrl: http://localhost:3001/manifest.json

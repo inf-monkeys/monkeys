@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -63,8 +63,8 @@ export const WorkflowRawDataEditor: React.FC<IWorkflowRawDataEditorProps> = () =
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-2xl">
-        <DialogTitle>开发者模式</DialogTitle>
-        <DialogDescription>请谨慎编辑工作流原始数据，错误的数据将会导致工作流损坏！</DialogDescription>
+        <DialogTitle>{t('workspace.flow-view.tooltip.raw-data.button')}</DialogTitle>
+        <DialogDescription>{t('workspace.flow-view.tooltip.raw-data.desc')}</DialogDescription>
 
         <CodeEditor
           data={draft}
@@ -77,10 +77,10 @@ export const WorkflowRawDataEditor: React.FC<IWorkflowRawDataEditorProps> = () =
         <DialogFooter className={cn(!isLatestWorkflowVersion && 'hidden')}>
           <div className="flex flex-1 items-center">{error && <p className="text-xs text-red-10">{error}</p>}</div>
           <Button variant="outline" onClick={() => setDraft((workflow ?? {}) as JSONValue)}>
-            重置
+            {t('workspace.flow-view.tooltip.raw-data.reset')}
           </Button>
           <Button variant="outline" onClick={handleSave} disabled={!!error}>
-            保存
+            {t('workspace.flow-view.tooltip.raw-data.save')}
           </Button>
         </DialogFooter>
       </DialogContent>

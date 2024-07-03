@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 
-import { BlockDefPropertyTypeOptions } from '@inf-monkeys/vines/src/models/BlockDefDto.ts';
+import { ToolPropertyTypeOptions } from '@inf-monkeys/monkeys';
 import { get } from 'lodash';
 
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
@@ -17,7 +17,7 @@ import { SqlKnowledgeBaseSelector } from './sql-knowledge-base';
 import { ToolSelector } from './tool';
 
 export interface IVinesInputPresetProps {
-  typeOptions: BlockDefPropertyTypeOptions;
+  typeOptions: ToolPropertyTypeOptions;
   componentMode: 'component' | 'input';
   setComponentMode: React.Dispatch<React.SetStateAction<'component' | 'input'>>;
 }

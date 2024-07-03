@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Play } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { VinesWorkflowInput } from '@/components/layout/vines-view/execution/workflow-input';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,8 @@ interface IAnInputProps {
 }
 
 export const AnInput: React.FC<IAnInputProps> = ({ inputs, onClick, disabled }) => {
+  const { t } = useTranslation();
+
   return (
     <>
       <VinesWorkflowInput
@@ -24,7 +27,7 @@ export const AnInput: React.FC<IAnInputProps> = ({ inputs, onClick, disabled }) 
         onSubmit={onClick}
       >
         <Button className="mb-1 min-h-10" variant="outline" icon={<Play />} type="submit" loading={disabled}>
-          运行
+          {t('workspace.chat-view.workflow-mode.execution')}
         </Button>
       </VinesWorkflowInput>
     </>

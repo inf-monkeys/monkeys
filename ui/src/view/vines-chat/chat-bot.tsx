@@ -5,6 +5,7 @@ import { CircularProgress } from '@nextui-org/progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { isEmpty, reduce, toNumber } from 'lodash';
 import { MessageSquareDashed } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { VinesChatInput } from 'src/components/layout/vines-view/chat/chat-bot/input';
 import { VirtualizedList } from 'src/components/layout/vines-view/chat/chat-bot/messages';
 
@@ -24,6 +25,8 @@ interface IVinesChatModeProps {
 
 // million-ignore
 export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) => {
+  const { t } = useTranslation();
+
   const { workflowId } = useFlowStore();
   const { userPhoto } = useVinesUser();
 
@@ -86,8 +89,12 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) =
     <>
       <header className="flex w-full justify-between pb-4 pl-4">
         <div className="flex flex-col">
-          <h1 className="text-xl font-bold">{!multipleChat && '单轮'}对话模式</h1>
-          {chatId === 'default' && <span className="text-xs opacity-70">临时对话中，聊天记录将不会存储</span>}
+          <h1 className="text-xl font-bold">
+            {t(`workspace.chat-view.chat-bot.title.${multipleChat ? 'multiple' : 'single'}`)}
+          </h1>
+          {chatId === 'default' && (
+            <span className="text-xs opacity-70">{t('workspace.chat-view.chat-bot.temporary-mode')}</span>
+          )}
         </div>
       </header>
       <div className="size-full flex-1">
@@ -128,7 +135,7 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) =
                 >
                   <MessageSquareDashed size={64} />
                   <div className="mt-4 flex flex-col text-center">
-                    <h2 className="font-bold">暂无对话</h2>
+                    <h2 className="font-bold">{t('workspace.chat-view.empty')}</h2>
                   </div>
                 </motion.div>
               )}

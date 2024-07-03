@@ -1,4 +1,4 @@
-import { MonkeyWorkflow } from '@inf-monkeys/vines';
+import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 
 export type IPagePermission = 'read' | 'write' | 'exec' | 'permission';
 
@@ -9,7 +9,7 @@ export interface IPageInstance {
   icon: string;
   type: IPageInstanceType;
   allowedPermissions: IPagePermission[];
-  // customOptionsProperties?: BlockDefPropertiesExtended[];
+  // customOptionsProperties?: ToolPropertyExtended[];
 }
 
 export interface IPageType {
@@ -52,3 +52,38 @@ export type IPinPage = IPageType & {
   workflowId: string;
   workflow: MonkeyWorkflow;
 };
+
+export declare type CreatePageDto = {
+  /**
+   * 类型
+   */
+  type: CreatePageDto.type;
+  /**
+   * 权限
+   */
+  permissions: Array<'read' | 'write' | 'exec' | 'permission'>;
+  /**
+   * 页面名称
+   */
+  displayName: string;
+  /**
+   * 序号（越小越靠前）
+   */
+  sortIndex: string;
+  /**
+   * 自定义配置项
+   */
+  customOptions: any;
+};
+export declare namespace CreatePageDto {
+  /**
+   * 类型
+   */
+  enum type {
+    PROCESS = 'process',
+    LOG = 'log',
+    CHAT = 'chat',
+    PREVIEW = 'preview',
+    API = 'api',
+  }
+}

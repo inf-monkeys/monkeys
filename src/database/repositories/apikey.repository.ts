@@ -1,7 +1,7 @@
 import { generateDbId } from '@/common/utils';
 import { generateRandomApiKey } from '@/common/utils/apikey';
 import { ApiKeyEntity, ApiKeyStatus } from '@/database/entities/apikey/apikey';
-import { CreateApiKeyDto } from '@inf-monkeys/vines';
+import { CreateApiKeyDto } from '@/modules/auth/apikey/dto/create-apikey.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -87,7 +87,9 @@ export class ApikeyRepository {
       },
     });
     if (count === 0) {
-      await this.createApiKey(userId, teamId, {});
+      await this.createApiKey(userId, teamId, {
+        desc: 'Creaetd by system',
+      });
     }
   }
 }
