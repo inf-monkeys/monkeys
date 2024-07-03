@@ -34,7 +34,11 @@ export const VinesLogList: React.FC<IVinesLogListProps> = ({ searchWorkflowExecu
     return _.keyBy(workflowDefinitions, 'workflowId');
   }, [workflowDefinitions]);
 
+  const useOpenAIInterface = vines.usedOpenAIInterface();
+  const openAIInterfaceEnabled = useOpenAIInterface.enable;
+
   const handleNavigateToPreview = (execution: VinesWorkflowExecution) => {
+    if (openAIInterfaceEnabled) return;
     const previewPage = pages?.find(({ type }) => type === 'preview');
     if (previewPage) {
       if (vines.swapExecutionInstance(execution)) {
@@ -74,6 +78,7 @@ export const VinesLogList: React.FC<IVinesLogListProps> = ({ searchWorkflowExecu
               onClick={() => handleNavigateToPreview(workflowExecution)}
               workflowExecution={workflowExecution}
               workflowDefinition={workflowDefinitionIdMapper[workflowExecution.workflowName!]}
+              disabled={openAIInterfaceEnabled}
             />
           ))
         : null}
