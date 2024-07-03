@@ -44,7 +44,7 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
         windowMs: rateLimiter?.windowMs ?? 1000,
       },
       exposeOpenaiCompatibleInterface,
-      openaiModelName: workflow?.openaiModelName,
+      openaiModelName: workflow?.openaiModelName || '',
     },
   });
 

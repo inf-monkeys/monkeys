@@ -9,7 +9,6 @@ import { VinesActuator } from '@/components/layout/vines-view/execution/actuator
 import { Separator } from '@/components/ui/separator.tsx';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
-import { ViewDisable } from '@/view/vines-preview/view-disable.tsx';
 
 // million-ignore
 export const VinesPreView: React.FC = () => {
@@ -22,7 +21,6 @@ export const VinesPreView: React.FC = () => {
 
   return (
     <div ref={ref} className={cn('relative h-full max-h-full p-6', !fullscreen && 'space-y-6')}>
-      <ViewDisable />
       <div className={cn('space-y-0.5', fullscreen && 'hidden')}>
         <h2 className="text-2xl font-bold tracking-tight">{t('workspace.pre-view.title')}</h2>
         <p className="text-muted-foreground">{t('workspace.pre-view.desc')}</p>

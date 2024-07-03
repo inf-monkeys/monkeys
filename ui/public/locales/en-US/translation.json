@@ -2159,9 +2159,7 @@
         }
       },
       "disable": {
-        "title": "View Disabled",
-        "desc": "The OpenAI compatible interface is enabled, which may cause the preview view to not display properly",
-        "button": "Disable OpenAI compatible interface and enable views"
+        "exec-button-tips": "Please use the chat view to execute the workflow"
       }
     },
     "chat-view": {
