@@ -690,6 +690,96 @@
           "add-to-team": "Add to Team"
         }
       }
+    },
+    "payment": {
+      "property": {
+        "title": "Team Account",
+        "desc": "Check team balance and details here",
+        "button": "Recharge"
+      },
+      "recharge": {
+        "title": "Recharge",
+        "placeholder": "Please enter the recharge amount, the minimum is 1 CNY",
+        "pay": "{{amount}} CNY",
+        "button": "Pay {{amount}} CNY",
+
+        "amount-too-small": "The recharge amount cannot be less than 1 CNY",
+        "amount-too-large": "The recharge amount cannot be greater than 10,000 CNY",
+
+        "loading": "Creating order...",
+        "success": "Order created successfully",
+        "error": "Order creation failed! Please try again later"
+      },
+      "pay": {
+        "title": "Please use WeChat to scan the QR code to pay",
+        "order-id": "Order number:{{orderId}}",
+        "order-status": "Payment status",
+
+        "pending": "Pending payment",
+        "paid": "Payment successful",
+        "delivered": "Payment received",
+        "closed": "Order closed",
+
+        "empty": "No payment information",
+
+        "close-order": {
+          "label": "Cancel payment",
+          "loading": "Cancelling payment...",
+          "success": "Payment cancelled",
+          "error": "Payment cancellation failed! Please try again later"
+        },
+        "re-check": {
+          "label": "Check payment status",
+          "loading": "Checking payment status...",
+          "success": "Payment status: {{status}}",
+          "error": "Payment status check failed! Please try again later"
+        },
+        "success-paid": "Successfully recharged {{amount}} CNY",
+        "success": "Recharge successful"
+      },
+      "recharge-details": {
+        "title": "Recharge Details",
+        "desc": "Cumulative recharge ￥{{amount}}",
+
+        "columns": {
+          "type": {
+            "label": "Payment Types",
+            "wxpay": "WeChat Pay",
+            "other": "Other"
+          },
+          "createdTimestamp": "Recharge Time",
+          "amount": "Amount",
+          "status": {
+            "pending": "Pending payment",
+            "paid": "Payment successful",
+            "delivered": "Payment received",
+            "closed": "Order closed"
+          },
+          "operate": {
+            "label": "Operations",
+            "check": "Check payment details"
+          }
+        }
+      },
+      "consumer-details": {
+        "title": "Consumer details",
+        "desc": "Total consumption ￥{{amount}}",
+
+        "columns": {
+          "type": {
+            "label": "Consumption Type",
+            "execute_tool": "Tool execution deduction",
+            "other": "Other"
+          },
+          "workflow": "Workflow",
+          "tool": "Tool",
+          "createdTimestamp": "Consumption Time",
+          "amount": "Amount",
+          "status": {
+            "padding": "Pending"
+          }
+        }
+      }
     }
   },
   "workbench": {

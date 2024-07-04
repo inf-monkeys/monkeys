@@ -256,7 +256,7 @@ export const config: Config = {
   database: readConfig('database', {
     type: 'better-sqlite3',
     database: 'data/db.sqlite',
-    synchronize: true,
+    synchronize: false,
   }),
   redis: {
     mode: readConfig('redis.mode', RedisMode.standalone),

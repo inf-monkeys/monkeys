@@ -58,7 +58,7 @@ if (!servers.length) {
 const serverHostToPortMap = {};
 const startPort = 8000;
 const serverConfigYamls = servers.map((server, index) => {
-  const { appId, host, auth, ...rest } = server;
+  const { appId, host, auth, paymentServer, ...rest } = server;
   const port = startPort + index;
   serverHostToPortMap[host] = port;
   const serverConfig = {
@@ -74,6 +74,10 @@ const serverConfigYamls = servers.map((server, index) => {
   // Override auth configuration
   if (auth) {
     serverConfig.auth = auth;
+  }
+
+  if (paymentServer) {
+    serverConfig.paymentServer = paymentServer;
   }
 
   return yaml.stringify(serverConfig);
@@ -155,6 +159,7 @@ const startServers = async () => {
 const runPorxyServer = (port) => {
   const httpServer = http.createServer((req, res) => {
     const host = req.headers.host;
+    console.log('Host:', host);
     const targetServerPort = serverHostToPortMap[host];
     if (!targetServerPort) {
       logger.warn(`Domain not found in configuration: ${host}`);
