@@ -11,7 +11,6 @@ import { Injectable } from '@nestjs/common';
 import { OpenAIStream, StreamData, StreamingTextResponse, ToolCallPayload } from 'ai';
 import axios from 'axios';
 import { Response } from 'express';
-import { isArray } from 'lodash';
 import OpenAI from 'openai';
 import { ChatCompletion, ChatCompletionChunk, ChatCompletionMessageParam, ChatCompletionTool } from 'openai/resources';
 import { ChatCompletionCreateParamsBase } from 'openai/resources/chat/completions';
@@ -124,7 +123,7 @@ export class LlmService {
     apiKey: string;
     defaultParams?: any;
     promptTemplate?: string;
-    autoMergeSystemMessages?: boolean;
+    autoMergeConsecutiveMessages?: boolean;
   }> {
     if (!modelName) {
       throw new Error('Model is required, check your workflow configuration.');
@@ -163,7 +162,7 @@ export class LlmService {
         apiKey: model.apiKey,
         defaultParams: model.defaultParams,
         promptTemplate: model.promptTemplate,
-        autoMergeSystemMessages: model.autoMergeSystemMessages,
+        autoMergeConsecutiveMessages: model.autoMergeConsecutiveMessages,
       };
     }
   }
@@ -185,25 +184,7 @@ export class LlmService {
   }
 
   private sanitizeMessages(messages: Array<ChatCompletionMessageParam>) {
-    const messageHistory: Array<ChatCompletionMessageParam> = messages
-      .map(({ role, content }) => {
-        if (role !== 'user' && role !== 'assistant' && role !== 'system') {
-          throw new Error(`Invalid message role '${role}'`);
-        }
-
-        if (isArray(content) && role === 'user') {
-          return {
-            role,
-            content,
-          };
-        } else {
-          return {
-            role,
-            content: (content as string).trim(),
-          };
-        }
-      })
-      .filter(({ content }) => !!content);
+    const messageHistory: Array<ChatCompletionMessageParam> = messages.filter(({ content }) => !!content);
     return messageHistory;
   }
 
@@ -419,15 +400,25 @@ export class LlmService {
     };
   }
 
-  private async autoMergeSystemMessages(messages: Array<ChatCompletionMessageParam>): Promise<Array<ChatCompletionMessageParam>> {
-    const systemMessages = messages.filter((msg) => msg.role === 'system');
-    const otherMessages = messages.filter((msg) => msg.role !== 'system');
-    if (!systemMessages.length) {
-      return messages;
+  private mergeConsecutiveMessages(messages: ChatCompletionMessageParam[]): ChatCompletionMessageParam[] {
+    if (messages.length === 0) {
+      return [];
     }
 
-    const mergedSystemMessage = systemMessages.map((x) => x.content).join('\n\n');
-    return [{ role: 'system', content: mergedSystemMessage }, ...otherMessages];
+    const mergedMessages: ChatCompletionMessageParam[] = [];
+    let currentMessage = { ...messages[0] };
+
+    for (let i = 1; i < messages.length; i++) {
+      if (messages[i].role === currentMessage.role) {
+        currentMessage.content += '\n\n' + messages[i].content;
+      } else {
+        mergedMessages.push(currentMessage);
+        currentMessage = { ...messages[i] };
+      }
+    }
+
+    mergedMessages.push(currentMessage);
+    return mergedMessages;
   }
 
   private geneChunkLine(chatCmplId: string, model: string, chunkString: string) {
@@ -483,6 +474,8 @@ export class LlmService {
     }
     let { model } = params;
     const { stream, systemPrompt, knowledgeBase, sqlKnowledgeBase, response_format = ResponseFormat.text } = params;
+
+    // Messages passed by the user
     let { messages } = params;
     const historyMessages = this.sanitizeMessages(messages);
 
@@ -492,6 +485,7 @@ export class LlmService {
       res.status(200);
     }
 
+    // Generate system messages
     const { generatedByKnowledgeBase, systemMessages } = await this.generateSystemMessages(messages, systemPrompt, knowledgeBase);
     const randomChatCmplId = Math.random().toString(36).substr(2, 16);
 
@@ -510,13 +504,17 @@ export class LlmService {
       });
     }
 
-    const { apiKey, baseURL, defaultParams, realModelName, autoMergeSystemMessages = false } = await this.getModelConfig(teamId, model);
+    // Cap messages
+    messages = await this.capMessages(systemMessages, historyMessages);
+
+    const { apiKey, baseURL, defaultParams, realModelName, autoMergeConsecutiveMessages = false } = await this.getModelConfig(teamId, model);
     if (realModelName) {
       model = realModelName as string;
     }
-    messages = await this.capMessages(systemMessages, historyMessages);
-    if (autoMergeSystemMessages) {
-      messages = await this.autoMergeSystemMessages(messages);
+
+    // Merge consecutive messages
+    if (autoMergeConsecutiveMessages) {
+      messages = this.mergeConsecutiveMessages(messages);
     }
     const openai = new OpenAI({
       apiKey: apiKey || 'mock-apikey',

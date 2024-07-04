@@ -162,7 +162,7 @@ export interface LlmModelConfig {
   displayName?: string;
   iconUrl?: string;
   defaultParams?: { [x: string]: any };
-  autoMergeSystemMessages?: boolean;
+  autoMergeConsecutiveMessages?: boolean;
   type?: LlmModelEndpointType[];
   promptTemplate?: string;
   max_tokens?: number;
