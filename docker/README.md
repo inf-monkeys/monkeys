@@ -6,6 +6,8 @@ This folder contains 3 `docker-compose` file:
 - `docker-compose-middleware.yaml`: All required middlewares, like `postgres`, `redis` and `conductor`.
 - `docker-compose-tenancy-config.yaml`: Multi tenancy version of `docker-compose.yaml`.
 
+> If you are using Docker Desktop for Mac or Windows, Change the Memory limit to at least 12 GB, or conductor may failed to start.
+
 ## 🚀 Quick Start
 
 1. Go to `docker` folder
