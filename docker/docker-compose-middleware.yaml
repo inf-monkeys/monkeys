@@ -21,6 +21,11 @@ services:
         limits:
           cpus: '1'
           memory: '8G'
+    depends_on:
+      monkeys-postgres:
+        condition: service_healthy
+      monkeys-elasticsearch:
+        condition: service_healthy
 
   monkeys-redis:
     image: redis:6.2.3-alpine
@@ -58,11 +63,12 @@ services:
     environment:
       - POSTGRES_USER=monkeys
       - POSTGRES_PASSWORD=monkeys123
-      - POSTGRES_DATABASE=monkeys
+      - POSTGRES_MULTIPLE_DATABASES=monkeys,conductor,oneapi
     ports:
       - 5432:5432
     volumes:
       - pgdata-monkeys:/var/lib/postgresql/data
+      - ./db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     networks:
       - monkeys
     healthcheck:
@@ -94,7 +100,10 @@ services:
     networks:
       - monkeys
     environment:
-      - SQL_DSN=postgres://monkeys:monkeys123@monkeys-postgres:5432/monkeys?sslmode=disable
+      - SQL_DSN=postgres://monkeys:monkeys123@monkeys-postgres:5432/oneapi?sslmode=disable
+    depends_on:
+      monkeys-postgres:
+        condition: service_healthy
 
 volumes:
   esdata-monkeys:
