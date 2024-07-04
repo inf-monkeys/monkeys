@@ -24,6 +24,7 @@
     "ts-typeorm": "ts-node -r tsconfig-paths/register ./node_modules/.bin/typeorm",
     "migration:create": "typeorm migration:create ./src/database/migrations/migartion",
     "migration:run": "node_modules/typeorm/cli.js migration:run -d ormconfig.js",
+    "migration:win-run": "node node_modules/typeorm/cli.js migration:run -d ormconfig.js",
     "migration:generate": "yarn ts-typeorm migration:generate ./src/database/migrations/migartion -d ormconfig.js"
   },
   "dependencies": {
