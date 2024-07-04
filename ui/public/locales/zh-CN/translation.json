@@ -684,6 +684,96 @@
       "color-list": {
         "title": "团队主题列表"
       }
+    },
+    "payment": {
+      "property": {
+        "title": "团队账户",
+        "desc": "在此查看团队余额与明细",
+        "button": "充值"
+      },
+      "recharge": {
+        "title": "充值",
+        "placeholder": "请输入充值金额，最小为 1 元",
+        "pay": "{{amount}} 元",
+        "button": "充值 {{amount}} 元",
+
+        "amount-too-small": "充值金额不能小于 1 元",
+        "amount-too-large": "充值金额不能大于 10,000 元",
+
+        "loading": "正在创建订单",
+        "success": "订单创建成功",
+        "error": "订单创建失败，请稍后再试"
+      },
+      "pay": {
+        "title": "请使用微信扫码支付",
+        "order-id": "订单号：{{orderId}}",
+        "order-status": "支付状态",
+
+        "pending": "待支付",
+        "paid": "支付成功",
+        "delivered": "已到账",
+        "closed": "订单已关闭",
+
+        "empty": "订单信息获取失败",
+
+        "close-order": {
+          "label": "取消支付",
+          "loading": "正在取消支付...",
+          "success": "取消支付成功",
+          "error": "取消支付失败，请稍后再试"
+        },
+        "re-check": {
+          "label": "我已完成支付",
+          "loading": "正在检查支付状态",
+          "success": "支付状态：{{status}}",
+          "error": "支付失败，请稍后再试"
+        },
+        "success-paid": "成功充值 {{amount}} 元",
+        "success": "充值成功"
+      },
+      "recharge-details": {
+        "title": "充值明细",
+        "desc": "累计充值 ￥{{amount}}",
+
+        "columns": {
+          "type": {
+            "label": "支付类型",
+            "wxpay": "微信支付",
+            "other": "其他"
+          },
+          "createdTimestamp": "创建时间",
+          "amount": "金额",
+          "status": {
+            "pending": "待支付",
+            "paid": "支付成功",
+            "delivered": "已到账",
+            "closed": "订单已关闭"
+          },
+          "operate": {
+            "label": "操作",
+            "check": "查看"
+          }
+        }
+      },
+      "consumer-details": {
+        "title": "消费明细",
+        "desc": "累计消费 ￥{{amount}}",
+
+        "columns": {
+          "type": {
+            "label": "消费类型",
+            "execute_tool": "工具运行扣费",
+            "other": "其他"
+          },
+          "workflow": "工作流",
+          "tool": "工具",
+          "createdTimestamp": "创建时间",
+          "amount": "金额",
+          "status": {
+            "padding": "待支付"
+          }
+        }
+      }
     }
   },
   "workbench": {
