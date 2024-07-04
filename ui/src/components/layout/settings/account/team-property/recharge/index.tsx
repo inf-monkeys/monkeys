@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useSWRConfig } from 'swr';
 
 import { CreditCard } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { usePaymentOrderCreate } from '@/apis/authz/team/payment';
@@ -16,6 +17,8 @@ import { Input } from '@/components/ui/input';
 interface IRechargeProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const Recharge: React.FC<IRechargeProps> = ({ children }) => {
+  const { t } = useTranslation();
+
   const { mutate } = useSWRConfig();
 
   const { trigger } = usePaymentOrderCreate();
@@ -28,23 +31,23 @@ export const Recharge: React.FC<IRechargeProps> = ({ children }) => {
 
   const handleCreateOrder = () => {
     if (amount < 1) {
-      toast.warning('请输入正确的金额，最小为 1 元');
+      toast.warning(t('settings.payment.recharge.amount-too-small'));
       return;
     }
     if (amount > 1000000) {
-      toast.warning('最大充值金额为 10000 元');
+      toast.warning(t('settings.payment.recharge.amount-too-large'));
       return;
     }
     toast.promise(trigger({ amount }), {
-      loading: '正在创建订单',
+      loading: t('settings.payment.recharge.loading'),
       success: (res) => {
         setVisible(false);
         res && setOrder(res);
         void mutate((key) => typeof key === 'string' && key.startsWith('/api/payment/orders?'));
 
-        return '创建订单成功';
+        return t('settings.payment.recharge.success');
       },
-      error: '创建订单失败',
+      error: t('settings.payment.recharge.error'),
     });
   };
 
@@ -54,11 +57,11 @@ export const Recharge: React.FC<IRechargeProps> = ({ children }) => {
         <DialogTrigger asChild>{children}</DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>充值</DialogTitle>
+            <DialogTitle>{t('settings.payment.recharge.title')}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-4">
             <Input
-              placeholder="请输入充值金额，最小为 1 元"
+              placeholder={t('settings.payment.recharge.placeholder')}
               value={inputAmount}
               onChange={(v) => {
                 setInputAmount(v);
@@ -79,7 +82,7 @@ export const Recharge: React.FC<IRechargeProps> = ({ children }) => {
                   }}
                   variant="outline"
                 >
-                  <span>{buttonAmount.toString()} 元</span>
+                  <span>{t('settings.payment.recharge.pay', { amount: buttonAmount.toString() })}</span>
                 </Button>
               ))}
             </div>
@@ -92,7 +95,7 @@ export const Recharge: React.FC<IRechargeProps> = ({ children }) => {
               disabled={amount < 1}
               onClick={handleCreateOrder}
             >
-              充值 {balanceFormat(amount).join('.')} 元
+              {t('settings.payment.recharge.button', { amount: balanceFormat(amount).join('.') })}
             </Button>
           </DialogFooter>
         </DialogContent>

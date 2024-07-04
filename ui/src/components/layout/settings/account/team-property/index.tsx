@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 
 import { CreditCard } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useTeamBalance } from '@/apis/authz/team/payment';
 import { Recharge } from '@/components/layout/settings/account/team-property/recharge';
@@ -11,6 +12,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 interface ITeamPropertyProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const TeamProperty: React.FC<ITeamPropertyProps> = () => {
+  const { t } = useTranslation();
+
   const { data: balance } = useTeamBalance();
 
   const balanceAmount = useMemo<[string, string]>(() => {
@@ -21,8 +24,8 @@ export const TeamProperty: React.FC<ITeamPropertyProps> = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>团队账户</CardTitle>
-        <CardDescription>在此查看团队余额与明细</CardDescription>
+        <CardTitle>{t('settings.payment.property.title')}</CardTitle>
+        <CardDescription>{t('settings.payment.property.desc')}</CardDescription>
       </CardHeader>
       <CardContent className="flex h-16 items-center">
         <div className="flex items-end">
@@ -33,7 +36,7 @@ export const TeamProperty: React.FC<ITeamPropertyProps> = () => {
         <div className="flex flex-1 justify-end">
           <Recharge>
             <Button size="small" icon={<CreditCard />} variant="outline">
-              充值
+              {t('settings.payment.property.button')}
             </Button>
           </Recharge>
         </div>

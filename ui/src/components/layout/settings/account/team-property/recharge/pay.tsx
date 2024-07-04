@@ -56,12 +56,16 @@ export const Pay: React.FC<IPayProps> = ({ children, order }) => {
     await mutate((key) => typeof key === 'string' && key.startsWith('/api/payment/orders?'));
     setVisible(false);
     setOrderId('');
-    toast.success(amount ? `成功充值 ${balanceFormat(amount).join('.')} 元` : '充值成功');
+    toast.success(
+      amount
+        ? t('settings.payment.pay.success-paid', { amount: balanceFormat(amount).join('.') })
+        : t('settings.payment.pay.success'),
+    );
   };
 
   const handleRecheck = async () => {
     toast.promise(mutateOrder(), {
-      loading: '正在检查支付状态',
+      loading: t('settings.payment.pay.re-check.loading'),
       success: (res) => {
         const payStatus = res?.status ?? '';
         const isPaySuccess = ['delivered', 'paid'].includes(payStatus);
@@ -69,9 +73,16 @@ export const Pay: React.FC<IPayProps> = ({ children, order }) => {
           void handlePaid(res?.amount);
         }
 
-        return `支付状态：${payStatus === 'pending' ? '待支付' : isPaySuccess ? '已支付' : '订单失效'}`;
+        return t('settings.payment.pay.re-check.success', {
+          status:
+            payStatus === 'pending'
+              ? t('settings.payment.pay.pending')
+              : isPaySuccess
+                ? t('settings.payment.pay.paid')
+                : t('settings.payment.pay.closed'),
+        });
       },
-      error: '支付状态检查失败',
+      error: t('settings.payment.pay.re-check.error'),
     });
   };
 
@@ -100,7 +111,7 @@ export const Pay: React.FC<IPayProps> = ({ children, order }) => {
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>请使用微信扫码支付</DialogTitle>
+          <DialogTitle>{t('settings.payment.pay.title')}</DialogTitle>
         </DialogHeader>
         <div className="vines-center flex flex-col gap-4 pt-4">
           {order ? (
@@ -114,7 +125,9 @@ export const Pay: React.FC<IPayProps> = ({ children, order }) => {
                   {balanceFormat(data?.amount ?? 0).join('.')} CNY
                 </span>
                 <div className="-my-2 flex items-center">
-                  <span className="text-xs text-gray-10">订单号：{data?.id ?? ''}</span>
+                  <span className="text-xs text-gray-10">
+                    {t('settings.payment.pay.order-id', { orderId: data?.id ?? '' })}
+                  </span>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
@@ -135,37 +148,37 @@ export const Pay: React.FC<IPayProps> = ({ children, order }) => {
                 </div>
               </div>
               <Alert>
-                <AlertTitle className="font-bold">支付状态</AlertTitle>
+                <AlertTitle className="font-bold">{t('settings.payment.pay.order-status')}</AlertTitle>
                 <AlertDescription className="flex items-center gap-2">
                   {status === 'pending' && (
                     <>
                       <LucideLoader2 size={16} className="animate-spin" />
-                      <span>待支付，请尽快完成支付</span>
+                      <span>{t('settings.payment.pay.pending')}</span>
                     </>
                   )}
                   {status === 'paid' && (
                     <>
                       <Check size={16} />
-                      <span>已支付</span>
+                      <span>{t('settings.payment.pay.paid')}</span>
                     </>
                   )}
                   {status === 'delivered' && (
                     <>
                       <CheckCheck size={16} />
-                      <span>已到账</span>
+                      <span>{t('settings.payment.pay.delivered')}</span>
                     </>
                   )}
                   {isOrderClose && (
                     <>
                       <MinusCircle size={16} />
-                      <span>订单失效</span>
+                      <span>{t('settings.payment.pay.closed')}</span>
                     </>
                   )}
                 </AlertDescription>
               </Alert>
             </>
           ) : (
-            <h1 className="py-10 font-bold">订单信息获取失败</h1>
+            <h1 className="py-10 font-bold">{t('settings.payment.pay.empty')}</h1>
           )}
         </div>
         <DialogFooter>
@@ -176,16 +189,16 @@ export const Pay: React.FC<IPayProps> = ({ children, order }) => {
               disabled={isOrderClose || isOrderPaid}
               onClick={() => {
                 toast.promise(closeOrderTrigger(), {
-                  loading: '正在取消支付',
+                  loading: t('settings.payment.pay.close-order.loading'),
                   success: () => {
                     void mutate((key) => typeof key === 'string' && key.startsWith('/api/payment/orders?'));
-                    return '订单已取消';
+                    return t('settings.payment.pay.close-order.success');
                   },
-                  error: '取消支付失败',
+                  error: t('settings.payment.pay.close-order.error'),
                 });
               }}
             >
-              取消支付
+              {t('settings.payment.pay.close-order.label')}
             </Button>
           </DialogClose>
           <Button
@@ -195,7 +208,7 @@ export const Pay: React.FC<IPayProps> = ({ children, order }) => {
             onClick={handleRecheck}
             disabled={isOrderClose || isOrderPaid}
           >
-            我已完成支付
+            {t('settings.payment.pay.re-check.label')}
           </Button>
         </DialogFooter>
       </DialogContent>
