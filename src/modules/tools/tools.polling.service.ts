@@ -476,6 +476,7 @@ export class ToolsPollingService {
         };
       }
     } catch (error) {
+      success = false;
       logger.error(`Execute tool ${__toolName} failed`, error.message);
       if (error.code === 'ECONNREFUSED') {
         return {
@@ -566,7 +567,7 @@ export class ToolsPollingService {
     } finally {
       const endTimestamp = +new Date();
       tokenCount = this.getTokenCount(rest, outputData);
-      await this.reportUsage(
+      this.reportUsage(
         __toolName,
         {
           ...__context,
