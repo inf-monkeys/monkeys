@@ -106,6 +106,12 @@ export class AppController {
 
   @Get('/configs')
   public getConfigs() {
+    const module: ISystemConfig['module'] = [];
+
+    if (config.paymentServer.enabled) {
+      module.push('payment');
+    }
+
     const data: ISystemConfig = {
       theme: {
         title: config.server.customization.title,
@@ -128,7 +134,7 @@ export class AppController {
       endpoints: {
         clientUrl: 'https://ai.infmonkeys.com',
       },
-      module: [],
+      module,
     };
     return new SuccessResponse({
       data,

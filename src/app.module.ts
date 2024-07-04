@@ -18,6 +18,7 @@ import { LLMToolsModule } from './modules/tools/llm/llm.module';
 import { ToolsModule } from './modules/tools/tools.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { OpenapiModule } from './openapi.module';
+import { PaymentModule } from './modules/payment/payment.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { OpenapiModule } from './openapi.module';
     AssetsModule,
     LLMToolsModule,
     ChatModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
