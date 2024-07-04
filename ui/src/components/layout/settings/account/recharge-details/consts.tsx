@@ -2,39 +2,18 @@ import React from 'react';
 
 import { ColumnDef } from '@tanstack/react-table';
 import dayjs from 'dayjs';
-import { ArrowUpDown, MinusSquare, PlusSquareIcon } from 'lucide-react';
+import { ArrowUpDown } from 'lucide-react';
 
-import { IOrder } from '@/apis/authz/team/payment/typings.ts';
+import { IOrder, IRechargeOrder } from '@/apis/authz/team/payment/typings.ts';
+import { Pay } from '@/components/layout/settings/account/team-property/recharge/pay.tsx';
 import { Badge } from '@/components/ui/badge.tsx';
+import { Button } from '@/components/ui/button';
 
 export const columns: ColumnDef<IOrder>[] = [
   {
-    id: 'type-column',
-    header: '',
-    size: 10,
-    cell: ({ row }) => (row.original.type === 'incr' ? <PlusSquareIcon /> : <MinusSquare />),
-  },
-  {
-    accessorKey: 'tag',
-    header: '类型',
-    cell: ({ cell }) => (
-      <span>
-        {(cell.getValue() === 'recharge' && '充值') ||
-          (cell.getValue() === 'admin-recharge' && '充值（管理员）') ||
-          '其他'}
-      </span>
-    ),
-  },
-  {
     accessorKey: 'payment',
     header: '支付类型',
-    cell: ({ row }) => (
-      <span>
-        {(row.original.tag === 'recharge' && '微信支付') ||
-          (row.original.tag === 'admin-recharge' && '管理员后台充值') ||
-          '其他'}
-      </span>
-    ),
+    cell: ({ row }) => <span>{(row.original?.['platform'] === 'wxpay' && '微信支付') || '其他'}</span>,
   },
   {
     accessorKey: 'createdTimestamp',
@@ -51,7 +30,7 @@ export const columns: ColumnDef<IOrder>[] = [
       );
     },
     enableSorting: true,
-    cell: ({ cell }) => <span>{dayjs(cell.getValue() as number).format('YYYY-MM-DD HH:mm:ss')}</span>,
+    cell: ({ cell }) => <span>{dayjs(Number(cell.getValue())).format('YYYY-MM-DD HH:mm:ss')}</span>,
   },
   {
     accessorKey: 'amount',
@@ -69,20 +48,30 @@ export const columns: ColumnDef<IOrder>[] = [
     },
     enableSorting: true,
     cell: ({ cell, row }) => {
+      const status = row.original?.['status'];
       return (
         <div className="flex items-center gap-2">
           <div className="flex flex-shrink-0 justify-end">
-            {(row.original.type === 'decr' ? '-' : '+')
-              .concat(' ￥')
-              .concat(((cell.getValue() as number) / 100).toFixed(2))}
+            {'+￥'.concat(((cell.getValue() as number) / 100).toFixed(2))}
           </div>
-          {row.original.status === 'created' && (
-            <Badge color="grey" className="flex-shrink-0 cursor-default">
-              未支付
-            </Badge>
-          )}
+          <Badge color="grey" className="flex-shrink-0 cursor-default">
+            {status === 'pending' && '待支付'}
+            {status === 'paid' && '已支付'}
+            {status === 'delivered' && '已到账'}
+            {status === 'closed' && '已关闭'}
+          </Badge>
         </div>
       );
     },
+  },
+  {
+    header: '操作',
+    cell: ({ row: { original } }) => (
+      <Pay order={original as IRechargeOrder}>
+        <Button variant="outline" size="small">
+          查看
+        </Button>
+      </Pay>
+    ),
   },
 ];

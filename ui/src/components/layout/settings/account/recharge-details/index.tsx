@@ -21,7 +21,7 @@ export const RechargeDetails: React.FC<IRechargeDetailsProps> = () => {
 
   const { data: balance } = useTeamBalance();
   const { data: orderListData } = useTeamOrderList(
-    ['recharge', 'admin-recharge'],
+    ['recharge', 'admin_recharge'],
     pagination.pageIndex + 1,
     pagination.pageSize,
   );

@@ -20,7 +20,7 @@ export const ConsumerDetails: React.FC<IConsumerDetailsProps> = () => {
   });
 
   const { data: balance } = useTeamBalance();
-  const { data: orderListData } = useTeamOrderList(['block-consume'], pagination.pageIndex + 1, pagination.pageSize);
+  const { data: orderListData } = useTeamOrderList(['execute_tool'], pagination.pageIndex + 1, pagination.pageSize);
 
   const balanceTotalConsume = useMemo<[string, string]>(() => {
     const { totalConsume } = balance || {};
@@ -35,6 +35,7 @@ export const ConsumerDetails: React.FC<IConsumerDetailsProps> = () => {
           累计消费 ￥{balanceTotalConsume[0]}.{balanceTotalConsume[1]}
         </CardDescription>
       </CardHeader>
+
       <CardContent>
         <SmoothTransition className="relative overflow-hidden">
           <AnimatePresence>{!orderListData && <Loading motionKey="vines-consumer-details-loading" />}</AnimatePresence>
