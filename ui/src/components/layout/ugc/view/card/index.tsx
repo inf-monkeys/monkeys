@@ -34,6 +34,7 @@ export const UgcViewCard = <E extends object>({
     () => getRenderNode('description') || t('components.layout.ugc.utils.no-description'),
     [index, row],
   );
+
   return (
     <Card
       className={cn('h-44', {

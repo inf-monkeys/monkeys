@@ -870,11 +870,10 @@
     "action-tools": {
       "utils": {
         "pricing-mode": {
-          "free": "Free",
-          "per-execute": "Per execution charged {{amount}} RMB",
-          "per-1k-token": "Per 1K Token charged {{amount}} RMB",
-          "per-1min": "Per 1 minute charged {{amount}} RMB",
-          "per-1mb-file": "Per 1 MB file charged {{amount}} RMB"
+          "FREE": "Free",
+          "PER_EXECUTR": "Per execution charged {{amount}} CNY",
+          "PER_1K_TOKEN": "Per 1K Token charged {{amount}} CNY",
+          "PER_1MIN": "Per 1 minute charged {{amount}} CNY"
         },
         "estimate": {
           "estimate-time": "Estimate {{time}}"

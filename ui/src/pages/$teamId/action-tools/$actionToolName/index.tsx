@@ -37,9 +37,11 @@ export const ActionToolDetail: React.FC<IActionToolDetailProps> = () => {
               variant="outline"
               size="small"
               className="-m-1 -ml-0.5 -mr-2 scale-85"
-              onClick={() => {
-                history.back();
-              }}
+              onClick={() =>
+                navigate({
+                  to: '/$teamId/action-tools/',
+                })
+              }
             />
           </TooltipTrigger>
           <TooltipContent>{t('common.utils.back')}</TooltipContent>

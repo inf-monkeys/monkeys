@@ -7,18 +7,15 @@ import { ToolPricing } from '@/apis/tools/typings.ts';
 export const PricingText: React.FC<{ pricing: ToolPricing }> = ({ pricing }) => {
   const { t } = useTranslation();
 
-  if (pricing.mode != 'free') pricing.unitPriceAmount = pricing.unitPriceAmount / 100;
+  switch (pricing.pricingRule) {
+    case 'FREE':
+      return t('ugc-page.action-tools.utils.pricing-mode.FREE');
 
-  switch (pricing.mode) {
-    case 'free':
-      return t('ugc-page.action-tools.utils.pricing-mode.free');
-
-    case 'per-execute':
-    case 'per-1k-token':
-    case 'per-1min':
-    case 'per-1mb-file':
-      return t(`ugc-page.action-tools.utils.pricing-mode.${pricing.mode}`, {
-        amount: pricing.unitPriceAmount,
+    case 'PER_EXECUTR':
+    case 'PER_1K_TOKEN':
+    case 'PER_1MIN':
+      return t(`ugc-page.action-tools.utils.pricing-mode.${pricing.pricingRule}`, {
+        amount: pricing.unitPrice / 100,
       });
 
     default:
