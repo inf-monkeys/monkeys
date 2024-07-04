@@ -864,11 +864,10 @@
     "action-tools": {
       "utils": {
         "pricing-mode": {
-          "free": "免费",
-          "per-execute": "每次运行收费 {{amount}} 元",
-          "per-1k-token": "每 1K Token 收费 {{amount}} 元",
-          "per-1min": "每 1 分钟收费 {{amount}} 元",
-          "per-1mb-file": "每 1 MB 文件收费 {{amount}} "
+          "FREE": "免费",
+          "PER_EXECUTR": "每次运行收费 {{amount}} 元",
+          "PER_1K_TOKEN": "每 1K Token 收费 {{amount}} 元",
+          "PER_1MIN": "每 1 分钟收费 {{amount}} 元"
         },
         "estimate": {
           "estimate-time": "预计执行 {{time}}"

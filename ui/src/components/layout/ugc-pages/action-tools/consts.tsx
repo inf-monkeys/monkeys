@@ -36,6 +36,7 @@ export const createActionToolsColumns = ({ hooks }: ICreateActionToolsColumnsPro
           className="cursor-pointer transition-colors hover:text-primary-500"
           onClick={() => {
             void hooks.navigate({
+              // @ts-ignore
               to: `/$teamId/action-tools/${row.original.name}`,
             });
           }}
@@ -60,13 +61,13 @@ export const createActionToolsColumns = ({ hooks }: ICreateActionToolsColumnsPro
         );
       },
     }),
-    columnHelper.accessor('pricing', {
+    columnHelper.accessor('extra', {
       id: 'pricing',
       cell: ({ getValue }) => {
-        const pricing = getValue() as ToolPricing | undefined;
+        const pricing = getValue();
         return (
           <span className="text-text2">
-            {pricing ? PricingText({ pricing }) : t('ugc-page.action-tools.utils.pricing-mode.free')}
+            {pricing ? PricingText({ pricing }) : t('ugc-page.action-tools.utils.pricing-mode.FREE')}
           </span>
         );
       },
