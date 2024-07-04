@@ -2,7 +2,7 @@ import React from 'react';
 
 import { ColumnDef } from '@tanstack/react-table';
 import dayjs from 'dayjs';
-import { ArrowUpDown, MinusSquare, PlusSquareIcon } from 'lucide-react';
+import { ArrowUpDown } from 'lucide-react';
 
 import { IOrder } from '@/apis/authz/team/payment/typings.ts';
 import { WorkflowCell } from '@/components/layout/settings/account/consumer-details/workflow-cell.tsx';
@@ -10,25 +10,19 @@ import { Badge } from '@/components/ui/badge.tsx';
 
 export const columns: ColumnDef<IOrder>[] = [
   {
-    id: 'type-column',
-    header: '',
-    size: 10,
-    cell: ({ row }) => (row.original.type === 'incr' ? <PlusSquareIcon /> : <MinusSquare />),
-  },
-  {
-    accessorKey: 'tag',
+    accessorKey: 'type',
     header: '类型',
-    cell: ({ cell }) => <span>{(cell.getValue() === 'block-consume' && '工作流组件运行扣费') || '其他'}</span>,
+    cell: ({ cell }) => <span>{(cell.getValue() === 'execute_tool' && '工作流工具运行扣费') || '其他'}</span>,
   },
   {
     id: 'workflow',
     header: '工作流',
-    cell: ({ row }) => <WorkflowCell workflowId={row.original.detail['workflowId']} />,
+    cell: ({ row }) => <WorkflowCell workflowId={row.original?.['workflowId'] ?? ''} />,
   },
   {
     id: 'workflow-block',
-    header: '工作流组件',
-    cell: ({ row }) => <span>{row.original.detail['blockName']}</span>,
+    header: '工具',
+    cell: ({ row }) => <span>{row.original?.['toolName'] ?? ''}</span>,
   },
   {
     accessorKey: 'createdTimestamp',
@@ -45,7 +39,7 @@ export const columns: ColumnDef<IOrder>[] = [
       );
     },
     enableSorting: true,
-    cell: ({ cell }) => <span>{dayjs(cell.getValue() as number).format('YYYY-MM-DD HH:mm:ss')}</span>,
+    cell: ({ cell }) => <span>{dayjs(Number(cell.getValue())).format('YYYY-MM-DD HH:mm:ss')}</span>,
   },
   {
     accessorKey: 'amount',
@@ -66,11 +60,9 @@ export const columns: ColumnDef<IOrder>[] = [
       return (
         <div className="flex items-center gap-2">
           <div className="flex flex-shrink-0 justify-end">
-            {(row.original.type === 'decr' ? '-' : '+')
-              .concat(' ￥')
-              .concat(((cell.getValue() as number) / 100).toFixed(2))}
+            {'-￥'.concat(((cell.getValue() as number) / 100).toFixed(2))}
           </div>
-          {row.original.status === 'created' && (
+          {row.original.status === 'pending' && (
             <Badge color="grey" className="flex-shrink-0 cursor-default">
               未支付
             </Badge>

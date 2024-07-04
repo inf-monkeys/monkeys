@@ -95,6 +95,7 @@
     "react-jwt": "^1.2.1",
     "react-markdown": "^9.0.1",
     "react-photo-gallery": "^8.0.0",
+    "react-qr-code": "^2.0.15",
     "react-resizable-panels": "^2.0.16",
     "react-virtuoso": "^4.7.7",
     "react-window": "^1.8.10",
