@@ -34,7 +34,7 @@ export const NavButton: React.FC<INavButtonProps> = ({ to, children, icon, postf
       {...props}
     >
       <div className="w-[20px] [&_svg]:h-[16px] [&_svg]:w-[16px]">{icon}</div>
-      <span>{children}</span>
+      <span className="text-sm">{children}</span>
       {postfix}
     </div>
   );

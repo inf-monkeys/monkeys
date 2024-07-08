@@ -11,11 +11,11 @@ import { cn } from '@/utils';
 
 export const VinesPreView: React.FC = () => {
   const { fullscreen } = useViewStore();
-  const { containerHeight } = usePageStore();
+  const { containerHeight, workbenchVisible } = usePageStore();
 
   return (
     <motion.div
-      className="relative flex h-full max-h-full p-6"
+      className={cn('relative flex h-full max-h-full p-6', workbenchVisible && 'p-0 pl-4')}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}

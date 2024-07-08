@@ -34,7 +34,7 @@ export const ActuatorHeader: React.FC<IActuatorHeaderProps> = ({ instanceId, wor
         spinClassName="scale-90 -ml-0"
       />
       <div>
-        <h1 className="text-xl font-bold">{t([`workspace.pre-view.actuator.execution.status.${status}`, status])}</h1>
+        <h1 className="text-base font-bold">{t([`workspace.pre-view.actuator.execution.status.${status}`, status])}</h1>
         <div className="flex items-center gap-2">
           <CardDescription className="line-clamp-1">
             {t('workspace.pre-view.actuator.execution.instance-id', { instanceId })}

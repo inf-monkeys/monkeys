@@ -26,7 +26,7 @@ export const User: React.FC<IUserProps> = ({ name, account, photo, isCollapsed }
           <Skeleton className="h-5 w-full" />
         )}
         {account ? (
-          <span className="text-xxs max-w-[5.5rem] truncate leading-none text-black text-opacity-60 dark:text-gold-12 dark:opacity-70">
+          <span className="max-w-[5.5rem] truncate text-xs leading-none text-black text-opacity-60 dark:text-gold-12 dark:opacity-70">
             {account}
           </span>
         ) : (

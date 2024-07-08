@@ -14,10 +14,11 @@ export const Space: React.FC<ISpaceProps> = ({ children }) => {
   const { ref, width, height } = useElementSize();
   const { pages, pageId } = useVinesPage();
 
-  const { setContainerWidth, setContainerHeight } = usePageStore();
+  const { setContainerWidth, setContainerHeight, setWorkbenchVisible } = usePageStore();
   useEffect(() => {
     setContainerWidth(width);
     setContainerHeight(height);
+    setWorkbenchVisible(false);
   }, [width, height]);
 
   const isFirstNavActive = pageId === pages?.[0].id;

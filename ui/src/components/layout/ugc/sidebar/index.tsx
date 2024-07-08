@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 
 import { motion } from 'framer-motion';
-import { ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { IUgcCustomProps } from '@/components/layout/ugc/typings.ts';
 import { IUgcViewFilterListProps, UgcViewFilterList } from '@/components/layout/ugc/view/filter/list';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils';
@@ -31,7 +32,15 @@ export const UgcSidebar: React.FC<IUgcSidebarProps> = ({ assetType, assetKey, is
           transition: { duration: 0.2 },
         }}
       >
-        <h1 className="text-2xl font-bold">{title}</h1>
+        <div className="flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button icon={<ChevronLeft />} variant="outline" onClick={() => setVisible(false)} />
+            </TooltipTrigger>
+            <TooltipContent>{t('common.sidebar.hide')}</TooltipContent>
+          </Tooltip>
+          <h1 className="text-base font-bold">{title}</h1>
+        </div>
         <UgcViewFilterList assetType={assetType} assetKey={assetKey} isMarket={isMarket} {...filterListProps} />
       </motion.div>
       <Separator orientation="vertical" className="vines-center">

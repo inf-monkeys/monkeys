@@ -17,7 +17,7 @@ import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { usePageStore } from '@/store/usePageStore';
-import { useLocalStorage } from '@/utils';
+import { cn, useLocalStorage } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 import { VinesFlowEvents } from '@/view/vines-flow/events.tsx';
 
@@ -25,7 +25,7 @@ interface IVinesFlowProps {}
 
 export const VinesFlow: React.FC<IVinesFlowProps> = () => {
   const { workflowId } = useFlowStore();
-  const { containerWidth, containerHeight, page } = usePageStore();
+  const { containerWidth, containerHeight, page, workbenchVisible } = usePageStore();
   const { canvasMode, visible, setVisible, setInitialScale } = useCanvasStore();
 
   const {
@@ -66,7 +66,7 @@ export const VinesFlow: React.FC<IVinesFlowProps> = () => {
   });
 
   return (
-    <main className="vines-center relative size-full">
+    <main className={cn('vines-center relative size-full', workbenchVisible && 'px-4')}>
       <VinesFlowWrapper>
         <AnimatePresence>
           {visible && (

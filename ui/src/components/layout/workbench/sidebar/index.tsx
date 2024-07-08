@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 
 import { motion } from 'framer-motion';
-import { ChevronRight, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useWorkspacePages } from '@/apis/pages';
@@ -49,7 +49,20 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
           transition: { duration: 0.2 },
         }}
       >
-        <h1 className="text-2xl font-bold">{t('components.layout.main.sidebar.list.workbench.label')}</h1>
+        <div className="flex items-center gap-2 px-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                icon={<ChevronLeft />}
+                className="!size-8 !p-1"
+                onClick={() => setVisible(false)}
+                variant="outline"
+              />
+            </TooltipTrigger>
+            <TooltipContent>{visible ? t('common.sidebar.hide') : t('common.sidebar.show')}</TooltipContent>
+          </Tooltip>
+          <h1 className="text-base font-bold">{t('components.layout.main.sidebar.list.workbench.label')}</h1>
+        </div>
         <div className="grid gap-2">
           {data?.map((page) => {
             const workflow = page?.workflow;
@@ -66,7 +79,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
                   >
                     <VinesIcon size="sm">{workflow?.iconUrl}</VinesIcon>
                     <div className="flex max-w-44 flex-col gap-0.5">
-                      <h1 className="font-bold leading-tight">
+                      <h1 className="text-sm font-bold leading-tight">
                         {getI18nContent(workflow?.displayName) ?? t('common.utils.untitled')}
                       </h1>
                       <span className="text-xxs">

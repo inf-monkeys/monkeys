@@ -43,7 +43,7 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
           transition: { duration: 0.2 },
         }}
       >
-        <h1 className="text-2xl font-bold">{t('workspace.chat-view.sidebar.title')}</h1>
+        <h1 className="text-xl font-bold">{t('workspace.chat-view.sidebar.title')}</h1>
         <ScrollArea className="h-full max-h-[calc(100%-3rem)]">
           <div className="grid gap-2 py-1 pl-1 pr-3">
             {data?.map((session) => (

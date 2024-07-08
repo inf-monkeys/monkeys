@@ -13,9 +13,6 @@ export const Workbench: React.FC = () => {
 
   useEffect(() => {
     setWorkbenchVisible(true);
-    return () => {
-      setWorkbenchVisible(false);
-    };
   }, []);
 
   const { teamId } = useVinesTeam();
