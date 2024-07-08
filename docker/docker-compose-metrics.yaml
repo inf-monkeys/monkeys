@@ -1,0 +1,54 @@
+version: '2.3'
+
+services:
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - 3003:3000
+    healthcheck:
+      test: curl http://localhost:3000/health -o /dev/null
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    logging:
+      driver: 'json-file'
+    volumes:
+      - grafana_data:/var/lib/grafana
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: '8G'
+    networks:
+      - monkeys
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - 9090:9090
+    healthcheck:
+      test: curl http://localhost:9090/health -o /dev/null
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    logging:
+      driver: 'json-file'
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: '8G'
+    networks:
+      - monkeys
+
+volumes:
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  monkeys:
