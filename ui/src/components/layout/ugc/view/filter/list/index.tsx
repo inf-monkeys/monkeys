@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import _ from 'lodash';
 import { Trash } from 'lucide-react';
@@ -65,29 +65,27 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
       : [];
   }, [assetType]);
 
-  useMemo(() => {
-    setTimeout(() => {
-      if (current === 'all') {
-        onChange({});
-        return;
+  useEffect(() => {
+    if (current === 'all') {
+      onChange({});
+      return;
+    }
+    if (assetType === 'tools') {
+      onChange({
+        cate: current,
+      });
+    } else if (isMarket) {
+      onChange({
+        categoryIds: [current],
+      });
+    } else if (assetFilterRules) {
+      const rule = assetFilterRules.find((r) => r.id === current);
+      if (!rule) {
+        toast.error(t('components.layout.ugc.view.filter.list.toast.filter-group-not-found'));
+      } else {
+        onChange(rule.rules);
       }
-      if (assetType === 'tools') {
-        onChange({
-          cate: current,
-        });
-      } else if (isMarket) {
-        onChange({
-          categoryIds: [current],
-        });
-      } else if (assetFilterRules) {
-        const rule = assetFilterRules.find((r) => r.id === current);
-        if (!rule) {
-          toast.error(t('components.layout.ugc.view.filter.list.toast.filter-group-not-found'));
-        } else {
-          onChange(rule.rules);
-        }
-      }
-    });
+    }
   }, [current]);
 
   return (

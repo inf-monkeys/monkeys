@@ -1,7 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { AssetType, ToolCategory } from '@inf-monkeys/monkeys';
-import { useElementSize } from '@mantine/hooks';
 import {
   ColumnDef,
   createColumnHelper,
@@ -75,7 +74,6 @@ export const UgcView = <E extends object>({
 }: IUgcViewProps<E>): React.ReactNode => {
   const { t } = useTranslation();
 
-  const { ref } = useElementSize();
   const team = useVinesTeam();
 
   // local storage
@@ -106,7 +104,7 @@ export const UgcView = <E extends object>({
     pageIndex: 0,
   });
 
-  useMemo(() => {
+  useEffect(() => {
     defaultPageSizeLS &&
       setPagination((prev) => {
         return {
@@ -191,43 +189,46 @@ export const UgcView = <E extends object>({
   };
 
   const columnHelper = createColumnHelper<IAssetItem<E>>();
-  const columns = createColumns();
+  const columns = useMemo(() => {
+    const cols = createColumns();
 
-  // 添加 header
-  columns.forEach((col, index) => {
-    if (!col.header) {
-      columns[index].header = t(`ugc-page.${assetKey}.ugc-view.columns.${col.id}.label`);
-    }
-  });
+    // 添加 header
+    cols.forEach((col, index) => {
+      if (!col.header) {
+        cols[index].header = t(`ugc-page.${assetKey}.ugc-view.columns.${col.id}.label`);
+      }
+    });
 
-  // 修改 tag 列
-  const tagColumn = columns.find((c) => c.id === 'assetTags');
-  if (tagColumn) {
-    const index = columns.indexOf(tagColumn);
-    columns[index] = {
-      ...tagColumn,
-      cell: ({ row }) =>
-        RenderTags({
-          assetType,
-          assetId: row.original[assetIdKey],
-          assetTags: row.original.assetTags,
-          mutate,
-        }),
-    };
-  }
-
-  // 添加操作列
-  if (operateArea && !columns.find((c) => c.id === 'operate')) {
-    columns.push(
-      columnHelper.display({
-        id: 'operate',
-        size: 24,
-        header: t('common.utils.operate'),
+    // 修改 tag 列
+    const tagColumn = cols.find((c) => c.id === 'assetTags');
+    if (tagColumn) {
+      const index = cols.indexOf(tagColumn);
+      cols[index] = {
+        ...tagColumn,
         cell: ({ row }) =>
-          operateArea(row.original, <Button icon={<MoreHorizontal />} size="small" />, t('common.utils.operate')),
-      }),
-    );
-  }
+          RenderTags({
+            assetType,
+            assetId: row.original[assetIdKey],
+            assetTags: row.original.assetTags,
+            mutate,
+          }),
+      };
+    }
+    // 添加操作列
+    if (operateArea && !cols.find((c) => c.id === 'operate')) {
+      cols.push(
+        columnHelper.display({
+          id: 'operate',
+          size: 24,
+          header: t('common.utils.operate'),
+          cell: ({ row }) =>
+            operateArea(row.original, <Button icon={<MoreHorizontal />} size="small" />, t('common.utils.operate')),
+        }),
+      );
+    }
+
+    return cols;
+  }, [assetKey, assetType, assetIdKey, operateArea, mutate, columnHelper]);
 
   // 使用 tanstack table 管理状态
   const table = useReactTable({
@@ -259,7 +260,7 @@ export const UgcView = <E extends object>({
           },
         }}
       />
-      <div ref={ref} className="relative w-full flex-1 overflow-x-clip">
+      <div className="relative w-full flex-1 overflow-x-clip">
         <UgcViewHeader
           assetKey={assetKey}
           assetType={assetType}

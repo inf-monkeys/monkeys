@@ -46,9 +46,7 @@ export const ActionTools: React.FC = () => {
               </span>
             );
           },
-          cover: (item) => {
-            return RenderIcon({ iconUrl: item.icon, size: 'gallery' });
-          },
+          cover: (item) => RenderIcon({ iconUrl: item.icon, size: 'gallery' }),
         }}
         onItemClick={(item) => {
           void navigate({
