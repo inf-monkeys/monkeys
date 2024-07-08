@@ -25,7 +25,6 @@ import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 interface IVinesExecutionHistoryProps extends React.ComponentPropsWithoutRef<'div'> {}
 
-// million-ignore
 export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () => {
   const { t } = useTranslation();
 

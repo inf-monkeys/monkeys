@@ -33,7 +33,6 @@ export interface IUgcViewFilterListProps extends IUgcCustomProps {
   filterButtonProps: Omit<IUgcViewFilterButtonProps, keyof IUgcCustomProps>;
 }
 
-// million-ignore
 export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
   assetType,
   assetKey,

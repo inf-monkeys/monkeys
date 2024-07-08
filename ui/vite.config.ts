@@ -6,7 +6,6 @@ import { mdx } from '@cyco130/vite-plugin-mdx';
 import { TanStackRouterVite } from '@tanstack/router-vite-plugin';
 import legacy from '@vitejs/plugin-legacy';
 import react from '@vitejs/plugin-react-swc';
-import million from 'million/compiler';
 import svgr from 'vite-plugin-svgr';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
@@ -26,7 +25,6 @@ export default defineConfig({
       ],
       rehypePlugins: [],
     }),
-    million.vite({ auto: true }),
     tsconfigPaths(),
     react(),
     svgr(),

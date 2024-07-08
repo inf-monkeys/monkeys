@@ -23,7 +23,6 @@ interface IVinesChatModeProps {
   multipleChat?: boolean;
 }
 
-// million-ignore
 export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) => {
   const { t } = useTranslation();
 
