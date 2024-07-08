@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { MoreHorizontal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -7,7 +7,7 @@ import { IUgcViewItemProps } from '@/components/layout/ugc/typings.ts';
 import { getRenderNodeFn } from '@/components/layout/ugc/view/utils/node-renderer.tsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.tsx';
-import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils';
 
 export const UgcViewCard = <E extends object>({
@@ -26,15 +26,6 @@ export const UgcViewCard = <E extends object>({
     renderOptions,
   });
 
-  const logo = useMemo(() => getRenderNode('logo'), [index, row]);
-  const title = useMemo(() => getRenderNode('title'), [index, row]);
-  const subtitle = useMemo(() => getRenderNode('subtitle'), [index, row]);
-  const tags = useMemo(() => getRenderNode('assetTags'), [index, row]);
-  const description = useMemo(
-    () => getRenderNode('description') || t('components.layout.ugc.utils.no-description'),
-    [index, row],
-  );
-
   return (
     <Card
       className={cn('h-44', {
@@ -51,14 +42,15 @@ export const UgcViewCard = <E extends object>({
     >
       <CardHeader className="p-4">
         <CardTitle className={cn('flex gap-3 font-medium', operateArea && 'justify-between')}>
-          <div>{logo}</div>
+          <div>{getRenderNode('logo')}</div>
           <div className={cn('flex flex-col', operateArea && 'max-w-[55%]')}>
-            <Tooltip content={title}>
+            <Tooltip>
               <TooltipTrigger asChild>
-                <span className="line-clamp-1 text-base font-bold">{title}</span>
+                <span className="line-clamp-1 text-base font-bold">{getRenderNode('title')}</span>
               </TooltipTrigger>
+              <TooltipContent>{getRenderNode('title')}</TooltipContent>
             </Tooltip>
-            <span className="text-xs">{subtitle}</span>
+            <span className="text-xs">{getRenderNode('subtitle')}</span>
           </div>
           {operateArea && (
             <>
@@ -75,8 +67,10 @@ export const UgcViewCard = <E extends object>({
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-2 p-4 pt-0">
-        {tags}
-        <div className="flex flex-col gap-1 text-xs text-opacity-70">{description}</div>
+        {getRenderNode('assetTags')}
+        <div className="flex flex-col gap-1 text-xs text-opacity-70">
+          {getRenderNode('description') || t('components.layout.ugc.utils.no-description')}
+        </div>
       </CardContent>
     </Card>
   );
