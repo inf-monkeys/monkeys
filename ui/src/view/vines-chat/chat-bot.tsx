@@ -120,6 +120,7 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) =
               transition={{ duration: 0.2, delay: 0.15 }}
             >
               <VirtualizedList
+                chatId={chatId}
                 data={messages ?? []}
                 userPhoto={userPhoto}
                 botPhoto={vines.workflowIcon}
