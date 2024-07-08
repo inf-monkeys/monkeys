@@ -152,9 +152,11 @@ export class WorkflowPageService {
     const workflowIds = uniq(pages.map((page) => page.workflowId));
     const workflows = await this.workflowRepository.findWorkflowByIds(workflowIds);
     const workflowMap = keyBy(workflows, 'workflowId');
+    const pageInstanceTypeMapper = keyBy(BUILT_IN_PAGE_INSTANCES, 'type');
     return pages.map((p) => ({
       ...p,
       workflow: workflowMap[p.workflowId],
+      instance: pageInstanceTypeMapper[p.type],
     }));
   }
 

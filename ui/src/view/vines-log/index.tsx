@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useElementSize } from '@mantine/hooks';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -16,15 +15,15 @@ import {
   IVinesSearchWorkflowExecutionsParams,
   vinesSearchWorkflowExecutionsSchema,
 } from '@/schema/workspace/workflow-execution.ts';
+import { usePageStore } from '@/store/usePageStore';
 import { useViewStore } from '@/store/useViewStore';
 
 export const VinesLogView: React.FC = () => {
   const { t } = useTranslation();
 
   const { visible } = useViewStore();
+  const { containerHeight } = usePageStore();
   const { vines } = useVinesFlow();
-
-  const { ref, height } = useElementSize();
 
   const form = useForm<IVinesSearchWorkflowExecutionsParams>({
     resolver: zodResolver(vinesSearchWorkflowExecutionsSchema),
@@ -36,9 +35,6 @@ export const VinesLogView: React.FC = () => {
   const { data: searchWorkflowExecutionsData, trigger, isMutating } = useMutationSearchWorkflowExecutions();
 
   const workflowPageRef = useRef(1);
-  const workflowDefinitions = searchWorkflowExecutionsData?.definitions;
-  const workflowExecutions = searchWorkflowExecutionsData?.data;
-  const workflowTotal = searchWorkflowExecutionsData?.total;
 
   useEffect(() => {
     if (vines.workflowId && visible) {
@@ -69,34 +65,20 @@ export const VinesLogView: React.FC = () => {
     }
   };
 
-  const finalHeight = height - 108;
+  const finalHeight = containerHeight - 52;
 
   return (
-    <main ref={ref} className="flex h-full max-h-full flex-col gap-2 p-6">
-      <div className="space-y-0.5">
-        <h2 className="text-2xl font-bold tracking-tight">{t('workspace.logs-view.title')}</h2>
-        <p className="text-muted-foreground">
-          {t('workspace.logs-view.desc', {
-            data: workflowTotal?.toString() ?? '-',
-            suffix:
-              workflowExecutions && workflowDefinitions
-                ? t('workspace.logs-view.desc-suffix', { loaded: workflowExecutions.length?.toString() ?? '-' })
-                : '',
-          })}
-        </p>
+    <main className="containerHeight flex h-full p-6">
+      <div className="w-2/5 max-w-80">
+        <ScrollArea style={{ height: finalHeight }}>
+          <VinesLogFilter form={form} handleSubmit={handleSubmit} isMutating={isMutating} />
+        </ScrollArea>
       </div>
-      <Separator className="my-4" />
-      <div className="flex h-full gap-4">
-        <div className="w-2/5 max-w-80">
-          <ScrollArea style={{ height: finalHeight }}>
-            <VinesLogFilter form={form} handleSubmit={handleSubmit} isMutating={isMutating} />
-          </ScrollArea>
-        </div>
-        <div className="h-full flex-1">
-          <ScrollArea className="[&>div>div]:h-full" style={{ height: finalHeight }}>
-            <VinesLogList searchWorkflowExecutionsData={searchWorkflowExecutionsData} handleSubmit={handleSubmit} />
-          </ScrollArea>
-        </div>
+      <Separator className="mx-4" orientation="vertical" />
+      <div className="h-full flex-1">
+        <ScrollArea className="[&>div>div]:h-full" style={{ height: finalHeight }}>
+          <VinesLogList searchWorkflowExecutionsData={searchWorkflowExecutionsData} handleSubmit={handleSubmit} />
+        </ScrollArea>
       </div>
     </main>
   );
