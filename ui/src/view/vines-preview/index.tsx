@@ -10,7 +10,6 @@ import { Separator } from '@/components/ui/separator.tsx';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 
-// million-ignore
 export const VinesPreView: React.FC = () => {
   const { t } = useTranslation();
 
