@@ -9,13 +9,13 @@ import { nanoIdLowerCase } from '@/utils';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 import { parseOpenAIStream } from '@/utils/openai.ts';
 
-import { ChatCompelitionLog } from './messages/chat-message/tool-display';
+import { ChatCompletionLog } from './messages/chat-message/tool-display';
 
 export interface IVinesMessage {
   id?: string;
   content: string;
   role: 'user' | 'assistant';
-  extra?: ChatCompelitionLog[];
+  extra?: ChatCompletionLog[];
   createdAt?: Date;
 }
 
@@ -138,7 +138,7 @@ export const useChat = ({
         const assistantChatId = nanoIdLowerCase();
         const createdAt = new Date();
         let aiResult = '';
-        const aiResultExtra: ChatCompelitionLog[] = [];
+        const aiResultExtra: ChatCompletionLog[] = [];
 
         // eslint-disable-next-line no-constant-condition
         while (true) {
