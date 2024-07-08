@@ -4,11 +4,12 @@ services:
   conductor-server:
     image: infmonkeys/conductor:1.0.0
     volumes:
-      - ./server/config/conductor-config.properties:/app/config/config-local.properties
+      - ./server/config/conductor-config.properties:/app/config/config.properties
     networks:
       - monkeys
     ports:
       - 8080:8080
+      - 5008:5000
     healthcheck:
       test: curl http://localhost:8080/health -o /dev/null
       interval: 5s
