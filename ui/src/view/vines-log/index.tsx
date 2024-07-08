@@ -17,12 +17,13 @@ import {
 } from '@/schema/workspace/workflow-execution.ts';
 import { usePageStore } from '@/store/usePageStore';
 import { useViewStore } from '@/store/useViewStore';
+import { cn } from '@/utils';
 
 export const VinesLogView: React.FC = () => {
   const { t } = useTranslation();
 
   const { visible } = useViewStore();
-  const { containerHeight } = usePageStore();
+  const { containerHeight, workbenchVisible } = usePageStore();
   const { vines } = useVinesFlow();
 
   const form = useForm<IVinesSearchWorkflowExecutionsParams>({
@@ -68,7 +69,7 @@ export const VinesLogView: React.FC = () => {
   const finalHeight = containerHeight - 52;
 
   return (
-    <main className="containerHeight flex h-full p-6">
+    <main className={cn('relative flex h-full max-h-full p-6', workbenchVisible && 'p-0 pl-4')}>
       <div className="w-2/5 max-w-80">
         <ScrollArea style={{ height: finalHeight }}>
           <VinesLogFilter form={form} handleSubmit={handleSubmit} isMutating={isMutating} />

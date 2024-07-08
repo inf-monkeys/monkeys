@@ -39,7 +39,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = () => {
   }, [width, height]);
 
   return (
-    <div ref={ref} className="relative w-full flex-1 overflow-x-clip">
+    <div ref={ref} className="relative w-full flex-1 overflow-hidden">
       <AnimatePresence>
         {hasPages && hasPage ? (
           <motion.div
@@ -50,7 +50,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = () => {
             exit={{ opacity: 0 }}
           >
             <WorkbenchViewHeader page={page} />
-            <div className="relative h-[calc(100%-3.2rem)] w-full overflow-hidden rounded-r-lg">
+            <div className="relative h-[calc(100%-3.2rem)] w-full overflow-hidden rounded-lg">
               <VinesIFrame pages={pages ?? []} page={page} />
             </div>
           </motion.div>

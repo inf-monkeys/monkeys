@@ -21,7 +21,7 @@ export const Team: React.FC<ITeamProps> = ({ className, name, logo }) => {
           {t('components.layout.main.sidebar.teams.team-selector.avatar-fallback')}
         </AvatarFallback>
       </Avatar>
-      <span className="line-clamp-1 font-bold">
+      <span className="line-clamp-1 text-sm font-bold">
         {t([`components.layout.main.sidebar.teams.${name ?? ''}`, name ?? ''])}
       </span>
     </div>

@@ -82,7 +82,7 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
         <div className="vines-center size-full flex-1 flex-col">
           <MousePointerSquareDashed size={64} />
           <div className="mt-4 flex flex-col text-center">
-            <h2 className="font-bold">{t('workspace.pre-view.history.search.empty')}</h2>
+            <h2 className="text-sm font-bold">{t('workspace.pre-view.history.search.empty')}</h2>
           </div>
         </div>
       )}
@@ -111,14 +111,17 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
               >
                 <Card className="flex w-full cursor-pointer items-center justify-between gap-3 p-6">
                   <CardHeader className="p-0">
-                    <CardTitle className="text-xl">{`${formatTimeDiffPrevious(startTime ?? 0)}${getDescOfTriggerType(triggerType ?? '')}`}</CardTitle>
-                    <div className="flex items-center gap-2">
-                      <CardDescription>{t('workspace.pre-view.history.item.desc', { instanceId })}</CardDescription>
+                    <CardTitle className="text-base">{`${formatTimeDiffPrevious(startTime ?? 0)} ${getDescOfTriggerType(triggerType ?? '')}`}</CardTitle>
+                    <div className="!mt-0 flex items-center gap-1">
+                      <CardDescription className="line-clamp-1 text-xs">
+                        {t('workspace.pre-view.history.item.desc', { instanceId })}
+                      </CardDescription>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
                             className="-m-2 scale-50"
                             icon={<Copy />}
+                            variant="outline"
                             onClick={(e) => {
                               e.stopPropagation();
                               if (!instanceId) {
