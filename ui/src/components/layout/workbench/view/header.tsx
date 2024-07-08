@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { Link } from '@tanstack/react-router';
 import { useSWRConfig } from 'swr';
+import { Link } from '@tanstack/react-router';
 
 import { Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -38,6 +38,7 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page 
 
   const workflowDesc = getI18nContent(workflow?.description) ? ` - ${getI18nContent(workflow?.description)}` : '';
   const displayName = page?.displayName ?? '';
+  const viewIcon = page?.instance?.icon ?? '';
 
   return (
     <header className="z-50 flex w-full items-center justify-between px-4 pb-4">
@@ -48,7 +49,7 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page 
             {getI18nContent(workflow?.displayName) ?? t('common.utils.untitled')}
           </h1>
           <span className="text-xxs">
-            {t([`workspace.wrapper.space.tabs.${displayName}`, displayName]) + workflowDesc}
+            {`${viewIcon} ${t([`workspace.wrapper.space.tabs.${displayName}`, displayName]) + workflowDesc}`}
           </span>
         </div>
       </div>

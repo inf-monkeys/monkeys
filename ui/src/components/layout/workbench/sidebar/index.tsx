@@ -51,26 +51,34 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
       >
         <h1 className="text-2xl font-bold">{t('components.layout.main.sidebar.list.workbench.label')}</h1>
         <div className="grid gap-2">
-          {data?.map((page) => (
-            <div
-              key={page.id}
-              className={cn(
-                'flex cursor-pointer items-start space-x-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
-                currentPage?.id === page.id && 'border border-input bg-background text-accent-foreground',
-              )}
-              onClick={() => setCurrentPage(page)}
-            >
-              <VinesIcon size="sm">{page.workflow?.iconUrl}</VinesIcon>
-              <div className="flex max-w-44 flex-col gap-0.5">
-                <h1 className="font-bold leading-tight">
-                  {getI18nContent(page.workflow?.displayName) ?? t('common.utils.untitled')}
-                </h1>
-                <span className="text-xxs">
-                  {t([`workspace.wrapper.space.tabs.${page.displayName}`, page.displayName])}
-                </span>
-              </div>
-            </div>
-          ))}
+          {data?.map((page) => {
+            const workflow = page?.workflow;
+            const viewIcon = page?.instance?.icon ?? '';
+            return (
+              <Tooltip key={page.id}>
+                <TooltipTrigger asChild>
+                  <div
+                    className={cn(
+                      'flex cursor-pointer items-start space-x-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
+                      currentPage?.id === page.id && 'border border-input bg-background text-accent-foreground',
+                    )}
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    <VinesIcon size="sm">{workflow?.iconUrl}</VinesIcon>
+                    <div className="flex max-w-44 flex-col gap-0.5">
+                      <h1 className="font-bold leading-tight">
+                        {getI18nContent(workflow?.displayName) ?? t('common.utils.untitled')}
+                      </h1>
+                      <span className="text-xxs">
+                        {`${viewIcon} ${t([`workspace.wrapper.space.tabs.${page.displayName}`, page.displayName])}`}
+                      </span>
+                    </div>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="left">{getI18nContent(workflow?.description)}</TooltipContent>
+              </Tooltip>
+            );
+          })}
           <Tooltip>
             <TooltipTrigger asChild>
               <Link to="/$teamId/workflows">
