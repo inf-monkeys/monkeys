@@ -14,11 +14,12 @@ import { AuthModule } from './modules/auth/auth.module';
 import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { ExportModule } from './modules/export/export.module';
+import { PaymentModule } from './modules/payment/payment.module';
 import { LLMToolsModule } from './modules/tools/llm/llm.module';
 import { ToolsModule } from './modules/tools/tools.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { OpenapiModule } from './openapi.module';
-import { PaymentModule } from './modules/payment/payment.module';
+import { PrometheusModule } from './prometheus/prometheus.module';
 
 @Module({
   imports: [
@@ -40,6 +41,12 @@ import { PaymentModule } from './modules/payment/payment.module';
     LLMToolsModule,
     ChatModule,
     PaymentModule,
+    PrometheusModule.register({
+      path: '/metrics',
+      defaultLabels: {
+        app: 'Monkeys Server',
+      },
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

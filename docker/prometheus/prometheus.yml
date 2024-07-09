@@ -6,3 +6,7 @@ scrape_configs:
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['conductor-server:8080']
+  - job_name: 'monkeys-server'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['server:3000']

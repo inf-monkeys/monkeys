@@ -46,6 +46,10 @@ async function bootstrap() {
         path: '/v1/models',
         method: RequestMethod.GET,
       },
+      {
+        path: '/metrics',
+        method: RequestMethod.GET,
+      },
     ],
   });
   app.useGlobalPipes(new ValidationPipe());
