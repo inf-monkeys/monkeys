@@ -50,7 +50,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = () => {
             exit={{ opacity: 0 }}
           >
             <WorkbenchViewHeader page={page} />
-            <div className="relative h-[calc(100%-3.2rem)] w-full overflow-hidden rounded-lg">
+            <div className="relative size-full max-h-[calc(100%-4.3rem)] overflow-hidden rounded-lg">
               <VinesIFrame pages={pages ?? []} page={page} />
             </div>
           </motion.div>
