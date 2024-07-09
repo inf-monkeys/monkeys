@@ -11,13 +11,12 @@ import { useSystemConfig } from '@/apis/common';
 import { AuthMethod } from '@/apis/common/typings.ts';
 import { AuthContainer } from '@/components/layout/login';
 import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
-import { IUserTokens } from '@/components/router/guard/auth.ts';
 import { I18nSelector } from '@/components/ui/i18n-selector';
 import { AppLogo } from '@/components/ui/logo';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
 import { pageSearchSchema } from '@/schema/common.ts';
 import { useAppStore } from '@/store/useAppStore';
-import { cn, useLocalStorage } from '@/utils';
+import { cn } from '@/utils';
 
 const Login: React.FC = () => {
   const { t } = useTranslation();
@@ -40,7 +39,7 @@ const Login: React.FC = () => {
 
   if (autoSignInOidc && isOidcEnabled) {
     handleOidcLogin();
-    return <></>;
+    return null;
   }
 
   const isServerError = error instanceof Error;
