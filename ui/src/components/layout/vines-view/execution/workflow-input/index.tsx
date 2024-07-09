@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ToolProperty } from '@inf-monkeys/monkeys';
-import { fromPairs, isArray, isBoolean } from 'lodash';
+import { fromPairs, isArray, isBoolean, isUndefined } from 'lodash';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -20,6 +20,7 @@ import {
 import { TagInput } from '@/components/ui/input/tag';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
+import { Slider } from '@/components/ui/slider.tsx';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesUpdater } from '@/components/ui/updater';
@@ -130,7 +131,11 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                       <FormLabel className="font-bold">{getI18nContent(displayName)}</FormLabel>
                       <FormControl>
                         <>
-                          {['string', 'number', 'file'].includes(type) &&
+                          {(['string', 'file'].includes(type) ||
+                            (type === 'number' &&
+                              (isUndefined(typeOptions?.minValue) ||
+                                isUndefined(typeOptions?.maxValue) ||
+                                typeOptions?.numberPrecision === 0))) &&
                             (isMultiple ? (
                               <TagInput
                                 value={
@@ -162,6 +167,23 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                               />
                             ))}
 
+                          {type === 'number' &&
+                            !(
+                              isUndefined(typeOptions?.minValue) ||
+                              isUndefined(typeOptions?.maxValue) ||
+                              typeOptions?.numberPrecision === 0
+                            ) && (
+                              <Slider
+                                min={typeOptions.minValue}
+                                max={typeOptions.maxValue}
+                                step={typeOptions.numberPrecision}
+                                defaultValue={[Number(value)]}
+                                value={[Number(value)]}
+                                onChange={onChange}
+                                {...field}
+                              />
+                            )}
+
                           {type === 'boolean' && (
                             <div>
                               {isMultiple ? (
@@ -177,7 +199,7 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                                 />
                               ) : (
                                 <Switch
-                                  checked={isBoolean(value) ? value : BOOLEAN_VALUES.includes(value?.toString()!)}
+                                  checked={isBoolean(value) ? value : BOOLEAN_VALUES.includes((value ?? '').toString())}
                                   onCheckedChange={onChange}
                                 />
                               )}
