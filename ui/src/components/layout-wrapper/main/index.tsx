@@ -5,6 +5,7 @@ import { Outlet } from '@tanstack/react-router';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { Sidebar } from '@/components/layout/main/sidebar';
+import { ViewGuard } from '@/components/layout-wrapper/view-guard.tsx';
 
 interface IProps {
   layoutId: string;
@@ -12,7 +13,7 @@ interface IProps {
 
 export const MainWrapper: React.FC<IProps> = ({ layoutId }) => {
   return (
-    <div className="flex w-screen bg-slate-3">
+    <ViewGuard className="flex w-screen bg-slate-3">
       <Sidebar />
       <AnimatePresence mode="wait">
         <div className="m-4 ml-0 flex max-h-[calc(100vh-2.2rem)] w-full max-w-[calc(100vw-15rem)] flex-1 rounded-lg border bg-slate-1 p-6 shadow-sm">
@@ -28,6 +29,6 @@ export const MainWrapper: React.FC<IProps> = ({ layoutId }) => {
           </motion.div>
         </div>
       </AnimatePresence>
-    </div>
+    </ViewGuard>
   );
 };

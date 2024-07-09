@@ -1,6 +1,6 @@
 import { ParsedLocation, redirect } from '@tanstack/react-router';
 
-import { has, pick, set } from 'lodash';
+import { pick } from 'lodash';
 import { decodeToken as jwtDecodeToken, isExpired as jwtIsExpired } from 'react-jwt';
 import { toast } from 'sonner';
 import { isJWT } from 'validator';
@@ -8,7 +8,9 @@ import { isJWT } from 'validator';
 import { getUser } from '@/apis/authz/user';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import i18n from '@/i18n.ts';
-import { readLocalStorageValue, setLocalStorage } from '@/utils';
+import { deleteLocalStorage, readLocalStorageValue, setLocalStorage } from '@/utils';
+
+const t = i18n.t;
 
 export interface IUserToken {
   data: IVinesUser;
@@ -16,8 +18,6 @@ export interface IUserToken {
 }
 
 export type IUserTokens = Record<string, IUserToken>;
-
-const TOKEN_KEY = 'vines-tokens';
 
 export const isAuthed = () => {
   const token = readLocalStorageValue('vines-token', '', false);
@@ -36,87 +36,51 @@ export const authGuard = ({ location }: { location: ParsedLocation }) => {
   }
 };
 
-export const saveAuthToken = async (token: string): Promise<number> => {
+export const saveAuthToken = async (token: string): Promise<Partial<IVinesUser> | undefined> => {
   if (!isJWT(token)) {
-    toast.error('身份信息解析失败！');
-    return 0;
+    toast.error(t('auth.parse-token-failed'));
+    return;
   }
 
   localStorage.removeItem('vines-team-id');
   setLocalStorage('vines-token', token);
 
-  const localData = readLocalStorageValue<IUserTokens>(TOKEN_KEY, {});
-
-  const localUserData = Object.values(localData).find((it) => it.token === token);
-  if (!localUserData) {
-    const user = await getUser();
-    const userId = user?.id;
-    if (!user || !userId) {
-      toast.error('用户信息获取失败！');
-      return 0;
-    }
-    const userData = pick(user, ['id', 'name', 'nickname', 'photo', 'email', 'phone', 'loginsCount']);
-
-    set(localData, `[${userId}].data`, userData);
-    set(localData, `[${userId}].token`, token);
-    setLocalStorage('vines-account', userData);
-  } else {
-    setLocalStorage('vines-account', localUserData.data);
+  const user = await getUser();
+  const userId = user?.id;
+  if (!user || !userId) {
+    toast.error(t('auth.fetch-user-data-failed'));
+    return;
   }
+  const userData = pick(user, ['id', 'name', 'nickname', 'photo', 'email', 'phone', 'loginsCount']);
 
-  setLocalStorage(TOKEN_KEY, localData);
+  setLocalStorage('vines-account', userData);
 
-  const userCount = Object.keys(localData).length;
-  if (userCount > 1) {
-    window.dispatchEvent(
-      new CustomEvent('mantine-local-storage', {
-        detail: {
-          key: TOKEN_KEY,
-          value: localData,
-        },
-      }),
-    );
-  }
+  window.dispatchEvent(
+    new CustomEvent('mantine-local-storage', {
+      detail: {
+        key: 'vines-token',
+        value: token,
+      },
+    }),
+  );
 
-  return userCount;
+  return userData;
 };
 
-export const logout = (id: string): Promise<number> =>
-  new Promise((resolve) => {
-    const users = readLocalStorageValue<IUserTokens>(TOKEN_KEY, {});
-    const userLength = Object.keys(users).length;
-    if (has(users, id)) {
-      const {
-        data: { name },
-      } = users[id];
+export const logout = () => {
+  const user = readLocalStorageValue<Partial<IVinesUser>>('vines-account', {});
+  const userName = user?.name;
 
-      delete users[id];
-      if (Object.keys(users).length === 0) {
-        localStorage.removeItem('vines-token');
-        localStorage.removeItem('vines-account');
-        localStorage.removeItem('vines-team-id');
-        localStorage.removeItem('vines-teams');
-      }
-      setLocalStorage(TOKEN_KEY, users);
-      resolve(userLength);
-
-      toast.success(i18n.t('auth.users.logout-user', { name }));
-    } else {
-      toast.error(i18n.t('auth.users.logout-success'));
-      resolve(userLength);
-    }
-  });
-
-export const swapAccount = (id: string) => {
-  const users = readLocalStorageValue<IUserTokens>(TOKEN_KEY, {});
-  const targetUser = users[id];
-  if (targetUser) {
-    setLocalStorage('vines-token', targetUser.token);
-    setLocalStorage('vines-account', targetUser.data);
-    toast.success(`已切换到「${targetUser.data.name}」`);
-    return true;
+  if (userName) {
+    toast.success(i18n.t('auth.users.logout-user', { name: userName }));
   } else {
-    toast.error('切换失败，用户不存在');
-    return false;
+    toast.error(i18n.t('auth.users.logout-success'));
   }
+
+  deleteLocalStorage('vines-token', false);
+  deleteLocalStorage('vines-account', false);
+  deleteLocalStorage('vines-team-id', false);
+  deleteLocalStorage('vines-teams', true, '{"json":[]}');
+
+  return user;
 };

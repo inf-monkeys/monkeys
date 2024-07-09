@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { setWith } from 'lodash';
 import { LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -8,7 +7,6 @@ import { updateUserInfo } from '@/apis/authz/user';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { UserAccount } from '@/components/layout/settings/account/user/user-account';
 import { UserName } from '@/components/layout/settings/account/user/user-name';
-import { IUserTokens } from '@/components/router/guard/auth.ts';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,14 +31,9 @@ export const User: React.FC<IUserProps> = () => {
   const { t } = useTranslation();
 
   const [user, setUser] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
-  const [users, setUsers] = useLocalStorage<IUserTokens>('vines-tokens', {});
 
   const handleUpdateUser = (key: string, val: string) => {
     setUser({ ...user, [key]: val });
-    const userId = user?.id ?? '';
-    if (!users[userId]) return;
-    const newUsers = setWith(users, `${userId}.data.${key}`, val);
-    setUsers(newUsers);
     void updateUserInfo({ [key]: val });
   };
 
@@ -78,7 +71,7 @@ export const User: React.FC<IUserProps> = () => {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>{t('common.utils.cancel')}</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => VinesEvent.emit('vines-logout', user.id)}>
+                  <AlertDialogAction onClick={() => VinesEvent.emit('vines-logout')}>
                     {t('common.utils.confirm')}
                   </AlertDialogAction>
                 </AlertDialogFooter>

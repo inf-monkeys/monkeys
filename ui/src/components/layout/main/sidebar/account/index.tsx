@@ -46,7 +46,7 @@ export const Account: React.FC = () => {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>{t('common.utils.cancel')}</AlertDialogCancel>
-              <AlertDialogAction onClick={() => VinesEvent.emit('vines-logout', user.id)}>
+              <AlertDialogAction onClick={() => VinesEvent.emit('vines-logout')}>
                 {t('common.utils.confirm')}
               </AlertDialogAction>
             </AlertDialogFooter>

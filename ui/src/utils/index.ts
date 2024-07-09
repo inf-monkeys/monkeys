@@ -48,6 +48,11 @@ export const setLocalStorage = <T>(key: string, value: T) => {
   dispatchLocalStorageEvent(key, value);
 };
 
+export const deleteLocalStorage = (key: string, dispatch = true, value = '') => {
+  localStorage.removeItem(key);
+  dispatch && dispatchLocalStorageEvent(key, value);
+};
+
 export const nanoIdLowerCase = customAlphabet('6789bcdfghjkmnpqrtwz', 8);
 export const nanoIdUpperCase = customAlphabet('6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz', 8);
 
