@@ -2,6 +2,7 @@ import React from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 
 import { AuthMethod } from '@/apis/common/typings.ts';
 import { AuthWrapper } from '@/components/layout/login/auth-wrapper.tsx';
@@ -14,6 +15,8 @@ interface IEmailAuthProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const EmailAuth: React.FC<IEmailAuthProps> = ({ onFinished }) => {
+  const { t } = useTranslation();
+
   const form = useForm<ILoginViaMail>({
     resolver: zodResolver(loginViaMailSchema),
     defaultValues: {
@@ -30,7 +33,7 @@ export const EmailAuth: React.FC<IEmailAuthProps> = ({ onFinished }) => {
         render={({ field }) => (
           <FormItem>
             <FormControl>
-              <Input placeholder="请输入邮箱" {...field} />
+              <Input placeholder={t('auth.login.email-placeholder')} {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -43,7 +46,7 @@ export const EmailAuth: React.FC<IEmailAuthProps> = ({ onFinished }) => {
         render={({ field }) => (
           <FormItem>
             <FormControl>
-              <Input type="password" placeholder="请输入密码" {...field} />
+              <Input type="password" placeholder={t('auth.login.password-placeholder')} {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>

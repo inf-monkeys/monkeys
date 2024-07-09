@@ -438,7 +438,17 @@
       "login": "Login",
       "login-desc": "Unregistered users will be automatically registered",
       "unsupported-login-method": "Unsupported login method",
-      "loading": "Logging in..."
+      "loading": "Logging in...",
+      "email-placeholder": "Enter email",
+      "password-placeholder": "Enter password",
+      "phone-placeholder": "Enter phone",
+      "send-sms": {
+        "loading": "Sending...",
+        "success": "SMS verification code has been sent",
+        "error": "Failed to send SMS verification code! Please try again later"
+      },
+      "nav-to-home": "Enter",
+      "has-token-tips": "You already have login credentials."
     },
     "users": {
       "logout": "Logout",
