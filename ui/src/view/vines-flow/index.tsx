@@ -100,10 +100,14 @@ export const VinesFlow: React.FC<IVinesFlowProps> = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      <VinesHeadlessModal />
-      <VinesToolbar />
-      <VinesExpandToolbar />
-      <VinesFlowEvents />
+      {visible && (
+        <>
+          <VinesHeadlessModal />
+          <VinesToolbar />
+          <VinesExpandToolbar />
+          <VinesFlowEvents />
+        </>
+      )}
     </main>
   );
 };

@@ -453,7 +453,10 @@
 
       "force-enter": "Forced Entry",
       "re-login": "Force re-login"
-    }
+    },
+    "parse-token-failed": "Identity information parsing failed!",
+    "fetch-user-data-failed": "Failed to obtain user information!",
+    "logging-expired": "Your login has expired, please log in again"
   },
   "settings": {
     "title": "Settings",

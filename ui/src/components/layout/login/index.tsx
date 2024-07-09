@@ -20,8 +20,6 @@ interface IAuthContainerProps extends React.ComponentPropsWithoutRef<'div'> {
   enablePassword: boolean;
 
   oidcButtonText?: string;
-
-  hasTokens: boolean;
 }
 
 export const AuthContainer: React.FC<IAuthContainerProps> = ({
@@ -30,7 +28,6 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
   enablePhone,
   enablePassword,
   oidcButtonText,
-  hasTokens,
 }) => {
   const { t } = useTranslation();
 
@@ -88,7 +85,7 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
           </AnimatePresence>
         </Tabs>
       )}
-      {hasTokens || enableOidc ? (
+      {enableOidc ? (
         <div className="-mt-2 flex w-full flex-col gap-6">
           {!onlyOne &&
             (enableOidc ? (

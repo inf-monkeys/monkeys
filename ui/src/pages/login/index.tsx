@@ -25,8 +25,6 @@ const Login: React.FC = () => {
   const { darkMode } = useAppStore();
   const { data: oem, error } = useSystemConfig();
 
-  const [tokens] = useLocalStorage<IUserTokens>('vines-tokens', {});
-
   const logoUrl = get(oem, `theme.logo.${darkMode ? 'dark' : 'light'}`, '');
   const appName = get(oem, 'theme.name', 'AI');
 
@@ -38,14 +36,12 @@ const Login: React.FC = () => {
   const isOidcEnabled = loginMethods.includes(AuthMethod.oidc);
 
   const oidcButtonText: string = get(oem, 'auth.oidc.buttonText', 'OIDC');
-  const autoSigninOidc: boolean = get(oem, 'auth.oidc.autoSignin', false);
+  const autoSignInOidc: boolean = get(oem, 'auth.oidc.autoSignin', false);
 
-  if (autoSigninOidc && isOidcEnabled) {
+  if (autoSignInOidc && isOidcEnabled) {
     handleOidcLogin();
     return <></>;
   }
-
-  const hasTokens = Object.keys(tokens).length > 0;
 
   const isServerError = error instanceof Error;
 
@@ -75,7 +71,6 @@ const Login: React.FC = () => {
                   enablePassword={isPasswordEnable}
                   enablePhone={isPhoneEnable}
                   oidcButtonText={oidcButtonText}
-                  hasTokens={hasTokens}
                 />
               </SmoothTransition>
             )}

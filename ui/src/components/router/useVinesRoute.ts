@@ -15,7 +15,7 @@ export const useVinesRoute = () => {
   // 之后再考虑是否改为开头匹配 vines-
   const isUseOutside = !routeIds;
   const isUseWorkSpace = routeAppId === 'workspace';
-  // const isUseVinesCore = ['vines-process', 'vines-log', 'vines-chat', 'vines-preview'].includes(routeIds?.[3]);
+  const isUseVinesCore = routeIds?.[4] === '$viewType'
 
   return {
     matches,
@@ -25,5 +25,6 @@ export const useVinesRoute = () => {
     routeAppId,
     isUseOutside,
     isUseWorkSpace,
+    isUseVinesCore,
   };
 };
