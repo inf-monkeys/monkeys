@@ -25,6 +25,9 @@ export const workflowInputSchema = z.object({
     .optional(),
   multipleValues: z.boolean().optional(),
   assetType: z.string().optional(),
+  minValue: z.number().optional(),
+  maxValue: z.number().optional(),
+  numberPrecision: z.number().optional(),
 });
 
 export type IWorkflowInput = z.infer<typeof workflowInputSchema>;

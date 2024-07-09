@@ -1923,6 +1923,21 @@
                 "desc": "在此处上传文件将自动生成文件直链来覆盖左侧默认值",
                 "list": "列表"
               },
+              "type-options": {
+                "min-value": {
+                  "label": "最小值",
+                  "placeholder": "请输入最小值"
+                },
+                "max-value": {
+                  "label": "最大值",
+                  "placeholder": "请输入最大值"
+                },
+                "number-precision": {
+                  "label": "步进值",
+                  "placeholder": "请输入步进值",
+                  "description": "当步进值不为 0 时，预览视图及对话视图的表单将展示滑块"
+                }
+              },
               "submit": "保存"
             }
           },
