@@ -64,12 +64,11 @@ You can read the documentation here: [https://inf-monkeys.github.io/docs/](https
 
 - [Node 18](https://nodejs.org/en/download/current): This project requires node version at least 18.
 - [yarn](https://yarnpkg.com/): We use yarn as the Node Package Manager.
-- [Conductor](https://github.com/inf-monkeys/conductor)(Optional): Conductor is a workflow orchestration engine, we recommand use [Docker](https://www.docker.com/products/docker-desktop/) to run Conductor, with one command bellow:
+- [Conductor](https://github.com/inf-monkeys/conductor)(Optional): Conductor is a workflow orchestration engine, we recommand use [Docker](https://www.docker.com/products/docker-desktop/) and docker-compose to run Conductor, with one command bellow:
 
   ```bash
-  docker pull infmonkeys/conductor:1.0.0
-
-  docker run -d --name conductor -p 8080:8080 -d infmonkeys/conductor:1.0.0
+  cd docker
+  docker-compose -f docker-compose-middleware.yaml up -d
   ```
 
   You can verify whether conductor running corrctly by use the following command:
@@ -83,6 +82,10 @@ You can read the documentation here: [https://inf-monkeys.github.io/docs/](https
   ```
   {"timestamp":"2024-03-21T10:29:36.635+00:00","status":404,"error":"Not Found","path":"/api"}
   ```
+
+  Or you can open your browser visit `http://localhost:5008`, which you can see the Conductor UI:
+
+  ![](./images/conductor-ui.png)
 
   > If you do not install conductor, you won't be able to use the Workflow feature, but others still works fine.
 
