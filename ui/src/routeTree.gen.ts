@@ -40,6 +40,7 @@ import { Route as TeamIdTableDataDatabaseIdIndexImport } from './pages/$teamId/t
 import { Route as TeamIdComfyuiComfyuiWorkflowIdIndexImport } from './pages/$teamId/comfyui/$comfyuiWorkflowId/index'
 import { Route as TeamIdActionToolsActionToolNameIndexImport } from './pages/$teamId/action-tools/$actionToolName/index'
 import { Route as TeamIdWorkspaceWorkflowIdPageIdIndexImport } from './pages/$teamId/workspace/$workflowId/$pageId/index'
+import { Route as TeamIdWorkspaceWorkflowIdPageIdViewTypeIndexImport } from './pages/$teamId/workspace/$workflowId/$pageId/$viewType/index'
 
 // Create/Update Routes
 
@@ -197,6 +198,12 @@ const TeamIdWorkspaceWorkflowIdPageIdIndexRoute =
     getParentRoute: () => rootRoute,
   } as any)
 
+const TeamIdWorkspaceWorkflowIdPageIdViewTypeIndexRoute =
+  TeamIdWorkspaceWorkflowIdPageIdViewTypeIndexImport.update({
+    path: '/$teamId/workspace/$workflowId/$pageId/$viewType/',
+    getParentRoute: () => rootRoute,
+  } as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -317,6 +324,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdPageIdIndexImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/workspace/$workflowId/$pageId/$viewType/': {
+      preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdPageIdViewTypeIndexImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -352,6 +363,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdTextModelsLlmModelIdIndexRoute,
   TeamIdWorkspaceWorkflowIdIndexRoute,
   TeamIdWorkspaceWorkflowIdPageIdIndexRoute,
+  TeamIdWorkspaceWorkflowIdPageIdViewTypeIndexRoute,
 ])
 
 /* prettier-ignore-end */

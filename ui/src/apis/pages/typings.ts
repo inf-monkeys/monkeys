@@ -8,25 +8,25 @@ export interface IPageInstance {
   name: string;
   icon: string;
   type: IPageInstanceType;
-  allowedPermissions: IPagePermission[];
+  allowedPermissions?: IPagePermission[];
   // customOptionsProperties?: ToolPropertyExtended[];
 }
 
 export interface IPageType {
   id: string;
-  createdTimestamp: number;
-  updatedTimestamp: number;
+  createdTimestamp?: number;
+  updatedTimestamp?: number;
   isDeleted?: boolean;
 
   displayName: string;
   type: IPageInstance['type'];
   workflowId: string;
   isBuiltIn: boolean;
-  creatorUserId: string;
-  teamId: string;
-  permissions: IPagePermission[];
-  apiKey: string;
-  sortIndex: number;
+  creatorUserId?: string;
+  teamId?: string;
+  permissions?: IPagePermission[];
+  apiKey?: string;
+  sortIndex?: number;
   pinned?: boolean;
   customOptions?: {
     joinTeam?: {

@@ -16,9 +16,6 @@ export const useGetWorkflow = (workflowId: string, version?: number) =>
     vinesFetcher(),
   );
 
-export const getWorkflow = (workflowId: string) =>
-  vinesFetcher<MonkeyWorkflow | null>({ simple: true })(`/api/workflow/metadata/${workflowId}`);
-
 export const useWorkflowList = (query: WorkflowListQuery = {}) =>
   useSWR<MonkeyWorkflow[] | undefined>(`/api/workflow/metadata?${qs.stringify(query)}`, vinesFetcher());
 
