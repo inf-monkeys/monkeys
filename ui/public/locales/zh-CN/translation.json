@@ -444,7 +444,10 @@
 
       "force-enter": "强制进入",
       "re-login": "强制重新登录"
-    }
+    },
+    "parse-token-failed": "身份信息解析失败！",
+    "fetch-user-data-failed": "用户信息获取失败！",
+    "logging-expired": "登录已过期，请重新登录"
   },
   "settings": {
     "title": "配置中心",

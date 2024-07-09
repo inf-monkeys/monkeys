@@ -6,7 +6,6 @@ import { createEditor, Editor, Element, Text, Transforms } from 'slate';
 import { HistoryEditor, withHistory } from 'slate-history';
 import { Editable, ReactEditor, RenderElementProps, Slate, useFocused, useSelected, withReact } from 'slate-react';
 import { EditableProps, RenderLeafProps } from 'slate-react/dist/components/editable';
-import { toast } from 'sonner';
 
 import { VINES_VARIABLE_TAG } from '@/package/vines-flow/core/tools/consts.ts';
 import { VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
@@ -85,7 +84,7 @@ export const useVariableEditor = (opt: UseVariableEditorOptions) => {
         pointerKeyMapper.sort((a, b) => (exactMatchRegex.test(b) ? 1 : exactMatchRegex.test(a) ? -1 : 0));
       } catch (e) {
         console.warn('[VinesEditor] 无法解析的文本', e);
-        toast.error(t('components.ui.vines-variable-editor.cannot-parse-toast'));
+        // toast.error(t('components.ui.vines-variable-editor.cannot-parse-toast'));
       }
 
       const finalTextArr: string[] = [];

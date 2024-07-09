@@ -18,9 +18,8 @@ export const vinesHeader = ({ apikey, useToast = false }: IVinesHeaderOptions) =
   if (!token) {
     if (useToast) {
       toast.warning('需要登录');
-    } else {
-      throw new Error('需要登录');
     }
+    throw new Error('需要登录');
   }
 
   return { Authorization: `Bearer ${token}`, ...(teamId && { 'x-monkeys-teamid': teamId }) };

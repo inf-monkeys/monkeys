@@ -3,15 +3,14 @@ import React, { useEffect, useRef } from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
 
-import { pick, setWith } from 'lodash';
+import { pick } from 'lodash';
 import { toast } from 'sonner';
 
 import { handleOidcLogout } from '@/apis/authz/oidc';
-import { useTeams } from '@/apis/authz/team';
 import { useUser } from '@/apis/authz/user';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { AuthMethod } from '@/apis/common/typings';
-import { logout, swapAccount } from '@/components/router/guard/auth.ts';
+import { logout } from '@/components/router/guard/auth.ts';
 import { Route } from '@/pages/login';
 import { useLocalStorage } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
@@ -23,27 +22,12 @@ export const UserGuard: React.FC = () => {
   const { data: user, mutate, error } = useUser();
 
   const [localUser, setUser] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
-  const [users, setUsers] = useLocalStorage<Partial<IVinesUser>[]>('vines-tokens', []);
 
-  const { mutate: teamsMutate } = useTeams();
-
-  const userIds = Object.keys(users);
-  const handleLogout = async (id?: string) => {
-    const finalUserId = id ?? localUser.id ?? '';
-    if (await logout(finalUserId)) {
-      const filtered = userIds.filter((it) => it !== finalUserId);
-      if (!filtered.length) {
-        if (user?.lastAuthMethod === AuthMethod.oidc) {
-          handleOidcLogout();
-        } else {
-          await navigate({ to: '/login' });
-        }
-      } else {
-        swapAccount(filtered[0]);
-        setTimeout(() => teamsMutate());
-      }
+  const handleLogout = () => {
+    if (logout()?.lastAuthMethod === AuthMethod.oidc) {
+      handleOidcLogout();
     } else {
-      await navigate({ to: '/login' });
+      void navigate({ to: '/login' });
     }
   };
 
@@ -59,8 +43,6 @@ export const UserGuard: React.FC = () => {
       const userId = newUserData.id ?? newUserData.id;
       const finalUser = { ...newUserData, id: userId };
       setUser(finalUser);
-      const newUsers = setWith(users, `${userId}.data`, finalUser);
-      setUsers(newUsers);
       isNeedToUpdate.current = false;
     }
   }, [localUser, user]);
@@ -70,7 +52,7 @@ export const UserGuard: React.FC = () => {
     return () => {
       VinesEvent.off('vines-logout', handleLogout);
     };
-  }, [userIds, localUser.id]);
+  }, [localUser.id]);
 
   useEffect(() => {
     if (error instanceof Error) {
