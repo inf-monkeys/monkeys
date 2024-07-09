@@ -2,7 +2,7 @@ version: '2.3'
 
 services:
   conductor-server:
-    image: infmonkeys/conductor:1.0.0
+    image: infmonkeys/conductor-oss:1.0.0
     volumes:
       - ./server/config/conductor-config.properties:/app/config/config.properties
     networks:
