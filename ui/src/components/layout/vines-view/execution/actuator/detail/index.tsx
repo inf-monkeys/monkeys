@@ -13,6 +13,7 @@ interface IVinesActuatorDetailProps {
 
 export const VinesActuatorDetail: React.FC<IVinesActuatorDetailProps> = memo(({ executionTask, height }) => {
   const { ref, height: headerHeight } = useElementSize();
+
   return (
     <div className="flex h-full flex-1 flex-col gap-4">
       <VinesActuatorDetailHeader
