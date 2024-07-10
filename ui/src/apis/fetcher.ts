@@ -2,7 +2,8 @@ import _, { isArray } from 'lodash';
 import { toast } from 'sonner';
 
 import { IOriginData } from '@/apis/typings.ts';
-import { IVinesHeaderOptions, vinesHeader } from '@/apis/utils.ts';
+import { getVinesToken, IVinesHeaderOptions, vinesHeader } from '@/apis/utils.ts';
+import i18n from '@/i18n.ts';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 import 'unfetch/polyfill';
@@ -19,6 +20,9 @@ interface IFetcherOptions<U = unknown, P extends boolean = false> extends IVines
   responseResolver?: (response: Response) => U | Promise<U>;
 }
 
+const t = i18n.t;
+const UN_AUTH_SKIP_URLS = ['/api/teams', '/api/users/profile'];
+
 export const vinesFetcher = <U, T = {}, P extends boolean = false>({
   method = 'GET',
   auth = true,
@@ -33,11 +37,17 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
       'Content-Type': 'application/json;charset=utf-8',
       ...(auth && vinesHeader({ apikey, useToast: simple })),
       ...(fetchOptions && fetchOptions.headers),
-    };
+    } as HeadersInit;
 
     const isArrayRawUrl = isArray(rawUrl);
     const url = isArrayRawUrl ? rawUrl[0] : rawUrl;
     const params = isArrayRawUrl ? rawUrl[1] : rawParams;
+
+    if (!getVinesToken()) {
+      if (window['vinesRoute']?.[0] === 'workspace' && UN_AUTH_SKIP_URLS.includes(url)) {
+        throw new Error('');
+      }
+    }
 
     const body = params ? stringify(simple ? params : params['arg']) : undefined;
 
@@ -62,7 +72,13 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
         }
 
         const errorMessage = raw?.message || null;
-        toast.warning(errorMessage ? errorMessage : code === 403 ? '请先登录' : '网络错误');
+        toast.warning(
+          errorMessage
+            ? t([`common.toast.${errorMessage}`, errorMessage])
+            : code === 403
+              ? '请先登录'
+              : 'Network Error',
+        );
 
         if (code === 403) {
           throw new Error('请先登录');

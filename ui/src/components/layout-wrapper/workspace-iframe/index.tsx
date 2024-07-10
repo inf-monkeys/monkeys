@@ -6,12 +6,13 @@ import { useElementSize } from '@mantine/hooks';
 
 import { IPageInstance } from '@/apis/pages/typings.ts';
 import { ViewGuard } from '@/components/layout-wrapper/view-guard.tsx';
+import { VINES_VIEW_ID_MAPPER } from '@/components/ui/vines-iframe/consts.ts';
 import { usePageStore } from '@/store/usePageStore';
 
 interface IWorkspaceIframeProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const WorkspaceIframe: React.FC<IWorkspaceIframeProps> = () => {
-  const { workflowId, pageId, viewType } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/$$viewType' });
+  const { workflowId, pageId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
 
   const { ref, width, height } = useElementSize();
 
@@ -23,19 +24,20 @@ export const WorkspaceIframe: React.FC<IWorkspaceIframeProps> = () => {
   }, [width, height]);
 
   useEffect(() => {
+    const type = (VINES_VIEW_ID_MAPPER[pageId] || pageId) as IPageInstance['type'];
     setPage({
       id: pageId,
-      type: viewType as IPageInstance['type'],
+      type,
       isBuiltIn: true,
       displayName: '',
       workflowId,
       instance: {
         name: '',
         icon: '',
-        type: viewType as IPageInstance['type'],
+        type,
       },
     });
-  }, [viewType]);
+  }, [pageId]);
 
   return (
     <ViewGuard ref={ref}>

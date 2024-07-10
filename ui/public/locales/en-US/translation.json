@@ -74,7 +74,8 @@
       "workflow-not-found": "The workflow doesn't exist.",
       "vector-database-not-found": "The vector database doesn't exist.",
       "copy-success": "Copy success.",
-      "copy-failed": "Copy failed."
+      "copy-failed": "Copy failed.",
+      "Forbidden resource": "Insufficient privileges, login required"
     },
     "dialog": {
       "delete-confirm": {
@@ -1572,6 +1573,24 @@
       }
     },
     "wrapper": {
+      "settings": {
+        "label": "Preferences",
+        "close": "Close",
+        "common": {
+          "label": "General Configuration",
+          "share-view": {
+            "title": "Share View",
+            "desc": "You can share the view with others and invite them to view, edit or execute the workflow with you.",
+
+            "switch": "Anyone who gets the link on the Internet can directly access the view",
+            "tips": "After release, anyone on the Internet can perform any operation on the workflow without authentication, so please pay attention to asset security!",
+
+            "loading": "Updating permissions...",
+            "success": "Update permissions successful!",
+            "error": "Update permissions failed! Please try again later!"
+          }
+        }
+      },
       "workflow-info-card": {
         "title": "Workflow Information",
         "tip": "Click to edit",
@@ -1613,13 +1632,13 @@
         "menu": {
           "del-view-button": "Delete View",
           "del-view": "Are you sure you want to delete ‘{{ view }}’?",
-          "pin": "{{ status }}pin",
-          "toggle-pin": "{{ status }}pinning...",
+          "pin": "{{ status }}Pin",
+          "toggle-pin": "{{ status }}Pinning...",
           "pin-un": "un",
-          "toggle-pin-success": "{{ status }}pin success",
-          "toggle-pin-failed": "{{ status }}pin failed",
+          "toggle-pin-success": "{{ status }}Pin success",
+          "toggle-pin-failed": "{{ status }}Pin failed",
           "rename": {
-            "trigger": "rename",
+            "trigger": "Rename",
             "title": "Rename the view",
             "placeholder": "Please enter a view name",
             "input-empty": "Please enter valid content",
@@ -1629,7 +1648,7 @@
         "tabs": {
           "流程视图": "Workflow",
           "日志视图": "Logs",
-          "预览视图": "Preview",
+          "预览视图": "Form",
           "对话视图": "Chat"
         }
       }
