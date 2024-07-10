@@ -72,7 +72,8 @@
       "workflow-not-found": "工作流不存在",
       "vector-database-not-found": "知识库不存在",
       "copy-success": "复制成功",
-      "copy-failed": "复制失败"
+      "copy-failed": "复制失败",
+      "Forbidden resource": "权限不足，请重新登录！"
     },
     "dialog": {
       "delete-confirm": {
@@ -1555,6 +1556,24 @@
       }
     },
     "wrapper": {
+      "settings": {
+        "label": "偏好设置",
+        "close": "关闭",
+        "common": {
+          "label": "通用配置",
+          "share-view": {
+            "title": "分享视图",
+            "desc": "你可以将视图分享给其他人，邀请对方和你一起查看、编辑或执行工作流",
+
+            "switch": "互联网上获得链接的人可直接访问视图",
+            "tips": "放行后互联网上任何人无需身份验证即可对工作流进行任意操作，请注意资产安全！",
+
+            "loading": "正在更新权限...",
+            "success": "更新权限成功！",
+            "error": "更新权限失败！请稍后重试！"
+          }
+        }
+      },
       "workflow-info-card": {
         "title": "工作流信息",
         "tip": "点击编辑",
@@ -1612,7 +1631,7 @@
         "tabs": {
           "流程视图": "流程视图",
           "日志视图": "日志视图",
-          "预览视图": "预览视图",
+          "预览视图": "表单视图",
           "对话视图": "对话视图"
         }
       }
@@ -2151,7 +2170,7 @@
         "empty": "暂无执行记录",
         "bottom": "到底了",
         "more": "剩余 {{data}} 项，点击加载",
-        "preview-page-not-found": "打开详情失败！找不到预览视图",
+        "preview-page-not-found": "打开详情失败！找不到表单视图",
         "item": {
           "desc": "实例 ID: {{instanceId}}",
           "exec-time": "于 {{time}}",

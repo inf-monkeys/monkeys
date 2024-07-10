@@ -29,8 +29,6 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
 
   const { workflowId, page, pages, pageId, navigateTo, pagesMutate, setPages } = useVinesPage();
 
-  // const { visibleCustomSetting, setVisibleCustomSetting } = usePageStore();
-
   const [toggleNameDialogVisible, setToggleNameDialogVisible] = useState(false);
   const [pageDisplayName, setPageDisplayName] = useState(page?.displayName ?? '');
 
@@ -135,14 +133,6 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
                 })}
               </p>
             </DropdownMenuItem>
-            {/*<DropdownMenuItem*/}
-            {/*  className="flex items-center gap-2"*/}
-            {/*  onClick={() => setVisibleCustomSetting(!visibleCustomSetting)}*/}
-            {/*  disabled*/}
-            {/*>*/}
-            {/*  <Settings2 strokeWidth={1.5} size={16} />*/}
-            {/*  <p>{visibleCustomSetting ? '关闭' : ''}偏好设置</p>*/}
-            {/*</DropdownMenuItem>*/}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="flex items-center gap-2 text-red-10"

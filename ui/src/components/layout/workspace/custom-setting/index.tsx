@@ -2,6 +2,7 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 import { XCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { CommonSetting } from '@/components/layout/workspace/custom-setting/common';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,10 @@ import { cn } from '@/utils';
 interface IWorkspaceCustomSettingProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const WorkspaceCustomSetting: React.FC<IWorkspaceCustomSettingProps> = () => {
+  const { t } = useTranslation();
+
   const { visibleCustomSetting, setVisibleCustomSetting } = usePageStore();
+
   return (
     <motion.div
       key="vines-pages-custom-setting"
@@ -28,9 +32,9 @@ export const WorkspaceCustomSetting: React.FC<IWorkspaceCustomSettingProps> = ()
       )}
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">偏好设置</h2>
+        <h2 className="text-2xl font-bold">{t('workspace.wrapper.settings.label')}</h2>
         <Button icon={<XCircle />} onClick={() => setVisibleCustomSetting(false)} variant="outline">
-          返回
+          {t('workspace.wrapper.settings.close')}
         </Button>
       </div>
       <Tabs
@@ -39,7 +43,7 @@ export const WorkspaceCustomSetting: React.FC<IWorkspaceCustomSettingProps> = ()
       >
         <TabsList>
           <TabsTrigger value="common" className="text-xs">
-            通用配置
+            {t('workspace.wrapper.settings.common.label')}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="common">
