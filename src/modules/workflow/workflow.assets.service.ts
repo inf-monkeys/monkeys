@@ -114,7 +114,7 @@ export class WorkflowAssetsService {
   }
 
   public async getWorkflowRelatedAssetsOfAllVersion(teamId: string, workflowId: string): Promise<WorkflowRelatedAssetResult> {
-    const versions = (await this.workflowRepository.getWorklfowVersions(workflowId)).map((x) => x.version);
+    const versions = (await this.workflowRepository.getWorkflowVersions(workflowId)).map((x) => x.version);
     const chunks = _.chunk(versions, 10);
     const assets: WorkflowRelatedAssetResult = {
       llmModels: [],

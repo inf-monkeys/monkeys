@@ -11,13 +11,9 @@ export interface IRequest extends express.Request {
   authenticationType: AuthenticationType;
   userId: string;
   teamId: string;
-  isAdmin?: boolean;
   user: any;
-}
 
-export interface IAdminRequest extends express.Request {
-  adminUserId: string;
-  isAdmin: boolean;
+  skipUnauthorized: boolean;
 }
 
 export interface ToolsReqContext {

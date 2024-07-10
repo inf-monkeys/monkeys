@@ -13,10 +13,11 @@ import { UpdateWorkflowDefDto } from './dto/req/update-workflow-def.dto';
 import { WorkflowWithAssetsJson } from './interfaces';
 import { WorkflowCrudService } from './workflow.curd.service';
 import { WorkflowPageService } from './workflow.page.service';
+import { UpdatePermissionsDto } from '@/modules/workflow/dto/req/update-permissions.dto';
+import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 
 @Controller('/workflow/metadata')
 @ApiTags('Workflows/CRUD')
-@UseGuards(CompatibleAuthGuard)
 export class WorkflowCrudController {
   constructor(
     private readonly service: WorkflowCrudService,
@@ -28,6 +29,7 @@ export class WorkflowCrudController {
     summary: '获取工作流列表',
     description: '获取工作流列表',
   })
+  @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
   public async listWorkflows(@Req() req: IRequest, @Query() query: ListDto) {
     const { teamId } = req;
     const { page, limit } = query;
@@ -40,6 +42,7 @@ export class WorkflowCrudController {
     summary: '获取 workflow 定义',
     description: '获取 workflow 定义',
   })
+  @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
   public async getWorkflowDef(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Query() dto: GetWorkflowDto) {
     const { version: versionStr } = dto;
     let version = undefined;
@@ -57,8 +60,9 @@ export class WorkflowCrudController {
     summary: '获取工作流的所有版本',
     description: '获取工作流的所有版本',
   })
+  @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
   public async getWorkflowVersions(@Req() req: IRequest, @Param('workflowId') workflowId: string) {
-    const result = await this.service.getWorklfowVersions(workflowId);
+    const result = await this.service.getWorkflowVersions(workflowId);
     return new SuccessResponse({
       data: result,
     });
@@ -69,6 +73,7 @@ export class WorkflowCrudController {
     summary: '创建工作流版本',
     description: '创建工作流版本',
   })
+  @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
   public async createWorkflowVersion(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Body() body: CreateWorkflowDefDto) {
     const { teamId, userId } = req;
     const result = await this.service.createWorkflowDef(teamId, userId, body, {
@@ -84,6 +89,7 @@ export class WorkflowCrudController {
     summary: '获取工作流的所有版本',
     description: '获取工作流的所有版本',
   })
+  @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
   public async getWorkflowValicationIssues(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Query('version') versionStr: string) {
     let version = undefined;
     if (versionStr) {
@@ -103,6 +109,7 @@ export class WorkflowCrudController {
     summary: '创建 workflow 定义',
     description: '创建 workflow 定义',
   })
+  @UseGuards(CompatibleAuthGuard)
   public async createWorkflowDef(@Req() req: IRequest, @Body() body: CreateWorkflowDefDto) {
     const { teamId, userId } = req;
     const { displayName, description, tasks, variables, output, iconUrl, triggers } = body;
@@ -127,6 +134,7 @@ export class WorkflowCrudController {
     summary: '更新 workflow 定义',
     description: '更新 workflow 定义',
   })
+  @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
   public async updateWorkflowDef(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Body() body: UpdateWorkflowDefDto) {
     const { teamId } = req;
     const { version = 1 } = body;
@@ -145,6 +153,7 @@ export class WorkflowCrudController {
     summary: '导出 workflow',
     description: '导出 workflow',
   })
+  @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
   public async exportWorkflow(
     @Req() req: IRequest,
     @Res() res: Response,
@@ -208,6 +217,7 @@ export class WorkflowCrudController {
     summary: '使用 zip 导入 workflow',
     description: '使用 zip 导入 workflow',
   })
+  @UseGuards(CompatibleAuthGuard)
   public async importWorkflowByZip(@Req() req: IRequest, @Body() body: ImportWorkflowDto) {
     const { teamId, userId } = req;
     const { zipUrl } = body;
@@ -224,6 +234,7 @@ export class WorkflowCrudController {
     summary: 'Clone workflow',
     description: 'Clone workflow',
   })
+  @UseGuards(CompatibleAuthGuard)
   public async cloneWorkflow(@Req() req: IRequest, @Param('workflowId') workflowId: string) {
     const { teamId, userId } = req;
     const newWorkflowId = await this.service.cloneWorkflow(teamId, userId, workflowId);
@@ -239,9 +250,32 @@ export class WorkflowCrudController {
     summary: '删除 workflow 定义',
     description: '删除 workflow 定义',
   })
+  @UseGuards(CompatibleAuthGuard)
   public async deleteWorkflowDef(@Req() req: IRequest, @Param('workflowId') workflowId: string) {
     const { teamId } = req;
     const result = await this.service.deleteWorkflowDef(teamId, workflowId);
+    return new SuccessResponse({
+      data: result,
+    });
+  }
+
+  @Post('/:workflowId/permissions')
+  @ApiOperation({
+    summary: '设置 workflow 权限',
+    description: '设置 workflow 权限',
+  })
+  @UseGuards(CompatibleAuthGuard)
+  public async setWorkflowPermissions(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Body() body: UpdatePermissionsDto) {
+    const { teamId } = req;
+    const result = await this.service.setWorkflowPermissions(teamId, workflowId, body);
+    return new SuccessResponse({
+      data: result,
+    });
+  }
+
+  @Get('/:workflowId/permissions')
+  public async getWorkflowPermissions(@Param('workflowId') workflowId: string) {
+    const result = await this.service.getWorkflowPermissions(workflowId);
     return new SuccessResponse({
       data: result,
     });
