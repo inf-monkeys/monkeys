@@ -6,9 +6,10 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards 
 import { CreateKnowledgeBaseDto } from './dto/req/create-knowledge-base.req.dto';
 import { UpdateKnowledgeBaseDto } from './dto/req/update-knowledge-base.req.dto';
 import { KnowledgeBaseService } from './knowledge-base.service';
+import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 
 @Controller('knowledge-bases')
-@UseGuards(CompatibleAuthGuard)
+@UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
 export class KnowledgeBaseController {
   constructor(private readonly service: KnowledgeBaseService) {}
 

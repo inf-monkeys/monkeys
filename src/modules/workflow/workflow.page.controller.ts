@@ -7,6 +7,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreatePageDto } from './dto/req/create-page.dto';
 import { UpdatePagesDto } from './dto/req/update-pages.dto';
 import { WorkflowPageService } from './workflow.page.service';
+import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 
 @ApiTags('Workflows/Pages')
 @Controller('/workflow')
@@ -17,7 +18,7 @@ export class WorkflowPageController {
     summary: '获取工作流下的所有视图（根据 sortIndex 从小到大排序），返回视图列表',
     description: '获取工作流下的所有视图（根据 sortIndex 从小到大排序），返回视图列表',
   })
-  @UseGuards(CompatibleAuthGuard)
+  @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
   @Get('/:workflowId/pages')
   async listWorkflowPages(@Param('workflowId') workflowId: string) {
     const data = await this.pageService.listWorkflowPages(workflowId);
@@ -40,7 +41,7 @@ export class WorkflowPageController {
     summary: '批量修改视图，可以用来更新 sortIndex，返回新的视图列表',
     description: '批量修改视图，可以用来更新 sortIndex，返回新的视图列表',
   })
-  @UseGuards(CompatibleAuthGuard)
+  @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
   @Put('/:workflowId/pages')
   async updateWorkflowPages(@Param('workflowId') workflowId: string, @Req() request: IRequest, @Body() body: UpdatePagesDto) {
     const { teamId, userId } = request;
@@ -57,7 +58,7 @@ export class WorkflowPageController {
     return new SuccessResponse({ data: BUILT_IN_PAGE_INSTANCES });
   }
 
-  @UseGuards(CompatibleAuthGuard)
+  @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
   @Get('/pages/pinned')
   async getPinnedPages(@Req() request: IRequest) {
     const { teamId } = request;

@@ -6,6 +6,7 @@ import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RegisterToolDto } from './dto/req/register-tool.dto';
 import { ToolsForwardService } from './tools.forward.service';
 import { ToolsRegistryService } from './tools.registry.service';
+import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 
 @Controller('tools')
 @ApiTags('Tools')
@@ -20,7 +21,7 @@ export class ToolsController {
     summary: 'List All tools',
     description: 'List All tools',
   })
-  @UseGuards(CompatibleAuthGuard)
+  @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
   public async listTools(@Req() req: IRequest) {
     const { teamId } = req;
     const result = await this.toolRegistryService.listTools(teamId);

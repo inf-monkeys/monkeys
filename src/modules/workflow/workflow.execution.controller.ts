@@ -8,10 +8,11 @@ import { SearchWorkflowExecutionsDto } from './dto/req/search-workflow-execution
 import { StartWorkflowSyncDto } from './dto/req/start-workflow-sync.dto';
 import { StartWorkflowDto } from './dto/req/start-workflow.dto';
 import { WorkflowExecutionService } from './workflow.execution.service';
+import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 
 @Controller('/workflow')
 @ApiTags('Workflows/Execution')
-@UseGuards(CompatibleAuthGuard)
+@UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
 export class WorkflowExecutionController {
   constructor(private readonly service: WorkflowExecutionService) {}
 
