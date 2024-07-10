@@ -1940,6 +1940,21 @@
                 "desc": "Uploading a file here will automatically generate a direct file link to override the defaults on the left.",
                 "list": "list"
               },
+              "type-options": {
+                "min-value": {
+                  "label": "Min Value",
+                  "placeholder": "Enter min value"
+                },
+                "max-value": {
+                  "label": "Max Value",
+                  "placeholder": "Enter max value"
+                },
+                "number-precision": {
+                  "label": "Number Precision",
+                  "placeholder": "Enter number precision",
+                  "description": "When the number precision is not 0, the forms in the preview view and chat view will display the slider"
+                }
+              },
               "submit": "Save"
             }
           },
