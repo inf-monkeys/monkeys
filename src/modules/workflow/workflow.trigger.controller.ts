@@ -6,10 +6,11 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateWorkflowTriggerDto } from './dto/req/create-trigger.dto';
 import { UpdateWorkflowTriggerDto } from './dto/req/update-trigger.dto';
 import { WorkflowTriggerService } from './workflow.trigger.service';
+import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 
 @Controller('workflow/')
 @ApiTags('Workflows/Trigger')
-@UseGuards(CompatibleAuthGuard)
+@UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
 export class WorkflowTriggerController {
   constructor(private readonly service: WorkflowTriggerService) {}
 

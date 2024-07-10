@@ -148,6 +148,13 @@ export class WorkflowMetadataEntity extends BaseAssetEntity {
   })
   openaiModelName: string;
 
+  @Column({
+    name: 'not_authorized',
+    nullable: true,
+    default: false,
+  })
+  notAuthorized?: boolean;
+
   public isRateLimitEnabled() {
     return this.rateLimiter?.enabled;
   }
