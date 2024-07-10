@@ -45,6 +45,7 @@ export const Updater: React.FC<IUpdaterProps> = ({
   }, [isUploading]);
 
   useEffect(() => {
+    console.log(initialFiles);
     if (initialFiles?.length) {
       setIsInteracted(true);
       setFiles(initialFiles);

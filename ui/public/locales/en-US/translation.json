@@ -46,6 +46,7 @@
       "descend": "Descend",
       "load-more": "Load More",
       "add": "Add",
+      "upload": "Upload",
       "click-to-copy": "Click to copy"
     },
     "type": {
@@ -220,6 +221,15 @@
       },
       "date-range-picker": {
         "select-date": "Select date"
+      },
+      "vines-image-mask-editor": {
+        "title": "Image mask editor",
+        "operate": {
+          "select-image": "Select image"
+        },
+        "toast": {
+          "no-file": "Please select a image file!"
+        }
       }
     },
     "layout": {
@@ -339,12 +349,9 @@
           "utils": {
             "this-project": "this project"
           },
-
           "dropdown": "Application market",
-
           "use-template": {
             "title": "Use this template",
-
             "loading": "Creating...",
             "success": "Create successful!",
             "error": "Create failed! Please try again later!"
@@ -352,7 +359,6 @@
           "import-to-team": "Import to team",
           "import-workflow": {
             "title": "Import workflow",
-
             "loading": "Creating...",
             "success": "Create successful!",
             "error": "Create failed! Please try again later!"
@@ -461,7 +467,6 @@
     "wait-to-long": {
       "title": "Detected that the waiting time on this page is too long",
       "desc": "Please try to log in again or force login",
-
       "force-enter": "Forced Entry",
       "re-login": "Force re-login"
     },
@@ -716,10 +721,8 @@
         "placeholder": "Please enter the recharge amount, the minimum is 1 CNY",
         "pay": "{{amount}} CNY",
         "button": "Pay {{amount}} CNY",
-
         "amount-too-small": "The recharge amount cannot be less than 1 CNY",
         "amount-too-large": "The recharge amount cannot be greater than 10,000 CNY",
-
         "loading": "Creating order...",
         "success": "Order created successfully",
         "error": "Order creation failed! Please try again later"
@@ -728,14 +731,11 @@
         "title": "Please use WeChat to scan the QR code to pay",
         "order-id": "Order number:{{orderId}}",
         "order-status": "Payment status",
-
         "pending": "Pending payment",
         "paid": "Payment successful",
         "delivered": "Payment received",
         "closed": "Order closed",
-
         "empty": "No payment information",
-
         "close-order": {
           "label": "Cancel payment",
           "loading": "Cancelling payment...",
@@ -754,7 +754,6 @@
       "recharge-details": {
         "title": "Recharge Details",
         "desc": "Cumulative recharge ￥{{amount}}",
-
         "columns": {
           "type": {
             "label": "Payment Types",
@@ -778,7 +777,6 @@
       "consumer-details": {
         "title": "Consumer details",
         "desc": "Total consumption ￥{{amount}}",
-
         "columns": {
           "type": {
             "label": "Consumption Type",
@@ -1581,10 +1579,8 @@
           "share-view": {
             "title": "Share View",
             "desc": "You can share the view with others and invite them to view, edit or execute the workflow with you.",
-
             "switch": "Anyone who gets the link on the Internet can directly access the view",
             "tips": "After release, anyone on the Internet can perform any operation on the workflow without authentication, so please pay attention to asset security!",
-
             "loading": "Updating permissions...",
             "success": "Update permissions successful!",
             "error": "Update permissions failed! Please try again later!"
@@ -2145,12 +2141,10 @@
         },
         "execution": {
           "button": "Execution Workflow",
-
           "COMPLETED": "Workflow execution completed!",
           "FAILED": "Workflow execution failed!",
           "TIMED_OUT": "Workflow execution timed out!",
           "TERMINATED": "Workflow execution terminated!",
-
           "swap": {
             "workflow-is-running": "Unable to switch instances! The current workflow is in progress",
             "workflow-id-is-empty": "Switch failed! Unable to obtain workflow instance ID",
@@ -2270,7 +2264,8 @@
           "string": "Enter {{displayName}}",
           "file": {
             "label": "Please enter the file url",
-            "click-to-upload": "Click to upload file"
+            "click-to-upload": "Click to upload file",
+            "click-to-open-in-image-mask-editor-and-upload": "Click to open in image mask editor and upload"
           },
           "options": "Please select an option"
         },
@@ -2333,10 +2328,8 @@
         "create": {
           "label": "New Session",
           "placeholder": "Enter the session name within 16 characters.",
-
           "def-label": "Default Session",
           "auto-create-session": "Automatically create new session",
-
           "loading": "Creating session...",
           "success": "Create session successfully",
           "error": "Create session failed"

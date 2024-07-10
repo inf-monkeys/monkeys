@@ -27,6 +27,7 @@ import { VinesUpdater } from '@/components/ui/updater';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
 import { cn, getI18nContent } from '@/utils';
+import { VinesImageMaskEditor } from '@/components/ui/image-mask-editor';
 
 interface IVinesWorkflowInputProps {
   inputs: VinesWorkflowVariable[];
@@ -208,21 +209,37 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                             </div>
                           )}
 
-                          {type === 'file' && (
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs text-opacity-70">
-                                {t('workspace.pre-view.actuator.execution-form.file.label')}
-                              </span>
-                              <VinesUpdater
-                                limit={isMultiple ? void 0 : 1}
-                                onFinished={(urls) => form.setValue(name, isMultiple ? urls : urls[0])}
-                              >
-                                <Button variant="outline" size="small" className="-mr-1 scale-90">
-                                  {t('workspace.pre-view.actuator.execution-form.file.click-to-upload')}
-                                </Button>
-                              </VinesUpdater>
-                            </div>
-                          )}
+                          {type === 'file' &&
+                            (typeOptions?.enableImageMask ? (
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs text-opacity-70">
+                                  {t('workspace.pre-view.actuator.execution-form.file.label')}
+                                </span>
+                                <VinesImageMaskEditor
+                                  onFinished={(urls) => form.setValue(name, isMultiple ? urls : urls[0])}
+                                >
+                                  <Button variant="outline" size="small" className="-mr-1 scale-90">
+                                    {t(
+                                      'workspace.pre-view.actuator.execution-form.file.click-to-open-in-image-mask-editor-and-upload',
+                                    )}
+                                  </Button>
+                                </VinesImageMaskEditor>
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs text-opacity-70">
+                                  {t('workspace.pre-view.actuator.execution-form.file.label')}
+                                </span>
+                                <VinesUpdater
+                                  limit={isMultiple ? void 0 : 1}
+                                  onFinished={(urls) => form.setValue(name, isMultiple ? urls : urls[0])}
+                                >
+                                  <Button variant="outline" size="small" className="-mr-1 scale-90">
+                                    {t('workspace.pre-view.actuator.execution-form.file.click-to-upload')}
+                                  </Button>
+                                </VinesUpdater>
+                              </div>
+                            ))}
 
                           {type === 'options' && (
                             <Select
