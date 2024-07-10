@@ -46,6 +46,7 @@
       "descend": "降序",
       "load-more": "加载更多",
       "add": "添加",
+      "upload": "上传",
       "click-to-copy": "点击复制"
     },
     "type": {
@@ -211,6 +212,15 @@
       },
       "date-range-picker": {
         "select-date": "选择日期"
+      },
+      "vines-image-mask-editor": {
+        "title": "图像遮罩编辑器",
+        "operate": {
+          "select-image": "选择图像文件"
+        },
+        "toast": {
+          "no-file": "请先选择图像文件！"
+        }
       }
     },
     "layout": {
@@ -2253,7 +2263,8 @@
           "string": "请输入{{displayName}}",
           "file": {
             "label": "请输入文件直链",
-            "click-to-upload": "点击上传文件"
+            "click-to-upload": "点击上传文件",
+            "click-to-open-in-image-mask-editor-and-upload": "点击打开图像遮罩编辑器并上传"
           },
           "options": "请选择一个选项"
         },
