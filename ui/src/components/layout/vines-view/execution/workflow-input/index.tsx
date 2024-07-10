@@ -199,7 +199,9 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                                 />
                               ) : (
                                 <Switch
-                                  checked={isBoolean(value) ? value : BOOLEAN_VALUES.includes((value ?? '').toString())}
+                                  checked={
+                                    isBoolean(value) ? value : BOOLEAN_VALUES.includes((value as string)?.toString())
+                                  }
                                   onCheckedChange={onChange}
                                 />
                               )}
