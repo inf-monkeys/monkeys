@@ -2111,7 +2111,34 @@
           },
           "unknown": "不受支持的工具，请尝试重新创建"
         },
-        "execution": "运行工作流"
+        "execution": {
+          "button": "运行工作流",
+
+          "COMPLETED": "工作流运行完毕！",
+          "FAILED": "工作流运行失败！",
+          "TIMED_OUT": "工作流运行超时！",
+          "TERMINATED": "工作流运行已终止！",
+
+          "swap": {
+            "workflow-is-running": "无法切换运行实例！当前工作流正在运行中",
+            "workflow-id-is-empty": "切换失败！无法获取工作流实例 ID",
+            "success": "工作流运行实例「{{workflowId}}」已恢复！"
+          },
+          "stop": {
+            "error": "终止运行异常！（可能未能成功停止）",
+            "workflow-is-un-exec": "无法终止运行！当前工作流未在运行中"
+          },
+          "pause": {
+            "success": "工作流运行已暂停",
+            "error": "暂停运行异常！（可能未能成功暂停）",
+            "workflow-is-un-exec": "无法暂停运行！当前工作流未在运行中"
+          },
+          "resume": {
+            "success": "运行已恢复",
+            "error": "恢复运行异常！（可能未能成功恢复）",
+            "workflow-is-un-pause": "无法恢复运行！当前工作流未在暂停中"
+          }
+        }
       },
       "error": {
         "tips": "定位到工具"
@@ -2167,7 +2194,9 @@
             "Terminated": "已终止",
             "Timed Out": "运行超时"
           },
-          "tips": "点击查看实例详情"
+          "tips": "点击查看实例详情",
+          "version": "版本号：{{version}}",
+          "temporary-workflow": "临时工作流"
         }
       },
       "loading": "查询中...",
