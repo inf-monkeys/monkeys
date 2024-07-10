@@ -6,9 +6,10 @@ import { LlmModelEntity } from '@/database/entities/assets/model/llm-model/llm-m
 import { getModels } from '@/modules/tools/llm/llm.service';
 import { Controller, Delete, Get, Param, Query, Req, UseGuards } from '@nestjs/common';
 import { LlmModelService } from './llm-model.service';
+import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 
 @Controller('llm-models')
-@UseGuards(CompatibleAuthGuard)
+@UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
 export class LlmModelController {
   constructor(private readonly service: LlmModelService) {}
 

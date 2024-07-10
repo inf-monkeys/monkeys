@@ -299,7 +299,7 @@ export class WorkflowRepository {
     );
   }
 
-  public async getWorklfowVersions(workflowId: string) {
+  public async getWorkflowVersions(workflowId: string) {
     const versions = await this.workflowMetadataRepository.find({
       where: {
         workflowId,
@@ -656,5 +656,30 @@ export class WorkflowRepository {
         isDeleted: false,
       },
     });
+  }
+
+  public async hasWorkflowUnauthorized(workflowId: string) {
+    const workflow = await this.workflowMetadataRepository.findOne({
+      where: {
+        workflowId,
+        isDeleted: false,
+      },
+    });
+    return {
+      userId: workflow?.creatorUserId,
+      notAuthorized: workflow?.notAuthorized,
+    };
+  }
+
+  public async toggleWorkflowUnauthorized(teamId: string, workflowId: string, notAuthorized: boolean) {
+    return await this.workflowMetadataRepository.update(
+      {
+        workflowId,
+        teamId,
+      },
+      {
+        notAuthorized,
+      },
+    );
   }
 }
