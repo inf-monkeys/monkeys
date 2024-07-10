@@ -89,13 +89,26 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
     form.setValue('default', currentVariable.default as IWorkflowInput['default']);
     form.setValue('multipleValues', get(currentVariable, 'typeOptions.multipleValues', false));
     form.setValue('assetType', get(currentVariable, 'typeOptions.assetType', ''));
+    form.setValue('minValue', get(currentVariable, 'typeOptions.minValue', undefined));
+    form.setValue('maxValue', get(currentVariable, 'typeOptions.maxValue', undefined));
+    form.setValue('numberPrecision', get(currentVariable, 'typeOptions.numberPrecision', undefined));
   }, [currentVariable]);
 
   const handleSubmit = form.handleSubmit((data) => {
-    const { multipleValues, assetType, default: Default } = pick(data, ['multipleValues', 'assetType', 'default']);
+    const {
+      multipleValues,
+      assetType,
+      minValue,
+      maxValue,
+      numberPrecision,
+      default: Default,
+    } = pick(data, ['multipleValues', 'assetType', 'default', 'minValue', 'maxValue', 'numberPrecision']);
     const finalVariable = omit(data, ['multipleValues', 'assetType', 'default']);
     multipleValues && set(finalVariable, 'typeOptions.multipleValues', true);
     assetType && set(finalVariable, 'typeOptions.assetType', assetType);
+    !isUndefined(minValue) && set(finalVariable, 'typeOptions.minValue', minValue);
+    !isUndefined(maxValue) && set(finalVariable, 'typeOptions.maxValue', maxValue);
+    !isUndefined(numberPrecision) && set(finalVariable, 'typeOptions.numberPrecision', numberPrecision);
     Default && set(finalVariable, 'default', Default);
 
     if (finalVariable.type === 'boolean') {
@@ -314,6 +327,97 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
                     <p className="text-xs text-muted-foreground">
                       {t('workspace.flow-view.endpoint.start-tool.input.config-form.file.desc')}
                     </p>
+                  </div>
+                </>
+              )}
+
+              {type === 'number' && (
+                <>
+                  <Separator orientation="vertical" className="mx-2" />
+                  <div className="flex w-[35rem] flex-col gap-2">
+                    <FormField
+                      name="minValue"
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {t(
+                              'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.min-value.label',
+                            )}
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder={t(
+                                'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.min-value.placeholder',
+                              )}
+                              {...field}
+                              className="grow"
+                              autoFocus
+                              type="number"
+                              onChange={(value) => form.setValue('minValue', Number(value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      name="maxValue"
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {t(
+                              'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.max-value.label',
+                            )}
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder={t(
+                                'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.max-value.placeholder',
+                              )}
+                              {...field}
+                              className="grow"
+                              autoFocus
+                              type="number"
+                              onChange={(value) => form.setValue('maxValue', Number(value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      name="numberPrecision"
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {t(
+                              'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.number-precision.label',
+                            )}
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder={t(
+                                'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.number-precision.placeholder',
+                              )}
+                              {...field}
+                              className="grow"
+                              autoFocus
+                              type="number"
+                              onChange={(value) => form.setValue('numberPrecision', Number(value))}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            {t(
+                              'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.number-precision.description',
+                            )}
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 </>
               )}
