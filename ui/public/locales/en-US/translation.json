@@ -2128,7 +2128,34 @@
           },
           "unknown": "Unsupported tools, try recreating"
         },
-        "execution": "Execution Workflow"
+        "execution": {
+          "button": "Execution Workflow",
+
+          "COMPLETED": "Workflow execution completed!",
+          "FAILED": "Workflow execution failed!",
+          "TIMED_OUT": "Workflow execution timed out!",
+          "TERMINATED": "Workflow execution terminated!",
+
+          "swap": {
+            "workflow-is-running": "Unable to switch instances! The current workflow is in progress",
+            "workflow-id-is-empty": "Switch failed! Unable to obtain workflow instance ID",
+            "success": "The workflow execution instance \"{{workflowId}}\" has been resumed!"
+          },
+          "stop": {
+            "error": "Termination execution abnormality! (May not be successfully stopped)",
+            "workflow-is-un-exec": "Unable to terminate execution! The current workflow is not executing"
+          },
+          "pause": {
+            "success": "Workflow execution is paused",
+            "error": "Suspend execution exception! (Maybe failed to suspend successfully)",
+            "workflow-is-un-exec": "Unable to pause execution! The current workflow is not executing"
+          },
+          "resume": {
+            "success": "Execution Resumed",
+            "error": "Recovery execution exception! (May not be successfully recovered)",
+            "workflow-is-un-pause": "Unable to resume execution! The current workflow is not paused"
+          }
+        }
       },
       "error": {
         "tips": "Move canvas to tool"
@@ -2184,7 +2211,9 @@
             "Terminated": "Terminated",
             "Timed Out": "Timed Out"
           },
-          "tips": "Click to view instance details"
+          "tips": "Click to view instance details",
+          "version": "Ver.{{version}}",
+          "temporary-workflow": "Temporary workflow"
         }
       },
       "loading": "Searching...",

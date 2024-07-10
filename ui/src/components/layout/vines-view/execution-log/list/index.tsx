@@ -1,18 +1,13 @@
 import React, { useMemo } from 'react';
 
-import { useNavigate } from '@tanstack/react-router';
-
 import { motion } from 'framer-motion';
 import _ from 'lodash';
 import { BookDashed } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 
 import { VinesWorkflowExecutionLists } from '@/apis/workflow/execution/typings';
 import { VinesLogItem } from '@/components/layout/vines-view/execution-log/item';
-import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
-import { useVinesFlow } from '@/package/vines-flow';
-import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
+import { Accordion } from '@/components/ui/accordion.tsx';
 
 interface IVinesLogListProps {
   searchWorkflowExecutionsData?: VinesWorkflowExecutionLists;
@@ -22,10 +17,6 @@ interface IVinesLogListProps {
 export const VinesLogList: React.FC<IVinesLogListProps> = ({ searchWorkflowExecutionsData, handleSubmit }) => {
   const { t } = useTranslation();
 
-  const { vines } = useVinesFlow();
-  const { pages } = useVinesPage();
-  const navigate = useNavigate();
-
   const workflowDefinitions = searchWorkflowExecutionsData?.definitions;
   const workflowExecutions = searchWorkflowExecutionsData?.data;
   const workflowTotal = searchWorkflowExecutionsData?.total;
@@ -33,23 +24,6 @@ export const VinesLogList: React.FC<IVinesLogListProps> = ({ searchWorkflowExecu
   const workflowDefinitionIdMapper = useMemo(() => {
     return _.keyBy(workflowDefinitions, 'workflowId');
   }, [workflowDefinitions]);
-
-  const handleNavigateToPreview = (execution: VinesWorkflowExecution) => {
-    const previewPage = pages?.find(({ type }) => type === 'preview');
-    if (previewPage) {
-      if (vines.swapExecutionInstance(execution)) {
-        void navigate({
-          to: '/$teamId/workspace/$workflowId/$pageId',
-          // @ts-ignore
-          params: {
-            pageId: previewPage.id,
-          },
-        });
-      }
-    } else {
-      toast.error(t('workspace.logs-view.list.preview-page-not-found'));
-    }
-  };
 
   const workflowExecutionLength = workflowExecutions?.length ?? 0;
 
@@ -67,16 +41,17 @@ export const VinesLogList: React.FC<IVinesLogListProps> = ({ searchWorkflowExecu
           </div>
         </motion.div>
       )}
-      {workflowExecutions && workflowDefinitions
-        ? workflowExecutions.map((workflowExecution, index) => (
-            <VinesLogItem
-              key={index}
-              onClick={() => handleNavigateToPreview(workflowExecution)}
-              workflowExecution={workflowExecution}
-              workflowDefinition={workflowDefinitionIdMapper[workflowExecution.workflowName!]}
-            />
-          ))
-        : null}
+      <Accordion type="single" collapsible className="flex w-full flex-col gap-3">
+        {workflowExecutions && workflowDefinitions
+          ? workflowExecutions.map((workflowExecution, index) => (
+              <VinesLogItem
+                key={index}
+                workflowExecution={workflowExecution}
+                workflowDefinition={workflowDefinitionIdMapper[workflowExecution.workflowName!]}
+              />
+            ))
+          : null}
+      </Accordion>
       {workflowExecutions && workflowDefinitions && workflowTotal ? (
         workflowTotal - workflowExecutionLength <= 0 ? (
           <div className="w-full cursor-default text-center text-sm opacity-75">
