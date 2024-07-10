@@ -2285,16 +2285,20 @@
     },
     "chat-view": {
       "sidebar": {
-        "title": "Conversations",
+        "title": "Sessions",
         "create": {
-          "label": "New Conversation",
+          "label": "New Session",
           "placeholder": "Enter the session name within 16 characters.",
+
+          "def-label": "Default Session",
+          "auto-create-session": "Automatically create new session",
+
           "loading": "Creating session...",
           "success": "Create session successfully",
           "error": "Create session failed"
         },
-        "expand": "Expand the conversation list",
-        "collapse": "Close conversation list",
+        "expand": "Expand the session list",
+        "collapse": "Close session list",
         "delete": {
           "label": "Delete Session",
           "title": "Are you sure you want to delete \"{{sessionDisplayName}}\"",
