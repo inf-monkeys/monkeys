@@ -84,6 +84,7 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
                         <TooltipTrigger asChild>
                           <Button
                             className="-m-2 scale-50"
+                            variant="outline"
                             icon={<Copy />}
                             onClick={(e) => {
                               e.stopPropagation();
