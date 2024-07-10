@@ -552,12 +552,17 @@ export class VinesCore extends VinesTools(VinesBase) {
     }
 
     if (this.executionStatus === 'RUNNING') {
-      toast.warning('无法切换运行实例！当前工作流正在运行中');
+      toast.warning(
+        this.t?.('workspace.flow-view.vines.execution.swap.workflow-is-running') ||
+          '无法切换运行实例！当前工作流正在运行中',
+      );
       return false;
     }
 
     if (!workflowId) {
-      toast.error('切换失败！无法获取工作流实例 ID');
+      toast.error(
+        this.t?.('workspace.flow-view.vines.execution.swap.workflow-id-is-empty') || '切换失败！无法获取工作流实例 ID',
+      );
       return false;
     }
 
@@ -572,7 +577,10 @@ export class VinesCore extends VinesTools(VinesBase) {
 
       this.executionTimeout = setTimeout(this.handleExecution.bind(this), 0);
 
-      toast.success(`工作流运行实例「${workflowId}」已恢复！`);
+      toast.success(
+        this.t?.('workspace.flow-view.vines.execution.swap.success', { workflowId }) ||
+          `工作流运行实例「${workflowId}」已恢复！`,
+      );
     }, 200);
 
     return true;
@@ -585,7 +593,7 @@ export class VinesCore extends VinesTools(VinesBase) {
       try {
         await executionWorkflowTerminate(this.executionInstanceId);
       } catch (_) {
-        toast.error('终止运行异常！（可能未能成功停止）');
+        toast.error(this.t?.('workspace.flow-view.vines.execution.stop.error') || '终止运行异常！（可能未能成功停止）');
         this.executionStatus = 'SCHEDULED';
         this.restoreSubWorkflowChildren();
       }
@@ -594,7 +602,10 @@ export class VinesCore extends VinesTools(VinesBase) {
 
       this.clearExecutionStatus();
     } else {
-      toast.warning('无法终止运行！当前工作流未在运行中');
+      toast.warning(
+        this.t?.('workspace.flow-view.vines.execution.stop.workflow-is-un-exec') ||
+          '无法终止运行！当前工作流未在运行中',
+      );
     }
   }
 
@@ -602,9 +613,11 @@ export class VinesCore extends VinesTools(VinesBase) {
     if (this.executionStatus === 'RUNNING' && this.executionInstanceId) {
       try {
         await executionWorkflowPause(this.executionInstanceId);
-        toast.warning('工作流运行已暂停');
+        toast.warning(this.t?.('workspace.flow-view.vines.execution.pause.success') || '工作流运行已暂停');
       } catch (_) {
-        toast.error('暂停运行异常！（可能未能成功暂停）');
+        toast.error(
+          this.t?.('workspace.flow-view.vines.execution.pause.error') || '暂停运行异常！（可能未能成功暂停）',
+        );
         this.executionStatus = 'SCHEDULED';
         this.restoreSubWorkflowChildren();
       }
@@ -612,7 +625,10 @@ export class VinesCore extends VinesTools(VinesBase) {
 
       this.executionTimeout = setTimeout(this.handleExecution.bind(this), 0);
     } else {
-      toast.warning('无法暂停运行！当前工作流未在运行中');
+      toast.warning(
+        this.t?.('workspace.flow-view.vines.execution.pause.workflow-is-un-exec') ||
+          '无法暂停运行！当前工作流未在运行中',
+      );
     }
   }
 
@@ -620,9 +636,11 @@ export class VinesCore extends VinesTools(VinesBase) {
     if (this.executionStatus === 'PAUSED' && this.executionInstanceId) {
       try {
         await executionWorkflowResume(this.executionInstanceId);
-        toast.success('运行已恢复');
+        toast.success(this.t?.('workspace.flow-view.vines.execution.resume.success') || '运行已恢复');
       } catch (_) {
-        toast.error('恢复运行异常！（可能未能成功恢复）');
+        toast.error(
+          this.t?.('workspace.flow-view.vines.execution.resume.error') || '恢复运行异常！（可能未能成功恢复）',
+        );
         this.executionStatus = 'SCHEDULED';
         this.restoreSubWorkflowChildren();
       }
@@ -630,7 +648,10 @@ export class VinesCore extends VinesTools(VinesBase) {
 
       this.executionTimeout = setTimeout(this.handleExecution.bind(this), 0);
     } else {
-      toast.warning('无法恢复运行！当前工作流未在暂停中');
+      toast.warning(
+        this.t?.('workspace.flow-view.vines.execution.resume.workflow-is-un-pause') ||
+          '无法恢复运行！当前工作流未在暂停中',
+      );
     }
   }
 
@@ -646,16 +667,16 @@ export class VinesCore extends VinesTools(VinesBase) {
       if (this.executionWorkflowDisableRestore) {
         switch (newExecutionStatus) {
           case 'COMPLETED':
-            toast.success('工作流运行完毕！');
+            toast.success(this.t?.('workspace.flow-view.vines.execution.COMPLETED') || '工作流运行完毕！');
             break;
           case 'FAILED':
-            toast.error('工作流运行失败！');
+            toast.error(this.t?.('workspace.flow-view.vines.execution.FAILED') || '工作流运行失败！');
             break;
           case 'TIMED_OUT':
-            toast.warning('工作流运行超时！');
+            toast.warning(this.t?.('workspace.flow-view.vines.execution.TIMED_OUT') || '工作流运行超时！');
             break;
           case 'TERMINATED':
-            toast.warning('工作流运行已终止！');
+            toast.warning(this.t?.('workspace.flow-view.vines.execution.TERMINATED') || '工作流运行已终止！');
             break;
           default:
             break;
