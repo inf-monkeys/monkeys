@@ -4,7 +4,7 @@ import { Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { WorkflowInfoEditor } from '@/components/layout/workspace/workflow/info-editor';
-import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
+import { useVinesOriginWorkflow } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { getI18nContent } from '@/utils';
@@ -14,7 +14,7 @@ interface IWorkflowInfoCardProps extends React.ComponentPropsWithoutRef<'div'> {
 export const WorkflowInfoCard: React.FC<IWorkflowInfoCardProps> = () => {
   const { t } = useTranslation();
 
-  const { workflow } = useVinesPage();
+  const { workflow } = useVinesOriginWorkflow();
 
   return (
     <Tooltip>
