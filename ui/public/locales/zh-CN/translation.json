@@ -2272,6 +2272,10 @@
         "create": {
           "label": "新建对话",
           "placeholder": "输入会话名称，16 字以内",
+
+          "def-label": "默认对话",
+          "auto-create-session": "自动创建新对话",
+
           "loading": "正在创建会话...",
           "success": "会话创建成功",
           "error": "会话创建失败"
