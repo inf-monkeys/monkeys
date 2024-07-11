@@ -98,6 +98,7 @@
     "react-i18next": "^14.1.1",
     "react-jwt": "^1.2.1",
     "react-markdown": "^9.0.1",
+    "react-mask-editor": "^0.0.2",
     "react-photo-gallery": "^8.0.0",
     "react-qr-code": "^2.0.15",
     "react-resizable-panels": "^2.0.16",

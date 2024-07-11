@@ -224,8 +224,15 @@
       },
       "vines-image-mask-editor": {
         "title": "Image mask editor",
+        "label": {
+          "brush-size": "Brush size",
+          "opacity": "Opacity"
+        },
         "operate": {
-          "select-image": "Select image"
+          "select-image": "Select another image",
+          "mask-color": {
+            "placeholder": "Select mask color"
+          }
         },
         "toast": {
           "no-file": "Please select a image file!"
