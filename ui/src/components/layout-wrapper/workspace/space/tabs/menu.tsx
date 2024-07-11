@@ -134,11 +134,7 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
               </p>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="flex items-center gap-2 text-red-10"
-              disabled={page?.type === 'process'}
-              onClick={handleDeletePage}
-            >
+            <DropdownMenuItem className="flex items-center gap-2 text-red-10" onClick={handleDeletePage}>
               <Trash2 strokeWidth={1.5} size={16} />
               <p>{t('workspace.wrapper.space.menu.del-view-button')}</p>
             </DropdownMenuItem>
