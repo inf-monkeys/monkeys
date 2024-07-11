@@ -10,7 +10,6 @@ import { StartWorkflowSyncDto } from './dto/req/start-workflow-sync.dto';
 import { StartWorkflowDto } from './dto/req/start-workflow.dto';
 import { UpdateTaskStatusDto } from './dto/req/update-task-status.dto';
 import { WorkflowExecutionService } from './workflow.execution.service';
-import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 
 @Controller('/workflow')
 @ApiTags('Workflows/Execution')
