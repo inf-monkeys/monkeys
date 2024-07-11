@@ -1,4 +1,5 @@
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
+import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
@@ -7,8 +8,8 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SearchWorkflowExecutionsDto } from './dto/req/search-workflow-execution.dto';
 import { StartWorkflowSyncDto } from './dto/req/start-workflow-sync.dto';
 import { StartWorkflowDto } from './dto/req/start-workflow.dto';
+import { UpdateTaskStatusDto } from './dto/req/update-task-status.dto';
 import { WorkflowExecutionService } from './workflow.execution.service';
-import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 
 @Controller('/workflow')
 @ApiTags('Workflows/Execution')
@@ -137,6 +138,17 @@ export class WorkflowExecutionController {
   })
   public async retryWorkflow(@Param('workflowInstanceId') workflowInstanceId: string) {
     const result = await this.service.retryWorkflow(workflowInstanceId);
+    return new SuccessResponse({
+      data: result,
+    });
+  }
+
+  @Post('/executions/:workflowInstanceId/tasks/:taskId')
+  @ApiOperation({
+    summary: '修改 workflow task 状态',
+  })
+  public async updateTaskStatus(@Param('workflowInstanceId') workflowInstanceId: string, @Param('taskId') taskId: string, @Body() dto: UpdateTaskStatusDto) {
+    const result = await this.service.updateTaskStatus(workflowInstanceId, taskId, dto);
     return new SuccessResponse({
       data: result,
     });
