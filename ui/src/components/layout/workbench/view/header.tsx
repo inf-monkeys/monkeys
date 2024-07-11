@@ -7,7 +7,7 @@ import { PinOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { toggleWorkspacePagePin } from '@/apis/pages';
+import { useUpdateGroupPages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -17,9 +17,10 @@ import { getI18nContent } from '@/utils';
 
 interface IWorkbenchViewHeaderProps extends React.ComponentPropsWithoutRef<'div'> {
   page?: Partial<IPinPage>;
+  groupId: string;
 }
 
-export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page }) => {
+export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page, groupId }) => {
   const { t } = useTranslation();
 
   const { teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
@@ -27,16 +28,25 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page 
   const { mutate } = useSWRConfig();
   const workflow = page?.workflow;
 
+  const { trigger } = useUpdateGroupPages(groupId);
+
   const handleUnPin = () => {
     if (!page?.id) return;
-    toast.promise(toggleWorkspacePagePin(page.id, false), {
-      loading: t('common.operate.loading'),
-      success: () => {
-        void mutate('/api/pages');
-        return t('common.operate.success');
+    toast.promise(
+      trigger({
+        pageId: page.id,
+        mode: 'remove',
+      }),
+      {
+        loading: t('workspace.wrapper.space.menu.group.update.loading'),
+        success: () => {
+          void mutate('/api/workflow/pages/pinned');
+
+          return t('workspace.wrapper.space.menu.group.update.success');
+        },
+        error: t('workspace.wrapper.space.menu.group.update.error'),
       },
-      error: t('common.operate.error'),
-    });
+    );
   };
 
   const workflowDesc = getI18nContent(workflow?.description) ? ` - ${getI18nContent(workflow?.description)}` : '';

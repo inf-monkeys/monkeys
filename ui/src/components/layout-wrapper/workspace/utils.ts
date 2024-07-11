@@ -14,7 +14,7 @@ import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 export const useVinesPage = () => {
   const navigate = useNavigate({ from: Route.fullPath });
-  const { workflowId, pageId, teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
+  const { workflowId, pageId, teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
   const { data: pages, mutate: pagesMutate } = useWorkspacePagesWithWorkflowId(workflowId);
 
   const { page, setPage } = usePageStore();
@@ -117,7 +117,7 @@ export const useVinesPage = () => {
 };
 
 export const useVinesOriginWorkflow = () => {
-  const { workflowId, teamId, pageId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
+  const { workflowId, teamId, pageId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
   const { data, mutate } = useGetWorkflow(workflowId);
 
   return {
