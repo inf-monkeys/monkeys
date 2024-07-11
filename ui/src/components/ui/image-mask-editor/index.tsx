@@ -1,6 +1,5 @@
 import React, { ChangeEventHandler, PointerEventHandler, useEffect, useMemo, useRef, useState } from 'react';
 
-import { FileWithPath } from '@mantine/dropzone';
 import * as png from '@stevebel/png';
 import { COLOR_TYPES } from '@stevebel/png/lib/helpers/color-types';
 import Metadata from '@stevebel/png/lib/helpers/metadata';
@@ -18,8 +17,8 @@ import { kbdWindowsKeysMap } from '@/components/ui/kbd/typings.ts';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { Slider } from '@/components/ui/slider.tsx';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group.tsx';
-import { VinesUpdater } from '@/components/ui/updater';
 import { cn, getI18nContent } from '@/utils';
+import VinesEvent from '@/utils/events.ts';
 
 interface IVinesImageMaskEditorProps extends React.ComponentPropsWithoutRef<'div'> {
   defaultImage?: string;
@@ -47,8 +46,6 @@ export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ chi
 
   const [canvasVisible, setCanvasVisible] = useState(false);
 
-  const [fileList, setFileList] = useState<FileWithPath[]>([]);
-
   let drawMode = false;
   let lastX = 0;
   let lastY = 0;
@@ -64,7 +61,6 @@ export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ chi
       drawMode = false;
       lastX = 0;
       lastY = 0;
-      setFileList([]);
     } else {
       fileInputRef.current && (fileInputRef.current.value = '');
     }
@@ -247,8 +243,13 @@ export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ chi
     const newBlob = new Blob([newPng], { type: 'image/png' });
     const newFile = new File([newBlob], newName, { type: 'image/png' }) as FileWithPathWritable;
     newFile.path = newName;
-    setFileList([newFile]);
-    toast.success(t('common.operate.success'));
+
+    setVisible(false);
+
+    VinesEvent.emit('vines-updater', [newFile], (urls) => {
+      onFinished?.(urls);
+      toast.success(t('common.operate.success'));
+    });
   };
 
   const fileInputHandler: ChangeEventHandler<HTMLInputElement> = async (event) => {
@@ -408,22 +409,9 @@ export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ chi
               >
                 {t('components.ui.vines-image-mask-editor.operate.select-image')}
               </Button>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={saveHandler}>
-                  {t('common.utils.save')}
-                </Button>
-                <VinesUpdater
-                  limit={1}
-                  files={fileList}
-                  onFinished={(urls) => {
-                    setVisible(false);
-                    onFinished?.(urls);
-                    toast.success(t('common.operate.success'));
-                  }}
-                >
-                  <Button variant="outline">{t('common.utils.upload')}</Button>
-                </VinesUpdater>
-              </div>
+              <Button variant="outline" onClick={saveHandler}>
+                {t('common.utils.save')}
+              </Button>
             </div>
           </DialogFooter>
         </DialogContent>
