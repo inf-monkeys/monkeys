@@ -33,7 +33,7 @@ export const ActionTools: React.FC = () => {
         createColumns={() => createComfyuiWorkflowColumns({ hooks: { navigate } })}
         onItemClick={(item) => {
           void navigate({
-            to: `/$teamId/comfyui/${item.id}`,
+            to: `/$teamId/comfyui/${item.id}/`,
           });
         }}
         operateArea={(item, trigger, tooltipTriggerContent) => (

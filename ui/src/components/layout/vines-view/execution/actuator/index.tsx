@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { motion } from 'framer-motion';
 import { t } from 'i18next';
-import { RotateCcw, StopCircle } from 'lucide-react';
+import { ChevronRight, RotateCcw, StopCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { VinesActuatorDetail } from '@/components/layout/vines-view/execution/actuator/detail';
@@ -16,6 +16,7 @@ import { useVinesFlow } from '@/package/vines-flow';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
+import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IVinesActuatorProps {
@@ -27,6 +28,8 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height, children 
   const [activeTool, setActiveTool] = useState<VinesNode>();
 
   const { setCanvasMode } = useCanvasStore();
+
+  const [sidebarVisible, setSidebarVisible] = useState(document.body.clientWidth > 520);
 
   const { vines } = useVinesFlow();
 
@@ -93,10 +96,29 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height, children 
         </div>
       </ActuatorHeader>
       <div className="flex items-center" style={{ height: actuatorHeight }}>
-        <div className="w-2/5">
+        <motion.div
+          initial={{ width: sidebarVisible ? 320 : 0, paddingRight: sidebarVisible ? 4 : 0 }}
+          animate={{
+            width: sidebarVisible ? 320 : 0,
+            paddingRight: sidebarVisible ? 6 : 0,
+            transition: { duration: 0.2 },
+          }}
+        >
           <ActuatorToolList height={actuatorHeight} activeTool={activeTool} setActiveTool={setActiveTool} />
-        </div>
-        <Separator orientation="vertical" className="ml-2 mr-6" />
+        </motion.div>
+        <Separator orientation="vertical" className="vines-center ml-2 mr-6">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                className="group z-10 flex h-4 w-3.5 cursor-pointer items-center justify-center rounded-sm border bg-border px-0.5 transition-opacity hover:opacity-75 active:opacity-95"
+                onClick={() => setSidebarVisible(!sidebarVisible)}
+              >
+                <ChevronRight className={cn(sidebarVisible && 'scale-x-[-1]')} />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>{sidebarVisible ? t('common.sidebar.hide') : t('common.sidebar.show')}</TooltipContent>
+          </Tooltip>
+        </Separator>
         <VinesActuatorDetail executionTask={activeTool?.executionTask} height={actuatorHeight} />
       </div>
     </motion.div>
