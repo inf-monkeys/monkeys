@@ -34,7 +34,7 @@ interface IFilesProps extends React.ComponentPropsWithoutRef<'div'> {
   limit?: number;
 }
 
-interface IFile {
+export interface IFile {
   id: string;
   file: FileWithPath;
   path: string;
@@ -274,9 +274,10 @@ export const FileList: React.FC<IFilesProps> = ({
                       <TooltipContent align="start">
                         {t('components.ui.updater.file-list.info-tooltip.name') + name}
                         <br />
-                        {t('components.ui.updater.file-list.info-tooltip.md5.index') + !progress
-                          ? t('components.ui.updater.file-list.info-tooltip.md5.waiting')
-                          : md5 ?? t('components.ui.updater.file-list.info-tooltip.md5.in-progress', { progress })}
+                        {t('components.ui.updater.file-list.info-tooltip.md5.index') +
+                          (!progress
+                            ? t('components.ui.updater.file-list.info-tooltip.md5.waiting')
+                            : md5 ?? t('components.ui.updater.file-list.info-tooltip.md5.in-progress', { progress }))}
                       </TooltipContent>
                     </td>
                   </tr>
