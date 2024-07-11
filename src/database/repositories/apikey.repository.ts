@@ -4,13 +4,26 @@ import { ApiKeyEntity, ApiKeyStatus } from '@/database/entities/apikey/apikey';
 import { CreateApiKeyDto } from '@/modules/auth/apikey/dto/create-apikey.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { differenceInDays, isAfter, isValid, parse, startOfDay } from 'date-fns';
+import { Between, Repository } from 'typeorm';
+import { ApiKeyUsageEntity, ApiKeyUsageExtraInfo, ApiKeyUsageLLMInfo, ApikeyUsageType } from '../entities/apikey/apikey-usage';
+import { ApiKeyUsagaSummaryEntity } from '../entities/apikey/apikey-usage-summary';
+
+export interface ApiKeyUsageSummary {
+  apiKey: string;
+  date: string;
+  data: { [key: string]: number };
+}
 
 @Injectable()
 export class ApikeyRepository {
   constructor(
     @InjectRepository(ApiKeyEntity)
     public readonly apiKeyRepo: Repository<ApiKeyEntity>,
+    @InjectRepository(ApiKeyUsageEntity)
+    public readonly apiKeyUsageRepo: Repository<ApiKeyUsageEntity>,
+    @InjectRepository(ApiKeyUsagaSummaryEntity)
+    public readonly apiKeyUsageSummaryRepo: Repository<ApiKeyUsagaSummaryEntity>,
   ) {}
 
   public async validateApiKey(apiKey: string): Promise<{ valid: boolean; teamId?: string; userId?: string }> {
@@ -91,5 +104,85 @@ export class ApikeyRepository {
         desc: 'Creaetd by system',
       });
     }
+  }
+
+  public async recordApiKeyUsage(teamId: string, apiKeyId: string, usageType: ApikeyUsageType, extraInfo: ApiKeyUsageExtraInfo) {
+    const record: ApiKeyUsageEntity = {
+      id: generateDbId(),
+      teamId,
+      apiKey: apiKeyId,
+      usageType,
+      extraInfo,
+      createdTimestamp: Date.now(),
+      updatedTimestamp: Date.now(),
+      isDeleted: false,
+    };
+    await this.apiKeyUsageRepo.save(record);
+  }
+
+  private async getApiKeyUsageSummaryByDate(date: string): Promise<ApiKeyUsageSummary[]> {}
+
+  private checkDateRange(startDate: string, endDate: string): boolean {
+    const dateFormat = 'yyyyMMdd';
+    const start = parse(startDate, dateFormat, new Date());
+    const end = parse(endDate, dateFormat, new Date());
+    if (!isValid(start) || !isValid(end)) {
+      throw new Error('Invalid date format, should be yyyyMMdd');
+    }
+    const difference = differenceInDays(end, start);
+    if (difference > 366) {
+      throw new Error('Date range should be less than 1 year');
+    }
+
+    return true;
+  }
+
+  private checkEndDateGraterOrEqualThanToday(endDate: string): boolean {
+    const today = startOfDay(new Date());
+    const dateFormat = 'yyyyMMdd';
+    const end = parse(endDate, dateFormat, new Date());
+    return isAfter(end, today);
+  }
+
+  public async listApiKeyUsage(teamId: string, startDate: string, endDate: string): Promise<ApiKeyUsageSummary[]> {
+    this.checkDateRange(startDate, endDate);
+    const shouldReturnTodayData = this.checkEndDateGraterOrEqualThanToday(endDate);
+    const previousData = await this.apiKeyUsageSummaryRepo.find({
+      where: {
+        teamId,
+        date: Between(startDate, endDate),
+        isDeleted: false,
+      },
+      order: {
+        id: -1,
+      },
+    });
+
+    if (!shouldReturnTodayData) {
+      return previousData.map((d) => ({
+        apiKey: d.apiKey,
+        date: d.date,
+        data: d.data,
+      }));
+    }
+
+    const today = startOfDay(new Date());
+    const todayData = await this.apiKeyUsageRepo.find({
+      where: {
+        teamId,
+        createdTimestamp: Between(today.getTime(), Date.now()),
+        isDeleted: false,
+      },
+    });
+
+    const chatCompletionsRecords = todayData.filter((d) => d.usageType === ApikeyUsageType.ChatCompletions);
+    const completionsRecords = todayData.filter((d) => d.usageType === ApikeyUsageType.Completions);
+    const workflowRecords = todayData.filter((d) => d.usageType === ApikeyUsageType.WORKFLOW);
+
+    const chatCompletions = chatCompletionsRecords.reduce((acc, record) => {
+      const key = (record.extraInfo as ApiKeyUsageLLMInfo).modelName;
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    });
   }
 }

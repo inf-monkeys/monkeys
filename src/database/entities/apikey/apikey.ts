@@ -33,17 +33,4 @@ export class ApiKeyEntity extends BaseEntity {
     nullable: true,
   })
   desc?: string;
-
-  @Column({
-    type: 'varchar',
-    nullable: true,
-  })
-  applicationId?: string;
-
-  // 私有的 ApiKey 是由后端逻辑创建的，不会被返回给前端
-  @Column({
-    type: 'boolean',
-    default: false,
-  })
-  isPrivate?: boolean;
 }

@@ -14,6 +14,8 @@ import { WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-tr
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
 import { ApiKeyEntity } from './entities/apikey/apikey';
+import { ApiKeyUsageEntity } from './entities/apikey/apikey-usage';
+import { ApiKeyUsagaSummaryEntity } from './entities/apikey/apikey-usage-summary';
 import { AssetsAuthorizationEntity } from './entities/assets/asset-authorization';
 import { AssetFilterEntity } from './entities/assets/asset-filter';
 import { AssetsMarketPlaceTagEntity } from './entities/assets/asset-marketplace-tag';
@@ -73,6 +75,8 @@ export const entities: EntityClassOrSchema[] = [
   ComfyuiWorkflowEntity,
   ComfyuiServerEntity,
   OneApiUsersEntity,
+  ApiKeyUsageEntity,
+  ApiKeyUsagaSummaryEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({
