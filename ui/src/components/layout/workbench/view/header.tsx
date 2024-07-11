@@ -1,9 +1,9 @@
 import React from 'react';
 
 import { useSWRConfig } from 'swr';
-import { Link } from '@tanstack/react-router';
+import { Link, useParams } from '@tanstack/react-router';
 
-import { Star } from 'lucide-react';
+import { PinOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -21,6 +21,8 @@ interface IWorkbenchViewHeaderProps extends React.ComponentPropsWithoutRef<'div'
 
 export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page }) => {
   const { t } = useTranslation();
+
+  const { teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
 
   const { mutate } = useSWRConfig();
   const workflow = page?.workflow;
@@ -58,21 +60,17 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page 
         <div className="flex gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                icon={
-                  <Star className="[&_polygon]:fill-yellow-9 [&_polygon]:stroke-yellow-9" strokeWidth={1.5} size={16} />
-                }
-                variant="outline"
-                onClick={handleUnPin}
-              />
+              <Button icon={<PinOff size={12} />} variant="outline" onClick={handleUnPin} size="small" />
             </TooltipTrigger>
             <TooltipContent>{t('workbench.view.header.delete')}</TooltipContent>
           </Tooltip>
           <Link
             to="/$teamId/workspace/$workflowId/$pageId"
-            params={{ workflowId: workflow?.workflowId, pageId: page?.id }}
+            params={{ teamId, workflowId: workflow?.workflowId ?? '', pageId: page?.id ?? '' }}
           >
-            <Button variant="outline">{t('workbench.view.header.enter')}</Button>
+            <Button variant="outline" size="small">
+              {t('workbench.view.header.enter')}
+            </Button>
           </Link>
         </div>
       </div>
