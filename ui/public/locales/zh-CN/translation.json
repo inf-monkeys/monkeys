@@ -215,8 +215,15 @@
       },
       "vines-image-mask-editor": {
         "title": "图像遮罩编辑器",
+        "label": {
+          "brush-size": "笔刷尺寸",
+          "opacity": "不透明度"
+        },
         "operate": {
-          "select-image": "选择图像文件"
+          "select-image": "重新选择图像",
+          "mask-color": {
+            "placeholder": "选择遮罩颜色"
+          }
         },
         "toast": {
           "no-file": "请先选择图像文件！"

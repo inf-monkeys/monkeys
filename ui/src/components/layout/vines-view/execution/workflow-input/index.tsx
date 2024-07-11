@@ -17,6 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form.tsx';
+import { VinesImageMaskEditor } from '@/components/ui/image-mask-editor';
 import { TagInput } from '@/components/ui/input/tag';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
@@ -27,7 +28,6 @@ import { VinesUpdater } from '@/components/ui/updater';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
 import { cn, getI18nContent } from '@/utils';
-import { VinesImageMaskEditor } from '@/components/ui/image-mask-editor';
 
 interface IVinesWorkflowInputProps {
   inputs: VinesWorkflowVariable[];
@@ -180,7 +180,7 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                                 step={typeOptions.numberPrecision}
                                 defaultValue={[Number(value) || 0]}
                                 value={[Number(value) || 0]}
-                                onChange={onChange}
+                                onValueChange={(v) => onChange(v[0])}
                                 {...field}
                               />
                             )}

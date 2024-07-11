@@ -6,20 +6,24 @@ import { isUndefined } from 'lodash';
 import { cn } from '@/utils';
 
 export interface SliderProps extends Omit<React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>, 'onChange'> {
-  onChange?: (value: number) => void;
+  // onChange?: (value: number) => void;
+  label?: string;
 }
 
 const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, SliderProps>(
-  ({ className, onChange, value, ...props }, ref) => (
+  ({ className, label, value, ...props }, ref) => (
     <div className="flex flex-col items-end gap-2">
-      <span className="text-sm">{isUndefined(value?.[0]) ? 'NaN' : value[0]}</span>
+      <div className="flex w-full justify-between">
+        {label && <span className="text-sm">{label}</span>}
+        <span className="text-sm">{isUndefined(value?.[0]) ? 'NaN' : value[0]}</span>
+      </div>
       <SliderPrimitive.Root
         ref={ref}
         className={cn('relative flex w-full touch-none select-none items-center', className)}
-        onChange={(e) => {
-          onChange?.(Number((e as React.ChangeEvent<HTMLInputElement>).target.value));
-        }}
-        // value={value}
+        // onChange={(e) => {
+        //   onChange?.(Number((e as React.ChangeEvent<HTMLInputElement>).target.value));
+        // }}
+        value={value}
         {...props}
       >
         <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary">
