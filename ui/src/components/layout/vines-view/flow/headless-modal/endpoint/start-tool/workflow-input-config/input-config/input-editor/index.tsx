@@ -364,6 +364,17 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
                             </Button>
                           </VinesImageMaskEditor>
                         </div>
+                        <FormField
+                          name="default"
+                          control={form.control}
+                          render={({ field: { value, ...field } }) => (
+                            <img
+                              src={value?.toString()}
+                              alt="image"
+                              className="max-w-96 rounded-md border border-input bg-background object-cover shadow-md"
+                            />
+                          )}
+                        />
                       </>
                     ) : (
                       <>

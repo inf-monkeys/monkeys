@@ -9,7 +9,6 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
-  "packageManager": "pnpm@8.15.3",
   "dependencies": {
     "@cyco130/vite-plugin-mdx": "^1.0.4",
     "@dnd-kit/core": "^6.1.0",
