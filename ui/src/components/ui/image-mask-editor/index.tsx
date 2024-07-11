@@ -30,6 +30,8 @@ export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ chi
 
   const [visible, setVisible] = useState(false);
 
+  const brushPreviewDivRef = useRef<HTMLDivElement | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const canvasDivRef = useRef<HTMLDivElement | null>(null);
   const imgCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -80,6 +82,16 @@ export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ chi
     if (!maskCanvasRef.current) return;
 
     const editorCtx = maskCanvasRef.current.getContext('2d')!;
+
+    if (brushPreviewDivRef.current) {
+      // update preview
+      const cursorX = event.nativeEvent.offsetX;
+      const cursorY = event.nativeEvent.offsetY;
+      brushPreviewDivRef.current.style.width = brushSize * 2 + 'px';
+      brushPreviewDivRef.current.style.height = brushSize * 2 + 'px';
+      brushPreviewDivRef.current.style.left = cursorX - brushSize + 'px';
+      brushPreviewDivRef.current.style.top = cursorY - brushSize + 'px';
+    }
 
     const leftButtonDown = (window.TouchEvent && event instanceof TouchEvent) || event.buttons == 1;
     const rightButtonDown = [2, 5, 32].includes(event.buttons);
@@ -181,6 +193,13 @@ export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ chi
     }
   };
 
+  const maskPointerOverHandler: PointerEventHandler<HTMLCanvasElement> = (event) => {
+    brushPreviewDivRef.current && (brushPreviewDivRef.current.style.display = 'block');
+  };
+  const maskPointerLeaveHandler: PointerEventHandler<HTMLCanvasElement> = (event) => {
+    brushPreviewDivRef.current && (brushPreviewDivRef.current.style.display = 'none');
+  };
+
   const clearHandler = () => {
     if (!maskCanvasRef.current) return;
     const maskCtx = maskCanvasRef.current.getContext('2d')!;
@@ -264,7 +283,6 @@ export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ chi
       return img;
     });
   };
-
   return (
     <>
       <input type="file" accept="image/*" onChange={fileInputHandler} ref={fileInputRef} className="hidden" />
@@ -337,6 +355,19 @@ export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ chi
             <TransformWrapper minScale={0.01} maxScale={20}>
               <TransformComponent wrapperStyle={{ maxWidth: 'calc(100vw - 80px)', maxHeight: 'calc(100vh - 200px)' }}>
                 <div ref={canvasDivRef}>
+                  <div
+                    ref={brushPreviewDivRef}
+                    id="brush-preview"
+                    style={{
+                      backgroundColor: 'transparent',
+                      outline: '1px dashed black',
+                      boxShadow: '0 0 0 1px white',
+                      borderRadius: '50%',
+                      position: 'absolute',
+                      zIndex: 9999,
+                      pointerEvents: 'none',
+                    }}
+                  />
                   <canvas
                     ref={imgCanvasRef}
                     className={cn('absolute', {
@@ -347,6 +378,8 @@ export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ chi
                     ref={maskCanvasRef}
                     onPointerMove={pointerMode != 'move' ? maskPointerMoveHandler : undefined}
                     onPointerDown={pointerMode != 'move' ? maskPointerDownHandler : undefined}
+                    onPointerOver={pointerMode != 'move' ? maskPointerOverHandler : undefined}
+                    onPointerLeave={pointerMode != 'move' ? maskPointerLeaveHandler : undefined}
                     className={cn('absolute', {
                       hidden: !canvasVisible,
                     })}
