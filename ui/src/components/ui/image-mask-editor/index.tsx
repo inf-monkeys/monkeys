@@ -4,8 +4,7 @@ import { FileWithPath } from '@mantine/dropzone';
 import * as png from '@stevebel/png';
 import { COLOR_TYPES } from '@stevebel/png/lib/helpers/color-types';
 import Metadata from '@stevebel/png/lib/helpers/metadata';
-import FileSaver from 'file-saver';
-import { Brush, Eraser, Move, Trash } from 'lucide-react';
+import { Brush, Eraser, Info, Move, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import { toast } from 'sonner';
@@ -13,7 +12,9 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { COLOR_LIST } from '@/components/ui/image-mask-editor/consts.ts';
-import { IPointerMode } from '@/components/ui/image-mask-editor/typings.ts';
+import { FileWithPathWritable, IPointerMode } from '@/components/ui/image-mask-editor/typings.ts';
+import { Kbd } from '@/components/ui/kbd';
+import { kbdWindowsKeysMap } from '@/components/ui/kbd/typings.ts';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { Slider } from '@/components/ui/slider.tsx';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group.tsx';
@@ -240,11 +241,12 @@ export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ chi
     const extIndex = originFile.name.lastIndexOf('.');
     const newName = `${extIndex === -1 ? originFile.name : originFile.name.substring(0, extIndex)}_mask-edited_${+new Date()}.png`;
 
-    FileSaver.saveAs(new Blob([newPng], { type: 'image/png' }), newName);
+    // FileSaver.saveAs(new Blob([newPng], { type: 'image/png' }), newName);
     // const url = URL.createObjectURL(new Blob([newPng], { type: 'image/png' }));
 
     const newBlob = new Blob([newPng], { type: 'image/png' });
-    const newFile = new File([newBlob], newName, { type: 'image/png' });
+    const newFile = new File([newBlob], newName, { type: 'image/png' }) as FileWithPathWritable;
+    newFile.path = newName;
     setFileList([newFile]);
     toast.success(t('common.operate.success'));
   };
@@ -291,6 +293,14 @@ export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ chi
         <DialogContent className="w-auto min-w-[400px] !max-w-[calc(100vw-20px)]">
           <DialogTitle>{t('components.ui.vines-image-mask-editor.title')}</DialogTitle>
           <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2 rounded-md border border-input p-2 shadow-sm">
+              <Info size={14} />
+              <span className="flex gap-1 text-xs text-opacity-70">
+                {t('components.ui.vines-image-mask-editor.tip-1')}
+                <Kbd keys={kbdWindowsKeysMap.option} />
+                {t('components.ui.vines-image-mask-editor.tip-2')}
+              </span>
+            </div>
             <div className="flex gap-4">
               <ToggleGroup
                 type="single"
@@ -353,7 +363,7 @@ export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ chi
             </div>
 
             <TransformWrapper minScale={0.01} maxScale={20}>
-              <TransformComponent wrapperStyle={{ maxWidth: 'calc(100vw - 80px)', maxHeight: 'calc(100vh - 200px)' }}>
+              <TransformComponent wrapperStyle={{ maxWidth: 'calc(100vw - 80px)', maxHeight: 'calc(100vh - 260px)' }}>
                 <div ref={canvasDivRef}>
                   <div
                     ref={brushPreviewDivRef}
@@ -402,7 +412,15 @@ export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ chi
                 <Button variant="outline" onClick={saveHandler}>
                   {t('common.utils.save')}
                 </Button>
-                <VinesUpdater limit={1} files={fileList} onFinished={onFinished}>
+                <VinesUpdater
+                  limit={1}
+                  files={fileList}
+                  onFinished={(urls) => {
+                    setVisible(false);
+                    onFinished?.(urls);
+                    toast.success(t('common.operate.success'));
+                  }}
+                >
                   <Button variant="outline">{t('common.utils.upload')}</Button>
                 </VinesUpdater>
               </div>

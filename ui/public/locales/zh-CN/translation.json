@@ -215,6 +215,8 @@
       },
       "vines-image-mask-editor": {
         "title": "图像遮罩编辑器",
+        "tip-1": "按住",
+        "tip-2": "也可以使用橡皮擦。请先保存，后上传。",
         "label": {
           "brush-size": "笔刷尺寸",
           "opacity": "不透明度"

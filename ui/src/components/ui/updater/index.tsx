@@ -53,6 +53,7 @@ export const Updater: React.FC<IUpdaterProps> = ({
   }, [initialFiles]);
 
   useEffect(() => {
+    console.log(initialFiles, files);
     onFilesUpdate?.(files);
   }, [files]);
 
