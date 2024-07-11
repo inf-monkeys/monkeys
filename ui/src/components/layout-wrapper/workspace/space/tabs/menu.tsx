@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useForceUpdate } from '@mantine/hooks';
 import { DialogTrigger } from '@radix-ui/react-dialog';
 import { get, isEmpty } from 'lodash';
-import { MoreVertical, Pencil, Star, Trash2 } from 'lucide-react';
+import { MoreVertical, Pencil, Pin, PinOff, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -20,7 +20,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/utils';
 
 interface ITabMenuProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -101,6 +100,8 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
     });
   };
 
+  const [visibleCreateGroup, setVisibleCreateGroup] = useState(false);
+
   return (
     <Dialog open={toggleNameDialogVisible} onOpenChange={setToggleNameDialogVisible}>
       <DropdownMenu>
@@ -118,15 +119,8 @@ export const TabMenu: React.FC<ITabMenuProps> = () => {
                 <p>{t('workspace.wrapper.space.menu.rename.trigger')}</p>
               </DropdownMenuItem>
             </DialogTrigger>
-            <DropdownMenuItem
-              className={cn('flex items-center gap-2', isPin && 'text-yellow-9')}
-              onClick={handlePinPage}
-            >
-              <Star
-                className={cn(isPin && '[&_polygon]:fill-yellow-9 [&_polygon]:stroke-yellow-9')}
-                strokeWidth={1.5}
-                size={16}
-              />
+            <DropdownMenuItem className="flex items-center gap-2" onClick={handlePinPage}>
+              {isPin ? <PinOff strokeWidth={1.5} size={16} /> : <Pin strokeWidth={1.5} size={16} />}
               <p>
                 {t('workspace.wrapper.space.menu.pin', {
                   status: isPin ? t('workspace.wrapper.space.menu.pin-un') : '',
