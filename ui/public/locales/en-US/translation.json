@@ -1651,6 +1651,38 @@
             "placeholder": "Please enter a view name",
             "input-empty": "Please enter valid content",
             "submit": "submit"
+          },
+          "group": {
+            "create": "Create a new group",
+            "placeholder": "Please enter a group name",
+            "def": "Default Group",
+            "name-默认分组": "Default Group",
+
+            "create-toast": {
+              "loading": "Creating group...",
+              "success": "Group created successfully!",
+              "error": "Group creation failed!"
+            },
+            "update": {
+              "loading": "Updating groups...",
+              "success": "Group update successful!",
+              "error": "Group update failed!"
+            },
+            "delete": {
+              "label": "Delete a group",
+              "title": "Are you sure you want to delete the group?",
+              "desc": "After deleting a group, the pages in the group will be unpinned to the workbench",
+              "cancel": "Cancel",
+              "confirm": "Delete",
+
+              "loading": "Deleting group...",
+              "success": "Group deleted successfully!",
+              "error": "Group deletion failed!"
+            },
+            "rename": {
+              "label": "Rename Group",
+              "placeholder": "Please enter a group name, no more than 16 characters"
+            }
           }
         },
         "tabs": {

@@ -53,6 +53,18 @@ export type IPinPage = IPageType & {
   workflow: MonkeyWorkflow;
 };
 
+export interface IPageGroup {
+  id: string;
+  pageIds: string[];
+  displayName: string;
+  isBuiltIn: boolean;
+}
+
+export type IPinningPage = {
+  pages: IPinPage[];
+  groups: IPageGroup[];
+};
+
 export declare type CreatePageDto = {
   /**
    * 类型

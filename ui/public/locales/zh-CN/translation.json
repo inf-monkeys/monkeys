@@ -1650,7 +1650,36 @@
             "submit": "保存"
           },
           "group": {
-            "placeholder": "请输入分组名称"
+            "create": "新建分组",
+            "placeholder": "请输入分组名称",
+            "def": "默认分组",
+            "name-默认分组": "默认分组",
+
+            "create-toast": {
+              "loading": "正在创建分组...",
+              "success": "分组创建成功！",
+              "error": "分组创建失败！"
+            },
+            "update": {
+              "loading": "正在更新分组...",
+              "success": "分组更新成功！",
+              "error": "分组更新失败！"
+            },
+            "delete": {
+              "label": "删除分组",
+              "title": "你确定要删除分组吗？",
+              "desc": "删除分组后，分组内的页面将会取消固定到工作台",
+              "cancel": "取消",
+              "confirm": "删除",
+
+              "loading": "正在删除分组...",
+              "success": "分组删除成功！",
+              "error": "分组删除失败！"
+            },
+            "rename": {
+              "label": "重命名分组",
+              "placeholder": "请输入分组名称，不超过 16 字"
+            }
           }
         },
         "tabs": {
