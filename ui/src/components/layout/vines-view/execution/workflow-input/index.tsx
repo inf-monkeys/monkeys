@@ -177,8 +177,8 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                                 min={typeOptions.minValue}
                                 max={typeOptions.maxValue}
                                 step={typeOptions.numberPrecision}
-                                defaultValue={[Number(value)]}
-                                value={[Number(value)]}
+                                defaultValue={[Number(value) || 0]}
+                                value={[Number(value) || 0]}
                                 onChange={onChange}
                                 {...field}
                               />
