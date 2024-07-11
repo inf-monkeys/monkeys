@@ -13,7 +13,7 @@ export interface SliderProps extends Omit<React.ComponentPropsWithoutRef<typeof 
 const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, SliderProps>(
   ({ className, label, value, ...props }, ref) => (
     <div className="flex flex-col items-end gap-2">
-      <div className="flex w-full justify-between">
+      <div className={cn('flex w-full justify-between', { 'justify-end': !label })}>
         {label && <span className="text-sm">{label}</span>}
         <span className="text-sm">{isUndefined(value?.[0]) ? 'NaN' : value[0]}</span>
       </div>
