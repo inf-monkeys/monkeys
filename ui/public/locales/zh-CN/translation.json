@@ -1621,7 +1621,10 @@
       },
       "space": {
         "unknown-view": "未知视图",
-        "add-tab": "新建视图",
+        "add-tab": {
+          "label": "新建视图",
+          "empty": "暂无视图"
+        },
         "menu": {
           "del-view-button": "删除视图",
           "del-view": "确定要删除「{{ view }}」吗？",
