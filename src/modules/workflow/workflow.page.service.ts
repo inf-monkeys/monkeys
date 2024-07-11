@@ -3,17 +3,20 @@ import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
 import { BUILT_IN_PAGE_INSTANCES, WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { keyBy, uniq } from 'lodash';
-import { Repository } from 'typeorm';
+import { keyBy, pick, set, uniq } from 'lodash';
+import { In, Repository } from 'typeorm';
 import { CreatePageDto } from './dto/req/create-page.dto';
-import { UpdatePagesDto } from './dto/req/update-pages.dto';
+import { UpdatePageGroupDto, UpdatePagesDto } from './dto/req/update-pages.dto';
 import { WorkflowPageJson } from './interfaces';
+import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 
 @Injectable()
 export class WorkflowPageService {
   constructor(
     @InjectRepository(WorkflowPageEntity)
     private readonly pageRepository: Repository<WorkflowPageEntity>,
+    @InjectRepository(WorkflowPageGroupEntity)
+    private readonly pageGroupRepository: Repository<WorkflowPageGroupEntity>,
     private readonly workflowRepository: WorkflowRepository,
   ) {}
 
@@ -142,25 +145,154 @@ export class WorkflowPageService {
   }
 
   public async getPinnedPages(teamId: string) {
+    const groups = await this.pageGroupRepository.find({
+      where: {
+        teamId,
+      },
+    });
+
+    const pageIds = uniq(groups.map((it) => it.pageIds).flat(1)) as string[];
+
     const pages = await this.pageRepository.find({
       where: {
         teamId,
-        pinned: true,
+        id: In(pageIds),
         isDeleted: false,
       },
     });
-    const workflowIds = uniq(pages.map((page) => page.workflowId));
+
+    const pageIdsSet = new Set<string>();
+    const filteredPages = pages.filter((it) => {
+      if (pageIdsSet.has(it.id)) {
+        return false;
+      }
+      pageIdsSet.add(it.id);
+      return true;
+    });
+
+    const workflowIds = uniq(filteredPages.map((page) => page.workflowId));
     const workflows = await this.workflowRepository.findWorkflowByIds(workflowIds);
     const workflowMap = keyBy(workflows, 'workflowId');
     const pageInstanceTypeMapper = keyBy(BUILT_IN_PAGE_INSTANCES, 'type');
-    return pages.map((p) => ({
-      ...p,
-      workflow: workflowMap[p.workflowId],
-      instance: pageInstanceTypeMapper[p.type],
-    }));
+
+    return {
+      pages: filteredPages.map((p) => ({
+        ...p,
+        workflow: workflowMap[p.workflowId],
+        instance: pageInstanceTypeMapper[p.type],
+      })),
+      groups: groups.map((it) => pick(it, ['id', 'displayName', 'pageIds', 'isBuiltIn'])),
+    };
   }
 
   async updatePagePinStatus(teamId: string, pageId: string, pin: boolean) {
     return await this.workflowRepository.updatePagePinStatus(teamId, pageId, pin);
+  }
+
+  async createPageGroup(teamId: string, displayName: string, pageId?: string) {
+    const teamGroups = await this.pageGroupRepository.find({
+      where: {
+        teamId,
+      },
+    });
+
+    const pageGroup: WorkflowPageGroupEntity = {
+      id: generateDbId(),
+      displayName,
+      isBuiltIn: false,
+      teamId,
+      pageIds: pageId ? [pageId] : [],
+      createdTimestamp: Date.now(),
+      updatedTimestamp: Date.now(),
+    };
+    await this.pageGroupRepository.save(pageGroup);
+
+    return [...teamGroups, pageGroup];
+  }
+
+  async removePageGroup(teamId: string, groupId: string) {
+    await this.pageGroupRepository.delete({
+      id: groupId,
+      teamId,
+    });
+    return await this.pageGroupRepository.find({
+      where: {
+        teamId,
+      },
+    });
+  }
+
+  async updatePageGroup(teamId: string, groupId: string, body: UpdatePageGroupDto) {
+    const { displayName, pageId, mode } = body;
+
+    const values: Partial<WorkflowPageGroupEntity> = {
+      ...(displayName && { displayName }),
+    };
+
+    const groups = await this.pageGroupRepository.find({
+      where: {
+        teamId,
+      },
+    });
+
+    if (groupId === 'default') {
+      const defaultGroup = groups.find((group) => group.isBuiltIn);
+
+      if (defaultGroup) {
+        groupId = defaultGroup.id;
+      } else {
+        const newDefaultGroup: WorkflowPageGroupEntity = {
+          id: generateDbId(),
+          displayName: '默认分组',
+          isBuiltIn: true,
+          teamId,
+          pageIds: [],
+          createdTimestamp: Date.now(),
+          updatedTimestamp: Date.now(),
+        };
+        await this.pageGroupRepository.save(newDefaultGroup);
+
+        groupId = newDefaultGroup.id;
+        groups.push(newDefaultGroup);
+      }
+    }
+
+    const currentGroup = groups.find((group) => group.id === groupId);
+    if (!currentGroup) {
+      return { groups, message: 'Group not found' };
+    }
+
+    if (displayName) {
+      set(currentGroup, 'displayName', displayName);
+    }
+
+    if (pageId && ['add', 'remove'].includes(mode)) {
+      switch (mode) {
+        case 'add':
+          values.pageIds = uniq([...currentGroup.pageIds, pageId]);
+          break;
+        case 'remove':
+          values.pageIds = uniq(currentGroup.pageIds.filter((id) => id !== pageId));
+          break;
+      }
+      set(currentGroup, 'pageIds', values.pageIds);
+    }
+
+    const result = await this.pageGroupRepository.update(
+      {
+        id: groupId,
+      },
+      values,
+    );
+
+    return { groups, message: result ? 'Group updated' : 'Group update failed' };
+  }
+
+  async getPageGroups(teamId: string) {
+    return await this.pageGroupRepository.find({
+      where: {
+        teamId,
+      },
+    });
   }
 }
