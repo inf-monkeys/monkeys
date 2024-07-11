@@ -1635,7 +1635,7 @@
         "menu": {
           "del-view-button": "Delete View",
           "del-view": "Are you sure you want to delete ‘{{ view }}’?",
-          "pin": "{{ status }}Pin",
+          "pin": "Pin",
           "toggle-pin": "{{ status }}Pinning...",
           "pin-un": "un",
           "toggle-pin-success": "{{ status }}Pin success",

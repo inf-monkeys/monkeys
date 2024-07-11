@@ -780,14 +780,14 @@
   },
   "workbench": {
     "view": {
-      "no-starred-view": "暂无标星视图",
+      "no-starred-view": "暂无固定视图",
       "header": {
         "enter": "进入视图",
-        "delete": "取消标星"
+        "delete": "取消固定"
       }
     },
     "sidebar": {
-      "add": "添加标星视图"
+      "add": "添加固定视图"
     }
   },
   "ugc-page": {
@@ -1618,17 +1618,20 @@
         "menu": {
           "del-view-button": "删除视图",
           "del-view": "确定要删除「{{ view }}」吗？",
-          "pin": "{{ status }}标星",
-          "toggle-pin": "正在{{ status }}标星中...",
+          "pin": "固定视图",
+          "toggle-pin": "正在{{ status }}固定到工作台中...",
           "pin-un": "取消",
-          "toggle-pin-success": "{{ status }}标星成功",
-          "toggle-pin-failed": "{{ status }}标星失败",
+          "toggle-pin-success": "{{ status }}固定到工作台成功",
+          "toggle-pin-failed": "{{ status }}固定到工作台失败",
           "rename": {
             "trigger": "重命名",
             "title": "重命名视图",
             "placeholder": "请输入视图名称",
             "input-empty": "请输入有效的内容",
             "submit": "保存"
+          },
+          "group": {
+            "placeholder": "请输入分组名称"
           }
         },
         "tabs": {
