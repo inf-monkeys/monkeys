@@ -25,6 +25,7 @@ export const workflowInputSchema = z.object({
     .optional(),
   multipleValues: z.boolean().optional(),
   assetType: z.string().optional(),
+  enableImageMask: z.boolean().optional(),
   minValue: z.number().optional(),
   maxValue: z.number().optional(),
   numberPrecision: z.number().optional(),

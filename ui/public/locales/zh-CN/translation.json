@@ -1944,6 +1944,9 @@
                 "list": "列表"
               },
               "type-options": {
+                "enable-image-mask": {
+                  "label": "启用图像遮罩"
+                },
                 "min-value": {
                   "label": "最小值",
                   "placeholder": "请输入最小值"

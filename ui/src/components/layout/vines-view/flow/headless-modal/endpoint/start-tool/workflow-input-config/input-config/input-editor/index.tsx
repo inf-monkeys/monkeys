@@ -20,12 +20,14 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form.tsx';
+import { VinesImageMaskEditor } from '@/components/ui/image-mask-editor';
 import { Input } from '@/components/ui/input';
 import { TagInput } from '@/components/ui/input/tag';
 import { Label } from '@/components/ui/label.tsx';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator.tsx';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
+import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { Updater } from '@/components/ui/updater';
 import { useVinesFlow } from '@/package/vines-flow';
@@ -89,6 +91,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
     form.setValue('default', currentVariable.default as IWorkflowInput['default']);
     form.setValue('multipleValues', get(currentVariable, 'typeOptions.multipleValues', false));
     form.setValue('assetType', get(currentVariable, 'typeOptions.assetType', ''));
+    form.setValue('enableImageMask', get(currentVariable, 'typeOptions.enableImageMask', undefined));
     form.setValue('minValue', get(currentVariable, 'typeOptions.minValue', undefined));
     form.setValue('maxValue', get(currentVariable, 'typeOptions.maxValue', undefined));
     form.setValue('numberPrecision', get(currentVariable, 'typeOptions.numberPrecision', undefined));
@@ -98,14 +101,26 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
     const {
       multipleValues,
       assetType,
+      enableImageMask,
       minValue,
       maxValue,
       numberPrecision,
       default: Default,
-    } = pick(data, ['multipleValues', 'assetType', 'default', 'minValue', 'maxValue', 'numberPrecision']);
+    } = pick(data, [
+      'multipleValues',
+      'assetType',
+      'default',
+      'minValue',
+      'maxValue',
+      'numberPrecision',
+      'enableImageMask',
+      'minValue',
+      'maxValue',
+    ]);
     const finalVariable = omit(data, ['multipleValues', 'assetType', 'default']);
     multipleValues && set(finalVariable, 'typeOptions.multipleValues', true);
     assetType && set(finalVariable, 'typeOptions.assetType', assetType);
+    enableImageMask && set(finalVariable, 'typeOptions.enableImageMask', enableImageMask);
     !isUndefined(minValue) && set(finalVariable, 'typeOptions.minValue', minValue);
     !isUndefined(maxValue) && set(finalVariable, 'typeOptions.maxValue', maxValue);
     !isUndefined(numberPrecision) && set(finalVariable, 'typeOptions.numberPrecision', numberPrecision);
@@ -135,6 +150,8 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
   });
 
   const { multipleValues, assetType, type } = form.getValues();
+
+  const enableImageMask = form.watch('enableImageMask');
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -312,21 +329,60 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
               {type === 'file' && isLatestWorkflowVersion && (
                 <>
                   <Separator orientation="vertical" className="mx-2" />
-                  <div className="flex w-[40rem] flex-col gap-2">
-                    <Label>
-                      {t('workspace.flow-view.endpoint.start-tool.input.config-form.file.label', {
-                        extra: multipleValues
-                          ? t('workspace.flow-view.endpoint.start-tool.input.config-form.file.list')
-                          : '',
-                      })}
-                    </Label>
-                    <Updater
-                      limit={multipleValues ? void 0 : 1}
-                      onFinished={(urls) => form.setValue('default', multipleValues ? urls : urls[0])}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      {t('workspace.flow-view.endpoint.start-tool.input.config-form.file.desc')}
-                    </p>
+                  <div className="flex w-[40rem] flex-col gap-4">
+                    {!multipleValues && (
+                      <FormField
+                        name="enableImageMask"
+                        control={form.control}
+                        render={({ field }) => (
+                          <FormItem className="flex w-full items-center justify-between">
+                            <FormLabel>
+                              {t(
+                                'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.enable-image-mask.label',
+                              )}
+                            </FormLabel>
+                            <div className="flex-grow" />
+                            <FormControl>
+                              <Switch checked={field.value} onCheckedChange={field.onChange} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                    {enableImageMask ? (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <Label>
+                            {t('workspace.flow-view.endpoint.start-tool.input.config-form.file.label', { extra: '' })}
+                          </Label>
+                          <VinesImageMaskEditor onFinished={(urls) => form.setValue('default', urls[0])}>
+                            <Button variant="outline" size="small" className="-mr-1 scale-90">
+                              {t(
+                                'workspace.pre-view.actuator.execution-form.file.click-to-open-in-image-mask-editor-and-upload',
+                              )}
+                            </Button>
+                          </VinesImageMaskEditor>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <Label>
+                          {t('workspace.flow-view.endpoint.start-tool.input.config-form.file.label', {
+                            extra: multipleValues
+                              ? t('workspace.flow-view.endpoint.start-tool.input.config-form.file.list')
+                              : '',
+                          })}
+                        </Label>
+                        <Updater
+                          limit={multipleValues ? void 0 : 1}
+                          onFinished={(urls) => form.setValue('default', multipleValues ? urls : urls[0])}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          {t('workspace.flow-view.endpoint.start-tool.input.config-form.file.desc')}
+                        </p>
+                      </>
+                    )}
                   </div>
                 </>
               )}

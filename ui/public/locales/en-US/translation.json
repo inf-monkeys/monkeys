@@ -1947,6 +1947,9 @@
                 "list": "list"
               },
               "type-options": {
+                "enable-image-mask": {
+                  "label": "Enable Image Mask"
+                },
                 "min-value": {
                   "label": "Min Value",
                   "placeholder": "Enter min value"
