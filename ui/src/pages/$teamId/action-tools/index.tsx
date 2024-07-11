@@ -50,7 +50,7 @@ export const ActionTools: React.FC = () => {
         }}
         onItemClick={(item) => {
           void navigate({
-            to: `/$teamId/action-tools/${item.name}`,
+            to: `/$teamId/action-tools/${item.name}/`,
           });
         }}
         subtitle={

@@ -1628,7 +1628,10 @@
       },
       "space": {
         "unknown-view": "Unknown view",
-        "add-tab": "New View",
+        "add-tab": {
+          "label": "Add View",
+          "empty": "No view available"
+        },
         "menu": {
           "del-view-button": "Delete View",
           "del-view": "Are you sure you want to delete ‘{{ view }}’?",

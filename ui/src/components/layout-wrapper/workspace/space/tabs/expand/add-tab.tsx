@@ -1,6 +1,7 @@
+import React from 'react';
+
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { createWorkspacePage, useWorkspacePageInstances } from '@/apis/pages';
@@ -25,7 +26,7 @@ interface IAddSpaceTabProps extends React.ComponentPropsWithoutRef<'div'> {}
 export const AddSpaceTab: React.FC<IAddSpaceTabProps> = ({ className }) => {
   const { t } = useTranslation();
 
-  const { workflowId, pagesMutate, navigateTo } = useVinesPage();
+  const { workflowId, pages, pagesMutate, navigateTo } = useVinesPage();
   const { data } = useWorkspacePageInstances();
 
   const handleAddPage = async (pageType: string) => {
@@ -46,6 +47,9 @@ export const AddSpaceTab: React.FC<IAddSpaceTabProps> = ({ className }) => {
     }
   };
 
+  const viewList = data?.filter(({ type }) => !(pages?.map(({ type }) => type) ?? []).includes(type)) ?? [];
+  const isEmpty = !viewList.length;
+
   return (
     <motion.div
       key="vines-workspace-add-page-button"
@@ -61,20 +65,19 @@ export const AddSpaceTab: React.FC<IAddSpaceTabProps> = ({ className }) => {
               <Button icon={<Plus />} className="my-auto !scale-75" variant="outline" />
             </TooltipTrigger>
           </DropdownMenuTrigger>
-          <TooltipContent>{t('workspace.wrapper.space.add-tab')}</TooltipContent>
+          <TooltipContent>{t('workspace.wrapper.space.add-tab.label')}</TooltipContent>
         </Tooltip>
         <DropdownMenuContent>
-          <DropdownMenuLabel>{t('workspace.wrapper.space.add-tab')}</DropdownMenuLabel>
+          <DropdownMenuLabel>{t('workspace.wrapper.space.add-tab.label')}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            {data
-              ?.filter(({ type }) => type !== 'process')
-              ?.map(({ type, icon, name }) => (
-                <DropdownMenuItem key={type} className="flex items-center gap-2" onClick={() => handleAddPage(type)}>
-                  <VinesIcon size="xs">{icon}</VinesIcon>
-                  <p>{t([`workspace.wrapper.space.tabs.${name}`, name])}</p>
-                </DropdownMenuItem>
-              ))}
+            {viewList.map(({ type, icon, name }) => (
+              <DropdownMenuItem key={type} className="flex items-center gap-2" onClick={() => handleAddPage(type)}>
+                <VinesIcon size="xs">{icon}</VinesIcon>
+                <p>{t([`workspace.wrapper.space.tabs.${name}`, name])}</p>
+              </DropdownMenuItem>
+            ))}
+            {isEmpty && <DropdownMenuItem disabled>{t('workspace.wrapper.space.add-tab.empty')}</DropdownMenuItem>}
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
