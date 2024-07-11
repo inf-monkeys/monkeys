@@ -24,6 +24,7 @@ import { WorkflowValidateController } from './workflow.validate.controller';
 import { WorkflowValidateService } from './workflow.validate.service';
 import { WorkflowWebhookController } from './workflow.webhook.controller';
 import { WorkflowWebhookService } from './workflow.webhook.service';
+import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 
 @Module({
   controllers: [
@@ -51,7 +52,7 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     WorkflowCustomTriggerInvokeService,
     WorkflowLogService,
   ],
-  imports: [ConductorModule, TypeOrmModule.forFeature([WorkflowPageEntity]), ToolsModule],
+  imports: [ConductorModule, TypeOrmModule.forFeature([WorkflowPageEntity, WorkflowPageGroupEntity]), ToolsModule],
   exports: [WorkflowCrudService, WorkflowExecutionService],
 })
 export class WorkflowModule {}

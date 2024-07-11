@@ -27,3 +27,30 @@ export class UpdatePagesDto {
   @joiful.array().items((joi) => joi.object())
   pages: UpdatePageData[];
 }
+
+export class UpdatePageGroupDto {
+  @ApiProperty({
+    name: 'displayName',
+    description: '分组名称',
+    type: String,
+    example: '分组名称',
+  })
+  @joiful.string()
+  displayName?: string;
+
+  @ApiProperty({
+    name: 'pageId',
+    description: '页面 ID',
+    type: String,
+    example: '6561ed83a60ba37fee5c6e14',
+  })
+  pageId?: string;
+
+  @ApiProperty({
+    name: 'mode',
+    description: '操作类型',
+    type: String,
+    example: 'add',
+  })
+  mode?: 'add' | 'remove';
+}
