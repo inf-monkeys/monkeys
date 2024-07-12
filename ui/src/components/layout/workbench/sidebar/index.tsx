@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { Link } from '@tanstack/react-router';
 
@@ -44,6 +44,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ groupId, se
 
   const [currentPage, setCurrentPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
 
+  const prevPageRef = useRef<string>();
   useDebounceEffect(
     () => {
       const currentPageId = currentPage?.id;
@@ -60,8 +61,9 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ groupId, se
 
           if (!currentPageId) {
             const page = originalPages.find((it) => it.id === (latestGroup.pageIds?.[0] ?? ''));
-            if (page) {
+            if (page && prevPageRef.current !== page.id) {
               setCurrentPage(page);
+              prevPageRef.current = page.id;
             }
           }
         }
@@ -73,7 +75,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ groupId, se
         }
       }
     },
-    [originalPages, originalGroups, currentPage],
+    [originalPages, originalGroups],
     { wait: 180 },
   );
 

@@ -41,6 +41,7 @@ export const TeamSelector: React.FC = () => {
 
   const handleSwapTeam = async (id: string) => {
     setTeamId(id);
+    localStorage.removeItem('vines-ui-workbench-page');
     await navigate({
       to: routeId?.replace(/.$/, ''),
       params: {
