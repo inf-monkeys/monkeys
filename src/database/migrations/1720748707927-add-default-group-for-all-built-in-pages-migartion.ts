@@ -37,7 +37,7 @@ export class MigartionAddDefaultGroupForAllBuiltInPages1720748707927 implements 
 
     if (needToCreateGroupTeamIds.length) {
       // 获取 PAGE_TABLE_NAME 表中所有团队的 is_builtin 为 true 的数据
-      const builtinPages = await queryRunner.query(`SELECT id, team_id FROM ${this.PAGE_TABLE_NAME} WHERE is_builtin = true AND pinned = true`);
+      const builtinPages = await queryRunner.query(`SELECT id, team_id FROM ${this.PAGE_TABLE_NAME} WHERE pinned = true`);
       // 转换为：{ teamId: [pageId1, pageId2, ...] }
       const builtinPagesMap: Record<string, string[]> = {};
 
