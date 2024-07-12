@@ -17,7 +17,7 @@ export class AssetsMarketPlaceRepository {
   ) {}
 
   public async forkBuiltInWorkflowAssetsFromMarketPlace(teamId: string, creatorUserId: string) {
-    const clonedWorfklows = await this.workflowAssetsRepository.forkBuiltInWorkflowAssetsFromMarketPlace(teamId, creatorUserId, (workflowMetadata: WorkflowMetadataEntity) => {
+    const clonedWorkflows = await this.workflowAssetsRepository.forkBuiltInWorkflowAssetsFromMarketPlace(teamId, creatorUserId, (workflowMetadata: WorkflowMetadataEntity) => {
       const { tasks = [] } = workflowMetadata;
       for (const task of tasks) {
         if (task.name === `${LLM_NAMESPACE}:${LLM_CHAT_COMPLETION_TOOL}`) {
@@ -41,7 +41,7 @@ export class AssetsMarketPlaceRepository {
         workflowId: generateDbId(),
       };
     });
-    for (const workflow of clonedWorfklows) {
+    for (const workflow of clonedWorkflows) {
       const { forkFromId } = workflow;
       const originalMarketPlaceData = BUILT_IN_WORKFLOW_MARKETPLACE_LIST.find((x) => x.id === forkFromId);
       if (originalMarketPlaceData?.autoPinPage?.length) {
@@ -54,6 +54,6 @@ export class AssetsMarketPlaceRepository {
         }
       }
     }
-    return clonedWorfklows;
+    return clonedWorkflows;
   }
 }
