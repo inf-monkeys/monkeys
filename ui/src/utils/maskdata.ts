@@ -8,3 +8,6 @@ export const maskPhone = (phone: string) =>
   });
 
 export const maskEmail = (email: string) => MaskData.maskEmail2(email);
+
+export const maskPassword = (password: string) =>
+  MaskData.maskPassword(password, { unmaskedStartCharacters: 8, unmaskedEndCharacters: 6, maxMaskedCharacters: 30 });

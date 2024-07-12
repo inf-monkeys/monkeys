@@ -633,6 +633,7 @@
     },
     "api-key": {
       "title": "API 密钥",
+      "desc": "在此配置用于访问所有 API 的密钥。您可以创建多个密钥，以便在不同的场景下使用。",
       "api-key-item": {
         "revoked": "已废弃",
         "operate": {
