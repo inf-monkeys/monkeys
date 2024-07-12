@@ -642,6 +642,7 @@
     },
     "api-key": {
       "title": "API Key",
+      "desc": "Configure the key used to access all APIs here. You can create multiple keys for use in different scenarios.",
       "api-key-item": {
         "revoked": "Revoked",
         "operate": {
