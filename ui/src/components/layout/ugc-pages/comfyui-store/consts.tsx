@@ -5,7 +5,7 @@ import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { IComfyuiWorkflow } from '@/apis/comfyui/typings';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
-import { I18nContent } from '@/utils';
+import { getI18nContent } from '@/utils';
 
 const columnHelper = createColumnHelper<IAssetItem<IComfyuiWorkflow>>();
 export const createComfyuiStoreColumns = () => [
@@ -19,13 +19,13 @@ export const createComfyuiStoreColumns = () => [
     id: 'title',
     header: '名称',
     cell: ({ row, getValue }) => (
-      <span className="transition-colors hover:text-primary-500">{I18nContent(getValue() as string | I18nValue)}</span>
+      <span className="transition-colors hover:text-primary-500">{getI18nContent(getValue() as string | I18nValue)}</span>
     ),
   }),
   columnHelper.accessor('description', {
     id: 'description',
     header: '描述',
-    cell: ({ getValue }) => RenderDescription({ description: I18nContent(getValue() as string | I18nValue) }),
+    cell: ({ getValue }) => RenderDescription({ description: getI18nContent(getValue() as string | I18nValue) }),
   }),
   columnHelper.accessor('user', {
     id: 'user',
