@@ -1,11 +1,11 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { flexRender } from '@tanstack/react-table';
 import { CircleEllipsis, Info } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { IUgcViewItemProps } from '@/components/layout/ugc/typings.ts';
-import { getRenderNodeFn } from '@/components/layout/ugc/view/utils/node-renderer.tsx';
+import { useColumnRenderer } from '@/components/layout/ugc/view/utils/node-renderer.tsx';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils';
@@ -20,15 +20,13 @@ export const UgcViewGalleryItem = <E extends object>({
 }: IUgcViewItemProps<E>) => {
   const { t } = useTranslation();
 
-  const getRenderNode = getRenderNodeFn({
-    row,
-    columns,
-    renderOptions,
-  });
+  const cells = row.getAllCells();
 
-  const cover = useMemo(() => getRenderNode('cover'), [index, row]);
-  const title = useMemo(() => getRenderNode('title'), [index, row]);
-  const subtitle = useMemo(() => getRenderNode('subtitle'), [index, row]);
+  const render = useColumnRenderer({ row, columns, renderOptions, cells });
+
+  const cover = render('cover');
+  const title = render('title');
+  const subtitle = render('subtitle');
 
   return (
     <div

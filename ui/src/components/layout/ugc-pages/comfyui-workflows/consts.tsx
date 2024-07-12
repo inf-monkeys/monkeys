@@ -8,7 +8,7 @@ import { IComfyuiWorkflow } from '@/apis/comfyui/typings';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { IUgcCreateColumnsProps } from '@/components/layout/ugc/typings.ts';
 import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
-import { I18nContent } from '@/utils';
+import { getI18nContent } from '@/utils';
 
 const columnHelper = createColumnHelper<IAssetItem<IComfyuiWorkflow>>();
 
@@ -35,7 +35,7 @@ export const createComfyuiWorkflowColumns = ({ hooks }: ICreateComfyuiWorkflowCo
           });
         }}
       >
-        {I18nContent(getValue() as string | I18nValue)}
+        {getI18nContent(getValue() as string | I18nValue)}
       </span>
     ),
   }),
@@ -46,7 +46,7 @@ export const createComfyuiWorkflowColumns = ({ hooks }: ICreateComfyuiWorkflowCo
   }),
   columnHelper.accessor('description', {
     id: 'description',
-    cell: ({ getValue }) => RenderDescription({ description: I18nContent(getValue() as string | I18nValue) }),
+    cell: ({ getValue }) => RenderDescription({ description: getI18nContent(getValue() as string | I18nValue) }),
   }),
   columnHelper.accessor('assetTags', {
     id: 'assetTags',

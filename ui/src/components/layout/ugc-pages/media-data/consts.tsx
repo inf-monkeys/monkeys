@@ -7,7 +7,7 @@ import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { IMediaData } from '@/apis/media-data/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
-import { I18nContent } from '@/utils';
+import { getI18nContent } from '@/utils';
 
 const columnHelper = createColumnHelper<IAssetItem<IMediaData>>();
 
@@ -21,7 +21,7 @@ export const createMediaDataColumns = () => [
     id: 'title',
     cell: ({ getValue }) => (
       <a className="transition-colors hover:text-primary-500" target="_blank" rel="noreferrer">
-        {I18nContent(getValue() as string | I18nValue)}
+        {getI18nContent(getValue() as string | I18nValue)}
       </a>
     ),
   }),
