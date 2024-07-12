@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 
 import { useParams } from '@tanstack/react-router';
 
@@ -9,7 +9,6 @@ import { useVinesFlow } from '@/package/vines-flow';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
-import { useLocalStorage } from '@/utils';
 
 interface IVinesViewWrapperProps {
   workflowId?: string;
