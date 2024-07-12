@@ -1591,6 +1591,17 @@
             "loading": "正在更新权限...",
             "success": "更新权限成功！",
             "error": "更新权限失败！请稍后重试！"
+          },
+          "iframe": {
+            "title": "页面嵌入",
+            "desc": "你可以通过 iframe 嵌入来整合工作流到你的应用",
+
+            "built-in": {
+              "label": "内置视图 iframe 嵌入地址" ,
+              "desc1": "内置视图的嵌入可不填写视图 ID，直接填写 view- 拼上视图类型",
+              "desc2": "流程视图：flow、日志视图：logs、表单视图：form、对话视图：chat",
+              "tips": "地址结构为：https://[domain]/[团队 ID]/workspace/[工作流 ID]/view-[视图类型]"
+            }
           }
         }
       },

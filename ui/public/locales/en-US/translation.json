@@ -1594,6 +1594,17 @@
             "loading": "Updating permissions...",
             "success": "Update permissions successful!",
             "error": "Update permissions failed! Please try again later!"
+          },
+          "iframe": {
+            "title": "View Iframe Embed",
+            "desc": "You can integrate the workflow into your application via iframe embed",
+
+            "built-in": {
+              "label": "Built-in view iframe embed address" ,
+              "desc1": "When embedding a built-in view, you do not need to fill in the view ID. Instead, you can directly fill in the view type with view-",
+              "desc2": "Flow view: flow, log view: logs, form view: form, conversation view: chat",
+              "tips": "The address structure is: https://[domain]/[team ID]/workspace/[workflow ID]/view-[view type]"
+            }
           }
         }
       },
