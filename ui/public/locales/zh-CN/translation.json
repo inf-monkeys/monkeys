@@ -1643,7 +1643,16 @@
         "unknown-view": "未知视图",
         "add-tab": {
           "label": "新建视图",
-          "empty": "暂无视图"
+          "empty": "暂无视图",
+
+          "create-custom-code-view": {
+            "button": "自定义视图",
+
+            "tips": {
+              "title": "创建自定义代码视图",
+              "desc": "你可以使用 ReactJS 代码，结合我们的组件库和 TailwindCSS，自定义页面排版和组件样式，并通过 JS SDK 轻松实现个性化视图。"
+            }
+          }
         },
         "menu": {
           "del-view-button": "删除视图",

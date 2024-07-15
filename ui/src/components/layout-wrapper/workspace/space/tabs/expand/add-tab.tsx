@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { motion } from 'framer-motion';
-import { Plus } from 'lucide-react';
+import { CodeSquare, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { createWorkspacePage, useWorkspacePageInstances } from '@/apis/pages';
@@ -79,6 +79,23 @@ export const AddSpaceTab: React.FC<IAddSpaceTabProps> = ({ className }) => {
             ))}
             {isEmpty && <DropdownMenuItem disabled>{t('workspace.wrapper.space.add-tab.empty')}</DropdownMenuItem>}
           </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuItem className="flex items-center gap-2">
+                <CodeSquare size={16} />
+                {t('workspace.wrapper.space.add-tab.create-custom-code-view.button')}
+              </DropdownMenuItem>
+            </TooltipTrigger>
+            <TooltipContent className="w-52 space-y-1" side="left" sideOffset={8} align="start">
+              <h1 className="text-sm font-bold">
+                {t('workspace.wrapper.space.add-tab.create-custom-code-view.tips.title')}
+              </h1>
+              <p className="text-xs text-gray-12">
+                {t('workspace.wrapper.space.add-tab.create-custom-code-view.tips.desc')}
+              </p>
+            </TooltipContent>
+          </Tooltip>
         </DropdownMenuContent>
       </DropdownMenu>
     </motion.div>
