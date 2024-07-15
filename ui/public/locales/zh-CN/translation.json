@@ -1647,10 +1647,21 @@
 
           "create-custom-code-view": {
             "button": "自定义视图",
+            "placeholder": "请输入自定义视图名称",
 
             "tips": {
               "title": "创建自定义代码视图",
               "desc": "你可以使用 ReactJS 代码，结合我们的组件库和 TailwindCSS，自定义页面排版和组件样式，并通过 JS SDK 轻松实现个性化视图。"
+            },
+
+            "form": {
+              "display-name": {
+                "label": "视图名称",
+                "placeholder": "请输入视图名称"
+              },
+              "icon": "视图图标",
+
+              "submit": "创建"
             }
           }
         },

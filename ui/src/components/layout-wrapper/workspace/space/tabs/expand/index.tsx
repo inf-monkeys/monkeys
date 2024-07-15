@@ -2,7 +2,7 @@ import React from 'react';
 
 import { AnimatePresence } from 'framer-motion';
 
-import { AddSpaceTab } from '@/components/layout-wrapper/workspace/space/tabs/expand/add-tab.tsx';
+import { CreateSpaceTab } from 'src/components/layout-wrapper/workspace/space/tabs/expand/create-tab';
 import { ScrollTool } from '@/components/layout-wrapper/workspace/space/tabs/expand/scroll-tool';
 
 interface IScrollToolProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -11,5 +11,5 @@ interface IScrollToolProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const Expand: React.FC<IScrollToolProps> = ({ visible, tabsNode }) => {
-  return <AnimatePresence>{!visible ? <AddSpaceTab /> : <ScrollTool tabsNode={tabsNode} />}</AnimatePresence>;
+  return <AnimatePresence>{!visible ? <CreateSpaceTab /> : <ScrollTool tabsNode={tabsNode} />}</AnimatePresence>;
 };

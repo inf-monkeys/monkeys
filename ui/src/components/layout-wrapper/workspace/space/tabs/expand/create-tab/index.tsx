@@ -1,11 +1,12 @@
 import React from 'react';
 
 import { motion } from 'framer-motion';
-import { CodeSquare, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { createWorkspacePage, useWorkspacePageInstances } from '@/apis/pages';
-import { CreatePageDto } from '@/apis/pages/typings';
+import { CreatePageDto } from '@/apis/pages/typings.ts';
+import { CreateCustomCodeView } from '@/components/layout-wrapper/workspace/space/tabs/expand/create-tab/create-custom-code-view.tsx';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,9 +22,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { cn } from '@/utils';
 
-interface IAddSpaceTabProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface ICreateSpaceTabProps extends React.ComponentPropsWithoutRef<'div'> {}
 
-export const AddSpaceTab: React.FC<IAddSpaceTabProps> = ({ className }) => {
+export const CreateSpaceTab: React.FC<ICreateSpaceTabProps> = ({ className }) => {
   const { t } = useTranslation();
 
   const { workflowId, pages, pagesMutate, navigateTo } = useVinesPage();
@@ -80,22 +81,7 @@ export const AddSpaceTab: React.FC<IAddSpaceTabProps> = ({ className }) => {
             {isEmpty && <DropdownMenuItem disabled>{t('workspace.wrapper.space.add-tab.empty')}</DropdownMenuItem>}
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <DropdownMenuItem className="flex items-center gap-2">
-                <CodeSquare size={16} />
-                {t('workspace.wrapper.space.add-tab.create-custom-code-view.button')}
-              </DropdownMenuItem>
-            </TooltipTrigger>
-            <TooltipContent className="w-52 space-y-1" side="left" sideOffset={8} align="start">
-              <h1 className="text-sm font-bold">
-                {t('workspace.wrapper.space.add-tab.create-custom-code-view.tips.title')}
-              </h1>
-              <p className="text-xs text-gray-12">
-                {t('workspace.wrapper.space.add-tab.create-custom-code-view.tips.desc')}
-              </p>
-            </TooltipContent>
-          </Tooltip>
+          <CreateCustomCodeView />
         </DropdownMenuContent>
       </DropdownMenu>
     </motion.div>

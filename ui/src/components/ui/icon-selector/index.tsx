@@ -13,11 +13,18 @@ interface IVinesIconSelectorProps extends Omit<React.ComponentPropsWithoutRef<'d
   emojiLink?: string;
   onChange?: (emojiLink: string) => void;
   onFinished?: (emojiLink: string) => void;
+  onlyEmoji?: boolean;
 }
 
 const colors = ['#434343', '#f2c1be', '#fadebb', '#fef8a3', '#ceefc5', '#d1dcfb', '#d9caf8'];
 
-export const VinesIconSelector: React.FC<IVinesIconSelectorProps> = ({ children, onChange, emojiLink, onFinished }) => {
+export const VinesIconSelector: React.FC<IVinesIconSelectorProps> = ({
+  children,
+  onChange,
+  emojiLink,
+  onFinished,
+  onlyEmoji = false,
+}) => {
   const { t } = useTranslation();
 
   const [selectedColor, setSelectedColor] = useState(colors[4]);
@@ -26,7 +33,7 @@ export const VinesIconSelector: React.FC<IVinesIconSelectorProps> = ({ children,
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const nextEmoji = `emoji:${selectedEmoji}:${selectedColor}`;
+    const nextEmoji = onlyEmoji ? selectedEmoji : `emoji:${selectedEmoji}:${selectedColor}`;
     if (emojiLink !== nextEmoji && visible) {
       onChange?.(nextEmoji);
     }
@@ -48,17 +55,27 @@ export const VinesIconSelector: React.FC<IVinesIconSelectorProps> = ({ children,
     <Popover open={visible} onOpenChange={setVisible}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent
-        className="h-[512px] w-[352px] scale-75 overflow-hidden rounded-xl bg-slate-2 p-0"
+        className={cn(
+          'h-[512px] w-[352px] scale-75 overflow-hidden rounded-xl bg-slate-2 p-0',
+          onlyEmoji && 'h-[432px]',
+        )}
         sideOffset={-55}
       >
         <Picker
           i18n={i18n}
           data={data}
-          onEmojiSelect={(e: any) => setSelectedEmoji(e.native)}
+          onEmojiSelect={(e: any) => {
+            if (onlyEmoji) {
+              onFinished?.(e.native);
+              onChange?.(e.native);
+              setVisible(false);
+            }
+            setSelectedEmoji(e.native);
+          }}
           locale="zh"
           previewPosition="none"
         />
-        <div className="flex h-20 w-full items-center justify-between gap-2 px-5 pb-1">
+        <div className={cn('flex h-20 w-full items-center justify-between gap-2 px-5 pb-1', onlyEmoji && 'hidden')}>
           <div>
             <p className="mb-2 text-sm">{t('components.ui.icon-selector.background-color')}</p>
             <div className="flex items-center gap-1">
