@@ -95,6 +95,10 @@ export class WorkflowPageController {
    * @param pin
    * @returns
    */
+  @ApiOperation({
+    summary: '固定某个视图到工作台',
+    description: '将某个视图固定到工作台',
+  })
   @Post('/pages/:pageId/pin')
   @UseGuards(CompatibleAuthGuard)
   async updatePagePinStatus(@Param('pageId') pageId: string, @Req() request: IRequest, @Body('pin') pin: boolean) {
@@ -106,6 +110,10 @@ export class WorkflowPageController {
     return new SuccessResponse({ data });
   }
 
+  @ApiOperation({
+    summary: '获取视图分组列表',
+    description: '获取视图分组列表',
+  })
   @Get('/page-groups')
   @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
   async getPageGroups(@Req() request: IRequest) {
@@ -114,6 +122,10 @@ export class WorkflowPageController {
     return new SuccessResponse({ data });
   }
 
+  @ApiOperation({
+    summary: '创建视图分组',
+    description: '创建视图分组',
+  })
   @Post('/page-groups')
   @UseGuards(CompatibleAuthGuard)
   async createPageGroup(@Req() request: IRequest, @Body('displayName') displayName: string, @Body('pageId') pageId?: string) {
@@ -122,6 +134,10 @@ export class WorkflowPageController {
     return new SuccessResponse({ data });
   }
 
+  @ApiOperation({
+    summary: '删除视图分组',
+    description: '删除视图分组',
+  })
   @Delete('/page-groups/:groupId')
   @UseGuards(CompatibleAuthGuard)
   async removePageGroup(@Req() request: IRequest, @Param('groupId') groupId: string) {
@@ -130,6 +146,10 @@ export class WorkflowPageController {
     return new SuccessResponse({ data });
   }
 
+  @ApiOperation({
+    summary: '更新视图分组',
+    description: '更新视图分组',
+  })
   @Put('/page-groups/:groupId')
   @UseGuards(CompatibleAuthGuard)
   async updatePageGroup(@Req() request: IRequest, @Param('groupId') groupId: string, @Body() body: UpdatePageGroupDto) {
