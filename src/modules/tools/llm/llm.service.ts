@@ -370,6 +370,38 @@ ${last5MessagesStr}`,
     return response.choices[0].message.content;
   }
 
+  private async chooseMetadataFilterByUserMessage(openai: OpenAI, model: string, userQuestion: string, values: string[]): Promise<string[]> {
+    const response = await openai.chat.completions.create({
+      messages: [
+        {
+          role: 'user',
+          content: `You are a file retriever, choose the most relevant knowledge base on user's question and avaliable file names.
+          
+Available Files:
+${values.map((x) => x).join('\n')}
+
+Rules:
+1. Choose the most relevant file names based on user's question.
+2. You can choose multiple file names, max to 3.
+3. Answer in user's language.
+4. Answer in the format of "file1, file2, file3", separate by comma.
+5. If no files found, answer "No files found".
+
+User's Question:
+${userQuestion}
+`,
+        },
+      ],
+      stream: false,
+      model,
+    });
+    const content = response.choices[0].message.content;
+    if (content.includes('No files found')) {
+      return [];
+    }
+    return response.choices[0].message.content.split(',').map((x) => x.trim());
+  }
+
   private async generateSystemMessages(
     openai: OpenAI,
     model: string,
@@ -388,11 +420,16 @@ ${last5MessagesStr}`,
       const useMessages = messages.filter((msg) => msg.role === 'user');
       if (useMessages.length > 0) {
         const summarizedUserMessage = await this.summarizeUserMessages(openai, model, useMessages);
+        const valuesToFilterByMetadataKey = await this.knowledgeBaseService.valuesToFilterByMetadataKey(knowledgeBase);
+        let metadataFilterValues = undefined;
+        if (valuesToFilterByMetadataKey?.length) {
+          metadataFilterValues = await this.chooseMetadataFilterByUserMessage(openai, model, summarizedUserMessage, valuesToFilterByMetadataKey);
+        }
         try {
-          logger.info(`Start to retrieve knowledge base: ${knowledgeBase} with summarized user message: ${summarizedUserMessage}`);
-          const retrieveResult = await this.knowledgeBaseService.retrieveKnowledgeBase(knowledgeBase, summarizedUserMessage);
+          logger.info(`Start to retrieve knowledge base: ${knowledgeBase} with summarized user message: ${summarizedUserMessage}, metadataFilterValues: ${metadataFilterValues}`);
+          const retrieveResult = await this.knowledgeBaseService.retrieveKnowledgeBase(knowledgeBase, summarizedUserMessage, metadataFilterValues);
           if (retrieveResult?.text) {
-            logger.info(`Retrieved knowledge base: ${retrieveResult.text}`);
+            logger.info(`Retrieved knowledge base: ${retrieveResult.text.slice(0, 200)}`);
             knowledgeBaseContext = retrieveResult.text;
             generatedByKnowledgeBase = knowledgeBase;
           } else {
