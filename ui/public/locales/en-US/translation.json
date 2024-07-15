@@ -1660,10 +1660,21 @@
 
           "create-custom-code-view": {
             "button": "Custom Views",
+            "placeholder": "Enter a view name",
 
             "tips": {
               "title": "Creating a Custom Code View",
               "desc": "You can use ReactJS code along with our component library and TailwindCSS to customize page layouts and component styles. Additionally, our JS SDK allows you to easily achieve personalized views."
+            },
+
+            "form": {
+              "display-name": {
+                "label": "View Name",
+                "placeholder": "Please enter a view name"
+              },
+              "icon": "View Icon",
+
+              "submit": "Create"
             }
           }
         },

@@ -9,9 +9,9 @@ import { toast } from 'sonner';
 
 import { useKnowledgeBase, useKnowledgeBaseMetadataFields, useUpdateKnowledgeBase } from '@/apis/vector';
 import { ICreateVectorDB } from '@/apis/vector/typings.ts';
-import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -35,8 +35,6 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
   const { data: detail, mutate } = useKnowledgeBase(textId);
   const { trigger } = useUpdateKnowledgeBase(detail?.uuid ?? '');
   const { data: fields } = useKnowledgeBaseMetadataFields(textId);
-
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleUpdate = (key: string, val: string) => {
     toast.promise(
@@ -68,9 +66,7 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
   });
 
   const handleSubmit = form.handleSubmit(async (data) => {
-    setIsLoading(true);
     if (!textId) {
-      setIsLoading(false);
       toast.error(t('common.toast.vector-database-not-found'));
       return;
     }
