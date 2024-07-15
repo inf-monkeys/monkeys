@@ -193,6 +193,9 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                         <FormLabel>
                           {t('ugc-page.text-data.detail.import.common-form.splitterConfig.chunk_size.label')}
                         </FormLabel>
+                        <FormDescription>
+                          {t('ugc-page.text-data.detail.import.common-form.splitterConfig.chunk_size.description')}
+                        </FormDescription>
                         <FormControl>
                           <Input
                             placeholder="500"
@@ -217,6 +220,9 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                         <FormLabel>
                           {t('ugc-page.text-data.detail.import.common-form.splitterConfig.chunk_overlap.label')}
                         </FormLabel>
+                        <FormDescription>
+                          {t('ugc-page.text-data.detail.import.common-form.splitterConfig.chunk_overlap.description')}
+                        </FormDescription>
                         <FormControl>
                           <Input
                             placeholder="50"

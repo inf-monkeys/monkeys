@@ -57,7 +57,7 @@ export const useAddKnowledgeBaseSegment = (knowledgeBaseId: string) =>
   );
 
 export const useSearchKnowledgeBase = (knowledgeBaseId: string, params: IFullTextSearchParams, useVector = false) => {
-  const { query, from = 0, size = 30, metadataFilter } = params;
+  const { query, from = 0, size = 30, metadata_filter } = params;
   return useSWR<IFullTextSearchResult | undefined>(
     knowledgeBaseId && params
       ? [
@@ -66,7 +66,7 @@ export const useSearchKnowledgeBase = (knowledgeBaseId: string, params: IFullTex
             query,
             from,
             size,
-            metadataFilter,
+            metadata_filter,
             ...(useVector
               ? {
                   topK: 10,

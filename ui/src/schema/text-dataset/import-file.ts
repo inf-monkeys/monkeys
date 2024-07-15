@@ -6,8 +6,8 @@ export const importFileSchema = z.object({
   preProcessRules: z.array(z.string()).optional(),
   splitterConfig: z
     .object({
-      chunk_overlap: z.number().min(5, '分段重叠长度至少为 5').max(1000, '分段重叠长度最多为 1000').optional(),
-      chunk_size: z.number().max(2000, '分段最大长度最多为 2000').optional(),
+      chunk_overlap: z.number().min(0, '分段重叠长度至少为 5').optional(),
+      chunk_size: z.number().min(0, '分段最大长度最小为 0').optional(),
       separator: z.string().optional(),
     })
     .optional(),

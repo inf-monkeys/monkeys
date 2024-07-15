@@ -55,6 +55,11 @@ export interface KnowledgeBaseRetrievalSettings {
   mode: KnowledgeBaseRetrievalMode;
   topK: number;
   scoreThreshHold?: number;
+  // Sometime, you may want to filter the document by metadata before retrieval.
+  // For example: See you have serveral documents about different company's annual report, we user ask a question about a specific company,
+  // you may want to filter the documents by company name before retrieval.
+  enabledMetadataFilter?: boolean;
+  metadataFilterKey?: string;
 }
 
 export interface ICreateVectorDB {
@@ -75,7 +80,7 @@ export interface IFullTextSearchParams {
   query?: string;
   from?: number;
   size?: number;
-  metadataFilter?: { [x: string]: unknown };
+  metadata_filter?: { [x: string]: unknown };
 }
 
 export interface IVectorRecord {
