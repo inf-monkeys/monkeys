@@ -80,7 +80,7 @@ export interface IFullTextSearchParams {
   query?: string;
   from?: number;
   size?: number;
-  metadataFilter?: { [x: string]: unknown };
+  metadata_filter?: { [x: string]: unknown };
 }
 
 export interface IVectorRecord {

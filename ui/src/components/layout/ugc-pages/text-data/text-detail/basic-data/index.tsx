@@ -12,6 +12,7 @@ import { ICreateVectorDB } from '@/apis/vector/typings.ts';
 import { InfoEditor } from '@/components/layout/settings/account/info-editor.tsx';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
@@ -96,7 +97,7 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
   const { enabledMetadataFilter = false } = form.getValues();
 
   return (
-    <>
+    <ScrollArea className="h-full max-h-[calc(100%-3rem)]">
       <div>
         <div
           style={{
@@ -313,6 +314,6 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
           </form>
         </Form>
       </div>
-    </>
+    </ScrollArea>
   );
 };
