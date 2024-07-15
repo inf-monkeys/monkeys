@@ -21,7 +21,27 @@ export function VinesView({ id, workflowId, pageId, type }: IVinesViewProps) {
   const { setVisible } = useViewStore();
 
   if (!((type ?? '') in IFRAME_MAP)) {
-    return <Page404 />;
+    return (
+      <motion.div
+        key={id}
+        variants={{
+          enter: {
+            opacity: 1,
+            display: 'block',
+          },
+          exit: {
+            opacity: 0,
+            transitionEnd: {
+              display: 'none',
+            },
+          },
+        }}
+        animate={id === pageId ? 'enter' : 'exit'}
+        className="absolute left-0 top-0 size-full"
+      >
+        <Page404 />
+      </motion.div>
+    );
   }
 
   const View = IFRAME_MAP[type ?? ''];
