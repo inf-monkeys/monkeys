@@ -1,10 +1,12 @@
 import React, { memo } from 'react';
 
+import { useForceUpdate } from '@mantine/hooks';
 import { MoreVertical } from 'lucide-react';
 
 import { DeletePage } from '@/components/layout-wrapper/workspace/space/tabs/menu/delete-page.tsx';
 import { ViewGroup } from '@/components/layout-wrapper/workspace/space/tabs/menu/group';
-import { PinView } from '@/components/layout-wrapper/workspace/space/tabs/menu/pin-view.tsx';
+import { RenameView } from '@/components/layout-wrapper/workspace/space/tabs/menu/rename-view.tsx';
+import { SetViewIcon } from '@/components/layout-wrapper/workspace/space/tabs/menu/set-view-icon.tsx';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,6 +22,8 @@ interface ITabMenuProps extends React.ComponentPropsWithoutRef<'div'> {}
 export const TabMenu: React.FC<ITabMenuProps> = memo(() => {
   const { workflowId, page, pages, pageId, navigateTo, pagesMutate, setPages } = useVinesPage();
 
+  const forceUpdate = useForceUpdate();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -27,7 +31,8 @@ export const TabMenu: React.FC<ITabMenuProps> = memo(() => {
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuGroup>
-          <PinView page={page} pageId={pageId} pages={pages} setPages={setPages} />
+          <RenameView page={page} pageId={pageId} pages={pages} setPages={setPages} />
+          <SetViewIcon pageId={pageId} pages={pages} setPages={setPages} forceUpdate={forceUpdate} />
           <ViewGroup pageId={pageId} pagesMutate={pagesMutate} />
           <DropdownMenuSeparator />
           <DeletePage

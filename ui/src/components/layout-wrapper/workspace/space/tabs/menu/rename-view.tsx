@@ -9,14 +9,14 @@ import { IPageType } from '@/apis/pages/typings.ts';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu.tsx';
 import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
 
-interface IPinViewProps extends React.ComponentPropsWithoutRef<'div'> {
+interface IRenameViewProps extends React.ComponentPropsWithoutRef<'div'> {
   page: IPageType | null;
   pageId: string;
   pages?: IPageType[];
   setPages: (pages: IPageType[]) => Promise<void>;
 }
 
-export const PinView: React.FC<IPinViewProps> = ({ page, pages, pageId, setPages }) => {
+export const RenameView: React.FC<IRenameViewProps> = ({ page, pages, pageId, setPages }) => {
   const { t } = useTranslation();
 
   const handleRenamePage = async (name: string) => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 
 import data from '@emoji-mart/data';
 import i18n from '@emoji-mart/data/i18n/zh.json';
@@ -18,91 +18,85 @@ interface IVinesIconSelectorProps extends Omit<React.ComponentPropsWithoutRef<'d
 
 const colors = ['#434343', '#f2c1be', '#fadebb', '#fef8a3', '#ceefc5', '#d1dcfb', '#d9caf8'];
 
-export const VinesIconSelector: React.FC<IVinesIconSelectorProps> = ({
-  children,
-  onChange,
-  emojiLink,
-  onFinished,
-  onlyEmoji = false,
-}) => {
-  const { t } = useTranslation();
+export const VinesIconSelector: React.FC<IVinesIconSelectorProps> = memo(
+  ({ children, onChange, emojiLink, onFinished, onlyEmoji = false }) => {
+    const { t } = useTranslation();
 
-  const [selectedColor, setSelectedColor] = useState(colors[4]);
-  const [selectedEmoji, setSelectedEmoji] = useState('🍀');
+    const [selectedColor, setSelectedColor] = useState(colors[4]);
+    const [selectedEmoji, setSelectedEmoji] = useState('🍀');
 
-  const [visible, setVisible] = useState(false);
+    const [visible, setVisible] = useState(false);
 
-  useEffect(() => {
-    const nextEmoji = onlyEmoji ? selectedEmoji : `emoji:${selectedEmoji}:${selectedColor}`;
-    if (emojiLink !== nextEmoji && visible) {
-      onChange?.(nextEmoji);
-    }
-  }, [selectedColor, selectedEmoji, visible]);
-
-  useEffect(() => {
-    if (emojiLink && emojiLink.startsWith('emoji:')) {
-      const [, emoji, bgColor] = emojiLink.split(':');
-      if (!bgColor) {
-        setSelectedColor(colors[0]);
-      } else {
-        setSelectedColor(bgColor);
+    useEffect(() => {
+      const nextEmoji = onlyEmoji ? selectedEmoji : `emoji:${selectedEmoji}:${selectedColor}`;
+      if (emojiLink !== nextEmoji && visible) {
+        onChange?.(nextEmoji);
       }
-      setSelectedEmoji(emoji);
-    }
-  }, [emojiLink]);
+    }, [selectedColor, selectedEmoji, visible]);
 
-  return (
-    <Popover open={visible} onOpenChange={setVisible}>
-      <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent
-        className={cn(
-          'h-[512px] w-[352px] scale-75 overflow-hidden rounded-xl bg-slate-2 p-0',
-          onlyEmoji && 'h-[432px]',
-        )}
-        sideOffset={-55}
-      >
-        <Picker
-          i18n={i18n}
-          data={data}
-          onEmojiSelect={(e: any) => {
-            if (onlyEmoji) {
-              onFinished?.(e.native);
-              onChange?.(e.native);
-              setVisible(false);
-            }
-            setSelectedEmoji(e.native);
-          }}
-          locale="zh"
-          previewPosition="none"
-        />
-        <div className={cn('flex h-20 w-full items-center justify-between gap-2 px-5 pb-1', onlyEmoji && 'hidden')}>
-          <div>
-            <p className="mb-2 text-sm">{t('components.ui.icon-selector.background-color')}</p>
-            <div className="flex items-center gap-1">
-              {colors.map((color, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    'mx-1 h-6 w-6 cursor-pointer rounded-full outline outline-[6px] outline-transparent transition-all',
-                    color === selectedColor && 'outline-gray-4',
-                  )}
-                  style={{ backgroundColor: color }}
-                  onClick={() => setSelectedColor(color)}
-                />
-              ))}
-            </div>
-          </div>
-          <Button
-            variant="solid"
-            onClick={() => {
-              onFinished?.(`emoji:${selectedEmoji}:${selectedColor}`);
-              setVisible(false);
+    useEffect(() => {
+      if (emojiLink && emojiLink.startsWith('emoji:')) {
+        const [, emoji, bgColor] = emojiLink.split(':');
+        if (!bgColor) {
+          setSelectedColor(colors[0]);
+        } else {
+          setSelectedColor(bgColor);
+        }
+        setSelectedEmoji(emoji);
+      }
+    }, [emojiLink]);
+
+    return (
+      <Popover open={visible} onOpenChange={setVisible}>
+        <PopoverTrigger asChild>{children}</PopoverTrigger>
+        <PopoverContent
+          className="h-[512px] w-[352px] scale-75 overflow-hidden rounded-xl bg-slate-2 p-0"
+          sideOffset={-55}
+        >
+          <Picker
+            i18n={i18n}
+            data={data}
+            onEmojiSelect={(e: any) => {
+              if (onlyEmoji) {
+                onChange?.(e.native);
+              }
+              setSelectedEmoji(e.native);
             }}
-          >
-            OK
-          </Button>
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
-};
+            locale="zh"
+            previewPosition="none"
+          />
+          <div className="flex h-20 w-full items-center justify-between gap-2 px-5 pb-1">
+            <div className={onlyEmoji ? 'hidden' : ''}>
+              <p className="mb-2 text-sm">{t('components.ui.icon-selector.background-color')}</p>
+              <div className="flex items-center gap-1">
+                {colors.map((color, index) => (
+                  <div
+                    key={index}
+                    className={cn(
+                      'mx-1 h-6 w-6 cursor-pointer rounded-full outline outline-[6px] outline-transparent transition-all',
+                      color === selectedColor && 'outline-gray-4',
+                    )}
+                    style={{ backgroundColor: color }}
+                    onClick={() => setSelectedColor(color)}
+                  />
+                ))}
+              </div>
+            </div>
+            <Button
+              className={onlyEmoji ? 'ml-auto' : ''}
+              variant="solid"
+              onClick={() => {
+                onFinished?.(onlyEmoji ? selectedEmoji : `emoji:${selectedEmoji}:${selectedColor}`);
+                setVisible(false);
+              }}
+            >
+              OK
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
+    );
+  },
+);
+
+VinesIconSelector.displayName = 'VinesIconSelector';
