@@ -46,6 +46,6 @@ jobs:
           OSS_BUCKET: ${{ secrets.OSS_BUCKET }}
         run: |
           RELEASE_TAG=${GITHUB_REF#refs/tags/}
-          wget https://gosspublic.alicdn.com/ossutil/1.7.5/ossutil64 && chmod 755 ossutil64 && mv ossutil64 /usr/local/bin/ossutil
-          ossutil64 config --endpoint "$OSS_ENDPOINT" --access-key-id "$OSS_ACCESS_KEY_ID" --access-key-secret "$OSS_ACCESS_KEY_SECRET"
-          ossutil64 cp monkeys-multi-tenancy-$RELEASE_TAG.tar.gz oss://$OSS_BUCKET/docker/monkeys/monkeys/monkeys-multi-tenancy-$RELEASE_TAG.tar.gz
+          wget https://gosspublic.alicdn.com/ossutil/1.7.5/ossutil64 && chmod 755 ossutil64
+          ./ossutil64 config --endpoint "$OSS_ENDPOINT" --access-key-id "$OSS_ACCESS_KEY_ID" --access-key-secret "$OSS_ACCESS_KEY_SECRET"
+          ./ossutil64 cp monkeys-multi-tenancy-$RELEASE_TAG.tar.gz oss://$OSS_BUCKET/docker/monkeys/monkeys/monkeys-multi-tenancy-$RELEASE_TAG.tar.gz
