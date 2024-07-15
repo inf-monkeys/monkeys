@@ -99,6 +99,7 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                         onFilesUpdate={(files) => {
                           setFilename(files[0]?.name ?? '');
                         }}
+                        basePath="user-files/text-data-file"
                       />
                     </FormControl>
                     <FormDescription>{t('common.form.description.upload-file-auto-store')}</FormDescription>
