@@ -304,6 +304,7 @@ export const ImportToolModal: React.FC<IImportToolModalProps> = ({ children }) =
                               onFinished={(urls) => {
                                 field.onChange(urls[0]);
                               }}
+                              basePath="user-files/openapi-spec"
                             />
                           </FormControl>
                           <FormDescription>在此处上传文件将自动存入「富媒体数据」</FormDescription>

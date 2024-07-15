@@ -96,6 +96,7 @@ export const ImportTableData: React.FC<IImportTableDataProps> = ({ databaseId, c
                       maxSize={10}
                       limit={1}
                       onFinished={(urls) => field.onChange(urls[0])}
+                      basePath="user-files/table-data"
                     />
                   </FormControl>
                   <FormDescription>在此处上传文件将自动存入「富媒体数据」</FormDescription>

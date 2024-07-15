@@ -41,6 +41,7 @@ export const UploadMedia: React.FC<IUploadMediaProps> = () => {
           onFinished={() => {
             void mutate((key) => typeof key === 'string' && key.startsWith('/api/media-files'));
           }}
+          basePath="user-files/media"
         />
       </DialogContent>
     </Dialog>
