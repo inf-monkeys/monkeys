@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 
 import { IUpdatePageGroupParams, useDeletePageGroup, useUpdateGroupPages } from '@/apis/pages';
 import { IPageGroup } from '@/apis/pages/typings.ts';
-import { InfoEditor } from '@/components/layout/settings/account/info-editor.tsx';
+import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -113,7 +113,7 @@ export const GroupItem: React.FC<IGroupItemProps> = ({
             </AlertDialogContent>
           </AlertDialog>
           <Tooltip>
-            <InfoEditor
+            <SimpleInputDialog
               title={t('workspace.wrapper.space.menu.group.rename.label')}
               placeholder={t('workspace.wrapper.space.menu.group.rename.placeholder')}
               onFinished={(val) => handleUpdateGroup({ displayName: val })}
@@ -121,7 +121,7 @@ export const GroupItem: React.FC<IGroupItemProps> = ({
               <TooltipTrigger asChild>
                 <Button className="-m-2 scale-[0.6]" icon={<Pencil />} size="small" variant="outline" />
               </TooltipTrigger>
-            </InfoEditor>
+            </SimpleInputDialog>
             <TooltipContent>{t('workspace.wrapper.space.menu.group.rename.label')}</TooltipContent>
           </Tooltip>
         </div>

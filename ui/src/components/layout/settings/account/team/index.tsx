@@ -9,7 +9,6 @@ import { toast } from 'sonner';
 import { updateTeam } from '@/apis/authz/team';
 import { ITeamUpdate } from '@/apis/authz/team/typings.ts';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
-import { InfoEditor } from '@/components/layout/settings/account/info-editor.tsx';
 import { ApplyManage } from '@/components/layout/settings/account/team/apply-manage';
 import { CreateTeam } from '@/components/layout/settings/account/team/create';
 import { DeleteTeam } from '@/components/layout/settings/account/team/delete';
@@ -19,6 +18,7 @@ import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { VinesImageEditor } from '@/components/ui/image-editor';
+import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
 import { cn, useLocalStorage } from '@/utils';
 
 interface ITeamProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -71,7 +71,7 @@ export const Team: React.FC<ITeamProps> = () => {
           </Avatar>
         </VinesImageEditor>
         <div className="flex flex-col justify-center">
-          <InfoEditor
+          <SimpleInputDialog
             disabled={!isOwner}
             title={t('settings.account.team.team-name.title')}
             placeholder={t('settings.account.team.team-name.placeholder')}
@@ -82,8 +82,8 @@ export const Team: React.FC<ITeamProps> = () => {
               <h3 className="line-clamp-1 font-semibold leading-tight">{teamName}</h3>
               <Pencil size={16} className="-mb-0.5 opacity-0 transition-opacity group-hover:opacity-100" />
             </div>
-          </InfoEditor>
-          <InfoEditor
+          </SimpleInputDialog>
+          <SimpleInputDialog
             disabled={!isOwner}
             title={t('settings.account.team.team-description.title')}
             placeholder={t('settings.account.team.team-description.placeholder')}
@@ -94,7 +94,7 @@ export const Team: React.FC<ITeamProps> = () => {
               <h3 className="line-clamp-1 text-xs">{teamDescription}</h3>
               <Pencil size={12} className="opacity-0 transition-opacity group-hover:opacity-100" />
             </div>
-          </InfoEditor>
+          </SimpleInputDialog>
         </div>
       </CardContent>
       <CardFooter className="justify-end gap-2">

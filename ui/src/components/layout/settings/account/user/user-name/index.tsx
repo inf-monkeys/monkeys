@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 import { updateUserInfo } from '@/apis/authz/user';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
-import { InfoEditor } from '@/components/layout/settings/account/info-editor.tsx';
+import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
 
 interface IUserNameProps extends React.ComponentPropsWithoutRef<'div'> {
   user: Partial<IVinesUser>;
@@ -35,7 +35,7 @@ export const UserName: React.FC<IUserNameProps> = ({ user, updateUser }) => {
   const userName = user.name || 'AI';
 
   return (
-    <InfoEditor
+    <SimpleInputDialog
       title={t('settings.account.user.user-name.info-editor.title')}
       placeholder={t('settings.account.user.user-name.info-editor.placeholder')}
       initialValue={userName}
@@ -45,6 +45,6 @@ export const UserName: React.FC<IUserNameProps> = ({ user, updateUser }) => {
         <h3 className="line-clamp-1 font-semibold leading-tight">{userName}</h3>
         <Pencil size={16} className="-mb-0.5 opacity-0 transition-opacity group-hover:opacity-100" />
       </div>
-    </InfoEditor>
+    </SimpleInputDialog>
   );
 };

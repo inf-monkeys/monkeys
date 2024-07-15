@@ -111,7 +111,6 @@ export class WorkflowPageController {
   async getPageGroups(@Req() request: IRequest) {
     const { teamId } = request;
     const data = await this.pageService.getPageGroups(teamId);
-    console.log(data);
     return new SuccessResponse({ data });
   }
 

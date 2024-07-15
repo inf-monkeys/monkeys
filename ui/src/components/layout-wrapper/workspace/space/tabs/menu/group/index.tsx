@@ -8,9 +8,9 @@ import { toast } from 'sonner';
 
 import { useCreatePageGroup, usePageGroups } from '@/apis/pages';
 import { IPageType } from '@/apis/pages/typings.ts';
-import { InfoEditor } from '@/components/layout/settings/account/info-editor.tsx';
 import { GroupItem } from '@/components/layout-wrapper/workspace/space/tabs/menu/group/item.tsx';
 import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu.tsx';
+import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
 
 interface IDropdownGroupProps extends React.ComponentPropsWithoutRef<'div'> {
   pageId: string;
@@ -61,7 +61,7 @@ export const DropdownGroup: React.FC<IDropdownGroupProps> = ({ pageId, pinned, h
       {isLoading && <DropdownMenuItem disabled>{t('common.load.loading')}</DropdownMenuItem>}
       {finalGroups?.map((group, i) => <GroupItem group={group} key={i} pageId={pageId} mutate={pageGroupMutate} />)}
       <DropdownMenuSeparator />
-      <InfoEditor
+      <SimpleInputDialog
         title={t('workspace.wrapper.space.menu.group.create')}
         placeholder={t('workspace.wrapper.space.menu.group.placeholder')}
         onFinished={handleCreateGroup}
@@ -76,7 +76,7 @@ export const DropdownGroup: React.FC<IDropdownGroupProps> = ({ pageId, pinned, h
           <Plus size={16} />
           {t('workspace.wrapper.space.menu.group.create')}
         </DropdownMenuItem>
-      </InfoEditor>
+      </SimpleInputDialog>
     </>
   );
 };
