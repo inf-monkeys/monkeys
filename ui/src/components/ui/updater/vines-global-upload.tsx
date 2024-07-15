@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { FileWithPath } from '@mantine/dropzone';
+import { FileWithPath } from 'react-dropzone';
 import { AnimatePresence, motion } from 'framer-motion';
 import { set } from 'lodash';
 import { CheckCircle2, FileClock, FileSearch, FileX2, Loader2 } from 'lucide-react';

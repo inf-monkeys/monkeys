@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
-import { FileWithPath } from '@mantine/dropzone';
 import { get, isArray, isString, set } from 'lodash';
+import { FileWithPath } from 'react-dropzone';
 
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
 import { Updater } from '@/components/ui/updater';

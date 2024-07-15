@@ -165,6 +165,9 @@
         "title_other": "Upload files",
         "click-or-drag-area_one": "Click or drag to upload file",
         "click-or-drag-area_other": "Click or drag to upload files",
+        "toast": {
+          "on-drop-rejected": "The file \"{{fileName}}\" is not in the correct format or exceeds the limit."
+        },
         "hint": {
           "accept": {
             "custom_one": "Only {{acceptString}} file can be uploaded.",

@@ -1,4 +1,4 @@
-import { FileWithPath } from '@mantine/dropzone';
+import { FileWithPath } from 'react-dropzone';
 
 export type IPointerMode = 'brush' | 'eraser' | 'move';
 
