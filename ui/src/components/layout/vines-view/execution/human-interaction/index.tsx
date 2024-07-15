@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useState } from 'react';
 
-import { CircularProgress } from '@nextui-org/progress';
+import { CircularProgress } from '@/components/ui/circular-progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, ChevronLast, Files, LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';

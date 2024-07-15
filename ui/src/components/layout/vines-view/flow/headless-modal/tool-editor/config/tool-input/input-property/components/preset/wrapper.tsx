@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { CircularProgress } from '@nextui-org/progress';
+import { CircularProgress } from '@/components/ui/circular-progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { get, isArray, isString } from 'lodash';
 import { useTranslation } from 'react-i18next';

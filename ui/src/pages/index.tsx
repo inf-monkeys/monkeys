@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
-import { CircularProgress } from '@nextui-org/progress';
+import { CircularProgress } from '@/components/ui/circular-progress';
 import { motion } from 'framer-motion';
 import { DoorOpen, LogIn } from 'lucide-react';
 import { useTranslation } from 'react-i18next';

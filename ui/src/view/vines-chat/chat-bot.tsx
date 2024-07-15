@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { useForceUpdate } from '@mantine/hooks';
-import { CircularProgress } from '@nextui-org/progress';
+import { CircularProgress } from '@/components/ui/circular-progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { isEmpty, reduce, toNumber } from 'lodash';
 import { MessageSquareDashed } from 'lucide-react';

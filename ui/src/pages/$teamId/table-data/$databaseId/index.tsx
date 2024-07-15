@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { createFileRoute } from '@tanstack/react-router';
 
-import { CircularProgress } from '@nextui-org/progress';
+import { CircularProgress } from '@/components/ui/circular-progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronRight, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -74,7 +74,9 @@ const TableDataDetail: React.FC = () => {
               </TooltipTrigger>
               <TooltipContent>{t('common.utils.back')}</TooltipContent>
             </Tooltip>
-            <h1 className="line-clamp-1 text-2xl font-bold">{displayName ? getI18nContent(displayName) : '表格数据'}</h1>
+            <h1 className="line-clamp-1 text-2xl font-bold">
+              {displayName ? getI18nContent(displayName) : '表格数据'}
+            </h1>
           </header>
           <TabsList className="!h-auto bg-transparent">
             {isEmpty ? (

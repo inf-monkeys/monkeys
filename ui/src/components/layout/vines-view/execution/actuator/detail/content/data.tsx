@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { CircularProgress } from '@nextui-org/progress';
+import { CircularProgress } from '@/components/ui/circular-progress';
 
 import { VinesAbstractDataPreview } from '@/components/layout/vines-view/execution/data-display/abstract';
 import { VinesExecutionHumanInteraction } from '@/components/layout/vines-view/execution/human-interaction';

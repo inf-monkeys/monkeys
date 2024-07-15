@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 
-import { CircularProgress } from '@nextui-org/progress';
+import { CircularProgress } from '@/components/ui/circular-progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertCircle, CheckCircle2, Circle, CircleDashed, CircleSlash, PauseCircle } from 'lucide-react';
 

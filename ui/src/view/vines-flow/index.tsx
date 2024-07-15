@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 
 import { useWindowEvent } from '@mantine/hooks';
-import { CircularProgress } from '@nextui-org/progress';
+import { CircularProgress } from '@/components/ui/circular-progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { get } from 'lodash';
 import { VinesEdges } from 'src/components/layout/vines-view/flow/edges';

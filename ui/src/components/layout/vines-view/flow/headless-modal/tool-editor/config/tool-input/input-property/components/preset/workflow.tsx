@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { ToolPropertyTypes } from '@inf-monkeys/monkeys';
-import { CircularProgress } from '@nextui-org/progress';
+import { CircularProgress } from '@/components/ui/circular-progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { isString } from 'lodash';
 import { useTranslation } from 'react-i18next';

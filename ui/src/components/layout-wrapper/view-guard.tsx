@@ -3,7 +3,7 @@ import React, { forwardRef, useState } from 'react';
 
 import { useNavigate, useParams } from '@tanstack/react-router';
 
-import { CircularProgress } from '@nextui-org/progress';
+import { CircularProgress } from '@/components/ui/circular-progress';
 import { useDebounceEffect } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { isEmpty } from 'lodash';

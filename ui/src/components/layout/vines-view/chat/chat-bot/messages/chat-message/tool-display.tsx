@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { CircularProgress } from '@nextui-org/progress';
+import { CircularProgress } from '@/components/ui/circular-progress';
 import { AlertCircle, CheckCircle, FullscreenIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 

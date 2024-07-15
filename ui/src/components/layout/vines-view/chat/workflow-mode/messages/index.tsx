@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { CircularProgress } from '@nextui-org/progress';
+import { CircularProgress } from '@/components/ui/circular-progress';
 import dayjs from 'dayjs';
 import equal from 'fast-deep-equal/es6';
 import { AnimatePresence, motion } from 'framer-motion';

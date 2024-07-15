@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { preload } from 'swr';
 import { createFileRoute, redirect, useNavigate, useParams } from '@tanstack/react-router';
 
-import { CircularProgress } from '@nextui-org/progress';
+import { CircularProgress } from '@/components/ui/circular-progress';
 import z from 'zod';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
