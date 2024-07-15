@@ -1188,16 +1188,18 @@
             "splitterConfig": {
               "separator": {
                 "label": "分段标识符",
-                "placeholder": "请输入分段标识符，如：「，」、「。」、「,」、「\n」",
+                "placeholder": "请输入分段标识符，如：「--」、「\\n」、「\\n\\n」",
                 "tip": "请输入分段标识符"
               },
               "chunk_size": {
                 "label": "分段最大长度",
-                "tip": "请输入分段最大长度"
+                "tip": "请输入分段最大长度",
+                "description": "分段最大长度，超过此长度的段落将被分割，默认值为 500。如果你想完全精确使用分隔符分割（比如一些对话纪录，不希望一个分段里面包含多条对话），可以设置为 0。"
               },
               "chunk_overlap": {
                 "label": "文本重叠量",
-                "tip": "请输入文本重叠量"
+                "tip": "请输入文本重叠量",
+                "description": "分段时，每个分段的文本重叠量，默认值为 50。此值必须小于分段最大长度。"
               }
             }
           },
@@ -1584,10 +1586,8 @@
           "share-view": {
             "title": "分享视图",
             "desc": "你可以将视图分享给其他人，邀请对方和你一起查看、编辑或执行工作流",
-
             "switch": "互联网上获得链接的人可直接访问视图",
             "tips": "放行后互联网上任何人无需身份验证即可对工作流进行任意操作，请注意资产安全！",
-
             "loading": "正在更新权限...",
             "success": "更新权限成功！",
             "error": "更新权限失败！请稍后重试！"
@@ -1595,9 +1595,8 @@
           "iframe": {
             "title": "页面嵌入",
             "desc": "你可以通过 iframe 嵌入来整合工作流到你的应用",
-
             "built-in": {
-              "label": "内置视图 iframe 嵌入地址" ,
+              "label": "内置视图 iframe 嵌入地址",
               "desc1": "内置视图的嵌入可不填写视图 ID，直接填写 view- 拼上视图类型",
               "desc2": "流程视图：flow、日志视图：logs、表单视图：form、对话视图：chat",
               "tips": "地址结构为：https://[domain]/[团队 ID]/workspace/[工作流 ID]/view-[视图类型]"
@@ -1666,7 +1665,6 @@
             "placeholder": "请输入分组名称",
             "def": "默认分组",
             "name-默认分组": "默认分组",
-
             "create-toast": {
               "loading": "正在创建分组...",
               "success": "分组创建成功！",
@@ -1683,7 +1681,6 @@
               "desc": "删除分组后，分组内的页面将会取消固定到工作台",
               "cancel": "取消",
               "confirm": "删除",
-
               "loading": "正在删除分组...",
               "success": "分组删除成功！",
               "error": "分组删除失败！"
@@ -2197,12 +2194,10 @@
         },
         "execution": {
           "button": "运行工作流",
-
           "COMPLETED": "工作流运行完毕！",
           "FAILED": "工作流运行失败！",
           "TIMED_OUT": "工作流运行超时！",
           "TERMINATED": "工作流运行已终止！",
-
           "swap": {
             "workflow-is-running": "无法切换运行实例！当前工作流正在运行中",
             "workflow-id-is-empty": "切换失败！无法获取工作流实例 ID",
@@ -2386,10 +2381,8 @@
         "create": {
           "label": "新建对话",
           "placeholder": "输入会话名称，16 字以内",
-
           "def-label": "默认对话",
           "auto-create-session": "自动创建新对话",
-
           "loading": "正在创建会话...",
           "success": "会话创建成功",
           "error": "会话创建失败"

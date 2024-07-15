@@ -1200,11 +1200,13 @@
               },
               "chunk_size": {
                 "label": "Segment Chunk Size",
-                "tip": "Please enter segment chunk size"
+                "tip": "Please enter segment chunk size",
+                "description": "The number of characters in each segment chunk. The default value is 500. If you want split exactly by the separator, please set it to 0."
               },
               "chunk_overlap": {
                 "label": "Segment Chunk Overlap",
-                "tip": "Please enter segment chunk overlap"
+                "tip": "Please enter segment chunk overlap",
+                "description": "The number of characters that overlap between adjacent segment chunks. The default value is 50. This value must be less than the chunk size."
               }
             }
           },
@@ -1606,9 +1608,8 @@
           "iframe": {
             "title": "View Iframe Embed",
             "desc": "You can integrate the workflow into your application via iframe embed",
-
             "built-in": {
-              "label": "Built-in view iframe embed address" ,
+              "label": "Built-in view iframe embed address",
               "desc1": "When embedding a built-in view, you do not need to fill in the view ID. Instead, you can directly fill in the view type with view-",
               "desc2": "Flow view: flow, log view: logs, form view: form, conversation view: chat",
               "tips": "The address structure is: https://[domain]/[team ID]/workspace/[workflow ID]/view-[view type]"
@@ -1677,7 +1678,6 @@
             "placeholder": "Please enter a group name",
             "def": "Default Group",
             "name-默认分组": "Default Group",
-
             "create-toast": {
               "loading": "Creating group...",
               "success": "Group created successfully!",
@@ -1694,7 +1694,6 @@
               "desc": "After deleting a group, the pages in the group will be unpinned to the workbench",
               "cancel": "Cancel",
               "confirm": "Delete",
-
               "loading": "Deleting group...",
               "success": "Group deleted successfully!",
               "error": "Group deletion failed!"
