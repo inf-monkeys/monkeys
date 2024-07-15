@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { AnimatePresence } from 'framer-motion';
-
 import { CreateSpaceTab } from 'src/components/layout-wrapper/workspace/space/tabs/expand/create-tab';
+
 import { ScrollTool } from '@/components/layout-wrapper/workspace/space/tabs/expand/scroll-tool';
 
 interface IScrollToolProps extends React.ComponentPropsWithoutRef<'div'> {
