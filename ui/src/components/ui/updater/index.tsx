@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
-import { Dropzone, FileWithPath } from '@mantine/dropzone';
 import { FileUp } from 'lucide-react';
+import Dropzone, { FileWithPath } from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -60,37 +60,64 @@ export const Updater: React.FC<IUpdaterProps> = ({
   return (
     <div className="flex w-full flex-col gap-4">
       <Dropzone
-        className={cn((isUploading || disabled) && 'pointer-events-none cursor-not-allowed opacity-60')}
         onDrop={(_files) => {
           setFiles((prev) => [...prev, ..._files]);
           !isInteracted && setIsInteracted(true);
         }}
-        accept={accept}
+        accept={
+          accept
+            ? accept.reduce((acc, mimeType) => {
+                acc[mimeType] = [];
+                return acc;
+              }, {})
+            : undefined
+        }
         maxSize={maxSize * 1024 ** 2}
         maxFiles={limit}
         disabled={disabled}
-        onReject={(file) => file.forEach((it) => toast.error(`文件 ${it.file.name} 超出限制`))}
+        onDropRejected={(fileRejections) => {
+          fileRejections.forEach((it) =>
+            toast.error(
+              t('components.ui.updater.toast.on-drop-rejected', {
+                fileName: it.file.name,
+              }),
+            ),
+          );
+        }}
       >
-        <div className="vines-center h-40 gap-4">
-          <FileUp size={50} className="stroke-gold-12" />
-          <div className="flex max-w-[70%] flex-col">
-            <h1 className="text-lg font-bold leading-tight">
-              {t('components.ui.updater.click-or-drag-area', {
-                count: limit ?? 2,
-              })}
-            </h1>
-            <p className="text-xs text-opacity-85">
-              {accept
-                ? t('components.ui.updater.hint.accept.custom', {
-                    acceptString: accept.map((it) => `.${it?.split('/')?.[1] ?? it}`).join('、'),
-                    count: limit ?? 2,
-                  })
-                : t('components.ui.updater.hint.accept.any')}
-              {t('components.ui.updater.hint.max-size', { maxSize })}
-              {limit ? t('components.ui.updater.hint.limit', { limit, count: limit }) : ''}
-            </p>
-          </div>
-        </div>
+        {({ getRootProps, getInputProps }) => {
+          return (
+            <div
+              {...getRootProps()}
+              className={cn([
+                'cursor-pointer',
+                (isUploading || disabled) && 'pointer-events-none cursor-not-allowed opacity-60',
+              ])}
+            >
+              <div className="vines-center h-40 gap-4">
+                <input {...getInputProps()} />
+                <FileUp size={50} className="stroke-gold-12" />
+                <div className="flex max-w-[70%] flex-col">
+                  <h1 className="text-lg font-bold leading-tight">
+                    {t('components.ui.updater.click-or-drag-area', {
+                      count: limit ?? 2,
+                    })}
+                  </h1>
+                  <p className="text-xs text-opacity-85">
+                    {accept
+                      ? t('components.ui.updater.hint.accept.custom', {
+                          acceptString: accept.map((it) => `.${it?.split('/')?.[1] ?? it}`).join('、'),
+                          count: limit ?? 2,
+                        })
+                      : t('components.ui.updater.hint.accept.any')}
+                    {t('components.ui.updater.hint.max-size', { maxSize })}
+                    {limit ? t('components.ui.updater.hint.limit', { limit, count: limit }) : ''}
+                  </p>
+                </div>
+              </div>
+            </div>
+          );
+        }}
       </Dropzone>
 
       {isInteracted && (

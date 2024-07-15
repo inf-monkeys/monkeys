@@ -161,6 +161,9 @@
       "updater": {
         "title": "上传文件",
         "click-or-drag-area": "点击或拖拽来上传文件",
+        "toast": {
+          "on-drop-rejected": "文件「{{fileName}}」格式不正确或超出限制"
+        },
         "hint": {
           "accept": {
             "custom": "仅支持 {{acceptString}} 格式的文件",

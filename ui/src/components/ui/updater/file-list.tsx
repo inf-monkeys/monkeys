@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { FileWithPath } from '@mantine/dropzone';
+import { FileWithPath } from 'react-dropzone';
 import { set } from 'lodash';
 import { CheckCircle2, FileCheck, FileClock, FileSearch, FileX2, Loader2, UploadCloud, XCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';

@@ -20,8 +20,8 @@ import {
 } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input';
 import { Updater } from '@/components/ui/updater';
+import { MIME_TYPES } from '@/components/ui/updater/mime-types';
 import { IImportFile, importFileSchema } from '@/schema/table-database/import-file.ts';
-import { MIME_TYPES } from '@mantine/dropzone';
 
 interface IImportTableDataProps {
   databaseId: string;
