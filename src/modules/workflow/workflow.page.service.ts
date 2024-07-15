@@ -3,7 +3,7 @@ import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
 import { BUILT_IN_PAGE_INSTANCES, WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { keyBy, pick, set, uniq } from 'lodash';
+import { keyBy, pick, pickBy, set, uniq } from 'lodash';
 import { In, Repository } from 'typeorm';
 import { CreatePageDto } from './dto/req/create-page.dto';
 import { UpdatePageGroupDto, UpdatePagesDto } from './dto/req/update-pages.dto';
@@ -90,28 +90,23 @@ export class WorkflowPageService {
   }
 
   async updateWorkflowPages(workflowId: string, teamId: string, userId: string, body: UpdatePagesDto) {
-    // const bulk = this.pageRepository.initializeUnorderedBulkOp();
-    // const { pages: pagesUpdates } = body;
-    // for (const update of pagesUpdates) {
-    //   const { pageId, permissions, displayName, sortIndex, customOptions } = update ?? {};
-    //   if (!pageId) continue;
-    //   bulk
-    //     .find({
-    //       _id: new ObjectId(pageId),
-    //       teamId,
-    //       workflowId,
-    //     })
-    //     .updateOne({
-    //       $set: {
-    //         ...pickBy({ permissions, displayName, sortIndex, customOptions }, (v) => typeof v !== 'undefined'),
-    //         updatedTimestamp: Date.now(),
-    //       },
-    //     });
-    // }
-    // if (pagesUpdates.length) {
-    //   await bulk.execute();
-    // }
-    // return this.listWorkflowPages(workflowId, teamId, userId);
+    const { pages: pagesUpdates } = body;
+    for (const update of pagesUpdates) {
+      const { pageId, permissions, displayName, sortIndex, customOptions } = update ?? {};
+      if (!pageId) continue;
+      await this.pageRepository.update(
+        {
+          id: pageId,
+          teamId,
+          workflowId,
+        },
+        {
+          ...pickBy({ permissions, displayName, sortIndex, customOptions }, (v) => typeof v !== 'undefined'),
+          updatedTimestamp: Date.now(),
+        },
+      );
+    }
+    return this.listWorkflowPages(workflowId);
   }
 
   async removeWorkflowPage(workflowId: string, teamId: string, userId: string, pageId: string) {
