@@ -112,6 +112,7 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
                             onFinished={(urls) => {
                               field.onChange(urls[0]);
                             }}
+                            basePath="user-files/import-comfyui-image"
                           />
                         </FormControl>
                         <FormDescription>{t('common.form.description.upload-file-auto-store')}</FormDescription>
@@ -138,6 +139,7 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
                             onFinished={(urls) => {
                               field.onChange(urls[0]);
                             }}
+                            basePath="user-files/import-comfyui-json"
                           />
                         </FormControl>
                         <FormDescription>{t('common.form.description.upload-file-auto-store')}</FormDescription>
@@ -161,6 +163,7 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
                             onFinished={(urls) => {
                               field.onChange(urls[0]);
                             }}
+                            basePath="user-files/import-comfyui-json-url"
                           />
                         </FormControl>
                         <FormDescription>{t('common.form.description.upload-file-auto-store')}</FormDescription>

@@ -123,6 +123,7 @@ export const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
               onFinished={(urls) => {
                 setTempImage(urls[0]);
               }}
+              basePath="user-files/base"
             >
               <Button variant="outline" disabled={loading}>
                 {t('components.ui.image-editor.upload-others')}
