@@ -1656,7 +1656,16 @@
         "unknown-view": "Unknown view",
         "add-tab": {
           "label": "Add View",
-          "empty": "No view available"
+          "empty": "No view available",
+
+          "create-custom-code-view": {
+            "button": "Custom Views",
+
+            "tips": {
+              "title": "Creating a Custom Code View",
+              "desc": "You can use ReactJS code along with our component library and TailwindCSS to customize page layouts and component styles. Additionally, our JS SDK allows you to easily achieve personalized views."
+            }
+          }
         },
         "menu": {
           "del-view-button": "Delete View",
