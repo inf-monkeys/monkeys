@@ -44,7 +44,8 @@ export class ConductorService {
   public convertConductorTasksToVinesTasks(teamId: string, tasks: Task[], workflowDefinition: WorkflowDefinition) {
     // const team = await this.teamService.getTeamById(teamId);
 
-    for (const task of tasks) {
+    const flattedTasks = flatTasks(tasks);
+    for (const task of flattedTasks) {
       const workflowTaskNamePrefix = config.conductor.workerPrefix;
       if (workflowTaskNamePrefix) {
         // 移除前缀
@@ -70,7 +71,7 @@ export class ConductorService {
       delete task.inputData[this.CONTEXT_KEY];
     }
 
-    for (const task of workflowDefinition?.tasks || []) {
+    for (const task of flatTasks(workflowDefinition?.tasks) || []) {
       const workflowTaskNamePrefix = config.conductor.workerPrefix;
       if (workflowTaskNamePrefix) {
         // 移除前缀
