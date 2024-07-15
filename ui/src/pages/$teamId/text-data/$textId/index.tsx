@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { createFileRoute } from '@tanstack/react-router';
 
-import { CircularProgress } from '@nextui-org/progress';
+import { CircularProgress } from '@/components/ui/circular-progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronRight, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';

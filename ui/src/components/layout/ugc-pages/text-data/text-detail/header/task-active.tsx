@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { useSWRConfig } from 'swr';
 
 import { useInterval } from '@mantine/hooks';
-import { CircularProgress } from '@nextui-org/progress';
+import { CircularProgress } from '@/components/ui/circular-progress';
 
 import { useKnowledgeBaseTaskDetail } from '@/apis/vector';
 

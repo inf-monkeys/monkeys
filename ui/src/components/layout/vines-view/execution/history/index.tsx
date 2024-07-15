@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { useClipboard } from '@mantine/hooks';
-import { CircularProgress } from '@nextui-org/progress';
+import { CircularProgress } from '@/components/ui/circular-progress';
 import { Command as CommandPrimitive, CommandLoading } from 'cmdk';
 import { Copy, MousePointerSquareDashed, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';

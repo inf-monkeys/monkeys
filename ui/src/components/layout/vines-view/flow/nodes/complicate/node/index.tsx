@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 
 import { useClickOutside } from '@mantine/hooks';
-import { CircularProgress } from '@nextui-org/progress';
+import { CircularProgress } from '@/components/ui/circular-progress';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { ComplicateSimpleNodeExpand } from 'src/components/layout/vines-view/flow/nodes/complicate/node/simple/expand';
