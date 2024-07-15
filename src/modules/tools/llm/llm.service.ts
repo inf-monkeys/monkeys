@@ -341,7 +341,70 @@ export class LlmService {
     return result;
   }
 
+  private async summarizeUserMessages(openai: OpenAI, model: string, messages: Array<ChatCompletionMessageParam>): Promise<string> {
+    const userMessages = messages.filter((msg) => msg.role === 'user');
+    if (userMessages.length === 1) {
+      return userMessages[0].content as string;
+    }
+    const las5Messages = userMessages.slice(-5);
+    const last5MessagesStr = las5Messages.map((msg) => msg.content).join('\n');
+    const response = await openai.chat.completions.create({
+      messages: [
+        {
+          role: 'user',
+          content: `You are a conversation summarizer, summarize the following conversation into a short centence representing user's question. Later we will use this question to retrieve knowledge base.\n\n
+
+Rules:
+1. The summary should be a question based on most recent questions.
+2. Answer in user's language.
+3. If user ask another question, use the last question.
+
+Conversation:
+\n\n
+${last5MessagesStr}`,
+        },
+      ],
+      stream: false,
+      model,
+    });
+    return response.choices[0].message.content;
+  }
+
+  private async chooseMetadataFilterByUserMessage(openai: OpenAI, model: string, userQuestion: string, values: string[]): Promise<string[]> {
+    const response = await openai.chat.completions.create({
+      messages: [
+        {
+          role: 'user',
+          content: `You are a file retriever, choose the most relevant knowledge base on user's question and avaliable file names.
+          
+Available Files:
+${values.map((x) => x).join('\n')}
+
+Rules:
+1. Choose the most relevant file names based on user's question.
+2. You can choose multiple file names, max to 3.
+3. Answer in user's language.
+4. Answer in the format of "file1, file2, file3", separate by comma.
+5. If no files found, answer "No files found".
+
+User's Question:
+${userQuestion}
+`,
+        },
+      ],
+      stream: false,
+      model,
+    });
+    const content = response.choices[0].message.content;
+    if (content.includes('No files found')) {
+      return [];
+    }
+    return response.choices[0].message.content.split(',').map((x) => x.trim());
+  }
+
   private async generateSystemMessages(
+    openai: OpenAI,
+    model: string,
     messages: Array<ChatCompletionMessageParam>,
     presetPrompt: string,
     knowledgeBase: string,
@@ -356,16 +419,21 @@ export class LlmService {
     if (knowledgeBase) {
       const useMessages = messages.filter((msg) => msg.role === 'user');
       if (useMessages.length > 0) {
-        const lastUserMessage = useMessages[useMessages.length - 1];
-        const { content: lastUserMessageContent } = lastUserMessage;
+        const summarizedUserMessage = await this.summarizeUserMessages(openai, model, useMessages);
+        const valuesToFilterByMetadataKey = await this.knowledgeBaseService.valuesToFilterByMetadataKey(knowledgeBase);
+        let metadataFilterValues = undefined;
+        if (valuesToFilterByMetadataKey?.length) {
+          metadataFilterValues = await this.chooseMetadataFilterByUserMessage(openai, model, summarizedUserMessage, valuesToFilterByMetadataKey);
+        }
         try {
-          const retrieveResult = await this.knowledgeBaseService.retrieveKnowledgeBase(knowledgeBase, lastUserMessageContent as string);
+          logger.info(`Start to retrieve knowledge base: ${knowledgeBase} with summarized user message: ${summarizedUserMessage}, metadataFilterValues: ${metadataFilterValues}`);
+          const retrieveResult = await this.knowledgeBaseService.retrieveKnowledgeBase(knowledgeBase, summarizedUserMessage, metadataFilterValues);
           if (retrieveResult?.text) {
-            logger.info(`Retrieved knowledge base: ${retrieveResult.text}`);
+            logger.info(`Retrieved knowledge base: ${retrieveResult.text.slice(0, 200)}`);
             knowledgeBaseContext = retrieveResult.text;
             generatedByKnowledgeBase = knowledgeBase;
           } else {
-            logger.info(`Not found any knowledge based on question: ${lastUserMessageContent}`);
+            logger.info(`Not found any knowledge based on question: ${summarizedUserMessage}`);
           }
         } catch (error) {
           logger.warn(`Failed to retrieve knowledge base: ${error.message}`);
@@ -484,9 +552,20 @@ export class LlmService {
       res.setHeader('content-type', 'text/event-stream;charset=utf-8');
       res.status(200);
     }
+    const { apiKey, baseURL, defaultParams, realModelName, autoMergeConsecutiveMessages = false } = await this.getModelConfig(teamId, model);
+    if (realModelName) {
+      model = realModelName as string;
+    }
+
+    const openai = new OpenAI({
+      apiKey: apiKey || 'mock-apikey',
+      baseURL: baseURL,
+      maxRetries: config.llm.maxRetries,
+      timeout: config.llm.timeout,
+    });
 
     // Generate system messages
-    const { generatedByKnowledgeBase, systemMessages } = await this.generateSystemMessages(messages, systemPrompt, knowledgeBase);
+    const { generatedByKnowledgeBase, systemMessages } = await this.generateSystemMessages(openai, model, messages, systemPrompt, knowledgeBase);
     const randomChatCmplId = Math.random().toString(36).substr(2, 16);
 
     const logs = [];
@@ -507,21 +586,11 @@ export class LlmService {
     // Cap messages
     messages = await this.capMessages(systemMessages, historyMessages);
 
-    const { apiKey, baseURL, defaultParams, realModelName, autoMergeConsecutiveMessages = false } = await this.getModelConfig(teamId, model);
-    if (realModelName) {
-      model = realModelName as string;
-    }
-
     // Merge consecutive messages
     if (autoMergeConsecutiveMessages) {
       messages = this.mergeConsecutiveMessages(messages);
     }
-    const openai = new OpenAI({
-      apiKey: apiKey || 'mock-apikey',
-      baseURL: baseURL,
-      maxRetries: config.llm.maxRetries,
-      timeout: config.llm.timeout,
-    });
+
     const tools: Array<ChatCompletionTool> = await this.resolveTools(params.tools || [], sqlKnowledgeBase);
 
     let response: ChatCompletion | Stream<ChatCompletionChunk>;
@@ -623,9 +692,6 @@ export class LlmService {
           onFinal() {
             res.write('data: [DONE]\n\n');
             res.end();
-          },
-          onToken(token) {
-            logger.info(`OnToken: ${token}`);
           },
         });
         const streamingTextResponse = new StreamingTextResponse(streamResponse, {}, data);
