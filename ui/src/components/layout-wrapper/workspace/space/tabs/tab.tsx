@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
 import { IPageType } from '@/apis/pages/typings.ts';
-import { TabMenu } from '@/components/layout-wrapper/workspace/space/tabs/menu.tsx';
+import { TabMenu } from '@/components/layout-wrapper/workspace/space/tabs/menu';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId';
 import { cn } from '@/utils';

@@ -9,7 +9,7 @@ import { VinesWorkflowInput } from '@/components/layout/vines-view/execution/wor
 import { calculateDisplayInputs } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/utils';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { I18nContent } from '@/utils';
+import { getI18nContent } from '@/utils';
 
 interface IUgcImportDialogProps {
   children?: React.ReactNode;
@@ -47,7 +47,7 @@ export const LLMChannelImportDialog: React.FC<IUgcImportDialogProps> = ({ childr
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{I18nContent(channel?.displayName)}</DialogTitle>
+          <DialogTitle>{getI18nContent(channel?.displayName)}</DialogTitle>
         </DialogHeader>
         <VinesWorkflowInput
           inputs={finalInputs}

@@ -29,6 +29,8 @@ import { CredentialsRepository } from '../../database/repositories/credential.re
 import { ToolsRepository } from '../../database/repositories/tools.repository';
 import { COMFYUI_NAMESPACE, COMFYUI_TOOL } from './comfyui/comfyui.execution.controller';
 import { OpenAPIParserOptions, parseOpenApiSpecAsTools } from './utils/openapi-parser';
+import { config } from '@/common/config';
+import { isArray, set } from 'lodash';
 
 @Injectable()
 export class ToolsRegistryService {
@@ -281,6 +283,25 @@ export class ToolsRegistryService {
 
   public async listTools(teamId: string) {
     const tools = await this.toolsRepository.listTools(teamId);
+
+    // Handle Get Tools Price
+    const { enabled: paymentEnable } = config.paymentServer;
+    if (paymentEnable) {
+      try {
+        const data = await this.getToolPrice();
+
+        for (const tool of tools) {
+          const toolPrice = data.find((x) => x.name === tool.name);
+          if (toolPrice) {
+            set(tool, 'extra.pricingRule', toolPrice.pricingRule);
+            set(tool, 'extra.unitPrice', toolPrice.unitPrice);
+          }
+        }
+      } catch (error) {
+        logger.error('Error when get tools price', error);
+      }
+    }
+
     // Handle Special comfyui tool
     const comfyuiInferTool = tools.find((x) => x.name === `${COMFYUI_NAMESPACE}:${COMFYUI_TOOL}`);
     if (comfyuiInferTool) {
@@ -308,6 +329,49 @@ export class ToolsRegistryService {
   }
 
   public async getToolByName(name: string) {
-    return await this.toolsRepository.getToolByName(name);
+    const tool = await this.toolsRepository.getToolByName(name);
+
+    // Handle Get Tools Price
+    const { enabled: paymentEnable } = config.paymentServer;
+    if (paymentEnable) {
+      try {
+        const data = await this.getToolPrice();
+
+        const toolPrice = data.find((x) => x.name === tool.name);
+        if (toolPrice) {
+          set(tool, 'extra.pricingRule', toolPrice.pricingRule);
+          set(tool, 'extra.unitPrice', toolPrice.unitPrice);
+        }
+      } catch (error) {
+        logger.error('Error when get tools price', error);
+      }
+    }
+
+    return tool;
+  }
+
+  private async getToolPrice() {
+    const { enabled: paymentEnable, baseUrl: paymentBaseUrl } = config.paymentServer;
+    if (paymentEnable && paymentBaseUrl) {
+      try {
+        const {
+          data: { data },
+        } = await axios<{ success: boolean; data: { name: string; pricingRule: string; unitPrice: number }[] }>({
+          method: 'GET',
+          url: '/payment/tool-price',
+          baseURL: paymentBaseUrl,
+          headers: { 'x-monkeys-appid': config.server.appId },
+        });
+
+        if (isArray(data)) {
+          return data;
+        } else {
+          return [];
+        }
+      } catch (error) {
+        logger.error('Error when get tools price', error);
+      }
+    }
+    return [];
   }
 }

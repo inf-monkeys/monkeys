@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
+import { useNavigate } from '@tanstack/react-router';
+
 import { AnimatePresence, motion } from 'framer-motion';
-import { ShieldCheck } from 'lucide-react';
+import { DoorOpen, ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { handleOidcLogin } from '@/apis/authz/oidc';
@@ -10,7 +12,7 @@ import { PhoneAuth } from '@/components/layout/login/phone-auth.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
-import { cn } from '@/utils';
+import { cn, useLocalStorage } from '@/utils';
 
 interface IAuthContainerProps extends React.ComponentPropsWithoutRef<'div'> {
   loginMethodsLength: number;
@@ -20,8 +22,6 @@ interface IAuthContainerProps extends React.ComponentPropsWithoutRef<'div'> {
   enablePassword: boolean;
 
   oidcButtonText?: string;
-
-  hasTokens: boolean;
 }
 
 export const AuthContainer: React.FC<IAuthContainerProps> = ({
@@ -30,9 +30,12 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
   enablePhone,
   enablePassword,
   oidcButtonText,
-  hasTokens,
 }) => {
   const { t } = useTranslation();
+
+  const navigate = useNavigate();
+
+  const [token] = useLocalStorage<string>('vines-token', '', false);
 
   const [activeTab, setActiveTab] = useState('phone');
 
@@ -88,18 +91,21 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
           </AnimatePresence>
         </Tabs>
       )}
-      {hasTokens || enableOidc ? (
+      {token || enableOidc ? (
         <div className="-mt-2 flex w-full flex-col gap-6">
-          {!onlyOne &&
-            (enableOidc ? (
-              <div className="flex items-center justify-center gap-4">
-                <Separator className="flex-1" />
-                <span className="text-xs text-opacity-70">{t('auth.login.other')}</span>
-                <Separator className="flex-1" />
-              </div>
-            ) : (
-              <Separator />
-            ))}
+          <div className="flex items-center justify-center gap-4">
+            <Separator className="flex-1" />
+            <span className="text-xs text-opacity-70">{t('auth.login.other')}</span>
+            <Separator className="flex-1" />
+          </div>
+          {token && (
+            <>
+              <Button variant="outline" icon={<DoorOpen />} onClick={() => navigate({ to: '/' })}>
+                {t('auth.login.nav-to-home')}
+              </Button>
+              <span className="-mt-4 text-xs text-opacity-70">{t('auth.login.has-token-tips')}</span>
+            </>
+          )}
           {enableOidc && (
             <>
               <Button
@@ -109,7 +115,7 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
               >
                 {oidcButtonText ?? 'OIDC'}
               </Button>
-              {!areValuesUsed && <span className="-mt-2 text-xs text-opacity-70">{t('auth.login.only-oidc')}</span>}
+              {!areValuesUsed && <span className="-mt-4 text-xs text-opacity-70">{t('auth.login.only-oidc')}</span>}
             </>
           )}
         </div>

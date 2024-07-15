@@ -9,17 +9,19 @@ import { useTranslation } from 'react-i18next';
 import { OEM } from '@/components/layout/oem';
 import { MainWrapper } from '@/components/layout-wrapper/main';
 import { WorkspaceWrapper } from '@/components/layout-wrapper/workspace';
+import { WorkspaceIframe } from '@/components/layout-wrapper/workspace-iframe';
 import { TeamsGuard } from '@/components/router/guard/team.tsx';
 import { UserGuard } from '@/components/router/guard/user.tsx';
 import { useVinesRoute } from '@/components/router/useVinesRoute.ts';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { VinesGlobalUpload } from '@/components/ui/updater/vines-global-upload.tsx';
 import { SIDEBAR_MAP } from '@/consts/sidebar.tsx';
 import VinesEvent from '@/utils/events.ts';
 
 const RootComponent: React.FC = () => {
   const { t } = useTranslation();
 
-  const { routeIds, routeAppId, isUseOutside, isUseWorkSpace } = useVinesRoute();
+  const { routeIds, routeAppId, isUseOutside, isUseWorkSpace, isUseVinesCore } = useVinesRoute();
 
   const namePath = SIDEBAR_MAP.flatMap((it) =>
     it.items
@@ -50,6 +52,7 @@ const RootComponent: React.FC = () => {
       <ScrollRestoration />
       <NextUIProvider>
         <TooltipProvider delayDuration={100}>
+          <VinesGlobalUpload />
           <main className="vines-ui h-screen w-screen">
             <AnimatePresence mode="popLayout">
               <motion.div
@@ -60,7 +63,9 @@ const RootComponent: React.FC = () => {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                {isUseOutside ? (
+                {isUseVinesCore ? (
+                  <WorkspaceIframe />
+                ) : isUseOutside ? (
                   <Outlet />
                 ) : isUseWorkSpace ? (
                   <WorkspaceWrapper />

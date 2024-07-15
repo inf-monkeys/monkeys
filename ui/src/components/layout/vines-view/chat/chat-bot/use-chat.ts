@@ -9,13 +9,13 @@ import { nanoIdLowerCase } from '@/utils';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 import { parseOpenAIStream } from '@/utils/openai.ts';
 
-import { ChatCompelitionLog } from './messages/chat-message/tool-display';
+import { ChatCompletionLog } from './messages/chat-message/tool-display';
 
 export interface IVinesMessage {
   id?: string;
   content: string;
   role: 'user' | 'assistant';
-  extra?: ChatCompelitionLog[];
+  extra?: ChatCompletionLog[];
   createdAt?: Date;
 }
 
@@ -77,6 +77,13 @@ export const useChat = ({
     messagesRef.current = messages || [];
   }, [messages]);
 
+  const chatIdRef = useRef(chatId);
+  useEffect(() => {
+    if (chatIdRef.current !== chatId) {
+      chatIdRef.current = chatId;
+    }
+  }, [chatId]);
+
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const triggerRequest = useCallback(
@@ -95,6 +102,7 @@ export const useChat = ({
         const finalMessages = messages.map((it) => omit(it, ['id', 'createdAt', 'extra'])).filter((it) => it.content);
 
         const finalMultipleChat = multipleChat ?? requestCredentials?.multipleChat;
+        const finalChatId = chatIdRef.current;
 
         const response = await fetch(`/v1/${finalMultipleChat ? 'chat/' : ''}completions`, {
           method: 'POST',
@@ -110,7 +118,7 @@ export const useChat = ({
           headers: {
             Authorization: `Bearer ${apiKey ?? requestCredentials?.apiKey ?? ''}`,
             'Content-Type': 'application/json',
-            ...(chatId && !chatId.startsWith('default-') && { 'x-monkeys-conversation-id': chatId }),
+            ...(finalChatId && !finalChatId.startsWith('default-') && { 'x-monkeys-conversation-id': finalChatId }),
           },
           signal: abortController.signal,
         }).catch((err) => {
@@ -138,7 +146,7 @@ export const useChat = ({
         const assistantChatId = nanoIdLowerCase();
         const createdAt = new Date();
         let aiResult = '';
-        const aiResultExtra: ChatCompelitionLog[] = [];
+        const aiResultExtra: ChatCompletionLog[] = [];
 
         // eslint-disable-next-line no-constant-condition
         while (true) {

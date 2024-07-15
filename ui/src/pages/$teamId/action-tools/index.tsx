@@ -3,6 +3,7 @@ import React from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { t } from 'i18next';
+import { Import } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { preloadUgcActionTools, useUgcActionTools } from '@/apis/ugc';
@@ -15,7 +16,6 @@ import { ImportToolModal } from '@/components/layout/workspace/tools/import-tool
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
 import { formatTime } from '@/utils/time.ts';
-import { Import } from 'lucide-react';
 
 export const ActionTools: React.FC = () => {
   const { t: tHook } = useTranslation();
@@ -34,25 +34,23 @@ export const ActionTools: React.FC = () => {
         createColumns={() => createActionToolsColumns({ hooks: { navigate } })}
         renderOptions={{
           subtitle: (item) => {
-            const estimateTime = item.extra ? item.extra.estimateTime : undefined;
-            const pricing = item.pricing;
+            const extra = item.extra;
+            const estimateTime = extra ? extra.estimateTime : undefined;
             return (
               <span className="line-clamp-1">
                 {t('ugc-page.action-tools.utils.estimate.estimate-time', {
                   time: formatTime({ seconds: estimateTime, defaultSeconds: 30 }),
                 })}
                 {' | '}
-                {pricing ? PricingText({ pricing }) : t('ugc-page.action-tools.utils.pricing-mode.free')}
+                {extra ? PricingText({ pricing: extra }) : t('ugc-page.action-tools.utils.pricing-mode.FREE')}
               </span>
             );
           },
-          cover: (item) => {
-            return RenderIcon({ iconUrl: item.icon, size: 'gallery' });
-          },
+          cover: (item) => RenderIcon({ iconUrl: item.icon, size: 'gallery' }),
         }}
         onItemClick={(item) => {
           void navigate({
-            to: `/$teamId/action-tools/${item.name}`,
+            to: `/$teamId/action-tools/${item.name}/`,
           });
         }}
         subtitle={

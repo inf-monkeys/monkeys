@@ -8,10 +8,11 @@ import { CreateChatSessionDto } from '../chat/dto/req/create-chat-session.dto';
 import { ListChatSessionsDto } from './dto/req/list-chat-sessions.dto';
 import { UpdateChatSessionDto } from './dto/req/update-chat-session.dto';
 import { WorkflowChatSessionService } from './workflow.chat-sessions.service';
+import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 
 @Controller('/workflow/chat-sessions')
 @ApiTags('Workflows/Chat Sessions')
-@UseGuards(CompatibleAuthGuard)
+@UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
 export class WorkflowChatSessionController {
   constructor(private readonly service: WorkflowChatSessionService) {}
 

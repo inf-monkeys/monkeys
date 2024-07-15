@@ -11,21 +11,18 @@ import { useSystemConfig } from '@/apis/common';
 import { AuthMethod } from '@/apis/common/typings.ts';
 import { AuthContainer } from '@/components/layout/login';
 import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
-import { IUserTokens } from '@/components/router/guard/auth.ts';
 import { I18nSelector } from '@/components/ui/i18n-selector';
 import { AppLogo } from '@/components/ui/logo';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
 import { pageSearchSchema } from '@/schema/common.ts';
 import { useAppStore } from '@/store/useAppStore';
-import { cn, useLocalStorage } from '@/utils';
+import { cn } from '@/utils';
 
 const Login: React.FC = () => {
   const { t } = useTranslation();
 
   const { darkMode } = useAppStore();
   const { data: oem, error } = useSystemConfig();
-
-  const [tokens] = useLocalStorage<IUserTokens>('vines-tokens', {});
 
   const logoUrl = get(oem, `theme.logo.${darkMode ? 'dark' : 'light'}`, '');
   const appName = get(oem, 'theme.name', 'AI');
@@ -38,14 +35,12 @@ const Login: React.FC = () => {
   const isOidcEnabled = loginMethods.includes(AuthMethod.oidc);
 
   const oidcButtonText: string = get(oem, 'auth.oidc.buttonText', 'OIDC');
-  const autoSigninOidc: boolean = get(oem, 'auth.oidc.autoSignin', false);
+  const autoSignInOidc: boolean = get(oem, 'auth.oidc.autoSignin', false);
 
-  if (autoSigninOidc && isOidcEnabled) {
+  if (autoSignInOidc && isOidcEnabled) {
     handleOidcLogin();
-    return <></>;
+    return null;
   }
-
-  const hasTokens = Object.keys(tokens).length > 0;
 
   const isServerError = error instanceof Error;
 
@@ -75,7 +70,6 @@ const Login: React.FC = () => {
                   enablePassword={isPasswordEnable}
                   enablePhone={isPhoneEnable}
                   oidcButtonText={oidcButtonText}
-                  hasTokens={hasTokens}
                 />
               </SmoothTransition>
             )}

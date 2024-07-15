@@ -11,7 +11,7 @@ import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { IUgcCreateColumnsProps } from '@/components/layout/ugc/typings.ts';
 import { RenderDescription, RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { PricingText } from '@/components/layout/ugc-pages/action-tools/utils.tsx';
-import { I18nContent } from '@/utils';
+import { getI18nContent } from '@/utils';
 import { formatTime } from '@/utils/time.ts';
 
 const columnHelper = createColumnHelper<IAssetItem<IWorkflowTool>>();
@@ -36,17 +36,18 @@ export const createActionToolsColumns = ({ hooks }: ICreateActionToolsColumnsPro
           className="cursor-pointer transition-colors hover:text-primary-500"
           onClick={() => {
             void hooks.navigate({
+              // @ts-ignore
               to: `/$teamId/action-tools/${row.original.name}`,
             });
           }}
         >
-          {I18nContent(getValue() as string | I18nValue)}
+          {getI18nContent(getValue() as string | I18nValue)}
         </span>
       ),
     }),
     columnHelper.accessor('description', {
       id: 'description',
-      cell: ({ getValue }) => RenderDescription({ description: I18nContent(getValue() as string | I18nValue) }),
+      cell: ({ getValue }) => RenderDescription({ description: getI18nContent(getValue() as string | I18nValue) }),
     }),
     columnHelper.display({
       id: 'estimateTime',
@@ -60,13 +61,13 @@ export const createActionToolsColumns = ({ hooks }: ICreateActionToolsColumnsPro
         );
       },
     }),
-    columnHelper.accessor('pricing', {
+    columnHelper.accessor('extra', {
       id: 'pricing',
       cell: ({ getValue }) => {
-        const pricing = getValue() as ToolPricing | undefined;
+        const pricing = getValue();
         return (
           <span className="text-text2">
-            {pricing ? PricingText({ pricing }) : t('ugc-page.action-tools.utils.pricing-mode.free')}
+            {pricing ? PricingText({ pricing }) : t('ugc-page.action-tools.utils.pricing-mode.FREE')}
           </span>
         );
       },

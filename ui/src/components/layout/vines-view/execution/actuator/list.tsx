@@ -45,7 +45,7 @@ export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({ height, act
       const tool = vines.getTool(toolName);
       const customData = node.customData;
 
-      const toolDesc = tool?.description ?? '';
+      const toolDesc = getI18nContent(tool?.description) ?? '';
       const customDesc = customData?.description ?? '';
 
       newTools.push({
@@ -108,7 +108,7 @@ export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({ height, act
               >
                 <div className="flex items-center gap-2">
                   <div className="flex size-12 items-center justify-center overflow-hidden rounded-lg border shadow-sm">
-                    <VinesIcon src={icon} size="lg" />
+                    <VinesIcon src={icon} size="md" />
                   </div>
                   <div className="flex max-w-[13rem] flex-col gap-1 leading-5">
                     <div className="flex items-center gap-2">

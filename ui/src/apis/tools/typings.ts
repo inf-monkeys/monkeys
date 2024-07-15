@@ -10,16 +10,16 @@ export interface ToolPropertyExtended extends ToolProperty {
   };
 }
 
-export type ChargeMode = 'free' | 'per-execute' | 'script' | 'per-1k-token' | 'per-1min' | 'per-1mb-file';
+export type ChargeMode = 'FREE' | 'PER_EXECUTR' | 'PER_1MIN' | 'PER_1K_TOKEN';
 
 export interface ToolPricing {
-  mode: ChargeMode;
-  unitPriceAmount: number;
+  pricingRule: ChargeMode;
+  unitPrice: number;
 }
 
 export interface ToolDefExtended extends ToolDef {
   input: ToolPropertyExtended[];
-  pricing?: ToolPricing;
+  extra: ToolDef['extra'] & ToolPricing;
 }
 
 export interface IWorkflowTool extends ToolDefExtended {

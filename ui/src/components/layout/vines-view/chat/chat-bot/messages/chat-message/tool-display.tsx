@@ -27,33 +27,33 @@ export interface ToolCallLogDetailedInfo {
   status: Status;
 }
 
-export interface RetriveKnowledgeBaseDetailedInfo {
+export interface RetrieveKnowledgeBaseDetailedInfo {
   knowledgeBaseId: string;
 }
 
-export interface ChatCompelitionLog {
+export interface ChatCompletionLog {
   type: 'retrive_knowledge_base' | 'tool_call';
   level: LogLevel;
   message: string;
-  detailedInfo: ToolCallLogDetailedInfo | RetriveKnowledgeBaseDetailedInfo;
+  detailedInfo: ToolCallLogDetailedInfo | RetrieveKnowledgeBaseDetailedInfo;
 }
 
 interface IToolDisplayProps {
-  data?: ChatCompelitionLog[];
+  data?: ChatCompletionLog[];
 }
 
 export const ToolDisplay: React.FC<IToolDisplayProps> = ({ data }) => {
   const { t } = useTranslation();
 
   const { vines } = useVinesFlow();
-  const { data: knowledges } = useKnowledgeBases();
-  const chatCompelitionLog = data?.at(-1);
+  const { data: knowledge } = useKnowledgeBases();
+  const chatCompletionLog = data?.at(-1);
 
-  if (!chatCompelitionLog) {
-    return <></>;
+  if (!chatCompletionLog) {
+    return null;
   }
 
-  const { type, message, detailedInfo } = chatCompelitionLog;
+  const { type, message, detailedInfo } = chatCompletionLog;
 
   let status: Status = 'inprogress';
   let result: JSONValue = {};
@@ -64,8 +64,8 @@ export const ToolDisplay: React.FC<IToolDisplayProps> = ({ data }) => {
   if (type === 'retrive_knowledge_base') {
     status = 'success';
     result = message;
-    const knowledgeBaseId = (detailedInfo as RetriveKnowledgeBaseDetailedInfo).knowledgeBaseId;
-    const knowledgeBase = knowledges?.find((k) => k.uuid === knowledgeBaseId);
+    const knowledgeBaseId = (detailedInfo as RetrieveKnowledgeBaseDetailedInfo).knowledgeBaseId;
+    const knowledgeBase = knowledge?.find((k) => k.uuid === knowledgeBaseId);
     if (knowledgeBase) {
       toolDisplayName = getI18nContent(knowledgeBase.displayName) ?? '';
       toolDesc = getI18nContent(knowledgeBase.description) ?? '';
@@ -82,7 +82,7 @@ export const ToolDisplay: React.FC<IToolDisplayProps> = ({ data }) => {
   }
 
   return (
-    chatCompelitionLog && (
+    chatCompletionLog && (
       <div className="mb-2 flex max-w-full flex-col items-center gap-2 overflow-hidden rounded border border-input p-2">
         <div className="flex w-full items-center justify-between">
           <div className="flex items-center gap-2">

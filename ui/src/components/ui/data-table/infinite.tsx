@@ -30,7 +30,6 @@ interface IInfiniteScrollingDataTableProps<TData, TValue> {
   tfoot?: React.ReactNode;
 }
 
-// million-ignore
 export function InfiniteScrollingDataTable<TData, TValue>({
   className,
 

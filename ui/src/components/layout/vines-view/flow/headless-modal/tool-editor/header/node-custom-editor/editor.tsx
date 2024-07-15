@@ -22,7 +22,6 @@ interface IToolCustomDataEditorProps {
   updateRaw: (task: VinesTask) => void;
 }
 
-// million-ignore
 export const ToolCustomDataEditor: React.FC<IToolCustomDataEditorProps> = ({
   task,
   icon,

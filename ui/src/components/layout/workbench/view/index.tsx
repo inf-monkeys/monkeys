@@ -12,34 +12,31 @@ import { VinesIFrame } from '@/components/ui/vines-iframe';
 import { usePageStore } from '@/store/usePageStore';
 import { useLocalStorage } from '@/utils';
 
-interface IWorkbenchViewProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface IWorkbenchViewProps extends React.ComponentPropsWithoutRef<'div'> {
+  groupId: string;
+}
 
-export const WorkbenchView: React.FC<IWorkbenchViewProps> = () => {
+export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ groupId }) => {
   const { t } = useTranslation();
 
-  const { data: pages } = useWorkspacePages();
+  const { data } = useWorkspacePages();
+  const pages = data?.pages;
 
   const { ref, width, height } = useElementSize();
 
-  const [page, setPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
+  const [page] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
 
   const hasPages = (pages?.length ?? 0) > 0;
   const hasPage = !!(page?.id && page?.teamId && page?.workflowId && page?.type);
 
-  useEffect(() => {
-    if (!hasPage && pages?.length) {
-      setPage(pages[0]);
-    }
-  }, [hasPage]);
-
   const { setContainerWidth, setContainerHeight } = usePageStore();
   useEffect(() => {
     setContainerWidth(width);
-    setContainerHeight(height);
+    setContainerHeight(height - 52);
   }, [width, height]);
 
   return (
-    <div ref={ref} className="relative w-full flex-1 overflow-x-clip">
+    <div ref={ref} className="relative w-full flex-1 overflow-hidden">
       <AnimatePresence>
         {hasPages && hasPage ? (
           <motion.div
@@ -49,8 +46,8 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <WorkbenchViewHeader page={page} />
-            <div className="relative h-[calc(100%-3.2rem)] w-full overflow-hidden rounded-r-lg">
+            <WorkbenchViewHeader page={page} groupId={groupId} />
+            <div className="relative size-full max-h-[calc(100%-4.3rem)] overflow-hidden rounded-lg">
               <VinesIFrame pages={pages ?? []} page={page} />
             </div>
           </motion.div>

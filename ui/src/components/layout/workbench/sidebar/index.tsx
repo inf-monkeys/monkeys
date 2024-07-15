@@ -1,42 +1,83 @@
-import React, { useEffect, useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { Link } from '@tanstack/react-router';
 
+import { useDebounceEffect } from 'ahooks';
 import { motion } from 'framer-motion';
-import { ChevronRight, Plus } from 'lucide-react';
+import { keyBy, map } from 'lodash';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
+import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { cn, getI18nContent, useLocalStorage } from '@/utils';
-import { useRetimer } from '@/utils/use-retimer.ts';
 
-interface IWorkbenchSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface IWorkbenchSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
+  groupId: string;
+  setGroupId: React.Dispatch<React.SetStateAction<string>>;
+}
 
-export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
+export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ groupId, setGroupId }) => {
   const { t } = useTranslation();
 
-  const reTimer = useRetimer();
+  const { teamId } = useVinesTeam();
+
   const { data } = useWorkspacePages();
   const [visible, setVisible] = useState(true);
 
-  const [currentPage, setCurrentPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', data?.[0] ?? {});
-  useEffect(() => {
-    reTimer(
-      setTimeout(() => {
-        if (data?.length && !currentPage?.id) {
-          setCurrentPage(data[0]);
+  const originalPages = data?.pages ?? [];
+  const originalGroups = data?.groups ?? [];
+
+  const pagesMap = keyBy(originalPages, 'id');
+  const lists = map(originalGroups, ({ pageIds, ...attr }) => ({
+    ...attr,
+    pages: map(pageIds, (pageId) => pagesMap[pageId]),
+  }))
+    .filter((it) => it.pages?.length)
+    .sort((a) => (a.isBuiltIn ? -1 : 1));
+
+  const [currentPage, setCurrentPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
+
+  const prevPageRef = useRef<string>();
+  useDebounceEffect(
+    () => {
+      const currentPageId = currentPage?.id;
+
+      if (originalGroups?.length) {
+        const defGroup = originalGroups.find((it) => it.isBuiltIn);
+        const latestGroup = currentPageId
+          ? originalGroups.find((it) => it.pageIds.includes(currentPageId))
+          : defGroup?.pageIds?.length
+            ? defGroup
+            : originalGroups?.[0];
+        if (latestGroup) {
+          setGroupId(latestGroup.id);
+
+          if (!currentPageId) {
+            const page = originalPages.find((it) => it.id === (latestGroup.pageIds?.[0] ?? ''));
+            if (page && prevPageRef.current !== page.id) {
+              setCurrentPage(page);
+              prevPageRef.current = page.id;
+            }
+          }
         }
-        if (currentPage?.id && !data?.find((page) => page.id === currentPage.id)) {
+      }
+
+      if (currentPageId) {
+        if (!originalPages?.find((page) => page.id === currentPageId)) {
           setCurrentPage({});
         }
-      }, 180) as unknown as number,
-    );
-  }, [currentPage, data]);
+      }
+    },
+    [originalPages, originalGroups],
+    { wait: 180 },
+  );
 
   return (
     <div className="flex h-full max-w-64">
@@ -49,32 +90,67 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = () => {
           transition: { duration: 0.2 },
         }}
       >
-        <h1 className="text-2xl font-bold">{t('components.layout.main.sidebar.list.workbench.label')}</h1>
-        <div className="grid gap-2">
-          {data?.map((page) => (
-            <div
-              key={page.id}
-              className={cn(
-                'flex cursor-pointer items-start space-x-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
-                currentPage?.id === page.id && 'border border-input bg-background text-accent-foreground',
-              )}
-              onClick={() => setCurrentPage(page)}
-            >
-              <VinesIcon size="sm">{page.workflow?.iconUrl}</VinesIcon>
-              <div className="flex max-w-44 flex-col gap-0.5">
-                <h1 className="font-bold leading-tight">
-                  {getI18nContent(page.workflow?.displayName) ?? t('common.utils.untitled')}
-                </h1>
-                <span className="text-xxs">
-                  {t([`workspace.wrapper.space.tabs.${page.displayName}`, page.displayName])}
-                </span>
-              </div>
+        <div className="flex items-center gap-2 px-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                icon={<ChevronLeft />}
+                className="!size-8 !p-1"
+                onClick={() => setVisible(false)}
+                variant="outline"
+              />
+            </TooltipTrigger>
+            <TooltipContent>{visible ? t('common.sidebar.hide') : t('common.sidebar.show')}</TooltipContent>
+          </Tooltip>
+          <h1 className="text-base font-bold">{t('components.layout.main.sidebar.list.workbench.label')}</h1>
+        </div>
+        <div className="grid">
+          {lists.map(({ id, displayName, isBuiltIn, pages }) => (
+            <div key={id} className="space-y-1">
+              {!isBuiltIn && <Label className="text-xs">{displayName}</Label>}
+              {pages?.map((page) => {
+                const workflow = page?.workflow;
+                const viewIcon = page?.instance?.icon ?? '';
+                const workflowDesc = getI18nContent(workflow?.description);
+
+                return (
+                  <Tooltip key={page.id}>
+                    <TooltipTrigger asChild>
+                      <div
+                        className={cn(
+                          'flex cursor-pointer items-start space-x-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
+                          currentPage?.id === page.id &&
+                            id === groupId &&
+                            'border border-input bg-background text-accent-foreground',
+                        )}
+                        onClick={() => {
+                          setCurrentPage(page);
+                          setGroupId(id);
+                        }}
+                      >
+                        <VinesIcon size="sm">{workflow?.iconUrl}</VinesIcon>
+                        <div className="flex max-w-44 flex-col gap-0.5">
+                          <h1 className="text-sm font-bold leading-tight">
+                            {getI18nContent(workflow?.displayName) ?? t('common.utils.untitled')}
+                          </h1>
+                          <span className="text-xxs">
+                            {`${viewIcon} ${t([`workspace.wrapper.space.tabs.${page.displayName}`, page.displayName])}`}
+                          </span>
+                        </div>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent className={workflowDesc ? '' : 'hidden'} side="left">
+                      {workflowDesc}
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
             </div>
           ))}
           <Tooltip>
             <TooltipTrigger asChild>
-              <Link to="/$teamId/workflows">
-                <Button icon={<Plus />} className="w-full" variant="outline" />
+              <Link to="/$teamId/workflows/" params={{ teamId }}>
+                <Button icon={<Plus />} className="mt-2 w-full" variant="outline" />
               </Link>
             </TooltipTrigger>
             <TooltipContent>{t('workbench.sidebar.add')}</TooltipContent>

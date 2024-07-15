@@ -8,13 +8,14 @@ import { AutoScroll } from '@/components/layout/vines-view/chat/workflow-mode/me
 import { VinesRealTimeChatMessage } from '@/components/layout/vines-view/chat/workflow-mode/messages/virtualized/chat-message/real-time.tsx';
 
 interface IVirtualizedListProps {
+  chatId: string;
   data: IVinesMessage[];
   isLoading: boolean;
   userPhoto: string;
   botPhoto: string;
 }
 
-export const VirtualizedList: React.FC<IVirtualizedListProps> = ({ data, isLoading, userPhoto, botPhoto }) => {
+export const VirtualizedList: React.FC<IVirtualizedListProps> = ({ chatId, data, isLoading, userPhoto, botPhoto }) => {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const [atBottom, setAtBottom] = useState(true);
 
@@ -40,6 +41,7 @@ export const VirtualizedList: React.FC<IVirtualizedListProps> = ({ data, isLoadi
         itemContent={(index: number, data: IVinesMessage) => {
           return (
             <VinesChatMessage
+              chatId={chatId}
               index={index}
               LastItemIndex={LastItemIndex}
               data={data}

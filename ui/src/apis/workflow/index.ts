@@ -16,9 +16,6 @@ export const useGetWorkflow = (workflowId: string, version?: number) =>
     vinesFetcher(),
   );
 
-export const getWorkflow = (workflowId: string) =>
-  vinesFetcher<MonkeyWorkflow | null>({ simple: true })(`/api/workflow/metadata/${workflowId}`);
-
 export const useWorkflowList = (query: WorkflowListQuery = {}) =>
   useSWR<MonkeyWorkflow[] | undefined>(`/api/workflow/metadata?${qs.stringify(query)}`, vinesFetcher());
 
@@ -70,3 +67,14 @@ export const exportWorkflow = async (workflowId: string, name: string, version?:
       ? `/api/workflow/metadata/${workflowId}/export?version=${version}&exportAssets=1`
       : `/api/workflow/metadata/${workflowId}/export?exportAssets=1`,
   );
+
+export const useToggleWorkflowPermission = (workflowId: string) =>
+  useSWRMutation<boolean | undefined, unknown, string | null, { notAuthorized: boolean }>(
+    workflowId ? `/api/workflow/metadata/${workflowId}/permissions` : null,
+    vinesFetcher({ method: 'POST' }),
+  );
+
+export const workflowPermission = (workflowId: string) =>
+  vinesFetcher<{
+    notAuthorized: boolean;
+  }>({ method: 'GET', simple: true })(`/api/workflow/metadata/${workflowId}/permissions`);
