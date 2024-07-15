@@ -1709,6 +1709,11 @@
               "label": "重命名分组",
               "placeholder": "请输入分组名称，不超过 16 字"
             }
+          },
+          "set-icon": {
+            "trigger": "设置图标",
+            "title": "请选择图标",
+            "reset": "重置"
           }
         },
         "tabs": {
