@@ -1,22 +1,18 @@
 import React from 'react';
 
-import { useClipboard } from '@mantine/hooks';
 import { isEmpty } from 'lodash';
-import { Copy, CopyCheck } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 
 import { ToolDisplay } from '@/components/layout/vines-view/chat/chat-bot/messages/chat-message/tool-display.tsx';
+import { MessageToolbar } from '@/components/layout/vines-view/chat/chat-bot/messages/chat-message/toolbar';
 import { IVinesMessage } from '@/components/layout/vines-view/chat/chat-bot/use-chat.ts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card.tsx';
 import { VinesMarkdown } from '@/components/ui/markdown';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
-import { execCopy } from '@/utils';
 
 interface IVinesChatMessageProps {
+  chatId: string;
+
   data: IVinesMessage;
   index: number;
   LastItemIndex: number;
@@ -29,6 +25,7 @@ interface IVinesChatMessageProps {
 const EMPTY_CONTENT = String.fromCharCode(12288);
 
 export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
+  chatId,
   data,
   index,
   LastItemIndex,
@@ -36,9 +33,6 @@ export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
   botPhoto,
   userPhoto,
 }) => {
-  const { t } = useTranslation();
-  const clipboard = useClipboard();
-
   const isUser = data.role === 'user';
   const content = data.content ?? '';
   const isEmptyMessage = isEmpty(content.trim());
@@ -65,22 +59,7 @@ export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
             <VinesMarkdown className={isLoading && LastItemIndex === index ? 'vines-result-streaming' : ''} allowHtml>
               {content + (isEmptyMessage ? EMPTY_CONTENT : '')}
             </VinesMarkdown>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  icon={clipboard.copied ? <CopyCheck /> : <Copy />}
-                  variant="outline"
-                  size="small"
-                  className="absolute -bottom-1 -right-9 flex scale-80 gap-2 p-1 opacity-0 transition-opacity group-hover:opacity-100"
-                  onClick={() => {
-                    clipboard.copy(content);
-                    if (!clipboard.copied && !execCopy(content)) toast.error(t('common.toast.copy-failed'));
-                    else toast.success(t('common.toast.copy-success'));
-                  }}
-                />
-              </TooltipTrigger>
-              <TooltipContent>{t('common.utils.click-to-copy')}</TooltipContent>
-            </Tooltip>
+            <MessageToolbar chatId={chatId} content={content} />
           </Card>
         </div>
       )}

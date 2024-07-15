@@ -16,10 +16,14 @@ export const vinesHeader = ({ apikey, useToast = false }: IVinesHeaderOptions) =
   const token = getVinesToken();
 
   if (!token) {
-    if (useToast) {
-      toast.warning('需要登录');
-    } else {
+    const [vinesRoute, routeTeamId, workflowId] = window['vinesRoute'];
+    if (vinesRoute !== 'workspace') {
+      if (useToast) {
+        toast.warning('需要登录');
+      }
       throw new Error('需要登录');
+    } else {
+      return { 'x-monkeys-workflow-id': workflowId, 'x-monkeys-teamid': teamId || routeTeamId };
     }
   }
 

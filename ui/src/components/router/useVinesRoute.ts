@@ -1,5 +1,7 @@
 import { useMatches } from '@tanstack/react-router';
 
+import { VINES_IFRAME_PAGE_IDS } from '@/components/ui/vines-iframe/consts.ts';
+
 export const useVinesRoute = () => {
   const matches = useMatches();
 
@@ -12,10 +14,14 @@ export const useVinesRoute = () => {
 
   const routeAppId = routeIds?.at(1);
 
+  const params = routeMatch?.params;
+
   // 之后再考虑是否改为开头匹配 vines-
   const isUseOutside = !routeIds;
   const isUseWorkSpace = routeAppId === 'workspace';
-  // const isUseVinesCore = ['vines-process', 'vines-log', 'vines-chat', 'vines-preview'].includes(routeIds?.[3]);
+  const isUseVinesCore = VINES_IFRAME_PAGE_IDS.includes(params?.['pageId']);
+
+  window['vinesRoute'] = [routeAppId || 'main', params?.['teamId'], params?.['workflowId']];
 
   return {
     matches,
@@ -25,5 +31,6 @@ export const useVinesRoute = () => {
     routeAppId,
     isUseOutside,
     isUseWorkSpace,
+    isUseVinesCore,
   };
 };

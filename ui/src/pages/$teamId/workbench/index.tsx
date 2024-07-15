@@ -13,9 +13,6 @@ export const Workbench: React.FC = () => {
 
   useEffect(() => {
     setWorkbenchVisible(true);
-    return () => {
-      setWorkbenchVisible(false);
-    };
   }, []);
 
   const { teamId } = useVinesTeam();
@@ -32,10 +29,12 @@ export const Workbench: React.FC = () => {
     currentTeamId.current = teamId;
   }, [teamId]);
 
+  const [groupId, setGroupId] = useState<string>('default');
+
   return (
     <main className="flex size-full">
-      <WorkbenchSidebar />
-      {!refresh && <WorkbenchView />}
+      <WorkbenchSidebar groupId={groupId} setGroupId={setGroupId} />
+      {!refresh && <WorkbenchView groupId={groupId} />}
     </main>
   );
 };

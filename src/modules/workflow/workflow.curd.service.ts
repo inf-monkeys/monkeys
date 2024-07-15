@@ -18,6 +18,7 @@ import { WorkflowRepository } from '../../database/repositories/workflow.reposit
 import { ConductorService } from './conductor/conductor.service';
 import { CreateWorkflowData, CreateWorkflowOptions, WorkflowExportJson, WorkflowWithAssetsJson } from './interfaces';
 import { WorkflowValidateService } from './workflow.validate.service';
+import { UpdatePermissionsDto } from '@/modules/workflow/dto/req/update-permissions.dto';
 
 @Injectable()
 export class WorkflowCrudService {
@@ -42,8 +43,8 @@ export class WorkflowCrudService {
     return workflow;
   }
 
-  public async getWorklfowVersions(workflowId: string) {
-    const versions = await this.workflowRepository.getWorklfowVersions(workflowId);
+  public async getWorkflowVersions(workflowId: string) {
+    const versions = await this.workflowRepository.getWorkflowVersions(workflowId);
     return versions;
   }
 
@@ -380,7 +381,7 @@ export class WorkflowCrudService {
   }
 
   public async cloneWorkflow(teamId: string, userId: string, originalWorkflowId: string) {
-    const versions = await this.workflowRepository.getWorklfowVersions(originalWorkflowId);
+    const versions = await this.workflowRepository.getWorkflowVersions(originalWorkflowId);
     const newWorkflowId = generateDbId();
     for (const { version } of versions) {
       const originalWorkflow = await this.workflowRepository.getWorkflowById(originalWorkflowId, version);
@@ -444,7 +445,7 @@ export class WorkflowCrudService {
    * 导出工作流
    */
   public async exportWorkflow(workflowId: string): Promise<WorkflowWithAssetsJson> {
-    const versions = await this.workflowRepository.getWorklfowVersions(workflowId);
+    const versions = await this.workflowRepository.getWorkflowVersions(workflowId);
     versions.sort((a, b) => b.version - a.version);
     const workflows = [];
     for (const version of versions) {
@@ -496,6 +497,20 @@ export class WorkflowCrudService {
     return {
       validated,
       validationIssues,
+    };
+  }
+
+  public async setWorkflowPermissions(teamId: string, workflowId: string, permissions: UpdatePermissionsDto) {
+    if ('notAuthorized' in permissions) {
+      return !!(await this.workflowRepository.toggleWorkflowUnauthorized(teamId, workflowId, permissions.notAuthorized));
+    }
+
+    return false;
+  }
+
+  public async getWorkflowPermissions(workflowId: string) {
+    return {
+      notAuthorized: (await this.workflowRepository.hasWorkflowUnauthorized(workflowId))?.notAuthorized || false,
     };
   }
 }

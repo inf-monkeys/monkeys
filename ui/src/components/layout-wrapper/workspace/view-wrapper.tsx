@@ -20,7 +20,8 @@ export const VinesViewWrapper: React.FC<IVinesViewWrapperProps> = memo(({ workfl
   const { setWorkflowId } = useFlowStore();
   const { setVisible } = useCanvasStore();
 
-  const { workflowId: pageWorkflowId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
+  const { workflowId: pageWorkflowId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
+
   const finalWorkflowId = pageWorkflowId ?? workflowId ?? '';
 
   const { vines } = useVinesFlow();
@@ -34,7 +35,7 @@ export const VinesViewWrapper: React.FC<IVinesViewWrapperProps> = memo(({ workfl
   const { data: workflow } = useGetWorkflow(finalWorkflowId, finalVersion);
 
   useEffect(() => {
-    workflowId && setWorkflowId(finalWorkflowId);
+    finalWorkflowId && setWorkflowId(finalWorkflowId);
     if (workflow) {
       const initialWorkflowVersion = initialWorkflowVersionRef.current;
       const workflowVersion = workflow.version;
@@ -64,7 +65,7 @@ export const VinesViewWrapper: React.FC<IVinesViewWrapperProps> = memo(({ workfl
       vines.executionWorkflowDisableRestore = false;
     }
 
-    if (!workflow?.tasks?.length) {
+    if (!workflow?.tasks?.length && workflow !== void 0) {
       setVisible(false);
     }
   }, [workflow]);

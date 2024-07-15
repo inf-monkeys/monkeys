@@ -13,7 +13,6 @@ interface IComfyuiWofrkflowToolInputProps {
   data: IComfyuiWorkflow;
 }
 
-// million-ignore
 export const ComfyuiWorkflowToolInput: React.FC<IComfyuiWofrkflowToolInputProps> = ({ data }) => {
   const { t } = useTranslation();
 

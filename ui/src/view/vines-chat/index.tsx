@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { ChatSidebar } from 'src/components/layout/vines-view/chat/sidebar';
 
 import { useVinesFlow } from '@/package/vines-flow';
+import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 import { VinesChatMode } from '@/view/vines-chat/chat-bot.tsx';
 import { VinesWorkflowMode } from '@/view/vines-chat/workflow-mode.tsx';
@@ -13,6 +14,7 @@ export const VinesChatView: React.FC = () => {
   const { ref, height } = useElementSize();
 
   const { vines } = useVinesFlow();
+  const { workbenchVisible } = usePageStore();
 
   const workflowInput = vines.workflowInput;
   const workflowInputLength = workflowInput.length;
@@ -27,7 +29,7 @@ export const VinesChatView: React.FC = () => {
   const finalHeight = height - 68;
 
   return (
-    <div ref={ref} className="relative flex size-full p-6">
+    <div ref={ref} className={cn('relative flex h-full max-h-full p-6', workbenchVisible && 'p-0 pl-4')}>
       <ChatSidebar />
       <motion.div
         key="vines-view-chat"

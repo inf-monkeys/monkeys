@@ -21,7 +21,7 @@ export const Balance: React.FC<IBalanceProps> = ({ max = 1000 }) => {
 
   return (
     <>
-      <p className="text-xxs flex gap-1 opacity-85">
+      <p className="flex gap-1 text-xs opacity-85">
         {t('components.layout.main.sidebar.teams.balance')}{' '}
         <span className="font-bold">￥{balanceInYuan.toFixed(2)}</span>
       </p>

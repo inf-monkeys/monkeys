@@ -1,39 +1,34 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { MoreHorizontal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { IUgcViewItemProps } from '@/components/layout/ugc/typings.ts';
-import { getRenderNodeFn } from '@/components/layout/ugc/view/utils/node-renderer.tsx';
+import { useColumnRenderer } from '@/components/layout/ugc/view/utils/node-renderer.tsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.tsx';
-import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils';
 
 export const UgcViewCard = <E extends object>({
   row,
   columns,
-  index,
   renderOptions,
   operateArea,
   onItemClick,
 }: IUgcViewItemProps<E>) => {
   const { t } = useTranslation();
 
-  const getRenderNode = getRenderNodeFn({
-    row,
-    columns,
-    renderOptions,
-  });
+  const cells = row.getAllCells();
 
-  const logo = useMemo(() => getRenderNode('logo'), [index, row]);
-  const title = useMemo(() => getRenderNode('title'), [index, row]);
-  const subtitle = useMemo(() => getRenderNode('subtitle'), [index, row]);
-  const tags = useMemo(() => getRenderNode('assetTags'), [index, row]);
-  const description = useMemo(
-    () => getRenderNode('description') || t('components.layout.ugc.utils.no-description'),
-    [index, row],
-  );
+  const render = useColumnRenderer({ row, columns, renderOptions, cells });
+
+  const logo = render('logo');
+  const title = render('title');
+  const subtitle = render('subtitle');
+  const assetTags = render('assetTags');
+  const description = render('description');
+
   return (
     <Card
       className={cn('h-44', {
@@ -52,10 +47,11 @@ export const UgcViewCard = <E extends object>({
         <CardTitle className={cn('flex gap-3 font-medium', operateArea && 'justify-between')}>
           <div>{logo}</div>
           <div className={cn('flex flex-col', operateArea && 'max-w-[55%]')}>
-            <Tooltip content={title}>
+            <Tooltip>
               <TooltipTrigger asChild>
                 <span className="line-clamp-1 text-base font-bold">{title}</span>
               </TooltipTrigger>
+              <TooltipContent>{title}</TooltipContent>
             </Tooltip>
             <span className="text-xs">{subtitle}</span>
           </div>
@@ -74,8 +70,10 @@ export const UgcViewCard = <E extends object>({
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-2 p-4 pt-0">
-        {tags}
-        <div className="flex flex-col gap-1 text-xs text-opacity-70">{description}</div>
+        {assetTags}
+        <div className="flex flex-col gap-1 text-xs text-opacity-70">
+          {description || t('components.layout.ugc.utils.no-description')}
+        </div>
       </CardContent>
     </Card>
   );

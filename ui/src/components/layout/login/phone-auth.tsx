@@ -14,12 +14,15 @@ import { Input } from '@/components/ui/input';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp.tsx';
 import { PHONE_REGEX } from '@/consts/authz';
 import { ILoginViaSms, loginViaSmsSchema } from '@/schema/authz';
+import { useTranslation } from 'react-i18next';
 
 interface IPhoneAuthProps extends React.ComponentPropsWithoutRef<'div'> {
   onFinished?: () => void;
 }
 
 export const PhoneAuth: React.FC<IPhoneAuthProps> = ({ onFinished }) => {
+  const {t} =useTranslation();
+
   const form = useForm<ILoginViaSms>({
     resolver: zodResolver(loginViaSmsSchema),
     defaultValues: {
@@ -48,9 +51,9 @@ export const PhoneAuth: React.FC<IPhoneAuthProps> = ({ onFinished }) => {
     start();
     interval.start();
     toast.promise(sendSmsVerifyCode(phone), {
-      loading: '发送中...',
-      success: '已发送短信验证码',
-      error: '发送失败！请稍后再重试',
+      loading: t('auth.login.send-sms.loading'),
+      success: t('auth.login.send-sms.success'),
+      error: t('auth.login.send-sms.error'),
     });
   };
 

@@ -15,6 +15,8 @@ import { getVinesToken } from '@/apis/utils.ts';
 import { useChatBotHistory } from '@/apis/workflow/chat';
 import { useChat } from '@/components/layout/vines-view/chat/chat-bot/use-chat.ts';
 import { useVinesUser } from '@/components/router/guard/user.tsx';
+import { Label } from '@/components/ui/label.tsx';
+import { Switch } from '@/components/ui/switch';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
 import { useLocalStorage } from '@/utils';
@@ -23,7 +25,6 @@ interface IVinesChatModeProps {
   multipleChat?: boolean;
 }
 
-// million-ignore
 export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) => {
   const { t } = useTranslation();
 
@@ -33,6 +34,10 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) =
   const { vines } = useVinesFlow();
 
   const [chatSessions] = useLocalStorage<Record<string, string>>('vines-ui-chat-session', {});
+  const [autoCreateSession, setAutoCreateSession] = useLocalStorage<Record<string, boolean>>(
+    'vines-ui-chat-session-auto-create',
+    { [workflowId]: true },
+  );
   const [chatId, setChatId] = useState<string>('default');
 
   const forceUpdate = useForceUpdate();
@@ -77,8 +82,10 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) =
     }
   }, [history, error]);
 
+  const isDefaultSession = chatId.startsWith('default-');
+
   useEffect(() => {
-    if (chatId === 'default' && !isLoading) {
+    if (isDefaultSession && !isLoading) {
       void setMessages([]);
     }
   }, [chatId]);
@@ -92,7 +99,7 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) =
           <h1 className="text-xl font-bold">
             {t(`workspace.chat-view.chat-bot.title.${multipleChat ? 'multiple' : 'single'}`)}
           </h1>
-          {chatId === 'default' && (
+          {isDefaultSession && (
             <span className="text-xs opacity-70">{t('workspace.chat-view.chat-bot.temporary-mode')}</span>
           )}
         </div>
@@ -120,6 +127,7 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) =
               transition={{ duration: 0.2, delay: 0.15 }}
             >
               <VirtualizedList
+                chatId={chatId}
                 data={messages ?? []}
                 userPhoto={userPhoto}
                 botPhoto={vines.workflowIcon}
@@ -143,7 +151,25 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) =
           )}
         </AnimatePresence>
       </div>
-      <VinesChatInput chatId={chatId} multipleChat={multipleChat} />
+      <div className="z-20">
+        {isDefaultSession && (
+          <div className="flex items-center space-x-2">
+            <Switch
+              size="small"
+              checked={autoCreateSession[workflowId]}
+              onCheckedChange={(checked) => setAutoCreateSession((prev) => ({ ...prev, [workflowId]: checked }))}
+            />
+            <Label>{t('workspace.chat-view.sidebar.create.auto-create-session')}</Label>
+          </div>
+        )}
+        <VinesChatInput
+          chatId={chatId}
+          workflowId={workflowId}
+          multipleChat={multipleChat}
+          autoCreateSession={isDefaultSession && autoCreateSession[workflowId]}
+          setChatId={setChatId}
+        />
+      </div>
     </>
   );
 };

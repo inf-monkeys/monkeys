@@ -44,7 +44,10 @@ export const VinesExpandToolErrors: React.FC<IVinesExpandToolErrorsProps> = ({ d
     const issuesMap = new Map<string, string[]>();
     data.validationIssues.forEach((issue) => {
       const messages = issuesMap.get(issue.taskReferenceName) ?? [];
-      issuesMap.set(issue.taskReferenceName, [...messages, issue.humanMessage[i18n.language === 'en-US' ? 'en' : 'zh']]);
+      issuesMap.set(issue.taskReferenceName, [
+        ...messages,
+        issue.humanMessage[i18n.language === 'en-US' ? 'en' : 'zh'],
+      ]);
     });
 
     setValidationIssues(

@@ -5,9 +5,10 @@ import { IRequest } from '@/common/typings/request';
 import { CreateSqlKnowledgeBaseParams } from '@/database/entities/assets/knowledge-base/knowledge-base-sql.entity';
 import { Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { SqlKnowledgeBaseService } from './sql-knowledge-base.service';
+import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 
 @Controller('sql-knowledge-bases')
-@UseGuards(CompatibleAuthGuard)
+@UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
 export class SqlKnowledgeBaseController {
   constructor(private readonly service: SqlKnowledgeBaseService) {}
 

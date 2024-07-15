@@ -1,5 +1,9 @@
 import { motion } from 'framer-motion';
 
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible.tsx';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { Separator } from '@/components/ui/separator.tsx';
+
 interface ErrorBoundaryProps {
   error: Error;
 }
@@ -16,9 +20,19 @@ export function ErrorComponent({ error }: ErrorBoundaryProps) {
       <div className="flex items-center gap-2 font-bold text-red-500">
         <h1 className="leading-tight text-red-10">出现了一些问题</h1>
       </div>
-      <p className="max-w-md overflow-hidden rounded bg-gray-10 bg-opacity-10 p-2 text-xs text-red-500 backdrop-blur-sm">
-        {error.message}
-      </p>
+      <div className="max-w-full overflow-hidden rounded bg-gray-10 bg-opacity-10 p-2 backdrop-blur-sm">
+        <Collapsible defaultOpen>
+          <CollapsibleTrigger asChild>
+            <p className="text-sm text-red-500">{error.message}</p>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <Separator className="my-2" />
+            <ScrollArea className="h-40">
+              <p className="text-xs">{error?.stack}</p>
+            </ScrollArea>
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
     </motion.div>
   );
 }

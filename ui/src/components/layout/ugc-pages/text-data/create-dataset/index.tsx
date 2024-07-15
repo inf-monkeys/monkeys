@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
 import { datasetInfoSchema, IDatasetInfo } from '@/schema/text-dataset';
-import { I18nContent } from '@/utils';
+import { getI18nContent } from '@/utils';
 
 interface ICreateDatasetProps {}
 
@@ -111,7 +111,7 @@ export const CreateDataset: React.FC<ICreateDatasetProps> = () => {
                       <SelectContent>
                         {embeddingModels?.map((it, i) => (
                           <SelectItem value={it.name} key={i} disabled={!it.enabled}>
-                            {I18nContent(it.displayName)}
+                            {getI18nContent(it.displayName)}
                           </SelectItem>
                         ))}
                       </SelectContent>

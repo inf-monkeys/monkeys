@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import React, { useEffect, useMemo } from 'react';
 
 import { motion } from 'framer-motion';
@@ -18,6 +19,11 @@ interface IVinesViewProps {
 
 export function VinesView({ id, workflowId, pageId, type }: IVinesViewProps) {
   const { setVisible } = useViewStore();
+
+  if (!((type ?? '') in IFRAME_MAP)) {
+    return <Page404 />;
+  }
+
   const View = IFRAME_MAP[type ?? ''];
 
   const content = useMemo(() => {

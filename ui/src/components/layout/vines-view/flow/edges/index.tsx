@@ -45,7 +45,7 @@ export const VinesEdges: React.FC = memo(() => {
   useEffect(() => {
     const edges = vines.svg();
     const edgeLength = edges.length;
-    edgeLength !== edgesLengthRef.current && setVisible(false);
+    // edgeLength !== edgesLengthRef.current && setVisible(false);
     handleUpdate(edges, edgeLength);
   }, [VINES_REFRESHER]);
 

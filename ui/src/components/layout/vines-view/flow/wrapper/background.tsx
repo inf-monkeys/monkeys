@@ -10,7 +10,6 @@ type DotsProps = {
   onContextMenu?: (event: React.MouseEvent<SVGSVGElement, MouseEvent>) => void;
 };
 
-// million-ignore
 export const DotsBackground: React.FC<SVGProps<SVGSVGElement> & DotsProps> = ({
   className,
   gap,

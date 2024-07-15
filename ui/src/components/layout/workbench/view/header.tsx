@@ -1,77 +1,90 @@
 import React from 'react';
 
-import { Link } from '@tanstack/react-router';
 import { useSWRConfig } from 'swr';
+import { Link, useParams } from '@tanstack/react-router';
 
-import { Star } from 'lucide-react';
+import { PinOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { toggleWorkspacePagePin } from '@/apis/pages';
+import { useUpdateGroupPages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { getI18nContent } from '@/utils';
 
 interface IWorkbenchViewHeaderProps extends React.ComponentPropsWithoutRef<'div'> {
   page?: Partial<IPinPage>;
+  groupId: string;
 }
 
-export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page }) => {
+export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page, groupId }) => {
   const { t } = useTranslation();
+
+  const { teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
 
   const { mutate } = useSWRConfig();
   const workflow = page?.workflow;
 
+  const { trigger } = useUpdateGroupPages(groupId);
+
   const handleUnPin = () => {
     if (!page?.id) return;
-    toast.promise(toggleWorkspacePagePin(page.id, false), {
-      loading: t('common.operate.loading'),
-      success: () => {
-        void mutate('/api/pages');
-        return t('common.operate.success');
+    toast.promise(
+      trigger({
+        pageId: page.id,
+        mode: 'remove',
+      }),
+      {
+        loading: t('workspace.wrapper.space.menu.group.update.loading'),
+        success: () => {
+          void mutate('/api/workflow/pages/pinned');
+
+          return t('workspace.wrapper.space.menu.group.update.success');
+        },
+        error: t('workspace.wrapper.space.menu.group.update.error'),
       },
-      error: t('common.operate.error'),
-    });
+    );
   };
 
   const workflowDesc = getI18nContent(workflow?.description) ? ` - ${getI18nContent(workflow?.description)}` : '';
   const displayName = page?.displayName ?? '';
+  const viewIcon = page?.instance?.icon ?? '';
 
   return (
-    <header className="z-50 flex w-full items-center justify-between px-4 pb-4">
-      <div className="flex gap-2">
-        <VinesIcon size="sm">{workflow?.iconUrl}</VinesIcon>
-        <div className="flex flex-col gap-0.5">
-          <h1 className="font-bold leading-tight">
-            {getI18nContent(workflow?.displayName) ?? t('common.utils.untitled')}
-          </h1>
-          <span className="text-xxs">
-            {t([`workspace.wrapper.space.tabs.${displayName}`, displayName]) + workflowDesc}
-          </span>
+    <header className="z-50 flex w-full flex-col justify-center  px-4">
+      <div className="flex items-center justify-between">
+        <div className="flex gap-2">
+          <VinesIcon size="sm">{workflow?.iconUrl}</VinesIcon>
+          <div className="flex flex-col gap-0.5">
+            <h1 className="text-sm font-bold leading-tight">
+              {getI18nContent(workflow?.displayName) ?? t('common.utils.untitled')}
+            </h1>
+            <span className="text-xxs">
+              {`${viewIcon} ${t([`workspace.wrapper.space.tabs.${displayName}`, displayName]) + workflowDesc}`}
+            </span>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button icon={<PinOff size={12} />} variant="outline" onClick={handleUnPin} size="small" />
+            </TooltipTrigger>
+            <TooltipContent>{t('workbench.view.header.delete')}</TooltipContent>
+          </Tooltip>
+          <Link
+            to="/$teamId/workspace/$workflowId/$pageId"
+            params={{ teamId, workflowId: workflow?.workflowId ?? '', pageId: page?.id ?? '' }}
+          >
+            <Button variant="outline" size="small">
+              {t('workbench.view.header.enter')}
+            </Button>
+          </Link>
         </div>
       </div>
-      <div className="flex gap-4">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              icon={
-                <Star className="[&_polygon]:fill-yellow-9 [&_polygon]:stroke-yellow-9" strokeWidth={1.5} size={16} />
-              }
-              variant="outline"
-              onClick={handleUnPin}
-            />
-          </TooltipTrigger>
-          <TooltipContent>{t('workbench.view.header.delete')}</TooltipContent>
-        </Tooltip>
-        <Link
-          to="/$teamId/workspace/$workflowId/$pageId"
-          params={{ workflowId: workflow?.workflowId, pageId: page?.id }}
-        >
-          <Button variant="outline">{t('workbench.view.header.enter')}</Button>
-        </Link>
-      </div>
+      <Separator className="my-4" />
     </header>
   );
 };

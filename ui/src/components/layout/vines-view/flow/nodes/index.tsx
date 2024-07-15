@@ -25,7 +25,7 @@ export const VinesNodes: React.FC<IVinesNodesProps> = memo(() => {
   useEffect(() => {
     const nodes = vines.getAllNodes();
     const nodeLength = nodes.length;
-    nodeLength !== nodeLengthRef.current && setVisible(false);
+    // nodeLength !== nodeLengthRef.current && setVisible(false);
 
     reTimer(
       setTimeout(() => {

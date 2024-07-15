@@ -33,8 +33,8 @@ const LoginCallback: React.FC = () => {
       return;
     }
 
-    saveAuthToken(access_token).then((usersCount) => {
-      if (!usersCount) {
+    saveAuthToken(access_token).then((user) => {
+      if (!user) {
         toast.warning(t('auth.oidc.auth-failed'));
         localStorage.removeItem('vines-token');
         localStorage.removeItem('vines-team-id');
