@@ -143,7 +143,7 @@ export const VinesGlobalUpload: React.FC<IVinesGlobalUploadProps> = () => {
       const fileNameArray = file.name.split('.');
       const fileNameWithoutSuffix = fileNameArray.length > 1 ? fileNameArray.slice(0, -1).join('.') : fileNameArray[0];
       const suffix = fileNameArray.length > 1 ? fileNameArray.pop() : null;
-      const filename = `workflow/${it.id}_${escapeFileName(fileNameWithoutSuffix)}${suffix ? '.'.concat(suffix) : ''}`;
+      const filename = `user-files/other/${it.id}_${escapeFileName(fileNameWithoutSuffix)}${suffix ? '.'.concat(suffix) : ''}`;
 
       it.status = 'busy';
       updateListById(fileId, it);

@@ -64,6 +64,7 @@ export const FileInput: React.FC<IVinesInputPropertyProps> = ({ def, value, onCh
             multipleValues ? [...files.map((it) => it.path), ...urls] : [...files.map((it) => it.path), ...urls][0],
           )
         }
+        basePath="user-files/workflow-input"
       />
     </>
   );

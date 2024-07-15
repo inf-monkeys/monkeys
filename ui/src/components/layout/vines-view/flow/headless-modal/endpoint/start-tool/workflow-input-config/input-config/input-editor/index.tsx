@@ -388,6 +388,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
                         <Updater
                           limit={multipleValues ? void 0 : 1}
                           onFinished={(urls) => form.setValue('default', multipleValues ? urls : urls[0])}
+                          basePath="user-files/workflow-input"
                         />
                         <p className="text-xs text-muted-foreground">
                           {t('workspace.flow-view.endpoint.start-tool.input.config-form.file.desc')}

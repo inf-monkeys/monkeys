@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 
 import { useKnowledgeBase, useKnowledgeBaseMetadataFields, useUpdateKnowledgeBase } from '@/apis/vector';
 import { ICreateVectorDB } from '@/apis/vector/typings.ts';
-import { InfoEditor } from '@/components/layout/settings/account/info-editor.tsx';
+import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -131,7 +131,7 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
               <TableCell>{t('ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.name.label')}</TableCell>
               <TableCell className="flex items-center gap-2">
                 <span>{getI18nContent(detail?.displayName)}</span>
-                <InfoEditor
+                <SimpleInputDialog
                   title={t('ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.name.info-editor.title')}
                   placeholder={t(
                     'ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.name.info-editor.placeholder',
@@ -142,7 +142,7 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
                   <Button variant="outline" size="small" icon={<Edit2Icon />} className="scale-80">
                     {t('common.utils.edit')}
                   </Button>
-                </InfoEditor>
+                </SimpleInputDialog>
               </TableCell>
             </TableRow>
             <TableRow>
@@ -151,7 +151,7 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
               </TableCell>
               <TableCell className="flex items-center gap-2">
                 <span>{getI18nContent(detail?.description) || t('components.layout.ugc.utils.no-description')}</span>
-                <InfoEditor
+                <SimpleInputDialog
                   title={t('ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.name.info-editor.title')}
                   placeholder={t(
                     'ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.name.info-editor.placeholder',
@@ -162,7 +162,7 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
                   <Button variant="outline" size="small" icon={<Edit2Icon />} className="scale-80">
                     {t('common.utils.edit')}
                   </Button>
-                </InfoEditor>
+                </SimpleInputDialog>
               </TableCell>
             </TableRow>
             <TableRow>

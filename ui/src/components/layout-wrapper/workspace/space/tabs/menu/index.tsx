@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { deleteWorkspacePage, toggleWorkspacePagePin } from '@/apis/pages';
-import { InfoEditor } from '@/components/layout/settings/account/info-editor.tsx';
 import { DropdownGroup } from '@/components/layout-wrapper/workspace/space/tabs/menu/group';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Button } from '@/components/ui/button';
@@ -23,6 +22,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
+import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
 
 interface ITabMenuProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -107,7 +107,7 @@ export const TabMenu: React.FC<ITabMenuProps> = memo(() => {
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuGroup>
-          <InfoEditor
+          <SimpleInputDialog
             title={t('workspace.wrapper.space.menu.rename.title')}
             placeholder={page?.displayName ?? t('workspace.wrapper.space.menu.rename.placeholder')}
             initialValue={page?.displayName ?? ''}
@@ -130,7 +130,7 @@ export const TabMenu: React.FC<ITabMenuProps> = memo(() => {
               <Pencil strokeWidth={1.5} size={16} />
               <p>{t('workspace.wrapper.space.menu.rename.trigger')}</p>
             </DropdownMenuItem>
-          </InfoEditor>
+          </SimpleInputDialog>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger className="flex items-center gap-2">
               <Pin strokeWidth={1.5} size={16} />
@@ -138,7 +138,7 @@ export const TabMenu: React.FC<ITabMenuProps> = memo(() => {
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent>
-                <DropdownGroup pageId={pageId} pinned={isPin} handlePinPage={handlePinPage} pagesMutate={pagesMutate}/>
+                <DropdownGroup pageId={pageId} pinned={isPin} handlePinPage={handlePinPage} pagesMutate={pagesMutate} />
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
