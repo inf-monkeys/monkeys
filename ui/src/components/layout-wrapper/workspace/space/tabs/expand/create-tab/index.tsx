@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 
 import { createWorkspacePage, useWorkspacePageInstances } from '@/apis/pages';
 import { CreatePageDto } from '@/apis/pages/typings.ts';
-import { CreateCustomCodeView } from '@/components/layout-wrapper/workspace/space/tabs/expand/create-tab/create-custom-code-view.tsx';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Button } from '@/components/ui/button';
 import {
@@ -80,8 +79,8 @@ export const CreateSpaceTab: React.FC<ICreateSpaceTabProps> = ({ className }) =>
             ))}
             {isEmpty && <DropdownMenuItem disabled>{t('workspace.wrapper.space.add-tab.empty')}</DropdownMenuItem>}
           </DropdownMenuGroup>
-          <DropdownMenuSeparator />
-          <CreateCustomCodeView />
+          {/*<DropdownMenuSeparator />*/}
+          {/*<CreateCustomCodeView />*/}
         </DropdownMenuContent>
       </DropdownMenu>
     </motion.div>
