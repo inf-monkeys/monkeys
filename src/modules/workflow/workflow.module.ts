@@ -1,4 +1,5 @@
 import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
+import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ToolsModule } from '../tools/tools.module';
@@ -18,13 +19,14 @@ import { WorkflowLogsController } from './workflow.log.controller';
 import { WorkflowLogService } from './workflow.log.service';
 import { WorkflowPageController } from './workflow.page.controller';
 import { WorkflowPageService } from './workflow.page.service';
+import { WorkflowStatisticsController } from './workflow.statistics.controller';
+import { WorkflowStatisticsService } from './workflow.statstics.service';
 import { WorkflowTriggerController } from './workflow.trigger.controller';
 import { WorkflowTriggerService } from './workflow.trigger.service';
 import { WorkflowValidateController } from './workflow.validate.controller';
 import { WorkflowValidateService } from './workflow.validate.service';
 import { WorkflowWebhookController } from './workflow.webhook.controller';
 import { WorkflowWebhookService } from './workflow.webhook.service';
-import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 
 @Module({
   controllers: [
@@ -38,6 +40,7 @@ import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-p
     WorkflowPageController,
     WorkflowCustomTriggerInvokeController,
     WorkflowLogsController,
+    WorkflowStatisticsController,
   ],
   providers: [
     WorkflowCrudService,
@@ -51,6 +54,7 @@ import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-p
     WorkflowPageService,
     WorkflowCustomTriggerInvokeService,
     WorkflowLogService,
+    WorkflowStatisticsService,
   ],
   imports: [ConductorModule, TypeOrmModule.forFeature([WorkflowPageEntity, WorkflowPageGroupEntity]), ToolsModule],
   exports: [WorkflowCrudService, WorkflowExecutionService],
