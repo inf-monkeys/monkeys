@@ -55,10 +55,9 @@ export const deleteLocalStorage = (key: string, dispatch = true, value = '') => 
 export const nanoIdLowerCase = customAlphabet('6789bcdfghjkmnpqrtwz', 8);
 export const nanoIdUpperCase = customAlphabet('6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz', 8);
 
-const i18nLanguage = i18n.language;
-
 export const getI18nContent = (content: string | I18nValue | null | undefined): string | undefined => {
   if (!content) return;
+  const i18nLanguage = i18n.language;
   if (typeof content === 'string') return content;
   return content[i18nLanguage] ? content[i18nLanguage] : content['en-US'];
 };
