@@ -180,6 +180,13 @@
         "title_other": "Upload files",
         "click-or-drag-area_one": "Click or drag to upload file",
         "click-or-drag-area_other": "Click or drag to upload files",
+        "toast": {
+          "file-too-small": "The file \"{{ filename }}\" size is too large",
+          "file-too-big": "The file \"{{ filename }}\" size is too small",
+          "too-many-files": "Too many files",
+          "filename-invalid": "The file \"{{ filename }}\"'s name is invalid.",
+          "file-invalid-type": "The file \"{{ filename }}\"'s type is invalid."
+        },
         "hint": {
           "accept": {
             "custom_one": "Only {{acceptString}} file can be uploaded.",

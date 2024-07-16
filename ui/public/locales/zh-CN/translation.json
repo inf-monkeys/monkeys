@@ -176,6 +176,13 @@
       "updater": {
         "title": "上传文件",
         "click-or-drag-area": "点击或拖拽来上传文件",
+        "toast": {
+          "file-too-small": "文件「{{ filename }}」尺寸过大",
+          "file-too-big": "文件「{{ filename }}」尺寸过小",
+          "too-many-files": "文件选取过多",
+          "filename-invalid": "文件「{{ filename }}」文件名非法",
+          "file-invalid-type": "文件「{{ filename }}」类型不支持"
+        },
         "hint": {
           "accept": {
             "custom": "仅支持 {{acceptString}} 格式的文件",

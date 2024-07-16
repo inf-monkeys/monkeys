@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { Dropzone, FileWithPath } from '@mantine/dropzone';
 import { FileUp } from 'lucide-react';
+import { ErrorCode } from 'react-dropzone-esm';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -71,7 +72,42 @@ export const Updater: React.FC<IUpdaterProps> = ({
         maxSize={maxSize * 1024 ** 2}
         maxFiles={limit}
         disabled={disabled}
-        onReject={(file) => file.forEach((it) => toast.error(`文件 ${it.file.name} 超出限制`))}
+        validator={(file) => {
+          if (/[!@#$%^&*.]{2,}/.test(file.name)) {
+            return {
+              code: 'filename-invalid',
+              message: '',
+            };
+          }
+          return null;
+        }}
+        onReject={(file) =>
+          file.forEach((it) => {
+            it.errors.forEach((err) => {
+              if (
+                [
+                  ErrorCode.FileTooLarge,
+                  ErrorCode.FileTooSmall,
+                  ErrorCode.TooManyFiles,
+                  ErrorCode.FileInvalidType,
+                  'filename-invalid',
+                ].includes(err.code)
+              ) {
+                toast.error(
+                  t(`components.ui.updater.toast.${err.code}`, {
+                    filename: it.file.name,
+                  }),
+                );
+              } else {
+                toast.error(
+                  t(`components.ui.updater.toast.file-invalid-type`, {
+                    filename: it.file.name,
+                  }),
+                );
+              }
+            });
+          })
+        }
       >
         <div className="vines-center h-40 gap-4">
           <FileUp size={50} className="stroke-gold-12" />

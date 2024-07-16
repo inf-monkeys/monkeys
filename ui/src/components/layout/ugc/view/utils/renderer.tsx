@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { I18nValue } from '@inf-monkeys/monkeys';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 
@@ -8,9 +9,8 @@ import { IUgcTagSelectorProps, UgcTagSelector } from '@/components/layout/ugc/vi
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { IVinesIconSize, VinesIcon } from '@/components/ui/vines-icon';
-import { formatTimeDiffPrevious } from '@/utils/time.ts';
-import { I18nValue } from '@inf-monkeys/monkeys';
 import { getI18nContent } from '@/utils';
+import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const RenderTime: React.FC<{ time: number }> = ({ time: rawTime }) => {
   const { i18n } = useTranslation();
@@ -62,7 +62,7 @@ export const RenderIcon: React.FC<{
   iconUrl?: string;
   size?: IVinesIconSize;
 }> = ({ iconUrl, size = 'md' }) => (
-  <VinesIcon size={size}>{iconUrl && iconUrl.trim() != '' ? iconUrl : 'emoji:🍀:#ceefc5'}</VinesIcon>
+  <VinesIcon size={size}>{iconUrl && iconUrl.trim() != '' ? encodeURI(iconUrl) : 'emoji:🍀:#ceefc5'}</VinesIcon>
 );
 
 export const RenderTags = (props: IUgcTagSelectorProps) => <UgcTagSelector {...props} />;
