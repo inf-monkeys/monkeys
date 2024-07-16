@@ -45,6 +45,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ groupId }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
           >
             <WorkbenchViewHeader page={page} groupId={groupId} />
             <div className="relative size-full max-h-[calc(100%-4.3rem)] overflow-hidden rounded-lg">
@@ -56,8 +57,9 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ groupId }) => {
             key="vines-workbench-view-empty"
             className="vines-center absolute top-0 size-full flex-col gap-4"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            animate={{ opacity: 1, transition: { delay: 0.5 } }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
           >
             <GitBranchPlus size={64} />
             <div className="flex flex-col text-center">

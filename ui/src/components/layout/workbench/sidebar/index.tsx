@@ -109,17 +109,22 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ groupId, se
             <div key={id} className="space-y-1">
               {!isBuiltIn && <Label className="text-xs">{displayName}</Label>}
               {pages?.map((page) => {
+                if (!page) {
+                  return null;
+                }
+
                 const workflow = page?.workflow;
                 const viewIcon = page?.instance?.icon ?? '';
+                const pageId = page?.id ?? '';
                 const workflowDesc = getI18nContent(workflow?.description);
 
                 return (
-                  <Tooltip key={page.id}>
+                  <Tooltip key={pageId}>
                     <TooltipTrigger asChild>
                       <div
                         className={cn(
                           'flex cursor-pointer items-start space-x-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
-                          currentPage?.id === page.id &&
+                          currentPage?.id === pageId &&
                             id === groupId &&
                             'border border-input bg-background text-accent-foreground',
                         )}
