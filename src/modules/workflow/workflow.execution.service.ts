@@ -220,7 +220,7 @@ export class WorkflowExecutionService {
   }
 
   public async startWorkflow(request: StartWorkflowRequest) {
-    const { teamId, userId, workflowId, triggerType, chatSessionId } = request;
+    const { teamId, userId, workflowId, triggerType, chatSessionId, apiKey } = request;
     const workflowContext: WorkflowExecutionContext = {
       userId,
       teamId: teamId,
@@ -258,7 +258,7 @@ export class WorkflowExecutionService {
       version: version,
       input: inputData,
     });
-    await this.workflowRepository.saveWorkflowExecution(workflowId, version, workflowInstanceId, userId, triggerType, chatSessionId);
+    await this.workflowRepository.saveWorkflowExecution(workflowId, version, workflowInstanceId, userId, triggerType, chatSessionId, apiKey);
     return workflowInstanceId;
   }
 
@@ -266,16 +266,20 @@ export class WorkflowExecutionService {
     let finished = false;
     let output;
     const start = +new Date();
+    let status;
+    let takes = 0;
     while (!finished) {
       const workflow = await this.getWorkflowExecutionDetail(teamId, workflowInstanceId);
-      const status = workflow.status;
+      status = workflow.status;
       finished = status === 'COMPLETED' || status === 'FAILED' || status === 'TERMINATED' || status === 'TIMED_OUT';
       output = workflow.output;
+      takes = workflow.endTime ? workflow.endTime - workflow.startTime : 0;
       await sleep(interval);
       if (+new Date() - start >= maxWiat) {
         break;
       }
     }
+    await this.workflowRepository.updateWorkflowExecutionStatus(workflowInstanceId, status, takes);
     return output;
   }
 

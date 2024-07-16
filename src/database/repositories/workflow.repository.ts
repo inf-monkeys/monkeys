@@ -1,20 +1,22 @@
+import { config } from '@/common/config';
 import { ListDto } from '@/common/dto/list.dto';
+import { WorkflowStatusEnum } from '@/common/dto/status.enum';
 import { generateDbId } from '@/common/utils';
 import { getNextCronTimestamp } from '@/common/utils/cron';
 import { calcMd5 } from '@/common/utils/utils';
 import { WorkflowChatSessionEntity } from '@/database/entities/workflow/workflow-chat-session';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { WorkflowMetadataEntity, WorkflowOutputValue, WorkflowRateLimiter, WorkflowValidationIssue } from '@/database/entities/workflow/workflow-metadata';
+import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 import { WorkflowTriggerType, WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
 import { I18nValue, MonkeyTaskDefTypes, ToolProperty } from '@inf-monkeys/monkeys';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _, { keyBy } from 'lodash';
 import { ChatCompletionMessageParam } from 'openai/resources';
-import { In, Repository } from 'typeorm';
+import { In, IsNull, Repository } from 'typeorm';
 import { PageInstance, WorkflowPageEntity } from '../entities/workflow/workflow-page';
 import { WorkflowAssetRepositroy } from './assets-workflow.respository';
-import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 
 export const BUILT_IN_PAGE_INSTANCES: PageInstance[] = [
   {
@@ -334,7 +336,7 @@ export class WorkflowRepository {
     });
   }
 
-  public async saveWorkflowExecution(workflowId: string, version: number, workflowInstanceId: string, userId: string, triggerType: WorkflowTriggerType, chatSessionId: string) {
+  public async saveWorkflowExecution(workflowId: string, version: number, workflowInstanceId: string, userId: string, triggerType: WorkflowTriggerType, chatSessionId: string, apiKey: string) {
     await this.workflowExecutionRepository.save({
       id: generateDbId(),
       createdTimestamp: Date.now(),
@@ -346,7 +348,263 @@ export class WorkflowRepository {
       userId,
       triggerType,
       chatSessionId,
+      apikey: apiKey,
     });
+  }
+
+  public async updateWorkflowExecutionStatus(workflowInstanceId: string, status: WorkflowStatusEnum, takes: number) {
+    await this.workflowExecutionRepository.update(
+      {
+        workflowInstanceId,
+      },
+      {
+        status,
+        updatedTimestamp: Date.now(),
+        takes,
+      },
+    );
+  }
+
+  public async fetchWorkflowExecutionWithNoStatus() {
+    return await this.workflowExecutionRepository.findOne({
+      where: [
+        {
+          status: IsNull(),
+        },
+        {
+          status: WorkflowStatusEnum.RUNNING,
+        },
+      ],
+    });
+  }
+
+  private getDateList(startTimestamp: number, endTimestamp: number) {
+    const startDate = new Date(startTimestamp);
+    const endDate = new Date(endTimestamp);
+    endDate.setDate(endDate.getDate() + 1);
+
+    const dateList = [];
+    const currentDate = startDate;
+
+    while (currentDate <= endDate) {
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const day = String(currentDate.getDate()).padStart(2, '0');
+
+      dateList.push(`${year}-${month}-${day}`);
+
+      // Move to the next day
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return dateList;
+  }
+
+  public async getWorkflowExecutionStatisticsByWorkflowId(workflowId: string, startTimestamp: number, endTimestamp: number) {
+    const appId = config.server.appId;
+    const callsPerDateSql = `
+SELECT
+    workflow_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/ 1000), 'YYYY-MM-DD') AS date,
+    COUNT(*) AS total_calls
+FROM
+    ${appId}_workflow_execution
+WHERE workflow_id = '${workflowId}' AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+GROUP BY
+    workflow_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
+ORDER BY
+    workflow_id,
+    date;
+    `;
+
+    const successPerDateSql = `
+SELECT
+    workflow_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/ 1000), 'YYYY-MM-DD') AS date,
+    COUNT(*) AS total_calls
+FROM
+    ${appId}_workflow_execution
+WHERE workflow_id = '${workflowId}' AND status = 'COMPLETED' AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+GROUP BY
+    workflow_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
+ORDER BY
+    workflow_id,
+    date;
+`;
+
+    const failedPerDateSql = `
+SELECT
+    workflow_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/ 1000), 'YYYY-MM-DD') AS date,
+    COUNT(*) AS total_calls
+FROM
+    ${appId}_workflow_execution
+WHERE workflow_id = '${workflowId}' AND status in ('FAILED','TERMINATED','PAUSED') AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+GROUP BY
+    workflow_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
+ORDER BY
+    workflow_id,
+    date;
+`;
+
+    const averageTakesPerDateSql = `
+SELECT
+  workflow_id,
+  TO_CHAR(TO_TIMESTAMP(created_timestamp / 1000), 'YYYY-MM-DD') AS date,
+  AVG(takes) AS average_time
+FROM
+  ${appId}_workflow_execution
+WHERE
+  status = 'COMPLETED' AND workflow_id = '${workflowId}' AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+GROUP BY
+  workflow_id,
+  date
+ORDER BY
+  workflow_id,
+  date;
+    `;
+
+    const dateList = this.getDateList(startTimestamp, endTimestamp);
+    const [callsPerDayResult, successPerDayResult, failedPerDayResult, averageTakesPerDayResult] = await Promise.all([
+      this.workflowExecutionRepository.query(callsPerDateSql),
+      this.workflowExecutionRepository.query(successPerDateSql),
+      this.workflowExecutionRepository.query(failedPerDateSql),
+      this.workflowExecutionRepository.query(averageTakesPerDateSql),
+    ]);
+
+    const result: Array<{
+      date: string;
+      totalCount: number;
+      successCount: number;
+      failedCount: number;
+      averageTime: number;
+    }> = [];
+    for (const date of dateList) {
+      const callsPerDay = callsPerDayResult.find((x) => x.date === date);
+      const successPerDay = successPerDayResult.find((x) => x.date === date);
+      const failedPerDay = failedPerDayResult.find((x) => x.date === date);
+      const averageTakesPerDay = averageTakesPerDayResult.find((x) => x.date === date);
+      result.push({
+        date,
+        totalCount: parseInt(callsPerDay?.total_calls) || 0,
+        successCount: parseInt(successPerDay?.total_calls) || 0,
+        failedCount: parseInt(failedPerDay?.total_calls) || 0,
+        averageTime: parseInt(averageTakesPerDay?.average_time) || 0,
+      });
+    }
+    return result;
+  }
+
+  public async getWorkflowExecutionStatisticsByTeamId(teamId: string, startTimestamp: number, endTimestamp: number) {
+    const appId = config.server.appId;
+    const workflowIds = _.uniq(
+      (
+        await this.workflowMetadataRepository.find({
+          where: {
+            teamId,
+          },
+          select: ['workflowId'],
+        })
+      ).map((x) => x.workflowId),
+    );
+    const workflowIdsStr = workflowIds.map((x) => `'${x}'`).join(',');
+    const callsPerDateSql = `
+SELECT
+    workflow_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/ 1000), 'YYYY-MM-DD') AS date,
+    COUNT(*) AS total_calls
+FROM
+    ${appId}_workflow_execution
+WHERE workflow_id IN (${workflowIdsStr}) AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+GROUP BY
+    workflow_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
+ORDER BY
+    workflow_id,
+    date;
+    `;
+
+    const successPerDateSql = `
+SELECT
+    workflow_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/ 1000), 'YYYY-MM-DD') AS date,
+    COUNT(*) AS total_calls
+FROM
+    ${appId}_workflow_execution
+WHERE workflow_id IN (${workflowIdsStr}) AND status = 'COMPLETED' AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+GROUP BY
+    workflow_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
+ORDER BY
+    workflow_id,
+    date;
+`;
+
+    const failedPerDateSql = `
+SELECT
+    workflow_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/ 1000), 'YYYY-MM-DD') AS date,
+    COUNT(*) AS total_calls
+FROM
+    ${appId}_workflow_execution
+WHERE workflow_id IN (${workflowIdsStr}) AND status in ('FAILED','TERMINATED','PAUSED') AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+GROUP BY
+    workflow_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
+ORDER BY
+    workflow_id,
+    date;
+`;
+
+    const averageTakesPerDateSql = `
+SELECT
+  workflow_id,
+  TO_CHAR(TO_TIMESTAMP(created_timestamp / 1000), 'YYYY-MM-DD') AS date,
+  AVG(takes) AS average_time
+FROM
+  ${appId}_workflow_execution
+WHERE
+  status = 'COMPLETED' AND workflow_id IN (${workflowIdsStr}) AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+GROUP BY
+  workflow_id,
+  date
+ORDER BY
+  workflow_id,
+  date;
+    `;
+
+    const dateList = this.getDateList(startTimestamp, endTimestamp);
+    const [callsPerDayResult, successPerDayResult, failedPerDayResult, averageTakesPerDayResult] = await Promise.all([
+      this.workflowExecutionRepository.query(callsPerDateSql),
+      this.workflowExecutionRepository.query(successPerDateSql),
+      this.workflowExecutionRepository.query(failedPerDateSql),
+      this.workflowExecutionRepository.query(averageTakesPerDateSql),
+    ]);
+
+    const result: Array<{
+      date: string;
+      totalCount: number;
+      successCount: number;
+      failedCount: number;
+      averageTime: number;
+    }> = [];
+    for (const date of dateList) {
+      const callsPerDay = callsPerDayResult.find((x) => x.date === date);
+      const successPerDay = successPerDayResult.find((x) => x.date === date);
+      const failedPerDay = failedPerDayResult.find((x) => x.date === date);
+      const averageTakesPerDay = averageTakesPerDayResult.find((x) => x.date === date);
+      result.push({
+        date,
+        totalCount: parseInt(callsPerDay?.total_calls) || 0,
+        successCount: parseInt(successPerDay?.total_calls) || 0,
+        failedCount: parseInt(failedPerDay?.total_calls) || 0,
+        averageTime: parseInt(averageTakesPerDay?.average_time) || 0,
+      });
+    }
+    return result;
   }
 
   public async deleteTrigger(workflowId: string, triggerId: string) {

@@ -69,7 +69,7 @@ export class WorkflowOpenAICompatibleController {
   })
   @HttpCode(200)
   public async createcCompletions(@Req() req: IRequest, @Body() body: CreateCompletionsDto, @Res() res: Response) {
-    const { teamId, userId } = req;
+    const { teamId, userId, apikey } = req;
     const { model, stream = false } = body;
     const workflow = await this.getWorkflowByModel(teamId, model);
     if (!workflow) {
@@ -84,6 +84,7 @@ export class WorkflowOpenAICompatibleController {
       inputData: body,
       triggerType: WorkflowTriggerType.API,
       chatSessionId: sessionId,
+      apiKey: apikey,
     });
     if (stream === false) {
       const result = await this.workflowExecutionService.waitForWorkflowResult(teamId, workflowInstanceId);
@@ -109,7 +110,7 @@ export class WorkflowOpenAICompatibleController {
   })
   @HttpCode(200)
   public async createChatComplitions(@Req() req: IRequest, @Body() body: CreateChatCompletionsDto, @Res() res: Response) {
-    const { teamId, userId } = req;
+    const { teamId, userId, apikey } = req;
     const { model, stream = false } = body;
     const workflow = await this.getWorkflowByModel(teamId, model);
     if (!workflow) {
@@ -124,6 +125,7 @@ export class WorkflowOpenAICompatibleController {
       inputData: body,
       triggerType: WorkflowTriggerType.API,
       chatSessionId: conversationId,
+      apiKey: apikey,
     });
     if (conversationId) {
       await this.workflowRepository.updateChatSessionMessages(teamId, conversationId, body.messages);
