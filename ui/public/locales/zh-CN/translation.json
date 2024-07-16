@@ -66,6 +66,21 @@
       "minute": "分钟",
       "hour": "小时"
     },
+    "workflow": {
+      "trigger": {
+        "MANUAL": "手动执行",
+        "SCHEDULER": "计划执行",
+        "WEBHOOK": "Webhook"
+      },
+      "status": {
+        "RUNNING": "运行中",
+        "COMPLETED": "运行完成",
+        "PAUSED": "运行暂停",
+        "FAILED": "运行失败",
+        "TIMED_OUT": "运行超时",
+        "TERMINATED": "运行终止"
+      }
+    },
     "toast": {
       "loading": "请等待数据加载完毕",
       "team-not-found": "团队不存在",

@@ -2,7 +2,7 @@ import { ToolProperty } from '@inf-monkeys/monkeys';
 
 export enum WorkflowTriggerType {
   // 手动
-  MANUALLY = 'MANUAL',
+  MANUAL = 'MANUAL',
   // 定时
   SCHEDULER = 'SCHEDULER',
   // Webhook
