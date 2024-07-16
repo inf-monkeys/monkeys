@@ -32,9 +32,10 @@ interface IFilesProps extends React.ComponentPropsWithoutRef<'div'> {
   saveToResource?: boolean;
   onFinished?: (urls: string[]) => void;
   limit?: number;
+  basePath?: string;
 }
 
-interface IFile {
+export interface IFile {
   id: string;
   file: FileWithPath;
   path: string;
@@ -55,6 +56,7 @@ export const FileList: React.FC<IFilesProps> = ({
   setIsUploading,
   onFinished,
   saveToResource = true,
+  basePath = 'user-files/other',
 }) => {
   const { t } = useTranslation();
 
@@ -164,7 +166,7 @@ export const FileList: React.FC<IFilesProps> = ({
       const fileNameArray = file.name.split('.');
       const fileNameWithoutSuffix = fileNameArray.length > 1 ? fileNameArray.slice(0, -1).join('.') : fileNameArray[0];
       const suffix = fileNameArray.length > 1 ? fileNameArray.pop() : null;
-      const filename = `workflow/${it.id}_${escapeFileName(fileNameWithoutSuffix)}${suffix ? '.'.concat(suffix) : ''}`;
+      const filename = `${basePath}/${it.id}_${escapeFileName(fileNameWithoutSuffix)}${suffix ? '.'.concat(suffix) : ''}`;
 
       it.status = 'busy';
       updateListById(fileId, it);
@@ -274,9 +276,10 @@ export const FileList: React.FC<IFilesProps> = ({
                       <TooltipContent align="start">
                         {t('components.ui.updater.file-list.info-tooltip.name') + name}
                         <br />
-                        {t('components.ui.updater.file-list.info-tooltip.md5.index') + !progress
-                          ? t('components.ui.updater.file-list.info-tooltip.md5.waiting')
-                          : md5 ?? t('components.ui.updater.file-list.info-tooltip.md5.in-progress', { progress })}
+                        {t('components.ui.updater.file-list.info-tooltip.md5.index') +
+                          (!progress
+                            ? t('components.ui.updater.file-list.info-tooltip.md5.waiting')
+                            : md5 ?? t('components.ui.updater.file-list.info-tooltip.md5.in-progress', { progress }))}
                       </TooltipContent>
                     </td>
                   </tr>

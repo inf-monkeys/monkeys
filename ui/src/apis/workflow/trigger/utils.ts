@@ -1,14 +1,10 @@
 import { WorkflowTriggerType } from '@/apis/workflow/trigger/typings.ts';
+import i18n from '@/i18n.ts';
+
+const { t } = i18n;
 
 export const getDescOfTriggerType = (triggerType: WorkflowTriggerType) => {
-  switch (triggerType) {
-    case WorkflowTriggerType.MANUALLY:
-      return '手动执行';
-    case WorkflowTriggerType.SCHEDULER:
-      return '定时任务';
-    case WorkflowTriggerType.WEBHOOK:
-      return 'Webhook';
-    default:
-      return '手动执行';
-  }
+  return [WorkflowTriggerType.MANUAL, WorkflowTriggerType.WEBHOOK, WorkflowTriggerType.SCHEDULER].includes(triggerType)
+    ? t(`common.workflow.trigger.${triggerType}`)
+    : t(`common.workflow.trigger.${WorkflowTriggerType.MANUAL}`);
 };

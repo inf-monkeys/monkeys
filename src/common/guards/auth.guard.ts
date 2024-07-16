@@ -8,12 +8,16 @@ import { IRequest } from '../typings/request';
 @Injectable()
 export class CompatibleAuthGuard implements CanActivate {
   constructor(
-    private readonly teamRepository: TeamRepository,
-    private readonly apiKeyRepository: ApikeyRepository,
+    public teamRepository: TeamRepository,
+    public apiKeyRepository: ApikeyRepository,
   ) {}
 
   async canActivate(context: ExecutionContext) {
-    const request: any = context.switchToHttp().getRequest<IRequest>();
+    const request = context.switchToHttp().getRequest<IRequest>();
+
+    if (request.skipUnauthorized) {
+      return true;
+    }
 
     if (config.auth.enabled?.length > 0) {
       // OIDC
@@ -40,7 +44,7 @@ export class CompatibleAuthGuard implements CanActivate {
             });
             userId = result.id;
             isAuthenticated = true;
-            teamId = request.headers['x-monkeys-teamid'];
+            teamId = request.headers['x-monkeys-teamid'] as string;
           } catch (error) {}
         }
       }

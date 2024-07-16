@@ -1,9 +1,10 @@
 import useSWR from 'swr';
+import useSWRMutation from 'swr/mutation';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
-import { CreatePageDto, IPageInstance, IPageType, IPinPage } from '@/apis/pages/typings.ts';
+import { CreatePageDto, IPageGroup, IPageInstance, IPageType, IPinningPage } from '@/apis/pages/typings.ts';
 
-export const useWorkspacePages = () => useSWR<IPinPage[] | undefined>('/api/workflow/pages/pinned', vinesFetcher());
+export const useWorkspacePages = () => useSWR<IPinningPage | undefined>('/api/workflow/pages/pinned', vinesFetcher());
 
 export const useWorkspacePagesWithWorkflowId = (workflowId: string) =>
   useSWR<IPageType[] | undefined>(workflowId ? `/api/workflow/${workflowId}/pages` : null, vinesFetcher());
@@ -34,4 +35,30 @@ export const toggleWorkspacePagePin = (pageId: string, pin: boolean) =>
     {
       pin,
     },
+  );
+
+export const usePageGroups = () => useSWR<IPageGroup[] | undefined>('/api/workflow/page-groups', vinesFetcher());
+
+export const useCreatePageGroup = () =>
+  useSWRMutation<IPageGroup[] | undefined, unknown, string, { displayName: string; pageId?: string }>(
+    '/api/workflow/page-groups',
+    vinesFetcher({ method: 'POST' }),
+  );
+
+export const useDeletePageGroup = (groupId: string) =>
+  useSWRMutation<IPageGroup[] | undefined, unknown, string | null>(
+    groupId ? `/api/workflow/page-groups/${groupId}` : null,
+    vinesFetcher({ method: 'DELETE' }),
+  );
+
+export interface IUpdatePageGroupParams {
+  displayName?: string;
+  pageId?: string;
+  mode?: 'add' | 'remove';
+}
+
+export const useUpdateGroupPages = (groupId: string) =>
+  useSWRMutation<IPageGroup[] | undefined, unknown, string, IUpdatePageGroupParams>(
+    `/api/workflow/page-groups/${groupId}`,
+    vinesFetcher({ method: 'PUT' }),
   );

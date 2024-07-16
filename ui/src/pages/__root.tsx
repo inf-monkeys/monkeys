@@ -14,6 +14,7 @@ import { TeamsGuard } from '@/components/router/guard/team.tsx';
 import { UserGuard } from '@/components/router/guard/user.tsx';
 import { useVinesRoute } from '@/components/router/useVinesRoute.ts';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { VinesGlobalUpload } from '@/components/ui/updater/vines-global-upload.tsx';
 import { SIDEBAR_MAP } from '@/consts/sidebar.tsx';
 import VinesEvent from '@/utils/events.ts';
 
@@ -51,6 +52,7 @@ const RootComponent: React.FC = () => {
       <ScrollRestoration />
       <NextUIProvider>
         <TooltipProvider delayDuration={100}>
+          <VinesGlobalUpload />
           <main className="vines-ui h-screen w-screen">
             <AnimatePresence mode="popLayout">
               <motion.div

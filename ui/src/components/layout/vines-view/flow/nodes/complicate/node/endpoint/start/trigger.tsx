@@ -65,7 +65,7 @@ export const ComplicateTriggerNode: React.FC = () => {
                 }}
               >
                 <Button variant="outline" type="submit" size="small">
-                  {t('workspace.flow-view.vines.execution')}
+                  {t('workspace.flow-view.vines.execution.button')}
                 </Button>
               </VinesWorkflowInput>
             </motion.div>

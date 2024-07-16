@@ -46,6 +46,7 @@
       "descend": "Descend",
       "load-more": "Load More",
       "add": "Add",
+      "upload": "Upload",
       "click-to-copy": "Click to copy"
     },
     "type": {
@@ -67,6 +68,21 @@
       "hour_one": "hour",
       "hour_other": "hours"
     },
+    "workflow": {
+      "trigger": {
+        "MANUAL": "Manual Execution",
+        "SCHEDULER": "Scheduled execution",
+        "WEBHOOK": "Webhook"
+      },
+      "status": {
+        "RUNNING": "Running",
+        "COMPLETED": "Completed",
+        "PAUSED": "Paused",
+        "FAILED": "Failed",
+        "TIMED_OUT": "Timed Out",
+        "TERMINATED": "Terminated"
+      }
+    },
     "toast": {
       "loading": "Please wait until the data is loaded.",
       "team-not-found": "The team doesn't exist.",
@@ -74,7 +90,8 @@
       "workflow-not-found": "The workflow doesn't exist.",
       "vector-database-not-found": "The vector database doesn't exist.",
       "copy-success": "Copy success.",
-      "copy-failed": "Copy failed."
+      "copy-failed": "Copy failed.",
+      "Forbidden resource": "Insufficient privileges, login required"
     },
     "dialog": {
       "delete-confirm": {
@@ -219,6 +236,24 @@
       },
       "date-range-picker": {
         "select-date": "Select date"
+      },
+      "vines-image-mask-editor": {
+        "title": "Image mask editor",
+        "tip-1": "You can also use the eraser by holding",
+        "tip-2": ". Please save first before uploading.",
+        "label": {
+          "brush-size": "Brush size",
+          "opacity": "Opacity"
+        },
+        "operate": {
+          "select-image": "Select another image",
+          "mask-color": {
+            "placeholder": "Select mask color"
+          }
+        },
+        "toast": {
+          "no-file": "Please select a image file!"
+        }
       }
     },
     "layout": {
@@ -338,12 +373,9 @@
           "utils": {
             "this-project": "this project"
           },
-
           "dropdown": "Application market",
-
           "use-template": {
             "title": "Use this template",
-
             "loading": "Creating...",
             "success": "Create successful!",
             "error": "Create failed! Please try again later!"
@@ -351,7 +383,6 @@
           "import-to-team": "Import to team",
           "import-workflow": {
             "title": "Import workflow",
-
             "loading": "Creating...",
             "success": "Create successful!",
             "error": "Create failed! Please try again later!"
@@ -460,7 +491,6 @@
     "wait-to-long": {
       "title": "Detected that the waiting time on this page is too long",
       "desc": "Please try to log in again or force login",
-
       "force-enter": "Forced Entry",
       "re-login": "Force re-login"
     },
@@ -627,6 +657,7 @@
     },
     "api-key": {
       "title": "API Key",
+      "desc": "Configure the key used to access all APIs here. You can create multiple keys for use in different scenarios.",
       "api-key-item": {
         "revoked": "Revoked",
         "operate": {
@@ -715,10 +746,8 @@
         "placeholder": "Please enter the recharge amount, the minimum is 1 CNY",
         "pay": "{{amount}} CNY",
         "button": "Pay {{amount}} CNY",
-
         "amount-too-small": "The recharge amount cannot be less than 1 CNY",
         "amount-too-large": "The recharge amount cannot be greater than 10,000 CNY",
-
         "loading": "Creating order...",
         "success": "Order created successfully",
         "error": "Order creation failed! Please try again later"
@@ -727,14 +756,11 @@
         "title": "Please use WeChat to scan the QR code to pay",
         "order-id": "Order number:{{orderId}}",
         "order-status": "Payment status",
-
         "pending": "Pending payment",
         "paid": "Payment successful",
         "delivered": "Payment received",
         "closed": "Order closed",
-
         "empty": "No payment information",
-
         "close-order": {
           "label": "Cancel payment",
           "loading": "Cancelling payment...",
@@ -753,7 +779,6 @@
       "recharge-details": {
         "title": "Recharge Details",
         "desc": "Cumulative recharge ￥{{amount}}",
-
         "columns": {
           "type": {
             "label": "Payment Types",
@@ -777,7 +802,6 @@
       "consumer-details": {
         "title": "Consumer details",
         "desc": "Total consumption ￥{{amount}}",
-
         "columns": {
           "type": {
             "label": "Consumption Type",
@@ -1191,11 +1215,13 @@
               },
               "chunk_size": {
                 "label": "Segment Chunk Size",
-                "tip": "Please enter segment chunk size"
+                "tip": "Please enter segment chunk size",
+                "description": "The number of characters in each segment chunk. The default value is 500. If you want split exactly by the separator, please set it to 0."
               },
               "chunk_overlap": {
                 "label": "Segment Chunk Overlap",
-                "tip": "Please enter segment chunk overlap"
+                "tip": "Please enter segment chunk overlap",
+                "description": "The number of characters that overlap between adjacent segment chunks. The default value is 50. This value must be less than the chunk size."
               }
             }
           },
@@ -1382,6 +1408,14 @@
                 "topK": {
                   "label": "Top K",
                   "placeholder": "Enter Top K"
+                },
+                "enabledMetadataFilter": {
+                  "label": "Enable Metadata Filter",
+                  "placeholder": "Sometime, you may want to filter the document by metadata before retrieval.For example: See you have serveral documents about different company's annual report, we user ask a question about a specific company,you may want to filter the documents by company name before retrieval."
+                },
+                "metadataFilterKey": {
+                  "label": "Metadata Key To Filter",
+                  "placeholder": "Choose a metadata key to filter, we will use this key to filter the documents based on user's question."
                 }
               }
             }
@@ -1572,6 +1606,32 @@
       }
     },
     "wrapper": {
+      "settings": {
+        "label": "Preferences",
+        "close": "Close",
+        "common": {
+          "label": "General Configuration",
+          "share-view": {
+            "title": "Share View",
+            "desc": "You can share the view with others and invite them to view, edit or execute the workflow with you.",
+            "switch": "Anyone who gets the link on the Internet can directly access the view",
+            "tips": "After release, anyone on the Internet can perform any operation on the workflow without authentication, so please pay attention to asset security!",
+            "loading": "Updating permissions...",
+            "success": "Update permissions successful!",
+            "error": "Update permissions failed! Please try again later!"
+          },
+          "iframe": {
+            "title": "View Iframe Embed",
+            "desc": "You can integrate the workflow into your application via iframe embed",
+            "built-in": {
+              "label": "Built-in view iframe embed address",
+              "desc1": "When embedding a built-in view, you do not need to fill in the view ID. Instead, you can directly fill in the view type with view-",
+              "desc2": "Flow view: flow, log view: logs, form view: form, conversation view: chat",
+              "tips": "The address structure is: https://[domain]/[team ID]/workspace/[workflow ID]/view-[view type]"
+            }
+          }
+        }
+      },
       "workflow-info-card": {
         "title": "Workflow Information",
         "tip": "Click to edit",
@@ -1609,27 +1669,80 @@
       },
       "space": {
         "unknown-view": "Unknown view",
-        "add-tab": "New View",
+        "add-tab": {
+          "label": "Add View",
+          "empty": "No view available",
+
+          "create-custom-code-view": {
+            "button": "Custom Views",
+            "placeholder": "Enter a view name",
+
+            "tips": {
+              "title": "Creating a Custom Code View",
+              "desc": "You can use ReactJS code along with our component library and TailwindCSS to customize page layouts and component styles. Additionally, our JS SDK allows you to easily achieve personalized views."
+            },
+
+            "form": {
+              "display-name": {
+                "label": "View Name",
+                "placeholder": "Please enter a view name"
+              },
+              "icon": "View Icon",
+
+              "submit": "Create"
+            }
+          }
+        },
         "menu": {
           "del-view-button": "Delete View",
           "del-view": "Are you sure you want to delete ‘{{ view }}’?",
-          "pin": "{{ status }}pin",
-          "toggle-pin": "{{ status }}pinning...",
+          "pin": "Pin",
+          "toggle-pin": "{{ status }}Pinning...",
           "pin-un": "un",
-          "toggle-pin-success": "{{ status }}pin success",
-          "toggle-pin-failed": "{{ status }}pin failed",
+          "toggle-pin-success": "{{ status }}Pin success",
+          "toggle-pin-failed": "{{ status }}Pin failed",
           "rename": {
-            "trigger": "rename",
+            "trigger": "Rename",
             "title": "Rename the view",
             "placeholder": "Please enter a view name",
             "input-empty": "Please enter valid content",
             "submit": "submit"
+          },
+          "group": {
+            "create": "Create a new group",
+            "placeholder": "Please enter a group name",
+            "def": "Default Group",
+            "name-默认分组": "Default Group",
+            "create-toast": {
+              "loading": "Creating group...",
+              "success": "Group created successfully!",
+              "error": "Group creation failed!"
+            },
+            "update": {
+              "loading": "Updating groups...",
+              "success": "Group update successful!",
+              "error": "Group update failed!"
+            },
+            "delete": {
+              "label": "Delete a group",
+              "title": "Are you sure you want to delete the group?",
+              "desc": "After deleting a group, the pages in the group will be unpinned to the workbench",
+              "cancel": "Cancel",
+              "confirm": "Delete",
+              "loading": "Deleting group...",
+              "success": "Group deleted successfully!",
+              "error": "Group deletion failed!"
+            },
+            "rename": {
+              "label": "Rename Group",
+              "placeholder": "Please enter a group name, no more than 16 characters"
+            }
           }
         },
         "tabs": {
           "流程视图": "Workflow",
           "日志视图": "Logs",
-          "预览视图": "Preview",
+          "预览视图": "Form",
           "对话视图": "Chat"
         }
       }
@@ -1921,6 +2034,24 @@
                 "desc": "Uploading a file here will automatically generate a direct file link to override the defaults on the left.",
                 "list": "list"
               },
+              "type-options": {
+                "enable-image-mask": {
+                  "label": "Enable Image Mask"
+                },
+                "min-value": {
+                  "label": "Min Value",
+                  "placeholder": "Enter min value"
+                },
+                "max-value": {
+                  "label": "Max Value",
+                  "placeholder": "Enter max value"
+                },
+                "number-precision": {
+                  "label": "Number Precision",
+                  "placeholder": "Enter number precision",
+                  "description": "When the number precision is not 0, the forms in the preview view and chat view will display the slider"
+                }
+              },
               "submit": "Save"
             }
           },
@@ -2109,7 +2240,32 @@
           },
           "unknown": "Unsupported tools, try recreating"
         },
-        "execution": "Execution Workflow"
+        "execution": {
+          "button": "Execution Workflow",
+          "COMPLETED": "Workflow execution completed!",
+          "FAILED": "Workflow execution failed!",
+          "TIMED_OUT": "Workflow execution timed out!",
+          "TERMINATED": "Workflow execution terminated!",
+          "swap": {
+            "workflow-is-running": "Unable to switch instances! The current workflow is in progress",
+            "workflow-id-is-empty": "Switch failed! Unable to obtain workflow instance ID",
+            "success": "The workflow execution instance \"{{workflowId}}\" has been resumed!"
+          },
+          "stop": {
+            "error": "Termination execution abnormality! (May not be successfully stopped)",
+            "workflow-is-un-exec": "Unable to terminate execution! The current workflow is not executing"
+          },
+          "pause": {
+            "success": "Workflow execution is paused",
+            "error": "Suspend execution exception! (Maybe failed to suspend successfully)",
+            "workflow-is-un-exec": "Unable to pause execution! The current workflow is not executing"
+          },
+          "resume": {
+            "success": "Execution Resumed",
+            "error": "Recovery execution exception! (May not be successfully recovered)",
+            "workflow-is-un-pause": "Unable to resume execution! The current workflow is not paused"
+          }
+        }
       },
       "error": {
         "tips": "Move canvas to tool"
@@ -2165,7 +2321,9 @@
             "Terminated": "Terminated",
             "Timed Out": "Timed Out"
           },
-          "tips": "Click to view instance details"
+          "tips": "Click to view instance details",
+          "version": "Ver.{{version}}",
+          "temporary-workflow": "Temporary workflow"
         }
       },
       "loading": "Searching...",
@@ -2207,7 +2365,8 @@
           "string": "Enter {{displayName}}",
           "file": {
             "label": "Please enter the file url",
-            "click-to-upload": "Click to upload file"
+            "click-to-upload": "Click to upload file",
+            "click-to-open-in-image-mask-editor-and-upload": "Click to open in image mask editor and upload"
           },
           "options": "Please select an option"
         },
@@ -2266,16 +2425,18 @@
     },
     "chat-view": {
       "sidebar": {
-        "title": "Conversations",
+        "title": "Sessions",
         "create": {
-          "label": "New Conversation",
+          "label": "New Session",
           "placeholder": "Enter the session name within 16 characters.",
+          "def-label": "Default Session",
+          "auto-create-session": "Automatically create new session",
           "loading": "Creating session...",
           "success": "Create session successfully",
           "error": "Create session failed"
         },
-        "expand": "Expand the conversation list",
-        "collapse": "Close conversation list",
+        "expand": "Expand the session list",
+        "collapse": "Close session list",
         "delete": {
           "label": "Delete Session",
           "title": "Are you sure you want to delete \"{{sessionDisplayName}}\"",

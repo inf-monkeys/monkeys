@@ -18,6 +18,16 @@ export const USER_MESSAGE_PROPERTY: ToolProperty = {
     'zh-CN': '用户消息',
     'en-US': 'User Message',
   },
+  name: 'userMessage',
+  type: 'string',
+  required: false,
+};
+
+export const PROMPT_PROPERTY: ToolProperty = {
+  displayName: {
+    'zh-CN': '用户消息',
+    'en-US': 'User Message',
+  },
   name: 'prompt',
   type: 'string',
   required: false,

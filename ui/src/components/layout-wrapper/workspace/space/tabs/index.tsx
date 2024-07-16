@@ -17,7 +17,7 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
-import { debounce } from 'lodash';
+import { debounce, get } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { IPageType } from '@/apis/pages/typings.ts';
@@ -106,11 +106,11 @@ export const SpaceTabs: React.FC<ITabsProps> = () => {
       <header ref={headerNode} className="relative z-20 mx-3 mt-2 flex h-10 overflow-x-clip scroll-smooth">
         <div ref={tabsNode} className={cn('flex overflow-hidden', scrollToolVisible && 'pr-32')}>
           <SortableContext items={pageIds} strategy={horizontalListSortingStrategy} disabled={disableDND}>
-            {pages?.map(({ id, displayName, instance }, index) => (
+            {pages?.map(({ id, displayName, instance, customOptions }, index) => (
               <SpaceTab
                 key={id}
                 id={id}
-                icon={instance?.icon ?? '⚠️'}
+                icon={get(customOptions, 'icon', instance?.icon ?? '⚠️')}
                 displayName={displayName ?? t('workspace.wrapper.space.unknown-view')}
                 activeIndex={activeIndex}
                 isLastItem={pageNavLastIndex !== index}

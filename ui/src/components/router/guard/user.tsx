@@ -55,7 +55,7 @@ export const UserGuard: React.FC = () => {
   }, [localUser.id]);
 
   useEffect(() => {
-    if (error instanceof Error) {
+    if (error instanceof Error && window['vinesRoute']?.[0] !== 'workspace') {
       const errorMessage = error?.message;
 
       if (errorMessage !== '需要登录') {

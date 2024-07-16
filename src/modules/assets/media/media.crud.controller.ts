@@ -6,10 +6,11 @@ import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Query, R
 import { ApiTags } from '@nestjs/swagger';
 import { CreateRichMediaDto } from './dto/req/create-rich-media.dto';
 import { MediaFileService } from './media.service';
+import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 
 @ApiTags('Resources')
 @Controller('/media-files')
-@UseGuards(CompatibleAuthGuard)
+@UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
 export class MediaFileCrudController {
   constructor(protected readonly service: MediaFileService) {}
 

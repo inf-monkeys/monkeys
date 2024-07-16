@@ -12,25 +12,22 @@ import { VinesIFrame } from '@/components/ui/vines-iframe';
 import { usePageStore } from '@/store/usePageStore';
 import { useLocalStorage } from '@/utils';
 
-interface IWorkbenchViewProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface IWorkbenchViewProps extends React.ComponentPropsWithoutRef<'div'> {
+  groupId: string;
+}
 
-export const WorkbenchView: React.FC<IWorkbenchViewProps> = () => {
+export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ groupId }) => {
   const { t } = useTranslation();
 
-  const { data: pages } = useWorkspacePages();
+  const { data } = useWorkspacePages();
+  const pages = data?.pages;
 
   const { ref, width, height } = useElementSize();
 
-  const [page, setPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
+  const [page] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
 
   const hasPages = (pages?.length ?? 0) > 0;
   const hasPage = !!(page?.id && page?.teamId && page?.workflowId && page?.type);
-
-  useEffect(() => {
-    if (!hasPage && pages?.length) {
-      setPage(pages[0]);
-    }
-  }, [hasPage]);
 
   const { setContainerWidth, setContainerHeight } = usePageStore();
   useEffect(() => {
@@ -48,9 +45,10 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
           >
-            <WorkbenchViewHeader page={page} />
-            <div className="relative h-[calc(100%-3.2rem)] w-full overflow-hidden rounded-lg">
+            <WorkbenchViewHeader page={page} groupId={groupId} />
+            <div className="relative size-full max-h-[calc(100%-4.3rem)] overflow-hidden rounded-lg">
               <VinesIFrame pages={pages ?? []} page={page} />
             </div>
           </motion.div>
@@ -59,8 +57,9 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = () => {
             key="vines-workbench-view-empty"
             className="vines-center absolute top-0 size-full flex-col gap-4"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            animate={{ opacity: 1, transition: { delay: 0.5 } }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
           >
             <GitBranchPlus size={64} />
             <div className="flex flex-col text-center">

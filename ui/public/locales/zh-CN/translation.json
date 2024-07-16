@@ -46,6 +46,7 @@
       "descend": "降序",
       "load-more": "加载更多",
       "add": "添加",
+      "upload": "上传",
       "click-to-copy": "点击复制"
     },
     "type": {
@@ -65,6 +66,21 @@
       "minute": "分钟",
       "hour": "小时"
     },
+    "workflow": {
+      "trigger": {
+        "MANUAL": "手动执行",
+        "SCHEDULER": "计划执行",
+        "WEBHOOK": "Webhook"
+      },
+      "status": {
+        "RUNNING": "运行中",
+        "COMPLETED": "运行完成",
+        "PAUSED": "运行暂停",
+        "FAILED": "运行失败",
+        "TIMED_OUT": "运行超时",
+        "TERMINATED": "运行终止"
+      }
+    },
     "toast": {
       "loading": "请等待数据加载完毕",
       "team-not-found": "团队不存在",
@@ -72,7 +88,8 @@
       "workflow-not-found": "工作流不存在",
       "vector-database-not-found": "知识库不存在",
       "copy-success": "复制成功",
-      "copy-failed": "复制失败"
+      "copy-failed": "复制失败",
+      "Forbidden resource": "权限不足，请重新登录！"
     },
     "dialog": {
       "delete-confirm": {
@@ -210,6 +227,24 @@
       },
       "date-range-picker": {
         "select-date": "选择日期"
+      },
+      "vines-image-mask-editor": {
+        "title": "图像遮罩编辑器",
+        "tip-1": "按住",
+        "tip-2": "也可以使用橡皮擦。请先保存，后上传。",
+        "label": {
+          "brush-size": "笔刷尺寸",
+          "opacity": "不透明度"
+        },
+        "operate": {
+          "select-image": "重新选择图像",
+          "mask-color": {
+            "placeholder": "选择遮罩颜色"
+          }
+        },
+        "toast": {
+          "no-file": "请先选择图像文件！"
+        }
       }
     },
     "layout": {
@@ -613,6 +648,7 @@
     },
     "api-key": {
       "title": "API 密钥",
+      "desc": "在此配置用于访问所有 API 的密钥。您可以创建多个密钥，以便在不同的场景下使用。",
       "api-key-item": {
         "revoked": "已废弃",
         "operate": {
@@ -779,14 +815,14 @@
   },
   "workbench": {
     "view": {
-      "no-starred-view": "暂无标星视图",
+      "no-starred-view": "暂无固定视图",
       "header": {
         "enter": "进入视图",
-        "delete": "取消标星"
+        "delete": "取消固定"
       }
     },
     "sidebar": {
-      "add": "添加标星视图"
+      "add": "添加固定视图"
     }
   },
   "ugc-page": {
@@ -1167,16 +1203,18 @@
             "splitterConfig": {
               "separator": {
                 "label": "分段标识符",
-                "placeholder": "请输入分段标识符，如：「，」、「。」、「,」、「\n」",
+                "placeholder": "请输入分段标识符，如：「--」、「\\n」、「\\n\\n」",
                 "tip": "请输入分段标识符"
               },
               "chunk_size": {
                 "label": "分段最大长度",
-                "tip": "请输入分段最大长度"
+                "tip": "请输入分段最大长度",
+                "description": "分段最大长度，超过此长度的段落将被分割，默认值为 500。如果你想完全精确使用分隔符分割（比如一些对话纪录，不希望一个分段里面包含多条对话），可以设置为 0。"
               },
               "chunk_overlap": {
                 "label": "文本重叠量",
-                "tip": "请输入文本重叠量"
+                "tip": "请输入文本重叠量",
+                "description": "分段时，每个分段的文本重叠量，默认值为 50。此值必须小于分段最大长度。"
               }
             }
           },
@@ -1555,6 +1593,32 @@
       }
     },
     "wrapper": {
+      "settings": {
+        "label": "偏好设置",
+        "close": "关闭",
+        "common": {
+          "label": "通用配置",
+          "share-view": {
+            "title": "分享视图",
+            "desc": "你可以将视图分享给其他人，邀请对方和你一起查看、编辑或执行工作流",
+            "switch": "互联网上获得链接的人可直接访问视图",
+            "tips": "放行后互联网上任何人无需身份验证即可对工作流进行任意操作，请注意资产安全！",
+            "loading": "正在更新权限...",
+            "success": "更新权限成功！",
+            "error": "更新权限失败！请稍后重试！"
+          },
+          "iframe": {
+            "title": "页面嵌入",
+            "desc": "你可以通过 iframe 嵌入来整合工作流到你的应用",
+            "built-in": {
+              "label": "内置视图 iframe 嵌入地址",
+              "desc1": "内置视图的嵌入可不填写视图 ID，直接填写 view- 拼上视图类型",
+              "desc2": "流程视图：flow、日志视图：logs、表单视图：form、对话视图：chat",
+              "tips": "地址结构为：https://[domain]/[团队 ID]/workspace/[工作流 ID]/view-[视图类型]"
+            }
+          }
+        }
+      },
       "workflow-info-card": {
         "title": "工作流信息",
         "tip": "点击编辑",
@@ -1592,27 +1656,85 @@
       },
       "space": {
         "unknown-view": "未知视图",
-        "add-tab": "新建视图",
+        "add-tab": {
+          "label": "新建视图",
+          "empty": "暂无视图",
+
+          "create-custom-code-view": {
+            "button": "自定义视图",
+            "placeholder": "请输入自定义视图名称",
+
+            "tips": {
+              "title": "创建自定义代码视图",
+              "desc": "你可以使用 ReactJS 代码，结合我们的组件库和 TailwindCSS，自定义页面排版和组件样式，并通过 JS SDK 轻松实现个性化视图。"
+            },
+
+            "form": {
+              "display-name": {
+                "label": "视图名称",
+                "placeholder": "请输入视图名称"
+              },
+              "icon": "视图图标",
+
+              "submit": "创建"
+            }
+          }
+        },
         "menu": {
           "del-view-button": "删除视图",
           "del-view": "确定要删除「{{ view }}」吗？",
-          "pin": "{{ status }}标星",
-          "toggle-pin": "正在{{ status }}标星中...",
+          "pin": "固定视图",
+          "toggle-pin": "正在{{ status }}固定到工作台中...",
           "pin-un": "取消",
-          "toggle-pin-success": "{{ status }}标星成功",
-          "toggle-pin-failed": "{{ status }}标星失败",
+          "toggle-pin-success": "{{ status }}固定到工作台成功",
+          "toggle-pin-failed": "{{ status }}固定到工作台失败",
           "rename": {
             "trigger": "重命名",
             "title": "重命名视图",
             "placeholder": "请输入视图名称",
             "input-empty": "请输入有效的内容",
             "submit": "保存"
+          },
+          "group": {
+            "create": "新建分组",
+            "placeholder": "请输入分组名称",
+            "def": "默认分组",
+            "name-默认分组": "默认分组",
+            "create-toast": {
+              "loading": "正在创建分组...",
+              "success": "分组创建成功！",
+              "error": "分组创建失败！"
+            },
+            "update": {
+              "loading": "正在更新分组...",
+              "success": "分组更新成功！",
+              "error": "分组更新失败！"
+            },
+            "delete": {
+              "label": "删除分组",
+              "title": "你确定要删除分组吗？",
+              "desc": "删除分组后，分组内的页面将会取消固定到工作台",
+              "cancel": "取消",
+              "confirm": "删除",
+              "loading": "正在删除分组...",
+              "success": "分组删除成功！",
+              "error": "分组删除失败！"
+            },
+            "rename": {
+              "label": "重命名分组",
+              "placeholder": "请输入分组名称，不超过 16 字"
+            }
+          },
+          "set-icon": {
+            "trigger": "设置图标",
+            "title": "请选择图标",
+            "reset": "重置"
           }
         },
         "tabs": {
           "流程视图": "流程视图",
           "日志视图": "日志视图",
-          "预览视图": "预览视图",
+          "预览视图": "表单视图",
           "对话视图": "对话视图"
         }
       }
@@ -1904,6 +2026,24 @@
                 "desc": "在此处上传文件将自动生成文件直链来覆盖左侧默认值",
                 "list": "列表"
               },
+              "type-options": {
+                "enable-image-mask": {
+                  "label": "启用图像遮罩"
+                },
+                "min-value": {
+                  "label": "最小值",
+                  "placeholder": "请输入最小值"
+                },
+                "max-value": {
+                  "label": "最大值",
+                  "placeholder": "请输入最大值"
+                },
+                "number-precision": {
+                  "label": "步进值",
+                  "placeholder": "请输入步进值",
+                  "description": "当步进值不为 0 时，预览视图及对话视图的表单将展示滑块"
+                }
+              },
               "submit": "保存"
             }
           },
@@ -2092,7 +2232,32 @@
           },
           "unknown": "不受支持的工具，请尝试重新创建"
         },
-        "execution": "运行工作流"
+        "execution": {
+          "button": "运行工作流",
+          "COMPLETED": "工作流运行完毕！",
+          "FAILED": "工作流运行失败！",
+          "TIMED_OUT": "工作流运行超时！",
+          "TERMINATED": "工作流运行已终止！",
+          "swap": {
+            "workflow-is-running": "无法切换运行实例！当前工作流正在运行中",
+            "workflow-id-is-empty": "切换失败！无法获取工作流实例 ID",
+            "success": "工作流运行实例「{{workflowId}}」已恢复！"
+          },
+          "stop": {
+            "error": "终止运行异常！（可能未能成功停止）",
+            "workflow-is-un-exec": "无法终止运行！当前工作流未在运行中"
+          },
+          "pause": {
+            "success": "工作流运行已暂停",
+            "error": "暂停运行异常！（可能未能成功暂停）",
+            "workflow-is-un-exec": "无法暂停运行！当前工作流未在运行中"
+          },
+          "resume": {
+            "success": "运行已恢复",
+            "error": "恢复运行异常！（可能未能成功恢复）",
+            "workflow-is-un-pause": "无法恢复运行！当前工作流未在暂停中"
+          }
+        }
       },
       "error": {
         "tips": "定位到工具"
@@ -2136,7 +2301,7 @@
         "empty": "暂无执行记录",
         "bottom": "到底了",
         "more": "剩余 {{data}} 项，点击加载",
-        "preview-page-not-found": "打开详情失败！找不到预览视图",
+        "preview-page-not-found": "打开详情失败！找不到表单视图",
         "item": {
           "desc": "实例 ID: {{instanceId}}",
           "exec-time": "于 {{time}}",
@@ -2148,7 +2313,9 @@
             "Terminated": "已终止",
             "Timed Out": "运行超时"
           },
-          "tips": "点击查看实例详情"
+          "tips": "点击查看实例详情",
+          "version": "版本号：{{version}}",
+          "temporary-workflow": "临时工作流"
         }
       },
       "loading": "查询中...",
@@ -2190,7 +2357,8 @@
           "string": "请输入{{displayName}}",
           "file": {
             "label": "请输入文件直链",
-            "click-to-upload": "点击上传文件"
+            "click-to-upload": "点击上传文件",
+            "click-to-open-in-image-mask-editor-and-upload": "点击打开图像遮罩编辑器并上传"
           },
           "options": "请选择一个选项"
         },
@@ -2253,6 +2421,8 @@
         "create": {
           "label": "新建对话",
           "placeholder": "输入会话名称，16 字以内",
+          "def-label": "默认对话",
+          "auto-create-session": "自动创建新对话",
           "loading": "正在创建会话...",
           "success": "会话创建成功",
           "error": "会话创建失败"

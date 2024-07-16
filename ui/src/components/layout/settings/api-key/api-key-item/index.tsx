@@ -28,6 +28,7 @@ import { Tag } from '@/components/ui/tag';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { execCopy } from '@/utils';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
+import { maskPassword } from '@/utils/maskdata.ts';
 
 interface IApiKeyItemProps extends React.ComponentPropsWithoutRef<'div'> {
   apiKey: IApiKey;
@@ -51,14 +52,16 @@ export const ApiKeyItem: React.FC<IApiKeyItemProps> = ({ apiKey, mutate }) => {
       },
     });
   };
+
   const handleCopyApiKey = (apiKey: string) => {
     clipboard.copy(apiKey);
     if (!clipboard.copied && !execCopy(apiKey)) toast.error(t('common.toast.copy-failed'));
     else toast.success(t('common.toast.copy-success'));
   };
+
   return (
     <Card>
-      <CardContent className="flex h-full items-center justify-between gap-2 p-3">
+      <CardContent className="flex h-full items-center justify-between gap-3 p-3">
         {apiKey.status === IApiKeyStatus.Revoked ? (
           <Avatar className="flex-shrink-0">
             <AvatarFallback>
@@ -80,7 +83,7 @@ export const ApiKeyItem: React.FC<IApiKeyItemProps> = ({ apiKey, mutate }) => {
             )}
           </span>
           <span className="flex gap-1 text-xs [&_*]:text-opacity-70">
-            <span>{apiKey.apiKey}</span>
+            <span>{maskPassword(apiKey.apiKey)}</span>
             <Tooltip content={dayjs(apiKey.createdTimestamp).format('YYYY-MM-DD HH:mm:ss')}>
               <TooltipTrigger asChild>
                 <span>

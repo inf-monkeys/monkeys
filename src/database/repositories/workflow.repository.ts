@@ -14,6 +14,7 @@ import { ChatCompletionMessageParam } from 'openai/resources';
 import { In, Repository } from 'typeorm';
 import { PageInstance, WorkflowPageEntity } from '../entities/workflow/workflow-page';
 import { WorkflowAssetRepositroy } from './assets-workflow.respository';
+import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 
 export const BUILT_IN_PAGE_INSTANCES: PageInstance[] = [
   {
@@ -59,9 +60,11 @@ export class WorkflowRepository {
     private readonly workflowTriggerRepository: Repository<WorkflowTriggersEntity>,
     @InjectRepository(WorkflowChatSessionEntity)
     private readonly workflowChatSessionRepository: Repository<WorkflowChatSessionEntity>,
-    private readonly workflowAssetRepositroy: WorkflowAssetRepositroy,
+    private readonly workflowAssetRepository: WorkflowAssetRepositroy,
     @InjectRepository(WorkflowPageEntity)
     private readonly pageRepository: Repository<WorkflowPageEntity>,
+    @InjectRepository(WorkflowPageGroupEntity)
+    private readonly pageGroupRepository: Repository<WorkflowPageGroupEntity>,
   ) {}
 
   public async findWorkflowByCondition(condition: FindWorkflowCondition) {
@@ -299,7 +302,7 @@ export class WorkflowRepository {
     );
   }
 
-  public async getWorklfowVersions(workflowId: string) {
+  public async getWorkflowVersions(workflowId: string) {
     const versions = await this.workflowMetadataRepository.find({
       where: {
         workflowId,
@@ -544,7 +547,7 @@ export class WorkflowRepository {
 
     if (filter) {
       // Apply any additional filters here using your `findAssetIdsByCommonFilter` logic.
-      const workflowIds = await this.workflowAssetRepositroy.findAssetIdsByCommonFilter('workflow', filter, 'workflowId');
+      const workflowIds = await this.workflowAssetRepository.findAssetIdsByCommonFilter('workflow', filter, 'workflowId');
       if (workflowIds.length === 0) {
         return { totalCount: 0, list: [] };
       }
@@ -618,24 +621,45 @@ export class WorkflowRepository {
   }
 
   async updatePagePinStatus(teamId: string, pageId: string, pin: boolean) {
-    const page = await this.pageRepository.findOne({
+    const defaultGroup = await this.getDefaultPageGroupAndCreateIfNotExists(teamId);
+
+    if (pin) {
+      if (!defaultGroup.pageIds.includes(pageId)) {
+        defaultGroup.pageIds.push(pageId);
+      }
+    } else {
+      const index = defaultGroup.pageIds.findIndex((id) => id === pageId);
+      if (index !== -1) {
+        defaultGroup.pageIds.splice(index, 1);
+      }
+    }
+
+    await this.pageGroupRepository.save(defaultGroup);
+  }
+
+  public async getDefaultPageGroupAndCreateIfNotExists(teamId: string) {
+    const defaultGroup = await this.pageGroupRepository.findOne({
       where: {
-        id: pageId,
         teamId,
-        isDeleted: false,
+        isBuiltIn: true,
       },
     });
-    if (!page) {
-      throw new Error('page not exists');
+    if (!defaultGroup) {
+      const group = this.pageGroupRepository.create({
+        id: generateDbId(),
+        displayName: '默认分组',
+        isBuiltIn: true,
+        teamId,
+        pageIds: [],
+        createdTimestamp: Date.now(),
+        updatedTimestamp: Date.now(),
+      });
+      await this.pageGroupRepository.save(group);
+
+      return group;
     }
-    await this.pageRepository.update(
-      {
-        id: page.id,
-      },
-      {
-        pinned: pin,
-      },
-    );
+
+    return defaultGroup;
   }
 
   public async listAllOpenAICompatibleWorkflows(teamId: string) {
@@ -656,5 +680,30 @@ export class WorkflowRepository {
         isDeleted: false,
       },
     });
+  }
+
+  public async hasWorkflowUnauthorized(workflowId: string) {
+    const workflow = await this.workflowMetadataRepository.findOne({
+      where: {
+        workflowId,
+        isDeleted: false,
+      },
+    });
+    return {
+      userId: workflow?.creatorUserId,
+      notAuthorized: workflow?.notAuthorized,
+    };
+  }
+
+  public async toggleWorkflowUnauthorized(teamId: string, workflowId: string, notAuthorized: boolean) {
+    return await this.workflowMetadataRepository.update(
+      {
+        workflowId,
+        teamId,
+      },
+      {
+        notAuthorized,
+      },
+    );
   }
 }

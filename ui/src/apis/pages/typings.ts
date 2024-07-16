@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 
 export type IPagePermission = 'read' | 'write' | 'exec' | 'permission';
@@ -29,14 +30,6 @@ export interface IPageType {
   sortIndex?: number;
   pinned?: boolean;
   customOptions?: {
-    joinTeam?: {
-      enable?: boolean;
-      url?: string;
-    };
-    theme?: {
-      enable?: boolean;
-      colors?: Record<string, string>;
-    };
     parameterOptions?: {
       type?: 'all' | 'endpoint-only';
     };
@@ -51,6 +44,18 @@ export interface IPageType {
 export type IPinPage = IPageType & {
   workflowId: string;
   workflow: MonkeyWorkflow;
+};
+
+export interface IPageGroup {
+  id: string;
+  pageIds: string[];
+  displayName: string;
+  isBuiltIn: boolean;
+}
+
+export type IPinningPage = {
+  pages: IPinPage[];
+  groups: IPageGroup[];
 };
 
 export declare type CreatePageDto = {

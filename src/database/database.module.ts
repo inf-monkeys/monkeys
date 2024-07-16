@@ -38,6 +38,7 @@ import { TeamMembersEntity } from './entities/identity/user-team-relationship';
 import { OneApiUsersEntity } from './entities/oneapi/oneapi-user.entity';
 import { ToolsTriggerTypesEntity } from './entities/tools/tools-trigger-types';
 import { WorkflowPageEntity } from './entities/workflow/workflow-page';
+import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 
 export const entities: EntityClassOrSchema[] = [
   ThemeEntity,
@@ -58,6 +59,7 @@ export const entities: EntityClassOrSchema[] = [
   TeamInvitesRequestsEntity,
   ApiKeyEntity,
   WorkflowPageEntity,
+  WorkflowPageGroupEntity,
   LlmModelEntity,
   LlmChannelEntity,
   SdModelEntity,

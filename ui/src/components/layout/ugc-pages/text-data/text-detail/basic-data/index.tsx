@@ -7,12 +7,14 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { useKnowledgeBase, useUpdateKnowledgeBase } from '@/apis/vector';
+import { useKnowledgeBase, useKnowledgeBaseMetadataFields, useUpdateKnowledgeBase } from '@/apis/vector';
 import { ICreateVectorDB } from '@/apis/vector/typings.ts';
-import { InfoEditor } from '@/components/layout/settings/account/info-editor.tsx';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
 import {
@@ -20,8 +22,8 @@ import {
   KnowledgeBaseRetrievalMode,
   retrievalSettingsSchema,
 } from '@/schema/text-dataset/retrieval-settings';
+import { getI18nContent } from '@/utils';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
-import { I18nContent } from '@/utils';
 
 interface IBasicInfoProps {
   textId: string;
@@ -32,7 +34,7 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
 
   const { data: detail, mutate } = useKnowledgeBase(textId);
   const { trigger } = useUpdateKnowledgeBase(detail?.uuid ?? '');
-  const [isLoading, setIsLoading] = useState(false);
+  const { data: fields } = useKnowledgeBaseMetadataFields(textId);
 
   const handleUpdate = (key: string, val: string) => {
     toast.promise(
@@ -58,22 +60,23 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
     defaultValues: {
       mode: detail?.retrievalSettings?.mode || KnowledgeBaseRetrievalMode.VectorSearch,
       topK: detail?.retrievalSettings?.topK || 3,
+      enabledMetadataFilter: detail?.retrievalSettings?.enabledMetadataFilter || false,
+      metadataFilterKey: detail?.retrievalSettings?.metadataFilterKey || '',
     },
   });
 
   const handleSubmit = form.handleSubmit(async (data) => {
-    setIsLoading(true);
     if (!textId) {
-      setIsLoading(false);
       toast.error(t('common.toast.vector-database-not-found'));
       return;
     }
-
     toast.promise(
       trigger({
         retrievalSettings: {
           mode: data.mode,
           topK: data.topK,
+          enabledMetadataFilter: data.enabledMetadataFilter,
+          metadataFilterKey: data.metadataFilterKey,
         },
       } as any),
       {
@@ -87,8 +90,10 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
     );
   });
 
+  const { enabledMetadataFilter = false } = form.getValues();
+
   return (
-    <>
+    <ScrollArea className="h-full max-h-[calc(100%-3rem)]">
       <div>
         <div
           style={{
@@ -121,19 +126,19 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
             <TableRow>
               <TableCell>{t('ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.name.label')}</TableCell>
               <TableCell className="flex items-center gap-2">
-                <span>{I18nContent(detail?.displayName)}</span>
-                <InfoEditor
+                <span>{getI18nContent(detail?.displayName)}</span>
+                <SimpleInputDialog
                   title={t('ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.name.info-editor.title')}
                   placeholder={t(
                     'ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.name.info-editor.placeholder',
                   )}
-                  initialValue={I18nContent(detail?.displayName) || ''}
+                  initialValue={getI18nContent(detail?.displayName) || ''}
                   onFinished={(val) => handleUpdate('displayName', val)}
                 >
                   <Button variant="outline" size="small" icon={<Edit2Icon />} className="scale-80">
                     {t('common.utils.edit')}
                   </Button>
-                </InfoEditor>
+                </SimpleInputDialog>
               </TableCell>
             </TableRow>
             <TableRow>
@@ -141,19 +146,19 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
                 {t('ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.description.label')}
               </TableCell>
               <TableCell className="flex items-center gap-2">
-                <span>{I18nContent(detail?.description) || t('components.layout.ugc.utils.no-description')}</span>
-                <InfoEditor
+                <span>{getI18nContent(detail?.description) || t('components.layout.ugc.utils.no-description')}</span>
+                <SimpleInputDialog
                   title={t('ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.name.info-editor.title')}
                   placeholder={t(
                     'ugc-page.text-data.detail.tabs.settings.basic-info.table.columns.name.info-editor.placeholder',
                   )}
-                  initialValue={I18nContent(detail?.description) || ''}
+                  initialValue={getI18nContent(detail?.description) || ''}
                   onFinished={(val) => handleUpdate('description', val)}
                 >
                   <Button variant="outline" size="small" icon={<Edit2Icon />} className="scale-80">
                     {t('common.utils.edit')}
                   </Button>
-                </InfoEditor>
+                </SimpleInputDialog>
               </TableCell>
             </TableRow>
             <TableRow>
@@ -199,7 +204,7 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
                   <FormLabel>{t('ugc-page.text-data.detail.tabs.settings.search-settings.form.mode.label')}</FormLabel>
                   <FormControl>
                     <FormControl>
-                      <Select defaultValue={field.value}>
+                      <Select defaultValue={field.value} onValueChange={field.onChange}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue
@@ -241,12 +246,70 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
                 </FormItem>
               )}
             />
+            <FormField
+              name="enabledMetadataFilter"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    {t('ugc-page.text-data.detail.tabs.settings.search-settings.form.enabledMetadataFilter.label')}
+                  </FormLabel>
+                  <FormDescription>
+                    {t(
+                      'ugc-page.text-data.detail.tabs.settings.search-settings.form.enabledMetadataFilter.placeholder',
+                    )}
+                  </FormDescription>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {enabledMetadataFilter && (
+              <FormField
+                name="metadataFilterKey"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {t('ugc-page.text-data.detail.tabs.settings.search-settings.form.metadataFilterKey.label')}
+                    </FormLabel>
+                    <FormDescription>
+                      {t('ugc-page.text-data.detail.tabs.settings.search-settings.form.metadataFilterKey.placeholder')}
+                    </FormDescription>
+                    <FormControl>
+                      <Select defaultValue={field.value} onValueChange={field.onChange}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={t(
+                                'ugc-page.text-data.detail.tabs.settings.search-settings.form.metadataFilterKey.placeholder',
+                              )}
+                            />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {fields?.map((it, i) => (
+                            <SelectItem value={it.name} key={it.name}>
+                              {getI18nContent(it.name)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <Button variant="outline" icon={<Save />} type="submit">
               {t('common.utils.save')}
             </Button>
           </form>
         </Form>
       </div>
-    </>
+    </ScrollArea>
   );
 };

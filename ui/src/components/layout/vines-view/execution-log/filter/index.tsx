@@ -1,7 +1,6 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { format } from 'date-fns';
-import _ from 'lodash';
 import { CalendarIcon } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -41,24 +40,18 @@ export const VinesLogFilter: React.FC<IVinesLogFilterProps> = ({ form, handleSub
       value: ver.toString(),
     };
   });
-  const workflowStatusOptions = EXECUTION_STATUS_LIST.map(({ status, text }) => {
+  const workflowStatusOptions = EXECUTION_STATUS_LIST.map((status) => {
     return {
-      label: text,
+      label: t(`common.workflow.status.${status}`),
       value: status!,
     };
   });
-  const workflowStatusOptionsMapper = useMemo(() => {
-    return _.keyBy(EXECUTION_STATUS_LIST, 'status');
-  }, [EXECUTION_STATUS_LIST]);
-  const workflowTriggerTypeOptions = TRIGGER_TYPE_LIST.map(({ value, text }) => {
+  const workflowTriggerTypeOptions = TRIGGER_TYPE_LIST.map((trigger) => {
     return {
-      label: text,
-      value,
+      label: t(`common.workflow.trigger.${trigger}`),
+      value: trigger,
     };
   });
-  const workflowTriggerTypeOptionsMapper = useMemo(() => {
-    return _.keyBy(TRIGGER_TYPE_LIST, 'value');
-  }, [TRIGGER_TYPE_LIST]);
 
   return (
     <div className="flex flex-col gap-4 px-2">
@@ -166,7 +159,7 @@ export const VinesLogFilter: React.FC<IVinesLogFilterProps> = ({ form, handleSub
                   <MultipleSelector
                     value={(field.value ?? []).map((status) => {
                       return {
-                        label: workflowStatusOptionsMapper[status].text,
+                        label: t(`common.workflow.status.${status}`),
                         value: status,
                       };
                     })}
@@ -192,7 +185,7 @@ export const VinesLogFilter: React.FC<IVinesLogFilterProps> = ({ form, handleSub
                   <MultipleSelector
                     value={(field.value ?? []).map((value) => {
                       return {
-                        label: workflowTriggerTypeOptionsMapper[value].text,
+                        label: t(`common.workflow.trigger.${value}`),
                         value,
                       };
                     })}

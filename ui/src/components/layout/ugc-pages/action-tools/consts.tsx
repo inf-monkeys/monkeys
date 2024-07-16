@@ -11,7 +11,7 @@ import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { IUgcCreateColumnsProps } from '@/components/layout/ugc/typings.ts';
 import { RenderDescription, RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { PricingText } from '@/components/layout/ugc-pages/action-tools/utils.tsx';
-import { I18nContent } from '@/utils';
+import { getI18nContent } from '@/utils';
 import { formatTime } from '@/utils/time.ts';
 
 const columnHelper = createColumnHelper<IAssetItem<IWorkflowTool>>();
@@ -41,13 +41,13 @@ export const createActionToolsColumns = ({ hooks }: ICreateActionToolsColumnsPro
             });
           }}
         >
-          {I18nContent(getValue() as string | I18nValue)}
+          {getI18nContent(getValue() as string | I18nValue)}
         </span>
       ),
     }),
     columnHelper.accessor('description', {
       id: 'description',
-      cell: ({ getValue }) => RenderDescription({ description: I18nContent(getValue() as string | I18nValue) }),
+      cell: ({ getValue }) => RenderDescription({ description: getI18nContent(getValue() as string | I18nValue) }),
     }),
     columnHelper.display({
       id: 'estimateTime',

@@ -51,7 +51,7 @@ export const TriggerSelector: React.FC<ITriggerSelectorProps> = () => {
   const handleCreateTrigger = (triggerType: ITriggerType) => {
     const type = triggerType.type;
 
-    if (type === WorkflowTriggerType.MANUALLY) {
+    if (type === WorkflowTriggerType.MANUAL) {
       toast.promise(createTrigger({ triggerType: type, enabled: true, version: workflowVersion }), {
         loading: t('workspace.flow-view.endpoint.start-tool.trigger.create.loading'),
         success: () => {

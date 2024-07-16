@@ -5,10 +5,11 @@ import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/comm
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApikeyService } from './apikey.service';
 import { CreateApiKeyDto } from './dto/create-apikey.dto';
+import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 
 @Controller('/auth/apikey')
 @ApiTags('Auth/APIKey')
-@UseGuards(CompatibleAuthGuard)
+@UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
 export class ApikeyController {
   constructor(private readonly apiKeyService: ApikeyService) {}
 

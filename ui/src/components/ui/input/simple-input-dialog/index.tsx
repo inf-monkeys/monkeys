@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 
-interface IInfoEditorProps extends React.ComponentPropsWithoutRef<'div'> {
+interface ISimpleInputDialogProps extends React.ComponentPropsWithoutRef<'div'> {
   title: string;
   description?: string;
   placeholder?: string;
@@ -25,7 +25,7 @@ interface IInfoEditorProps extends React.ComponentPropsWithoutRef<'div'> {
   disabled?: boolean;
 }
 
-export const InfoEditor: React.FC<IInfoEditorProps> = ({
+export const SimpleInputDialog: React.FC<ISimpleInputDialogProps> = ({
   children,
   title,
   description,

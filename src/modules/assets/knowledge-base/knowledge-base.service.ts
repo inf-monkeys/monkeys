@@ -69,9 +69,30 @@ export class KnowledgeBaseService {
     await this.knowledgeBaseRepository.deleteKnowledgeBase(teamId, knowledgeBaseId);
   }
 
+  public async getUniqueMetadataValueByKey(knowledgeBaseId: string, key: string) {
+    const { list } = await this.toolsForwardService.request<{
+      list: string[];
+    }>(KNOWLEDGE_BASE_NAMESPACE, {
+      url: `/knowledge-bases/${knowledgeBaseId}/metadata-fields/${key}/values`,
+      method: 'GET',
+    });
+    return list;
+  }
+
+  public async valuesToFilterByMetadataKey(knowledgeBaseId: string): Promise<string[]> {
+    const knowledgeBase = await this.knowledgeBaseRepository.getKnowledgeBaseByUUIDWithoutTeam(knowledgeBaseId);
+    const retrievalSettings = knowledgeBase.getRetrievalSettings();
+    if (!retrievalSettings.enabledMetadataFilter) {
+      return [];
+    }
+    const { metadataFilterKey } = retrievalSettings;
+    return await this.getUniqueMetadataValueByKey(knowledgeBaseId, metadataFilterKey);
+  }
+
   public async retrieveKnowledgeBase(
     knowledgeBaseId: string,
     query: string,
+    metadataFilterValues?: string[],
   ): Promise<{
     hits: Array<{
       page_content: string;
@@ -85,14 +106,20 @@ export class KnowledgeBaseService {
 
     switch (retrievalSettings.mode) {
       case KnowledgeBaseRetrievalMode.VectorSearch:
+        const body = {
+          query: query,
+          topK: retrievalSettings.topK,
+          scoreThreshHold: retrievalSettings.scoreThreshHold,
+        };
+        if (retrievalSettings.enabledMetadataFilter && metadataFilterValues?.length) {
+          body['metadata_filter'] = {
+            [retrievalSettings.metadataFilterKey]: metadataFilterValues,
+          };
+        }
         return await this.toolsForwardService.request(KNOWLEDGE_BASE_NAMESPACE, {
           url: `/knowledge-bases/${knowledgeBaseId}/vector-search`,
           method: 'POST',
-          data: {
-            query: query,
-            topK: retrievalSettings.topK,
-            scoreThreshHold: retrievalSettings.scoreThreshHold,
-          },
+          data: body,
         });
       case KnowledgeBaseRetrievalMode.FullTextSearch:
         return await this.toolsForwardService.request(KNOWLEDGE_BASE_NAMESPACE, {

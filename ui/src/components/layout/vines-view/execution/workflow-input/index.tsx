@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ToolProperty } from '@inf-monkeys/monkeys';
-import { fromPairs, isArray, isBoolean } from 'lodash';
+import { fromPairs, isArray, isBoolean, isUndefined } from 'lodash';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -17,9 +17,11 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form.tsx';
+import { VinesImageMaskEditor } from '@/components/ui/image-mask-editor';
 import { TagInput } from '@/components/ui/input/tag';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
+import { Slider } from '@/components/ui/slider.tsx';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesUpdater } from '@/components/ui/updater';
@@ -130,7 +132,11 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                       <FormLabel className="font-bold">{getI18nContent(displayName)}</FormLabel>
                       <FormControl>
                         <>
-                          {['string', 'number', 'file'].includes(type) &&
+                          {(['string', 'file'].includes(type) ||
+                            (type === 'number' &&
+                              (isUndefined(typeOptions?.minValue) ||
+                                isUndefined(typeOptions?.maxValue) ||
+                                typeOptions?.numberPrecision === 0))) &&
                             (isMultiple ? (
                               <TagInput
                                 value={
@@ -162,6 +168,23 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                               />
                             ))}
 
+                          {type === 'number' &&
+                            !(
+                              isUndefined(typeOptions?.minValue) ||
+                              isUndefined(typeOptions?.maxValue) ||
+                              typeOptions?.numberPrecision === 0
+                            ) && (
+                              <Slider
+                                min={typeOptions.minValue}
+                                max={typeOptions.maxValue}
+                                step={typeOptions.numberPrecision}
+                                defaultValue={[Number(value) || 0]}
+                                value={[Number(value) || 0]}
+                                onValueChange={(v) => onChange(v[0])}
+                                {...field}
+                              />
+                            )}
+
                           {type === 'boolean' && (
                             <div>
                               {isMultiple ? (
@@ -177,28 +200,47 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                                 />
                               ) : (
                                 <Switch
-                                  checked={isBoolean(value) ? value : BOOLEAN_VALUES.includes(value?.toString()!)}
+                                  checked={
+                                    isBoolean(value) ? value : BOOLEAN_VALUES.includes((value as string)?.toString())
+                                  }
                                   onCheckedChange={onChange}
                                 />
                               )}
                             </div>
                           )}
 
-                          {type === 'file' && (
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs text-opacity-70">
-                                {t('workspace.pre-view.actuator.execution-form.file.label')}
-                              </span>
-                              <VinesUpdater
-                                limit={isMultiple ? void 0 : 1}
-                                onFinished={(urls) => form.setValue(name, isMultiple ? urls : urls[0])}
-                              >
-                                <Button variant="outline" size="small" className="-mr-1 scale-90">
-                                  {t('workspace.pre-view.actuator.execution-form.file.click-to-upload')}
-                                </Button>
-                              </VinesUpdater>
-                            </div>
-                          )}
+                          {type === 'file' &&
+                            (typeOptions?.enableImageMask ? (
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs text-opacity-70">
+                                  {t('workspace.pre-view.actuator.execution-form.file.label')}
+                                </span>
+                                <VinesImageMaskEditor
+                                  onFinished={(urls) => form.setValue(name, isMultiple ? urls : urls[0])}
+                                >
+                                  <Button variant="outline" size="small" className="-mr-1 scale-90">
+                                    {t(
+                                      'workspace.pre-view.actuator.execution-form.file.click-to-open-in-image-mask-editor-and-upload',
+                                    )}
+                                  </Button>
+                                </VinesImageMaskEditor>
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs text-opacity-70">
+                                  {t('workspace.pre-view.actuator.execution-form.file.label')}
+                                </span>
+                                <VinesUpdater
+                                  limit={isMultiple ? void 0 : 1}
+                                  onFinished={(urls) => form.setValue(name, isMultiple ? urls : urls[0])}
+                                  basePath="user-files/workflow-input"
+                                >
+                                  <Button variant="outline" size="small" className="-mr-1 scale-90">
+                                    {t('workspace.pre-view.actuator.execution-form.file.click-to-upload')}
+                                  </Button>
+                                </VinesUpdater>
+                              </div>
+                            ))}
 
                           {type === 'options' && (
                             <Select

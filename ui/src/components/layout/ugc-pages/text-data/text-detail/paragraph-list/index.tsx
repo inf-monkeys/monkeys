@@ -30,11 +30,11 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
 
   const [inputData, setInputData] = useState<string>('');
   const [query, setQuery] = useState<string>('');
-  const [metadataFilter, setMetadataFilter] = useState<IFullTextSearchParams['metadataFilter']>();
+  const [metadata_filter, setMetadataFilter] = useState<IFullTextSearchParams['metadata_filter']>();
 
   const { data, isLoading, mutate } = useSearchKnowledgeBase(
     textId,
-    { from, query, metadataFilter },
+    { from, query, metadata_filter },
     searchMode === 'vector',
   );
 

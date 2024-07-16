@@ -9,7 +9,6 @@ import { toast } from 'sonner';
 import { deleteTeamInvite, toggleTeamInviteStatus, updateTeamInviteRemark, useTeamInvites } from '@/apis/authz/team';
 import { ITeamInviteStatus, ITeamInviteWithUserProfile } from '@/apis/authz/team/typings.ts';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
-import { InfoEditor } from '@/components/layout/settings/account/info-editor.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { DataTable } from '@/components/ui/data-table';
@@ -24,6 +23,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
+import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
 import { Spinner } from '@/components/ui/spinner';
 import { Tooltip } from '@/components/ui/tooltip';
 
@@ -102,7 +102,7 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
       minSize: 60,
       maxSize: 200,
       cell: ({ cell, row }) => (
-        <InfoEditor
+        <SimpleInputDialog
           title={t('settings.account.team-member.invite.invite-manage.columns.remark.info-editor.title')}
           placeholder={t('settings.account.team-member.invite.invite-manage.columns.remark.info-editor.placeholder')}
           initialValue={cell.getValue() as string}
@@ -112,7 +112,7 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
             <span>{cell.getValue() as string}</span>
             <Pencil size={13} className="-mb-0.5 opacity-0 transition-opacity group-hover:opacity-100" />
           </div>
-        </InfoEditor>
+        </SimpleInputDialog>
       ),
     },
     {

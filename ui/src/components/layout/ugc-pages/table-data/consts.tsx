@@ -5,7 +5,7 @@ import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { ITableData } from '@/apis/table-data/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
-import { I18nContent } from '@/utils';
+import { getI18nContent } from '@/utils';
 
 const columnHelper = createColumnHelper<IAssetItem<ITableData>>();
 
@@ -19,7 +19,7 @@ export const createTableDataColumns = () => [
     id: 'title',
     cell: ({ getValue }) => (
       <a className="transition-colors hover:text-primary-500" target="_blank" rel="noreferrer">
-        {I18nContent(getValue() as string | I18nValue)}
+        {getI18nContent(getValue() as string | I18nValue)}
       </a>
     ),
   }),
@@ -30,7 +30,7 @@ export const createTableDataColumns = () => [
   }),
   columnHelper.accessor('description', {
     id: 'description',
-    cell: ({ getValue }) => RenderDescription({ description: I18nContent(getValue() as string | I18nValue) }),
+    cell: ({ getValue }) => RenderDescription({ description: getI18nContent(getValue() as string | I18nValue) }),
   }),
   columnHelper.accessor('assetTags', {
     id: 'assetTags',
