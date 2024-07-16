@@ -12,6 +12,7 @@ export interface IRequest extends express.Request {
   userId: string;
   teamId: string;
   user: any;
+  apikey: string;
 
   skipUnauthorized: boolean;
 }
