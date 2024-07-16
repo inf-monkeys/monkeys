@@ -68,6 +68,21 @@
       "hour_one": "hour",
       "hour_other": "hours"
     },
+    "workflow": {
+      "trigger": {
+        "MANUAL": "Manual Execution",
+        "SCHEDULER": "Scheduled execution",
+        "WEBHOOK": "Webhook"
+      },
+      "status": {
+        "RUNNING": "Running",
+        "COMPLETED": "Completed",
+        "PAUSED": "Paused",
+        "FAILED": "Failed",
+        "TIMED_OUT": "Timed Out",
+        "TERMINATED": "Terminated"
+      }
+    },
     "toast": {
       "loading": "Please wait until the data is loaded.",
       "team-not-found": "The team doesn't exist.",
