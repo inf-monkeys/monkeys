@@ -208,6 +208,7 @@ export interface StartWorkflowRequest {
   teamId: string;
   userId: string;
   workflowId: string;
+  apiKey?: string;
   version?: number;
   inputData: { [x: string]: any };
   triggerType: WorkflowTriggerType;
