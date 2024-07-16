@@ -59,7 +59,7 @@ export const getI18nContent = (content: string | I18nValue | null | undefined): 
   if (!content) return;
   const i18nLanguage = i18n.language;
   if (typeof content === 'string') return content;
-  return content[i18nLanguage] ? content[i18nLanguage] : content['en-US'];
+  return content[i18nLanguage] ?? content['en-US'];
 };
 
 export const I18nAllContent = (content: string | I18nValue | undefined): string | undefined => {
