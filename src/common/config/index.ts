@@ -25,6 +25,7 @@ export interface ServerConfig {
   appUrl: string;
   loadExample: boolean;
   rateLimit: {
+    enabled: boolean;
     windowMs: number;
     max: number;
   };
@@ -232,6 +233,7 @@ export const config: Config = {
     appUrl: appUrl,
     loadExample: readConfig('server.loadExample', true),
     rateLimit: {
+      enabled: readConfig('server.rateLimit.enabled', false),
       windowMs: readConfig('server.rateLimit.windowMs', 1000),
       max: readConfig('server.rateLimit.max', 100),
     },
