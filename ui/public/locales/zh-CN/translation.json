@@ -2007,9 +2007,18 @@
                 "placeholder": "请填写「输入配置」显示的名称"
               },
               "name": {
-                "label": "字段",
+                "label": "字段名",
                 "placeholder": "请填写「输入配置」的字段名",
-                "desc": "输入字段用于在工作流中引用输入的数据，在工具装配项中填写「 ${workflow.input.{{name}}} 」来使用"
+                "desc": "输入字段用于在工作流中引用输入的数据，在工具装配项中填写「 ${workflow.input.{{name}}} 」来使用",
+                "reset": "重置"
+              },
+              "desc": {
+                "label": "描述",
+                "placeholder": "填写后，将在表单下方显示描述信息"
+              },
+              "tips": {
+                "label": "输入提示",
+                "placeholder": "填写后，将显示提示图标，鼠标悬浮时显示提示信息"
               },
               "type": {
                 "label": "数据类型",
@@ -2338,12 +2347,13 @@
           "max": "视图内全屏"
         },
         "execution": {
-          "label": "运行工作流",
+          "label": "运行",
           "button": {
             "restart": "重新运行",
             "stop": "终止运行"
           },
           "form-empty": "请先完善工作流表单",
+          "workflow-execution-created": "任务创建成功！",
           "status": {
             "completed": "工作流运行完毕",
             "canceled": "工作流运行取消",

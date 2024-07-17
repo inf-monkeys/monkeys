@@ -18,7 +18,8 @@ export const VinesActuatorDetailData: React.FC<IVinesActuatorDetailDataProps> = 
 
   const isCompleted =
     Object.keys(executionOutputData).length > 0 ||
-    !['IN_PROGRESS', 'SCHEDULED'].includes(executionTask?.originStatus ?? '');
+    !['IN_PROGRESS', 'SCHEDULED'].includes(executionTask?.originStatus ?? '') ||
+    ['DEFAULT', 'CANCELED'].includes(executionTask?.status ?? '');
   const isHUMANInteraction = executionTask?.taskType === 'HUMAN';
 
   return (
