@@ -2017,7 +2017,16 @@
               "name": {
                 "label": "Key",
                 "placeholder": "Enter key",
-                "desc": "The input field is used to reference the input data in the workflow, fill in \"${workflow.input.{{name}}}\" in the tool assembly item to use the"
+                "desc": "The input field is used to reference the input data in the workflow, fill in \"${workflow.input.{{name}}}\" in the tool assembly item to use the",
+                "reset": "Reset"
+              },
+              "desc": {
+                "label": "Description",
+                "placeholder": "After filling in, the description of the configuration will be displayed below"
+              },
+              "tips": {
+                "label": "Tips",
+                "placeholder": "After filling in, a prompt icon will be displayed, and prompt information will be displayed when the mouse hovers"
               },
               "type": {
                 "label": "Data Type",
@@ -2346,12 +2355,13 @@
           "max": "Full screen in view"
         },
         "execution": {
-          "label": "Execute workflow",
+          "label": "Execute",
           "button": {
             "restart": "Restart",
             "stop": "Stop"
           },
           "form-empty": "Please complete the workflow form first",
+          "workflow-execution-created": "Task created successfully!",
           "status": {
             "completed": "Workflow completed",
             "canceled": "Workflow execution cancellation",

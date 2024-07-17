@@ -12,9 +12,17 @@ import { Accordion } from '@/components/ui/accordion.tsx';
 interface IVinesLogListProps {
   searchWorkflowExecutionsData?: VinesWorkflowExecutionLists;
   handleSubmit: (loadNextPage?: boolean) => void;
+
+  activeTab: string;
+  setActiveTab: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export const VinesLogList: React.FC<IVinesLogListProps> = ({ searchWorkflowExecutionsData, handleSubmit }) => {
+export const VinesLogList: React.FC<IVinesLogListProps> = ({
+  searchWorkflowExecutionsData,
+  handleSubmit,
+  activeTab,
+  setActiveTab,
+}) => {
   const { t } = useTranslation();
 
   const workflowDefinitions = searchWorkflowExecutionsData?.definitions;
@@ -41,7 +49,13 @@ export const VinesLogList: React.FC<IVinesLogListProps> = ({ searchWorkflowExecu
           </div>
         </motion.div>
       )}
-      <Accordion type="single" collapsible className="flex w-full flex-col gap-3">
+      <Accordion
+        type="single"
+        collapsible
+        className="flex w-full flex-col gap-3"
+        value={activeTab}
+        onValueChange={setActiveTab}
+      >
         {workflowExecutions && workflowDefinitions
           ? workflowExecutions.map((workflowExecution, index) => (
               <VinesLogItem

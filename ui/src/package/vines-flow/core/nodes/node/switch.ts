@@ -50,7 +50,7 @@ export class SwitchNode extends ControlFlowVinesNode<SwitchTaskDef> {
       merge(this._task, { inputParameters: parameters });
     }
 
-    this._task = omit(this._task, ['inputParameters.parameters']) as SwitchTaskDef;
+    // this._task = omit(this._task, ['inputParameters.parameters']) as SwitchTaskDef;
 
     return super.check();
   }
