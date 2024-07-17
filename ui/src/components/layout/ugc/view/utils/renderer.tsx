@@ -62,7 +62,7 @@ export const RenderIcon: React.FC<{
   iconUrl?: string;
   size?: IVinesIconSize;
 }> = ({ iconUrl, size = 'md' }) => (
-  <VinesIcon size={size}>{iconUrl && iconUrl.trim() != '' ? encodeURI(iconUrl) : 'emoji:🍀:#ceefc5'}</VinesIcon>
+  <VinesIcon size={size}>{iconUrl && iconUrl.trim() != '' ? iconUrl : 'emoji:🍀:#ceefc5'}</VinesIcon>
 );
 
 export const RenderTags = (props: IUgcTagSelectorProps) => <UgcTagSelector {...props} />;
