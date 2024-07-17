@@ -18,7 +18,6 @@ import {
   IVinesNodePosition,
   IVinesWorkflowUpdate,
   VinesEdgePath,
-  VinesNodeExecutionTask,
   VinesTask,
 } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesTools } from '@/package/vines-flow/core/tools';
@@ -543,10 +542,7 @@ export class VinesCore extends VinesTools(VinesBase) {
     return true;
   }
 
-  public swapExecutionInstance({
-    workflowId,
-    workflowDefinition,
-  }: Pick<VinesWorkflowExecution, 'workflowId' | 'workflowDefinition'>) {
+  public swapExecutionInstance({ workflowId }: Pick<VinesWorkflowExecution, 'workflowId' | 'workflowDefinition'>) {
     if (workflowId === this.executionInstanceId) {
       return false;
     }
@@ -568,19 +564,21 @@ export class VinesCore extends VinesTools(VinesBase) {
 
     this.fillUpSubWorkflowChildren();
 
-    this.update({ workflow: workflowDefinition as unknown as MonkeyWorkflow, renderDirection: 'vertical' });
+    this.update({ renderDirection: 'vertical' });
+
+    this.executionInstanceId = workflowId;
+    this.executionStatus = 'RUNNING';
+    this.nodes[0].executionStatus = 'COMPLETED';
 
     setTimeout(() => {
-      this.executionInstanceId = workflowId;
-      this.executionStatus = 'RUNNING';
-      this.nodes[0].executionStatus = 'COMPLETED';
-
-      this.executionTimeout = setTimeout(this.handleExecution.bind(this), 0);
-
-      toast.success(
-        this.t?.('workspace.flow-view.vines.execution.swap.success', { workflowId }) ||
-          `工作流运行实例「${workflowId}」已恢复！`,
-      );
+      this.fetchWorkflowExecution().then((status) => {
+        if (['RUNNING', 'PAUSED', 'SCHEDULED'].includes(status ?? '')) {
+          toast.success(
+            this.t?.('workspace.flow-view.vines.execution.swap.success', { workflowId }) ||
+              `工作流运行实例「${workflowId}」已恢复！`,
+          );
+        }
+      });
     }, 200);
 
     return true;
@@ -731,6 +729,8 @@ export class VinesCore extends VinesTools(VinesBase) {
     if (needRender) {
       this.sendEvent('update-execution', this.executionInstanceId, data);
     }
+
+    return data.status;
   }
 
   private async handleExecution() {
@@ -783,33 +783,6 @@ export class VinesCore extends VinesTools(VinesBase) {
       this.render();
       this.sendEvent('refresh');
     }
-  }
-
-  public async flatWorkflowExecution(execution: VinesWorkflowExecution): Promise<VinesNodeExecutionTask[]> {
-    if (!('tasks' in execution)) return [];
-
-    this.fillUpSubWorkflowChildren(false);
-
-    const nodeExecutions: VinesNodeExecutionTask[] = [];
-    for (const task of execution.tasks) {
-      const taskId = task.workflowTask?.taskReferenceName;
-      const currentTaskStatus = task.status;
-      if (!taskId || !currentTaskStatus) continue;
-
-      const node = this.getNodeById(taskId);
-      if (!node) {
-        continue;
-      }
-      await node.updateStatus(task);
-    }
-
-    const vinesNodes = this.getAllNodes();
-    vinesNodes.slice(1, vinesNodes.length - 1).forEach((it) => nodeExecutions.push(it.executionTask));
-
-    this.restoreSubWorkflowChildren(false);
-    this.clearExecutionStatus(false);
-
-    return nodeExecutions;
   }
   // endregion
 }

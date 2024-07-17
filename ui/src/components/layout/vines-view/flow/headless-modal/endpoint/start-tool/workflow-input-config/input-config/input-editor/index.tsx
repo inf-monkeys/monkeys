@@ -2,34 +2,20 @@ import React, { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForceUpdate } from '@mantine/hooks';
-import { get, isArray, isBoolean, isUndefined, omit, pick, set } from 'lodash';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { get, isBoolean, isUndefined, omit, pick, set } from 'lodash';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
-import { WORKFLOW_INPUT_TYPE_OPTION_LIST } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/consts.ts';
+import { FieldAccordion } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion';
+import { FieldDefaultValue } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/default-value.tsx';
+import { FieldDisplayName } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/display-name.tsx';
+import { FieldFile } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/file.tsx';
+import { FieldNumber } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/number.tsx';
+import { FieldType } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/type.tsx';
 import { Button } from '@/components/ui/button';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form.tsx';
-import { VinesImageMaskEditor } from '@/components/ui/image-mask-editor';
-import { Input } from '@/components/ui/input';
-import { TagInput } from '@/components/ui/input/tag';
-import { Label } from '@/components/ui/label.tsx';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Separator } from '@/components/ui/separator.tsx';
-import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea.tsx';
-import { Updater } from '@/components/ui/updater';
+import { Form } from '@/components/ui/form.tsx';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInput, workflowInputSchema } from '@/schema/workspace/workflow-input.ts';
@@ -87,6 +73,8 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
 
     form.setValue('displayName', getI18nContent(currentVariable.displayName) ?? t('common.utils.unknown'));
     form.setValue('name', currentVariable.name);
+    form.setValue('description', getI18nContent(currentVariable.description) ?? '');
+    form.setValue('tips', get(currentVariable, 'typeOptions.tips', ''));
     form.setValue('type', currentVariable.type as IWorkflowInput['type']);
     form.setValue('default', currentVariable.default as IWorkflowInput['default']);
     form.setValue('multipleValues', get(currentVariable, 'typeOptions.multipleValues', false));
@@ -106,6 +94,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       maxValue,
       numberPrecision,
       default: Default,
+      tips,
     } = pick(data, [
       'multipleValues',
       'assetType',
@@ -116,8 +105,10 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       'enableImageMask',
       'minValue',
       'maxValue',
+      'tips',
     ]);
-    const finalVariable = omit(data, ['multipleValues', 'assetType', 'default']);
+    const finalVariable = omit(data, ['multipleValues', 'assetType', 'default', 'tips']);
+
     multipleValues && set(finalVariable, 'typeOptions.multipleValues', true);
     assetType && set(finalVariable, 'typeOptions.assetType', assetType);
     enableImageMask && set(finalVariable, 'typeOptions.enableImageMask', enableImageMask);
@@ -125,6 +116,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
     !isUndefined(maxValue) && set(finalVariable, 'typeOptions.maxValue', maxValue);
     !isUndefined(numberPrecision) && set(finalVariable, 'typeOptions.numberPrecision', numberPrecision);
     Default && set(finalVariable, 'default', Default);
+    !isUndefined(tips) && set(finalVariable, 'typeOptions.tips', tips);
 
     if (finalVariable.type === 'boolean') {
       if (multipleValues) {
@@ -149,9 +141,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
     setOpen(false);
   });
 
-  const { multipleValues, assetType, type } = form.getValues();
-
-  const enableImageMask = form.watch('enableImageMask');
+  const { type } = form.getValues();
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -164,331 +154,18 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
             onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
           >
             <div className="flex gap-2">
-              <div className="flex min-w-72 max-w-md flex-col gap-2">
-                <FormField
-                  name="displayName"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        {t('workspace.flow-view.endpoint.start-tool.input.config-form.display-name.label')}
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder={t(
-                            'workspace.flow-view.endpoint.start-tool.input.config-form.display-name.placeholder',
-                          )}
-                          {...field}
-                          className="grow"
-                          autoFocus
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <ScrollArea className="-mx-3 h-80 px-3">
+                <div className="flex w-72 max-w-md flex-col gap-2 px-1">
+                  <FieldDisplayName form={form} />
+                  <FieldType form={form} forceUpdate={forceUpdate} />
+                  <FieldDefaultValue form={form} />
 
-                <FormField
-                  name="name"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('workspace.flow-view.endpoint.start-tool.input.config-form.name.label')}</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder={t('workspace.flow-view.endpoint.start-tool.input.config-form.name.placeholder')}
-                          {...field}
-                          className="grow"
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        {t('workspace.flow-view.endpoint.start-tool.input.config-form.name.desc', {
-                          name: field.value,
-                        })}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FieldAccordion form={form} />
+                </div>
+              </ScrollArea>
+              {type === 'file' && <FieldFile form={form} />}
 
-                <FormField
-                  name="type"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('workspace.flow-view.endpoint.start-tool.input.config-form.type.label')}</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              className={cn('w-full justify-between', !field.value && 'text-muted-foreground')}
-                            >
-                              {field.value
-                                ? WORKFLOW_INPUT_TYPE_OPTION_LIST.find(
-                                    (it) =>
-                                      it.value === field.value &&
-                                      it.multipleValues === multipleValues &&
-                                      it.assetType === assetType,
-                                  )?.label
-                                : t('workspace.flow-view.endpoint.start-tool.input.config-form.type.button')}
-                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="p-0">
-                          <Command>
-                            <CommandInput
-                              placeholder={t(
-                                'workspace.flow-view.endpoint.start-tool.input.config-form.type.placeholder',
-                              )}
-                            />
-                            <CommandEmpty>
-                              {t('workspace.flow-view.endpoint.start-tool.input.config-form.type.search-empty')}
-                            </CommandEmpty>
-                            <CommandGroup>
-                              {WORKFLOW_INPUT_TYPE_OPTION_LIST.map((it, i) => {
-                                const labelVal = t(
-                                  'workspace.flow-view.endpoint.start-tool.input.config-form.type.' + it.label,
-                                  {
-                                    extra: it.multipleValues
-                                      ? t('workspace.flow-view.endpoint.start-tool.input.config-form.type.list')
-                                      : '',
-                                  },
-                                );
-                                return (
-                                  <CommandItem
-                                    value={labelVal}
-                                    key={i}
-                                    onSelect={() => {
-                                      form.setValue('type', it.value as IWorkflowInput['type']);
-                                      form.setValue('multipleValues', it.multipleValues);
-                                      form.setValue('assetType', it.assetType);
-                                      forceUpdate();
-                                    }}
-                                  >
-                                    <Check
-                                      className={cn(
-                                        'mr-2 h-4 w-4',
-                                        it.value === field.value &&
-                                          it.multipleValues === multipleValues &&
-                                          it.assetType === assetType
-                                          ? 'opacity-100'
-                                          : 'opacity-0',
-                                      )}
-                                    />
-                                    {labelVal}
-                                  </CommandItem>
-                                );
-                              })}
-                            </CommandGroup>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  name="default"
-                  control={form.control}
-                  render={({ field: { value, ...field } }) => (
-                    <FormItem>
-                      <FormLabel>
-                        {t('workspace.flow-view.endpoint.start-tool.input.config-form.default.label')}
-                      </FormLabel>
-                      <FormControl>
-                        <SmoothTransition>
-                          {multipleValues ? (
-                            <TagInput
-                              placeholder={t(
-                                'workspace.flow-view.endpoint.start-tool.input.config-form.default.placeholder-list',
-                              )}
-                              value={isArray(value) ? value.map((it: string | number | boolean) => it.toString()) : []}
-                              onChange={(value) => form.setValue('default', value)}
-                            />
-                          ) : (
-                            <Textarea
-                              placeholder={t(
-                                'workspace.flow-view.endpoint.start-tool.input.config-form.default.placeholder',
-                              )}
-                              className="resize-none"
-                              value={value?.toString()}
-                              {...field}
-                            />
-                          )}
-                        </SmoothTransition>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              {type === 'file' && isLatestWorkflowVersion && (
-                <>
-                  <Separator orientation="vertical" className="mx-2" />
-                  <div className="flex w-[40rem] flex-col gap-4">
-                    {!multipleValues && (
-                      <FormField
-                        name="enableImageMask"
-                        control={form.control}
-                        render={({ field }) => (
-                          <FormItem className="flex w-full items-center justify-between">
-                            <FormLabel>
-                              {t(
-                                'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.enable-image-mask.label',
-                              )}
-                            </FormLabel>
-                            <div className="flex-grow" />
-                            <FormControl>
-                              <Switch checked={field.value} onCheckedChange={field.onChange} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    )}
-                    {enableImageMask ? (
-                      <>
-                        <div className="flex items-center justify-between">
-                          <Label>
-                            {t('workspace.flow-view.endpoint.start-tool.input.config-form.file.label', { extra: '' })}
-                          </Label>
-                          <VinesImageMaskEditor onFinished={(urls) => form.setValue('default', urls[0])}>
-                            <Button variant="outline" size="small" className="-mr-1 scale-90">
-                              {t(
-                                'workspace.pre-view.actuator.execution-form.file.click-to-open-in-image-mask-editor-and-upload',
-                              )}
-                            </Button>
-                          </VinesImageMaskEditor>
-                        </div>
-                        <FormField
-                          name="default"
-                          control={form.control}
-                          render={({ field: { value, ...field } }) => (
-                            <img
-                              src={value?.toString()}
-                              alt="image"
-                              className="max-w-96 rounded-md border border-input bg-background object-cover shadow-md"
-                            />
-                          )}
-                        />
-                      </>
-                    ) : (
-                      <>
-                        <Label>
-                          {t('workspace.flow-view.endpoint.start-tool.input.config-form.file.label', {
-                            extra: multipleValues
-                              ? t('workspace.flow-view.endpoint.start-tool.input.config-form.file.list')
-                              : '',
-                          })}
-                        </Label>
-                        <Updater
-                          limit={multipleValues ? void 0 : 1}
-                          onFinished={(urls) => form.setValue('default', multipleValues ? urls : urls[0])}
-                          basePath="user-files/workflow-input"
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          {t('workspace.flow-view.endpoint.start-tool.input.config-form.file.desc')}
-                        </p>
-                      </>
-                    )}
-                  </div>
-                </>
-              )}
-
-              {type === 'number' && (
-                <>
-                  <Separator orientation="vertical" className="mx-2" />
-                  <div className="flex w-[35rem] flex-col gap-2">
-                    <FormField
-                      name="minValue"
-                      control={form.control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            {t(
-                              'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.min-value.label',
-                            )}
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder={t(
-                                'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.min-value.placeholder',
-                              )}
-                              {...field}
-                              className="grow"
-                              autoFocus
-                              type="number"
-                              onChange={(value) => form.setValue('minValue', Number(value))}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      name="maxValue"
-                      control={form.control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            {t(
-                              'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.max-value.label',
-                            )}
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder={t(
-                                'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.max-value.placeholder',
-                              )}
-                              {...field}
-                              className="grow"
-                              autoFocus
-                              type="number"
-                              onChange={(value) => form.setValue('maxValue', Number(value))}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      name="numberPrecision"
-                      control={form.control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            {t(
-                              'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.number-precision.label',
-                            )}
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder={t(
-                                'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.number-precision.placeholder',
-                              )}
-                              {...field}
-                              className="grow"
-                              autoFocus
-                              type="number"
-                              onChange={(value) => form.setValue('numberPrecision', Number(value))}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            {t(
-                              'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.number-precision.description',
-                            )}
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </>
-              )}
+              {type === 'number' && <FieldNumber form={form} />}
             </div>
 
             <DialogFooter>
