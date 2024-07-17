@@ -19,6 +19,8 @@ export const workflowInputSchema = z.object({
     .string()
     .min(2, 'Field cannot be less than two characters')
     .max(20, 'Field cannot be more than twenty characters'),
+  description: z.string().optional(),
+  tips: z.string().optional(),
   type: inputType,
   default: z
     .union([z.string(), z.number(), z.boolean(), z.array(z.string()), z.array(z.number()), z.array(z.boolean())])

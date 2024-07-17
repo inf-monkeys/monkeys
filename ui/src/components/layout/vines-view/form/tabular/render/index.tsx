@@ -3,9 +3,11 @@ import React, { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ToolProperty } from '@inf-monkeys/monkeys';
 import { fromPairs, isArray, isBoolean, isUndefined } from 'lodash';
+import { HelpCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { BOOLEAN_VALUES } from '@/components/layout/vines-view/execution/workflow-input';
 import { NoticeInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/notice.tsx';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,12 +26,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider.tsx';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea.tsx';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesUpdater } from '@/components/ui/updater';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
 import { cn, getI18nContent } from '@/utils';
 
-interface IVinesWorkflowInputProps {
+interface ITabularRenderProps {
   inputs: VinesWorkflowVariable[];
   height?: number;
   children?: React.ReactNode;
@@ -40,9 +43,7 @@ interface IVinesWorkflowInputProps {
   itemClassName?: string;
 }
 
-export const BOOLEAN_VALUES = ['true', 'yes', '是', '1'];
-
-export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
+export const TabularRender: React.FC<ITabularRenderProps> = ({
   inputs,
   height,
   children,
@@ -94,7 +95,7 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
     for (const [key, value] of Object.entries(data)) {
       if (isArray(value)) {
         if (inputs?.find((it) => it.name === key)?.type === 'boolean') {
-          data[key] = value.map((it) => BOOLEAN_VALUES.includes(it));
+          data[key] = value.map((it: string | number | boolean) => BOOLEAN_VALUES.includes(it?.toString() ?? ''));
         }
       }
     }
@@ -104,7 +105,7 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
   return (
     <Form {...form}>
       <form
-        className={cn('flex flex-col gap-4', formClassName)}
+        className={cn('-mx-3 flex flex-col gap-4', formClassName)}
         onSubmit={handleSubmit}
         onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
       >
@@ -117,19 +118,27 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
 
               const isMultiple = typeOptions?.multipleValues ?? false;
               const isNumber = type === 'number';
+
+              const tips = typeOptions?.tips;
+
               return (
                 <FormField
                   key={name}
                   name={name}
                   control={form.control}
                   render={({ field: { value, onChange, ...field } }) => (
-                    <FormItem
-                      className={cn(
-                        'overflow-hidden rounded-lg border bg-card px-3 pb-1 pt-2 text-card-foreground shadow-sm',
-                        itemClassName,
-                      )}
-                    >
-                      <FormLabel className="font-bold">{getI18nContent(displayName)}</FormLabel>
+                    <FormItem className={cn('px-3', itemClassName)}>
+                      <div className="flex items-center gap-1">
+                        <FormLabel className="font-bold">{getI18nContent(displayName)}</FormLabel>
+                        {tips && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <HelpCircle size={18} className="cursor-pointer fill-gray-7 stroke-slate-1" />
+                            </TooltipTrigger>
+                            <TooltipContent>{tips}</TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
                       <FormControl>
                         <>
                           {(['string', 'file'].includes(type) ||

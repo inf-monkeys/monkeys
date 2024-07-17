@@ -42,9 +42,15 @@ export const VinesLogView: React.FC = () => {
 
   const workflowPageRef = useRef(1);
 
+  const [activeTab, setActiveTab] = useState('');
+
   useEffect(() => {
     if (vines.workflowId && visible) {
       void handleSubmit();
+    }
+    if (!visible) {
+      vines.executionInstanceId = '';
+      setActiveTab('');
     }
   }, [vines.workflowId, visible]);
 
@@ -102,7 +108,12 @@ export const VinesLogView: React.FC = () => {
       </Separator>
       <div className="h-full flex-1">
         <ScrollArea className="pr-1 [&>div>div]:h-full" style={{ height: finalHeight }}>
-          <VinesLogList searchWorkflowExecutionsData={searchWorkflowExecutionsData} handleSubmit={handleSubmit} />
+          <VinesLogList
+            searchWorkflowExecutionsData={searchWorkflowExecutionsData}
+            handleSubmit={handleSubmit}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
         </ScrollArea>
       </div>
     </main>

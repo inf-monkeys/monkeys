@@ -37,8 +37,8 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
 
   const statusMapper = useMemo(() => {
     const mapper: Record<string, string> = {};
-    EXECUTION_STATUS_LIST.forEach(({ status, text }) => {
-      if (status) mapper[status] = t([`workspace.logs-view.list.item.status.${text}`, text]);
+    EXECUTION_STATUS_LIST.forEach((text) => {
+      if (text) mapper[text] = t([`common.workflow.status.${text}`, text]);
     });
     return mapper;
   }, [EXECUTION_STATUS_LIST]);

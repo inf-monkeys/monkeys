@@ -108,7 +108,7 @@ export const StringInput: React.FC<IVinesInputPropertyProps & IStringInputProps>
       >
         <h1 className="text-base font-bold">
           {t('workspace.flow-view.headless-modal.tool-editor.input.comps.string.preview', {
-            title: def?.displayName ?? '',
+            title: getI18nContent(def?.displayName ?? ''),
           })}
         </h1>
         <Separator />
