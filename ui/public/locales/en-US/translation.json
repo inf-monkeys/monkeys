@@ -61,12 +61,23 @@
       }
     },
     "time": {
+      "a-few-seconds": "a few seconds",
       "second_one": "sec",
       "second_other": "secs",
       "minute_one": "min",
       "minute_other": "mins",
       "hour_one": "hour",
-      "hour_other": "hours"
+      "hour_other": "hours",
+      "day_one": "day",
+      "day_other": "days",
+      "week_one": "week",
+      "week_other": "weeks",
+      "month_one": "month",
+      "month_other": "months",
+      "year_one": "year",
+      "year_other": "years",
+      "ago": "{{ time }} ago",
+      "just-now": "just now"
     },
     "workflow": {
       "trigger": {
@@ -1679,23 +1690,19 @@
         "add-tab": {
           "label": "Add View",
           "empty": "No view available",
-
           "create-custom-code-view": {
             "button": "Custom Views",
             "placeholder": "Enter a view name",
-
             "tips": {
               "title": "Creating a Custom Code View",
               "desc": "You can use ReactJS code along with our component library and TailwindCSS to customize page layouts and component styles. Additionally, our JS SDK allows you to easily achieve personalized views."
             },
-
             "form": {
               "display-name": {
                 "label": "View Name",
                 "placeholder": "Please enter a view name"
               },
               "icon": "View Icon",
-
               "submit": "Create"
             }
           }

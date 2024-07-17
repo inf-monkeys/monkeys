@@ -1,21 +1,29 @@
 import dayjs from 'dayjs';
-import { t } from 'i18next';
+
+import i18n from '@/i18n.ts';
 
 export const formatTimeDiff = (diffValue: number) => {
   const duration = dayjs.duration(diffValue);
 
+  const { t } = i18n;
+
   if (duration.asMonths() >= 1) {
-    return `${Math.floor(duration.asMonths())} months`;
+    const count = Math.floor(duration.asMonths());
+    return `${count} ${t('common.time.month', { count })}`;
   } else if (duration.asWeeks() >= 1) {
-    return `${Math.floor(duration.asWeeks())} weeks`;
+    const count = Math.floor(duration.asWeeks());
+    return `${count} ${t('common.time.week', { count })}`;
   } else if (duration.asDays() >= 1) {
-    return `${Math.floor(duration.asDays())} days`;
+    const count = Math.floor(duration.asDays());
+    return `${count} ${t('common.time.day', { count })}`;
   } else if (duration.asHours() >= 1) {
-    return `${Math.floor(duration.asHours())} hours`;
+    const count = Math.floor(duration.asHours());
+    return `${count} ${t('common.time.hour', { count })}`;
   } else if (duration.asMinutes() >= 1) {
-    return `${Math.floor(duration.asMinutes())} minutes`;
+    const count = Math.floor(duration.asMinutes());
+    return `${count} ${t('common.time.minute', { count })}`;
   } else {
-    return 'a few seconds';
+    return t('common.time.a-few-seconds');
   }
 };
 
@@ -26,7 +34,12 @@ export const formatTimeDiffPrevious = (timestamp: number) => {
   const diff = Date.now() - timestamp;
   if (diff < 0) return '';
   const text = formatTimeDiff(diff);
-  return text === 'just now' ? text : text + ' ago';
+  const { t } = i18n;
+  return text === t('common.time.just-now')
+    ? text
+    : t('common.time.ago', {
+        time: text,
+      });
 };
 
 export const formatTimeGap = (timestamp: dayjs.ConfigType, prevTimestamp: dayjs.ConfigType) => {
@@ -60,6 +73,8 @@ export const formatTime = ({ seconds, defaultSeconds }: { seconds?: number; defa
   const remainingSeconds = seconds % 60;
 
   let result = '';
+
+  const { t } = i18n;
 
   if (hours > 0) {
     result += `${hours} ${t('common.time.hour', {
