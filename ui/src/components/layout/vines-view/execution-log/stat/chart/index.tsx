@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 
 import { VinesWorkflowExecutionStatData } from '@/apis/workflow/execution/typings.ts';
-import { CHART_INFO } from '@/components/layout/vines-view/execution-log/stat/chart/consts.ts';
+import { CHART_INFO } from '@/components/layout/vines-view/execution-log/stat/consts.ts';
 import { getI18nContent } from '@/utils';
 
 interface IVinesLogViewStatChartProps {
@@ -33,7 +33,6 @@ export const VinesLogViewStatChart: React.FC<IVinesLogViewStatChartProps> = ({ s
               data.averageTime = parseFloat((data.averageTime / 1000).toFixed(2));
               return data;
             })}
-            margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
           >
             <defs>
               {CHART_INFO.map(({ id, color }) => (
@@ -50,7 +49,7 @@ export const VinesLogViewStatChart: React.FC<IVinesLogViewStatChartProps> = ({ s
             <XAxis dataKey="date" />
             <YAxis />
             <RechartsTooltip
-              content={({ payload, label, active }) => {
+              content={({ payload, label }) => {
                 return (
                   <div className="flex flex-col gap-3 rounded-lg bg-slate-1 bg-opacity-30 p-3 shadow-md backdrop-blur">
                     <span>{label}</span>

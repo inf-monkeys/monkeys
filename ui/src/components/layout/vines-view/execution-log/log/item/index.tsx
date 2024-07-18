@@ -79,7 +79,7 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
                       </Tag>
                     </div>
                     <div className="flex items-center gap-2">
-                      <CardDescription>{t('workspace.logs-view.list.item.desc', { instanceId })}</CardDescription>
+                      <CardDescription>{t('workspace.logs-view.log.list.item.desc', { instanceId })}</CardDescription>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
@@ -119,7 +119,7 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
                 </div>
 
                 <span className="w-32 flex-shrink-0 opacity-50">
-                  {t('workspace.logs-view.list.item.exec-time', {
+                  {t('workspace.logs-view.log.list.item.exec-time', {
                     time: formatTimeDiffPrevious(workflowExecution.startTime ?? 0),
                   })}
                 </span>
@@ -127,7 +127,7 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
             </TooltipTrigger>
           </AccordionPrimitive.Trigger>
 
-          <TooltipContent>{t('workspace.logs-view.list.item.tips')}</TooltipContent>
+          <TooltipContent>{t('workspace.logs-view.log.list.item.tips')}</TooltipContent>
         </Tooltip>
         <AccordionContent className="space-y-1 p-4 pt-0">
           <Separator className="mb-4" />

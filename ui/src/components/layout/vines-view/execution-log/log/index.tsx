@@ -7,9 +7,9 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { VinesLogViewLogFilter } from 'src/components/layout/vines-view/execution-log/log/filter';
-import { VinesLogViewLogList } from 'src/components/layout/vines-view/execution-log/log/list';
 
 import { useMutationSearchWorkflowExecutions } from '@/apis/workflow/execution';
+import { VinesLogViewLogList } from '@/components/layout/vines-view/execution-log/log/list';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -30,6 +30,7 @@ export const VinesLogViewLogTab: React.FC = () => {
   const { vines } = useVinesFlow();
 
   const [sidebarVisible, setSidebarVisible] = useState(!workbenchVisible);
+  const [activeTab, setActiveTab] = useState('');
 
   const form = useForm<IVinesSearchWorkflowExecutionsParams>({
     resolver: zodResolver(vinesSearchWorkflowExecutionsSchema),
@@ -45,6 +46,10 @@ export const VinesLogViewLogTab: React.FC = () => {
   useEffect(() => {
     if (vines.workflowId && visible) {
       void handleSubmit();
+    }
+    if (!visible) {
+      vines.executionInstanceId = '';
+      setActiveTab('');
     }
   }, [vines.workflowId, visible]);
 
@@ -105,6 +110,8 @@ export const VinesLogViewLogTab: React.FC = () => {
           <VinesLogViewLogList
             searchWorkflowExecutionsData={searchWorkflowExecutionsData}
             handleSubmit={handleSubmit}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
           />
         </ScrollArea>
       </div>

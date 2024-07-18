@@ -7,10 +7,12 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { useMutationSearchWorkflowExecutionStats } from '@/apis/workflow/execution';
+import { exportSearchWorkflowExecutionStats, useMutationSearchWorkflowExecutionStats } from '@/apis/workflow/execution';
 import { VinesLogViewStatChart } from '@/components/layout/vines-view/execution-log/stat/chart';
 import { VinesLogViewStatFilter } from '@/components/layout/vines-view/execution-log/stat/filter';
+import { VinesLogViewStatTable } from '@/components/layout/vines-view/execution-log/stat/table';
 import { getDayBegin, getRelativeDate } from '@/components/layout/vines-view/execution-log/stat/utils.ts';
+import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -42,8 +44,6 @@ export const VinesLogViewStatTab: React.FC<IVinesLogViewStatTabProps> = () => {
     startTimestamp: getRelativeDate(today, -7).getTime(),
     endTimestamp: today.getTime(),
   };
-
-  console.log(now.toLocaleDateString(), today.toLocaleDateString());
 
   const form = useForm<IVinesSearchWorkflowExecutionStatParams>({
     resolver: zodResolver(vinesSearchWorkflowExecutionStatSchema),
@@ -79,6 +79,24 @@ export const VinesLogViewStatTab: React.FC<IVinesLogViewStatTabProps> = () => {
 
   const finalHeight = containerHeight - 52 - 40;
 
+  const handleDownload = () => {
+    if (!vines.workflowId) {
+      toast.warning('common.toast.loading');
+      return;
+    }
+    toast.promise(
+      exportSearchWorkflowExecutionStats(vines.workflowId, {
+        ...form.getValues(),
+        format: 'csv',
+      }),
+      {
+        loading: t('workspace.logs-view.stat.toast.export.loading'),
+        success: t('workspace.logs-view.stat.toast.export.success'),
+        error: t('workspace.logs-view.stat.toast.export.error'),
+      },
+    );
+  };
+
   return (
     <div className="relative flex h-full max-h-full">
       <motion.div
@@ -90,7 +108,12 @@ export const VinesLogViewStatTab: React.FC<IVinesLogViewStatTabProps> = () => {
         }}
       >
         <ScrollArea style={{ height: finalHeight }}>
-          <VinesLogViewStatFilter form={form} handleSubmit={handleSubmit} isMutating={isMutating} />
+          <div className="flex flex-col gap-2">
+            <VinesLogViewStatFilter form={form} handleSubmit={handleSubmit} isMutating={isMutating} />
+            <Button onClick={handleDownload} theme="tertiary" className="mx-2 flex-1" disabled={isMutating}>
+              {t('workspace.logs-view.stat.filter.form.export')}
+            </Button>
+          </div>
         </ScrollArea>
       </motion.div>
       <Separator orientation="vertical" className="vines-center mx-4">
@@ -108,10 +131,16 @@ export const VinesLogViewStatTab: React.FC<IVinesLogViewStatTabProps> = () => {
       </Separator>
       <div className="h-full flex-1">
         <ScrollArea className="pr-1 [&>div>div]:h-full" style={{ height: finalHeight }}>
-          <VinesLogViewStatChart
-            handleSubmit={handleSubmit}
-            searchWorkflowExecutionStatData={searchWorkflowExecutionStatData}
-          />
+          <div className="mx-4 flex flex-col gap-3">
+            <VinesLogViewStatChart
+              handleSubmit={handleSubmit}
+              searchWorkflowExecutionStatData={searchWorkflowExecutionStatData}
+            />
+            <VinesLogViewStatTable
+              handleSubmit={handleSubmit}
+              searchWorkflowExecutionStatData={searchWorkflowExecutionStatData}
+            />
+          </div>
         </ScrollArea>
       </div>
     </div>

@@ -6,6 +6,7 @@ import qs from 'qs';
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import {
   IUpdateExecutionTaskParams,
+  IVinesSearchWorkflowExecutionStatExportParams,
   VinesWorkflowExecutionLists,
   VinesWorkflowExecutionStatData,
 } from '@/apis/workflow/execution/typings.ts';
@@ -13,6 +14,7 @@ import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
 import { IVinesSearchWorkflowExecutionsParams } from '@/schema/workspace/workflow-execution.ts';
 import { IVinesSearchWorkflowExecutionStatParams } from '@/schema/workspace/workflow-execution-stat.ts';
+import FileSaver from 'file-saver';
 
 export const executionWorkflow = (workflowId: string, inputData: Record<string, unknown>, version = 1) =>
   vinesFetcher<string>({
@@ -93,6 +95,17 @@ export const useMutationSearchWorkflowExecutionStats = (workflowId?: string) =>
       },
     }),
   );
+export const exportSearchWorkflowExecutionStats = async (
+  workflowId: string,
+  params: IVinesSearchWorkflowExecutionStatExportParams,
+) =>
+  vinesFetcher({
+    method: 'GET',
+    simple: true,
+    responseResolver: async (r) => {
+      FileSaver.saveAs(await r.blob(), `${workflowId}_${params.startTimestamp}-${params.endTimestamp}.csv`);
+    },
+  })(`/api/workflow/statistics/${workflowId}?${qs.stringify(params, { encode: false })}`);
 
 export const useUpdateExecutionTask = (instanceId: string, taskId: string) =>
   useSWRMutation<string | undefined, unknown, string | null, IUpdateExecutionTaskParams>(

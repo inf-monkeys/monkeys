@@ -42,7 +42,7 @@ export const VinesLogViewStatFilter: React.FC<IVinesLogViewStatFilterProps> = ({
               const endTimestamp = form.getValues('endTimestamp');
               return (
                 <FormItem>
-                  <FormLabel>{t('workspace.logs-view.filter.form.start-time.label')}</FormLabel>
+                  <FormLabel>{t('workspace.logs-view.stat.filter.form.time.label')}</FormLabel>
                   <FormControl>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -62,7 +62,7 @@ export const VinesLogViewStatFilter: React.FC<IVinesLogViewStatFilterProps> = ({
                               format(field.value, 'yyyy-MM-dd')
                             )
                           ) : (
-                            <span>{t('workspace.logs-view.filter.form.start-time.placeholder')}</span>
+                            <span>{t('workspace.logs-view.stat.filter.form.time.placeholder')}</span>
                           )}
                         </Button>
                       </PopoverTrigger>
@@ -92,10 +92,10 @@ export const VinesLogViewStatFilter: React.FC<IVinesLogViewStatFilterProps> = ({
           />
           <div className="mt-2 flex w-full gap-2">
             <Button type="reset" theme="tertiary" className="flex-1" disabled={isMutating}>
-              {t('workspace.logs-view.filter.form.reset')}
+              {t('workspace.logs-view.stat.filter.form.reset')}
             </Button>
             <Button type="submit" variant="solid" className="flex-1" disabled={isMutating}>
-              {t('workspace.logs-view.filter.form.submit')}
+              {t('workspace.logs-view.stat.filter.form.submit')}
             </Button>
           </div>
         </form>
