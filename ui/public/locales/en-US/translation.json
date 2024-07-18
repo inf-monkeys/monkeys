@@ -2411,7 +2411,7 @@
           "file": {
             "label": "Please enter the file url",
             "click-to-upload": "Click to upload file",
-            "click-to-open-in-image-mask-editor-and-upload": "Click to open in image mask editor and upload"
+            "click-to-open-in-image-mask-editor-and-upload": "Open image mask editor"
           },
           "options": "Please select an option"
         },
