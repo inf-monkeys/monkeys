@@ -330,13 +330,11 @@ export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ chi
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectContent>
-                    {COLOR_LIST.map(({ value, label }, i) => (
-                      <SelectItem key={i} value={value}>
-                        {getI18nContent(label)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
+                  {COLOR_LIST.map(({ value, label }, i) => (
+                    <SelectItem key={i} value={value}>
+                      {getI18nContent(label)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <Slider
@@ -363,41 +361,43 @@ export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ chi
               />
             </div>
 
-            <TransformWrapper minScale={0.01} maxScale={20}>
-              <TransformComponent wrapperStyle={{ maxWidth: 'calc(100vw - 80px)', maxHeight: 'calc(100vh - 260px)' }}>
-                <div ref={canvasDivRef}>
-                  <div
-                    ref={brushPreviewDivRef}
-                    id="brush-preview"
-                    style={{
-                      backgroundColor: 'transparent',
-                      outline: '1px dashed black',
-                      boxShadow: '0 0 0 1px white',
-                      borderRadius: '50%',
-                      position: 'absolute',
-                      zIndex: 9999,
-                      pointerEvents: 'none',
-                    }}
-                  />
-                  <canvas
-                    ref={imgCanvasRef}
-                    className={cn('absolute', {
-                      hidden: !canvasVisible,
-                    })}
-                  />
-                  <canvas
-                    ref={maskCanvasRef}
-                    onPointerMove={pointerMode != 'move' ? maskPointerMoveHandler : undefined}
-                    onPointerDown={pointerMode != 'move' ? maskPointerDownHandler : undefined}
-                    onPointerOver={pointerMode != 'move' ? maskPointerOverHandler : undefined}
-                    onPointerLeave={pointerMode != 'move' ? maskPointerLeaveHandler : undefined}
-                    className={cn('absolute', {
-                      hidden: !canvasVisible,
-                    })}
-                  />
-                </div>
-              </TransformComponent>
-            </TransformWrapper>
+            <div className="h-96 w-[40rem] overflow-hidden rounded-lg bg-slate-2 shadow">
+              <TransformWrapper minScale={0.01} maxScale={20} initialScale={0.2} centerOnInit>
+                <TransformComponent wrapperClass="max-h-96 max-w-full">
+                  <div ref={canvasDivRef}>
+                    <div
+                      ref={brushPreviewDivRef}
+                      id="brush-preview"
+                      style={{
+                        backgroundColor: 'transparent',
+                        outline: '1px dashed black',
+                        boxShadow: '0 0 0 1px white',
+                        borderRadius: '50%',
+                        position: 'absolute',
+                        zIndex: 9999,
+                        pointerEvents: 'none',
+                      }}
+                    />
+                    <canvas
+                      ref={imgCanvasRef}
+                      className={cn('absolute', {
+                        hidden: !canvasVisible,
+                      })}
+                    />
+                    <canvas
+                      ref={maskCanvasRef}
+                      onPointerMove={pointerMode != 'move' ? maskPointerMoveHandler : undefined}
+                      onPointerDown={pointerMode != 'move' ? maskPointerDownHandler : undefined}
+                      onPointerOver={pointerMode != 'move' ? maskPointerOverHandler : undefined}
+                      onPointerLeave={pointerMode != 'move' ? maskPointerLeaveHandler : undefined}
+                      className={cn('absolute', {
+                        hidden: !canvasVisible,
+                      })}
+                    />
+                  </div>
+                </TransformComponent>
+              </TransformWrapper>
+            </div>
           </div>
           <DialogFooter>
             <div className="flex w-full justify-between">
