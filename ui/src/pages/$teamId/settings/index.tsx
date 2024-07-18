@@ -10,6 +10,8 @@ import { VinesTheme } from '@/components/layout/settings/theme';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import VinesEvent from '@/utils/events.ts';
+import { VinesLogViewStatTab } from '@/components/layout/vines-view/execution-log/stat';
+import { Stat } from '@/components/layout/settings/stat';
 
 export const Settings: React.FC = () => {
   const { t } = useTranslation();
@@ -29,6 +31,9 @@ export const Settings: React.FC = () => {
           <TabsTrigger value="account" className="text-xs">
             {t('settings.account.title')}
           </TabsTrigger>
+          <TabsTrigger value="stat" className="text-xs">
+            {t('settings.stat.title')}
+          </TabsTrigger>
           <TabsTrigger value="theme" className="text-xs">
             {t('settings.theme.title')}
           </TabsTrigger>
@@ -38,6 +43,9 @@ export const Settings: React.FC = () => {
         </TabsList>
         <TabsContent value="account">
           <Account />
+        </TabsContent>
+        <TabsContent value="stat">
+          <Stat />
         </TabsContent>
         <TabsContent value="theme">
           <VinesTheme />

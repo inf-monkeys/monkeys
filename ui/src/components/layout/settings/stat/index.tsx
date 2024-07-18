@@ -15,23 +15,22 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useVinesFlow } from '@/package/vines-flow';
 import {
   IVinesSearchWorkflowExecutionStatParams,
   vinesSearchWorkflowExecutionStatSchema,
 } from '@/schema/workspace/workflow-execution-stat.ts';
 import { usePageStore } from '@/store/usePageStore';
-import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
+import { useVinesTeam } from '@/components/router/guard/team.tsx';
 
-interface IVinesLogViewStatTabProps {}
+interface IStatProps {}
 
-export const VinesLogViewStatTab: React.FC<IVinesLogViewStatTabProps> = () => {
+export const Stat: React.FC<IStatProps> = () => {
   const { t } = useTranslation();
 
-  const { visible } = useViewStore();
   const { containerHeight, workbenchVisible } = usePageStore();
-  const { vines } = useVinesFlow();
+
+  const { team } = useVinesTeam();
 
   const [sidebarVisible, setSidebarVisible] = useState(!workbenchVisible);
 
@@ -54,39 +53,29 @@ export const VinesLogViewStatTab: React.FC<IVinesLogViewStatTabProps> = () => {
     trigger,
     isMutating,
   } = useMutationSearchWorkflowExecutionStats({
-    workflowId: vines.workflowId,
+    isTeam: true,
   });
 
   useEffect(() => {
-    if (vines.workflowId && visible) {
-      void handleSubmit();
-    }
-  }, [vines.workflowId, visible]);
+    team && handleSubmit();
+  }, [team]);
 
   const handleSubmit = () => {
-    if (vines.workflowId) {
-      form.handleSubmit((params) => {
-        toast.promise(trigger(params), {
-          loading: t('workspace.logs-view.loading'),
-          error: t('workspace.logs-view.error'),
-        });
-      })();
-    } else {
-      toast.warning(t('workspace.logs-view.workflow-id-error'));
-    }
+    form.handleSubmit((params) => {
+      toast.promise(trigger(params), {
+        loading: t('workspace.logs-view.loading'),
+        error: t('workspace.logs-view.error'),
+      });
+    })();
   };
 
   const finalHeight = containerHeight - 52 - 40;
 
   const handleDownload = () => {
-    if (!vines.workflowId) {
-      toast.warning('common.toast.loading');
-      return;
-    }
     toast.promise(
       exportSearchWorkflowExecutionStats(
         {
-          workflowId: vines.workflowId,
+          isTeam: true,
         },
         {
           ...form.getValues(),
