@@ -103,7 +103,7 @@ export const VinesExecutionResultItem: React.FC<IVinesExecutionResultItemProps> 
         </TooltipTrigger>
         <TooltipContent>{t('workspace.pre-view.actuator.detail.form-render.tips')}</TooltipContent>
       </Tooltip>
-      <DialogContent className="max-w-[36rem]">
+      <DialogContent className="max-w-[30rem]">
         <DialogHeader>
           <DialogTitle>{t('workspace.pre-view.actuator.detail.form-render.title')}</DialogTitle>
         </DialogHeader>

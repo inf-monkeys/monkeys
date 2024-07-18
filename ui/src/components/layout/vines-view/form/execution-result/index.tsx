@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 
 import { CircularProgress } from '@nextui-org/progress';
 import { useMemoizedFn } from 'ahooks';
+import { type EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { AnimatePresence, motion } from 'framer-motion';
 import { VirtuosoGrid } from 'react-virtuoso';
 
@@ -22,9 +23,11 @@ import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 import { flattenKeys } from '@/utils/flat.ts';
 
-interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {
+  event$: EventEmitter<void>;
+}
 
-export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ className }) => {
+export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ className, event$ }) => {
   const { visible } = useViewStore();
   const { workflowId } = useFlowStore();
 
@@ -37,6 +40,8 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
         }
       : null,
   );
+
+  const [refresh, setRefresh] = useState(0);
 
   const executions = result?.data;
   const list = useMemo(() => {
@@ -87,7 +92,9 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
     }
 
     return result;
-  }, [executions]);
+  }, [executions, refresh]);
+
+  event$.useSubscription(() => setRefresh((it) => it + 1));
 
   const [height, setHeight] = useState<number>(100);
   const ref = useMemoizedFn((node: HTMLDivElement) => {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { useResponsive } from 'ahooks';
+import { useEventEmitter, useResponsive } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { VinesExecutionResult } from '@/components/layout/vines-view/form/execution-result';
@@ -21,6 +21,8 @@ export const VinesForm: React.FC<IVinesFormProps> = () => {
   const responsive = useResponsive();
   const isSmallFrame = !responsive.sm;
 
+  const event$ = useEventEmitter();
+
   return (
     <>
       {isSmallFrame && <IframeHeader historyVisible={historyVisible} setHistoryVisible={setHistoryVisible} />}
@@ -39,9 +41,10 @@ export const VinesForm: React.FC<IVinesFormProps> = () => {
           isSmallFrame={isSmallFrame}
           setConfigVisible={setConfigVisible}
           setHistoryVisible={setHistoryVisible}
+          event$={event$}
         />
 
-        <VinesExecutionResult />
+        <VinesExecutionResult event$={event$} />
         <AnimatePresence>
           {configVisible && (
             <motion.div
