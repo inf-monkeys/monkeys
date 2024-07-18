@@ -2038,7 +2038,17 @@
               "default": {
                 "label": "默认值",
                 "placeholder": "请输入默认值",
-                "placeholder-list": "请输入列表项"
+                "placeholder-list": "请输入列表项",
+
+                "select": {
+                  "label": "列表选择",
+
+                  "set-default": "设置为默认值",
+                  "label-placeholder": "别名",
+                  "value-placeholder": "默认值",
+                  "remove-tips": "删除",
+                  "add": "新增"
+                }
               },
               "file": {
                 "label": "默认文件{{extra}}",
@@ -2390,7 +2400,8 @@
             "click-to-upload": "点击上传文件",
             "click-to-open-in-image-mask-editor-and-upload": "点击打开图像遮罩编辑器并上传"
           },
-          "options": "请选择一个选项"
+          "options": "请选择一个选项",
+          "reset": "重置"
         },
         "detail": {
           "tabs": {
@@ -2428,6 +2439,14 @@
             "label": "内容过大，请到 OSS 下载查看",
             "open-external-storage": "点击查看",
             "preview": "放大查看代码"
+          },
+          "form-render": {
+            "tips": "点击查看执行详情",
+            "title": "执行详情",
+            "tabs": {
+              "data": "数据",
+              "logs": "原始数据"
+            }
           }
         }
       },

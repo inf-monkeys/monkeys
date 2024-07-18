@@ -75,7 +75,7 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({ it, for
                   forceUpdate();
                 }}
               >
-                重置
+                {t('workspace.flow-view.endpoint.start-tool.input.config-form.type-options.reset')}
               </Button>
             )}
           </div>

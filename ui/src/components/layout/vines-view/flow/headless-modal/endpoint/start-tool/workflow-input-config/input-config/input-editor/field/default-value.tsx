@@ -106,7 +106,7 @@ export const FieldDefaultValue: React.FC<IFieldDefaultValueProps> = ({ form }) =
                     forceUpdate();
                   }}
                 />
-                <Label>列表选择</Label>
+                <Label>{t('workspace.flow-view.endpoint.start-tool.input.config-form.default.select.label')}</Label>
               </div>
             )}
           </div>
@@ -125,16 +125,22 @@ export const FieldDefaultValue: React.FC<IFieldDefaultValueProps> = ({ form }) =
                             onClick={(e) => handleSetDefault(e, value)}
                           />
                         </TooltipTrigger>
-                        <TooltipContent>设置为默认值</TooltipContent>
+                        <TooltipContent>
+                          {t('workspace.flow-view.endpoint.start-tool.input.config-form.default.select.set-default')}
+                        </TooltipContent>
                       </Tooltip>
                       <Input
                         className="flex-[40%]"
-                        placeholder="别名"
+                        placeholder={t(
+                          'workspace.flow-view.endpoint.start-tool.input.config-form.default.select.label-placeholder',
+                        )}
                         value={label}
                         onChange={(labelVal) => handleUpdateSelectList(i, 'label', labelVal)}
                       />
                       <Input
-                        placeholder="默认值"
+                        placeholder={t(
+                          'workspace.flow-view.endpoint.start-tool.input.config-form.default.select.value-placeholder',
+                        )}
                         value={value}
                         type={type === 'number' ? 'number' : 'text'}
                         onChange={(defVal) => handleUpdateSelectList(i, 'value', defVal)}
@@ -148,12 +154,14 @@ export const FieldDefaultValue: React.FC<IFieldDefaultValueProps> = ({ form }) =
                             onClick={(e) => handleRemoveSelectList(e, i)}
                           />
                         </TooltipTrigger>
-                        <TooltipContent>删除</TooltipContent>
+                        <TooltipContent>
+                          {t('workspace.flow-view.endpoint.start-tool.input.config-form.default.select.remove-tips')}
+                        </TooltipContent>
                       </Tooltip>
                     </div>
                   ))}
                   <Button className="w-full" variant="outline" icon={<Plus />} onClick={handleAddSelectList}>
-                    新增
+                    {t('workspace.flow-view.endpoint.start-tool.input.config-form.default.select.add')}
                   </Button>
                 </div>
               ) : multipleValues ? (
