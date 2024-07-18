@@ -1,11 +1,18 @@
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
+import qs from 'qs';
+
 import { vinesFetcher } from '@/apis/fetcher.ts';
-import { IUpdateExecutionTaskParams, VinesWorkflowExecutionLists } from '@/apis/workflow/execution/typings.ts';
+import {
+  IUpdateExecutionTaskParams,
+  VinesWorkflowExecutionLists,
+  VinesWorkflowExecutionStatData,
+} from '@/apis/workflow/execution/typings.ts';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
 import { IVinesSearchWorkflowExecutionsParams } from '@/schema/workspace/workflow-execution.ts';
+import { IVinesSearchWorkflowExecutionStatParams } from '@/schema/workspace/workflow-execution-stat.ts';
 
 export const executionWorkflow = (workflowId: string, inputData: Record<string, unknown>, version = 1) =>
   vinesFetcher<string>({
@@ -67,6 +74,24 @@ export const useSearchWorkflowExecutions = (
         ...(args as [string, IVinesSearchWorkflowExecutionsParams]),
       ),
     { refreshInterval },
+  );
+
+export const useMutationSearchWorkflowExecutionStats = (workflowId?: string) =>
+  useSWRMutation<
+    VinesWorkflowExecutionStatData[] | undefined,
+    unknown,
+    string | null,
+    IVinesSearchWorkflowExecutionStatParams
+  >(
+    workflowId ? `/api/workflow/statistics/${workflowId}` : null,
+    vinesFetcher({
+      method: 'GET',
+      requestResolver: ({ rawUrl, params }) => {
+        return {
+          url: `${rawUrl}?${qs.stringify(params, { encode: false })}`,
+        };
+      },
+    }),
   );
 
 export const useUpdateExecutionTask = (instanceId: string, taskId: string) =>

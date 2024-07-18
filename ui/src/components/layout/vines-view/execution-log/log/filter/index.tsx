@@ -9,7 +9,7 @@ import { useWorkflowVersions } from '@/apis/workflow/version';
 import {
   EXECUTION_STATUS_LIST,
   TRIGGER_TYPE_LIST,
-} from '@/components/layout/vines-view/execution-log/filter/consts.ts';
+} from '@/components/layout/vines-view/execution-log/log/filter/consts.ts';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar.tsx';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
@@ -21,13 +21,13 @@ import { useVinesFlow } from '@/package/vines-flow';
 import { IVinesSearchWorkflowExecutionsParams } from '@/schema/workspace/workflow-execution.ts';
 import { cn } from '@/utils';
 
-interface IVinesLogFilterProps {
+interface IVinesLogViewLogFilterProps {
   form: UseFormReturn<IVinesSearchWorkflowExecutionsParams>;
   handleSubmit: (loadNextPage?: boolean) => void;
   isMutating: boolean;
 }
 
-export const VinesLogFilter: React.FC<IVinesLogFilterProps> = ({ form, handleSubmit, isMutating }) => {
+export const VinesLogViewLogFilter: React.FC<IVinesLogViewLogFilterProps> = ({ form, handleSubmit, isMutating }) => {
   const { t } = useTranslation();
 
   const { vines } = useVinesFlow();

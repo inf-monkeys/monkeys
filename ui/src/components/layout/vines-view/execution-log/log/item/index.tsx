@@ -9,8 +9,8 @@ import { toast } from 'sonner';
 
 import { getDescOfTriggerType } from '@/apis/workflow/trigger/utils.ts';
 import { VinesActuator } from '@/components/layout/vines-view/execution/actuator';
-import { EXECUTION_STATUS_LIST } from '@/components/layout/vines-view/execution-log/filter/consts.ts';
-import { WorkflowVersionTag } from '@/components/layout/vines-view/execution-log/item/version-tag';
+import { EXECUTION_STATUS_LIST } from '@/components/layout/vines-view/execution-log/log/filter/consts.ts';
+import { WorkflowVersionTag } from '@/components/layout/vines-view/execution-log/log/item/version-tag';
 import { AccordionContent, AccordionItem } from '@/components/ui/accordion.tsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription } from '@/components/ui/card.tsx';

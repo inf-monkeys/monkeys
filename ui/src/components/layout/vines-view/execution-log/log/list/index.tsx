@@ -5,16 +5,19 @@ import _ from 'lodash';
 import { BookDashed } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { VinesWorkflowExecutionLists } from '@/apis/workflow/execution/typings';
-import { VinesLogItem } from '@/components/layout/vines-view/execution-log/item';
+import { VinesWorkflowExecutionLists } from '@/apis/workflow/execution/typings.ts';
+import { VinesLogItem } from '@/components/layout/vines-view/execution-log/log/item';
 import { Accordion } from '@/components/ui/accordion.tsx';
 
-interface IVinesLogListProps {
+interface IVinesLogViewLogListProps {
   searchWorkflowExecutionsData?: VinesWorkflowExecutionLists;
   handleSubmit: (loadNextPage?: boolean) => void;
 }
 
-export const VinesLogList: React.FC<IVinesLogListProps> = ({ searchWorkflowExecutionsData, handleSubmit }) => {
+export const VinesLogViewLogList: React.FC<IVinesLogViewLogListProps> = ({
+  searchWorkflowExecutionsData,
+  handleSubmit,
+}) => {
   const { t } = useTranslation();
 
   const workflowDefinitions = searchWorkflowExecutionsData?.definitions;
