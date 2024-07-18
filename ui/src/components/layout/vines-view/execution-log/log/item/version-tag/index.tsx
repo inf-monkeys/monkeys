@@ -14,8 +14,8 @@ interface IWorkflowVersionTagProps {
 export const WorkflowVersionTag: React.FC<IWorkflowVersionTagProps> = ({ version, onClick }) => {
   const displayName =
     version === -1
-      ? t('workspace.logs-view.list.item.temporary-workflow')
-      : t('workspace.logs-view.list.item.version', { version });
+      ? t('workspace.logs-view.log.list.item.temporary-workflow')
+      : t('workspace.logs-view.log.list.item.version', { version });
   const color = version === -1 ? 'warning' : 'primary';
   return (
     <Tag

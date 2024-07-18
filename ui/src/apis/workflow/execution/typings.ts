@@ -2,6 +2,7 @@ import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import type { Workflow as WorkflowExecution } from '@io-orkes/conductor-javascript';
 
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
+import { IVinesSearchWorkflowExecutionStatParams } from '@/schema/workspace/workflow-execution-stat.ts';
 
 export type VinesWorkflowExecutionLists = {
   page: number;
@@ -34,6 +35,10 @@ export interface IVinesSearchWorkflowExecutionsParams {
   };
   pagination?: { page: number; limit: number };
   status?: WorkflowExecution['status'][];
+}
+
+export interface IVinesSearchWorkflowExecutionStatExportParams extends IVinesSearchWorkflowExecutionStatParams {
+  format: 'csv';
 }
 
 export type IUpdateExecutionTaskParams = {

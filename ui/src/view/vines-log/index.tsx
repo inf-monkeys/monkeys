@@ -21,10 +21,10 @@ export const VinesLogView: React.FC = () => {
       >
         <TabsList>
           <TabsTrigger value="log" className="text-xs">
-            Log
+            {t('workspace.logs-view.log.title')}
           </TabsTrigger>
           <TabsTrigger value="stat" className="text-xs">
-            Stat
+            {t('workspace.logs-view.stat.title')}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="log">

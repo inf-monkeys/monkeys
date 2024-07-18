@@ -2284,57 +2284,81 @@
     },
     "logs-view": {
       "title": "日志视图",
-      "desc": "共 {{data}} 项{{suffix}}",
-      "desc-suffix": "，已加载 {{loaded}} 项",
-      "filter": {
-        "form": {
-          "versions": {
-            "label": "版本号",
-            "placeholder": "请选择版本号",
-            "temp": "临时"
-          },
-          "start-time": {
-            "label": "开始运行时间",
-            "placeholder": "请选择开始时间"
-          },
-          "status": {
-            "label": "运行状态",
-            "placeholder": "请选择运行状态"
-          },
-          "trigger-types": {
-            "label": "触发方式",
-            "placeholder": "请选择触发方式"
-          },
-          "workflow-instance-id": {
-            "label": "工作流运行实例 ID",
-            "placeholder": "请输入工作流运行实例 ID"
-          },
-          "order-by": {
-            "label": "由旧到新排序"
-          },
-          "reset": "重置",
-          "submit": "查询"
+      "log": {
+        "title": "运行日志",
+        "desc": "共 {{data}} 项{{suffix}}",
+        "desc-suffix": "，已加载 {{loaded}} 项",
+        "filter": {
+          "form": {
+            "versions": {
+              "label": "版本号",
+              "placeholder": "请选择版本号",
+              "temp": "临时"
+            },
+            "start-time": {
+              "label": "开始运行时间",
+              "placeholder": "请选择开始时间"
+            },
+            "status": {
+              "label": "运行状态",
+              "placeholder": "请选择运行状态"
+            },
+            "trigger-types": {
+              "label": "触发方式",
+              "placeholder": "请选择触发方式"
+            },
+            "workflow-instance-id": {
+              "label": "工作流运行实例 ID",
+              "placeholder": "请输入工作流运行实例 ID"
+            },
+            "order-by": {
+              "label": "由旧到新排序"
+            },
+            "reset": "重置",
+            "submit": "查询"
+          }
+        },
+        "list": {
+          "empty": "暂无执行记录",
+          "bottom": "到底了",
+          "more": "剩余 {{data}} 项，点击加载",
+          "preview-page-not-found": "打开详情失败！找不到表单视图",
+          "item": {
+            "desc": "实例 ID: {{instanceId}}",
+            "exec-time": "于 {{time}}",
+            "status": {
+              "Running": "运行中",
+              "Completed": "已完成",
+              "Paused": "已暂停",
+              "Failed": "运行失败",
+              "Terminated": "已终止",
+              "Timed Out": "运行超时"
+            },
+            "tips": "点击查看实例详情",
+            "version": "版本号：{{version}}",
+            "temporary-workflow": "临时工作流"
+          }
         }
       },
-      "list": {
-        "empty": "暂无执行记录",
-        "bottom": "到底了",
-        "more": "剩余 {{data}} 项，点击加载",
-        "preview-page-not-found": "打开详情失败！找不到表单视图",
-        "item": {
-          "desc": "实例 ID: {{instanceId}}",
-          "exec-time": "于 {{time}}",
-          "status": {
-            "Running": "运行中",
-            "Completed": "已完成",
-            "Paused": "已暂停",
-            "Failed": "运行失败",
-            "Terminated": "已终止",
-            "Timed Out": "运行超时"
-          },
-          "tips": "点击查看实例详情",
-          "version": "版本号：{{version}}",
-          "temporary-workflow": "临时工作流"
+      "stat": {
+        "title": "运行统计",
+        "filter": {
+          "form": {
+            "time": {
+              "label": "日期范围选择",
+              "placeholder": "请选择运行的日期范围"
+            },
+            "reset": "重置",
+            "submit": "查询",
+            "export": "导出"
+          }
+        },
+        "toast": {
+          "export": {
+            "loading": "导出中...",
+            "success": "导出成功！",
+            "error": "导出失败！请稍后重试！"
+          }
         }
       },
       "loading": "查询中...",
