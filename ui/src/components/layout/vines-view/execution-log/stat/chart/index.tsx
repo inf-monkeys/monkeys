@@ -1,17 +1,7 @@
 import React from 'react';
 
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip as RechartsTooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
-
 import { VinesWorkflowExecutionStatData } from '@/apis/workflow/execution/typings.ts';
-import { CHART_INFO } from '@/components/layout/vines-view/execution-log/stat/consts.ts';
+import { VinesLogViewStatChartCard } from '@/components/layout/vines-view/execution-log/stat/chart/card.tsx';
 import { getI18nContent } from '@/utils';
 
 interface IVinesLogViewStatChartProps {
@@ -20,55 +10,61 @@ interface IVinesLogViewStatChartProps {
 }
 
 export const VinesLogViewStatChart: React.FC<IVinesLogViewStatChartProps> = ({ searchWorkflowExecutionStatData }) => {
-  const CHART_LABEL_MAPPER = CHART_INFO.reduce((acc, item) => {
-    acc[item.id] = getI18nContent(item.displayName);
-    return acc;
-  }, {});
+  const statChartConfig = {
+    totalCount: {
+      label: getI18nContent({
+        'zh-CN': '运行总数',
+        'en-US': 'Total Count',
+      }),
+      color: '#87e8de',
+    },
+    successCount: {
+      label: getI18nContent({
+        'zh-CN': '运行成功',
+        'en-US': 'Success Count',
+      }),
+      color: '#b7eb8f',
+    },
+    failedCount: {
+      label: getI18nContent({
+        'zh-CN': '运行失败',
+        'en-US': 'Failed Count',
+      }),
+      color: '#ffa39e',
+    },
+    averageTime: {
+      label: getI18nContent({
+        'zh-CN': '平均用时',
+        'en-US': 'Average Time',
+      }),
+      color: '#ffe58f',
+      unit: getI18nContent({
+        'zh-CN': '秒',
+        'en-US': 's',
+      }),
+    },
+  };
   return (
     <>
       {searchWorkflowExecutionStatData && (
-        <ResponsiveContainer height={250}>
-          <AreaChart
-            data={searchWorkflowExecutionStatData.map((data) => {
-              data.averageTime = parseFloat((data.averageTime / 1000).toFixed(2));
-              return data;
-            })}
-          >
-            <defs>
-              {CHART_INFO.map(({ id, color }) => (
-                <linearGradient id={id} x1="0" y1="0" x2="0" y2="1" key={id}>
-                  <stop offset="5%" stopColor={color} stopOpacity={0.8} />
-                  <stop offset="95%" stopColor={color} stopOpacity={0} />
-                </linearGradient>
-              ))}
-            </defs>
-            {CHART_INFO.map(({ id, color }) => (
-              <Area type="monotone" dataKey={id} stroke={color} fillOpacity={1} fill={`url(#${id})`} key={id} />
-            ))}
-            <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <RechartsTooltip
-              content={({ payload, label }) => {
-                return (
-                  <div className="flex flex-col gap-3 rounded-lg bg-slate-1 bg-opacity-30 p-3 shadow-md backdrop-blur">
-                    <span>{label}</span>
-                    {payload?.map((p, index) => {
-                      return (
-                        <div className="grid grid-cols-5 text-sm" key={index}>
-                          <span className="col-span-2 flex justify-start font-bold">
-                            {CHART_LABEL_MAPPER[p.dataKey!]}
-                          </span>
-                          <span className="col-span-3 flex flex-wrap justify-end">{p.value}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+        <div className="grid grid-cols-[1fr_1fr] gap-4">
+          <VinesLogViewStatChartCard
+            chartConfig={{ totalCount: statChartConfig['totalCount'] }}
+            searchWorkflowExecutionStatData={searchWorkflowExecutionStatData}
+          />
+          <VinesLogViewStatChartCard
+            chartConfig={{ averageTime: statChartConfig['averageTime'] }}
+            searchWorkflowExecutionStatData={searchWorkflowExecutionStatData}
+          />
+          <VinesLogViewStatChartCard
+            chartConfig={{ successCount: statChartConfig['successCount'] }}
+            searchWorkflowExecutionStatData={searchWorkflowExecutionStatData}
+          />
+          <VinesLogViewStatChartCard
+            chartConfig={{ failedCount: statChartConfig['failedCount'] }}
+            searchWorkflowExecutionStatData={searchWorkflowExecutionStatData}
+          />
+        </div>
       )}
     </>
   );
