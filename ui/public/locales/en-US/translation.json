@@ -258,7 +258,7 @@
       "vines-image-mask-editor": {
         "title": "Image mask editor",
         "tip-1": "You can also use the eraser by holding",
-        "tip-2": ". Please save first before uploading.",
+        "tip-2": ".",
         "label": {
           "brush-size": "Brush size",
           "opacity": "Opacity"

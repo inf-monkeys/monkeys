@@ -12,6 +12,7 @@ import { Switch } from '@/components/ui/switch';
 import { Updater } from '@/components/ui/updater';
 import { IWorkflowInput } from '@/schema/workspace/workflow-input.ts';
 import { useFlowStore } from '@/store/useFlowStore';
+import { cn } from '@/utils';
 
 interface IFieldFileProps extends React.ComponentPropsWithoutRef<'div'> {
   form: UseFormReturn<IWorkflowInput>;
@@ -65,13 +66,19 @@ export const FieldFile: React.FC<IFieldFileProps> = ({ form }) => {
               <FormField
                 name="default"
                 control={form.control}
-                render={({ field: { value } }) => (
-                  <img
-                    src={value?.toString()}
-                    alt="image"
-                    className="max-w-96 rounded-md border border-input bg-background object-cover shadow-md"
-                  />
-                )}
+                render={({ field: { value } }) => {
+                  const src = value?.toString();
+                  return (
+                    <img
+                      src={src}
+                      alt="image"
+                      className={cn(
+                        'max-w-96 rounded-md border border-input bg-background object-cover shadow-md',
+                        !src && 'hidden',
+                      )}
+                    />
+                  );
+                }}
               />
             </>
           ) : (
