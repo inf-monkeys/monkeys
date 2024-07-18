@@ -30,59 +30,41 @@ export const FieldFile: React.FC<IFieldFileProps> = ({ form }) => {
     isLatestWorkflowVersion && (
       <>
         <Separator orientation="vertical" className="mx-2" />
-        <div className="flex w-[40rem] flex-col gap-4">
-          {!multipleValues && (
-            <FormField
-              name="enableImageMask"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem className="flex w-full items-center justify-between">
-                  <FormLabel>
-                    {t(
-                      'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.enable-image-mask.label',
-                    )}
-                  </FormLabel>
-                  <div className="flex-grow" />
-                  <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
+        <div className="space-y-2">
           {enableImageMask ? (
-            <>
-              <div className="flex items-center justify-between">
-                <Label>
-                  {t('workspace.flow-view.endpoint.start-tool.input.config-form.file.label', { extra: '' })}
-                </Label>
-                <VinesImageMaskEditor onFinished={(urls) => form.setValue('default', urls[0])}>
-                  <Button variant="outline" size="small" className="-mr-1 scale-90">
-                    {t('workspace.pre-view.actuator.execution-form.file.click-to-open-in-image-mask-editor-and-upload')}
-                  </Button>
-                </VinesImageMaskEditor>
-              </div>
+            <div className="flex w-96 flex-col gap-4">
+              <Label>{t('workspace.flow-view.endpoint.start-tool.input.config-form.file.label', { extra: '' })}</Label>
               <FormField
                 name="default"
                 control={form.control}
                 render={({ field: { value } }) => {
                   const src = value?.toString();
                   return (
-                    <img
-                      src={src}
-                      alt="image"
-                      className={cn(
-                        'max-w-96 rounded-md border border-input bg-background object-cover shadow-md',
-                        !src && 'hidden',
-                      )}
-                    />
+                    <>
+                      <img
+                        src={src}
+                        alt="image"
+                        className={cn(
+                          'max-h-96 max-w-96 rounded-md border border-input bg-background object-cover shadow-md',
+                          !src && 'hidden',
+                        )}
+                      />
+                      <div className={cn('vines-center w-full', !src && 'rounded-md border border-input py-16')}>
+                        <VinesImageMaskEditor onFinished={(urls) => form.setValue('default', urls[0])}>
+                          <Button variant="outline" size="small" className="-mr-1 scale-90">
+                            {t(
+                              'workspace.pre-view.actuator.execution-form.file.click-to-open-in-image-mask-editor-and-upload',
+                            )}
+                          </Button>
+                        </VinesImageMaskEditor>
+                      </div>
+                    </>
                   );
                 }}
               />
-            </>
+            </div>
           ) : (
-            <>
+            <div className="w-[38rem] space-y-2">
               <Label>
                 {t('workspace.flow-view.endpoint.start-tool.input.config-form.file.label', {
                   extra: multipleValues ? t('workspace.flow-view.endpoint.start-tool.input.config-form.file.list') : '',
@@ -96,7 +78,28 @@ export const FieldFile: React.FC<IFieldFileProps> = ({ form }) => {
               <p className="text-xs text-muted-foreground">
                 {t('workspace.flow-view.endpoint.start-tool.input.config-form.file.desc')}
               </p>
-            </>
+            </div>
+          )}
+
+          {!multipleValues && (
+            <FormField
+              name="enableImageMask"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between">
+                  <FormLabel>
+                    {t(
+                      'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.enable-image-mask.label',
+                    )}
+                  </FormLabel>
+                  <div className="flex-grow" />
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           )}
         </div>
       </>

@@ -2398,7 +2398,7 @@
           "file": {
             "label": "请输入文件直链",
             "click-to-upload": "点击上传文件",
-            "click-to-open-in-image-mask-editor-and-upload": "点击打开图像遮罩编辑器并上传"
+            "click-to-open-in-image-mask-editor-and-upload": "打开图像遮罩编辑器"
           },
           "options": "请选择一个选项",
           "reset": "重置"
