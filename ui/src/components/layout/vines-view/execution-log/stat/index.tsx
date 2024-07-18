@@ -10,7 +10,6 @@ import { toast } from 'sonner';
 import { exportSearchWorkflowExecutionStats, useMutationSearchWorkflowExecutionStats } from '@/apis/workflow/execution';
 import { VinesLogViewStatChart } from '@/components/layout/vines-view/execution-log/stat/chart';
 import { VinesLogViewStatFilter } from '@/components/layout/vines-view/execution-log/stat/filter';
-import { VinesLogViewStatTable } from '@/components/layout/vines-view/execution-log/stat/table';
 import { getDayBegin, getRelativeDate } from '@/components/layout/vines-view/execution-log/stat/utils.ts';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
@@ -134,11 +133,12 @@ export const VinesLogViewStatTab: React.FC<IVinesLogViewStatTabProps> = () => {
           <div className="mx-4 flex flex-col gap-3">
             <VinesLogViewStatChart
               handleSubmit={handleSubmit}
-              searchWorkflowExecutionStatData={searchWorkflowExecutionStatData}
-            />
-            <VinesLogViewStatTable
-              handleSubmit={handleSubmit}
-              searchWorkflowExecutionStatData={searchWorkflowExecutionStatData}
+              searchWorkflowExecutionStatData={searchWorkflowExecutionStatData?.map((data) => {
+                return {
+                  ...data,
+                  averageTime: parseFloat((data.averageTime / 1000).toFixed(2)),
+                };
+              })}
             />
           </div>
         </ScrollArea>
