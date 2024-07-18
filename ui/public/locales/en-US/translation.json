@@ -835,6 +835,9 @@
           }
         }
       }
+    },
+    "stat": {
+      "title": "Team Statistic"
     }
   },
   "workbench": {

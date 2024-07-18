@@ -78,14 +78,20 @@ export const useSearchWorkflowExecutions = (
     { refreshInterval },
   );
 
-export const useMutationSearchWorkflowExecutionStats = (workflowId?: string) =>
+export const useMutationSearchWorkflowExecutionStats = ({
+  workflowId,
+  isTeam = false,
+}: {
+  workflowId?: string;
+  isTeam?: boolean;
+}) =>
   useSWRMutation<
     VinesWorkflowExecutionStatData[] | undefined,
     unknown,
     string | null,
     IVinesSearchWorkflowExecutionStatParams
   >(
-    workflowId ? `/api/workflow/statistics/${workflowId}` : null,
+    workflowId && !isTeam ? `/api/workflow/statistics/${workflowId}` : isTeam ? `/api/workflow/statistics` : null,
     vinesFetcher({
       method: 'GET',
       requestResolver: ({ rawUrl, params }) => {
@@ -96,16 +102,29 @@ export const useMutationSearchWorkflowExecutionStats = (workflowId?: string) =>
     }),
   );
 export const exportSearchWorkflowExecutionStats = async (
-  workflowId: string,
+  {
+    workflowId,
+    isTeam = false,
+  }: {
+    workflowId?: string;
+    isTeam?: boolean;
+  },
   params: IVinesSearchWorkflowExecutionStatExportParams,
 ) =>
   vinesFetcher({
     method: 'GET',
     simple: true,
     responseResolver: async (r) => {
-      FileSaver.saveAs(await r.blob(), `${workflowId}_${params.startTimestamp}-${params.endTimestamp}.csv`);
+      FileSaver.saveAs(
+        await r.blob(),
+        `${isTeam ? '' : workflowId + '_'}${params.startTimestamp}-${params.endTimestamp}.csv`,
+      );
     },
-  })(`/api/workflow/statistics/${workflowId}?${qs.stringify(params, { encode: false })}`);
+  })(
+    isTeam
+      ? `/api/workflow/statistics?${qs.stringify(params, { encode: false })}`
+      : `/api/workflow/statistics/${workflowId}?${qs.stringify(params, { encode: false })}`,
+  );
 
 export const useUpdateExecutionTask = (instanceId: string, taskId: string) =>
   useSWRMutation<string | undefined, unknown, string | null, IUpdateExecutionTaskParams>(
