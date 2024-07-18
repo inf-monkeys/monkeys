@@ -2050,7 +2050,17 @@
               "default": {
                 "label": "Default Value",
                 "placeholder": "Enter default value",
-                "placeholder-list": "Enter default value"
+                "placeholder-list": "Enter default value",
+
+                "select": {
+                  "label": "List Selection",
+
+                  "set-default": "Set as Default",
+                  "label-placeholder": "Aliases",
+                  "value-placeholder": "Value",
+                  "remove-tips": "Delete",
+                  "add": "Add"
+                }
               },
               "file": {
                 "label": "File {{extra}} Default",
@@ -2078,8 +2088,12 @@
                   "label": "Fold to \"Advanced Configuration\"",
                   "description": "When fields are optional, they can be grouped under Advanced Configuration to organize configuration options more efficiently."
                 },
+                "enable-reset": {
+                  "label": "Enable the Reset button"
+                },
 
-                "fold": "Advanced Configuration"
+                "fold": "Advanced Configuration",
+                "reset": "Reset"
               },
               "submit": "Save"
             }
@@ -2437,6 +2451,14 @@
             "label": "The content is too large, please go to OSS to download and view",
             "open-external-storage": "Click to open external storage",
             "preview": "Zoom in to see the code"
+          },
+          "form-render": {
+            "tips": "Click to view execution details",
+            "title": "Execution Details",
+            "tabs": {
+              "data": "Data",
+              "logs": "Raw Data"
+            }
           }
         }
       },

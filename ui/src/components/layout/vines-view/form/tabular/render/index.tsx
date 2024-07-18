@@ -99,6 +99,8 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
     [inputs],
   );
 
+  const hasFoldInputs = foldInputs?.length > 0;
+
   return (
     <Form {...form}>
       <form
@@ -111,25 +113,27 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
             {defInputs?.map((it, i) => (
               <VinesFormFieldItem it={it} form={form} itemClassName={itemClassName} key={i} defValues={defValues} />
             ))}
-            <Accordion type="single" collapsible>
-              <AccordionItem value="more">
-                <AccordionTrigger className="justify-start gap-2 px-3 text-sm [&[data-state=open]_.chevron]:rotate-90">
-                  {t('workspace.flow-view.endpoint.start-tool.input.config-form.type-options.fold')}
-                  <ChevronRightIcon className="chevron size-4 shrink-0 text-muted-foreground transition-transform duration-200" />
-                </AccordionTrigger>
-                <AccordionContent className="pt-6">
-                  {foldInputs?.map((it, i) => (
-                    <VinesFormFieldItem
-                      it={it}
-                      form={form}
-                      itemClassName={itemClassName}
-                      key={i}
-                      defValues={defValues}
-                    />
-                  ))}
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+            {hasFoldInputs && (
+              <Accordion type="single" collapsible>
+                <AccordionItem value="more">
+                  <AccordionTrigger className="justify-start gap-2 px-3 text-sm [&[data-state=open]_.chevron]:rotate-90">
+                    {t('workspace.flow-view.endpoint.start-tool.input.config-form.type-options.fold')}
+                    <ChevronRightIcon className="chevron size-4 shrink-0 text-muted-foreground transition-transform duration-200" />
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-6">
+                    {foldInputs?.map((it, i) => (
+                      <VinesFormFieldItem
+                        it={it}
+                        form={form}
+                        itemClassName={itemClassName}
+                        key={i}
+                        defValues={defValues}
+                      />
+                    ))}
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            )}
           </div>
         </ScrollArea>
         {children}
