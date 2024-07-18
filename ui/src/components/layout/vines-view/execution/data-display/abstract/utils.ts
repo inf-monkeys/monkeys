@@ -3,22 +3,30 @@ import { isBoolean, isNumber, isString } from 'lodash';
 import { JSONValue } from '@/components/ui/code-editor';
 import { flattenKeys } from '@/utils/flat.ts';
 
-export const extractImageUrls = (text: string): string[] => {
+export const extractImageUrls = (text: unknown): string[] => {
+  if (typeof text !== 'string') return [];
+
   const regex = /https?:\/\/[^\s"]+?\.(jpg|jpeg|png|gif|bmp|webp|svg)/gi;
   return text.match(regex) || [];
 };
 
-export const extractVideoUrls = (text: string): string[] => {
+export const extractVideoUrls = (text: unknown): string[] => {
+  if (typeof text !== 'string') return [];
+
   const regex = /https?:\/\/[^\s"]+?\.(mp4|avi|mov|mkv|flv|wmv|webm)/gi;
   return text.match(regex) || [];
 };
 
-export const extractPdbUrls = (text: string): string[] => {
+export const extractPdbUrls = (text: unknown): string[] => {
+  if (typeof text !== 'string') return [];
+
   const regex = /https?:\/\/[^\s"]+?\.pdb/gi;
   return text.match(regex) || [];
 };
 
-export const extractOtherUrls = (text: string): string[] => {
+export const extractOtherUrls = (text: unknown): string[] => {
+  if (typeof text !== 'string') return [];
+
   const excludeRegex = /https?:\/\/[^\s"]+\.(jpg|jpeg|png|gif|bmp|webp|svg|mp4|avi|mov|mkv|flv|wmv|webm|pdb)/gi;
   const allUrlsRegex = /https?:\/\/\S+/gi;
 

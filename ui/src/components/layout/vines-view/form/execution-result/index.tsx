@@ -19,11 +19,12 @@ import { Card, CardContent } from '@/components/ui/card.tsx';
 import { JSONValue } from '@/components/ui/code-editor';
 import { useFlowStore } from '@/store/useFlowStore';
 import { useViewStore } from '@/store/useViewStore';
+import { cn } from '@/utils';
 import { flattenKeys } from '@/utils/flat.ts';
 
 interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {}
 
-export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = () => {
+export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ className }) => {
   const { visible } = useViewStore();
   const { workflowId } = useFlowStore();
 
@@ -50,12 +51,15 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = () => 
       const images = outputValues.map((it) => extractImageUrls(it)).flat();
       const videos = outputValues.map((it) => extractVideoUrls(it)).flat();
 
+      let isInserted = false;
+
       const outputValuesLength = outputValues.length;
       if (outputValuesLength === 1 && !images.length && !videos.length) {
         result.push({
           ...execution,
           render: { type: 'raw', data: outputValues[0] },
         });
+        isInserted = true;
       }
 
       for (const image of images) {
@@ -63,12 +67,21 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = () => 
           ...execution,
           render: { type: 'image', data: image },
         });
+        isInserted = true;
       }
 
       for (const video of videos) {
         result.push({
           ...execution,
           render: { type: 'video', data: video },
+        });
+        isInserted = true;
+      }
+
+      if (!isInserted) {
+        result.push({
+          ...execution,
+          render: { type: 'raw', data: output },
         });
       }
     }
@@ -87,7 +100,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = () => 
   const totalCount = list.length;
 
   return (
-    <Card ref={ref} className="relative">
+    <Card ref={ref} className={cn('relative', className)}>
       <CardContent className="-mr-3 p-4">
         <VirtuosoGrid
           data={list}
