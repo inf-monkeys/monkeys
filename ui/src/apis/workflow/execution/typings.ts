@@ -11,6 +11,17 @@ export type VinesWorkflowExecutionLists = {
   definitions: MonkeyWorkflow[];
 };
 
+export type VinesWorkflowExecutionStatLists = {
+  data: VinesWorkflowExecutionStatData[];
+};
+export type VinesWorkflowExecutionStatData = {
+  date: string;
+  totalCount: number;
+  successCount: number;
+  failedCount: number;
+  averageTime: number;
+};
+
 export interface IVinesSearchWorkflowExecutionsParams {
   workflowId: string;
   freeText?: string;

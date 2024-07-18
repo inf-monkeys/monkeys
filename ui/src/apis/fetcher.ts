@@ -18,6 +18,10 @@ interface IFetcherOptions<U = unknown, P extends boolean = false> extends IVines
   wrapper?: (data: U | undefined, originData: IOriginData<U>) => U | undefined;
   fetchOptions?: RequestInit;
   responseResolver?: (response: Response) => U | Promise<U>;
+  requestResolver?: ({ rawUrl, params }: { rawUrl: string; params?: Record<string, any> }) => {
+    url: string;
+    body?: string;
+  };
 }
 
 const t = i18n.t;
@@ -31,6 +35,7 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
   wrapper = (data) => data,
   fetchOptions,
   responseResolver,
+  requestResolver,
 }: IFetcherOptions<U, P> = {}) => {
   return async (rawUrl: string | [url: string, params?: T], rawParams?: T) => {
     const headers = {
@@ -49,9 +54,11 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
       }
     }
 
-    const body = params ? stringify(simple ? params : params['arg']) : undefined;
+    const customRequest = requestResolver?.({ rawUrl: url, params: simple ? params : params?.['arg'] });
 
-    return await fetch(url, {
+    const body = customRequest ? customRequest.body : params ? stringify(simple ? params : params['arg']) : undefined;
+
+    return await fetch(customRequest?.url || url, {
       method,
       headers,
       body,
