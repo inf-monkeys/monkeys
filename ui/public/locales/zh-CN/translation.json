@@ -2448,6 +2448,10 @@
               "logs": "原始数据"
             }
           }
+        },
+        "frame": {
+          "history": "{{status}}历史记录",
+          "close": "关闭"
         }
       },
       "history": {

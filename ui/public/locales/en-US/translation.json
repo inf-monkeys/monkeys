@@ -2460,6 +2460,10 @@
               "logs": "Raw Data"
             }
           }
+        },
+        "frame": {
+          "history": "{{status}}History",
+          "close": "Close "
         }
       },
       "history": {
