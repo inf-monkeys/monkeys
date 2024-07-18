@@ -2073,7 +2073,13 @@
                   "label": "Number Precision",
                   "placeholder": "Enter number precision",
                   "description": "When the number precision is not 0, the forms in the preview view and chat view will display the slider"
-                }
+                },
+                "fold-up": {
+                  "label": "Fold to \"Advanced Configuration\"",
+                  "description": "When fields are optional, they can be grouped under Advanced Configuration to organize configuration options more efficiently."
+                },
+
+                "fold": "Advanced Configuration"
               },
               "submit": "Save"
             }
@@ -2387,6 +2393,7 @@
         },
         "execution-form": {
           "string": "Enter {{displayName}}",
+          "select": "Select {{displayName}}",
           "file": {
             "label": "Please enter the file url",
             "click-to-upload": "Click to upload file",
