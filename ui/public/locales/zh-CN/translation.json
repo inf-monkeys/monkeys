@@ -2061,7 +2061,16 @@
                   "label": "步进值",
                   "placeholder": "请输入步进值",
                   "description": "当步进值不为 0 时，预览视图及对话视图的表单将展示滑块"
-                }
+                },
+                "fold-up": {
+                  "label": "折叠到「高级配置」",
+                  "description": "当字段为选填项时，可以将其归入「高级配置」，以便更有效地整理配置选项"
+                },
+                "enable-reset": {
+                  "label": "启用「重置」按钮"
+                },
+
+                "fold": "高级配置"
               },
               "submit": "保存"
             }
@@ -2375,6 +2384,7 @@
         },
         "execution-form": {
           "string": "请输入{{displayName}}",
+          "select": "请选择{{displayName}}",
           "file": {
             "label": "请输入文件直链",
             "click-to-upload": "点击上传文件",

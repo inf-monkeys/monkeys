@@ -1,36 +1,19 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ToolProperty } from '@inf-monkeys/monkeys';
-import { fromPairs, isArray, isBoolean, isUndefined } from 'lodash';
-import { HelpCircle } from 'lucide-react';
+import { fromPairs, groupBy, isArray } from 'lodash';
+import { ChevronRightIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { BOOLEAN_VALUES } from '@/components/layout/vines-view/execution/workflow-input';
-import { NoticeInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/notice.tsx';
-import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form.tsx';
-import { VinesImageMaskEditor } from '@/components/ui/image-mask-editor';
-import { TagInput } from '@/components/ui/input/tag';
+import { VinesFormFieldItem } from '@/components/layout/vines-view/form/tabular/render/item.tsx';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx';
+import { Form } from '@/components/ui/form.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
-import { Slider } from '@/components/ui/slider.tsx';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea.tsx';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { VinesUpdater } from '@/components/ui/updater';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
-import { cn, getI18nContent } from '@/utils';
+import { cn } from '@/utils';
 
 interface ITabularRenderProps {
   inputs: VinesWorkflowVariable[];
@@ -58,6 +41,8 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
   const form = useForm<IWorkflowInputForm>({
     resolver: zodResolver(workflowInputFormSchema),
   });
+
+  const [defValues, setDefValues] = useState<IWorkflowInputForm>({});
 
   useEffect(() => {
     if (!inputs) return;
@@ -88,6 +73,9 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
           return [it.name, defValue];
         }),
     ) as IWorkflowInputForm;
+
+    setDefValues(defaultValues);
+
     form.reset(defaultValues);
   }, [inputs]);
 
@@ -102,6 +90,15 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
     onSubmit?.(data);
   });
 
+  const { foldInputs, defInputs } = useMemo(
+    () =>
+      groupBy(inputs, (it) => (it?.typeOptions?.foldUp ? 'foldInputs' : 'defInputs')) as Record<
+        string,
+        VinesWorkflowVariable[]
+      >,
+    [inputs],
+  );
+
   return (
     <Form {...form}>
       <form
@@ -111,183 +108,28 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
       >
         <ScrollArea className={scrollAreaClassName} style={{ height }}>
           <div className={cn('flex flex-col gap-4', formClassName)}>
-            {inputs?.map(({ displayName, name, type, description, typeOptions, ...other }) => {
-              if (type === 'notice') {
-                return <NoticeInput key={name} def={{ displayName }} />;
-              }
-
-              const isMultiple = typeOptions?.multipleValues ?? false;
-              const isNumber = type === 'number';
-
-              const tips = typeOptions?.tips;
-
-              return (
-                <FormField
-                  key={name}
-                  name={name}
-                  control={form.control}
-                  render={({ field: { value, onChange, ...field } }) => (
-                    <FormItem className={cn('px-3', itemClassName)}>
-                      <div className="flex items-center gap-1">
-                        <FormLabel className="font-bold">{getI18nContent(displayName)}</FormLabel>
-                        {tips && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <HelpCircle size={18} className="cursor-pointer fill-gray-7 stroke-slate-1" />
-                            </TooltipTrigger>
-                            <TooltipContent>{tips}</TooltipContent>
-                          </Tooltip>
-                        )}
-                      </div>
-                      <FormControl>
-                        <>
-                          {(['string', 'file'].includes(type) ||
-                            (type === 'number' &&
-                              (isUndefined(typeOptions?.minValue) ||
-                                isUndefined(typeOptions?.maxValue) ||
-                                typeOptions?.numberPrecision === 0))) &&
-                            (isMultiple ? (
-                              <TagInput
-                                value={
-                                  isArray(value) ? value.map((it: string | number | boolean) => it.toString()) : []
-                                }
-                                onChange={(value) =>
-                                  form.setValue(
-                                    name,
-                                    value.filter((it) => (isNumber ? !isNaN(Number(it)) : it)),
-                                  )
-                                }
-                                placeholder={t('workspace.pre-view.actuator.execution-form.string', { displayName })}
-                              />
-                            ) : (
-                              <Textarea
-                                placeholder={t('workspace.pre-view.actuator.execution-form.string', { displayName })}
-                                value={(value as string) ?? ''}
-                                onChange={(value) => {
-                                  if (isNumber) {
-                                    const numberValue = Number(value);
-                                    onChange(isNaN(numberValue) ? '' : numberValue);
-                                  } else {
-                                    onChange(value);
-                                  }
-                                }}
-                                className="grow"
-                                autoFocus
-                                {...field}
-                              />
-                            ))}
-
-                          {type === 'number' &&
-                            !(
-                              isUndefined(typeOptions?.minValue) ||
-                              isUndefined(typeOptions?.maxValue) ||
-                              typeOptions?.numberPrecision === 0
-                            ) && (
-                              <Slider
-                                min={typeOptions.minValue}
-                                max={typeOptions.maxValue}
-                                step={typeOptions.numberPrecision}
-                                defaultValue={[Number(value) || 0]}
-                                value={[Number(value) || 0]}
-                                onValueChange={(v) => onChange(v[0])}
-                                {...field}
-                              />
-                            )}
-
-                          {type === 'boolean' && (
-                            <div>
-                              {isMultiple ? (
-                                <TagInput
-                                  value={isArray(value) ? value.map((it: any) => it.toString()) : []}
-                                  onChange={(value) =>
-                                    form.setValue(
-                                      name,
-                                      value.filter((it) => BOOLEAN_VALUES.includes(it)),
-                                    )
-                                  }
-                                  placeholder={t('workspace.pre-view.actuator.execution-form.string', { displayName })}
-                                />
-                              ) : (
-                                <Switch
-                                  checked={
-                                    isBoolean(value) ? value : BOOLEAN_VALUES.includes((value as string)?.toString())
-                                  }
-                                  onCheckedChange={onChange}
-                                />
-                              )}
-                            </div>
-                          )}
-
-                          {type === 'file' &&
-                            (typeOptions?.enableImageMask ? (
-                              <div className="flex items-center justify-between">
-                                <span className="text-xs text-opacity-70">
-                                  {t('workspace.pre-view.actuator.execution-form.file.label')}
-                                </span>
-                                <VinesImageMaskEditor
-                                  onFinished={(urls) => form.setValue(name, isMultiple ? urls : urls[0])}
-                                >
-                                  <Button variant="outline" size="small" className="-mr-1 scale-90">
-                                    {t(
-                                      'workspace.pre-view.actuator.execution-form.file.click-to-open-in-image-mask-editor-and-upload',
-                                    )}
-                                  </Button>
-                                </VinesImageMaskEditor>
-                              </div>
-                            ) : (
-                              <div className="flex items-center justify-between">
-                                <span className="text-xs text-opacity-70">
-                                  {t('workspace.pre-view.actuator.execution-form.file.label')}
-                                </span>
-                                <VinesUpdater
-                                  limit={isMultiple ? void 0 : 1}
-                                  onFinished={(urls) => form.setValue(name, isMultiple ? urls : urls[0])}
-                                  basePath="user-files/workflow-input"
-                                >
-                                  <Button variant="outline" size="small" className="-mr-1 scale-90">
-                                    {t('workspace.pre-view.actuator.execution-form.file.click-to-upload')}
-                                  </Button>
-                                </VinesUpdater>
-                              </div>
-                            ))}
-
-                          {type === 'options' && (
-                            <Select
-                              onValueChange={(val) =>
-                                onChange(
-                                  (
-                                    (other as ToolProperty)?.options?.find((it) =>
-                                      'value' in it ? it.value.toString() : '' === val,
-                                    ) as any
-                                  )?.value ?? '',
-                                )
-                              }
-                              defaultValue={value as string}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder={t('workspace.pre-view.actuator.execution-form.options')} />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {(other as ToolProperty)?.options?.map((it, i) => (
-                                  <SelectItem value={'value' in it ? it.value.toString() : ''} key={i}>
-                                    {getI18nContent(it.name)}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          )}
-                        </>
-                      </FormControl>
-                      <FormDescription className="font-bold">{getI18nContent(description)}</FormDescription>
-
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              );
-            })}
+            {defInputs?.map((it, i) => (
+              <VinesFormFieldItem it={it} form={form} itemClassName={itemClassName} key={i} defValues={defValues} />
+            ))}
+            <Accordion type="single" collapsible>
+              <AccordionItem value="more">
+                <AccordionTrigger className="justify-start gap-2 px-3 text-sm [&[data-state=open]_.chevron]:rotate-90">
+                  {t('workspace.flow-view.endpoint.start-tool.input.config-form.type-options.fold')}
+                  <ChevronRightIcon className="chevron size-4 shrink-0 text-muted-foreground transition-transform duration-200" />
+                </AccordionTrigger>
+                <AccordionContent className="pt-6">
+                  {foldInputs?.map((it, i) => (
+                    <VinesFormFieldItem
+                      it={it}
+                      form={form}
+                      itemClassName={itemClassName}
+                      key={i}
+                      defValues={defValues}
+                    />
+                  ))}
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
         </ScrollArea>
         {children}

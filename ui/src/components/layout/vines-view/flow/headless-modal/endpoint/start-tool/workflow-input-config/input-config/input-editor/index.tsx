@@ -71,18 +71,26 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
   useEffect(() => {
     if (!currentVariable) return;
 
-    form.setValue('displayName', getI18nContent(currentVariable.displayName) ?? t('common.utils.unknown'));
-    form.setValue('name', currentVariable.name);
-    form.setValue('description', getI18nContent(currentVariable.description) ?? '');
-    form.setValue('tips', get(currentVariable, 'typeOptions.tips', ''));
-    form.setValue('type', currentVariable.type as IWorkflowInput['type']);
-    form.setValue('default', currentVariable.default as IWorkflowInput['default']);
-    form.setValue('multipleValues', get(currentVariable, 'typeOptions.multipleValues', false));
-    form.setValue('assetType', get(currentVariable, 'typeOptions.assetType', ''));
-    form.setValue('enableImageMask', get(currentVariable, 'typeOptions.enableImageMask', undefined));
-    form.setValue('minValue', get(currentVariable, 'typeOptions.minValue', undefined));
-    form.setValue('maxValue', get(currentVariable, 'typeOptions.maxValue', undefined));
-    form.setValue('numberPrecision', get(currentVariable, 'typeOptions.numberPrecision', undefined));
+    const defaultValues = {
+      displayName: getI18nContent(currentVariable.displayName) ?? t('common.utils.unknown'),
+      name: currentVariable.name,
+      description: getI18nContent(currentVariable.description) ?? '',
+      tips: get(currentVariable, 'typeOptions.tips', ''),
+      type: currentVariable.type as IWorkflowInput['type'],
+      default: currentVariable.default as IWorkflowInput['default'],
+      multipleValues: get(currentVariable, 'typeOptions.multipleValues', false),
+      assetType: get(currentVariable, 'typeOptions.assetType', ''),
+      enableImageMask: get(currentVariable, 'typeOptions.enableImageMask', undefined),
+      minValue: get(currentVariable, 'typeOptions.minValue', undefined),
+      maxValue: get(currentVariable, 'typeOptions.maxValue', undefined),
+      numberPrecision: get(currentVariable, 'typeOptions.numberPrecision', undefined),
+      enableSelectList: get(currentVariable, 'typeOptions.enableSelectList', undefined),
+      selectList: get(currentVariable, 'typeOptions.selectList', []),
+      foldUp: get(currentVariable, 'typeOptions.foldUp', false),
+      enableReset: get(currentVariable, 'typeOptions.enableReset', false),
+    };
+
+    form.reset(defaultValues);
   }, [currentVariable]);
 
   const handleSubmit = form.handleSubmit((data) => {
@@ -95,6 +103,10 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       numberPrecision,
       default: Default,
       tips,
+      selectList,
+      enableSelectList,
+      foldUp,
+      enableReset,
     } = pick(data, [
       'multipleValues',
       'assetType',
@@ -103,20 +115,49 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       'maxValue',
       'numberPrecision',
       'enableImageMask',
+      'tips',
+      'enableSelectList',
+      'selectList',
+      'foldUp',
+      'enableReset',
+    ]);
+
+    const finalVariable = omit(data, [
+      'multipleValues',
+      'assetType',
+      'default',
       'minValue',
       'maxValue',
+      'numberPrecision',
+      'enableImageMask',
       'tips',
+      'enableSelectList',
+      'selectList',
+      'foldUp',
+      'enableReset',
     ]);
-    const finalVariable = omit(data, ['multipleValues', 'assetType', 'default', 'tips']);
 
-    multipleValues && set(finalVariable, 'typeOptions.multipleValues', true);
-    assetType && set(finalVariable, 'typeOptions.assetType', assetType);
-    enableImageMask && set(finalVariable, 'typeOptions.enableImageMask', enableImageMask);
-    !isUndefined(minValue) && set(finalVariable, 'typeOptions.minValue', minValue);
-    !isUndefined(maxValue) && set(finalVariable, 'typeOptions.maxValue', maxValue);
-    !isUndefined(numberPrecision) && set(finalVariable, 'typeOptions.numberPrecision', numberPrecision);
-    Default && set(finalVariable, 'default', Default);
-    !isUndefined(tips) && set(finalVariable, 'typeOptions.tips', tips);
+    const setOption = (key: string, value: unknown) => {
+      if (!isUndefined(value)) {
+        set(finalVariable, `typeOptions.${key}`, value);
+      }
+    };
+
+    setOption('multipleValues', multipleValues);
+    setOption('assetType', assetType);
+    setOption('enableImageMask', enableImageMask);
+    setOption('minValue', minValue);
+    setOption('maxValue', maxValue);
+    setOption('numberPrecision', numberPrecision);
+    setOption('tips', tips);
+    setOption('enableSelectList', enableSelectList);
+    setOption('selectList', selectList);
+    setOption('foldUp', foldUp);
+    setOption('enableReset', enableReset);
+
+    if (Default) {
+      set(finalVariable, 'default', Default);
+    }
 
     if (finalVariable.type === 'boolean') {
       if (multipleValues) {
@@ -144,7 +185,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
   const { type } = form.getValues();
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={setOpen} modal={false}>
       <DialogContent className="w-auto max-w-5xl">
         <DialogTitle>{t('workspace.flow-view.endpoint.start-tool.input.config-form.title')}</DialogTitle>
         <Form {...form}>
@@ -155,7 +196,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
           >
             <div className="flex gap-2">
               <ScrollArea className="-mx-3 h-80 px-3">
-                <div className="flex w-72 max-w-md flex-col gap-2 px-1">
+                <div className="flex w-80 max-w-md flex-col gap-2 px-1">
                   <FieldDisplayName form={form} />
                   <FieldType form={form} forceUpdate={forceUpdate} />
                   <FieldDefaultValue form={form} />
