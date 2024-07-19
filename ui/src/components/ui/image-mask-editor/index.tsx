@@ -9,7 +9,6 @@ import Compressor from 'compressorjs';
 import { Brush, CircleEllipsisIcon, Eraser, Info, Move, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
-import { types } from 'sass';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -18,13 +17,12 @@ import { COLOR_LIST } from '@/components/ui/image-mask-editor/consts.ts';
 import { FileWithPathWritable, IPointerMode } from '@/components/ui/image-mask-editor/typings.ts';
 import { Kbd } from '@/components/ui/kbd';
 import { kbdWindowsKeysMap } from '@/components/ui/kbd/typings.ts';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { Slider } from '@/components/ui/slider.tsx';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group.tsx';
 import { cn, getI18nContent } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
-import Error = types.Error;
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export type IImageMaskEditorEvent = 'trigger-reselect-file' | 'trigger-save';
 
