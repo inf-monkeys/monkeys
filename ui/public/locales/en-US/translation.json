@@ -835,6 +835,9 @@
           }
         }
       }
+    },
+    "stat": {
+      "title": "Team Statistic"
     }
   },
   "workbench": {
@@ -2316,57 +2319,81 @@
     },
     "logs-view": {
       "title": "Logs",
-      "desc": "Total {{data}} items{{suffix}}",
-      "desc-suffix": ", {{loaded}} items loaded",
-      "filter": {
-        "form": {
-          "versions": {
-            "label": "Version",
-            "placeholder": "Select version",
-            "temp": "Temp"
-          },
-          "start-time": {
-            "label": "Execution Start Time",
-            "placeholder": "Select execution start time"
-          },
-          "status": {
-            "label": "Execution Status",
-            "placeholder": "Select execution status"
-          },
-          "trigger-types": {
-            "label": "Trigger execution mode",
-            "placeholder": "Select trigger execution mode"
-          },
-          "workflow-instance-id": {
-            "label": "Workflow execution instance ID",
-            "placeholder": "Enter workflow execution instance ID"
-          },
-          "order-by": {
-            "label": "Sort by oldest to newest"
-          },
-          "reset": "Reset",
-          "submit": "Filter"
+      "log": {
+        "title": "Execution Logs",
+        "desc": "Total {{data}} items{{suffix}}",
+        "desc-suffix": ", {{loaded}} items loaded",
+        "filter": {
+          "form": {
+            "versions": {
+              "label": "Version",
+              "placeholder": "Select version",
+              "temp": "Temp"
+            },
+            "start-time": {
+              "label": "Execution Start Time",
+              "placeholder": "Select execution start time"
+            },
+            "status": {
+              "label": "Execution Status",
+              "placeholder": "Select execution status"
+            },
+            "trigger-types": {
+              "label": "Trigger execution mode",
+              "placeholder": "Select trigger execution mode"
+            },
+            "workflow-instance-id": {
+              "label": "Workflow execution instance ID",
+              "placeholder": "Enter workflow execution instance ID"
+            },
+            "order-by": {
+              "label": "Sort by oldest to newest"
+            },
+            "reset": "Reset",
+            "submit": "Filter"
+          }
+        },
+        "list": {
+          "empty": "Execution record is empty",
+          "bottom": "No more data",
+          "more": "Remaining {{data}} items, click to load more",
+          "preview-page-not-found": "Failed to open details! Preview view not found",
+          "item": {
+            "desc": "Instance ID: {{instanceId}}",
+            "exec-time": "at {{time}}",
+            "status": {
+              "Running": "Running",
+              "Completed": "Completed",
+              "Paused": "Paused",
+              "Failed": "Failed",
+              "Terminated": "Terminated",
+              "Timed Out": "Timed Out"
+            },
+            "tips": "Click to view instance details",
+            "version": "Ver.{{version}}",
+            "temporary-workflow": "Temporary workflow"
+          }
         }
       },
-      "list": {
-        "empty": "Execution record is empty",
-        "bottom": "No more data",
-        "more": "Remaining {{data}} items, click to load more",
-        "preview-page-not-found": "Failed to open details! Preview view not found",
-        "item": {
-          "desc": "Instance ID: {{instanceId}}",
-          "exec-time": "at {{time}}",
-          "status": {
-            "Running": "Running",
-            "Completed": "Completed",
-            "Paused": "Paused",
-            "Failed": "Failed",
-            "Terminated": "Terminated",
-            "Timed Out": "Timed Out"
-          },
-          "tips": "Click to view instance details",
-          "version": "Ver.{{version}}",
-          "temporary-workflow": "Temporary workflow"
+      "stat": {
+        "title": "Execution Statistics",
+        "filter": {
+          "form": {
+            "time": {
+              "label": "Date Range Selector",
+              "placeholder": "Select a date range about executions"
+            },
+            "reset": "Reset",
+            "submit": "Filter",
+            "export": "Export"
+          }
+        },
+        "toast": {
+          "export": {
+            "loading": "Exporting...",
+            "success": "Export success!",
+            "error": "Export failed! Please try again later!"
+          }
         }
       },
       "loading": "Searching...",
