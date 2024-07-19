@@ -27,8 +27,6 @@ import VinesEvent from '@/utils/events.ts';
 export type IImageMaskEditorEvent = 'trigger-reselect-file' | 'trigger-save';
 
 export interface IImageMaskEditorProps {
-  defaultImage?: string;
-
   onBeforeExport?: () => void; // 准备导出图片前的回调
 
   onBeforeSave?: () => void;
@@ -39,7 +37,7 @@ export interface IImageMaskEditorProps {
   quality?: number;
 
   className?: string;
-  style?: React.CSSProperties;
+  maxWidth?: number;
   tipsEnabled?: boolean;
 
   enableMini?: boolean;
@@ -48,8 +46,7 @@ export interface IImageMaskEditorProps {
 export const ImageMaskEditor: React.FC<IImageMaskEditorProps> = memo(
   ({
     className,
-    style,
-    defaultImage,
+    maxWidth = 562,
     onBeforeExport,
     onBeforeSave,
     onFinished,
@@ -434,8 +431,11 @@ export const ImageMaskEditor: React.FC<IImageMaskEditorProps> = memo(
           )}
         </div>
 
-        <div className={cn('h-96 w-[40rem] overflow-hidden rounded-lg bg-slate-2 shadow', className)} style={style}>
-          <TransformWrapper minScale={0.01} maxScale={20} initialScale={0.2} centerOnInit>
+        <TransformWrapper minScale={0.01} maxScale={20} initialScale={0.2} centerOnInit>
+          <div
+            className={cn('h-96 w-[40rem] overflow-hidden rounded-lg bg-slate-2 shadow', className)}
+            style={{ maxWidth: `${maxWidth}px` }}
+          >
             <TransformComponent wrapperClass="max-h-full max-w-full">
               <div ref={canvasDivRef}>
                 <div
@@ -469,8 +469,8 @@ export const ImageMaskEditor: React.FC<IImageMaskEditorProps> = memo(
                 />
               </div>
             </TransformComponent>
-          </TransformWrapper>
-        </div>
+          </div>
+        </TransformWrapper>
       </div>
     );
   },
