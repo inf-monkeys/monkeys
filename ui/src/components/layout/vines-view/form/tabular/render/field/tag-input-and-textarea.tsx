@@ -63,7 +63,6 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
           }
         }}
         className="grow"
-        autoFocus
         {...field}
       />
     ))
