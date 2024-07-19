@@ -49,22 +49,25 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
           inputs={vines.workflowInput}
           height={containerHeight - 100 - (isSmallFrame ? 64 : 0)}
           onSubmit={(inputData) => {
-            vines.start({ inputData });
-            setCanvasMode(CanvasStatus.RUNNING);
-            toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
-            setHistoryVisible(true);
-            void mutate(
-              (it) => isArray(it) && it?.[0] === '/api/workflow/executions/search',
-              (data) => {
-                if (data?.data) {
-                  data.data.unshift({
-                    status: 'RUNNING',
-                  });
-                }
-                event$.emit?.();
-                return data;
-              },
-            );
+            vines.start({ inputData }).then((status) => {
+              if (status) {
+                setCanvasMode(CanvasStatus.RUNNING);
+                toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
+                setHistoryVisible(true);
+                void mutate(
+                  (it) => isArray(it) && it?.[0] === '/api/workflow/executions/search',
+                  (data) => {
+                    if (data?.data) {
+                      data.data.unshift({
+                        status: 'RUNNING',
+                      });
+                    }
+                    event$.emit?.();
+                    return data;
+                  },
+                );
+              }
+            });
           }}
         >
           <Button ref={submitButton} className="hidden" type="submit" />
