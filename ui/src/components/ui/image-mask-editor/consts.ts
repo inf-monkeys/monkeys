@@ -9,7 +9,7 @@ export const COLOR_LIST: { value: string; label: I18nValue }[] = [
     },
   },
   {
-    value: 'rgb(255,255,255)',
+    value: 'rgb(189,189,189)',
     label: {
       'zh-CN': '白色',
       'en-US': 'White',

@@ -244,8 +244,6 @@
       },
       "vines-image-mask-editor": {
         "title": "图像遮罩编辑器",
-        "tip-1": "按住",
-        "tip-2": "也可以使用橡皮擦",
         "label": {
           "brush-size": "笔刷尺寸",
           "opacity": "不透明度"
@@ -258,6 +256,15 @@
         },
         "toast": {
           "no-file": "请先选择图像文件！"
+        },
+        "toolbar": {
+          "brush": "画笔",
+          "eraser": "橡皮擦",
+          "move": "移动画布",
+          "clear": "清空涂层",
+
+          "brush-color": "画笔颜色",
+          "more": "画笔设置"
         }
       }
     },
