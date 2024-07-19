@@ -245,7 +245,7 @@
       "vines-image-mask-editor": {
         "title": "图像遮罩编辑器",
         "tip-1": "按住",
-        "tip-2": "也可以使用橡皮擦。请先保存，后上传。",
+        "tip-2": "也可以使用橡皮擦",
         "label": {
           "brush-size": "笔刷尺寸",
           "opacity": "不透明度"
@@ -2041,7 +2041,17 @@
               "default": {
                 "label": "默认值",
                 "placeholder": "请输入默认值",
-                "placeholder-list": "请输入列表项"
+                "placeholder-list": "请输入列表项",
+
+                "select": {
+                  "label": "列表选择",
+
+                  "set-default": "设置为默认值",
+                  "label-placeholder": "别名",
+                  "value-placeholder": "默认值",
+                  "remove-tips": "删除",
+                  "add": "新增"
+                }
               },
               "file": {
                 "label": "默认文件{{extra}}",
@@ -2064,7 +2074,16 @@
                   "label": "步进值",
                   "placeholder": "请输入步进值",
                   "description": "当步进值不为 0 时，预览视图及对话视图的表单将展示滑块"
-                }
+                },
+                "fold-up": {
+                  "label": "折叠到「高级配置」",
+                  "description": "当字段为选填项时，可以将其归入「高级配置」，以便更有效地整理配置选项"
+                },
+                "enable-reset": {
+                  "label": "启用「重置」按钮"
+                },
+
+                "fold": "高级配置"
               },
               "submit": "保存"
             }
@@ -2402,12 +2421,14 @@
         },
         "execution-form": {
           "string": "请输入{{displayName}}",
+          "select": "请选择{{displayName}}",
           "file": {
             "label": "请输入文件直链",
             "click-to-upload": "点击上传文件",
-            "click-to-open-in-image-mask-editor-and-upload": "点击打开图像遮罩编辑器并上传"
+            "click-to-open-in-image-mask-editor-and-upload": "打开图像遮罩编辑器"
           },
-          "options": "请选择一个选项"
+          "options": "请选择一个选项",
+          "reset": "重置"
         },
         "detail": {
           "tabs": {
@@ -2445,7 +2466,19 @@
             "label": "内容过大，请到 OSS 下载查看",
             "open-external-storage": "点击查看",
             "preview": "放大查看代码"
+          },
+          "form-render": {
+            "tips": "点击查看执行详情",
+            "title": "执行详情",
+            "tabs": {
+              "data": "数据",
+              "logs": "原始数据"
+            }
           }
+        },
+        "frame": {
+          "history": "{{status}}历史记录",
+          "close": "关闭"
         }
       },
       "history": {

@@ -3,30 +3,74 @@ import { isBoolean, isNumber, isString } from 'lodash';
 import { JSONValue } from '@/components/ui/code-editor';
 import { flattenKeys } from '@/utils/flat.ts';
 
+export const extractImageUrls = (text: unknown): string[] => {
+  if (typeof text !== 'string') return [];
+
+  const regex = /https?:\/\/[^\s"]+?\.(jpg|jpeg|png|gif|bmp|webp|svg)/gi;
+  return text.match(regex) || [];
+};
+
+export const extractVideoUrls = (text: unknown): string[] => {
+  if (typeof text !== 'string') return [];
+
+  const regex = /https?:\/\/[^\s"]+?\.(mp4|avi|mov|mkv|flv|wmv|webm)/gi;
+  return text.match(regex) || [];
+};
+
+export const extractPdbUrls = (text: unknown): string[] => {
+  if (typeof text !== 'string') return [];
+
+  const regex = /https?:\/\/[^\s"]+?\.pdb/gi;
+  return text.match(regex) || [];
+};
+
+export const extractOtherUrls = (text: unknown): string[] => {
+  if (typeof text !== 'string') return [];
+
+  const excludeRegex = /https?:\/\/[^\s"]+\.(jpg|jpeg|png|gif|bmp|webp|svg|mp4|avi|mov|mkv|flv|wmv|webm|pdb)/gi;
+  const allUrlsRegex = /https?:\/\/\S+/gi;
+
+  const allUrls = text.match(allUrlsRegex) || [];
+
+  return allUrls.filter((url) => !excludeRegex.test(url));
+};
+
 interface IVinesAbstractDataPreview {
   value: JSONValue;
   type: 'string' | 'boolean' | 'url' | 'image' | 'pdb' | 'video';
   name: string;
 }
-
-const URL_REGEXP = /https?:\/\/\S+/i;
-const IMG_REGEXP = /https?:\/\/\S+\.(?:png|webp|jpg|jpeg)/i;
-const VIDEO_REGEXP = /https?:\/\/\S+\.(?:mp4|webm)/i;
-const PDB_REGEXP = /https?:\/\/\S+\.pdb/i;
-
 export const previewDataGenerator = (data: JSONValue) => {
   const previewData: IVinesAbstractDataPreview[] = [];
   for (const [name, value] of Object.entries(flattenKeys(data))) {
     if (isString(value)) {
-      if (IMG_REGEXP.test(value)) {
-        previewData.push({ value, type: 'image', name });
-      } else if (PDB_REGEXP.test(value)) {
-        previewData.push({ value, type: 'pdb', name });
-      } else if (VIDEO_REGEXP.test(value)) {
-        previewData.push({ value, type: 'video', name });
-      } else if (URL_REGEXP.test(value)) {
-        previewData.push({ value, type: 'url', name });
-      } else {
+      const images = extractImageUrls(value);
+      const videos = extractVideoUrls(value);
+      const pdbs = extractPdbUrls(value);
+      const others = extractOtherUrls(value);
+
+      const hasImage = images.length > 0;
+      const hasVideo = videos.length > 0;
+      const hasPdb = pdbs.length > 0;
+      const hasOther = others.length > 0;
+
+      if (hasImage) {
+        images.forEach((image) => previewData.push({ value: image, type: 'image', name }));
+      }
+
+      if (hasPdb) {
+        pdbs.forEach((pdb) => previewData.push({ value: pdb, type: 'pdb', name }));
+      }
+
+      if (hasVideo) {
+        videos.forEach((video) => previewData.push({ value: video, type: 'video', name }));
+      }
+
+      if (hasOther) {
+        others.forEach((url) => previewData.push({ value: url, type: 'url', name }));
+      }
+
+      if (!hasImage && !hasVideo && !hasPdb && !hasOther) {
         previewData.push({ value, type: 'string', name });
       }
     } else if (isNumber(value)) {

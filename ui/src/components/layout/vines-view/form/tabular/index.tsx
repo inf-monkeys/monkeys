@@ -1,5 +1,9 @@
 import React, { useRef } from 'react';
 
+import { useSWRConfig } from 'swr';
+
+import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
+import { isArray } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -9,12 +13,23 @@ import { useVinesFlow } from '@/package/vines-flow';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { usePageStore } from '@/store/usePageStore';
+import { cn } from '@/utils';
 
 interface IVinesTabularProps extends React.ComponentPropsWithoutRef<'div'> {
   setConfigVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setHistoryVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  isSmallFrame?: boolean;
+  event$: EventEmitter<void>;
 }
 
-export const VinesTabular: React.FC<IVinesTabularProps> = () => {
+export const VinesTabular: React.FC<IVinesTabularProps> = ({
+  className,
+  style,
+  setHistoryVisible,
+  isSmallFrame = false,
+  event$,
+}) => {
+  const { mutate } = useSWRConfig();
   const { t } = useTranslation();
 
   const { containerHeight } = usePageStore();
@@ -28,15 +43,28 @@ export const VinesTabular: React.FC<IVinesTabularProps> = () => {
   const openAIInterfaceEnabled = useOpenAIInterface.enable;
 
   return (
-    <div className="flex flex-col pr-6">
+    <div className={cn('flex flex-col pr-6', className)} style={style}>
       <div className="flex-1">
         <TabularRender
           inputs={vines.workflowInput}
-          height={containerHeight - 100}
+          height={containerHeight - 100 - (isSmallFrame ? 64 : 0)}
           onSubmit={(inputData) => {
             vines.start({ inputData });
             setCanvasMode(CanvasStatus.RUNNING);
             toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
+            setHistoryVisible(true);
+            void mutate(
+              (it) => isArray(it) && it?.[0] === '/api/workflow/executions/search',
+              (data) => {
+                if (data?.data) {
+                  data.data.unshift({
+                    status: 'RUNNING',
+                  });
+                }
+                event$.emit?.();
+                return data;
+              },
+            );
           }}
         >
           <Button ref={submitButton} className="hidden" type="submit" />
