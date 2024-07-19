@@ -78,6 +78,7 @@ export const VinesLogViewStatFilter: React.FC<IVinesLogViewStatFilterProps> = ({
                           onSelect={(selectedDate) => {
                             selectedDate?.from && field.onChange(selectedDate.from.getTime());
                             selectedDate?.to && form.setValue('endTimestamp', selectedDate.to.getTime());
+                            handleSubmit();
                           }}
                           numberOfMonths={2}
                         />
@@ -91,7 +92,7 @@ export const VinesLogViewStatFilter: React.FC<IVinesLogViewStatFilterProps> = ({
             }}
           />
           <div className="mt-2 flex w-full gap-2">
-            <Button type="reset" theme="tertiary" className="flex-1" disabled={isMutating}>
+            <Button type="reset" variant="outline" className="flex-1" disabled={isMutating}>
               {t('workspace.logs-view.stat.filter.form.reset')}
             </Button>
             <Button type="submit" variant="solid" className="flex-1" disabled={isMutating}>

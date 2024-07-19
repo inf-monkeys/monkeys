@@ -11,6 +11,7 @@ import { exportSearchWorkflowExecutionStats, useMutationSearchWorkflowExecutionS
 import { VinesLogViewStatChart } from '@/components/layout/vines-view/execution-log/stat/chart';
 import { VinesLogViewStatFilter } from '@/components/layout/vines-view/execution-log/stat/filter';
 import { getDayBegin, getRelativeDate } from '@/components/layout/vines-view/execution-log/stat/utils.ts';
+import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -21,7 +22,6 @@ import {
 } from '@/schema/workspace/workflow-execution-stat.ts';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
-import { useVinesTeam } from '@/components/router/guard/team.tsx';
 
 interface IStatProps {}
 
@@ -103,7 +103,7 @@ export const Stat: React.FC<IStatProps> = () => {
         <ScrollArea style={{ height: finalHeight }}>
           <div className="flex flex-col gap-2">
             <VinesLogViewStatFilter form={form} handleSubmit={handleSubmit} isMutating={isMutating} />
-            <Button onClick={handleDownload} theme="tertiary" className="mx-2 flex-1" disabled={isMutating}>
+            <Button onClick={handleDownload} variant="outline" className="mx-2 flex-1" disabled={isMutating}>
               {t('workspace.logs-view.stat.filter.form.export')}
             </Button>
           </div>
