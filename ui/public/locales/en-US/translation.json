@@ -257,8 +257,6 @@
       },
       "vines-image-mask-editor": {
         "title": "Image mask editor",
-        "tip-1": "You can also use the eraser by holding",
-        "tip-2": ".",
         "label": {
           "brush-size": "Brush size",
           "opacity": "Opacity"
@@ -271,6 +269,15 @@
         },
         "toast": {
           "no-file": "Please select a image file!"
+        },
+        "toolbar": {
+          "brush": "Brush",
+          "eraser": "Eraser",
+          "move": "Move Canvas",
+          "clear": "Clear Mask",
+
+          "brush-color": "Brush Color",
+          "more": "Brush Options"
         }
       }
     },

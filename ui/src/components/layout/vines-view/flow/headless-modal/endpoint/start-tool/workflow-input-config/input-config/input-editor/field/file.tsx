@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { VinesImageMaskEditor } from '@/components/ui/image-mask-editor';
 import { Label } from '@/components/ui/label.tsx';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Switch } from '@/components/ui/switch';
 import { Updater } from '@/components/ui/updater';
@@ -41,14 +42,16 @@ export const FieldFile: React.FC<IFieldFileProps> = ({ form }) => {
                   const src = value?.toString();
                   return (
                     <>
-                      <img
-                        src={src}
-                        alt="image"
-                        className={cn(
-                          'max-h-96 max-w-96 rounded-md border border-input bg-background object-cover shadow-md',
-                          !src && 'hidden',
-                        )}
-                      />
+                      <ScrollArea className="h-52">
+                        <img
+                          src={src}
+                          alt="image"
+                          className={cn(
+                            'max-w-96 rounded-md border border-input bg-background object-cover shadow-md',
+                            !src && 'hidden',
+                          )}
+                        />
+                      </ScrollArea>
                       <div className={cn('vines-center w-full', !src && 'rounded-md border border-input py-16')}>
                         <VinesImageMaskEditor onFinished={(urls) => form.setValue('default', urls[0])}>
                           <Button variant="outline" size="small" className="-mr-1 scale-90">

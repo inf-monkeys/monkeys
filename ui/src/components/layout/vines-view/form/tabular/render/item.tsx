@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 
 import { NoticeInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/notice.tsx';
 import { FieldBoolean } from '@/components/layout/vines-view/form/tabular/render/field/boolean.tsx';
-import { FieldFile } from '@/components/layout/vines-view/form/tabular/render/field/file.tsx';
+import { FieldFile } from '@/components/layout/vines-view/form/tabular/render/field/file';
 import { FieldNumber } from '@/components/layout/vines-view/form/tabular/render/field/number.tsx';
 import { FieldOptions } from '@/components/layout/vines-view/form/tabular/render/field/options.tsx';
 import { FieldTagInputAndTextarea } from '@/components/layout/vines-view/form/tabular/render/field/tag-input-and-textarea.tsx';
