@@ -121,32 +121,35 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
           itemContent={VinesExecutionItemContent}
           components={gridComponents}
         />
+
+        <AnimatePresence>
+          {!totalCount && (
+            <motion.div
+              key="vines-execution-result-empty"
+              className="vines-center absolute left-0 top-0 size-full flex-col gap-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { delay: 0.3 } }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <History size={64} />
+              <Label className="text-sm">{t('workspace.logs-view.log.list.empty')}</Label>
+            </motion.div>
+          )}
+          {isLoading && (
+            <motion.div
+              key="vines-execution-result-loading"
+              className="vines-center absolute left-0 top-0 size-full"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { delay: 0.5 } }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </CardContent>
-      <AnimatePresence>
-        {!totalCount && (
-          <motion.div
-            className="vines-center absolute left-0 top-0 size-full flex-col gap-2"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { delay: 0.3 } }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <History size={64} />
-            <Label className="text-sm">{t('workspace.logs-view.log.list.empty')}</Label>
-          </motion.div>
-        )}
-        {isLoading && (
-          <motion.div
-            className="vines-center absolute left-0 top-0 size-full"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { delay: 0.5 } }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
-          </motion.div>
-        )}
-      </AnimatePresence>
     </Card>
   );
 };

@@ -125,5 +125,5 @@ export const VinesExecutionResultItem: React.FC<IVinesExecutionResultItemProps> 
 };
 
 export const VinesExecutionItemContent: GridItemContent<IVinesExecutionResultItem, unknown> = (index, data) => {
-  return <VinesExecutionResultItem data={data} />;
+  return <VinesExecutionResultItem data={data} key={index} />;
 };
