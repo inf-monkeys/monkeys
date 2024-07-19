@@ -57,7 +57,12 @@ export const FieldFile: React.FC<IFieldFileProps> = ({ value, input: { name, typ
     (typeOptions?.enableImageMask ? (
       <div className="flex items-center justify-between">
         <span className="text-xs text-opacity-70">{t('workspace.pre-view.actuator.execution-form.file.label')}</span>
-        <VinesImageMaskEditor onFinished={(urls) => form.setValue(name, isMultiple ? urls : urls[0])}>
+        <VinesImageMaskEditor
+          onFinished={(urls) => {
+            console.log('form-set', isMultiple ? urls : urls[0]);
+            form.setValue(name, isMultiple ? urls : urls[0]);
+          }}
+        >
           <Button variant="outline" size="small" className="-mr-1 scale-90">
             {t('workspace.pre-view.actuator.execution-form.file.click-to-open-in-image-mask-editor-and-upload')}
           </Button>

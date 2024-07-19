@@ -1,11 +1,15 @@
-import React, { ChangeEventHandler, PointerEventHandler, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ChangeEventHandler, PointerEventHandler, useEffect, useRef, useState } from 'react';
 
 import * as png from '@stevebel/png';
 import { COLOR_TYPES } from '@stevebel/png/lib/helpers/color-types';
 import Metadata from '@stevebel/png/lib/helpers/metadata';
+import { useEventEmitter } from 'ahooks';
+import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
+import Compressor from 'compressorjs';
 import { Brush, Eraser, Info, Move, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
+import { types } from 'sass';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -19,16 +23,32 @@ import { Slider } from '@/components/ui/slider.tsx';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group.tsx';
 import { cn, getI18nContent } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
+import Error = types.Error;
 
-interface IVinesImageMaskEditorProps extends React.ComponentPropsWithoutRef<'div'> {
+type IImageMaskEditorEvent = 'trigger-reselect-file' | 'trigger-save';
+
+interface IImageMaskEditorProps {
   defaultImage?: string;
+
+  onBeforeExport?: () => void; // 准备导出图片前的回调
+
+  onBeforeSave?: () => void;
   onFinished?: (urls: string[]) => void;
+
+  event$: EventEmitter<IImageMaskEditorEvent>;
+
+  quality?: number;
 }
 
-export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ children, defaultImage, onFinished }) => {
+export const ImageMaskEditor: React.FC<IImageMaskEditorProps> = ({
+  defaultImage,
+  onBeforeExport,
+  onBeforeSave,
+  onFinished,
+  event$,
+  quality = 0.6,
+}) => {
   const { t } = useTranslation();
-
-  const [visible, setVisible] = useState(false);
 
   const brushPreviewDivRef = useRef<HTMLDivElement | null>(null);
 
@@ -54,17 +74,13 @@ export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ chi
     maskCanvasRef.current && (maskCanvasRef.current.style.opacity = (opacity / 100).toString());
   }, [opacity]);
 
-  useMemo(() => {
-    if (visible) {
-      !defaultImage && fileInputRef.current?.click();
-      fileInputRef.current && (fileInputRef.current.value = '');
-      drawMode = false;
-      lastX = 0;
-      lastY = 0;
-    } else {
-      fileInputRef.current && (fileInputRef.current.value = '');
-    }
-  }, [visible]);
+  useEffect(() => {
+    !defaultImage && fileInputRef.current?.click();
+    fileInputRef.current && (fileInputRef.current.value = '');
+    drawMode = false;
+    lastX = 0;
+    lastY = 0;
+  }, []);
 
   const setCanvasDivSize = () => {
     if (!canvasDivRef.current) return;
@@ -211,6 +227,8 @@ export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ chi
       return;
     }
 
+    onBeforeExport?.();
+
     const originFile = fileInputRef.current.files[0];
     const imgArrayBuffer = await originFile.arrayBuffer();
 
@@ -223,9 +241,15 @@ export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ chi
     const maskMetadata = png.decode(await maskBlob.arrayBuffer());
 
     const newData = rawMetadata.data;
-    for (let i = 0; i < rawMetadata.data.length; i += 4) {
-      if (maskMetadata.data[i + 3]) newData[i + 3] = 0;
-    }
+
+    requestIdleCallback(
+      () => {
+        for (let i = 0; i < rawMetadata.data.length; i += 4) {
+          if (maskMetadata.data[i + 3]) newData[i + 3] = 0;
+        }
+      },
+      { timeout: 1000 },
+    );
 
     const newMetadata: Metadata = {
       ...rawMetadata,
@@ -237,18 +261,26 @@ export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ chi
     const extIndex = originFile.name.lastIndexOf('.');
     const newName = `${extIndex === -1 ? originFile.name : originFile.name.substring(0, extIndex)}_mask-edited_${+new Date()}.png`;
 
-    // FileSaver.saveAs(new Blob([newPng], { type: 'image/png' }), newName);
-    // const url = URL.createObjectURL(new Blob([newPng], { type: 'image/png' }));
-
     const newBlob = new Blob([newPng], { type: 'image/png' });
     const newFile = new File([newBlob], newName, { type: 'image/png' }) as FileWithPathWritable;
     newFile.path = newName;
 
-    setVisible(false);
+    new Compressor(newFile, {
+      quality,
 
-    VinesEvent.emit('vines-updater', [newFile], (urls) => {
-      onFinished?.(urls);
-      toast.success(t('common.operate.success'));
+      success(result) {
+        onBeforeSave?.();
+
+        VinesEvent.emit('vines-updater', [result], (urls: string[]) => {
+          onFinished?.(urls);
+          toast.success(t('common.operate.success'));
+        });
+      },
+
+      error(error: Error) {
+        console.error(error);
+        toast.error(t('common.operate.error'));
+      },
     });
   };
 
@@ -286,136 +318,166 @@ export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ chi
       return img;
     });
   };
+
+  event$.useSubscription((mode) => {
+    switch (mode) {
+      case 'trigger-reselect-file':
+        fileInputRef.current?.click();
+        break;
+      case 'trigger-save':
+        void saveHandler();
+        break;
+    }
+  });
+
   return (
     <>
       <input type="file" accept="image/*" onChange={fileInputHandler} ref={fileInputRef} className="hidden" />
-      <Dialog open={visible} onOpenChange={setVisible}>
-        <DialogTrigger asChild>{children}</DialogTrigger>
-        <DialogContent className="w-auto min-w-[400px] !max-w-[calc(100vw-20px)]">
-          <DialogTitle>{t('components.ui.vines-image-mask-editor.title')}</DialogTitle>
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2 rounded-md border border-input p-2 shadow-sm">
-              <Info size={14} />
-              <span className="flex gap-1 text-xs text-opacity-70">
-                {t('components.ui.vines-image-mask-editor.tip-1')}
-                <Kbd keys={kbdWindowsKeysMap.option} />
-                {t('components.ui.vines-image-mask-editor.tip-2')}
-              </span>
-            </div>
-            <div className="flex gap-4">
-              <ToggleGroup
-                type="single"
-                size="sm"
-                variant="outline"
-                value={pointerMode}
-                onValueChange={(v) => setPointerMode(v as IPointerMode)}
-              >
-                <ToggleGroupItem value="brush">
-                  <Brush className="h-4 w-4" />
-                </ToggleGroupItem>
-                <ToggleGroupItem value="eraser">
-                  <Eraser className="h-4 w-4" />
-                </ToggleGroupItem>
-                <ToggleGroupItem value="move">
-                  <Move className="h-4 w-4" />
-                </ToggleGroupItem>
-              </ToggleGroup>
-              <Button variant="outline" onClick={clearHandler}>
-                <Trash className="h-4 w-4" />
-              </Button>
-              <Select value={maskColor} onValueChange={setMaskColor}>
-                <SelectTrigger>
-                  <SelectValue
-                    placeholder={t('components.ui.vines-image-mask-editor.operate.mask-color.placeholder')}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {COLOR_LIST.map(({ value, label }, i) => (
-                    <SelectItem key={i} value={value}>
-                      {getI18nContent(label)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Slider
-                label={t('components.ui.vines-image-mask-editor.label.brush-size')}
-                className="w-32"
-                min={1}
-                max={72}
-                step={1}
-                value={[brushSize]}
-                onValueChange={(v) => {
-                  setBrushSize(v[0]);
-                }}
-              />
-              <Slider
-                label={t('components.ui.vines-image-mask-editor.label.opacity')}
-                className="w-32"
-                min={1}
-                max={100}
-                step={1}
-                value={[opacity]}
-                onValueChange={(v) => {
-                  setOpacity(v[0]);
-                }}
-              />
-            </div>
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2 rounded-md border border-input p-2 shadow-sm">
+          <Info size={14} />
+          <span className="flex gap-1 text-xs text-opacity-70">
+            {t('components.ui.vines-image-mask-editor.tip-1')}
+            <Kbd keys={kbdWindowsKeysMap.option} />
+            {t('components.ui.vines-image-mask-editor.tip-2')}
+          </span>
+        </div>
+        <div className="flex gap-4">
+          <ToggleGroup
+            type="single"
+            size="sm"
+            variant="outline"
+            value={pointerMode}
+            onValueChange={(v) => setPointerMode(v as IPointerMode)}
+          >
+            <ToggleGroupItem value="brush">
+              <Brush className="h-4 w-4" />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="eraser">
+              <Eraser className="h-4 w-4" />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="move">
+              <Move className="h-4 w-4" />
+            </ToggleGroupItem>
+          </ToggleGroup>
+          <Button variant="outline" onClick={clearHandler}>
+            <Trash className="h-4 w-4" />
+          </Button>
+          <Select value={maskColor} onValueChange={setMaskColor}>
+            <SelectTrigger>
+              <SelectValue placeholder={t('components.ui.vines-image-mask-editor.operate.mask-color.placeholder')} />
+            </SelectTrigger>
+            <SelectContent>
+              {COLOR_LIST.map(({ value, label }, i) => (
+                <SelectItem key={i} value={value}>
+                  {getI18nContent(label)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Slider
+            label={t('components.ui.vines-image-mask-editor.label.brush-size')}
+            className="w-32"
+            min={1}
+            max={72}
+            step={1}
+            value={[brushSize]}
+            onValueChange={(v) => {
+              setBrushSize(v[0]);
+            }}
+          />
+          <Slider
+            label={t('components.ui.vines-image-mask-editor.label.opacity')}
+            className="w-32"
+            min={1}
+            max={100}
+            step={1}
+            value={[opacity]}
+            onValueChange={(v) => {
+              setOpacity(v[0]);
+            }}
+          />
+        </div>
 
-            <div className="h-96 w-[40rem] overflow-hidden rounded-lg bg-slate-2 shadow">
-              <TransformWrapper minScale={0.01} maxScale={20} initialScale={0.2} centerOnInit>
-                <TransformComponent wrapperClass="max-h-96 max-w-full">
-                  <div ref={canvasDivRef}>
-                    <div
-                      ref={brushPreviewDivRef}
-                      id="brush-preview"
-                      style={{
-                        backgroundColor: 'transparent',
-                        outline: '1px dashed black',
-                        boxShadow: '0 0 0 1px white',
-                        borderRadius: '50%',
-                        position: 'absolute',
-                        zIndex: 9999,
-                        pointerEvents: 'none',
-                      }}
-                    />
-                    <canvas
-                      ref={imgCanvasRef}
-                      className={cn('absolute', {
-                        hidden: !canvasVisible,
-                      })}
-                    />
-                    <canvas
-                      ref={maskCanvasRef}
-                      onPointerMove={pointerMode != 'move' ? maskPointerMoveHandler : undefined}
-                      onPointerDown={pointerMode != 'move' ? maskPointerDownHandler : undefined}
-                      onPointerOver={pointerMode != 'move' ? maskPointerOverHandler : undefined}
-                      onPointerLeave={pointerMode != 'move' ? maskPointerLeaveHandler : undefined}
-                      className={cn('absolute', {
-                        hidden: !canvasVisible,
-                      })}
-                    />
-                  </div>
-                </TransformComponent>
-              </TransformWrapper>
-            </div>
-          </div>
-          <DialogFooter>
-            <div className="flex w-full justify-between">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  fileInputRef.current!.click();
-                }}
-              >
-                {t('components.ui.vines-image-mask-editor.operate.select-image')}
-              </Button>
-              <Button variant="outline" onClick={saveHandler}>
-                {t('common.utils.save')}
-              </Button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        <div className="h-96 w-[40rem] overflow-hidden rounded-lg bg-slate-2 shadow">
+          <TransformWrapper minScale={0.01} maxScale={20} initialScale={0.2} centerOnInit>
+            <TransformComponent wrapperClass="max-h-full max-w-full">
+              <div ref={canvasDivRef}>
+                <div
+                  ref={brushPreviewDivRef}
+                  id="brush-preview"
+                  style={{
+                    backgroundColor: 'transparent',
+                    outline: '1px dashed black',
+                    boxShadow: '0 0 0 1px white',
+                    borderRadius: '50%',
+                    position: 'absolute',
+                    zIndex: 9999,
+                    pointerEvents: 'none',
+                  }}
+                />
+                <canvas
+                  ref={imgCanvasRef}
+                  className={cn('absolute', {
+                    hidden: !canvasVisible,
+                  })}
+                />
+                <canvas
+                  ref={maskCanvasRef}
+                  onPointerMove={pointerMode != 'move' ? maskPointerMoveHandler : undefined}
+                  onPointerDown={pointerMode != 'move' ? maskPointerDownHandler : undefined}
+                  onPointerOver={pointerMode != 'move' ? maskPointerOverHandler : undefined}
+                  onPointerLeave={pointerMode != 'move' ? maskPointerLeaveHandler : undefined}
+                  className={cn('absolute', {
+                    hidden: !canvasVisible,
+                  })}
+                />
+              </div>
+            </TransformComponent>
+          </TransformWrapper>
+        </div>
+      </div>
     </>
+  );
+};
+
+type IVinesImageMaskEditorProps = Omit<IImageMaskEditorProps, 'event$'> & {
+  children: React.ReactNode;
+};
+
+export const VinesImageMaskEditor: React.FC<IVinesImageMaskEditorProps> = ({ children, ...attr }) => {
+  const { t } = useTranslation();
+
+  const maskEditor$ = useEventEmitter<IImageMaskEditorEvent>();
+
+  const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  return (
+    <Dialog open={visible} onOpenChange={setVisible}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="w-auto min-w-[400px] !max-w-[calc(100vw-20px)]">
+        <DialogTitle>{t('components.ui.vines-image-mask-editor.title')}</DialogTitle>
+        <ImageMaskEditor
+          event$={maskEditor$}
+          onBeforeSave={() => {
+            setLoading(false);
+            setVisible(false);
+          }}
+          onBeforeExport={() => setLoading(true)}
+          {...attr}
+        />
+        <DialogFooter>
+          <div className="flex w-full justify-between">
+            <Button variant="outline" onClick={() => maskEditor$.emit('trigger-reselect-file')}>
+              {t('components.ui.vines-image-mask-editor.operate.select-image')}
+            </Button>
+            <Button variant="outline" onClick={() => maskEditor$.emit('trigger-save')} loading={loading}>
+              {t('common.utils.save')}
+            </Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
