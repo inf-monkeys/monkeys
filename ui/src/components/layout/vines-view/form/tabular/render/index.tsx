@@ -89,8 +89,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
         }
       }
     }
-    console.log(data);
-    // onSubmit?.(data);
+    onSubmit?.(data);
   });
 
   const { foldInputs, defInputs } = useMemo(
@@ -144,7 +143,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
                         it={it}
                         form={form}
                         itemClassName={itemClassName}
-                        key={i}
+                        key={'fold_' + i}
                         defValues={defValues}
                       />
                     ))}
