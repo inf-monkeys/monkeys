@@ -109,7 +109,7 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({ it, for
 
                   <FieldBoolean input={it} value={value} onChange={onChange} form={form} />
 
-                  <FieldFile input={it} form={form} />
+                  <FieldFile input={it} form={form} value={value} />
 
                   <FieldOptions input={it} value={value} onChange={onChange} />
                 </>

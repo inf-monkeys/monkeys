@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
 import { FileUp } from 'lucide-react';
-import { ErrorCode } from 'react-dropzone-esm';
 import Dropzone, { FileWithPath } from 'react-dropzone';
+import { ErrorCode } from 'react-dropzone-esm';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -87,7 +87,7 @@ export const Updater: React.FC<IUpdaterProps> = ({
           }
           return null;
         }}
-        onReject={(file) =>
+        onDropRejected={(file) =>
           file.forEach((it) => {
             it.errors.forEach((err) => {
               if (
@@ -120,7 +120,7 @@ export const Updater: React.FC<IUpdaterProps> = ({
             <div
               {...getRootProps()}
               className={cn([
-                'cursor-pointer',
+                'cursor-pointer rounded border-2 border-dashed border-input',
                 (isUploading || disabled) && 'pointer-events-none cursor-not-allowed opacity-60',
               ])}
             >
