@@ -2428,7 +2428,14 @@
             "click-to-open-in-image-mask-editor-and-upload": "打开图像遮罩编辑器"
           },
           "options": "请选择一个选项",
-          "reset": "重置"
+          "reset": "重置",
+
+          "mask-editor": {
+            "empty": "暂无遮罩图片",
+            "empty-action": "选择图片并编辑",
+            "re-edit": "重新编辑",
+            "clear": "清除"
+          }
         },
         "detail": {
           "tabs": {

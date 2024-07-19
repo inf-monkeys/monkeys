@@ -25,9 +25,9 @@ import { cn, getI18nContent } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 import Error = types.Error;
 
-type IImageMaskEditorEvent = 'trigger-reselect-file' | 'trigger-save';
+export type IImageMaskEditorEvent = 'trigger-reselect-file' | 'trigger-save';
 
-interface IImageMaskEditorProps {
+export interface IImageMaskEditorProps {
   defaultImage?: string;
 
   onBeforeExport?: () => void; // 准备导出图片前的回调
@@ -38,15 +38,22 @@ interface IImageMaskEditorProps {
   event$: EventEmitter<IImageMaskEditorEvent>;
 
   quality?: number;
+
+  className?: string;
+  style?: React.CSSProperties;
+  tipsEnabled?: boolean;
 }
 
 export const ImageMaskEditor: React.FC<IImageMaskEditorProps> = ({
+  className,
+  style,
   defaultImage,
   onBeforeExport,
   onBeforeSave,
   onFinished,
   event$,
   quality = 0.6,
+  tipsEnabled = true,
 }) => {
   const { t } = useTranslation();
 
@@ -75,11 +82,13 @@ export const ImageMaskEditor: React.FC<IImageMaskEditorProps> = ({
   }, [opacity]);
 
   useEffect(() => {
-    !defaultImage && fileInputRef.current?.click();
-    fileInputRef.current && (fileInputRef.current.value = '');
-    drawMode = false;
-    lastX = 0;
-    lastY = 0;
+    setTimeout(() => {
+      !defaultImage && fileInputRef.current?.click();
+      fileInputRef.current && (fileInputRef.current.value = '');
+      drawMode = false;
+      lastX = 0;
+      lastY = 0;
+    }, 80);
   }, []);
 
   const setCanvasDivSize = () => {
@@ -213,7 +222,9 @@ export const ImageMaskEditor: React.FC<IImageMaskEditorProps> = ({
     brushPreviewDivRef.current && (brushPreviewDivRef.current.style.display = 'none');
   };
 
-  const clearHandler = () => {
+  const clearHandler = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    e.preventDefault();
     if (!maskCanvasRef.current) return;
     const maskCtx = maskCanvasRef.current.getContext('2d')!;
     maskCtx.clearRect(0, 0, maskCtx.canvas.width, maskCtx.canvas.height);
@@ -242,14 +253,9 @@ export const ImageMaskEditor: React.FC<IImageMaskEditorProps> = ({
 
     const newData = rawMetadata.data;
 
-    requestIdleCallback(
-      () => {
-        for (let i = 0; i < rawMetadata.data.length; i += 4) {
-          if (maskMetadata.data[i + 3]) newData[i + 3] = 0;
-        }
-      },
-      { timeout: 1000 },
-    );
+    for (let i = 0; i < rawMetadata.data.length; i += 4) {
+      if (maskMetadata.data[i + 3]) newData[i + 3] = 0;
+    }
 
     const newMetadata: Metadata = {
       ...rawMetadata,
@@ -334,14 +340,16 @@ export const ImageMaskEditor: React.FC<IImageMaskEditorProps> = ({
     <>
       <input type="file" accept="image/*" onChange={fileInputHandler} ref={fileInputRef} className="hidden" />
       <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-2 rounded-md border border-input p-2 shadow-sm">
-          <Info size={14} />
-          <span className="flex gap-1 text-xs text-opacity-70">
-            {t('components.ui.vines-image-mask-editor.tip-1')}
-            <Kbd keys={kbdWindowsKeysMap.option} />
-            {t('components.ui.vines-image-mask-editor.tip-2')}
-          </span>
-        </div>
+        {tipsEnabled && (
+          <div className="flex items-center gap-2 rounded-md border border-input p-2 shadow-sm">
+            <Info size={14} />
+            <span className="flex gap-1 text-xs text-opacity-70">
+              {t('components.ui.vines-image-mask-editor.tip-1')}
+              <Kbd keys={kbdWindowsKeysMap.option} />
+              {t('components.ui.vines-image-mask-editor.tip-2')}
+            </span>
+          </div>
+        )}
         <div className="flex gap-4">
           <ToggleGroup
             type="single"
@@ -399,7 +407,7 @@ export const ImageMaskEditor: React.FC<IImageMaskEditorProps> = ({
           />
         </div>
 
-        <div className="h-96 w-[40rem] overflow-hidden rounded-lg bg-slate-2 shadow">
+        <div className={cn('h-96 w-[40rem] overflow-hidden rounded-lg bg-slate-2 shadow', className)} style={style}>
           <TransformWrapper minScale={0.01} maxScale={20} initialScale={0.2} centerOnInit>
             <TransformComponent wrapperClass="max-h-full max-w-full">
               <div ref={canvasDivRef}>
