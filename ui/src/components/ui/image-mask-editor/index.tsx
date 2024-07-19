@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/
 import { IImageMaskEditorCanvasEvent, ImageMaskEditorCanvas } from '@/components/ui/image-mask-editor/canvas.tsx';
 import { ImageMaskEditorToolbar } from '@/components/ui/image-mask-editor/toolbar.tsx';
 import { IPointerMode } from '@/components/ui/image-mask-editor/typings.ts';
+import { cn } from '@/utils';
 
 export type IImageMaskEditorEvent = 'trigger-select-image';
 
@@ -48,6 +49,8 @@ export const ImageMaskEditor: React.FC<IImageMaskEditorProps> = memo(
     const [brushSize, setBrushSize] = useState(12);
     const [opacity, setOpacity] = useState(50);
 
+    const [loading, setLoading] = useState(false);
+
     const maskEditorCanvas$ = useEventEmitter<IImageMaskEditorCanvasEvent>();
 
     const handleSelectImage = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -59,6 +62,7 @@ export const ImageMaskEditor: React.FC<IImageMaskEditorProps> = memo(
     const handleSave = (e: React.MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
       e.preventDefault();
+      setLoading(true);
       maskEditorCanvas$.emit('trigger-save');
     };
 
@@ -71,7 +75,7 @@ export const ImageMaskEditor: React.FC<IImageMaskEditorProps> = memo(
     });
 
     return (
-      <div className="flex flex-col gap-3">
+      <div className={cn('flex flex-col gap-3', loading && 'pointer-events-none')}>
         <ImageMaskEditorToolbar
           pointerMode={pointerMode}
           setPointerMode={setPointerMode}
@@ -95,17 +99,20 @@ export const ImageMaskEditor: React.FC<IImageMaskEditorProps> = memo(
           quality={quality}
           onBeforeExport={onBeforeExport}
           onBeforeSave={onBeforeSave}
-          onFinished={onFinished}
+          onFinished={(urls) => {
+            setLoading(false);
+            onFinished?.(urls);
+          }}
           event$={maskEditorCanvas$}
         />
 
-        <div className="flex w-full justify-between">
-          <Button variant="outline" onClick={handleSelectImage}>
+        <div className="flex w-full items-center justify-between">
+          <Button variant="outline" onClick={handleSelectImage} disabled={loading}>
             {t('components.ui.vines-image-mask-editor.operate.select-image')}
           </Button>
-          <div className="space-x-2">
+          <div className="vines-center gap-2">
             {children}
-            <Button variant="outline" onClick={handleSave}>
+            <Button variant="outline" onClick={handleSave} loading={loading}>
               {t('common.utils.save')}
             </Button>
           </div>

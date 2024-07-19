@@ -28,7 +28,7 @@ export const WorkspaceCustomSetting: React.FC<IWorkspaceCustomSettingProps> = ()
       animate={visibleCustomSetting ? 'visible' : 'hidden'}
       className={cn(
         'absolute left-0 top-0 z-[1100] flex size-full flex-col gap-4 bg-slate-1 p-6',
-        !visibleCustomSetting && 'pointer-events-none',
+        !visibleCustomSetting && 'pointer-events-none z-0',
       )}
     >
       <div className="flex items-center justify-between">

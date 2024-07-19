@@ -12,7 +12,7 @@ export function ErrorComponent({ error }: ErrorBoundaryProps) {
   return (
     <motion.div
       key="vines-catch-boundary"
-      className="flex max-w-full flex-col gap-4 rounded border border-solid border-white border-opacity-20 bg-slate-1 p-4 shadow backdrop-blur-sm"
+      className="m-6 flex max-w-full flex-col gap-4 rounded-md border border-solid border-white border-opacity-20 bg-slate-1 p-4 shadow backdrop-blur-sm"
       initial={{ opacity: 0, scale: 0.92 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.92 }}
@@ -28,7 +28,7 @@ export function ErrorComponent({ error }: ErrorBoundaryProps) {
           <CollapsibleContent>
             <Separator className="my-2" />
             <ScrollArea className="h-40">
-              <p className="text-xs">{error?.stack}</p>
+              <pre className="text-xs">{error?.stack}</pre>
             </ScrollArea>
           </CollapsibleContent>
         </Collapsible>
