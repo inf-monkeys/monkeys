@@ -237,15 +237,15 @@ export const FileList: React.FC<IFilesProps> = ({
             </TableCaption>
             <TableHeader>
               <TableRow className="[&_th]:text-center">
+                <TableHead className="w-11">
+                  {t('components.ui.updater.file-list.info-table.columns.operate')}
+                </TableHead>
                 <TableHead className="w-32 !text-left">
                   {t('components.ui.updater.file-list.info-table.columns.name')}
                 </TableHead>
                 <TableHead className="w-11">{t('components.ui.updater.file-list.info-table.columns.type')}</TableHead>
                 <TableHead className="w-11">{t('components.ui.updater.file-list.info-table.columns.size')}</TableHead>
                 <TableHead className="w-11">{t('components.ui.updater.file-list.info-table.columns.status')}</TableHead>
-                <TableHead className="w-11">
-                  {t('components.ui.updater.file-list.info-table.columns.operate')}
-                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -253,19 +253,6 @@ export const FileList: React.FC<IFilesProps> = ({
                 <Tooltip key={path}>
                   <TooltipTrigger asChild>
                     <TableRow className="[&_td]:text-xs" id={'vines-uploader-' + id}>
-                      <TableCell>
-                        <p className="line-clamp-1 w-32 break-keep">{name}</p>
-                      </TableCell>
-                      <TableCell className="text-center">{type.split('/')?.[1] || type}</TableCell>
-                      <TableCell className="text-center">{coverFileSize(size)}</TableCell>
-                      <TableCell className="[&_svg]:m-auto">
-                        {status === 'wait' && <FileSearch size={16} />}
-                        {status === 'busy' ? `${progress}%` : ''}
-                        {status === 'uploading' && <Loader2 size={16} className="animate-spin" />}
-                        {status === 'wait-to-update' && <FileClock size={16} />}
-                        {status === 'success' && <CheckCircle2 size={16} />}
-                        {status === 'error' && <FileX2 size={16} />}
-                      </TableCell>
                       <TableCell className="p-0 text-center">
                         <Button
                           disabled={status === 'uploading' || status === 'busy' || isUploading}
@@ -278,6 +265,19 @@ export const FileList: React.FC<IFilesProps> = ({
                             setList((prev) => prev.filter((it) => it.id !== id));
                           }}
                         />
+                      </TableCell>
+                      <TableCell>
+                        <p className="line-clamp-1 w-32 break-keep">{name}</p>
+                      </TableCell>
+                      <TableCell className="text-center">{type.split('/')?.[1] || type}</TableCell>
+                      <TableCell className="text-center">{coverFileSize(size)}</TableCell>
+                      <TableCell className="[&_svg]:m-auto">
+                        {status === 'wait' && <FileSearch size={16} />}
+                        {status === 'busy' ? `${progress}%` : ''}
+                        {status === 'uploading' && <Loader2 size={16} className="animate-spin" />}
+                        {status === 'wait-to-update' && <FileClock size={16} />}
+                        {status === 'success' && <CheckCircle2 size={16} />}
+                        {status === 'error' && <FileX2 size={16} />}
                       </TableCell>
                     </TableRow>
                   </TooltipTrigger>

@@ -20,9 +20,6 @@ const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, S
       <SliderPrimitive.Root
         ref={ref}
         className={cn('relative flex w-full touch-none select-none items-center', className)}
-        // onChange={(e) => {
-        //   onChange?.(Number((e as React.ChangeEvent<HTMLInputElement>).target.value));
-        // }}
         value={value}
         {...props}
       >

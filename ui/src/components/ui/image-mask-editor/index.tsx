@@ -6,7 +6,7 @@ import Metadata from '@stevebel/png/lib/helpers/metadata';
 import { useEventEmitter } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import Compressor from 'compressorjs';
-import { Brush, Eraser, Info, Move, Trash } from 'lucide-react';
+import { Brush, CircleEllipsisIcon, Eraser, Info, Move, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import { types } from 'sass';
@@ -24,6 +24,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group.tsx';
 import { cn, getI18nContent } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 import Error = types.Error;
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export type IImageMaskEditorEvent = 'trigger-reselect-file' | 'trigger-save';
 
@@ -42,6 +43,8 @@ export interface IImageMaskEditorProps {
   className?: string;
   style?: React.CSSProperties;
   tipsEnabled?: boolean;
+
+  enableMini?: boolean;
 }
 
 export const ImageMaskEditor: React.FC<IImageMaskEditorProps> = ({
@@ -54,6 +57,7 @@ export const ImageMaskEditor: React.FC<IImageMaskEditorProps> = ({
   event$,
   quality = 0.6,
   tipsEnabled = true,
+  enableMini = false,
 }) => {
   const { t } = useTranslation();
 
@@ -383,28 +387,54 @@ export const ImageMaskEditor: React.FC<IImageMaskEditorProps> = ({
               ))}
             </SelectContent>
           </Select>
-          <Slider
-            label={t('components.ui.vines-image-mask-editor.label.brush-size')}
-            className="w-32"
-            min={1}
-            max={72}
-            step={1}
-            value={[brushSize]}
-            onValueChange={(v) => {
-              setBrushSize(v[0]);
-            }}
-          />
-          <Slider
-            label={t('components.ui.vines-image-mask-editor.label.opacity')}
-            className="w-32"
-            min={1}
-            max={100}
-            step={1}
-            value={[opacity]}
-            onValueChange={(v) => {
-              setOpacity(v[0]);
-            }}
-          />
+          {enableMini ? (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" icon={<CircleEllipsisIcon />} />
+              </PopoverTrigger>
+              <PopoverContent className="flex flex-col gap-4">
+                <Slider
+                  label={t('components.ui.vines-image-mask-editor.label.brush-size')}
+                  className="w-32"
+                  min={1}
+                  max={72}
+                  step={1}
+                  value={[brushSize]}
+                  onValueChange={(v) => setBrushSize(v[0])}
+                />
+                <Slider
+                  label={t('components.ui.vines-image-mask-editor.label.opacity')}
+                  className="w-32"
+                  min={1}
+                  max={100}
+                  step={1}
+                  value={[opacity]}
+                  onValueChange={(v) => setOpacity(v[0])}
+                />
+              </PopoverContent>
+            </Popover>
+          ) : (
+            <>
+              <Slider
+                label={t('components.ui.vines-image-mask-editor.label.brush-size')}
+                className="w-32"
+                min={1}
+                max={72}
+                step={1}
+                value={[brushSize]}
+                onValueChange={(v) => setBrushSize(v[0])}
+              />
+              <Slider
+                label={t('components.ui.vines-image-mask-editor.label.opacity')}
+                className="w-32"
+                min={1}
+                max={100}
+                step={1}
+                value={[opacity]}
+                onValueChange={(v) => setOpacity(v[0])}
+              />
+            </>
+          )}
         </div>
 
         <div className={cn('h-96 w-[40rem] overflow-hidden rounded-lg bg-slate-2 shadow', className)} style={style}>
