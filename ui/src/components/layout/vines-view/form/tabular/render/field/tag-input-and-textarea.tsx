@@ -29,7 +29,7 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
 
   const visible = useMemo(
     () =>
-      ['string', 'file'].includes(type) ||
+      type === 'string' ||
       (type === 'number' &&
         (isUndefined(typeOptions?.minValue) ||
           isUndefined(typeOptions?.maxValue) ||

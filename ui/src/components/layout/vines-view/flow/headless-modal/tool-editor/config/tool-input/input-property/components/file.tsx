@@ -50,10 +50,12 @@ export const FileInput: React.FC<IVinesInputPropertyProps> = ({ def, value, onCh
         onFilesUpdate={(_files) => {
           const updateFilesLength = _files.length;
           if (!updateFilesLength) return;
-          if (updateFilesLength < files.length && multipleValues) {
-            onChange(_files.map((it) => it.path));
-          } else {
-            onChange(_files.map((it) => it.path)[0]);
+          if (updateFilesLength < files.length) {
+            if (multipleValues) {
+              onChange(_files.map((it) => it.path));
+            } else {
+              onChange(_files.map((it) => it.path)[0]);
+            }
           }
         }}
         accept={finalAccept}

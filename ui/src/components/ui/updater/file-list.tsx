@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { FileWithPath } from 'react-dropzone';
 import { set } from 'lodash';
 import { CheckCircle2, FileCheck, FileClock, FileSearch, FileX2, Loader2, UploadCloud, XCircle } from 'lucide-react';
+import { FileWithPath } from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -206,7 +206,14 @@ export const FileList: React.FC<IFilesProps> = ({
     if (uploadQueue.length) {
       void handleUpload();
     } else if (isUploading) {
-      setTimeout(() => onFinished?.(finalLists.map((it) => it?.url ?? '').filter((it) => it)), 1000);
+      setTimeout(() => {
+        const mergeList = [...finalLists.map((it) => it?.url ?? ''), ...list.map((it) => it?.url ?? '')].filter(
+          (it) => it,
+        );
+        const urls = Array.from(new Set(mergeList));
+
+        onFinished?.(urls);
+      }, 200);
       setIsUploading(false);
     }
   }, [uploadQueue]);
@@ -266,7 +273,10 @@ export const FileList: React.FC<IFilesProps> = ({
                           icon={<XCircle />}
                           variant="borderless"
                           type="button"
-                          onClick={() => setFiles((prev) => prev.filter((it) => it.path !== path))}
+                          onClick={() => {
+                            setFiles((prev) => prev.filter((it) => it.path !== path));
+                            setList((prev) => prev.filter((it) => it.id !== id));
+                          }}
                         />
                       </TableCell>
                     </TableRow>
