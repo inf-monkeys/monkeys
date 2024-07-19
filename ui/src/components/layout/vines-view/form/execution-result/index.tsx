@@ -4,6 +4,8 @@ import { CircularProgress } from '@nextui-org/progress';
 import { useMemoizedFn } from 'ahooks';
 import { type EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { AnimatePresence, motion } from 'framer-motion';
+import { History } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { VirtuosoGrid } from 'react-virtuoso';
 
 import { useSearchWorkflowExecutions } from '@/apis/workflow/execution';
@@ -18,6 +20,7 @@ import {
 } from '@/components/layout/vines-view/form/execution-result/item.tsx';
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { JSONValue } from '@/components/ui/code-editor';
+import { Label } from '@/components/ui/label.tsx';
 import { useFlowStore } from '@/store/useFlowStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
@@ -28,6 +31,8 @@ interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div
 }
 
 export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ className, event$ }) => {
+  const { t } = useTranslation();
+
   const { visible } = useViewStore();
   const { workflowId } = useFlowStore();
 
@@ -118,6 +123,18 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
         />
       </CardContent>
       <AnimatePresence>
+        {!totalCount && (
+          <motion.div
+            className="vines-center absolute left-0 top-0 size-full flex-col gap-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { delay: 0.3 } }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <History size={64} />
+            <Label className="text-sm">{t('workspace.logs-view.log.list.empty')}</Label>
+          </motion.div>
+        )}
         {isLoading && (
           <motion.div
             className="vines-center absolute left-0 top-0 size-full"

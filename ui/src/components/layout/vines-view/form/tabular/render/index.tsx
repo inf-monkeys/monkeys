@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AnimatePresence, motion } from 'framer-motion';
 import { fromPairs, groupBy, isArray } from 'lodash';
-import { ChevronRightIcon } from 'lucide-react';
+import { ChevronRightIcon, Workflow } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -10,6 +11,7 @@ import { BOOLEAN_VALUES } from '@/components/layout/vines-view/execution/workflo
 import { VinesFormFieldItem } from '@/components/layout/vines-view/form/tabular/render/item.tsx';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx';
 import { Form } from '@/components/ui/form.tsx';
+import { Label } from '@/components/ui/label.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
@@ -100,14 +102,29 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
   );
 
   const hasFoldInputs = foldInputs?.length > 0;
+  const isFormEmpty = !defInputs?.length && !hasFoldInputs;
 
   return (
     <Form {...form}>
       <form
-        className={cn('-mx-3 flex flex-col gap-4', formClassName)}
+        className={cn('relative -mx-3 flex flex-col gap-4', formClassName)}
         onSubmit={handleSubmit}
         onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
       >
+        <AnimatePresence>
+          {isFormEmpty && (
+            <motion.div
+              className="vines-center absolute left-0 top-0 size-full flex-col gap-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { delay: 0.2 } }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Workflow size={64} />
+              <Label className="text-sm">{t('workspace.chat-view.workflow-mode.empty-input.completed')}</Label>
+            </motion.div>
+          )}
+        </AnimatePresence>
         <ScrollArea className={scrollAreaClassName} style={{ height }}>
           <div className={cn('flex flex-col gap-4', formClassName)}>
             {defInputs?.map((it, i) => (
