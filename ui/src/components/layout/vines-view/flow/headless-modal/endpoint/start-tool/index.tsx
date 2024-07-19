@@ -28,7 +28,7 @@ export const StartTool: React.FC<IStartToolProps> = () => {
   }, [workflowId]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={setOpen} modal={false}>
       <DialogContent>
         <DialogTitle>{t('workspace.flow-view.endpoint.start-tool.title')}</DialogTitle>
         <WorkflowInputConfig />

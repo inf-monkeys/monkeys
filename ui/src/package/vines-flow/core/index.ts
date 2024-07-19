@@ -543,15 +543,18 @@ export class VinesCore extends VinesTools(VinesBase) {
   }
 
   public swapExecutionInstance({ workflowId }: Pick<VinesWorkflowExecution, 'workflowId' | 'workflowDefinition'>) {
-    if (workflowId === this.executionInstanceId) {
+    const isExecuteIdSame = workflowId === this.executionInstanceId;
+    if (isExecuteIdSame) {
       return false;
     }
 
     if (this.executionStatus === 'RUNNING') {
-      toast.warning(
-        this.t?.('workspace.flow-view.vines.execution.swap.workflow-is-running') ||
-          '无法切换运行实例！当前工作流正在运行中',
-      );
+      if (!isExecuteIdSame) {
+        toast.warning(
+          this.t?.('workspace.flow-view.vines.execution.swap.workflow-is-running') ||
+            '无法切换运行实例！当前工作流正在运行中',
+        );
+      }
       return false;
     }
 
