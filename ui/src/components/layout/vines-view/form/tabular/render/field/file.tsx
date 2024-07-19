@@ -71,7 +71,7 @@ export const FieldFile: React.FC<IFieldFileProps> = ({ value, input: { name, typ
 
   return (
     type === 'file' && (
-      <Card className="w-full" ref={containerRef}>
+      <Card className="w-full overflow-hidden max-sm:max-w-[calc(100vw-3rem)]" ref={containerRef}>
         <CardContent className="relative p-4">
           {typeOptions?.enableImageMask ? (
             <>
@@ -87,6 +87,7 @@ export const FieldFile: React.FC<IFieldFileProps> = ({ value, input: { name, typ
                   setMaskEditorVisible(false);
                 }}
                 tipsEnabled={false}
+                enableMini
               />
               <div className="mt-2 flex w-full justify-between">
                 <Button
