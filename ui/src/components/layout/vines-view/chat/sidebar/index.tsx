@@ -6,9 +6,9 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useCreateWorkflowChatSession, useWorkflowChatSessions } from '@/apis/workflow/chat';
-import { InfoEditor } from '@/components/layout/settings/account/info-editor.tsx';
 import { ChatSession } from '@/components/layout/vines-view/chat/sidebar/chat-session.tsx';
 import { Button } from '@/components/ui/button';
+import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -74,7 +74,7 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
               />
             ))}
 
-            <InfoEditor
+            <SimpleInputDialog
               title={t('workspace.chat-view.sidebar.create.label')}
               placeholder={t('workspace.chat-view.sidebar.create.placeholder')}
               onFinished={(displayName) =>
@@ -96,7 +96,7 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
               <Button variant="outline" icon={<Plus />}>
                 {t('workspace.chat-view.sidebar.create.label')}
               </Button>
-            </InfoEditor>
+            </SimpleInputDialog>
           </div>
         </ScrollArea>
       </motion.div>

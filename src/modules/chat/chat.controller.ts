@@ -1,7 +1,5 @@
 import { MQ_TOKEN } from '@/common/common.module';
-import { config } from '@/common/config';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
-import { logger } from '@/common/logger';
 import { Mq } from '@/common/mq';
 import { IRequest } from '@/common/typings/request';
 import { isValidObjectId } from '@/common/utils';
@@ -71,7 +69,7 @@ export class WorkflowOpenAICompatibleController {
   })
   @HttpCode(200)
   public async createcCompletions(@Req() req: IRequest, @Body() body: CreateCompletionsDto, @Res() res: Response) {
-    const { teamId, userId } = req;
+    const { teamId, userId, apikey } = req;
     const { model, stream = false } = body;
     const workflow = await this.getWorkflowByModel(teamId, model);
     if (!workflow) {
@@ -86,6 +84,7 @@ export class WorkflowOpenAICompatibleController {
       inputData: body,
       triggerType: WorkflowTriggerType.API,
       chatSessionId: sessionId,
+      apiKey: apikey,
     });
     if (stream === false) {
       const result = await this.workflowExecutionService.waitForWorkflowResult(teamId, workflowInstanceId);
@@ -111,7 +110,7 @@ export class WorkflowOpenAICompatibleController {
   })
   @HttpCode(200)
   public async createChatComplitions(@Req() req: IRequest, @Body() body: CreateChatCompletionsDto, @Res() res: Response) {
-    const { teamId, userId } = req;
+    const { teamId, userId, apikey } = req;
     const { model, stream = false } = body;
     const workflow = await this.getWorkflowByModel(teamId, model);
     if (!workflow) {
@@ -126,6 +125,7 @@ export class WorkflowOpenAICompatibleController {
       inputData: body,
       triggerType: WorkflowTriggerType.API,
       chatSessionId: conversationId,
+      apiKey: apikey,
     });
     if (conversationId) {
       await this.workflowRepository.updateChatSessionMessages(teamId, conversationId, body.messages);
@@ -146,7 +146,6 @@ export class WorkflowOpenAICompatibleController {
       const channel = TOOL_STREAM_RESPONSE_TOPIC(workflowInstanceId);
       let aiResponse = '';
       this.mq.subscribe(channel, (channel, message: string) => {
-        logger.info(`[Chat] appId=${config.server.appId}, channel=${channel}, teamId=${teamId}, model=${model}, workflowInstanceId=${workflowInstanceId} message=${message}`);
         res.write(message);
         // TODO: listen on workflow finished event
         if (message.startsWith('data: [DONE]')) {

@@ -40,7 +40,7 @@ interface IVinesWorkflowInputProps {
   itemClassName?: string;
 }
 
-const BOOLEAN_VALUES = ['true', 'yes', '是', '1'];
+export const BOOLEAN_VALUES = ['true', 'yes', '是', '1'];
 
 export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
   inputs,
@@ -233,6 +233,7 @@ export const VinesWorkflowInput: React.FC<IVinesWorkflowInputProps> = ({
                                 <VinesUpdater
                                   limit={isMultiple ? void 0 : 1}
                                   onFinished={(urls) => form.setValue(name, isMultiple ? urls : urls[0])}
+                                  basePath="user-files/workflow-input"
                                 >
                                   <Button variant="outline" size="small" className="-mr-1 scale-90">
                                     {t('workspace.pre-view.actuator.execution-form.file.click-to-upload')}

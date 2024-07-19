@@ -49,7 +49,7 @@ export class WorkflowExecutionController {
     description: '运行 workflow',
   })
   public async startWorkflowSync(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Body() body: StartWorkflowSyncDto) {
-    const { teamId, userId } = req;
+    const { teamId, userId, apikey } = req;
     const { inputData, version } = body;
     const workflowInstanceId = await this.service.startWorkflow({
       teamId,
@@ -58,6 +58,7 @@ export class WorkflowExecutionController {
       inputData,
       version,
       triggerType: WorkflowTriggerType.MANUALLY,
+      apiKey: apikey,
     });
     const result = await this.service.waitForWorkflowResult(teamId, workflowInstanceId);
     return result;

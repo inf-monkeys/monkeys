@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 
+import { isEmpty } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { VinesAbstractBoolean } from '@/components/layout/vines-view/execution/data-display/abstract/node/boolean.tsx';
@@ -29,6 +30,8 @@ export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
 
     const previewDataLength = previewData.length;
 
+    const isValueEmpty = previewDataLength === 1 && isEmpty(previewData?.[0]?.value);
+
     return (
       <ScrollArea className={cn('[&>div>div]:h-full', className)} style={style}>
         <div className="flex h-full w-full flex-col gap-1">
@@ -48,7 +51,7 @@ export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
               </div>
             );
           })}
-          {!previewDataLength && (
+          {(!previewDataLength || isValueEmpty) && (
             <h1 className="m-auto text-sm font-bold">
               {t('workspace.pre-view.actuator.detail.abstract-data-preview.empty')}
             </h1>

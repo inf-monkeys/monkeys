@@ -19,16 +19,33 @@ export const workflowInputSchema = z.object({
     .string()
     .min(2, 'Field cannot be less than two characters')
     .max(20, 'Field cannot be more than twenty characters'),
+  description: z.string().optional(),
+  tips: z.string().optional(),
   type: inputType,
   default: z
     .union([z.string(), z.number(), z.boolean(), z.array(z.string()), z.array(z.number()), z.array(z.boolean())])
     .optional(),
   multipleValues: z.boolean().optional(),
   assetType: z.string().optional(),
+
   enableImageMask: z.boolean().optional(),
+
   minValue: z.number().optional(),
   maxValue: z.number().optional(),
   numberPrecision: z.number().optional(),
+
+  enableSelectList: z.boolean().optional(),
+  selectList: z
+    .array(
+      z.object({
+        value: z.union([z.string(), z.number()]),
+        label: z.string(),
+      }),
+    )
+    .optional(),
+
+  foldUp: z.boolean().optional(),
+  enableReset: z.boolean().optional(),
 });
 
 export type IWorkflowInput = z.infer<typeof workflowInputSchema>;

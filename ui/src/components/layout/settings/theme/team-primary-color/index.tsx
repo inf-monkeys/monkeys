@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 
 import { updateTeam } from '@/apis/authz/team';
 import { useCreateTheme } from '@/apis/theme';
-import { InfoEditor } from '@/components/layout/settings/account/info-editor.tsx';
+import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
@@ -75,7 +75,7 @@ export const TeamPrimaryColor: React.FC<ITeamPrimaryColorProps> = () => {
       <CardFooter className="flex items-center justify-between">
         <span className="text-xs text-gray-10">{t('settings.theme.team-primary-color.tip')}</span>
         <div className="flex gap-2">
-          <InfoEditor
+          <SimpleInputDialog
             title={t('settings.theme.team-primary-color.operate.save.title')}
             placeholder={t('settings.theme.team-primary-color.operate.save.placeholder')}
             onFinished={(val) => handleCreateTheme(val, value)}
@@ -83,7 +83,7 @@ export const TeamPrimaryColor: React.FC<ITeamPrimaryColorProps> = () => {
             <Button variant="outline" size="small">
               {t('settings.theme.team-primary-color.operate.save.button')}
             </Button>
-          </InfoEditor>
+          </SimpleInputDialog>
           <Button variant="outline" size="small" onClick={handleUpdate}>
             {t('common.utils.update')}
           </Button>

@@ -42,6 +42,8 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height, children 
   const useOpenAIInterface = vines.usedOpenAIInterface();
   const openAIInterfaceEnabled = useOpenAIInterface.enable;
 
+  const hasWorkflowVariables = vines.workflowInput.length > 0;
+
   const actuatorHeight = height - 64;
 
   return (
@@ -59,14 +61,13 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height, children 
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                className={openAIInterfaceEnabled ? 'hidden' : ''}
+                className={hasWorkflowVariables || openAIInterfaceEnabled ? 'hidden' : ''}
                 variant="outline"
                 icon={isExecutionRunning ? <StopCircle size={16} /> : <RotateCcw size={16} />}
                 onClick={() => {
                   if (isExecutionRunning) {
                     vines.stop();
                   } else {
-                    const hasWorkflowVariables = vines.workflowInput.length > 0;
                     if (hasWorkflowVariables) {
                       vines.executionWorkflowExecution = null;
                       toast.info(t('workspace.pre-view.actuator.execution.form-empty'));
