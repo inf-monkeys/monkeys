@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
+import { execCopy } from '@/utils';
 
 interface IOperateAreaProps {
   item: IAssetItem<IMediaData>;
@@ -60,7 +61,9 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
         <DropdownMenuGroup>
           <DropdownMenuItem
             onClick={() => {
-              item.url;
+              clipboard.copy(item.url);
+              if (!clipboard.copied && !execCopy(item.url)) toast.error(t('common.toast.copy-failed'));
+              else toast.success(t('common.toast.copy-success'));
               toast.success(t('common.toast.copy-success'));
             }}
           >

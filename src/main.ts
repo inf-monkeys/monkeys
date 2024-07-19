@@ -62,12 +62,14 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE'.split(','),
     origin: '*',
   });
-  app.use(
-    rateLimit({
-      windowMs: config.server.rateLimit.windowMs,
-      max: config.server.rateLimit.max,
-    }),
-  );
+  if (config.server.rateLimit.enabled) {
+    app.use(
+      rateLimit({
+        windowMs: config.server.rateLimit.windowMs,
+        max: config.server.rateLimit.max,
+      }),
+    );
+  }
   // Authentication & Session
   app.use(
     session({

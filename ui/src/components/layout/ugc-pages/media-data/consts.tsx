@@ -14,7 +14,8 @@ const columnHelper = createColumnHelper<IAssetItem<IMediaData>>();
 export const createMediaDataColumns = () => [
   columnHelper.display({
     id: 'logo',
-    cell: ({ row }) => RenderIcon({ iconUrl: row.original.type.startsWith('image') ? row.original.url : '' }),
+    cell: ({ row }) =>
+      RenderIcon({ iconUrl: row.original.type.startsWith('image') ? encodeURI(row.original.url) : '' }),
     maxSize: 48,
   }),
   columnHelper.accessor('displayName', {

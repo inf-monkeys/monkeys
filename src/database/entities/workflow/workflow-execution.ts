@@ -1,3 +1,4 @@
+import { WorkflowStatusEnum } from '@/common/dto/status.enum';
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../base/base';
 import { WorkflowTriggerType } from './workflow-trigger';
@@ -35,4 +36,24 @@ export class WorkflowExecutionEntity extends BaseEntity {
     nullable: true,
   })
   chatSessionId?: string;
+
+  @Column({
+    name: 'status',
+    nullable: true,
+    type: 'varchar',
+    length: 255,
+  })
+  status: WorkflowStatusEnum;
+
+  @Column({
+    name: 'takes',
+    nullable: true,
+  })
+  takes: number;
+
+  @Column({
+    name: 'apikey',
+    nullable: true,
+  })
+  apikey: string;
 }

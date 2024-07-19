@@ -3,7 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-import { AddSpaceTab } from '@/components/layout-wrapper/workspace/space/tabs/expand/add-tab.tsx';
+import { CreateSpaceTab } from 'src/components/layout-wrapper/workspace/space/tabs/expand/create-tab';
 import { Button } from '@/components/ui/button';
 
 interface IScrollToolProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -32,7 +32,7 @@ export const ScrollTool: React.FC<IScrollToolProps> = ({ tabsNode }) => {
         className="!scale-75"
         onClick={() => tabsNode.current?.scrollBy({ left: 100, behavior: 'smooth' })}
       />
-      <AddSpaceTab className="ml-0" />
+      <CreateSpaceTab className="ml-0" />
     </motion.div>
   );
 };

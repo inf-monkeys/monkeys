@@ -24,6 +24,7 @@ export class CompatibleAuthGuard implements CanActivate {
       let isAuthenticated = false;
       let userId: string;
       let teamId: string;
+      let apiKey: string;
       let authorizationToken = request.headers['authorization'] as string;
       if (authorizationToken) {
         authorizationToken = authorizationToken.replace('Bearer ', '');
@@ -34,6 +35,7 @@ export class CompatibleAuthGuard implements CanActivate {
           if (isAuthenticated) {
             userId = validateApiKeyResult.userId;
             teamId = validateApiKeyResult.teamId;
+            apiKey = authorizationToken;
           }
         }
         // password or phone
@@ -59,6 +61,7 @@ export class CompatibleAuthGuard implements CanActivate {
         }
         request.userId = userId;
         request.teamId = teamId;
+        request.apikey = apiKey;
         return true;
       } else {
         return false;

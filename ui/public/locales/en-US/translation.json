@@ -61,12 +61,38 @@
       }
     },
     "time": {
+      "a-few-seconds": "a few seconds",
       "second_one": "sec",
       "second_other": "secs",
       "minute_one": "min",
       "minute_other": "mins",
       "hour_one": "hour",
-      "hour_other": "hours"
+      "hour_other": "hours",
+      "day_one": "day",
+      "day_other": "days",
+      "week_one": "week",
+      "week_other": "weeks",
+      "month_one": "month",
+      "month_other": "months",
+      "year_one": "year",
+      "year_other": "years",
+      "ago": "{{ time }} ago",
+      "just-now": "just now"
+    },
+    "workflow": {
+      "trigger": {
+        "MANUAL": "Manual Execution",
+        "SCHEDULER": "Scheduled execution",
+        "WEBHOOK": "Webhook"
+      },
+      "status": {
+        "RUNNING": "Running",
+        "COMPLETED": "Completed",
+        "PAUSED": "Paused",
+        "FAILED": "Failed",
+        "TIMED_OUT": "Timed Out",
+        "TERMINATED": "Terminated"
+      }
     },
     "toast": {
       "loading": "Please wait until the data is loaded.",
@@ -166,7 +192,11 @@
         "click-or-drag-area_one": "Click or drag to upload file",
         "click-or-drag-area_other": "Click or drag to upload files",
         "toast": {
-          "on-drop-rejected": "The file \"{{fileName}}\" is not in the correct format or exceeds the limit."
+          "file-too-small": "The file \"{{ filename }}\" size is too large",
+          "file-too-big": "The file \"{{ filename }}\" size is too small",
+          "too-many-files": "Too many files",
+          "filename-invalid": "The file \"{{ filename }}\"'s name is invalid.",
+          "file-invalid-type": "The file \"{{ filename }}\"'s type is invalid."
         },
         "hint": {
           "accept": {
@@ -228,7 +258,7 @@
       "vines-image-mask-editor": {
         "title": "Image mask editor",
         "tip-1": "You can also use the eraser by holding",
-        "tip-2": ". Please save first before uploading.",
+        "tip-2": ".",
         "label": {
           "brush-size": "Brush size",
           "opacity": "Opacity"
@@ -805,6 +835,9 @@
           }
         }
       }
+    },
+    "stat": {
+      "title": "Team Statistic"
     }
   },
   "workbench": {
@@ -1203,11 +1236,13 @@
               },
               "chunk_size": {
                 "label": "Segment Chunk Size",
-                "tip": "Please enter segment chunk size"
+                "tip": "Please enter segment chunk size",
+                "description": "The number of characters in each segment chunk. The default value is 500. If you want split exactly by the separator, please set it to 0."
               },
               "chunk_overlap": {
                 "label": "Segment Chunk Overlap",
-                "tip": "Please enter segment chunk overlap"
+                "tip": "Please enter segment chunk overlap",
+                "description": "The number of characters that overlap between adjacent segment chunks. The default value is 50. This value must be less than the chunk size."
               }
             }
           },
@@ -1394,6 +1429,14 @@
                 "topK": {
                   "label": "Top K",
                   "placeholder": "Enter Top K"
+                },
+                "enabledMetadataFilter": {
+                  "label": "Enable Metadata Filter",
+                  "placeholder": "Sometime, you may want to filter the document by metadata before retrieval.For example: See you have serveral documents about different company's annual report, we user ask a question about a specific company,you may want to filter the documents by company name before retrieval."
+                },
+                "metadataFilterKey": {
+                  "label": "Metadata Key To Filter",
+                  "placeholder": "Choose a metadata key to filter, we will use this key to filter the documents based on user's question."
                 }
               }
             }
@@ -1601,9 +1644,8 @@
           "iframe": {
             "title": "View Iframe Embed",
             "desc": "You can integrate the workflow into your application via iframe embed",
-
             "built-in": {
-              "label": "Built-in view iframe embed address" ,
+              "label": "Built-in view iframe embed address",
               "desc1": "When embedding a built-in view, you do not need to fill in the view ID. Instead, you can directly fill in the view type with view-",
               "desc2": "Flow view: flow, log view: logs, form view: form, conversation view: chat",
               "tips": "The address structure is: https://[domain]/[team ID]/workspace/[workflow ID]/view-[view type]"
@@ -1650,7 +1692,23 @@
         "unknown-view": "Unknown view",
         "add-tab": {
           "label": "Add View",
-          "empty": "No view available"
+          "empty": "No view available",
+          "create-custom-code-view": {
+            "button": "Custom Views",
+            "placeholder": "Enter a view name",
+            "tips": {
+              "title": "Creating a Custom Code View",
+              "desc": "You can use ReactJS code along with our component library and TailwindCSS to customize page layouts and component styles. Additionally, our JS SDK allows you to easily achieve personalized views."
+            },
+            "form": {
+              "display-name": {
+                "label": "View Name",
+                "placeholder": "Please enter a view name"
+              },
+              "icon": "View Icon",
+              "submit": "Create"
+            }
+          }
         },
         "menu": {
           "del-view-button": "Delete View",
@@ -1672,7 +1730,6 @@
             "placeholder": "Please enter a group name",
             "def": "Default Group",
             "name-默认分组": "Default Group",
-
             "create-toast": {
               "loading": "Creating group...",
               "success": "Group created successfully!",
@@ -1689,7 +1746,6 @@
               "desc": "After deleting a group, the pages in the group will be unpinned to the workbench",
               "cancel": "Cancel",
               "confirm": "Delete",
-
               "loading": "Deleting group...",
               "success": "Group deleted successfully!",
               "error": "Group deletion failed!"
@@ -1971,7 +2027,16 @@
               "name": {
                 "label": "Key",
                 "placeholder": "Enter key",
-                "desc": "The input field is used to reference the input data in the workflow, fill in \"${workflow.input.{{name}}}\" in the tool assembly item to use the"
+                "desc": "The input field is used to reference the input data in the workflow, fill in \"${workflow.input.{{name}}}\" in the tool assembly item to use the",
+                "reset": "Reset"
+              },
+              "desc": {
+                "label": "Description",
+                "placeholder": "After filling in, the description of the configuration will be displayed below"
+              },
+              "tips": {
+                "label": "Tips",
+                "placeholder": "After filling in, a prompt icon will be displayed, and prompt information will be displayed when the mouse hovers"
               },
               "type": {
                 "label": "Data Type",
@@ -1988,7 +2053,17 @@
               "default": {
                 "label": "Default Value",
                 "placeholder": "Enter default value",
-                "placeholder-list": "Enter default value"
+                "placeholder-list": "Enter default value",
+
+                "select": {
+                  "label": "List Selection",
+
+                  "set-default": "Set as Default",
+                  "label-placeholder": "Aliases",
+                  "value-placeholder": "Value",
+                  "remove-tips": "Delete",
+                  "add": "Add"
+                }
               },
               "file": {
                 "label": "File {{extra}} Default",
@@ -2011,7 +2086,17 @@
                   "label": "Number Precision",
                   "placeholder": "Enter number precision",
                   "description": "When the number precision is not 0, the forms in the preview view and chat view will display the slider"
-                }
+                },
+                "fold-up": {
+                  "label": "Fold to \"Advanced Configuration\"",
+                  "description": "When fields are optional, they can be grouped under Advanced Configuration to organize configuration options more efficiently."
+                },
+                "enable-reset": {
+                  "label": "Enable the Reset button"
+                },
+
+                "fold": "Advanced Configuration",
+                "reset": "Reset"
               },
               "submit": "Save"
             }
@@ -2234,57 +2319,81 @@
     },
     "logs-view": {
       "title": "Logs",
-      "desc": "Total {{data}} items{{suffix}}",
-      "desc-suffix": ", {{loaded}} items loaded",
-      "filter": {
-        "form": {
-          "versions": {
-            "label": "Version",
-            "placeholder": "Select version",
-            "temp": "Temp"
-          },
-          "start-time": {
-            "label": "Execution Start Time",
-            "placeholder": "Select execution start time"
-          },
-          "status": {
-            "label": "Execution Status",
-            "placeholder": "Select execution status"
-          },
-          "trigger-types": {
-            "label": "Trigger execution mode",
-            "placeholder": "Select trigger execution mode"
-          },
-          "workflow-instance-id": {
-            "label": "Workflow execution instance ID",
-            "placeholder": "Enter workflow execution instance ID"
-          },
-          "order-by": {
-            "label": "Sort by oldest to newest"
-          },
-          "reset": "Reset",
-          "submit": "Filter"
+      "log": {
+        "title": "Execution Logs",
+        "desc": "Total {{data}} items{{suffix}}",
+        "desc-suffix": ", {{loaded}} items loaded",
+        "filter": {
+          "form": {
+            "versions": {
+              "label": "Version",
+              "placeholder": "Select version",
+              "temp": "Temp"
+            },
+            "start-time": {
+              "label": "Execution Start Time",
+              "placeholder": "Select execution start time"
+            },
+            "status": {
+              "label": "Execution Status",
+              "placeholder": "Select execution status"
+            },
+            "trigger-types": {
+              "label": "Trigger execution mode",
+              "placeholder": "Select trigger execution mode"
+            },
+            "workflow-instance-id": {
+              "label": "Workflow execution instance ID",
+              "placeholder": "Enter workflow execution instance ID"
+            },
+            "order-by": {
+              "label": "Sort by oldest to newest"
+            },
+            "reset": "Reset",
+            "submit": "Filter"
+          }
+        },
+        "list": {
+          "empty": "Execution record is empty",
+          "bottom": "No more data",
+          "more": "Remaining {{data}} items, click to load more",
+          "preview-page-not-found": "Failed to open details! Preview view not found",
+          "item": {
+            "desc": "Instance ID: {{instanceId}}",
+            "exec-time": "at {{time}}",
+            "status": {
+              "Running": "Running",
+              "Completed": "Completed",
+              "Paused": "Paused",
+              "Failed": "Failed",
+              "Terminated": "Terminated",
+              "Timed Out": "Timed Out"
+            },
+            "tips": "Click to view instance details",
+            "version": "Ver.{{version}}",
+            "temporary-workflow": "Temporary workflow"
+          }
         }
       },
-      "list": {
-        "empty": "Execution record is empty",
-        "bottom": "No more data",
-        "more": "Remaining {{data}} items, click to load more",
-        "preview-page-not-found": "Failed to open details! Preview view not found",
-        "item": {
-          "desc": "Instance ID: {{instanceId}}",
-          "exec-time": "at {{time}}",
-          "status": {
-            "Running": "Running",
-            "Completed": "Completed",
-            "Paused": "Paused",
-            "Failed": "Failed",
-            "Terminated": "Terminated",
-            "Timed Out": "Timed Out"
-          },
-          "tips": "Click to view instance details",
-          "version": "Ver.{{version}}",
-          "temporary-workflow": "Temporary workflow"
+      "stat": {
+        "title": "Execution Statistics",
+        "filter": {
+          "form": {
+            "time": {
+              "label": "Date Range Selector",
+              "placeholder": "Select a date range about executions"
+            },
+            "reset": "Reset",
+            "submit": "Filter",
+            "export": "Export"
+          }
+        },
+        "toast": {
+          "export": {
+            "loading": "Exporting...",
+            "success": "Export success!",
+            "error": "Export failed! Please try again later!"
+          }
         }
       },
       "loading": "Searching...",
@@ -2300,12 +2409,13 @@
           "max": "Full screen in view"
         },
         "execution": {
-          "label": "Execute workflow",
+          "label": "Execute",
           "button": {
             "restart": "Restart",
             "stop": "Stop"
           },
           "form-empty": "Please complete the workflow form first",
+          "workflow-execution-created": "Task created successfully!",
           "status": {
             "completed": "Workflow completed",
             "canceled": "Workflow execution cancellation",
@@ -2324,10 +2434,11 @@
         },
         "execution-form": {
           "string": "Enter {{displayName}}",
+          "select": "Select {{displayName}}",
           "file": {
             "label": "Please enter the file url",
             "click-to-upload": "Click to upload file",
-            "click-to-open-in-image-mask-editor-and-upload": "Click to open in image mask editor and upload"
+            "click-to-open-in-image-mask-editor-and-upload": "Open image mask editor"
           },
           "options": "Please select an option"
         },
@@ -2367,7 +2478,19 @@
             "label": "The content is too large, please go to OSS to download and view",
             "open-external-storage": "Click to open external storage",
             "preview": "Zoom in to see the code"
+          },
+          "form-render": {
+            "tips": "Click to view execution details",
+            "title": "Execution Details",
+            "tabs": {
+              "data": "Data",
+              "logs": "Raw Data"
+            }
           }
+        },
+        "frame": {
+          "history": "{{status}}History",
+          "close": "Close "
         }
       },
       "history": {

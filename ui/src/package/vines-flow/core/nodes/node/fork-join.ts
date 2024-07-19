@@ -20,7 +20,7 @@ export class ForkJoinNode extends ControlFlowVinesNode<VinesForkJoinTaskDef> {
 
   public branches: VinesNode[][] = [];
 
-  public readonly maxBranches = 5;
+  public readonly maxBranches = 100;
 
   private joinOnBranchIndex: number[] = [];
 

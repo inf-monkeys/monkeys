@@ -22,8 +22,8 @@ import {
 import { IVinesVariable, VinesVariableMapper } from '@/package/vines-flow/core/tools/typings.ts';
 import { IVinesInsertChildParams } from '@/package/vines-flow/core/typings.ts';
 import { createNanoId, createSubWorkflowDef } from '@/package/vines-flow/core/utils.ts';
-import VinesEvent from '@/utils/events.ts';
 import { getI18nContent } from '@/utils';
+import VinesEvent from '@/utils/events.ts';
 
 export type NodeClass = new (task: any, vinesCore: VinesCore) => VinesNode;
 

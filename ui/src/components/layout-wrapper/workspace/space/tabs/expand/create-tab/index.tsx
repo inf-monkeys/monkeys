@@ -5,7 +5,7 @@ import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { createWorkspacePage, useWorkspacePageInstances } from '@/apis/pages';
-import { CreatePageDto } from '@/apis/pages/typings';
+import { CreatePageDto } from '@/apis/pages/typings.ts';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,9 +21,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { cn } from '@/utils';
 
-interface IAddSpaceTabProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface ICreateSpaceTabProps extends React.ComponentPropsWithoutRef<'div'> {}
 
-export const AddSpaceTab: React.FC<IAddSpaceTabProps> = ({ className }) => {
+export const CreateSpaceTab: React.FC<ICreateSpaceTabProps> = ({ className }) => {
   const { t } = useTranslation();
 
   const { workflowId, pages, pagesMutate, navigateTo } = useVinesPage();
@@ -79,6 +79,8 @@ export const AddSpaceTab: React.FC<IAddSpaceTabProps> = ({ className }) => {
             ))}
             {isEmpty && <DropdownMenuItem disabled>{t('workspace.wrapper.space.add-tab.empty')}</DropdownMenuItem>}
           </DropdownMenuGroup>
+          {/*<DropdownMenuSeparator />*/}
+          {/*<CreateCustomCodeView />*/}
         </DropdownMenuContent>
       </DropdownMenu>
     </motion.div>

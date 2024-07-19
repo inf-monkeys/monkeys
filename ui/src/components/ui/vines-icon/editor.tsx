@@ -12,6 +12,7 @@ interface IVinesIconEditorProps {
   onChange?: (value: string) => void;
   onFinished?: (value: string) => void;
   size?: IVinesIconSize;
+  onlyEmoji?: boolean;
 }
 
 export const VinesIconEditor: React.FC<IVinesIconEditorProps> = ({
@@ -20,19 +21,22 @@ export const VinesIconEditor: React.FC<IVinesIconEditorProps> = ({
   onChange,
   onFinished,
   size = 'lg',
+  onlyEmoji = false,
 }) => {
   return (
     <div className="flex">
-      <VinesIconSelector emojiLink={value} onChange={onChange} onFinished={onFinished}>
+      <VinesIconSelector emojiLink={value} onChange={onChange} onFinished={onFinished} onlyEmoji={onlyEmoji}>
         <div className="relative cursor-pointer">
-          <VinesIcon size={size}>{value}</VinesIcon>
+          <VinesIcon size={size} preClassName={onlyEmoji ? 'border border-input' : ''}>
+            {value}
+          </VinesIcon>
           <Tooltip>
             <TooltipTrigger asChild>
               <div
                 className="absolute bottom-0 right-0 cursor-pointer rounded-br-md rounded-tl-md bg-white bg-opacity-45 p-1 shadow hover:bg-opacity-60 [&_svg]:stroke-vines-500"
                 onClick={(e) => {
                   e.preventDefault();
-                  onChange?.(defaultValue || 'emoji:🍀:#ceefc5');
+                  onChange?.(defaultValue || (onlyEmoji ? '🍀' : 'emoji:🍀:#ceefc5'));
                 }}
               >
                 <RotateCcw size={8} />

@@ -44,7 +44,8 @@ export class ConductorService {
   public convertConductorTasksToVinesTasks(teamId: string, tasks: Task[], workflowDefinition: WorkflowDefinition) {
     // const team = await this.teamService.getTeamById(teamId);
 
-    for (const task of tasks) {
+    const flattedTasks = flatTasks(tasks);
+    for (const task of flattedTasks) {
       const workflowTaskNamePrefix = config.conductor.workerPrefix;
       if (workflowTaskNamePrefix) {
         // 移除前缀
@@ -70,7 +71,7 @@ export class ConductorService {
       delete task.inputData[this.CONTEXT_KEY];
     }
 
-    for (const task of workflowDefinition?.tasks || []) {
+    for (const task of flatTasks(workflowDefinition?.tasks) || []) {
       const workflowTaskNamePrefix = config.conductor.workerPrefix;
       if (workflowTaskNamePrefix) {
         // 移除前缀
@@ -212,26 +213,32 @@ export class ConductorService {
 
   public async saveWorkflowInConductor(workflowEntity: WorkflowMetadataEntity) {
     const { tasks, teamId, workflowId, version, output } = workflowEntity;
-    await this.convertVinesTasksToConductorTasks(teamId, output, tasks, {});
-    const res = await conductorClient.metadataResource.update(
-      [
-        {
-          name: workflowId,
-          description: workflowEntity.getDisplayNameStr(),
-          version: version,
-          restartable: true,
-          workflowStatusListenerEnabled: true,
-          schemaVersion: 2,
-          ownerEmail: 'dev@inf-monkeys.com',
-          timeoutPolicy: 'TIME_OUT_WF',
-          timeoutSeconds: 60 * 60 * 24,
-          tasks,
-        },
-      ],
-      true,
-    );
-    if (!res.bulkSuccessfulResults?.length) {
-      throw new Error('Save workflow in conductor failed');
+
+    try {
+      await this.convertVinesTasksToConductorTasks(teamId, output, tasks, {});
+      const res = await conductorClient.metadataResource.update(
+        [
+          {
+            name: workflowId,
+            description: workflowEntity.getDisplayNameStr(),
+            version: version,
+            restartable: true,
+            workflowStatusListenerEnabled: true,
+            schemaVersion: 2,
+            ownerEmail: 'dev@inf-monkeys.com',
+            timeoutPolicy: 'TIME_OUT_WF',
+            timeoutSeconds: 60 * 60 * 24,
+            tasks,
+          },
+        ],
+        true,
+      );
+      if (!res.bulkSuccessfulResults?.length) {
+        throw new Error('Save workflow in conductor failed');
+      }
+    } catch (error) {
+      const message = JSON.stringify(error.body.validationErrors);
+      throw new Error(message);
     }
   }
 

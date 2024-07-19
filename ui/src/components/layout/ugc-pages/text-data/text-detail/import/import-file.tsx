@@ -99,6 +99,7 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                         onFilesUpdate={(files) => {
                           setFilename(files[0]?.name ?? '');
                         }}
+                        basePath="user-files/text-data-file"
                       />
                     </FormControl>
                     <FormDescription>{t('common.form.description.upload-file-auto-store')}</FormDescription>
@@ -193,6 +194,9 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                         <FormLabel>
                           {t('ugc-page.text-data.detail.import.common-form.splitterConfig.chunk_size.label')}
                         </FormLabel>
+                        <FormDescription>
+                          {t('ugc-page.text-data.detail.import.common-form.splitterConfig.chunk_size.description')}
+                        </FormDescription>
                         <FormControl>
                           <Input
                             placeholder="500"
@@ -217,6 +221,9 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                         <FormLabel>
                           {t('ugc-page.text-data.detail.import.common-form.splitterConfig.chunk_overlap.label')}
                         </FormLabel>
+                        <FormDescription>
+                          {t('ugc-page.text-data.detail.import.common-form.splitterConfig.chunk_overlap.description')}
+                        </FormDescription>
                         <FormControl>
                           <Input
                             placeholder="50"

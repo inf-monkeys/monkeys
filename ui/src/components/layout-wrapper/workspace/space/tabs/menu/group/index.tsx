@@ -2,24 +2,29 @@ import React, { useMemo } from 'react';
 
 import { KeyedMutator } from 'swr/_internal';
 
-import { Plus } from 'lucide-react';
+import { Pin, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useCreatePageGroup, usePageGroups } from '@/apis/pages';
 import { IPageType } from '@/apis/pages/typings.ts';
-import { InfoEditor } from '@/components/layout/settings/account/info-editor.tsx';
 import { GroupItem } from '@/components/layout-wrapper/workspace/space/tabs/menu/group/item.tsx';
-import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu.tsx';
+import {
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+} from '@/components/ui/dropdown-menu.tsx';
+import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
 
-interface IDropdownGroupProps extends React.ComponentPropsWithoutRef<'div'> {
+interface IViewGroupProps extends React.ComponentPropsWithoutRef<'div'> {
   pageId: string;
-  pinned?: boolean;
-  handlePinPage?: (e: React.MouseEvent<HTMLDivElement>) => void;
   pagesMutate?: (data?: KeyedMutator<IPageType[] | undefined>) => void;
 }
 
-export const DropdownGroup: React.FC<IDropdownGroupProps> = ({ pageId, pinned, handlePinPage, pagesMutate }) => {
+export const ViewGroup: React.FC<IViewGroupProps> = ({ pageId, pagesMutate }) => {
   const { t } = useTranslation();
 
   const { data, isLoading, mutate: pageGroupMutate } = usePageGroups();
@@ -57,26 +62,34 @@ export const DropdownGroup: React.FC<IDropdownGroupProps> = ({ pageId, pinned, h
   }, [data]);
 
   return (
-    <>
-      {isLoading && <DropdownMenuItem disabled>{t('common.load.loading')}</DropdownMenuItem>}
-      {finalGroups?.map((group, i) => <GroupItem group={group} key={i} pageId={pageId} mutate={pageGroupMutate} />)}
-      <DropdownMenuSeparator />
-      <InfoEditor
-        title={t('workspace.wrapper.space.menu.group.create')}
-        placeholder={t('workspace.wrapper.space.menu.group.placeholder')}
-        onFinished={handleCreateGroup}
-      >
-        <DropdownMenuItem
-          className="flex items-center gap-2"
-          onSelect={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-          }}
-        >
-          <Plus size={16} />
-          {t('workspace.wrapper.space.menu.group.create')}
-        </DropdownMenuItem>
-      </InfoEditor>
-    </>
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger className="flex items-center gap-2">
+        <Pin strokeWidth={1.5} size={16} />
+        {t('workspace.wrapper.space.menu.pin')}
+      </DropdownMenuSubTrigger>
+      <DropdownMenuPortal>
+        <DropdownMenuSubContent>
+          {isLoading && <DropdownMenuItem disabled>{t('common.load.loading')}</DropdownMenuItem>}
+          {finalGroups?.map((group, i) => <GroupItem group={group} key={i} pageId={pageId} mutate={pageGroupMutate} />)}
+          <DropdownMenuSeparator />
+          <SimpleInputDialog
+            title={t('workspace.wrapper.space.menu.group.create')}
+            placeholder={t('workspace.wrapper.space.menu.group.placeholder')}
+            onFinished={handleCreateGroup}
+          >
+            <DropdownMenuItem
+              className="flex items-center gap-2"
+              onSelect={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+              }}
+            >
+              <Plus size={16} />
+              {t('workspace.wrapper.space.menu.group.create')}
+            </DropdownMenuItem>
+          </SimpleInputDialog>
+        </DropdownMenuSubContent>
+      </DropdownMenuPortal>
+    </DropdownMenuSub>
   );
 };
