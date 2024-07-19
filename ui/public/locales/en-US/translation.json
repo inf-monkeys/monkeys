@@ -2440,7 +2440,14 @@
             "click-to-upload": "Click to upload file",
             "click-to-open-in-image-mask-editor-and-upload": "Open image mask editor"
           },
-          "options": "Please select an option"
+          "options": "Please select an option",
+
+          "mask-editor": {
+            "empty": "No mask image yet",
+            "empty-action": "Select image and edit mask",
+            "re-edit": "Re-edit image mask",
+            "clear": "Clear"
+          }
         },
         "detail": {
           "tabs": {

@@ -76,7 +76,7 @@ export const VinesExecutionResultItem: React.FC<IVinesExecutionResultItemProps> 
                   </motion.div>
                 ) : (
                   <motion.div
-                    className="size-full"
+                    className="group size-full"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
