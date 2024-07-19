@@ -77,12 +77,11 @@ export const FieldFile: React.FC<IFieldFileProps> = ({ value, input: { name, typ
             <>
               <ImageMaskEditor
                 className="h-64 w-full max-w-full"
-                style={{ maxWidth: width }}
+                maxWidth={width}
                 event$={maskEditor$}
                 onBeforeSave={() => setMaskEditorLoading(false)}
                 onBeforeExport={() => setMaskEditorLoading(true)}
                 onFinished={(urls) => {
-                  console.log('form-set', isMultiple ? urls : urls[0]);
                   form.setValue(name, isMultiple ? urls : urls[0]);
                   setMaskEditorVisible(false);
                 }}
