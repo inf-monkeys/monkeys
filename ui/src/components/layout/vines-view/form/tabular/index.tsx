@@ -30,7 +30,6 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
   event$,
 }) => {
   const { mutate } = useSWRConfig();
-
   const { t } = useTranslation();
 
   const { containerHeight } = usePageStore();
