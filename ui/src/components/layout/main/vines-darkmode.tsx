@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useLocalStorage } from '@/utils';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 interface IVinesDarkModeProps extends React.ComponentPropsWithoutRef<'div'> {}
 

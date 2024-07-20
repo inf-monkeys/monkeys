@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useLocalStorage } from '@/utils';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import VinesEvent from '@/utils/events.ts';
 import { maskEmail, maskPhone } from '@/utils/maskdata.ts';
 

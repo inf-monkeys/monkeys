@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 
 import _ from 'lodash';
 import { ArrowDownNarrowWide, ArrowDownWideNarrow } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import {
   ISortCondition,
@@ -23,8 +24,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
-import { useLocalStorage } from '@/utils';
-import { useTranslation } from 'react-i18next';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 interface IUgcHeaderSortButtonProps extends IUgcCustomProps {}
 

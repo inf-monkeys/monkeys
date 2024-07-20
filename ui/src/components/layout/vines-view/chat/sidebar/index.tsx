@@ -12,9 +12,10 @@ import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
-import { cn, useLocalStorage } from '@/utils';
+import { cn } from '@/utils';
 
 interface IChatSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 

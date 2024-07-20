@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useLocalStorage } from '@/utils';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { maskEmail, maskPhone } from '@/utils/maskdata.ts';
 
 interface ITeamMemberProps extends React.ComponentPropsWithoutRef<'div'> {}

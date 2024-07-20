@@ -17,9 +17,9 @@ import { Label } from '@/components/ui/label.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import { Switch } from '@/components/ui/switch';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
-import { useLocalStorage } from '@/utils';
 
 interface IVinesChatModeProps {
   multipleChat?: boolean;

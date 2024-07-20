@@ -37,7 +37,8 @@ import { RemoteDataTable } from '@/components/ui/data-table/remote.tsx';
 import { VinesFullLoading } from '@/components/ui/loading';
 import { TablePagination } from '@/components/ui/pagination/table-pagination.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { getI18nContent, useLocalStorage } from '@/utils';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+import { getI18nContent } from '@/utils';
 
 interface IUgcViewProps<E extends object> {
   assetKey: string;

@@ -12,10 +12,10 @@ import { IVinesChatListItem } from '@/components/layout/vines-view/chat/workflow
 import { VirtualizedList } from '@/components/layout/vines-view/chat/workflow-mode/messages/virtualized';
 import { useVinesUser } from '@/components/router/guard/user.tsx';
 import { VinesLoading } from '@/components/ui/loading';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { useViewStore } from '@/store/useViewStore';
-import { useLocalStorage } from '@/utils';
 
 interface IVinesChatListProps {
   visible: boolean;

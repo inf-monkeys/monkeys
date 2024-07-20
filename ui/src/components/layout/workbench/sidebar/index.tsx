@@ -16,7 +16,8 @@ import { Label } from '@/components/ui/label.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
-import { cn, getI18nContent, useLocalStorage } from '@/utils';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+import { cn, getI18nContent } from '@/utils';
 
 interface IWorkbenchSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
   groupId: string;

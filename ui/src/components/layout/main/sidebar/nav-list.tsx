@@ -7,7 +7,7 @@ import { NavButton } from '@/components/layout/main/sidebar/nav-button.tsx';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { SIDEBAR_MAP } from '@/consts/sidebar.tsx';
-import { useLocalStorage } from '@/utils';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 interface INavListProps extends React.ComponentPropsWithoutRef<'div'> {}
 

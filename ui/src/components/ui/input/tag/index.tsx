@@ -1,6 +1,7 @@
-import React, { forwardRef, useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useRef, useState } from 'react';
 
-import { useFocusWithin } from '@mantine/hooks';
+import { useFocusWithin } from 'ahooks';
+import { BasicTarget } from 'ahooks/lib/utils/domTarget';
 import { X } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge.tsx';
@@ -17,7 +18,8 @@ interface ITagInputProps extends Omit<React.HTMLAttributes<HTMLInputElement>, 'o
 
 export const TagInput = forwardRef<HTMLInputElement, ITagInputProps>(
   ({ value = [], onChange, placeholder, disabled, addOnBlur = true, ...props }, ref) => {
-    const { ref: inputRef, focused } = useFocusWithin();
+    const inputRef = useRef<HTMLInputElement | null>(null);
+    const focused = useFocusWithin(ref as BasicTarget<HTMLInputElement>);
 
     const [inputValue, setInputValue] = useState('');
 

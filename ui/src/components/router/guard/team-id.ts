@@ -5,8 +5,8 @@ import z from 'zod';
 
 import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { authGuard } from '@/components/router/guard/auth.ts';
+import { readLocalStorageValue, setLocalStorage } from '@/hooks/use-local-storage';
 import { Route } from '@/pages/$teamId';
-import { readLocalStorageValue, setLocalStorage } from '@/utils';
 
 export const teamIdGuard = async ({
   location,

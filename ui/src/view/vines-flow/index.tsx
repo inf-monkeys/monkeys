@@ -11,13 +11,14 @@ import { VinesNodes } from '@/components/layout/vines-view/flow/nodes';
 import { VinesToolbar } from '@/components/layout/vines-view/flow/toolbar';
 import { VinesExpandToolbar } from '@/components/layout/vines-view/flow/toolbar/expand';
 import { VinesLoading } from '@/components/ui/loading';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { IVinesFlowRenderOptions, IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { usePageStore } from '@/store/usePageStore';
-import { cn, useLocalStorage } from '@/utils';
+import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 import { VinesFlowEvents } from '@/view/vines-flow/events.tsx';
 

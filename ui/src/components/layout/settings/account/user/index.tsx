@@ -22,7 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { VinesImageEditor } from '@/components/ui/image-editor';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useLocalStorage } from '@/utils';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import VinesEvent from '@/utils/events.ts';
 
 interface IUserProps extends React.ComponentPropsWithoutRef<'div'> {}

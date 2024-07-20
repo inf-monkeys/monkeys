@@ -13,7 +13,7 @@ import { authGuard } from '@/components/router/guard/auth.ts';
 import { Button } from '@/components/ui/button';
 import { I18nSelector } from '@/components/ui/i18n-selector';
 import { VinesLoading } from '@/components/ui/loading';
-import { clearAllLocalData, useLocalStorage } from '@/utils';
+import { clearAllLocalData, useLocalStorage } from '@/hooks/use-local-storage';
 
 const TeamsIdPage: React.FC = () => {
   const { t } = useTranslation();

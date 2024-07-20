@@ -9,7 +9,7 @@ import { acceptTeamInvite, useInviteTeam } from '@/apis/authz/team';
 import { authGuard } from '@/components/router/guard/auth.ts';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
-import { useLocalStorage } from '@/utils';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 const JoinTeamPage: React.FC = () => {
   const { mutate } = useSWRConfig();

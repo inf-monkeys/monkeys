@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { useSetState } from '@mantine/hooks';
+import { useSetState } from 'ahooks';
 import { groupBy, isObject } from 'lodash';
 import { useTranslation } from 'react-i18next';
 

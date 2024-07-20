@@ -19,7 +19,8 @@ import {
   CommandSeparator,
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn, useLocalStorage } from '@/utils';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+import { cn } from '@/utils';
 
 export const TeamSelector: React.FC = () => {
   const { t } = useTranslation();
