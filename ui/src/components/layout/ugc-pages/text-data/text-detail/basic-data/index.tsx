@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { NumberInput } from '@mantine/core';
 import { Edit2Icon, Save } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +10,7 @@ import { useKnowledgeBase, useKnowledgeBaseMetadataFields, useUpdateKnowledgeBas
 import { ICreateVectorDB } from '@/apis/vector/typings.ts';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -236,9 +236,10 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
                 <FormItem>
                   <FormLabel>{t('ugc-page.text-data.detail.tabs.settings.search-settings.form.topK.label')}</FormLabel>
                   <FormControl>
-                    <NumberInput
+                    <Input
                       placeholder={t('ugc-page.text-data.detail.tabs.settings.search-settings.form.topK.placeholder')}
                       className="h-10 resize-none"
+                      type="number"
                       {...field}
                     />
                   </FormControl>
@@ -292,7 +293,7 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
                         </FormControl>
                         <SelectContent>
                           {fields?.map((it, i) => (
-                            <SelectItem value={it.name} key={it.name}>
+                            <SelectItem value={it.name} key={i}>
                               {getI18nContent(it.name)}
                             </SelectItem>
                           ))}

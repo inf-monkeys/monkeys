@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { useDebouncedState } from '@mantine/hooks';
+import { useDebounce } from 'ahooks';
 import { isEmpty } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -36,7 +36,9 @@ export const ParagraphEditor: React.FC<IImportParagraphProps> = ({
   const { t } = useTranslation();
 
   const [value, setValue] = useState(paragraph);
-  const [tempMetadata, setTempMetadata] = useDebouncedState(stringify(metadata), 200);
+
+  const [tempMetadata, setTempMetadata] = useState(stringify(metadata));
+  const debouncedTempMetadata = useDebounce(tempMetadata, { wait: 200 });
 
   useEffect(() => {
     setValue(paragraph);
@@ -48,7 +50,7 @@ export const ParagraphEditor: React.FC<IImportParagraphProps> = ({
 
   const handleOnConfirm = () => {
     try {
-      const newMetadata = JSON.parse(tempMetadata);
+      const newMetadata = JSON.parse(debouncedTempMetadata);
       if (typeof newMetadata !== 'object') {
         toast.error(t('ugc-page.text-data.detail.paragraph-editor.toast.not-json'));
         return;
@@ -83,7 +85,7 @@ export const ParagraphEditor: React.FC<IImportParagraphProps> = ({
             })}
           </p>
           <Label>{t('ugc-page.text-data.detail.paragraph-editor.form.metadata.label')}</Label>
-          <CodeEditor data={tempMetadata} onUpdate={setTempMetadata} height={200} lineNumbers={2} />
+          <CodeEditor data={debouncedTempMetadata} onUpdate={setTempMetadata} height={200} lineNumbers={2} />
           <p className="text-xs text-muted-foreground">
             {t('ugc-page.text-data.detail.paragraph-editor.form.metadata.stats')}
           </p>

@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 
-import { useClickOutside } from '@mantine/hooks';
+import { useClickAway } from 'ahooks';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { ComplicateSimpleNodeExpand } from 'src/components/layout/vines-view/flow/nodes/complicate/node/simple/expand';
@@ -45,13 +45,14 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
   const mouseFocusRef = useRef(false);
   const [isNodeFocus, setIsNodeFocus] = useState(false);
 
-  const ref = useClickOutside(() => {
+  const ref = useRef<HTMLDivElement | null>(null);
+  useClickAway(() => {
     if (!mouseFocusRef.current) {
       setIsNodeFocus(false);
       // 当当前节点与用户交互的节点相同时，点击节点外部，清除用户交互状态
       void (nodeId === isUserInteraction && setIsUserInteraction(null));
     }
-  });
+  }, ref);
 
   const handleNodeClick = () => {
     setIsUserInteraction(nodeId);

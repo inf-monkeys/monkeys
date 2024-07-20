@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 
-import { useWindowEvent } from '@mantine/hooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { get } from 'lodash';
 import { VinesEdges } from 'src/components/layout/vines-view/flow/edges';
@@ -12,6 +11,7 @@ import { VinesToolbar } from '@/components/layout/vines-view/flow/toolbar';
 import { VinesExpandToolbar } from '@/components/layout/vines-view/flow/toolbar/expand';
 import { VinesLoading } from '@/components/ui/loading';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import { useWindowEvent } from '@/hooks/use-window-event.ts';
 import { IVinesFlowRenderOptions, IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { useCanvasStore } from '@/store/useCanvasStore';

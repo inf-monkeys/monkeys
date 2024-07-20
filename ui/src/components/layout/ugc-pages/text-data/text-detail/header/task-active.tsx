@@ -2,10 +2,9 @@ import React, { useEffect } from 'react';
 
 import { useSWRConfig } from 'swr';
 
-import { useInterval } from '@mantine/hooks';
-
 import { useKnowledgeBaseTaskDetail } from '@/apis/vector';
 import { VinesLoading } from '@/components/ui/loading';
+import { useInterval } from '@/hooks/use-interval.ts';
 
 interface IActiveTaskProps {
   knowledgeBaseId: string;

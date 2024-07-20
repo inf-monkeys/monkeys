@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 
 import { useSWRConfig } from 'swr';
 
-import { useHotkeys } from '@mantine/hooks';
 import equal from 'fast-deep-equal/es6';
 import { pick } from 'lodash';
 import { GitCommitHorizontal } from 'lucide-react';
@@ -23,6 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog.tsx';
+import { useHotkeys } from '@/hooks/use-hotkeys';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';

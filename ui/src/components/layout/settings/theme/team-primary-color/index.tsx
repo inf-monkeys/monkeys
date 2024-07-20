@@ -2,17 +2,18 @@ import React, { useEffect, useState } from 'react';
 
 import { useSWRConfig } from 'swr';
 
-import { ColorPicker } from '@mantine/core';
 import { set } from 'lodash';
+import { HexColorPicker } from 'react-colorful';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { updateTeam } from '@/apis/authz/team';
 import { useCreateTheme } from '@/apis/theme';
-import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
+import { Input } from '@/components/ui/input';
+import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
 import usePaletteStore from '@/store/usePaletteStore.ts';
 
 interface ITeamPrimaryColorProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -62,10 +63,9 @@ export const TeamPrimaryColor: React.FC<ITeamPrimaryColorProps> = () => {
         <CardDescription>{t('settings.theme.team-primary-color.description')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <ColorPicker
-          fullWidth
-          format="hex"
-          value={value}
+        <HexColorPicker
+          className="!w-full"
+          color={value}
           onChange={(color) => {
             onChange(color);
             setValue(color);
@@ -73,14 +73,23 @@ export const TeamPrimaryColor: React.FC<ITeamPrimaryColorProps> = () => {
         />
       </CardContent>
       <CardFooter className="flex items-center justify-between">
-        <span className="text-xs text-gray-10">{t('settings.theme.team-primary-color.tip')}</span>
+        <Input
+          className="max-w-24"
+          value={tempColor}
+          onChange={(val) => {
+            onChange(val);
+            if (/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(val)) {
+              setValue(val);
+            }
+          }}
+        />
         <div className="flex gap-2">
           <SimpleInputDialog
             title={t('settings.theme.team-primary-color.operate.save.title')}
             placeholder={t('settings.theme.team-primary-color.operate.save.placeholder')}
             onFinished={(val) => handleCreateTheme(val, value)}
           >
-            <Button variant="outline" size="small">
+            <Button variant="outline" size="small" disabled>
               {t('settings.theme.team-primary-color.operate.save.button')}
             </Button>
           </SimpleInputDialog>
