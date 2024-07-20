@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-import { useElementSize } from '@mantine/hooks';
+import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { motion } from 'framer-motion';
 
 import { WorkspaceCustomSetting } from '@/components/layout/workspace/custom-setting';

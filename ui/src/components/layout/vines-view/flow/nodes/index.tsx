@@ -6,7 +6,7 @@ import { SimplifyNodes } from '@/components/layout/vines-view/flow/nodes/simplif
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
-import { useRetimer } from '@/utils/use-retimer.ts';
+import { useRetimer } from '@/hooks/use-retimer.ts';
 
 interface IVinesNodesProps extends React.ComponentPropsWithoutRef<'div'> {}
 

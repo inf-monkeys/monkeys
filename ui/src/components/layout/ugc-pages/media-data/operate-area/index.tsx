@@ -2,7 +2,6 @@ import React from 'react';
 
 import { useSWRConfig } from 'swr';
 
-import { useClipboard } from '@mantine/hooks';
 import { Copy, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -22,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
-import { execCopy } from '@/utils';
+import { useCopy } from '@/hooks/use-copy.ts';
 
 interface IOperateAreaProps {
   item: IAssetItem<IMediaData>;
@@ -34,7 +33,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
   const { t } = useTranslation();
 
   const { mutate } = useSWRConfig();
-  const clipboard = useClipboard({ timeout: 500 });
+  const { copy } = useCopy({ timeout: 500 });
 
   const { trigger: deleteTrigger } = useDeleteMediaData(item.id);
 
@@ -59,14 +58,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
         <DropdownMenuLabel>{t('ugc-page.media-data.ugc-view.operate-area.dropdown-label')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem
-            onClick={() => {
-              clipboard.copy(item.url);
-              if (!clipboard.copied && !execCopy(item.url)) toast.error(t('common.toast.copy-failed'));
-              else toast.success(t('common.toast.copy-success'));
-              toast.success(t('common.toast.copy-success'));
-            }}
-          >
+          <DropdownMenuItem onClick={() => copy(item.url)}>
             <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
               <Copy size={15} />
             </DropdownMenuShortcut>

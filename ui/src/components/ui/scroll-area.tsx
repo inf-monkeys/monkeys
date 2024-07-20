@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area';
 
 import { cn } from '@/utils';
-import { useDataScrollOverflow } from '@/utils/use-data-scroll-overflow.ts';
+import { useDataScrollOverflow } from '@/hooks/use-data-scroll-overflow.ts';
 
 export interface ScrollAreaProps extends React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> {
   scrollBarDisabled?: boolean;

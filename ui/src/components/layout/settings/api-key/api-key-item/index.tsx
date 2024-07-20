@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 
 import { KeyedMutator } from 'swr';
 
-import { useClipboard } from '@mantine/hooks';
 import dayjs from 'dayjs';
 import { KeyRound, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -26,9 +25,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { Tag } from '@/components/ui/tag';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
-import { execCopy } from '@/utils';
-import { formatTimeDiffPrevious } from '@/utils/time.ts';
+import { useCopy } from '@/hooks/use-copy.ts';
 import { maskPassword } from '@/utils/maskdata.ts';
+import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 interface IApiKeyItemProps extends React.ComponentPropsWithoutRef<'div'> {
   apiKey: IApiKey;
@@ -38,8 +37,10 @@ interface IApiKeyItemProps extends React.ComponentPropsWithoutRef<'div'> {
 export const ApiKeyItem: React.FC<IApiKeyItemProps> = ({ apiKey, mutate }) => {
   const { t } = useTranslation();
 
+  const { copy } = useCopy();
+
   const [loading, setLoading] = useState(false);
-  const clipboard = useClipboard();
+
   const handleRevokeApiKey = (apiKeyId: string) => {
     setLoading(true);
     toast.promise(revokeApiKey(apiKeyId), {
@@ -51,12 +52,6 @@ export const ApiKeyItem: React.FC<IApiKeyItemProps> = ({ apiKey, mutate }) => {
         mutate();
       },
     });
-  };
-
-  const handleCopyApiKey = (apiKey: string) => {
-    clipboard.copy(apiKey);
-    if (!clipboard.copied && !execCopy(apiKey)) toast.error(t('common.toast.copy-failed'));
-    else toast.success(t('common.toast.copy-success'));
   };
 
   return (
@@ -119,7 +114,7 @@ export const ApiKeyItem: React.FC<IApiKeyItemProps> = ({ apiKey, mutate }) => {
               </AlertDialogContent>
             </AlertDialog>
           )}
-          <Button onClick={() => handleCopyApiKey(apiKey.apiKey)} variant="outline" size="small">
+          <Button onClick={() => copy(apiKey.apiKey)} variant="outline" size="small">
             {t('common.utils.copy')}
           </Button>
         </div>

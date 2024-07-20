@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { JSONValue } from '@/components/ui/code-editor';
 import { VinesLoading } from '@/components/ui/loading';
 import { useAppStore } from '@/store/useAppStore';
-import useExternal from '@/utils/use-external.ts';
+import useExternal from '@/hooks/use-external.ts';
 
 interface IVinesAbstractPDBProps {
   children: JSONValue;

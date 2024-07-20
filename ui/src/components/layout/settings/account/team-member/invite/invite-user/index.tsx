@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 
-import { useClipboard } from '@mantine/hooks';
 import { ChevronDown, Inbox } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -22,7 +21,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Spinner } from '@/components/ui/spinner';
-import { execCopy, useLocalStorage } from '@/utils';
+import { useCopy } from '@/hooks/use-copy.ts';
+import { useLocalStorage } from '@/utils';
 
 interface IInviteUserProps extends React.ComponentPropsWithoutRef<'div'> {
   visible: boolean;
@@ -39,7 +39,7 @@ export const InviteUser: React.FC<IInviteUserProps> = ({ visible, setVisible }) 
   const [searchResult, setSearchResult] = useState<IVinesUser[]>([]);
   const { team } = useVinesTeam();
   const [currentUser] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
-  const clipboard = useClipboard();
+  const { copy } = useCopy();
   const { mutate: mutateInviteLinkList } = useTeamInvites(team?.id);
 
   const handleSearchUsers = async () => {
@@ -71,14 +71,15 @@ export const InviteUser: React.FC<IInviteUserProps> = ({ visible, setVisible }) 
           teamId,
           inviterUserId,
           outdateType,
-        }).then((link) => {
-          void mutateInviteLinkList();
-          if (!link) throw new Error("Link doesn't exists.");
-          clipboard.copy(link);
-          if (!clipboard.copied && !execCopy(link)) throw new Error('Copy failed.');
         }),
         {
-          success: t('common.toast.copy-success'),
+          success: (link) => {
+            void mutateInviteLinkList();
+            if (!link) throw new Error("Link doesn't exists.");
+            copy(link);
+
+            return t('common.operate.success');
+          },
           error: t('common.operate.error'),
           loading: t('common.operate.loading'),
           finally: () => {

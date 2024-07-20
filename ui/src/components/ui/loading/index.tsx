@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { cn } from '@/utils';
 import { clampPercentage } from '@/utils/number.ts';
-import { useIsMounted } from '@/utils/use-is-mounted.ts';
+import { useIsMounted } from '@/hooks/use-is-mounted.ts';
 
 interface IVinesLoadingProps {
   strokeWidth?: number;

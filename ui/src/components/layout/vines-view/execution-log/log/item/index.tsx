@@ -1,11 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
-import { useClipboard } from '@mantine/hooks';
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
 import { Copy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 
 import { getDescOfTriggerType } from '@/apis/workflow/trigger/utils.ts';
 import { VinesActuator } from '@/components/layout/vines-view/execution/actuator';
@@ -18,9 +16,10 @@ import { Separator } from '@/components/ui/separator.tsx';
 import { Tag } from '@/components/ui/tag';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { useCopy } from '@/hooks/use-copy.ts';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
-import { cn, execCopy, getI18nContent } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 import { formatTimeDiffPrevious, formatTimeGap } from '@/utils/time.ts';
 
 interface IVinesLogItemProps {
@@ -31,7 +30,7 @@ interface IVinesLogItemProps {
 
 export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition, workflowExecution, disabled }) => {
   const { t } = useTranslation();
-  const clipboard = useClipboard({ timeout: 500 });
+  const { copy } = useCopy({ timeout: 500 });
 
   const { vines } = useVinesFlow();
 
@@ -88,10 +87,7 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
                             icon={<Copy />}
                             onClick={(e) => {
                               e.stopPropagation();
-                              clipboard.copy(instanceId);
-                              if (!clipboard.copied && !execCopy(instanceId))
-                                toast.error(t('common.toast.copy-failed'));
-                              else toast.success(t('common.toast.copy-success'));
+                              copy(instanceId);
                             }}
                           />
                         </TooltipTrigger>

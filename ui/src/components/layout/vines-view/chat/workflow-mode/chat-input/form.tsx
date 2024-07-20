@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useElementSize } from '@mantine/hooks';
+import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 

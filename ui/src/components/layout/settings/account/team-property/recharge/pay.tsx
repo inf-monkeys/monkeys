@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 
 import { useSWRConfig } from 'swr';
 
-import { useClipboard } from '@mantine/hooks';
 import { Check, CheckCheck, Copy, LucideLoader2, MinusCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import QRCode from 'react-qr-code';
@@ -23,7 +22,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn, execCopy } from '@/utils';
+import { useCopy } from '@/hooks/use-copy.ts';
+import { cn } from '@/utils';
 
 interface IPayProps extends React.ComponentPropsWithoutRef<'div'> {
   order?: IRechargeOrder | null;
@@ -33,7 +33,7 @@ export const Pay: React.FC<IPayProps> = ({ children, order }) => {
   const { t } = useTranslation();
 
   const { mutate } = useSWRConfig();
-  const clipboard = useClipboard();
+  const { copy } = useCopy();
 
   const [orderId, setOrderId] = useState('');
   const [visible, setVisible] = useState(false);
@@ -135,12 +135,7 @@ export const Pay: React.FC<IPayProps> = ({ children, order }) => {
                         variant="outline"
                         size="small"
                         icon={<Copy />}
-                        onClick={() => {
-                          const content = data?.id ?? '';
-                          clipboard.copy(content);
-                          if (!clipboard.copied && !execCopy(content)) toast.error(t('common.toast.copy-failed'));
-                          else toast.success(t('common.toast.copy-success'));
-                        }}
+                        onClick={() => copy(data?.id ?? '')}
                       />
                     </TooltipTrigger>
                     <TooltipContent>{t('common.utils.copy')}</TooltipContent>

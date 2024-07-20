@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 
-import { useClipboard } from '@mantine/hooks';
 import { Command as CommandPrimitive, CommandLoading } from 'cmdk';
 import { Copy, MousePointerSquareDashed, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -14,13 +13,14 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { VinesLoading } from '@/components/ui/loading';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useCopy } from '@/hooks/use-copy.ts';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { useViewStore } from '@/store/useViewStore';
-import { cn, execCopy } from '@/utils';
+import { cn } from '@/utils';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 interface IVinesExecutionHistoryProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -32,7 +32,7 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
   const { setCanvasMode } = useCanvasStore();
   const { workflowId } = useFlowStore();
 
-  const clipboard = useClipboard({ timeout: 500 });
+  const { copy } = useCopy({ timeout: 500 });
 
   const { vines } = useVinesFlow();
 
@@ -128,10 +128,7 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
                                 toast.error(t('common.toast.loading'));
                                 return;
                               }
-                              clipboard.copy(instanceId);
-                              if (!clipboard.copied && !execCopy(instanceId))
-                                toast.error(t('common.toast.copy-failed'));
-                              else toast.success(t('common.toast.copy-success'));
+                              copy(instanceId);
                             }}
                           />
                         </TooltipTrigger>

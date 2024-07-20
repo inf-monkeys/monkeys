@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 
-import { useElementSize } from '@mantine/hooks';
+import { useElementSize } from '@/hooks/use-resize-observer.ts';
 
 import { VinesActuatorDetailContent } from '@/components/layout/vines-view/execution/actuator/detail/content';
 import { VinesActuatorDetailHeader } from '@/components/layout/vines-view/execution/actuator/detail/header.tsx';
