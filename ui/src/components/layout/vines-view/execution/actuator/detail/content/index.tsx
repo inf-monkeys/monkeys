@@ -1,12 +1,12 @@
 import React, { memo, useEffect, useState } from 'react';
 
-import { useElementSize } from '@mantine/hooks';
 import { useTranslation } from 'react-i18next';
 
 import { VinesActuatorDetailData } from '@/components/layout/vines-view/execution/actuator/detail/content/data.tsx';
 import { ExecutionRawDataDisplay } from '@/components/layout/vines-view/execution/data-display/raw';
 import { JSONValue } from '@/components/ui/code-editor';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';

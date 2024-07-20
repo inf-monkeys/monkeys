@@ -1,9 +1,6 @@
 import React from 'react';
 
-import { useClipboard } from '@mantine/hooks';
 import { Copy, CopyCheck } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card.tsx';
@@ -11,7 +8,7 @@ import { VinesHighlighter } from '@/components/ui/highlighter';
 import { languageMap } from '@/components/ui/highlighter/useHighlight.ts';
 import { isSingleLine } from '@/components/ui/highlighter/utils.ts';
 import { Label } from '@/components/ui/label.tsx';
-import { execCopy } from '@/utils';
+import { useCopy } from '@/hooks/use-copy.ts';
 
 interface IMdxCodeProps {
   children: string;
@@ -19,8 +16,7 @@ interface IMdxCodeProps {
 }
 
 export const MdxCode: React.FC<IMdxCodeProps> = ({ children, language }) => {
-  const { t } = useTranslation();
-  const clipboard = useClipboard();
+  const { copy, copied } = useCopy();
 
   const code = (Array.isArray(children) ? (children[0] as string) : children)?.trim() ?? '';
   const showLanguage = !isSingleLine(code) && language;
@@ -30,15 +26,11 @@ export const MdxCode: React.FC<IMdxCodeProps> = ({ children, language }) => {
         {children}
       </VinesHighlighter>
       <Button
-        icon={clipboard.copied ? <CopyCheck /> : <Copy />}
+        icon={copied ? <CopyCheck /> : <Copy />}
         variant="outline"
         size="small"
         className="absolute right-1 top-1 scale-80 opacity-0 group-hover/codeblock:opacity-75"
-        onClick={() => {
-          clipboard.copy(children);
-          if (!clipboard.copied && !execCopy(children)) toast.error(t('common.toast.copy-failed'));
-          else toast.success(t('common.toast.copy-success'));
-        }}
+        onClick={() => copy(children)}
       />
       {showLanguage && (
         <Label className="pointer-events-none absolute bottom-2 right-2 opacity-0 transition-opacity group-hover/codeblock:opacity-70">

@@ -1,9 +1,7 @@
 import React, { memo } from 'react';
 
-import { useClipboard } from '@mantine/hooks';
 import { Copy, Workflow } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 
 import { ExecutionStatusIcon } from '@/components/layout/vines-view/execution/status-icon';
 import { Button } from '@/components/ui/button';
@@ -11,9 +9,10 @@ import { Card, CardDescription } from '@/components/ui/card.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { useCopy } from '@/hooks/use-copy.ts';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
-import { cn, execCopy } from '@/utils';
+import { cn } from '@/utils';
 
 interface IVinesBotChatMessageProps {
   botPhoto: string;
@@ -27,7 +26,7 @@ interface IVinesBotChatMessageProps {
 export const VinesBotChatMessage = memo<IVinesBotChatMessageProps>(
   ({ botPhoto, endTime, instanceId, status, className, children }) => {
     const { t } = useTranslation();
-    const clipboard = useClipboard({ timeout: 500 });
+    const { copy } = useCopy({ timeout: 500 });
 
     return (
       <div className={cn('group flex flex-row items-start gap-4', className)}>
@@ -57,9 +56,7 @@ export const VinesBotChatMessage = memo<IVinesBotChatMessageProps>(
                           variant="outline"
                           onClick={(e) => {
                             e.stopPropagation();
-                            clipboard.copy(instanceId);
-                            if (!clipboard.copied && !execCopy(instanceId)) toast.error(t('common.toast.copy-failed'));
-                            else toast.success(t('common.toast.copy-success'));
+                            copy(instanceId);
                           }}
                         />
                       </TooltipTrigger>

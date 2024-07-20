@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import { useDocumentTitle, useFavicon } from '@mantine/hooks';
+import { useFavicon, useTitle } from 'ahooks';
 import { get } from 'lodash';
 
 import { useSystemConfig } from '@/apis/common';
@@ -75,7 +75,7 @@ export const OEM: React.FC = () => {
     };
   }, []);
 
-  useDocumentTitle(title + get(oem, 'theme.title', 'AI'));
+  useTitle(title + get(oem, 'theme.title', 'AI'));
   useFavicon(get(oem, `theme.favicon.${darkMode ? 'dark' : 'light'}`, ''));
 
   return null;

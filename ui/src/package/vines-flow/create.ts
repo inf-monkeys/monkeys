@@ -12,7 +12,7 @@ import { updateWorkflow, useUpdateWorkflow, useWorkflowList } from '@/apis/workf
 import { VinesCore } from '@/package/vines-flow/core';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
-import { useRetimer } from '@/utils/use-retimer.ts';
+import { useRetimer } from '@/hooks/use-retimer.ts';
 
 interface VinesContext {
   _vines: VinesCore;

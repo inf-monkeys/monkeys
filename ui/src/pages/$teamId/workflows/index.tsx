@@ -4,7 +4,6 @@ import { mutate } from 'swr';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
-import { useClipboard } from '@mantine/hooks';
 import { Copy, FileUp, FolderUp, Import, Link, Pencil, Plus, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -42,15 +41,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
+import { useCopy } from '@/hooks/use-copy.ts';
 import { useWorkflow } from '@/package/vines-flow';
-import { execCopy, getI18nContent } from '@/utils';
+import { getI18nContent } from '@/utils';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const Workflows: React.FC = () => {
   const { t } = useTranslation();
 
   const navigate = useNavigate();
-  const clipboard = useClipboard({ timeout: 500 });
+  const { copy } = useCopy({ timeout: 500 });
   const { teamId } = useVinesTeam();
   const { createWorkflow } = useWorkflow();
   const mutateWorkflows = () => mutate((key) => typeof key === 'string' && key.startsWith('/api/workflow/list'));
@@ -153,13 +153,7 @@ export const Workflows: React.FC = () => {
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem
-                  onSelect={() => {
-                    const url = location.origin.concat(`/${item.teamId}/workspace/${item.workflowId}`);
-                    clipboard.copy(url);
-                    if (!clipboard.copied && !execCopy(url)) toast.error(t('common.toast.copy-failed'));
-                    else toast.success(t('common.toast.copy-success'));
-                    toast.success(t('common.toast.copy-success'));
-                  }}
+                  onSelect={() => copy(location.origin.concat(`/${item.teamId}/workspace/${item.workflowId}`))}
                 >
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <Link size={15} />

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-import { useElementSize } from '@mantine/hooks';
+import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { AnimatePresence, motion } from 'framer-motion';
 import { GitBranchPlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';

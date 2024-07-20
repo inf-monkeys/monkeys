@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 
-import { useClipboard } from '@mantine/hooks';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -10,7 +9,8 @@ import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card.tsx';
-import { execCopy, useLocalStorage } from '@/utils';
+import { useCopy } from '@/hooks/use-copy.ts';
+import { useLocalStorage } from '@/utils';
 import { maskPhone } from '@/utils/maskdata.ts';
 
 interface IUserItemProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -25,7 +25,7 @@ export const UserItem: React.FC<IUserItemProps> = ({ user, teamId, outdateType }
   const { mutate: mutateInviteLinkList } = useTeamInvites(teamId);
   const [currentUser] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
   const [isHandleCopyLink, setIsHandleCopyLink] = useState(false);
-  const clipboard = useClipboard();
+  const { copy } = useCopy();
   const handleCopyLink = () => {
     if (teamId && currentUser.id) {
       setIsHandleCopyLink(true);
@@ -38,8 +38,7 @@ export const UserItem: React.FC<IUserItemProps> = ({ user, teamId, outdateType }
         }).then((link) => {
           void mutateInviteLinkList();
           if (!link) throw new Error("Link doesn't exists.");
-          clipboard.copy(link);
-          if (!clipboard.copied && !execCopy(link)) throw new Error('Copy failed.');
+          copy(link);
         }),
         {
           success: t('common.toast.copy-success'),

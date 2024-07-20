@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 
 import { Outlet, useParams } from '@tanstack/react-router';
 
-import { useElementSize } from '@mantine/hooks';
+import { useElementSize } from '@/hooks/use-resize-observer.ts';
 
 import { IPageInstance } from '@/apis/pages/typings.ts';
 import { ViewGuard } from '@/components/layout-wrapper/view-guard.tsx';

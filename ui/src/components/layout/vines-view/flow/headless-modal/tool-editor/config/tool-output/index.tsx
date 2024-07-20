@@ -1,17 +1,16 @@
 import React from 'react';
 
-import { useClipboard } from '@mantine/hooks';
 import { Copy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 
 import { buttonVariants } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Tree, TreeDataItem } from '@/components/ui/tree.tsx';
+import { useCopy } from '@/hooks/use-copy.ts';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VINES_VARIABLE_TAG } from '@/package/vines-flow/core/tools/consts.ts';
 import { IVinesVariable } from '@/package/vines-flow/core/tools/typings.ts';
-import { cn, execCopy, getI18nContent } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 
 interface IToolOutputProps {
   nodeId?: string;
@@ -19,7 +18,7 @@ interface IToolOutputProps {
 
 export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
   const { t } = useTranslation();
-  const clipboard = useClipboard({ timeout: 500 });
+  const { copy } = useCopy({ timeout: 500 });
   const { vines } = useVinesFlow();
 
   const { variables } = vines.generateWorkflowVariables();
@@ -42,14 +41,7 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
         return (
           <Tooltip>
             <TooltipTrigger asChild>
-              <div
-                className="flex size-full items-center gap-2 p-2 text-sm"
-                onClick={() => {
-                  clipboard.copy(it.id);
-                  if (!clipboard.copied && !execCopy(it.id)) toast.error(t('common.toast.copy-failed'));
-                  else toast.success(t('common.toast.copy-success'));
-                }}
-              >
+              <div className="flex size-full items-center gap-2 p-2 text-sm" onClick={() => copy(it.id)}>
                 <span
                   className="text-xxs line-clamp-1 cursor-default select-none whitespace-nowrap break-all rounded-sm px-1 py-1 font-medium leading-none shadow-inner"
                   style={{
@@ -103,9 +95,7 @@ export const ToolOutput: React.FC<IToolOutputProps> = ({ nodeId }) => {
                     )}
                     onClick={(e) => {
                       e.preventDefault();
-                      clipboard.copy(it.jsonpath);
-                      if (!clipboard.copied && !execCopy(it.jsonpath)) toast.error(t('common.toast.copy-failed'));
-                      else toast.success(t('common.toast.copy-success'));
+                      copy(it.jsonpath);
                     }}
                   >
                     <Copy className="size-4" />

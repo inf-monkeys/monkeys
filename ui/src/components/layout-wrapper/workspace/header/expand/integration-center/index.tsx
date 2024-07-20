@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 
-import { useClipboard } from '@mantine/hooks';
 import { Blocks } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -8,7 +7,6 @@ import { useApiKeyList } from '@/apis/api-keys/api-key.ts';
 import { IApiKeyStatus } from '@/apis/api-keys/typings.ts';
 import { curl } from '@/components/layout-wrapper/workspace/header/expand/integration-center/utils.ts';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
-import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -25,9 +23,6 @@ interface IIntegrationCenterProps extends React.ComponentPropsWithoutRef<'div'> 
 
 export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
   const { t } = useTranslation();
-
-  const { teamId } = useVinesTeam();
-  const clipboard = useClipboard({ timeout: 500 });
 
   const { data: apiKeys } = useApiKeyList();
 

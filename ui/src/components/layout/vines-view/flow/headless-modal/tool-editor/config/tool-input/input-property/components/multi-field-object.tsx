@@ -1,17 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { useClipboard } from '@mantine/hooks';
 import { isEmpty, set } from 'lodash';
 import { ClipboardCopyIcon, PlusIcon, TrashIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 
 import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
 import { StringInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/string.tsx';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tooltip } from '@/components/ui/tooltip';
-import { execCopy } from '@/utils';
+import { useCopy } from '@/hooks/use-copy.ts';
 
 interface InputGroupValue {
   id: number;
@@ -29,7 +27,7 @@ export const MultiFieldObjectInput: React.FC<IVinesInputPropertyProps> = ({
   const { t } = useTranslation();
   const { default: defaultValue } = def ?? {};
 
-  const clipboard = useClipboard({ timeout: 500 });
+  const { copy } = useCopy({ timeout: 500 });
 
   const [inputs, setInputs] = useState<InputGroupValue[]>(
     Object.keys(value || defaultValue || {})
@@ -95,16 +93,7 @@ export const MultiFieldObjectInput: React.FC<IVinesInputPropertyProps> = ({
               <>
                 <Button icon={<TrashIcon />} onClick={() => handleDelete(index)} />
                 <Tooltip content={hasKey ? `$.${it.key}` : ''}>
-                  <Button
-                    icon={<ClipboardCopyIcon />}
-                    disabled={!hasKey}
-                    onClick={() => {
-                      const text = `$.${it.key}`;
-                      clipboard.copy(text);
-                      if (!clipboard.copied && !execCopy(text)) toast.error(t('common.toast.copy-failed'));
-                      else toast.success(t('common.toast.copy-success'));
-                    }}
-                  />
+                  <Button icon={<ClipboardCopyIcon />} disabled={!hasKey} onClick={() => copy(`$.${it.key}`)} />
                 </Tooltip>
               </>
             )}

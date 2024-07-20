@@ -2,17 +2,15 @@ import React from 'react';
 
 import { useParams } from '@tanstack/react-router';
 
-import { useClipboard } from '@mantine/hooks';
 import { Copy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { execCopy } from '@/utils';
+import { useCopy } from '@/hooks/use-copy.ts';
 
 interface IIFrameEmbedProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -21,7 +19,7 @@ export const IFrameEmbed: React.FC<IIFrameEmbedProps> = () => {
 
   const { workflowId, teamId, pageId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
 
-  const clipboard = useClipboard();
+  const { copy } = useCopy();
 
   const urlPrefix = window.location.protocol + '//' + window.location.host;
   const iframeUrl = `${urlPrefix}/${teamId}/workspace/${workflowId}/${pageId}/view-iframe`;
@@ -47,11 +45,7 @@ export const IFrameEmbed: React.FC<IIFrameEmbedProps> = () => {
                   size="small"
                   variant="outline"
                   className="absolute top-0 mr-0.5 mt-0.5 scale-75"
-                  onClick={() => {
-                    clipboard.copy(builtinUrl);
-                    if (!clipboard.copied && !execCopy(builtinUrl)) toast.error(t('common.toast.copy-failed'));
-                    else toast.success(t('common.toast.copy-success'));
-                  }}
+                  onClick={() => copy(builtinUrl)}
                 />
               </TooltipTrigger>
               <TooltipContent>{t('common.utils.copy')}</TooltipContent>
@@ -70,11 +64,7 @@ export const IFrameEmbed: React.FC<IIFrameEmbedProps> = () => {
                   size="small"
                   variant="outline"
                   className="absolute top-0 mr-0.5 mt-0.5 scale-75"
-                  onClick={() => {
-                    clipboard.copy(iframeUrl);
-                    if (!clipboard.copied && !execCopy(iframeUrl)) toast.error(t('common.toast.copy-failed'));
-                    else toast.success(t('common.toast.copy-success'));
-                  }}
+                  onClick={() => copy(iframeUrl)}
                 />
               </TooltipTrigger>
               <TooltipContent>{t('common.utils.copy')}</TooltipContent>
