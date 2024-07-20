@@ -486,6 +486,8 @@
       "password-placeholder": "请输入密码",
       "phone-placeholder": "请输入手机号",
       "send-sms": {
+        "button": "发送验证码",
+
         "loading": "发送中...",
         "success": "已发送短信验证码",
         "error": "发送失败！请稍后再试"

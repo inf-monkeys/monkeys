@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useInterval, useTimeout } from '@mantine/hooks';
+import { useCountDown } from 'ahooks';
 import { Pencil } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -60,24 +60,22 @@ export const UserAccount: React.FC<IUserAccountProps> = ({ user, updateUser }) =
     }
   }, [originVerifyCode]);
 
-  const [originCountDownSeconds, setOriginCountDownSeconds] = useState(30);
-  const originInterval = useInterval(() => setOriginCountDownSeconds((s) => s - 1), 1000);
-  const { start: originStart } = useTimeout(() => originInterval.stop(), 30000);
+  const [originTargetDate, setOriginTargetDate] = useState<number>();
+  const [originCountdown] = useCountDown({
+    targetDate: originTargetDate,
+  });
 
-  const [countDownSeconds, setCountDownSeconds] = useState(30);
-  const interval = useInterval(() => setCountDownSeconds((s) => s - 1), 1000);
-  const { start } = useTimeout(() => interval.stop(), 30000);
+  const [targetDate, setTargetDate] = useState<number>();
+  const [countdown] = useCountDown({
+    targetDate,
+  });
 
   const handleSandSmsCode = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, _phone?: string) => {
     e.preventDefault();
     if (_phone) {
-      setOriginCountDownSeconds(30);
-      originStart();
-      originInterval.start();
+      setOriginTargetDate(Date.now() + 30000);
     } else {
-      setCountDownSeconds(30);
-      start();
-      interval.start();
+      setTargetDate(Date.now() + 30000);
     }
     const finalPhone = _phone ? _phone : phone;
     toast.promise(sendSmsVerifyCode(finalPhone), {
@@ -161,7 +159,9 @@ export const UserAccount: React.FC<IUserAccountProps> = ({ user, updateUser }) =
                     </FormControl>
 
                     <Button onClick={(e) => handleSandSmsCode(e, user.phone)}>
-                      {originInterval.active ? `${originCountDownSeconds} s` : t('common.sms-verify.send-button')}
+                      {originCountdown === 0
+                        ? t('common.sms-verify.send-button')
+                        : `${Math.round(originCountdown / 1000)} s`}
                     </Button>
                   </div>
 
@@ -199,8 +199,8 @@ export const UserAccount: React.FC<IUserAccountProps> = ({ user, updateUser }) =
                       />
                     </FormControl>
 
-                    <Button disabled={disabledCodeInput || interval.active} onClick={handleSandSmsCode}>
-                      {interval.active ? `${countDownSeconds} s` : t('common.sms-verify.send-button')}
+                    <Button disabled={disabledCodeInput || countdown !== 0} onClick={handleSandSmsCode}>
+                      {countdown === 0 ? t('common.sms-verify.send-button') : `${Math.round(countdown / 1000)} s`}
                     </Button>
                   </div>
 

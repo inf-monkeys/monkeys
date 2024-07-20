@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { useSWRConfig } from 'swr';
 import { useNavigate } from '@tanstack/react-router';
 
+import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { Info } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -15,13 +16,19 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form.tsx';
 import { Route } from '@/pages/login';
 
-interface IAuthWrapperProps extends React.ComponentPropsWithoutRef<'div'> {
+export type AuthEvent = 'trigger-login' | 'clear-sms-code-input';
+
+interface IAuthWrapperProps {
+  children?: React.ReactNode;
+
   form: UseFormReturn<never>;
   onFinished?: () => void;
   method: AuthMethod;
+
+  event$?: EventEmitter<AuthEvent>;
 }
 
-export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, children, method }) => {
+export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, children, method, event$ }) => {
   const { t } = useTranslation();
 
   const navigate = useNavigate({ from: Route.fullPath });
@@ -43,10 +50,17 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
 
     localStorage.removeItem('vines-team-id');
 
-    toast.promise((method === AuthMethod.phone ? triggerPhone : triggerPassword)(params), {
-      loading: t('auth.login.loading'),
-      finally: () => setIsLoggingIn(false),
-    });
+    toast.promise(
+      (method === AuthMethod.phone ? triggerPhone : triggerPassword)(params).catch(() => {
+        if (method === AuthMethod.phone) {
+          event$?.emit('clear-sms-code-input');
+        }
+      }),
+      {
+        loading: t('auth.login.loading'),
+        finally: () => setIsLoggingIn(false),
+      },
+    );
   });
 
   useEffect(() => {
@@ -65,6 +79,13 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
     });
   }, [passwordData, phoneData]);
 
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
+  event$?.useSubscription((mode) => {
+    if (mode === 'trigger-login') {
+      submitButtonRef.current?.click();
+    }
+  });
+
   return (
     <Form {...form}>
       <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
@@ -77,7 +98,7 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
           </span>
         </div>
 
-        <Button type="submit" loading={isLoggingIn} variant="solid">
+        <Button ref={submitButtonRef} type="submit" loading={isLoggingIn} variant="solid">
           {t('auth.login.login')}
         </Button>
       </form>
