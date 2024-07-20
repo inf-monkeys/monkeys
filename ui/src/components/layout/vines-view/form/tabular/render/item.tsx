@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { useForceUpdate } from '@mantine/hooks';
 import { isUndefined } from 'lodash';
 import { HelpCircle } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
@@ -16,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
 import { cn, getI18nContent } from '@/utils';

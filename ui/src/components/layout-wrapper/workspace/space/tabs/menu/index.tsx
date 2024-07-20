@@ -1,6 +1,5 @@
 import React, { memo } from 'react';
 
-import { useForceUpdate } from '@mantine/hooks';
 import { MoreVertical } from 'lucide-react';
 
 import { DeletePage } from '@/components/layout-wrapper/workspace/space/tabs/menu/delete-page.tsx';
@@ -16,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
+import { useForceUpdate } from '@/hooks/use-force-update.ts';
 
 interface ITabMenuProps extends React.ComponentPropsWithoutRef<'div'> {}
 

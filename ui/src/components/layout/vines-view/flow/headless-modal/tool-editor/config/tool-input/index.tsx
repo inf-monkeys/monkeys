@@ -1,7 +1,6 @@
 import React, { memo, useEffect, useRef, useState } from 'react';
 
 import { ToolCredentialItem } from '@inf-monkeys/monkeys';
-import { useForceUpdate } from '@mantine/hooks';
 import equal from 'fast-deep-equal/es6';
 import { get, isArray, set } from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +12,7 @@ import {
   calculateDisplayInputs,
   getPropertyValueFromTask,
 } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/utils.ts';
+import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { IVinesVariableMap, VinesToolDef, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 import { VARIABLE_REGEXP } from '@/package/vines-flow/core/utils.ts';

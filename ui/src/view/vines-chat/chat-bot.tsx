@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 
-import { useForceUpdate } from '@mantine/hooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { isEmpty, reduce, toNumber } from 'lodash';
 import { MessageSquareDashed } from 'lucide-react';
@@ -17,6 +16,7 @@ import { useVinesUser } from '@/components/router/guard/user.tsx';
 import { Label } from '@/components/ui/label.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import { Switch } from '@/components/ui/switch';
+import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
 import { useLocalStorage } from '@/utils';

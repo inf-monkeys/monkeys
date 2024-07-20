@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForceUpdate } from '@mantine/hooks';
 import { get, isBoolean, isUndefined, omit, pick, set } from 'lodash';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInput, workflowInputSchema } from '@/schema/workspace/workflow-input.ts';

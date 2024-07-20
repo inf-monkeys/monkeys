@@ -1,7 +1,6 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { ToolPropertyTypeOptions, ToolPropertyTypes } from '@inf-monkeys/monkeys';
-import { useForceUpdate } from '@mantine/hooks';
 import { debounce, get, isEmpty, isNumber, isString } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { PresetInput } from 'src/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset';
@@ -23,6 +22,7 @@ import { Label } from '@/components/ui/label.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { IVinesVariableMap, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
 export interface IVinesInputPropertyProps {
