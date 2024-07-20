@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { ScrollShadow } from '@nextui-org/scroll-shadow';
 import { Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -12,6 +11,7 @@ import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalStorage } from '@/utils';
 import { maskEmail, maskPhone } from '@/utils/maskdata.ts';
@@ -63,7 +63,7 @@ export const TeamMember: React.FC<ITeamMemberProps> = () => {
           <Invite />
         </div>
       </CardHeader>
-      <ScrollShadow className="max-h-64">
+      <ScrollArea className="max-h-64">
         <CardContent className="grid gap-4">
           {finalMember.map(({ id, name, photo, phone, email }) => (
             <div className="flex items-center gap-4" key={id}>
@@ -93,7 +93,7 @@ export const TeamMember: React.FC<ITeamMemberProps> = () => {
             </div>
           ))}
         </CardContent>
-      </ScrollShadow>
+      </ScrollArea>
     </Card>
   );
 };

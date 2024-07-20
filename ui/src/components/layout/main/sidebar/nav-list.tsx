@@ -1,11 +1,11 @@
 import React from 'react';
 
-import { ScrollShadow } from '@nextui-org/scroll-shadow';
 import { ChevronDownIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { NavButton } from '@/components/layout/main/sidebar/nav-button.tsx';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { SIDEBAR_MAP } from '@/consts/sidebar.tsx';
 import { useLocalStorage } from '@/utils';
 
@@ -20,7 +20,7 @@ export const NavList: React.FC<INavListProps> = () => {
   );
 
   return (
-    <ScrollShadow hideScrollBar className="h-full flex-1 overflow-y-scroll pb-8" visibility="bottom">
+    <ScrollArea className="h-full flex-1 overflow-y-scroll pb-8" scrollBarDisabled>
       <Accordion
         type="multiple"
         className="flex w-full flex-col gap-1 text-xs text-slateA-8 text-opacity-70"
@@ -60,6 +60,6 @@ export const NavList: React.FC<INavListProps> = () => {
           </AccordionItem>
         ))}
       </Accordion>
-    </ScrollShadow>
+    </ScrollArea>
   );
 };

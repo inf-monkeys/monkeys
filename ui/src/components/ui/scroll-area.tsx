@@ -1,19 +1,44 @@
 import * as React from 'react';
+import { useRef } from 'react';
 
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area';
 
 import { cn } from '@/utils';
+import { useDataScrollOverflow } from '@/utils/use-data-scroll-overflow.ts';
 
-const ScrollArea = React.forwardRef<
-  React.ElementRef<typeof ScrollAreaPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root>
->(({ className, children, ...props }, ref) => (
-  <ScrollAreaPrimitive.Root ref={ref} className={cn('relative overflow-hidden', className)} {...props}>
-    <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">{children}</ScrollAreaPrimitive.Viewport>
-    <ScrollBar />
-    <ScrollAreaPrimitive.Corner />
-  </ScrollAreaPrimitive.Root>
-));
+export interface ScrollAreaProps extends React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> {
+  scrollBarDisabled?: boolean;
+  disabledOverflowMask?: boolean;
+}
+
+const ScrollArea = React.forwardRef<React.ElementRef<typeof ScrollAreaPrimitive.Root>, ScrollAreaProps>(
+  ({ className, children, scrollBarDisabled = false, disabledOverflowMask = false, ...props }, ref) => {
+    const scrollAreaRef = useRef<HTMLDivElement | null>(null);
+
+    useDataScrollOverflow({
+      domRef: scrollAreaRef,
+      updateDeps: [children],
+      isEnabled: !disabledOverflowMask,
+    });
+
+    return (
+      <ScrollAreaPrimitive.Root
+        ref={ref}
+        className={cn('relative overflow-hidden', className, scrollBarDisabled && 'no-scrollbar')}
+        {...props}
+      >
+        <ScrollAreaPrimitive.Viewport
+          ref={scrollAreaRef}
+          className="size-full rounded-[inherit] data-[top-bottom-scroll=true]:[mask-image:linear-gradient(#000,#000,transparent_0,#000_40px,#000_calc(100%_-_40px),transparent)] data-[top-scroll=true]:[mask-image:linear-gradient(0deg,#000_calc(100%_-_40px),transparent)] data-[bottom-scroll=true]:[mask-image:linear-gradient(180deg,#000_calc(100%_-_40px),transparent)]"
+        >
+          {children}
+        </ScrollAreaPrimitive.Viewport>
+        <ScrollBar className={cn(scrollBarDisabled && 'size-0 p-0')} />
+        <ScrollAreaPrimitive.Corner />
+      </ScrollAreaPrimitive.Root>
+    );
+  },
+);
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName;
 
 const ScrollBar = React.forwardRef<
