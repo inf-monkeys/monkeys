@@ -8,7 +8,6 @@ import { routeTree } from '@/routeTree.gen';
 import 'normalize.css';
 import '@/styles/index.scss';
 
-import { MantineProvider } from '@mantine/core';
 import * as Portal from '@radix-ui/react-portal';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
@@ -41,11 +40,9 @@ declare module '@tanstack/react-router' {
 ReactDOM.createRoot(document.getElementById('vines-ui')!).render(
   <Suspense fallback={<Skeleton className="h-screen w-screen" />}>
     <SWRConfig>
-      <MantineProvider>
-        <AnimatePresence mode="wait">
-          <RouterProvider router={router} />
-        </AnimatePresence>
-      </MantineProvider>
+      <AnimatePresence mode="wait">
+        <RouterProvider router={router} />
+      </AnimatePresence>
     </SWRConfig>
     <Suspense>
       <LagRadar />

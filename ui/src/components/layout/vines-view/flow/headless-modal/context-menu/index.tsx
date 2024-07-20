@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { useSetState } from '@mantine/hooks';
+import { useSetState } from 'ahooks';
 import { ChevronDownSquare, ChevronUpSquare, PencilRuler, Workflow, XSquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 

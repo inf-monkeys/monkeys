@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { useHotkeys } from '@mantine/hooks';
 import {
   BetweenHorizontalStart,
   BetweenVerticalStart,
@@ -19,6 +18,7 @@ import { MoreToolbar } from '@/components/layout/vines-view/flow/toolbar/more.ts
 import { ToolButton } from '@/components/layout/vines-view/flow/toolbar/tool-button.tsx';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Card } from '@/components/ui/card.tsx';
+import { useHotkeys } from '@/hooks/use-hotkeys';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
