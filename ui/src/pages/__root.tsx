@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 
 import { createRootRoute, Outlet, ScrollRestoration } from '@tanstack/react-router';
 
-import { NextUIProvider } from '@nextui-org/system';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
@@ -50,33 +49,31 @@ const RootComponent: React.FC = () => {
   return (
     <>
       <ScrollRestoration />
-      <NextUIProvider>
-        <TooltipProvider delayDuration={100}>
-          <VinesGlobalUpload />
-          <main className="vines-ui h-screen w-screen">
-            <AnimatePresence mode="popLayout">
-              <motion.div
-                key={isUseOutside ? 'vines-outside' : isUseWorkSpace ? 'vines-workspace' : 'vines-main'}
-                className="vines-center relative size-full flex-col"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                {isUseVinesCore ? (
-                  <WorkspaceIframe />
-                ) : isUseOutside ? (
-                  <Outlet />
-                ) : isUseWorkSpace ? (
-                  <WorkspaceWrapper />
-                ) : (
-                  <MainWrapper layoutId={'vines-' + routeIds?.join('-')} />
-                )}
-              </motion.div>
-            </AnimatePresence>
-          </main>
-        </TooltipProvider>
-      </NextUIProvider>
+      <TooltipProvider delayDuration={100}>
+        <VinesGlobalUpload />
+        <main className="vines-ui h-screen w-screen">
+          <AnimatePresence mode="popLayout">
+            <motion.div
+              key={isUseOutside ? 'vines-outside' : isUseWorkSpace ? 'vines-workspace' : 'vines-main'}
+              className="vines-center relative size-full flex-col"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {isUseVinesCore ? (
+                <WorkspaceIframe />
+              ) : isUseOutside ? (
+                <Outlet />
+              ) : isUseWorkSpace ? (
+                <WorkspaceWrapper />
+              ) : (
+                <MainWrapper layoutId={'vines-' + routeIds?.join('-')} />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </main>
+      </TooltipProvider>
       <OEM />
       <TeamsGuard />
       <UserGuard />

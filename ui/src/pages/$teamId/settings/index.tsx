@@ -6,12 +6,12 @@ import { useTranslation } from 'react-i18next';
 
 import { Account } from '@/components/layout/settings/account';
 import { ApiKey } from '@/components/layout/settings/api-key';
+import { Stat } from '@/components/layout/settings/stat';
 import { VinesTheme } from '@/components/layout/settings/theme';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import VinesEvent from '@/utils/events.ts';
-import { VinesLogViewStatTab } from '@/components/layout/vines-view/execution-log/stat';
-import { Stat } from '@/components/layout/settings/stat';
 
 export const Settings: React.FC = () => {
   const { t } = useTranslation();
@@ -41,17 +41,25 @@ export const Settings: React.FC = () => {
             {t('settings.api-key.title')}
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="account">
-          <Account />
+        <TabsContent value="account" asChild>
+          <ScrollArea className="-mr-3 pr-3">
+            <Account />
+          </ScrollArea>
         </TabsContent>
-        <TabsContent value="stat">
-          <Stat />
+        <TabsContent value="stat" asChild>
+          <ScrollArea className="-mr-3 pr-3">
+            <Stat />
+          </ScrollArea>
         </TabsContent>
-        <TabsContent value="theme">
-          <VinesTheme />
+        <TabsContent value="theme" asChild>
+          <ScrollArea className="-mr-3 pr-3">
+            <VinesTheme />
+          </ScrollArea>
         </TabsContent>
-        <TabsContent value="api-key">
-          <ApiKey />
+        <TabsContent value="api-key" asChild>
+          <ScrollArea className="-mr-3 pr-3">
+            <ApiKey />
+          </ScrollArea>
         </TabsContent>
       </Tabs>
     </div>
