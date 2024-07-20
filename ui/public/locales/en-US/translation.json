@@ -499,6 +499,8 @@
       "password-placeholder": "Enter password",
       "phone-placeholder": "Enter phone",
       "send-sms": {
+        "button": "Send SMS",
+
         "loading": "Sending...",
         "success": "SMS verification code has been sent",
         "error": "Failed to send SMS verification code! Please try again later"

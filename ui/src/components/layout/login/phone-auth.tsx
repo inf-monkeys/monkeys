@@ -1,27 +1,27 @@
 import React, { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useInterval, useTimeout } from '@mantine/hooks';
+import { useCountDown, useEventEmitter } from 'ahooks';
 import { useForm, UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { sendSmsVerifyCode } from '@/apis/authz';
 import { AuthMethod } from '@/apis/common/typings.ts';
-import { AuthWrapper } from '@/components/layout/login/auth-wrapper.tsx';
+import { AuthEvent, AuthWrapper } from '@/components/layout/login/auth-wrapper.tsx';
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp.tsx';
 import { PHONE_REGEX } from '@/consts/authz';
 import { ILoginViaSms, loginViaSmsSchema } from '@/schema/authz';
-import { useTranslation } from 'react-i18next';
 
 interface IPhoneAuthProps extends React.ComponentPropsWithoutRef<'div'> {
   onFinished?: () => void;
 }
 
 export const PhoneAuth: React.FC<IPhoneAuthProps> = ({ onFinished }) => {
-  const {t} =useTranslation();
+  const { t } = useTranslation();
 
   const form = useForm<ILoginViaSms>({
     resolver: zodResolver(loginViaSmsSchema),
@@ -30,6 +30,8 @@ export const PhoneAuth: React.FC<IPhoneAuthProps> = ({ onFinished }) => {
       verifyCode: '',
     },
   });
+
+  const event$ = useEventEmitter<AuthEvent>();
 
   const phone = form.watch('phoneNumber');
   const [disabledCodeInput, setDisabledCodeInput] = useState(false);
@@ -42,14 +44,24 @@ export const PhoneAuth: React.FC<IPhoneAuthProps> = ({ onFinished }) => {
     }
   }, [phone]);
 
-  const [countDownSeconds, setCountDownSeconds] = useState(30);
-  const interval = useInterval(() => setCountDownSeconds((s) => s - 1), 1000);
-  const { start } = useTimeout(() => interval.stop(), 30000);
+  const verifyCode = form.watch('verifyCode');
+  useEffect(() => {
+    if (verifyCode.length === 6) {
+      if (PHONE_REGEX.test(phone)) {
+        event$.emit('trigger-login');
+      }
+    }
+  }, [verifyCode]);
+
+  const [targetDate, setTargetDate] = useState<number>();
+
+  const [countdown] = useCountDown({
+    targetDate,
+  });
+
   const handleSandSmsCode = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
-    setCountDownSeconds(30);
-    start();
-    interval.start();
+    setTargetDate(Date.now() + 30000);
     toast.promise(sendSmsVerifyCode(phone), {
       loading: t('auth.login.send-sms.loading'),
       success: t('auth.login.send-sms.success'),
@@ -57,15 +69,26 @@ export const PhoneAuth: React.FC<IPhoneAuthProps> = ({ onFinished }) => {
     });
   };
 
+  event$.useSubscription((mode) => {
+    if (mode === 'clear-sms-code-input') {
+      form.setValue('verifyCode', '');
+    }
+  });
+
   return (
-    <AuthWrapper form={form as unknown as UseFormReturn<never>} onFinished={onFinished} method={AuthMethod.phone}>
+    <AuthWrapper
+      form={form as unknown as UseFormReturn<never>}
+      onFinished={onFinished}
+      method={AuthMethod.phone}
+      event$={event$}
+    >
       <FormField
         name="phoneNumber"
         control={form.control}
         render={({ field }) => (
           <FormItem>
             <FormControl>
-              <Input placeholder="请输入手机号" {...field} />
+              <Input placeholder={t('auth.login.phone-placeholder')} {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -93,11 +116,11 @@ export const PhoneAuth: React.FC<IPhoneAuthProps> = ({ onFinished }) => {
 
               <Button
                 className="flex-1"
-                disabled={disabledCodeInput || interval.active}
+                disabled={disabledCodeInput || countdown !== 0}
                 onClick={handleSandSmsCode}
                 size="small"
               >
-                {interval.active ? `${countDownSeconds} s` : '发送验证码'}
+                {countdown === 0 ? t('auth.login.send-sms.button') : `${Math.round(countdown / 1000)} s`}
               </Button>
             </div>
 
