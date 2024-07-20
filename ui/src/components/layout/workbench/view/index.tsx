@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 
-import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { AnimatePresence, motion } from 'framer-motion';
 import { GitBranchPlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -9,8 +8,9 @@ import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
 import { WorkbenchViewHeader } from '@/components/layout/workbench/view/header.tsx';
 import { VinesIFrame } from '@/components/ui/vines-iframe';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { usePageStore } from '@/store/usePageStore';
-import { useLocalStorage } from '@/utils';
 
 interface IWorkbenchViewProps extends React.ComponentPropsWithoutRef<'div'> {
   groupId: string;

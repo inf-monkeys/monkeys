@@ -5,10 +5,10 @@ import { get } from 'lodash';
 
 import { useSystemConfig } from '@/apis/common';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useAppStore } from '@/store/useAppStore';
 import { EDarkModeTrigger } from '@/store/useAppStore/dark-mode.slice.ts';
 import usePaletteStore from '@/store/usePaletteStore.ts';
-import { useLocalStorage } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 export const OEM: React.FC = () => {

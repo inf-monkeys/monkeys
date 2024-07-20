@@ -7,8 +7,8 @@ import { isJWT } from 'validator';
 
 import { getUser } from '@/apis/authz/user';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
+import { deleteLocalStorage, readLocalStorageValue, setLocalStorage } from '@/hooks/use-local-storage';
 import i18n from '@/i18n.ts';
-import { deleteLocalStorage, readLocalStorageValue, setLocalStorage } from '@/utils';
 
 const t = i18n.t;
 

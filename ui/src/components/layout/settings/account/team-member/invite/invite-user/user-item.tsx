@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { useCopy } from '@/hooks/use-copy.ts';
-import { useLocalStorage } from '@/utils';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { maskPhone } from '@/utils/maskdata.ts';
 
 interface IUserItemProps extends React.ComponentPropsWithoutRef<'div'> {

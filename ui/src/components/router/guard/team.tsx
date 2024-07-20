@@ -7,7 +7,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { useTeams } from '@/apis/authz/team';
 import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { useSystemConfig } from '@/apis/common';
-import { useLocalStorage } from '@/utils';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 export const TeamsGuard: React.FC = () => {
   const { mutate } = useSWRConfig();

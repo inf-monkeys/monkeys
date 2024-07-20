@@ -11,7 +11,7 @@ import { useChat } from '@/components/layout/vines-view/chat/chat-bot/use-chat.t
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useLocalStorage } from '@/utils';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 interface IVinesChatInputProps {
   chatId: string;

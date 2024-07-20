@@ -12,7 +12,8 @@ import { PhoneAuth } from '@/components/layout/login/phone-auth.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
-import { cn, useLocalStorage } from '@/utils';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+import { cn } from '@/utils';
 
 interface IAuthContainerProps extends React.ComponentPropsWithoutRef<'div'> {
   loginMethodsLength: number;

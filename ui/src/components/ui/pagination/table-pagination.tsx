@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { usePagination } from '@mantine/hooks';
 import { OnChangeFn, PaginationState } from '@tanstack/react-table';
 import { useTranslation } from 'react-i18next';
 
@@ -22,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select.tsx';
+import { usePagination } from '@/hooks/use-pagination.ts';
 import { cn } from '@/utils';
 
 export interface ITablePaginationProps {

@@ -19,7 +19,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { VinesImageEditor } from '@/components/ui/image-editor';
 import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
-import { cn, useLocalStorage } from '@/utils';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+import { cn } from '@/utils';
 
 interface ITeamProps extends React.ComponentPropsWithoutRef<'div'> {}
 

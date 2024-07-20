@@ -22,7 +22,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Spinner } from '@/components/ui/spinner';
 import { useCopy } from '@/hooks/use-copy.ts';
-import { useLocalStorage } from '@/utils';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 interface IInviteUserProps extends React.ComponentPropsWithoutRef<'div'> {
   visible: boolean;

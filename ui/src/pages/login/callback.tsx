@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { I18nSelector } from '@/components/ui/i18n-selector';
 import { VinesLoading } from '@/components/ui/loading';
 import { loginCallbackPageSearchSchema } from '@/schema/common.ts';
-import { clearAllLocalData } from '@/utils';
+import { clearAllLocalData } from '@/hooks/use-local-storage';
 
 const LoginCallback: React.FC = () => {
   const { t } = useTranslation();
