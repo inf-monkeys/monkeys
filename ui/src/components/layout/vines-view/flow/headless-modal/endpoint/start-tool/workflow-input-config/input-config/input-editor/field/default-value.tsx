@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 
-import { useForceUpdate } from '@mantine/hooks';
 import { isArray, isBoolean, isEmpty } from 'lodash';
 import { Circle, CircleDot, Plus, Trash } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
@@ -16,6 +15,7 @@ import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothT
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { IWorkflowInput } from '@/schema/workspace/workflow-input.ts';
 
 interface IFieldDefaultValueProps extends React.ComponentPropsWithoutRef<'div'> {

@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { useSWRConfig } from 'swr';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForceUpdate } from '@mantine/hooks';
 import { isUndefined, omitBy } from 'lodash';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -18,6 +17,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } f
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { useVinesFlow } from '@/package/vines-flow';
 import {
   AuthTypeLabelEnum,
