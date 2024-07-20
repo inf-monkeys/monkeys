@@ -16,7 +16,6 @@
     "@dnd-kit/sortable": "^8.0.0",
     "@emoji-mart/data": "^1.1.2",
     "@emoji-mart/react": "^1.1.1",
-    "@headlessui/react": "^1.7.19",
     "@hookform/resolvers": "^3.3.4",
     "@inf-monkeys/monkeys": "^0.0.3",
     "@mdx-js/loader": "^3.0.1",
@@ -162,15 +161,5 @@
     "vite": "^5.2.8",
     "vite-plugin-svgr": "^4.2.0",
     "vite-tsconfig-paths": "^4.3.2"
-  },
-  "pnpm": {
-    "peerDependencyRules": {
-      "ignoreMissing": [
-        "*"
-      ],
-      "allowAny": [
-        "*"
-      ]
-    }
   }
 }
