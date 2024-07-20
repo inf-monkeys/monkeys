@@ -3,7 +3,6 @@ import React, { useEffect } from 'react';
 import { useSWRConfig } from 'swr';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
-import { CircularProgress } from '@/components/ui/circular-progress';
 import { motion } from 'framer-motion';
 import { DoorOpen, LogIn } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +13,7 @@ import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { saveAuthToken } from '@/components/router/guard/auth.ts';
 import { Button } from '@/components/ui/button';
 import { I18nSelector } from '@/components/ui/i18n-selector';
+import { VinesLoading } from '@/components/ui/loading';
 import { loginCallbackPageSearchSchema } from '@/schema/common.ts';
 import { clearAllLocalData } from '@/utils';
 
@@ -52,7 +52,7 @@ const LoginCallback: React.FC = () => {
 
   return (
     <>
-      <CircularProgress className="mb-4 [&_circle:last-child]:stroke-vines-500" aria-label={t('common.load.loading')} />
+      <VinesLoading />
       <h1 className="animate-pulse font-bold text-vines-500">
         {t(`auth.${oidcText ? 'oidc' : 'login'}.logging-in`, { oidc: oidcText })}
       </h1>

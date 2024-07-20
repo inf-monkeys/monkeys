@@ -3,12 +3,12 @@ import React, { useEffect } from 'react';
 import { preload } from 'swr';
 import { createFileRoute, redirect, useNavigate, useParams } from '@tanstack/react-router';
 
-import { CircularProgress } from '@/components/ui/circular-progress';
 import z from 'zod';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { useWorkspacePagesWithWorkflowId } from '@/apis/pages';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
+import { VinesLoading } from '@/components/ui/loading';
 
 export const WorkspaceIndex: React.FC = () => {
   const { to } = Route.useSearch();
@@ -37,7 +37,7 @@ export const WorkspaceIndex: React.FC = () => {
 
   return (
     <div className="vines-center size-full">
-      <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+      <VinesLoading />
     </div>
   );
 };

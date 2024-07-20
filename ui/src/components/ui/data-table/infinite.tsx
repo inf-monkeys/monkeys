@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { CircularProgress } from '@/components/ui/circular-progress';
 import {
   ColumnDef,
   flexRender,
@@ -13,6 +12,7 @@ import { CircleSlash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { TableVirtuoso } from 'react-virtuoso';
 
+import { VinesLoading } from '@/components/ui/loading';
 import { TableCell, TableHead, TableRow } from '@/components/ui/table.tsx';
 import { cn } from '@/utils';
 
@@ -95,7 +95,7 @@ export function InfiniteScrollingDataTable<TData, TValue>({
         <div className="vines-center size-full flex-col gap-4">
           {loading ? (
             <>
-              <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+              <VinesLoading />
             </>
           ) : (
             <CircleSlash size={64} />

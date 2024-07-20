@@ -3,9 +3,9 @@ import React, { useEffect } from 'react';
 import { useSWRConfig } from 'swr';
 
 import { useInterval } from '@mantine/hooks';
-import { CircularProgress } from '@/components/ui/circular-progress';
 
 import { useKnowledgeBaseTaskDetail } from '@/apis/vector';
+import { VinesLoading } from '@/components/ui/loading';
 
 interface IActiveTaskProps {
   knowledgeBaseId: string;
@@ -39,12 +39,7 @@ export const ActiveTask: React.FC<IActiveTaskProps> = ({ knowledgeBaseId, taskId
 
   return (
     <>
-      <CircularProgress
-        className="-m-3 scale-[0.4] [&_circle:last-child]:stroke-vines-500"
-        size="lg"
-        aria-label="Loading..."
-        value={(data?.progress ?? 0) * 100}
-      />
+      <VinesLoading value={(data?.progress ?? 0) * 100} />
       <span className="text-xs">{data?.latestMessage}</span>
     </>
   );

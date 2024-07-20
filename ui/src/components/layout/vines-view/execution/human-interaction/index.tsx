@@ -1,6 +1,5 @@
 import React, { memo, useEffect, useState } from 'react';
 
-import { CircularProgress } from '@/components/ui/circular-progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, ChevronLast, Files, LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +8,7 @@ import { toast } from 'sonner';
 import { useUpdateExecutionTask } from '@/apis/workflow/execution';
 import { objectToArray } from '@/components/layout/vines-view/execution/human-interaction/utils.ts';
 import { Button } from '@/components/ui/button';
+import { VinesLoading } from '@/components/ui/loading';
 import { cn } from '@/utils';
 
 interface IVinesExecutionHumanInteractionProps {
@@ -91,7 +91,7 @@ export const VinesExecutionHumanInteraction: React.FC<IVinesExecutionHumanIntera
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+              <VinesLoading />
             </motion.div>
           ) : (
             <motion.div

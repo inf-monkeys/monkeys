@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 
-import { CircularProgress } from '@nextui-org/progress';
 import { useMemoizedFn } from 'ahooks';
 import { type EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -21,6 +20,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { JSONValue } from '@/components/ui/code-editor';
 import { Label } from '@/components/ui/label.tsx';
+import { VinesLoading } from '@/components/ui/loading';
 import { useFlowStore } from '@/store/useFlowStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
@@ -145,7 +145,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+              <VinesLoading />
             </motion.div>
           )}
         </AnimatePresence>

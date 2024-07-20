@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { createFileRoute } from '@tanstack/react-router';
 
-import { CircularProgress } from '@/components/ui/circular-progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronRight, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +11,7 @@ import { useDatabase, useDatabaseTables } from '@/apis/table-data';
 import { TableDatabase } from '@/components/layout/ugc-pages/table-data/table-detail';
 import { TableDetailHeader } from '@/components/layout/ugc-pages/table-data/table-detail/header';
 import { Button } from '@/components/ui/button';
+import { VinesLoading } from '@/components/ui/loading';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -124,11 +124,7 @@ const TableDataDetail: React.FC = () => {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <CircularProgress
-                  className="[&_circle:last-child]:stroke-vines-500"
-                  size="lg"
-                  aria-label="Loading..."
-                />
+                <VinesLoading />
               </motion.div>
             ) : (
               <>

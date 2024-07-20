@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { CircularProgress } from '@/components/ui/circular-progress';
 import dayjs from 'dayjs';
 import equal from 'fast-deep-equal/es6';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -12,6 +11,7 @@ import { useSearchWorkflowExecutions } from '@/apis/workflow/execution';
 import { IVinesChatListItem } from '@/components/layout/vines-view/chat/workflow-mode/messages/typings.ts';
 import { VirtualizedList } from '@/components/layout/vines-view/chat/workflow-mode/messages/virtualized';
 import { useVinesUser } from '@/components/router/guard/user.tsx';
+import { VinesLoading } from '@/components/ui/loading';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { useViewStore } from '@/store/useViewStore';
@@ -107,7 +107,7 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ workflowId }) => 
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+          <VinesLoading />
         </motion.div>
       ) : list?.length ? (
         <motion.div

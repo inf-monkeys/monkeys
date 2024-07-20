@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge.tsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { RemoteDataTable } from '@/components/ui/data-table/remote.tsx';
-import { Loading } from '@/components/ui/loading';
+import { VinesFullLoading } from '@/components/ui/loading';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
 
 interface IRechargeDetailsProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -118,7 +118,9 @@ export const RechargeDetails: React.FC<IRechargeDetailsProps> = () => {
       </CardHeader>
       <CardContent>
         <SmoothTransition className="relative overflow-hidden">
-          <AnimatePresence>{!orderListData && <Loading motionKey="vines-recharge-details-loading" />}</AnimatePresence>
+          <AnimatePresence>
+            {!orderListData && <VinesFullLoading motionKey="vines-recharge-details-loading" />}
+          </AnimatePresence>
           <RemoteDataTable
             columns={columns}
             data={orderListData?.data ?? []}

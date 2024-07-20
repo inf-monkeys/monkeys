@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
 
 import { useClickOutside } from '@mantine/hooks';
-import { CircularProgress } from '@/components/ui/circular-progress';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { ComplicateSimpleNodeExpand } from 'src/components/layout/vines-view/flow/nodes/complicate/node/simple/expand';
@@ -11,6 +10,7 @@ import { ComplicateEndNode } from '@/components/layout/vines-view/flow/nodes/com
 import { ComplicateTriggerNode } from '@/components/layout/vines-view/flow/nodes/complicate/node/endpoint/start/trigger.tsx';
 import { ComplicateSimpleNode } from '@/components/layout/vines-view/flow/nodes/complicate/node/simple';
 import { Card } from '@/components/ui/card.tsx';
+import { VinesLoading } from '@/components/ui/loading';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
@@ -108,7 +108,7 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+            <VinesLoading />
           </motion.div>
         ) : (
           <>

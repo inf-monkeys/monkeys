@@ -8,7 +8,7 @@ import { ApiKeyItem } from '@/components/layout/settings/api-key/api-key-item';
 import { CreateNewApiKey } from '@/components/layout/settings/api-key/create-apikey.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
-import { Loading } from '@/components/ui/loading';
+import { VinesFullLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition';
 
@@ -34,7 +34,7 @@ export const ApiKey: React.FC<IApiKeyProps> = () => {
       </CardHeader>
       <CardContent>
         <SmoothTransition className="relative overflow-hidden">
-          <AnimatePresence>{isLoading && <Loading motionKey="vines-api-key-list-loading" />}</AnimatePresence>
+          <AnimatePresence>{isLoading && <VinesFullLoading motionKey="vines-api-key-list-loading" />}</AnimatePresence>
           <ScrollArea className="h-40">
             <div className="flex flex-col gap-2">
               {(apiKeyList ?? []).map((apiKey, index) => (

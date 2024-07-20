@@ -3,7 +3,6 @@ import React, { forwardRef, useState } from 'react';
 
 import { useNavigate, useParams } from '@tanstack/react-router';
 
-import { CircularProgress } from '@/components/ui/circular-progress';
 import { useDebounceEffect } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { isEmpty } from 'lodash';
@@ -16,6 +15,7 @@ import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { I18nSelector } from '@/components/ui/i18n-selector';
+import { VinesLoading } from '@/components/ui/loading';
 import { cn, useLocalStorage } from '@/utils';
 
 export const ViewGuard = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
@@ -67,10 +67,7 @@ export const ViewGuard = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
               animate={{ opacity: 1, transition: { delay: 0.25 } }}
             >
               {loading ? (
-                <CircularProgress
-                  className="mb-4 [&_circle:last-child]:stroke-vines-500"
-                  aria-label={t('common.load.loading')}
-                />
+                <VinesLoading />
               ) : (
                 <Card>
                   <CardHeader>

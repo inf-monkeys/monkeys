@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 
-import { CircularProgress } from '@nextui-org/progress';
 import { useMemoizedFn } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { omit } from 'lodash';
@@ -11,6 +10,7 @@ import { VinesAbstractDataPreview } from '@/components/layout/vines-view/executi
 import { VinesAbstractVideo } from '@/components/layout/vines-view/execution/data-display/abstract/node/video.tsx';
 import { CodeEditor, JSONValue } from '@/components/ui/code-editor';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { VinesLoading } from '@/components/ui/loading';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
@@ -68,11 +68,7 @@ export const VinesExecutionResultItem: React.FC<IVinesExecutionResultItemProps> 
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <CircularProgress
-                      className="[&_circle:last-child]:stroke-vines-500"
-                      size="lg"
-                      aria-label="Loading..."
-                    />
+                    <VinesLoading />
                   </motion.div>
                 ) : (
                   <motion.div
