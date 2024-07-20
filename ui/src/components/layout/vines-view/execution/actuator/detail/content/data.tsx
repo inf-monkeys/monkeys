@@ -1,9 +1,8 @@
 import React from 'react';
 
-import { CircularProgress } from '@/components/ui/circular-progress';
-
 import { VinesAbstractDataPreview } from '@/components/layout/vines-view/execution/data-display/abstract';
 import { VinesExecutionHumanInteraction } from '@/components/layout/vines-view/execution/human-interaction';
+import { VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
 
@@ -37,7 +36,7 @@ export const VinesActuatorDetailData: React.FC<IVinesActuatorDetailDataProps> = 
         />
       ) : (
         <div className="vines-center size-full">
-          <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+          <VinesLoading />
         </div>
       )}
     </ScrollArea>

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import { useForceUpdate } from '@mantine/hooks';
-import { CircularProgress } from '@/components/ui/circular-progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { isEmpty, reduce, toNumber } from 'lodash';
 import { MessageSquareDashed } from 'lucide-react';
@@ -16,6 +15,7 @@ import { useChatBotHistory } from '@/apis/workflow/chat';
 import { useChat } from '@/components/layout/vines-view/chat/chat-bot/use-chat.ts';
 import { useVinesUser } from '@/components/router/guard/user.tsx';
 import { Label } from '@/components/ui/label.tsx';
+import { VinesLoading } from '@/components/ui/loading';
 import { Switch } from '@/components/ui/switch';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
@@ -115,7 +115,7 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) =
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+              <VinesLoading />
             </motion.div>
           ) : (
             <motion.div

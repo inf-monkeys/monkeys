@@ -10,7 +10,6 @@ import { exportWorkflow, useWorkflowRelatedAssets } from '@/apis/workflow';
 import { IExportWorkflowWithAssetsContext } from '@/components/layout/ugc-pages/workflows/export-workflow/typings.ts';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
-import { CircularProgress } from '@/components/ui/circular-progress';
 import { DataTable } from '@/components/ui/data-table';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
@@ -20,6 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
+import { VinesLoading } from '@/components/ui/loading';
 
 export interface IExportWorkflowDialogProps {
   visible: boolean;
@@ -192,7 +192,7 @@ export const ExportWorkflowDialog: React.FC<IExportWorkflowDialogProps> = ({ vis
         </DialogHeader>
         {loading ? (
           <div className="my-8 flex w-full select-none items-center justify-center gap-4 text-xs">
-            <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+            <VinesLoading />
             <div className="opacity-70">加载此工作流关联的资产中</div>
           </div>
         ) : (

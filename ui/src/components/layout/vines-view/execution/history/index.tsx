@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import { useClipboard } from '@mantine/hooks';
-import { CircularProgress } from '@/components/ui/circular-progress';
 import { Command as CommandPrimitive, CommandLoading } from 'cmdk';
 import { Copy, MousePointerSquareDashed, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +12,7 @@ import { ExecutionStatusIcon } from '@/components/layout/vines-view/execution/st
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
+import { VinesLoading } from '@/components/ui/loading';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
@@ -89,7 +89,7 @@ export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () =
       <CommandList className={cn('relative h-full max-h-none', isEmpty && 'hidden')}>
         {!data && isLoading ? (
           <CommandLoading className="vines-center absolute z-10 size-full py-6">
-            <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+            <VinesLoading />
           </CommandLoading>
         ) : !isEmpty ? (
           <CommandEmpty>{t('workspace.pre-view.history.search.search-empty')}</CommandEmpty>

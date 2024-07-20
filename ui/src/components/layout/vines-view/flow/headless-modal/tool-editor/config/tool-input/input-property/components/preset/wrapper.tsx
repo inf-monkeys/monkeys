@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 
-import { CircularProgress } from '@/components/ui/circular-progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { get, isArray, isString } from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +8,7 @@ import { IVinesInputPropertyProps } from '@/components/layout/vines-view/flow/he
 import { CollectionInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/collection.tsx';
 import { IVinesInputPresetProps } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/index.tsx';
 import { StringInput } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/string.tsx';
+import { VinesLoading } from '@/components/ui/loading';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { IVinesToolPropertiesOption, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 
@@ -74,7 +74,7 @@ export const PresetWrapper = <T extends Array<IVinesToolPropertiesOption>>({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.1 }}
         >
-          <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="md" aria-label="Loading..." />
+          <VinesLoading />
         </motion.div>
       ) : componentMode === 'input' ? (
         <motion.div

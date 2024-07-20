@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { CircularProgress } from '@/components/ui/circular-progress';
 import { AnimatePresence, motion } from 'framer-motion';
 
+import { VinesLoading } from '@/components/ui/loading';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
@@ -66,7 +66,7 @@ export const VinesSimpleNode: React.FC<IVinesSimpleNodeProps> = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <CircularProgress className="[&_circle:last-child]:stroke-vines-500" aria-label="Loading..." />
+              <VinesLoading />
             </motion.div>
           ) : (
             <motion.div

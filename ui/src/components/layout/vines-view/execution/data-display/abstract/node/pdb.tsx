@@ -2,13 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import '@/styles/molstar.scss';
 
-import { CircularProgress } from '@/components/ui/circular-progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 
 import { JSONValue } from '@/components/ui/code-editor';
+import { VinesLoading } from '@/components/ui/loading';
 import { useAppStore } from '@/store/useAppStore';
-import useExternal from '@/utils/useExternal.ts';
+import useExternal from '@/utils/use-external.ts';
 
 interface IVinesAbstractPDBProps {
   children: JSONValue;
@@ -81,7 +81,7 @@ export const VinesAbstractPDB: React.FC<IVinesAbstractPDBProps> = ({ children, h
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+            <VinesLoading />
             <div className="space-y-1">
               <p className="text-xxs opacity-70">Molstar Plugin: {molstarPlugin}</p>
             </div>

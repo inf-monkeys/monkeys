@@ -34,7 +34,7 @@ import { RenderTags } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { RemoteDataTable } from '@/components/ui/data-table/remote.tsx';
-import { Loading } from '@/components/ui/loading';
+import { VinesFullLoading } from '@/components/ui/loading';
 import { TablePagination } from '@/components/ui/pagination/table-pagination.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { getI18nContent, useLocalStorage } from '@/utils';
@@ -273,7 +273,7 @@ export const UgcView = <E extends object>({
         />
         <div className="relative overflow-hidden">
           <AnimatePresence>
-            {(isLoading || isNull(displayMode)) && <Loading motionKey={`vines-assets-${assetKey}-loading`} />}
+            {(isLoading || isNull(displayMode)) && <VinesFullLoading motionKey={`vines-assets-${assetKey}-loading`} />}
           </AnimatePresence>
           <div className="flex flex-col">
             <ScrollArea className="relative h-[calc(100vh-9.5rem)] w-full rounded-r-lg px-4 py-2">

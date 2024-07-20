@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 
 import { createFileRoute } from '@tanstack/react-router';
 
-import { CircularProgress } from '@/components/ui/circular-progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronRight, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +14,7 @@ import { ParagraphList } from '@/components/layout/ugc-pages/text-data/text-deta
 import { RelatedApplication } from '@/components/layout/ugc-pages/text-data/text-detail/related-application';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
+import { VinesLoading } from '@/components/ui/loading';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -113,11 +113,7 @@ const TextDataDetail: React.FC = () => {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <CircularProgress
-                  className="[&_circle:last-child]:stroke-vines-500"
-                  size="lg"
-                  aria-label={t('common.load.loading')}
-                />
+                <VinesLoading />
               </motion.div>
             ) : (
               <>

@@ -1,10 +1,10 @@
 import React from 'react';
 
-import { CircularProgress } from '@/components/ui/circular-progress';
 import { CircleSlash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useSearchReferenceWorkflows } from '@/apis/ugc';
+import { VinesLoading } from '@/components/ui/loading';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { getI18nContent } from '@/utils';
@@ -24,7 +24,7 @@ export const RelatedApplication: React.FC<IRelatedApplicationProps> = ({ textId 
   return isEmpty || isLoading ? (
     <div className="vines-center size-full flex-col">
       {isLoading ? (
-        <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+        <VinesLoading />
       ) : (
         <>
           <CircleSlash size={64} />

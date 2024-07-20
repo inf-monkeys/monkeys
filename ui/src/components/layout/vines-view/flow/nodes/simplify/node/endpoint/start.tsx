@@ -1,9 +1,9 @@
 import React from 'react';
 
-import { CircularProgress } from '@/components/ui/circular-progress';
 import { motion } from 'framer-motion';
 
 import { useTriggers, useTriggerTypes } from '@/apis/workflow/trigger';
+import { VinesLoading } from '@/components/ui/loading';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
@@ -54,7 +54,7 @@ export const VinesStartNode: React.FC<IVinesStartNodeProps> = ({ isMiniNode, can
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <CircularProgress className="[&_circle:last-child]:stroke-vines-500" aria-label="Loading..." />
+            <VinesLoading />
           </motion.div>
         ) : (
           <motion.div

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { callToolsApi, GeneQRCodeResult, QRCodeStatus, QRCodeStatusResult, QRCodeUserInfo } from '@/apis/tools';
-import { Loading } from '@/components/ui/loading';
+import { VinesFullLoading } from '@/components/ui/loading';
 import { cn } from '@/utils';
 
 import { IVinesInputPropertyProps } from '..';
@@ -71,12 +71,8 @@ export const QRCodeInput: React.FC<IVinesInputPropertyProps & IQrcodeInputProps>
   return (
     <div className={cn('relative', { 'pointer-events-none': false })}>
       {loading && (
-        <div
-          style={{
-            marginTop: 20,
-          }}
-        >
-          <Loading motionKey="vines-qrcode-loading" />
+        <div className="mt-5">
+          <VinesFullLoading motionKey="vines-qrcode-loading" />
         </div>
       )}
 

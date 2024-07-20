@@ -1,10 +1,10 @@
 import React, { memo } from 'react';
 
-import { CircularProgress } from '@/components/ui/circular-progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertCircle, CheckCircle2, Circle, CircleDashed, CircleSlash, PauseCircle } from 'lucide-react';
 
 import { getExecutionStatusText } from '@/components/layout/vines-view/execution/status-icon/utils.ts';
+import { VinesLoading } from '@/components/ui/loading';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesWorkflowExecutionType } from '@/package/vines-flow/core/typings.ts';
@@ -34,11 +34,7 @@ export const ExecutionStatusIcon: React.FC<IExecutionStatusIconProps> = memo(
                   className="flex"
                   style={{ width: size, height: size }}
                 >
-                  <CircularProgress
-                    className={cn('-ml-4 scale-50 [&_circle:last-child]:stroke-vines-500', spinClassName)}
-                    size="lg"
-                    aria-label="Loading..."
-                  />
+                  <VinesLoading />
                 </motion.div>
               ) : status === 'COMPLETED' ? (
                 <motion.div

@@ -13,7 +13,7 @@ import { balanceFormat } from '@/components/layout/settings/account/utils.ts';
 import { Badge } from '@/components/ui/badge.tsx';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { RemoteDataTable } from '@/components/ui/data-table/remote.tsx';
-import { Loading } from '@/components/ui/loading';
+import { VinesFullLoading } from '@/components/ui/loading';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
 
 interface IConsumerDetailsProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -115,7 +115,9 @@ export const ConsumerDetails: React.FC<IConsumerDetailsProps> = () => {
 
       <CardContent>
         <SmoothTransition className="relative overflow-hidden">
-          <AnimatePresence>{!orderListData && <Loading motionKey="vines-consumer-details-loading" />}</AnimatePresence>
+          <AnimatePresence>
+            {!orderListData && <VinesFullLoading motionKey="vines-consumer-details-loading" />}
+          </AnimatePresence>
           <RemoteDataTable
             columns={columns}
             data={orderListData?.data ?? []}

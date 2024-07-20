@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { CircularProgress } from '@/components/ui/circular-progress';
 import { AlertCircle, CheckCircle, FullscreenIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -8,6 +7,7 @@ import { useKnowledgeBases } from '@/apis/knowledge-base';
 import { Button } from '@/components/ui/button';
 import { CodePreview } from '@/components/ui/code-editor/preview.tsx';
 import { VinesHighlighter } from '@/components/ui/highlighter';
+import { VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -92,13 +92,7 @@ export const ToolDisplay: React.FC<IToolDisplayProps> = ({ data }) => {
               <span className="text-xs leading-tight text-gray-10">{toolDesc}</span>
             </div>
           </div>
-          {status === 'inprogress' && (
-            <CircularProgress
-              className="-m-3 -mr-2 scale-[.5] [&_circle:last-child]:stroke-vines-500"
-              size="lg"
-              aria-label="Loading..."
-            />
-          )}
+          {status === 'inprogress' && <VinesLoading className="-m-3 -mr-2 scale-[.5]" />}
           {status === 'success' && <CheckCircle size={20} className="mr-1 stroke-green-10" />}
           {status === 'failed' && <AlertCircle size={20} className="mr-1 stroke-red-10" />}
         </div>

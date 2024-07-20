@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 
 import { useWindowEvent } from '@mantine/hooks';
-import { CircularProgress } from '@/components/ui/circular-progress';
 import { AnimatePresence, motion } from 'framer-motion';
 import { get } from 'lodash';
 import { VinesEdges } from 'src/components/layout/vines-view/flow/edges';
@@ -11,6 +10,7 @@ import { VinesHeadlessModal } from '@/components/layout/vines-view/flow/headless
 import { VinesNodes } from '@/components/layout/vines-view/flow/nodes';
 import { VinesToolbar } from '@/components/layout/vines-view/flow/toolbar';
 import { VinesExpandToolbar } from '@/components/layout/vines-view/flow/toolbar/expand';
+import { VinesLoading } from '@/components/ui/loading';
 import { IVinesFlowRenderOptions, IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
 import { useCanvasStore } from '@/store/useCanvasStore';
@@ -95,7 +95,7 @@ export const VinesFlow: React.FC<IVinesFlowProps> = () => {
             className="vines-center absolute left-0 top-0 z-20 size-full"
           >
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { delay: 0.1 } }}>
-              <CircularProgress className="[&_circle:last-child]:stroke-vines-500" size="lg" aria-label="Loading..." />
+              <VinesLoading />
             </motion.div>
           </motion.div>
         )}
