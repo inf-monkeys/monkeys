@@ -510,7 +510,8 @@
     "fetch-user-data-failed": "用户信息获取失败！",
     "login-expired": "登录已过期，请重新登录",
     "re-login": "重新登录",
-    "login-required": "请先登录（{{ count }}）",
+    "login-required": "接口鉴权异常！建议重新登录（{{ count }}）",
+    "api-403": "接口鉴权异常！建议重新登录",
     "api-invalid": "接口数据异常！建议重新登录"
   },
   "settings": {
