@@ -28,7 +28,7 @@ export const Account: React.FC = () => {
   const currentUserPhoto = user.photo;
 
   return (
-    <div className="flex w-full items-center justify-between p-1">
+    <div className="flex w-full items-center justify-between px-3 py-1">
       <User name={currentUserName} photo={currentUserPhoto} photoSize={5} simple />
       <Tooltip>
         <AlertDialog>
