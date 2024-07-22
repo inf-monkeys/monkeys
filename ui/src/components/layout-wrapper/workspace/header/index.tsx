@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useNavigate, useParams } from '@tanstack/react-router';
+import { useParams } from '@tanstack/react-router';
 
 import { LogIn, Settings2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -15,8 +15,8 @@ import { Button } from '@/components/ui/button';
 import { I18nSelector } from '@/components/ui/i18n-selector';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId';
 import { usePageStore } from '@/store/usePageStore';
+import VinesEvent from '@/utils/events.ts';
 
 interface IWorkspaceHeaderProps extends React.ComponentPropsWithoutRef<'header'> {}
 
@@ -24,7 +24,6 @@ export const WorkspaceHeader: React.FC<IWorkspaceHeaderProps> = () => {
   const { t } = useTranslation();
 
   const { teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
-  const navigate = useNavigate({ from: Route.fullPath });
 
   const { visibleCustomSetting, setVisibleCustomSetting } = usePageStore();
 
@@ -37,7 +36,7 @@ export const WorkspaceHeader: React.FC<IWorkspaceHeaderProps> = () => {
           description=""
           height={32}
           className={hasToken ? 'cursor-pointer' : ''}
-          onClick={() => hasToken && navigate({ to: '/$teamId', params: { teamId } })}
+          onClick={() => hasToken && VinesEvent.emit('vines-nav', '/$teamId', { teamId })}
         />
         <Separator orientation="vertical" className="h-1/2" />
         <WorkflowInfoCard />
@@ -64,7 +63,12 @@ export const WorkspaceHeader: React.FC<IWorkspaceHeaderProps> = () => {
         {hasToken ? (
           <UserCard />
         ) : (
-          <Button variant="outline" size="small" icon={<LogIn />} onClick={() => navigate({ to: '/login' })}>
+          <Button
+            variant="outline"
+            size="small"
+            icon={<LogIn />}
+            onClick={() => VinesEvent.emit('vines-nav', '/login')}
+          >
             {t('auth.login.login')}
           </Button>
         )}

@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { IOriginData } from '@/apis/typings.ts';
 import { getVinesToken, IVinesHeaderOptions, vinesHeader } from '@/apis/utils.ts';
 import i18n from '@/i18n.ts';
+import VinesEvent from '@/utils/events.ts';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 import 'unfetch/polyfill';
@@ -26,9 +27,6 @@ interface IFetcherOptions<U = unknown, P extends boolean = false> extends IVines
 
 const t = i18n.t;
 const UN_AUTH_SKIP_URLS = ['/api/teams', '/api/users/profile'];
-
-let warningToastCount = 0;
-let warningToastTimer: NodeJS.Timeout | null = null;
 
 export const vinesFetcher = <U, T = {}, P extends boolean = false>({
   method = 'GET',
@@ -84,17 +82,26 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
         const errorMessage = raw?.message || null;
 
         if (code === 403) {
-          warningToastCount++;
-
-          if (warningToastTimer) {
-            clearTimeout(warningToastTimer);
+          if (window['vinesRoute403_COUNT']) {
+            window['vinesRoute403_COUNT']++;
+            if (window['vinesRoute403_TOAST_ID']) {
+              toast(window['vinesRoute403_COUNT'], { id: window['vinesRoute403_TOAST_ID'] });
+            } else {
+              window['vinesRoute403_TOAST_ID'] = toast(t('auth.api-invalid'), {
+                action: {
+                  label: t('auth.re-login'),
+                  onClick: () => {
+                    localStorage.removeItem('vines-token');
+                    localStorage.removeItem('vines-team-id');
+                    VinesEvent.emit('vines-nav', '/login');
+                  },
+                },
+              });
+            }
+          } else {
+            window['vinesRoute403_COUNT'] = 1;
+            toast.warning(t('auth.login-expired'));
           }
-
-          warningToastTimer = setTimeout(() => {
-            toast.warning(t('auth.login-required', { count: warningToastCount }));
-            warningToastCount = 0;
-          }, 2000);
-
           throw new Error('Login Required');
         } else {
           toast.warning(errorMessage ? t([`common.toast.${errorMessage}`, errorMessage]) : 'Network Error');

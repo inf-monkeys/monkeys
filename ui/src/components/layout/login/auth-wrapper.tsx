@@ -14,7 +14,9 @@ import { AuthMethod } from '@/apis/common/typings.ts';
 import { saveAuthToken } from '@/components/router/guard/auth.ts';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form.tsx';
+import { setLocalStorage } from '@/hooks/use-local-storage';
 import { Route } from '@/pages/login';
+import VinesEvent from '@/utils/events.ts';
 
 export type AuthEvent = 'trigger-login' | 'clear-sms-code-input';
 
@@ -32,7 +34,7 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
   const { t } = useTranslation();
 
   const navigate = useNavigate({ from: Route.fullPath });
-  const { redirect_url } = Route.useSearch();
+  const { redirect_id, redirect_params } = Route.useSearch();
   const { mutate } = useSWRConfig();
 
   const { trigger: triggerPassword, data: passwordData } = useLoginByPassword();
@@ -70,9 +72,14 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
 
     saveAuthToken(finalToken).then((result) => {
       if (result) {
-        void mutate('/api/teams');
-        // TODO: 似乎无法正常跳转
-        void navigate({ to: redirect_url ?? '/' });
+        mutate('/api/teams').then((it) => {
+          setLocalStorage('vines-teams', it);
+          if (redirect_id && redirect_params) {
+            VinesEvent.emit('vines-nav', redirect_id, redirect_params);
+          } else {
+            void navigate({ to: '/' });
+          }
+        });
       }
       onFinished?.();
       toast.success(t('auth.login.success'));

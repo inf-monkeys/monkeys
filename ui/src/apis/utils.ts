@@ -8,9 +8,6 @@ export interface IVinesHeaderOptions {
 
 export const getVinesToken = () => localStorage.getItem('vines-token');
 
-let warningToastCount = 0;
-let warningToastTimer: NodeJS.Timeout | null = null;
-
 export const vinesHeader = ({ apikey, useToast = false }: IVinesHeaderOptions) => {
   const teamId = localStorage.getItem('vines-team-id');
   if (apikey) {
@@ -23,16 +20,7 @@ export const vinesHeader = ({ apikey, useToast = false }: IVinesHeaderOptions) =
     const [vinesRoute, routeTeamId, workflowId] = window['vinesRoute'];
     if (vinesRoute !== 'workspace') {
       if (useToast) {
-        warningToastCount++;
-
-        if (warningToastTimer) {
-          clearTimeout(warningToastTimer);
-        }
-
-        warningToastTimer = setTimeout(() => {
-          toast.warning(t('auth.login-required', { count: warningToastCount }));
-          warningToastCount = 0;
-        }, 2000);
+        toast.warning(t('auth.login-expired'));
       }
       throw new Error('Login Required');
     } else {
