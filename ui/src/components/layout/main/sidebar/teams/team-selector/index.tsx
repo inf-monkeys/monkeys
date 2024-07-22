@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useTeams } from '@/apis/authz/team';
 import { Team } from '@/components/layout/main/sidebar/teams/team-selector/team.tsx';
-import { useVinesRoute } from '@/components/router/useVinesRoute.ts';
+import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 import { Button } from '@/components/ui/button';
 import {
   Command,

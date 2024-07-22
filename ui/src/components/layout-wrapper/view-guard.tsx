@@ -18,6 +18,7 @@ import { I18nSelector } from '@/components/ui/i18n-selector';
 import { VinesLoading } from '@/components/ui/loading';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn } from '@/utils';
+import VinesEvent from '@/utils/events.ts';
 
 export const ViewGuard = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => {
@@ -75,19 +76,7 @@ export const ViewGuard = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
                     <CardTitle>{t(isUnAuth ? 'common.toast.Forbidden resource' : 'auth.login-expired')}</CardTitle>
                   </CardHeader>
                   <CardContent className="vines-center flex">
-                    <Button
-                      variant="outline"
-                      icon={<LogIn />}
-                      onClick={() =>
-                        navigate({
-                          to: '/login',
-                          search: {
-                            redirect_url:
-                              (location.search as { redirect_url?: string })?.redirect_url || location.pathname,
-                          },
-                        })
-                      }
-                    >
+                    <Button variant="outline" icon={<LogIn />} onClick={() => VinesEvent.emit('vines-nav', '/login')}>
                       {t('auth.login.login')}
                     </Button>
                   </CardContent>

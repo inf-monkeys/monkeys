@@ -1,8 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { useEffect, useRef } from 'react';
 
-import { useNavigate } from '@tanstack/react-router';
-
 import { pick } from 'lodash';
 import { toast } from 'sonner';
 
@@ -12,14 +10,10 @@ import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { AuthMethod } from '@/apis/common/typings';
 import { logout } from '@/components/router/guard/auth.ts';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-import { Route } from '@/pages/login';
 import VinesEvent from '@/utils/events.ts';
 import { maskEmail, maskPhone } from '@/utils/maskdata.ts';
-import { t } from 'i18next';
 
 export const UserGuard: React.FC = () => {
-  const navigate = useNavigate({ from: Route.fullPath });
-
   const { data: user, mutate, error } = useUser();
 
   const [localUser, setUser] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
@@ -28,7 +22,7 @@ export const UserGuard: React.FC = () => {
     if (logout()?.lastAuthMethod === AuthMethod.oidc) {
       handleOidcLogout();
     } else {
-      void navigate({ to: '/login' });
+      VinesEvent.emit('vines-nav', '/login');
     }
   };
 
@@ -59,21 +53,8 @@ export const UserGuard: React.FC = () => {
     if (error instanceof Error && window['vinesRoute']?.[0] !== 'workspace') {
       const errorMessage = error?.message;
 
-      if (errorMessage !== '需要登录') {
-        if (errorMessage === '请先登录') {
-          toast.error(t('auth.login-expired'));
-        } else {
-          toast(t('auth.api-invalid'), {
-            action: {
-              label: t('auth.re-login'),
-              onClick: () => {
-                localStorage.removeItem('vines-token');
-                localStorage.removeItem('vines-team-id');
-                void navigate({ to: '/login' });
-              },
-            },
-          });
-        }
+      if (errorMessage !== 'Login Required') {
+        toast.warning(errorMessage ? errorMessage : 'Network Error');
       }
     }
   }, [error]);

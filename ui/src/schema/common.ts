@@ -1,7 +1,8 @@
 import z from 'zod';
 
 export const pageSearchSchema = z.object({
-  redirect_url: z.string().optional(),
+  redirect_id: z.string().optional(),
+  redirect_params: z.record(z.string(), z.string()).optional(),
 });
 
 export const loginCallbackPageSearchSchema = z.object({
