@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 
-import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { motion } from 'framer-motion';
 
 import { WorkspaceCustomSetting } from '@/components/layout/workspace/custom-setting';
 import { SpaceTabs } from '@/components/layout-wrapper/workspace/space/tabs';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
+import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { usePageStore } from '@/store/usePageStore';
 
 interface ISpaceProps extends React.ComponentPropsWithoutRef<'div'> {}

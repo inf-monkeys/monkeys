@@ -14,8 +14,9 @@ import { saveAuthToken } from '@/components/router/guard/auth.ts';
 import { Button } from '@/components/ui/button';
 import { I18nSelector } from '@/components/ui/i18n-selector';
 import { VinesLoading } from '@/components/ui/loading';
-import { loginCallbackPageSearchSchema } from '@/schema/common.ts';
 import { clearAllLocalData } from '@/hooks/use-local-storage';
+import { loginCallbackPageSearchSchema } from '@/schema/common.ts';
+import VinesEvent from '@/utils/events.ts';
 
 const LoginCallback: React.FC = () => {
   const { t } = useTranslation();
@@ -29,7 +30,7 @@ const LoginCallback: React.FC = () => {
   useEffect(() => {
     if (!access_token) {
       toast.warning(t('auth.oidc.auth-failed'));
-      void navigate({ to: '/login' });
+      VinesEvent.emit('vines-nav', '/login');
       return;
     }
 
@@ -38,7 +39,7 @@ const LoginCallback: React.FC = () => {
         toast.warning(t('auth.oidc.auth-failed'));
         localStorage.removeItem('vines-token');
         localStorage.removeItem('vines-team-id');
-        void navigate({ to: '/login' });
+        VinesEvent.emit('vines-nav', '/login');
         return;
       }
 
@@ -69,10 +70,10 @@ const LoginCallback: React.FC = () => {
             icon={<LogIn />}
             onClick={() => {
               clearAllLocalData();
-              void navigate({ to: '/login' });
+              VinesEvent.emit('vines-nav', '/login');
             }}
           >
-            {t('auth.wait-to-long.re-login')}
+            {t('auth.wait-to-long.force-re-login')}
           </Button>
           <Button
             className="mb-2 mt-9"

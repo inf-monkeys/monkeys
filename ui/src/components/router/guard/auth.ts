@@ -1,4 +1,4 @@
-import { ParsedLocation, redirect } from '@tanstack/react-router';
+import { ParsedLocation } from '@tanstack/react-router';
 
 import { pick } from 'lodash';
 import { decodeToken as jwtDecodeToken, isExpired as jwtIsExpired } from 'react-jwt';
@@ -9,6 +9,7 @@ import { getUser } from '@/apis/authz/user';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { deleteLocalStorage, readLocalStorageValue, setLocalStorage } from '@/hooks/use-local-storage';
 import i18n from '@/i18n.ts';
+import VinesEvent from '@/utils/events.ts';
 
 const t = i18n.t;
 
@@ -25,14 +26,9 @@ export const isAuthed = () => {
   return token && jwtDecodeToken(token) && !jwtIsExpired(token);
 };
 
-export const authGuard = ({ location }: { location: ParsedLocation }) => {
+export const authGuard = (_: { location: ParsedLocation }) => {
   if (!isAuthed()) {
-    throw redirect({
-      to: '/login',
-      search: {
-        redirect_url: (location.search as { redirect_url?: string })?.redirect_url || location.pathname,
-      },
-    });
+    VinesEvent.emit('vines-nav', '/login');
   }
 };
 

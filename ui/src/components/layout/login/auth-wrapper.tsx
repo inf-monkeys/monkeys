@@ -14,7 +14,10 @@ import { AuthMethod } from '@/apis/common/typings.ts';
 import { saveAuthToken } from '@/components/router/guard/auth.ts';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form.tsx';
+import { VinesFullLoading } from '@/components/ui/loading';
+import { setLocalStorage } from '@/hooks/use-local-storage';
 import { Route } from '@/pages/login';
+import VinesEvent from '@/utils/events.ts';
 
 export type AuthEvent = 'trigger-login' | 'clear-sms-code-input';
 
@@ -32,13 +35,14 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
   const { t } = useTranslation();
 
   const navigate = useNavigate({ from: Route.fullPath });
-  const { redirect_url } = Route.useSearch();
+  const { redirect_id, redirect_params } = Route.useSearch();
   const { mutate } = useSWRConfig();
 
   const { trigger: triggerPassword, data: passwordData } = useLoginByPassword();
   const { trigger: triggerPhone, data: phoneData } = useLoginByPhone();
 
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = form.handleSubmit((params) => {
     if (!Object.values(AuthMethod).includes(method)) {
@@ -70,9 +74,16 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
 
     saveAuthToken(finalToken).then((result) => {
       if (result) {
-        void mutate('/api/teams');
-        // TODO: 似乎无法正常跳转
-        void navigate({ to: redirect_url ?? '/' });
+        setLoading(true);
+        mutate('/api/teams').then((it) => {
+          setLoading(false);
+          setLocalStorage('vines-teams', it);
+          if (redirect_id && redirect_params) {
+            VinesEvent.emit('vines-nav', redirect_id, redirect_params);
+          } else {
+            void navigate({ to: '/' });
+          }
+        });
       }
       onFinished?.();
       toast.success(t('auth.login.success'));
@@ -102,6 +113,7 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
           {t('auth.login.login')}
         </Button>
       </form>
+      {loading && <VinesFullLoading className="top-0 z-50 backdrop-blur-sm" tips={t('auth.login.fetch-teams')} />}
     </Form>
   );
 };

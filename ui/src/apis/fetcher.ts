@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { IOriginData } from '@/apis/typings.ts';
 import { getVinesToken, IVinesHeaderOptions, vinesHeader } from '@/apis/utils.ts';
 import i18n from '@/i18n.ts';
+import VinesEvent from '@/utils/events.ts';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 import 'unfetch/polyfill';
@@ -79,22 +80,47 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
         }
 
         const errorMessage = raw?.message || null;
-        toast.warning(
-          errorMessage
-            ? t([`common.toast.${errorMessage}`, errorMessage])
-            : code === 403
-              ? '请先登录'
-              : 'Network Error',
-        );
 
         if (code === 403) {
-          throw new Error('请先登录');
+          clearTimeout(window['vinesRoute403_TIMEOUT']);
+          window['vinesRoute403_TIMEOUT'] = window.setTimeout(() => {
+            window['vinesRoute403_COUNT'] = 0;
+            window['vinesRoute403_TOAST_ID'] = void 0;
+          }, 3000);
+
+          if (window['vinesRoute403_COUNT']) {
+            window['vinesRoute403_COUNT']++;
+            const toastData = {
+              action: {
+                label: t('auth.re-login'),
+                onClick: () => {
+                  localStorage.removeItem('vines-token');
+                  localStorage.removeItem('vines-team-id');
+                  VinesEvent.emit('vines-nav', '/login');
+                },
+              },
+            };
+            if (window['vinesRoute403_TOAST_ID']) {
+              toast(t('auth.login-required', { count: window['vinesRoute403_COUNT'] }), {
+                ...toastData,
+                id: window['vinesRoute403_TOAST_ID'],
+              });
+            } else {
+              window['vinesRoute403_TOAST_ID'] = toast(t('auth.api-403'), toastData);
+            }
+          } else {
+            window['vinesRoute403_COUNT'] = 1;
+            toast.warning(t('auth.login-expired'));
+          }
+          throw new Error('Login Required');
+        } else {
+          toast.warning(errorMessage ? t([`common.toast.${errorMessage}`, errorMessage]) : 'Network Error');
         }
 
         if (simple) {
           return void 0;
         } else {
-          throw new Error(errorMessage || '网络错误');
+          throw new Error(errorMessage || 'Network Error');
         }
       }
 

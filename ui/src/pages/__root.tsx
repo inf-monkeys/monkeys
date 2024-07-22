@@ -9,9 +9,10 @@ import { OEM } from '@/components/layout/oem';
 import { MainWrapper } from '@/components/layout-wrapper/main';
 import { WorkspaceWrapper } from '@/components/layout-wrapper/workspace';
 import { WorkspaceIframe } from '@/components/layout-wrapper/workspace-iframe';
+import { RouteEvent } from '@/components/router/event.tsx';
 import { TeamsGuard } from '@/components/router/guard/team.tsx';
 import { UserGuard } from '@/components/router/guard/user.tsx';
-import { useVinesRoute } from '@/components/router/useVinesRoute.ts';
+import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { VinesGlobalUpload } from '@/components/ui/updater/vines-global-upload.tsx';
 import { SIDEBAR_MAP } from '@/consts/sidebar.tsx';
@@ -54,7 +55,15 @@ const RootComponent: React.FC = () => {
         <main className="vines-ui h-screen w-screen">
           <AnimatePresence mode="popLayout">
             <motion.div
-              key={isUseOutside ? 'vines-outside' : isUseWorkSpace ? 'vines-workspace' : 'vines-main'}
+              key={
+                isUseVinesCore
+                  ? 'vines-outlet-core'
+                  : isUseOutside
+                    ? 'vines-outlet-outside'
+                    : isUseWorkSpace
+                      ? 'vines-outlet-workspace'
+                      : 'vines-outlet-main'
+              }
               className="vines-center relative size-full flex-col"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -68,7 +77,7 @@ const RootComponent: React.FC = () => {
               ) : isUseWorkSpace ? (
                 <WorkspaceWrapper />
               ) : (
-                <MainWrapper layoutId={'vines-' + routeIds?.join('-')} />
+                <MainWrapper layoutId={'vines-outlet-main-' + routeIds?.join('-')} />
               )}
             </motion.div>
           </AnimatePresence>
@@ -77,6 +86,7 @@ const RootComponent: React.FC = () => {
       <OEM />
       <TeamsGuard />
       <UserGuard />
+      <RouteEvent />
     </>
   );
 };

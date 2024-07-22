@@ -1,8 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { useEffect, useRef } from 'react';
 
-import { useNavigate } from '@tanstack/react-router';
-
 import { pick } from 'lodash';
 import { toast } from 'sonner';
 
@@ -12,13 +10,10 @@ import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { AuthMethod } from '@/apis/common/typings';
 import { logout } from '@/components/router/guard/auth.ts';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-import { Route } from '@/pages/login';
 import VinesEvent from '@/utils/events.ts';
 import { maskEmail, maskPhone } from '@/utils/maskdata.ts';
 
 export const UserGuard: React.FC = () => {
-  const navigate = useNavigate({ from: Route.fullPath });
-
   const { data: user, mutate, error } = useUser();
 
   const [localUser, setUser] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
@@ -27,7 +22,7 @@ export const UserGuard: React.FC = () => {
     if (logout()?.lastAuthMethod === AuthMethod.oidc) {
       handleOidcLogout();
     } else {
-      void navigate({ to: '/login' });
+      VinesEvent.emit('vines-nav', '/login');
     }
   };
 
@@ -58,21 +53,8 @@ export const UserGuard: React.FC = () => {
     if (error instanceof Error && window['vinesRoute']?.[0] !== 'workspace') {
       const errorMessage = error?.message;
 
-      if (errorMessage !== '需要登录') {
-        if (errorMessage === '请先登录') {
-          toast.error('登录已过期，请重新登录');
-        } else {
-          toast('接口数据异常！建议重新登录', {
-            action: {
-              label: '重新登录',
-              onClick: () => {
-                localStorage.removeItem('vines-token');
-                localStorage.removeItem('vines-team-id');
-                void navigate({ to: '/login' });
-              },
-            },
-          });
-        }
+      if (errorMessage !== 'Login Required') {
+        toast.warning(errorMessage ? errorMessage : 'Network Error');
       }
     }
   }, [error]);

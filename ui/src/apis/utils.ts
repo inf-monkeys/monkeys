@@ -1,3 +1,4 @@
+import { t } from 'i18next';
 import { toast } from 'sonner';
 
 export interface IVinesHeaderOptions {
@@ -19,9 +20,9 @@ export const vinesHeader = ({ apikey, useToast = false }: IVinesHeaderOptions) =
     const [vinesRoute, routeTeamId, workflowId] = window['vinesRoute'];
     if (vinesRoute !== 'workspace') {
       if (useToast) {
-        toast.warning('需要登录');
+        toast.warning(t('auth.login-expired'));
       }
-      throw new Error('需要登录');
+      throw new Error('Login Required');
     } else {
       return { 'x-monkeys-workflow-id': workflowId, 'x-monkeys-teamid': teamId || routeTeamId };
     }
