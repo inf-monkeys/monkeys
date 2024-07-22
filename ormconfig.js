@@ -25,7 +25,7 @@ const config = [...rawConfigs].reduce((prev, curr) => {
 });
 
 console.log('Run migration for appId: ', config.server.appId);
-const appId = config.server.appId;
+const appId = config.server.appId || 'monkeys';
 const dataSource = new DataSource({
   ...config.database,
   entityPrefix: appId.concat('_'),
