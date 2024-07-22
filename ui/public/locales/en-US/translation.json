@@ -102,7 +102,7 @@
       "vector-database-not-found": "The vector database doesn't exist.",
       "copy-success": "Copy success.",
       "copy-failed": "Copy failed.",
-      "Forbidden resource": "Insufficient privileges, login required"
+      "Forbidden resource": "Insufficient privileges, login required."
     },
     "dialog": {
       "delete-confirm": {
@@ -275,7 +275,6 @@
           "eraser": "Eraser",
           "move": "Move Canvas",
           "clear": "Clear Mask",
-
           "brush-color": "Brush Color",
           "more": "Brush Options"
         }
@@ -500,7 +499,6 @@
       "phone-placeholder": "Enter phone",
       "send-sms": {
         "button": "Send SMS",
-
         "loading": "Sending...",
         "success": "SMS verification code has been sent",
         "error": "Failed to send SMS verification code! Please try again later"
@@ -516,14 +514,17 @@
     },
     "loading": "Loading...",
     "wait-to-long": {
-      "title": "Detected that the waiting time on this page is too long",
-      "desc": "Please try to log in again or force login",
+      "title": "Detected that the waiting time on this page is too long.",
+      "desc": "Please try to log in again or force login.",
       "force-enter": "Forced Entry",
-      "re-login": "Force re-login"
+      "force-re-login": "Force re-login"
     },
     "parse-token-failed": "Identity information parsing failed!",
     "fetch-user-data-failed": "Failed to obtain user information!",
-    "logging-expired": "Your login has expired, please log in again"
+    "login-expired": "Your login has expired, please log in again.",
+    "re-login": "Re-login",
+    "login-required": "Please log in. ({{ count }})",
+    "api-invalid": "Data anomaly! Suggest to log in again."
   },
   "settings": {
     "title": "Settings",
@@ -2063,10 +2064,8 @@
                 "label": "Default Value",
                 "placeholder": "Enter default value",
                 "placeholder-list": "Enter default value",
-
                 "select": {
                   "label": "List Selection",
-
                   "set-default": "Set as Default",
                   "label-placeholder": "Aliases",
                   "value-placeholder": "Value",
@@ -2103,7 +2102,6 @@
                 "enable-reset": {
                   "label": "Enable the Reset button"
                 },
-
                 "fold": "Advanced Configuration",
                 "reset": "Reset"
               },
@@ -2450,7 +2448,6 @@
             "click-to-open-in-image-mask-editor-and-upload": "Open image mask editor"
           },
           "options": "Please select an option",
-
           "mask-editor": {
             "empty": "No mask image yet",
             "empty-action": "Select image and edit mask",

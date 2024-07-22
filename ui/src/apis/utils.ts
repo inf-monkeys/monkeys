@@ -1,3 +1,4 @@
+import { t } from 'i18next';
 import { toast } from 'sonner';
 
 export interface IVinesHeaderOptions {
@@ -6,6 +7,9 @@ export interface IVinesHeaderOptions {
 }
 
 export const getVinesToken = () => localStorage.getItem('vines-token');
+
+let warningToastCount = 0;
+let warningToastTimer: NodeJS.Timeout | null = null;
 
 export const vinesHeader = ({ apikey, useToast = false }: IVinesHeaderOptions) => {
   const teamId = localStorage.getItem('vines-team-id');
@@ -19,9 +23,18 @@ export const vinesHeader = ({ apikey, useToast = false }: IVinesHeaderOptions) =
     const [vinesRoute, routeTeamId, workflowId] = window['vinesRoute'];
     if (vinesRoute !== 'workspace') {
       if (useToast) {
-        toast.warning('需要登录');
+        warningToastCount++;
+
+        if (warningToastTimer) {
+          clearTimeout(warningToastTimer);
+        }
+
+        warningToastTimer = setTimeout(() => {
+          toast.warning(t('auth.login-required', { count: warningToastCount }));
+          warningToastCount = 0;
+        }, 2000);
       }
-      throw new Error('需要登录');
+      throw new Error('Login Required');
     } else {
       return { 'x-monkeys-workflow-id': workflowId, 'x-monkeys-teamid': teamId || routeTeamId };
     }

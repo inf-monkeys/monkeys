@@ -15,6 +15,7 @@ import { useLocalStorage } from '@/hooks/use-local-storage';
 import { Route } from '@/pages/login';
 import VinesEvent from '@/utils/events.ts';
 import { maskEmail, maskPhone } from '@/utils/maskdata.ts';
+import { t } from 'i18next';
 
 export const UserGuard: React.FC = () => {
   const navigate = useNavigate({ from: Route.fullPath });
@@ -60,11 +61,11 @@ export const UserGuard: React.FC = () => {
 
       if (errorMessage !== '需要登录') {
         if (errorMessage === '请先登录') {
-          toast.error('登录已过期，请重新登录');
+          toast.error(t('auth.login-expired'));
         } else {
-          toast('接口数据异常！建议重新登录', {
+          toast(t('auth.api-invalid'), {
             action: {
-              label: '重新登录',
+              label: t('auth.re-login'),
               onClick: () => {
                 localStorage.removeItem('vines-token');
                 localStorage.removeItem('vines-team-id');

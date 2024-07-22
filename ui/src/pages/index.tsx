@@ -55,7 +55,7 @@ const TeamsIdPage: React.FC = () => {
               void navigate({ to: '/login' });
             }}
           >
-            {t('auth.wait-to-long.re-login')}
+            {t('auth.wait-to-long.force-re-login')}
           </Button>
           <Button
             className="mb-2 mt-9"

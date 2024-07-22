@@ -27,6 +27,9 @@ interface IFetcherOptions<U = unknown, P extends boolean = false> extends IVines
 const t = i18n.t;
 const UN_AUTH_SKIP_URLS = ['/api/teams', '/api/users/profile'];
 
+let warningToastCount = 0;
+let warningToastTimer: NodeJS.Timeout | null = null;
+
 export const vinesFetcher = <U, T = {}, P extends boolean = false>({
   method = 'GET',
   auth = true,
@@ -79,22 +82,28 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
         }
 
         const errorMessage = raw?.message || null;
-        toast.warning(
-          errorMessage
-            ? t([`common.toast.${errorMessage}`, errorMessage])
-            : code === 403
-              ? '请先登录'
-              : 'Network Error',
-        );
 
         if (code === 403) {
-          throw new Error('请先登录');
+          warningToastCount++;
+
+          if (warningToastTimer) {
+            clearTimeout(warningToastTimer);
+          }
+
+          warningToastTimer = setTimeout(() => {
+            toast.warning(t('auth.login-required', { count: warningToastCount }));
+            warningToastCount = 0;
+          }, 2000);
+
+          throw new Error('Login Required');
+        } else {
+          toast.warning(errorMessage ? t([`common.toast.${errorMessage}`, errorMessage]) : 'Network Error');
         }
 
         if (simple) {
           return void 0;
         } else {
-          throw new Error(errorMessage || '网络错误');
+          throw new Error(errorMessage || 'Network Error');
         }
       }
 
