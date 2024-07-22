@@ -523,7 +523,8 @@
     "fetch-user-data-failed": "Failed to obtain user information!",
     "login-expired": "Your login has expired, please log in again.",
     "re-login": "Re-login",
-    "login-required": "Please log in. ({{ count }})",
+    "login-required": "Api authentication exception! Please login again. ({{ count }})",
+    "api-403": "Api authentication exception! Please login again.",
     "api-invalid": "Data anomaly! Suggest to log in again."
   },
   "settings": {

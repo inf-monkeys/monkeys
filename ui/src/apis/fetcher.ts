@@ -82,21 +82,31 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
         const errorMessage = raw?.message || null;
 
         if (code === 403) {
+          clearTimeout(window['vinesRoute403_TIMEOUT']);
+          window['vinesRoute403_TIMEOUT'] = window.setTimeout(() => {
+            window['vinesRoute403_COUNT'] = 0;
+            window['vinesRoute403_TOAST_ID'] = void 0;
+          }, 3000);
+
           if (window['vinesRoute403_COUNT']) {
             window['vinesRoute403_COUNT']++;
-            if (window['vinesRoute403_TOAST_ID']) {
-              toast(window['vinesRoute403_COUNT'], { id: window['vinesRoute403_TOAST_ID'] });
-            } else {
-              window['vinesRoute403_TOAST_ID'] = toast(t('auth.api-invalid'), {
-                action: {
-                  label: t('auth.re-login'),
-                  onClick: () => {
-                    localStorage.removeItem('vines-token');
-                    localStorage.removeItem('vines-team-id');
-                    VinesEvent.emit('vines-nav', '/login');
-                  },
+            const toastData = {
+              action: {
+                label: t('auth.re-login'),
+                onClick: () => {
+                  localStorage.removeItem('vines-token');
+                  localStorage.removeItem('vines-team-id');
+                  VinesEvent.emit('vines-nav', '/login');
                 },
+              },
+            };
+            if (window['vinesRoute403_TOAST_ID']) {
+              toast(t('auth.login-required', { count: window['vinesRoute403_COUNT'] }), {
+                ...toastData,
+                id: window['vinesRoute403_TOAST_ID'],
               });
+            } else {
+              window['vinesRoute403_TOAST_ID'] = toast(t('auth.api-403'), toastData);
             }
           } else {
             window['vinesRoute403_COUNT'] = 1;
