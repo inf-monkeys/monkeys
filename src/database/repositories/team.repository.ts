@@ -30,10 +30,10 @@ export class TeamRepository {
   ) {}
 
   private async refreshLogo(teams: TeamEntity[]) {
-    const s3Helpers = new S3Helpers();
     const promises = teams.filter(Boolean).map(async (team) => {
       if (team.iconUrl) {
         try {
+          const s3Helpers = new S3Helpers();
           const { refreshed, refreshedUrl } = await s3Helpers.refreshSignedUrl(team.iconUrl);
           if (refreshed) {
             team.iconUrl = refreshedUrl;
