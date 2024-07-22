@@ -9,6 +9,8 @@ export interface NavItemWithoutLabel {
   path?: LinkOptions['to'];
   icon?: React.ReactNode;
   items?: NavItemWithoutLabel[];
+  comingSoon?: boolean;
+  super?: boolean;
 }
 
 export interface NavItem extends NavItemWithoutLabel {
@@ -16,15 +18,17 @@ export interface NavItem extends NavItemWithoutLabel {
 }
 
 export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
+  // {
+  //   name: 'agent',
+  //   icon: <Bot />,
+  //   path: '/$teamId/agents',
+  //   super: true,
+  //   comingSoon: true,
+  // },
   {
     path: '/$teamId',
     name: 'workbench',
     icon: <Rocket />,
-  },
-  {
-    name: 'agent',
-    icon: <Bot />,
-    path: '/$teamId/agents',
   },
   {
     name: 'workflow',
