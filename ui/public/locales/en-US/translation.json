@@ -288,11 +288,11 @@
             "workbench": {
               "label": "Workbench"
             },
-            "app": {
-              "label": "App",
-              "workflows": {
-                "label": "Workflows"
-              }
+            "agent": {
+              "label": "Agents"
+            },
+            "workflow": {
+              "label": "Workflows"
             },
             "tool": {
               "label": "Tools",
