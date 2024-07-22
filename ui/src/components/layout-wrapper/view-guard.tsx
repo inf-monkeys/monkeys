@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { forwardRef, useState } from 'react';
 
-import { useNavigate, useParams } from '@tanstack/react-router';
+import { useParams } from '@tanstack/react-router';
 
 import { useDebounceEffect } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -23,8 +23,6 @@ import VinesEvent from '@/utils/events.ts';
 export const ViewGuard = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, children, ...props }, ref) => {
     const { t } = useTranslation();
-
-    const navigate = useNavigate();
 
     const [token] = useLocalStorage<string>('vines-token', '', false);
 

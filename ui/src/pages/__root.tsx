@@ -55,7 +55,15 @@ const RootComponent: React.FC = () => {
         <main className="vines-ui h-screen w-screen">
           <AnimatePresence mode="popLayout">
             <motion.div
-              key={isUseOutside ? 'vines-outside' : isUseWorkSpace ? 'vines-workspace' : 'vines-main'}
+              key={
+                isUseVinesCore
+                  ? 'vines-outlet-core'
+                  : isUseOutside
+                    ? 'vines-outlet-outside'
+                    : isUseWorkSpace
+                      ? 'vines-outlet-workspace'
+                      : 'vines-outlet-main'
+              }
               className="vines-center relative size-full flex-col"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -69,7 +77,7 @@ const RootComponent: React.FC = () => {
               ) : isUseWorkSpace ? (
                 <WorkspaceWrapper />
               ) : (
-                <MainWrapper layoutId={'vines-' + routeIds?.join('-')} />
+                <MainWrapper layoutId={'vines-outlet-main-' + routeIds?.join('-')} />
               )}
             </motion.div>
           </AnimatePresence>

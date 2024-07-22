@@ -115,7 +115,7 @@ export const VinesFullLoading: React.FC<ILoadingProps> = ({ motionKey, className
   return (
     <motion.div
       key={motionKey}
-      className={cn('vines-center absolute size-full z-50', className)}
+      className={cn('vines-center absolute z-50 size-full', className)}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1, transition: { delay: immediately ? 0 : 0.3 } }}
       exit={{ opacity: 0 }}
