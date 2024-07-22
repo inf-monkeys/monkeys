@@ -15,11 +15,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import VinesEvent from '@/utils/events.ts';
-import { maskEmail, maskPhone } from '@/utils/maskdata.ts';
 
 export const Account: React.FC = () => {
   const { t } = useTranslation();
@@ -27,17 +25,16 @@ export const Account: React.FC = () => {
   const [user] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
 
   const currentUserName = user.name;
-  const currentAccount = user.phone ? maskPhone(user.phone.toString()) : user.email ? maskEmail(user.email) : '';
   const currentUserPhoto = user.photo;
 
   return (
-    <div className="flex w-full items-center justify-between gap-2 rounded-md bg-mauve-2 p-2 shadow-sm">
-      <User name={currentUserName} account={currentAccount} photo={currentUserPhoto} />
+    <div className="flex w-full items-center justify-between p-1">
+      <User name={currentUserName} photo={currentUserPhoto} photoSize={5} simple />
       <Tooltip>
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <TooltipTrigger>
-              <Button icon={<LogOut className="!stroke-red-10" strokeWidth={1.5} size={16} />} variant="borderless" />
+              <LogOut className="!stroke-red-10" strokeWidth={1.5} size={16} />
             </TooltipTrigger>
           </AlertDialogTrigger>
           <AlertDialogContent>

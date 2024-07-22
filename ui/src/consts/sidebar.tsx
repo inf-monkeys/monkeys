@@ -21,10 +21,11 @@ export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
     name: 'workbench',
     icon: <Rocket />,
   },
-  // {
-  //   name: 'agent',
-  //   icon: <Bot />,
-  // },
+  {
+    name: 'agent',
+    icon: <Bot />,
+    path: '/$teamId/agents',
+  },
   {
     name: 'workflow',
     icon: <Server />,
