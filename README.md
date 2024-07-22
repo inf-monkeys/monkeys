@@ -10,7 +10,6 @@ Monkeys is an open source tool for build workflow-centric AI applications.
 
 ![](./images/dashboard.png)
 
-
 </div>
 
 > **Note: We are currently iterating rapidly, so backwards compatibility is not guaranteed until a stable version (1.0.0) is released.**
@@ -28,6 +27,7 @@ Monkeys is an open source tool for build workflow-centric AI applications.
 - [🤝 Contributing](#-contributing)
 
 ####
+
 <br/>
 
 </details>
@@ -55,7 +55,6 @@ You can read the documentation here: [https://inf-monkeys.github.io/docs/](https
 
 - [Docker Compose](./docker/README.md)
 - [Helm Chart](https://github.com/inf-monkeys/helm-charts)
-
 
 ### 👨‍💻 Developer
 
@@ -127,16 +126,16 @@ You can read the documentation here: [https://inf-monkeys.github.io/docs/](https
 5. Run Migrations
 
    ```sh
-   yarn migartions:run
+   yarn migration:run
    ```
-    
+
 6. Run the server:
 
    ```sh
    yarn start
    ```
 
-#### Frontend 
+#### Frontend
 
 1. Go to `ui` folder
 
@@ -164,8 +163,9 @@ You can read the documentation here: [https://inf-monkeys.github.io/docs/](https
    yarn dev
    ```
 
-That's all, you are ready to go!
+5. Open Your browser at `http://localhost:2048`
 
+That's all, you are ready to go!
 
 ## 📦 Ecosystem
 
@@ -179,4 +179,3 @@ Contributions of all types are more than welcome; if you are interested in contr
 <a href="https://github.com/inf-monkeys/monkeys/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=inf-monkeys/monkeys" />
 </a>
-
