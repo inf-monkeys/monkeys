@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useParams } from '@tanstack/react-router';
+import { Link, useParams } from '@tanstack/react-router';
 
 import { LogIn, Settings2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -32,12 +32,9 @@ export const WorkspaceHeader: React.FC<IWorkspaceHeaderProps> = () => {
   return (
     <header className="flex h-14 w-full items-center justify-between bg-slate-1 px-6 shadow-sm">
       <div className="z-20 flex h-full items-center gap-5">
-        <VinesLogo
-          description=""
-          height={32}
-          className={hasToken ? 'cursor-pointer' : ''}
-          onClick={() => hasToken && VinesEvent.emit('vines-nav', '/$teamId', { teamId })}
-        />
+        <Link to="/$teamId/" params={{ teamId }} disabled={!hasToken}>
+          <VinesLogo description="" height={32} className={hasToken ? 'cursor-pointer' : ''} />
+        </Link>
         <Separator orientation="vertical" className="h-1/2" />
         <WorkflowInfoCard />
       </div>
