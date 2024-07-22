@@ -119,7 +119,7 @@ export const Workflows: React.FC = () => {
         assetKey="workflow"
         assetType="workflow"
         assetIdKey="workflowId"
-        assetName={t('components.layout.main.sidebar.list.app.workflows.label')}
+        assetName={t('components.layout.main.sidebar.list.workflow.label')}
         useUgcFetcher={useUgcWorkflows}
         preloadUgcFetcher={preloadUgcWorkflows}
         createColumns={() => createWorkflowsColumns()}

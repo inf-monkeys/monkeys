@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { FileUp } from 'lucide-react';
 import Dropzone, { FileWithPath } from 'react-dropzone';
-import { ErrorCode } from 'react-dropzone-esm';
+import { ErrorCode } from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
