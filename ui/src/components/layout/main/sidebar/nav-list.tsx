@@ -20,7 +20,7 @@ export const NavList: React.FC<INavListProps> = () => {
   );
 
   return (
-    <ScrollArea className="h-full flex-1 overflow-y-scroll pb-8" scrollBarDisabled>
+    <ScrollArea className="h-full flex-1 overflow-y-scroll" scrollBarDisabled>
       <Accordion
         type="multiple"
         className="flex w-full flex-col gap-1 text-xs text-slateA-8 text-opacity-70"

@@ -32,6 +32,7 @@ import { Route as TeamIdImageModelStoreIndexImport } from './pages/$teamId/image
 import { Route as TeamIdComfyuiIndexImport } from './pages/$teamId/comfyui/index'
 import { Route as TeamIdComfyuiStoreIndexImport } from './pages/$teamId/comfyui-store/index'
 import { Route as TeamIdApplicationStoreIndexImport } from './pages/$teamId/application-store/index'
+import { Route as TeamIdAgentsIndexImport } from './pages/$teamId/agents/index'
 import { Route as TeamIdActionToolsIndexImport } from './pages/$teamId/action-tools/index'
 import { Route as TeamIdWorkspaceWorkflowIdIndexImport } from './pages/$teamId/workspace/$workflowId/index'
 import { Route as TeamIdTextModelsLlmModelIdIndexImport } from './pages/$teamId/text-models/$llmModelId/index'
@@ -151,6 +152,11 @@ const TeamIdApplicationStoreIndexRoute =
     getParentRoute: () => rootRoute,
   } as any)
 
+const TeamIdAgentsIndexRoute = TeamIdAgentsIndexImport.update({
+  path: '/$teamId/agents/',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const TeamIdActionToolsIndexRoute = TeamIdActionToolsIndexImport.update({
   path: '/$teamId/action-tools/',
   getParentRoute: () => rootRoute,
@@ -219,6 +225,10 @@ declare module '@tanstack/react-router' {
     }
     '/$teamId/action-tools/': {
       preLoaderRoute: typeof TeamIdActionToolsIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/$teamId/agents/': {
+      preLoaderRoute: typeof TeamIdAgentsIndexImport
       parentRoute: typeof rootRoute
     }
     '/$teamId/application-store/': {
@@ -328,6 +338,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdIndexRoute,
   LoginIndexRoute,
   TeamIdActionToolsIndexRoute,
+  TeamIdAgentsIndexRoute,
   TeamIdApplicationStoreIndexRoute,
   TeamIdComfyuiStoreIndexRoute,
   TeamIdComfyuiIndexRoute,

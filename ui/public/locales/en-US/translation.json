@@ -47,7 +47,8 @@
       "load-more": "Load More",
       "add": "Add",
       "upload": "Upload",
-      "click-to-copy": "Click to copy"
+      "click-to-copy": "Click to copy",
+      "coming-soon": "Coming soon"
     },
     "type": {
       "workflow": "workflow",

@@ -10,12 +10,14 @@ export interface IUserProps {
   account?: string;
   photo?: string;
   isCollapsed?: boolean;
+  simple?: boolean;
+  photoSize?: number;
 }
 
-export const User: React.FC<IUserProps> = ({ name, account, photo, isCollapsed }) => {
+export const User: React.FC<IUserProps> = ({ name, account, photo, isCollapsed, simple, photoSize = 8 }) => {
   return (
-    <div className="flex items-center gap-2 py-1">
-      <Avatar className={cn('size-8', isCollapsed && 'size-9')}>
+    <div className={cn('flex items-center gap-2', !simple && 'py-1')}>
+      <Avatar className={cn(`size-${photoSize}`, isCollapsed && 'size-9')}>
         <AvatarImage className="aspect-auto" src={photo} alt={name} />
         <AvatarFallback className="rounded-none p-2 text-xs">{(name ?? 'AI').substring(0, 2)}</AvatarFallback>
       </Avatar>
@@ -25,13 +27,14 @@ export const User: React.FC<IUserProps> = ({ name, account, photo, isCollapsed }
         ) : (
           <Skeleton className="h-5 w-full" />
         )}
-        {account ? (
-          <span className="max-w-[5.5rem] truncate text-xs leading-none text-black text-opacity-60 dark:text-gold-12 dark:opacity-70">
-            {account}
-          </span>
-        ) : (
-          <Skeleton className="h-4 w-full" />
-        )}
+        {!simple &&
+          (account ? (
+            <span className="max-w-[5.5rem] truncate text-xs leading-none text-black text-opacity-60 dark:text-gold-12 dark:opacity-70">
+              {account}
+            </span>
+          ) : (
+            <Skeleton className="h-4 w-full" />
+          ))}
       </div>
     </div>
   );
