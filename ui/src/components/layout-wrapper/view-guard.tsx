@@ -72,7 +72,7 @@ export const ViewGuard = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
               ) : (
                 <Card>
                   <CardHeader>
-                    <CardTitle>{t(isUnAuth ? 'common.toast.Forbidden resource' : 'auth.logging-expired')}</CardTitle>
+                    <CardTitle>{t(isUnAuth ? 'common.toast.Forbidden resource' : 'auth.login-expired')}</CardTitle>
                   </CardHeader>
                   <CardContent className="vines-center flex">
                     <Button
