@@ -4,9 +4,10 @@ import { useCreation } from 'ahooks';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
+import { Card, CardContent } from '@/components/ui/card.tsx';
+import { useIsMounted } from '@/hooks/use-is-mounted.ts';
 import { cn } from '@/utils';
 import { clampPercentage } from '@/utils/number.ts';
-import { useIsMounted } from '@/hooks/use-is-mounted.ts';
 
 interface IVinesLoadingProps {
   strokeWidth?: number;
@@ -15,12 +16,13 @@ interface IVinesLoadingProps {
   maxValue?: number;
   minValue?: number;
   className?: string;
+  immediately?: boolean;
 }
 
 const CENTER = 16;
 
 export const VinesLoading = forwardRef<Omit<HTMLDivElement, 'value'>, IVinesLoadingProps>(
-  ({ strokeWidth = 3, value, minValue = 0, maxValue = 100, className, color }, ref) => {
+  ({ strokeWidth = 3, value, minValue = 0, maxValue = 100, className, color, immediately }, ref) => {
     const { t } = useTranslation();
 
     const [, isMounted] = useIsMounted({
@@ -61,7 +63,7 @@ export const VinesLoading = forwardRef<Omit<HTMLDivElement, 'value'>, IVinesLoad
         ref={ref}
         className={cn('relative block', className)}
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1, transition: { delay: 0.3 } }}
+        animate={{ opacity: 1, transition: { delay: immediately ? 0 : 0.3 } }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
         aria-label={t('common.load.loading')}
@@ -69,7 +71,7 @@ export const VinesLoading = forwardRef<Omit<HTMLDivElement, 'value'>, IVinesLoad
         <svg
           viewBox="0 0 32 32"
           fill="none"
-          className="relative z-0 size-12 animate-spinner-ease-spin overflow-hidden"
+          className="animate-spinner-ease-spin relative z-0 size-12 overflow-hidden"
           strokeWidth={strokeWidth}
         >
           <circle
@@ -103,13 +105,28 @@ export const VinesLoading = forwardRef<Omit<HTMLDivElement, 'value'>, IVinesLoad
 VinesLoading.displayName = 'VinesLoading';
 
 interface ILoadingProps {
-  motionKey: React.Key | null | undefined;
+  className?: string;
+  motionKey?: React.Key | null;
+  immediately?: boolean;
+  tips?: string;
 }
 
-export const VinesFullLoading: React.FC<ILoadingProps> = ({ motionKey }) => {
+export const VinesFullLoading: React.FC<ILoadingProps> = ({ motionKey, className, immediately, tips }) => {
   return (
-    <div className="vines-center absolute size-full">
-      <VinesLoading key={motionKey} />
-    </div>
+    <motion.div
+      key={motionKey}
+      className={cn('vines-center absolute size-full z-50', className)}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1, transition: { delay: immediately ? 0 : 0.3 } }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+    >
+      <Card className="shadow-md">
+        <CardContent className="vines-center flex-col gap-2 p-4">
+          <VinesLoading immediately />
+          {tips && <span className="text-sm font-bold">{tips}</span>}
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
