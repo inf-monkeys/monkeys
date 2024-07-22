@@ -11,8 +11,6 @@ import { VinesMarkdown } from '@/components/ui/markdown';
 import { VinesIcon } from '@/components/ui/vines-icon';
 
 interface IVinesChatMessageProps {
-  chatId: string;
-
   data: IVinesMessage;
   index: number;
   LastItemIndex: number;
@@ -20,13 +18,15 @@ interface IVinesChatMessageProps {
   isLoading: boolean;
   userPhoto: string;
   botPhoto: string;
+
+  setMessageByIndex: (index: number, message?: Partial<IVinesMessage>) => void;
 }
 
 const EMPTY_CONTENT = String.fromCharCode(12288);
 
 export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
-  chatId,
   data,
+  setMessageByIndex,
   index,
   LastItemIndex,
   isLoading,
@@ -47,20 +47,23 @@ export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
             <AvatarImage className="aspect-auto" src={userPhoto} alt={isUser ? 'user' : 'assistant'} />
             <AvatarFallback className="rounded-none p-2 text-xs">{isUser ? 'user' : 'assistant'}</AvatarFallback>
           </Avatar>
-          <div className="flex flex-col gap-1">
+          <div className="flex-full flex items-end">
+            <MessageToolbar setMessageByIndex={setMessageByIndex} content={content} messageIndex={index} />
             <Card className="p-4 text-sm">{content}</Card>
           </div>
         </div>
       ) : (
         <div className="group flex flex-row items-start gap-4">
           <VinesIcon size="sm">{botPhoto}</VinesIcon>
-          <Card className="relative max-w-[calc(100%-3rem)] p-4 text-sm">
-            <ToolDisplay data={extra} />
-            <VinesMarkdown className={isLoading && LastItemIndex === index ? 'vines-result-streaming' : ''} allowHtml>
-              {content + (isEmptyMessage ? EMPTY_CONTENT : '')}
-            </VinesMarkdown>
-            <MessageToolbar chatId={chatId} content={content} />
-          </Card>
+          <div className="flex w-full items-end">
+            <Card className="relative max-w-[calc(100%-3rem)] p-4 text-sm">
+              <ToolDisplay data={extra} />
+              <VinesMarkdown className={isLoading && LastItemIndex === index ? 'vines-result-streaming' : ''} allowHtml>
+                {content + (isEmptyMessage ? EMPTY_CONTENT : '')}
+              </VinesMarkdown>
+            </Card>
+            <MessageToolbar setMessageByIndex={setMessageByIndex} content={content} messageIndex={index} />
+          </div>
         </div>
       )}
     </div>

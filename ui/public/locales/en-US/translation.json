@@ -2567,6 +2567,17 @@
           "placeholder": "What to talk about...",
           "send": "Send",
           "stop": "Stop Generating"
+        },
+        "message-toolbar": {
+          "edit": {
+            "label": "Edit Message",
+            "desc": "Edit the message content, the data will be saved in the next round of conversation"
+          },
+          "del": {
+            "label": "Delete Message",
+            "title": "Are you sure you want to delete this message?",
+            "desc": "Remove this message from the message list. The data will be saved in the next round of conversation."
+          }
         }
       },
       "workflow-mode": {

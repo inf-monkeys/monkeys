@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import { useMemoizedFn } from 'ahooks';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 
 import { VinesChatMessage } from '@/components/layout/vines-view/chat/chat-bot/messages/chat-message/index.tsx';
@@ -8,14 +9,20 @@ import { AutoScroll } from '@/components/layout/vines-view/chat/workflow-mode/me
 import { VinesRealTimeChatMessage } from '@/components/layout/vines-view/chat/workflow-mode/messages/virtualized/chat-message/real-time.tsx';
 
 interface IVirtualizedListProps {
-  chatId: string;
   data: IVinesMessage[];
+  setMessages: (messages: IVinesMessage[]) => void;
   isLoading: boolean;
   userPhoto: string;
   botPhoto: string;
 }
 
-export const VirtualizedList: React.FC<IVirtualizedListProps> = ({ chatId, data, isLoading, userPhoto, botPhoto }) => {
+export const VirtualizedList: React.FC<IVirtualizedListProps> = ({
+  data,
+  setMessages,
+  isLoading,
+  userPhoto,
+  botPhoto,
+}) => {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const [atBottom, setAtBottom] = useState(true);
 
@@ -24,6 +31,21 @@ export const VirtualizedList: React.FC<IVirtualizedListProps> = ({ chatId, data,
       virtuosoRef.current.scrollToIndex({ align: 'end', behavior: 'auto', index: 'LAST' });
     }
   }, []);
+
+  const handleSetMessageByIndex = useMemoizedFn((index: number, message?: Partial<IVinesMessage>) => {
+    setMessages(
+      data
+        .map((it, i) => {
+          if (index === i && message) {
+            return { ...it, ...message };
+          }
+          return it;
+        })
+        .filter((_, i) => {
+          return !(i === index && !message);
+        }),
+    );
+  });
 
   const overScan = window.innerHeight;
 
@@ -41,7 +63,7 @@ export const VirtualizedList: React.FC<IVirtualizedListProps> = ({ chatId, data,
         itemContent={(index: number, data: IVinesMessage) => {
           return (
             <VinesChatMessage
-              chatId={chatId}
+              setMessageByIndex={handleSetMessageByIndex}
               index={index}
               LastItemIndex={LastItemIndex}
               data={data}
