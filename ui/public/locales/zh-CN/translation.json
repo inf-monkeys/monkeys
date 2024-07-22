@@ -492,7 +492,8 @@
         "error": "发送失败！请稍后再试"
       },
       "nav-to-home": "直接进入",
-      "has-token-tips": "检查到已有登录凭证，可直接进入"
+      "has-token-tips": "检查到已有登录凭证，可直接进入",
+      "fetch-teams": "正在拉取团队数据"
     },
     "users": {
       "logout": "退出登录",
@@ -505,11 +506,15 @@
       "title": "检测到在此页面等待时间过长",
       "desc": "请尝试重新登录或强制进入",
       "force-enter": "强制进入",
-      "re-login": "强制重新登录"
+      "force-re-login": "强制重新登录"
     },
     "parse-token-failed": "身份信息解析失败！",
     "fetch-user-data-failed": "用户信息获取失败！",
-    "logging-expired": "登录已过期，请重新登录"
+    "login-expired": "登录已过期，请重新登录",
+    "re-login": "重新登录",
+    "login-required": "接口鉴权异常！建议重新登录（{{ count }}）",
+    "api-403": "接口鉴权异常！建议重新登录",
+    "api-invalid": "接口数据异常！建议重新登录"
   },
   "settings": {
     "title": "配置中心",

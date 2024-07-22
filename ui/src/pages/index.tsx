@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { I18nSelector } from '@/components/ui/i18n-selector';
 import { VinesLoading } from '@/components/ui/loading';
 import { clearAllLocalData, useLocalStorage } from '@/hooks/use-local-storage';
+import VinesEvent from '@/utils/events.ts';
 
 const TeamsIdPage: React.FC = () => {
   const { t } = useTranslation();
@@ -52,10 +53,10 @@ const TeamsIdPage: React.FC = () => {
             icon={<LogIn />}
             onClick={() => {
               clearAllLocalData();
-              void navigate({ to: '/login' });
+              VinesEvent.emit('vines-nav', '/login');
             }}
           >
-            {t('auth.wait-to-long.re-login')}
+            {t('auth.wait-to-long.force-re-login')}
           </Button>
           <Button
             className="mb-2 mt-9"
