@@ -68,13 +68,9 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
             handleDelete={() => {
               toast.promise(deleteTrigger, {
                 success: () => {
-                  setTimeout(
-                    () =>
-                      void mutate((key) => typeof key === 'string' && key.startsWith('/api/media-files'), undefined, {
-                        revalidate: true,
-                      }),
-                    1000,
-                  );
+                  void mutate((key) => typeof key === 'string' && key.startsWith('/api/media-files'), undefined, {
+                    revalidate: true,
+                  });
                   return t('common.delete.success');
                 },
                 error: t('common.delete.error'),
