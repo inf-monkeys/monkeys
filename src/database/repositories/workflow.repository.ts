@@ -302,6 +302,14 @@ export class WorkflowRepository {
         isDeleted: true,
       },
     );
+    await this.pageRepository.update(
+      {
+        workflowId,
+      },
+      {
+        isDeleted: true,
+      },
+    );
   }
 
   public async getWorkflowVersions(workflowId: string) {
