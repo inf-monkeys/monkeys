@@ -29,8 +29,6 @@ export const UgcViewCard = <E extends object>({
   const assetTags = render('assetTags');
   const description = render('description');
 
-  console.log(title);
-
   return (
     <Card
       className={cn('h-44', {

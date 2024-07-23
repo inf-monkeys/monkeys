@@ -143,7 +143,7 @@ export const UgcView = <E extends object>({
           : rawData.data
         : [];
 
-    const newData = result.map((it) => {
+    return result.map((it) => {
       const { description, displayName } = it as IAssetItem<E> & { displayName?: string };
 
       return {
@@ -152,10 +152,6 @@ export const UgcView = <E extends object>({
         ...(displayName && { displayName: getI18nContent(displayName) }),
       };
     });
-
-    console.log(newData.map((d) => d.displayName));
-
-    return newData;
   }, [rawData, filter]);
   const pageData = useMemo(
     () =>
