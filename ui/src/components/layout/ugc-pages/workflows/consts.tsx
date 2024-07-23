@@ -18,7 +18,7 @@ export const createWorkflowsColumns = () => [
     id: 'title',
     cell: ({ row, getValue }) => (
       <a
-        className="transition-colors hover:text-primary-500"
+        className="hover:text-primary-500 transition-colors"
         href={`/${row.original.teamId}/workspace/${row.original.workflowId}`}
         target="_blank"
         rel="noreferrer"
