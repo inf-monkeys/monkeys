@@ -53,7 +53,7 @@ export const Workflows: React.FC = () => {
   const { copy } = useCopy({ timeout: 500 });
   const { teamId } = useVinesTeam();
   const { createWorkflow } = useWorkflow();
-  const mutateWorkflows = () => mutate((key) => typeof key === 'string' && key.startsWith('/api/workflow/list'));
+  const mutateWorkflows = () => mutate((key) => typeof key === 'string' && key.startsWith('/api/workflow/metadata'));
 
   const [isCreating, setIsCreating] = useState(false);
 
@@ -94,7 +94,6 @@ export const Workflows: React.FC = () => {
       return;
     }
     void mutateWorkflows();
-    open(`/${teamId}/workspace/${newWorkflowInfo.workflowId}`, '_blank');
   };
 
   const handleDeleteWorkflow = (workflowId?: string) => {

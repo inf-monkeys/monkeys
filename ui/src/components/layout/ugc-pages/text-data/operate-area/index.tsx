@@ -46,7 +46,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
     toast.promise(deleteKnowledgeBase(item.uuid), {
       loading: t('common.delete.loading'),
       success: () => {
-        void mutate((key) => typeof key === 'string' && key.startsWith('/api/vector/collections'));
+        void mutate((key) => typeof key === 'string' && key.startsWith('/api/knowledge-bases'));
         return t('common.delete.success');
       },
       error: t('common.delete.error'),

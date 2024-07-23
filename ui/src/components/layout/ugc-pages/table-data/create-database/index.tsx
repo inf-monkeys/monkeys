@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
-import { IDatabaseInfo, databaseInfoSchema } from '@/schema/table-database/create-database.ts';
+import { databaseInfoSchema, IDatabaseInfo } from '@/schema/table-database/create-database.ts';
 
 interface ICreateDatabaseProps {}
 

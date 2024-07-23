@@ -44,7 +44,7 @@ export const CreateDataset: React.FC<ICreateDatasetProps> = () => {
     toast.promise(trigger(data), {
       loading: t('common.create.loading'),
       success: () => {
-        void mutate((key) => typeof key === 'string' && key.startsWith('/api/vector/collections'));
+        void mutate((key) => typeof key === 'string' && key.startsWith('/api/knowledge-bases'));
         return t('common.create.success');
       },
       error: t('common.create.error'),

@@ -23,6 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Updater } from '@/components/ui/updater';
 import { MIME_TYPES } from '@/components/ui/updater/mime-types.ts';
 import { IImportComfyUIWorkflow, importComfyUIWorkflowSchema } from '@/schema/workspace/import-comfyui-workflow';
+import { useSWRConfig } from 'swr';
 
 interface IImportToolModalProps {
   children?: React.ReactNode;
@@ -33,6 +34,7 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
 
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { mutate } = useSWRConfig();
 
   const form = useForm<IImportComfyUIWorkflow>({
     resolver: zodResolver(importComfyUIWorkflowSchema),
@@ -47,6 +49,7 @@ export const ImportComfyUIWorkflowModal: React.FC<IImportToolModalProps> = ({ ch
       loading: t('common.operate.loading'),
       success: () => {
         setOpen(false);
+        void mutate((key) => typeof key === 'string' && key.startsWith('/api/comfyui/workflows'));
         return t('common.operate.success');
       },
       error: t('common.operate.error'),
