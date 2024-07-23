@@ -114,7 +114,7 @@ export const VinesLogViewStatTab: React.FC<IVinesLogViewStatTabProps> = () => {
         <ScrollArea style={{ height: finalHeight }}>
           <div className="flex flex-col gap-2">
             <VinesLogViewStatFilter form={form} handleSubmit={handleSubmit} isMutating={isMutating} />
-            <Button onClick={handleDownload} theme="tertiary" className="mx-2 flex-1" disabled={isMutating}>
+            <Button onClick={handleDownload} variant="outline" className="mx-2 flex-1" disabled={isMutating}>
               {t('workspace.logs-view.stat.filter.form.export')}
             </Button>
           </div>
