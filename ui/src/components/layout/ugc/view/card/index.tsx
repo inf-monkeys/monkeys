@@ -29,6 +29,8 @@ export const UgcViewCard = <E extends object>({
   const assetTags = render('assetTags');
   const description = render('description');
 
+  console.log(title);
+
   return (
     <Card
       className={cn('h-44', {
@@ -61,7 +63,7 @@ export const UgcViewCard = <E extends object>({
               <div>
                 {operateArea(
                   row.original,
-                  <Button icon={<MoreHorizontal />} size="small" variant="outline" className="-m-1 scale-80" />,
+                  <Button icon={<MoreHorizontal />} size="small" variant="outline" className="scale-80 -m-1" />,
                   t('common.utils.operate'),
                 )}
               </div>

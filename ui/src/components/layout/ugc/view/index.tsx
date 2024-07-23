@@ -143,7 +143,7 @@ export const UgcView = <E extends object>({
           : rawData.data
         : [];
 
-    return result.map((it) => {
+    const newData = result.map((it) => {
       const { description, displayName } = it as IAssetItem<E> & { displayName?: string };
 
       return {
@@ -152,6 +152,10 @@ export const UgcView = <E extends object>({
         ...(displayName && { displayName: getI18nContent(displayName) }),
       };
     });
+
+    console.log(newData.map((d) => d.displayName));
+
+    return newData;
   }, [rawData, filter]);
   const pageData = useMemo(
     () =>
@@ -298,7 +302,7 @@ export const UgcView = <E extends object>({
                       {rows.map((row, index) => (
                         <UgcViewCard
                           row={row}
-                          key={index}
+                          key={row.original['id']}
                           index={index}
                           columns={columns}
                           renderOptions={renderOptions}
@@ -324,7 +328,7 @@ export const UgcView = <E extends object>({
                         <UgcViewGalleryItem
                           row={row}
                           columns={columns}
-                          key={index}
+                          key={row.original['id']}
                           index={index}
                           renderOptions={renderOptions}
                           operateArea={operateArea}
