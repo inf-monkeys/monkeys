@@ -121,7 +121,7 @@ export const Workflows: React.FC = () => {
         assetName={t('components.layout.main.sidebar.list.workflow.label')}
         useUgcFetcher={useUgcWorkflows}
         preloadUgcFetcher={preloadUgcWorkflows}
-        createColumns={() => createWorkflowsColumns()}
+        createColumns={createWorkflowsColumns}
         renderOptions={{
           subtitle: (item) => (
             <span className="line-clamp-1">

@@ -2,7 +2,7 @@ import React from 'react';
 
 import { LinkOptions } from '@tanstack/react-router';
 
-import { Bot, Calculator, Database, Package, Rocket, Server, ShoppingCart } from 'lucide-react';
+import { Calculator, Database, Package, Rocket, Server, ShoppingCart } from 'lucide-react';
 
 export interface NavItemWithoutLabel {
   name: string;

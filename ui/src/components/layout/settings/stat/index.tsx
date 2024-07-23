@@ -109,19 +109,21 @@ export const Stat: React.FC<IStatProps> = () => {
           </div>
         </ScrollArea>
       </motion.div>
-      <Separator orientation="vertical" className="vines-center mx-4">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div
-              className="group z-10 flex h-4 w-3.5 cursor-pointer items-center justify-center rounded-sm border bg-border px-0.5 transition-opacity hover:opacity-75 active:opacity-95"
-              onClick={() => setSidebarVisible(!sidebarVisible)}
-            >
-              <ChevronRight className={cn(sidebarVisible && 'scale-x-[-1]')} />
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>{sidebarVisible ? t('common.sidebar.hide') : t('common.sidebar.show')}</TooltipContent>
-        </Tooltip>
-      </Separator>
+      <div>
+        <Separator orientation="vertical" className="vines-center mx-4">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                className="group z-10 flex h-4 w-3.5 cursor-pointer items-center justify-center rounded-sm border bg-border px-0.5 transition-opacity hover:opacity-75 active:opacity-95"
+                onClick={() => setSidebarVisible(!sidebarVisible)}
+              >
+                <ChevronRight className={cn(sidebarVisible && 'scale-x-[-1]')} />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>{sidebarVisible ? t('common.sidebar.hide') : t('common.sidebar.show')}</TooltipContent>
+          </Tooltip>
+        </Separator>
+      </div>
       <div className="h-full flex-1">
         <ScrollArea className="pr-1 [&>div>div]:h-full" style={{ height: finalHeight }}>
           <div className="mx-4 flex flex-col gap-3">
