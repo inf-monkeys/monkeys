@@ -99,7 +99,9 @@ export const useUgcTools = (dto: IListUgcDto) => {
     }) ?? [];
 
   const totalList = [...processActionToolList, ...processComfyuiWorkflowList];
-  const sortedList = totalList.sort((a, b) => a[orderColumn] - b[orderColumn]);
+  const sortedList = totalList.sort((a, b) =>
+    a[orderColumn] !== b[orderColumn] ? a[orderColumn] - b[orderColumn] : a.id.localeCompare(b.id),
+  );
   const sliceList = (orderBy === 'DESC' ? sortedList.reverse() : sortedList).slice(limit * (page - 1), limit);
 
   const data: IPaginationListData<ICommonTool> = {
