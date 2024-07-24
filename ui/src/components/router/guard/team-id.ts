@@ -17,7 +17,7 @@ export const teamIdGuard = async ({
   skip?: boolean;
 }) => {
   const teams = readLocalStorageValue<IVinesTeam[]>('vines-teams', []);
-  if (!teams.length)
+  if (!teams || !teams.length)
     throw redirect({
       to: '/',
       search: {

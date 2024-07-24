@@ -128,7 +128,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                 const rootLabel = getI18nContent(TOOLS_ROOT_CATEGORIES_MAP[rootName]['label']);
                 const rootIcon = TOOLS_ROOT_CATEGORIES_MAP[rootName]['icon'];
                 const categoriesMap =
-                  rootName === 'action-tools' ? ACTION_TOOLS_CATEGORIES_MAP : EXTERNAL_TOOLS_CATEGORIES_MAP;
+                  rootName === 'internal-tools' ? ACTION_TOOLS_CATEGORIES_MAP : EXTERNAL_TOOLS_CATEGORIES_MAP;
                 return (
                   <AccordionItem key={rootName} value={rootName}>
                     <>
