@@ -281,6 +281,9 @@
             "workflow": {
               "label": "工作流"
             },
+            "tools": {
+              "label": "工具"
+            },
             "tool": {
               "label": "工具",
               "action-tools": {
