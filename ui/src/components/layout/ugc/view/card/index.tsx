@@ -29,6 +29,12 @@ export const UgcViewCard = <E extends object>({
   const assetTags = render('assetTags');
   const description = render('description');
 
+  const operateAreaNode = operateArea?.(
+    row.original,
+    <Button icon={<MoreHorizontal />} size="small" variant="outline" className="scale-80 -m-1" />,
+    t('common.utils.operate'),
+  );
+
   return (
     <Card
       className={cn('h-44', {
@@ -44,9 +50,9 @@ export const UgcViewCard = <E extends object>({
       }
     >
       <CardHeader className="p-4">
-        <CardTitle className={cn('flex gap-3 font-medium', operateArea && 'justify-between')}>
+        <CardTitle className={cn('flex gap-3 font-medium', operateAreaNode && 'justify-between')}>
           <div>{logo}</div>
-          <div className={cn('flex flex-col', operateArea && 'max-w-[55%]')}>
+          <div className={cn('flex flex-col', operateAreaNode && 'max-w-[55%]')}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <span className="line-clamp-1 text-base font-bold">{title}</span>
@@ -55,16 +61,10 @@ export const UgcViewCard = <E extends object>({
             </Tooltip>
             <span className="text-xs">{subtitle}</span>
           </div>
-          {operateArea && (
+          {operateAreaNode && (
             <>
               <div className="flex-1" />
-              <div>
-                {operateArea(
-                  row.original,
-                  <Button icon={<MoreHorizontal />} size="small" variant="outline" className="scale-80 -m-1" />,
-                  t('common.utils.operate'),
-                )}
-              </div>
+              <div>{operateAreaNode}</div>
             </>
           )}
         </CardTitle>

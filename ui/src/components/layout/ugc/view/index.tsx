@@ -47,7 +47,7 @@ interface IUgcViewProps<E extends object> {
   isLoadAll?: boolean;
   isMarket?: boolean;
   useUgcFetcher: IListUgcItemsFnType<E>;
-  preloadUgcFetcher: IPreloadUgcItemsFnType<E>;
+  preloadUgcFetcher?: IPreloadUgcItemsFnType<E>;
   createColumns: () => ColumnDef<IAssetItem<E>, any>[];
   renderOptions: IUgcRenderOptions<IAssetItem<E>>;
   operateArea?: IOperateAreaProps<E>;
@@ -166,7 +166,7 @@ export const UgcView = <E extends object>({
   );
 
   const handlePreload = (pageIndex: number) =>
-    preloadUgcFetcher({
+    preloadUgcFetcher?.({
       page: pageIndex,
       limit: pagination.pageSize,
       filter: {},

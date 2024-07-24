@@ -28,7 +28,7 @@ export const createComfyuiWorkflowColumns = ({ hooks }: ICreateComfyuiWorkflowCo
     id: 'title',
     cell: ({ getValue, row }) => (
       <span
-        className="cursor-pointer transition-colors hover:text-primary-500"
+        className="hover:text-primary-500 cursor-pointer transition-colors"
         onClick={() => {
           void hooks.navigate({
             to: `/$teamId/comfyui/${row.original.id}`,

@@ -9,7 +9,7 @@ import { ILLMChannel, ILLMModel } from '@/apis/llm/typings.ts';
 import { IMediaData } from '@/apis/media-data/typings.ts';
 import { ISDModel } from '@/apis/sd/typings.ts';
 import { ITableData } from '@/apis/table-data/typings.ts';
-import { IWorkflowTool } from '@/apis/tools/typings.ts';
+import { ICommonTool, IWorkflowTool } from '@/apis/tools/typings.ts';
 import { IPaginationListData } from '@/apis/typings.ts';
 import { IApplicationStoreItemDetail } from '@/apis/ugc/asset-typings.ts';
 import { IKnowledgeBaseFrontEnd } from '@/apis/vector/typings.ts';
@@ -54,6 +54,72 @@ export const useUgcComfyuiWorkflows = (dto: IListUgcDto) =>
   useUgcItems<IComfyuiWorkflow>(dto, '/api/comfyui/workflows');
 export const preloadUgcComfyuiWorkflows = (dto: IListUgcDto) =>
   preloadUgcItems<IComfyuiWorkflow>(dto, '/api/comfyui/workflows');
+
+export const useUgcTools = (dto: IListUgcDto) => {
+  const { filter, page, limit, orderBy, orderColumn = 'createdTimestamp' } = dto;
+
+  const {
+    data: actionToolsData,
+    isLoading: isActionToolsLoading,
+    mutate: mutateActionTools,
+  } = useUgcActionTools({
+    page: 1,
+    // FIXME
+    limit: 99999,
+    filter,
+  });
+
+  const {
+    data: comfyuiWorkflowsData,
+    isLoading: isComfyuiWorkflowsLoading,
+    mutate: mutateComfyuiWorkflows,
+  } = useUgcComfyuiWorkflows({
+    page: 1,
+    limit: 99999,
+    filter,
+  });
+
+  const processActionToolList: ICommonTool[] =
+    actionToolsData?.data.map((actionTool) => {
+      return {
+        ...actionTool,
+        toolType: 'tool',
+        iconUrl: actionTool.icon,
+      };
+    }) ?? [];
+
+  const processComfyuiWorkflowList: ICommonTool[] =
+    comfyuiWorkflowsData?.data.map((actionTool) => {
+      return {
+        ...actionTool,
+        toolType: 'comfyui',
+        name: actionTool.id,
+        categories: ['comfyui-workflow'],
+      };
+    }) ?? [];
+
+  const totalList = [...processActionToolList, ...processComfyuiWorkflowList];
+  const sortedList = totalList.sort((a, b) => a[orderColumn] - b[orderColumn]);
+  const sliceList = (orderBy === 'DESC' ? sortedList.reverse() : sortedList).slice(limit * (page - 1), limit);
+
+  const data: IPaginationListData<ICommonTool> = {
+    page,
+    limit,
+    total: processActionToolList.length + processComfyuiWorkflowList.length,
+    data: sliceList,
+  };
+
+  const mutate = async () => {
+    await mutateActionTools();
+    await mutateComfyuiWorkflows();
+  };
+
+  return {
+    isLoading: isActionToolsLoading || isComfyuiWorkflowsLoading,
+    mutate,
+    data,
+  };
+};
 
 export const useUgcTextModels = (dto: IListUgcDto) => useUgcItems<ILLMModel>(dto, '/api/llm-models');
 export const preloadUgcTextModels = (dto: IListUgcDto) => preloadUgcItems<ILLMModel>(dto, '/api/llm-models');

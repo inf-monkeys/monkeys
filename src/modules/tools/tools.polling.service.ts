@@ -610,7 +610,7 @@ export class ToolsPollingService {
           break;
         }
       } catch (error) {
-        logger.warn('Can not connect to conductor: ', error.message);
+        // logger.warn('Can not connect to conductor: ', error.message);
       } finally {
         await sleep(200);
       }
