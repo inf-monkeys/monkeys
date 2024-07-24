@@ -941,6 +941,64 @@
         }
       }
     },
+    "tools": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "Icon"
+          },
+          "title": {
+            "label": "Name"
+          },
+          "type": {
+            "label": "Type"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "estimateTime": {
+            "label": "Estimate Time"
+          },
+          "pricing": {
+            "label": "Pricing"
+          }
+        },
+        "subtitle": {
+          "external-account": {
+            "button": "Credentials",
+            "title": "Credentials",
+            "manage": {
+              "content": "All account information will be encrypted and stored without disclosing your key information (e.g. keys) and will not be sent back to the page",
+              "columns": {
+                "name": "Name",
+                "operate": "Operations"
+              },
+              "delete": {
+                "title": "Delete confirmation of third party account",
+                "content": "Are you sure you want to delete the third party account?\nDeleting this account will prevent it from being used properly in the workflow.\nThe operation cannot be undone."
+              },
+              "create": {
+                "title": "Add {{name}}",
+                "columns": {
+                  "displayName": "Account Name"
+                },
+                "utils": {
+                  "name": "{{name}} account"
+                }
+              }
+            },
+            "list": {
+              "create": "Add Account",
+              "count": {
+                "total_one": "Total {{count}} account, click to manage",
+                "total_other": "Total {{count}} accounts, click to manage",
+                "none": "No account, click to add one"
+              }
+            }
+          }
+        }
+      }
+    },
     "action-tools": {
       "utils": {
         "pricing-mode": {
@@ -1022,7 +1080,9 @@
       }
     },
     "comfyui-workflow": {
-      "utils": {},
+      "utils": {
+        "name": "ComfyUI Workflow"
+      },
       "detail": {
         "title": "ComfyUI Workflow Detail",
         "tabs": {

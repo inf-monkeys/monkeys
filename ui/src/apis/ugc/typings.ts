@@ -1,6 +1,6 @@
 import { SWRResponse } from 'swr';
 
-import { AssetType } from '@inf-monkeys/monkeys';
+import { AssetType, I18nValue } from '@inf-monkeys/monkeys';
 
 import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
@@ -17,8 +17,8 @@ export interface IAssetTag {
 export type IAssetItem<T = object> = T & {
   id: string;
   name: string;
-  description: string;
-  iconUrl: string;
+  description?: string | I18nValue;
+  iconUrl?: string;
   teamId?: string;
   creatorUserId?: string;
   team?: Partial<IVinesTeam>;
@@ -61,7 +61,13 @@ export interface IListUgcDto {
   filter: IListUgcFilter;
 }
 
+export type IManuallyFetcher<T> = {
+  isLoading: boolean;
+  mutate: () => Promise<void>;
+  data: IPaginationListData<IAssetItem<T>> | undefined;
+};
+
 export type IListUgcItemsFnType<T> = (
   dto: IListUgcDto,
-) => SWRResponse<IPaginationListData<IAssetItem<T>> | undefined, any>;
+) => SWRResponse<IPaginationListData<IAssetItem<T>> | undefined, any> | IManuallyFetcher<T>;
 export type IPreloadUgcItemsFnType<T> = (dto: IListUgcDto) => Promise<any>;

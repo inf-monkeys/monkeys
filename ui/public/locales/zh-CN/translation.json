@@ -931,6 +931,64 @@
         }
       }
     },
+    "tools": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "type": {
+            "label": "类型"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "estimateTime": {
+            "label": "预估执行时间"
+          },
+          "pricing": {
+            "label": "费用"
+          }
+        },
+        "subtitle": {
+          "external-account": {
+            "button": "Credentials",
+            "title": "Credentials",
+            "manage": {
+              "content": "All account information will be encrypted and stored without disclosing your key information (e.g. keys) and will not be sent back to the page",
+              "columns": {
+                "name": "Name",
+                "operate": "Operations"
+              },
+              "delete": {
+                "title": "Delete confirmation of third party account",
+                "content": "Are you sure you want to delete the third party account?\nDeleting this account will prevent it from being used properly in the workflow.\nThe operation cannot be undone."
+              },
+              "create": {
+                "title": "Add {{name}}",
+                "columns": {
+                  "displayName": "Account Name"
+                },
+                "utils": {
+                  "name": "{{name}} account"
+                }
+              }
+            },
+            "list": {
+              "create": "Add Account",
+              "count": {
+                "total_one": "Total {{count}} account, click to manage",
+                "total_other": "Total {{count}} accounts, click to manage",
+                "none": "No account, click to add one"
+              }
+            }
+          }
+        }
+      }
+    },
     "action-tools": {
       "utils": {
         "pricing-mode": {
@@ -1011,7 +1069,9 @@
       }
     },
     "comfyui-workflow": {
-      "utils": {},
+      "utils": {
+        "name": "ComfyUI 工作流"
+      },
       "detail": {
         "title": "ComfyUI 工作流详情",
         "tabs": {

@@ -1,3 +1,5 @@
+import { I18nValue } from '@inf-monkeys/monkeys';
+
 export type WorkflowListQuery = {
   /** 当前页数，从 1 开始 **/
   page?: number;
@@ -11,21 +13,59 @@ export type WorkflowListQuery = {
   orderBy?: string;
 };
 
-export const IAppCategoryNameMap = {
-  all: '全部组件',
-  process: '流程控制',
-  image: '图像处理',
-  text: '文本处理',
-  file: '文件处理',
-  'gen-image': '图像生成',
-  'gen-text': '文本生成',
-  auto: '自动化',
-  db: '数据存储',
-  query: '搜索增强',
-  extra: '扩展能力',
-  'train-model': '模型训练',
-  bio: '生命科学',
-  human: '用户交互',
+export const ACTION_TOOLS_CATEGORIES_MAP: Record<string, I18nValue> = {
+  process: {
+    'zh-CN': '流程控制',
+    'en-US': 'Process Control',
+  },
+  image: {
+    'zh-CN': '图像处理',
+    'en-US': 'Image Process',
+  },
+  text: {
+    'zh-CN': '文本处理',
+    'en-US': 'Text Process',
+  },
+  file: {
+    'zh-CN': '文件处理',
+    'en-US': 'File Process',
+  },
+  'gen-image': {
+    'zh-CN': '图像生成',
+    'en-US': 'Image Generation',
+  },
+  'gen-text': {
+    'zh-CN': '文本生成',
+    'en-US': 'Text Generation',
+  },
+  auto: {
+    'zh-CN': '自动化',
+    'en-US': 'Automatic',
+  },
+  db: {
+    'zh-CN': '数据存储',
+    'en-US': 'Data Storage',
+  },
+  query: {
+    'zh-CN': '搜索增强',
+    'en-US': 'Search Enhancement',
+  },
+  extra: {
+    'zh-CN': '扩展能力',
+    'en-US': 'Extended Capabilities',
+  },
+  'train-model': {
+    'zh-CN': '模型训练',
+    'en-US': 'Model Training',
+  },
+  bio: {
+    'zh-CN': '生命科学',
+    'en-US': 'Biological Sciences',
+  },
+  human: {
+    'zh-CN': '用户交互',
+    'en-US': 'User Interactions',
+  },
 };
 
 export interface IVinesWorkflowRateLimiter {

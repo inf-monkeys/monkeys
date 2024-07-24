@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router';
 
 import { Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -22,7 +22,9 @@ export const IComfyUIWorkflowDetail: React.FC<IComfyUIWorkflowDetailProps> = () 
   const { t } = useTranslation();
 
   const navigate = useNavigate();
-  const { comfyuiWorkflowId, teamId } = Route.useParams();
+  const { history } = useRouter();
+
+  const { comfyuiWorkflowId } = Route.useParams();
   const { data: comfyuiWorkflow } = useComfyuiWorkflow(comfyuiWorkflowId);
 
   return (
@@ -34,7 +36,7 @@ export const IComfyUIWorkflowDetail: React.FC<IComfyUIWorkflowDetailProps> = () 
               icon={<Undo2 />}
               variant="outline"
               size="small"
-              className="-m-1 -ml-0.5 -mr-2 scale-85"
+              className="scale-85 -m-1 -ml-0.5 -mr-2"
               onClick={() => {
                 history.back();
               }}

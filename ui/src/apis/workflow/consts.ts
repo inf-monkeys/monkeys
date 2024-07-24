@@ -1,4 +1,4 @@
-export const BLOCK_CATEGORY_SORT_INDEX_LIST = [
+export const ACTION_TOOLS_CATEGORY_INDEX_LIST = [
   'all',
   'block',
   'gen-text',
@@ -14,4 +14,7 @@ export const BLOCK_CATEGORY_SORT_INDEX_LIST = [
   'human',
   'extra',
   'bio',
+  'comfyui-workflow',
 ];
+
+export const EXTERNAL_TOOLS_CATEGORY_INDEX_LIST = ['comfyui-workflow'];
