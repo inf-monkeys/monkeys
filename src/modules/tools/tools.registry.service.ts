@@ -302,8 +302,6 @@ export class ToolsRegistryService {
       }
     }
 
-    logger.debug(tools.map((t) => t.name));
-
     // Handle Special comfyui tool
     const comfyuiInferTool = tools.find((x) => x.name === `${COMFYUI_NAMESPACE}:${COMFYUI_TOOL}`);
     if (comfyuiInferTool) {
