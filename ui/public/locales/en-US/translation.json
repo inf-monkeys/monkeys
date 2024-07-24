@@ -294,6 +294,9 @@
             "workflow": {
               "label": "Workflows"
             },
+            "tools": {
+              "label": "Tools"
+            },
             "tool": {
               "label": "Tools",
               "action-tools": {

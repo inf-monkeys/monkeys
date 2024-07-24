@@ -36,6 +36,11 @@ export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
     path: '/$teamId/workflows',
   },
   {
+    name: 'tools',
+    icon: <Calculator />,
+    path: '/$teamId/tools',
+  },
+  {
     name: 'tool',
     icon: <Calculator />,
     items: [
@@ -47,10 +52,6 @@ export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
         path: '/$teamId/comfyui',
         name: 'comfyui',
       },
-      // {
-      //   path: '/$teamId/render-tools',
-      //   name: 'render-tools',
-      // },
     ],
   },
   {
