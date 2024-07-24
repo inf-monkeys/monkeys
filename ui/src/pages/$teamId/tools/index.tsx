@@ -3,9 +3,7 @@ import React from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { t } from 'i18next';
-import { Server } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { ComfyUIServerListModal } from 'src/components/layout/ugc-pages/tools/comfyui-server-list';
 
 import { useUgcTools } from '@/apis/ugc';
 import { UgcView } from '@/components/layout/ugc/view';
@@ -16,7 +14,6 @@ import { OperateArea } from '@/components/layout/ugc-pages/comfyui-workflows/ope
 import { createToolsColumns } from '@/components/layout/ugc-pages/tools/consts.tsx';
 import { ImportTools } from '@/components/layout/ugc-pages/tools/import-tool';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
-import { Button } from '@/components/ui/button';
 import { formatTime } from '@/utils/time.ts';
 
 export const Tools: React.FC = () => {
