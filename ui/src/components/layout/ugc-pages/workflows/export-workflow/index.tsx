@@ -218,7 +218,7 @@ export const ExportWorkflowDialog: React.FC<IExportWorkflowDialogProps> = ({ vis
           </div>
         )}
         <DialogFooter>
-          <Button>取消</Button>
+          <Button onClick={() => setVisible(false)}>取消</Button>
           <Button variant="solid" loading={exporting} onClick={handleExport}>
             开始导出
           </Button>

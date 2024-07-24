@@ -1,3 +1,4 @@
+import { config } from '@/common/config';
 import { logger } from '@/common/logger';
 import { enumToList, generateDbId, isValidNamespace } from '@/common/utils';
 import { ExtendedToolDef } from '@/common/utils/define-tool';
@@ -11,6 +12,7 @@ import { OpenAPIObject } from '@nestjs/swagger';
 import { ServerObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 import axios from 'axios';
 import * as fs from 'fs';
+import { isArray, set } from 'lodash';
 import * as path from 'path';
 import url from 'url';
 import {
@@ -29,8 +31,6 @@ import { CredentialsRepository } from '../../database/repositories/credential.re
 import { ToolsRepository } from '../../database/repositories/tools.repository';
 import { COMFYUI_NAMESPACE, COMFYUI_TOOL } from './comfyui/comfyui.execution.controller';
 import { OpenAPIParserOptions, parseOpenApiSpecAsTools } from './utils/openapi-parser';
-import { config } from '@/common/config';
-import { isArray, set } from 'lodash';
 
 @Injectable()
 export class ToolsRegistryService {
@@ -301,6 +301,8 @@ export class ToolsRegistryService {
         logger.error('Error when get tools price', error);
       }
     }
+
+    logger.debug(tools.map((t) => t.name));
 
     // Handle Special comfyui tool
     const comfyuiInferTool = tools.find((x) => x.name === `${COMFYUI_NAMESPACE}:${COMFYUI_TOOL}`);

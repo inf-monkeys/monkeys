@@ -294,6 +294,9 @@
             "workflow": {
               "label": "Workflows"
             },
+            "tools": {
+              "label": "Tools"
+            },
             "tool": {
               "label": "Tools",
               "action-tools": {
@@ -938,6 +941,198 @@
         }
       }
     },
+    "tools": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "Icon"
+          },
+          "title": {
+            "label": "Name"
+          },
+          "type": {
+            "label": "Type"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "estimateTime": {
+            "label": "Estimate Time"
+          },
+          "pricing": {
+            "label": "Pricing"
+          }
+        },
+        "subtitle": {
+          "external-account": {
+            "button": "Credentials",
+            "title": "Credentials",
+            "manage": {
+              "content": "All account information will be encrypted and stored without disclosing your key information (e.g. keys) and will not be sent back to the page",
+              "columns": {
+                "name": "Name",
+                "operate": "Operations"
+              },
+              "delete": {
+                "title": "Delete confirmation of third party account",
+                "content": "Are you sure you want to delete the third party account?\nDeleting this account will prevent it from being used properly in the workflow.\nThe operation cannot be undone."
+              },
+              "create": {
+                "title": "Add {{name}}",
+                "columns": {
+                  "displayName": "Account Name"
+                },
+                "utils": {
+                  "name": "{{name}} account"
+                }
+              }
+            },
+            "list": {
+              "create": "Add Account",
+              "count": {
+                "total_one": "Total {{count}} account, click to manage",
+                "total_other": "Total {{count}} accounts, click to manage",
+                "none": "No account, click to add one"
+              }
+            }
+          }
+        }
+      },
+      "import": {
+        "label": "Import Tool",
+        "tabs": {
+          "comfyui": {
+            "label": "External Process",
+            "desc": "Converting ComfyUI Flow to Tools"
+          },
+          "restful-api": {
+            "label": "Interface expansion",
+            "desc": "Converting RESTful APIs into tools"
+          },
+          "monkeys-tool": {
+            "label": "Service Extension",
+            "desc": "Import the running tool service into"
+          }
+        },
+        "import-comfyui-workflow": {
+          "title": "Importing ComfyUI workflow",
+          "form": {
+            "workflowType": {
+              "label": "ComfyUI Workflow Type",
+              "placeholder": "Please select a creation type",
+              "options": {
+                "image": "Image",
+                "json": "Workflow JSON file"
+              }
+            },
+            "workflowJsonUrl": {
+              "label": "Workflow JSON"
+            },
+            "workflowApiJsonUrl": {
+              "label": "Workflow API JSON"
+            },
+            "displayName": {
+              "label": "Display name",
+              "placeholder": "Please enter a workflow display name"
+            }
+          }
+        },
+        "comfyui-server": {
+          "title": "ComfyUI Server",
+          "table": {
+            "columns": {
+              "address": {
+                "label": "Server Address"
+              },
+              "description": {
+                "label": "Description"
+              },
+              "status": {
+                "label": "Status"
+              },
+              "operate": {
+                "label": "Operations"
+              }
+            }
+          },
+          "import-label": "Add ComfyUI Server",
+          "form": {
+            "address": {
+              "label": "Server Address",
+              "placeholder": "Please enter the server address"
+            },
+            "description": {
+              "label": "Description",
+              "placeholder": "Please enter the server description"
+            }
+          }
+        },
+        "restful-api": {
+          "form": {
+            "display-name": {
+              "label": "Display Name",
+              "placeholder": "Please enter display name"
+            },
+            "description": {
+              "label": "Description",
+              "placeholder": "Please enter description"
+            },
+            "url": {
+              "label": "Interface Url",
+              "placeholder": "Please enter interface url"
+            },
+            "method": {
+              "label": "HTTP Request Method",
+              "placeholder": "Please select HTTP request method"
+            },
+            "credential-place-at": {
+              "label": "Authentication method",
+              "placeholder": "Please select the authentication method"
+            },
+            "credential-value": {
+              "label": "Credential Value",
+              "placeholder": "Please enter the authentication value"
+            },
+            "credential-key": {
+              "label": "Credential Key",
+              "placeholder": "Please enter the key corresponding to the header/query/body during authentication"
+            },
+            "properties": {
+              "label": "Interface parameters"
+            },
+            "output": {
+              "label": "Return data"
+            },
+            "validate": {
+              "display-name-is-empty": "Display name cannot be empty",
+              "url-is-empty": "The interface address cannot be empty",
+              "method-is-empty": "HTTP request method cannot be empty",
+              "properties-is-empty": "Interface parameters cannot be empty",
+              "parse-json-error": "The request parameters must be in JSON format.",
+              "parse-output-error": "The returned data must be in JSON format",
+              "output-is-empty": "The returned data cannot be empty"
+            },
+            "loading": "Importing...",
+            "success": "Import successful",
+            "error": "Import failed"
+          }
+        },
+        "monkeys-tool": {
+          "form": {
+            "manifest-url": {
+              "label": "Manifest URL",
+              "placeholder": "Please enter the manifest URL"
+            },
+            "validate": {
+              "manifest-url-is-empty": "Manifest URL cannot be empty"
+            },
+            "loading": "Importing...",
+            "success": "Import successful",
+            "error": "Import failed"
+          }
+        }
+      }
+    },
     "action-tools": {
       "utils": {
         "pricing-mode": {
@@ -1019,7 +1214,9 @@
       }
     },
     "comfyui-workflow": {
-      "utils": {},
+      "utils": {
+        "name": "ComfyUI Workflow"
+      },
       "detail": {
         "title": "ComfyUI Workflow Detail",
         "tabs": {
@@ -1584,60 +1781,6 @@
   "workspace": {
     "404": {
       "description": "Pages under construction"
-    },
-    "tools": {
-      "import-comfyui-workflow": {
-        "title": "Import ComfyUI workflow",
-        "form": {
-          "workflowType": {
-            "label": "ComfyUI Workflow Type",
-            "placeholder": "Select a create type",
-            "options": {
-              "image": "Image",
-              "json": "Workflow JSON File"
-            }
-          },
-          "workflowJsonUrl": {
-            "label": "Workflow JSON"
-          },
-          "workflowApiJsonUrl": {
-            "label": "Workflow API JSON"
-          },
-          "displayName": {
-            "label": "Display Name",
-            "placeholder": "Enter workflow name"
-          }
-        }
-      },
-      "comfyui-server": {
-        "title": "ComfyUI Server",
-        "table": {
-          "columns": {
-            "address": {
-              "label": "Address"
-            },
-            "description": {
-              "label": "Description"
-            },
-            "status": {
-              "label": "Status"
-            },
-            "operate": {
-              "label": "Operations"
-            }
-          }
-        },
-        "form": {
-          "address": {
-            "label": "Address",
-            "placeholder": "Enter address"
-          },
-          "description": {
-            "label": "Description",
-            "placeholder": "Enter description"
-          }
-        }
-      }
     },
     "wrapper": {
       "settings": {

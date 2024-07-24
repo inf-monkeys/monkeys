@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 
+import { Plus, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 import { deleteComfyuiServer, useComfyuiServers } from '@/apis/comfyui';
-import { AlertDialog } from '@/components/ui/alert-dialog';
+import { ImportComfyUIServerModal } from '@/components/layout/ugc-pages/tools/comfyui-server-list/import-comfyui-server';
+import { AlertDialog } from '@/components/ui/alert-dialog.tsx';
 import {
   AlertDialogAction,
   AlertDialogCancel,
@@ -15,11 +18,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog.tsx';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
-import { Plus, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { ImportComfyuiServerModal } from '../import-comfyui-server';
 
 interface IImportToolModalProps {
   children?: React.ReactNode;
@@ -33,11 +33,11 @@ export const ComfyUIServerListModal: React.FC<IImportToolModalProps> = ({ childr
 
   const rows = [
     {
-      displayName: t('workspace.tools.comfyui-server.table.columns.address.label'),
+      displayName: t('ugc-page.tools.import.comfyui-server.table.columns.address.label'),
       key: 'address',
     },
     {
-      displayName: t('workspace.tools.comfyui-server.table.columns.description.label'),
+      displayName: t('ugc-page.tools.import.comfyui-server.table.columns.description.label'),
       key: 'description',
     },
   ];
@@ -56,29 +56,15 @@ export const ComfyUIServerListModal: React.FC<IImportToolModalProps> = ({ childr
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[800px]">
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>
-            {t('workspace.tools.comfyui-server.title')}
-            <div
-              style={{
-                float: 'right',
-                marginRight: '1rem',
-              }}
-            >
-              <ImportComfyuiServerModal>
-                <Button variant="outline" size="small" icon={<Plus />}>
-                  {t('common.utils.add')}
-                </Button>
-              </ImportComfyuiServerModal>
-            </div>
-          </DialogTitle>
+          <DialogTitle>{t('ugc-page.tools.import.comfyui-server.title')}</DialogTitle>
         </DialogHeader>
         <Table className="w-full">
           <TableCaption>{t('common.load.no-more')}</TableCaption>
           <TableHeader>
             <TableRow>
-              {rows?.map(({ key, displayName }, i) => <TableHead key={i}>{displayName}</TableHead>)}
+              {rows?.map(({ displayName }, i) => <TableHead key={i}>{displayName}</TableHead>)}
               <TableHead className="sticky right-0 bg-background">
                 {t('ugc-page.action-tools.ugc-view.subtitle.external-account.manage.columns.operate')}
               </TableHead>
@@ -118,6 +104,13 @@ export const ComfyUIServerListModal: React.FC<IImportToolModalProps> = ({ childr
             ))}
           </TableBody>
         </Table>
+        <DialogFooter>
+          <ImportComfyUIServerModal>
+            <Button variant="outline" size="small" icon={<Plus />}>
+              {t('common.utils.add')}
+            </Button>
+          </ImportComfyUIServerModal>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
