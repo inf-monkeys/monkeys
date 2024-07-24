@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { createFileRoute } from '@tanstack/react-router';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { handleOidcLogin } from '@/apis/authz/oidc';
 import { useSystemConfig } from '@/apis/common';
 import { AuthMethod } from '@/apis/common/typings.ts';
+import { getVinesToken } from '@/apis/utils.ts';
 import { AuthContainer } from '@/components/layout/login';
 import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { I18nSelector } from '@/components/ui/i18n-selector';
@@ -37,10 +38,11 @@ const Login: React.FC = () => {
   const oidcButtonText: string = get(oem, 'auth.oidc.buttonText', 'OIDC');
   const autoSignInOidc: boolean = get(oem, 'auth.oidc.autoSignin', false);
 
-  if (autoSignInOidc && isOidcEnabled) {
-    handleOidcLogin();
-    return null;
-  }
+  useEffect(() => {
+    if (autoSignInOidc && isOidcEnabled && isEmpty(getVinesToken())) {
+      handleOidcLogin();
+    }
+  }, [autoSignInOidc, isOidcEnabled]);
 
   const isServerError = error instanceof Error;
 
