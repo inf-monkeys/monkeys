@@ -42,10 +42,8 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
 
   const onlyOne = loginMethodsLength === 1;
   useEffect(() => {
-    if (onlyOne) {
-      setActiveTab(enablePhone ? 'phone' : 'email');
-    }
-  }, [onlyOne]);
+    setActiveTab(enablePhone ? 'phone' : 'email');
+  }, []);
 
   const areValuesUsed = enablePassword || enablePhone;
 
