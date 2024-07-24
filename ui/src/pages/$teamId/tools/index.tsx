@@ -3,8 +3,9 @@ import React from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { t } from 'i18next';
-import { Import, Server } from 'lucide-react';
+import { Server } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { ComfyUIServerListModal } from 'src/components/layout/ugc-pages/tools/comfyui-server-list';
 
 import { useUgcTools } from '@/apis/ugc';
 import { UgcView } from '@/components/layout/ugc/view';
@@ -13,8 +14,7 @@ import { VinesExternalAccount } from '@/components/layout/ugc-pages/action-tools
 import { PricingText } from '@/components/layout/ugc-pages/action-tools/utils.tsx';
 import { OperateArea } from '@/components/layout/ugc-pages/comfyui-workflows/operate-area';
 import { createToolsColumns } from '@/components/layout/ugc-pages/tools/consts.tsx';
-import { ComfyUIServerListModal } from '@/components/layout/workspace/tools/comfyui-server-list';
-import { ImportToolModal } from '@/components/layout/workspace/tools/import-tool';
+import { ImportTools } from '@/components/layout/ugc-pages/tools/import-tool';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
 import { formatTime } from '@/utils/time.ts';
@@ -61,16 +61,7 @@ export const Tools: React.FC = () => {
         subtitle={
           <>
             <VinesExternalAccount />
-            <ComfyUIServerListModal>
-              <Button variant="outline" size="small" icon={<Server />}>
-                {t('workspace.tools.comfyui-server.title')}
-              </Button>
-            </ComfyUIServerListModal>
-            <ImportToolModal>
-              <Button variant="outline" size="small" icon={<Import />}>
-                {tHook('common.utils.import')}
-              </Button>
-            </ImportToolModal>
+            <ImportTools />
           </>
         }
         operateArea={(item, trigger, tooltipTriggerContent) =>
