@@ -1,6 +1,6 @@
 import useSWR, { preload } from 'swr';
 
-import { AssetType, MonkeyWorkflow } from '@inf-monkeys/monkeys';
+import { AssetType, MonkeyWorkflow, ToolCategory } from '@inf-monkeys/monkeys';
 import _ from 'lodash';
 import qs from 'qs';
 
@@ -9,6 +9,7 @@ import { ILLMChannel, ILLMModel } from '@/apis/llm/typings.ts';
 import { IMediaData } from '@/apis/media-data/typings.ts';
 import { ISDModel } from '@/apis/sd/typings.ts';
 import { ITableData } from '@/apis/table-data/typings.ts';
+import { INTERNAL_TOOLS_NAMESPACE } from '@/apis/tools/consts.tsx';
 import { ICommonTool, IWorkflowTool } from '@/apis/tools/typings.ts';
 import { IPaginationListData } from '@/apis/typings.ts';
 import { IApplicationStoreItemDetail } from '@/apis/ugc/asset-typings.ts';
@@ -79,14 +80,16 @@ export const useUgcTools = (dto: IListUgcDto) => {
     filter,
   });
 
-  const processActionToolList: ICommonTool[] =
-    actionToolsData?.data.map((actionTool) => {
-      return {
-        ...actionTool,
-        toolType: 'tool',
-        iconUrl: actionTool.icon,
-      };
-    }) ?? [];
+  const processInternalToolList: ICommonTool[] =
+    actionToolsData?.data
+      .filter((tool) => INTERNAL_TOOLS_NAMESPACE.includes(tool.namespace))
+      .map((actionTool) => {
+        return {
+          ...actionTool,
+          toolType: 'tool',
+          iconUrl: actionTool.icon,
+        };
+      }) ?? [];
 
   const processComfyuiWorkflowList: ICommonTool[] =
     comfyuiWorkflowsData?.data.map((actionTool) => {
@@ -94,11 +97,40 @@ export const useUgcTools = (dto: IListUgcDto) => {
         ...actionTool,
         toolType: 'comfyui',
         name: actionTool.id,
-        categories: ['comfyui-workflow'],
+        categories: ['comfyui'],
       };
     }) ?? [];
 
-  const totalList = [...processActionToolList, ...processComfyuiWorkflowList];
+  const processApiToolList: ICommonTool[] =
+    actionToolsData?.data
+      .filter((tool) => tool.namespace === 'api')
+      .map((actionTool) => {
+        return {
+          ...actionTool,
+          toolType: 'api',
+          iconUrl: actionTool.icon,
+          categories: ['api'],
+        };
+      }) ?? [];
+
+  const processServiceToolList: ICommonTool[] =
+    actionToolsData?.data
+      .filter((tool) => !['api', ...INTERNAL_TOOLS_NAMESPACE].includes(tool.namespace))
+      .map((actionTool) => {
+        return {
+          ...actionTool,
+          toolType: 'service',
+          iconUrl: actionTool.icon,
+          categories: ['service'],
+        };
+      }) ?? [];
+
+  const totalList = [
+    ...processInternalToolList,
+    ...processComfyuiWorkflowList,
+    ...processApiToolList,
+    ...processServiceToolList,
+  ];
   const sortedList = totalList.sort((a, b) =>
     a[orderColumn] !== b[orderColumn] ? a[orderColumn] - b[orderColumn] : a.id.localeCompare(b.id),
   );
@@ -107,7 +139,7 @@ export const useUgcTools = (dto: IListUgcDto) => {
   const data: IPaginationListData<ICommonTool> = {
     page,
     limit,
-    total: processActionToolList.length + processComfyuiWorkflowList.length,
+    total: totalList.length,
     data: sliceList,
   };
 
