@@ -6,13 +6,13 @@ const appId = config.server.appId;
 
 export class Migartion1721116431677 implements MigrationInterface {
   TABLE_NAME = `${appId}_workflow_execution`;
-  INDEX_NAME1 = 'idx_workflow_execution_workflow_id';
+  INDEX_NAME1 = `${appId}_idx_workflow_execution_workflow_id`;
   INDEX_COLUMNS1 = ['workflow_id'];
-  INDEX_NAME2 = 'idx_workflow_execution_workflow_instance_id';
+  INDEX_NAME2 = `${appId}_idx_workflow_execution_workflow_instance_id`;
   INDEX_COLUMNS2 = ['workflow_instance_id'];
-  INDEX_NAME3 = 'idx_workflow_execution_workflow_created_timestamp';
+  INDEX_NAME3 = `${appId}_idx_workflow_execution_workflow_created_timestamp`;
   INDEX_COLUMNS3 = ['created_timestamp'];
-  INDEX_NAME4 = 'idx_workflow_execution_workflow_status';
+  INDEX_NAME4 = `${appId}_idx_workflow_execution_workflow_status`;
   INDEX_COLUMNS4 = ['status'];
   public async up(queryRunner: QueryRunner): Promise<void> {
     const table = await queryRunner.getTable(this.TABLE_NAME);
