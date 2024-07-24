@@ -51,22 +51,6 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
 
   const [activeIndex, setActiveIndex] = useState<string[]>([]);
 
-  // const blockCate = useMemo(() => {
-  //   return assetType === 'tools'
-  //     ? (ACTION_TOOLS_CATEGORY_INDEX_LIST.map((c) => {
-  //         if (c === 'all' || c === 'human' || !_.get(ACTION_TOOLS_CATEGORIES_MAP, c)) return null;
-  //         return {
-  //           id: c,
-  //           name: getI18nContent(_.get(ACTION_TOOLS_CATEGORIES_MAP, c)),
-  //           type: 'tools',
-  //           createdTimestamp: 0,
-  //           updatedTimestamp: 0,
-  //           isDeleted: false,
-  //         };
-  //       }).filter((c) => c) as unknown as IAssetPublicCategory[])
-  //     : [];
-  // }, [assetType]);
-
   useEffect(() => {
     if (current === 'all') {
       onChange({});
@@ -102,7 +86,6 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
           <UgcViewFilterButton assetType={assetType} assetKey={assetKey} {...filterButtonProps} defaultAddToFavourite />
         </div>
       )}
-      {/*{assetType != 'tools' && (*/}
       <div
         className={cn(
           'group flex h-10 cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
@@ -110,17 +93,21 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
         )}
         onClick={() => setCurrent('all')}
       >
-        <div className="flex w-full items-center justify-between px-4 text-xs">
+        <div
+          className={cn(
+            'flex w-full items-center justify-between text-sm',
+            assetType === 'tools' ? 'pl-[calc(1rem+20px+0.5rem)] pr-4' : 'px-4',
+          )}
+        >
           <span>{t('common.utils.all')}</span>
         </div>
       </div>
-      {/*)}*/}
       <ScrollArea className="h-[calc(100vh-15rem)]">
         <div className="flex flex-col gap-2">
           {assetType === 'tools' && !isMarket ? (
             <Accordion
               type="multiple"
-              className="flex w-full flex-col gap-1 text-xs text-slateA-8 text-opacity-70"
+              className="flex w-full flex-col gap-2 text-sm text-slateA-8 text-opacity-70"
               value={activeIndex}
               onValueChange={setActiveIndex}
             >
@@ -134,8 +121,8 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                     <>
                       <AccordionTrigger>
                         <div className="group flex h-10 w-full cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground">
-                          <div className="flex w-full items-center justify-between px-4 text-xs">
-                            <div className="flex items-center gap-1">
+                          <div className="flex w-full items-center justify-between px-4 text-sm">
+                            <div className="flex items-center gap-2">
                               <div className="w-[20px] [&_svg]:h-[16px] [&_svg]:w-[16px]">{rootIcon}</div>
                               <span>{rootLabel}</span>
                             </div>
@@ -143,7 +130,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                           </div>
                         </div>
                       </AccordionTrigger>
-                      <AccordionContent className="flex flex-col gap-1 first:mt-1">
+                      <AccordionContent className="flex flex-col gap-2 first:mt-1">
                         {Object.keys(categoriesMap).map((cateName) => {
                           const cateLabel = getI18nContent(categoriesMap[cateName]);
                           return (
@@ -156,7 +143,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                               onClick={() => setCurrent(cateName)}
                               key={cateName}
                             >
-                              <div className="flex w-full items-center justify-between pl-[calc(1rem+20px+0.25rem)] pr-4 text-xs">
+                              <div className="flex w-full items-center justify-between pl-[calc(1rem+20px+0.5rem)] pr-4 text-sm">
                                 <span>{cateLabel}</span>
                               </div>
                             </div>
@@ -185,7 +172,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                   )}
                   onClick={() => setCurrent(rule.id!)}
                 >
-                  <div className="flex w-full items-center justify-between px-4 text-xs">
+                  <div className="flex w-full items-center justify-between px-4 text-sm">
                     <span>{rule.name}</span>
                     {!isMarket && (
                       <AlertDialog>
