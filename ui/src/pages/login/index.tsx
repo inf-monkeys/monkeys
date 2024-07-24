@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { createFileRoute } from '@tanstack/react-router';
 
+import { useDebounceEffect } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { get, isEmpty } from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -18,6 +19,7 @@ import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothT
 import { pageSearchSchema } from '@/schema/common.ts';
 import { useAppStore } from '@/store/useAppStore';
 import { cn } from '@/utils';
+import VinesEvent from '@/utils/events.ts';
 
 const Login: React.FC = () => {
   const { t } = useTranslation();
@@ -38,11 +40,26 @@ const Login: React.FC = () => {
   const oidcButtonText: string = get(oem, 'auth.oidc.buttonText', 'OIDC');
   const autoSignInOidc: boolean = get(oem, 'auth.oidc.autoSignin', false);
 
-  useEffect(() => {
-    if (autoSignInOidc && isOidcEnabled && isEmpty(getVinesToken())) {
-      handleOidcLogin();
-    }
-  }, [autoSignInOidc, isOidcEnabled]);
+  useDebounceEffect(
+    () => {
+      if (autoSignInOidc && isOidcEnabled) {
+        if (isEmpty(getVinesToken())) {
+          handleOidcLogin();
+        } else {
+          const teamId = localStorage.getItem('vines-team-id');
+          if (isEmpty(teamId)) {
+            VinesEvent.emit('vines-nav', '/');
+          } else {
+            VinesEvent.emit('vines-nav', '/$teamId', { teamId });
+          }
+        }
+      }
+    },
+    [autoSignInOidc, isOidcEnabled],
+    {
+      wait: 200,
+    },
+  );
 
   const isServerError = error instanceof Error;
 
