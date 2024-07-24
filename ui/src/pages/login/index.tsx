@@ -57,7 +57,7 @@ const Login: React.FC = () => {
     },
     [autoSignInOidc, isOidcEnabled],
     {
-      wait: 200,
+      wait: 80,
     },
   );
 
