@@ -47,7 +47,7 @@ interface IUgcViewProps<E extends object> {
   isLoadAll?: boolean;
   isMarket?: boolean;
   useUgcFetcher: IListUgcItemsFnType<E>;
-  preloadUgcFetcher: IPreloadUgcItemsFnType<E>;
+  preloadUgcFetcher?: IPreloadUgcItemsFnType<E>;
   createColumns: () => ColumnDef<IAssetItem<E>, any>[];
   renderOptions: IUgcRenderOptions<IAssetItem<E>>;
   operateArea?: IOperateAreaProps<E>;
@@ -143,16 +143,18 @@ export const UgcView = <E extends object>({
           : rawData.data
         : [];
 
-    return result.map((it) => {
+    return result.map((it, i) => {
       const { description, displayName } = it as IAssetItem<E> & { displayName?: string };
 
       return {
+        _key: `${i}_${it?.['id'] ?? ''}_${it?.['updatedTimestamp'] ?? ''}`,
         ...it,
         ...(description && { description: getI18nContent(description) }),
         ...(displayName && { displayName: getI18nContent(displayName) }),
       };
     });
   }, [rawData, filter]);
+
   const pageData = useMemo(
     () =>
       rawData
@@ -166,7 +168,7 @@ export const UgcView = <E extends object>({
   );
 
   const handlePreload = (pageIndex: number) =>
-    preloadUgcFetcher({
+    preloadUgcFetcher?.({
       page: pageIndex,
       limit: pagination.pageSize,
       filter: {},
@@ -298,7 +300,10 @@ export const UgcView = <E extends object>({
                       {rows.map((row, index) => (
                         <UgcViewCard
                           row={row}
-                          key={row.original['id'] + (row.original['updatedTimestamp'] ?? '')}
+                          key={
+                            row.original?.['_key'] ??
+                            (row.original?.['id'] ?? '') + (row.original['updatedTimestamp'] ?? '')
+                          }
                           index={index}
                           columns={columns}
                           renderOptions={renderOptions}

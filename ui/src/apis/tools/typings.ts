@@ -1,5 +1,6 @@
 import { ToolDef, ToolProperty } from '@inf-monkeys/monkeys';
 
+import { IComfyuiWorkflow } from '@/apis/comfyui/typings.ts';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 
 export interface ToolPropertyExtended extends ToolProperty {
@@ -25,4 +26,17 @@ export interface ToolDefExtended extends ToolDef {
 export interface IWorkflowTool extends ToolDefExtended {
   id: string;
   namespace: string;
+  createdTimestamp: number;
+  updatedTimestamp: number;
 }
+
+export type ICommonTool =
+  | (IComfyuiWorkflow & {
+      toolType: 'comfyui';
+      categories: ['comfyui-workflow'];
+      name: string;
+    })
+  | (IWorkflowTool & {
+      toolType: 'tool';
+      iconUrl?: string;
+    });

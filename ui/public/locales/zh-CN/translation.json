@@ -281,6 +281,9 @@
             "workflow": {
               "label": "工作流"
             },
+            "tools": {
+              "label": "工具"
+            },
             "tool": {
               "label": "工具",
               "action-tools": {
@@ -928,6 +931,198 @@
         }
       }
     },
+    "tools": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "type": {
+            "label": "类型"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "estimateTime": {
+            "label": "预估执行时间"
+          },
+          "pricing": {
+            "label": "费用"
+          }
+        },
+        "subtitle": {
+          "external-account": {
+            "button": "Credentials",
+            "title": "Credentials",
+            "manage": {
+              "content": "All account information will be encrypted and stored without disclosing your key information (e.g. keys) and will not be sent back to the page",
+              "columns": {
+                "name": "Name",
+                "operate": "Operations"
+              },
+              "delete": {
+                "title": "Delete confirmation of third party account",
+                "content": "Are you sure you want to delete the third party account?\nDeleting this account will prevent it from being used properly in the workflow.\nThe operation cannot be undone."
+              },
+              "create": {
+                "title": "Add {{name}}",
+                "columns": {
+                  "displayName": "Account Name"
+                },
+                "utils": {
+                  "name": "{{name}} account"
+                }
+              }
+            },
+            "list": {
+              "create": "Add Account",
+              "count": {
+                "total_one": "Total {{count}} account, click to manage",
+                "total_other": "Total {{count}} accounts, click to manage",
+                "none": "No account, click to add one"
+              }
+            }
+          }
+        }
+      },
+      "import": {
+        "label": "导入工具",
+        "tabs": {
+          "comfyui": {
+            "label": "外部流程",
+            "desc": "将 ComfyUI 流程转换为工具"
+          },
+          "restful-api": {
+            "label": "接口扩展",
+            "desc": "将 RESTful API 转换为工具"
+          },
+          "monkeys-tool": {
+            "label": "服务扩展",
+            "desc": "将运行中的工具服务导入"
+          }
+        },
+        "import-comfyui-workflow": {
+          "title": "导入 ComfyUI 工作流",
+          "form": {
+            "workflowType": {
+              "label": "ComfyUI 工作流类型",
+              "placeholder": "请选择一个创建类型",
+              "options": {
+                "image": "图片",
+                "json": "工作流 JSON 文件"
+              }
+            },
+            "workflowJsonUrl": {
+              "label": "工作流 JSON"
+            },
+            "workflowApiJsonUrl": {
+              "label": "工作流 API JSON"
+            },
+            "displayName": {
+              "label": "显示名称",
+              "placeholder": "请输入工作流名称"
+            }
+          }
+        },
+        "comfyui-server": {
+          "title": "ComfyUI 服务",
+          "table": {
+            "columns": {
+              "address": {
+                "label": "服务地址"
+              },
+              "description": {
+                "label": "描述"
+              },
+              "status": {
+                "label": "状态"
+              },
+              "operate": {
+                "label": "操作"
+              }
+            }
+          },
+          "import-label": "添加 ComfyUI 服务",
+          "form": {
+            "address": {
+              "label": "服务地址",
+              "placeholder": "请输入服务地址"
+            },
+            "description": {
+              "label": "描述",
+              "placeholder": "请输入描述"
+            }
+          }
+        },
+        "restful-api": {
+          "form": {
+            "display-name": {
+              "label": "显示名称",
+              "placeholder": "请输入显示名称"
+            },
+            "description": {
+              "label": "描述",
+              "placeholder": "请输入描述"
+            },
+            "url": {
+              "label": "接口地址",
+              "placeholder": "请输入接口地址"
+            },
+            "method": {
+              "label": "HTTP 请求方法",
+              "placeholder": "请选择 HTTP 请求方法"
+            },
+            "credential-place-at": {
+              "label": "鉴权方式",
+              "placeholder": "请选择鉴权方式"
+            },
+            "credential-value": {
+              "label": "密钥",
+              "placeholder": "请输入密钥"
+            },
+            "credential-key": {
+              "label": "密钥键",
+              "placeholder": "请输入鉴权时 header/query/body 对应的 key"
+            },
+            "properties": {
+              "label": "接口参数"
+            },
+            "output": {
+              "label": "返回数据"
+            },
+            "validate": {
+              "display-name-is-empty": "显示名称不能为空",
+              "url-is-empty": "接口地址不能为空",
+              "method-is-empty": "HTTP 请求方法不能为空",
+              "properties-is-empty": "接口参数不能为空",
+              "parse-json-error": "请求参数必须为 JSON 格式",
+              "parse-output-error": "返回数据必须为 JSON 格式",
+              "output-is-empty": "返回数据不能为空"
+            },
+            "loading": "导入中...",
+            "success": "导入成功",
+            "error": "导入失败"
+          }
+        },
+        "monkeys-tool": {
+          "form": {
+            "manifest-url": {
+              "label": "Manifest 地址",
+              "placeholder": "请输入 Manifest 地址"
+            },
+            "validate": {
+              "manifest-url-is-empty": "Manifest URL 不能为空"
+            },
+            "loading": "导入中...",
+            "success": "导入成功",
+            "error": "导入失败"
+          }
+        }
+      }
+    },
     "action-tools": {
       "utils": {
         "pricing-mode": {
@@ -1008,7 +1203,9 @@
       }
     },
     "comfyui-workflow": {
-      "utils": {},
+      "utils": {
+        "name": "ComfyUI 工作流"
+      },
       "detail": {
         "title": "ComfyUI 工作流详情",
         "tabs": {
@@ -1567,60 +1764,6 @@
   "workspace": {
     "404": {
       "description": "页面正在建设中"
-    },
-    "tools": {
-      "import-comfyui-workflow": {
-        "title": "导入 ComfyUI 工作流",
-        "form": {
-          "workflowType": {
-            "label": "ComfyUI 工作流类型",
-            "placeholder": "请选择一个创建类型",
-            "options": {
-              "image": "图片",
-              "json": "工作流 JSON 文件"
-            }
-          },
-          "workflowJsonUrl": {
-            "label": "Workflow JSON"
-          },
-          "workflowApiJsonUrl": {
-            "label": "Workflow API JSON"
-          },
-          "displayName": {
-            "label": "显示名称",
-            "placeholder": "请输入工作流名称"
-          }
-        }
-      },
-      "comfyui-server": {
-        "title": "ComfyUI 服务",
-        "table": {
-          "columns": {
-            "address": {
-              "label": "服务地址"
-            },
-            "description": {
-              "label": "描述"
-            },
-            "status": {
-              "label": "状态"
-            },
-            "operate": {
-              "label": "操作"
-            }
-          }
-        },
-        "form": {
-          "address": {
-            "label": "服务地址",
-            "placeholder": "请输入服务地址"
-          },
-          "description": {
-            "label": "描述",
-            "placeholder": "请输入描述"
-          }
-        }
-      }
     },
     "wrapper": {
       "settings": {
