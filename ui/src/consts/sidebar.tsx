@@ -41,20 +41,6 @@ export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
     path: '/$teamId/tools',
   },
   {
-    name: 'tool',
-    icon: <Calculator />,
-    items: [
-      {
-        path: '/$teamId/action-tools',
-        name: 'action-tools',
-      },
-      {
-        path: '/$teamId/comfyui',
-        name: 'comfyui',
-      },
-    ],
-  },
-  {
     name: 'model',
     icon: <Package />,
     items: [
