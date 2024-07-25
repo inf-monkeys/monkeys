@@ -76,7 +76,7 @@ export const createTask = (tool: VinesToolDef, extendObject = {}) => {
 
   set(newTask, 'inputParameters.__advancedConfig.timeout', get(tool, 'extra.defaultTimeout', 3600));
 
-  merge(newTask, extendObject);
+  merge(newTask, merge(get(tool, '_preset', {}), extendObject));
 
   // 将特殊的字段提取到 inputParameters 外
   const { loopCondition, evaluatorType, expression, ...rest } = newTask.inputParameters as any;

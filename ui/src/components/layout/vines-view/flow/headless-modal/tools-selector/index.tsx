@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Inbox, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -77,6 +77,17 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
       ...it,
     ]) as VinesToolWithCategory[];
 
+  const [activeTab, setActiveTab] = useState('all');
+
+  const listLength = list.length;
+  useEffect(() => {
+    if (searchValue) {
+      setActiveTab(list?.[0]?.[2] ?? 'all');
+    } else if (!listLength) {
+      setActiveTab('all');
+    }
+  }, [list]);
+
   const tabsNode = useRef<HTMLDivElement>(null);
 
   return (
@@ -91,7 +102,7 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
             onChange={setSearchValue}
           />
         </div>
-        <Tabs defaultValue="all">
+        <Tabs className="h-[31.125rem]" defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
           <div className="flex justify-between">
             <div ref={tabsNode} className="max-w-[690px] overflow-x-hidden overflow-y-clip pr-2">
               <TabsList>
@@ -100,6 +111,11 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
                     {t(`workspace.flow-view.headless-modal.tool-selector.category.${category}`)}
                   </TabsTrigger>
                 ))}
+                {!listLength && (
+                  <TabsTrigger value="all">
+                    {t(`workspace.flow-view.headless-modal.tool-selector.category.all`)}
+                  </TabsTrigger>
+                )}
               </TabsList>
             </div>
             <div className="relative flex items-center">
@@ -124,6 +140,14 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
               <ToolLists list={list} length={length} category={category} onClick={handleOnClick} />
             </TabsContent>
           ))}
+          {!listLength && (
+            <TabsContent value="all">
+              <div className="vines-center h-[28.125rem] flex-col gap-2">
+                <Inbox size={58} />
+                <p className="text-sm">{t('common.load.empty')}</p>
+              </div>
+            </TabsContent>
+          )}
         </Tabs>
       </DialogContent>
     </Dialog>
