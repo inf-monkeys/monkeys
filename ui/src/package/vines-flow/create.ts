@@ -150,7 +150,7 @@ export const createVinesCore = (workflowId: string, t?: i18n) => {
 
     const { data: tools } = useToolLists();
     const { data: workflows } = useWorkflowList({ page: 1, limit: 9999 });
-    const { data: comfyUIWorkflows } = useUgcComfyuiWorkflows({ page: 1, limit: 9999 });
+    const { data: comfyUIWorkflows, error: comfyUIWorkflowsError } = useUgcComfyuiWorkflows({ page: 1, limit: 9999 });
 
     useEffect(() => {
       if (isArray(tools)) {
@@ -168,8 +168,10 @@ export const createVinesCore = (workflowId: string, t?: i18n) => {
       const workflows = comfyUIWorkflows?.data;
       if (isArray(workflows)) {
         void _vines.updateComfyUIWorkflows(workflows);
+      } else if (comfyUIWorkflowsError instanceof Error) {
+        void _vines.updateComfyUIWorkflows([]);
       }
-    }, [comfyUIWorkflows]);
+    }, [comfyUIWorkflows, comfyUIWorkflowsError]);
 
     return createElement(VinesContext.Provider, { value: { _vines, _refresher, forceUpdate } }, children);
   };
