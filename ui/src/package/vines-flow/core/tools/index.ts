@@ -42,7 +42,8 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
 
     // ... other methods
     private checkoutData() {
-      this.tools = this.vinesTools.concat(this.vinesSubWorkflowTools);
+      // this.tools = this.vinesTools.concat(this.vinesSubWorkflowTools);
+      this.tools = this.vinesTools;
       if (this.status !== VINES_STATUS.IDLE) return;
       if (this.toolInitialized && this.subWorkflowInitialized) {
         this.status = VINES_STATUS.READY;
@@ -119,7 +120,17 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
             if (IGNORE_TOOLS.some((n) => name.startsWith(n))) return false;
             return !search ? true : [displayName, name, description].some((s) => I18nAllContent(s)?.includes(search));
           });
-          tools.push([subWorkflowTools, subWorkflowTools.length, 'block', 'sub-workflows']);
+          tools.push([subWorkflowTools, subWorkflowTools.length, 'sub-workflow', 'sub-workflow']);
+
+          // tools.push([[], [].length, 'comfyui', 'comfyui']);
+
+          const apiApp = this.tools.filter(({ categories }) => categories?.includes('api'));
+          tools.push([apiApp, apiApp.length, 'api', 'api']);
+
+          const serviceApp = this.tools.filter(
+            ({ categories }) => categories?.includes('service') && categories?.length === 1,
+          );
+          tools.push([serviceApp, serviceApp.length, 'service', 'service']);
         } else {
           const appList = this.tools
             .filter(({ categories }) => categories?.includes(category as ToolCategory))
@@ -208,6 +219,7 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
 
       return mapper;
     }
+
     // endregion
   };
 }

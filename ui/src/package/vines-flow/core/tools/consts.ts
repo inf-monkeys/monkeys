@@ -1,6 +1,8 @@
 import { ToolType } from '@inf-monkeys/monkeys';
 
 import { IVinesVariableTag, VinesToolDef, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
+import { ACTION_TOOLS_CATEGORIES_MAP } from '@/apis/workflow/typings.ts';
+import { EXTERNAL_TOOLS_CATEGORIES_MAP } from '@/apis/tools/consts.tsx';
 
 export const BUILT_IN_TOOLS: VinesToolDef[] = [
   {
@@ -27,22 +29,29 @@ export const SUB_WORKFLOW_TOOL_CHOOSE_VERSION_PROP = (workflowId: string): Vines
   },
 });
 
+// export const TOOL_CATEGORY_SORT_INDEX_LIST = [
+//   'all',
+//   'block',
+//   'gen-text',
+//   'query',
+//   'text',
+//   'gen-image',
+//   'image',
+//   'file',
+//   'train-model',
+//   'db',
+//   'auto',
+//   'process',
+//   'human',
+//   'extra',
+//   'bio',
+// ];
+
 export const TOOL_CATEGORY_SORT_INDEX_LIST = [
   'all',
-  'block',
-  'gen-text',
-  'query',
-  'text',
-  'gen-image',
-  'image',
-  'file',
-  'train-model',
-  'db',
-  'auto',
-  'process',
-  'human',
-  'extra',
-  'bio',
+  ...Object.keys(EXTERNAL_TOOLS_CATEGORIES_MAP),
+  ...Object.keys(ACTION_TOOLS_CATEGORIES_MAP),
+  'unknown',
 ];
 
 export enum TOOL_CATEGORY {

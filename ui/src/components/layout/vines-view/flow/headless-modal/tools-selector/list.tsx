@@ -7,7 +7,9 @@ import { Card } from '@/components/ui/card.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
-import { getI18nContent } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
+import { Tag } from '@/components/ui/tag';
+import { useTranslation } from 'react-i18next';
 
 interface IToolListsProps {
   onClick?: (tool: VinesToolDef) => void;
@@ -17,6 +19,7 @@ interface IToolListsProps {
 }
 
 export const ToolLists: React.FC<IToolListsProps> = ({ list, length, category, onClick }) => {
+  const { t } = useTranslation();
   return (
     <Grid
       columnCount={3}
@@ -58,7 +61,26 @@ export const ToolLists: React.FC<IToolListsProps> = ({ list, length, category, o
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="mt-1 line-clamp-1 text-xs opacity-50">{getI18nContent(toolDesc)}</div>
+                      <div
+                        className={cn(
+                          'mt-1 items-center gap-1 text-xs opacity-50',
+                          tool.categories?.includes('service') || tool.categories?.includes('api')
+                            ? 'line-clamp-1'
+                            : 'line-clamp-2',
+                        )}
+                      >
+                        {tool.categories?.includes('api') && (
+                          <Tag size="xs" color="primary">
+                            {t('workspace.flow-view.headless-modal.tool-selector.category.api')}
+                          </Tag>
+                        )}
+                        {tool.categories?.includes('service') && (
+                          <Tag size="xs" color="primary">
+                            {t('workspace.flow-view.headless-modal.tool-selector.category.service')}
+                          </Tag>
+                        )}
+                        {getI18nContent(toolDesc)}
+                      </div>
                     </TooltipTrigger>
                     <TooltipContent
                       side="bottom"

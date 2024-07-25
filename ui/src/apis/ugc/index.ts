@@ -144,13 +144,11 @@ export const useUgcTools = (dto: IListUgcDto) => {
         };
       }) ?? [];
 
-  const orderMap = new Map(
-    [...Object.keys(ACTION_TOOLS_CATEGORIES_MAP), 'unknown', ...Object.keys(EXTERNAL_TOOLS_CATEGORIES_MAP)].map(
-      (cate, index) => [cate, index],
-    ),
-  );
-
-  console.log(orderMap);
+  const orderList = [
+    ...Object.keys(ACTION_TOOLS_CATEGORIES_MAP),
+    'unknown',
+    ...Object.keys(EXTERNAL_TOOLS_CATEGORIES_MAP),
+  ];
 
   const totalList = [
     ...processInternalToolList,
@@ -160,7 +158,7 @@ export const useUgcTools = (dto: IListUgcDto) => {
     ...processServiceToolList,
   ];
   const sortedList = totalList.sort(
-    (a, b) => (orderMap.get(a.categories?.[0] ?? '') ?? 999) - (orderMap.get(b.categories?.[0] ?? '') ?? 0),
+    (a, b) => (orderList.indexOf(a.categories?.[0] ?? '') ?? 999) - (orderList.indexOf(b.categories?.[0] ?? '') ?? 0),
   );
   const sliceList = sortedList.slice(limit * (page - 1), limit);
 

@@ -1,4 +1,4 @@
-import { ToolDef, ToolProperty, ToolPropertyTypes } from '@inf-monkeys/monkeys';
+import { ToolCategory, ToolDef, ToolProperty, ToolPropertyTypes } from '@inf-monkeys/monkeys';
 
 export type VinesToolDefProperties = ToolProperty & {
   extra?: {
@@ -6,9 +6,11 @@ export type VinesToolDefProperties = ToolProperty & {
   };
 };
 
-export type VinesToolDef = Omit<ToolDef, 'input' | 'output'> & {
+export type VinesToolDef = Omit<ToolDef, 'input' | 'output' | 'categories'> & {
   input: VinesToolDefProperties[];
   output: VinesToolDefProperties[];
+  namespace?: string;
+  categories?: (ToolCategory | 'api' | 'comfyui' | 'service' | 'unknown')[];
 };
 
 export type VinesToolWithCategory = [VinesToolDef[], number, string, string];
@@ -55,6 +57,7 @@ export interface IVinesVariableTag {
 }
 
 export type JSONValue = null | string | number | boolean | { [x: string]: JSONValue } | Array<JSONValue>;
+
 export interface IVinesToolPropertiesOption {
   name: string;
   value: JSONValue;

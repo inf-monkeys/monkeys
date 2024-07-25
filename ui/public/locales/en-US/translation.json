@@ -2081,7 +2081,10 @@
           "create-failed": "Failed to create tool",
           "category": {
             "all": "All",
-            "sub-workflows": "Invoking workflows",
+            "sub-workflow": "Sub Workflow",
+            "comfyui": "External Workflow",
+            "api": "API External",
+            "service": "Service External",
             "process": "Process Controls",
             "image": "Image Processing",
             "text": "Text Processing",
