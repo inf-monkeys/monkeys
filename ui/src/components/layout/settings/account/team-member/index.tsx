@@ -63,7 +63,7 @@ export const TeamMember: React.FC<ITeamMemberProps> = () => {
           <Invite />
         </div>
       </CardHeader>
-      <ScrollArea className="max-h-64">
+      <ScrollArea className="h-64">
         <CardContent className="grid gap-4">
           {finalMember.map(({ id, name, photo, phone, email }) => (
             <div className="flex items-center gap-4" key={id}>

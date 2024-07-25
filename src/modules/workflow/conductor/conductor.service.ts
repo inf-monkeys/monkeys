@@ -95,12 +95,18 @@ export class ConductorService {
   }
 
   private getJoinTaskJoinOn(taskReferenceName: string, tasks: WorkflowTask[]) {
+    logger.info('Replace join task joinOn', taskReferenceName);
     try {
       const joinTaskIndex = tasks.findIndex((x) => x.taskReferenceName === taskReferenceName);
+      logger.info('joinTaskIndex index', joinTaskIndex);
       const forJoinTaskIndex = joinTaskIndex - 1;
+      logger.info('forJoinTaskIndex index', forJoinTaskIndex);
       const forJoinTask = tasks[forJoinTaskIndex];
-      const { forkTasks } = forJoinTask;
-      return forkTasks.map((x) => x[x.length - 1].taskReferenceName);
+      const { forkTasks = [] } = forJoinTask;
+      logger.info('forkTasks', forkTasks);
+      const joinOn = forkTasks.map((x) => x[x.length - 1].taskReferenceName);
+      logger.info('joinOn', joinOn);
+      return joinOn;
     } catch (error) {
       logger.error('Get join task joinOn failed', error);
       return [];
@@ -143,18 +149,6 @@ export class ConductorService {
     for (const task of flattedTasks) {
       if (!task.inputParameters) {
         task.inputParameters = {};
-      }
-
-      const tool = tools.find((x) => x.name === task.name);
-      if (!tool) {
-        continue;
-      }
-
-      if (tool.namespace !== SYSTEM_NAMESPACE || task.type === ToolType.SIMPLE) {
-        // use CUSTOM_BLOCK_NAME_KEY to store real task_name
-        task.inputParameters[this.TOOL_NAME_KEY] = task.name;
-        task.inputParameters[this.CONTEXT_KEY] = '${workflow.input.__context}';
-        task.name = CONDUCTOR_TASK_DEF_NAME;
       }
 
       // 循环 block 的列表循环模式
@@ -219,6 +213,18 @@ export class ConductorService {
 
       if (task.type === ToolType.JOIN) {
         task.joinOn = this.getJoinTaskJoinOn(task.taskReferenceName, tasks);
+      }
+
+      const tool = tools.find((x) => x.name === task.name);
+      if (!tool) {
+        continue;
+      }
+
+      if (tool.namespace !== SYSTEM_NAMESPACE || task.type === ToolType.SIMPLE) {
+        // use CUSTOM_BLOCK_NAME_KEY to store real task_name
+        task.inputParameters[this.TOOL_NAME_KEY] = task.name;
+        task.inputParameters[this.CONTEXT_KEY] = '${workflow.input.__context}';
+        task.name = CONDUCTOR_TASK_DEF_NAME;
       }
 
       // TODO
