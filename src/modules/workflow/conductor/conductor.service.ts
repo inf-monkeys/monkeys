@@ -95,12 +95,18 @@ export class ConductorService {
   }
 
   private getJoinTaskJoinOn(taskReferenceName: string, tasks: WorkflowTask[]) {
+    logger.info('Replace join task joinOn', taskReferenceName);
     try {
       const joinTaskIndex = tasks.findIndex((x) => x.taskReferenceName === taskReferenceName);
+      logger.info('joinTaskIndex index', joinTaskIndex);
       const forJoinTaskIndex = joinTaskIndex - 1;
+      logger.info('forJoinTaskIndex index', forJoinTaskIndex);
       const forJoinTask = tasks[forJoinTaskIndex];
-      const { forkTasks } = forJoinTask;
-      return forkTasks.map((x) => x[x.length - 1].taskReferenceName);
+      const { forkTasks = [] } = forJoinTask;
+      logger.info('forkTasks', forkTasks);
+      const joinOn = forkTasks.map((x) => x[x.length - 1].taskReferenceName);
+      logger.info('joinOn', joinOn);
+      return joinOn;
     } catch (error) {
       logger.error('Get join task joinOn failed', error);
       return [];
