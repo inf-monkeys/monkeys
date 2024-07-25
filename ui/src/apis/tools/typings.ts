@@ -1,7 +1,8 @@
-import { ToolDef, ToolProperty } from '@inf-monkeys/monkeys';
+import { MonkeyWorkflow, ToolDef, ToolProperty } from '@inf-monkeys/monkeys';
 
 import { IComfyuiWorkflow } from '@/apis/comfyui/typings.ts';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
+import { IAssetItem } from '@/apis/ugc/typings.ts';
 
 export interface ToolPropertyExtended extends ToolProperty {
   id: number;
@@ -38,15 +39,17 @@ export type ICommonTool =
     })
   | (IWorkflowTool & {
       toolType: 'tool';
-      iconUrl?: string;
     })
   | (Omit<IWorkflowTool, 'categories'> & {
       toolType: 'api';
-      iconUrl?: string;
       categories: ['api'];
     })
   | (Omit<IWorkflowTool, 'categories'> & {
       toolType: 'service';
-      iconUrl?: string;
       categories: ['service'];
+    })
+  | (IAssetItem<MonkeyWorkflow> & {
+      toolType: 'sub-workflow';
+      categories: ['sub-workflow'];
+      icon?: string | undefined;
     });

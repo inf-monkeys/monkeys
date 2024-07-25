@@ -34,6 +34,14 @@ export const ACTION_TOOLS_CATEGORIES_MAP: Record<string, I18nValue> = {
     'zh-CN': '图像处理',
     'en-US': 'Image Process',
   },
+  'gen-video': {
+    'zh-CN': '视频生成',
+    'en-US': 'Video Generation',
+  },
+  video: {
+    'zh-CN': '视频处理',
+    'en-US': 'Video Process',
+  },
   file: {
     'zh-CN': '文件处理',
     'en-US': 'File Process',

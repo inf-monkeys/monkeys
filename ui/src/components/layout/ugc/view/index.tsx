@@ -15,7 +15,7 @@ import _, { isNull } from 'lodash';
 import { CircleSlash, MoreHorizontal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { IWorkflowTool } from '@/apis/tools/typings.ts';
+import { ICommonTool, IWorkflowTool } from '@/apis/tools/typings.ts';
 import { IAssetItem, IListUgcDto, IListUgcItemsFnType, IPreloadUgcItemsFnType } from '@/apis/ugc/typings.ts';
 import { UgcSidebar } from '@/components/layout/ugc/sidebar';
 import {
@@ -130,6 +130,8 @@ export const UgcView = <E extends object>({
     orderBy: sortCondition.orderBy,
     orderColumn: sortCondition.orderColumn,
   });
+
+  const originData = rawData;
 
   const data = useMemo(() => {
     const result =
@@ -261,6 +263,7 @@ export const UgcView = <E extends object>({
             filter,
             onChange: setFilter,
           },
+          toolsData: assetType === 'tools' ? ((originData?.data ?? []) as IAssetItem<ICommonTool>[]) : undefined,
         }}
       />
       <div className="relative w-full flex-1 overflow-x-clip">

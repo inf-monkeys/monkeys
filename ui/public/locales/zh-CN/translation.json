@@ -1128,6 +1128,9 @@
             "error": "导入失败"
           }
         }
+      },
+      "utils": {
+        "sub-workflow": "子流程"
       }
     },
     "action-tools": {

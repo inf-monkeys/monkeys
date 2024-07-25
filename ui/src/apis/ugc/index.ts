@@ -1,6 +1,6 @@
 import useSWR, { preload } from 'swr';
 
-import { AssetType, MonkeyWorkflow, ToolCategory } from '@inf-monkeys/monkeys';
+import { AssetType, MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import _ from 'lodash';
 import qs from 'qs';
 
@@ -9,7 +9,7 @@ import { ILLMChannel, ILLMModel } from '@/apis/llm/typings.ts';
 import { IMediaData } from '@/apis/media-data/typings.ts';
 import { ISDModel } from '@/apis/sd/typings.ts';
 import { ITableData } from '@/apis/table-data/typings.ts';
-import { INTERNAL_TOOLS_NAMESPACE } from '@/apis/tools/consts.tsx';
+import { EXTERNAL_TOOLS_CATEGORIES_MAP, INTERNAL_TOOLS_NAMESPACE } from '@/apis/tools/consts.tsx';
 import { ICommonTool, IWorkflowTool } from '@/apis/tools/typings.ts';
 import { IPaginationListData } from '@/apis/typings.ts';
 import { IApplicationStoreItemDetail } from '@/apis/ugc/asset-typings.ts';
@@ -18,6 +18,8 @@ import { paginationWrapper } from '@/apis/wrapper.ts';
 
 import { IComfyuiWorkflow } from '../comfyui/typings';
 import { IAssetItem, IAssetPublicCategory, IAssetTag, IListUgcDto, IUgcFilterRules } from './typings';
+import { ACTION_TOOLS_CATEGORIES_MAP } from '@/apis/workflow/typings.ts';
+import { undefined } from 'zod';
 
 export const useUgcItems = <T extends object>(dto: IListUgcDto, url: string, method: 'GET' | 'POST' = 'GET') => {
   const swrUrl = method === 'GET' ? `${url}?${qs.stringify(dto, { encode: false })}` : url;
@@ -49,25 +51,20 @@ export const useUgcWorkflows = (dto: IListUgcDto) => useUgcItems<MonkeyWorkflow>
 export const preloadUgcWorkflows = (dto: IListUgcDto) => preloadUgcItems<MonkeyWorkflow>(dto, '/api/workflow/metadata');
 
 export const useUgcActionTools = (dto: IListUgcDto) => useUgcItems<IWorkflowTool>(dto, '/api/tools');
-export const preloadUgcActionTools = (dto: IListUgcDto) => preloadUgcItems<IWorkflowTool>(dto, '/api/tools');
-
 export const useUgcComfyuiWorkflows = (dto: IListUgcDto) =>
   useUgcItems<IComfyuiWorkflow>(dto, '/api/comfyui/workflows');
-export const preloadUgcComfyuiWorkflows = (dto: IListUgcDto) =>
-  preloadUgcItems<IComfyuiWorkflow>(dto, '/api/comfyui/workflows');
-
 export const useUgcTools = (dto: IListUgcDto) => {
-  const { filter, page, limit, orderBy, orderColumn = 'createdTimestamp' } = dto;
+  const { page, limit } = dto;
 
   const {
     data: actionToolsData,
     isLoading: isActionToolsLoading,
     mutate: mutateActionTools,
   } = useUgcActionTools({
+    filter: undefined,
     page: 1,
     // FIXME
     limit: 99999,
-    filter,
   });
 
   const {
@@ -77,7 +74,17 @@ export const useUgcTools = (dto: IListUgcDto) => {
   } = useUgcComfyuiWorkflows({
     page: 1,
     limit: 99999,
-    filter,
+    filter: undefined,
+  });
+
+  const {
+    data: subWorkflowsData,
+    isLoading: isSubWorkflowsLoading,
+    mutate: mutateSubWorkflows,
+  } = useUgcWorkflows({
+    page: 1,
+    limit: 99999,
+    filter: undefined,
   });
 
   const processInternalToolList: ICommonTool[] =
@@ -87,16 +94,25 @@ export const useUgcTools = (dto: IListUgcDto) => {
         return {
           ...actionTool,
           toolType: 'tool',
-          iconUrl: actionTool.icon,
         };
       }) ?? [];
 
-  const processComfyuiWorkflowList: ICommonTool[] =
-    comfyuiWorkflowsData?.data.map((actionTool) => {
+  const processSubWorkflowList: ICommonTool[] =
+    subWorkflowsData?.data.map((subWorkflow) => {
       return {
-        ...actionTool,
+        ...subWorkflow,
+        toolType: 'sub-workflow',
+        categories: ['sub-workflow'],
+        icon: subWorkflow.iconUrl,
+      };
+    }) ?? [];
+
+  const processComfyuiWorkflowList: ICommonTool[] =
+    comfyuiWorkflowsData?.data.map((comfyuiWorkflow) => {
+      return {
+        ...comfyuiWorkflow,
         toolType: 'comfyui',
-        name: actionTool.id,
+        name: comfyuiWorkflow.id,
         categories: ['comfyui'],
       };
     }) ?? [];
@@ -104,11 +120,10 @@ export const useUgcTools = (dto: IListUgcDto) => {
   const processApiToolList: ICommonTool[] =
     actionToolsData?.data
       .filter((tool) => tool.namespace === 'api')
-      .map((actionTool) => {
+      .map((apiTool) => {
         return {
-          ...actionTool,
+          ...apiTool,
           toolType: 'api',
-          iconUrl: actionTool.icon,
           categories: ['api'],
         };
       }) ?? [];
@@ -116,25 +131,32 @@ export const useUgcTools = (dto: IListUgcDto) => {
   const processServiceToolList: ICommonTool[] =
     actionToolsData?.data
       .filter((tool) => !['api', ...INTERNAL_TOOLS_NAMESPACE].includes(tool.namespace))
-      .map((actionTool) => {
+      .map((serviceTool) => {
         return {
-          ...actionTool,
+          ...serviceTool,
           toolType: 'service',
-          iconUrl: actionTool.icon,
           categories: ['service'],
         };
       }) ?? [];
 
+  const orderMap = new Map(
+    [...Object.keys(ACTION_TOOLS_CATEGORIES_MAP), ...Object.keys(EXTERNAL_TOOLS_CATEGORIES_MAP)].map((cate, index) => [
+      cate,
+      index,
+    ]),
+  );
+
   const totalList = [
     ...processInternalToolList,
+    ...processSubWorkflowList,
     ...processComfyuiWorkflowList,
     ...processApiToolList,
     ...processServiceToolList,
   ];
-  const sortedList = totalList.sort((a, b) =>
-    a[orderColumn] !== b[orderColumn] ? a[orderColumn] - b[orderColumn] : a.id.localeCompare(b.id),
+  const sortedList = totalList.sort(
+    (a, b) => (orderMap.get(a.categories?.[0] ?? '') ?? 0) - (orderMap.get(b.categories?.[0] ?? '') ?? 0),
   );
-  const sliceList = (orderBy === 'DESC' ? sortedList.reverse() : sortedList).slice(limit * (page - 1), limit);
+  const sliceList = sortedList.slice(limit * (page - 1), limit);
 
   const data: IPaginationListData<ICommonTool> = {
     page,
@@ -146,10 +168,11 @@ export const useUgcTools = (dto: IListUgcDto) => {
   const mutate = async () => {
     await mutateActionTools();
     await mutateComfyuiWorkflows();
+    await mutateSubWorkflows();
   };
 
   return {
-    isLoading: isActionToolsLoading || isComfyuiWorkflowsLoading,
+    isLoading: isActionToolsLoading || isComfyuiWorkflowsLoading || isSubWorkflowsLoading,
     mutate,
     data,
   };

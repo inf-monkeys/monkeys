@@ -1,5 +1,6 @@
 import { I18nValue } from '@inf-monkeys/monkeys';
 import { Hammer, Pickaxe } from 'lucide-react';
+import React from 'react';
 
 export const TOOLS_ROOT_CATEGORIES_MAP: Record<
   string,
@@ -25,6 +26,10 @@ export const TOOLS_ROOT_CATEGORIES_MAP: Record<
 };
 
 export const EXTERNAL_TOOLS_CATEGORIES_MAP: Record<string, I18nValue> = {
+  'sub-workflow': {
+    'zh-CN': '子流程',
+    'en-US': 'Sub Workflow',
+  },
   comfyui: {
     'zh-CN': 'ComfyUI 流程',
     'en-US': 'ComfyUI Workflow',
@@ -41,7 +46,6 @@ export const EXTERNAL_TOOLS_CATEGORIES_MAP: Record<string, I18nValue> = {
 
 export const INTERNAL_TOOLS_NAMESPACE = [
   'comfyui',
-  'api',
   'bepipred30_predictor',
   'system',
   'llm',
