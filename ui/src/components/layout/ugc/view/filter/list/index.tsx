@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { ChevronDownIcon, Trash } from 'lucide-react';
+import { ChevronDownIcon, LayoutGrid, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -93,13 +93,13 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
         )}
         onClick={() => setCurrent('all')}
       >
-        <div
-          className={cn(
-            'flex w-full items-center justify-between text-sm',
-            assetType === 'tools' ? 'pl-[calc(1rem+20px+0.5rem)] pr-4' : 'px-4',
-          )}
-        >
-          <span>{t('common.utils.all')}</span>
+        <div className="flex w-full items-center justify-between px-4 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-[20px] [&_svg]:h-[16px] [&_svg]:w-[16px]">
+              <LayoutGrid />
+            </div>
+            <span>{t('common.utils.all')}</span>
+          </div>
         </div>
       </div>
       <ScrollArea className="h-[calc(100vh-15rem)]">
@@ -124,7 +124,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                           <div className="flex w-full items-center justify-between px-4 text-sm">
                             <div className="flex items-center gap-2">
                               <div className="w-[20px] [&_svg]:h-[16px] [&_svg]:w-[16px]">{rootIcon}</div>
-                              <span>{rootLabel}</span>
+                              <span className="font-normal">{rootLabel}</span>
                             </div>
                             <ChevronDownIcon className="chevron h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
                           </div>
@@ -144,7 +144,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                               key={cateName}
                             >
                               <div className="flex w-full items-center justify-between pl-[calc(1rem+20px+0.5rem)] pr-4 text-sm">
-                                <span>{cateLabel}</span>
+                                <span className="font-normal">{cateLabel}</span>
                               </div>
                             </div>
                           );
