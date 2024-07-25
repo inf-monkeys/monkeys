@@ -996,6 +996,9 @@
               }
             }
           }
+        },
+        "utils": {
+          "sub-workflow": "Sub Workflow"
         }
       },
       "import": {

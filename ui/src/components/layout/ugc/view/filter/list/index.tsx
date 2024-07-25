@@ -1,12 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
+import { ToolCategory } from '@inf-monkeys/monkeys';
 import { ChevronDownIcon, LayoutGrid, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { EXTERNAL_TOOLS_CATEGORIES_MAP, TOOLS_ROOT_CATEGORIES_MAP } from '@/apis/tools/consts.tsx';
+import {
+  EXTERNAL_TOOLS_CATEGORIES_MAP,
+  INTERNAL_TOOLS_NAMESPACE,
+  TOOLS_ROOT_CATEGORIES_MAP,
+} from '@/apis/tools/consts.tsx';
+import { ICommonTool, IWorkflowTool } from '@/apis/tools/typings.ts';
 import { removeAssetFilterRules, useAssetFilterRuleList, useAssetPublicCategories } from '@/apis/ugc';
-import { IListUgcDto, IUgcFilterRules } from '@/apis/ugc/typings.ts';
+import { IAssetItem, IListUgcDto, IUgcFilterRules } from '@/apis/ugc/typings.ts';
 import { ACTION_TOOLS_CATEGORIES_MAP } from '@/apis/workflow/typings';
 import { NON_FILTER_TYPE_LIST } from '@/components/layout/ugc/consts.ts';
 import { IUgcCustomProps } from '@/components/layout/ugc/typings.ts';
@@ -31,6 +37,9 @@ import { cn, getI18nContent } from '@/utils';
 export interface IUgcViewFilterListProps extends IUgcCustomProps {
   onChange: (filter: Partial<IListUgcDto['filter']>) => void;
   filterButtonProps: Omit<IUgcViewFilterButtonProps, keyof IUgcCustomProps>;
+
+  // special for tools
+  toolsData?: IAssetItem<ICommonTool>[];
 }
 
 export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
@@ -39,6 +48,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
   isMarket = false,
   onChange,
   filterButtonProps,
+  toolsData: rawToolsData,
 }) => {
   const { t } = useTranslation();
 
@@ -74,6 +84,40 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
     }
   }, [current]);
 
+  // special for tools
+  const toolsData = useMemo(() => {
+    if (assetType != 'tools' || isMarket || !rawToolsData) return undefined;
+    const internalTools = rawToolsData.filter((tool) =>
+      INTERNAL_TOOLS_NAMESPACE.includes((tool as IAssetItem<IWorkflowTool>).namespace),
+    );
+    const internal = Object.keys(ACTION_TOOLS_CATEGORIES_MAP).reduce((acc, curr) => {
+      acc[curr] =
+        internalTools.filter((tool) => (tool as IAssetItem<IWorkflowTool>).categories?.includes(curr as ToolCategory))
+          .length ?? 0;
+      return acc;
+    }, {});
+    const externalTools = rawToolsData.filter(
+      (tool) => !INTERNAL_TOOLS_NAMESPACE.includes((tool as IAssetItem<IWorkflowTool>).namespace),
+    );
+    const external = Object.keys(EXTERNAL_TOOLS_CATEGORIES_MAP).reduce((acc, curr) => {
+      acc[curr] =
+        externalTools.filter((tool) => (tool as IAssetItem<IWorkflowTool>).categories?.includes(curr as ToolCategory))
+          .length ?? 0;
+      return acc;
+    }, {});
+    return {
+      total: rawToolsData.length,
+      'internal-tools': {
+        ...internal,
+        total: internalTools.length,
+      },
+      'external-tools': {
+        ...external,
+        total: externalTools.length,
+      },
+    };
+  }, [rawToolsData, assetType, isMarket]);
+
   return (
     <div className="flex flex-col gap-2 p-1">
       {filterAreaVisible && (
@@ -98,7 +142,14 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
             <div className="w-[20px] [&_svg]:h-[16px] [&_svg]:w-[16px]">
               <LayoutGrid />
             </div>
-            <span>{t('common.utils.all')}</span>
+            {assetType === 'tools' && !isMarket ? (
+              <div className="flex gap-3">
+                <span>{t('common.utils.all')}</span>
+                <span>( {toolsData?.total} )</span>
+              </div>
+            ) : (
+              <span>{t('common.utils.all')}</span>
+            )}
           </div>
         </div>
       </div>
@@ -124,7 +175,11 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                           <div className="flex w-full items-center justify-between px-4 text-sm">
                             <div className="flex items-center gap-2">
                               <div className="w-[20px] [&_svg]:h-[16px] [&_svg]:w-[16px]">{rootIcon}</div>
-                              <span className="font-normal">{rootLabel}</span>
+
+                              <div className="&>span:font-normal flex gap-3">
+                                <span>{rootLabel}</span>
+                                <span>( {toolsData?.[rootName]['total']} )</span>
+                              </div>
                             </div>
                             <ChevronDownIcon className="chevron h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
                           </div>
@@ -143,8 +198,9 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                               onClick={() => setCurrent(cateName)}
                               key={cateName}
                             >
-                              <div className="flex w-full items-center justify-between pl-[calc(1rem+20px+0.5rem)] pr-4 text-sm">
-                                <span className="font-normal">{cateLabel}</span>
+                              <div className="&>span:font-normal flex w-full items-center gap-3 pl-[calc(1rem+20px+0.5rem)] pr-4 text-sm">
+                                <span>{cateLabel}</span>
+                                <span>( {toolsData?.[rootName][cateName]} )</span>
                               </div>
                             </div>
                           );

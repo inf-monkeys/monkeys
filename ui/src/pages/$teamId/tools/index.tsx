@@ -32,7 +32,11 @@ export const Tools: React.FC = () => {
         createColumns={() => createToolsColumns({ hooks: { navigate } })}
         renderOptions={{
           subtitle: (item) => {
-            if (item.toolType === 'tool') {
+            if (item.toolType === 'comfyui') {
+              return <span className="line-clamp-1">{tHook('ugc-page.comfyui-workflow.utils.name')}</span>;
+            } else if (item.toolType === 'sub-workflow') {
+              return <span className="line-clamp-1">{tHook('ugc-page.tools.utils.sub-workflow')}</span>;
+            } else {
               const extra = item.extra;
               const estimateTime = extra ? extra.estimateTime : undefined;
               return (
@@ -44,16 +48,29 @@ export const Tools: React.FC = () => {
                   {extra ? PricingText({ pricing: extra }) : t('ugc-page.action-tools.utils.pricing-mode.FREE')}
                 </span>
               );
-            } else {
-              return <span className="line-clamp-1">{tHook('ugc-page.comfyui-workflow.utils.name')}</span>;
             }
           },
           cover: (item) => RenderIcon({ iconUrl: item.iconUrl, size: 'gallery' }),
         }}
         onItemClick={(item) => {
-          void navigate({
-            to: `/$teamId/${item.toolType === 'comfyui' ? 'comfyui' : 'action-tools'}/${item.name}/`,
-          });
+          switch (item.toolType) {
+            case 'comfyui':
+              void navigate({
+                to: `/$teamId/comfyui/${item.name}/`,
+              });
+              break;
+
+            case 'tool':
+            case 'api':
+            case 'service':
+              void navigate({
+                to: `/$teamId/action-tools/${item.name}/`,
+              });
+              break;
+
+            default:
+              break;
+          }
         }}
         subtitle={
           <>
