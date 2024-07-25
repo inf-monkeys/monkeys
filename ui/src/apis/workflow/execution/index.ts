@@ -12,8 +12,8 @@ import {
 } from '@/apis/workflow/execution/typings.ts';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
-import { IVinesSearchWorkflowExecutionsParams } from '@/schema/workspace/workflow-execution.ts';
 import { IVinesSearchWorkflowExecutionStatParams } from '@/schema/workspace/workflow-execution-stat.ts';
+import { IVinesSearchWorkflowExecutionsParams } from '@/schema/workspace/workflow-execution.ts';
 import FileSaver from 'file-saver';
 
 export const executionWorkflow = (workflowId: string, inputData: Record<string, unknown>, version = 1) =>
@@ -128,6 +128,6 @@ export const exportSearchWorkflowExecutionStats = async (
 
 export const useUpdateExecutionTask = (instanceId: string, taskId: string) =>
   useSWRMutation<string | undefined, unknown, string | null, IUpdateExecutionTaskParams>(
-    instanceId && taskId ? `/api/workflow/${instanceId}/tasks/${taskId}` : null,
+    instanceId && taskId ? `/api/workflow/executions/${instanceId}/tasks/${taskId}` : null,
     vinesFetcher({ method: 'POST' }),
   );
