@@ -1023,7 +1023,14 @@
             },
             "displayName": {
               "label": "显示名称",
-              "placeholder": "请输入工作流名称"
+              "placeholder": "请输入显示名称"
+            },
+            "description": {
+              "label": "描述",
+              "placeholder": "请输入描述"
+            },
+            "icon": {
+              "label": "显示图标"
             }
           }
         },
@@ -1066,6 +1073,9 @@
             "description": {
               "label": "描述",
               "placeholder": "请输入描述"
+            },
+            "icon": {
+              "label": "显示图标"
             },
             "url": {
               "label": "接口地址",
