@@ -2072,7 +2072,10 @@
           "create-failed": "创建工具失败",
           "category": {
             "all": "全部工具",
-            "sub-workflows": "调用工作流",
+            "sub-workflow": "子流程",
+            "comfyui": "外部流程",
+            "api": "接口扩展",
+            "service": "服务扩展",
             "process": "流程控制",
             "image": "图像处理",
             "text": "文本处理",

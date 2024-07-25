@@ -1,6 +1,7 @@
+import React from 'react';
+
 import { I18nValue } from '@inf-monkeys/monkeys';
 import { Hammer, Pickaxe } from 'lucide-react';
-import React from 'react';
 
 export const TOOLS_ROOT_CATEGORIES_MAP: Record<
   string,
