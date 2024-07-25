@@ -1,4 +1,4 @@
-import { MonkeyWorkflow, ToolDef, ToolProperty } from '@inf-monkeys/monkeys';
+import { MonkeyWorkflow, ToolCategory, ToolDef, ToolProperty } from '@inf-monkeys/monkeys';
 
 import { IComfyuiWorkflow } from '@/apis/comfyui/typings.ts';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
@@ -37,8 +37,9 @@ export type ICommonTool =
       categories: ['comfyui'];
       name: string;
     })
-  | (IWorkflowTool & {
+  | (Omit<IWorkflowTool, 'categories'> & {
       toolType: 'tool';
+      categories: (ToolCategory | 'unknown')[];
     })
   | (Omit<IWorkflowTool, 'categories'> & {
       toolType: 'api';
