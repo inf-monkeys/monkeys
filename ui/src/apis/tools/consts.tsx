@@ -8,7 +8,7 @@ export const TOOLS_ROOT_CATEGORIES_MAP: Record<
     label: I18nValue;
   }
 > = {
-  'action-tools': {
+  'internal-tools': {
     icon: <Hammer />,
     label: {
       'zh-CN': '预置工具',
@@ -25,8 +25,30 @@ export const TOOLS_ROOT_CATEGORIES_MAP: Record<
 };
 
 export const EXTERNAL_TOOLS_CATEGORIES_MAP: Record<string, I18nValue> = {
-  'comfyui-workflow': {
-    'zh-CN': 'ComfyUI 工作流',
+  comfyui: {
+    'zh-CN': 'ComfyUI 流程',
     'en-US': 'ComfyUI Workflow',
   },
+  api: {
+    'zh-CN': '接口工具',
+    'en-US': 'API Tools',
+  },
+  service: {
+    'zh-CN': '服务工具',
+    'en-US': 'Service Tools',
+  },
 };
+
+export const INTERNAL_TOOLS_NAMESPACE = [
+  'comfyui',
+  'api',
+  'bepipred30_predictor',
+  'system',
+  'llm',
+  'monkey_tools_knowledge_base',
+  'midjourney',
+  'social_media',
+  'monkey_tools_internet',
+  'sandbox',
+  'monkey_tools_example',
+];

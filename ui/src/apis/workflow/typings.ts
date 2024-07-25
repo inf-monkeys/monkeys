@@ -14,45 +14,33 @@ export type WorkflowListQuery = {
 };
 
 export const ACTION_TOOLS_CATEGORIES_MAP: Record<string, I18nValue> = {
-  process: {
-    'zh-CN': '流程控制',
-    'en-US': 'Process Control',
-  },
-  image: {
-    'zh-CN': '图像处理',
-    'en-US': 'Image Process',
-  },
-  text: {
-    'zh-CN': '文本处理',
-    'en-US': 'Text Process',
-  },
-  file: {
-    'zh-CN': '文件处理',
-    'en-US': 'File Process',
-  },
-  'gen-image': {
-    'zh-CN': '图像生成',
-    'en-US': 'Image Generation',
-  },
   'gen-text': {
     'zh-CN': '文本生成',
     'en-US': 'Text Generation',
-  },
-  auto: {
-    'zh-CN': '自动化',
-    'en-US': 'Automatic',
-  },
-  db: {
-    'zh-CN': '数据存储',
-    'en-US': 'Data Storage',
   },
   query: {
     'zh-CN': '搜索增强',
     'en-US': 'Search Enhancement',
   },
-  extra: {
-    'zh-CN': '扩展能力',
-    'en-US': 'Extended Capabilities',
+  text: {
+    'zh-CN': '文本处理',
+    'en-US': 'Text Process',
+  },
+  'gen-image': {
+    'zh-CN': '图像生成',
+    'en-US': 'Image Generation',
+  },
+  image: {
+    'zh-CN': '图像处理',
+    'en-US': 'Image Process',
+  },
+  file: {
+    'zh-CN': '文件处理',
+    'en-US': 'File Process',
+  },
+  db: {
+    'zh-CN': '数据存储',
+    'en-US': 'Data Storage',
   },
   'train-model': {
     'zh-CN': '模型训练',
@@ -62,9 +50,21 @@ export const ACTION_TOOLS_CATEGORIES_MAP: Record<string, I18nValue> = {
     'zh-CN': '生命科学',
     'en-US': 'Biological Sciences',
   },
+  auto: {
+    'zh-CN': '自动化',
+    'en-US': 'Automatic',
+  },
+  process: {
+    'zh-CN': '流程控制',
+    'en-US': 'Process Control',
+  },
   human: {
     'zh-CN': '用户交互',
     'en-US': 'User Interactions',
+  },
+  extra: {
+    'zh-CN': '扩展能力',
+    'en-US': 'Extended Capabilities',
   },
 };
 

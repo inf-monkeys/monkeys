@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { Textarea } from '@/components/ui/textarea.tsx';
+import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
 import { IImportTool, importToolSchema, ToolImportType } from '@/schema/workspace/tools-import.ts';
 
 const HTTP_METHOD_OPTIONS: Array<{
@@ -69,6 +70,9 @@ export const ImportToolService: React.FC<IImportToolServiceProps> = ({ onFinishe
     resolver: zodResolver(importToolSchema),
     defaultValues: {
       importType: ToolImportType.api,
+      apiInfo: {
+        iconUrl: 'emoji:🍀:#ceefc5',
+      },
     },
   });
 
@@ -147,6 +151,7 @@ export const ImportToolService: React.FC<IImportToolServiceProps> = ({ onFinishe
               </FormItem>
             )}
           />
+
           <FormField
             name="apiInfo.description"
             control={form.control}
@@ -165,6 +170,25 @@ export const ImportToolService: React.FC<IImportToolServiceProps> = ({ onFinishe
               </FormItem>
             )}
           />
+
+          <FormField
+            name="apiInfo.iconUrl"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('ugc-page.tools.import.restful-api.form.icon.label')}</FormLabel>
+                <FormControl>
+                  <VinesIconEditor
+                    value={field.value ?? ''}
+                    defaultValue="emoji:🍀:#ceefc5"
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             name="apiInfo.url"
             control={form.control}

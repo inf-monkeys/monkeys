@@ -33,10 +33,20 @@ export interface IWorkflowTool extends ToolDefExtended {
 export type ICommonTool =
   | (IComfyuiWorkflow & {
       toolType: 'comfyui';
-      categories: ['comfyui-workflow'];
+      categories: ['comfyui'];
       name: string;
     })
   | (IWorkflowTool & {
       toolType: 'tool';
       iconUrl?: string;
+    })
+  | (Omit<IWorkflowTool, 'categories'> & {
+      toolType: 'api';
+      iconUrl?: string;
+      categories: ['api'];
+    })
+  | (Omit<IWorkflowTool, 'categories'> & {
+      toolType: 'service';
+      iconUrl?: string;
+      categories: ['service'];
     });
