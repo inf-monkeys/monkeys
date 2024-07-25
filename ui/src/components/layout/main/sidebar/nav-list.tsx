@@ -31,7 +31,7 @@ export const NavList: React.FC<INavListProps> = () => {
           <AccordionItem key={i} value={name}>
             {items ? (
               <>
-                <AccordionTrigger>
+                <AccordionTrigger className="font-normal">
                   <NavButton
                     key={name + i}
                     icon={icon}
