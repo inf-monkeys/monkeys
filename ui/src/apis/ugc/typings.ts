@@ -58,7 +58,7 @@ export interface IListUgcDto {
   search?: string;
   orderColumn?: ISortConditionOrderColumn;
   orderBy?: ISortConditionOrderBy;
-  filter: IListUgcFilter;
+  filter?: IListUgcFilter;
 }
 
 export type IManuallyFetcher<T> = {

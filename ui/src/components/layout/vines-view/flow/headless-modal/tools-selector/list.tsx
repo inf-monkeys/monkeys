@@ -1,15 +1,15 @@
 import React from 'react';
 
-import { Link2 } from 'lucide-react';
+import { Inbox, Link2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { FixedSizeGrid as Grid, GridChildComponentProps } from 'react-window';
 
 import { Card } from '@/components/ui/card.tsx';
+import { Tag } from '@/components/ui/tag';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesToolDef } from '@/package/vines-flow/core/tools/typings.ts';
 import { cn, getI18nContent } from '@/utils';
-import { Tag } from '@/components/ui/tag';
-import { useTranslation } from 'react-i18next';
 
 interface IToolListsProps {
   onClick?: (tool: VinesToolDef) => void;
@@ -20,7 +20,15 @@ interface IToolListsProps {
 
 export const ToolLists: React.FC<IToolListsProps> = ({ list, length, category, onClick }) => {
   const { t } = useTranslation();
-  return (
+
+  const isEmptyList = list.length === 0;
+
+  return isEmptyList ? (
+    <div className="vines-center h-[28.125rem] flex-col gap-2">
+      <Inbox size={58} />
+      <p className="text-sm">{t('common.load.empty')}</p>
+    </div>
+  ) : (
     <Grid
       columnCount={3}
       columnWidth={250}
@@ -38,7 +46,7 @@ export const ToolLists: React.FC<IToolListsProps> = ({ list, length, category, o
           tool && (
             <div key={tool.name} className="px-1 pt-2" style={style}>
               <Card
-                className="flex size-full cursor-pointer items-center gap-4 p-4 hover:bg-gray-2 dark:hover:bg-gray-3"
+                className="flex size-full cursor-pointer items-center gap-4 overflow-hidden p-4 hover:bg-gray-2 dark:hover:bg-gray-3"
                 onClick={() => onClick?.(tool)}
                 onDoubleClick={() => onClick?.(tool)}
               >

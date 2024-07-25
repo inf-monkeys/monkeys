@@ -29,24 +29,6 @@ export const SUB_WORKFLOW_TOOL_CHOOSE_VERSION_PROP = (workflowId: string): Vines
   },
 });
 
-// export const TOOL_CATEGORY_SORT_INDEX_LIST = [
-//   'all',
-//   'block',
-//   'gen-text',
-//   'query',
-//   'text',
-//   'gen-image',
-//   'image',
-//   'file',
-//   'train-model',
-//   'db',
-//   'auto',
-//   'process',
-//   'human',
-//   'extra',
-//   'bio',
-// ];
-
 export const TOOL_CATEGORY_SORT_INDEX_LIST = [
   'all',
   ...Object.keys(EXTERNAL_TOOLS_CATEGORIES_MAP),

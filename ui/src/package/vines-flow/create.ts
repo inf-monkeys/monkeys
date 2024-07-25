@@ -8,13 +8,12 @@ import { isArray } from 'lodash';
 import { toast } from 'sonner';
 
 import { useToolLists } from '@/apis/tools';
+import { useUgcComfyuiWorkflows } from '@/apis/ugc';
 import { updateWorkflow, useUpdateWorkflow, useWorkflowList } from '@/apis/workflow';
 import { useRetimer } from '@/hooks/use-retimer.ts';
 import { VinesCore } from '@/package/vines-flow/core';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
-import { INTERNAL_TOOLS_NAMESPACE } from '@/apis/tools/consts.tsx';
-import { TOOL_CATEGORY_SORT_INDEX_LIST } from '@/package/vines-flow/core/tools/consts.ts';
 
 interface VinesContext {
   _vines: VinesCore;
@@ -151,41 +150,26 @@ export const createVinesCore = (workflowId: string, t?: i18n) => {
 
     const { data: tools } = useToolLists();
     const { data: workflows } = useWorkflowList({ page: 1, limit: 9999 });
+    const { data: comfyUIWorkflows } = useUgcComfyuiWorkflows({ page: 1, limit: 9999 });
 
     useEffect(() => {
       if (isArray(tools)) {
-        for (let i = 0; i < tools.length; i++) {
-          const tool = tools[i];
-          if (tool.namespace) {
-            if (tool.namespace === 'api') {
-              tool.categories ? tool.categories.unshift('api') : (tool.categories = ['api']);
-            } else if (!INTERNAL_TOOLS_NAMESPACE.includes(tool.namespace)) {
-              tool.categories
-                ? tool.categories.find((cate) => !TOOL_CATEGORY_SORT_INDEX_LIST.includes(cate))
-                  ? (tool.categories = ['service'])
-                  : tool.categories.unshift('service')
-                : (tool.categories = ['service']);
-            } else if (
-              !tool.categories ||
-              tool.categories.find((cate) => !TOOL_CATEGORY_SORT_INDEX_LIST.includes(cate))
-            ) {
-              tool.categories = ['unknown'];
-            }
-          }
-        }
-        const sortedTools = tools.sort(
-          (a, b) =>
-            (TOOL_CATEGORY_SORT_INDEX_LIST.indexOf(a.categories?.[0] ?? '') ?? 999) -
-            (TOOL_CATEGORY_SORT_INDEX_LIST.indexOf(b.categories?.[0] ?? '') ?? 0),
-        );
-        console.log(sortedTools);
-        _vines.updateTools(sortedTools);
+        _vines.updateTools(tools);
       }
     }, [tools]);
 
     useEffect(() => {
-      isArray(workflows) && _vines.updateWorkflows(workflows);
+      if (isArray(workflows)) {
+        _vines.updateWorkflows(workflows);
+      }
     }, [workflows]);
+
+    useEffect(() => {
+      const workflows = comfyUIWorkflows?.data;
+      if (isArray(workflows)) {
+        void _vines.updateComfyUIWorkflows(workflows);
+      }
+    }, [comfyUIWorkflows]);
 
     return createElement(VinesContext.Provider, { value: { _vines, _refresher, forceUpdate } }, children);
   };
