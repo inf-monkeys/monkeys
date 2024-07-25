@@ -1,5 +1,6 @@
 import { conductorClient } from '@/common/conductor';
 import { config } from '@/common/config';
+import { logger } from '@/common/logger';
 import { InputParametersType } from '@/common/typings/workflow';
 import { flatTasks } from '@/common/utils/conductor';
 import { SYSTEM_NAMESPACE } from '@/database/entities/tools/tools-server.entity';
@@ -90,6 +91,19 @@ export class ConductorService {
           task.taskDefinition.name = realBlockName;
         }
       }
+    }
+  }
+
+  private getJoinTaskJoinOn(taskReferenceName: string, tasks: WorkflowTask[]) {
+    try {
+      const joinTaskIndex = tasks.findIndex((x) => x.taskReferenceName === taskReferenceName);
+      const forJoinTaskIndex = joinTaskIndex - 1;
+      const forJoinTask = tasks[forJoinTaskIndex];
+      const { forkTasks } = forJoinTask;
+      return forkTasks.map((x) => x[x.length - 1].taskReferenceName);
+    } catch (error) {
+      logger.error('Get join task joinOn failed', error);
+      return [];
     }
   }
 
@@ -201,6 +215,10 @@ export class ConductorService {
             delete task.inputParameters.listToLoopOver;
           }
         }
+      }
+
+      if (task.type === ToolType.JOIN) {
+        task.joinOn = this.getJoinTaskJoinOn(task.taskReferenceName, tasks);
       }
 
       // TODO
