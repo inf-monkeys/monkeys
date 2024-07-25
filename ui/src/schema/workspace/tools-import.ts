@@ -26,6 +26,7 @@ export const importToolSchema = z.object({
   apiInfo: z.object({
     displayName: z.string().optional(),
     description: z.string().optional(),
+    iconUrl: z.string().optional(),
     url: z.string().url('必须为合法的链接').optional(),
     method: z.string().optional(),
     credentialPlaceAt: z.string().optional(),
