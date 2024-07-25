@@ -151,18 +151,6 @@ export class ConductorService {
         task.inputParameters = {};
       }
 
-      const tool = tools.find((x) => x.name === task.name);
-      if (!tool) {
-        continue;
-      }
-
-      if (tool.namespace !== SYSTEM_NAMESPACE || task.type === ToolType.SIMPLE) {
-        // use CUSTOM_BLOCK_NAME_KEY to store real task_name
-        task.inputParameters[this.TOOL_NAME_KEY] = task.name;
-        task.inputParameters[this.CONTEXT_KEY] = '${workflow.input.__context}';
-        task.name = CONDUCTOR_TASK_DEF_NAME;
-      }
-
       // 循环 block 的列表循环模式
       if (task.type === 'DO_WHILE') {
         const { mode = DoWhileMode.Expression, loopCount = 0 } = task.inputParameters;
@@ -225,6 +213,18 @@ export class ConductorService {
 
       if (task.type === ToolType.JOIN) {
         task.joinOn = this.getJoinTaskJoinOn(task.taskReferenceName, tasks);
+      }
+
+      const tool = tools.find((x) => x.name === task.name);
+      if (!tool) {
+        continue;
+      }
+
+      if (tool.namespace !== SYSTEM_NAMESPACE || task.type === ToolType.SIMPLE) {
+        // use CUSTOM_BLOCK_NAME_KEY to store real task_name
+        task.inputParameters[this.TOOL_NAME_KEY] = task.name;
+        task.inputParameters[this.CONTEXT_KEY] = '${workflow.input.__context}';
+        task.name = CONDUCTOR_TASK_DEF_NAME;
       }
 
       // TODO
