@@ -23,7 +23,6 @@ import {
 } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { Updater } from '@/components/ui/updater';
 import { MIME_TYPES } from '@/components/ui/updater/mime-types.ts';
@@ -44,7 +43,7 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
     resolver: zodResolver(importComfyUIWorkflowSchema),
     defaultValues: {
       iconUrl: 'emoji:🍀:#ceefc5',
-      workflowType: 'image',
+      workflowType: 'json',
     },
   });
 
@@ -62,32 +61,51 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
     });
   });
 
-  const comfyuiWorkflowTypeOptions = ['image', 'json'];
-
   const { workflowType } = form.getValues();
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-        <ScrollArea className="h-96 pr-3 [&>[data-radix-scroll-area-viewport]>div]:px-1">
-          <FormField
-            name="displayName"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('ugc-page.tools.import.import-comfyui-workflow.form.displayName.label')}</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder={t('ugc-page.tools.import.import-comfyui-workflow.form.displayName.placeholder')}
-                    {...field}
-                    className="grow"
-                    autoFocus
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <form onSubmit={handleSubmit}>
+        <ScrollArea className="-ml-1 -mr-3.5 h-[calc(100vh-22rem)] pr-3 [&>[data-radix-scroll-area-viewport]>div]:px-1">
+          <div className="w-full space-y-2">
+            <FormLabel>{t('ugc-page.tools.import.import-comfyui-workflow.form.display-name.label')}</FormLabel>
+            <div className="flex w-full items-center gap-2">
+              <FormField
+                name="iconUrl"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <VinesIconEditor
+                        value={field.value ?? ''}
+                        defaultValue="emoji:🍀:#ceefc5"
+                        onChange={field.onChange}
+                        size="md"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                name="displayName"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormControl>
+                      <Input
+                        placeholder={t('ugc-page.tools.import.import-comfyui-workflow.form.display-name.placeholder')}
+                        {...field}
+                        className="grow"
+                        autoFocus
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
 
           <FormField
             name="description"
@@ -108,52 +126,34 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
             )}
           />
 
-          <FormField
-            name="iconUrl"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('ugc-page.tools.import.import-comfyui-workflow.form.icon.label')}</FormLabel>
-                <FormControl>
-                  <VinesIconEditor
-                    value={field.value ?? ''}
-                    defaultValue="emoji:🍀:#ceefc5"
-                    onChange={field.onChange}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            name="workflowType"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('ugc-page.tools.import.import-comfyui-workflow.form.workflowType.label')}</FormLabel>
-                <FormControl>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={t('ugc-page.tools.import.import-comfyui-workflow.form.workflowType.placeholder')}
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {comfyuiWorkflowTypeOptions.map((option) => (
-                        <SelectItem value={option} key={option}>
-                          {t(`ugc-page.tools.import.import-comfyui-workflow.form.workflowType.options.${option}`)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/*<FormField*/}
+          {/*  name="workflowType"*/}
+          {/*  control={form.control}*/}
+          {/*  render={({ field }) => (*/}
+          {/*    <FormItem>*/}
+          {/*      <FormLabel>{t('ugc-page.tools.import.import-comfyui-workflow.form.workflowType.label')}</FormLabel>*/}
+          {/*      <FormControl>*/}
+          {/*        <Select onValueChange={field.onChange} defaultValue={field.value}>*/}
+          {/*          <FormControl>*/}
+          {/*            <SelectTrigger>*/}
+          {/*              <SelectValue*/}
+          {/*                placeholder={t('ugc-page.tools.import.import-comfyui-workflow.form.workflowType.placeholder')}*/}
+          {/*              />*/}
+          {/*            </SelectTrigger>*/}
+          {/*          </FormControl>*/}
+          {/*          <SelectContent>*/}
+          {/*            {comfyuiWorkflowTypeOptions.map((option) => (*/}
+          {/*              <SelectItem value={option} key={option}>*/}
+          {/*                {t(`ugc-page.tools.import.import-comfyui-workflow.form.workflowType.options.${option}`)}*/}
+          {/*              </SelectItem>*/}
+          {/*            ))}*/}
+          {/*          </SelectContent>*/}
+          {/*        </Select>*/}
+          {/*      </FormControl>*/}
+          {/*      <FormMessage />*/}
+          {/*    </FormItem>*/}
+          {/*  )}*/}
+          {/*/>*/}
 
           {workflowType === 'image' && (
             <>

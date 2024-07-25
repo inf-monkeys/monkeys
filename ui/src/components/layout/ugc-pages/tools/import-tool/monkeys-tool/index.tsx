@@ -53,25 +53,27 @@ export const ImportToolWithManifest: React.FC<IImportToolWithManifestProps> = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit} className="mx-1 flex flex-col gap-2">
-        <FormField
-          name="manifestUrl"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('ugc-page.tools.import.monkeys-tool.form.manifest-url.label')}</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder={t('ugc-page.tools.import.monkeys-tool.form.manifest-url.placeholder')}
-                  {...field}
-                  className="grow"
-                  autoFocus
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <form onSubmit={handleSubmit}>
+        <div className="h-[calc(100vh-22rem)]">
+          <FormField
+            name="manifestUrl"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('ugc-page.tools.import.monkeys-tool.form.manifest-url.label')}</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder={t('ugc-page.tools.import.monkeys-tool.form.manifest-url.placeholder')}
+                    {...field}
+                    className="grow"
+                    autoFocus
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <DialogFooter>
           <Button type="submit" loading={isLoading} variant="solid" size="small">
