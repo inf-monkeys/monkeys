@@ -81,6 +81,11 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
           (TOOL_CATEGORY_SORT_INDEX_LIST.indexOf(a.categories?.[0] ?? '') ?? 999) -
           (TOOL_CATEGORY_SORT_INDEX_LIST.indexOf(b.categories?.[0] ?? '') ?? 0),
       );
+
+      if (!this.vinesTools.find((tool) => tool.name === 'comfyui:run_comfyui_workflow')) {
+        this.comfyUIInitialized = true;
+      }
+
       this.toolInitialized = true;
       this.checkoutData();
     }
@@ -109,7 +114,7 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
     public async updateComfyUIWorkflows(comfyUIWorkflows: IComfyuiWorkflow[]) {
       let wrapperTool: VinesToolDef | undefined;
       let skip = false;
-      while (!wrapperTool) {
+      while (!wrapperTool && !skip) {
         wrapperTool = this.getTool('comfyui:run_comfyui_workflow');
         if (!wrapperTool) {
           if (skip || this.tools.length) {

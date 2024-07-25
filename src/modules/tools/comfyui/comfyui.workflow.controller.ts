@@ -7,10 +7,11 @@ import { ToolProperty } from '@inf-monkeys/monkeys';
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ComfyUIService, ImportComfyuiWorkflowParams } from './comfyui.service';
+import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 
 @Controller('comfyui/workflows/')
 @ApiTags('ComfyUI')
-@UseGuards(CompatibleAuthGuard)
+@UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
 export class ComfyuiWorkflowController {
   constructor(private readonly comfyuiService: ComfyUIService) {}
 
