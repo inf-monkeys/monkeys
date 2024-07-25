@@ -104,6 +104,8 @@ export const useChat = ({
         const finalMultipleChat = multipleChat ?? requestCredentials?.multipleChat;
         const finalChatId = chatIdRef.current;
 
+        const teamId = localStorage.getItem('vines-team-id');
+
         const response = await fetch(`/v1/${finalMultipleChat ? 'chat/' : ''}completions`, {
           method: 'POST',
           body: stringify({
@@ -119,6 +121,7 @@ export const useChat = ({
             Authorization: `Bearer ${apiKey ?? requestCredentials?.apiKey ?? ''}`,
             'Content-Type': 'application/json',
             ...(finalChatId && !finalChatId.startsWith('default-') && { 'x-monkeys-conversation-id': finalChatId }),
+            ...(teamId && { 'x-monkeys-teamid': teamId }),
           },
           signal: abortController.signal,
         }).catch((err) => {
