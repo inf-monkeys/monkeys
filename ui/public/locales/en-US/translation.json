@@ -1033,7 +1033,14 @@
             },
             "displayName": {
               "label": "Display name",
-              "placeholder": "Please enter a workflow display name"
+              "placeholder": "Please enter display name"
+            },
+            "description": {
+              "label": "Description",
+              "placeholder": "Please enter description"
+            },
+            "icon": {
+              "label": "Icon"
             }
           }
         },
@@ -1076,6 +1083,9 @@
             "description": {
               "label": "Description",
               "placeholder": "Please enter description"
+            },
+            "icon": {
+              "label": "Icon"
             },
             "url": {
               "label": "Interface Url",

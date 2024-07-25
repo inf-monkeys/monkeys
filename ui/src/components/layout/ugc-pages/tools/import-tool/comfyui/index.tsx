@@ -3,11 +3,13 @@ import React, { useState } from 'react';
 import { useSWRConfig } from 'swr';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Server } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { importComfyuiWorkflow } from '@/apis/comfyui';
+import { ComfyUIServerListModal } from '@/components/layout/ugc-pages/tools/comfyui-server-list';
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';
 import {
@@ -22,11 +24,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
+import { Textarea } from '@/components/ui/textarea.tsx';
 import { Updater } from '@/components/ui/updater';
 import { MIME_TYPES } from '@/components/ui/updater/mime-types.ts';
+import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
 import { IImportComfyUIWorkflow, importComfyUIWorkflowSchema } from '@/schema/workspace/import-comfyui-workflow.ts';
-import { ComfyUIServerListModal } from '@/components/layout/ugc-pages/tools/comfyui-server-list';
-import { Server } from 'lucide-react';
 
 interface IImportComfyUIWorkflowProps {
   onFinished?: () => void;
@@ -41,6 +43,7 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
   const form = useForm<IImportComfyUIWorkflow>({
     resolver: zodResolver(importComfyUIWorkflowSchema),
     defaultValues: {
+      iconUrl: 'emoji:🍀:#ceefc5',
       workflowType: 'image',
     },
   });
@@ -79,6 +82,43 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
                     {...field}
                     className="grow"
                     autoFocus
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            name="description"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('ugc-page.tools.import.import-comfyui-workflow.form.description.label')}</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder={t('ugc-page.tools.import.import-comfyui-workflow.form.description.placeholder')}
+                    {...field}
+                    className="grow"
+                    autoFocus
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            name="iconUrl"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('ugc-page.tools.import.import-comfyui-workflow.form.icon.label')}</FormLabel>
+                <FormControl>
+                  <VinesIconEditor
+                    value={field.value ?? ''}
+                    defaultValue="emoji:🍀:#ceefc5"
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage />
