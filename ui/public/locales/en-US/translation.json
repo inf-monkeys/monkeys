@@ -1031,16 +1031,13 @@
             "workflowApiJsonUrl": {
               "label": "Workflow API JSON"
             },
-            "displayName": {
-              "label": "Display name",
+            "display-name": {
+              "label": "Tool Icon & Name",
               "placeholder": "Please enter display name"
             },
             "description": {
               "label": "Description",
               "placeholder": "Please enter description"
-            },
-            "icon": {
-              "label": "Icon"
             }
           }
         },
@@ -1077,15 +1074,12 @@
         "restful-api": {
           "form": {
             "display-name": {
-              "label": "Display Name",
+              "label": "Tool Icon & Name",
               "placeholder": "Please enter display name"
             },
             "description": {
               "label": "Description",
               "placeholder": "Please enter description"
-            },
-            "icon": {
-              "label": "Icon"
             },
             "url": {
               "label": "Interface Url",

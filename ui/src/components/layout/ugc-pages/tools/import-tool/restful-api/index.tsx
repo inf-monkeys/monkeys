@@ -132,25 +132,46 @@ export const ImportToolService: React.FC<IImportToolServiceProps> = ({ onFinishe
   return (
     <Form {...form}>
       <form onSubmit={handleSubmit}>
-        <ScrollArea className="h-96 pr-3 [&>[data-radix-scroll-area-viewport]>div]:px-1">
-          <FormField
-            name="apiInfo.displayName"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('ugc-page.tools.import.restful-api.form.display-name.label')}</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder={t('ugc-page.tools.import.restful-api.form.display-name.placeholder')}
-                    {...field}
-                    className="grow"
-                    autoFocus
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <ScrollArea className="-ml-1 -mr-3.5 h-[calc(100vh-22rem)] pr-3 [&>[data-radix-scroll-area-viewport]>div]:px-1">
+          <div className="w-full space-y-2">
+            <FormLabel>{t('ugc-page.tools.import.restful-api.form.display-name.label')}</FormLabel>
+            <div className="flex w-full items-center gap-2">
+              <FormField
+                name="apiInfo.iconUrl"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <VinesIconEditor
+                        value={field.value ?? ''}
+                        defaultValue="emoji:🍀:#ceefc5"
+                        onChange={field.onChange}
+                        size="md"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                name="apiInfo.displayName"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormControl>
+                      <Input
+                        placeholder={t('ugc-page.tools.import.restful-api.form.display-name.placeholder')}
+                        {...field}
+                        className="grow"
+                        autoFocus
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
 
           <FormField
             name="apiInfo.description"
@@ -164,24 +185,6 @@ export const ImportToolService: React.FC<IImportToolServiceProps> = ({ onFinishe
                     {...field}
                     className="grow"
                     autoFocus
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            name="apiInfo.iconUrl"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('ugc-page.tools.import.restful-api.form.icon.label')}</FormLabel>
-                <FormControl>
-                  <VinesIconEditor
-                    value={field.value ?? ''}
-                    defaultValue="emoji:🍀:#ceefc5"
-                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage />
