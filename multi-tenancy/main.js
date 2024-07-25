@@ -159,7 +159,6 @@ const startServers = async () => {
 const runPorxyServer = (port) => {
   const httpServer = http.createServer((req, res) => {
     const host = req.headers.host;
-    console.log('Host:', host);
     const targetServerPort = serverHostToPortMap[host];
     if (!targetServerPort) {
       logger.warn(`Domain not found in configuration: ${host}`);
