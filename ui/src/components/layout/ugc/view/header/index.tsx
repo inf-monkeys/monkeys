@@ -24,7 +24,7 @@ export const UgcViewHeader: React.FC<IUgcViewHeaderProps> = ({
     <header className="flex w-full items-center justify-end px-4 pb-2">
       <div className="flex gap-2">
         <UgcHeaderDisplayModeButton assetKey={assetKey} />
-        <UgcHeaderSortButton assetKey={assetKey} assetType={assetType} />
+        {filterAreaVisible && <UgcHeaderSortButton assetKey={assetKey} assetType={assetType} />}
         {filterAreaVisible && <UgcViewFilterButton assetKey={assetKey} assetType={assetType} {...filterButtonProps} />}
         {subtitle}
       </div>
