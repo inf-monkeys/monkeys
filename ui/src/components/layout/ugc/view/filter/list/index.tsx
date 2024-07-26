@@ -176,7 +176,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                             <div className="flex items-center gap-2">
                               <div className="w-[20px] [&_svg]:h-[16px] [&_svg]:w-[16px]">{rootIcon}</div>
 
-                              <div className="&>span:font-normal flex gap-3">
+                              <div className="flex gap-3 !font-normal">
                                 <span>{rootLabel}</span>
                                 <span>( {toolsData?.[rootName]['total']} )</span>
                               </div>
