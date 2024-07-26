@@ -133,7 +133,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
       <div
         className={cn(
           'group flex h-10 cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
-          current === 'all' && 'border border-input bg-background text-accent-foreground shadow-sm',
+          current === 'all' ? 'border border-input bg-background text-accent-foreground shadow-sm' : 'p-[1px]',
         )}
         onClick={() => setCurrent('all')}
       >
@@ -171,7 +171,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                   <AccordionItem key={rootName} value={rootName}>
                     <>
                       <AccordionTrigger>
-                        <div className="group flex h-10 w-full cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground">
+                        <div className="group flex h-10 w-full cursor-pointer items-center rounded-md p-[1px] transition-colors hover:bg-accent hover:text-accent-foreground">
                           <div className="flex w-full items-center justify-between px-4 text-sm">
                             <div className="flex items-center gap-2">
                               <div className="w-[20px] [&_svg]:h-[16px] [&_svg]:w-[16px]">{rootIcon}</div>
@@ -192,8 +192,9 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                             <div
                               className={cn(
                                 'group flex h-10 cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
-                                current === cateName &&
-                                  'border border-input bg-background text-accent-foreground shadow-sm',
+                                current === cateName
+                                  ? 'border border-input bg-background text-accent-foreground shadow-sm'
+                                  : 'p-[1px]',
                               )}
                               onClick={() => setCurrent(cateName)}
                               key={cateName}
@@ -224,7 +225,9 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                   key={rule.id}
                   className={cn(
                     'group flex h-10 cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
-                    current === rule.id && 'border border-input bg-background text-accent-foreground shadow-sm',
+                    current === rule.id
+                      ? 'border border-input bg-background text-accent-foreground shadow-sm'
+                      : 'p-[1px]',
                   )}
                   onClick={() => setCurrent(rule.id!)}
                 >
