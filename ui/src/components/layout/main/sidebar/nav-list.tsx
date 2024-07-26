@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ChevronDownIcon } from 'lucide-react';
+import { ChevronRightIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { NavButton } from '@/components/layout/main/sidebar/nav-button.tsx';
@@ -37,7 +37,7 @@ export const NavList: React.FC<INavListProps> = () => {
                     icon={icon}
                     postfix={
                       <div className="flex flex-1 justify-end">
-                        <ChevronDownIcon className="chevron h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
+                        <ChevronRightIcon className="chevron h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
                       </div>
                     }
                   >

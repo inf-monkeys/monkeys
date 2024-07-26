@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { ToolCategory } from '@inf-monkeys/monkeys';
-import { ChevronDownIcon, LayoutGrid, Trash } from 'lucide-react';
+import { ChevronRightIcon, LayoutGrid, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -181,7 +181,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                                 <span>( {toolsData?.[rootName]['total']} )</span>
                               </div>
                             </div>
-                            <ChevronDownIcon className="chevron h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
+                            <ChevronRightIcon className="chevron h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
                           </div>
                         </div>
                       </AccordionTrigger>
