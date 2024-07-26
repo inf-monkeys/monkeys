@@ -1214,7 +1214,7 @@
     },
     "comfyui-workflow": {
       "utils": {
-        "name": "ComfyUI 工作流"
+        "name": "外部流程"
       },
       "detail": {
         "title": "ComfyUI 工作流详情",
