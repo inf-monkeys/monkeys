@@ -1917,6 +1917,11 @@
               "label": "Rename Group",
               "placeholder": "Please enter a group name, no more than 16 characters"
             }
+          },
+          "set-icon": {
+            "trigger": "Settings Icon",
+            "title": "Please select an icon",
+            "reset": "Reset"
           }
         },
         "tabs": {
