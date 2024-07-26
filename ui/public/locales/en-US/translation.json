@@ -1222,7 +1222,7 @@
     },
     "comfyui-workflow": {
       "utils": {
-        "name": "ComfyUI Workflow"
+        "name": "External Workflow"
       },
       "detail": {
         "title": "ComfyUI Workflow Detail",

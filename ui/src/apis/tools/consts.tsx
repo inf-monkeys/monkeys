@@ -32,8 +32,8 @@ export const EXTERNAL_TOOLS_CATEGORIES_MAP: Record<string, I18nValue> = {
     'en-US': 'Sub Workflow',
   },
   comfyui: {
-    'zh-CN': 'ComfyUI 流程',
-    'en-US': 'ComfyUI Workflow',
+    'zh-CN': '外部流程',
+    'en-US': 'External Workflow',
   },
   api: {
     'zh-CN': '接口工具',
