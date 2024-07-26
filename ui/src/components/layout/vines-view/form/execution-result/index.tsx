@@ -1,18 +1,17 @@
-import React, { useMemo, useState } from 'react';
+import React, { forwardRef, useMemo, useState } from 'react';
 
 import { useThrottleEffect } from 'ahooks';
 import { type EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { AnimatePresence, motion } from 'framer-motion';
 import { History } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { VirtuosoGrid } from 'react-virtuoso';
+import { GridItemProps, GridListProps, VirtuosoGrid } from 'react-virtuoso';
 
 import { useSearchWorkflowExecutions } from '@/apis/workflow/execution';
 import {
   extractImageUrls,
   extractVideoUrls,
 } from '@/components/layout/vines-view/execution/data-display/abstract/utils.ts';
-import { gridComponents } from '@/components/layout/vines-view/form/execution-result/consts.tsx';
 import {
   IVinesExecutionResultItem,
   VinesExecutionItemContent,
@@ -29,9 +28,10 @@ import { flattenKeys } from '@/utils/flat.ts';
 
 interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {
   event$: EventEmitter<void>;
+  minimalGap?: boolean;
 }
 
-export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ className, event$ }) => {
+export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ className, event$, minimalGap }) => {
   const { t } = useTranslation();
 
   const { visible } = useViewStore();
@@ -106,9 +106,9 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
   const { ref, height: containerHeight } = useElementSize();
   useThrottleEffect(
     () => {
-      setHeight(containerHeight - 48);
+      setHeight(containerHeight - (minimalGap ? 18 : 48));
     },
-    [containerHeight],
+    [containerHeight, minimalGap],
     { wait: 100 },
   );
 
@@ -116,13 +116,30 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
 
   return (
     <Card ref={ref} className={cn('relative', className)}>
-      <CardContent className="-mr-3 p-4">
+      <CardContent className={cn('-mr-3 p-4', minimalGap && 'p-2')}>
         <VirtuosoGrid
           data={list}
           style={{ height }}
           totalCount={totalCount}
           itemContent={VinesExecutionItemContent}
-          components={gridComponents}
+          components={{
+            // eslint-disable-next-line react/display-name
+            List: forwardRef(
+              ({ children, className, ...props }: GridListProps, ref: React.ForwardedRef<HTMLDivElement>) => (
+                <div ref={ref} className={cn('flex flex-wrap', className)} {...props}>
+                  {children}
+                </div>
+              ),
+            ),
+            Item: ({ children, className, ...props }: GridItemProps) => (
+              <div
+                className={cn('box-border w-1/3 flex-none content-stretch p-3', className, minimalGap && 'p-1')}
+                {...props}
+              >
+                {children}
+              </div>
+            ),
+          }}
         />
 
         <AnimatePresence>

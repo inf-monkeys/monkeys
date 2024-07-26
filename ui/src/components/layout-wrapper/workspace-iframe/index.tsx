@@ -16,11 +16,12 @@ export const WorkspaceIframe: React.FC<IWorkspaceIframeProps> = () => {
 
   const { ref, width, height } = useElementSize();
 
-  const { setContainerWidth, setContainerHeight, setWorkbenchVisible, setPage } = usePageStore();
+  const { setContainerWidth, setContainerHeight, setWorkbenchVisible, setPage, setVinesIFrameVisible } = usePageStore();
   useEffect(() => {
     setContainerWidth(width);
     setContainerHeight(height);
     setWorkbenchVisible(false);
+    setVinesIFrameVisible(true);
   }, [width, height]);
 
   useEffect(() => {

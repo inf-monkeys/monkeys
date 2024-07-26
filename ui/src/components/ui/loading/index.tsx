@@ -71,7 +71,7 @@ export const VinesLoading = forwardRef<Omit<HTMLDivElement, 'value'>, IVinesLoad
         <svg
           viewBox="0 0 32 32"
           fill="none"
-          className="animate-spinner-ease-spin relative z-0 size-12 overflow-hidden"
+          className="relative z-0 size-12 animate-spinner-ease-spin overflow-hidden"
           strokeWidth={strokeWidth}
         >
           <circle

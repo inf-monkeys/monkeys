@@ -24,7 +24,7 @@ export const IframeHeader: React.FC<IIframeHeaderProps> = ({ historyVisible, set
 
   return (
     <>
-      <header className="flex items-center justify-between px-6 py-4">
+      <header className="flex items-center justify-between p-4">
         <div className="flex items-center gap-2.5">
           <VinesIcon size="sm">{workflow?.iconUrl || 'emoji:🍀:#ceefc5'}</VinesIcon>
           <div className="flex flex-col gap-0.5">
@@ -51,7 +51,7 @@ export const IframeHeader: React.FC<IIframeHeaderProps> = ({ historyVisible, set
           </Popover>
         </div>
       </header>
-      <div className="px-6">
+      <div className="px-4">
         <Separator orientation="horizontal" />
       </div>
     </>
