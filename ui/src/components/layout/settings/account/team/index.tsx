@@ -8,7 +8,6 @@ import { toast } from 'sonner';
 
 import { updateTeam } from '@/apis/authz/team';
 import { ITeamUpdate } from '@/apis/authz/team/typings.ts';
-import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { ApplyManage } from '@/components/layout/settings/account/team/apply-manage';
 import { CreateTeam } from '@/components/layout/settings/account/team/create';
 import { DeleteTeam } from '@/components/layout/settings/account/team/delete';
@@ -19,7 +18,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { VinesImageEditor } from '@/components/ui/image-editor';
 import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
-import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn } from '@/utils';
 
 interface ITeamProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -29,7 +27,7 @@ export const Team: React.FC<ITeamProps> = () => {
 
   const { mutate } = useSWRConfig();
   const { team } = useVinesTeam();
-  const [user] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
+  // const [user] = useLocalStorage<Partial<IVinesUser>>('vines-account', {});
 
   const handleUpdateTeam = (key: string, val: string) => {
     toast.promise(
@@ -49,7 +47,7 @@ export const Team: React.FC<ITeamProps> = () => {
     );
   };
 
-  const isOwner = user?.id === team?.ownerUserId;
+  const isOwner = true; // user?.id === team?.ownerUserId
   const teamName = team?.name || '团队';
   const teamDescription = team?.description || '暂无描述';
   const teamLogo = team?.iconUrl;
