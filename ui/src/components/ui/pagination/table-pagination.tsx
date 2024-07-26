@@ -98,59 +98,61 @@ export const TablePagination: React.FC<ITablePaginationProps> = ({
           </>
         )}
       </div>
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              disabled={paginationState.active === 1}
-              onClick={() => paginationState.previous()}
-              onMouseOver={
-                preloadHover && paginationState.active != 1
-                  ? (e) => {
-                      preloadHover(paginationState.active, e);
+      {!isLoadAll && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                disabled={paginationState.active === 1}
+                onClick={() => paginationState.previous()}
+                onMouseOver={
+                  preloadHover && paginationState.active != 1
+                    ? (e) => {
+                        preloadHover(paginationState.active, e);
+                      }
+                    : undefined
+                }
+              />
+            </PaginationItem>
+            {paginationState.range.map((item, index) =>
+              item === 'dots' ? (
+                <PaginationItem key={index}>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              ) : (
+                <PaginationItem key={index}>
+                  <PaginationLink
+                    isActive={item === paginationState.active}
+                    onClick={() => paginationState.setPage(item)}
+                    onMouseOver={
+                      preloadHover
+                        ? (e) => {
+                            preloadHover(item + 1, e);
+                          }
+                        : undefined
                     }
-                  : undefined
-              }
-            />
-          </PaginationItem>
-          {paginationState.range.map((item, index) =>
-            item === 'dots' ? (
-              <PaginationItem key={index}>
-                <PaginationEllipsis />
-              </PaginationItem>
-            ) : (
-              <PaginationItem key={index}>
-                <PaginationLink
-                  isActive={item === paginationState.active}
-                  onClick={() => paginationState.setPage(item)}
-                  onMouseOver={
-                    preloadHover
-                      ? (e) => {
-                          preloadHover(item + 1, e);
-                        }
-                      : undefined
-                  }
-                >
-                  {item}
-                </PaginationLink>
-              </PaginationItem>
-            ),
-          )}
-          <PaginationItem>
-            <PaginationNext
-              disabled={paginationState.active === total || total === 0}
-              onClick={() => paginationState.next()}
-              onMouseOver={
-                preloadHover && paginationState.active != total
-                  ? (e) => {
-                      preloadHover(paginationState.active + 2, e);
-                    }
-                  : undefined
-              }
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+                  >
+                    {item}
+                  </PaginationLink>
+                </PaginationItem>
+              ),
+            )}
+            <PaginationItem>
+              <PaginationNext
+                disabled={paginationState.active === total || total === 0}
+                onClick={() => paginationState.next()}
+                onMouseOver={
+                  preloadHover && paginationState.active != total
+                    ? (e) => {
+                        preloadHover(paginationState.active + 2, e);
+                      }
+                    : undefined
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
   );
 };

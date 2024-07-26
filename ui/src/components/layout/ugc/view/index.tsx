@@ -38,13 +38,14 @@ import { VinesFullLoading } from '@/components/ui/loading';
 import { TablePagination } from '@/components/ui/pagination/table-pagination.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-import { getI18nContent } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 
 interface IUgcViewProps<E extends object> {
   assetKey: string;
   assetName: string;
   assetType: AssetType;
   isLoadAll?: boolean;
+  showPagination?: boolean;
   isMarket?: boolean;
   useUgcFetcher: IListUgcItemsFnType<E>;
   preloadUgcFetcher?: IPreloadUgcItemsFnType<E>;
@@ -62,6 +63,7 @@ export const UgcView = <E extends object>({
   assetName,
   assetType,
   isLoadAll = false,
+  showPagination = true,
   isMarket = false,
   useUgcFetcher,
   preloadUgcFetcher,
@@ -136,7 +138,7 @@ export const UgcView = <E extends object>({
   const data = useMemo(() => {
     const result =
       rawData && _.isArray(rawData.data)
-        ? assetType === 'tools' && filter.cate
+        ? assetType === 'tools' && filter?.cate
           ? rawData.data.filter((l) =>
               filter.cate
                 ? (l as unknown as IAssetItem<IWorkflowTool>)?.categories?.includes(filter.cate as ToolCategory)
@@ -282,7 +284,13 @@ export const UgcView = <E extends object>({
             {(isLoading || isNull(displayMode)) && <VinesFullLoading motionKey={`vines-assets-${assetKey}-loading`} />}
           </AnimatePresence>
           <div className="flex flex-col">
-            <ScrollArea className="relative h-[calc(100vh-9.5rem)] w-full rounded-r-lg px-4 py-2" disabledOverflowMask>
+            <ScrollArea
+              className={cn(
+                'relative  w-full rounded-r-lg px-4 py-2',
+                showPagination ? 'h-[calc(100vh-9.5rem)]' : 'h-[calc(100vh-7.5rem)]',
+              )}
+              disabledOverflowMask
+            >
               {rows.length === 0 ? (
                 !isLoading && (
                   <motion.div
@@ -344,14 +352,16 @@ export const UgcView = <E extends object>({
                 </>
               )}
             </ScrollArea>
-            <TablePagination
-              className="py-0"
-              pagination={table.getState().pagination}
-              onPaginationChange={table.setPagination}
-              rowCount={table.getRowCount()}
-              preloadHover={handlePreload}
-              isLoadAll={isLoadAll}
-            />
+            {showPagination && (
+              <TablePagination
+                className="py-0"
+                pagination={table.getState().pagination}
+                onPaginationChange={table.setPagination}
+                rowCount={table.getRowCount()}
+                preloadHover={handlePreload}
+                isLoadAll={isLoadAll}
+              />
+            )}
           </div>
         </div>
       </div>
