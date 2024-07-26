@@ -18,6 +18,9 @@ export interface PageSlice {
   workbenchVisible: boolean;
   setWorkbenchVisible: (visible: boolean) => void;
 
+  vinesIFrameVisible: boolean;
+  setVinesIFrameVisible: (visible: boolean) => void;
+
   pageTitle: string;
 }
 
@@ -34,6 +37,9 @@ export const usePageStore = create<PageSlice>()(
 
     workbenchVisible: false,
     setWorkbenchVisible: (workbenchVisible) => set({ workbenchVisible }),
+
+    vinesIFrameVisible: false,
+    setVinesIFrameVisible: (vinesIFrameVisible) => set({ vinesIFrameVisible }),
 
     pageTitle: '',
   })),

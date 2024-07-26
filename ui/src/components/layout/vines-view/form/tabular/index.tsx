@@ -16,10 +16,10 @@ import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
 interface IVinesTabularProps extends React.ComponentPropsWithoutRef<'div'> {
-  setConfigVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setHistoryVisible: React.Dispatch<React.SetStateAction<boolean>>;
   isSmallFrame?: boolean;
   event$: EventEmitter<void>;
+  minimalGap?: boolean;
 }
 
 export const VinesTabular: React.FC<IVinesTabularProps> = ({
@@ -28,6 +28,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
   setHistoryVisible,
   isSmallFrame = false,
   event$,
+  minimalGap,
 }) => {
   const { mutate } = useSWRConfig();
   const { t } = useTranslation();
@@ -46,6 +47,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
     <div className={cn('flex flex-col pr-6', className)} style={style}>
       <div className="flex-1">
         <TabularRender
+          formClassName={cn(minimalGap && 'gap-0')}
           inputs={vines.workflowInput}
           height={containerHeight - 100 - (isSmallFrame ? 64 : 0)}
           onSubmit={(inputData) => {

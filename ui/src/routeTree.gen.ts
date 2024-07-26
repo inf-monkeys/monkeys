@@ -42,6 +42,7 @@ import { Route as TeamIdTableDataDatabaseIdIndexImport } from './pages/$teamId/t
 import { Route as TeamIdComfyuiComfyuiWorkflowIdIndexImport } from './pages/$teamId/comfyui/$comfyuiWorkflowId/index'
 import { Route as TeamIdActionToolsActionToolNameIndexImport } from './pages/$teamId/action-tools/$actionToolName/index'
 import { Route as TeamIdWorkspaceWorkflowIdPageIdIndexImport } from './pages/$teamId/workspace/$workflowId/$pageId/index'
+import { Route as TeamIdWorkspaceWorkflowIdPageIdViewIframeImport } from './pages/$teamId/workspace/$workflowId/$pageId/view-iframe'
 
 // Create/Update Routes
 
@@ -209,6 +210,12 @@ const TeamIdWorkspaceWorkflowIdPageIdIndexRoute =
     getParentRoute: () => rootRoute,
   } as any)
 
+const TeamIdWorkspaceWorkflowIdPageIdViewIframeRoute =
+  TeamIdWorkspaceWorkflowIdPageIdViewIframeImport.update({
+    path: '/$teamId/workspace/$workflowId/$pageId/view-iframe',
+    getParentRoute: () => rootRoute,
+  } as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -333,6 +340,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdIndexImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/workspace/$workflowId/$pageId/view-iframe': {
+      preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdPageIdViewIframeImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/workspace/$workflowId/$pageId/': {
       preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdPageIdIndexImport
       parentRoute: typeof rootRoute
@@ -373,6 +384,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdTextDataTextIdIndexRoute,
   TeamIdTextModelsLlmModelIdIndexRoute,
   TeamIdWorkspaceWorkflowIdIndexRoute,
+  TeamIdWorkspaceWorkflowIdPageIdViewIframeRoute,
   TeamIdWorkspaceWorkflowIdPageIdIndexRoute,
 ])
 

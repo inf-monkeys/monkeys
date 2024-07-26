@@ -64,7 +64,9 @@ export const ViewGuard = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
             <motion.div
               className="vines-center absolute left-0 top-0 z-[100] flex size-full backdrop-blur"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: { delay: 0.25 } }}
+              animate={{ opacity: 1, transition: { delay: 0.42 } }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
             >
               {loading ? (
                 <VinesLoading />

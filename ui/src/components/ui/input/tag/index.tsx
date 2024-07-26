@@ -66,7 +66,7 @@ export const TagInput = forwardRef<HTMLInputElement, ITagInputProps>(
         ))}
         <Input
           ref={inputRef}
-          className="peer h-auto w-auto flex-1 rounded-none border-none p-0 focus-visible:ring-transparent"
+          className="peer h-auto w-auto flex-1 rounded-none border-none bg-transparent p-0 ring-transparent ring-offset-transparent focus-visible:ring-transparent"
           value={inputValue}
           onChange={setInputValue}
           placeholder={placeholder}

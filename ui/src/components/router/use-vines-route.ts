@@ -19,7 +19,7 @@ export const useVinesRoute = () => {
   // 之后再考虑是否改为开头匹配 vines-
   const isUseOutside = !routeIds;
   const isUseWorkSpace = routeAppId === 'workspace';
-  const isUseVinesCore = VINES_IFRAME_PAGE_IDS.includes(params?.['pageId']);
+  const isUseVinesCore = VINES_IFRAME_PAGE_IDS.includes(params?.['pageId']) || routeIds?.[4] === 'view-iframe';
 
   window['vinesRoute'] = [routeAppId || 'main', params?.['teamId'], params?.['workflowId']];
 

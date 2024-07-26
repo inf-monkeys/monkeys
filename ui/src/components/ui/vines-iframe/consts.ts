@@ -21,3 +21,5 @@ export const VINES_VIEW_ID_MAPPER: Record<string, string> = {
 };
 
 export const VINES_IFRAME_PAGE_IDS = Object.keys(VINES_VIEW_ID_MAPPER).concat(Object.values(VINES_VIEW_ID_MAPPER));
+
+export const VINES_IFRAME_PAGE_TYPES = Object.keys(IFRAME_MAP);
