@@ -145,7 +145,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
             {assetType === 'tools' && !isMarket ? (
               <div className="flex gap-3">
                 <span>{t('common.utils.all')}</span>
-                <span>( {toolsData?.total} )</span>
+                <span>({toolsData?.total})</span>
               </div>
             ) : (
               <span>{t('common.utils.all')}</span>
@@ -178,14 +178,14 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
 
                               <div className="flex gap-3 !font-normal">
                                 <span>{rootLabel}</span>
-                                <span>( {toolsData?.[rootName]['total']} )</span>
+                                <span>({toolsData?.[rootName]['total']})</span>
                               </div>
                             </div>
                             <ChevronRightIcon className="chevron h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
                           </div>
                         </div>
                       </AccordionTrigger>
-                      <AccordionContent className="flex flex-col gap-2 first:mt-1">
+                      <AccordionContent className="flex flex-col gap-2 first:mt-2">
                         {Object.keys(categoriesMap).map((cateName) => {
                           const cateLabel = getI18nContent(categoriesMap[cateName]);
                           return (
@@ -201,7 +201,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                             >
                               <div className="&>span:font-normal flex w-full items-center gap-3 pl-[calc(1rem+20px+0.5rem)] pr-4 text-sm">
                                 <span>{cateLabel}</span>
-                                <span>( {toolsData?.[rootName][cateName]} )</span>
+                                <span>({toolsData?.[rootName][cateName]})</span>
                               </div>
                             </div>
                           );
