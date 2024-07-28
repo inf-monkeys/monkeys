@@ -1,6 +1,7 @@
 import { LlmModelEndpointType, config } from '@/common/config';
 import { LogLevel, logger } from '@/common/logger';
 import { maskString, replacerNoEscape } from '@/common/utils';
+import { getI18NValue } from '@/common/utils/i18n';
 import { LlmModelRepository } from '@/database/repositories/llm-model.repository';
 import { OneApiRepository } from '@/database/repositories/oneapi.respository';
 import { ToolsRepository } from '@/database/repositories/tools.repository';
@@ -238,14 +239,14 @@ export class LlmService {
       }
     }
 
-    function convertProperties(properties: any[]): any {
+    function convertProperties(properties: ToolProperty[]): any {
       const propertiesSchema: any = {};
       const requiredFields: string[] = [];
 
       properties.forEach((prop) => {
         propertiesSchema[prop.name] = {
           type: convertType(prop.type),
-          description: prop.description,
+          description: getI18NValue(prop.description),
         };
         if (prop.type === 'json' && prop.properties) {
           const nestedSchema = convertProperties(prop.properties);
@@ -277,7 +278,7 @@ export class LlmService {
     input.forEach((item) => {
       schema.properties[item.name] = {
         type: convertType(item.type),
-        description: item.description,
+        description: getI18NValue(item.description),
       };
       if (item.type === 'json' && item.properties) {
         const nestedSchema = convertProperties(item.properties);

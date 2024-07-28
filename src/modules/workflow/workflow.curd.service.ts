@@ -3,11 +3,12 @@ import { ListDto } from '@/common/dto/list.dto';
 import { logger } from '@/common/logger';
 import { generateDbId } from '@/common/utils';
 import { flatTasks } from '@/common/utils/conductor';
-import { getDisplayName } from '@/common/utils/i18n';
+import { getI18NValue } from '@/common/utils/i18n';
 import { extractAssetFromZip } from '@/common/utils/zip-asset';
 import { ValidationIssueType, WorkflowMetadataEntity, WorkflowOutputValue, WorkflowRateLimiter, WorkflowValidationIssue } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
 import { AssetsCommonRepository } from '@/database/repositories/assets-common.repository';
+import { UpdatePermissionsDto } from '@/modules/workflow/dto/req/update-permissions.dto';
 import { WorkflowTask } from '@inf-monkeys/conductor-javascript';
 import { AssetType, MonkeyTaskDefTypes, ToolProperty, ToolType } from '@inf-monkeys/monkeys';
 import { Injectable, NotFoundException } from '@nestjs/common';
@@ -18,7 +19,6 @@ import { WorkflowRepository } from '../../database/repositories/workflow.reposit
 import { ConductorService } from './conductor/conductor.service';
 import { CreateWorkflowData, CreateWorkflowOptions, WorkflowExportJson, WorkflowWithAssetsJson } from './interfaces';
 import { WorkflowValidateService } from './workflow.validate.service';
-import { UpdatePermissionsDto } from '@/modules/workflow/dto/req/update-permissions.dto';
 
 @Injectable()
 export class WorkflowCrudService {
@@ -371,8 +371,8 @@ export class WorkflowCrudService {
     const originalWorkflow = await this.workflowRepository.getWorkflowById(originalWorkflowId, originalWorkflowVersion);
     const workflowId = await this.createWorkflowDef(teamId, userId, {
       displayName: {
-        'zh-CN': getDisplayName(originalWorkflow.displayName, 'zh-CN') + ' - 副本',
-        'en-US': getDisplayName(originalWorkflow.displayName, 'en-US') + ' - Copy',
+        'zh-CN': getI18NValue(originalWorkflow.displayName, 'zh-CN') + ' - 副本',
+        'en-US': getI18NValue(originalWorkflow.displayName, 'en-US') + ' - Copy',
       },
       version: originalWorkflowVersion,
       tasks: originalWorkflow.tasks,
@@ -390,8 +390,8 @@ export class WorkflowCrudService {
         userId,
         {
           displayName: {
-            'zh-CN': getDisplayName(originalWorkflow.displayName, 'zh-CN') + ' - 副本',
-            'en-US': getDisplayName(originalWorkflow.displayName, 'en-US') + ' - Copy',
+            'zh-CN': getI18NValue(originalWorkflow.displayName, 'zh-CN') + ' - 副本',
+            'en-US': getI18NValue(originalWorkflow.displayName, 'en-US') + ' - Copy',
           },
           version: version,
           tasks: originalWorkflow.tasks,
