@@ -1,6 +1,6 @@
 import { I18nValue } from '@inf-monkeys/monkeys';
 
-export const getDisplayName = (displayName: I18nValue | string, defaultLocale: string = 'en-US') => {
+export const getI18NValue = (displayName: I18nValue | string, defaultLocale: string = 'en-US') => {
   if (!displayName) {
     return displayName;
   }
