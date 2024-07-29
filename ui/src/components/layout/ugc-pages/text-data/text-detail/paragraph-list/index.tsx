@@ -32,9 +32,11 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
   const [query, setQuery] = useState<string>('');
   const [metadata_filter, setMetadataFilter] = useState<IFullTextSearchParams['metadata_filter']>();
 
+  const size = 30;
+
   const { data, isLoading, mutate } = useSearchKnowledgeBase(
     textId,
-    { from, query, metadata_filter },
+    { from, query, metadata_filter, size },
     searchMode === 'vector',
   );
 
@@ -89,7 +91,7 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
             }}
           />
           <Button
-            className={cn('absolute right-2 -mx-2 scale-80', isQueryEmpty && '-mx-3')}
+            className={cn('scale-80 absolute right-2 -mx-2', isQueryEmpty && '-mx-3')}
             variant="outline"
             onClick={() => {
               if (isQueryEmpty) {
@@ -119,7 +121,7 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
         />
       </div>
       <InfiniteScrollingDataTable
-        className="h-3/5"
+        className="h-[calc(100vh-14rem)]"
         columns={columns}
         data={hits}
         loading={isLoading}
@@ -128,18 +130,20 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
             <tr>
               <td className="absolute w-full py-4 text-center">
                 {searchMode === 'fulltext' ? (
-                  <Button
-                    variant="outline"
-                    size="small"
-                    loading={isLoading}
-                    onClick={() => setFrom((prev) => prev + 30)}
-                  >
-                    {t('common.utils.load-more')}
-                  </Button>
+                  hits.length < size ? (
+                    <span>{t('common.utils.all-loaded')}</span>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="small"
+                      loading={isLoading}
+                      onClick={() => setFrom((prev) => prev + 30)}
+                    >
+                      {t('common.utils.load-more')}
+                    </Button>
+                  )
                 ) : (
-                  <Button variant="outline" size="small">
-                    {t('ugc-page.text-data.detail.tabs.segments.load-tip')}
-                  </Button>
+                  <span>{t('ugc-page.text-data.detail.tabs.segments.load-tip')}</span>
                 )}
               </td>
             </tr>
