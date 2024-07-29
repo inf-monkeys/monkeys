@@ -10,8 +10,8 @@ import { IPageType } from '@/apis/pages/typings.ts';
 import { TabMenu } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/menu';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId';
-import { cn } from '@/utils';
 import { usePageStore } from '@/store/usePageStore';
+import { cn } from '@/utils';
 
 const EMOJI2LUCIDE_MAPPER = {
   '🚀': 'square-function',
@@ -79,7 +79,7 @@ export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon,
     >
       <div className="flex h-full select-none items-center" {...listeners}>
         <p className="mr-2">
-          <VinesLucideIcon size={15} src={EMOJI2LUCIDE_MAPPER[icon] ?? icon} />
+          <VinesLucideIcon className="size-[15px]" size={15} src={EMOJI2LUCIDE_MAPPER[icon] ?? icon} />
         </p>
         <h1 className="whitespace-nowrap text-sm">{t([`workspace.wrapper.space.tabs.${displayName}`, displayName])}</h1>
         <AnimatePresence>
