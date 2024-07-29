@@ -36,8 +36,9 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const { isLatestWorkflowVersion, workflowId } = useFlowStore();
-  const { canvasMode } = useCanvasStore();
+  const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
+  const workflowId = useFlowStore((s) => s.workflowId);
+  const canvasMode = useCanvasStore((s) => s.canvasMode);
 
   const { vines } = useVinesFlow();
   const { data: workflow } = useGetWorkflow(workflowId, vines.version);
@@ -215,7 +216,7 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({
           readonly={disabled || !isLatestWorkflowVersion}
         />
         {editorError && (
-          <p className="pointer-events-none absolute bottom-7 left-8 flex items-center gap-2 text-xs text-danger opacity-80">
+          <p className="text-danger pointer-events-none absolute bottom-7 left-8 flex items-center gap-2 text-xs opacity-80">
             <Info size={14} />
             {editorError}
           </p>

@@ -12,7 +12,7 @@ interface IStartToolProps {}
 export const StartTool: React.FC<IStartToolProps> = () => {
   const { t } = useTranslation();
 
-  const { workflowId } = useFlowStore();
+  const workflowId = useFlowStore((s) => s.workflowId);
 
   const [open, setOpen] = useState(false);
 

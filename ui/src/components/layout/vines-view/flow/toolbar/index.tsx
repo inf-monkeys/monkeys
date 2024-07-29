@@ -36,10 +36,20 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
 
   const { updatePageData } = useVinesPage();
   const { vines } = useVinesFlow();
-  const { isLatestWorkflowVersion, workflowId } = useFlowStore();
-  const { canvasMode, isWorkflowRUNNING, setCanvasMode, setVisible } = useCanvasStore();
-  const { canvasDisabled, isCanvasMoving, setCanvasDisabled, setCanvasMoving, setIsUserInteraction } =
-    useCanvasInteractionStore();
+
+  const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
+  const workflowId = useFlowStore((s) => s.workflowId);
+
+  const canvasMode = useCanvasStore((s) => s.canvasMode);
+  const isWorkflowRUNNING = useCanvasStore((s) => s.isWorkflowRUNNING);
+  const setCanvasMode = useCanvasStore((s) => s.setCanvasMode);
+  const setVisible = useCanvasStore((s) => s.setVisible);
+
+  const canvasDisabled = useCanvasInteractionStore((s) => s.canvasDisabled);
+  const isCanvasMoving = useCanvasInteractionStore((s) => s.isCanvasMoving);
+  const setCanvasDisabled = useCanvasInteractionStore((s) => s.setCanvasDisabled);
+  const setCanvasMoving = useCanvasInteractionStore((s) => s.setCanvasMoving);
+  const setIsUserInteraction = useCanvasInteractionStore((s) => s.setIsUserInteraction);
 
   const [, setLocalRenderDirection] = useLocalStorage<string>('vines-ui-process-page-render-direction', 'false', false);
   const [, setLocalRenderType] = useLocalStorage<Record<string, IVinesFlowRenderType>>(

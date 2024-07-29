@@ -11,7 +11,8 @@ interface IComplicateFakeNodeProps {
 
 export const ComplicateFakeNode: React.FC<IComplicateFakeNodeProps> = ({ insertFromNodeId }) => {
   const { t } = useTranslation();
-  const { workflowId } = useFlowStore();
+
+  const workflowId = useFlowStore((s) => s.workflowId);
 
   const handleOnClick = () => {
     VinesEvent.emit('flow-select-nodes', {

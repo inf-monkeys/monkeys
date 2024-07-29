@@ -21,7 +21,8 @@ export const WorkspaceIFramePage: React.FC = () => {
 
   const { workflow, workflowId, page, pageId } = useVinesPage();
 
-  const { pageTitle, setVinesIFrameVisible } = usePageStore();
+  const pageTitle = usePageStore((s) => s.pageTitle);
+  const setVinesIFrameVisible = usePageStore((s) => s.setVinesIFrameVisible);
 
   useEffect(() => {
     if (!workflow) return;

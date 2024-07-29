@@ -23,8 +23,11 @@ interface IToolEditorProps extends React.ComponentPropsWithoutRef<'div'> {}
 export const ToolEditor: React.FC<IToolEditorProps> = () => {
   const { t } = useTranslation();
 
-  const { isLatestWorkflowVersion, workflowId } = useFlowStore();
-  const { disableDialogClose } = useCanvasStore();
+  const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
+  const workflowId = useFlowStore((s) => s.workflowId);
+
+  const disableDialogClose = useCanvasStore((s) => s.disableDialogClose);
+
   const { vines } = useVinesFlow();
 
   const [activeTab, setActiveTab] = useState('config');

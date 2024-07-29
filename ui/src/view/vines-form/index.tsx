@@ -11,7 +11,8 @@ import { cn } from '@/utils';
 interface IVinesFormProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const VinesForm: React.FC<IVinesFormProps> = () => {
-  const { workbenchVisible, vinesIFrameVisible } = usePageStore();
+  const workbenchVisible = usePageStore((s) => s.workbenchVisible);
+  const vinesIFrameVisible = usePageStore((s) => s.vinesIFrameVisible);
 
   const [historyVisible, setHistoryVisible] = useState(false);
 

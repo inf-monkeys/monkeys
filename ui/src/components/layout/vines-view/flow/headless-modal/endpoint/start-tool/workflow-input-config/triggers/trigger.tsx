@@ -37,7 +37,7 @@ export const Trigger: React.FC<ITriggerProps> = ({ trigger, workflowVersion, wor
 
   const { type, id, enabled } = trigger;
 
-  const { isLatestWorkflowVersion } = useFlowStore();
+  const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
 
   const { mutate } = useSWRConfig();
 

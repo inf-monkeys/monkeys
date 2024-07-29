@@ -25,9 +25,17 @@ import { VinesFlowEvents } from '@/view/vines-flow/events.tsx';
 interface IVinesFlowProps {}
 
 export const VinesFlow: React.FC<IVinesFlowProps> = () => {
-  const { workflowId } = useFlowStore();
-  const { containerWidth, containerHeight, page, workbenchVisible } = usePageStore();
-  const { canvasMode, visible, setVisible, setInitialScale } = useCanvasStore();
+  const workflowId = useFlowStore((s) => s.workflowId);
+
+  const containerWidth = usePageStore((s) => s.containerWidth);
+  const containerHeight = usePageStore((s) => s.containerHeight);
+  const page = usePageStore((s) => s.page);
+  const workbenchVisible = usePageStore((s) => s.workbenchVisible);
+
+  const canvasMode = useCanvasStore((s) => s.canvasMode);
+  const visible = useCanvasStore((s) => s.visible);
+  const setVisible = useCanvasStore((s) => s.setVisible);
+  const setInitialScale = useCanvasStore((s) => s.setInitialScale);
 
   const {
     vines,

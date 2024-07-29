@@ -16,7 +16,7 @@ interface IVinesAbstractPDBProps {
 }
 
 export const VinesAbstractPDB: React.FC<IVinesAbstractPDBProps> = ({ children, height }) => {
-  const { darkMode } = useAppStore();
+  const darkMode = useAppStore((s) => s.darkMode);
 
   const node = useRef<HTMLDivElement>(null);
 

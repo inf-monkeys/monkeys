@@ -18,7 +18,7 @@ export const SimplifyStartNodeExpand: React.FC<ISimplifyStartNodeExpandProps> = 
   const { data: triggerTypes } = useTriggerTypes();
   const { data: triggers } = useTriggers(vines.workflowId, vines.version);
 
-  const { canvasMode } = useCanvasStore();
+  const canvasMode = useCanvasStore((s) => s.canvasMode);
   const visible = canvasMode === CanvasStatus.EDIT;
 
   const trigger = triggers?.find(({ enabled }) => enabled);

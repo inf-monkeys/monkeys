@@ -16,7 +16,7 @@ interface IInsertVariableProps {
 export const InsertVariable: React.FC<IInsertVariableProps> = ({ insertVariablesFn }) => {
   const { t } = useTranslation();
 
-  const { workflowId } = useFlowStore();
+  const workflowId = useFlowStore((s) => s.workflowId);
 
   return (
     <Tooltip>

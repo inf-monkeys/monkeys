@@ -24,9 +24,10 @@ interface IContextMenuProps extends React.ComponentPropsWithoutRef<'div'> {}
 export const ContextMenu: React.FC<IContextMenuProps> = () => {
   const { t } = useTranslation();
 
-  const { isLatestWorkflowVersion, workflowId } = useFlowStore();
-  const { canvasMode } = useCanvasStore();
-  const { canvasDisabled } = useCanvasInteractionStore();
+  const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
+  const workflowId = useFlowStore((s) => s.workflowId);
+  const canvasMode = useCanvasStore((s) => s.canvasMode);
+  const canvasDisabled = useCanvasInteractionStore((s) => s.canvasDisabled);
 
   const [{ x, y }, setPosition] = useSetState({ x: 0, y: 0 });
   const [open, setOpen] = useState(false);

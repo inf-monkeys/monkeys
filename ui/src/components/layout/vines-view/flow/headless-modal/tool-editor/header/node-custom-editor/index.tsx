@@ -18,7 +18,8 @@ interface INodeCustomEditorProps {
 export const NodeCustomEditor: React.FC<INodeCustomEditorProps> = ({ node }) => {
   const { t } = useTranslation();
 
-  const { isLatestWorkflowVersion } = useFlowStore();
+  const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
+
   const { vines } = useVinesFlow();
 
   const nodeId = node?.id ?? '';

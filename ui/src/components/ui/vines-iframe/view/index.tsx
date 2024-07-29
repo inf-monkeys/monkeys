@@ -18,7 +18,7 @@ interface IVinesViewProps {
 }
 
 export function VinesView({ id, workflowId, pageId, type }: IVinesViewProps) {
-  const { setVisible } = useViewStore();
+  const setVisible = useViewStore((s) => s.setVisible);
 
   if (!((type ?? '') in IFRAME_MAP)) {
     return (
