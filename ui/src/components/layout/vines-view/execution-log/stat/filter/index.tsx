@@ -5,6 +5,7 @@ import { CalendarIcon } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { getDayEnd } from '@/components/layout/vines-view/execution-log/stat/utils.ts';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar.tsx';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
@@ -77,7 +78,7 @@ export const VinesLogViewStatFilter: React.FC<IVinesLogViewStatFilterProps> = ({
                           }}
                           onSelect={(selectedDate) => {
                             selectedDate?.from && field.onChange(selectedDate.from.getTime());
-                            selectedDate?.to && form.setValue('endTimestamp', selectedDate.to.getTime());
+                            selectedDate?.to && form.setValue('endTimestamp', getDayEnd(selectedDate.to).getTime());
                             handleSubmit();
                           }}
                           numberOfMonths={2}

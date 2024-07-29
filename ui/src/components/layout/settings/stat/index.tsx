@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { exportSearchWorkflowExecutionStats, useMutationSearchWorkflowExecutionStats } from '@/apis/workflow/execution';
 import { VinesLogViewStatChart } from '@/components/layout/vines-view/execution-log/stat/chart';
 import { VinesLogViewStatFilter } from '@/components/layout/vines-view/execution-log/stat/filter';
-import { getDayBegin, getRelativeDate } from '@/components/layout/vines-view/execution-log/stat/utils.ts';
+import { getDayBegin, getDayEnd, getRelativeDate } from '@/components/layout/vines-view/execution-log/stat/utils.ts';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
@@ -37,10 +37,11 @@ export const Stat: React.FC<IStatProps> = () => {
   const now = new Date();
 
   const today = getDayBegin(now);
+  const todayEnd = getDayEnd(now);
 
   const defaultValues = {
     startTimestamp: getRelativeDate(today, -7).getTime(),
-    endTimestamp: today.getTime(),
+    endTimestamp: todayEnd.getTime(),
   };
 
   const form = useForm<IVinesSearchWorkflowExecutionStatParams>({
