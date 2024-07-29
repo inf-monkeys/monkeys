@@ -22,11 +22,13 @@ export const VinesLogViewStatChartCard: React.FC<IVinesLogViewStatChartCardProps
   chartConfig,
   countCalcType = 'sum',
 }) => {
-  const count =
+  const count: number =
     countCalcType === 'avg'
       ? searchWorkflowExecutionStatData
           .map((d) => d[Object.keys(chartConfig)[0]])
-          .reduce((accumulator, currentValue) => accumulator + currentValue, 0) / searchWorkflowExecutionStatData.length
+          .reduce((accumulator, currentValue) => accumulator + currentValue, 0) /
+        (searchWorkflowExecutionStatData.map((d) => d[Object.keys(chartConfig)[0]]).filter((data) => data != 0)
+          .length ?? 1)
       : searchWorkflowExecutionStatData
           .map((d) => d[Object.keys(chartConfig)[0]])
           .reduce((accumulator, currentValue) => accumulator + currentValue, 0);
@@ -37,7 +39,7 @@ export const VinesLogViewStatChartCard: React.FC<IVinesLogViewStatChartCardProps
         <CardTitle>{chartConfig[Object.keys(chartConfig)[0]]['label']}</CardTitle>
         <CardDescription>{`${searchWorkflowExecutionStatData[0]['date']} - ${searchWorkflowExecutionStatData[searchWorkflowExecutionStatData.length - 1]['date']}`}</CardDescription>
         <span className={cn('flex items-end gap-1', count == 0 && '[&>*]:text-opacity-20')}>
-          <span className="text-4xl">{count}</span>
+          <span className="text-4xl">{Number.isInteger(count) ? count : count.toFixed(2)}</span>
           {chartConfig[Object.keys(chartConfig)[0]]['unit'] && (
             <span>{chartConfig[Object.keys(chartConfig)[0]]['unit']}</span>
           )}
