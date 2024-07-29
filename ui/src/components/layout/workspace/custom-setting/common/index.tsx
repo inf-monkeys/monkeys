@@ -2,7 +2,7 @@ import React from 'react';
 
 import { ApiKey } from '@/components/layout/settings/api-key';
 import { PagePermissions } from '@/components/layout/workspace/custom-setting/common/page-permissions.tsx';
-import { IFrameEmbed } from '@/components/layout/workspace/custom-setting/common/iframe-embed.tsx';
+import { IFrameEmbed } from '@/components/layout-wrapper/workspace/space/sidebar/footer/share/iframe-embed.tsx';
 
 interface ICommonSettingProps extends React.ComponentPropsWithoutRef<'div'> {}
 
