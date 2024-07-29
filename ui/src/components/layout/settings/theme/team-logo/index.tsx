@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { useSWRConfig } from 'swr';
 
@@ -27,18 +27,14 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
   const teamName = team?.name || t('common.utils.team');
   const enableTeamLogo = get(team, 'customTheme.enableTeamLogo', void 0);
 
-  useEffect(() => {
-    if (!selected && enableTeamLogo !== void 0) {
-      setSelected(enableTeamLogo ? 'team' : 'system');
-    } else {
-      setSelected('system');
-    }
+  useMemo(() => {
+    setSelected(enableTeamLogo ? 'team' : 'system');
   }, [enableTeamLogo]);
 
   const handleUpdate = (val: string) => {
     setSelected(val);
     if (!team) {
-      toast.error('团队不存在');
+      toast.error(t('common.toast.team-not-found'));
       return;
     }
     set(team, 'customTheme.enableTeamLogo', val === 'team');
@@ -85,7 +81,7 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
             <AvatarFallback className="rounded-none p-2 text-xs">{teamName?.substring(0, 2)}</AvatarFallback>
           </Avatar>
         </VinesImageEditor>
-        <Tabs value={selected} onValueChange={handleUpdate} defaultValue="system">
+        <Tabs value={selected} onValueChange={handleUpdate}>
           <TabsList>
             <TabsTrigger value="team">{t('settings.theme.team-logo.options.team')}</TabsTrigger>
             <TabsTrigger value="system">{t('settings.theme.team-logo.options.system')}</TabsTrigger>
