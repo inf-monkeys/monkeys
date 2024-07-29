@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React from 'react';
 
 import {
   closestCenter,
@@ -10,21 +10,20 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { restrictToFirstScrollableAncestor, restrictToHorizontalAxis } from '@dnd-kit/modifiers';
+import { restrictToFirstScrollableAncestor, restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import {
   arrayMove,
-  horizontalListSortingStrategy,
   SortableContext,
   sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { debounce, get } from 'lodash';
+import { get } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { IPageType } from '@/apis/pages/typings.ts';
-import { Expand } from '@/components/layout-wrapper/workspace/space/tabs/expand';
-import { SpaceTab } from '@/components/layout-wrapper/workspace/space/tabs/tab.tsx';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
-import { cn } from '@/utils';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { SpaceTab } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab.tsx';
 
 interface ITabsProps {}
 
@@ -50,30 +49,6 @@ export const SpaceTabs: React.FC<ITabsProps> = () => {
     }),
   );
 
-  const headerNode = useRef<HTMLDivElement>(null);
-  const tabsNode = useRef<HTMLDivElement>(null);
-  const [scrollToolVisible, setScrollToolVisible] = useState(false);
-
-  const handleVisibilityChange = useCallback(
-    debounce(() => {
-      const tabsEl = tabsNode.current;
-      const headerEl = headerNode.current;
-      setScrollToolVisible((tabsEl?.offsetWidth ?? 0) > (headerEl?.offsetWidth ?? 0) - 120);
-    }, 100),
-    [],
-  );
-
-  useLayoutEffect(() => {
-    window.addEventListener('resize', handleVisibilityChange);
-    return () => {
-      window.removeEventListener('resize', handleVisibilityChange);
-    };
-  }, [tabsNode]);
-
-  useEffect(() => {
-    handleVisibilityChange();
-  }, [pages]);
-
   const pageIds = pages?.map(({ id }) => id) ?? [];
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -97,15 +72,15 @@ export const SpaceTabs: React.FC<ITabsProps> = () => {
   const activeIndex = pages?.findIndex(({ id }) => id === pageId) ?? 0;
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      modifiers={[restrictToHorizontalAxis, restrictToFirstScrollableAncestor]}
-      onDragEnd={handleDragEnd}
-    >
-      <header ref={headerNode} className="relative z-20 mx-3 mt-2 flex h-10 overflow-x-clip scroll-smooth">
-        <div ref={tabsNode} className={cn('flex overflow-hidden', scrollToolVisible && 'pr-32')}>
-          <SortableContext items={pageIds} strategy={horizontalListSortingStrategy} disabled={disableDND}>
+    <ScrollArea className="h-full flex-1 overflow-y-scroll" scrollBarDisabled>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        modifiers={[restrictToVerticalAxis, restrictToFirstScrollableAncestor]}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="relative z-20 flex w-full flex-col gap-2 scroll-smooth">
+          <SortableContext items={pageIds} strategy={verticalListSortingStrategy} disabled={disableDND}>
             {pages?.map(({ id, displayName, instance, customOptions }, index) => (
               <SpaceTab
                 key={id}
@@ -121,8 +96,7 @@ export const SpaceTabs: React.FC<ITabsProps> = () => {
             ))}
           </SortableContext>
         </div>
-        <Expand visible={scrollToolVisible} tabsNode={tabsNode} />
-      </header>
-    </DndContext>
+      </DndContext>
+    </ScrollArea>
   );
 };
