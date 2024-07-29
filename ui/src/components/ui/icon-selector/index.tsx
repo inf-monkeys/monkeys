@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/utils';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 interface IVinesIconSelectorProps extends Omit<React.ComponentPropsWithoutRef<'div'>, 'onChange'> {
   emojiLink?: string;
@@ -21,6 +22,7 @@ const colors = ['#434343', '#f2c1be', '#fadebb', '#fef8a3', '#ceefc5', '#d1dcfb'
 export const VinesIconSelector: React.FC<IVinesIconSelectorProps> = memo(
   ({ children, onChange, emojiLink, onFinished, onlyEmoji = false }) => {
     const { t } = useTranslation();
+    const [theme] = useLocalStorage<string>('vines-ui-dark-mode', 'auto', false);
 
     const [selectedColor, setSelectedColor] = useState(colors[4]);
     const [selectedEmoji, setSelectedEmoji] = useState('🍀');
@@ -64,6 +66,7 @@ export const VinesIconSelector: React.FC<IVinesIconSelectorProps> = memo(
             }}
             locale="zh"
             previewPosition="none"
+            theme={theme}
           />
           <div className="flex h-20 w-full items-center justify-between gap-2 px-5 pb-1">
             <div className={onlyEmoji ? 'hidden' : ''}>
