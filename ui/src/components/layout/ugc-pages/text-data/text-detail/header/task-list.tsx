@@ -5,12 +5,12 @@ import { useTranslation } from 'react-i18next';
 
 import { useKnowledgeBaseTasks } from '@/apis/vector';
 import { KnowledgebaseTaskStatus } from '@/apis/vector/typings';
-import { ActiveTask } from '@/components/layout/ugc-pages/text-data/text-detail/header/task-active.tsx';
 import { Card } from '@/components/ui/card.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ActiveTask } from '@/components/layout/ugc-pages/text-data/text-detail/header/task-active.tsx';
 
 interface ITaskListProps {
   knowledgeBaseId: string;
@@ -48,7 +48,7 @@ export const TaskList: React.FC<ITaskListProps> = ({ knowledgeBaseId }) => {
           <TooltipTrigger asChild>
             <Card className="flex h-8 cursor-pointer items-center justify-center gap-2 px-2 py-1 hover:bg-accent hover:text-accent-foreground">
               {isLoading ? (
-                <VinesLoading />
+                <VinesLoading size="sm" />
               ) : isActiveTask ? (
                 <ActiveTask knowledgeBaseId={knowledgeBaseId} taskId={isActiveTask.id} />
               ) : (
@@ -70,7 +70,7 @@ export const TaskList: React.FC<ITaskListProps> = ({ knowledgeBaseId }) => {
                     {currentProgress === 100 ? (
                       <CheckCircle size={28} />
                     ) : (
-                      <VinesLoading color={getColor(task.status)} value={currentProgress} />
+                      <VinesLoading color={getColor(task.status)} value={currentProgress} size="md" />
                     )}
                     <div className="flex flex-col">
                       <h1 className="text-sm">{task.id}</h1>

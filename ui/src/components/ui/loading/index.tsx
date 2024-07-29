@@ -17,12 +17,13 @@ interface IVinesLoadingProps {
   minValue?: number;
   className?: string;
   immediately?: boolean;
+  size?: 'sm' | 'md' | 'lg';
 }
 
 const CENTER = 16;
 
 export const VinesLoading = forwardRef<Omit<HTMLDivElement, 'value'>, IVinesLoadingProps>(
-  ({ strokeWidth = 3, value, minValue = 0, maxValue = 100, className, color, immediately }, ref) => {
+  ({ strokeWidth = 3, value, minValue = 0, maxValue = 100, className, color, immediately, size = 'lg' }, ref) => {
     const { t } = useTranslation();
 
     const [, isMounted] = useIsMounted({
@@ -71,8 +72,14 @@ export const VinesLoading = forwardRef<Omit<HTMLDivElement, 'value'>, IVinesLoad
         <svg
           viewBox="0 0 32 32"
           fill="none"
-          className="relative z-0 size-12 animate-spinner-ease-spin overflow-hidden"
+          className={cn(
+            'relative z-0 animate-spinner-ease-spin overflow-hidden',
+            size === 'md' && 'size-8',
+            size === 'sm' && 'size-6',
+            size === 'lg' && 'size-12',
+          )}
           strokeWidth={strokeWidth}
+          preserveAspectRatio="xMidYMid meet"
         >
           <circle
             cx={CENTER}

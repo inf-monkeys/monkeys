@@ -38,7 +38,7 @@ export const ActiveTask: React.FC<IActiveTaskProps> = ({ knowledgeBaseId, taskId
 
   return (
     <>
-      <VinesLoading value={(data?.progress ?? 0) * 100} />
+      <VinesLoading value={(data?.progress ?? 0) * 100} size="sm" />
       <span className="text-xs">{data?.latestMessage}</span>
     </>
   );
