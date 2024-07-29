@@ -24,7 +24,7 @@ interface ITextDetailHeaderProps {
 export const TextDetailHeader: React.FC<ITextDetailHeaderProps> = ({ textId }) => {
   const { t } = useTranslation();
   return (
-    <header className="flex w-full items-center justify-end gap-4 px-4 py-2">
+    <header className="flex w-full items-center justify-end gap-2 pb-2">
       <TaskList knowledgeBaseId={textId} />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

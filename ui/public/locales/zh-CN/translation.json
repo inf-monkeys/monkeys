@@ -45,6 +45,7 @@
       "ascend": "升序",
       "descend": "降序",
       "load-more": "加载更多",
+      "all-loaded": "已全部加载",
       "add": "添加",
       "upload": "上传",
       "click-to-copy": "点击复制",
@@ -1727,6 +1728,28 @@
                 "placeholder": "请选择数据库类型"
               }
             }
+          }
+        }
+      },
+      "detail": {
+        "title": "表格数据",
+        "header": {
+          "refresh": {
+            "tooltip": "刷新数据"
+          },
+          "import": {
+            "label": "导入数据"
+          },
+          "create": {
+            "label": "创建表"
+          }
+        },
+        "data": {
+          "search": {
+            "placeholder": "输入关键词基于当前已加载的数据搜索"
+          },
+          "delete": {
+            "label": "删除表格"
           }
         }
       }

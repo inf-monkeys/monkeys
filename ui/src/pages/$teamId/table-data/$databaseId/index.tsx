@@ -59,14 +59,13 @@ const TableDataDetail: React.FC = () => {
             transition: { duration: 0.2 },
           }}
         >
-          <header className="flex items-center gap-4">
+          <header className="flex items-center gap-2">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   icon={<Undo2 />}
                   variant="outline"
                   size="small"
-                  className="-m-1 -ml-0.5 -mr-2 scale-85"
                   onClick={() => {
                     history.back();
                   }}
@@ -74,8 +73,8 @@ const TableDataDetail: React.FC = () => {
               </TooltipTrigger>
               <TooltipContent>{t('common.utils.back')}</TooltipContent>
             </Tooltip>
-            <h1 className="line-clamp-1 text-2xl font-bold">
-              {displayName ? getI18nContent(displayName) : '表格数据'}
+            <h1 className="line-clamp-1 text-base font-bold">
+              {displayName ? getI18nContent(displayName) : t('ugc-page.table-data.detail.title')}
             </h1>
           </header>
           <TabsList className="!h-auto bg-transparent">
