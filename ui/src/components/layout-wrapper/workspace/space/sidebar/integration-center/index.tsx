@@ -5,11 +5,10 @@ import { useTranslation } from 'react-i18next';
 
 import { useApiKeyList } from '@/apis/api-keys/api-key.ts';
 import { IApiKeyStatus } from '@/apis/api-keys/typings.ts';
-import { curl } from '@/components/layout-wrapper/workspace/header/expand/integration-center/utils.ts';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { cn } from '@/utils';
 
 // @ts-ignore
@@ -18,6 +17,7 @@ import ChatCompletionsTemplateZH from './templates/chat-completions.mdx';
 import CompletionsTemplateZH from './templates/completions.mdx';
 // @ts-ignore
 import ExecuteWorkflowTemplateZH from './templates/execute-workflow.mdx';
+import { curl } from '@/components/layout-wrapper/workspace/space/sidebar/integration-center/utils.ts';
 
 interface IIntegrationCenterProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -58,10 +58,10 @@ export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
           url: `${urlPrefix}/api/workflow/executions/${workflowId}/start-sync`,
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${apikey}`,
+            Authorization: `Bearer ${apikey}`
           },
-          body: data,
-        }),
+          body: data
+        })
       );
       setExecuteWorkflowCurl(
         curl({
@@ -94,7 +94,7 @@ export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="-mx-4 scale-90" icon={<Blocks />}>
+        <Button variant="borderless" icon={<Blocks />} size="small" className="justify-start [&_svg]:stroke-gold-12 hover:bg-mauve-2">
           {t('workspace.wrapper.integration-center.title')}
         </Button>
       </DialogTrigger>
