@@ -45,6 +45,7 @@
       "ascend": "Ascend",
       "descend": "Descend",
       "load-more": "Load More",
+      "all-loaded": "All Loaded",
       "add": "Add",
       "upload": "Upload",
       "click-to-copy": "Click to copy",
@@ -1741,6 +1742,28 @@
                 "placeholder": "Select a database type"
               }
             }
+          }
+        }
+      },
+      "detail": {
+        "title": "Table Data",
+        "header": {
+          "refresh": {
+            "tooltip": "Refresh Data"
+          },
+          "import": {
+            "label": "Import Data"
+          },
+          "create": {
+            "label": "Create Table"
+          }
+        },
+        "data": {
+          "search": {
+            "placeholder": "Enter keywords to search based on currently loaded data"
+          },
+          "delete": {
+            "label": "Delete Table"
           }
         }
       }

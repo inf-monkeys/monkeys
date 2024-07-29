@@ -22,6 +22,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { InfiniteScrollingDataTable } from '@/components/ui/data-table/infinite.tsx';
 import { Input } from '@/components/ui/input';
+import { useTranslation } from 'react-i18next';
+import { getI18nContent } from '@/utils';
 
 interface ITableDatabaseProps {
   database: ITableData;
@@ -29,6 +31,7 @@ interface ITableDatabaseProps {
 }
 
 export const TableDatabase: React.FC<ITableDatabaseProps> = ({ database, tableId }) => {
+  const { t } = useTranslation();
   const { mutate } = useSWRConfig();
   const isExternalDatabase = database?.createType === SqlKnowledgeBaseCreateType.external;
   const databaseId = database?.uuid;
@@ -41,6 +44,8 @@ export const TableDatabase: React.FC<ITableDatabaseProps> = ({ database, tableId
   const [dataList, setDataList] = useState<IDatabaseData[]>([]);
 
   const [query, setQuery] = useState<string>('');
+
+  const displayName = database.displayName;
 
   const isEmpty = !data?.length;
   useEffect(() => {
@@ -81,7 +86,11 @@ export const TableDatabase: React.FC<ITableDatabaseProps> = ({ database, tableId
   return (
     <>
       <div className="mb-4 flex items-center gap-2">
-        <Input placeholder="输入关键词基于当前已加载的数据搜索" value={query} onChange={setQuery} />
+        <Input
+          placeholder={t('ugc-page.table-data.detail.data.search.placeholder')}
+          value={query}
+          onChange={setQuery}
+        />
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button
@@ -90,17 +99,26 @@ export const TableDatabase: React.FC<ITableDatabaseProps> = ({ database, tableId
               variant="outline"
               icon={<Trash2 />}
             >
-              删除表格
+              {t('ugc-page.table-data.detail.data.delete.label')}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>确定要删除该表数据吗？</AlertDialogTitle>
-              <AlertDialogDescription>删除后，该表数据将无法恢复，其中的数据也将被永久删除。</AlertDialogDescription>
+              <AlertDialogTitle>
+                {t('common.dialog.delete-confirm.title', {
+                  type: t('common.type.table-data'),
+                })}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {t('common.dialog.delete-confirm.content', {
+                  type: t('common.type.table-data'),
+                  name: displayName ? getI18nContent(displayName) : t('common.utils.unknown'),
+                })}
+              </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>取消</AlertDialogCancel>
-              <AlertDialogAction onClick={handelDelete}>删除</AlertDialogAction>
+              <AlertDialogCancel>{t('common.utils.cancel')}</AlertDialogCancel>
+              <AlertDialogAction onClick={handelDelete}>{t('common.utils.confirm')}</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -127,7 +145,7 @@ export const TableDatabase: React.FC<ITableDatabaseProps> = ({ database, tableId
                   loading={isLoading}
                   onClick={() => setPage((prev) => prev + 1)}
                 >
-                  {isEmpty && !isLoading ? '数据已全部加载' : '加载更多'}
+                  {isEmpty && !isLoading ? t('common.utils.all-loaded') : t('common.utils.load-more')}
                 </Button>
               </td>
             </tr>
