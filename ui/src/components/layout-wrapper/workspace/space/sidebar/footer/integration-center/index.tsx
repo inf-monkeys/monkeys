@@ -17,7 +17,7 @@ import ChatCompletionsTemplateZH from './templates/chat-completions.mdx';
 import CompletionsTemplateZH from './templates/completions.mdx';
 // @ts-ignore
 import ExecuteWorkflowTemplateZH from './templates/execute-workflow.mdx';
-import { curl } from '@/components/layout-wrapper/workspace/space/sidebar/integration-center/utils.ts';
+import { curl } from '@/components/layout-wrapper/workspace/space/sidebar/footer/integration-center/utils.ts';
 
 interface IIntegrationCenterProps extends React.ComponentPropsWithoutRef<'div'> {}
 
