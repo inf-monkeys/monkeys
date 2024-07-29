@@ -7,9 +7,17 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
 import { IPageType } from '@/apis/pages/typings.ts';
+import { TabMenu } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/menu';
+import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId';
 import { cn } from '@/utils';
-import { TabMenu } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/menu';
+
+const EMOJI2LUCIDE_MAPPER = {
+  '🚀': 'square-function',
+  '📃': 'square-kanban',
+  '📷': 'square-menu',
+  '💬': 'square-play',
+};
 
 interface ISpaceTabProps extends React.ComponentPropsWithoutRef<'div'> {
   id: string;
@@ -67,10 +75,10 @@ export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon,
       {...attributes}
     >
       <div className="flex h-full select-none items-center" {...listeners}>
-        <p className="mr-2">{icon}</p>
-        <h1 className="whitespace-nowrap text-sm">
-          {t([`workspace.wrapper.space.tabs.${displayName}`, displayName])}
-        </h1>
+        <p className="mr-2">
+          <VinesLucideIcon size={15} src={EMOJI2LUCIDE_MAPPER[icon] ?? EMOJI2LUCIDE_MAPPER} />
+        </p>
+        <h1 className="whitespace-nowrap text-sm">{t([`workspace.wrapper.space.tabs.${displayName}`, displayName])}</h1>
         <AnimatePresence>
           {isActive && (
             <motion.div
