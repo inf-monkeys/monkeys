@@ -21,14 +21,17 @@ import { get } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { IPageType } from '@/apis/pages/typings.ts';
+import { SpaceTab } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab.tsx';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { SpaceTab } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab.tsx';
+import { usePageStore } from '@/store/usePageStore';
 
 interface ITabsProps {}
 
 export const SpaceTabs: React.FC<ITabsProps> = () => {
   const { t } = useTranslation();
+
+  const apiDocumentVisible = usePageStore((s) => s.apiDocumentVisible);
 
   const { pages, setPages, page, pageId } = useVinesPage();
 
@@ -68,8 +71,7 @@ export const SpaceTabs: React.FC<ITabsProps> = () => {
 
   const pageLength = pages?.length ?? 0;
   const disableDND = pageLength === 1;
-  const pageNavLastIndex = pageLength - 1;
-  const activeIndex = pages?.findIndex(({ id }) => id === pageId) ?? 0;
+  const activeIndex = apiDocumentVisible ? -1 : pages?.findIndex(({ id }) => id === pageId) ?? 0;
 
   return (
     <ScrollArea className="h-full flex-1 overflow-y-scroll" scrollBarDisabled>
@@ -79,7 +81,7 @@ export const SpaceTabs: React.FC<ITabsProps> = () => {
         modifiers={[restrictToVerticalAxis, restrictToFirstScrollableAncestor]}
         onDragEnd={handleDragEnd}
       >
-        <div className="relative z-20 flex w-full flex-col gap-2 scroll-smooth">
+        <div className="relative z-20 flex w-full flex-col gap-1 scroll-smooth">
           <SortableContext items={pageIds} strategy={verticalListSortingStrategy} disabled={disableDND}>
             {pages?.map(({ id, displayName, instance, customOptions }, index) => (
               <SpaceTab
@@ -88,7 +90,6 @@ export const SpaceTabs: React.FC<ITabsProps> = () => {
                 icon={get(customOptions, 'icon', instance?.icon ?? '⚠️')}
                 displayName={displayName ?? t('workspace.wrapper.space.unknown-view')}
                 activeIndex={activeIndex}
-                isLastItem={pageNavLastIndex !== index}
                 index={index}
                 pages={pages}
                 page={page}

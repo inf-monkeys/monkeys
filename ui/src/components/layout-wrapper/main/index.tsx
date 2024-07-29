@@ -16,7 +16,7 @@ export const MainWrapper: React.FC<IProps> = ({ layoutId }) => {
     <ViewGuard className="flex w-screen bg-slate-3">
       <Sidebar />
       <AnimatePresence mode="wait">
-        <div className="m-4 ml-0 flex max-h-[calc(100vh-2.2rem)] w-full max-w-[calc(100vw-15rem)] flex-1 rounded-lg border bg-slate-1 p-6 shadow-sm">
+        <div className="m-4 ml-0 flex h-[calc(100vh-2rem)] w-full max-w-[calc(100vw-15rem)] flex-1 rounded-md border bg-slate-1 p-6 shadow-sm">
           <motion.div
             key={layoutId}
             className="relative size-full"

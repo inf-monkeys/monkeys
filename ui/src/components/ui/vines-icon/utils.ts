@@ -1,5 +1,7 @@
 import chroma from 'chroma-js';
 
+import { emojiRegex } from '@/utils/emoji-regex.ts';
+
 const morandiColorMapper: Record<string, string> = {
   '#c15048': chroma.mix('white', '#c15048', 1, 'hsv').hex(),
   '#e58c3a': '#fadebb',
@@ -17,7 +19,7 @@ export const splitEmojiLink = (
   src = '',
   fallbackColor = 'var(--slate1)',
 ): { backgroundColor: string; text: string; emoji: string } => {
-  if (src.startsWith('emoji') && src.includes(':')) {
+  if (src?.toString()?.startsWith('emoji') && src.includes(':')) {
     const [, emoji, color, lucide] = src.split(':');
     const morandiColor = morandiColorMapper[color];
 
@@ -37,9 +39,10 @@ export const splitEmojiLink = (
       };
     }
   }
+
   return {
     backgroundColor: fallbackColor,
     text: src.length >= 3 ? src.slice(1) : src,
-    emoji: '🍀',
+    emoji: emojiRegex().test(src) ? src : '🍀',
   };
 };
