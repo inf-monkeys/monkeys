@@ -1,14 +1,18 @@
 import { MQ_TOKEN } from '@/common/common.module';
+import { config } from '@/common/config';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { Mq } from '@/common/mq';
 import { IRequest } from '@/common/typings/request';
 import { isValidObjectId } from '@/common/utils';
+import { ConversationAppEntity } from '@/database/entities/conversation-app/conversation-app.entity';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
+import { ConversationAppRepository } from '@/database/repositories/conversation-app.repository';
 import { TeamRepository } from '@/database/repositories/team.repository';
 import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Body, Controller, Get, HttpCode, Inject, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import axios from 'axios';
 import { Response } from 'express';
 import { TOOL_STREAM_RESPONSE_TOPIC } from '../tools/tools.polling.service';
 import { WorkflowExecutionService } from '../workflow/workflow.execution.service';
@@ -22,6 +26,7 @@ export class WorkflowOpenAICompatibleController {
   constructor(
     private readonly workflowExecutionService: WorkflowExecutionService,
     private readonly workflowRepository: WorkflowRepository,
+    private readonly conversationAppRepository: ConversationAppRepository,
     private readonly teamRepository: TeamRepository,
     @Inject(MQ_TOKEN) private readonly mq: Mq,
   ) {}
@@ -46,20 +51,35 @@ export class WorkflowOpenAICompatibleController {
     };
   }
 
-  private async getWorkflowByModel(teamId: string, model: string): Promise<WorkflowMetadataEntity> {
-    let workflowId: string;
-    let workflow: WorkflowMetadataEntity;
+  private async getWorkflowOrConversationAppByModel(
+    teamId: string,
+    model: string,
+  ): Promise<{
+    found: boolean;
+    type?: 'conversation-app' | 'workflow';
+    data?: ConversationAppEntity | WorkflowMetadataEntity;
+  }> {
     if (isValidObjectId(model)) {
-      workflowId = model;
-      workflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(workflowId);
-    } else {
-      workflow = await this.workflowRepository.findWorkflowByOpenAIModelName(teamId, model);
-      if (!workflow) {
-        return null;
+      const workflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(model, false);
+      if (workflow) {
+        return { found: true, type: 'workflow', data: workflow };
       }
-      workflowId = workflow.workflowId;
+      const conversationApp = await this.conversationAppRepository.getConversationAppById(teamId, model);
+      if (conversationApp) {
+        return { found: true, type: 'conversation-app', data: conversationApp };
+      }
+      return { found: false };
+    } else {
+      const workflow = await this.workflowRepository.findWorkflowByOpenAIModelName(teamId, model);
+      if (workflow) {
+        return { found: true, type: 'workflow', data: workflow };
+      }
+      const conversationApp = await this.conversationAppRepository.getConversationAppByCustomModelName(teamId, model);
+      if (conversationApp) {
+        return { found: true, type: 'conversation-app', data: conversationApp };
+      }
+      return { found: false };
     }
-    return workflow;
   }
 
   @Post('/completions')
@@ -71,11 +91,14 @@ export class WorkflowOpenAICompatibleController {
   public async createcCompletions(@Req() req: IRequest, @Body() body: CreateCompletionsDto, @Res() res: Response) {
     const { teamId, userId, apikey } = req;
     const { model, stream = false } = body;
-    const workflow = await this.getWorkflowByModel(teamId, model);
-    if (!workflow) {
+    const { found, data, type } = await this.getWorkflowOrConversationAppByModel(teamId, model);
+    if (!found) {
       return res.status(404).json({ message: 'Model not found' });
     }
-    const { workflowId } = workflow;
+    if (type === 'conversation-app') {
+      throw new Error('Compeletion Mode is not supported in Conversation app');
+    }
+    const { workflowId } = data as WorkflowMetadataEntity;
     const sessionId = (req.headers['x-monkeys-session-id'] as string) || 'default';
     const workflowInstanceId = await this.workflowExecutionService.startWorkflow({
       teamId,
@@ -112,61 +135,103 @@ export class WorkflowOpenAICompatibleController {
   public async createChatComplitions(@Req() req: IRequest, @Body() body: CreateChatCompletionsDto, @Res() res: Response) {
     const { teamId, userId, apikey } = req;
     const { model, stream = false } = body;
-    const workflow = await this.getWorkflowByModel(teamId, model);
-    if (!workflow) {
+    const { found, data, type } = await this.getWorkflowOrConversationAppByModel(teamId, model);
+    if (!found) {
       return res.status(404).json({ message: 'Model not found' });
     }
-    const { workflowId } = workflow;
     const conversationId = req.headers['x-monkeys-conversation-id'] as string;
-    const workflowInstanceId = await this.workflowExecutionService.startWorkflow({
-      teamId,
-      userId,
-      workflowId,
-      inputData: body,
-      triggerType: WorkflowTriggerType.API,
-      chatSessionId: conversationId,
-      apiKey: apikey,
-    });
-    if (conversationId) {
-      await this.workflowRepository.updateChatSessionMessages(teamId, conversationId, body.messages);
-    }
-    if (stream === false) {
-      const result = await this.workflowExecutionService.waitForWorkflowResult(teamId, workflowInstanceId);
-      const aiResponse = (result?.choices || [])[0]?.message?.content;
-      if (aiResponse) {
-        const newMessages = body.messages.concat({ role: 'assistant', content: aiResponse });
-        if (conversationId) {
-          await this.workflowRepository.updateChatSessionMessages(teamId, conversationId, newMessages);
-        }
+    if (type === 'workflow') {
+      const { workflowId } = data as WorkflowMetadataEntity;
+      const workflowInstanceId = await this.workflowExecutionService.startWorkflow({
+        teamId,
+        userId,
+        workflowId,
+        inputData: body,
+        triggerType: WorkflowTriggerType.API,
+        chatSessionId: conversationId,
+        apiKey: apikey,
+      });
+      if (conversationId) {
+        await this.workflowRepository.updateChatSessionMessages(teamId, conversationId, body.messages);
       }
-      return res.status(200).json(result);
-    } else {
-      res.setHeader('content-type', 'text/event-stream');
-      res.status(200);
-      const channel = TOOL_STREAM_RESPONSE_TOPIC(workflowInstanceId);
-      let aiResponse = '';
-      this.mq.subscribe(channel, (channel, message: string) => {
-        res.write(message);
-        // TODO: listen on workflow finished event
-        if (message.startsWith('data: [DONE]')) {
+      if (stream === false) {
+        const result = await this.workflowExecutionService.waitForWorkflowResult(teamId, workflowInstanceId);
+        const aiResponse = (result?.choices || [])[0]?.message?.content;
+        if (aiResponse) {
           const newMessages = body.messages.concat({ role: 'assistant', content: aiResponse });
           if (conversationId) {
-            this.workflowRepository.updateChatSessionMessages(teamId, conversationId, newMessages);
+            await this.workflowRepository.updateChatSessionMessages(teamId, conversationId, newMessages);
           }
-          this.mq.unsubscribe(channel);
-          res.end();
-        } else {
-          const cleanedMessageStr = message.replace('data: ', '').trim();
-          try {
-            const parsedMessage = JSON.parse(cleanedMessageStr);
-            const { choices = [] } = parsedMessage;
-            const content = choices[0]?.delta?.content;
-            if (content) {
-              aiResponse += content;
-            }
-          } catch (error) {}
         }
-      });
+        return res.status(200).json(result);
+      } else {
+        res.setHeader('content-type', 'text/event-stream');
+        res.status(200);
+        const channel = TOOL_STREAM_RESPONSE_TOPIC(workflowInstanceId);
+        let aiResponse = '';
+        this.mq.subscribe(channel, (channel, message: string) => {
+          res.write(message);
+          // TODO: listen on workflow finished event
+          if (message.startsWith('data: [DONE]')) {
+            const newMessages = body.messages.concat({ role: 'assistant', content: aiResponse });
+            if (conversationId) {
+              this.workflowRepository.updateChatSessionMessages(teamId, conversationId, newMessages);
+            }
+            this.mq.unsubscribe(channel);
+            res.end();
+          } else {
+            const cleanedMessageStr = message.replace('data: ', '').trim();
+            try {
+              const parsedMessage = JSON.parse(cleanedMessageStr);
+              const { choices = [] } = parsedMessage;
+              const content = choices[0]?.delta?.content;
+              if (content) {
+                aiResponse += content;
+              }
+            } catch (error) {}
+          }
+        });
+      }
+    } else if (type === 'conversation-app') {
+      const conversationApp = data as ConversationAppEntity;
+      if (conversationId) {
+        await this.workflowRepository.updateChatSessionMessages(teamId, conversationId, body.messages);
+      }
+      if (stream === false) {
+        const { data: chatComplitionsResult } = await axios.post(`http://127.0.0.1:${config.server.port}/api/llm-tool/chat/completions`, {
+          ...body,
+          model: conversationApp.model,
+        });
+        const aiResponse = (chatComplitionsResult?.choices || [])[0]?.message?.content;
+        if (aiResponse) {
+          const newMessages = body.messages.concat({ role: 'assistant', content: aiResponse });
+          if (conversationId) {
+            await this.workflowRepository.updateChatSessionMessages(teamId, conversationId, newMessages);
+          }
+        }
+        return res.status(200).json(chatComplitionsResult);
+      } else {
+        const chatComplitionsResponse = await axios.post(
+          `http://127.0.0.1:${config.server.port}/api/llm-tool/chat/completions`,
+          {
+            ...body,
+            model: conversationApp.model,
+            temperature: body.temperature || conversationApp.temperature,
+            presence_penalty: body.presence_penalty || conversationApp.presence_penalty,
+            frequency_penalty: body.frequency_penalty || conversationApp.frequency_penalty,
+            tools: conversationApp.tools || [],
+            knowledgeBase: conversationApp.knowledgeBase,
+            sqlKnowledgeBase: conversationApp.sqlKnowledgeBase,
+            systemPrompt: conversationApp.systemPrompt,
+          },
+          {
+            responseType: 'stream',
+          },
+        );
+        res.setHeader('content-type', 'text/event-stream');
+        res.status(200);
+        chatComplitionsResponse.data.pipe(res);
+      }
     }
   }
 }
