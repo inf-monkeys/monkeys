@@ -17,6 +17,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { VinesGlobalUpload } from '@/components/ui/updater/vines-global-upload.tsx';
 import { SIDEBAR_MAP } from '@/consts/sidebar.tsx';
 import VinesEvent from '@/utils/events.ts';
+import { IconGuard } from '@/components/ui/vines-icon/lucide/guard.tsx';
 
 const RootComponent: React.FC = () => {
   const { t } = useTranslation();
@@ -86,6 +87,7 @@ const RootComponent: React.FC = () => {
       <OEM />
       <TeamsGuard />
       <UserGuard />
+      <IconGuard />
       <RouteEvent />
     </>
   );
