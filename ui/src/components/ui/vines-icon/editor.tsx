@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { RotateCcw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { VinesIconSelector } from '@/components/ui/icon-selector';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -23,6 +24,7 @@ export const VinesIconEditor: React.FC<IVinesIconEditorProps> = ({
   size = 'lg',
   onlyEmoji = false,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="flex">
       <VinesIconSelector emojiLink={value} onChange={onChange} onFinished={onFinished} onlyEmoji={onlyEmoji}>
@@ -42,7 +44,7 @@ export const VinesIconEditor: React.FC<IVinesIconEditorProps> = ({
                 <RotateCcw size={8} />
               </div>
             </TooltipTrigger>
-            <TooltipContent>点击重置</TooltipContent>
+            <TooltipContent>{t('common.utils.reset')}</TooltipContent>
           </Tooltip>
         </div>
       </VinesIconSelector>
