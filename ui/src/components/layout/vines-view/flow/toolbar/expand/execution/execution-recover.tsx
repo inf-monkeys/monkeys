@@ -23,8 +23,9 @@ interface IExecutionRecoverProps {
 export const ExecutionRecover: React.FC<IExecutionRecoverProps> = ({ className }) => {
   const { t } = useTranslation();
 
-  const { setCanvasMode } = useCanvasStore();
-  const { workflowId } = useFlowStore();
+  const setCanvasMode = useCanvasStore((s) => s.setCanvasMode);
+  const workflowId = useFlowStore((s) => s.workflowId);
+
   const { data } = useSearchWorkflowExecutions(
     workflowId
       ? {

@@ -28,7 +28,8 @@ interface IVinesChatModeProps {
 export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) => {
   const { t } = useTranslation();
 
-  const { workflowId } = useFlowStore();
+  const workflowId = useFlowStore((s) => s.workflowId);
+
   const { userPhoto } = useVinesUser();
 
   const { vines } = useVinesFlow();

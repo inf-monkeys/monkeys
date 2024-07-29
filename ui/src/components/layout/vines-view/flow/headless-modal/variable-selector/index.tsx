@@ -31,8 +31,8 @@ export type VariableInsertType = 'simple' | 'jsonpath' | 'taskReferenceName';
 export const VinesVariableSelector: React.FC<IVinesVariableSelectorProps> = () => {
   const { t } = useTranslation();
 
-  const { setDisableDialogClose } = useCanvasStore();
-  const { workflowId } = useFlowStore();
+  const setDisableDialogClose = useCanvasStore((s) => s.setDisableDialogClose);
+  const workflowId = useFlowStore((s) => s.workflowId);
 
   const { vines } = useVinesFlow();
 

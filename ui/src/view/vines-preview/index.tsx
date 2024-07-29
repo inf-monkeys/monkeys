@@ -18,9 +18,9 @@ import { useViewStore } from '@/store/useViewStore';
 export const VinesPreView: React.FC = () => {
   const { t } = useTranslation();
 
-  const { setCanvasMode } = useCanvasStore();
-  const { visible } = useViewStore();
-  const { containerHeight } = usePageStore();
+  const setCanvasMode = useCanvasStore((s) => s.setCanvasMode);
+  const visible = useViewStore((s) => s.visible);
+  const containerHeight = usePageStore((s) => s.containerHeight);
 
   const { vines } = useVinesFlow();
 

@@ -32,7 +32,7 @@ export const StringInput: React.FC<IVinesInputPropertyProps & IStringInputProps>
 }) => {
   const { t } = useTranslation();
 
-  const { workflowId } = useFlowStore();
+  const workflowId = useFlowStore((s) => s.workflowId);
 
   const variableEditorRef = useRef<VariableEditorRefProps>({ insertVariable: () => {} });
 

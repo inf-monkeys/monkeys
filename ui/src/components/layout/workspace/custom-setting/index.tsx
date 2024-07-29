@@ -15,7 +15,8 @@ interface IWorkspaceCustomSettingProps extends React.ComponentPropsWithoutRef<'d
 export const WorkspaceCustomSetting: React.FC<IWorkspaceCustomSettingProps> = () => {
   const { t } = useTranslation();
 
-  const { visibleCustomSetting, setVisibleCustomSetting } = usePageStore();
+  const visibleCustomSetting = usePageStore((s) => s.visibleCustomSetting);
+  const setVisibleCustomSetting = usePageStore((s) => s.setVisibleCustomSetting);
 
   return (
     <motion.div

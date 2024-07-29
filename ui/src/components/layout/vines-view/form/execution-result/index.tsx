@@ -34,8 +34,8 @@ interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div
 export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ className, event$, minimalGap }) => {
   const { t } = useTranslation();
 
-  const { visible } = useViewStore();
-  const { workflowId } = useFlowStore();
+  const visible = useViewStore((s) => s.visible);
+  const workflowId = useFlowStore((s) => s.workflowId);
 
   const { data: result, isLoading } = useSearchWorkflowExecutions(
     workflowId && visible

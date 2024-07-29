@@ -28,9 +28,9 @@ interface IVinesExecutionHistoryProps extends React.ComponentPropsWithoutRef<'di
 export const VinesExecutionHistory: React.FC<IVinesExecutionHistoryProps> = () => {
   const { t } = useTranslation();
 
-  const { visible } = useViewStore();
-  const { setCanvasMode } = useCanvasStore();
-  const { workflowId } = useFlowStore();
+  const visible = useViewStore((s) => s.visible);
+  const setCanvasMode = useCanvasStore((s) => s.setCanvasMode);
+  const workflowId = useFlowStore((s) => s.workflowId);
 
   const { copy } = useCopy({ timeout: 500 });
 

@@ -26,8 +26,9 @@ interface IScheduleTriggerProps {}
 export const ScheduleTrigger: React.FC<IScheduleTriggerProps> = () => {
   const { t } = useTranslation();
 
-  const { workflowId } = useFlowStore();
   const { mutate } = useSWRConfig();
+
+  const workflowId = useFlowStore((s) => s.workflowId);
 
   const [open, setOpen] = useState(false);
 

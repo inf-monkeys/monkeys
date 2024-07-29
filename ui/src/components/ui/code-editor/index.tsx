@@ -85,7 +85,7 @@ export const CodeEditor: React.FC<ICodeEditorProps> = ({
   editorRef,
   onInitial,
 }) => {
-  const { darkMode } = useAppStore();
+  const darkMode = useAppStore((s) => s.darkMode);
 
   const saveInput = useCallback(
     debounce((input: string) => onUpdate && onUpdate(input), saveWait),

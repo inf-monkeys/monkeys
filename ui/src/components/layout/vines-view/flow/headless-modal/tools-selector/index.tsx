@@ -20,7 +20,8 @@ interface IToolsSelectorProps extends React.ComponentPropsWithoutRef<'div'> {}
 export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
   const { t } = useTranslation();
 
-  const { workflowId } = useFlowStore();
+  const workflowId = useFlowStore((s) => s.workflowId);
+
   const { vines } = useVinesFlow();
 
   const [open, setOpen] = useState(false);

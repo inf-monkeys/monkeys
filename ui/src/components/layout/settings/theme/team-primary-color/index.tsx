@@ -28,7 +28,8 @@ export const TeamPrimaryColor: React.FC<ITeamPrimaryColorProps> = () => {
 
   const [tempColor, onChange] = useState('#62ab31');
 
-  const { setValue, value } = usePaletteStore();
+  const setValue = usePaletteStore((s) => s.setValue);
+  const value = usePaletteStore((s) => s.value);
 
   useEffect(() => {
     value && setValue(value);

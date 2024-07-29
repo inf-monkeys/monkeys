@@ -22,8 +22,10 @@ import VinesEvent from '@/utils/events.ts';
 export const ComplicateTriggerNode: React.FC = () => {
   const { t } = useTranslation();
 
-  const { canvasMode, setCanvasMode } = useCanvasStore();
-  const { setIsUserInteraction } = useCanvasInteractionStore();
+  const canvasMode = useCanvasStore((s) => s.canvasMode);
+  const setCanvasMode = useCanvasStore((s) => s.setCanvasMode);
+  const setIsUserInteraction = useCanvasInteractionStore((s) => s.setIsUserInteraction);
+
   const { vines } = useVinesFlow();
 
   const { data: triggerTypes } = useTriggerTypes();

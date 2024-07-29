@@ -18,7 +18,8 @@ interface IQuickOptionsProps {
 export const QuickOptions: React.FC<IQuickOptionsProps> = ({ nodeId }) => {
   const { t } = useTranslation();
 
-  const { isLatestWorkflowVersion } = useFlowStore();
+  const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
+
   const { vines } = useVinesFlow();
 
   const nodes = vines

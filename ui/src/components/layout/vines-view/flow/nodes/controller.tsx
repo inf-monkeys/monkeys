@@ -21,9 +21,9 @@ interface INodeControllerProps {
 export const NodeController: React.FC<INodeControllerProps> = memo(({ nodes, nodeStagger }) => {
   const { t } = useTranslation();
 
-  const { isLatestWorkflowVersion } = useFlowStore();
-  const { canvasMode } = useCanvasStore();
-  const { canvasDisabled } = useCanvasInteractionStore();
+  const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
+  const canvasMode = useCanvasStore((s) => s.canvasMode);
+  const canvasDisabled = useCanvasInteractionStore((s) => s.canvasDisabled);
 
   const controller = nodes
     .map((node) => node.getController().map((it, index) => ({ id: `${node.id}_controller_${index}`, ...it })))

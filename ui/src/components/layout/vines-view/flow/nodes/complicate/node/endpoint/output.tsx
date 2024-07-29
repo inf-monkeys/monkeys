@@ -22,8 +22,8 @@ import { cn } from '@/utils';
 export const ComplicateEndNode: React.FC = () => {
   const { t } = useTranslation();
 
-  const { isWorkflowRUNNING } = useCanvasStore();
-  const { workflowId } = useFlowStore();
+  const isWorkflowRUNNING = useCanvasStore((s) => s.isWorkflowRUNNING);
+  const workflowId = useFlowStore((s) => s.workflowId);
 
   const { vines } = useVinesFlow();
   const { trigger } = useUpdateWorkflow(workflowId ?? '');

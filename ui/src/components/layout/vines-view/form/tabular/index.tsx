@@ -33,8 +33,8 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
   const { mutate } = useSWRConfig();
   const { t } = useTranslation();
 
-  const { containerHeight } = usePageStore();
-  const { setCanvasMode } = useCanvasStore();
+  const containerHeight = usePageStore((s) => s.containerHeight);
+  const setCanvasMode = useCanvasStore((s) => s.setCanvasMode);
 
   const { vines } = useVinesFlow();
 

@@ -18,7 +18,9 @@ interface IWorkflowTriggerProps extends React.ComponentPropsWithoutRef<'div'> {}
 export const WorkflowTrigger: React.FC<IWorkflowTriggerProps> = ({ className }) => {
   const { t } = useTranslation();
 
-  const { isLatestWorkflowVersion, workflowId } = useFlowStore();
+  const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
+  const workflowId = useFlowStore((s) => s.workflowId);
+
   const { vines } = useVinesFlow();
 
   const workflowVersion = vines.version;

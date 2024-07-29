@@ -39,8 +39,11 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
 
   const { vines } = useVinesFlow();
 
-  const { canvasMode, isWorkflowRUNNING } = useCanvasStore();
-  const { isUserInteraction, setIsUserInteraction } = useCanvasInteractionStore();
+  const canvasMode = useCanvasStore((s) => s.canvasMode);
+  const isWorkflowRUNNING = useCanvasStore((s) => s.isWorkflowRUNNING);
+
+  const isUserInteraction = useCanvasInteractionStore((s) => s.isUserInteraction);
+  const setIsUserInteraction = useCanvasInteractionStore((s) => s.setIsUserInteraction);
 
   const mouseFocusRef = useRef(false);
   const [isNodeFocus, setIsNodeFocus] = useState(false);
