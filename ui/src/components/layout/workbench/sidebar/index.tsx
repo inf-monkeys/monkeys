@@ -10,12 +10,14 @@ import { useTranslation } from 'react-i18next';
 
 import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
+import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn, getI18nContent } from '@/utils';
 
@@ -137,9 +139,16 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ groupId, se
                       <h1 className="text-sm font-bold leading-tight">
                         {getI18nContent(workflow?.displayName) ?? t('common.utils.untitled')}
                       </h1>
-                      <span className="text-xxs">
-                        {`${viewIcon} ${t([`workspace.wrapper.space.tabs.${page.displayName}`, page.displayName])}`}
-                      </span>
+                      <div className="flex items-center gap-0.5">
+                        <VinesLucideIcon
+                          className="size-3"
+                          size={12}
+                          src={EMOJI2LUCIDE_MAPPER[viewIcon] ?? viewIcon}
+                        />
+                        <span className="text-xxs">
+                          {t([`workspace.wrapper.space.tabs.${page.displayName}`, page.displayName])}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 );

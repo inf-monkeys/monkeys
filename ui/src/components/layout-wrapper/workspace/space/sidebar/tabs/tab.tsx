@@ -13,7 +13,7 @@ import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
-const EMOJI2LUCIDE_MAPPER = {
+export const EMOJI2LUCIDE_MAPPER = {
   '🚀': 'square-function',
   '📃': 'square-kanban',
   '📷': 'square-menu',
