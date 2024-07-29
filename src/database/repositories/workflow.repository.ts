@@ -120,7 +120,7 @@ export class WorkflowRepository {
     return await this.getWorkflowById(workflowId, version);
   }
 
-  public async getWorkflowById(workflowId: string, version: number) {
+  public async getWorkflowById(workflowId: string, version: number, throwError = true) {
     const workflow = await this.workflowMetadataRepository.findOne({
       where: {
         workflowId,
@@ -128,15 +128,15 @@ export class WorkflowRepository {
         isDeleted: false,
       },
     });
-    if (!workflow) {
+    if (!workflow && throwError) {
       throw new NotFoundException(`Workflow ${workflowId} not found`);
     }
     return workflow;
   }
 
-  public async getWorkflowByIdWithoutVersion(workflowId: string) {
+  public async getWorkflowByIdWithoutVersion(workflowId: string, throwError = true) {
     const maxVersion = await this.getMaxVersion(workflowId);
-    return await this.getWorkflowById(workflowId, maxVersion);
+    return await this.getWorkflowById(workflowId, maxVersion, throwError);
   }
 
   public async findWorkflowByIds(workflowIds: string[]) {

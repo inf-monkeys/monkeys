@@ -9,6 +9,7 @@ import { ToolsEntity } from '@/database/entities/tools/tools.entity';
 import { WorkflowChatSessionEntity } from '@/database/entities/workflow/workflow-chat-session';
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
+import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 import { WorkflowTemplateEntity } from '@/database/entities/workflow/workflow-template';
 import { WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -29,6 +30,7 @@ import { LlmModelEntity } from './entities/assets/model/llm-model/llm-model';
 import { SdModelEntity } from './entities/assets/model/sd-model/sd-model';
 import { ComfyuiServerEntity } from './entities/comfyui/comfyui-server.entity';
 import { ComfyuiWorkflowEntity } from './entities/comfyui/comfyui-workflow.entity';
+import { ConversationAppEntity } from './entities/conversation-app/conversation-app.entity';
 import { TeamEntity } from './entities/identity/team';
 import { TeamJoinRequestsEntity } from './entities/identity/team-join-request';
 import { UserEntity } from './entities/identity/user';
@@ -36,7 +38,6 @@ import { TeamMembersEntity } from './entities/identity/user-team-relationship';
 import { OneApiUsersEntity } from './entities/oneapi/oneapi-user.entity';
 import { ToolsTriggerTypesEntity } from './entities/tools/tools-trigger-types';
 import { WorkflowPageEntity } from './entities/workflow/workflow-page';
-import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 
 export const entities: EntityClassOrSchema[] = [
   ThemeEntity,
@@ -75,6 +76,7 @@ export const entities: EntityClassOrSchema[] = [
   ComfyuiWorkflowEntity,
   ComfyuiServerEntity,
   OneApiUsersEntity,
+  ConversationAppEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({

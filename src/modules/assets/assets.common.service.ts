@@ -2,6 +2,7 @@ import { BaseAssetEntity } from '@/database/entities/assets/base-asset';
 import { AbstractAssetRepository } from '@/database/repositories/assets-abstract.repository';
 import { CanvasAssetRepositroy } from '@/database/repositories/assets-canvas.repository';
 import { ComfyuiWorkflowAssetRepositroy } from '@/database/repositories/assets-comfyui-workflow.respository';
+import { ConversationAppAssetRepositroy } from '@/database/repositories/assets-conversation-app.repository';
 import { SqlKnowledgeBaseAssetRepositroy } from '@/database/repositories/assets-knowledge-base-sql.repository';
 import { KnowledgeBaseAssetRepositroy } from '@/database/repositories/assets-knowledge-base.repository';
 import { LlmChannelAssetRepositroy } from '@/database/repositories/assets-llm-channel.respository';
@@ -24,6 +25,7 @@ export class AssetsMapperService {
     private readonly sqlKnowledgeBaseRepository: SqlKnowledgeBaseAssetRepositroy,
     private readonly comfyuiWorkflowAssetsRepository: ComfyuiWorkflowAssetRepositroy,
     private readonly llmChannelAssetRepository: LlmChannelAssetRepositroy,
+    private readonly conversationAppAssetRepository: ConversationAppAssetRepositroy,
   ) {}
 
   public getRepositoryByAssetType(assetType: AssetType): AbstractAssetRepository<BaseAssetEntity> {
@@ -45,6 +47,8 @@ export class AssetsMapperService {
       return this.comfyuiWorkflowAssetsRepository as AbstractAssetRepository<BaseAssetEntity>;
     } else if (assetType === 'llm-channel') {
       return this.llmChannelAssetRepository as AbstractAssetRepository<BaseAssetEntity>;
+    } else if (assetType === 'conversation-app') {
+      return this.conversationAppAssetRepository as AbstractAssetRepository<BaseAssetEntity>;
     } else {
       throw new Error('invalid assetType');
     }
