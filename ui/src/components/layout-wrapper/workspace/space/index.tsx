@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 
+import { FullScreenDisplay } from '@/components/layout-wrapper/workspace/space/full-screen-display.tsx';
 import { WorkspaceSidebar } from '@/components/layout-wrapper/workspace/space/sidebar';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { usePageStore } from '@/store/usePageStore';
@@ -27,10 +28,11 @@ export const Space: React.FC<ISpaceProps> = ({ children }) => {
       <div
         ref={ref}
         className={cn(
-          'relative m-4 w-full overflow-hidden rounded-md border border-input bg-slate-1 shadow-sm',
+          'relative m-4 w-[calc(100vw-15rem)] overflow-hidden rounded-md border border-input bg-slate-1 shadow-sm',
           !vinesIFrameVisible && 'ml-0',
         )}
       >
+        <FullScreenDisplay />
         {children}
       </div>
     </div>

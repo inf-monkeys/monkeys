@@ -11,6 +11,7 @@ import { TabMenu } from '@/components/layout-wrapper/workspace/space/sidebar/tab
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId';
 import { cn } from '@/utils';
+import { usePageStore } from '@/store/usePageStore';
 
 const EMOJI2LUCIDE_MAPPER = {
   '🚀': 'square-function',
@@ -25,15 +26,16 @@ interface ISpaceTabProps extends React.ComponentPropsWithoutRef<'div'> {
   icon: string;
   activeIndex: number;
   index: number;
-  isLastItem: boolean;
   pages: IPageType[];
   page: IPageType | null;
 }
 
-export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon, activeIndex, index, isLastItem }) => {
+export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon, activeIndex, index }) => {
   const { t } = useTranslation();
 
   const navigate = useNavigate({ from: Route.fullPath });
+
+  const setApiDocumentVisible = usePageStore((s) => s.setApiDocumentVisible);
 
   const { setNodeRef, listeners, attributes, transform, isDragging } = useSortable({ id });
 
@@ -41,6 +43,7 @@ export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon,
 
   const handleChangePage = () => {
     if (!isActive) {
+      setApiDocumentVisible(false);
       void navigate({
         to: '/$teamId/workspace/$workflowId/$pageId',
         params: {
@@ -76,7 +79,7 @@ export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon,
     >
       <div className="flex h-full select-none items-center" {...listeners}>
         <p className="mr-2">
-          <VinesLucideIcon size={15} src={EMOJI2LUCIDE_MAPPER[icon] ?? EMOJI2LUCIDE_MAPPER} />
+          <VinesLucideIcon size={15} src={EMOJI2LUCIDE_MAPPER[icon] ?? icon} />
         </p>
         <h1 className="whitespace-nowrap text-sm">{t([`workspace.wrapper.space.tabs.${displayName}`, displayName])}</h1>
         <AnimatePresence>
