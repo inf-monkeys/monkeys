@@ -117,38 +117,31 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ groupId, se
                 const workflow = page?.workflow;
                 const viewIcon = page?.instance?.icon ?? '';
                 const pageId = page?.id ?? '';
-                const workflowDesc = getI18nContent(workflow?.description);
 
                 return (
-                  <Tooltip key={pageId}>
-                    <TooltipTrigger asChild>
-                      <div
-                        className={cn(
-                          'flex cursor-pointer items-start space-x-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
-                          currentPage?.id === pageId &&
-                            id === groupId &&
-                            'border border-input bg-background text-accent-foreground',
-                        )}
-                        onClick={() => {
-                          setCurrentPage(page);
-                          setGroupId(id);
-                        }}
-                      >
-                        <VinesIcon size="sm">{workflow?.iconUrl}</VinesIcon>
-                        <div className="flex max-w-44 flex-col gap-0.5">
-                          <h1 className="text-sm font-bold leading-tight">
-                            {getI18nContent(workflow?.displayName) ?? t('common.utils.untitled')}
-                          </h1>
-                          <span className="text-xxs">
-                            {`${viewIcon} ${t([`workspace.wrapper.space.tabs.${page.displayName}`, page.displayName])}`}
-                          </span>
-                        </div>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent className={workflowDesc ? '' : 'hidden'} side="left">
-                      {workflowDesc}
-                    </TooltipContent>
-                  </Tooltip>
+                  <div
+                    key={pageId}
+                    className={cn(
+                      'flex cursor-pointer items-start space-x-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
+                      currentPage?.id === pageId &&
+                        id === groupId &&
+                        'border border-input bg-background text-accent-foreground',
+                    )}
+                    onClick={() => {
+                      setCurrentPage(page);
+                      setGroupId(id);
+                    }}
+                  >
+                    <VinesIcon size="sm">{workflow?.iconUrl}</VinesIcon>
+                    <div className="flex max-w-44 flex-col gap-0.5">
+                      <h1 className="text-sm font-bold leading-tight">
+                        {getI18nContent(workflow?.displayName) ?? t('common.utils.untitled')}
+                      </h1>
+                      <span className="text-xxs">
+                        {`${viewIcon} ${t([`workspace.wrapper.space.tabs.${page.displayName}`, page.displayName])}`}
+                      </span>
+                    </div>
+                  </div>
                 );
               })}
             </div>
