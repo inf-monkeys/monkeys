@@ -122,10 +122,10 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ groupId, se
                   <div
                     key={pageId}
                     className={cn(
-                      'flex cursor-pointer items-start space-x-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
-                      currentPage?.id === pageId &&
-                        id === groupId &&
-                        'border border-input bg-background text-accent-foreground',
+                      'flex cursor-pointer items-start space-x-2 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
+                      currentPage?.id === pageId && id === groupId
+                        ? 'border border-input bg-background p-2 text-accent-foreground'
+                        : 'p-[calc(0.5rem+1px)]',
                     )}
                     onClick={() => {
                       setCurrentPage(page);
