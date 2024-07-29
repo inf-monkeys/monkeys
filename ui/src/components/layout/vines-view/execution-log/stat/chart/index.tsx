@@ -54,6 +54,7 @@ export const VinesLogViewStatChart: React.FC<IVinesLogViewStatChartProps> = ({ s
           />
           <VinesLogViewStatChartCard
             chartConfig={{ averageTime: statChartConfig['averageTime'] }}
+            countCalcType="avg"
             searchWorkflowExecutionStatData={searchWorkflowExecutionStatData}
           />
           <VinesLogViewStatChartCard
