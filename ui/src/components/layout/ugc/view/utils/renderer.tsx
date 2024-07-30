@@ -11,12 +11,16 @@ import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { IVinesIconSize, VinesIcon } from '@/components/ui/vines-icon';
 import { getI18nContent } from '@/utils';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
+import _ from 'lodash';
 
-export const RenderTime: React.FC<{ time: number }> = ({ time: rawTime }) => {
+export const RenderTime: React.FC<{ time: number | string }> = ({ time: rawTime }) => {
   const { i18n } = useTranslation();
+  rawTime = _.isNumber(rawTime) ? rawTime : _.toNumber(rawTime);
   const time = rawTime >= 1000000000000 ? rawTime : rawTime * 1000;
   return (
-    <Tooltip content={dayjs(time).format(i18n.language === 'zh' ? 'YYYY-MM-DD HH:mm:ss' : 'MM-DD-YYYY HH:mm:ss')}>
+    <Tooltip
+      content={dayjs(time).format(i18n.language.startsWith('zh') ? 'YYYY-MM-DD HH:mm:ss' : 'MM-DD-YYYY HH:mm:ss')}
+    >
       <TooltipTrigger asChild>
         <span className="cursor-default">{formatTimeDiffPrevious(time)}</span>
       </TooltipTrigger>
