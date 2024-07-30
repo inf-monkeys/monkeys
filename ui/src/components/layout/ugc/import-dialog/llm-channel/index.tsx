@@ -5,8 +5,8 @@ import { toast } from 'sonner';
 
 import { createLLMChannel } from '@/apis/llm';
 import { ILLMChannel } from '@/apis/llm/typings';
-import { VinesWorkflowInput } from '@/components/layout/vines-view/execution/workflow-input';
 import { calculateDisplayInputs } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/utils';
+import { TabularRender } from '@/components/layout/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { getI18nContent } from '@/utils';
@@ -49,17 +49,18 @@ export const LLMChannelImportDialog: React.FC<IUgcImportDialogProps> = ({ childr
         <DialogHeader>
           <DialogTitle>{getI18nContent(channel?.displayName)}</DialogTitle>
         </DialogHeader>
-        <VinesWorkflowInput
+        <TabularRender
           inputs={finalInputs}
           height={400}
           onSubmit={(data) => {
             handleImport(data);
           }}
+          miniMode
         >
           <Button className="mb-1 min-h-10" variant="outline" type="submit">
             {t('common.utils.confirm')}
           </Button>
-        </VinesWorkflowInput>
+        </TabularRender>
       </DialogContent>
     </Dialog>
   );

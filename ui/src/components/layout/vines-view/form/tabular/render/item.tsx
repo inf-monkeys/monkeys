@@ -25,9 +25,16 @@ interface IVinesFormFieldItemProps extends React.ComponentPropsWithoutRef<'div'>
   it: VinesWorkflowVariable;
   form: UseFormReturn<IWorkflowInputForm>;
   defValues: IWorkflowInputForm;
+  miniMode?: boolean;
 }
 
-export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({ it, form, defValues, itemClassName }) => {
+export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
+  it,
+  form,
+  defValues,
+  itemClassName,
+  miniMode = false,
+}) => {
   const { t } = useTranslation();
 
   const forceUpdate = useForceUpdate();
@@ -103,13 +110,20 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({ it, for
                 </Select>
               ) : (
                 <>
-                  <FieldTagInputAndTextarea input={it} value={value} onChange={onChange} form={form} field={field} />
+                  <FieldTagInputAndTextarea
+                    input={it}
+                    value={value}
+                    onChange={onChange}
+                    form={form}
+                    field={field}
+                    miniMode={miniMode}
+                  />
 
                   <FieldNumber input={it} value={value} onChange={onChange} field={field} />
 
                   <FieldBoolean input={it} value={value} onChange={onChange} form={form} />
 
-                  <FieldFile input={it} form={form} value={value} />
+                  <FieldFile input={it} form={form} value={value} miniMode={miniMode} />
 
                   <FieldOptions input={it} value={value} onChange={onChange} />
                 </>

@@ -6,8 +6,8 @@ import { useTranslation } from 'react-i18next';
 
 import { useSearchWorkflowExecutions } from '@/apis/workflow/execution';
 import { VinesActuator } from '@/components/layout/vines-view/execution/actuator';
-import { VinesWorkflowInput } from '@/components/layout/vines-view/execution/workflow-input';
 import { ExecutionRecover } from '@/components/layout/vines-view/flow/toolbar/expand/execution/execution-recover.tsx';
+import { TabularRender } from '@/components/layout/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useCanvasStore } from '@/store/useCanvasStore';
@@ -96,7 +96,7 @@ export const VinesPreView: React.FC = () => {
               className="absolute top-0 size-full max-w-xl"
             >
               {hasWorkflowVariables ? (
-                <VinesWorkflowInput
+                <TabularRender
                   formClassName="w-full"
                   inputs={vines.workflowInput}
                   height={height - 46}
@@ -104,6 +104,7 @@ export const VinesPreView: React.FC = () => {
                     vines.start({ inputData });
                     setCanvasMode(CanvasStatus.RUNNING);
                   }}
+                  miniMode
                 >
                   <Button variant="outline" type="submit" disabled={openAIInterfaceEnabled}>
                     {t(
@@ -112,7 +113,7 @@ export const VinesPreView: React.FC = () => {
                         : 'workspace.pre-view.actuator.execution.label',
                     )}
                   </Button>
-                </VinesWorkflowInput>
+                </TabularRender>
               ) : (
                 <div className="absolute top-0 flex size-full flex-col items-center justify-center gap-4">
                   <BugPlay size={80} strokeWidth={1.5} />
