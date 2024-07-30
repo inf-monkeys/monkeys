@@ -73,7 +73,7 @@ export const VinesLogViewLogList: React.FC<IVinesLogViewLogListProps> = ({
           </div>
         ) : (
           <div
-            className="w-full cursor-pointer bg-opacity-0 py-2 text-center hover:bg-foreground-500 hover:bg-opacity-5"
+            className="hover:bg-foreground-500 w-full cursor-pointer bg-opacity-0 py-2 text-center hover:bg-opacity-5"
             onClick={() => handleSubmit(true)}
           >
             {t('workspace.logs-view.log.list.more', { data: workflowTotal - workflowExecutionLength })}
