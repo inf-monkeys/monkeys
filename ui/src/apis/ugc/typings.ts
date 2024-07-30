@@ -25,8 +25,9 @@ export type IAssetItem<T = object> = T & {
   user?: Partial<IVinesUser>;
   assetTags?: IAssetTag[];
   assetType?: AssetType;
-  isPresetAsset?: boolean;
-  isPublicAsset?: boolean;
+  isDeleted?: boolean;
+  isPreset?: boolean;
+  isPublished?: boolean;
 };
 
 export interface IAssetPublicCategory extends IBaseEntity {

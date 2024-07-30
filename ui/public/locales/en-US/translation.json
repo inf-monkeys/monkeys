@@ -876,6 +876,77 @@
     }
   },
   "ugc-page": {
+    "app": {
+      "create": {
+        "dialog": {
+          "title": "Create App",
+          "type": {
+            "label": "App Type",
+            "agent": {
+              "label": "Agent App",
+              "tag": "Concise",
+              "descriptions": [
+                "Manage on the 'Agents' page, allowing individual views of the application to be pinned for use on the 'Workbench'.",
+                "Powered by a large language model, it autonomously uses tools, queries data, and builds workflows based on natural language requirements.",
+                "Strong generalization capability, requires minimal pre-configured information, but execution may not be precise enough.",
+                "Shares a streaming conversation interface consistent with OpenAI's standard API."
+              ]
+            },
+            "workflow": {
+              "label": "Workflow App",
+              "tag": "Precise",
+              "descriptions": [
+                "Manage on the 'Workflow' page, allowing individual views of the application to be pinned for use on the 'Workbench'.",
+                "Centered around pre-configured workflows, which can be used directly or invoked by other agent applications.",
+                "Strictly executes pre-configured workflows, with stringent input requirements, necessitating background knowledge of the large model during configuration.",
+                "Shares input-output API consistent with the configuration."
+              ]
+            }
+          },
+          "info": {
+            "label": "App Icon & Name",
+            "placeholder": "Enter app name"
+          },
+          "description": {
+            "label": "App Description",
+            "placeholder": "Enter app description"
+          }
+        }
+      }
+    },
+    "agent": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "Icon"
+          },
+          "title": {
+            "label": "Name"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "model": {
+            "label": "Model"
+          },
+          "customModelName": {
+            "label": "Custom Model Name"
+          },
+          "user": {
+            "label": "Creator"
+          },
+          "assetTags": {
+            "label": "Tags"
+          },
+          "createdTimestamp": {
+            "label": "Created Time"
+          },
+          "updatedTimestamp": {
+            "label": "Updated Time"
+          }
+        }
+      }
+    },
     "workflow": {
       "ugc-view": {
         "columns": {

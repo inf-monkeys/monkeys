@@ -5,6 +5,7 @@ import _ from 'lodash';
 import qs from 'qs';
 import { undefined } from 'zod';
 
+import { IAgents } from '@/apis/agents/typings.ts';
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { ILLMChannel, ILLMModel } from '@/apis/llm/typings.ts';
 import { IMediaData } from '@/apis/media-data/typings.ts';
@@ -49,6 +50,9 @@ export const preloadUgcItems = <T extends object>(dto: IListUgcDto, url: string,
 
 export const useUgcWorkflows = (dto: IListUgcDto) => useUgcItems<MonkeyWorkflow>(dto, '/api/workflow/metadata');
 export const preloadUgcWorkflows = (dto: IListUgcDto) => preloadUgcItems<MonkeyWorkflow>(dto, '/api/workflow/metadata');
+
+export const useUgcAgents = (dto: IListUgcDto) => useUgcItems<IAgents>(dto, '/api/conversation-apps');
+export const preloadUgcAgents = (dto: IListUgcDto) => preloadUgcItems<IAgents>(dto, '/api/conversation-apps');
 
 export const useUgcActionTools = (dto: IListUgcDto) => useUgcItems<IWorkflowTool>(dto, '/api/tools');
 export const useUgcComfyuiWorkflows = (dto: IListUgcDto) =>

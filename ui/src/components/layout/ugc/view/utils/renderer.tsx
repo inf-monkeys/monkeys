@@ -2,6 +2,7 @@ import React from 'react';
 
 import { I18nValue } from '@inf-monkeys/monkeys';
 import dayjs from 'dayjs';
+import _ from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
@@ -11,7 +12,6 @@ import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { IVinesIconSize, VinesIcon } from '@/components/ui/vines-icon';
 import { getI18nContent } from '@/utils';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
-import _ from 'lodash';
 
 export const RenderTime: React.FC<{ time: number | string }> = ({ time: rawTime }) => {
   const { i18n } = useTranslation();
