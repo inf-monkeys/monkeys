@@ -1224,10 +1224,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-2.0.3.tgz#4a2868d75d6d6963e423bcf90b7fd1be343409d3"
   integrity sha512-93zYdMES/c1D69yZiKDBj0V24vqNzB/koF26KPaagAfd3P/4gUlh3Dys5ogAK+Exi9QyzlD8x/08Zt7wIKcDcA==
 
-"@inf-monkeys/monkeys@^0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@inf-monkeys/monkeys/-/monkeys-0.0.3.tgz#fb28d4d158ccd1efc268e6d42d06ee69622f43b0"
-  integrity sha512-1xpU8ZZsoZtn+uK5v17ClYU3Wprx4vasKa1yycEnzbawqXY+IBFwdEFlCdgMgRYgYqawNo1TC3wB837OlBnoeQ==
+"@inf-monkeys/monkeys@0.0.5":
+  version "0.0.5"
+  resolved "https://registry.npmmirror.com/@inf-monkeys/monkeys/-/monkeys-0.0.5.tgz#1107034c33790ffc36daf56f79cc1009e1e9546f"
+  integrity sha512-ZqEIJbVU9cNyUKfIdQUTcM3fV8tWO6x5RFkYa+91BwWAtb+xLcyrCzyfkhzE+VZfPaDGzuIrEgtoWIbhfsQr8A==
   dependencies:
     "@io-orkes/conductor-javascript" "^2.1.0"
 
@@ -1239,9 +1239,9 @@
     uuid "^9.0.0"
 
 "@io-orkes/conductor-javascript@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@io-orkes/conductor-javascript/-/conductor-javascript-2.1.0.tgz#1dd61cf49fc537603b7d5213666ca38447305b82"
-  integrity sha512-rwXO3I2xRstKo+WRb/kvj927RLsX9k0ERSTfF22V9xK/SsujFJm4XM+rkxvz15dTEOtpr2gVQdgLT1CE5GeyjA==
+  version "2.1.1"
+  resolved "https://registry.npmmirror.com/@io-orkes/conductor-javascript/-/conductor-javascript-2.1.1.tgz#4a3a3eba1a6d829a567e82684cfbc3d045f0a8af"
+  integrity sha512-yBYbXlDzJ0bXpFZ5CBUzwtwMRaf1ebS4/7Mnu42uW8SUz4DBsJ0cHgCvLe/oh8I5K4JV6RofPVsiHIPjcUBoog==
 
 "@isaacs/cliui@^8.0.2":
   version "8.0.2"

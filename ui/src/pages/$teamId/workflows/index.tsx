@@ -4,7 +4,7 @@ import { mutate } from 'swr';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
-import { Copy, FileUp, FolderUp, Import, Link, Pencil, Plus, Trash } from 'lucide-react';
+import { Copy, FileUp, FolderUp, Import, Link, Pencil, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -42,9 +42,9 @@ import {
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCopy } from '@/hooks/use-copy.ts';
-import { useWorkflow } from '@/package/vines-flow';
 import { getI18nContent } from '@/utils';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
+import { CreateAppDialog } from '@/components/layout/ugc-pages/apps/create';
 
 export const Workflows: React.FC = () => {
   const { t } = useTranslation();
@@ -52,32 +52,13 @@ export const Workflows: React.FC = () => {
   const navigate = useNavigate();
   const { copy } = useCopy({ timeout: 500 });
   const { teamId } = useVinesTeam();
-  const { createWorkflow } = useWorkflow();
   const mutateWorkflows = () => mutate((key) => typeof key === 'string' && key.startsWith('/api/workflow/metadata'));
-
-  const [isCreating, setIsCreating] = useState(false);
 
   const [currentWorkflow, setCurrentWorkflow] = useState<IAssetItem<MonkeyWorkflow>>();
   const [workflowEditorVisible, setWorkflowEditorVisible] = useState(false);
   const [deleteAlertDialogVisible, setDeleteAlertDialogVisible] = useState(false);
   const [exportDialogVisible, setExportDialogVisible] = useState(false);
   const [exportAssetContext, setExportAssetContext] = useState<IExportWorkflowWithAssetsContext | undefined>();
-
-  const handleCreateWorkflow = async () => {
-    if (!teamId) {
-      toast.warning(t('common.toast.loading'));
-      return;
-    }
-    setIsCreating(true);
-    const workflowId = await createWorkflow(t('common.utils.untitled'));
-    setIsCreating(false);
-    if (!workflowId) {
-      toast.error(t('common.create.error'));
-      return;
-    }
-    void mutateWorkflows();
-    open(`/${teamId}/workspace/${workflowId}`, '_blank');
-  };
 
   const handleAfterUpdateWorkflow = () => {
     void mutateWorkflows();
@@ -258,9 +239,7 @@ export const Workflows: React.FC = () => {
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="outline" size="small" icon={<Plus />} onClick={handleCreateWorkflow} loading={isCreating}>
-              {t('common.utils.create')}
-            </Button>
+            <CreateAppDialog defaultSelect="workflow" />
           </>
         }
       />

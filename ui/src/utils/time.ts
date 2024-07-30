@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 
 import i18n from '@/i18n.ts';
+import _ from 'lodash';
 
 export const formatTimeDiff = (diffValue: number) => {
   const duration = dayjs.duration(diffValue);
@@ -27,7 +28,8 @@ export const formatTimeDiff = (diffValue: number) => {
   }
 };
 
-export const formatTimeDiffPrevious = (timestamp: number) => {
+export const formatTimeDiffPrevious = (timestamp: number | string) => {
+  !_.isNumber(timestamp) && (timestamp = _.toNumber(timestamp));
   if (String(timestamp).length === 10) {
     timestamp *= 1000;
   }

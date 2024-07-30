@@ -40,6 +40,17 @@ export const splitEmojiLink = (
     }
   }
 
+  if (src?.toString()?.startsWith('lucide') && src.includes(':')) {
+    const [, icon, color] = src.split(':');
+    const morandiColor = morandiColorMapper[color];
+
+    return {
+      backgroundColor: morandiColor || color || fallbackColor,
+      text: icon,
+      emoji: icon,
+    };
+  }
+
   return {
     backgroundColor: fallbackColor,
     text: src.length >= 3 ? src.slice(1) : src,

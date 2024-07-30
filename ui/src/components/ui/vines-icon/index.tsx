@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { isUndefined } from 'lodash';
 import emojiRenderer from 'react-easy-emoji';
@@ -6,6 +6,11 @@ import isURL from 'validator/es/lib/isURL';
 
 import { splitEmojiLink } from '@/components/ui/vines-icon/utils.ts';
 import { cn } from '@/utils';
+import { useCreation } from 'ahooks';
+import { emojiRegex } from '@/utils/emoji-regex.ts';
+import { useAppStore } from '@/store/useAppStore';
+import { LucideIconRender } from '@/components/ui/vines-icon/lucide/render.tsx';
+import VinesEvent from '@/utils/events.ts';
 
 export type IVinesIconSize = 'auto' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'max' | 'gallery';
 
@@ -27,7 +32,23 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
 }) => {
   const src = (propSrc ?? children ?? '').toString().trim();
 
+  const iconNames = useAppStore((s) => s.iconNames);
+  const initialized = useAppStore((s) => s.iconInitialized);
+
   const { text, backgroundColor } = splitEmojiLink(src);
+
+  useEffect(() => {
+    if (!initialized) {
+      VinesEvent.emit('vines-trigger-init-icons');
+    }
+  }, [initialized]);
+
+  const iconType = useCreation(() => {
+    if (emojiRegex().test(text)) return 'emoji';
+    if (iconNames.includes(text)) return 'lucide';
+    if (isURL(src)) return 'img';
+    return 'text';
+  }, [iconNames, text, src, initialized]);
 
   return (
     <div
@@ -54,7 +75,22 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
         <div className="h-full w-full" />
       ) : (
         <div className="flex h-full w-full items-center justify-center" style={{ backgroundColor }}>
-          {isURL(src) ? <img src={src} alt={alt} /> : emojiRenderer(text, { protocol: 'https', ext: '.png' })}
+          {iconType === 'img' && <img src={src} alt={alt} />}
+          {iconType === 'emoji' && emojiRenderer(text, { protocol: 'https', ext: '.png' })}
+          {iconType === 'lucide' && (
+            <LucideIconRender
+              src={text}
+              className={cn(
+                'stroke-current text-black',
+                (size === 'xl' || size === '2xl' || size === '3xl') && 'size-6',
+                size === 'lg' && 'size-5',
+                size === 'md' && 'size-4',
+                size === 'sm' && 'size-3',
+                size === 'xs' && 'size-2',
+              )}
+            />
+          )}
+          {iconType === 'text' && emojiRenderer(text, { protocol: 'https', ext: '.png' })}
         </div>
       )}
     </div>

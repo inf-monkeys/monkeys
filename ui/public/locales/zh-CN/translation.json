@@ -866,6 +866,77 @@
     }
   },
   "ugc-page": {
+    "app": {
+      "create": {
+        "dialog": {
+          "title": "创建应用",
+          "type": {
+            "label": "应用类型",
+            "agent": {
+              "label": "智能体应用",
+              "tag": "简洁",
+              "descriptions": [
+                "在「智能体」页面中管理，可将应用的单个视图在「工作台」中固定使用",
+                "由大语言模型为核心，根据自然语言需求，自主使用工具、查询数据、构建工作流",
+                "泛化能力强，需要预先配置的信息少，执行可能不够精确",
+                "分享出与 OpenAI 标准 API 一致的流式对话接口"
+              ]
+            },
+            "workflow": {
+              "label": "工作流应用",
+              "tag": "精确",
+              "descriptions": [
+                "在「工作流」页面中管理，可将应用的单个视图在「工作台」中固定使用",
+                "由预先配置的流程为核心，可以直接使用，也可以后续被其他的智能体应用调用",
+                "严格执行预先配置的流程，输入要求严格，配置时需要了解大模型的背景知识",
+                "分享出与配置一致的 API 输入输出接口"
+              ]
+            }
+          },
+          "info": {
+            "label": "应用图标 & 名称",
+            "placeholder": "输入应用名称"
+          },
+          "description": {
+            "label": "应用描述",
+            "placeholder": "输入应用描述"
+          }
+        }
+      }
+    },
+    "agent": {
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "model": {
+            "label": "模型"
+          },
+          "customModelName": {
+            "label": "自定义模型名称"
+          },
+          "user": {
+            "label": "用户"
+          },
+          "assetTags": {
+            "label": "标签"
+          },
+          "createdTimestamp": {
+            "label": "创建时间"
+          },
+          "updatedTimestamp": {
+            "label": "更新时间"
+          }
+        }
+      }
+    },
     "workflow": {
       "ugc-view": {
         "columns": {
@@ -1818,7 +1889,6 @@
             "loading": "正在更新权限...",
             "success": "更新权限成功！",
             "error": "更新权限失败！请稍后重试！",
-
             "copy-workspace-url": {
               "label": "复制链接",
               "tips": "互联网上获得链接的人可查看整个工作区"
