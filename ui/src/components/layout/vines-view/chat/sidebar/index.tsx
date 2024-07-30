@@ -22,8 +22,9 @@ interface IChatSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
   const { t } = useTranslation();
 
-  const { workbenchVisible } = usePageStore();
-  const { workflowId } = useFlowStore();
+  const workbenchVisible = usePageStore((s) => s.workbenchVisible);
+  const workflowId = useFlowStore((s) => s.workflowId);
+
   const { data, mutate } = useWorkflowChatSessions(workflowId);
   const { trigger } = useCreateWorkflowChatSession();
 

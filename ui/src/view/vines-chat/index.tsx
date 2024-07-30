@@ -14,7 +14,8 @@ export const VinesChatView: React.FC = () => {
   const { ref, height } = useElementSize();
 
   const { vines } = useVinesFlow();
-  const { workbenchVisible } = usePageStore();
+
+  const workbenchVisible = usePageStore((s) => s.workbenchVisible);
 
   const workflowInput = vines.workflowInput;
   const workflowInputLength = workflowInput.length;

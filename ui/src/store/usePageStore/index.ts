@@ -12,8 +12,9 @@ export interface PageSlice {
   containerHeight: number;
   setContainerHeight: (height: number) => void;
 
-  visibleCustomSetting: boolean;
-  setVisibleCustomSetting: (loading: boolean) => void;
+  apiDocumentVisible: boolean;
+  setApiDocumentVisible: (visible: boolean) => void;
+  toggleApiDocumentVisible: () => void;
 
   workbenchVisible: boolean;
   setWorkbenchVisible: (visible: boolean) => void;
@@ -32,8 +33,10 @@ export const usePageStore = create<PageSlice>()(
     setContainerWidth: (containerWidth) => set({ containerWidth }),
     containerHeight: 0,
     setContainerHeight: (containerHeight) => set({ containerHeight }),
-    visibleCustomSetting: false,
-    setVisibleCustomSetting: (visibleCustomSetting) => set({ visibleCustomSetting }),
+
+    apiDocumentVisible: false,
+    setApiDocumentVisible: (apiDocumentVisible) => set({ apiDocumentVisible }),
+    toggleApiDocumentVisible: () => set((state) => ({ apiDocumentVisible: !state.apiDocumentVisible })),
 
     workbenchVisible: false,
     setWorkbenchVisible: (workbenchVisible) => set({ workbenchVisible }),

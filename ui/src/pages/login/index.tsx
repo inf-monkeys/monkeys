@@ -24,7 +24,7 @@ import VinesEvent from '@/utils/events.ts';
 const Login: React.FC = () => {
   const { t } = useTranslation();
 
-  const { darkMode } = useAppStore();
+  const darkMode = useAppStore((s) => s.darkMode);
   const { data: oem, error } = useSystemConfig();
 
   const logoUrl = get(oem, `theme.logo.${darkMode ? 'dark' : 'light'}`, '');

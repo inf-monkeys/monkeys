@@ -24,7 +24,7 @@ interface ITriggerSelectorProps {}
 export const TriggerSelector: React.FC<ITriggerSelectorProps> = () => {
   const { t } = useTranslation();
 
-  const { workflowId } = useFlowStore();
+  const workflowId = useFlowStore((s) => s.workflowId);
 
   const { mutate } = useSWRConfig();
 

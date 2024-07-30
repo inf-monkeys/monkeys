@@ -22,9 +22,15 @@ interface IGridViewProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const GridView: React.FC<IGridViewProps> = ({ toggleMoveState, children }) => {
-  const { workflowId } = useFlowStore();
-  const { initialScale } = useCanvasStore();
-  const { isCanvasMoving, isUserInteraction, setScale, setIsUserInteraction } = useCanvasInteractionStore();
+  const workflowId = useFlowStore((s) => s.workflowId);
+
+  const initialScale = useCanvasStore((s) => s.initialScale);
+
+  const isCanvasMoving = useCanvasInteractionStore((s) => s.isCanvasMoving);
+  const isUserInteraction = useCanvasInteractionStore((s) => s.isUserInteraction);
+  const setScale = useCanvasInteractionStore((s) => s.setScale);
+  const setIsUserInteraction = useCanvasInteractionStore((s) => s.setIsUserInteraction);
+
   const { zoomIn, zoomOut, centerView, zoomToElement, setTransform } = useControls();
 
   useTransformEffect(debounce(({ state }) => setScale(state.scale), 100));

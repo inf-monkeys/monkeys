@@ -16,8 +16,9 @@ import VinesEvent from '@/utils/events.ts';
 interface ICustomTriggerProps {}
 
 export const CustomTrigger: React.FC<ICustomTriggerProps> = () => {
-  const { workflowId } = useFlowStore();
   const { mutate } = useSWRConfig();
+
+  const workflowId = useFlowStore((s) => s.workflowId);
 
   const [open, setOpen] = useState(false);
 

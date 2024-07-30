@@ -25,7 +25,9 @@ interface IWorkflowApiConfigProps {}
 export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
   const { t } = useTranslation();
 
-  const { isLatestWorkflowVersion, workflowId } = useFlowStore();
+  const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
+  const workflowId = useFlowStore((s) => s.workflowId);
+
   const { vines } = useVinesFlow();
   const { workflow } = useVinesPage();
 

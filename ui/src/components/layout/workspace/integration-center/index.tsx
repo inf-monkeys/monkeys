@@ -1,16 +1,13 @@
 import React, { useEffect } from 'react';
 
-import { Blocks } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useApiKeyList } from '@/apis/api-keys/api-key.ts';
 import { IApiKeyStatus } from '@/apis/api-keys/typings.ts';
-import { curl } from '@/components/layout-wrapper/workspace/header/expand/integration-center/utils.ts';
+import { curl } from '@/components/layout/workspace/integration-center/utils.ts';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { cn } from '@/utils';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { usePageStore } from '@/store/usePageStore';
 
 // @ts-ignore
 import ChatCompletionsTemplateZH from './templates/chat-completions.mdx';
@@ -23,6 +20,8 @@ interface IIntegrationCenterProps extends React.ComponentPropsWithoutRef<'div'> 
 
 export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
   const { t } = useTranslation();
+
+  const containerHeight = usePageStore((s) => s.containerHeight);
 
   const { data: apiKeys } = useApiKeyList();
 
@@ -92,50 +91,47 @@ export const IntegrationCenter: React.FC<IIntegrationCenterProps> = () => {
   const enabledOpenAIInterface = workflow?.exposeOpenaiCompatibleInterface ?? false;
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="-mx-4 scale-90" icon={<Blocks />}>
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-lg font-semibold leading-none tracking-tight">
           {t('workspace.wrapper.integration-center.title')}
-        </Button>
-      </DialogTrigger>
-      <DialogContent className={cn('max-h max-w-xl', 'max-w-7xl')}>
-        <DialogTitle>{t('workspace.wrapper.integration-center.title')}</DialogTitle>
-        <DialogDescription>{t('workspace.wrapper.integration-center.desc')}</DialogDescription>
-        <ScrollArea className="h-[calc(100vh-20rem)]">
-          <div className="prose max-w-full px-3 dark:prose-invert prose-p:leading-relaxed prose-pre:p-0">
-            {enabledOpenAIInterface ? (
-              <>
-                {workflow?.variables?.find((variable) => variable.name === 'messages') ? (
-                  <ChatCompletionsTemplateZH
-                    apiBaseUrl={chatApiBaseUrl}
-                    apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
-                    model={model}
-                  />
-                ) : (
-                  <CompletionsTemplateZH
-                    apiBaseUrl={chatApiBaseUrl}
-                    apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
-                    model={model}
-                  />
-                )}
-              </>
-            ) : (
-              <>
-                <ExecuteWorkflowTemplateZH
-                  apiBaseUrl={apiBaseUrl}
+        </h1>
+        <span className="text-sm text-muted-foreground">{t('workspace.wrapper.integration-center.desc')}</span>
+      </div>
+      <ScrollArea style={{ height: containerHeight - 107 }}>
+        <div className="prose max-w-full px-3 dark:prose-invert prose-p:leading-relaxed prose-pre:p-0">
+          {enabledOpenAIInterface ? (
+            <>
+              {workflow?.variables?.find((variable) => variable.name === 'messages') ? (
+                <ChatCompletionsTemplateZH
+                  apiBaseUrl={chatApiBaseUrl}
                   apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
                   model={model}
-                  workflowInputs={workflowInputs}
-                  curlSync={executeWorkflowSyncCurl}
-                  curl={executeWorkflowCurl}
-                  curlExecutionStatus={getExecutionStatusCurl}
-                  workflowId={workflowId}
                 />
-              </>
-            )}
-          </div>
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+              ) : (
+                <CompletionsTemplateZH
+                  apiBaseUrl={chatApiBaseUrl}
+                  apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
+                  model={model}
+                />
+              )}
+            </>
+          ) : (
+            <>
+              <ExecuteWorkflowTemplateZH
+                apiBaseUrl={apiBaseUrl}
+                apiKey={finalApikey ? finalApikey.apiKey : '$MONKEYS_API_KEY'}
+                model={model}
+                workflowInputs={workflowInputs}
+                curlSync={executeWorkflowSyncCurl}
+                curl={executeWorkflowCurl}
+                curlExecutionStatus={getExecutionStatusCurl}
+                workflowId={workflowId}
+              />
+            </>
+          )}
+        </div>
+      </ScrollArea>
+    </div>
   );
 };

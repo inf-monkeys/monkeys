@@ -20,7 +20,9 @@ export const NodeToolbar: React.FC<INodeToolbarProps> = ({ node }) => {
   } = node;
 
   const { vines } = useVinesFlow();
-  const { overNodeId, activeDraggableNodeId } = useCanvasStore();
+
+  const overNodeId = useCanvasStore((s) => s.overNodeId);
+  const activeDraggableNodeId = useCanvasStore((s) => s.activeDraggableNodeId);
 
   const visible = overNodeId === id && activeDraggableNodeId !== overNodeId;
 

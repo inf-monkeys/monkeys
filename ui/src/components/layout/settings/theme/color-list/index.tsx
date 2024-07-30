@@ -25,7 +25,7 @@ export const ThemeColorList: React.FC<IThemeColorListProps> = () => {
   const { mutate } = useSWRConfig();
   const { data, error } = useThemeList();
 
-  const { setValue } = usePaletteStore();
+  const setValue = usePaletteStore((s) => s.setValue);
 
   const handleDeleteTheme = (themeId: string) => {
     toast.promise(deleteTheme(themeId), {

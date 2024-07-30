@@ -17,7 +17,8 @@ export const useVinesPage = () => {
   const { workflowId, pageId, teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
   const { data: pages, mutate: pagesMutate } = useWorkspacePagesWithWorkflowId(workflowId);
 
-  const { page, setPage } = usePageStore();
+  const page = usePageStore((s) => s.page);
+  const setPage = usePageStore((s) => s.setPage);
 
   const { data: workflow, mutate: mutateWorkflow } = useGetWorkflow(workflowId);
 

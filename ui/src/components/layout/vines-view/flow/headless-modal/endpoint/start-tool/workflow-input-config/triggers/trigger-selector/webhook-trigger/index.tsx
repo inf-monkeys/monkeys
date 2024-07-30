@@ -38,7 +38,8 @@ export const WebhookTrigger: React.FC<IWebhookTriggerProps> = () => {
   const { t } = useTranslation();
 
   const { mutate } = useSWRConfig();
-  const { workflowId } = useFlowStore();
+
+  const workflowId = useFlowStore((s) => s.workflowId);
 
   const { vines } = useVinesFlow();
   const workflowVersion = vines.version;

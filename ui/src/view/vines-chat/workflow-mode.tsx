@@ -15,8 +15,8 @@ interface IVinesWorkflowModeProps {
 }
 
 export const VinesWorkflowMode: React.FC<IVinesWorkflowModeProps> = ({ height, disabled = false }) => {
-  const { visible } = useViewStore();
-  const { workflowId } = useFlowStore();
+  const visible = useViewStore((s) => s.visible);
+  const workflowId = useFlowStore((s) => s.workflowId);
 
   const { vines } = useVinesFlow();
 

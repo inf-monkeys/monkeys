@@ -21,7 +21,7 @@ export const VinesLogo: React.FC<Omit<ILogoProps, 'url'> & { disableInitialHeigh
   const { data: oem, isLoading: isOemLoading } = useSystemConfig();
 
   const { team } = useVinesTeam();
-  const { darkMode } = useAppStore();
+  const darkMode = useAppStore((s) => s.darkMode);
 
   const enabledCustomIcon = get(team, 'customTheme.enableTeamLogo', false);
 

@@ -1,39 +1,40 @@
 import React, { useEffect } from 'react';
 
-import { motion } from 'framer-motion';
-
-import { WorkspaceCustomSetting } from '@/components/layout/workspace/custom-setting';
-import { SpaceTabs } from '@/components/layout-wrapper/workspace/space/tabs';
-import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
+import { FullScreenDisplay } from '@/components/layout-wrapper/workspace/space/full-screen-display.tsx';
+import { WorkspaceSidebar } from '@/components/layout-wrapper/workspace/space/sidebar';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { usePageStore } from '@/store/usePageStore';
+import { cn } from '@/utils';
 
 interface ISpaceProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const Space: React.FC<ISpaceProps> = ({ children }) => {
   const { ref, width, height } = useElementSize();
-  const { pages, pageId } = useVinesPage();
 
-  const { setContainerWidth, setContainerHeight, setWorkbenchVisible } = usePageStore();
+  const setContainerWidth = usePageStore((s) => s.setContainerWidth);
+  const setContainerHeight = usePageStore((s) => s.setContainerHeight);
+  const setWorkbenchVisible = usePageStore((s) => s.setWorkbenchVisible);
   useEffect(() => {
     setContainerWidth(width);
     setContainerHeight(height);
     setWorkbenchVisible(false);
   }, [width, height]);
 
-  const isFirstNavActive = pageId === pages?.[0].id;
+  const vinesIFrameVisible = usePageStore((s) => s.vinesIFrameVisible);
 
   return (
-    <>
-      <SpaceTabs />
-      <motion.div
+    <div className="flex h-[calc(100%-3.5rem)] w-full">
+      {!vinesIFrameVisible && <WorkspaceSidebar />}
+      <div
         ref={ref}
-        animate={{ borderTopLeftRadius: isFirstNavActive ? 0 : 16 }}
-        className="relative mx-3 mb-2 mt-0 h-[calc(100%-7.5rem)] w-[calc(100%-1.5rem)] overflow-hidden overflow-x-clip rounded-b-2xl rounded-r-2xl bg-slate-1 shadow-sm"
+        className={cn(
+          'relative m-4 w-[calc(100vw-15rem)] overflow-hidden rounded-md border border-input bg-slate-1 shadow-sm',
+          !vinesIFrameVisible && 'ml-0',
+        )}
       >
-        <WorkspaceCustomSetting />
+        <FullScreenDisplay />
         {children}
-      </motion.div>
-    </>
+      </div>
+    </div>
   );
 };

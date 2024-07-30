@@ -22,7 +22,7 @@ export const WorkspacePage: React.FC = () => {
 
   const { workflow, workflowId, pages, page, pageId, teamId, setPage } = useVinesPage();
 
-  const { pageTitle } = usePageStore();
+  const pageTitle = usePageStore((s) => s.pageTitle);
 
   useEffect(() => {
     if (!workflow) return;

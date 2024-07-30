@@ -12,7 +12,7 @@ interface ISyntaxHighlighterProps {
 }
 
 export const SyntaxHighlighter = memo<ISyntaxHighlighterProps>(({ children, language, className, style }) => {
-  const { darkMode } = useAppStore();
+  const darkMode = useAppStore((s) => s.darkMode);
   const { data, isLoading } = useHighlight(children.trim(), language, darkMode);
 
   return (

@@ -53,8 +53,9 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const { isLatestWorkflowVersion } = useFlowStore();
-  const { isWorkflowRUNNING } = useCanvasStore();
+  const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
+  const isWorkflowRUNNING = useCanvasStore((s) => s.isWorkflowRUNNING);
+
   const [activeTab, setActiveTab] = useState('config');
 
   const isUnSupport = !tool;

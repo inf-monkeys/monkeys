@@ -34,7 +34,7 @@ interface IMoreToolbarProps extends React.ComponentPropsWithoutRef<'div'> {}
 export const MoreToolbar: React.FC<IMoreToolbarProps> = () => {
   const { t } = useTranslation();
 
-  const { workflowId } = useFlowStore();
+  const workflowId = useFlowStore((s) => s.workflowId);
 
   const { teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
   const navigate = useNavigate({ from: Route.fullPath });

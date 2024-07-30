@@ -25,7 +25,8 @@ interface IVinesChatListProps {
 export const VinesChatList: React.FC<IVinesChatListProps> = ({ workflowId }) => {
   const { t } = useTranslation();
 
-  const { visible } = useViewStore();
+  const visible = useViewStore((s) => s.visible);
+
   const { userPhoto, userName } = useVinesUser();
   const { vines } = useVinesFlow();
 

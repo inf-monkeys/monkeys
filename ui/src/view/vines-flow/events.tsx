@@ -7,7 +7,8 @@ import VinesEvent from '@/utils/events.ts';
 interface IVinesFlowEventsProps {}
 
 export const VinesFlowEvents: React.FC<IVinesFlowEventsProps> = () => {
-  const { workflowId } = useFlowStore();
+  const workflowId = useFlowStore((s) => s.workflowId);
+
   const { vines } = useVinesFlow();
 
   const handleRemoveNode = (_wid: string, nodeId: string) => {
