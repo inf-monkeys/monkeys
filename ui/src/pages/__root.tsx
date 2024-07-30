@@ -4,20 +4,20 @@ import { createRootRoute, Outlet, ScrollRestoration } from '@tanstack/react-rout
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { WorkspaceIframe } from 'src/components/layout-wrapper/space/iframe';
 
 import { OEM } from '@/components/layout/oem';
 import { MainWrapper } from '@/components/layout-wrapper/main';
 import { WorkspaceWrapper } from '@/components/layout-wrapper/workspace';
-import { WorkspaceIframe } from '@/components/layout-wrapper/workspace-iframe';
 import { RouteEvent } from '@/components/router/event.tsx';
 import { TeamsGuard } from '@/components/router/guard/team.tsx';
 import { UserGuard } from '@/components/router/guard/user.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { VinesGlobalUpload } from '@/components/ui/updater/vines-global-upload.tsx';
+import { IconGuard } from '@/components/ui/vines-icon/lucide/guard.tsx';
 import { SIDEBAR_MAP } from '@/consts/sidebar.tsx';
 import VinesEvent from '@/utils/events.ts';
-import { IconGuard } from '@/components/ui/vines-icon/lucide/guard.tsx';
 
 const RootComponent: React.FC = () => {
   const { t } = useTranslation();

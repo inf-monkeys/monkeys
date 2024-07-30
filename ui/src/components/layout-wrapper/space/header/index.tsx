@@ -8,14 +8,13 @@ import { useTranslation } from 'react-i18next';
 import { getVinesToken } from '@/apis/utils.ts';
 import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
 import { UserCard } from '@/components/layout-wrapper/workspace/header/expand/user-card.tsx';
-import { WorkflowInfoCard } from '@/components/layout-wrapper/workspace/header/workflow-info-card.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import VinesEvent from '@/utils/events.ts';
 
-interface IWorkspaceHeaderProps extends React.ComponentPropsWithoutRef<'header'> {}
+interface ISpaceHeaderProps extends React.ComponentPropsWithoutRef<'header'> {}
 
-export const WorkspaceHeader: React.FC<IWorkspaceHeaderProps> = () => {
+export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({ children }) => {
   const { t } = useTranslation();
 
   const { teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
@@ -29,7 +28,7 @@ export const WorkspaceHeader: React.FC<IWorkspaceHeaderProps> = () => {
           <VinesLogo description="" height={32} className={hasToken ? 'cursor-pointer' : ''} />
         </Link>
         <Separator orientation="vertical" className="h-1/2" />
-        <WorkflowInfoCard />
+        {children}
       </div>
       <div className="z-20 flex items-center gap-6">
         {hasToken ? (

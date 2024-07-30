@@ -51,25 +51,3 @@ export const kbdWindowsKeysMap: Record<string, string> = {
   home: 'Home',
   end: 'End',
 };
-
-export const kbdKeysLabelMap: Record<KbdKey, string> = {
-  command: 'Command',
-  shift: 'Shift',
-  ctrl: 'Control',
-  option: 'Option',
-  enter: 'Enter',
-  delete: 'Delete',
-  escape: 'Escape',
-  tab: 'Tab',
-  capslock: 'Caps Lock',
-  up: 'Up',
-  right: 'Right',
-  down: 'Down',
-  left: 'Left',
-  pageup: 'Page Up',
-  pagedown: 'Page Down',
-  home: 'Home',
-  end: 'End',
-  help: 'Help',
-  space: 'Space',
-};

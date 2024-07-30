@@ -21,9 +21,9 @@ import { get } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { IPageType } from '@/apis/pages/typings.ts';
+import { SpaceSidebarTabsList } from '@/components/layout-wrapper/space/sidebar/tabs.tsx';
 import { SpaceTab } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab.tsx';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
-import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { usePageStore } from '@/store/usePageStore';
 
 interface ITabsProps {}
@@ -74,30 +74,28 @@ export const SpaceTabs: React.FC<ITabsProps> = () => {
   const activeIndex = apiDocumentVisible ? -1 : pages?.findIndex(({ id }) => id === pageId) ?? 0;
 
   return (
-    <ScrollArea className="h-full flex-1 overflow-y-scroll" scrollBarDisabled>
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        modifiers={[restrictToVerticalAxis, restrictToFirstScrollableAncestor]}
-        onDragEnd={handleDragEnd}
-      >
-        <div className="relative z-20 flex w-full flex-col gap-1 scroll-smooth">
-          <SortableContext items={pageIds} strategy={verticalListSortingStrategy} disabled={disableDND}>
-            {pages?.map(({ id, displayName, instance, customOptions }, index) => (
-              <SpaceTab
-                key={id}
-                id={id}
-                icon={get(customOptions, 'icon', instance?.icon ?? '⚠️')}
-                displayName={displayName ?? t('workspace.wrapper.space.unknown-view')}
-                activeIndex={activeIndex}
-                index={index}
-                pages={pages}
-                page={page}
-              />
-            ))}
-          </SortableContext>
-        </div>
-      </DndContext>
-    </ScrollArea>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      modifiers={[restrictToVerticalAxis, restrictToFirstScrollableAncestor]}
+      onDragEnd={handleDragEnd}
+    >
+      <SpaceSidebarTabsList>
+        <SortableContext items={pageIds} strategy={verticalListSortingStrategy} disabled={disableDND}>
+          {pages?.map(({ id, displayName, instance, customOptions }, index) => (
+            <SpaceTab
+              key={id}
+              id={id}
+              icon={get(customOptions, 'icon', instance?.icon ?? '⚠️')}
+              displayName={displayName ?? t('workspace.wrapper.space.unknown-view')}
+              activeIndex={activeIndex}
+              index={index}
+              pages={pages}
+              page={page}
+            />
+          ))}
+        </SortableContext>
+      </SpaceSidebarTabsList>
+    </DndContext>
   );
 };

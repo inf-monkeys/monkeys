@@ -2,6 +2,10 @@ import React, { memo } from 'react';
 
 import { MoreVertical } from 'lucide-react';
 
+import { DeletePage } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/menu/delete-page.tsx';
+import { ViewGroup } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/menu/group';
+import { RenameView } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/menu/rename-view.tsx';
+import { SetViewIcon } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/menu/set-view-icon.tsx';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,10 +16,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
-import { SetViewIcon } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/menu/set-view-icon.tsx';
-import { RenameView } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/menu/rename-view.tsx';
-import { ViewGroup } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/menu/group';
-import { DeletePage } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/menu/delete-page.tsx';
 
 interface ITabMenuProps extends React.ComponentPropsWithoutRef<'div'> {}
 

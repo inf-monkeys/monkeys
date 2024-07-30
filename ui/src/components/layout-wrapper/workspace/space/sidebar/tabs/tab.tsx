@@ -7,11 +7,10 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
 import { IPageType } from '@/apis/pages/typings.ts';
+import { SpaceSidebarTabContent, spaceSidebarTabVariants } from '@/components/layout-wrapper/space/sidebar/tabs.tsx';
 import { TabMenu } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/menu';
-import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId';
 import { usePageStore } from '@/store/usePageStore';
-import { cn } from '@/utils';
 
 export const EMOJI2LUCIDE_MAPPER = {
   '🚀': 'square-function',
@@ -39,10 +38,10 @@ export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon,
 
   const { setNodeRef, listeners, attributes, transform, isDragging } = useSortable({ id });
 
-  const isActive = activeIndex === index;
+  const active = activeIndex === index;
 
   const handleChangePage = () => {
-    if (!isActive) {
+    if (!active) {
       setApiDocumentVisible(false);
       void navigate({
         to: '/$teamId/workspace/$workflowId/$pageId',
@@ -60,10 +59,7 @@ export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon,
   return (
     <motion.div
       ref={setNodeRef}
-      className={cn(
-        'relative w-full cursor-pointer select-none items-center rounded-md border border-transparent p-2 text-sm hover:bg-mauve-2 hover:bg-opacity-70',
-        isActive && 'border-input bg-mauve-2 font-medium',
-      )}
+      className={spaceSidebarTabVariants(active ? { status: 'active' } : {})}
       onClick={handleChangePage}
       onContextMenu={handleContextMenu}
       layoutId={id}
@@ -77,13 +73,13 @@ export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon,
       exit={{ opacity: 0 }}
       {...attributes}
     >
-      <div className="flex h-full select-none items-center" {...listeners}>
-        <p className="mr-2">
-          <VinesLucideIcon className="size-[15px]" size={15} src={EMOJI2LUCIDE_MAPPER[icon] ?? icon} />
-        </p>
-        <h1 className="whitespace-nowrap text-sm">{t([`workspace.wrapper.space.tabs.${displayName}`, displayName])}</h1>
+      <SpaceSidebarTabContent
+        icon={icon}
+        displayName={t([`workspace.wrapper.space.tabs.${displayName}`, displayName])}
+        {...listeners}
+      >
         <AnimatePresence>
-          {isActive && (
+          {active && (
             <motion.div
               key={id + '_more_button'}
               initial={{ opacity: 0 }}
@@ -96,7 +92,7 @@ export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon,
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </SpaceSidebarTabContent>
     </motion.div>
   );
 });
