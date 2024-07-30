@@ -49,7 +49,8 @@
       "add": "Add",
       "upload": "Upload",
       "click-to-copy": "Click to copy",
-      "coming-soon": "Coming soon"
+      "coming-soon": "Coming soon",
+      "counter": " ({{count}})"
     },
     "type": {
       "workflow": "workflow",
