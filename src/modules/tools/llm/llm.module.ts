@@ -9,5 +9,6 @@ import { LlmService } from './llm.service';
   controllers: [LlmController],
   providers: [LlmService],
   imports: [ToolsModule, KnowledgeBaseModule, SqlKnowledgeBaseModule],
+  exports: [LlmService],
 })
 export class LLMToolsModule {}

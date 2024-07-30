@@ -47,8 +47,10 @@ export interface CreateCompelitionsParams {
 }
 
 export interface CreateChatCompelitionsResponseOptions {
-  apiResponseType: 'simple' | 'full';
+  apiResponseType?: 'simple' | 'full';
   showLogs?: boolean;
+  onSuccess?: (text: string) => void;
+  onFailed?: (error: string) => void;
 }
 
 export const getModels = (
@@ -536,8 +538,8 @@ ${userQuestion}
     }
   }
 
-  public async createChatCompelitions(res: Response, teamId: string, params: CreateChatCompelitionsParams, options: CreateChatCompelitionsResponseOptions) {
-    const { apiResponseType = 'full', showLogs = false } = options;
+  public async createChatCompelitions(res: Response, teamId: string, params: CreateChatCompelitionsParams, options?: CreateChatCompelitionsResponseOptions) {
+    const { apiResponseType = 'full', showLogs = false, onSuccess, onFailed } = options || {};
     if (apiResponseType === 'simple' && params.stream) {
       throw new Error('Stream is not supported in simple api response type');
     }
@@ -632,6 +634,7 @@ ${userQuestion}
       }
       logger.error(`Failed to create chat completions: `, error);
       logger.error(`Failed to create chat completions: `, errorMsg);
+      onFailed?.(errorMsg);
       return this.setErrorResponse(res, randomChatCmplId, model, stream, errorMsg);
     }
 
@@ -688,6 +691,7 @@ ${userQuestion}
             }
           },
           onCompletion(completion) {
+            onSuccess?.(completion);
             logger.info(`Completion Finished: ${completion}`);
           },
           onFinal() {
@@ -772,7 +776,7 @@ ${userQuestion}
           if (showLogs) {
             (result as any).logs = logs;
           }
-
+          onSuccess?.(result.choices[0].message?.content);
           return res.status(200).send(
             apiResponseType === 'full'
               ? result
@@ -785,6 +789,7 @@ ${userQuestion}
           if (showLogs) {
             (response as any).logs = logs;
           }
+          onSuccess?.((response as ChatCompletion).choices[0].message?.content);
           return res.status(200).send(
             apiResponseType === 'full'
               ? response
@@ -797,6 +802,7 @@ ${userQuestion}
       }
     } catch (error) {
       logger.error(`Failed to create chat completions: `, error);
+      onFailed?.(error.message);
       return this.setErrorResponse(res, randomChatCmplId, model, stream, error.message);
     }
   }
