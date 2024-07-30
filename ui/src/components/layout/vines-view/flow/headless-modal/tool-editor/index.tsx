@@ -72,11 +72,11 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
 
   return (
     <Dialog modal={false} open={open} onOpenChange={(val) => !disableDialogClose && setOpen(val)}>
-      <DialogContent className="max-h-[calc(100vh-5%)] min-w-[55rem] max-w-[calc(100vw-40%)]">
+      <DialogContent className="flex h-full max-h-[calc(100%-15rem)] min-w-[55rem] max-w-[calc(100%-40%)] flex-col">
         <DialogTitle asChild>
           <Header node={node} />
         </DialogTitle>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="inset-1 h-[calc(100%-8.3rem)]">
           <TabsList>
             <TabsTrigger value="config">{t('workspace.flow-view.headless-modal.tool-editor.tabs.config')}</TabsTrigger>
             <TabsTrigger value="dev">{t('workspace.flow-view.headless-modal.tool-editor.tabs.dev')}</TabsTrigger>
@@ -84,31 +84,31 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
               {t('workspace.flow-view.headless-modal.tool-editor.tabs.more-config')}
             </TabsTrigger>
           </TabsList>
-          <AnimatePresence>
+          <AnimatePresence mode="popLayout">
             <motion.div
               key={activeTab}
-              className="w-full"
+              className="h-[calc(100%-4rem)] w-full [&>div[role=tabpanel]]:mt-4 [&>div[role=tabpanel]]:h-full"
               initial={{ x: 10, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -10, opacity: 0 }}
               transition={{ duration: activeTab === 'empty' ? 0 : 0.2 }}
             >
               {activeTab === 'config' && (
-                <TabsContent className="mt-4 h-[25em]" value="config">
+                <TabsContent value="config">
                   <ToolConfig nodeId={node?.id ?? ''} task={node?.getRaw()} />
                 </TabsContent>
               )}
               {activeTab === 'dev' && (
-                <TabsContent className="mt-4 h-[25em]" value="dev">
+                <TabsContent value="dev">
                   <CodeEditor data={task} lineNumbers={4} onUpdate={handleRawUpdate} readonly={disabled} />
                 </TabsContent>
               )}
               {activeTab === 'more-config' && (
-                <TabsContent className="mt-4 h-[25em]" value="more-config">
+                <TabsContent value="more-config">
                   <ToolAdvancedConfig nodeId={node?.id ?? ''} task={node?.getRaw()} />
                 </TabsContent>
               )}
-              {activeTab === 'empty' && <TabsContent className="mt-4 h-[25em]" value="empty"></TabsContent>}
+              {activeTab === 'empty' && <TabsContent value="empty"></TabsContent>}
             </motion.div>
           </AnimatePresence>
         </Tabs>

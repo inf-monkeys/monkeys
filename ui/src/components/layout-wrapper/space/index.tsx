@@ -1,14 +1,15 @@
 import React, { useEffect } from 'react';
 
-import { FullScreenDisplay } from '@/components/layout-wrapper/workspace/space/full-screen-display.tsx';
-import { WorkspaceSidebar } from '@/components/layout-wrapper/workspace/space/sidebar';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
-interface ISpaceProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface IVinesSpaceProps {
+  children: React.ReactNode;
+  sidebar?: React.ReactNode;
+}
 
-export const Space: React.FC<ISpaceProps> = ({ children }) => {
+export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar }) => {
   const { ref, width, height } = useElementSize();
 
   const setContainerWidth = usePageStore((s) => s.setContainerWidth);
@@ -24,7 +25,7 @@ export const Space: React.FC<ISpaceProps> = ({ children }) => {
 
   return (
     <div className="flex h-[calc(100%-3.5rem)] w-full">
-      {!vinesIFrameVisible && <WorkspaceSidebar />}
+      {!vinesIFrameVisible && sidebar}
       <div
         ref={ref}
         className={cn(
@@ -32,7 +33,6 @@ export const Space: React.FC<ISpaceProps> = ({ children }) => {
           !vinesIFrameVisible && 'ml-0',
         )}
       >
-        <FullScreenDisplay />
         {children}
       </div>
     </div>
