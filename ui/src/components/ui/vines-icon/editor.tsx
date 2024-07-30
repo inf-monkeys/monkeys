@@ -3,7 +3,7 @@ import React from 'react';
 import { RotateCcw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { VinesIconSelector } from '@/components/ui/icon-selector';
+import { VinesEmojiSelector } from 'src/components/ui/emoji-selector';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { IVinesIconSize, VinesIcon } from '@/components/ui/vines-icon/index.tsx';
 
@@ -27,7 +27,7 @@ export const VinesIconEditor: React.FC<IVinesIconEditorProps> = ({
   const { t } = useTranslation();
   return (
     <div className="flex">
-      <VinesIconSelector emojiLink={value} onChange={onChange} onFinished={onFinished} onlyEmoji={onlyEmoji}>
+      <VinesEmojiSelector emojiLink={value} onChange={onChange} onFinished={onFinished} onlyEmoji={onlyEmoji}>
         <div className="relative cursor-pointer">
           <VinesIcon size={size} preClassName={onlyEmoji ? 'border border-input' : ''}>
             {value}
@@ -47,7 +47,7 @@ export const VinesIconEditor: React.FC<IVinesIconEditorProps> = ({
             <TooltipContent>{t('common.utils.reset')}</TooltipContent>
           </Tooltip>
         </div>
-      </VinesIconSelector>
+      </VinesEmojiSelector>
     </div>
   );
 };

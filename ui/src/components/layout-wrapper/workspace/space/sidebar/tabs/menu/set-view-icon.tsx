@@ -1,8 +1,4 @@
 import React, { useState } from 'react';
-
-import data from '@emoji-mart/data';
-import i18n from '@emoji-mart/data/i18n/zh.json';
-import Picker from '@emoji-mart/react';
 import { set } from 'lodash';
 import { RotateCcw, SmilePlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { VinesIconSelector } from '@/components/ui/icon-selector';
 
 interface ISetViewIconProps extends React.ComponentPropsWithoutRef<'div'> {
   pageId: string;
@@ -80,13 +77,7 @@ export const SetViewIcon: React.FC<ISetViewIconProps> = ({ pageId, pages, setPag
         <DialogHeader>
           <DialogTitle>{t('workspace.wrapper.space.menu.set-icon.title')}</DialogTitle>
         </DialogHeader>
-        <Picker
-          i18n={i18n}
-          data={data}
-          onEmojiSelect={(e: any) => void handleSetViewIcon(e.native)}
-          locale="zh"
-          previewPosition="none"
-        />
+        <VinesIconSelector onIconSelect={handleSetViewIcon} />
       </DialogContent>
     </Dialog>
   );
