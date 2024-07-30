@@ -88,12 +88,6 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
               : 'workspace.pre-view.actuator.execution.label',
           )}
         </Button>
-        {/*<Tooltip>*/}
-        {/*  <TooltipTrigger asChild>*/}
-        {/*    <Button icon={<SettingsIcon />} variant="outline" onClick={() => setConfigVisible(true)} />*/}
-        {/*  </TooltipTrigger>*/}
-        {/*  <TooltipContent>配置表单</TooltipContent>*/}
-        {/*</Tooltip>*/}
       </div>
     </div>
   );

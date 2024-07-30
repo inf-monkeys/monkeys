@@ -3,10 +3,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { isArray, isString, set } from 'lodash';
 import { FileWithPath } from 'react-dropzone';
 import { UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 
 import { FieldImageMaskEditor } from '@/components/layout/vines-view/form/tabular/render/field/file/field-image-mask-editor.tsx';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card.tsx';
-import { Updater } from '@/components/ui/updater';
+import { VinesImageMaskEditor } from '@/components/ui/image-mask-editor';
+import { IUpdaterProps, Updater, VinesUpdater } from '@/components/ui/updater';
 import { getFileNameByOssUrl } from '@/components/ui/updater/utils.ts';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
@@ -15,9 +18,18 @@ interface IFieldFileProps {
   input: VinesWorkflowVariable;
   form: UseFormReturn<IWorkflowInputForm>;
   value: any;
+
+  miniMode?: boolean;
 }
 
-export const FieldFile: React.FC<IFieldFileProps> = ({ value, input: { name, type, typeOptions }, form }) => {
+export const FieldFile: React.FC<IFieldFileProps> = ({
+  value,
+  input: { name, type, typeOptions },
+  form,
+  miniMode = false,
+}) => {
+  const { t } = useTranslation();
+
   const [files, setFiles] = useState<FileWithPath[]>([]);
 
   const isMultiple = typeOptions?.multipleValues ?? false;
@@ -57,11 +69,60 @@ export const FieldFile: React.FC<IFieldFileProps> = ({ value, input: { name, typ
     }
   }, []);
 
+  const updaterProps: IUpdaterProps = {
+    files,
+    onFilesUpdate: (_files) => {
+      const updateFilesLength = _files.length;
+      if (!updateFilesLength) {
+        form.setValue(name, void 0);
+        return;
+      }
+      if (updateFilesLength < files.length) {
+        if (isMultiple) {
+          form.setValue(name, _files.map((it) => it.path) as string[]);
+        } else {
+          form.setValue(name, _files.map((it) => it.path)[0]);
+        }
+      }
+    },
+    limit: isMultiple ? void 0 : 1,
+    onFinished: (urls) => {
+      form.setValue(name, isMultiple ? urls : urls[0]);
+    },
+    basePath: 'user-files/workflow-input',
+  };
+
+  const enableImageMask = typeOptions?.enableImageMask ?? false;
+
   return (
-    type === 'file' && (
+    type === 'file' &&
+    (miniMode ? (
+      <>
+
+        {enableImageMask ? (
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-opacity-70">{t('workspace.pre-view.actuator.execution-form.file.label')}</span>
+            <VinesImageMaskEditor onFinished={(urls) => form.setValue(name, isMultiple ? urls : urls[0])}>
+              <Button variant="outline" size="small" className="-mr-1 scale-90">
+                {t('workspace.pre-view.actuator.execution-form.file.click-to-open-in-image-mask-editor-and-upload')}
+              </Button>
+            </VinesImageMaskEditor>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-opacity-70">{t('workspace.pre-view.actuator.execution-form.file.label')}</span>
+            <VinesUpdater {...updaterProps}>
+              <Button variant="outline" size="small" className="-mr-1 scale-90">
+                {t('workspace.pre-view.actuator.execution-form.file.click-to-upload')}
+              </Button>
+            </VinesUpdater>
+          </div>
+        )}
+      </>
+    ) : (
       <Card className="w-full overflow-hidden max-sm:max-w-[calc(100vw-3rem)]" ref={containerRef}>
         <CardContent className="relative p-4">
-          {typeOptions?.enableImageMask ? (
+          {enableImageMask ? (
             <FieldImageMaskEditor
               form={form}
               name={name}
@@ -71,31 +132,10 @@ export const FieldFile: React.FC<IFieldFileProps> = ({ value, input: { name, typ
               maxWidth={width}
             />
           ) : (
-            <Updater
-              files={files}
-              onFilesUpdate={(_files) => {
-                const updateFilesLength = _files.length;
-                if (!updateFilesLength) {
-                  form.setValue(name, void 0);
-                  return;
-                }
-                if (updateFilesLength < files.length) {
-                  if (isMultiple) {
-                    form.setValue(name, _files.map((it) => it.path) as string[]);
-                  } else {
-                    form.setValue(name, _files.map((it) => it.path)[0]);
-                  }
-                }
-              }}
-              limit={isMultiple ? void 0 : 1}
-              onFinished={(urls) => {
-                form.setValue(name, isMultiple ? urls : urls[0]);
-              }}
-              basePath="user-files/workflow-input"
-            />
+            <Updater {...updaterProps} />
           )}
         </CardContent>
       </Card>
-    )
+    ))
   );
 };
