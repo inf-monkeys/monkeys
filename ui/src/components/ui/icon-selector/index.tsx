@@ -19,7 +19,7 @@ interface IVinesIconSelectorProps extends Omit<React.ComponentPropsWithoutRef<'d
   onIconSelect?: (iconName: string) => void | Promise<void>;
 }
 
-export const VinesIconSelector: React.FC<IVinesIconSelectorProps> = memo(({ children, onIconSelect }) => {
+export const VinesIconSelector: React.FC<IVinesIconSelectorProps> = memo(({ onIconSelect }) => {
   const { t } = useTranslation();
 
   const [searchValue, setSearchValue] = useState('');
@@ -77,7 +77,7 @@ export const VinesIconSelector: React.FC<IVinesIconSelectorProps> = memo(({ chil
   const tabsNode = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="flex h-[calc(100vh-10rem)] w-full flex-col gap-2">
+    <div className="flex h-96 w-full flex-col gap-2">
       <div className="relative flex w-full items-center">
         <Search className="absolute ml-3 size-4 shrink-0 opacity-50" />
         <Input
@@ -116,7 +116,7 @@ export const VinesIconSelector: React.FC<IVinesIconSelectorProps> = memo(({ chil
         {Object.keys(iconCateMap).map((cateName) => (
           <TabsContent value={cateName} key={cateName}>
             <VirtuosoGrid
-              style={{ height: 'calc( 100vh - 16rem )' }}
+              style={{ height: 288 }}
               data={iconCateMap[cateName].icons}
               components={{
                 // eslint-disable-next-line react/display-name
