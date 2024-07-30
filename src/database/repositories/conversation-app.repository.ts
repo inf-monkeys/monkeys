@@ -1,11 +1,14 @@
-import { LlmModelEndpointType } from '@/common/config';
+import { config, LlmModelEndpointType } from '@/common/config';
 import { ListDto } from '@/common/dto/list.dto';
+import { ConversationStatusEnum } from '@/common/dto/status.enum';
 import { generateDbId } from '@/common/utils';
 import { getModels } from '@/modules/tools/llm/llm.service';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import _ from 'lodash';
 import { Repository } from 'typeorm';
 import { ConversationAppEntity, CreateConversationAppParams, UpdateConversationAppParams } from '../entities/conversation-app/conversation-app.entity';
+import { ConversationExecutionEntity } from '../entities/conversation-app/conversation-executions.entity';
 import { ConversationAppAssetRepositroy } from './assets-conversation-app.repository';
 
 @Injectable()
@@ -13,6 +16,8 @@ export class ConversationAppRepository {
   constructor(
     @InjectRepository(ConversationAppEntity)
     private readonly repository: Repository<ConversationAppEntity>,
+    @InjectRepository(ConversationExecutionEntity)
+    private readonly executionRepository: Repository<ConversationExecutionEntity>,
     private readonly assetRepository: ConversationAppAssetRepositroy,
   ) {}
 
@@ -156,5 +161,247 @@ export class ConversationAppRepository {
     }
     entity.updatedTimestamp = Date.now();
     return await this.repository.save(entity);
+  }
+
+  private getDateList(startTimestamp: number, endTimestamp: number) {
+    const startDate = new Date(startTimestamp);
+    const endDate = new Date(endTimestamp);
+    endDate.setDate(endDate.getDate() + 1);
+
+    const dateList = [];
+    const currentDate = startDate;
+
+    while (currentDate <= endDate) {
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const day = String(currentDate.getDate()).padStart(2, '0');
+
+      dateList.push(`${year}-${month}-${day}`);
+
+      // Move to the next day
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return dateList;
+  }
+
+  public async createConversationExecution(userId: string, appId: string, status: ConversationStatusEnum, takes: number) {
+    await this.executionRepository.save({
+      id: generateDbId(),
+      createdTimestamp: +Date.now(),
+      updatedTimestamp: +Date.now(),
+      isDeleted: false,
+      userId,
+      status,
+      takes,
+      appId,
+    });
+  }
+
+  public async getExecutionStatisticsByAppId(conversationAppId: string, startTimestamp: number, endTimestamp: number) {
+    const appId = config.server.appId;
+    const callsPerDateSql = `
+SELECT
+    app_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/ 1000), 'YYYY-MM-DD') AS date,
+    COUNT(*) AS total_calls
+FROM
+    ${appId}_conversation_executions
+WHERE app_id = '${conversationAppId}' AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+GROUP BY
+    app_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
+ORDER BY
+    app_id,
+    date;
+    `;
+
+    const successPerDateSql = `
+SELECT
+    app_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/ 1000), 'YYYY-MM-DD') AS date,
+    COUNT(*) AS total_calls
+FROM
+    ${appId}_conversation_executions
+WHERE app_id = '${conversationAppId}' AND status = 'SUCCEED' AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+GROUP BY
+    app_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
+ORDER BY
+    app_id,
+    date;
+`;
+
+    const failedPerDateSql = `
+SELECT
+    app_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/ 1000), 'YYYY-MM-DD') AS date,
+    COUNT(*) AS total_calls
+FROM
+    ${appId}_conversation_executions
+WHERE app_id = '${conversationAppId}' AND status = 'FAILED' AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+GROUP BY
+    app_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
+ORDER BY
+    app_id,
+    date;
+`;
+
+    const averageTakesPerDateSql = `
+SELECT
+  app_id,
+  TO_CHAR(TO_TIMESTAMP(created_timestamp / 1000), 'YYYY-MM-DD') AS date,
+  AVG(takes) AS average_time
+FROM
+  ${appId}_conversation_executions
+WHERE
+  status = 'SUCCEED' AND app_id = '${conversationAppId}' AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+GROUP BY
+  app_id,
+  date
+ORDER BY
+  app_id,
+  date;
+    `;
+
+    const dateList = this.getDateList(startTimestamp, endTimestamp);
+    const [callsPerDayResult, successPerDayResult, failedPerDayResult, averageTakesPerDayResult] = await Promise.all([
+      this.executionRepository.query(callsPerDateSql),
+      this.executionRepository.query(successPerDateSql),
+      this.executionRepository.query(failedPerDateSql),
+      this.executionRepository.query(averageTakesPerDateSql),
+    ]);
+
+    const result: Array<{
+      date: string;
+      totalCount: number;
+      successCount: number;
+      failedCount: number;
+      averageTime: number;
+    }> = [];
+    for (const date of dateList) {
+      const callsPerDay = callsPerDayResult.find((x) => x.date === date);
+      const successPerDay = successPerDayResult.find((x) => x.date === date);
+      const failedPerDay = failedPerDayResult.find((x) => x.date === date);
+      const averageTakesPerDay = averageTakesPerDayResult.find((x) => x.date === date);
+      result.push({
+        date,
+        totalCount: parseInt(callsPerDay?.total_calls) || 0,
+        successCount: parseInt(successPerDay?.total_calls) || 0,
+        failedCount: parseInt(failedPerDay?.total_calls) || 0,
+        averageTime: parseInt(averageTakesPerDay?.average_time) || 0,
+      });
+    }
+    return result;
+  }
+
+  public async getExecutionStatisticsByTeamId(teamId: string, startTimestamp: number, endTimestamp: number) {
+    const appId = config.server.appId;
+    const appIds = _.uniq(
+      (
+        await this.repository.find({
+          where: {
+            teamId,
+          },
+          select: ['id'],
+        })
+      ).map((x) => x.id),
+    );
+    const appIdsStr = appIds.map((x) => `'${x}'`).join(',');
+    const callsPerDateSql = `
+SELECT
+    app_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/ 1000), 'YYYY-MM-DD') AS date,
+    COUNT(*) AS total_calls
+FROM
+    ${appId}_conversation_executions
+WHERE app_id IN (${appIdsStr}) AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+GROUP BY
+    app_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
+ORDER BY
+    app_id,
+    date;
+    `;
+
+    const successPerDateSql = `
+SELECT
+    app_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/ 1000), 'YYYY-MM-DD') AS date,
+    COUNT(*) AS total_calls
+FROM
+    ${appId}_conversation_executions
+WHERE app_id IN (${appIdsStr}) AND status = 'SUCCEED' AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+GROUP BY
+    app_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
+ORDER BY
+    app_id,
+    date;
+`;
+
+    const failedPerDateSql = `
+SELECT
+    app_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/ 1000), 'YYYY-MM-DD') AS date,
+    COUNT(*) AS total_calls
+FROM
+    ${appId}_conversation_executions
+WHERE app_id IN (${appIdsStr}) AND status = 'FAILED' AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+GROUP BY
+    app_id,
+    TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
+ORDER BY
+    app_id,
+    date;
+`;
+
+    const averageTakesPerDateSql = `
+SELECT
+  app_id,
+  TO_CHAR(TO_TIMESTAMP(created_timestamp / 1000), 'YYYY-MM-DD') AS date,
+  AVG(takes) AS average_time
+FROM
+  ${appId}_conversation_executions
+WHERE
+  status = 'SUCCEED' AND app_id IN (${appIdsStr}) AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+GROUP BY
+  app_id,
+  date
+ORDER BY
+  app_id,
+  date;
+    `;
+
+    const dateList = this.getDateList(startTimestamp, endTimestamp);
+    const [callsPerDayResult, successPerDayResult, failedPerDayResult, averageTakesPerDayResult] = await Promise.all([
+      this.executionRepository.query(callsPerDateSql),
+      this.executionRepository.query(successPerDateSql),
+      this.executionRepository.query(failedPerDateSql),
+      this.executionRepository.query(averageTakesPerDateSql),
+    ]);
+
+    const result: Array<{
+      date: string;
+      totalCount: number;
+      successCount: number;
+      failedCount: number;
+      averageTime: number;
+    }> = [];
+    for (const date of dateList) {
+      const callsPerDay = callsPerDayResult.find((x) => x.date === date);
+      const successPerDay = successPerDayResult.find((x) => x.date === date);
+      const failedPerDay = failedPerDayResult.find((x) => x.date === date);
+      const averageTakesPerDay = averageTakesPerDayResult.find((x) => x.date === date);
+      result.push({
+        date,
+        totalCount: parseInt(callsPerDay?.total_calls) || 0,
+        successCount: parseInt(successPerDay?.total_calls) || 0,
+        failedCount: parseInt(failedPerDay?.total_calls) || 0,
+        averageTime: parseInt(averageTakesPerDay?.average_time) || 0,
+      });
+    }
+    return result;
   }
 }

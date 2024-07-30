@@ -9,3 +9,8 @@ export enum WorkflowStatusEnum {
   // UNKNOWN
   UNKNOWN = 'UNKNOWN',
 }
+
+export enum ConversationStatusEnum {
+  SUCCEED = 'SUCCEED',
+  FAILED = 'FAILED',
+}

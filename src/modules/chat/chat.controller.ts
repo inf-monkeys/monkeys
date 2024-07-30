@@ -1,5 +1,5 @@
 import { MQ_TOKEN } from '@/common/common.module';
-import { config } from '@/common/config';
+import { ConversationStatusEnum } from '@/common/dto/status.enum';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { Mq } from '@/common/mq';
 import { IRequest } from '@/common/typings/request';
@@ -12,8 +12,8 @@ import { TeamRepository } from '@/database/repositories/team.repository';
 import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Body, Controller, Get, HttpCode, Inject, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import axios from 'axios';
 import { Response } from 'express';
+import { LlmService } from '../tools/llm/llm.service';
 import { TOOL_STREAM_RESPONSE_TOPIC } from '../tools/tools.polling.service';
 import { WorkflowExecutionService } from '../workflow/workflow.execution.service';
 import { CreateChatCompletionsDto } from './dto/req/create-chat-compltion.dto';
@@ -29,6 +29,7 @@ export class WorkflowOpenAICompatibleController {
     private readonly conversationAppRepository: ConversationAppRepository,
     private readonly teamRepository: TeamRepository,
     @Inject(MQ_TOKEN) private readonly mq: Mq,
+    private readonly llmService: LlmService,
   ) {}
 
   @Get('/models')
@@ -194,44 +195,40 @@ export class WorkflowOpenAICompatibleController {
       }
     } else if (type === 'conversation-app') {
       const conversationApp = data as ConversationAppEntity;
-      if (conversationId) {
-        await this.workflowRepository.updateChatSessionMessages(teamId, conversationId, body.messages);
-      }
-      if (stream === false) {
-        const { data: chatComplitionsResult } = await axios.post(`http://127.0.0.1:${config.server.port}/api/llm-tool/chat/completions`, {
+      const start = +new Date();
+      const onSuccess = async (text: string) => {
+        if (conversationId) {
+          const end = +new Date();
+          const newMessages = body.messages.concat({ role: 'assistant', content: text });
+          await this.workflowRepository.updateChatSessionMessages(teamId, conversationId, newMessages);
+          await this.conversationAppRepository.createConversationExecution(userId, conversationApp.id, ConversationStatusEnum.SUCCEED, end - start);
+        }
+      };
+      const onFailed = async () => {
+        if (conversationId) {
+          const end = +new Date();
+          await this.conversationAppRepository.createConversationExecution(userId, conversationApp.id, ConversationStatusEnum.FAILED, end - start);
+        }
+      };
+      await this.llmService.createChatCompelitions(
+        res,
+        teamId,
+        {
           ...body,
           model: conversationApp.model,
-        });
-        const aiResponse = (chatComplitionsResult?.choices || [])[0]?.message?.content;
-        if (aiResponse) {
-          const newMessages = body.messages.concat({ role: 'assistant', content: aiResponse });
-          if (conversationId) {
-            await this.workflowRepository.updateChatSessionMessages(teamId, conversationId, newMessages);
-          }
-        }
-        return res.status(200).json(chatComplitionsResult);
-      } else {
-        const chatComplitionsResponse = await axios.post(
-          `http://127.0.0.1:${config.server.port}/api/llm-tool/chat/completions`,
-          {
-            ...body,
-            model: conversationApp.model,
-            temperature: body.temperature || conversationApp.temperature,
-            presence_penalty: body.presence_penalty || conversationApp.presence_penalty,
-            frequency_penalty: body.frequency_penalty || conversationApp.frequency_penalty,
-            tools: conversationApp.tools || [],
-            knowledgeBase: conversationApp.knowledgeBase,
-            sqlKnowledgeBase: conversationApp.sqlKnowledgeBase,
-            systemPrompt: conversationApp.systemPrompt,
-          },
-          {
-            responseType: 'stream',
-          },
-        );
-        res.setHeader('content-type', 'text/event-stream');
-        res.status(200);
-        chatComplitionsResponse.data.pipe(res);
-      }
+          temperature: body.temperature || conversationApp.temperature,
+          presence_penalty: body.presence_penalty || conversationApp.presence_penalty,
+          frequency_penalty: body.frequency_penalty || conversationApp.frequency_penalty,
+          tools: conversationApp.tools || [],
+          knowledgeBase: conversationApp.knowledgeBase,
+          sqlKnowledgeBase: conversationApp.sqlKnowledgeBase,
+          systemPrompt: conversationApp.systemPrompt,
+        },
+        {
+          onSuccess,
+          onFailed,
+        },
+      );
     }
   }
 }

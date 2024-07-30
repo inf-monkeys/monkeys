@@ -31,6 +31,7 @@ import { SdModelEntity } from './entities/assets/model/sd-model/sd-model';
 import { ComfyuiServerEntity } from './entities/comfyui/comfyui-server.entity';
 import { ComfyuiWorkflowEntity } from './entities/comfyui/comfyui-workflow.entity';
 import { ConversationAppEntity } from './entities/conversation-app/conversation-app.entity';
+import { ConversationExecutionEntity } from './entities/conversation-app/conversation-executions.entity';
 import { TeamEntity } from './entities/identity/team';
 import { TeamJoinRequestsEntity } from './entities/identity/team-join-request';
 import { UserEntity } from './entities/identity/user';
@@ -77,6 +78,7 @@ export const entities: EntityClassOrSchema[] = [
   ComfyuiServerEntity,
   OneApiUsersEntity,
   ConversationAppEntity,
+  ConversationExecutionEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({
