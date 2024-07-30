@@ -174,8 +174,13 @@
           "page-size": "每页条目"
         }
       },
-      "icon-selector": {
+      "emoji-selector": {
         "background-color": "背景颜色"
+      },
+      "icon-selector": {
+        "search": {
+          "placeholder": "输入图标名称来搜索图标"
+        }
       },
       "image-editor": {
         "title": "上传图像",
