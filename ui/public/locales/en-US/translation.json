@@ -1825,7 +1825,12 @@
             "tips": "After release, anyone on the Internet can perform any operation on the workflow without authentication, so please pay attention to asset security!",
             "loading": "Updating permissions...",
             "success": "Update permissions successful!",
-            "error": "Update permissions failed! Please try again later!"
+            "error": "Update permissions failed! Please try again later!",
+
+            "copy-workspace-url": {
+              "label": "Copy Link",
+              "tips": "Anyone on the Internet with the link can view the entire workspace"
+            }
           },
           "iframe": {
             "title": "View Iframe Embed",

@@ -31,7 +31,7 @@ interface IInputConfigProps {
 export const InputConfig: React.FC<IInputConfigProps> = ({ className, contentWidth }) => {
   const { t } = useTranslation();
 
-  const { isLatestWorkflowVersion } = useFlowStore();
+  const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
 
   const { vines } = useVinesFlow();
 

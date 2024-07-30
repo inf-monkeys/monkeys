@@ -21,8 +21,9 @@ interface IEndToolProps {}
 export const EndTool: React.FC<IEndToolProps> = () => {
   const { t } = useTranslation();
 
-  const { isLatestWorkflowVersion, workflowId } = useFlowStore();
-  const { disableDialogClose } = useCanvasStore();
+  const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
+  const workflowId = useFlowStore((s) => s.workflowId);
+  const disableDialogClose = useCanvasStore((s) => s.disableDialogClose);
 
   const [open, setOpen] = useState(false);
 

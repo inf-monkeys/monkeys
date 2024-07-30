@@ -37,8 +37,9 @@ export const WorkflowRelease: React.FC<IWorkflowReleaseProps> = ({ version, onVe
 
   const { mutate } = useSWRConfig();
 
-  const { isLatestWorkflowVersion, workflowId } = useFlowStore();
-  const { setVisible } = useCanvasStore();
+  const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
+  const workflowId = useFlowStore((s) => s.workflowId);
+  const setVisible = useCanvasStore((s) => s.setVisible);
 
   const { data: validation, mutate: reValidation } = useWorkflowValidation(workflowId, version);
   const { data: workflowVersions } = useWorkflowVersions(workflowId);

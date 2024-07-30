@@ -17,7 +17,7 @@ export const DotsBackground: React.FC<SVGProps<SVGSVGElement> & DotsProps> = ({
   scale,
   onContextMenu,
 }) => {
-  const { visible } = useViewStore();
+  const visible = useViewStore((s) => s.visible);
 
   const gapScale = scale || 1;
   const [gapX, gapY] = Array.isArray(gap) ? gap : [gap, gap];

@@ -13,7 +13,7 @@ interface IVinesEndNodeProps {
 }
 
 export const VinesEndNode: React.FC<IVinesEndNodeProps> = ({ isMiniNode, canvasMode, canvasDisabled }) => {
-  const { workflowId } = useFlowStore();
+  const workflowId = useFlowStore((s) => s.workflowId);
 
   return (
     <div

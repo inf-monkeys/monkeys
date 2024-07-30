@@ -20,8 +20,9 @@ interface IVinesVersionToolbarProps extends React.ComponentPropsWithoutRef<'div'
 export const VinesVersionToolbar: React.FC<IVinesVersionToolbarProps> = ({ version = 1, onVersionChange }) => {
   const { t } = useTranslation();
 
-  const { setIsLatestWorkflowVersion, workflowId } = useFlowStore();
-  const { setVisible } = useCanvasStore();
+  const setIsLatestWorkflowVersion = useFlowStore((s) => s.setIsLatestWorkflowVersion);
+  const workflowId = useFlowStore((s) => s.workflowId);
+  const setVisible = useCanvasStore((s) => s.setVisible);
 
   const { data } = useWorkflowVersions(workflowId);
 

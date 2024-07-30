@@ -22,7 +22,7 @@ interface IFieldFileProps extends React.ComponentPropsWithoutRef<'div'> {
 export const FieldFile: React.FC<IFieldFileProps> = ({ form }) => {
   const { t } = useTranslation();
 
-  const { isLatestWorkflowVersion } = useFlowStore();
+  const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
 
   const { multipleValues } = form.getValues();
   const enableImageMask = form.watch('enableImageMask');

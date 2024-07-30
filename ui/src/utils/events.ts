@@ -1,6 +1,6 @@
 import EventEmitter from 'eventemitter3';
 
-export type AppEventType = 'vines-logout' | 'vines-update-site-title' | 'vines-updater' | 'vines-nav';
+export type AppEventType = 'vines-logout' | 'vines-update-site-title' | 'vines-updater' | 'vines-nav' | 'vines-trigger-init-icons';
 
 export type FlowCanvasEventType =
   | 'canvas-zoom-in'

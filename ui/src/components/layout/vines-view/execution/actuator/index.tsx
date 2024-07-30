@@ -27,7 +27,7 @@ interface IVinesActuatorProps {
 export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height, children }) => {
   const [activeTool, setActiveTool] = useState<VinesNode>();
 
-  const { setCanvasMode } = useCanvasStore();
+  const setCanvasMode = useCanvasStore((s) => s.setCanvasMode);
 
   const [sidebarVisible, setSidebarVisible] = useState(document.body.clientWidth > 520);
 

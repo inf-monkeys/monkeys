@@ -11,7 +11,7 @@ import { cn } from '@/utils';
 export const VinesLogView: React.FC = () => {
   const { t } = useTranslation();
 
-  const { workbenchVisible } = usePageStore();
+  const workbenchVisible = usePageStore((s) => s.workbenchVisible);
 
   return (
     <main className={cn('relative  h-full max-h-full p-6', workbenchVisible && 'p-0 pl-4')}>

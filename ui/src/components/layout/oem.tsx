@@ -17,9 +17,12 @@ export const OEM: React.FC = () => {
 
   const { data: oem } = useSystemConfig();
 
-  const { darkMode, toggleDarkMode, setDarkMode, setDarkModeTrigger } = useAppStore();
+  const darkMode = useAppStore((s) => s.darkMode);
+  const toggleDarkMode = useAppStore((s) => s.toggleDarkMode);
+  const setDarkMode = useAppStore((s) => s.setDarkMode);
+  const setDarkModeTrigger = useAppStore((s) => s.setDarkModeTrigger);
 
-  const { setValue } = usePaletteStore();
+  const setValue = usePaletteStore((s) => s.setValue);
 
   const siteThemeColor = get(oem, 'theme.colors.primaryColor', '');
   const teamThemeColor = get(team, 'customTheme.primaryColor', '');

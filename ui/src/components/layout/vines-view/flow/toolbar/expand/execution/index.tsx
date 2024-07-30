@@ -23,9 +23,11 @@ interface IVinesRunInsideToolbarProps {}
 export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () => {
   const { t } = useTranslation();
 
-  const { isLatestWorkflowVersion } = useFlowStore();
-  const { isWorkflowRUNNING, setCanvasMode } = useCanvasStore();
-  const { setIsUserInteraction } = useCanvasInteractionStore();
+  const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
+  const isWorkflowRUNNING = useCanvasStore((s) => s.isWorkflowRUNNING);
+  const setCanvasMode = useCanvasStore((s) => s.setCanvasMode);
+  const setIsUserInteraction = useCanvasInteractionStore((s) => s.setIsUserInteraction);
+
   const { vines } = useVinesFlow();
 
   const workflowExecution = vines.executionWorkflowExecution;

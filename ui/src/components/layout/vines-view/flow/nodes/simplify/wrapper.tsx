@@ -8,7 +8,8 @@ import { useCanvasStore } from '@/store/useCanvasStore';
 interface ISimplifyWrapperProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const SimplifyWrapper: React.FC<ISimplifyWrapperProps> = ({ children }) => {
-  const { setActiveDraggableNodeId, setOverNodeId } = useCanvasStore();
+  const setActiveDraggableNodeId = useCanvasStore((s) => s.setActiveDraggableNodeId);
+  const setOverNodeId = useCanvasStore((s) => s.setOverNodeId);
 
   const handleDragStart = useCallback(({ active }: DragStartEvent) => {
     const { id } = active;

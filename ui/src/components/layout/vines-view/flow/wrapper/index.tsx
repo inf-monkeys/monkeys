@@ -11,8 +11,12 @@ import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 interface IVinesFlowWrapperProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const VinesFlowWrapper: React.FC<IVinesFlowWrapperProps> = ({ children }) => {
-  const { initialScale, canvasMode } = useCanvasStore();
-  const { isCanvasMoving, setCanvasMoving, setCanvasDisabled } = useCanvasInteractionStore();
+  const initialScale = useCanvasStore((s) => s.initialScale);
+  const canvasMode = useCanvasStore((s) => s.canvasMode);
+
+  const isCanvasMoving = useCanvasInteractionStore((s) => s.isCanvasMoving);
+  const setCanvasMoving = useCanvasInteractionStore((s) => s.setCanvasMoving);
+  const setCanvasDisabled = useCanvasInteractionStore((s) => s.setCanvasDisabled);
 
   const [isToggleScale, setIsToggleScale] = useState(false);
 

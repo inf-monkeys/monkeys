@@ -7,10 +7,18 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
 import { IPageType } from '@/apis/pages/typings.ts';
-import { TabMenu } from '@/components/layout-wrapper/workspace/space/tabs/menu';
-import { Separator } from '@/components/ui/separator.tsx';
+import { TabMenu } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/menu';
+import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId';
+import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
+
+export const EMOJI2LUCIDE_MAPPER = {
+  '🚀': 'square-function',
+  '📃': 'square-kanban',
+  '📷': 'square-menu',
+  '💬': 'square-play',
+};
 
 interface ISpaceTabProps extends React.ComponentPropsWithoutRef<'div'> {
   id: string;
@@ -18,15 +26,16 @@ interface ISpaceTabProps extends React.ComponentPropsWithoutRef<'div'> {
   icon: string;
   activeIndex: number;
   index: number;
-  isLastItem: boolean;
   pages: IPageType[];
   page: IPageType | null;
 }
 
-export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon, activeIndex, index, isLastItem }) => {
+export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon, activeIndex, index }) => {
   const { t } = useTranslation();
 
   const navigate = useNavigate({ from: Route.fullPath });
+
+  const setApiDocumentVisible = usePageStore((s) => s.setApiDocumentVisible);
 
   const { setNodeRef, listeners, attributes, transform, isDragging } = useSortable({ id });
 
@@ -34,6 +43,7 @@ export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon,
 
   const handleChangePage = () => {
     if (!isActive) {
+      setApiDocumentVisible(false);
       void navigate({
         to: '/$teamId/workspace/$workflowId/$pageId',
         params: {
@@ -51,11 +61,8 @@ export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon,
     <motion.div
       ref={setNodeRef}
       className={cn(
-        'group relative h-full rounded-t-xl after:absolute after:-right-3 after:bottom-0 after:z-10 after:h-3 after:w-3',
-        isActive
-          ? 'z-20 bg-slate-1 before:bg-[radial-gradient(circle_at_0_0,transparent_0.75rem,rgb(var(--slate1)/80)_0.75rem)] after:z-20 after:bg-[radial-gradient(circle_at_100%_0,transparent_0.75rem,rgb(var(--slate1)/80)_0.75rem)]'
-          : 'hover:z-10 hover:bg-slate-1/70 after:hover:bg-[radial-gradient(circle_at_100%_0,transparent_0.75rem,rgb(var(--slate1)/70)_0.75rem)]',
-        index !== 0 && 'before:absolute before:-left-3 before:bottom-0 before:z-10 before:h-3 before:w-3',
+        'relative w-full cursor-pointer select-none items-center rounded-md border border-transparent p-2 text-sm hover:bg-mauve-2 hover:bg-opacity-70',
+        isActive && 'border-input bg-mauve-2 font-medium',
       )}
       onClick={handleChangePage}
       onContextMenu={handleContextMenu}
@@ -70,33 +77,24 @@ export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon,
       exit={{ opacity: 0 }}
       {...attributes}
     >
-      <div className="flex h-full select-none items-center p-4" {...listeners}>
-        <p className="mr-2">{icon}</p>
-        <h1 className="whitespace-nowrap text-sm font-bold">
-          {t([`workspace.wrapper.space.tabs.${displayName}`, displayName])}
-        </h1>
+      <div className="flex h-full select-none items-center" {...listeners}>
+        <p className="mr-2">
+          <VinesLucideIcon className="size-[15px]" size={15} src={EMOJI2LUCIDE_MAPPER[icon] ?? icon} />
+        </p>
+        <h1 className="whitespace-nowrap text-sm">{t([`workspace.wrapper.space.tabs.${displayName}`, displayName])}</h1>
         <AnimatePresence>
           {isActive && (
             <motion.div
               key={id + '_more_button'}
-              initial={{ width: 0, paddingLeft: 0 }}
-              animate={{ width: 40, paddingLeft: 8, transition: { duration: 0.15 } }}
-              exit={{ width: 0, paddingLeft: 0 }}
-              className="overflow-hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute right-2"
             >
               <TabMenu />
             </motion.div>
           )}
-          {!isActive && isLastItem && activeIndex - 1 !== index ? (
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute right-0 z-10 h-4 transition-opacity group-hover:!opacity-0"
-            >
-              <Separator orientation="vertical" className="h-full" />
-            </motion.span>
-          ) : null}
         </AnimatePresence>
       </div>
     </motion.div>

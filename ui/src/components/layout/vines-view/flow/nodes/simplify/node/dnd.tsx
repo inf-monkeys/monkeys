@@ -25,8 +25,12 @@ export const NodeDnd: React.FC<INodeDndProps> = ({ node, children, onOver, onCli
   } = node;
 
   const { vines } = useVinesFlow();
-  const { canvasMode, setOverNodeId } = useCanvasStore();
-  const { scale, canvasDisabled } = useCanvasInteractionStore();
+
+  const canvasMode = useCanvasStore((s) => s.canvasMode);
+  const setOverNodeId = useCanvasStore((s) => s.setOverNodeId);
+
+  const scale = useCanvasInteractionStore((s) => s.scale);
+  const canvasDisabled = useCanvasInteractionStore((s) => s.canvasDisabled);
 
   const isEditCanvasMode = canvasMode === CanvasStatus.EDIT;
   const isNodeDisabledDroppable = nodeId.startsWith('fake_node') || nodeId === 'workflow_start';

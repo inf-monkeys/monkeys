@@ -30,7 +30,7 @@ export const VinesActuatorDetailContent: React.FC<IVinesActuatorDetailContentPro
 
     const finalHeight = height ? height - 14 - headerHeight : 320;
 
-    const { fullscreen } = useViewStore();
+    const fullscreen = useViewStore((s) => s.fullscreen);
 
     const [activeTab, setActiveTab] = useState('data');
 

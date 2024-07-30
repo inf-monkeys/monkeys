@@ -11,7 +11,7 @@ interface ISimplifyEndNodeExpandProps {}
 export const SimplifyEndNodeExpand: React.FC<ISimplifyEndNodeExpandProps> = () => {
   const { t } = useTranslation();
 
-  const { canvasMode } = useCanvasStore();
+  const canvasMode = useCanvasStore((s) => s.canvasMode);
   const visible = canvasMode === CanvasStatus.EDIT;
 
   return (

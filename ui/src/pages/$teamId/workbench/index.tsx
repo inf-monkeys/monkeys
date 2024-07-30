@@ -9,7 +9,7 @@ import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { usePageStore } from '@/store/usePageStore';
 
 export const Workbench: React.FC = () => {
-  const { setWorkbenchVisible } = usePageStore();
+  const setWorkbenchVisible = usePageStore((s) => s.setWorkbenchVisible);
 
   useEffect(() => {
     setWorkbenchVisible(true);

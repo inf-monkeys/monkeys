@@ -28,7 +28,8 @@ interface IStatProps {}
 export const Stat: React.FC<IStatProps> = () => {
   const { t } = useTranslation();
 
-  const { containerHeight, workbenchVisible } = usePageStore();
+  const containerHeight = usePageStore((s) => s.containerHeight);
+  const workbenchVisible = usePageStore((s) => s.workbenchVisible);
 
   const { team } = useVinesTeam();
 

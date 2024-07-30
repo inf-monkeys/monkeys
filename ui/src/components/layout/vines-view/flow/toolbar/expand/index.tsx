@@ -13,7 +13,7 @@ import { cn } from '@/utils';
 interface IVinesVersionToolbarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const VinesExpandToolbar: React.FC<IVinesVersionToolbarProps> = () => {
-  const { isWorkflowRUNNING } = useCanvasStore();
+  const isWorkflowRUNNING = useCanvasStore((s) => s.isWorkflowRUNNING);
 
   const { vines } = useVinesFlow();
   const vinesVersion = vines.version;

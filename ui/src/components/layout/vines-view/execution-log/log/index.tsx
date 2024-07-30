@@ -25,8 +25,10 @@ import { cn } from '@/utils';
 export const VinesLogViewLogTab: React.FC = () => {
   const { t } = useTranslation();
 
-  const { visible } = useViewStore();
-  const { containerHeight, workbenchVisible } = usePageStore();
+  const visible = useViewStore((s) => s.visible);
+  const containerHeight = usePageStore((s) => s.containerHeight);
+  const workbenchVisible = usePageStore((s) => s.workbenchVisible);
+
   const { vines } = useVinesFlow();
 
   const [sidebarVisible, setSidebarVisible] = useState(!workbenchVisible);

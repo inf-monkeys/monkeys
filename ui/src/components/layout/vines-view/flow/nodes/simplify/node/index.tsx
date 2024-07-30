@@ -30,8 +30,9 @@ export const SimplifyNode: React.FC<ISimplifyNodeProps> = ({ node }) => {
   const { name: toolName } = node.getRaw();
 
   const { vines } = useVinesFlow();
-  const { canvasMode } = useCanvasStore();
-  const { canvasDisabled } = useCanvasInteractionStore();
+
+  const canvasMode = useCanvasStore((s) => s.canvasMode);
+  const canvasDisabled = useCanvasInteractionStore((s) => s.canvasDisabled);
 
   const handleNodeClick = () => {
     if (![CanvasStatus.EDIT, CanvasStatus.READONLY].includes(canvasMode)) return;

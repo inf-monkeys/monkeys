@@ -17,7 +17,8 @@ interface IWorkflowRawDataEditorProps extends React.ComponentPropsWithoutRef<'di
 export const WorkflowRawDataEditor: React.FC<IWorkflowRawDataEditorProps> = () => {
   const { t } = useTranslation();
 
-  const { isLatestWorkflowVersion, workflowId } = useFlowStore();
+  const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
+  const workflowId = useFlowStore((s) => s.workflowId);
 
   const { trigger } = useUpdateWorkflow(workflowId);
 
