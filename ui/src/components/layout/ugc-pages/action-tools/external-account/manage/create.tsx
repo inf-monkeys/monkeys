@@ -5,8 +5,8 @@ import { toast } from 'sonner';
 
 import { useCreateCredential, useCredentials } from '@/apis/credential';
 import { IVinesCredentialType } from '@/apis/credential/typings.ts';
-import { VinesWorkflowInput } from '@/components/layout/vines-view/execution/workflow-input';
 import { calculateDisplayInputs } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/utils.ts';
+import { TabularRender } from '@/components/layout/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
@@ -43,7 +43,7 @@ export const CreateExternalAccount: React.FC<ICreateExternalAccountProps> = ({ c
             name: detail?.displayName,
           })}
         </DialogTitle>
-        <VinesWorkflowInput
+        <TabularRender
           inputs={finalInputs}
           height={400}
           onSubmit={(data) => {
@@ -68,11 +68,12 @@ export const CreateExternalAccount: React.FC<ICreateExternalAccountProps> = ({ c
               },
             );
           }}
+          miniMode
         >
           <Button className="mb-1 min-h-10" variant="outline" type="submit">
             {t('common.utils.create')}
           </Button>
-        </VinesWorkflowInput>
+        </TabularRender>
       </DialogContent>
     </Dialog>
   );

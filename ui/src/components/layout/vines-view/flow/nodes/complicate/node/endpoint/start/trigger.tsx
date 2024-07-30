@@ -4,12 +4,12 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
 import { useTriggers, useTriggerTypes } from '@/apis/workflow/trigger';
-import { VinesWorkflowInput } from '@/components/layout/vines-view/execution/workflow-input';
 import { WorkflowApiConfig } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/api-config';
 import { InputConfig } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config';
 import { WorkflowTrigger } from '@/components/layout/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/triggers';
 import { InputPreview } from '@/components/layout/vines-view/flow/nodes/complicate/node/endpoint/start/input-preview.tsx';
 import { ComplicateNodeHeader } from '@/components/layout/vines-view/flow/nodes/complicate/node/header.tsx';
+import { TabularRender } from '@/components/layout/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
@@ -56,7 +56,7 @@ export const ComplicateTriggerNode: React.FC = () => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <VinesWorkflowInput
+              <TabularRender
                 inputs={vines.workflowInput}
                 height={330}
                 onSubmit={(inputData) => {
@@ -65,11 +65,12 @@ export const ComplicateTriggerNode: React.FC = () => {
                   setTimeout(() => VinesEvent.emit('canvas-auto-zoom'), 80);
                   setCanvasMode(CanvasStatus.RUNNING);
                 }}
+                miniMode
               >
                 <Button variant="outline" type="submit" size="small">
                   {t('workspace.flow-view.vines.execution.button')}
                 </Button>
-              </VinesWorkflowInput>
+              </TabularRender>
             </motion.div>
           ) : canvasMode === CanvasStatus.RUNNING ? (
             <InputPreview />

@@ -11,7 +11,7 @@ import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothT
 import { FileList } from '@/components/ui/updater/file-list.tsx';
 import { cn } from '@/utils';
 
-interface IUpdaterProps {
+export interface IUpdaterProps {
   files?: FileWithPath[]; // 文件列表
   limit?: number; // 文件数量限制
   maxSize?: number; // 文件大小限制 (MB)

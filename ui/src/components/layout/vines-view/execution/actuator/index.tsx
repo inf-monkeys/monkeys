@@ -98,9 +98,9 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height, children 
       </ActuatorHeader>
       <div className="flex items-center" style={{ height: actuatorHeight }}>
         <motion.div
-          initial={{ width: sidebarVisible ? 320 : 0, paddingRight: sidebarVisible ? 4 : 0 }}
+          initial={{ width: sidebarVisible ? 352 : 0, paddingRight: sidebarVisible ? 4 : 0 }}
           animate={{
-            width: sidebarVisible ? 320 : 0,
+            width: sidebarVisible ? 352 : 0,
             paddingRight: sidebarVisible ? 6 : 0,
             transition: { duration: 0.2 },
           }}

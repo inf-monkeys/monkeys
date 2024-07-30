@@ -15,6 +15,8 @@ interface IFieldTagInputAndTextareaProps {
   onChange: (value: any) => void;
   form: UseFormReturn<IWorkflowInputForm>;
   field: Omit<ControllerRenderProps<FieldValues, string>, 'value' | 'onChange'>;
+
+  miniMode?: boolean;
 }
 
 export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> = ({
@@ -23,6 +25,7 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
   onChange,
   form,
   field,
+  miniMode = false,
 }) => {
   const isNumber = type === 'number';
   const isMultiple = typeOptions?.multipleValues ?? false;
@@ -33,8 +36,9 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
       (type === 'number' &&
         (isUndefined(typeOptions?.minValue) ||
           isUndefined(typeOptions?.maxValue) ||
-          typeOptions?.numberPrecision === 0)),
-    [type, typeOptions],
+          typeOptions?.numberPrecision === 0)) ||
+      (miniMode && type === 'file'),
+    [type, typeOptions, miniMode],
   );
 
   return (

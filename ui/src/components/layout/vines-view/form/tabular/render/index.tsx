@@ -26,6 +26,8 @@ interface ITabularRenderProps {
   formClassName?: string;
   scrollAreaClassName?: string;
   itemClassName?: string;
+
+  miniMode?: boolean;
 }
 
 export const TabularRender: React.FC<ITabularRenderProps> = ({
@@ -37,6 +39,8 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
   formClassName,
   scrollAreaClassName,
   itemClassName,
+
+  miniMode = false,
 }) => {
   const { t } = useTranslation();
 
@@ -128,7 +132,14 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
         <ScrollArea className={scrollAreaClassName} style={{ height }}>
           <div className={cn('flex flex-col gap-4', formClassName)}>
             {defInputs?.map((it, i) => (
-              <VinesFormFieldItem it={it} form={form} itemClassName={itemClassName} key={i} defValues={defValues} />
+              <VinesFormFieldItem
+                it={it}
+                form={form}
+                itemClassName={itemClassName}
+                key={i}
+                defValues={defValues}
+                miniMode={miniMode}
+              />
             ))}
             {hasFoldInputs && (
               <Accordion type="single" collapsible>
@@ -145,6 +156,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
                         itemClassName={itemClassName}
                         key={'fold_' + i}
                         defValues={defValues}
+                        miniMode={miniMode}
                       />
                     ))}
                   </AccordionContent>
