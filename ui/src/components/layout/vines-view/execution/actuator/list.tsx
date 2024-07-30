@@ -93,6 +93,7 @@ export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({ height, act
         <AnimatePresence>
           {tools.map(({ id, status, icon, name, customName, description, node }, i) => (
             <motion.div
+              className="min-w-64"
               key={id + i}
               initial={{ opacity: 0, bottom: -30, marginTop: -12 }}
               animate={{ opacity: 1, bottom: 0, marginTop: 0 }}
@@ -128,7 +129,9 @@ export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({ height, act
                     </div>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <div className="line-clamp-1 !text-xs font-normal opacity-50">{description}</div>
+                        <div className="line-clamp-1 max-w-[calc(100%-2rem)] !text-xs font-normal opacity-50">
+                          {description}
+                        </div>
                       </TooltipTrigger>
                       <TooltipContent className="max-w-64" side="bottom">
                         {description}

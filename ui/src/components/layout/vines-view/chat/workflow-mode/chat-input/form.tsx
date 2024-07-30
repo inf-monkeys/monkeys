@@ -1,11 +1,11 @@
 import React from 'react';
 
-import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
-import { VinesWorkflowInput } from '@/components/layout/vines-view/execution/workflow-input';
+import { TabularRender } from '@/components/layout/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
+import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { cn } from '@/utils';
 
@@ -24,14 +24,14 @@ export const FormInput: React.FC<IFormInputProps> = ({ inputs, height, onClick, 
   return (
     <motion.div
       ref={ref}
-      className={cn('w-2/6 max-w-80 overflow-hidden', disabled && 'pointer-events-none opacity-85')}
+      className={cn('w-2/6 max-w-80 overflow-hidden px-1', disabled && 'pointer-events-none opacity-85')}
       animate={{ marginRight: disabled ? -width - 35 : 0 }}
     >
-      <VinesWorkflowInput inputs={inputs} height={height} onSubmit={onClick}>
+      <TabularRender inputs={inputs} height={height} onSubmit={onClick} miniMode>
         <Button variant="outline" type="submit" className="line-clamp-1" loading={disabled}>
           {t('workspace.chat-view.workflow-mode.execution')}
         </Button>
-      </VinesWorkflowInput>
+      </TabularRender>
     </motion.div>
   );
 };

@@ -201,7 +201,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                               onClick={() => setCurrent(cateName)}
                               key={cateName}
                             >
-                              <span className="pl-[calc(1rem+20px+0.5rem)] pr-4 !font-normal">
+                              <span className="pl-[calc(1rem+20px+0.5rem)] pr-4 text-sm !font-normal">
                                 {cateLabel +
                                   t('common.utils.counter', {
                                     count: toolsData?.[rootName][cateName],

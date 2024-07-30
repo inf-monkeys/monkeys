@@ -37,7 +37,7 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
   return (
     <div className="flex h-full max-w-64">
       <motion.div
-        className="flex flex-col gap-4 overflow-hidden [&_h1]:line-clamp-1 [&_span]:line-clamp-1"
+        className="flex flex-col gap-2 overflow-hidden [&_h1]:line-clamp-1 [&_span]:line-clamp-1"
         initial={{ width: visible ? 256 : 0, paddingRight: visible ? 4 : 0 }}
         animate={{
           width: visible ? 256 : 0,
@@ -45,7 +45,7 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
           transition: { duration: 0.2 },
         }}
       >
-        <h1 className="text-xl font-bold">{t('workspace.chat-view.sidebar.title')}</h1>
+        <h1 className="text-sm font-bold">{t('workspace.chat-view.sidebar.title')}</h1>
         <ScrollArea className="h-full max-h-[calc(100%-3rem)]">
           <div className="grid gap-2 py-1 pl-1 pr-3">
             {data?.map((session) => (
