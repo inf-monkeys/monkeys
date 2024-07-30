@@ -49,7 +49,8 @@
       "add": "添加",
       "upload": "上传",
       "click-to-copy": "点击复制",
-      "coming-soon": "即将上线"
+      "coming-soon": "即将上线",
+      "counter": "（{{count}}）"
     },
     "type": {
       "workflow": "工作流",
