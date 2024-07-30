@@ -17,15 +17,17 @@ import {
 } from '@/components/ui/dropdown-menu.tsx';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
 
-interface ITabMenuProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface ITabMenuProps extends React.ComponentPropsWithoutRef<'div'> {
+  onOpenChange?: (isOpen: boolean) => void;
+}
 
-export const TabMenu: React.FC<ITabMenuProps> = memo(() => {
+export const TabMenu: React.FC<ITabMenuProps> = memo(({ onOpenChange }) => {
   const { workflowId, page, pages, pageId, navigateTo, pagesMutate, setPages } = useVinesPage();
 
   const forceUpdate = useForceUpdate();
 
   return (
-    <DropdownMenu>
+    <DropdownMenu onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>
         <Button className="-m-1 scale-[.8] p-1 [&_svg]:stroke-gold-12" icon={<MoreVertical />} variant="borderless" />
       </DropdownMenuTrigger>
