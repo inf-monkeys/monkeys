@@ -142,14 +142,14 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
             <div className="w-[20px] [&_svg]:h-[16px] [&_svg]:w-[16px]">
               <LayoutGrid />
             </div>
-            {assetType === 'tools' && !isMarket ? (
-              <div className="flex gap-3">
-                <span>{t('common.utils.all')}</span>
-                <span>({toolsData?.total})</span>
-              </div>
-            ) : (
-              <span>{t('common.utils.all')}</span>
-            )}
+            <span>
+              {t('common.utils.all') +
+                (assetType === 'tools' && !isMarket
+                  ? t('common.utils.counter', {
+                      count: toolsData?.total,
+                    })
+                  : '')}
+            </span>
           </div>
         </div>
       </div>
@@ -176,10 +176,12 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                             <div className="flex items-center gap-2">
                               <div className="w-[20px] [&_svg]:h-[16px] [&_svg]:w-[16px]">{rootIcon}</div>
 
-                              <div className="flex gap-3 !font-normal">
-                                <span>{rootLabel}</span>
-                                <span>({toolsData?.[rootName]['total']})</span>
-                              </div>
+                              <span className="!font-normal">
+                                {rootLabel +
+                                  t('common.utils.counter', {
+                                    count: toolsData?.[rootName]['total'],
+                                  })}
+                              </span>
                             </div>
                             <ChevronRightIcon className="chevron h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
                           </div>
@@ -199,10 +201,12 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                               onClick={() => setCurrent(cateName)}
                               key={cateName}
                             >
-                              <div className="&>span:font-normal flex w-full items-center gap-3 pl-[calc(1rem+20px+0.5rem)] pr-4 text-sm">
-                                <span>{cateLabel}</span>
-                                <span>({toolsData?.[rootName][cateName]})</span>
-                              </div>
+                              <span className="pl-[calc(1rem+20px+0.5rem)] pr-4 !font-normal">
+                                {cateLabel +
+                                  t('common.utils.counter', {
+                                    count: toolsData?.[rootName][cateName],
+                                  })}
+                              </span>
                             </div>
                           );
                         })}
