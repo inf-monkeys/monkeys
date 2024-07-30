@@ -180,8 +180,13 @@
           "page-size": "Max per page"
         }
       },
-      "icon-selector": {
+      "emoji-selector": {
         "background-color": "Background color"
+      },
+      "icon-selector": {
+        "search": {
+          "placeholder": "Enter icon name to search icons"
+        }
       },
       "image-editor": {
         "title": "Upload image",
