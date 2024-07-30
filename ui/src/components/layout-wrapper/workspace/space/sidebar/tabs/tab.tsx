@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
 
@@ -37,7 +37,9 @@ export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon,
 
   const setApiDocumentVisible = usePageStore((s) => s.setApiDocumentVisible);
 
-  const { setNodeRef, listeners, attributes, transform, isDragging } = useSortable({ id });
+  const [disabled, setDisabled] = useState(false);
+
+  const { setNodeRef, listeners, attributes, transform, isDragging } = useSortable({ id, disabled });
 
   const isActive = activeIndex === index;
 
@@ -92,7 +94,7 @@ export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon,
               transition={{ duration: 0.2 }}
               className="absolute right-2"
             >
-              <TabMenu />
+              <TabMenu onOpenChange={(status) => setDisabled(status)} />
             </motion.div>
           )}
         </AnimatePresence>

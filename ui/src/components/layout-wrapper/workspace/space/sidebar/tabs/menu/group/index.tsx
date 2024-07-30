@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 
 import { useCreatePageGroup, usePageGroups } from '@/apis/pages';
 import { IPageType } from '@/apis/pages/typings.ts';
+import { GroupItem } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/menu/group/item.tsx';
 import {
   DropdownMenuItem,
   DropdownMenuPortal,
@@ -17,7 +18,6 @@ import {
   DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
-import { GroupItem } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/menu/group/item.tsx';
 
 interface IViewGroupProps extends React.ComponentPropsWithoutRef<'div'> {
   pageId: string;
@@ -35,7 +35,9 @@ export const ViewGroup: React.FC<IViewGroupProps> = ({ pageId, pagesMutate }) =>
       loading: t('workspace.wrapper.space.menu.group.create-toast.loading'),
       success: (groups) => {
         pageGroupMutate(groups ?? [], { revalidate: false }).then(() => {
-          setTimeout(() => pagesMutate?.(), 500);
+          if (pagesMutate) {
+            setTimeout(() => pagesMutate(), 500);
+          }
         });
         return t('workspace.wrapper.space.menu.group.create-toast.success');
       },
