@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 
+import { useCreation } from 'ahooks';
 import { motion } from 'framer-motion';
 
 import { Page404 } from '@/components/layout/workspace/404.tsx';
@@ -13,11 +14,12 @@ import { useViewStore } from '@/store/useViewStore';
 interface IVinesViewProps {
   id?: string;
   workflowId?: string;
+  agentId?: string;
   pageId?: string;
   type?: string;
 }
 
-export function VinesView({ id, workflowId, pageId, type }: IVinesViewProps) {
+export function VinesView({ id, workflowId, agentId, pageId, type }: IVinesViewProps) {
   const setVisible = useViewStore((s) => s.setVisible);
 
   if (!((type ?? '') in IFRAME_MAP)) {
@@ -46,17 +48,22 @@ export function VinesView({ id, workflowId, pageId, type }: IVinesViewProps) {
 
   const View = IFRAME_MAP[type ?? ''];
 
-  const content = useMemo(() => {
+  const content = useCreation(() => {
     if (!id) return <Page404 />;
-    return (
-      <FlowStoreProvider createStore={createFlowStore}>
-        <CanvasStoreProvider createStore={createCanvasStore}>
-          <VinesViewWrapper workflowId={workflowId}>
-            <View />
-          </VinesViewWrapper>
-        </CanvasStoreProvider>
-      </FlowStoreProvider>
-    );
+    if (workflowId) {
+      return (
+        <FlowStoreProvider createStore={createFlowStore}>
+          <CanvasStoreProvider createStore={createCanvasStore}>
+            <VinesViewWrapper workflowId={workflowId}>
+              <View />
+            </VinesViewWrapper>
+          </CanvasStoreProvider>
+        </FlowStoreProvider>
+      );
+    }
+
+    console.log(agentId);
+    return <Page404 />;
   }, [id]);
 
   useEffect(() => {

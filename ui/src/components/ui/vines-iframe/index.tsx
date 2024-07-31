@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { AnimatePresence } from 'framer-motion';
-import { groupBy } from 'lodash';
+import { groupBy, has, reduce } from 'lodash';
 
 import { VinesView } from '@/components/ui/vines-iframe/view';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider.tsx';
@@ -11,6 +11,7 @@ export interface IVinesIFramePropsRequired {
   id?: string;
   teamId?: string;
   workflowId?: string;
+  agentId?: string;
   type?: string;
 }
 
@@ -40,11 +41,27 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }
 
   const currentPageId = page?.id;
 
+  const { agents, workflows } = useMemo(() => {
+    const mixinGroups = groupBy(renderer, (it) => it?.workflowId ?? it?.agentId ?? '');
+    const { agentGroups, workflowGroups } = reduce(
+      mixinGroups,
+      (acc, group, key) => {
+        has(group[0], 'workflowId') ? (acc.workflowGroups[key] = group) : (acc.agentGroups[key] = group);
+        return acc;
+      },
+      { agentGroups: {}, workflowGroups: {} },
+    );
+    return {
+      agents: Object.entries(agentGroups) as [string, P[]][],
+      workflows: Object.entries(workflowGroups) as [string, P[]][],
+    };
+  }, [renderer]);
+
   return (
     <AnimatePresence>
-      {hasPages &&
-        Object.entries(groupBy(renderer, 'workflowId')).map(([workflowId, pages]) => {
-          return (
+      {hasPages && (
+        <>
+          {workflows.map(([workflowId, pages]) => (
             <VinesFlowProvider key={workflowId} workflowId={workflowId}>
               {pages.map(({ id, type }) => (
                 <ViewStoreProvider key={id} createStore={createViewStore}>
@@ -52,8 +69,16 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }
                 </ViewStoreProvider>
               ))}
             </VinesFlowProvider>
-          );
-        })}
+          ))}
+          {agents.map(([agentId, pages]) => {
+            return pages.map(({ id, type }) => (
+              <ViewStoreProvider key={id} createStore={createViewStore}>
+                <VinesView id={id} agentId={agentId} pageId={currentPageId} type={type} />
+              </ViewStoreProvider>
+            ));
+          })}
+        </>
+      )}
     </AnimatePresence>
   );
 };

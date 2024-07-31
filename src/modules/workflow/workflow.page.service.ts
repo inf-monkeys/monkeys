@@ -209,6 +209,7 @@ export class WorkflowPageService {
         id: agentPageId,
         type: 'agent-' + type,
         displayName: isChat ? '对话视图' : '配置视图',
+        agentId: id,
         instance: {
           name: isChat ? '对话视图' : '配置视图',
           icon: isChat ? 'square-play' : 'bolt',
