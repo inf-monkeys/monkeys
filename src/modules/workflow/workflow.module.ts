@@ -27,6 +27,7 @@ import { WorkflowValidateController } from './workflow.validate.controller';
 import { WorkflowValidateService } from './workflow.validate.service';
 import { WorkflowWebhookController } from './workflow.webhook.controller';
 import { WorkflowWebhookService } from './workflow.webhook.service';
+import { ConversationAppEntity } from '@/database/entities/conversation-app/conversation-app.entity';
 
 @Module({
   controllers: [
@@ -56,7 +57,7 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     WorkflowLogService,
     WorkflowStatisticsService,
   ],
-  imports: [ConductorModule, TypeOrmModule.forFeature([WorkflowPageEntity, WorkflowPageGroupEntity]), ToolsModule],
+  imports: [ConductorModule, TypeOrmModule.forFeature([WorkflowPageEntity, WorkflowPageGroupEntity, ConversationAppEntity]), ToolsModule],
   exports: [WorkflowCrudService, WorkflowExecutionService],
 })
 export class WorkflowModule {}

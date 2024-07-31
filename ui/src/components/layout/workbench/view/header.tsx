@@ -28,7 +28,7 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page,
   const { teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
 
   const { mutate } = useSWRConfig();
-  const workflow = page?.workflow;
+  const info = page?.workflow || page?.agent;
 
   const { trigger } = useUpdateGroupPages(groupId);
 
@@ -51,18 +51,20 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page,
     );
   };
 
-  const workflowDesc = getI18nContent(workflow?.description) ? ` - ${getI18nContent(workflow?.description)}` : '';
+  const workflowDesc = getI18nContent(info?.description) ? ` - ${getI18nContent(info?.description)}` : '';
   const displayName = page?.displayName ?? '';
   const viewIcon = page?.instance?.icon ?? '';
+
+  const isWorkflowPage = !!page?.workflowId;
 
   return (
     <header className="z-50 flex w-full flex-col justify-center  px-4">
       <div className="flex items-center justify-between">
         <div className="flex gap-2">
-          <VinesIcon size="sm">{workflow?.iconUrl}</VinesIcon>
+          <VinesIcon size="sm">{info?.iconUrl}</VinesIcon>
           <div className="flex flex-col gap-0.5">
             <h1 className="text-sm font-bold leading-tight">
-              {getI18nContent(workflow?.displayName) ?? t('common.utils.untitled')}
+              {getI18nContent(info?.displayName) ?? t('common.utils.untitled')}
             </h1>
             <div className="flex items-center gap-0.5">
               <VinesLucideIcon className="size-3" size={12} src={EMOJI2LUCIDE_MAPPER[viewIcon] ?? viewIcon} />
@@ -80,8 +82,12 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page,
             <TooltipContent>{t('workbench.view.header.delete')}</TooltipContent>
           </Tooltip>
           <Link
-            to="/$teamId/workspace/$workflowId/$pageId"
-            params={{ teamId, workflowId: workflow?.workflowId ?? '', pageId: page?.id ?? '' }}
+            to={isWorkflowPage ? '/$teamId/workspace/$workflowId/$pageId' : '/$teamId/agent/$agentId'}
+            params={{
+              teamId,
+              ...(isWorkflowPage ? { workflowId: page?.workflowId, pageId: page?.id } : { agentId: page?.agent?.id }),
+            }}
+            search={isWorkflowPage ? {} : { tab: page?.instance?.type }}
           >
             <Button variant="outline" size="small">
               {t('workbench.view.header.enter')}

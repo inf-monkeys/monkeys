@@ -3,12 +3,13 @@ import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
 import { BUILT_IN_PAGE_INSTANCES, WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { keyBy, pick, pickBy, set, uniq } from 'lodash';
+import { keyBy, partition, pick, pickBy, set, uniq } from 'lodash';
 import { In, Repository } from 'typeorm';
 import { CreatePageDto } from './dto/req/create-page.dto';
 import { UpdatePageGroupDto, UpdatePagesDto } from './dto/req/update-pages.dto';
 import { WorkflowPageJson } from './interfaces';
 import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
+import { ConversationAppEntity } from '@/database/entities/conversation-app/conversation-app.entity';
 
 @Injectable()
 export class WorkflowPageService {
@@ -17,6 +18,8 @@ export class WorkflowPageService {
     private readonly pageRepository: Repository<WorkflowPageEntity>,
     @InjectRepository(WorkflowPageGroupEntity)
     private readonly pageGroupRepository: Repository<WorkflowPageGroupEntity>,
+    @InjectRepository(ConversationAppEntity)
+    private readonly conversationAppRepository: Repository<ConversationAppEntity>,
     private readonly workflowRepository: WorkflowRepository,
   ) {}
 
@@ -148,10 +151,12 @@ export class WorkflowPageService {
 
     const pageIds = uniq(groups.map((it) => it.pageIds).flat(1)) as string[];
 
+    const [agentPageIds, normalPageIds] = partition(pageIds, (id) => id.startsWith('agent-'));
+
     const pages = await this.pageRepository.find({
       where: {
         teamId,
-        id: In(pageIds),
+        id: In(normalPageIds),
         isDeleted: false,
       },
     });
@@ -170,12 +175,57 @@ export class WorkflowPageService {
     const workflowMap = keyBy(workflows, 'workflowId');
     const pageInstanceTypeMapper = keyBy(BUILT_IN_PAGE_INSTANCES, 'type');
 
+    const [agentIds, agentPageInfo] = agentPageIds.reduce(
+      ([ids, map], str) => {
+        const match = str.match(/agent-(\w+)-(\w+)/);
+        if (match) {
+          const [, id, type] = match;
+          ids.push(id);
+          map[str] = {
+            type,
+            id,
+          };
+        }
+        return [ids, map];
+      },
+      [[], {}],
+    ) as [string[], Record<string, Record<string, string>>];
+
+    // agent page
+    const agentApps = await this.conversationAppRepository.find({
+      where: {
+        teamId,
+        isDeleted: false,
+        id: In(agentIds),
+      },
+    });
+
+    const agentPages = agentPageIds.map((agentPageId) => {
+      const { type, id } = agentPageInfo[agentPageId];
+      const isChat = type === 'chat';
+
+      return {
+        agent: agentApps.find((it) => it.id === id),
+        id: agentPageId,
+        type: 'agent-' + type,
+        displayName: isChat ? '对话视图' : '配置视图',
+        instance: {
+          name: isChat ? '对话视图' : '配置视图',
+          icon: isChat ? 'square-play' : 'bolt',
+          type,
+        },
+      };
+    });
+
     return {
-      pages: filteredPages.map((p) => ({
-        ...p,
-        workflow: workflowMap[p.workflowId],
-        instance: pageInstanceTypeMapper[p.type],
-      })),
+      pages: [
+        ...filteredPages.map((p) => ({
+          ...p,
+          workflow: workflowMap[p.workflowId],
+          instance: pageInstanceTypeMapper[p.type],
+        })),
+        ...agentPages,
+      ],
       groups: groups.map((it) => pick(it, ['id', 'displayName', 'pageIds', 'isBuiltIn'])),
     };
   }
