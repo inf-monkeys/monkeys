@@ -154,8 +154,8 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) =
                   transition={{ duration: 0.2 }}
                 >
                   <MessageSquareDashed size={64} />
-                  <div className="mt-4 flex flex-col text-center">
-                    <h2 className="font-bold">{t('workspace.chat-view.empty')}</h2>
+                  <div className="mt-2 flex flex-col text-center">
+                    <h2 className="text-sm font-bold">{t('workspace.chat-view.empty')}</h2>
                   </div>
                 </motion.div>
               )}
