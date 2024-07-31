@@ -20,8 +20,8 @@ import { Card, CardContent } from '@/components/ui/card.tsx';
 import { JSONValue } from '@/components/ui/code-editor';
 import { Label } from '@/components/ui/label.tsx';
 import { VinesLoading } from '@/components/ui/loading';
-import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { useFlowStore } from '@/store/useFlowStore';
+import { usePageStore } from '@/store/usePageStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 import { flattenKeys } from '@/utils/flat.ts';
@@ -102,20 +102,22 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
 
   event$.useSubscription(() => setRefresh((it) => it + 1));
 
+  const containerHeight = usePageStore((s) => s.containerHeight);
+
   const [height, setHeight] = useState<number>(100);
-  const { ref, height: containerHeight } = useElementSize();
   useThrottleEffect(
     () => {
-      setHeight(containerHeight - (minimalGap ? 18 : 48));
+      if (!containerHeight) return;
+      setHeight(containerHeight - (minimalGap ? 52 : 82));
     },
     [containerHeight, minimalGap],
-    { wait: 100 },
+    { wait: 64 },
   );
 
   const totalCount = list.length;
 
   return (
-    <Card ref={ref} className={cn('relative', className)}>
+    <Card className={cn('relative', className)}>
       <CardContent className={cn('-mr-3 p-4', minimalGap && 'p-2')}>
         <VirtuosoGrid
           data={list}
