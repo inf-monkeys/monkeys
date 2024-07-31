@@ -91,7 +91,7 @@ export const ConversationApps: React.FC = () => {
           ),
           cover: (item) => RenderIcon({ iconUrl: item.iconUrl, size: 'gallery' }),
         }}
-        onItemClick={(item) => open(`/${item.teamId}/agents/${item.id}`, '_blank')}
+        onItemClick={(item) => open(`/${item.teamId}/agent/${item.id}`, '_blank')}
         subtitle={
           <>
             <CreateAppDialog defaultSelect="agent" />

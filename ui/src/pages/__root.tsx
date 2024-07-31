@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { WorkspaceIframe } from 'src/components/layout-wrapper/space/iframe';
 
 import { OEM } from '@/components/layout/oem';
+import { AgentWrapper } from '@/components/layout-wrapper/agent';
 import { MainWrapper } from '@/components/layout-wrapper/main';
 import { WorkspaceWrapper } from '@/components/layout-wrapper/workspace';
 import { RouteEvent } from '@/components/router/event.tsx';
@@ -22,7 +23,7 @@ import VinesEvent from '@/utils/events.ts';
 const RootComponent: React.FC = () => {
   const { t } = useTranslation();
 
-  const { routeIds, routeAppId, isUseOutside, isUseWorkSpace, isUseVinesCore } = useVinesRoute();
+  const { routeIds, routeAppId, isUseOutside, isUseWorkSpace, isUseVinesCore, isUseAgent } = useVinesRoute();
 
   const namePath = SIDEBAR_MAP.flatMap((it) =>
     it.items
@@ -63,7 +64,9 @@ const RootComponent: React.FC = () => {
                     ? 'vines-outlet-outside'
                     : isUseWorkSpace
                       ? 'vines-outlet-workspace'
-                      : 'vines-outlet-main'
+                      : isUseAgent
+                        ? 'vines-outlet-agent'
+                        : 'vines-outlet-main'
               }
               className="vines-center relative size-full flex-col"
               initial={{ opacity: 0 }}
@@ -77,6 +80,8 @@ const RootComponent: React.FC = () => {
                 <Outlet />
               ) : isUseWorkSpace ? (
                 <WorkspaceWrapper />
+              ) : isUseAgent ? (
+                <AgentWrapper />
               ) : (
                 <MainWrapper layoutId={'vines-outlet-main-' + routeIds?.join('-')} />
               )}

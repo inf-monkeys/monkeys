@@ -3,6 +3,7 @@ import * as React from 'react';
 import * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
 import { Controller, ControllerProps, FieldPath, FieldValues, FormProvider, useFormContext } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 
 import { Label } from '@/components/ui/label';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
@@ -112,8 +113,9 @@ FormDescription.displayName = 'FormDescription';
 
 const FormMessage = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
   ({ className, children, ...props }, ref) => {
+    const { t } = useTranslation();
     const { error, formMessageId } = useFormField();
-    const body = error && !children ? String(error?.message) : children;
+    const body = error && !children ? t(String(error?.message)) : children;
 
     return (
       <SmoothTransition>

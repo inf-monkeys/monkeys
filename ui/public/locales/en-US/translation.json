@@ -2871,5 +2871,32 @@
       "empty": "No conversation yet",
       "back-to-bottom": "Back to bottom"
     }
+  },
+  "agent": {
+    "info": {
+      "title": "Agent Information",
+      "tip": "Click to edit",
+      "default-agent-name": "Unnamed agent",
+      "form": {
+        "agent-name": "Agent name",
+        "agent-name-placeholder": "Please enter a agent name",
+        "agent-desc": "Agent description",
+        "agent-desc-placeholder": "Please enter a description of the agent in no more than 200 characters.",
+        "agent-icon": "Agent Icons",
+        "submit": "Submit"
+      },
+      "agent-id-empty": "Agent ID does not exist",
+      "agent-updated": "Agent information has been updated",
+      "agent-update-failed": "Agent information update failure",
+
+      "display-name-is-non-empty": "The display name cannot be empty",
+      "description-is-too-long": "The description cannot exceed 200 characters"
+    },
+    "space": {
+      "tab": {
+        "config-view": "Configuration View",
+        "chat-view": "Chat View"
+      }
+    }
   }
 }
