@@ -122,7 +122,7 @@ export class ConversationAppRepository {
     if (updates.displayName) {
       entity.displayName = updates.displayName;
     }
-    if (updates.description) {
+    if (typeof updates.description !== 'undefined') {
       entity.description = updates.description;
     }
     if (updates.iconUrl) {
