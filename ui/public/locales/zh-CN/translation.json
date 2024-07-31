@@ -54,6 +54,7 @@
     },
     "type": {
       "workflow": "工作流",
+      "agent": "智能体",
       "comfyui-workflow": "ComfyUI 工作流",
       "filter-group": "筛选分组",
       "text-data": "文本数据",
@@ -900,6 +901,15 @@
           "description": {
             "label": "应用描述",
             "placeholder": "输入应用描述"
+          },
+          "model": {
+            "label": "应用语言模型",
+            "placeholder": "选择语言模型"
+          },
+          "customModelName": {
+            "label": "应用自定义模型名称",
+            "description": "默认使用智能体 id",
+            "placeholder": "输入应用自定义模型名称"
           }
         }
       }

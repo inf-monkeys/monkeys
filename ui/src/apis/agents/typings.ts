@@ -1,5 +1,5 @@
-export interface IAgents {
-  displayName?: string;
+export interface IAgent {
+  displayName: string;
   customModelName?: string;
   model: string;
   systemPrompt?: string;
