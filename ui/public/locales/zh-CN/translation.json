@@ -2857,5 +2857,32 @@
       "empty": "暂无对话",
       "back-to-bottom": "回到底部"
     }
+  },
+  "agent": {
+    "info": {
+      "title": "智能体信息",
+      "tip": "点击编辑",
+      "default-agent-name": "未命名应用",
+      "form": {
+        "agent-name": "智能体名称",
+        "agent-name-placeholder": "请输入智能体名称",
+        "agent-desc": "智能体描述",
+        "agent-desc-placeholder": "请输入智能体描述，不超过 200 字",
+        "agent-icon": "智能体图标",
+        "submit": "保存"
+      },
+      "agent-id-empty": "智能体 ID 不存在",
+      "agent-updated": "智能体信息已更新",
+      "agent-update-failed": "智能体信息更新失败",
+
+      "display-name-is-non-empty": "显示名称不能为空",
+      "description-is-too-long": "描述不能超过 200 个字符"
+    },
+    "space": {
+      "tab": {
+        "config-view": "配置视图",
+        "chat-view": "对话视图"
+      }
+    }
   }
 }

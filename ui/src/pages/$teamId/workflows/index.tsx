@@ -13,6 +13,7 @@ import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { cloneWorkflow, deleteWorkflow } from '@/apis/workflow';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { CreateAppDialog } from '@/components/layout/ugc-pages/apps/create';
 import { createWorkflowsColumns } from '@/components/layout/ugc-pages/workflows/consts.tsx';
 import { ExportWorkflowDialog } from '@/components/layout/ugc-pages/workflows/export-workflow';
 import { IExportWorkflowWithAssetsContext } from '@/components/layout/ugc-pages/workflows/export-workflow/typings.ts';
@@ -44,7 +45,6 @@ import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCopy } from '@/hooks/use-copy.ts';
 import { getI18nContent } from '@/utils';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
-import { CreateAppDialog } from '@/components/layout/ugc-pages/apps/create';
 
 export const Workflows: React.FC = () => {
   const { t } = useTranslation();

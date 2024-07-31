@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { getVinesToken } from '@/apis/utils.ts';
 import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
-import { UserCard } from '@/components/layout-wrapper/workspace/header/expand/user-card.tsx';
+import { UserCard } from '@/components/layout-wrapper/space/header/expand/user-card.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import VinesEvent from '@/utils/events.ts';
