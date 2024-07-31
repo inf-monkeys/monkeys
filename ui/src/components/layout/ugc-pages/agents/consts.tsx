@@ -20,7 +20,7 @@ export const createAgentsColumns = () => [
     cell: ({ row, getValue }) => (
       <a
         className="hover:text-primary-500 transition-colors"
-        href={`/${row.original.teamId}/conversation-apps/${row.original.id}`}
+        href={`/${row.original.teamId}/agent/${row.original.id}`}
         target="_blank"
         rel="noreferrer"
       >
