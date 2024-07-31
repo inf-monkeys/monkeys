@@ -18,7 +18,7 @@ const morandiColorMapper: Record<string, string> = {
 export const splitEmojiLink = (
   src = '',
   fallbackColor = 'var(--slate1)',
-): { backgroundColor: string; text: string; emoji: string } => {
+): { backgroundColor: string; text: string; emoji: string; type: 'emoji' | 'lucide' } => {
   if (src?.toString()?.startsWith('emoji') && src.includes(':')) {
     const [, emoji, color, lucide] = src.split(':');
     const morandiColor = morandiColorMapper[color];
@@ -28,6 +28,7 @@ export const splitEmojiLink = (
         backgroundColor: morandiColor || color || fallbackColor,
         text: lucide,
         emoji,
+        type: 'lucide',
       };
     }
 
@@ -36,6 +37,7 @@ export const splitEmojiLink = (
         backgroundColor: morandiColor || color || fallbackColor,
         text: emoji,
         emoji,
+        type: 'emoji',
       };
     }
   }
@@ -48,6 +50,7 @@ export const splitEmojiLink = (
       backgroundColor: morandiColor || color || fallbackColor,
       text: icon,
       emoji: icon,
+      type: 'lucide',
     };
   }
 
@@ -55,5 +58,6 @@ export const splitEmojiLink = (
     backgroundColor: fallbackColor,
     text: src.length >= 3 ? src.slice(1) : src,
     emoji: emojiRegex().test(src) ? src : '🍀',
+    type: 'emoji',
   };
 };

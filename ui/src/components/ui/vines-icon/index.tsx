@@ -1,16 +1,13 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { useCreation } from 'ahooks';
 import { isUndefined } from 'lodash';
 import emojiRenderer from 'react-easy-emoji';
 import isURL from 'validator/es/lib/isURL';
 
-import { LucideIconRender } from '@/components/ui/vines-icon/lucide/render.tsx';
+import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { splitEmojiLink } from '@/components/ui/vines-icon/utils.ts';
-import { useAppStore } from '@/store/useAppStore';
 import { cn } from '@/utils';
-import { emojiRegex } from '@/utils/emoji-regex.ts';
-import VinesEvent from '@/utils/events.ts';
 
 export type IVinesIconSize = 'auto' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'max' | 'gallery';
 
@@ -32,23 +29,12 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
 }) => {
   const src = (propSrc ?? children ?? '').toString().trim();
 
-  const iconNames = useAppStore((s) => s.iconNames);
-  const initialized = useAppStore((s) => s.iconInitialized);
-
-  const { text, backgroundColor } = splitEmojiLink(src);
-
-  useEffect(() => {
-    if (!initialized) {
-      VinesEvent.emit('vines-trigger-init-icons');
-    }
-  }, [initialized]);
+  const { text, backgroundColor, type } = splitEmojiLink(src);
 
   const iconType = useCreation(() => {
-    if (emojiRegex().test(text)) return 'emoji';
-    if (iconNames.includes(text)) return 'lucide';
     if (isURL(src)) return 'img';
-    return 'text';
-  }, [iconNames, text, src, initialized]);
+    return type;
+  }, [src, type]);
 
   return (
     <div
@@ -78,7 +64,7 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
           {iconType === 'img' && <img src={src} alt={alt} />}
           {iconType === 'emoji' && emojiRenderer(text, { protocol: 'https', ext: '.png' })}
           {iconType === 'lucide' && (
-            <LucideIconRender
+            <VinesLucideIcon
               src={text}
               className={cn(
                 'stroke-current text-black',
@@ -90,7 +76,6 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
               )}
             />
           )}
-          {iconType === 'text' && emojiRenderer(text, { protocol: 'https', ext: '.png' })}
         </div>
       )}
     </div>
