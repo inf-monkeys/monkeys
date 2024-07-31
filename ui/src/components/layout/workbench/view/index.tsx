@@ -27,7 +27,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ groupId }) => {
   const [page] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
 
   const hasPages = (pages?.length ?? 0) > 0;
-  const hasPage = !!(page?.id && page?.teamId && page?.workflowId && page?.type);
+  const hasPage = !!(page?.id && page?.type);
 
   const setContainerWidth = usePageStore((s) => s.setContainerWidth);
   const setContainerHeight = usePageStore((s) => s.setContainerHeight);

@@ -116,7 +116,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ groupId, se
                   return null;
                 }
 
-                const workflow = page?.workflow;
+                const info = page?.workflow || page?.agent;
                 const viewIcon = page?.instance?.icon ?? '';
                 const pageId = page?.id ?? '';
 
@@ -134,17 +134,13 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ groupId, se
                       setGroupId(id);
                     }}
                   >
-                    <VinesIcon size="sm">{workflow?.iconUrl}</VinesIcon>
+                    <VinesIcon size="sm">{info?.iconUrl}</VinesIcon>
                     <div className="flex max-w-44 flex-col gap-0.5">
                       <h1 className="text-sm font-bold leading-tight">
-                        {getI18nContent(workflow?.displayName) ?? t('common.utils.untitled')}
+                        {getI18nContent(info?.displayName) ?? t('common.utils.untitled')}
                       </h1>
                       <div className="flex items-center gap-0.5">
-                        <VinesLucideIcon
-                          className="size-3"
-                          size={12}
-                          src={EMOJI2LUCIDE_MAPPER[viewIcon] ?? viewIcon}
-                        />
+                        <VinesLucideIcon className="size-3" size={12} src={EMOJI2LUCIDE_MAPPER[viewIcon] ?? viewIcon} />
                         <span className="text-xxs">
                           {t([`workspace.wrapper.space.tabs.${page.displayName}`, page.displayName])}
                         </span>

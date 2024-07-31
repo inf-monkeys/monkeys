@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 
+import { IAgent } from '@/apis/agents/typings.ts';
+import { IAssetItem } from '@/apis/ugc/typings.ts';
+
 export type IPagePermission = 'read' | 'write' | 'exec' | 'permission';
 
 export type IPageInstanceType = 'process' | 'log' | 'chat' | 'preview' | 'api';
@@ -44,6 +47,7 @@ export interface IPageType {
 export type IPinPage = IPageType & {
   workflowId: string;
   workflow: MonkeyWorkflow;
+  agent: IAssetItem<IAgent>;
 };
 
 export interface IPageGroup {
