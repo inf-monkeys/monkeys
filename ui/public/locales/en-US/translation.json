@@ -54,6 +54,7 @@
     },
     "type": {
       "workflow": "workflow",
+      "agent": "agent",
       "comfyui-workflow": "ComfyUI workflow",
       "filter-group": "filter group",
       "text-data": "text data"
@@ -910,6 +911,15 @@
           "description": {
             "label": "App Description",
             "placeholder": "Enter app description"
+          },
+          "model": {
+            "label": "App Model",
+            "placeholder": "Select app llm model"
+          },
+          "customModelName": {
+            "label": "App Custom Model Name",
+            "description": "Defaults to the agent id",
+            "placeholder": "Enter app custom model name"
           }
         }
       }

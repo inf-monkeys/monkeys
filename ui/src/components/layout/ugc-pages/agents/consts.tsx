@@ -1,13 +1,13 @@
 import { I18nValue } from '@inf-monkeys/monkeys';
 import { createColumnHelper } from '@tanstack/react-table';
 
-import { IAgents } from '@/apis/agents/typings.ts';
+import { IAgent } from '@/apis/agents/typings.ts';
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { getI18nContent } from '@/utils';
 
-const columnHelper = createColumnHelper<IAssetItem<IAgents>>();
+const columnHelper = createColumnHelper<IAssetItem<IAgent>>();
 
 export const createAgentsColumns = () => [
   columnHelper.accessor('iconUrl', {
