@@ -35,7 +35,7 @@ export const ChatSession: React.FC<IChatSessionProps> = ({ session, active, onCl
       onClick={onClick}
     >
       <MessageSquare size={16} />
-      <span>{sessionDisplayName}</span>
+      <span className="text-sm">{sessionDisplayName}</span>
       <div
         className={cn(
           'flex flex-1 justify-end opacity-0 transition-opacity group-hover:opacity-100',

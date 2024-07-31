@@ -95,7 +95,7 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
                 })
               }
             >
-              <Button variant="outline" icon={<Plus />}>
+              <Button variant="outline" icon={<Plus />} size="small">
                 {t('workspace.chat-view.sidebar.create.label')}
               </Button>
             </SimpleInputDialog>
