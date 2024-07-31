@@ -3,7 +3,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ICreateAppType } from '@/components/layout/ugc-pages/apps/create/app-type/typings.ts';
-import { VinesIcon } from '@/components/ui/vines-icon';
+import { VinesLucideIconWithBackground } from '@/components/ui/vines-icon/lucide/with-background.tsx';
 import { cn } from '@/utils';
 
 export const AppTypeItem: React.FC<{
@@ -24,7 +24,10 @@ export const AppTypeItem: React.FC<{
     >
       <div className="flex gap-3">
         <div>
-          <VinesIcon src={type === 'agent' ? 'lucide:bot:#ceefc5' : 'lucide:server:#ceefc5'} size="md" />
+          <VinesLucideIconWithBackground
+            src={type === 'agent' ? 'lucide:bot:#ceefc5' : 'lucide:server:#ceefc5'}
+            size="md"
+          />
         </div>
         <div className="flex flex-1 flex-col gap-1">
           <div className="flex w-full items-center justify-between">
