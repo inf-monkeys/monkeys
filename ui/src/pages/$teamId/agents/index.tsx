@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 
-import { mutate } from 'swr';
 import { createFileRoute } from '@tanstack/react-router';
+import { mutate } from 'swr';
 
-import { Link, Trash } from 'lucide-react';
+import { Link, Pencil, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -11,10 +11,11 @@ import { deleteAgent } from '@/apis/agents';
 import { IAgent } from '@/apis/agents/typings.ts';
 import { preloadUgcAgents, useUgcAgents } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { UgcView } from '@/components/layout/ugc/view';
-import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { AgentInfoEditor } from '@/components/layout/agent/info-editor';
 import { createAgentsColumns } from '@/components/layout/ugc-pages/agents/consts.tsx';
 import { CreateAppDialog } from '@/components/layout/ugc-pages/apps/create';
+import { UgcView } from '@/components/layout/ugc/view';
+import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import {
   AlertDialog,
@@ -51,6 +52,11 @@ export const ConversationApps: React.FC = () => {
   const [currentAgent, setCurrentAgent] = useState<IAssetItem<IAgent>>();
 
   const [deleteAlertDialogVisible, setDeleteAlertDialogVisible] = useState(false);
+  const [infoEditorDialogVisible, setInfoEditorDialogVisible] = useState(false);
+
+  const handleAfterUpdate = () => {
+    void mutateAgents();
+  };
 
   const handleDeleteAgent = (agentId?: string) => {
     if (!agentId) {
@@ -118,11 +124,23 @@ export const ConversationApps: React.FC = () => {
               <DropdownMenuLabel>{tHook('ugc-page.agent.ugc-view.operate-area.dropdown-label')}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem onSelect={() => copy(location.origin.concat(`/${item.teamId}/agents/${item.id}`))}>
+                <DropdownMenuItem onSelect={() => copy(location.origin.concat(`/${item.teamId}/agent/${item.id}`))}>
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <Link size={15} />
                   </DropdownMenuShortcut>
                   {tHook('ugc-page.agent.ugc-view.operate-area.options.copy-link')}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setCurrentAgent(item);
+                    setInfoEditorDialogVisible(true);
+                  }}
+                >
+                  <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                    <Pencil size={15} />
+                  </DropdownMenuShortcut>
+                  {tHook('ugc-page.agent.ugc-view.operate-area.options.edit-info')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -141,6 +159,12 @@ export const ConversationApps: React.FC = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
+      />
+      <AgentInfoEditor
+        visible={infoEditorDialogVisible}
+        setVisible={setInfoEditorDialogVisible}
+        agent={currentAgent}
+        afterUpdate={handleAfterUpdate}
       />
       <AlertDialog open={deleteAlertDialogVisible} onOpenChange={setDeleteAlertDialogVisible}>
         <AlertDialogContent

@@ -959,7 +959,8 @@
         "operate-area": {
           "dropdown-label": "Operations",
           "options": {
-            "copy-link": "Copy Link"
+            "copy-link": "Copy Link",
+            "edit-info": "Edit Info"
           }
         }
       }
@@ -2888,7 +2889,6 @@
       "agent-id-empty": "Agent ID does not exist",
       "agent-updated": "Agent information has been updated",
       "agent-update-failed": "Agent information update failure",
-
       "display-name-is-non-empty": "The display name cannot be empty",
       "description-is-too-long": "The description cannot exceed 200 characters"
     },

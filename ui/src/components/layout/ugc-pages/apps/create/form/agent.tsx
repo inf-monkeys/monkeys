@@ -77,7 +77,7 @@ export const AgentCreateForm: React.FC<{
 
     toast.promise(createAgent(data), {
       success: (agent) => {
-        if (agent) open(`/${teamId}/agents/${agent.id}`, '_blank');
+        if (agent) open(`/${teamId}/agent/${agent.id}`, '_blank');
         setOpen(false);
         return t('common.create.success');
       },

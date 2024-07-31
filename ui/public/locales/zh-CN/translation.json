@@ -949,7 +949,8 @@
         "operate-area": {
           "dropdown-label": "智能体操作",
           "options": {
-            "copy-link": "复制链接"
+            "copy-link": "复制链接",
+            "edit-info": "编辑信息"
           }
         }
       }
@@ -2874,7 +2875,6 @@
       "agent-id-empty": "智能体 ID 不存在",
       "agent-updated": "智能体信息已更新",
       "agent-update-failed": "智能体信息更新失败",
-
       "display-name-is-non-empty": "显示名称不能为空",
       "description-is-too-long": "描述不能超过 200 个字符"
     },
