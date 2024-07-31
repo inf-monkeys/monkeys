@@ -4,15 +4,15 @@ import { mutate } from 'swr';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreation } from 'ahooks';
+import { ChevronRightIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { createAgent } from '@/apis/agents';
-import { IAgent } from '@/apis/agents/typings.ts';
 import { useLLMModels } from '@/apis/llm';
-import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx';
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';
 import {
@@ -74,26 +74,22 @@ export const AgentCreateForm: React.FC<{
       return;
     }
     setIsCreating(true);
-    toast.promise(
-      async (): Promise<IAssetItem<IAgent>> => {
-        const result = await createAgent(data);
-        if (!result) throw new Error('agent created failed');
-        return result.agent;
-      },
-      {
-        success: (agent) => {
+
+    toast.promise(createAgent(data), {
+      success: (agent) => {
+        if (agent) {
           // open(`/${teamId}/agent/${agent.id}`, '_blank');
-          setOpen(false);
-          return t('common.create.success');
-        },
-        loading: t('common.create.loading'),
-        error: t('common.create.error'),
-        finally: () => {
-          setIsCreating(false);
-          void mutateAgents();
-        },
+        }
+        setOpen(false);
+        return t('common.create.success');
       },
-    );
+      loading: t('common.create.loading'),
+      error: t('common.create.error'),
+      finally: () => {
+        setIsCreating(false);
+        void mutateAgents();
+      },
+    });
   });
 
   return (
@@ -180,24 +176,34 @@ export const AgentCreateForm: React.FC<{
           )}
         />
 
-        <FormField
-          name="customModelName"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem className="flex-1">
-              <FormLabel>{t('ugc-page.app.create.dialog.customModelName.label')}</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder={t('ugc-page.app.create.dialog.customModelName.placeholder')}
-                  {...field}
-                  className=""
-                />
-              </FormControl>
-              <FormDescription>{t('ugc-page.app.create.dialog.customModelName.description')}</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <Accordion type="single" collapsible>
+          <AccordionItem value="item-1">
+            <AccordionTrigger className="justify-start gap-2 text-sm [&[data-state=open]_.chevron]:rotate-90">
+              {t('ugc-page.app.create.dialog.options-label')}
+              <ChevronRightIcon className="chevron size-4 shrink-0 text-muted-foreground transition-transform duration-200" />
+            </AccordionTrigger>
+            <AccordionContent className="px-1 pt-4">
+              <FormField
+                name="customModelName"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>{t('ugc-page.app.create.dialog.customModelName.label')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={t('ugc-page.app.create.dialog.customModelName.placeholder')}
+                        {...field}
+                        className=""
+                      />
+                    </FormControl>
+                    <FormDescription>{t('ugc-page.app.create.dialog.customModelName.description')}</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
         <DialogFooter>
           <Button

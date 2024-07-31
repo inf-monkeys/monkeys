@@ -906,9 +906,10 @@
             "label": "应用语言模型",
             "placeholder": "选择语言模型"
           },
+          "options-label": "高级配置",
           "customModelName": {
             "label": "应用自定义模型名称",
-            "description": "默认使用智能体 id",
+            "description": "默认使用智能体 ID",
             "placeholder": "输入应用自定义模型名称"
           }
         }

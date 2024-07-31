@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { AnimatePresence, motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -9,7 +10,6 @@ import { AgentCreateForm } from '@/components/layout/ugc-pages/apps/create/form/
 import { WorkflowCreateForm } from '@/components/layout/ugc-pages/apps/create/form/workflow.tsx';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { AnimatePresence, motion } from 'framer-motion';
 
 export interface ICreateAppDialogProps {
   defaultSelect: ICreateAppType;
@@ -29,7 +29,7 @@ export const CreateAppDialog: React.FC<ICreateAppDialogProps> = ({ defaultSelect
           {t('common.utils.create')}
         </Button>
       </DialogTrigger>
-      <DialogContent className="min-w-[1200px]" style={{ transition: 'height 0.5s ease' }}>
+      <DialogContent className="min-w-[1200px] overflow-hidden">
         <DialogHeader>
           <DialogTitle>{t('ugc-page.app.create.dialog.title')}</DialogTitle>
         </DialogHeader>
@@ -38,13 +38,13 @@ export const CreateAppDialog: React.FC<ICreateAppDialogProps> = ({ defaultSelect
             <span className="text-sm font-medium">{t('ugc-page.app.create.dialog.type.label')}</span>
             <AppTypeSelector selectedType={selectedType} onChange={setSelectedType} />
           </div>
-          <AnimatePresence>
+          <AnimatePresence mode="wait">
             <motion.div
               className="flex flex-col gap-4"
               key={selectedType}
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
               {selectedType === 'workflow' && <WorkflowCreateForm setOpen={setOpen} />}
