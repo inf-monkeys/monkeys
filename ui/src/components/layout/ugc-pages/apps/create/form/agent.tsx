@@ -191,7 +191,6 @@ export const AgentCreateForm: React.FC<{
                   placeholder={t('ugc-page.app.create.dialog.customModelName.placeholder')}
                   {...field}
                   className=""
-                  autoFocus
                 />
               </FormControl>
               <FormDescription>{t('ugc-page.app.create.dialog.customModelName.description')}</FormDescription>
