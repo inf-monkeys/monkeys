@@ -916,9 +916,10 @@
             "label": "App Model",
             "placeholder": "Select app llm model"
           },
+          "options-label": "Advanced Configuration",
           "customModelName": {
             "label": "App Custom Model Name",
-            "description": "Defaults to the agent id",
+            "description": "Defaults to the agent ID",
             "placeholder": "Enter app custom model name"
           }
         }
