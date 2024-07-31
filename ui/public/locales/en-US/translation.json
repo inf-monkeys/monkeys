@@ -955,6 +955,12 @@
           "updatedTimestamp": {
             "label": "Updated Time"
           }
+        },
+        "operate-area": {
+          "dropdown-label": "Operations",
+          "options": {
+            "copy-link": "Copy Link"
+          }
         }
       }
     },
@@ -1914,7 +1920,6 @@
             "loading": "Updating permissions...",
             "success": "Update permissions successful!",
             "error": "Update permissions failed! Please try again later!",
-
             "copy-workspace-url": {
               "label": "Copy Link",
               "tips": "Anyone on the Internet with the link can view the entire workspace"

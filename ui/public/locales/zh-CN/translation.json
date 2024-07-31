@@ -945,6 +945,12 @@
           "updatedTimestamp": {
             "label": "更新时间"
           }
+        },
+        "operate-area": {
+          "dropdown-label": "智能体操作",
+          "options": {
+            "copy-link": "复制链接"
+          }
         }
       }
     },
