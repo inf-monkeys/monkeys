@@ -15,6 +15,7 @@ import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { getI18nContent } from '@/utils';
 
 interface IWorkbenchViewHeaderProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -32,6 +33,8 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page,
 
   const { trigger } = useUpdateGroupPages(groupId);
 
+  const [, setCurrentPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
+
   const handleUnPin = () => {
     if (!page?.id) return;
     toast.promise(
@@ -42,7 +45,9 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page,
       {
         loading: t('workspace.wrapper.space.menu.group.update.loading'),
         success: () => {
-          void mutate('/api/workflow/pages/pinned');
+          void mutate('/api/workflow/pages/pinned').then((it) => {
+            setCurrentPage(it.pages?.[0] ?? {});
+          });
 
           return t('workspace.wrapper.space.menu.group.update.success');
         },
