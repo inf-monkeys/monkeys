@@ -30,6 +30,7 @@ export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
     const previewData = previewDataGenerator(data);
 
     const previewDataLength = previewData.length;
+    const visibleKey = previewDataLength > 1;
 
     const isValueEmpty = previewDataLength === 1 && isEmpty(previewData?.[0]?.value);
 
@@ -43,7 +44,7 @@ export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
           {previewData.map(({ name, type, value }, i) => {
             return (
               <div key={name} className="flex flex-col items-start justify-center">
-                <h1 className="break-all text-sm font-medium">{name}</h1>
+                {visibleKey && <h1 className="break-all text-sm font-medium">{name}</h1>}
                 {type === 'string' && <VinesAbstractString>{value}</VinesAbstractString>}
                 {type === 'boolean' && <VinesAbstractBoolean>{value}</VinesAbstractBoolean>}
                 {type === 'url' && <VinesAbstractUrl>{value}</VinesAbstractUrl>}
