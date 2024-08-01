@@ -6,7 +6,6 @@ import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { VinesChatMessage } from '@/components/layout/workspace/vines-view/chat/chat-bot/messages/chat-message';
 import { IVinesMessage } from '@/components/layout/workspace/vines-view/chat/chat-bot/use-chat.ts';
 import { AutoScroll } from '@/components/layout/workspace/vines-view/chat/workflow-mode/messages/virtualized/auto-scroll.tsx';
-import { VinesRealTimeChatMessage } from '@/components/layout/workspace/vines-view/chat/workflow-mode/messages/virtualized/chat-message/real-time.tsx';
 
 interface IVirtualizedListProps {
   data: IVinesMessage[];
@@ -72,9 +71,6 @@ export const VirtualizedList: React.FC<IVirtualizedListProps> = ({
               userPhoto={userPhoto}
             />
           );
-        }}
-        components={{
-          Footer: VinesRealTimeChatMessage,
         }}
         overscan={overScan}
         ref={virtuosoRef}

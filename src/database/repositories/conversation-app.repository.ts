@@ -122,7 +122,7 @@ export class ConversationAppRepository {
     if (updates.displayName) {
       entity.displayName = updates.displayName;
     }
-    if (typeof updates.description !== 'undefined') {
+    if (updates.description != undefined) {
       entity.description = updates.description;
     }
     if (updates.iconUrl) {
@@ -132,13 +132,13 @@ export class ConversationAppRepository {
       this.checkModel(updates.model);
       entity.model = updates.model;
     }
-    if (updates.customModelName) {
+    if (updates.customModelName != undefined) {
       if (updates.customModelName !== entity.customModelName) {
         await this.checkCustomModelUnique(teamId, updates.customModelName);
       }
       entity.customModelName = updates.customModelName;
     }
-    if (updates.systemPrompt) {
+    if (updates.systemPrompt != undefined) {
       entity.systemPrompt = updates.systemPrompt;
     }
     if (updates.knowledgeBase) {

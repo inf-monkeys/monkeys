@@ -13,26 +13,26 @@ import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
-interface IChatSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface IChatSidebarProps {
+  id: string;
+}
 
-export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
+export const ChatSidebar: React.FC<IChatSidebarProps> = ({ id }) => {
   const { t } = useTranslation();
 
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
-  const workflowId = useFlowStore((s) => s.workflowId);
 
-  const { data, mutate } = useWorkflowChatSessions(workflowId);
+  const { data, mutate } = useWorkflowChatSessions(id);
   const { trigger } = useCreateWorkflowChatSession();
 
   const [chatSessions, setChatSessions] = useLocalStorage<Record<string, string>>('vines-ui-chat-session', {});
 
   const [visible, setVisible] = useState(!workbenchVisible);
 
-  const activeSessionId = chatSessions[workflowId] ?? data?.[0]?.id;
+  const activeSessionId = chatSessions[id] ?? data?.[0]?.id;
 
   return (
     <div className="flex h-full max-w-64">
@@ -57,12 +57,12 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
                   mutate().then((newData) => {
                     if (!newData?.length) {
                       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                      const { [workflowId]: _, ...rest } = chatSessions;
+                      const { [id]: _, ...rest } = chatSessions;
                       setChatSessions(rest);
                     } else {
                       setChatSessions({
                         ...chatSessions,
-                        [workflowId]: newData?.[0].id ?? '',
+                        [id]: newData?.[0].id ?? '',
                       });
                     }
                   });
@@ -70,7 +70,7 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
                 onClick={() => {
                   setChatSessions({
                     ...chatSessions,
-                    [workflowId]: session.id,
+                    [id]: session.id,
                   });
                 }}
               />
@@ -80,13 +80,13 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = () => {
               title={t('workspace.chat-view.sidebar.create.label')}
               placeholder={t('workspace.chat-view.sidebar.create.placeholder')}
               onFinished={(displayName) =>
-                toast.promise(trigger({ displayName, workflowId }), {
+                toast.promise(trigger({ displayName, workflowId: id }), {
                   loading: t('workspace.chat-view.sidebar.create.loading'),
                   success: (session) => {
                     session &&
                       setChatSessions({
                         ...chatSessions,
-                        [workflowId]: session.id,
+                        [id]: session.id,
                       });
                     return t('workspace.chat-view.sidebar.create.success');
                   },

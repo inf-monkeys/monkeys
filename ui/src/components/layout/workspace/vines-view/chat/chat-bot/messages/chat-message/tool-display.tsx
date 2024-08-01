@@ -12,7 +12,6 @@ import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
-import { useVinesFlow } from '@/package/vines-flow';
 import { JSONValue } from '@/package/vines-flow/core/tools/typings.ts';
 import { getI18nContent } from '@/utils';
 
@@ -45,7 +44,6 @@ interface IToolDisplayProps {
 export const ToolDisplay: React.FC<IToolDisplayProps> = ({ data }) => {
   const { t } = useTranslation();
 
-  const { vines } = useVinesFlow();
   const { data: knowledge } = useKnowledgeBases();
   const chatCompletionLog = data?.at(-1);
 
@@ -75,10 +73,16 @@ export const ToolDisplay: React.FC<IToolDisplayProps> = ({ data }) => {
     status = (detailedInfo as ToolCallLogDetailedInfo).status;
     result = (detailedInfo as ToolCallLogDetailedInfo).result || (detailedInfo as ToolCallLogDetailedInfo).arguments;
     const toolName = (detailedInfo as ToolCallLogDetailedInfo).toolName;
-    const vinesTool = vines.getTool(toolName);
-    toolDisplayName = getI18nContent(vinesTool?.displayName) || toolName;
-    toolDesc = getI18nContent(vinesTool?.description) || '';
-    toolIcon = vinesTool?.icon || 'emoji:🛠:#f0f0f0';
+
+    // TODO: need static vinesFlow instance
+    // const vinesTool = vines.getTool(toolName);
+    // toolDisplayName = getI18nContent(vinesTool?.displayName) || toolName;
+    // toolDesc = getI18nContent(vinesTool?.description) || '';
+    // toolIcon = vinesTool?.icon || 'emoji:🛠:#f0f0f0';
+
+    toolDisplayName = toolName;
+    toolDesc = '';
+    toolIcon = 'emoji:🛠:#f0f0f0';
   }
 
   return (
@@ -106,7 +110,7 @@ export const ToolDisplay: React.FC<IToolDisplayProps> = ({ data }) => {
               <VinesHighlighter language="markdown">{result as string}</VinesHighlighter>
             )}
           </ScrollArea>
-          <div className="absolute -bottom-1 -right-2 flex scale-80 items-center gap-2">
+          <div className="scale-80 absolute -bottom-1 -right-2 flex items-center gap-2">
             <Tooltip>
               <CodePreview data={data ?? ([] as any[])} lineNumbers={3} minimap>
                 <TooltipTrigger asChild>
