@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 
 import { Link } from '@tanstack/react-router';
 
-import { useDebounceEffect } from 'ahooks';
+import { useDebounceEffect, useThrottleEffect } from 'ahooks';
 import { motion } from 'framer-motion';
 import { keyBy, map } from 'lodash';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
-import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab.tsx';
+import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label.tsx';
@@ -19,7 +19,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import { useElementSize } from '@/hooks/use-resize-observer';
 import { cn, getI18nContent } from '@/utils';
+import { GroupedVirtuoso } from 'react-virtuoso';
 
 interface IWorkbenchSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
   groupId: string;
@@ -44,6 +46,17 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ groupId, se
   }))
     .filter((it) => it.pages?.length)
     .sort((a) => (a.isBuiltIn ? -1 : 1));
+
+  const pages = lists.reduce((acc: (IPinPage & { groupId: string })[], list) => {
+    return acc.concat(
+      list.pages.map((page) => {
+        return {
+          ...page,
+          groupId: list.id,
+        };
+      }),
+    );
+  }, []);
 
   const [currentPage, setCurrentPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
 
@@ -82,8 +95,19 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ groupId, se
     { wait: 180 },
   );
 
+  const { ref, height: wrapperHeight } = useElementSize();
+  const [height, setHeight] = useState(500);
+  useThrottleEffect(
+    () => {
+      if (!wrapperHeight) return;
+      setHeight(wrapperHeight - 96);
+    },
+    [wrapperHeight],
+    { wait: 64 },
+  );
+
   return (
-    <div className="flex h-full max-w-64">
+    <div className="flex h-full max-w-64" ref={ref}>
       <motion.div
         className="flex flex-col gap-4 overflow-hidden [&_h1]:line-clamp-1 [&_span]:line-clamp-1"
         initial={{ width: 256, paddingRight: 16 }}
@@ -108,49 +132,56 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ groupId, se
           <h1 className="text-base font-bold">{t('components.layout.main.sidebar.list.workbench.label')}</h1>
         </div>
         <div className="grid">
-          {lists.map(({ id, displayName, isBuiltIn, pages }) => (
-            <div key={id} className="space-y-1">
-              {!isBuiltIn && <Label className="text-xs">{displayName}</Label>}
-              {pages?.map((page) => {
-                if (!page) {
-                  return null;
-                }
+          <GroupedVirtuoso
+            groupCounts={lists.map((g) => g.pages.length)}
+            style={{ height }}
+            groupContent={(i) => {
+              const { displayName, isBuiltIn } = lists[i];
+              return isBuiltIn ? null : (
+                <div className="w-full bg-slate-1">
+                  <Label className="text-xs">{displayName}</Label>
+                </div>
+              );
+            }}
+            itemContent={(i) => {
+              const page = pages[i];
+              if (!page) {
+                return null;
+              }
 
-                const info = page?.workflow || page?.agent;
-                const viewIcon = page?.instance?.icon ?? '';
-                const pageId = page?.id ?? '';
-
-                return (
-                  <div
-                    key={pageId}
-                    className={cn(
-                      'flex cursor-pointer items-start space-x-2 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
-                      currentPage?.id === pageId && id === groupId
-                        ? 'border border-input bg-background p-2 text-accent-foreground'
-                        : 'p-[calc(0.5rem+1px)]',
-                    )}
-                    onClick={() => {
-                      setCurrentPage(page);
-                      setGroupId(id);
-                    }}
-                  >
-                    <VinesIcon size="sm">{info?.iconUrl}</VinesIcon>
-                    <div className="flex max-w-44 flex-col gap-0.5">
-                      <h1 className="text-sm font-bold leading-tight">
-                        {getI18nContent(info?.displayName) ?? t('common.utils.untitled')}
-                      </h1>
-                      <div className="flex items-center gap-0.5">
-                        <VinesLucideIcon className="size-3" size={12} src={EMOJI2LUCIDE_MAPPER[viewIcon] ?? viewIcon} />
-                        <span className="text-xxs">
-                          {t([`workspace.wrapper.space.tabs.${page.displayName}`, page.displayName])}
-                        </span>
-                      </div>
+              const info = page?.workflow || page?.agent;
+              const viewIcon = page?.instance?.icon ?? '';
+              const pageId = page?.id ?? '';
+              return (
+                <div
+                  key={pageId}
+                  className={cn(
+                    'flex cursor-pointer items-start space-x-2 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
+                    currentPage?.id === pageId && page.groupId === groupId
+                      ? 'border border-input bg-background p-2 text-accent-foreground'
+                      : 'p-[calc(0.5rem+1px)]',
+                  )}
+                  onClick={() => {
+                    setCurrentPage(page);
+                    setGroupId(page.groupId);
+                  }}
+                >
+                  <VinesIcon size="sm">{info?.iconUrl}</VinesIcon>
+                  <div className="flex max-w-44 flex-col gap-0.5">
+                    <h1 className="text-sm font-bold leading-tight">
+                      {getI18nContent(info?.displayName) ?? t('common.utils.untitled')}
+                    </h1>
+                    <div className="flex items-center gap-0.5">
+                      <VinesLucideIcon className="size-3" size={12} src={EMOJI2LUCIDE_MAPPER[viewIcon] ?? viewIcon} />
+                      <span className="text-xxs">
+                        {t([`workspace.wrapper.space.tabs.${page.displayName}`, page.displayName])}
+                      </span>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          ))}
+                </div>
+              );
+            }}
+          />
           <Tooltip>
             <TooltipTrigger asChild>
               <Link to="/$teamId/workflows/" params={{ teamId }}>
