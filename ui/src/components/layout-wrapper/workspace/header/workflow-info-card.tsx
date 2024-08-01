@@ -3,7 +3,7 @@ import React from 'react';
 import { Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { WorkflowInfoEditor } from '@/components/layout/workspace/workflow/info-editor';
+import { WorkflowInfoEditor } from '@/components/layout/workspace/workflow-info-editor.tsx';
 import { useVinesOriginWorkflow } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
