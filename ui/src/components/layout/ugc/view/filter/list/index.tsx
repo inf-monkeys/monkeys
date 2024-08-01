@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { ToolCategory } from '@inf-monkeys/monkeys';
+import { useThrottleEffect } from 'ahooks';
 import { ChevronRightIcon, LayoutGrid, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Virtuoso } from 'react-virtuoso';
 import { toast } from 'sonner';
 
 import {
@@ -32,6 +34,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
+import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { cn, getI18nContent } from '@/utils';
 
 export interface IUgcViewFilterListProps extends IUgcCustomProps {
@@ -118,8 +121,19 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
     };
   }, [rawToolsData, assetType, isMarket]);
 
+  const { ref, height: wrapperHeight } = useElementSize();
+  const [height, setHeight] = useState(500);
+  useThrottleEffect(
+    () => {
+      if (!wrapperHeight) return;
+      setHeight(wrapperHeight - 96);
+    },
+    [wrapperHeight],
+    { wait: 64 },
+  );
+
   return (
-    <div className="flex flex-col gap-2 p-1">
+    <div ref={ref} className="flex flex-col gap-2 p-1">
       {filterAreaVisible && (
         <div className="flex gap-2">
           <Input
@@ -217,85 +231,92 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
               })}
             </Accordion>
           ) : (
-            (assetFilterRules || assetPublicCategories) &&
-            (isMarket && assetPublicCategories
-              ? assetPublicCategories
-              : searchValue != '' && assetFilterRules
-                ? assetFilterRules.filter((r) => r.name.includes(searchValue))
-                : assetFilterRules || []
-            ).map((rule: Partial<IUgcFilterRules>) => {
-              return (
-                <div
-                  key={rule.id}
-                  className={cn(
-                    'group flex h-10 cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
-                    current === rule.id
-                      ? 'border border-input bg-background text-accent-foreground shadow-sm'
-                      : 'p-[1px]',
-                  )}
-                  onClick={() => setCurrent(rule.id!)}
-                >
-                  <div className="flex w-full items-center justify-between px-4 text-sm">
-                    <span>{rule.name}</span>
-                    {!isMarket && (
-                      <AlertDialog>
-                        <Tooltip content={t('common.utils.delete')}>
-                          <TooltipTrigger asChild>
-                            <AlertDialogTrigger asChild>
-                              <div
-                                className="p-2"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                }}
-                              >
-                                <Trash size={14} className="opacity-0 transition-opacity group-hover:opacity-75" />
-                              </div>
-                            </AlertDialogTrigger>
-                          </TooltipTrigger>
-                        </Tooltip>
-                        <AlertDialogContent
-                          onClick={(e) => {
-                            e.stopPropagation();
-                          }}
-                        >
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              {t('common.dialog.delete-confirm.title', {
-                                type: t('common.type.filter-group'),
-                              })}
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              {t('common.dialog.delete-confirm.content', {
-                                name: rule.name,
-                                type: t('common.type.filter-group'),
-                              })}
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>{t('common.utils.cancel')}</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => {
-                                toast.promise(removeAssetFilterRules(rule.id!), {
-                                  loading: t('common.delete.loading'),
-                                  success: () => {
-                                    void mutateAssetFilterRules();
-                                    (current === rule.id || current === rule.id) && setCurrent('all');
-                                    return t('common.delete.success');
-                                  },
-                                  error: t('common.delete.error'),
-                                });
+            (assetFilterRules || assetPublicCategories) && (
+              <Virtuoso
+                className="w-full"
+                style={{ height }}
+                data={
+                  ((isMarket && assetPublicCategories
+                    ? assetPublicCategories
+                    : searchValue != '' && assetFilterRules
+                      ? assetFilterRules.filter((r) => r.name.includes(searchValue))
+                      : assetFilterRules || []) ?? []) as Partial<IUgcFilterRules>[]
+                }
+                itemContent={(_, rule) => {
+                  return (
+                    <div
+                      key={rule.id}
+                      className={cn(
+                        'group flex h-10 cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
+                        current === rule.id
+                          ? 'border border-input bg-background text-accent-foreground shadow-sm'
+                          : 'p-[1px]',
+                      )}
+                      onClick={() => setCurrent(rule.id!)}
+                    >
+                      <div className="flex w-full items-center justify-between px-4 text-sm">
+                        <span>{rule.name}</span>
+                        {!isMarket && (
+                          <AlertDialog>
+                            <Tooltip content={t('common.utils.delete')}>
+                              <TooltipTrigger asChild>
+                                <AlertDialogTrigger asChild>
+                                  <div
+                                    className="p-2"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                    }}
+                                  >
+                                    <Trash size={14} className="opacity-0 transition-opacity group-hover:opacity-75" />
+                                  </div>
+                                </AlertDialogTrigger>
+                              </TooltipTrigger>
+                            </Tooltip>
+                            <AlertDialogContent
+                              onClick={(e) => {
+                                e.stopPropagation();
                               }}
                             >
-                              {t('common.utils.confirm')}
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    )}
-                  </div>
-                </div>
-              );
-            })
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  {t('common.dialog.delete-confirm.title', {
+                                    type: t('common.type.filter-group'),
+                                  })}
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  {t('common.dialog.delete-confirm.content', {
+                                    name: rule.name,
+                                    type: t('common.type.filter-group'),
+                                  })}
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>{t('common.utils.cancel')}</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => {
+                                    toast.promise(removeAssetFilterRules(rule.id!), {
+                                      loading: t('common.delete.loading'),
+                                      success: () => {
+                                        void mutateAssetFilterRules();
+                                        (current === rule.id || current === rule.id) && setCurrent('all');
+                                        return t('common.delete.success');
+                                      },
+                                      error: t('common.delete.error'),
+                                    });
+                                  }}
+                                >
+                                  {t('common.utils.confirm')}
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </div>
+                    </div>
+                  );
+                }}
+              />
+            )
           )}
         </div>
       </ScrollArea>
