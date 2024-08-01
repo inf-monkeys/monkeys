@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
 
-import { useParams } from '@tanstack/react-router';
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { I18nValue } from '@inf-monkeys/monkeys';
 import { isArray, isNull, isObject, isUndefined, pick } from 'lodash';
@@ -29,13 +27,14 @@ import { Form } from '@/components/ui/form.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { agentConfigSchema, IAgentConfig } from '@/schema/agent/agent-config.ts';
+import { useAgentStore } from '@/store/useAgentStore';
 import { usePageStore } from '@/store/usePageStore';
 import { getI18nContent } from '@/utils';
 
 export const AgentConfigView: React.FC = () => {
   const { t } = useTranslation();
 
-  const { agentId } = useParams({ from: '/$teamId/agent/$agentId/' });
+  const agentId = useAgentStore((s) => s.agentId);
   const { data: agentData } = useGetAgent(agentId);
 
   const form = useForm<IAgentConfig>({

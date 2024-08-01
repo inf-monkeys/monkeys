@@ -22,7 +22,7 @@ export interface IVinesMessage {
 interface ChatOptions {
   chatId: string;
 
-  workflowId?: string;
+  model?: string;
   apiKey?: string;
   history?: IVinesMessage[];
   multipleChat?: boolean;
@@ -35,11 +35,11 @@ interface ChatOptions {
 export const useChat = ({
   chatId,
   history,
-  workflowId,
+  model,
   apiKey,
   multipleChat,
   initialInput = '',
-  extraBody,
+  extraBody = {},
 }: ChatOptions) => {
   const [initialMessagesFallback] = useState([]);
   const { data: messages, mutate } = useSWR<IVinesMessage[]>([chatId, 'messages'], null, {
@@ -55,7 +55,7 @@ export const useChat = ({
     {
       fallbackData: {
         apiKey,
-        workflowId,
+        model,
         multipleChat,
         extraBody,
       },
@@ -65,12 +65,12 @@ export const useChat = ({
   useEffect(() => {
     const newCredentials: Record<string, any> = requestCredentials ?? {};
     if (apiKey) newCredentials.apiKey = apiKey;
-    if (workflowId) newCredentials.workflowId = workflowId;
+    if (model) newCredentials.model = model;
     if (multipleChat) newCredentials.multipleChat = multipleChat;
     if (extraBody) newCredentials.extraBody = extraBody;
 
     void mutateRequestCredentials(newCredentials, false);
-  }, [apiKey, multipleChat, extraBody, workflowId]);
+  }, [apiKey, multipleChat, extraBody, model]);
 
   const messagesRef = useRef<IVinesMessage[]>(messages || []);
   useEffect(() => {
@@ -109,7 +109,7 @@ export const useChat = ({
         const response = await fetch(`/v1/${finalMultipleChat ? 'chat/' : ''}completions`, {
           method: 'POST',
           body: stringify({
-            model: workflowId ?? requestCredentials?.workflowId,
+            model: model ?? requestCredentials?.model,
             [finalMultipleChat ? 'messages' : 'prompt']: finalMultipleChat
               ? finalMessages
               : messages.find((it) => it.role === 'user')?.content ?? '',
@@ -220,7 +220,7 @@ export const useChat = ({
       messagesRef,
       abortControllerRef,
       apiKey,
-      workflowId,
+      model,
       chatId,
       multipleChat,
       requestCredentials,

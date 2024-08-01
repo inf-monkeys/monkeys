@@ -1,10 +1,12 @@
 import React from 'react';
 
 import { motion } from 'framer-motion';
+import { reduce, toNumber } from 'lodash';
 
 import { ChatSidebar } from '@/components/layout/workspace/vines-view/chat/sidebar';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { useVinesFlow } from '@/package/vines-flow';
+import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 import { VinesChatMode } from '@/view/vines-chat/chat-bot.tsx';
@@ -16,6 +18,7 @@ export const VinesChatView: React.FC = () => {
   const { vines } = useVinesFlow();
 
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
+  const workflowId = useFlowStore((s) => s.workflowId);
 
   const workflowInput = vines.workflowInput;
   const workflowInputLength = workflowInput.length;
@@ -29,9 +32,18 @@ export const VinesChatView: React.FC = () => {
 
   const finalHeight = height - 68;
 
+  const extraBody = reduce(
+    vines.workflowInput.filter((it) => it.default !== void 0 && !['stream', 'messages'].includes(it.name)),
+    function (acc, curr) {
+      acc[curr.name] = curr.type === 'number' ? toNumber(curr?.default) : curr.default;
+      return acc;
+    },
+    {},
+  );
+
   return (
     <div ref={ref} className={cn('relative flex h-full max-h-full p-6', workbenchVisible && 'p-0 pl-4')}>
-      <ChatSidebar />
+      <ChatSidebar id={workflowId} />
       <motion.div
         key="vines-view-chat"
         className={cn(
@@ -44,7 +56,12 @@ export const VinesChatView: React.FC = () => {
         transition={{ duration: 0.2 }}
       >
         {openAIInterfaceEnabled ? (
-          <VinesChatMode multipleChat={useOpenAIInterface.multipleChat} />
+          <VinesChatMode
+            multipleChat={useOpenAIInterface.multipleChat}
+            id={workflowId}
+            extraBody={extraBody}
+            botPhoto={vines.workflowIcon}
+          />
         ) : (
           <VinesWorkflowMode height={finalHeight} disabled={disabled} />
         )}

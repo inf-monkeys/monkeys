@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useDebounceEffect, useLatest } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
-import { isEmpty, reduce, toNumber } from 'lodash';
+import { isEmpty } from 'lodash';
 import { MessageSquareDashed } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -17,31 +17,33 @@ import { useVinesUser } from '@/components/router/guard/user.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-import { useVinesFlow } from '@/package/vines-flow';
-import { useFlowStore } from '@/store/useFlowStore';
 
 interface IVinesChatModeProps {
   multipleChat?: boolean;
+  id: string;
+  extraBody?: Record<string, any>;
+  botPhoto?: string;
 }
 
-export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) => {
+export const VinesChatMode: React.FC<IVinesChatModeProps> = ({
+  multipleChat,
+  id,
+  extraBody,
+  botPhoto = 'emoji:🤖:#f2c1be',
+}) => {
   const { t } = useTranslation();
-
-  const workflowId = useFlowStore((s) => s.workflowId);
 
   const { userPhoto } = useVinesUser();
 
-  const { vines } = useVinesFlow();
-
   const [chatSessions, setChatSessions] = useLocalStorage<Record<string, string>>('vines-ui-chat-session', {});
 
-  const { data: sessions } = useWorkflowChatSessions(workflowId);
+  const { data: sessions } = useWorkflowChatSessions(id);
 
   const [chatId, setChatId] = useState<string>('default');
 
   const forceUpdate = useForceUpdate();
 
-  const currentSession = chatSessions?.[workflowId];
+  const currentSession = chatSessions?.[id];
   useDebounceEffect(
     () => {
       if (sessions?.length) {
@@ -49,14 +51,14 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) =
           setChatId(sessions[0].id);
           setChatSessions({
             ...chatSessions,
-            [workflowId]: sessions[0].id,
+            [id]: sessions[0].id,
           });
         } else {
           setChatId(currentSession);
         }
       } else {
         setChatSessions((prev) => {
-          const { [workflowId]: _, ...rest } = prev;
+          const { [id]: _, ...rest } = prev;
           return rest;
         });
         setChatId('default');
@@ -80,18 +82,9 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) =
 
   const { data: history, error, isLoading: isHistoryLoading } = useChatBotHistory(chatId);
 
-  const extraBody = reduce(
-    vines.workflowInput.filter((it) => it.default !== void 0 && !['stream', 'messages'].includes(it.name)),
-    function (acc, curr) {
-      acc[curr.name] = curr.type === 'number' ? toNumber(curr?.default) : curr.default;
-      return acc;
-    },
-    {},
-  );
-
   const { isLoading, setMessages, messages } = useChat({
     chatId,
-    workflowId,
+    model: id,
     apiKey,
     history,
     multipleChat,
@@ -142,7 +135,7 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) =
                 data={messages ?? []}
                 setMessages={setMessages}
                 userPhoto={userPhoto}
-                botPhoto={vines.workflowIcon}
+                botPhoto={botPhoto}
                 isLoading={isLoading}
               />
               {isEmptyMessages && (
@@ -166,7 +159,7 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({ multipleChat }) =
       <div className="z-20">
         <VinesChatInput
           chatId={chatId}
-          workflowId={workflowId}
+          id={id}
           multipleChat={multipleChat}
           autoCreateSession={isDefaultSession}
           setChatId={setChatId}

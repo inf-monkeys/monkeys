@@ -15,7 +15,7 @@ import { useLocalStorage } from '@/hooks/use-local-storage';
 
 interface IVinesChatInputProps {
   chatId: string;
-  workflowId: string;
+  id: string;
   multipleChat?: boolean;
   autoCreateSession?: boolean;
   setChatId?: (chatId: string) => void;
@@ -23,7 +23,7 @@ interface IVinesChatInputProps {
 
 export const VinesChatInput: React.FC<IVinesChatInputProps> = ({
   chatId,
-  workflowId,
+  id,
   multipleChat = true,
   autoCreateSession = false,
   setChatId,
@@ -34,20 +34,20 @@ export const VinesChatInput: React.FC<IVinesChatInputProps> = ({
     chatId,
   });
 
-  const { mutate } = useWorkflowChatSessions(workflowId);
+  const { mutate } = useWorkflowChatSessions(id);
   const { trigger } = useCreateWorkflowChatSession();
   const [chatSessions, setChatSessions] = useLocalStorage<Record<string, string>>('vines-ui-chat-session', {});
 
   const handleSend = () => {
     if (autoCreateSession) {
-      toast.promise(trigger({ displayName: t('workspace.chat-view.sidebar.create.def-label'), workflowId }), {
+      toast.promise(trigger({ displayName: t('workspace.chat-view.sidebar.create.def-label'), workflowId: id }), {
         loading: t('workspace.chat-view.sidebar.create.loading'),
         success: (session) => {
           if (session) {
             const sessionId = session.id;
             setChatSessions({
               ...chatSessions,
-              [workflowId]: sessionId,
+              [id]: sessionId,
             });
 
             setChatId?.(sessionId);
