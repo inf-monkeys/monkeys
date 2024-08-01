@@ -47,7 +47,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ groupId, se
     .filter((it) => it.pages?.length)
     .sort((a) => (a.isBuiltIn ? -1 : 1));
 
-  const pages = lists.reduce((acc: (IPinPage & { groupId: string })[], list) => {
+  const pages = lists.reduce((acc: (Partial<IPinPage> & { groupId: string })[], list) => {
     return acc.concat(
       list.pages.map((page) => {
         return {
@@ -174,7 +174,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ groupId, se
                     <div className="flex items-center gap-0.5">
                       <VinesLucideIcon className="size-3" size={12} src={EMOJI2LUCIDE_MAPPER[viewIcon] ?? viewIcon} />
                       <span className="text-xxs">
-                        {t([`workspace.wrapper.space.tabs.${page.displayName}`, page.displayName])}
+                        {t([`workspace.wrapper.space.tabs.${page?.displayName ?? ''}`, page?.displayName ?? ''])}
                       </span>
                     </div>
                   </div>
