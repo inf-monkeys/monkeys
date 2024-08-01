@@ -5,8 +5,8 @@ import { toast } from 'sonner';
 
 import { useCreateCredential, useCredentials } from '@/apis/credential';
 import { IVinesCredentialType } from '@/apis/credential/typings.ts';
-import { calculateDisplayInputs } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/utils.ts';
-import { TabularRender } from '@/components/layout/vines-view/form/tabular/render';
+import { calculateDisplayInputs } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input/utils.ts';
+import { TabularRender } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';

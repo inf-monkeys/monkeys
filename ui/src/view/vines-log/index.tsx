@@ -2,8 +2,8 @@ import React from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { VinesLogViewLogTab } from '@/components/layout/vines-view/execution-log/log';
-import { VinesLogViewStatTab } from '@/components/layout/vines-view/execution-log/stat';
+import { VinesLogViewLogTab } from '@/components/layout/workspace/vines-view/execution-log/log';
+import { VinesLogViewStatTab } from '@/components/layout/workspace/vines-view/execution-log/stat';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';

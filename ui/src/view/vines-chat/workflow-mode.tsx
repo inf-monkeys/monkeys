@@ -1,9 +1,9 @@
 import React from 'react';
 
-import { AnInput } from '@/components/layout/vines-view/chat/workflow-mode/chat-input/an-input.tsx';
-import { EmptyInput } from '@/components/layout/vines-view/chat/workflow-mode/chat-input/empty.tsx';
-import { FormInput } from '@/components/layout/vines-view/chat/workflow-mode/chat-input/form.tsx';
-import { VinesChatList } from '@/components/layout/vines-view/chat/workflow-mode/messages';
+import { AnInput } from '@/components/layout/workspace/vines-view/chat/workflow-mode/chat-input/an-input.tsx';
+import { EmptyInput } from '@/components/layout/workspace/vines-view/chat/workflow-mode/chat-input/empty.tsx';
+import { FormInput } from '@/components/layout/workspace/vines-view/chat/workflow-mode/chat-input/form.tsx';
+import { VinesChatList } from '@/components/layout/workspace/vines-view/chat/workflow-mode/messages';
 import { Separator } from '@/components/ui/separator.tsx';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';

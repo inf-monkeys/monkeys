@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 
 import { useEventEmitter, useResponsive } from 'ahooks';
 
-import { VinesExecutionResult } from '@/components/layout/vines-view/form/execution-result';
-import { VinesTabular } from '@/components/layout/vines-view/form/tabular';
-import { IframeHeader } from '@/components/layout/vines-view/form/tabular/iframe-header.tsx';
+import { VinesExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result';
+import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
+import { IframeHeader } from '@/components/layout/workspace/vines-view/form/tabular/iframe-header.tsx';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
