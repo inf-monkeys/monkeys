@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { keyBy, map } from 'lodash';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { GroupedVirtuoso } from 'react-virtuoso';
 
 import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
@@ -21,7 +22,6 @@ import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import { cn, getI18nContent } from '@/utils';
-import { GroupedVirtuoso } from 'react-virtuoso';
 
 interface IWorkbenchSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
   groupId: string;
@@ -42,7 +42,7 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ groupId, se
   const pagesMap = keyBy(originalPages, 'id');
   const lists = map(originalGroups, ({ pageIds, ...attr }) => ({
     ...attr,
-    pages: map(pageIds, (pageId) => pagesMap[pageId]),
+    pages: map(pageIds, (pageId) => pagesMap[pageId]).filter(Boolean),
   }))
     .filter((it) => it.pages?.length)
     .sort((a) => (a.isBuiltIn ? -1 : 1));
