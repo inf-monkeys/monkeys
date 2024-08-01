@@ -2,13 +2,13 @@ import React, { useEffect } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { get } from 'lodash';
-import { VinesEdges } from 'src/components/layout/vines-view/flow/edges';
-import { VinesFlowWrapper } from 'src/components/layout/vines-view/flow/wrapper';
 
-import { VinesHeadlessModal } from '@/components/layout/vines-view/flow/headless-modal';
-import { VinesNodes } from '@/components/layout/vines-view/flow/nodes';
-import { VinesToolbar } from '@/components/layout/vines-view/flow/toolbar';
-import { VinesExpandToolbar } from '@/components/layout/vines-view/flow/toolbar/expand';
+import { VinesEdges } from '@/components/layout/workspace/vines-view/flow/edges';
+import { VinesHeadlessModal } from '@/components/layout/workspace/vines-view/flow/headless-modal';
+import { VinesNodes } from '@/components/layout/workspace/vines-view/flow/nodes';
+import { VinesToolbar } from '@/components/layout/workspace/vines-view/flow/toolbar';
+import { VinesExpandToolbar } from '@/components/layout/workspace/vines-view/flow/toolbar/expand';
+import { VinesFlowWrapper } from '@/components/layout/workspace/vines-view/flow/wrapper';
 import { VinesLoading } from '@/components/ui/loading';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useWindowEvent } from '@/hooks/use-window-event.ts';

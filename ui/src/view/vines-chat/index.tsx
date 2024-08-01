@@ -1,8 +1,8 @@
 import React from 'react';
 
 import { motion } from 'framer-motion';
-import { ChatSidebar } from 'src/components/layout/vines-view/chat/sidebar';
 
+import { ChatSidebar } from '@/components/layout/workspace/vines-view/chat/sidebar';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { useVinesFlow } from '@/package/vines-flow';
 import { usePageStore } from '@/store/usePageStore';

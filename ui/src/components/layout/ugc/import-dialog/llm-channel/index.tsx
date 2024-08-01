@@ -5,8 +5,8 @@ import { toast } from 'sonner';
 
 import { createLLMChannel } from '@/apis/llm';
 import { ILLMChannel } from '@/apis/llm/typings';
-import { calculateDisplayInputs } from '@/components/layout/vines-view/flow/headless-modal/tool-editor/config/tool-input/utils';
-import { TabularRender } from '@/components/layout/vines-view/form/tabular/render';
+import { calculateDisplayInputs } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input/utils.ts';
+import { TabularRender } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { getI18nContent } from '@/utils';

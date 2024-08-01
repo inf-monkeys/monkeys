@@ -5,14 +5,14 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { isEmpty, reduce, toNumber } from 'lodash';
 import { MessageSquareDashed } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { VinesChatInput } from 'src/components/layout/vines-view/chat/chat-bot/input';
-import { VirtualizedList } from 'src/components/layout/vines-view/chat/chat-bot/messages';
 
 import { useApiKeyList } from '@/apis/api-keys/api-key.ts';
 import { IApiKeyStatus } from '@/apis/api-keys/typings.ts';
 import { getVinesToken } from '@/apis/utils.ts';
 import { useChatBotHistory, useWorkflowChatSessions } from '@/apis/workflow/chat';
-import { useChat } from '@/components/layout/vines-view/chat/chat-bot/use-chat.ts';
+import { VinesChatInput } from '@/components/layout/workspace/vines-view/chat/chat-bot/input';
+import { VirtualizedList } from '@/components/layout/workspace/vines-view/chat/chat-bot/messages';
+import { useChat } from '@/components/layout/workspace/vines-view/chat/chat-bot/use-chat.ts';
 import { useVinesUser } from '@/components/router/guard/user.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
