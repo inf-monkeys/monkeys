@@ -11,7 +11,7 @@ import { deleteAgent } from '@/apis/agents';
 import { IAgent } from '@/apis/agents/typings.ts';
 import { preloadUgcAgents, useUgcAgents } from '@/apis/ugc';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { AgentInfoEditor } from '@/components/layout/agent/info-editor';
+import { AgentInfoEditor } from '@/components/layout/agent-space/agent-info-editor.tsx';
 import { createAgentsColumns } from '@/components/layout/ugc-pages/agents/consts.tsx';
 import { CreateAppDialog } from '@/components/layout/ugc-pages/apps/create';
 import { UgcView } from '@/components/layout/ugc/view';

@@ -62,8 +62,7 @@ export function VinesView({ id, workflowId, agentId, pageId, type }: IVinesViewP
       );
     }
 
-    console.log(agentId);
-    return <Page404 />;
+    return <View />;
   }, [id]);
 
   useEffect(() => {
