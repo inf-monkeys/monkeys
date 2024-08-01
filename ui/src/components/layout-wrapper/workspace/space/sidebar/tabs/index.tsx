@@ -82,7 +82,7 @@ export const SpaceTabs: React.FC<ITabsProps> = () => {
     >
       <SpaceSidebarTabsList>
         <SortableContext items={pageIds} strategy={verticalListSortingStrategy} disabled={disableDND}>
-          {pages?.map(({ id, displayName, instance, customOptions }, index) => (
+          {pages?.map(({ id, displayName, instance, customOptions, type }, index) => (
             <SpaceTab
               key={id}
               id={id}
@@ -90,8 +90,7 @@ export const SpaceTabs: React.FC<ITabsProps> = () => {
               displayName={displayName ?? t('workspace.wrapper.space.unknown-view')}
               activeIndex={activeIndex}
               index={index}
-              pages={pages}
-              page={page}
+              type={type}
             />
           ))}
         </SortableContext>
