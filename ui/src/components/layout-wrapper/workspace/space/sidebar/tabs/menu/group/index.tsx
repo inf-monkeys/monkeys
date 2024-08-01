@@ -4,6 +4,7 @@ import { KeyedMutator } from 'swr/_internal';
 
 import { Pin, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Virtuoso } from 'react-virtuoso';
 import { toast } from 'sonner';
 
 import { useCreatePageGroup, usePageGroups } from '@/apis/pages';
@@ -72,7 +73,14 @@ export const ViewGroup: React.FC<IViewGroupProps> = ({ pageId, pagesMutate }) =>
       <DropdownMenuPortal>
         <DropdownMenuSubContent>
           {isLoading && <DropdownMenuItem disabled>{t('common.load.loading')}</DropdownMenuItem>}
-          {finalGroups?.map((group, i) => <GroupItem group={group} key={i} pageId={pageId} mutate={pageGroupMutate} />)}
+          <Virtuoso
+            className="w-52"
+            style={{ height: 384 }}
+            data={finalGroups}
+            itemContent={(_, data) => {
+              return <GroupItem group={data} key={_} pageId={pageId} mutate={pageGroupMutate} />;
+            }}
+          />
           <DropdownMenuSeparator />
           <SimpleInputDialog
             title={t('workspace.wrapper.space.menu.group.create')}
