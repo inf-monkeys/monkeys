@@ -23,7 +23,7 @@ export const VinesLogViewStatChartCard: React.FC<IVinesLogViewStatChartCardProps
   countCalcType = 'sum',
 }) => {
   const count: number =
-    countCalcType === 'avg'
+    (countCalcType === 'avg'
       ? searchWorkflowExecutionStatData
           .map((d) => d[Object.keys(chartConfig)[0]])
           .reduce((accumulator, currentValue) => accumulator + currentValue, 0) /
@@ -31,7 +31,7 @@ export const VinesLogViewStatChartCard: React.FC<IVinesLogViewStatChartCardProps
           .length ?? 1)
       : searchWorkflowExecutionStatData
           .map((d) => d[Object.keys(chartConfig)[0]])
-          .reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+          .reduce((accumulator, currentValue) => accumulator + currentValue, 0)) || 0;
 
   return (
     <Card>
