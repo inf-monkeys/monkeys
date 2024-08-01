@@ -120,18 +120,18 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
                 variant="outline"
                 className={cn(
                   'w-full justify-start text-left font-normal',
-                  (!filter.createdTimestamp || filter.createdTimestamp.length === 0) && 'text-muted-foreground',
+                  (!filter?.createdTimestamp || filter?.createdTimestamp.length === 0) && 'text-muted-foreground',
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {filter.createdTimestamp?.[0] ? (
-                  filter.createdTimestamp?.[1] ? (
+                {filter?.createdTimestamp?.[0] ? (
+                  filter?.createdTimestamp?.[1] ? (
                     <>
-                      {format(filter.createdTimestamp[0], timeFormat)} -{' '}
-                      {format(filter.createdTimestamp[1], timeFormat)}
+                      {format(filter?.createdTimestamp[0], timeFormat)} -{' '}
+                      {format(filter?.createdTimestamp[1], timeFormat)}
                     </>
                   ) : (
-                    format(filter.createdTimestamp[0], timeFormat)
+                    format(filter?.createdTimestamp[0], timeFormat)
                   )
                 ) : (
                   <span>{t('components.layout.ugc.view.filter.button.created-time.placeholder')}</span>
@@ -142,10 +142,10 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
               <Calendar
                 initialFocus
                 mode="range"
-                defaultMonth={filter.createdTimestamp?.[0] ? new Date(filter.createdTimestamp[0]) : undefined}
+                defaultMonth={filter?.createdTimestamp?.[0] ? new Date(filter?.createdTimestamp[0]) : undefined}
                 selected={{
-                  from: filter.createdTimestamp?.[0] ? new Date(filter.createdTimestamp[0]) : undefined,
-                  to: filter.createdTimestamp?.[1] ? new Date(filter.createdTimestamp[1]) : undefined,
+                  from: filter?.createdTimestamp?.[0] ? new Date(filter?.createdTimestamp[0]) : undefined,
+                  to: filter?.createdTimestamp?.[1] ? new Date(filter?.createdTimestamp[1]) : undefined,
                 }}
                 onSelect={(selectedDate) => {
                   onFilterChange({
@@ -170,18 +170,18 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
                 variant="outline"
                 className={cn(
                   'w-full justify-start text-left font-normal',
-                  (!filter.updatedTimestamp || filter.updatedTimestamp.length === 0) && 'text-muted-foreground',
+                  (!filter?.updatedTimestamp || filter?.updatedTimestamp.length === 0) && 'text-muted-foreground',
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {filter.updatedTimestamp?.[0] ? (
-                  filter.updatedTimestamp?.[1] ? (
+                {filter?.updatedTimestamp?.[0] ? (
+                  filter?.updatedTimestamp?.[1] ? (
                     <>
-                      {format(filter.updatedTimestamp[0], timeFormat)} -{' '}
-                      {format(filter.updatedTimestamp[1], timeFormat)}
+                      {format(filter?.updatedTimestamp[0], timeFormat)} -{' '}
+                      {format(filter?.updatedTimestamp[1], timeFormat)}
                     </>
                   ) : (
-                    format(filter.updatedTimestamp[0], timeFormat)
+                    format(filter?.updatedTimestamp[0], timeFormat)
                   )
                 ) : (
                   <span>{t('components.layout.ugc.view.filter.button.updated-time.placeholder')}</span>
@@ -192,10 +192,10 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
               <Calendar
                 initialFocus
                 mode="range"
-                defaultMonth={filter.updatedTimestamp?.[0] ? new Date(filter.updatedTimestamp[0]) : undefined}
+                defaultMonth={filter?.updatedTimestamp?.[0] ? new Date(filter?.updatedTimestamp[0]) : undefined}
                 selected={{
-                  from: filter.updatedTimestamp?.[0] ? new Date(filter.updatedTimestamp[0]) : undefined,
-                  to: filter.updatedTimestamp?.[1] ? new Date(filter.updatedTimestamp[1]) : undefined,
+                  from: filter?.updatedTimestamp?.[0] ? new Date(filter?.updatedTimestamp[0]) : undefined,
+                  to: filter?.updatedTimestamp?.[1] ? new Date(filter?.updatedTimestamp[1]) : undefined,
                 }}
                 onSelect={(selectedDate) => {
                   onFilterChange({
