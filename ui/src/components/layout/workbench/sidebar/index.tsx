@@ -136,10 +136,12 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ groupId, se
             groupCounts={lists.map((g) => g.pages.length)}
             style={{ height }}
             groupContent={(i) => {
-              const { displayName, isBuiltIn } = lists[i];
-              return isBuiltIn ? null : (
+              const { displayName } = lists[i];
+              return (
                 <div className="w-full bg-slate-1">
-                  <Label className="text-xs">{displayName}</Label>
+                  <Label className="text-xs">
+                    {t([`workspace.wrapper.space.menu.group.name-${displayName}`, displayName])}
+                  </Label>
                 </div>
               );
             }}
