@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { forwardRef, useEffect, useMemo } from 'react';
+import { forwardRef, useEffect } from 'react';
 
 import { Command as CommandPrimitive, useCommandState } from 'cmdk';
 import { X } from 'lucide-react';
@@ -79,6 +79,7 @@ export interface MultipleSelectorRef {
   input: HTMLInputElement;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useDebounce<T>(value: T, delay?: number): T {
   const [debouncedValue, setDebouncedValue] = React.useState<T>(value);
 
@@ -185,9 +186,9 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
     const [inputValue, setInputValue] = React.useState('');
     const debouncedSearchTerm = useDebounce(inputValue, delay || 500);
 
-    useMemo(() => {
-      setOptions(transToGroupOption(arrayDefaultOptions, groupBy));
-    }, [arrayDefaultOptions]);
+    // useEffect(() => {
+    //   setOptions(transToGroupOption(arrayDefaultOptions, groupBy));
+    // }, [arrayDefaultOptions]);
 
     React.useImperativeHandle(
       ref,
@@ -357,7 +358,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                 <Badge
                   key={option.value}
                   className={cn(
-                    'mx-1 data-[disabled]:bg-muted-foreground data-[disabled]:text-muted data-[disabled]:hover:bg-muted-foreground',
+                    'mx-1 my-0.5 data-[disabled]:bg-muted-foreground data-[disabled]:text-muted data-[disabled]:hover:bg-muted-foreground',
                     'data-[fixed]:bg-muted-foreground data-[fixed]:text-muted data-[fixed]:hover:bg-muted-foreground',
                     badgeClassName,
                   )}

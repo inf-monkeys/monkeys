@@ -2884,6 +2884,55 @@
         "config-view": "配置视图",
         "chat-view": "对话视图"
       }
+    },
+    "view-config": {
+      "form": {
+        "label": "配置智能体",
+        "desc": "你可以在这里配置智能体相关的参数",
+        "advanced-configuration": "高级配置",
+
+        "model": {
+          "label": "大语言模型"
+        },
+        "system-prompt": {
+          "label": "系统提示词",
+          "placeholder": "请输入系统提示词"
+        },
+        "temperature": {
+          "label": "温度",
+          "desc": "温度将影响随机性，低温会减少随机性，而当温度趋近零时，模型将表现出确定性和重复性。相反，高温则会增加随机性"
+        },
+        "presence-penalty": {
+          "label": "存在惩罚",
+          "desc": "存在惩罚是一种惩罚机制，用于惩罚重复的内容。存在惩罚值越高，模型生成的内容中重复的内容越少"
+        },
+        "frequency-penalty": {
+          "label": "频率惩罚",
+          "desc": "频率惩罚是一种惩罚机制，用于惩罚生成的内容中的词频。频率惩罚值越高，模型生成的内容中高频词的概率越低"
+        },
+        "tools": {
+          "label": "工具链",
+          "placeholder": "选择工具链",
+          "empty": "暂无更多工具链"
+        },
+        "knowledge-base": {
+          "label": "知识库上下文",
+          "placeholder": "选择知识库",
+          "empty": "暂无更多知识库"
+        },
+        "sql-knowledge-base": {
+          "label": "关系型知识库上下文",
+          "placeholder": "选择关系型知识库",
+          "empty": "暂无更多关系型知识库"
+        },
+        "custom-model-name": {
+          "label": "自定义模型名称",
+          "placeholder": "请输入自定义模型名称",
+          "desc": "该配置一般用于 API 调用时传入的模型名称，如果不填写则使用默认模型"
+        },
+
+        "submit": "保存"
+      }
     }
   }
 }

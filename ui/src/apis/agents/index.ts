@@ -16,7 +16,7 @@ export const deleteAgent = (agentId: string) =>
   })(`/api/conversation-apps/${agentId}`);
 
 export const updateAgent = (agentId: string, agent: Partial<IAgent>) =>
-  vinesFetcher<IAssetItem<IAgent>, Partial<IAgent>>({ method: 'PUT', simple: true })(
+  vinesFetcher<IAssetItem<IAgent>, Partial<IAssetItem<IAgent>>>({ method: 'PUT', simple: true })(
     `/api/conversation-apps/${agentId}`,
     agent,
   );
