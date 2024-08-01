@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 
 import { useEventEmitter, useResponsive } from 'ahooks';
+import { ShieldBan } from 'lucide-react';
 
 import { VinesExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result';
 import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
 import { IframeHeader } from '@/components/layout/workspace/vines-view/form/tabular/iframe-header.tsx';
+import { useVinesFlow } from '@/package/vines-flow';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
@@ -20,6 +22,10 @@ export const VinesForm: React.FC<IVinesFormProps> = () => {
   const isSmallFrame = !responsive.sm;
 
   const event$ = useEventEmitter();
+
+  const { vines } = useVinesFlow();
+  const useOpenAIInterface = vines.usedOpenAIInterface();
+  const openAIInterfaceEnabled = useOpenAIInterface.enable;
 
   return (
     <>
@@ -46,6 +52,12 @@ export const VinesForm: React.FC<IVinesFormProps> = () => {
 
         <VinesExecutionResult event$={event$} minimalGap={vinesIFrameVisible} />
       </div>
+      {openAIInterfaceEnabled && (
+        <div className="vines-center absolute inset-1 size-full flex-col gap-4 backdrop-blur">
+          <ShieldBan size={64} />
+          <span className="text-sm font-medium">THE FORM VIEW DOES NOT SUPPORT THIS WORKFLOW</span>
+        </div>
+      )}
     </>
   );
 };

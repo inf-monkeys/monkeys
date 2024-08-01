@@ -74,6 +74,9 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
     );
   });
 
+  const { exposeOpenaiCompatibleInterface: F_exposeOpenaiCompatibleInterface, rateLimiter: F_rateLimiter } =
+    form.getValues();
+
   return (
     <div className="relative flex h-80 w-full flex-col py-2">
       <Form {...form}>
@@ -83,7 +86,7 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
               name="exposeOpenaiCompatibleInterface"
               control={form.control}
               render={({ field }) => (
-                <FormItem className="flex flex-col gap-2">
+                <FormItem className="hidden flex-col gap-2">
                   <FormLabel>
                     {t(
                       'workspace.flow-view.endpoint.start-tool.api-config.form.expose-openai-compatible-interface.label',
@@ -97,12 +100,12 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
               )}
             />
 
-            {form.getValues().exposeOpenaiCompatibleInterface && (
+            {F_exposeOpenaiCompatibleInterface && (
               <FormField
                 name="openaiModelName"
                 control={form.control}
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="hidden">
                     <FormLabel>
                       {t('workspace.flow-view.endpoint.start-tool.api-config.form.openai-model-name.label')}
                     </FormLabel>
@@ -139,7 +142,7 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
               )}
             />
 
-            {form.getValues().rateLimiter?.enabled && (
+            {F_rateLimiter?.enabled && (
               <>
                 <FormField
                   name="rateLimiter.windowMs"
