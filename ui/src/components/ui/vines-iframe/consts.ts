@@ -3,6 +3,8 @@ import { VinesLogView } from 'src/view/vines-log';
 
 import { withProviders } from '@/components/ui/vines-iframe/utils.ts';
 import { CanvasInteractionStoreProvider, createCanvasInteractionStore } from '@/store/useCanvasStore/interaction.ts';
+import { AgentChatView } from '@/view/agent-chat';
+import { AgentConfigView } from '@/view/agent-config';
 import { VinesFlow } from '@/view/vines-flow';
 import { VinesForm } from '@/view/vines-form';
 
@@ -11,6 +13,8 @@ export const IFRAME_MAP = {
   log: VinesLogView,
   preview: VinesForm,
   chat: VinesChatView,
+  'agent-chat': AgentChatView,
+  'agent-config': AgentConfigView,
 };
 
 export const VINES_VIEW_ID_MAPPER: Record<string, string> = {
