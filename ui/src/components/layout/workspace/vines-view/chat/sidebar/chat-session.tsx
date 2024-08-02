@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 
 import { useDeleteWorkflowChatSession } from '@/apis/workflow/chat';
 import { IVinesChatSession } from '@/apis/workflow/chat/typings.ts';
+import { spaceSidebarTabVariants } from '@/components/layout-wrapper/space/sidebar/tabs.tsx';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -29,8 +30,9 @@ export const ChatSession: React.FC<IChatSessionProps> = ({ session, active, onCl
   return (
     <Card
       className={cn(
-        'group flex cursor-pointer items-center gap-2 px-3 py-2 hover:bg-gray-10/5 active:bg-gray-10/10',
-        active && 'outline outline-vines-500',
+        spaceSidebarTabVariants(active ? { status: 'active' } : {}),
+        'group flex items-center gap-2 bg-transparent shadow-transparent hover:bg-accent',
+        active && 'bg-background',
       )}
       onClick={onClick}
     >
