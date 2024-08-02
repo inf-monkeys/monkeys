@@ -1,7 +1,6 @@
 import React, { FC, memo, useMemo } from 'react';
 
 import { Copy, CopyCheck, ExternalLink } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import ReactMarkdown, { Components, Options } from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
@@ -32,7 +31,6 @@ interface IVinesMarkdownProps extends Options {
 }
 
 export const VinesMarkdown: React.FC<IVinesMarkdownProps> = ({ allowHtml, className, children }) => {
-  const { t } = useTranslation();
   const components: Components = useMemo(
     () => ({
       a: ({ href, children }) => (
@@ -77,7 +75,7 @@ export const VinesMarkdown: React.FC<IVinesMarkdownProps> = ({ allowHtml, classN
               icon={copied ? <CopyCheck /> : <Copy />}
               variant="outline"
               size="small"
-              className="absolute right-1 top-1 scale-80 opacity-0 group-hover/codeblock:opacity-75"
+              className="scale-80 absolute right-1 top-1 opacity-0 group-hover/codeblock:opacity-75"
               onClick={() => copy(code)}
             />
             {showLanguage && (
@@ -97,7 +95,10 @@ export const VinesMarkdown: React.FC<IVinesMarkdownProps> = ({ allowHtml, classN
 
   return (
     <MemoizedReactMarkdown
-      className={cn('prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0', className)}
+      className={cn(
+        'prose prose-sm break-words dark:prose-invert prose-h1:text-sm prose-h2:text-sm prose-h3:text-sm prose-h4:text-sm prose-p:leading-relaxed prose-pre:p-0',
+        className,
+      )}
       components={components}
       rehypePlugins={rehypePlugins}
       remarkPlugins={remarkPlugins}
