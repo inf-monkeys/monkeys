@@ -374,15 +374,15 @@ export class LlmController {
   })
   @MonkeyToolName(LLM_CHAT_COMPLETION_TOOL)
   @MonkeyToolDisplayName({
-    'zh-CN': '多轮对话（大语言模型）',
-    'en-US': 'Chat Completions (LLM)',
+    'zh-CN': '智能体（大语言模型）',
+    'en-US': 'Agent (LLM Chat)',
   })
   @MonkeyToolDescription({
-    'zh-CN': '大语言模型多轮对话',
-    'en-US': 'Chat Completions (LLM)',
+    'zh-CN': '通过单个工具组成的流程实现智能体应用的效果，配置过程相对复杂',
+    'en-US': 'The effect of intelligent agent application is achieved through a process composed of a single tool, and the configuration process is relatively complicated',
   })
-  @MonkeyToolCategories(['gen-text'])
-  @MonkeyToolIcon('emoji:💬:#c15048')
+  @MonkeyToolCategories(['extra'])
+  @MonkeyToolIcon('emoji:💬:#d3c4f5')
   @MonkeyToolInput([
     {
       displayName: {
