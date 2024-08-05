@@ -24,7 +24,7 @@ export const FormInput: React.FC<IFormInputProps> = ({ inputs, height, onClick, 
   return (
     <motion.div
       ref={ref}
-      className={cn('w-2/6 max-w-80 overflow-hidden px-1', disabled && 'pointer-events-none opacity-85')}
+      className={cn('w-2/6 max-w-80 overflow-hidden px-3', disabled && 'pointer-events-none opacity-85')}
       animate={{ marginRight: disabled ? -width - 35 : 0 }}
     >
       <TabularRender inputs={inputs} height={height} onSubmit={onClick} miniMode>

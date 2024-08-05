@@ -21,6 +21,7 @@ interface IWorkflowInputListProps {
   cardClassName?: string;
   contentWidth?: number;
   defaultValueText?: string;
+  disabledTypeTag?: boolean;
 }
 
 export const WorkflowInputList: React.FC<IWorkflowInputListProps> = ({
@@ -30,6 +31,7 @@ export const WorkflowInputList: React.FC<IWorkflowInputListProps> = ({
   className,
   cardClassName,
   contentWidth,
+  disabledTypeTag = false,
 }) => {
   const { t } = useTranslation();
 
@@ -55,13 +57,16 @@ export const WorkflowInputList: React.FC<IWorkflowInputListProps> = ({
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Tag className="text-xxs bg-muted py-1 shadow-sm">
-                  {
-                    VINES_WORKFLOW_INPUT_TYPE_DISPLAY_MAPPER[
-                      type + (assetType ? `:${assetType}` : '') + (multipleValues ? '-list' : '')
-                    ]
-                  }
-                </Tag>
+                {disabledTypeTag ? null : (
+                  <Tag className="text-xxs bg-muted py-1 shadow-sm">
+                    {
+                      VINES_WORKFLOW_INPUT_TYPE_DISPLAY_MAPPER[
+                        type + (assetType ? `:${assetType}` : '') + (multipleValues ? '-list' : '')
+                      ]
+                    }
+                  </Tag>
+                )}
+
                 <h1 className="font-bold">{getI18nContent(displayName)}</h1>
               </div>
               {child}

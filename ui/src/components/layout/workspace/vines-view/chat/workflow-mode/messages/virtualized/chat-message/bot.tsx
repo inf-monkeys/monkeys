@@ -40,13 +40,14 @@ export const VinesBotChatMessage = memo<IVinesBotChatMessageProps>(
           )}
           <Card className="p-4">
             {children}
-            <Separator className="my-4" />
+            <Separator className="mb-2 mt-4" />
             <div className="group/footer flex items-center justify-between gap-4">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="flex items-center gap-2">
-                    <CardDescription className="flex gap-1">
-                      <Workflow size={12} className="mt-0.5 stroke-muted-foreground" /> {instanceId}
+                  <div className="-mb-2 flex items-center gap-2">
+                    <CardDescription className="flex gap-1 py-0">
+                      <Workflow size={10} className="stroke-muted-foreground" />
+                      <span className="text-xxs text-muted-foreground">{instanceId}</span>
                     </CardDescription>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -67,7 +68,7 @@ export const VinesBotChatMessage = memo<IVinesBotChatMessageProps>(
                 <TooltipContent>{t('workspace.chat-view.workflow-mode.instance-id-tips')}</TooltipContent>
               </Tooltip>
               <ExecutionStatusIcon
-                className="scale-80 -m-1"
+                className="-mb-4 -ml-4 -mt-2.5 scale-75"
                 status={status as VinesNodeExecutionTask['status']}
                 workflowStatus={status as string}
               />
