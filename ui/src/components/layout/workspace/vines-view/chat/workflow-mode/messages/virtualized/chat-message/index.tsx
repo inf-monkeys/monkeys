@@ -47,7 +47,8 @@ export const ChatMessage = memo<{ data: IVinesChatListItem; isLast?: boolean }>(
             {hasInput ? (
               <WorkflowInputList
                 inputs={inputs}
-                defaultValueText={''}
+                defaultValueText=""
+                disabledTypeTag
                 cardClassName="p-0 border-transparent shadow-transparent"
               />
             ) : hasOriginalInput ? (
