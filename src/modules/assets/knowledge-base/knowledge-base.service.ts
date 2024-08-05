@@ -67,6 +67,9 @@ export class KnowledgeBaseService {
 
     // Delete knowledge base in database
     await this.knowledgeBaseRepository.deleteKnowledgeBase(teamId, knowledgeBaseId);
+    return {
+      success: true,
+    };
   }
 
   public async getUniqueMetadataValueByKey(knowledgeBaseId: string, key: string) {
