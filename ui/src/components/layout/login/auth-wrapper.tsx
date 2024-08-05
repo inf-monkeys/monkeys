@@ -35,7 +35,7 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
   const { t } = useTranslation();
 
   const navigate = useNavigate({ from: Route.fullPath });
-  const { redirect_id, redirect_params } = Route.useSearch();
+  const { redirect_id, redirect_params, redirect_search } = Route.useSearch();
   const { mutate } = useSWRConfig();
 
   const { trigger: triggerPassword, data: passwordData } = useLoginByPassword();
@@ -55,7 +55,7 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
     localStorage.removeItem('vines-team-id');
 
     toast.promise(
-      (method === AuthMethod.phone ? triggerPhone : triggerPassword)(params).catch(() => {
+      (method === AuthMethod.phone ? triggerPhone : (triggerPassword as any))(params).catch(() => {
         if (method === AuthMethod.phone) {
           event$?.emit('clear-sms-code-input');
         }
@@ -79,7 +79,7 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
           setLoading(false);
           setLocalStorage('vines-teams', it);
           if (redirect_id && redirect_params) {
-            VinesEvent.emit('vines-nav', redirect_id, redirect_params);
+            VinesEvent.emit('vines-nav', redirect_id, redirect_params, redirect_search);
           } else {
             void navigate({ to: '/' });
           }
