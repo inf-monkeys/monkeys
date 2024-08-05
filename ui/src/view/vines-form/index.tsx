@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import { useEventEmitter, useResponsive } from 'ahooks';
 import { ShieldBan } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { VinesExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result';
 import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
@@ -13,6 +14,8 @@ import { cn } from '@/utils';
 interface IVinesFormProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const VinesForm: React.FC<IVinesFormProps> = () => {
+  const { t } = useTranslation();
+
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
   const vinesIFrameVisible = usePageStore((s) => s.vinesIFrameVisible);
 
@@ -55,7 +58,7 @@ export const VinesForm: React.FC<IVinesFormProps> = () => {
       {openAIInterfaceEnabled && (
         <div className="vines-center absolute inset-1 size-full flex-col gap-4 backdrop-blur">
           <ShieldBan size={64} />
-          <span className="text-sm font-medium">THE FORM VIEW DOES NOT SUPPORT THIS WORKFLOW</span>
+          <span className="text-sm font-medium">{t('workspace.form-view.not-support')}</span>
         </div>
       )}
     </>

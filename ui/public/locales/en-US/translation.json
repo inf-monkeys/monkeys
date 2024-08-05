@@ -2872,6 +2872,9 @@
       },
       "empty": "No conversation yet",
       "back-to-bottom": "Back to bottom"
+    },
+    "form-view": {
+      "not-support": "THE FORM VIEW DOES NOT SUPPORT THIS WORKFLOW"
     }
   },
   "agent": {
