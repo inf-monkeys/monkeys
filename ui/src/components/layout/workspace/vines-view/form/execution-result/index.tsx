@@ -128,19 +128,12 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
             // eslint-disable-next-line react/display-name
             List: forwardRef(
               ({ children, className, ...props }: GridListProps, ref: React.ForwardedRef<HTMLDivElement>) => (
-                <div ref={ref} className={cn('flex flex-wrap', className)} {...props}>
+                <div ref={ref} className={cn('grid grid-cols-3', className)} {...props}>
                   {children}
                 </div>
               ),
             ),
-            Item: ({ children, className, ...props }: GridItemProps) => (
-              <div
-                className={cn('box-border w-1/3 flex-none content-stretch p-3', className, minimalGap && 'p-1')}
-                {...props}
-              >
-                {children}
-              </div>
-            ),
+            Item: ({ children }: GridItemProps) => children,
           }}
         />
 

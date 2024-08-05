@@ -2858,6 +2858,9 @@
       },
       "empty": "暂无对话",
       "back-to-bottom": "回到底部"
+    },
+    "form-view": {
+      "not-support": "该工作流不支持表单视图"
     }
   },
   "agent": {

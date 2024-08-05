@@ -51,49 +51,51 @@ export const VinesExecutionResultItem: React.FC<IVinesExecutionResultItemProps> 
       <Tooltip>
         <TooltipTrigger asChild>
           <DialogTrigger asChild>
-            <div
-              ref={ref}
-              className={cn(
-                'relative size-full cursor-pointer overflow-hidden rounded-lg border border-input bg-background shadow-sm',
-                isRenderRaw && 'p-2',
-              )}
-              style={{ height }}
-            >
-              <AnimatePresence>
-                {isRUNNING ? (
-                  <motion.div
-                    className="vines-center absolute left-0 top-0 size-full"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <VinesLoading />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    className="group size-full"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {isRenderRaw && <VinesAbstractDataPreview data={renderData} className="h-full" />}
-                    {type === 'image' && (
-                      <img
-                        src={renderData as string}
-                        alt="image"
-                        className="aspect-square size-full transform rounded-lg object-cover object-center shadow transition-transform duration-200 ease-in-out group-hover:scale-110"
-                      />
-                    )}
-                    {type === 'video' && (
-                      <VinesAbstractVideo className="my-auto [&>video]:min-h-16">
-                        {renderData as string}
-                      </VinesAbstractVideo>
-                    )}
-                  </motion.div>
+            <div className={cn('box-border flex-none content-stretch p-3', isRenderRaw ? 'col-span-3' : 'col-span-1')}>
+              <div
+                ref={ref}
+                className={cn(
+                  'relative cursor-pointer overflow-hidden rounded-lg border border-input bg-background shadow-sm',
+                  isRenderRaw ? 'max-h-36 w-full p-2' : 'size-full',
                 )}
-              </AnimatePresence>
+                style={{ height }}
+              >
+                <AnimatePresence>
+                  {isRUNNING ? (
+                    <motion.div
+                      className="vines-center absolute left-0 top-0 size-full"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <VinesLoading />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      className="group size-full"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      {isRenderRaw && <VinesAbstractDataPreview data={renderData} className="h-full" />}
+                      {type === 'image' && (
+                        <img
+                          src={renderData as string}
+                          alt="image"
+                          className="aspect-square size-full transform rounded-lg object-cover object-center shadow transition-transform duration-200 ease-in-out group-hover:scale-110"
+                        />
+                      )}
+                      {type === 'video' && (
+                        <VinesAbstractVideo className="my-auto [&>video]:min-h-16">
+                          {renderData as string}
+                        </VinesAbstractVideo>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </DialogTrigger>
         </TooltipTrigger>
