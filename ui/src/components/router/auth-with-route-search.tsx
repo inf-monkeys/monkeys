@@ -1,0 +1,81 @@
+import React, { useEffect } from 'react';
+
+import { useSWRConfig } from 'swr';
+import { useSearch } from '@tanstack/react-router';
+
+import { has } from 'lodash';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+
+import { useLoginByPassword } from '@/apis/authz';
+import { getVinesToken } from '@/apis/utils.ts';
+import { saveAuthToken } from '@/components/router/guard/auth.ts';
+import { setLocalStorage } from '@/hooks/use-local-storage';
+import VinesEvent from '@/utils/events.ts';
+
+export const AuthWithRouteSearch: React.FC = () => {
+  const { t } = useTranslation();
+  const { mutate } = useSWRConfig();
+
+  const search = useSearch({
+    strict: false,
+  }) as Record<string, string>;
+
+  const { redirect_id, redirect_params, redirect_search } = search;
+
+  const { trigger, data } = useLoginByPassword();
+
+  const handelRedirect = () => {
+    let needRedirect = false;
+    if (redirect_id && redirect_params) {
+      needRedirect = true;
+    } else {
+      void mutate((k: any) => k);
+    }
+    mutate('/api/teams').then((it) => {
+      setLocalStorage('vines-teams', it);
+      if (needRedirect) {
+        delete redirect_search['auth_mode'];
+        delete redirect_search['auth_user'];
+        delete redirect_search['auth_pwd'];
+        delete redirect_search['auth_token'];
+        VinesEvent.emit('vines-nav', redirect_id, redirect_params, redirect_search);
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (getVinesToken() && search?.auth_mode !== 'force') return;
+
+    if (has(search, 'auth_user') && has(search, 'auth_pwd')) {
+      void trigger({ email: search?.auth_user ?? '', password: search?.auth_pwd ?? '' });
+      return;
+    } else if (has(search, 'auth_token')) {
+      saveAuthToken(search?.auth_token).then((user) => {
+        if (!user) {
+          toast.warning(t('auth.oidc.auth-failed'));
+          localStorage.removeItem('vines-token');
+          localStorage.removeItem('vines-team-id');
+          VinesEvent.emit('vines-nav', '/login');
+          return;
+        }
+
+        handelRedirect();
+        toast.success(t('auth.login.success'));
+      });
+    }
+  }, [search]);
+
+  useEffect(() => {
+    if (!data) return;
+
+    saveAuthToken(data?.token ?? '').then((result) => {
+      if (result) {
+        handelRedirect();
+      }
+      toast.success(t('auth.login.success'));
+    });
+  }, [data]);
+
+  return null;
+};

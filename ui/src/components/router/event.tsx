@@ -11,6 +11,7 @@ export const RouteEvent: React.FC = () => {
   const routeMatch = matches.find((it) => it.routeId.includes('/$teamId'));
   const routeId = routeMatch?.routeId;
   const routeParams = routeMatch?.params;
+  const routeSearch = routeMatch?.search;
 
   const navigate = useNavigate({ from: routeId });
 
@@ -20,11 +21,12 @@ export const RouteEvent: React.FC = () => {
     routeMetadata.current = {
       id: routeId,
       params: routeParams,
+      search: routeSearch,
     };
   }, [routeId, routeParams]);
 
   useEffect(() => {
-    const handleVinesNav = (to: string, params?: Record<string, any>) => {
+    const handleVinesNav = (to: string, params?: Record<string, any>, search?: Record<string, any>) => {
       if (to === '/login') {
         const metadata = routeMetadata.current;
         return navigate({
@@ -32,6 +34,7 @@ export const RouteEvent: React.FC = () => {
           search: {
             redirect_id: metadata.id,
             redirect_params: metadata.params,
+            redirect_search: metadata.search,
           },
         });
       } else {
@@ -40,6 +43,10 @@ export const RouteEvent: React.FC = () => {
           params: {
             ...routeMetadata.current.params,
             ...params,
+          },
+          search: {
+            ...routeMetadata.current.search,
+            ...search,
           },
         });
       }

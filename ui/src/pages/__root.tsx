@@ -10,6 +10,7 @@ import { OEM } from '@/components/layout/oem';
 import { AgentWrapper } from '@/components/layout-wrapper/agent';
 import { MainWrapper } from '@/components/layout-wrapper/main';
 import { WorkspaceWrapper } from '@/components/layout-wrapper/workspace';
+import { AuthWithRouteSearch } from '@/components/router/auth-with-route-search.tsx';
 import { RouteEvent } from '@/components/router/event.tsx';
 import { TeamsGuard } from '@/components/router/guard/team.tsx';
 import { UserGuard } from '@/components/router/guard/user.tsx';
@@ -94,6 +95,7 @@ const RootComponent: React.FC = () => {
       <UserGuard />
       <IconGuard />
       <RouteEvent />
+      <AuthWithRouteSearch />
     </>
   );
 };

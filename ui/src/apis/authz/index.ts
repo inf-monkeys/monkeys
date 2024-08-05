@@ -3,7 +3,7 @@ import useSWRMutation from 'swr/mutation';
 import { vinesFetcher } from '@/apis/fetcher.ts';
 
 export const useLoginByPassword = () =>
-  useSWRMutation<{ token: string } | undefined>(
+  useSWRMutation<{ token: string } | undefined, unknown, string, { email: string; password: string }>(
     '/api/auth/password/login',
     vinesFetcher({ method: 'POST', auth: false }),
   );
