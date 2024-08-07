@@ -27,3 +27,11 @@ export const VINES_VIEW_ID_MAPPER: Record<string, string> = {
 export const VINES_IFRAME_PAGE_IDS = Object.keys(VINES_VIEW_ID_MAPPER).concat(Object.values(VINES_VIEW_ID_MAPPER));
 
 export const VINES_IFRAME_PAGE_TYPES = Object.keys(IFRAME_MAP);
+
+export const VINEs_IFRAME_PAGE_TYPE2ID_MAPPER = Object.entries(VINES_VIEW_ID_MAPPER).reduce(
+  (acc, [key, value]) => {
+    acc[value] = key;
+    return acc;
+  },
+  {} as Record<string, string>,
+);
