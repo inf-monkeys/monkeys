@@ -15,9 +15,8 @@ export const nanoIdUpperCase = customAlphabet('6789BCDFGHJKLMNPQRTWbcdfghjkmnpqr
 
 export const getI18nContent = (content: string | I18nValue | null | undefined): string | undefined => {
   if (!content) return;
-  const i18nLanguage = i18n.language;
   if (typeof content === 'string') return content;
-  return content[i18nLanguage] ?? content['en-US'];
+  return content[i18n.language] ?? content['en-US'];
 };
 
 export const I18nAllContent = (content: string | I18nValue | undefined): string | undefined => {

@@ -11,8 +11,8 @@ interface IWorkbenchSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
 
 export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ groupId, setGroupId, mode = 'normal' }) => {
   return mode === 'mini' ? (
-    <WorkbenchMiniModeSidebar mode={mode} />
+    <WorkbenchMiniModeSidebar />
   ) : (
-    <WorkbenchNormalModeSidebar groupId={groupId} setGroupId={setGroupId} mode={mode} />
+    <WorkbenchNormalModeSidebar groupId={groupId} setGroupId={setGroupId} />
   );
 };

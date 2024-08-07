@@ -3,6 +3,7 @@ import React from 'react';
 import { CircleEllipsisIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { IPinPage } from '@/apis/pages/typings.ts';
 import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { useVinesOriginWorkflow } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,7 @@ import { I18nSelector } from '@/components/ui/i18n-selector';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator.tsx';
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { getI18nContent } from '@/utils';
 
 interface IIframeHeaderProps {
@@ -20,15 +22,19 @@ interface IIframeHeaderProps {
 export const IframeHeader: React.FC<IIframeHeaderProps> = ({ historyVisible, setHistoryVisible }) => {
   const { t } = useTranslation();
 
-  const { workflow } = useVinesOriginWorkflow();
+  const { workflow: data } = useVinesOriginWorkflow();
+
+  const [page] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
+
+  const workflow = page?.workflow ?? data;
 
   return (
     <>
-      <header className="flex items-center justify-between p-4">
+      <header className="flex items-center justify-between p-2">
         <div className="flex items-center gap-2.5">
           <VinesIcon size="sm">{workflow?.iconUrl || 'emoji:🍀:#ceefc5'}</VinesIcon>
           <div className="flex flex-col gap-0.5">
-            <h1 className="font-bold leading-tight">{getI18nContent(workflow?.displayName)}</h1>
+            <h1 className="font-bold text-sm leading-tight">{getI18nContent(workflow?.displayName)}</h1>
             {workflow?.description && <span className="text-xxs">{getI18nContent(workflow?.description)}</span>}
           </div>
         </div>
@@ -40,7 +46,7 @@ export const IframeHeader: React.FC<IIframeHeaderProps> = ({ historyVisible, set
           </Button>
           <Popover>
             <PopoverTrigger asChild>
-              <Button icon={<CircleEllipsisIcon />} variant="outline" size="small" />
+              <Button icon={<CircleEllipsisIcon />} variant="outline" size="small" className="!py-0" />
             </PopoverTrigger>
             <PopoverContent className="w-auto p-2" align="end">
               <div className="flex items-center gap-2">
@@ -51,7 +57,7 @@ export const IframeHeader: React.FC<IIframeHeaderProps> = ({ historyVisible, set
           </Popover>
         </div>
       </header>
-      <div className="px-4">
+      <div className="px-2">
         <Separator orientation="horizontal" />
       </div>
     </>

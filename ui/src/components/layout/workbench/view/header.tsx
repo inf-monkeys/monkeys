@@ -82,7 +82,13 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page,
         <div className="flex gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button icon={<PinOff size={12} />} variant="outline" onClick={handleUnPin} size="small" />
+              <Button
+                icon={<PinOff size={12} />}
+                variant="outline"
+                onClick={handleUnPin}
+                size="small"
+                className="!py-0"
+              />
             </TooltipTrigger>
             <TooltipContent>{t('workbench.view.header.delete')}</TooltipContent>
           </Tooltip>
