@@ -1921,7 +1921,9 @@
               "tips": "地址结构为：https://[domain]/[团队 ID]/workspace/[工作流 ID]/[视图 ID]/view-iframe"
             },
             "other": "其他视图 iframe 嵌入链接",
-            "copy-other-view": "复制 {{name}} 嵌入链接"
+            "copy-other-view": "复制 {{name}} 嵌入链接",
+
+            "entry-edit": "进入应用编辑模式"
           }
         }
       },
