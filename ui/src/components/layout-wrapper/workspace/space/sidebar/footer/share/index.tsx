@@ -7,8 +7,10 @@ import { CircleHelp, Info, Link, Share2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { useWorkspacePagesWithWorkflowId } from '@/apis/pages';
 import { useToggleWorkflowPermission } from '@/apis/workflow';
 import { IFrameEmbed } from '@/components/layout-wrapper/workspace/space/sidebar/footer/share/iframe-embed.tsx';
+import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab.tsx';
 import { useVinesOriginWorkflow } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label.tsx';
@@ -16,6 +18,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Separator } from '@/components/ui/separator.tsx';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
+import { VINEs_IFRAME_PAGE_TYPE2ID_MAPPER, VINES_IFRAME_PAGE_TYPES } from '@/components/ui/vines-iframe/consts.ts';
 import { useCopy } from '@/hooks/use-copy.ts';
 
 interface IShareViewProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -27,22 +31,36 @@ export const ShareView: React.FC<IShareViewProps> = () => {
 
   const { trigger } = useToggleWorkflowPermission(workflowId);
 
+  const { data: pages } = useWorkspacePagesWithWorkflowId(workflowId);
+
   const isUnauthorized = !!workflow?.['notAuthorized'];
 
   const { teamId, pageId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
 
   const { copy } = useCopy();
 
-  const { workspaceUrl, iframeUrl, builtinUrl } = useMemo(() => {
+  const { workspaceUrl, viewUrls } = useMemo(() => {
     const urlPrefix = window.location.protocol + '//' + window.location.host;
+    const workspacePrefix = `${urlPrefix}/${teamId}/workspace/${workflowId}`;
 
     return {
-      workspaceUrl: `${urlPrefix}/${teamId}/workspace/${workflowId}/${pageId}`,
-      iframeUrl: `${urlPrefix}/${teamId}/workspace/${workflowId}/${pageId}/view-iframe`,
-      builtinUrl: `${urlPrefix}/${teamId}/workspace/${workflowId}/view-flow`,
+      workspaceUrl: `${workspacePrefix}/${pageId}`,
+      viewUrls: pages?.reduce(
+        (acc, { type, id, instance, displayName }) => [
+          ...acc,
+          {
+            displayName,
+            icon: EMOJI2LUCIDE_MAPPER[instance?.icon] ?? instance?.icon ?? '🍀',
+            iframeUrl: `${workspacePrefix}/${id}/view-iframe`,
+            ...(VINES_IFRAME_PAGE_TYPES.includes(type) && {
+              viewUrl: `${workspacePrefix}/${VINEs_IFRAME_PAGE_TYPE2ID_MAPPER[type] || `view-${type}`}`,
+            }),
+          },
+        ],
+        [] as Record<string, string>[],
+      ),
     };
-  }, [teamId, workflowId, pageId]);
-
+  }, [teamId, workflowId, pageId, pages]);
   return (
     <Popover>
       <Tooltip>
@@ -54,7 +72,7 @@ export const ShareView: React.FC<IShareViewProps> = () => {
         <TooltipContent>{t('workspace.wrapper.settings.common.share-view.title')}</TooltipContent>
       </Tooltip>
 
-      <PopoverContent align="end" side="right" className="w-96 space-y-4">
+      <PopoverContent align="end" side="right" className="w-full min-w-96 space-y-4">
         <div className="flex gap-1">
           <Label>{t('workspace.wrapper.settings.common.share-view.title')}</Label>
           <Tooltip>
@@ -93,7 +111,7 @@ export const ShareView: React.FC<IShareViewProps> = () => {
           )}
           <Separator className="!my-4" />
           <div className="flex items-center justify-between">
-            <div className="flex gap-2">
+            <div className="flex gap-1">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button variant="outline" size="small" icon={<Link />} onClick={() => copy(workspaceUrl)}>
@@ -104,8 +122,26 @@ export const ShareView: React.FC<IShareViewProps> = () => {
                   {t('workspace.wrapper.settings.common.share-view.copy-workspace-url.tips')}
                 </TooltipContent>
               </Tooltip>
+              {viewUrls?.map(({ icon, displayName, viewUrl, iframeUrl }, i) => (
+                <Tooltip key={i}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      className="size-8 !p-0"
+                      icon={<VinesLucideIcon className="size-3" size={12} src={icon} />}
+                      variant="outline"
+                      size="small"
+                      onClick={() => copy(viewUrl ?? iframeUrl)}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {t('workspace.wrapper.settings.common.share-view.copy-view-url', {
+                      name: t([`workspace.wrapper.space.tabs.${displayName}`, displayName]),
+                    })}
+                  </TooltipContent>
+                </Tooltip>
+              ))}
             </div>
-            <IFrameEmbed />
+            <IFrameEmbed viewUrls={viewUrls} />
           </div>
         </div>
       </PopoverContent>
