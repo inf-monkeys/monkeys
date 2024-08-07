@@ -13,11 +13,11 @@ export const WorkbenchFastModeWrapper: React.FC = () => {
   return (
     <ViewGuard className="bg-slate-3">
       <SpaceHeader
-        headerEndArea={
-          <>
+        tail={
+          <div className="flex items-center gap-2">
             <VinesDarkMode />
             <I18nSelector />
-          </>
+          </div>
         }
       />
       <VinesSpace>

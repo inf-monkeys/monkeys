@@ -20,9 +20,9 @@ export const useVinesRoute = () => {
   const isUseOutside = !routeIds;
   const isUseShareView = VINES_IFRAME_PAGE_IDS.includes(params?.['pageId']);
   const isUseIFrame = routeIds?.[4] === 'view-iframe';
+  const isUseWorkbench = !routeAppId;
   const isUseWorkSpace = routeAppId === 'workspace' && !isUseShareView && !isUseIFrame;
   const isUseAgent = routeAppId === 'agent';
-  const isUseWorkbench = !routeAppId;
 
   window['vinesRoute'] = [routeAppId || 'main', params?.['teamId'], params?.['workflowId']];
 
