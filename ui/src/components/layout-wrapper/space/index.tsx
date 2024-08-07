@@ -6,10 +6,11 @@ import { cn } from '@/utils';
 
 interface IVinesSpaceProps {
   children: React.ReactNode;
+  className?: string;
   sidebar?: React.ReactNode;
 }
 
-export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar }) => {
+export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar, className }) => {
   const { ref, width, height } = useElementSize();
 
   const setContainerWidth = usePageStore((s) => s.setContainerWidth);
@@ -29,9 +30,10 @@ export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar }) =>
       <div
         ref={ref}
         className={cn(
-          'relative m-4  overflow-hidden rounded-md border border-input bg-slate-1 shadow-sm',
+          'relative m-4 overflow-hidden rounded-md border border-input bg-slate-1 shadow-sm',
           !vinesIFrameVisible && sidebar && 'ml-0',
           sidebar ? 'w-[calc(100vw-15rem)]' : 'w-full p-4',
+          className,
         )}
       >
         {children}
