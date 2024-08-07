@@ -82,7 +82,7 @@ const RootComponent: React.FC = () => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              {isUseVinesCore ? (
+              {isUseVinesCore || (isUseWorkbench && mode === 'mini') ? (
                 <WorkspaceIframe />
               ) : isUseOutside ? (
                 <Outlet />

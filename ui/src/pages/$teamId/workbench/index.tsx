@@ -6,10 +6,15 @@ import { WorkbenchSidebar } from '@/components/layout/workbench/sidebar';
 import { WorkbenchView } from '@/components/layout/workbench/view';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
+import useUrlState from '@/hooks/use-url-state.ts';
 import { usePageStore } from '@/store/usePageStore';
 
 export const Workbench: React.FC = () => {
   const setWorkbenchVisible = usePageStore((s) => s.setWorkbenchVisible);
+
+  const [{ mode }] = useUrlState<{
+    mode: 'normal' | 'fast' | 'mini';
+  }>({ mode: 'normal' });
 
   useEffect(() => {
     setWorkbenchVisible(true);
@@ -33,7 +38,7 @@ export const Workbench: React.FC = () => {
 
   return (
     <main className="flex size-full">
-      <WorkbenchSidebar groupId={groupId} setGroupId={setGroupId} />
+      <WorkbenchSidebar groupId={groupId} setGroupId={setGroupId} mode={mode} />
       {!refresh && <WorkbenchView groupId={groupId} />}
     </main>
   );
