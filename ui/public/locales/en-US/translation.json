@@ -1935,7 +1935,9 @@
               "tips": "The address structure is: https://[Domain]/[Team ID]/workspace/[Workflow ID]/[View ID]/view-iframe"
             },
             "other": "Other views iframe embed link",
-            "copy-other-view": "Copy {{name}} Embed link"
+            "copy-other-view": "Copy {{name}} Embed link",
+
+            "entry-edit": "Enter application editing mode"
           }
         }
       },
