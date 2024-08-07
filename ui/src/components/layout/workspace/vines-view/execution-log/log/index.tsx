@@ -108,14 +108,13 @@ export const VinesLogViewLogTab: React.FC = () => {
         </Tooltip>
       </Separator>
       <div className="h-full flex-1">
-        <ScrollArea className="pr-1" style={{ height: finalHeight }} disabledOverflowMask>
-          <VinesLogViewLogList
-            searchWorkflowExecutionsData={searchWorkflowExecutionsData}
-            handleSubmit={handleSubmit}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-          />
-        </ScrollArea>
+        <VinesLogViewLogList
+          searchWorkflowExecutionsData={searchWorkflowExecutionsData}
+          handleSubmit={handleSubmit}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          height={finalHeight}
+        />
       </div>
     </div>
   );

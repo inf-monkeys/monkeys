@@ -11,6 +11,7 @@ import { AgentWrapper } from '@/components/layout-wrapper/agent';
 import { MainWrapper } from '@/components/layout-wrapper/main';
 import { WorkbenchFastModeWrapper } from '@/components/layout-wrapper/workbench/fast-mode';
 import { WorkspaceWrapper } from '@/components/layout-wrapper/workspace';
+import { WorkspaceShareView } from '@/components/layout-wrapper/workspace/share-view';
 import { AuthWithRouteSearch } from '@/components/router/auth-with-route-search.tsx';
 import { RouteEvent } from '@/components/router/event.tsx';
 import { TeamsGuard } from '@/components/router/guard/team.tsx';
@@ -26,7 +27,7 @@ import VinesEvent from '@/utils/events.ts';
 const RootComponent: React.FC = () => {
   const { t } = useTranslation();
 
-  const { routeIds, routeAppId, isUseOutside, isUseWorkSpace, isUseVinesCore, isUseAgent, isUseWorkbench } =
+  const { routeIds, routeAppId, isUseOutside, isUseWorkSpace, isUseShareView, isUseIFrame, isUseAgent, isUseWorkbench } =
     useVinesRoute();
 
   const [{ mode }] = useUrlState<{
@@ -57,6 +58,8 @@ const RootComponent: React.FC = () => {
     VinesEvent.emit('vines-update-site-title', routeSiteName);
   }, [routeSiteName]);
 
+  const isUseDefault = !isUseOutside && !isUseWorkSpace && !isUseShareView && !isUseIFrame && !isUseAgent;
+
   return (
     <>
       <ScrollRestoration />
@@ -65,36 +68,19 @@ const RootComponent: React.FC = () => {
         <main className="vines-ui h-screen w-screen">
           <AnimatePresence mode="popLayout">
             <motion.div
-              key={
-                isUseVinesCore
-                  ? 'vines-outlet-core'
-                  : isUseOutside
-                    ? 'vines-outlet-outside'
-                    : isUseWorkSpace
-                      ? 'vines-outlet-workspace'
-                      : isUseAgent
-                        ? 'vines-outlet-agent'
-                        : 'vines-outlet-main'
-              }
               className="vines-center relative size-full flex-col"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              {isUseVinesCore || (isUseWorkbench && mode === 'mini') ? (
-                <WorkspaceIframe />
-              ) : isUseOutside ? (
-                <Outlet />
-              ) : isUseWorkSpace ? (
-                <WorkspaceWrapper />
-              ) : isUseAgent ? (
-                <AgentWrapper />
-              ) : isUseWorkbench && mode === 'fast' ? (
-                <WorkbenchFastModeWrapper />
-              ) : (
-                <MainWrapper layoutId={'vines-outlet-main-' + routeIds?.join('-')} />
-              )}
+              {isUseShareView && <WorkspaceShareView />}
+              {isUseIFrame && <WorkspaceIframe />}
+              {isUseOutside && <Outlet />}
+              {isUseWorkSpace && <WorkspaceWrapper />}
+              {isUseAgent && <AgentWrapper />}
+              {isUseWorkbench && mode === 'fast' && <WorkbenchFastModeWrapper />}
+              {isUseDefault && <MainWrapper layoutId={'vines-outlet-main-' + routeIds?.join('-')} />}
             </motion.div>
           </AnimatePresence>
         </main>

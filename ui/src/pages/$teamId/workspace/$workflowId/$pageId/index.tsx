@@ -4,7 +4,6 @@ import React, { useEffect } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { useTranslation } from 'react-i18next';
-import z from 'zod';
 
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { VinesIFrame } from '@/components/ui/vines-iframe';
@@ -68,7 +67,4 @@ export const WorkspacePage: React.FC = () => {
 
 export const Route = createFileRoute('/$teamId/workspace/$workflowId/$pageId/')({
   component: WorkspacePage,
-  validateSearch: z.object({
-    to: z.string().optional(),
-  }),
 });
