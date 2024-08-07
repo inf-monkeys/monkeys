@@ -26,13 +26,11 @@ import { cn, getI18nContent } from '@/utils';
 interface IWorkbenchNormalModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
   groupId: string;
   setGroupId: React.Dispatch<React.SetStateAction<string>>;
-  mode?: 'normal' | 'fast' | 'mini';
 }
 
 export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarProps> = ({
   groupId,
   setGroupId,
-  mode = 'normal',
 }) => {
   const { t } = useTranslation();
 
@@ -122,22 +120,20 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
           transition: { duration: 0.2 },
         }}
       >
-        {mode === 'normal' && (
-          <div className="flex items-center gap-2 px-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  icon={<ChevronLeft />}
-                  className="!size-8 !p-1"
-                  onClick={() => setVisible(false)}
-                  variant="outline"
-                />
-              </TooltipTrigger>
-              <TooltipContent>{visible ? t('common.sidebar.hide') : t('common.sidebar.show')}</TooltipContent>
-            </Tooltip>
-            <h1 className="text-base font-bold">{t('components.layout.main.sidebar.list.workbench.label')}</h1>
-          </div>
-        )}
+        <div className="flex items-center gap-2 px-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                icon={<ChevronLeft />}
+                className="!size-8 !p-1"
+                onClick={() => setVisible(false)}
+                variant="outline"
+              />
+            </TooltipTrigger>
+            <TooltipContent>{visible ? t('common.sidebar.hide') : t('common.sidebar.show')}</TooltipContent>
+          </Tooltip>
+          <h1 className="text-base font-bold">{t('components.layout.main.sidebar.list.workbench.label')}</h1>
+        </div>
         <div className="grid">
           <GroupedVirtuoso
             groupCounts={lists.map((g) => g.pages.length)}

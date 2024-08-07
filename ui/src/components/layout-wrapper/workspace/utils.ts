@@ -117,9 +117,9 @@ export const useVinesPage = () => {
   };
 };
 
-export const useVinesOriginWorkflow = () => {
+export const useVinesOriginWorkflow = (initialWorkflowId?: string) => {
   const { workflowId, teamId, pageId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
-  const { data, mutate } = useGetWorkflow(workflowId);
+  const { data, mutate } = useGetWorkflow(initialWorkflowId ?? workflowId);
 
   return {
     workflowId,

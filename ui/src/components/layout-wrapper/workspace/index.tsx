@@ -12,7 +12,7 @@ import { Footer } from '@/components/layout-wrapper/workspace/space/sidebar/foot
 import { SpaceTabs } from '@/components/layout-wrapper/workspace/space/sidebar/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 
-export const WorkspaceWrapper: React.FC = () => {
+export const WorkspaceLayout: React.FC = () => {
   return (
     <ViewGuard className="bg-slate-3">
       <SpaceHeader>

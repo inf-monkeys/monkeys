@@ -7,10 +7,11 @@ import { useTranslation } from 'react-i18next';
 import { WorkspaceIframe } from 'src/components/layout-wrapper/space/iframe';
 
 import { OEM } from '@/components/layout/oem';
-import { AgentWrapper } from '@/components/layout-wrapper/agent';
+import { AgentLayout } from '@/components/layout-wrapper/agent';
 import { MainWrapper } from '@/components/layout-wrapper/main';
-import { WorkbenchFastModeWrapper } from '@/components/layout-wrapper/workbench/fast-mode';
-import { WorkspaceWrapper } from '@/components/layout-wrapper/workspace';
+import { WorkbenchFastModeLayout } from '@/components/layout-wrapper/workbench/fast-mode';
+import { WorkbenchMiniModeLayout } from '@/components/layout-wrapper/workbench/mini-mode';
+import { WorkspaceLayout } from '@/components/layout-wrapper/workspace';
 import { WorkspaceShareView } from '@/components/layout-wrapper/workspace/share-view';
 import { AuthWithRouteSearch } from '@/components/router/auth-with-route-search.tsx';
 import { RouteEvent } from '@/components/router/event.tsx';
@@ -38,9 +39,7 @@ const RootComponent: React.FC = () => {
     isUseWorkbench,
   } = useVinesRoute();
 
-  const [{ mode }] = useUrlState<{
-    mode: 'normal' | 'fast' | 'mini';
-  }>({ mode: 'normal' });
+  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
 
   const namePath = SIDEBAR_MAP.flatMap((it) =>
     it.items
@@ -91,9 +90,14 @@ const RootComponent: React.FC = () => {
               {isUseShareView && <WorkspaceShareView />}
               {isUseIFrame && <WorkspaceIframe />}
               {isUseOutside && <Outlet />}
-              {isUseWorkSpace && <WorkspaceWrapper />}
-              {isUseAgent && <AgentWrapper />}
-              {isUseWorkbench && mode === 'fast' && <WorkbenchFastModeWrapper />}
+              {isUseWorkSpace && <WorkspaceLayout />}
+              {isUseAgent && <AgentLayout />}
+              {isUseWorkbench && (
+                <>
+                  {mode === 'fast' && <WorkbenchFastModeLayout />}
+                  {mode === 'mini' && <WorkbenchMiniModeLayout />}
+                </>
+              )}
               {isUseDefault && <MainWrapper layoutId={'vines-outlet-main-' + routeIds?.join('-')} />}
             </motion.div>
           </AnimatePresence>

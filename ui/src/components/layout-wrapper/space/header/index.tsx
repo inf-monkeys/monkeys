@@ -10,6 +10,7 @@ import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
 import { UserCard } from '@/components/layout-wrapper/space/header/expand/user-card.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
+import useUrlState from '@/hooks/use-url-state.ts';
 import VinesEvent from '@/utils/events.ts';
 
 interface ISpaceHeaderProps extends React.ComponentPropsWithoutRef<'header'> {
@@ -22,12 +23,19 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({ children, tail, tailW
 
   const { teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
 
+  const [mode, setMode] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>();
+
   const hasToken = !!getVinesToken();
 
   return (
     <header className="flex h-14 w-full items-center justify-between bg-slate-1 px-6 shadow-sm">
       <div className="z-20 flex h-full items-center gap-5">
-        <Link to="/$teamId/" params={{ teamId }} disabled={!hasToken}>
+        <Link
+          to="/$teamId/"
+          params={{ teamId }}
+          disabled={!hasToken}
+          onClick={() => Object.keys(mode).length && setMode({ mode: 'normal' })}
+        >
           <VinesLogo description="" height={32} className={hasToken ? 'cursor-pointer' : ''} />
         </Link>
 

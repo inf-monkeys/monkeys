@@ -11,7 +11,7 @@ import { SpaceSidebar } from '@/components/layout-wrapper/space/sidebar';
 import { I18nSelector } from '@/components/ui/i18n-selector';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 
-export const AgentWrapper: React.FC = () => {
+export const AgentLayout: React.FC = () => {
   return (
     <main className="size-full bg-slate-3">
       <SpaceHeader>

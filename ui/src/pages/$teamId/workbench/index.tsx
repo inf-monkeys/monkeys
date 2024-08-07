@@ -12,12 +12,10 @@ import { usePageStore } from '@/store/usePageStore';
 export const Workbench: React.FC = () => {
   const setWorkbenchVisible = usePageStore((s) => s.setWorkbenchVisible);
 
-  const [{ mode }] = useUrlState<{
-    mode: 'normal' | 'fast' | 'mini';
-  }>({ mode: 'normal' });
+  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
 
   useEffect(() => {
-    setWorkbenchVisible(true);
+    setTimeout(()=> setWorkbenchVisible(true), 80)
   }, []);
 
   const { teamId } = useVinesTeam();
@@ -39,7 +37,7 @@ export const Workbench: React.FC = () => {
   return (
     <main className="flex size-full">
       <WorkbenchSidebar groupId={groupId} setGroupId={setGroupId} mode={mode} />
-      {!refresh && <WorkbenchView groupId={groupId} />}
+      {!refresh && <WorkbenchView groupId={groupId} mode={mode} />}
     </main>
   );
 };
