@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { createRootRoute, Outlet, ScrollRestoration } from '@tanstack/react-router';
 
@@ -15,7 +15,7 @@ import { WorkspaceLayout } from '@/components/layout-wrapper/workspace';
 import { WorkspaceShareView } from '@/components/layout-wrapper/workspace/share-view';
 import { AuthWithRouteSearch } from '@/components/router/auth-with-route-search.tsx';
 import { RouteEvent } from '@/components/router/event.tsx';
-import { TeamsGuard } from '@/components/router/guard/team.tsx';
+import { TeamsGuard, useVinesTeam } from '@/components/router/guard/team.tsx';
 import { UserGuard } from '@/components/router/guard/user.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -73,6 +73,19 @@ const RootComponent: React.FC = () => {
     !isUseAgent &&
     (!['mini', 'fast'].includes(mode) || !isUseWorkbench);
 
+  const { teamId } = useVinesTeam();
+  const [visible, setVisible] = useState(true);
+  const currentTeamId = useRef<string>();
+  useEffect(() => {
+    if (!teamId) return;
+    const teamIdRef = currentTeamId.current;
+    if (teamIdRef && teamIdRef !== teamId) {
+      setVisible(false);
+      setTimeout(() => setVisible(true), 16);
+    }
+    currentTeamId.current = teamId;
+  }, [teamId]);
+
   return (
     <>
       <ScrollRestoration />
@@ -80,26 +93,28 @@ const RootComponent: React.FC = () => {
         <VinesGlobalUpload />
         <main className="vines-ui h-screen w-screen">
           <AnimatePresence mode="popLayout">
-            <motion.div
-              className="vines-center relative size-full flex-col"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              {isUseShareView && <WorkspaceShareView />}
-              {isUseIFrame && <WorkspaceIframe />}
-              {isUseOutside && <Outlet />}
-              {isUseWorkSpace && <WorkspaceLayout />}
-              {isUseAgent && <AgentLayout />}
-              {isUseWorkbench && (
-                <>
-                  {mode === 'fast' && <WorkbenchFastModeLayout />}
-                  {mode === 'mini' && <WorkbenchMiniModeLayout />}
-                </>
-              )}
-              {isUseDefault && <MainWrapper layoutId={'vines-outlet-main-' + routeIds?.join('-')} />}
-            </motion.div>
+            {visible && (
+              <motion.div
+                className="vines-center relative size-full flex-col"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {isUseShareView && <WorkspaceShareView />}
+                {isUseIFrame && <WorkspaceIframe />}
+                {isUseOutside && <Outlet />}
+                {isUseWorkSpace && <WorkspaceLayout />}
+                {isUseAgent && <AgentLayout />}
+                {isUseWorkbench && (
+                  <>
+                    {mode === 'fast' && <WorkbenchFastModeLayout />}
+                    {mode === 'mini' && <WorkbenchMiniModeLayout />}
+                  </>
+                )}
+                {isUseDefault && <MainWrapper layoutId={'vines-outlet-main-' + routeIds?.join('-')} />}
+              </motion.div>
+            )}
           </AnimatePresence>
         </main>
       </TooltipProvider>

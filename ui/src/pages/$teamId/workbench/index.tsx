@@ -18,26 +18,13 @@ export const Workbench: React.FC = () => {
     setTimeout(()=> setWorkbenchVisible(true), 80)
   }, []);
 
-  const { teamId } = useVinesTeam();
-
-  const [refresh, setRefresh] = useState(false);
-  const currentTeamId = useRef<string>();
-  useEffect(() => {
-    if (!teamId) return;
-    const teamIdRef = currentTeamId.current;
-    if (teamIdRef && teamIdRef !== teamId) {
-      setRefresh(true);
-      setTimeout(() => setRefresh(false), 180);
-    }
-    currentTeamId.current = teamId;
-  }, [teamId]);
 
   const [groupId, setGroupId] = useState<string>('default');
 
   return (
     <main className="flex size-full">
       <WorkbenchSidebar groupId={groupId} setGroupId={setGroupId} mode={mode} />
-      {!refresh && <WorkbenchView groupId={groupId} mode={mode} />}
+      <WorkbenchView groupId={groupId} mode={mode} />
     </main>
   );
 };

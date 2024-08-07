@@ -29,7 +29,7 @@ const TeamsIdPage: React.FC = () => {
     if (!teams) return;
     setLocalTeams(teams);
     void navigate({
-      to: '/$teamId',
+      to: '/$teamId/',
       params: {
         teamId: teamId ? teamId : teams[0].id,
       },
