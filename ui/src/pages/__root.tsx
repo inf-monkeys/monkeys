@@ -27,8 +27,16 @@ import VinesEvent from '@/utils/events.ts';
 const RootComponent: React.FC = () => {
   const { t } = useTranslation();
 
-  const { routeIds, routeAppId, isUseOutside, isUseWorkSpace, isUseShareView, isUseIFrame, isUseAgent, isUseWorkbench } =
-    useVinesRoute();
+  const {
+    routeIds,
+    routeAppId,
+    isUseOutside,
+    isUseWorkSpace,
+    isUseShareView,
+    isUseIFrame,
+    isUseAgent,
+    isUseWorkbench,
+  } = useVinesRoute();
 
   const [{ mode }] = useUrlState<{
     mode: 'normal' | 'fast' | 'mini';
@@ -58,7 +66,13 @@ const RootComponent: React.FC = () => {
     VinesEvent.emit('vines-update-site-title', routeSiteName);
   }, [routeSiteName]);
 
-  const isUseDefault = !isUseOutside && !isUseWorkSpace && !isUseShareView && !isUseIFrame && !isUseAgent;
+  const isUseDefault =
+    !isUseOutside &&
+    !isUseWorkSpace &&
+    !isUseShareView &&
+    !isUseIFrame &&
+    !isUseAgent &&
+    (!['mini', 'fast'].includes(mode) || !isUseWorkbench);
 
   return (
     <>

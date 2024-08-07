@@ -27,10 +27,7 @@ export const I18nSelector: React.FC<II18nSelectorProps> = ({ className }) => {
   const handleToggle = (lang: string) => {
     toast.promise(i18n.changeLanguage(lang), {
       loading: t('common.language-selector.switching'),
-      success: () => {
-        window.location.pathname.split('/').length === 3 && window.location.reload();
-        return t('common.language-selector.switched');
-      },
+      success: t('common.language-selector.switched'),
       error: t('common.language-selector.switch-failed'),
     });
   };
