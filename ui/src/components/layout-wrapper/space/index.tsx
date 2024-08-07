@@ -29,8 +29,9 @@ export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar }) =>
       <div
         ref={ref}
         className={cn(
-          'relative m-4 w-[calc(100vw-15rem)] overflow-hidden rounded-md border border-input bg-slate-1 shadow-sm',
-          !vinesIFrameVisible && 'ml-0',
+          'relative m-4  overflow-hidden rounded-md border border-input bg-slate-1 shadow-sm',
+          !vinesIFrameVisible && sidebar && 'ml-0',
+          sidebar ? 'w-[calc(100vw-15rem)]' : 'w-full p-4',
         )}
       >
         {children}

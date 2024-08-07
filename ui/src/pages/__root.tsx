@@ -9,6 +9,7 @@ import { WorkspaceIframe } from 'src/components/layout-wrapper/space/iframe';
 import { OEM } from '@/components/layout/oem';
 import { AgentWrapper } from '@/components/layout-wrapper/agent';
 import { MainWrapper } from '@/components/layout-wrapper/main';
+import { WorkbenchFastModeWrapper } from '@/components/layout-wrapper/workbench/fast-mode';
 import { WorkspaceWrapper } from '@/components/layout-wrapper/workspace';
 import { AuthWithRouteSearch } from '@/components/router/auth-with-route-search.tsx';
 import { RouteEvent } from '@/components/router/event.tsx';
@@ -19,12 +20,18 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { VinesGlobalUpload } from '@/components/ui/updater/vines-global-upload.tsx';
 import { IconGuard } from '@/components/ui/vines-icon/lucide/guard.tsx';
 import { SIDEBAR_MAP } from '@/consts/sidebar.tsx';
+import useUrlState from '@/hooks/use-url-state.ts';
 import VinesEvent from '@/utils/events.ts';
 
 const RootComponent: React.FC = () => {
   const { t } = useTranslation();
 
-  const { routeIds, routeAppId, isUseOutside, isUseWorkSpace, isUseVinesCore, isUseAgent } = useVinesRoute();
+  const { routeIds, routeAppId, isUseOutside, isUseWorkSpace, isUseVinesCore, isUseAgent, isUseWorkbench } =
+    useVinesRoute();
+
+  const [{ mode }] = useUrlState<{
+    mode: 'normal' | 'fast' | 'mini';
+  }>({ mode: 'normal' });
 
   const namePath = SIDEBAR_MAP.flatMap((it) =>
     it.items
@@ -83,6 +90,8 @@ const RootComponent: React.FC = () => {
                 <WorkspaceWrapper />
               ) : isUseAgent ? (
                 <AgentWrapper />
+              ) : isUseWorkbench && mode === 'fast' ? (
+                <WorkbenchFastModeWrapper />
               ) : (
                 <MainWrapper layoutId={'vines-outlet-main-' + routeIds?.join('-')} />
               )}
