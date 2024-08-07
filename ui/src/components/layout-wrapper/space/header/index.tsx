@@ -12,9 +12,11 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import VinesEvent from '@/utils/events.ts';
 
-interface ISpaceHeaderProps extends React.ComponentPropsWithoutRef<'header'> {}
+interface ISpaceHeaderProps extends React.ComponentPropsWithoutRef<'header'> {
+  headerEndArea?: React.ReactNode;
+}
 
-export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({ children }) => {
+export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({ children, headerEndArea }) => {
   const { t } = useTranslation();
 
   const { teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
@@ -27,10 +29,16 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({ children }) => {
         <Link to="/$teamId/" params={{ teamId }} disabled={!hasToken}>
           <VinesLogo description="" height={32} className={hasToken ? 'cursor-pointer' : ''} />
         </Link>
-        <Separator orientation="vertical" className="h-1/2" />
-        {children}
+
+        {children && (
+          <>
+            <Separator orientation="vertical" className="h-1/2" />
+            {children}
+          </>
+        )}
       </div>
-      <div className="z-20 flex items-center gap-6">
+      <div className="z-20 flex items-center gap-2">
+        {headerEndArea}
         {hasToken ? (
           <UserCard />
         ) : (

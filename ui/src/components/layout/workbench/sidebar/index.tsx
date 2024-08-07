@@ -21,6 +21,7 @@ import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer';
+import useUrlState from '@/hooks/use-url-state.ts';
 import { cn, getI18nContent } from '@/utils';
 
 interface IWorkbenchSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -30,6 +31,10 @@ interface IWorkbenchSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
 
 export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ groupId, setGroupId }) => {
   const { t } = useTranslation();
+
+  const [{ mode }] = useUrlState<{
+    mode: 'normal' | 'fast' | 'mini';
+  }>({ mode: 'normal' });
 
   const { teamId } = useVinesTeam();
 
@@ -117,20 +122,22 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ groupId, se
           transition: { duration: 0.2 },
         }}
       >
-        <div className="flex items-center gap-2 px-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                icon={<ChevronLeft />}
-                className="!size-8 !p-1"
-                onClick={() => setVisible(false)}
-                variant="outline"
-              />
-            </TooltipTrigger>
-            <TooltipContent>{visible ? t('common.sidebar.hide') : t('common.sidebar.show')}</TooltipContent>
-          </Tooltip>
-          <h1 className="text-base font-bold">{t('components.layout.main.sidebar.list.workbench.label')}</h1>
-        </div>
+        {mode === 'normal' && (
+          <div className="flex items-center gap-2 px-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  icon={<ChevronLeft />}
+                  className="!size-8 !p-1"
+                  onClick={() => setVisible(false)}
+                  variant="outline"
+                />
+              </TooltipTrigger>
+              <TooltipContent>{visible ? t('common.sidebar.hide') : t('common.sidebar.show')}</TooltipContent>
+            </Tooltip>
+            <h1 className="text-base font-bold">{t('components.layout.main.sidebar.list.workbench.label')}</h1>
+          </div>
+        )}
         <div className="grid">
           <GroupedVirtuoso
             groupCounts={lists.map((g) => g.pages.length)}

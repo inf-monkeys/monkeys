@@ -43,10 +43,12 @@ export default defineConfig({
       '/api': {
         target: process.env.SERVER_ENDPOINT || 'https://ai.infmonkeys.com',
         changeOrigin: true,
+        secure: false,
       },
       '/v1': {
         target: process.env.SERVER_ENDPOINT || 'https://ai.infmonkeys.com',
         changeOrigin: true,
+        secure: false,
       },
     },
   },

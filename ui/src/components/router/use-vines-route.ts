@@ -21,6 +21,7 @@ export const useVinesRoute = () => {
   const isUseWorkSpace = routeAppId === 'workspace';
   const isUseVinesCore = VINES_IFRAME_PAGE_IDS.includes(params?.['pageId']) || routeIds?.[4] === 'view-iframe';
   const isUseAgent = routeAppId === 'agent';
+  const isUseWorkbench = !routeAppId;
 
   window['vinesRoute'] = [routeAppId || 'main', params?.['teamId'], params?.['workflowId']];
 
@@ -34,5 +35,6 @@ export const useVinesRoute = () => {
     isUseWorkSpace,
     isUseVinesCore,
     isUseAgent,
+    isUseWorkbench,
   };
 };
