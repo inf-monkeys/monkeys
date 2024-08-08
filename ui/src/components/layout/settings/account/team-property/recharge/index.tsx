@@ -12,7 +12,8 @@ import { Pay } from '@/components/layout/settings/account/team-property/recharge
 import { balanceFormat } from '@/components/layout/settings/account/utils.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
+import { FieldGroup } from '@/components/ui/form.tsx';
+import { NumberField, NumberFieldInput } from '@/components/ui/input/number.tsx';
 
 interface IRechargeProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -25,7 +26,7 @@ export const Recharge: React.FC<IRechargeProps> = ({ children }) => {
 
   const [visible, setVisible] = useState(false);
   const [amount, setAmount] = useState(10000);
-  const [inputAmount, setInputAmount] = useState('100');
+  const [inputAmount, setInputAmount] = useState(100);
 
   const [order, setOrder] = useState<IRechargeOrder | null>(null);
 
@@ -60,8 +61,7 @@ export const Recharge: React.FC<IRechargeProps> = ({ children }) => {
             <DialogTitle>{t('settings.payment.recharge.title')}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-4">
-            <Input
-              placeholder={t('settings.payment.recharge.placeholder')}
+            <NumberField
               value={inputAmount}
               onChange={(v) => {
                 setInputAmount(v);
@@ -71,14 +71,24 @@ export const Recharge: React.FC<IRechargeProps> = ({ children }) => {
                   setAmount(value * 100);
                 }
               }}
-            />
+              formatOptions={{
+                style: 'currency',
+                currency: 'CNY',
+                currencyDisplay: 'code',
+                currencySign: 'accounting',
+              }}
+            >
+              <FieldGroup>
+                <NumberFieldInput placeholder={t('settings.payment.recharge.placeholder')} />
+              </FieldGroup>
+            </NumberField>
             <div className="flex gap-2 [&>*]:flex-grow">
               {[1, 10, 100, 300].map((buttonAmount, index) => (
                 <Button
                   key={index}
                   onClick={() => {
                     setAmount(buttonAmount * 100);
-                    setInputAmount(buttonAmount.toString());
+                    setInputAmount(buttonAmount);
                   }}
                   variant="outline"
                 >

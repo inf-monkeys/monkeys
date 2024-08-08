@@ -4,7 +4,7 @@ import { isArray, isBoolean } from 'lodash';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
-import { BOOLEAN_VALUES } from '@/components/layout/workspace/vines-view/execution/workflow-input';
+import { BOOLEAN_VALUES } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { TagInput } from '@/components/ui/input/tag';
 import { Switch } from '@/components/ui/switch';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';

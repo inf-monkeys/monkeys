@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,7 +8,6 @@ import { ChevronRightIcon, Workflow } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
-import { BOOLEAN_VALUES } from '@/components/layout/workspace/vines-view/execution/workflow-input';
 import { VinesFormFieldItem } from '@/components/layout/workspace/vines-view/form/tabular/render/item.tsx';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx';
 import { Form } from '@/components/ui/form.tsx';
@@ -16,6 +16,8 @@ import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
 import { cn } from '@/utils';
+
+export const BOOLEAN_VALUES = ['true', 'yes', '是', '1'];
 
 interface ITabularRenderProps {
   inputs: VinesWorkflowVariable[];

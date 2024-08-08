@@ -2,6 +2,8 @@ import * as React from 'react';
 
 import * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
+import { cva, VariantProps } from 'class-variance-authority';
+import { composeRenderProps, Group as AriaGroup, GroupProps as AriaGroupProps } from 'react-aria-components';
 import { Controller, ControllerProps, FieldPath, FieldValues, FormProvider, useFormContext } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -130,5 +132,34 @@ const FormMessage = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<
 );
 FormMessage.displayName = 'FormMessage';
 
+const fieldGroupVariants = cva('', {
+  variants: {
+    variant: {
+      default: [
+        'relative flex h-10 w-full items-center overflow-hidden rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background',
+        /* Focus Within */
+        'data-[focus-within]:outline-none data-[focus-within]:ring-2 data-[focus-within]:ring-ring data-[focus-within]:ring-offset-2',
+        /* Disabled */
+        'data-[disabled]:opacity-50',
+      ],
+      ghost: '',
+    },
+  },
+  defaultVariants: {
+    variant: 'default',
+  },
+});
+
+interface GroupProps extends AriaGroupProps, VariantProps<typeof fieldGroupVariants> {}
+
+function FieldGroup({ className, variant, ...props }: GroupProps) {
+  return (
+    <AriaGroup
+      className={composeRenderProps(className, (className) => cn(fieldGroupVariants({ variant }), className))}
+      {...props}
+    />
+  );
+}
+
 // eslint-disable-next-line react-refresh/only-export-components
-export { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, useFormField };
+export { FieldGroup, Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, useFormField };
