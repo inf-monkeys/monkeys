@@ -11,10 +11,15 @@ import { VinesTheme } from '@/components/layout/settings/theme';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import useUrlState from '@/hooks/use-url-state.ts';
 import VinesEvent from '@/utils/events.ts';
 
 export const Settings: React.FC = () => {
   const { t } = useTranslation();
+
+  const [{ tab }, setSettingsTab] = useUrlState<{ tab: 'account' | 'stat' | 'theme' | 'apikey' }>({
+    tab: 'account',
+  });
 
   useLayoutEffect(() => {
     VinesEvent.emit('vines-update-site-title', t('settings.title'));
@@ -24,7 +29,8 @@ export const Settings: React.FC = () => {
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
       <Tabs
-        defaultValue="account"
+        value={tab}
+        onValueChange={(value) => setSettingsTab({ tab: value })}
         className="[&_[role='tabpanel']]:mt-4 [&_[role='tabpanel']]:h-[calc(100vh-11.5rem)] [&_[role='tabpanel']]:overflow-y-auto [&_[role='tabpanel']]:overflow-x-hidden"
       >
         <TabsList>
@@ -37,7 +43,7 @@ export const Settings: React.FC = () => {
           <TabsTrigger value="theme" className="text-xs">
             {t('settings.theme.title')}
           </TabsTrigger>
-          <TabsTrigger value="api-key" className="text-xs">
+          <TabsTrigger value="apikey" className="text-xs">
             {t('settings.api-key.title')}
           </TabsTrigger>
         </TabsList>
@@ -56,7 +62,7 @@ export const Settings: React.FC = () => {
             <VinesTheme />
           </ScrollArea>
         </TabsContent>
-        <TabsContent value="api-key" asChild>
+        <TabsContent value="apikey" asChild>
           <ScrollArea className="-mr-3 pr-3">
             <ApiKey />
           </ScrollArea>
