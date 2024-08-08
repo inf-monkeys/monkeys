@@ -2855,8 +2855,11 @@
           "cancel": "Cancel",
           "action": "Confirm"
         },
+        "resend-message": "Resend Message",
+        "resend-latest-message": "Resend",
         "chat": {
           "placeholder": "What to talk about...",
+          "tips": "{{submitKey}} to send / Shift + Enter to line break",
           "send": "Send",
           "stop": "Stop Generating"
         },

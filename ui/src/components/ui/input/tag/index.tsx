@@ -46,7 +46,7 @@ export const TagInput = forwardRef<HTMLInputElement, ITagInputProps>(
             <span className="text-xs text-gold-12">{tag}</span>
             <button
               className={cn(
-                'ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2',
+                'ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-vines-500 focus:ring-offset-2',
                 disabled && 'hidden',
               )}
               onKeyDown={(e) => {

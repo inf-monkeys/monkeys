@@ -264,6 +264,69 @@ export const useChat = ({
     [mutate],
   );
 
+  const resend = useCallback(
+    (resendingIndex?: number) => {
+      // 1. 对于用户消息，查找下一个机器人响应
+      // 2. 对于机器人消息，查找最后一个用户输入
+      // 3. 删除原始用户输入和机器人消息
+      // 4. 重新发送用户输入
+
+      const messages = messagesRef.current;
+      const messagesLength = messages.length;
+      if (!resendingIndex) {
+        resendingIndex = messagesLength - 1;
+      }
+      if (resendingIndex < 0 || resendingIndex >= messagesLength) {
+        console.error('failed to find resending message', resendingIndex);
+        return;
+      }
+
+      let userMessageIndex: number | undefined;
+      let assistantMessageIndex: number | undefined;
+
+      const message = messages[resendingIndex];
+      if (message.role === 'assistant') {
+        // 如果正在重新发送机器人的消息，查找用户输入
+        assistantMessageIndex = resendingIndex;
+        for (let i = resendingIndex; i >= 0; i -= 1) {
+          if (messages[i].role === 'user') {
+            userMessageIndex = i;
+            break;
+          }
+        }
+      } else {
+        // 如果正在重新发送用户的消息，查找机器人的响应
+        userMessageIndex = resendingIndex;
+        for (let i = resendingIndex; i < messagesLength; i += 1) {
+          if (messages[i].role === 'assistant') {
+            assistantMessageIndex = i;
+            break;
+          }
+        }
+      }
+
+      if (userMessageIndex === void 0) {
+        console.error('failed to resend', message);
+        return;
+      }
+
+      // 根据索引删除对应的消息
+      setMessages(
+        messages
+          .filter((_, index) => index !== userMessageIndex && index !== assistantMessageIndex)
+          .map((it) => omit(it, ['id', 'createdAt', 'extra'])),
+      );
+
+      // 重新发送用户消息
+      void append({
+        content: messages[userMessageIndex].content,
+        role: 'user',
+        createdAt: new Date(),
+      });
+    },
+    [append, setMessages],
+  );
+
   const [input, setInput] = useState(initialInput);
 
   const handleEnterPress = useCallback(() => {
@@ -282,6 +345,7 @@ export const useChat = ({
     error,
     append,
     reload,
+    resend,
     stop,
     setMessages,
     input,
