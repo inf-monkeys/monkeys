@@ -37,12 +37,12 @@ export const VinesMarkdown: React.FC<IVinesMarkdownProps> = ({ allowHtml, classN
         <Tooltip>
           <TooltipTrigger asChild>
             <a
-              className="flex items-center gap-1 underline hover:decoration-2 [&>*]:cursor-pointer"
+              className="inline-flex items-center gap-0.5 align-sub underline hover:decoration-2 [&>*]:cursor-pointer"
               href={href}
               target="_blank"
               rel="noopener noreferrer"
             >
-              <ExternalLink size={14} className="-mb-1" />
+              <ExternalLink size={14} className="-mb-1 ml-0.5" />
               <Label>{children}</Label>
             </a>
           </TooltipTrigger>
