@@ -126,6 +126,53 @@ export const exportSearchWorkflowExecutionStats = async (
       : `/api/workflow/statistics/${workflowId}?${qs.stringify(params, { encode: false })}`,
   );
 
+export const useMutationAgentExecutionStats = ({ agentId, isTeam = false }: { agentId?: string; isTeam?: boolean }) =>
+  useSWRMutation<
+    VinesWorkflowExecutionStatData[] | undefined,
+    unknown,
+    string | null,
+    IVinesSearchWorkflowExecutionStatParams
+  >(
+    agentId && !isTeam
+      ? `/api/conversation-apps/${agentId}/statistics`
+      : isTeam
+        ? `/api/conversation-apps/statistics`
+        : null,
+    vinesFetcher({
+      method: 'GET',
+      requestResolver: ({ rawUrl, params }) => {
+        return {
+          url: `${rawUrl}?${qs.stringify(params, { encode: false })}`,
+        };
+      },
+    }),
+  );
+
+export const exportAgentExecutionStats = async (
+  {
+    agentId,
+    isTeam = false,
+  }: {
+    agentId?: string;
+    isTeam?: boolean;
+  },
+  params: IVinesSearchWorkflowExecutionStatExportParams,
+) =>
+  vinesFetcher({
+    method: 'GET',
+    simple: true,
+    responseResolver: async (r) => {
+      FileSaver.saveAs(
+        await r.blob(),
+        `${isTeam ? '' : agentId + '_'}${params.startTimestamp}-${params.endTimestamp}.csv`,
+      );
+    },
+  })(
+    isTeam
+      ? `/api/conversation-apps/statistics?${qs.stringify(params, { encode: false })}`
+      : `/api/conversation-apps/${agentId}/statistics?${qs.stringify(params, { encode: false })}`,
+  );
+
 export const useUpdateExecutionTask = (instanceId: string, taskId: string) =>
   useSWRMutation<string | undefined, unknown, string | null, IUpdateExecutionTaskParams>(
     instanceId && taskId ? `/api/workflow/executions/${instanceId}/tasks/${taskId}` : null,
