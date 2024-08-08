@@ -15,6 +15,7 @@ import {
   getDayEnd,
   getRelativeDate,
 } from '@/components/layout/workspace/vines-view/execution-log/stat/utils.ts';
+import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -23,20 +24,18 @@ import {
   IVinesSearchWorkflowExecutionStatParams,
   vinesSearchWorkflowExecutionStatSchema,
 } from '@/schema/workspace/workflow-execution-stat.ts';
-import { useAgentStore } from '@/store/useAgentStore';
 import { usePageStore } from '@/store/usePageStore';
-import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 
-interface IAgentLogsViewProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface IAgentStatProps extends React.ComponentPropsWithoutRef<'div'> {}
 
-export const AgentLogsView: React.FC<IAgentLogsViewProps> = () => {
+export const AgentStat: React.FC<IAgentStatProps> = () => {
   const { t } = useTranslation();
-
-  const visible = useViewStore((s) => s.visible);
 
   const containerHeight = usePageStore((s) => s.containerHeight);
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
+
+  const { team } = useVinesTeam();
 
   const [sidebarVisible, setSidebarVisible] = useState(!workbenchVisible);
 
@@ -55,41 +54,32 @@ export const AgentLogsView: React.FC<IAgentLogsViewProps> = () => {
     defaultValues,
   });
 
-  const agentId = useAgentStore((s) => s.agentId);
-
   const {
     data: searchWorkflowExecutionStatData,
     trigger,
     isMutating,
   } = useMutationAgentExecutionStats({
-    agentId,
+    isTeam: true,
   });
 
   useEffect(() => {
-    if (agentId && visible) {
-      void handleSubmit();
-    }
-  }, [agentId, visible]);
+    team && handleSubmit();
+  }, [team]);
 
-  const handleSubmit = () =>
-    form.handleSubmit((params) => {
-      toast.promise(trigger(params), {
-        loading: t('workspace.logs-view.loading'),
-        error: t('workspace.logs-view.error'),
-      });
+  const handleSubmit = form.handleSubmit((params) => {
+    toast.promise(trigger(params), {
+      loading: t('workspace.logs-view.loading'),
+      error: t('workspace.logs-view.error'),
     });
+  });
 
   const finalHeight = containerHeight - 52 - 40;
 
   const handleDownload = () => {
-    if (!agentId) {
-      toast.warning('common.toast.loading');
-      return;
-    }
     toast.promise(
       exportAgentExecutionStats(
         {
-          agentId,
+          isTeam: true,
         },
         {
           ...form.getValues(),
@@ -105,7 +95,7 @@ export const AgentLogsView: React.FC<IAgentLogsViewProps> = () => {
   };
 
   return (
-    <div className="relative flex h-full max-h-full p-6">
+    <div className="relative flex h-full max-h-full">
       <motion.div
         initial={{ width: sidebarVisible ? 320 : 0, paddingRight: sidebarVisible ? 4 : 0 }}
         animate={{
@@ -123,19 +113,21 @@ export const AgentLogsView: React.FC<IAgentLogsViewProps> = () => {
           </div>
         </ScrollArea>
       </motion.div>
-      <Separator orientation="vertical" className="vines-center mx-4">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div
-              className="group z-10 flex h-4 w-3.5 cursor-pointer items-center justify-center rounded-sm border bg-border px-0.5 transition-opacity hover:opacity-75 active:opacity-95"
-              onClick={() => setSidebarVisible(!sidebarVisible)}
-            >
-              <ChevronRight className={cn(sidebarVisible && 'scale-x-[-1]')} />
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>{sidebarVisible ? t('common.sidebar.hide') : t('common.sidebar.show')}</TooltipContent>
-        </Tooltip>
-      </Separator>
+      <div>
+        <Separator orientation="vertical" className="vines-center mx-4">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                className="group z-10 flex h-4 w-3.5 cursor-pointer items-center justify-center rounded-sm border bg-border px-0.5 transition-opacity hover:opacity-75 active:opacity-95"
+                onClick={() => setSidebarVisible(!sidebarVisible)}
+              >
+                <ChevronRight className={cn(sidebarVisible && 'scale-x-[-1]')} />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>{sidebarVisible ? t('common.sidebar.hide') : t('common.sidebar.show')}</TooltipContent>
+          </Tooltip>
+        </Separator>
+      </div>
       <div className="h-full flex-1">
         <ScrollArea className="pr-1 [&>div>div]:h-full" style={{ height: finalHeight }}>
           <div className="mx-4 flex flex-col gap-3">

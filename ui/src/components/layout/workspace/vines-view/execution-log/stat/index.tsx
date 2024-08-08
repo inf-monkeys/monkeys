@@ -19,11 +19,11 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useVinesFlow } from '@/package/vines-flow';
 import {
   IVinesSearchWorkflowExecutionStatParams,
   vinesSearchWorkflowExecutionStatSchema,
 } from '@/schema/workspace/workflow-execution-stat.ts';
+import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
@@ -38,7 +38,7 @@ export const VinesLogViewStatTab: React.FC<IVinesLogViewStatTabProps> = () => {
   const containerHeight = usePageStore((s) => s.containerHeight);
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
 
-  const { vines } = useVinesFlow();
+  const workflowId = useFlowStore((s) => s.workflowId);
 
   const [sidebarVisible, setSidebarVisible] = useState(!workbenchVisible);
 
@@ -62,17 +62,17 @@ export const VinesLogViewStatTab: React.FC<IVinesLogViewStatTabProps> = () => {
     trigger,
     isMutating,
   } = useMutationSearchWorkflowExecutionStats({
-    workflowId: vines.workflowId,
+    workflowId,
   });
 
   useEffect(() => {
-    if (vines.workflowId && visible) {
+    if (workflowId && visible) {
       void handleSubmit();
     }
-  }, [vines.workflowId, visible]);
+  }, [workflowId, visible]);
 
   const handleSubmit = () => {
-    if (vines.workflowId) {
+    if (workflowId) {
       form.handleSubmit((params) => {
         toast.promise(trigger(params), {
           loading: t('workspace.logs-view.loading'),
@@ -87,14 +87,14 @@ export const VinesLogViewStatTab: React.FC<IVinesLogViewStatTabProps> = () => {
   const finalHeight = containerHeight - 52 - 40;
 
   const handleDownload = () => {
-    if (!vines.workflowId) {
+    if (!workflowId) {
       toast.warning('common.toast.loading');
       return;
     }
     toast.promise(
       exportSearchWorkflowExecutionStats(
         {
-          workflowId: vines.workflowId,
+          workflowId,
         },
         {
           ...form.getValues(),
