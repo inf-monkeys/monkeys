@@ -2902,7 +2902,8 @@
     "space": {
       "tab": {
         "config-view": "Configuration View",
-        "chat-view": "Chat View"
+        "chat-view": "Chat View",
+        "logs-view": "Logs View"
       }
     },
     "view-config": {
