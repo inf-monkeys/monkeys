@@ -4,6 +4,7 @@ import { useSWRConfig } from 'swr';
 
 import { ColumnDef } from '@tanstack/react-table';
 import { Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { deleteTable, useDatabaseData } from '@/apis/table-data';
@@ -22,7 +23,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { InfiniteScrollingDataTable } from '@/components/ui/data-table/infinite.tsx';
 import { Input } from '@/components/ui/input';
-import { useTranslation } from 'react-i18next';
 import { getI18nContent } from '@/utils';
 
 interface ITableDatabaseProps {
@@ -36,7 +36,8 @@ export const TableDatabase: React.FC<ITableDatabaseProps> = ({ database, tableId
   const isExternalDatabase = database?.createType === SqlKnowledgeBaseCreateType.external;
   const databaseId = database?.uuid;
   const [page, setPage] = useState(1);
-  const { data, isLoading } = useDatabaseData(databaseId, tableId, page);
+  const size = 30;
+  const { data, isLoading } = useDatabaseData(databaseId, tableId, page, size);
 
   const [columns, setColumns] = useState<ColumnDef<IDatabaseData>[]>([]);
   const [colKeys, setColKeys] = useState<string[]>([]);
@@ -62,7 +63,7 @@ export const TableDatabase: React.FC<ITableDatabaseProps> = ({ database, tableId
           header: key,
           id: key,
           cell: ({ cell }) => <span>{(cell.getValue() as string) || '-'}</span>,
-          ...(i ? {} : { size: 32 }),
+          ...(i ? {} : { size }),
         })),
       );
     }
@@ -70,18 +71,26 @@ export const TableDatabase: React.FC<ITableDatabaseProps> = ({ database, tableId
 
   const handelDelete = () => {
     toast.promise(deleteTable(databaseId, tableId), {
-      loading: '正在删除表格数据...',
+      loading: t('common.delete.loading'),
       success: () => {
         void mutate(
           (key) => typeof key === 'string' && key.startsWith(`/api/sql-knowledge-bases/${databaseId}/tables`),
         );
-        return '表格数据删除成功';
+        return t('common.delete.success');
       },
-      error: '表格数据删除失败',
+      error: t('common.delete.error'),
     });
   };
 
   const colKeysLength = colKeys.length;
+
+  const hits = dataList.filter((it) => {
+    if (!query) return true;
+    for (let i = 0; i < colKeysLength; i++) {
+      if (it[colKeys[i]].toString().includes(query)) return true;
+    }
+    return false;
+  });
 
   return (
     <>
@@ -126,27 +135,24 @@ export const TableDatabase: React.FC<ITableDatabaseProps> = ({ database, tableId
       <InfiniteScrollingDataTable
         className="h-5/6"
         columns={columns}
-        data={dataList.filter((it) => {
-          if (!query) return true;
-          for (let i = 0; i < colKeysLength; i++) {
-            if (it[colKeys[i]].toString().includes(query)) return true;
-          }
-          return false;
-        })}
+        data={hits}
         loading={isLoading}
         tfoot={
           <tfoot className="relative">
             <tr>
               <td className="absolute w-full py-4 text-center">
-                <Button
-                  disabled={isEmpty}
-                  variant="outline"
-                  size="small"
-                  loading={isLoading}
-                  onClick={() => setPage((prev) => prev + 1)}
-                >
-                  {isEmpty && !isLoading ? t('common.utils.all-loaded') : t('common.utils.load-more')}
-                </Button>
+                {hits.length < size ? (
+                  <span>{t('common.utils.all-loaded')}</span>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="small"
+                    loading={isLoading}
+                    onClick={() => setPage((prev) => prev + 1)}
+                  >
+                    {t('common.utils.load-more')}
+                  </Button>
+                )}
               </td>
             </tr>
           </tfoot>
