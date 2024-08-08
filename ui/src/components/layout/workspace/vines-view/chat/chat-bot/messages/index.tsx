@@ -13,6 +13,7 @@ interface IVirtualizedListProps {
   isLoading: boolean;
   userPhoto: string;
   botPhoto: string;
+  resend: (index?: number) => void;
 }
 
 export const VirtualizedList: React.FC<IVirtualizedListProps> = ({
@@ -21,6 +22,7 @@ export const VirtualizedList: React.FC<IVirtualizedListProps> = ({
   isLoading,
   userPhoto,
   botPhoto,
+  resend
 }) => {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const [atBottom, setAtBottom] = useState(true);
@@ -69,6 +71,7 @@ export const VirtualizedList: React.FC<IVirtualizedListProps> = ({
               isLoading={isLoading}
               botPhoto={botPhoto}
               userPhoto={userPhoto}
+              resend={resend}
             />
           );
         }}

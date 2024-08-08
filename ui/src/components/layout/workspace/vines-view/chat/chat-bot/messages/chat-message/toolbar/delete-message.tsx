@@ -3,7 +3,7 @@ import React from 'react';
 import { Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { IVinesMessage } from '@/components/layout/vines-view/chat/chat-bot/use-chat.ts';
+import { IVinesMessage } from '@/components/layout/workspace/vines-view/chat/chat-bot/use-chat.ts';
 import {
   AlertDialog,
   AlertDialogAction,

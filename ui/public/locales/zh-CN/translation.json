@@ -2841,8 +2841,11 @@
           "cancel": "取消",
           "action": "清空"
         },
+        "resend-message": "重发消息",
+        "resend-latest-message": "重发",
         "chat": {
           "placeholder": "聊些什么...",
+          "tips": "{{submitKey}} 发送 / Shift + Enter 换行",
           "send": "发送",
           "stop": "停止生成"
         },

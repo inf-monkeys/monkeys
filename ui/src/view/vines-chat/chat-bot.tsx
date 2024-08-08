@@ -82,7 +82,7 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({
 
   const { data: history, error, isLoading: isHistoryLoading } = useChatBotHistory(chatId);
 
-  const { isLoading, setMessages, messages } = useChat({
+  const { isLoading, setMessages, messages, resend } = useChat({
     chatId,
     model: id,
     apiKey,
@@ -130,6 +130,7 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({
                 userPhoto={userPhoto}
                 botPhoto={botPhoto}
                 isLoading={isLoading}
+                resend={resend}
               />
               {isEmptyMessages && (
                 <motion.div

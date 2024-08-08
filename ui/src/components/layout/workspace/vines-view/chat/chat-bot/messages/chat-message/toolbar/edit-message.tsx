@@ -4,7 +4,7 @@ import { useControllableValue } from 'ahooks';
 import { Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { IVinesMessage } from '@/components/layout/vines-view/chat/chat-bot/use-chat.ts';
+import { IVinesMessage } from '@/components/layout/workspace/vines-view/chat/chat-bot/use-chat.ts';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,

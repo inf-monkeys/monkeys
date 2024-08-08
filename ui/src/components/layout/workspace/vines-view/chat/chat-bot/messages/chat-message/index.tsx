@@ -20,6 +20,7 @@ interface IVinesChatMessageProps {
   botPhoto: string;
 
   setMessageByIndex: (index: number, message?: Partial<IVinesMessage>) => void;
+  resend: (index?: number) => void;
 }
 
 const EMPTY_CONTENT = String.fromCharCode(12288);
@@ -32,6 +33,7 @@ export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
   isLoading,
   botPhoto,
   userPhoto,
+  resend,
 }) => {
   const isUser = data.role === 'user';
   const content = data.content ?? '';
@@ -48,8 +50,16 @@ export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
             <AvatarFallback className="rounded-none p-2 text-xs">{isUser ? 'user' : 'assistant'}</AvatarFallback>
           </Avatar>
           <div className="flex-full flex items-end">
-            <MessageToolbar setMessageByIndex={setMessageByIndex} content={content} messageIndex={index} />
-            <Card className="p-4 text-sm">{content}</Card>
+            <MessageToolbar
+              className="-mr-3 ml-0"
+              setMessageByIndex={setMessageByIndex}
+              resend={resend}
+              content={content}
+              messageIndex={index}
+            />
+            <Card className="p-4 text-sm">
+              <VinesMarkdown>{content}</VinesMarkdown>
+            </Card>
           </div>
         </div>
       ) : (
@@ -62,7 +72,12 @@ export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
                 {content + (isEmptyMessage ? EMPTY_CONTENT : '')}
               </VinesMarkdown>
             </Card>
-            <MessageToolbar setMessageByIndex={setMessageByIndex} content={content} messageIndex={index} />
+            <MessageToolbar
+              setMessageByIndex={setMessageByIndex}
+              resend={resend}
+              content={content}
+              messageIndex={index}
+            />
           </div>
         </div>
       )}
