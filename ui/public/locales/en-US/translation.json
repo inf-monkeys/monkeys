@@ -861,7 +861,15 @@
       }
     },
     "stat": {
-      "title": "Team Statistic"
+      "title": "Team Statistic",
+      "workflow": {
+        "label": "Workflow Statistics",
+        "desc": "Here will show the statistics of all workflows in the team"
+      },
+      "agent": {
+        "label": "Agent Statistics",
+        "desc": "Here will show the statistics of all agents in the team"
+      }
     }
   },
   "workbench": {

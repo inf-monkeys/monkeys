@@ -6,6 +6,7 @@ import { VinesLogViewLogTab } from '@/components/layout/workspace/vines-view/exe
 import { VinesLogViewStatTab } from '@/components/layout/workspace/vines-view/execution-log/stat';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import useUrlState from '@/hooks/use-url-state.ts';
+import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
@@ -13,6 +14,7 @@ export const VinesLogView: React.FC = () => {
   const { t } = useTranslation();
 
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
+
 
   const [{ tab }, setTab] = useUrlState({ tab: 'log' });
 
