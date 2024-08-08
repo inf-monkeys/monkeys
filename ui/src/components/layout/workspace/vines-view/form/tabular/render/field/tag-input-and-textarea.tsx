@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 
 import { t } from 'i18next';
-import { isArray, isUndefined } from 'lodash';
+import { isArray } from 'lodash';
 import { ControllerRenderProps, FieldValues, UseFormReturn } from 'react-hook-form';
 
 import { TagInput } from '@/components/ui/input/tag';
@@ -30,16 +30,7 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
   const isNumber = type === 'number';
   const isMultiple = typeOptions?.multipleValues ?? false;
 
-  const visible = useMemo(
-    () =>
-      type === 'string' ||
-      (type === 'number' &&
-        (isUndefined(typeOptions?.minValue) ||
-          isUndefined(typeOptions?.maxValue) ||
-          typeOptions?.numberPrecision === 0)) ||
-      (miniMode && type === 'file'),
-    [type, typeOptions, miniMode],
-  );
+  const visible = useMemo(() => type === 'string' || (miniMode && type === 'file'), [type, typeOptions, miniMode]);
 
   return (
     visible &&

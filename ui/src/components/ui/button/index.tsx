@@ -18,6 +18,7 @@ const buttonVariants = cva(
         outline:
           'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground [&_svg]:stroke-gold-12',
         borderless: 'hover:bg-gray-3 active:bg-opacity-20',
+        ghost: 'data-[hovered]:bg-accent data-[hovered]:text-accent-foreground',
       },
       theme: {
         primary: 'button-theme-primary',

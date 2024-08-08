@@ -1,14 +1,15 @@
 import React, { useEffect } from 'react';
 
-import { isArray, isBoolean, isEmpty } from 'lodash';
+import { isArray, isBoolean, isEmpty, toNumber } from 'lodash';
 import { Circle, CircleDot, Plus, Trash } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
-import { BOOLEAN_VALUES } from '@/components/layout/workspace/vines-view/execution/workflow-input';
+import { BOOLEAN_VALUES } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
+import { FieldGroup, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input';
+import { NumberField, NumberFieldInput } from '@/components/ui/input/number.tsx';
 import { TagInput } from '@/components/ui/input/tag';
 import { Label } from '@/components/ui/label.tsx';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
@@ -175,6 +176,12 @@ export const FieldDefaultValue: React.FC<IFieldDefaultValueProps> = ({ form }) =
                   checked={isBoolean(value) ? value : BOOLEAN_VALUES.includes((value as string)?.toString())}
                   onCheckedChange={field.onChange}
                 />
+              ) : isNumber ? (
+                <NumberField value={toNumber(value)} {...field}>
+                  <FieldGroup>
+                    <NumberFieldInput />
+                  </FieldGroup>
+                </NumberField>
               ) : (
                 <Textarea
                   placeholder={t('workspace.flow-view.endpoint.start-tool.input.config-form.default.placeholder')}
