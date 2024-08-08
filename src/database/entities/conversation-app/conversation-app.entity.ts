@@ -51,7 +51,7 @@ export class ConversationAppEntity extends BaseAssetEntity {
 
   @Column({
     name: 'system_prompt',
-    type: 'varchar',
+    type: 'text',
     nullable: true,
   })
   systemPrompt?: string;
