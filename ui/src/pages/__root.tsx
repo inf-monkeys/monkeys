@@ -81,7 +81,7 @@ const RootComponent: React.FC = () => {
     const teamIdRef = currentTeamId.current;
     if (teamIdRef && teamIdRef !== teamId) {
       setVisible(false);
-      setTimeout(() => setVisible(true), 16);
+      setTimeout(() => setVisible(true), 32);
     }
     currentTeamId.current = teamId;
   }, [teamId]);

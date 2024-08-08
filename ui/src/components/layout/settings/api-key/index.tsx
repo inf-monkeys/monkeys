@@ -23,6 +23,8 @@ export const ApiKey: React.FC<IApiKeyProps> = () => {
 
   useEffect(() => void mutate(), [team?.id]);
 
+  const isEmpty = !apiKeyList || apiKeyList.length === 0;
+
   return (
     <Card>
       <CardHeader className="relative">
@@ -40,6 +42,9 @@ export const ApiKey: React.FC<IApiKeyProps> = () => {
               {(apiKeyList ?? []).map((apiKey, index) => (
                 <ApiKeyItem key={index} apiKey={apiKey} mutate={mutate} />
               ))}
+              {isEmpty && (
+                <div className="flex h-40 items-center justify-center text-gray-400">{t('common.load.empty')}</div>
+              )}
             </div>
           </ScrollArea>
         </SmoothTransition>
