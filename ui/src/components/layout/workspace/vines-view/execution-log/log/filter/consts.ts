@@ -1,5 +1,6 @@
 import { WorkflowTriggerType } from '@inf-monkeys/monkeys';
-import { Workflow } from '@io-orkes/conductor-javascript';
+
+import { Workflow } from '@/package/vines-flow/share/types.ts';
 
 export const EXECUTION_STATUS_LIST: Workflow['status'][] = [
   'RUNNING',

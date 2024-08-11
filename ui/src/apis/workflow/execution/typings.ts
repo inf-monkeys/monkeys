@@ -1,7 +1,7 @@
 import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
-import type { Workflow as WorkflowExecution } from '@io-orkes/conductor-javascript';
 
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
+import type { Workflow as WorkflowExecution } from '@/package/vines-flow/share/types.ts';
 import { IVinesSearchWorkflowExecutionStatParams } from '@/schema/workspace/workflow-execution-stat.ts';
 
 export type VinesWorkflowExecutionLists = {

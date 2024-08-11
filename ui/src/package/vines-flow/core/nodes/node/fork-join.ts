@@ -1,5 +1,3 @@
-import { type ForkJoinTaskDef, TaskType } from '@io-orkes/conductor-javascript';
-
 import { VinesCore } from '@/package/vines-flow/core';
 import { JoinNode, VinesJoinTaskDef } from '@/package/vines-flow/core/nodes';
 import { ControlFlowVinesNode, VinesNode } from '@/package/vines-flow/core/nodes/base.ts';
@@ -7,6 +5,7 @@ import { drawSmoothLine, VinesSVGPosition } from '@/package/vines-flow/core/node
 import { IVinesMoveAfterTargetType, IVinesNodePosition, VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { IVinesInsertChildParams } from '@/package/vines-flow/core/typings.ts';
 import { getBoundary } from '@/package/vines-flow/core/utils.ts';
+import { type ForkJoinTaskDef, TaskType } from '@/package/vines-flow/share/types.ts';
 import VinesEvent from '@/utils/events.ts';
 
 export type VinesForkJoinTaskDef = ForkJoinTaskDef & { __joinTaskId?: string };

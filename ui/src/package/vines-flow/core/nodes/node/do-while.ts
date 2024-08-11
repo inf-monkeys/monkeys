@@ -1,5 +1,3 @@
-import { type DoWhileTaskDef, TaskType } from '@io-orkes/conductor-javascript';
-
 import { VinesCore } from '@/package/vines-flow/core';
 import { SubWorkflowNode } from '@/package/vines-flow/core/nodes';
 import { ControlFlowVinesNode, VinesNode } from '@/package/vines-flow/core/nodes/base.ts';
@@ -14,8 +12,9 @@ import { IVinesCollectDoWhileOutputTaskDef, IVinesNodePosition } from '@/package
 import { IVinesVariable, VinesVariableMapper } from '@/package/vines-flow/core/tools/typings.ts';
 import { IVinesInsertChildParams } from '@/package/vines-flow/core/typings.ts';
 import { createTask } from '@/package/vines-flow/core/utils.ts';
-import VinesEvent from '@/utils/events';
+import { type DoWhileTaskDef, TaskType } from '@/package/vines-flow/share/types.ts';
 import { getI18nContent } from '@/utils';
+import VinesEvent from '@/utils/events';
 
 export class DoWhileNode extends ControlFlowVinesNode<DoWhileTaskDef> {
   static {

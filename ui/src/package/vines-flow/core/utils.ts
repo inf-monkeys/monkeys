@@ -1,3 +1,9 @@
+import { get, merge, set, setWith } from 'lodash';
+import { customAlphabet } from 'nanoid';
+
+import { VinesNode, VinesSubWorkflowTaskDef } from '@/package/vines-flow/core/nodes';
+import { IVinesNodeBoundary, VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
+import { VinesToolDef, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 import {
   DoWhileTaskDef,
   ForkJoinTaskDef,
@@ -5,13 +11,7 @@ import {
   SwitchTaskDef,
   TaskType,
   WorkflowTask,
-} from '@io-orkes/conductor-javascript';
-import { get, merge, set, setWith } from 'lodash';
-import { customAlphabet } from 'nanoid';
-
-import { VinesNode, VinesSubWorkflowTaskDef } from '@/package/vines-flow/core/nodes';
-import { IVinesNodeBoundary, VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
-import { VinesToolDef, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
+} from '@/package/vines-flow/share/types.ts';
 
 export const createNanoId = customAlphabet('6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz', 8);
 

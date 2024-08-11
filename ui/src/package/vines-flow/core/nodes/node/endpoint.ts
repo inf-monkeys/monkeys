@@ -1,8 +1,7 @@
-import { TaskType } from '@io-orkes/conductor-javascript';
-
 import { VinesCore } from '@/package/vines-flow/core';
 import { VinesNode } from '@/package/vines-flow/core/nodes/base';
 import { IVinesNodeController } from '@/package/vines-flow/core/nodes/typings.ts';
+import { TaskType } from '@/package/vines-flow/share/types.ts';
 
 export class EndPointNode extends VinesNode {
   static {

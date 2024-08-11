@@ -1,7 +1,7 @@
-import type { TaskDefTypes } from '@io-orkes/conductor-javascript';
 import { get } from 'lodash';
 
 import { VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
+import type { TaskDefTypes } from '@/package/vines-flow/share/types.ts';
 
 export const getPropertyValueFromTask = (
   def: VinesToolDefProperties,

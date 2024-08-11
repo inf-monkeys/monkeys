@@ -1,10 +1,10 @@
 import { MonkeyTaskDefTypes, MonkeyWorkflow } from '@inf-monkeys/monkeys';
-import type { ForkJoinTaskDef, JoinTaskDef, SimpleTaskDef, Task } from '@io-orkes/conductor-javascript';
 
 import { VinesForkJoinTaskDef } from '@/package/vines-flow/core/nodes/node/fork-join.ts';
 import { VinesJoinTaskDef } from '@/package/vines-flow/core/nodes/node/join.ts';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IVinesFlowRenderOptions } from '@/package/vines-flow/core/typings.ts';
+import { ForkJoinTaskDef, JoinTaskDef, SimpleTaskDef, Task } from '@/package/vines-flow/share/types.ts';
 
 export interface NodeCustomData {
   icon?: string | null;
