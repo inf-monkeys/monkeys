@@ -1,5 +1,4 @@
 import { MonkeyTaskDefTypes } from '@inf-monkeys/monkeys';
-import { TaskDefTypes, TaskType } from '@io-orkes/conductor-javascript';
 import { isArray, max, min } from 'lodash';
 import { toast } from 'sonner';
 
@@ -22,6 +21,7 @@ import {
 import { IVinesVariable, VinesVariableMapper } from '@/package/vines-flow/core/tools/typings.ts';
 import { IVinesInsertChildParams } from '@/package/vines-flow/core/typings.ts';
 import { createNanoId, createSubWorkflowDef } from '@/package/vines-flow/core/utils.ts';
+import { TaskDefTypes, TaskType } from '@/package/vines-flow/share/types.ts';
 import { getI18nContent } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 

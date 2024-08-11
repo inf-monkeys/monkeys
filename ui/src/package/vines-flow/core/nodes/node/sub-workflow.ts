@@ -1,4 +1,3 @@
-import { type SubWorkflowTaskDef, TaskType, WorkflowDef } from '@io-orkes/conductor-javascript';
 import equal from 'fast-deep-equal/es6';
 import { get, omit, set } from 'lodash';
 
@@ -15,6 +14,7 @@ import {
 } from '@/package/vines-flow/core/nodes/typings.ts';
 import { IVinesInsertChildParams, VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
 import { getBoundary } from '@/package/vines-flow/core/utils.ts';
+import { type SubWorkflowTaskDef, TaskType, WorkflowDef } from '@/package/vines-flow/share/types.ts';
 
 export type VinesSubWorkflowTaskDef = SubWorkflowTaskDef & {
   subWorkflowParam: {

@@ -1,4 +1,3 @@
-import { SwitchTaskDef, TaskType } from '@io-orkes/conductor-javascript';
 import { get, isEmpty, merge } from 'lodash';
 
 import { VinesCore } from '@/package/vines-flow/core';
@@ -7,6 +6,7 @@ import { drawSmoothLine, VinesSVGPosition } from '@/package/vines-flow/core/node
 import { IVinesNodePosition } from '@/package/vines-flow/core/nodes/typings.ts';
 import { IVinesInsertChildParams } from '@/package/vines-flow/core/typings.ts';
 import { getBoundary } from '@/package/vines-flow/core/utils.ts';
+import { SwitchTaskDef, TaskType } from '@/package/vines-flow/share/types.ts';
 import VinesEvent from '@/utils/events.ts';
 
 export class SwitchNode extends ControlFlowVinesNode<SwitchTaskDef> {

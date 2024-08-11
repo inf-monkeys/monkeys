@@ -1299,13 +1299,6 @@
   dependencies:
     "@swc/helpers" "^0.5.0"
 
-"@io-orkes/conductor-javascript@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@io-orkes/conductor-javascript/-/conductor-javascript-1.0.0.tgz#7974b7a25efeb4103319d872e9b113856154feca"
-  integrity sha512-uSxxoYvtY4nR/7rMAQfvJU1mdgYDtlsrERrHurwXhG0GmxUQu2qvY5W3jhPnPRbp8jUGLbOuEp2Yeb0stmM3xg==
-  dependencies:
-    uuid "^9.0.0"
-
 "@io-orkes/conductor-javascript@^2.1.0":
   version "2.1.1"
   resolved "https://registry.npmmirror.com/@io-orkes/conductor-javascript/-/conductor-javascript-2.1.1.tgz#4a3a3eba1a6d829a567e82684cfbc3d045f0a8af"
@@ -8967,11 +8960,6 @@ util-deprecate@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
   integrity sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==
-
-uuid@^9.0.0:
-  version "9.0.1"
-  resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.1.tgz#e188d4c8853cc722220392c424cd637f32293f30"
-  integrity sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==
 
 validator@^13.11.0:
   version "13.11.0"

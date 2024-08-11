@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef } from 'react';
 
 import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
-import { TaskType, WorkflowDef } from '@io-orkes/conductor-javascript';
 
 import { createWorkflow as createWorkflowFromAPI } from '@/apis/workflow';
 import { useVinesRefresher } from '@/package/vines-flow';
 import { VINES_DEF_NODE } from '@/package/vines-flow/core/consts.ts';
 import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
+import { TaskType, WorkflowDef } from '@/package/vines-flow/share/types.ts';
 
 export const useVinesFlow = () => {
   const { _refresher, _vines } = useVinesRefresher();

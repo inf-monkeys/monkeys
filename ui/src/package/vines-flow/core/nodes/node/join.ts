@@ -1,8 +1,7 @@
-import { JoinTaskDef, TaskType } from '@io-orkes/conductor-javascript';
-
 import { VinesCore } from '@/package/vines-flow/core';
 import { ForkJoinNode } from '@/package/vines-flow/core/nodes';
 import { ControlFlowVinesNode, VinesNode } from '@/package/vines-flow/core/nodes/base.ts';
+import { JoinTaskDef, TaskType } from '@/package/vines-flow/share/types.ts';
 
 export type VinesJoinTaskDef = JoinTaskDef & { __forkTaskId?: string };
 
