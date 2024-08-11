@@ -89,7 +89,10 @@ export const AgentConfigView: React.FC = () => {
         <Form {...form}>
           <form onSubmit={handleSubmit}>
             <CardContent style={{ height: containerHeight - containerHeight * 0.3 }}>
-              <ScrollArea className="-ml-1 -mr-3.5 h-full pr-3 [&>[data-radix-scroll-area-viewport]>div]:px-1">
+              <ScrollArea
+                className="-ml-1 -mr-3.5 h-full pr-3 [&>[data-radix-scroll-area-viewport]>div]:px-1"
+                disabledOverflowMask
+              >
                 <div className="flex flex-col gap-2">
                   <AgentConfigFormFieldModel form={form} />
 

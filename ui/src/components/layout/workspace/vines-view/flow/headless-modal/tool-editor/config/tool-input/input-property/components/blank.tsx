@@ -1,32 +1,38 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { Info } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { IVinesInputPropertyProps } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
 import { Input } from '@/components/ui/input';
-import { TagInput } from '@/components/ui/input/tag';
+import { MultiSelect } from '@/components/ui/multi-select';
 import { getI18nContent } from '@/utils';
 
 export const BlankInput: React.FC<IVinesInputPropertyProps> = ({ def, value, onChange, disabled }) => {
   const { t } = useTranslation();
 
+  const valueArray = useMemo(
+    () => (typeof value !== 'object' ? (value as unknown)?.toString()?.split(',') : (value as string[])),
+    [value],
+  );
+
+  const placeholder = getI18nContent(def?.placeholder);
+
   return (
     <div className="flex flex-col gap-2">
       {Array.isArray(value) ? (
-        <TagInput
+        <MultiSelect
           placeholder={
-            getI18nContent(def?.placeholder)
-              ? t('workspace.flow-view.headless-modal.tool-editor.input.comps.collection.placeholder', {
-                  name: getI18nContent(def.placeholder),
-                })
-              : t('workspace.flow-view.headless-modal.tool-editor.input.comps.collection.placeholder-name', {
+            placeholder
+              ? placeholder
+              : t('workspace.flow-view.headless-modal.tool-editor.input.comps.collection.placeholder', {
                   name: getI18nContent(def.displayName),
                 })
           }
-          value={typeof value !== 'object' ? (value as unknown)?.toString()?.split(',') : (value as string[])}
-          onChange={onChange}
+          value={valueArray}
+          onValueChange={onChange}
           disabled={disabled}
+          maxCount={8}
         />
       ) : (
         <Input value={value as string} onChange={onChange} disabled={disabled} />
