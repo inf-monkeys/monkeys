@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar.tsx';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input';
-import MultipleSelector from '@/components/ui/multiple-selector';
+import { MultiSelect } from '@/components/ui/multi-select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
 import { useVinesFlow } from '@/package/vines-flow';
@@ -74,17 +74,10 @@ export const VinesLogViewLogFilter: React.FC<IVinesLogViewLogFilterProps> = ({ f
               <FormItem>
                 <FormLabel>{t('workspace.logs-view.log.filter.form.versions.label')}</FormLabel>
                 <FormControl>
-                  <MultipleSelector
-                    value={(field.value ?? []).map((ver) => {
-                      return {
-                        label: ver === -1 ? t('workspace.logs-view.log.filter.form.versions.temp') : ver.toString(),
-                        value: ver.toString(),
-                      };
-                    })}
-                    onChange={(options) => {
-                      field.onChange(options.map((option) => parseInt(option.value)));
-                    }}
-                    defaultOptions={workflowVersionOptions}
+                  <MultiSelect
+                    options={workflowVersionOptions}
+                    value={(field.value ?? []).map((it) => it.toString())}
+                    onValueChange={(options) => field.onChange(options.map((option) => parseInt(option)))}
                     placeholder={t('workspace.logs-view.log.filter.form.versions.placeholder')}
                   />
                 </FormControl>
@@ -92,7 +85,6 @@ export const VinesLogViewLogFilter: React.FC<IVinesLogViewLogFilterProps> = ({ f
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="startTimeFrom"
@@ -156,17 +148,10 @@ export const VinesLogViewLogFilter: React.FC<IVinesLogViewLogFilterProps> = ({ f
               <FormItem>
                 <FormLabel>{t('workspace.logs-view.log.filter.form.status.label')}</FormLabel>
                 <FormControl>
-                  <MultipleSelector
-                    value={(field.value ?? []).map((status) => {
-                      return {
-                        label: t(`common.workflow.status.${status}`),
-                        value: status,
-                      };
-                    })}
-                    onChange={(options) => {
-                      field.onChange(options.map((option) => option.value));
-                    }}
-                    defaultOptions={workflowStatusOptions}
+                  <MultiSelect
+                    options={workflowStatusOptions}
+                    value={field.value ?? []}
+                    onValueChange={(options) => field.onChange(options)}
                     placeholder={t('workspace.logs-view.log.filter.form.status.placeholder')}
                   />
                 </FormControl>
@@ -182,17 +167,10 @@ export const VinesLogViewLogFilter: React.FC<IVinesLogViewLogFilterProps> = ({ f
               <FormItem>
                 <FormLabel>{t('workspace.logs-view.log.filter.form.trigger-types.label')}</FormLabel>
                 <FormControl>
-                  <MultipleSelector
-                    value={(field.value ?? []).map((value) => {
-                      return {
-                        label: t(`common.workflow.trigger.${value}`),
-                        value,
-                      };
-                    })}
-                    onChange={(options) => {
-                      field.onChange(options.map((option) => option.value));
-                    }}
-                    defaultOptions={workflowTriggerTypeOptions}
+                  <MultiSelect
+                    options={workflowTriggerTypeOptions}
+                    value={field.value ?? []}
+                    onValueChange={(options) => field.onChange(options)}
                     placeholder={t('workspace.logs-view.log.filter.form.trigger-types.placeholder')}
                   />
                 </FormControl>

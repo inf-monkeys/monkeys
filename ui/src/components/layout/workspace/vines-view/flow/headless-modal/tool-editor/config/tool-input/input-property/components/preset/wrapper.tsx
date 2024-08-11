@@ -127,7 +127,14 @@ export const PresetWrapper = <T extends Array<IVinesToolPropertiesOption>>({
             transition={{ duration: 0.1 }}
           >
             {multipleValues ? (
-              <CollectionInput value={value} onChange={onChange} disabled={disabled} {...rest} />
+              <CollectionInput
+                value={value}
+                onChange={onChange}
+                disabled={disabled}
+                options={options.map((option) => ({ label: option.name, value: option.value as string }))}
+                maxCount={8}
+                {...rest}
+              />
             ) : (
               <StringInput
                 value={value}

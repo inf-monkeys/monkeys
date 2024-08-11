@@ -287,6 +287,20 @@
           "brush-color": "Brush Color",
           "more": "Brush Options"
         }
+      },
+      "multi-select": {
+        "clear": "Clear All",
+        "close": "Close",
+        "remove": "Remove",
+        "select-all": "(Select All)",
+
+        "empty": "No data",
+        "search-placeholder": "Search...",
+        "search-empty": "No results found.",
+
+        "more": "+ {{count}} more",
+        "expand": "Expand",
+        "collapse": "Collapse"
       }
     },
     "layout": {
@@ -2148,8 +2162,7 @@
                 "create-field": "New Parameter"
               },
               "collection": {
-                "placeholder-name": "Enter {{name}}, enter to add new",
-                "placeholder": "{{name}}, enter to add new"
+                "placeholder": "Select {{name}}"
               },
               "editor": {
                 "check-json-failed": "Must be a JSON array",

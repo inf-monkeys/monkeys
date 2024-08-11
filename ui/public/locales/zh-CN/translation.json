@@ -274,6 +274,20 @@
           "brush-color": "画笔颜色",
           "more": "画笔设置"
         }
+      },
+      "multi-select": {
+        "clear": "清空全部",
+        "close": "关闭",
+        "remove": "移除",
+        "select-all": "「全选」",
+
+        "empty": "暂无选项",
+        "search-placeholder": "搜索...",
+        "search-empty": "无匹配项",
+
+        "more": "+ {{count}} 选项",
+        "expand": "展开",
+        "collapse": "收起"
       }
     },
     "layout": {
@@ -2134,8 +2148,7 @@
                 "create-field": "新增参数"
               },
               "collection": {
-                "placeholder-name": "请输入 {{name}}，回车新增",
-                "placeholder": "{{name}}，回车新增"
+                "placeholder": "请选择 {{name}}"
               },
               "editor": {
                 "check-json-failed": "必须为 JSON 数组",

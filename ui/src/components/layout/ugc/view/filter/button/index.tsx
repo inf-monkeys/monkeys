@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar.tsx';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label.tsx';
-import MultipleSelector from '@/components/ui/multiple-selector';
+import { MultiSelect } from '@/components/ui/multi-select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
@@ -74,40 +74,29 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
       <PopoverContent className="flex w-72 flex-col gap-2">
         <div className="flex flex-col gap-3">
           <Label>{t('components.layout.ugc.view.filter.button.creator.label')}</Label>
-          <MultipleSelector
-            value={(filter?.userIds ?? []).map((userId) => {
-              return {
-                label: teamMember?.list.find((user) => user.id === userId)?.name ?? '未知用户',
-                value: userId,
-              };
-            })}
-            onChange={(options) => {
+          <MultiSelect
+            options={defaultUsersOptions}
+            value={filter?.userIds ?? []}
+            onValueChange={(userIds) =>
               onFilterChange({
                 ...filter,
-                userIds: options.map((option) => option.value),
-              });
-            }}
-            defaultOptions={defaultUsersOptions}
+                userIds,
+              })
+            }
             placeholder={t('components.layout.ugc.view.filter.button.creator.placeholder')}
           />
         </div>
         <div className="flex flex-col gap-3">
           <Label>{t('components.layout.ugc.view.filter.button.tag.label')}</Label>
-          <MultipleSelector
-            value={(filter?.tagIds ?? []).map((tagId) => {
-              const tag = tagsData?.find((x) => x.id === tagId);
-              return {
-                label: tag?.name || tagId,
-                value: tagId,
-              };
-            })}
-            onChange={(options) => {
+          <MultiSelect
+            options={defaultTagsOptions}
+            value={filter?.tagIds ?? []}
+            onValueChange={(tagIds) =>
               onFilterChange({
                 ...filter,
-                tagIds: options.map((option) => option.value),
-              });
-            }}
-            defaultOptions={defaultTagsOptions}
+                tagIds,
+              })
+            }
             placeholder={t('components.layout.ugc.view.filter.button.tag.placeholder')}
           />
         </div>

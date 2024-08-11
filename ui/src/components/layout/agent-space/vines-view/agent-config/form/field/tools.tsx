@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useToolLists } from '@/apis/tools';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { VinesLoading } from '@/components/ui/loading';
-import MultipleSelector from '@/components/ui/multiple-selector';
+import { MultiSelect } from '@/components/ui/multi-select';
 import { IAgentConfig } from '@/schema/agent/agent-config.ts';
 import { getI18nContent } from '@/utils';
 
@@ -64,20 +64,13 @@ export const AgentConfigFormFieldTools: React.FC<IAgentConfigFormFieldToolsProps
               <FormItem className="flex-1">
                 <FormLabel>{t('agent.view-config.form.tools.label')}</FormLabel>
                 <FormControl>
-                  <MultipleSelector
+                  <MultiSelect
                     className="w-[30rem]"
-                    value={(isArray(field.value) ? field.value : []).map((it) => ({
-                      label: list.find((item) => item.value === it)?.label || it,
-                      value: it,
-                    }))}
                     options={list}
-                    onChange={(val) => {
-                      field.onChange(val.map((it) => it.value));
-                    }}
+                    value={isArray(field.value) ? field.value : []}
+                    onValueChange={(vals) => field.onChange(vals)}
                     placeholder={t('agent.view-config.form.tools.placeholder')}
-                    emptyIndicator={
-                      <span className="text-xs text-gray-10">{t('agent.view-config.form.tools.empty')}</span>
-                    }
+                    maxCount={5}
                   />
                 </FormControl>
                 <FormMessage />
