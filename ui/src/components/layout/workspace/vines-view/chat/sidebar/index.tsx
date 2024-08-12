@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import { motion } from 'framer-motion';
+import { isEmpty } from 'lodash';
 import { ChevronRight, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -18,9 +19,10 @@ import { cn } from '@/utils';
 
 interface IChatSidebarProps {
   id: string;
+  showDefaultSession?: boolean; // !!! 只能给工作流模式使用
 }
 
-export const ChatSidebar: React.FC<IChatSidebarProps> = ({ id }) => {
+export const ChatSidebar: React.FC<IChatSidebarProps> = ({ id, showDefaultSession }) => {
   const { t } = useTranslation();
 
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
@@ -48,6 +50,18 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = ({ id }) => {
         <h1 className="text-sm font-bold">{t('workspace.chat-view.sidebar.title')}</h1>
         <ScrollArea className="h-full max-h-[calc(100%-3rem)]">
           <div className="grid gap-2 py-1 pl-1 pr-3">
+            {showDefaultSession && (
+              <ChatSession
+                active={isEmpty(activeSessionId)}
+                session={{ id: '', displayName: t('workspace.chat-view.sidebar.create.def-label') }}
+                onClick={() => {
+                  setChatSessions({
+                    ...chatSessions,
+                    [id]: '',
+                  });
+                }}
+              />
+            )}
             {data?.map((session) => (
               <ChatSession
                 active={activeSessionId === session.id}
