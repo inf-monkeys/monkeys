@@ -34,9 +34,10 @@ const EMPTY_ITEM: IVinesExecutionResultItem = {
 
 interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {
   event$: EventEmitter<void>;
+  miniGap?: boolean;
 }
 
-export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ className, event$ }) => {
+export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ className, event$, miniGap }) => {
   const { t } = useTranslation();
 
   const visible = useViewStore((s) => s.visible);
@@ -151,12 +152,12 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
       if (!containerHeight || !containerWidth) return;
       setSize({
         width: containerWidth / 2 - 18,
-        height: containerHeight - 20,
+        height: containerHeight - (miniGap ? 20 : 50),
       });
       setGridVisible(false);
       setTimeout(() => setGridVisible(true), 16);
     },
-    [containerHeight, containerWidth],
+    [containerHeight, containerWidth, miniGap],
     { wait: 64 },
   );
 

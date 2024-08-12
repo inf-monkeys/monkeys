@@ -2728,7 +2728,7 @@
           "max": "Full screen in view"
         },
         "execution": {
-          "label": "Execute",
+          "label": "Generate",
           "button": {
             "restart": "Restart",
             "stop": "Stop"

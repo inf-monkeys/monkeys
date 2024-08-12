@@ -2713,7 +2713,7 @@
           "max": "视图内全屏"
         },
         "execution": {
-          "label": "运行",
+          "label": "生成",
           "button": {
             "restart": "重新运行",
             "stop": "终止运行"

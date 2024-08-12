@@ -55,7 +55,7 @@ export const VinesForm: React.FC<IVinesFormProps> = () => {
           minimalGap={vinesIFrameVisible}
         />
 
-        <VinesExecutionResult event$={event$} />
+        <VinesExecutionResult event$={event$} miniGap={vinesIFrameVisible} />
       </div>
       {openAIInterfaceEnabled && (
         <div className="vines-center absolute inset-1 size-full flex-col gap-4 backdrop-blur">
