@@ -3,8 +3,16 @@ import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
-import { Input } from '@/components/ui/input';
+import {
+  FieldGroup,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form.tsx';
+import { NumberField, NumberFieldInput } from '@/components/ui/input/number.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { IWorkflowInput } from '@/schema/workspace/workflow-input.ts';
 
@@ -28,16 +36,15 @@ export const FieldNumber: React.FC<IFieldNumberProps> = ({ form }) => {
                 {t('workspace.flow-view.endpoint.start-tool.input.config-form.type-options.min-value.label')}
               </FormLabel>
               <FormControl>
-                <Input
-                  placeholder={t(
-                    'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.min-value.placeholder',
-                  )}
-                  {...field}
-                  className="grow"
-                  autoFocus
-                  type="number"
-                  onChange={(value) => form.setValue('minValue', Number(value))}
-                />
+                <NumberField {...field}>
+                  <FieldGroup>
+                    <NumberFieldInput
+                      placeholder={t(
+                        'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.min-value.placeholder',
+                      )}
+                    />
+                  </FieldGroup>
+                </NumberField>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -52,16 +59,15 @@ export const FieldNumber: React.FC<IFieldNumberProps> = ({ form }) => {
                 {t('workspace.flow-view.endpoint.start-tool.input.config-form.type-options.max-value.label')}
               </FormLabel>
               <FormControl>
-                <Input
-                  placeholder={t(
-                    'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.max-value.placeholder',
-                  )}
-                  {...field}
-                  className="grow"
-                  autoFocus
-                  type="number"
-                  onChange={(value) => form.setValue('maxValue', Number(value))}
-                />
+                <NumberField {...field}>
+                  <FieldGroup>
+                    <NumberFieldInput
+                      placeholder={t(
+                        'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.max-value.placeholder',
+                      )}
+                    />
+                  </FieldGroup>
+                </NumberField>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -76,16 +82,15 @@ export const FieldNumber: React.FC<IFieldNumberProps> = ({ form }) => {
                 {t('workspace.flow-view.endpoint.start-tool.input.config-form.type-options.number-precision.label')}
               </FormLabel>
               <FormControl>
-                <Input
-                  placeholder={t(
-                    'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.number-precision.placeholder',
-                  )}
-                  {...field}
-                  className="grow"
-                  autoFocus
-                  type="number"
-                  onChange={(value) => form.setValue('numberPrecision', Number(value))}
-                />
+                <NumberField {...field}>
+                  <FieldGroup>
+                    <NumberFieldInput
+                      placeholder={t(
+                        'workspace.flow-view.endpoint.start-tool.input.config-form.type-options.number-precision.placeholder',
+                      )}
+                    />
+                  </FieldGroup>
+                </NumberField>
               </FormControl>
               <FormDescription>
                 {t(

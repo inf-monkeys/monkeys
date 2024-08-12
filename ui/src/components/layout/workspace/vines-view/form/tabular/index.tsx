@@ -4,6 +4,7 @@ import { useSWRConfig } from 'swr';
 
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { isArray } from 'lodash';
+import { Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -77,10 +78,11 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
       </div>
       <div className="flex gap-2">
         <Button
-          variant="outline"
+          variant="solid"
           className="w-full"
           onClick={() => submitButton.current?.click()}
           disabled={openAIInterfaceEnabled}
+          icon={<Sparkles className="fill-slate-1" />}
         >
           {t(
             openAIInterfaceEnabled
