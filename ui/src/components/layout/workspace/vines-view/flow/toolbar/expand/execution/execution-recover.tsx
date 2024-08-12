@@ -4,6 +4,7 @@ import { Check, ChevronsUpDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useSearchWorkflowExecutions } from '@/apis/workflow/execution';
+import { WorkflowTriggerType } from '@/apis/workflow/trigger/typings.ts';
 import { getDescOfTriggerType } from '@/apis/workflow/trigger/utils.ts';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
@@ -58,7 +59,7 @@ export const ExecutionRecover: React.FC<IExecutionRecoverProps> = ({ className }
 
   const currentActiveExecution = executions.find((it) => it.workflowId === activeInstanceId);
   const activeExecutionName = currentActiveExecution
-    ? `${formatTimeDiffPrevious(currentActiveExecution?.startTime ?? 0)}${getDescOfTriggerType(currentActiveExecution?.triggerType ?? '')} ${currentActiveExecution?.workflowId}`
+    ? `${formatTimeDiffPrevious(currentActiveExecution?.startTime ?? 0)}${getDescOfTriggerType(currentActiveExecution?.triggerType ?? WorkflowTriggerType.MANUAL)} ${currentActiveExecution?.workflowId}`
     : '';
 
   return (
@@ -105,7 +106,7 @@ export const ExecutionRecover: React.FC<IExecutionRecoverProps> = ({ className }
                         className={cn('mr-2 h-4 w-4', activeInstanceId === instanceId ? 'opacity-100' : 'opacity-0')}
                       />
                       <span className="line-clamp-1">
-                        {`${formatTimeDiffPrevious(startTime ?? 0)}${getDescOfTriggerType(triggerType ?? '')} ${instanceId}`}
+                        {`${formatTimeDiffPrevious(startTime ?? 0)}${getDescOfTriggerType(triggerType ?? WorkflowTriggerType.MANUAL)} ${instanceId}`}
                       </span>
                     </CommandItem>
                   );

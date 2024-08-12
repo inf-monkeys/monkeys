@@ -48,5 +48,5 @@ export type VinesWorkflowExecutionType =
 export type VinesWorkflowExecution = Omit<WorkflowExecution, 'tasks'> & {
   tasks: VinesNodeExecutionTask[];
   originTasks: Array<Task>;
-  triggerType: WorkflowTriggerType;
+  triggerType?: WorkflowTriggerType;
 };

@@ -1,11 +1,11 @@
-import React, { forwardRef, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
-import { useThrottleEffect } from 'ahooks';
+import { useSetState, useThrottleEffect } from 'ahooks';
 import { type EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { AnimatePresence, motion } from 'framer-motion';
 import { History } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { GridItemProps, GridListProps, VirtuosoGrid } from 'react-virtuoso';
+import { VariableSizeGrid as Grid } from 'react-window';
 
 import { useSearchWorkflowExecutions } from '@/apis/workflow/execution';
 import {
@@ -14,7 +14,7 @@ import {
 } from '@/components/layout/workspace/vines-view/execution/data-display/abstract/utils.ts';
 import {
   IVinesExecutionResultItem,
-  VinesExecutionItemContent,
+  VinesExecutionResultItem,
 } from '@/components/layout/workspace/vines-view/form/execution-result/item.tsx';
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { JSONValue } from '@/components/ui/code-editor';
@@ -26,12 +26,17 @@ import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 import { flattenKeys } from '@/utils/flat.ts';
 
+const EMPTY_ITEM: IVinesExecutionResultItem = {
+  tasks: [],
+  originTasks: [],
+  render: { type: 'empty', data: '' },
+};
+
 interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {
   event$: EventEmitter<void>;
-  minimalGap?: boolean;
 }
 
-export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ className, event$, minimalGap }) => {
+export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ className, event$ }) => {
   const { t } = useTranslation();
 
   const visible = useViewStore((s) => s.visible);
@@ -51,7 +56,41 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
 
   const executions = result?.data;
   const list = useMemo(() => {
-    const result: IVinesExecutionResultItem[] = [];
+    const result: IVinesExecutionResultItem[][] = [[]];
+
+    let rowIndex = 0;
+    const insertData = (data: IVinesExecutionResultItem) => {
+      if (result[rowIndex].length === 3) {
+        result.push([]);
+        rowIndex++;
+      }
+
+      const currentRow = result[rowIndex];
+
+      if (data.render.type === 'raw') {
+        if (currentRow.length !== 0) {
+          for (let i = 0; i < 4 - currentRow.length; i++) {
+            currentRow.push(EMPTY_ITEM);
+          }
+          result.push([data, EMPTY_ITEM, EMPTY_ITEM]);
+          result.push([]);
+          rowIndex++;
+        } else {
+          currentRow.push(data);
+          currentRow.push(EMPTY_ITEM);
+          currentRow.push(EMPTY_ITEM);
+          result.push([]);
+          rowIndex++;
+        }
+      } else {
+        const emptyIndex = currentRow.findIndex((it) => it.render.type === 'empty');
+        if (emptyIndex !== -1) {
+          currentRow[emptyIndex] = data;
+        } else {
+          currentRow.push(data);
+        }
+      }
+    };
 
     for (const execution of executions ?? []) {
       const output: JSONValue = execution.output ?? {};
@@ -66,7 +105,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
 
       const outputValuesLength = outputValues.length;
       if (outputValuesLength === 1 && !images.length && !videos.length) {
-        result.push({
+        insertData({
           ...execution,
           render: { type: 'raw', data: outputValues[0] },
         });
@@ -74,7 +113,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
       }
 
       for (const image of images) {
-        result.push({
+        insertData({
           ...execution,
           render: { type: 'image', data: image },
         });
@@ -82,7 +121,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
       }
 
       for (const video of videos) {
-        result.push({
+        insertData({
           ...execution,
           render: { type: 'video', data: video },
         });
@@ -90,52 +129,66 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
       }
 
       if (!isInserted) {
-        result.push({
+        insertData({
           ...execution,
           render: { type: 'raw', data: output },
         });
       }
     }
 
-    return result;
+    return result.flat();
   }, [executions, refresh]);
 
   event$.useSubscription(() => setRefresh((it) => it + 1));
 
   const containerHeight = usePageStore((s) => s.containerHeight);
+  const containerWidth = usePageStore((s) => s.containerWidth);
 
-  const [height, setHeight] = useState<number>(100);
+  const [size, setSize] = useSetState({ width: 512, height: 512 });
+  const [gridVisible, setGridVisible] = useState(true);
   useThrottleEffect(
     () => {
-      if (!containerHeight) return;
-      setHeight(containerHeight - (minimalGap ? 52 : 82));
+      if (!containerHeight || !containerWidth) return;
+      setSize({
+        width: containerWidth / 2 - 18,
+        height: containerHeight - 20,
+      });
+      setGridVisible(false);
+      setTimeout(() => setGridVisible(true), 16);
     },
-    [containerHeight, minimalGap],
+    [containerHeight, containerWidth],
     { wait: 64 },
   );
 
   const totalCount = list.length;
+  const itemSize = size.width / 3;
 
   return (
     <Card className={cn('relative', className)}>
-      <CardContent className={cn('-mr-3 p-4', minimalGap && 'p-2')}>
-        <VirtuosoGrid
-          data={list}
-          style={{ height }}
-          totalCount={totalCount}
-          itemContent={VinesExecutionItemContent}
-          components={{
-            // eslint-disable-next-line react/display-name
-            List: forwardRef(
-              ({ children, className, ...props }: GridListProps, ref: React.ForwardedRef<HTMLDivElement>) => (
-                <div ref={ref} className={cn('grid grid-cols-3', className)} {...props}>
-                  {children}
+      <CardContent className="p-0">
+        {gridVisible && (
+          <Grid
+            className="!overflow-x-hidden"
+            height={size.height}
+            width={size.width}
+            columnCount={3}
+            columnWidth={() => itemSize}
+            rowCount={Math.ceil(totalCount / 3)}
+            rowHeight={() => itemSize}
+            itemData={list}
+          >
+            {({ columnIndex, rowIndex, style: { width, ...style }, data }) => {
+              const item = data[rowIndex * 3 + columnIndex];
+              const type = item?.render?.type;
+              if (!item || type === 'empty') return null;
+              return (
+                <div style={{ ...style, width: type === 'raw' ? size.width : width }}>
+                  <VinesExecutionResultItem data={item} height={itemSize - 16} />
                 </div>
-              ),
-            ),
-            Item: ({ children }: GridItemProps) => children,
-          }}
-        />
+              );
+            }}
+          </Grid>
+        )}
 
         <AnimatePresence>
           {!totalCount && (
