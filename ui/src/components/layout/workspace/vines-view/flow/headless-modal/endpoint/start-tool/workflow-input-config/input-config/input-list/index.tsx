@@ -39,7 +39,7 @@ export const WorkflowInputList: React.FC<IWorkflowInputListProps> = ({
   const inputLastIndex = inputLength - 1;
 
   return (
-    <ScrollArea className={className}>
+    <ScrollArea className={className} disabledOverflowMask>
       {inputs.map((it, index) => {
         const { name: variableId, displayName, type, default: defaultData, typeOptions } = it;
         const defaultValueType = typeof defaultData;

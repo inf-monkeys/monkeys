@@ -50,6 +50,7 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
   const enableSelectList = (typeOptions?.enableSelectList ?? false) && selectList.length > 0;
 
   const enableReset = (typeOptions?.enableReset ?? false) && !isUndefined(defValues?.[name]);
+  const singleColumn = typeOptions?.singleColumn ?? false;
 
   return (
     <FormField
@@ -57,7 +58,7 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
       name={name}
       control={form.control}
       render={({ field: { value, onChange, ...field } }) => (
-        <FormItem className={cn('px-3', itemClassName)}>
+        <FormItem className={cn('col-span-2 px-3', singleColumn && 'col-span-1', itemClassName)}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
               <FormLabel className="font-bold">{getI18nContent(displayName)}</FormLabel>
