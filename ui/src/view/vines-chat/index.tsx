@@ -43,7 +43,7 @@ export const VinesChatView: React.FC = () => {
 
   return (
     <div ref={ref} className={cn('relative flex h-full max-h-full p-6', workbenchVisible && 'p-0 pl-4')}>
-      <ChatSidebar id={workflowId} />
+      <ChatSidebar id={workflowId} showDefaultSession />
       <motion.div
         key="vines-view-chat"
         className={cn(

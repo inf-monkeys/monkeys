@@ -38,40 +38,42 @@ export const ChatSession: React.FC<IChatSessionProps> = ({ session, active, onCl
     >
       <MessageSquare size={16} />
       <span className="text-sm">{sessionDisplayName}</span>
-      <div
-        className={cn(
-          'flex flex-1 justify-end opacity-0 transition-opacity group-hover:opacity-100',
-          disableDelete && 'pointer-events-none group-hover:opacity-0',
-        )}
-      >
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              disabled={disableDelete}
-              icon={<Trash2 />}
-              className="-m-1 scale-90"
-              variant="outline"
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                toast(t('workspace.chat-view.sidebar.delete.title', { sessionDisplayName }), {
-                  action: {
-                    label: t('workspace.chat-view.sidebar.delete.action'),
-                    onClick: () =>
-                      toast.promise(trigger, {
-                        loading: t('workspace.chat-view.sidebar.delete.loading'),
-                        success: t('workspace.chat-view.sidebar.delete.success'),
-                        error: t('workspace.chat-view.sidebar.delete.error'),
-                        finally: () => onDeleted?.(),
-                      }),
-                  },
-                });
-              }}
-            />
-          </TooltipTrigger>
-          <TooltipContent>{t('workspace.chat-view.sidebar.delete.label')}</TooltipContent>
-        </Tooltip>
-      </div>
+      {disableDelete && (
+        <div
+          className={cn(
+            'flex flex-1 justify-end opacity-0 transition-opacity group-hover:opacity-100',
+            disableDelete && 'pointer-events-none group-hover:opacity-0',
+          )}
+        >
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                disabled={disableDelete}
+                icon={<Trash2 />}
+                className="-m-1 scale-90"
+                variant="outline"
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toast(t('workspace.chat-view.sidebar.delete.title', { sessionDisplayName }), {
+                    action: {
+                      label: t('workspace.chat-view.sidebar.delete.action'),
+                      onClick: () =>
+                        toast.promise(trigger, {
+                          loading: t('workspace.chat-view.sidebar.delete.loading'),
+                          success: t('workspace.chat-view.sidebar.delete.success'),
+                          error: t('workspace.chat-view.sidebar.delete.error'),
+                          finally: () => onDeleted?.(),
+                        }),
+                    },
+                  });
+                }}
+              />
+            </TooltipTrigger>
+            <TooltipContent>{t('workspace.chat-view.sidebar.delete.label')}</TooltipContent>
+          </Tooltip>
+        </div>
+      )}
     </Card>
   );
 };
