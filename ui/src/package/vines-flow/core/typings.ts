@@ -33,6 +33,7 @@ export interface IVinesFlowRunParams {
   instanceId?: string;
   version?: number;
   debug?: boolean;
+  chatSessionId?: string;
 }
 
 export type VinesWorkflowExecutionType =

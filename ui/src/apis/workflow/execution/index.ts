@@ -16,7 +16,12 @@ import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
 import { IVinesSearchWorkflowExecutionsParams } from '@/schema/workspace/workflow-execution.ts';
 import { IVinesSearchWorkflowExecutionStatParams } from '@/schema/workspace/workflow-execution-stat.ts';
 
-export const executionWorkflow = (workflowId: string, inputData: Record<string, unknown>, version = 1) =>
+export const executionWorkflow = (
+  workflowId: string,
+  inputData: Record<string, unknown>,
+  version = 1,
+  chatSessionId?: string,
+) =>
   vinesFetcher<string>({
     method: 'POST',
     simple: true,
@@ -24,6 +29,7 @@ export const executionWorkflow = (workflowId: string, inputData: Record<string, 
   })(`/api/workflow/executions/${workflowId}/start`, {
     inputData,
     version,
+    ...(chatSessionId && { chatSessionId }),
   });
 
 export const executionWorkflowWithDebug = (
