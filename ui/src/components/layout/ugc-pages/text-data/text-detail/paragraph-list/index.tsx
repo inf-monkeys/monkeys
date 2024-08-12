@@ -91,8 +91,9 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
             }}
           />
           <Button
-            className={cn('scale-80 absolute right-2 -mx-2', isQueryEmpty && '-mx-3')}
+            className={cn('absolute right-2 -mx-2 scale-75', isQueryEmpty && '-mx-3')}
             variant="outline"
+            size="small"
             onClick={() => {
               if (isQueryEmpty) {
                 setForceClearHits(true);
