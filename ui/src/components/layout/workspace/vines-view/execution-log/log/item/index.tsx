@@ -5,6 +5,7 @@ import * as AccordionPrimitive from '@radix-ui/react-accordion';
 import { Copy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { WorkflowTriggerType } from '@/apis/workflow/trigger/typings.ts';
 import { getDescOfTriggerType } from '@/apis/workflow/trigger/utils.ts';
 import { VinesActuator } from '@/components/layout/workspace/vines-view/execution/actuator';
 import { EXECUTION_STATUS_LIST } from '@/components/layout/workspace/vines-view/execution-log/log/filter/consts.ts';
@@ -74,7 +75,7 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
                       {getI18nContent(workflowDefinition.displayName)}
                       <WorkflowVersionTag version={workflowExecution.workflowDefinition?.version ?? 1} />
                       <Tag size="xs" color="tertiary">
-                        {getDescOfTriggerType(workflowExecution.triggerType)}
+                        {getDescOfTriggerType(workflowExecution?.triggerType ?? WorkflowTriggerType.MANUAL)}
                       </Tag>
                     </div>
                     <div className="flex items-center gap-2">
