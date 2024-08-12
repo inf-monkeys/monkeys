@@ -5,6 +5,7 @@ import { EmptyInput } from '@/components/layout/workspace/vines-view/chat/workfl
 import { FormInput } from '@/components/layout/workspace/vines-view/chat/workflow-mode/chat-input/form.tsx';
 import { VinesChatList } from '@/components/layout/workspace/vines-view/chat/workflow-mode/messages';
 import { Separator } from '@/components/ui/separator.tsx';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
 import { useViewStore } from '@/store/useViewStore';
@@ -20,7 +21,10 @@ export const VinesWorkflowMode: React.FC<IVinesWorkflowModeProps> = ({ height, d
 
   const { vines } = useVinesFlow();
 
-  const handleExecutionWorkflow = (inputData: Record<string, any> = {}) => vines.start({ inputData });
+  const [sessions] = useLocalStorage<Record<string, string>>('vines-ui-chat-session', {});
+
+  const handleExecutionWorkflow = (inputData: Record<string, any> = {}) =>
+    vines.start({ inputData, chatSessionId: sessions[workflowId] });
 
   const workflowInput = vines.workflowInput;
   const workflowInputLength = workflowInput.length;
