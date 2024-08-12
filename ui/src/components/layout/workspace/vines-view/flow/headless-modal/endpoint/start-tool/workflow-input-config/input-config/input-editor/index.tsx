@@ -89,6 +89,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       selectList: get(currentVariable, 'typeOptions.selectList', []),
       foldUp: get(currentVariable, 'typeOptions.foldUp', false),
       enableReset: get(currentVariable, 'typeOptions.enableReset', false),
+      singleColumn: get(currentVariable, 'typeOptions.singleColumn', false),
     };
 
     form.reset(defaultValues);
@@ -108,6 +109,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       enableSelectList,
       foldUp,
       enableReset,
+      singleColumn,
     } = pick(data, [
       'multipleValues',
       'assetType',
@@ -121,6 +123,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       'selectList',
       'foldUp',
       'enableReset',
+      'singleColumn',
     ]);
 
     const finalVariable = omit(data, [
@@ -136,6 +139,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       'selectList',
       'foldUp',
       'enableReset',
+      'singleColumn',
     ]);
 
     const setOption = (key: string, value: unknown) => {
@@ -155,6 +159,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
     setOption('selectList', selectList);
     setOption('foldUp', foldUp);
     setOption('enableReset', enableReset);
+    setOption('singleColumn', singleColumn);
 
     if (Default) {
       set(finalVariable, 'default', Default);

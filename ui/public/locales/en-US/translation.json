@@ -2410,6 +2410,10 @@
                 "enable-reset": {
                   "label": "Enable the Reset button"
                 },
+                "single-column": {
+                  "label": "Single column display",
+                  "desc": "When enabled, it will form a double column with the adjacent single column"
+                },
                 "fold": "Advanced Configuration",
                 "reset": "Reset"
               },

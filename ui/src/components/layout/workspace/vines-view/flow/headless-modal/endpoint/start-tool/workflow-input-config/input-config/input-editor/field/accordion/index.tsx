@@ -8,6 +8,7 @@ import { FieldDesc } from '@/components/layout/workspace/vines-view/flow/headles
 import { FieldEnableReset } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion/enable-reset.tsx';
 import { FieldFoldUp } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion/fold-up.tsx';
 import { FieldName } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion/name.tsx';
+import { FieldSingleColumn } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion/single-column.tsx';
 import { FieldTips } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion/tips.tsx';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx';
 import { IWorkflowInput } from '@/schema/workspace/workflow-input.ts';
@@ -32,6 +33,7 @@ export const FieldAccordion: React.FC<IFieldAccordionProps> = ({ form }) => {
           <FieldName form={form} />
           <FieldFoldUp form={form} />
           <FieldEnableReset form={form} />
+          <FieldSingleColumn form={form} />
         </AccordionContent>
       </AccordionItem>
     </Accordion>

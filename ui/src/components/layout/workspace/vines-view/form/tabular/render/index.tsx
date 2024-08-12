@@ -107,6 +107,10 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
     [inputs],
   );
 
+  const isInputsNeedCol2 = defInputs?.length === 2 && defInputs?.some((it) => it?.typeOptions?.singleColumn ?? false);
+  const isFoldInputsNeedCol2 =
+    foldInputs?.length === 2 && foldInputs?.some((it) => it?.typeOptions?.singleColumn ?? false);
+
   const hasFoldInputs = foldInputs?.length > 0;
   const isFormEmpty = !defInputs?.length && !hasFoldInputs;
 
@@ -132,7 +136,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
           )}
         </AnimatePresence>
         <ScrollArea className={scrollAreaClassName} style={{ height }}>
-          <div className={cn('flex flex-col gap-4', formClassName)}>
+          <div className={cn('grid gap-4', isInputsNeedCol2 && 'grid-cols-2', formClassName)}>
             {defInputs?.map((it, i) => (
               <VinesFormFieldItem
                 it={it}
@@ -144,13 +148,13 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
               />
             ))}
             {hasFoldInputs && (
-              <Accordion type="single" collapsible>
+              <Accordion className="col-span-2" type="single" collapsible>
                 <AccordionItem value="more">
                   <AccordionTrigger className="justify-start gap-2 px-3 text-sm [&[data-state=open]_.chevron]:rotate-90">
                     {t('workspace.flow-view.endpoint.start-tool.input.config-form.type-options.fold')}
                     <ChevronRightIcon className="chevron size-4 shrink-0 text-muted-foreground transition-transform duration-200" />
                   </AccordionTrigger>
-                  <AccordionContent className="pt-6">
+                  <AccordionContent className={cn('grid gap-4 pt-6', isFoldInputsNeedCol2 && 'grid-cols-2')}>
                     {foldInputs?.map((it, i) => (
                       <VinesFormFieldItem
                         it={it}
