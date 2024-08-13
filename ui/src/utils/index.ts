@@ -13,10 +13,14 @@ export const cloneDeep = rfdc();
 export const nanoIdLowerCase = customAlphabet('6789bcdfghjkmnpqrtwz', 8);
 export const nanoIdUpperCase = customAlphabet('6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz', 8);
 
+const I18N_MAPPER = {
+  en: 'en-US',
+  zh: 'zh-CN',
+};
 export const getI18nContent = (content: string | I18nValue | null | undefined): string | undefined => {
   if (!content) return;
   if (typeof content === 'string') return content;
-  return content[i18n.language] ?? content['en-US'];
+  return content[I18N_MAPPER[i18n.language] ?? 'en-US'] ?? content['en-US'];
 };
 
 export const I18nAllContent = (content: string | I18nValue | undefined): string | undefined => {

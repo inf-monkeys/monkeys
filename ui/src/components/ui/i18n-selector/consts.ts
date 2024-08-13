@@ -1,6 +1,6 @@
 export enum LANGUAGES {
-  'en-US' = 'English',
-  'zh-CN' = '简体中文',
+  'en' = 'English',
+  'zh' = '简体中文',
 }
 
 export const LANGUAGES_LIST = Object.entries(LANGUAGES);
