@@ -19,7 +19,7 @@ import VinesEvent from '@/utils/events.ts';
 
 interface IWorkspaceShareViewProps extends React.ComponentPropsWithoutRef<'div'> {}
 
-export const WorkspaceShareView: React.FC<IWorkspaceShareViewProps> = ({ children }) => {
+export const WorkspaceShareView: React.FC<IWorkspaceShareViewProps> = () => {
   const { t } = useTranslation();
 
   const { teamId, workflowId, pageId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });

@@ -19,7 +19,7 @@ import { Separator } from '@/components/ui/separator.tsx';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
-import { VINEs_IFRAME_PAGE_TYPE2ID_MAPPER, VINES_IFRAME_PAGE_TYPES } from '@/components/ui/vines-iframe/consts.ts';
+import { VINES_IFRAME_PAGE_TYPE2ID_MAPPER, VINES_IFRAME_PAGE_TYPES } from '@/components/ui/vines-iframe/consts.ts';
 import { useCopy } from '@/hooks/use-copy.ts';
 
 interface IShareViewProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -53,7 +53,7 @@ export const ShareView: React.FC<IShareViewProps> = () => {
             icon: EMOJI2LUCIDE_MAPPER[instance?.icon] ?? instance?.icon ?? '🍀',
             iframeUrl: `${workspacePrefix}/${id}/view-iframe`,
             ...(VINES_IFRAME_PAGE_TYPES.includes(type) && {
-              viewUrl: `${workspacePrefix}/${VINEs_IFRAME_PAGE_TYPE2ID_MAPPER[type] || `view-${type}`}`,
+              viewUrl: `${workspacePrefix}/${VINES_IFRAME_PAGE_TYPE2ID_MAPPER[type] || `view-${type}`}`,
             }),
           },
         ],

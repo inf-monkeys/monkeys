@@ -28,10 +28,7 @@ interface IWorkbenchNormalModeSidebarProps extends React.ComponentPropsWithoutRe
   setGroupId: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarProps> = ({
-  groupId,
-  setGroupId,
-}) => {
+export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarProps> = ({ groupId, setGroupId }) => {
   const { t } = useTranslation();
 
   const { teamId } = useVinesTeam();

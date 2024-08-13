@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 
 import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
+import useUrlState from '@/hooks/use-url-state.ts';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
@@ -35,6 +36,8 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
   const { mutate } = useSWRConfig();
   const { t } = useTranslation();
 
+  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
+
   const containerHeight = usePageStore((s) => s.containerHeight);
   const setCanvasMode = useCanvasStore((s) => s.setCanvasMode);
 
@@ -55,7 +58,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
         <TabularRender
           formClassName={cn(minimalGap && 'gap-0')}
           inputs={vines.workflowInput}
-          height={containerHeight - 115 - (isMiniFrame ? 64 : 0)}
+          height={containerHeight - 115 - (isMiniFrame ? 64 : 0) - (mode === 'fast' ? 30 : 0)}
           onSubmit={(inputData) => {
             vines.start({ inputData }).then((status) => {
               if (status) {
@@ -108,7 +111,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
           className="size-full"
           onClick={() => submitButton.current?.click()}
           disabled={openAIInterfaceEnabled}
-          icon={<Sparkles className="fill-slate-1" />}
+          icon={<Sparkles className="fill-white" />}
         >
           {t(
             openAIInterfaceEnabled

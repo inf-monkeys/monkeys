@@ -45,7 +45,7 @@ export const VinesForm: React.FC<IVinesFormProps> = () => {
       >
         <VinesTabular
           className={cn(
-            isMiniFrame && 'absolute z-20 size-full bg-slate-3 p-2 pb-1 transition-opacity',
+            isMiniFrame && 'absolute z-20 size-full bg-slate-1 p-4 transition-opacity',
             isMiniFrame && historyVisible && 'pointer-events-none opacity-0',
             vinesIFrameVisible && !isMiniFrame && 'pr-4',
           )}
@@ -55,7 +55,7 @@ export const VinesForm: React.FC<IVinesFormProps> = () => {
           minimalGap={vinesIFrameVisible}
         />
 
-        <VinesExecutionResult event$={event$} miniGap={vinesIFrameVisible} />
+        <VinesExecutionResult event$={event$} miniGap={isMiniFrame} workbenchGap={workbenchVisible} />
       </div>
       {openAIInterfaceEnabled && (
         <div className="vines-center absolute inset-1 size-full flex-col gap-4 backdrop-blur">
