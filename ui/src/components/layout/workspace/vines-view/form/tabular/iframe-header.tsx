@@ -12,6 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Separator } from '@/components/ui/separator.tsx';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import useUrlState from '@/hooks/use-url-state.ts';
 import { getI18nContent } from '@/utils';
 
 interface IIframeHeaderProps {
@@ -26,6 +27,12 @@ export const IframeHeader: React.FC<IIframeHeaderProps> = ({ historyVisible, set
 
   const [page] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
 
+  const [{ hidden: routeHidden }] = useUrlState<{ hidden?: string }>();
+  const hidden = (routeHidden?.toString() ?? '')?.split(',');
+
+  const moreBtnVisible = !hidden.includes('form-header-more-btn');
+  const historyBtnVisible = !hidden.includes('form-header-history-btn');
+
   const workflow = page?.workflow ?? data;
 
   return (
@@ -34,30 +41,34 @@ export const IframeHeader: React.FC<IIframeHeaderProps> = ({ historyVisible, set
         <div className="flex items-center gap-2.5">
           <VinesIcon size="sm">{workflow?.iconUrl || 'emoji:🍀:#ceefc5'}</VinesIcon>
           <div className="flex flex-col gap-0.5">
-            <h1 className="font-bold text-sm leading-tight">{getI18nContent(workflow?.displayName)}</h1>
+            <h1 className="text-sm font-bold leading-tight">{getI18nContent(workflow?.displayName)}</h1>
             {workflow?.description && <span className="text-xxs">{getI18nContent(workflow?.description)}</span>}
           </div>
         </div>
         <div className="flex space-x-2">
-          <Button onClick={() => setHistoryVisible(!historyVisible)} variant="outline" size="small">
-            {t('workspace.pre-view.actuator.frame.history', {
-              status: historyVisible ? t('workspace.pre-view.actuator.frame.close') : '',
-            })}
-          </Button>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button icon={<CircleEllipsisIcon />} variant="outline" size="small" className="!py-0" />
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-2" align="end">
-              <div className="flex items-center gap-2">
-                <VinesDarkMode />
-                <I18nSelector />
-              </div>
-            </PopoverContent>
-          </Popover>
+          {historyBtnVisible && (
+            <Button onClick={() => setHistoryVisible(!historyVisible)} variant="outline" size="small">
+              {t('workspace.pre-view.actuator.frame.history', {
+                status: historyVisible ? t('workspace.pre-view.actuator.frame.close') : '',
+              })}
+            </Button>
+          )}
+          {moreBtnVisible && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button icon={<CircleEllipsisIcon />} variant="outline" size="small" className="!py-0" />
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-2" align="end">
+                <div className="flex items-center gap-2">
+                  <VinesDarkMode />
+                  <I18nSelector />
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
         </div>
       </header>
-      <div className="px-2">
+      <div className="px-2 pt-2">
         <Separator orientation="horizontal" />
       </div>
     </>

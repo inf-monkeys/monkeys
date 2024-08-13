@@ -1,10 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { createFileRoute } from '@tanstack/react-router';
 
 import { WorkbenchSidebar } from '@/components/layout/workbench/sidebar';
 import { WorkbenchView } from '@/components/layout/workbench/view';
-import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { usePageStore } from '@/store/usePageStore';
@@ -15,9 +14,8 @@ export const Workbench: React.FC = () => {
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
 
   useEffect(() => {
-    setTimeout(()=> setWorkbenchVisible(true), 80)
+    setTimeout(() => setWorkbenchVisible(true), 80);
   }, []);
-
 
   const [groupId, setGroupId] = useState<string>('default');
 

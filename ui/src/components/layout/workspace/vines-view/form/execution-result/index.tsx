@@ -20,6 +20,7 @@ import { Card, CardContent } from '@/components/ui/card.tsx';
 import { JSONValue } from '@/components/ui/code-editor';
 import { Label } from '@/components/ui/label.tsx';
 import { VinesLoading } from '@/components/ui/loading';
+import useUrlState from '@/hooks/use-url-state.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
 import { useViewStore } from '@/store/useViewStore';
@@ -35,9 +36,15 @@ const EMPTY_ITEM: IVinesExecutionResultItem = {
 interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {
   event$: EventEmitter<void>;
   miniGap?: boolean;
+  workbenchGap?: boolean;
 }
 
-export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ className, event$, miniGap }) => {
+export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
+  className,
+  event$,
+  miniGap,
+  workbenchGap,
+}) => {
   const { t } = useTranslation();
 
   const visible = useViewStore((s) => s.visible);
@@ -142,6 +149,8 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
 
   event$.useSubscription(() => setRefresh((it) => it + 1));
 
+  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
+
   const containerHeight = usePageStore((s) => s.containerHeight);
   const containerWidth = usePageStore((s) => s.containerWidth);
 
@@ -151,13 +160,13 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
     () => {
       if (!containerHeight || !containerWidth) return;
       setSize({
-        width: containerWidth / 2 - 18,
-        height: containerHeight - (miniGap ? 20 : 50),
+        width: miniGap ? containerWidth - 25 : containerWidth / 2 - (mode === 'fast' ? 140 : 18),
+        height: containerHeight - (workbenchGap ? (mode === 'fast' ? 72 : 32) : miniGap ? 84 : 50),
       });
       setGridVisible(false);
       setTimeout(() => setGridVisible(true), 16);
     },
-    [containerHeight, containerWidth, miniGap],
+    [containerHeight, containerWidth, miniGap, workbenchGap, mode],
     { wait: 64 },
   );
 

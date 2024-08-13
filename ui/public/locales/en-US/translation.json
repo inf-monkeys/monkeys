@@ -2914,7 +2914,18 @@
       "back-to-bottom": "Back to bottom"
     },
     "form-view": {
-      "not-support": "THE FORM VIEW DOES NOT SUPPORT THIS WORKFLOW"
+      "not-support": "THE FORM VIEW DOES NOT SUPPORT THIS WORKFLOW",
+      "quick-toolbar": {
+        "more": "More operations",
+        "reset": "Restore default parameters",
+        "restore-previous-param": {
+          "label": "Restore last generated parameters",
+          "loading": "Restoring last generated parameters...",
+          "success": "Parameters restored",
+          "prev-param-empty": "No historical operation records",
+          "error": "Failed to restore last generated parameters"
+        }
+      }
     }
   },
   "agent": {
