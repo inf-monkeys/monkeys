@@ -15,11 +15,10 @@ interface IExecutionStatusIconProps {
   size?: number;
   status: VinesNodeExecutionTask['status'] | string;
   workflowStatus: VinesWorkflowExecutionType | string;
-  spinClassName?: string;
 }
 
 export const ExecutionStatusIcon: React.FC<IExecutionStatusIconProps> = memo(
-  ({ className, status = '', workflowStatus, size = 20, spinClassName }) => {
+  ({ className, status = '', workflowStatus, size = 20 }) => {
     return (
       <Tooltip>
         <TooltipTrigger asChild>
@@ -34,7 +33,7 @@ export const ExecutionStatusIcon: React.FC<IExecutionStatusIconProps> = memo(
                   className="flex"
                   style={{ width: size, height: size }}
                 >
-                  <VinesLoading />
+                  <VinesLoading size="sm" />
                 </motion.div>
               ) : status === 'COMPLETED' ? (
                 <motion.div

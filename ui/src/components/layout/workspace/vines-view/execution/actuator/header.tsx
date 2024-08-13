@@ -25,12 +25,7 @@ export const ActuatorHeader: React.FC<IActuatorHeaderProps> = ({ instanceId, wor
 
   return (
     <header className="flex w-full items-center gap-4 pl-2">
-      <ExecutionStatusIcon
-        size={45}
-        workflowStatus={workflowStatus as string}
-        status={workflowStatus as string}
-        spinClassName="scale-90 -ml-0"
-      />
+      <ExecutionStatusIcon size={45} workflowStatus={workflowStatus as string} status={workflowStatus as string} />
       <div>
         <h1 className="text-base font-bold">{t([`workspace.pre-view.actuator.execution.status.${status}`, status])}</h1>
         <div className="flex items-center gap-2">
