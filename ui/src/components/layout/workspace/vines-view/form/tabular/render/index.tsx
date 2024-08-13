@@ -2,12 +2,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useLatest } from 'ahooks';
+import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { AnimatePresence, motion } from 'framer-motion';
-import { fromPairs, groupBy, isArray } from 'lodash';
+import { fromPairs, groupBy, isArray, omit } from 'lodash';
 import { ChevronRightIcon, Workflow } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
+import { useMutationSearchWorkflowExecutions } from '@/apis/workflow/execution';
 import { VinesFormFieldItem } from '@/components/layout/workspace/vines-view/form/tabular/render/item.tsx';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx';
 import { Form } from '@/components/ui/form.tsx';
@@ -15,9 +19,12 @@ import { Label } from '@/components/ui/label.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
+import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
 
 export const BOOLEAN_VALUES = ['true', 'yes', '是', '1'];
+
+export type TTabularEvent = 'reset' | 'restore-previous-param';
 
 interface ITabularRenderProps {
   inputs: VinesWorkflowVariable[];
@@ -30,6 +37,8 @@ interface ITabularRenderProps {
   itemClassName?: string;
 
   miniMode?: boolean;
+
+  event$?: EventEmitter<TTabularEvent>;
 }
 
 export const TabularRender: React.FC<ITabularRenderProps> = ({
@@ -43,6 +52,8 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
   itemClassName,
 
   miniMode = false,
+
+  event$,
 }) => {
   const { t } = useTranslation();
 
@@ -87,6 +98,41 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
     form.reset(defaultValues);
   }, [inputs]);
 
+  const { trigger: triggerGetExecutions } = useMutationSearchWorkflowExecutions();
+
+  const workflowId = useFlowStore((s) => s.workflowId);
+
+  const latestValues = useLatest(defValues);
+  event$?.useSubscription((event) => {
+    switch (event) {
+      case 'reset':
+        form.reset(latestValues.current);
+        break;
+      case 'restore-previous-param':
+        toast.promise(
+          triggerGetExecutions({
+            pagination: { page: 1, limit: 10 },
+            orderBy: { filed: 'startTime', order: 'DESC' },
+            workflowId,
+          }),
+          {
+            loading: t('workspace.form-view.quick-toolbar.restore-previous-param.loading'),
+            success: (data) => {
+              if (data) {
+                form.reset(omit(data?.data?.[0]?.input, '__context'));
+                return t('workspace.form-view.quick-toolbar.restore-previous-param.success');
+              }
+              return t('workspace.form-view.quick-toolbar.restore-previous-param.prev-param-empty');
+            },
+            error: t('workspace.form-view.quick-toolbar.restore-previous-param.error'),
+          },
+        );
+        break;
+      default:
+        break;
+    }
+  });
+
   const handleSubmit = form.handleSubmit((data) => {
     for (const [key, value] of Object.entries(data)) {
       if (isArray(value)) {
@@ -106,10 +152,6 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
       >,
     [inputs],
   );
-
-  const isInputsNeedCol2 = defInputs?.length === 2 && defInputs?.some((it) => it?.typeOptions?.singleColumn ?? false);
-  const isFoldInputsNeedCol2 =
-    foldInputs?.length === 2 && foldInputs?.some((it) => it?.typeOptions?.singleColumn ?? false);
 
   const hasFoldInputs = foldInputs?.length > 0;
   const isFormEmpty = !defInputs?.length && !hasFoldInputs;
@@ -136,7 +178,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
           )}
         </AnimatePresence>
         <ScrollArea className={scrollAreaClassName} style={{ height }}>
-          <div className={cn('grid gap-4', isInputsNeedCol2 && 'grid-cols-2', formClassName)}>
+          <div className={cn('grid grid-cols-2 items-start gap-4', formClassName)}>
             {defInputs?.map((it, i) => (
               <VinesFormFieldItem
                 it={it}
@@ -154,7 +196,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
                     {t('workspace.flow-view.endpoint.start-tool.input.config-form.type-options.fold')}
                     <ChevronRightIcon className="chevron size-4 shrink-0 text-muted-foreground transition-transform duration-200" />
                   </AccordionTrigger>
-                  <AccordionContent className={cn('grid gap-4 pt-6', isFoldInputsNeedCol2 && 'grid-cols-2')}>
+                  <AccordionContent className="grid grid-cols-2 gap-4 pt-6">
                     {foldInputs?.map((it, i) => (
                       <VinesFormFieldItem
                         it={it}
