@@ -2900,7 +2900,19 @@
       "back-to-bottom": "回到底部"
     },
     "form-view": {
-      "not-support": "该工作流不支持表单视图"
+      "not-support": "该工作流不支持表单视图",
+      "quick-toolbar": {
+        "more": "更多操作",
+
+        "reset": "恢复默认参数",
+        "restore-previous-param": {
+          "label": "恢复上次生成参数",
+          "loading": "正在恢复上次生成参数...",
+          "success": "参数已恢复",
+          "prev-param-empty": "暂无历史运行记录",
+          "error": "恢复上次生成参数失败"
+        }
+      }
     }
   },
   "agent": {

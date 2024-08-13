@@ -6,11 +6,12 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 
 interface IEmptyInputProps {
+  loading: boolean;
   disabled: boolean;
   onClick: () => void;
 }
 
-export const EmptyInput: React.FC<IEmptyInputProps> = ({ disabled, onClick }) => {
+export const EmptyInput: React.FC<IEmptyInputProps> = ({ disabled, onClick, loading }) => {
   const { t } = useTranslation();
 
   return (
@@ -22,7 +23,7 @@ export const EmptyInput: React.FC<IEmptyInputProps> = ({ disabled, onClick }) =>
             : t('workspace.chat-view.workflow-mode.empty-input.completed')}
         </p>
       </div>
-      <Button disabled={disabled} variant="outline" icon={<Play />} onClick={() => onClick()} loading={disabled}>
+      <Button disabled={disabled} variant="outline" icon={<Play />} onClick={() => onClick()} loading={loading}>
         {t('workspace.chat-view.workflow-mode.execution')}
       </Button>
     </div>
