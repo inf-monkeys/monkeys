@@ -63,7 +63,7 @@ export const VinesStartNode: React.FC<IVinesStartNodeProps> = ({ isMiniNode, can
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <VinesIcon src={triggerType?.icon ?? icon} size="2xl" backgroundColor="#fff" />
+            <VinesIcon src={triggerType?.icon ?? icon} size="2xl" backgroundColor="#fff" disabledPreview />
           </motion.div>
         )}
       </div>

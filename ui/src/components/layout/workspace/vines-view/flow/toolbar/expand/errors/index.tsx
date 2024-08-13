@@ -86,7 +86,7 @@ export const VinesExpandToolErrors: React.FC<IVinesExpandToolErrorsProps> = ({ d
           <div className="flex w-full max-w-64 flex-col gap-1 rounded-md bg-muted p-2" key={i}>
             <div className="flex items-center justify-between gap-8">
               <div className="flex min-w-36 items-center gap-2">
-                <VinesIcon src={nodeIcon} size="xs" />
+                <VinesIcon src={nodeIcon} size="xs" disabledPreview />
                 <p className="line-clamp-1 max-w-24 text-sm font-bold leading-tight">{nodeName}</p>
               </div>
               <Tooltip>

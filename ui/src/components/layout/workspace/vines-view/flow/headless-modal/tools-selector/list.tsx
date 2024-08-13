@@ -52,7 +52,7 @@ export const ToolLists: React.FC<IToolListsProps> = ({ list, length, category, o
               >
                 <div className="relative flex h-12 w-12 flex-shrink-0 items-end justify-end overflow-hidden rounded-lg border-input shadow-md">
                   <div className="absolute">
-                    <VinesIcon className="size-full" size="lg" src={tool.icon} />
+                    <VinesIcon className="size-full" size="lg" src={tool.icon} disabledPreview />
                   </div>
                   {category === 'block' && (
                     <div className="z-20 translate-x-[0.5px] translate-y-[0.5px] scale-90 rounded-lg rounded-bl-none rounded-tr-none bg-white bg-opacity-45 p-1 opacity-80">

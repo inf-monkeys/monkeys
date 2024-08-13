@@ -26,7 +26,7 @@ export const ComplicateFakeNode: React.FC<IComplicateFakeNodeProps> = ({ insertF
       className="flex h-full w-full cursor-pointer flex-col items-center justify-center gap-4"
       onClick={handleOnClick}
     >
-      <VinesIcon src="emoji:⛔:#35363b" size="xl" />
+      <VinesIcon src="emoji:⛔:#35363b" size="xl" disabledPreview />
       <h1 className="font-bold">{t('workspace.flow-view.vines.tools.fake.name')}</h1>
     </div>
   );
