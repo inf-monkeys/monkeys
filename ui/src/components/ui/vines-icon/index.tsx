@@ -5,6 +5,7 @@ import { isUndefined } from 'lodash';
 import emojiRenderer from 'react-easy-emoji';
 import isURL from 'validator/es/lib/isURL';
 
+import { VinesImage } from '@/components/ui/image';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { splitEmojiLink } from '@/components/ui/vines-icon/utils.ts';
 import { cn } from '@/utils';
@@ -17,6 +18,7 @@ interface IVinesIconProps extends React.ComponentPropsWithoutRef<'div'> {
   backgroundColor?: string;
   size?: IVinesIconSize;
   alt?: string;
+  disabledPreview?: boolean;
 }
 
 export const VinesIcon: React.FC<IVinesIconProps> = ({
@@ -26,6 +28,7 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
   preClassName,
   children,
   alt,
+  disabledPreview,
 }) => {
   const src = (propSrc ?? children ?? '').toString().trim();
 
@@ -61,7 +64,7 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
         <div className="h-full w-full" />
       ) : (
         <div className="flex h-full w-full items-center justify-center" style={{ backgroundColor }}>
-          {iconType === 'img' && <img src={src} alt={alt} />}
+          {iconType === 'img' && <VinesImage src={src} alt={alt} disabled={disabledPreview} />}
           {iconType === 'emoji' && emojiRenderer(text, { protocol: 'https', ext: '.png' })}
           {iconType === 'lucide' && (
             <VinesLucideIcon

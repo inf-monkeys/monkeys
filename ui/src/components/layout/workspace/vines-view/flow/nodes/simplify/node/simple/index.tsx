@@ -76,7 +76,7 @@ export const VinesSimpleNode: React.FC<IVinesSimpleNodeProps> = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <VinesIcon src={icon} size="2xl" backgroundColor="#fff" />
+              <VinesIcon src={icon} size="2xl" backgroundColor="#fff" disabledPreview />
             </motion.div>
           )}
         </div>

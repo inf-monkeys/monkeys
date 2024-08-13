@@ -301,6 +301,15 @@
         "more": "+ {{count}} more",
         "expand": "Expand",
         "collapse": "Collapse"
+      },
+      "image-preview": {
+        "close": "Close",
+        "flipX": "Flip horizontally",
+        "flipY": "Flip vertically",
+        "rotateLeft": "Rotate counterclockwise",
+        "rotateRight": "Rotate clockwise",
+        "zoomIn": "Zoom in",
+        "zoomOut": "Zoom out"
       }
     },
     "layout": {

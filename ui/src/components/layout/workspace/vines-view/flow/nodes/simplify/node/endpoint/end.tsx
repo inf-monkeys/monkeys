@@ -27,7 +27,7 @@ export const VinesEndNode: React.FC<IVinesEndNodeProps> = ({ isMiniNode, canvasM
       onClick={() => VinesEvent.emit('flow-end-tool', workflowId)}
       onContextMenu={() => VinesEvent.emit('flow-end-tool', workflowId)}
     >
-      <VinesIcon src="🏁" size="2xl" backgroundColor="#fff" />
+      <VinesIcon src="🏁" size="2xl" backgroundColor="#fff" disabledPreview />
     </div>
   );
 };

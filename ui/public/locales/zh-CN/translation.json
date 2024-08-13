@@ -288,6 +288,15 @@
         "more": "+ {{count}} 选项",
         "expand": "展开",
         "collapse": "收起"
+      },
+      "image-preview": {
+        "close": "关闭",
+        "flipX": "水平翻转",
+        "flipY": "垂直翻转",
+        "rotateLeft": "逆时针旋转",
+        "rotateRight": "顺时针旋转",
+        "zoomIn": "放大",
+        "zoomOut": "缩小"
       }
     },
     "layout": {

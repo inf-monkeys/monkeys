@@ -76,7 +76,7 @@ export const Trigger: React.FC<ITriggerProps> = ({ trigger, workflowVersion, wor
     <Card className="relative">
       <CardHeader className="relative pl-20">
         <div className="absolute left-0 top-0 flex size-full items-center justify-between px-6">
-          <VinesIcon src={icon} size="md" />
+          <VinesIcon src={icon} size="md" disabledPreview />
           <Switch disabled={!isLatestWorkflowVersion} checked={enabled} onCheckedChange={handleEnableChange} />
         </div>
         <CardTitle>{displayName}</CardTitle>

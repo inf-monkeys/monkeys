@@ -38,7 +38,9 @@ export const NodeCustomEditor: React.FC<INodeCustomEditorProps> = ({ node }) => 
         <PopoverTrigger asChild>
           <TooltipTrigger asChild>
             <div className="flex cursor-pointer items-center gap-4 rounded-md p-2 transition-all hover:bg-gray-2 hover:shadow">
-              <VinesIcon size="lg">{icon}</VinesIcon>
+              <VinesIcon size="lg" disabledPreview>
+                {icon}
+              </VinesIcon>
               <div className="flex flex-col gap-1 leading-5">
                 <div className="flex items-center gap-2">
                   <div className="flex items-end gap-2">
