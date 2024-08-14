@@ -237,13 +237,23 @@
             "waiting-for-uploading": "等待操作上传",
             "upload-successful": "上传成功",
             "waiting-for-uploading-description": "（点此上传）",
+            "count": "共 {{count}} 个文件",
             "status": {
               "upload": "上传",
               "calculate": "计算",
               "hint": "正在{{operate}}文件"
             }
+          },
+          "item-status": {
+            "wait": "等待中",
+            "busy": "正在处理中",
+            "error": "发生错误",
+            "wait-to-update": "等待上传",
+            "uploading": "上传中",
+            "success": "文件已上传"
           }
-        }
+        },
+        "remove": "移除"
       },
       "vines-variable-editor": {
         "cannot-parse-toast": "VinesVariableEditor 无法解析文本！"
@@ -296,7 +306,9 @@
         "rotateLeft": "逆时针旋转",
         "rotateRight": "顺时针旋转",
         "zoomIn": "放大",
-        "zoomOut": "缩小"
+        "zoomOut": "缩小",
+        "left": "上一个",
+        "right": "下一个"
       }
     },
     "layout": {

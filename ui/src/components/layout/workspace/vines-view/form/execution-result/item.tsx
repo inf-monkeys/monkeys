@@ -2,13 +2,14 @@ import React from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { omit } from 'lodash';
+import { Eye } from 'lucide-react';
+import Image from 'rc-image';
 import { useTranslation } from 'react-i18next';
 
 import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/execution/data-display/abstract';
 import { VinesAbstractVideo } from '@/components/layout/workspace/vines-view/execution/data-display/abstract/node/video.tsx';
 import { CodeEditor, JSONValue } from '@/components/ui/code-editor';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { VinesImage } from '@/components/ui/image';
 import { VinesLoading } from '@/components/ui/loading';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -40,10 +41,14 @@ export const VinesExecutionResultItem: React.FC<IVinesExecutionResultItemProps> 
   return type === 'image' ? (
     <div className="box-border flex-none content-stretch p-3">
       <div className="vines-center overflow-hidden rounded-lg" style={{ height }}>
-        <VinesImage
+        <Image
           src={renderData as string}
           alt="image"
           className="aspect-square size-full transform rounded-lg border border-input object-cover object-center shadow-sm"
+          loading="lazy"
+          preview={{
+            mask: <Eye className="stroke-white" />,
+          }}
         />
       </div>
     </div>

@@ -158,6 +158,7 @@ $background-color: #f3f3f3;
 
   &-progress {
     margin-bottom: 20px;
+    @apply text-white;
   }
 
   &-operations {
@@ -194,7 +195,7 @@ $background-color: #f3f3f3;
     color: $text-color;
     &-disabled {
       background: fade($text-color, 30%);
-      @apply opacity-70;
+      @apply opacity-50 pointer-events-none;
       cursor: not-allowed;
       > .anticon {
         cursor: not-allowed;
@@ -222,7 +223,7 @@ $background-color: #f3f3f3;
     color: $text-color;
     &-disabled {
       background: fade($text-color, 20%);
-      @apply opacity-70;
+      @apply opacity-50 pointer-events-none;
       cursor: not-allowed;
       > .anticon {
         cursor: not-allowed;
