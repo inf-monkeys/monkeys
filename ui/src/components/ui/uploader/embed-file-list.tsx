@@ -15,9 +15,9 @@ import { Label } from '@/components/ui/label.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { IFile } from '@/components/ui/updater/file-list.tsx';
-import { useVinesUpdaterManage } from '@/components/ui/updater/use-vines-updater-manage.ts';
-import { coverFileSize } from '@/components/ui/updater/utils.ts';
+import { IFile } from '@/components/ui/uploader/file-list.tsx';
+import { useVinesUploaderManage } from '@/components/ui/uploader/use-vines-uploader-manage.ts';
+import { coverFileSize } from '@/components/ui/uploader/utils.ts';
 import { cn } from '@/utils';
 
 interface IEmbedFileListProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -52,7 +52,7 @@ export const EmbedFileList: React.FC<IEmbedFileListProps> = ({
 
   const [list, setList] = useState<IFile[]>([]);
 
-  const { validList, hasFile, isWaitToUpload, handleOnClickUpload } = useVinesUpdaterManage({
+  const { validList, hasFile, isWaitToUpload, handleOnClickUpload } = useVinesUploaderManage({
     files,
     list,
     setList,
@@ -100,7 +100,7 @@ export const EmbedFileList: React.FC<IEmbedFileListProps> = ({
           }}
         >
           <motion.div
-            key="vines-updater-embed-file-list"
+            key="vines-uploader-embed-file-list"
             className={cn(
               'grid grid-cols-1 items-center gap-2',
               previewLength > 1 ? (previewLength > 2 ? 'grid-cols-3' : 'grid-cols-2 ') : '',
@@ -154,7 +154,7 @@ export const EmbedFileList: React.FC<IEmbedFileListProps> = ({
         </VinesImageGroup>
       </ScrollArea>
       <motion.div
-        key="vines-updater-embed-toolbar"
+        key="vines-uploader-embed-toolbar"
         className="w-full overflow-hidden"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1, transition: { delay: 0.2 } }}

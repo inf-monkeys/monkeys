@@ -259,7 +259,7 @@ export const ImageMaskEditorCanvas: React.FC<IImageMaskEditorCanvasProps> = ({
       success(result) {
         onBeforeSave?.();
 
-        VinesEvent.emit('vines-updater', [result], (urls: string[]) => {
+        VinesEvent.emit('vines-uploader', [result], (urls: string[]) => {
           onFinished?.(urls);
           toast.success(t('common.operate.success'));
         });

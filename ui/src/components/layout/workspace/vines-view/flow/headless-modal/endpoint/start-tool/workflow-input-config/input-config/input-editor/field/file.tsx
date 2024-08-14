@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Switch } from '@/components/ui/switch';
-import { Uploader } from '@/components/ui/updater';
+import { Uploader } from 'src/components/ui/uploader';
 import { IWorkflowInput } from '@/schema/workspace/workflow-input.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';

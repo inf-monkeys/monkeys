@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { base64toFile } from '@/components/ui/image-editor/utils.ts';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { VinesUploader } from '@/components/ui/updater';
-import { calculateMD5, uploadFile } from '@/components/ui/updater/utils.ts';
+import { VinesUploader } from 'src/components/ui/uploader';
+import { calculateMD5, uploadFile } from '@/components/ui/uploader/utils.ts';
 import { nanoIdLowerCase } from '@/utils';
 
 interface IVinesImageEditorProps {

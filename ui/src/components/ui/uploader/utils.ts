@@ -2,7 +2,7 @@ import { customAlphabet } from 'nanoid';
 import SparkMD5 from 'spark-md5';
 
 import { simpleFilePut, simpleGet, simplePost } from '@/apis/non-fetcher.ts';
-import { PartUploadResponse } from '@/components/ui/updater/typings.ts';
+import { PartUploadResponse } from '@/components/ui/uploader/typings.ts';
 
 export const coverFileSize = (size: number) => {
   if (size < 1024) {

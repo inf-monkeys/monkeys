@@ -3,7 +3,7 @@ import EventEmitter from 'eventemitter3';
 export type AppEventType =
   | 'vines-logout'
   | 'vines-update-site-title'
-  | 'vines-updater'
+  | 'vines-uploader'
   | 'vines-nav'
   | 'vines-trigger-init-icons';
 

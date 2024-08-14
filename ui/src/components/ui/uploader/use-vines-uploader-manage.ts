@@ -8,10 +8,10 @@ import { toast } from 'sonner';
 
 import { createMediaFile, getResourceByMd5 } from '@/apis/resources';
 import { VinesResourceImageParams, VinesResourceSource, VinesResourceType } from '@/apis/resources/typting.ts';
-import { IFile } from '@/components/ui/updater/file-list.tsx';
-import { calculateMD5, generateUploadFilePrefix, getImageSize, uploadFile } from '@/components/ui/updater/utils.ts';
+import { IFile } from '@/components/ui/uploader/file-list.tsx';
+import { calculateMD5, generateUploadFilePrefix, getImageSize, uploadFile } from '@/components/ui/uploader/utils.ts';
 
-interface IUseVinesUpdaterManage {
+interface IUseVinesUploaderManage {
   files: FileWithPath[];
 
   isUploading: boolean;
@@ -26,7 +26,7 @@ interface IUseVinesUpdaterManage {
   setList: React.Dispatch<React.SetStateAction<IFile[]>>;
 }
 
-export const useVinesUpdaterManage = ({
+export const useVinesUploaderManage = ({
   files,
   list,
   setList,
@@ -35,7 +35,7 @@ export const useVinesUpdaterManage = ({
   onFinished,
   saveToResource = true,
   basePath = 'user-files/other',
-}: IUseVinesUpdaterManage) => {
+}: IUseVinesUploaderManage) => {
   const { t } = useTranslation();
 
   const [hiddenList, setHiddenList] = useState<string[]>([]);

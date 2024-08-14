@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Uploader } from '@/components/ui/updater';
+import { Uploader } from 'src/components/ui/uploader';
 
 interface IUploadMediaProps {}
 
