@@ -18,6 +18,7 @@ import {
 } from '@/components/layout/workspace/vines-view/form/execution-result/item.tsx';
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { JSONValue } from '@/components/ui/code-editor';
+import { VinesImageGroup } from '@/components/ui/image';
 import { Label } from '@/components/ui/label.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import useUrlState from '@/hooks/use-url-state.ts';
@@ -176,29 +177,31 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   return (
     <Card className={cn('relative', className)}>
       <CardContent className="p-0">
-        {gridVisible && (
-          <Grid
-            className="!overflow-x-hidden"
-            height={size.height}
-            width={size.width}
-            columnCount={3}
-            columnWidth={() => itemSize}
-            rowCount={Math.ceil(totalCount / 3)}
-            rowHeight={() => itemSize}
-            itemData={list}
-          >
-            {({ columnIndex, rowIndex, style: { width, ...style }, data }) => {
-              const item = data[rowIndex * 3 + columnIndex];
-              const type = item?.render?.type;
-              if (!item || type === 'empty') return null;
-              return (
-                <div style={{ ...style, width: type === 'raw' ? size.width : width }}>
-                  <VinesExecutionResultItem data={item} height={itemSize - 16} />
-                </div>
-              );
-            }}
-          </Grid>
-        )}
+        <VinesImageGroup>
+          {gridVisible && (
+            <Grid
+              className="!overflow-x-hidden"
+              height={size.height}
+              width={size.width}
+              columnCount={3}
+              columnWidth={() => itemSize}
+              rowCount={Math.ceil(totalCount / 3)}
+              rowHeight={() => itemSize}
+              itemData={list}
+            >
+              {({ columnIndex, rowIndex, style: { width, ...style }, data }) => {
+                const item = data[rowIndex * 3 + columnIndex];
+                const type = item?.render?.type;
+                if (!item || type === 'empty') return null;
+                return (
+                  <div style={{ ...style, width: type === 'raw' ? size.width : width }}>
+                    <VinesExecutionResultItem data={item} height={itemSize - 16} />
+                  </div>
+                );
+              }}
+            </Grid>
+          )}
+        </VinesImageGroup>
 
         <AnimatePresence>
           {!totalCount && (

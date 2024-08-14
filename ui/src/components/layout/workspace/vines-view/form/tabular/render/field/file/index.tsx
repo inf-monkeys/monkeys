@@ -124,7 +124,7 @@ export const FieldFile: React.FC<IFieldFileProps> = ({
       </>
     ) : (
       <Card className="w-full overflow-hidden max-sm:max-w-[calc(100vw-3rem)]" ref={containerRef}>
-        <CardContent className="relative p-4">
+        <CardContent className="relative p-2">
           {enableImageMask ? (
             <FieldImageMaskEditor
               form={form}
@@ -135,7 +135,7 @@ export const FieldFile: React.FC<IFieldFileProps> = ({
               maxWidth={width}
             />
           ) : (
-            <Updater {...updaterProps} />
+            <Updater mode="embed" {...updaterProps} />
           )}
         </CardContent>
       </Card>

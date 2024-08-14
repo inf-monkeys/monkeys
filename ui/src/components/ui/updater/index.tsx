@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
+import { AnimatePresence, motion } from 'framer-motion';
 import { FileUp } from 'lucide-react';
 import Dropzone, { FileWithPath } from 'react-dropzone';
 import { ErrorCode } from 'react-dropzone';
@@ -8,6 +9,7 @@ import { toast } from 'sonner';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
+import { EmbedFileList } from '@/components/ui/updater/embed-file-list.tsx';
 import { FileList } from '@/components/ui/updater/file-list.tsx';
 import { cn } from '@/utils';
 
@@ -21,6 +23,8 @@ export interface IUpdaterProps {
   onFilesUpdate?: (files: FileWithPath[]) => void; // 文件列表更新回调
   saveToResource?: boolean; // 是否保存到富媒体桶
   basePath?: string;
+
+  mode?: 'simple' | 'embed';
 }
 
 export const Updater: React.FC<IUpdaterProps> = ({
@@ -33,6 +37,7 @@ export const Updater: React.FC<IUpdaterProps> = ({
   onFilesUpdate,
   saveToResource,
   basePath,
+  mode = 'simple',
 }) => {
   const { t } = useTranslation();
 
@@ -40,6 +45,7 @@ export const Updater: React.FC<IUpdaterProps> = ({
 
   const [isInteracted, setIsInteracted] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [disabled, setDisabled] = useState(false);
 
   useEffect(() => {
     if (isInteracted && isUploading) {
@@ -58,7 +64,11 @@ export const Updater: React.FC<IUpdaterProps> = ({
     onFilesUpdate?.(files);
   }, [files]);
 
-  const disabled = isUploading || files.length >= (limit ?? 999);
+  const isSimpleMode = mode === 'simple';
+  const isEmbedMode = mode === 'embed';
+
+  const filesLength = files.length;
+  const disabledComp = isUploading || filesLength >= (limit ?? 999) || disabled;
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -77,7 +87,7 @@ export const Updater: React.FC<IUpdaterProps> = ({
         }
         maxSize={maxSize * 1024 ** 2}
         maxFiles={limit}
-        disabled={disabled}
+        disabled={disabledComp}
         validator={(file) => {
           if (/[!@#$%^&*.]{2,}/.test(file.name)) {
             return {
@@ -120,37 +130,65 @@ export const Updater: React.FC<IUpdaterProps> = ({
             <div
               {...getRootProps()}
               className={cn([
-                'cursor-pointer rounded border-2 border-dashed border-input',
-                (isUploading || disabled) && 'pointer-events-none cursor-not-allowed opacity-60',
+                'group/up relative cursor-pointer rounded border-2 border-dashed border-input',
+                isSimpleMode && disabledComp && 'pointer-events-none cursor-not-allowed opacity-60',
+                isEmbedMode && filesLength && 'cursor-default border-transparent hover:border-input',
+                disabledComp && 'hover:border-transparent',
               ])}
             >
-              <div className="vines-center h-40 gap-4">
+              <div className="vines-center min-h-40 flex-col overflow-hidden">
                 <input {...getInputProps()} />
-                <FileUp size={50} className="stroke-gold-12" />
-                <div className="flex max-w-[70%] flex-col">
-                  <h1 className="text-lg font-bold leading-tight">
-                    {t('components.ui.updater.click-or-drag-area', {
-                      count: limit ?? 2,
-                    })}
-                  </h1>
-                  <p className="text-xs text-opacity-85">
-                    {accept
-                      ? t('components.ui.updater.hint.accept.custom', {
-                          acceptString: accept.map((it) => `.${it?.split('/')?.[1] ?? it}`).join('、'),
-                          count: limit ?? 2,
-                        })
-                      : t('components.ui.updater.hint.accept.any')}
-                    {t('components.ui.updater.hint.max-size', { maxSize })}
-                    {limit ? t('components.ui.updater.hint.limit', { limit, count: limit }) : ''}
-                  </p>
-                </div>
+
+                <AnimatePresence mode="popLayout">
+                  {(isEmbedMode ? !filesLength : true) ? (
+                    <motion.div
+                      key="vines-updater-hint"
+                      className="absolute flex items-center gap-4"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <FileUp size={50} className="stroke-gold-12" />
+                      <div className="flex max-w-[70%] flex-col">
+                        <h1 className="text-lg font-bold leading-tight">
+                          {t('components.ui.updater.click-or-drag-area', {
+                            count: limit ?? 2,
+                          })}
+                        </h1>
+                        <p className="text-xs text-opacity-85">
+                          {accept
+                            ? t('components.ui.updater.hint.accept.custom', {
+                                acceptString: accept.map((it) => `.${it?.split('/')?.[1] ?? it}`).join('、'),
+                                count: limit ?? 2,
+                              })
+                            : t('components.ui.updater.hint.accept.any')}
+                          {t('components.ui.updater.hint.max-size', { maxSize })}
+                          {limit ? t('components.ui.updater.hint.limit', { limit, count: limit }) : ''}
+                        </p>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <EmbedFileList
+                      files={files}
+                      setFiles={setFiles}
+                      onVisibleChange={setDisabled}
+                      limit={limit}
+                      isUploading={isUploading}
+                      setIsUploading={setIsUploading}
+                      onFinished={onFinished}
+                      saveToResource={saveToResource}
+                      basePath={basePath}
+                    />
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           );
         }}
       </Dropzone>
 
-      {isInteracted && (
+      {isInteracted && isSimpleMode && (
         <SmoothTransition className="overflow-hidden">
           <FileList
             files={files}

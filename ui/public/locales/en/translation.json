@@ -243,6 +243,7 @@
               "waiting": "Waiting for calculating"
             }
           },
+          "count": "Total {{count}} files",
           "status": {
             "waiting-for-file_one": "Waiting for file",
             "waiting-for-file_other": "Waiting for files",
@@ -255,8 +256,17 @@
               "hint_one": "{{operate}} file",
               "hint_other": "{{operate}} files"
             }
+          },
+          "item-status": {
+            "wait": "Waiting",
+            "busy": "Processing",
+            "error": "Error occurred",
+            "wait-to-update": "Waiting to upload",
+            "uploading": "Uploading",
+            "success": "File uploaded"
           }
-        }
+        },
+        "remove": "Remove"
       },
       "vines-variable-editor": {
         "cannot-parse-toast": "VinesVariableEditor can't parse text!"
@@ -309,7 +319,9 @@
         "rotateLeft": "Rotate counterclockwise",
         "rotateRight": "Rotate clockwise",
         "zoomIn": "Zoom in",
-        "zoomOut": "Zoom out"
+        "zoomOut": "Zoom out",
+        "left": "Previous",
+        "right": "Next"
       }
     },
     "layout": {

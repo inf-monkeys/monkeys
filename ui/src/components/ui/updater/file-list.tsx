@@ -1,26 +1,17 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 
-import { set } from 'lodash';
 import { CheckCircle2, FileCheck, FileClock, FileSearch, FileX2, Loader2, UploadCloud, XCircle } from 'lucide-react';
 import { FileWithPath } from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 
-import { createMediaFile, getResourceByMd5 } from '@/apis/resources';
-import { VinesResourceImageParams, VinesResourceSource, VinesResourceType } from '@/apis/resources/typting.ts';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import {
-  calculateMD5,
-  coverFileSize,
-  generateUploadFilePrefix,
-  getImageSize,
-  uploadFile,
-} from '@/components/ui/updater/utils.ts';
+import { useVinesUpdaterManage } from '@/components/ui/updater/use-vines-updater-manage.ts';
+import { coverFileSize } from '@/components/ui/updater/utils.ts';
 import { cn } from '@/utils';
 
 interface IFilesProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -60,172 +51,26 @@ export const FileList: React.FC<IFilesProps> = ({
   const { t } = useTranslation();
 
   const [list, setList] = useState<IFile[]>([]);
-  const [hiddenList, setHiddenList] = useState<string[]>([]);
 
-  const fileMd5 = useRef(new Map<string, string>());
-  const [md5Queue, setMd5Queue] = useState<string[]>([]);
-
-  useEffect(() => {
-    const newList: IFile[] = files
-      .map((it) => {
-        const path = it.path;
-        if (!path || list.some((item) => item.path === path)) return null;
-        const fileId = generateUploadFilePrefix();
-        !fileMd5.current.has(path) && setMd5Queue((prev) => [...prev, fileId]);
-        return {
-          id: fileId,
-          file: it,
-          path: path,
-          name: it.name,
-          type: it.type,
-          size: it.size,
-          status: 'wait',
-          progress: '0',
-        };
-      })
-      .filter((it) => it !== null) as IFile[];
-    setList((prev) => [...prev, ...newList]);
-    setHiddenList(list.filter((it) => !files.some((file) => file.path === it.path)).map((it) => it.id));
-  }, [files]);
-
-  const updateListById = (id: string, data: Partial<IFile>) => {
-    setList((prev) => prev.map((it) => (it.id === id ? { ...it, ...data } : it)));
-  };
-
-  const isBusyRef = useRef(false);
-  const handleCalcMd5 = async () => {
-    const fileId = md5Queue[0];
-    const it = list.find((it) => it.id === fileId);
-
-    if (!fileId || !it || isBusyRef.current) return;
-    isBusyRef.current = true;
-
-    it.status = 'busy';
-    const md5 = (await calculateMD5(it.file, (process) => {
-      it.progress = process.toFixed(2);
-      updateListById(fileId, it);
-    })) as string;
-    if (!md5) {
-      it.status = 'error';
-      updateListById(fileId, it);
-      isBusyRef.current = false;
-      return;
-    }
-    set(it, 'md5', md5);
-    it.status = 'wait-to-update';
-    updateListById(fileId, it);
-    fileMd5.current.set(it.path, md5);
-
-    isBusyRef.current = false;
-    setMd5Queue((prev) => prev.filter((it) => it !== fileId));
-  };
-
-  useEffect(() => {
-    void handleCalcMd5();
-  }, [md5Queue]);
-
-  const finalLists = list.filter((it) => !hiddenList.includes(it.id));
-  const hasFile = finalLists.length > 0;
-  const isWaitToUpload =
-    hasFile && finalLists.filter((it) => it.status !== 'success').every((it) => it.status === 'wait-to-update');
-
-  const [uploadQueue, setUploadQueue] = useState<string[]>([]);
-  const handleOnClickUpload = async () => {
-    if (!isWaitToUpload) return;
-    const filteredList = finalLists.filter((it) => !/(https|http):\/\/[^\s/]+\.[^\s/]+\/\S+\.\w{2,5}/g.test(it.path));
-    if (!filteredList.length) {
-      toast.error(t('components.ui.updater.file-list.toast.no-file'));
-      return;
-    }
-    setIsUploading(true);
-    setUploadQueue(filteredList.map((it) => it.id));
-    setList((prev) => prev.map((it) => ({ ...it, progress: '0' })));
-  };
-
-  const node = useRef<HTMLDivElement>(null);
-  const isUploadBusyRef = useRef(false);
-  const handleUpload = async () => {
-    const fileId = uploadQueue[0];
-    const it = list.find((it) => it.id === fileId);
-
-    if (!fileId || !it) return;
-    isUploadBusyRef.current = true;
-    it.status = 'uploading';
-    updateListById(fileId, it);
-
-    const existingFileUrl = (await getResourceByMd5(it.md5 as string))?.data?.url;
-    let ossUrl: string = '';
-    if (existingFileUrl) {
-      ossUrl = existingFileUrl;
-      it.progress = '100';
-    }
-
-    if (!ossUrl) {
-      const file = it.file;
-      const fileNameArray = file.name.split('.');
-      const fileNameWithoutSuffix = fileNameArray.length > 1 ? fileNameArray.slice(0, -1).join('.') : fileNameArray[0];
-      const suffix = fileNameArray.length > 1 ? fileNameArray.pop() : null;
-      // const filename = `${basePath}/${it.id}_${escapeFileName(fileNameWithoutSuffix)}${suffix ? '.'.concat(suffix) : ''}`;
-      const filename = `${basePath}/${it.id}_${fileNameWithoutSuffix}${suffix ? '.'.concat(suffix) : ''}`;
-
-      it.status = 'busy';
-      updateListById(fileId, it);
-      ossUrl = await uploadFile(file, filename, (progress) => {
-        it.progress = progress.toFixed(2);
-        updateListById(fileId, it);
-      });
-
-      if (saveToResource) {
-        let params: VinesResourceImageParams | undefined = void 0;
-        if (file.type.startsWith('image')) {
-          params = await getImageSize(ossUrl);
-        }
-        await createMediaFile({
-          type: file.type as VinesResourceType,
-          md5: it.md5,
-          displayName: file.name,
-          source: VinesResourceSource.UPLOAD,
-          url: ossUrl,
-          tags: [],
-          categoryIds: [],
-          size: file.size,
-          params,
-        });
-      }
-    }
-
-    it.url = ossUrl;
-    it.status = 'success';
-    updateListById(fileId, it);
-    isUploadBusyRef.current = false;
-    setUploadQueue((prev) => prev.filter((it) => it !== fileId));
-  };
-
-  useEffect(() => {
-    if (isUploadBusyRef.current) return;
-    if (uploadQueue.length) {
-      void handleUpload();
-    } else if (isUploading) {
-      setTimeout(() => {
-        const mergeList = [...finalLists.map((it) => it?.url ?? ''), ...list.map((it) => it?.url ?? '')].filter(
-          (it) => it,
-        );
-        const urls = Array.from(new Set(mergeList));
-
-        onFinished?.(urls);
-      }, 200);
-      setIsUploading(false);
-    }
-  }, [uploadQueue]);
+  const { validList, hasFile, isWaitToUpload, handleOnClickUpload } = useVinesUpdaterManage({
+    files,
+    list,
+    setList,
+    setIsUploading,
+    isUploading,
+    saveToResource,
+    basePath,
+    onFinished,
+  });
 
   const remaining = limit ? limit - files.length : 0;
 
-  const totalProgress = finalLists.reduce((prev, curr) => prev + Number(curr.progress), 0) / finalLists.length;
+  const totalProgress = validList.reduce((prev, curr) => prev + Number(curr.progress), 0) / validList.length;
 
   return (
     <>
       <div className="flex max-h-36 w-full">
-        <ScrollArea className="grow pr-4" ref={node}>
+        <ScrollArea className="grow pr-4">
           <Table>
             <TableCaption className="text-xs">
               {remaining
@@ -249,8 +94,8 @@ export const FileList: React.FC<IFilesProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {finalLists.map(({ id, path, name, type, size, status, md5, progress }) => (
-                <Tooltip key={path}>
+              {validList.map(({ id, path, name, type, size, status, md5, progress }) => (
+                <Tooltip key={id}>
                   <TooltipTrigger asChild>
                     <TableRow className="[&_td]:text-xs" id={'vines-uploader-' + id}>
                       <TableCell className="p-0 text-center">
@@ -315,7 +160,7 @@ export const FileList: React.FC<IFilesProps> = ({
                 {t('components.ui.updater.file-list.status.waiting-for-file', { count: limit ?? 2 })}
               </p>
             </>
-          ) : finalLists
+          ) : validList
               .filter((it) => !/(https|http):\/\/[^\s/]+\.[^\s/]+\/\S+\.\w{2,5}/g.test(it.path))
               .every((it) => it.status === 'success') ? (
             <>
@@ -336,7 +181,7 @@ export const FileList: React.FC<IFilesProps> = ({
               <p className="text-xs">
                 {t('components.ui.updater.file-list.status.status.hint', {
                   operate:
-                    finalLists.some((it) => it.status === 'uploading') || isUploading
+                    validList.some((it) => it.status === 'uploading') || isUploading
                       ? t('components.ui.updater.file-list.status.status.upload')
                       : t('components.ui.updater.file-list.status.status.calculate'),
                   count: limit ?? 2,
