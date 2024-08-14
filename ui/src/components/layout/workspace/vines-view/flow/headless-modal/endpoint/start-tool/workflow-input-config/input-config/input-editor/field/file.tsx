@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Switch } from '@/components/ui/switch';
-import { Updater } from '@/components/ui/updater';
+import { Uploader } from '@/components/ui/updater';
 import { IWorkflowInput } from '@/schema/workspace/workflow-input.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
@@ -73,10 +73,11 @@ export const FieldFile: React.FC<IFieldFileProps> = ({ form }) => {
                   extra: multipleValues ? t('workspace.flow-view.endpoint.start-tool.input.config-form.file.list') : '',
                 })}
               </Label>
-              <Updater
+              <Uploader
                 limit={multipleValues ? void 0 : 1}
                 onFinished={(urls) => form.setValue('default', multipleValues ? urls : urls[0])}
                 basePath="user-files/workflow-input"
+                mode="embed"
               />
               <p className="text-xs text-muted-foreground">
                 {t('workspace.flow-view.endpoint.start-tool.input.config-form.file.desc')}

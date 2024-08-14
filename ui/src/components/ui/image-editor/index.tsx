@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { base64toFile } from '@/components/ui/image-editor/utils.ts';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { VinesUpdater } from '@/components/ui/updater';
+import { VinesUploader } from '@/components/ui/updater';
 import { calculateMD5, uploadFile } from '@/components/ui/updater/utils.ts';
 import { nanoIdLowerCase } from '@/utils';
 
@@ -116,7 +116,7 @@ export const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
           />
 
           <DialogFooter>
-            <VinesUpdater
+            <VinesUploader
               accept={['image/png', 'image/jpeg']}
               maxSize={10}
               limit={1}
@@ -128,7 +128,7 @@ export const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
               <Button variant="outline" disabled={loading}>
                 {t('components.ui.image-editor.upload-others')}
               </Button>
-            </VinesUpdater>
+            </VinesUploader>
             <Button variant="outline" onClick={handleSave} loading={loading}>
               {t('common.utils.save')}
             </Button>

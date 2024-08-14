@@ -24,7 +24,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Textarea } from '@/components/ui/textarea.tsx';
-import { Updater } from '@/components/ui/updater';
+import { Uploader } from '@/components/ui/updater';
 import { MIME_TYPES } from '@/components/ui/updater/mime-types.ts';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
 import { IImportComfyUIWorkflow, importComfyUIWorkflowSchema } from '@/schema/workspace/import-comfyui-workflow.ts';
@@ -163,7 +163,7 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Updater
+                      <Uploader
                         accept={[MIME_TYPES.png, MIME_TYPES.jpeg, MIME_TYPES.gif]}
                         maxSize={20}
                         limit={1}
@@ -171,6 +171,7 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
                           field.onChange(urls[0]);
                         }}
                         basePath="user-files/import-comfyui-image"
+                        mode="embed"
                       />
                     </FormControl>
                     <FormDescription>{t('common.form.description.upload-file-auto-store')}</FormDescription>
@@ -192,7 +193,7 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
                       {t('ugc-page.tools.import.import-comfyui-workflow.form.workflowJsonUrl.label')}
                     </FormLabel>
                     <FormControl>
-                      <Updater
+                      <Uploader
                         accept={['application/json']}
                         maxSize={20}
                         limit={1}
@@ -200,6 +201,7 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
                           field.onChange(urls[0]);
                         }}
                         basePath="user-files/import-comfyui-json"
+                        mode="embed"
                       />
                     </FormControl>
                     <FormDescription>{t('common.form.description.upload-file-auto-store')}</FormDescription>
@@ -216,7 +218,7 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
                       {t('ugc-page.tools.import.import-comfyui-workflow.form.workflowApiJsonUrl.label')}
                     </FormLabel>
                     <FormControl>
-                      <Updater
+                      <Uploader
                         accept={['application/json']}
                         maxSize={20}
                         limit={1}
@@ -224,6 +226,7 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
                           field.onChange(urls[0]);
                         }}
                         basePath="user-files/import-comfyui-json-url"
+                        mode="embed"
                       />
                     </FormControl>
                     <FormDescription>{t('common.form.description.upload-file-auto-store')}</FormDescription>

@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Updater } from '@/components/ui/updater';
+import { Uploader } from '@/components/ui/updater';
 
 interface IUploadMediaProps {}
 
@@ -25,7 +25,7 @@ export const UploadMedia: React.FC<IUploadMediaProps> = () => {
       </DialogTrigger>
       <DialogContent className="w-[40rem] max-w-[40rem]">
         <DialogTitle>{t('ugc-page.media-data.ugc-view.subtitle.upload.title')}</DialogTitle>
-        <Updater
+        <Uploader
           maxSize={30}
           accept={[
             'image/png',
@@ -42,6 +42,7 @@ export const UploadMedia: React.FC<IUploadMediaProps> = () => {
             void mutate((key) => typeof key === 'string' && key.startsWith('/api/media-files'));
           }}
           basePath="user-files/media"
+          mode="embed"
         />
       </DialogContent>
     </Dialog>
