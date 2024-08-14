@@ -10,8 +10,8 @@ import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useVinesUpdaterManage } from '@/components/ui/updater/use-vines-updater-manage.ts';
-import { coverFileSize } from '@/components/ui/updater/utils.ts';
+import { useVinesUploaderManage } from '@/components/ui/uploader/use-vines-uploader-manage.ts';
+import { coverFileSize } from '@/components/ui/uploader/utils.ts';
 import { cn } from '@/utils';
 
 interface IFilesProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -52,7 +52,7 @@ export const FileList: React.FC<IFilesProps> = ({
 
   const [list, setList] = useState<IFile[]>([]);
 
-  const { validList, hasFile, isWaitToUpload, handleOnClickUpload } = useVinesUpdaterManage({
+  const { validList, hasFile, isWaitToUpload, handleOnClickUpload } = useVinesUploaderManage({
     files,
     list,
     setList,

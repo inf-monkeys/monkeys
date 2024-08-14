@@ -9,8 +9,8 @@ import { FieldImageMaskEditor } from '@/components/layout/workspace/vines-view/f
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { VinesImageMaskEditor } from '@/components/ui/image-mask-editor';
-import { IUpdaterProps, Uploader, VinesUploader } from '@/components/ui/updater';
-import { getFileNameByOssUrl } from '@/components/ui/updater/utils.ts';
+import { IUpdaterProps, Uploader, VinesUploader } from 'src/components/ui/uploader';
+import { getFileNameByOssUrl } from '@/components/ui/uploader/utils.ts';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
 

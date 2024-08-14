@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { FileWithPath } from 'react-dropzone';
 import { AnimatePresence, motion } from 'framer-motion';
 import { set } from 'lodash';
 import { CheckCircle2, FileClock, FileSearch, FileX2, Loader2 } from 'lucide-react';
+import { FileWithPath } from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -14,14 +14,14 @@ import { Progress } from '@/components/ui/progress.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { IFile } from '@/components/ui/updater/file-list.tsx';
+import { IFile } from '@/components/ui/uploader/file-list.tsx';
 import {
   calculateMD5,
   coverFileSize,
   generateUploadFilePrefix,
   getImageSize,
   uploadFile,
-} from '@/components/ui/updater/utils.ts';
+} from '@/components/ui/uploader/utils.ts';
 import VinesEvent from '@/utils/events.ts';
 
 interface IVinesGlobalUploadProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -114,9 +114,9 @@ export const VinesGlobalUpload: React.FC<IVinesGlobalUploadProps> = () => {
       setHiddenList(list.filter((it) => !files.some((file) => file.path === it.path)).map((it) => it.id));
     };
 
-    VinesEvent.on('vines-updater', upload);
+    VinesEvent.on('vines-uploader', upload);
     return () => {
-      VinesEvent.off('vines-updater', upload);
+      VinesEvent.off('vines-uploader', upload);
     };
   }, []);
 

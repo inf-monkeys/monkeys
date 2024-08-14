@@ -24,8 +24,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Textarea } from '@/components/ui/textarea.tsx';
-import { Uploader } from '@/components/ui/updater';
-import { MIME_TYPES } from '@/components/ui/updater/mime-types.ts';
+import { Uploader } from 'src/components/ui/uploader';
+import { MIME_TYPES } from '@/components/ui/uploader/mime-types.ts';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
 import { IImportComfyUIWorkflow, importComfyUIWorkflowSchema } from '@/schema/workspace/import-comfyui-workflow.ts';
 

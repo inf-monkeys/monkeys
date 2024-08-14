@@ -9,8 +9,8 @@ import { toast } from 'sonner';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
-import { EmbedFileList } from '@/components/ui/updater/embed-file-list.tsx';
-import { FileList } from '@/components/ui/updater/file-list.tsx';
+import { EmbedFileList } from '@/components/ui/uploader/embed-file-list.tsx';
+import { FileList } from '@/components/ui/uploader/file-list.tsx';
 import { cn } from '@/utils';
 
 export interface IUpdaterProps {
@@ -142,7 +142,7 @@ export const Uploader: React.FC<IUpdaterProps> = ({
                 <AnimatePresence mode="popLayout">
                   {(isEmbedMode ? !filesLength : true) ? (
                     <motion.div
-                      key="vines-updater-hint"
+                      key="vines-uploader-hint"
                       className="absolute flex items-center gap-4"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}

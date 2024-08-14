@@ -4,8 +4,8 @@ import { get, isArray, isString, set } from 'lodash';
 import { FileWithPath } from 'react-dropzone';
 
 import { IVinesInputPropertyProps } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
-import { Uploader } from '@/components/ui/updater';
-import { getFileNameByOssUrl } from '@/components/ui/updater/utils.ts';
+import { Uploader } from 'src/components/ui/uploader';
+import { getFileNameByOssUrl } from '@/components/ui/uploader/utils.ts';
 
 export const FileInput: React.FC<IVinesInputPropertyProps> = ({ def, value, onChange }) => {
   const accept = get(def, 'typeOptions.accept', '');
