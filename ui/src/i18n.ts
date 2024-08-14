@@ -9,7 +9,11 @@ void i18n
   .use(initReactI18next)
   .init({
     fallbackLng: 'en',
-    debug: false,
+    debug: true,
+    detection: {
+      order: ['localStorage', 'navigator'],
+      convertDetectedLanguage: (lng: string) => (lng.includes('-') ? lng.split('-')[0] : lng),
+    },
     supportedLngs: ['zh', 'en'],
 
     interpolation: {
