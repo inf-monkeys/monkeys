@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useTeams } from '@/apis/authz/team';
 import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
-import { authGuard } from '@/components/router/guard/auth.ts';
+import { isAuthed } from '@/components/router/guard/auth';
 import { Button } from '@/components/ui/button';
 import { I18nSelector } from '@/components/ui/i18n-selector';
 import { VinesLoading } from '@/components/ui/loading';
@@ -35,6 +35,10 @@ const TeamsIdPage: React.FC = () => {
       },
     });
   }, [teamId, teams]);
+
+  if (!isAuthed()) {
+    VinesEvent.emit('vines-nav', '/login');
+  }
 
   return (
     <>
@@ -81,5 +85,4 @@ const TeamsIdPage: React.FC = () => {
 
 export const Route = createFileRoute('/')({
   component: TeamsIdPage,
-  beforeLoad: authGuard,
 });
