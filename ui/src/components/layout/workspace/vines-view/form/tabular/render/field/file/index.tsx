@@ -9,7 +9,7 @@ import { FieldImageMaskEditor } from '@/components/layout/workspace/vines-view/f
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { VinesImageMaskEditor } from '@/components/ui/image-mask-editor';
-import { IUpdaterProps, Updater, VinesUpdater } from '@/components/ui/updater';
+import { IUpdaterProps, Uploader, VinesUploader } from '@/components/ui/updater';
 import { getFileNameByOssUrl } from '@/components/ui/updater/utils.ts';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
@@ -114,11 +114,11 @@ export const FieldFile: React.FC<IFieldFileProps> = ({
             <span className="text-xs text-opacity-70">
               {t('workspace.pre-view.actuator.execution-form.file.label')}
             </span>
-            <VinesUpdater {...updaterProps}>
+            <VinesUploader {...updaterProps}>
               <Button variant="outline" size="small" className="-mr-1 scale-90">
                 {t('workspace.pre-view.actuator.execution-form.file.click-to-upload')}
               </Button>
-            </VinesUpdater>
+            </VinesUploader>
           </div>
         )}
       </>
@@ -135,7 +135,7 @@ export const FieldFile: React.FC<IFieldFileProps> = ({
               maxWidth={width}
             />
           ) : (
-            <Updater mode="embed" {...updaterProps} />
+            <Uploader mode="embed" {...updaterProps} />
           )}
         </CardContent>
       </Card>

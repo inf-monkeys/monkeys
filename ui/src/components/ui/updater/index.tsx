@@ -27,7 +27,7 @@ export interface IUpdaterProps {
   mode?: 'simple' | 'embed';
 }
 
-export const Updater: React.FC<IUpdaterProps> = ({
+export const Uploader: React.FC<IUpdaterProps> = ({
   files: initialFiles = [],
   accept,
   maxSize = 30,
@@ -206,7 +206,7 @@ export const Updater: React.FC<IUpdaterProps> = ({
   );
 };
 
-export const VinesUpdater: React.FC<
+export const VinesUploader: React.FC<
   IUpdaterProps & {
     children: React.ReactNode;
   }
@@ -223,7 +223,7 @@ export const VinesUpdater: React.FC<
         <DialogHeader>
           <DialogTitle>{t('components.ui.updater.title', { count: limit ?? 2 })}</DialogTitle>
         </DialogHeader>
-        <Updater
+        <Uploader
           onBeforeUpload={() => {
             setIsUploading(true);
             onBeforeUpload?.();
@@ -234,6 +234,7 @@ export const VinesUpdater: React.FC<
             setIsUploading(false);
           }}
           limit={limit}
+          mode="embed"
           {...props}
         />
       </DialogContent>

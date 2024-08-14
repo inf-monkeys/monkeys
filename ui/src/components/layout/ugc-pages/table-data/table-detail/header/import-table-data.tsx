@@ -19,7 +19,7 @@ import {
   FormMessage,
 } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input';
-import { Updater } from '@/components/ui/updater';
+import { Uploader } from '@/components/ui/updater';
 import { MIME_TYPES } from '@/components/ui/updater/mime-types.ts';
 import { IImportFile, importFileSchema } from '@/schema/table-database/import-file.ts';
 
@@ -91,12 +91,13 @@ export const ImportTableData: React.FC<IImportTableDataProps> = ({ databaseId, c
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Updater
+                    <Uploader
                       accept={[MIME_TYPES.csv, MIME_TYPES.xls, MIME_TYPES.xlsx]}
                       maxSize={10}
                       limit={1}
                       onFinished={(urls) => field.onChange(urls[0])}
                       basePath="user-files/table-data"
+                      mode="embed"
                     />
                   </FormControl>
                   <FormDescription>在此处上传文件将自动存入「富媒体数据」</FormDescription>

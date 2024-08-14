@@ -24,7 +24,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
-import { Updater } from '@/components/ui/updater';
+import { Uploader } from '@/components/ui/updater';
 import { IImportFile, importFileSchema, PRE_PROCESS_RULES } from '@/schema/text-dataset/import-file.ts';
 
 interface IImportFileProps {
@@ -82,7 +82,7 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Updater
+                      <Uploader
                         accept={[
                           'text/plain',
                           'application/pdf',
@@ -100,6 +100,7 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                           setFilename(files[0]?.name ?? '');
                         }}
                         basePath="user-files/text-data-file"
+                        mode="embed"
                       />
                     </FormControl>
                     <FormDescription>{t('common.form.description.upload-file-auto-store')}</FormDescription>

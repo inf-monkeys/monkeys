@@ -4,7 +4,7 @@ import { get, isArray, isString, set } from 'lodash';
 import { FileWithPath } from 'react-dropzone';
 
 import { IVinesInputPropertyProps } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
-import { Updater } from '@/components/ui/updater';
+import { Uploader } from '@/components/ui/updater';
 import { getFileNameByOssUrl } from '@/components/ui/updater/utils.ts';
 
 export const FileInput: React.FC<IVinesInputPropertyProps> = ({ def, value, onChange }) => {
@@ -45,7 +45,7 @@ export const FileInput: React.FC<IVinesInputPropertyProps> = ({ def, value, onCh
 
   return (
     <>
-      <Updater
+      <Uploader
         files={files}
         onFilesUpdate={(_files) => {
           const updateFilesLength = _files.length;
@@ -67,6 +67,7 @@ export const FileInput: React.FC<IVinesInputPropertyProps> = ({ def, value, onCh
           )
         }
         basePath="user-files/workflow-input"
+        mode="embed"
       />
     </>
   );
