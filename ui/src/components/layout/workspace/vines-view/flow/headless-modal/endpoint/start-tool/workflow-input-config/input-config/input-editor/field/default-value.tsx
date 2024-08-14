@@ -177,7 +177,7 @@ export const FieldDefaultValue: React.FC<IFieldDefaultValueProps> = ({ form }) =
                   onCheckedChange={field.onChange}
                 />
               ) : isNumber ? (
-                <NumberField value={toNumber(value)} {...field}>
+                <NumberField value={toNumber(value)} aria-label="number input" {...field}>
                   <FieldGroup>
                     <NumberFieldInput />
                   </FieldGroup>

@@ -36,7 +36,7 @@ export const FieldNumber: React.FC<IFieldNumberProps> = ({ form }) => {
                 {t('workspace.flow-view.endpoint.start-tool.input.config-form.type-options.min-value.label')}
               </FormLabel>
               <FormControl>
-                <NumberField {...field}>
+                <NumberField aria-label="number input" {...field}>
                   <FieldGroup>
                     <NumberFieldInput
                       placeholder={t(
@@ -59,7 +59,7 @@ export const FieldNumber: React.FC<IFieldNumberProps> = ({ form }) => {
                 {t('workspace.flow-view.endpoint.start-tool.input.config-form.type-options.max-value.label')}
               </FormLabel>
               <FormControl>
-                <NumberField {...field}>
+                <NumberField aria-label="number input" {...field}>
                   <FieldGroup>
                     <NumberFieldInput
                       placeholder={t(
@@ -82,7 +82,7 @@ export const FieldNumber: React.FC<IFieldNumberProps> = ({ form }) => {
                 {t('workspace.flow-view.endpoint.start-tool.input.config-form.type-options.number-precision.label')}
               </FormLabel>
               <FormControl>
-                <NumberField {...field}>
+                <NumberField aria-label="number input" {...field}>
                   <FieldGroup>
                     <NumberFieldInput
                       placeholder={t(
