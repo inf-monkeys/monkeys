@@ -77,6 +77,7 @@ export const Recharge: React.FC<IRechargeProps> = ({ children }) => {
                 currencyDisplay: 'code',
                 currencySign: 'accounting',
               }}
+              aria-label="number input"
             >
               <FieldGroup>
                 <NumberFieldInput placeholder={t('settings.payment.recharge.placeholder')} />
