@@ -53,35 +53,36 @@ export const ImageMaskEditorToolbar: React.FC<IImageMaskEditorToolbarProps> = ({
         value={pointerMode}
         onValueChange={(v) => setPointerMode(v as IPointerMode)}
       >
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <ToggleGroupItem value="brush">
+        <ToggleGroupItem value="brush">
+          <Tooltip>
+            <TooltipTrigger asChild>
               <Brush className="h-4 w-4" />
-            </ToggleGroupItem>
-          </TooltipTrigger>
-          <TooltipContent>{t('components.ui.vines-image-mask-editor.toolbar.brush')}</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <ToggleGroupItem value="eraser">
+            </TooltipTrigger>
+            <TooltipContent>{t('components.ui.vines-image-mask-editor.toolbar.brush')}</TooltipContent>
+          </Tooltip>
+        </ToggleGroupItem>
+        <ToggleGroupItem value="eraser">
+          <Tooltip>
+            <TooltipTrigger asChild>
               <Eraser className="h-4 w-4" />
-            </ToggleGroupItem>
-          </TooltipTrigger>
-          <TooltipContent>{t('components.ui.vines-image-mask-editor.toolbar.eraser')}</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <ToggleGroupItem value="move">
+            </TooltipTrigger>
+            <TooltipContent>{t('components.ui.vines-image-mask-editor.toolbar.eraser')}</TooltipContent>
+          </Tooltip>
+        </ToggleGroupItem>
+        <ToggleGroupItem value="move">
+          <Tooltip>
+            <TooltipTrigger asChild>
               <Move className="h-4 w-4" />
-            </ToggleGroupItem>
-          </TooltipTrigger>
-          <TooltipContent>{t('components.ui.vines-image-mask-editor.toolbar.move')}</TooltipContent>
-        </Tooltip>
+            </TooltipTrigger>
+            <TooltipContent>{t('components.ui.vines-image-mask-editor.toolbar.move')}</TooltipContent>
+          </Tooltip>
+        </ToggleGroupItem>
       </ToggleGroup>
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
             variant="outline"
+            size="small"
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
@@ -114,7 +115,7 @@ export const ImageMaskEditorToolbar: React.FC<IImageMaskEditorToolbarProps> = ({
           <Tooltip>
             <TooltipTrigger asChild>
               <PopoverTrigger asChild>
-                <Button variant="outline" icon={<CircleEllipsisIcon />} />
+                <Button variant="outline" size="small" icon={<CircleEllipsisIcon />} />
               </PopoverTrigger>
             </TooltipTrigger>
             <TooltipContent>{t('components.ui.vines-image-mask-editor.toolbar.more')}</TooltipContent>

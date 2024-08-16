@@ -107,12 +107,12 @@ export const ImageMaskEditor: React.FC<IImageMaskEditorProps> = memo(
         />
 
         <div className="flex w-full items-center justify-between">
-          <Button variant="outline" onClick={handleSelectImage} disabled={loading}>
+          <Button variant="outline" size="small" onClick={handleSelectImage} disabled={loading}>
             {t('components.ui.vines-image-mask-editor.operate.select-image')}
           </Button>
           <div className="vines-center gap-2">
             {children}
-            <Button variant="outline" onClick={handleSave} loading={loading}>
+            <Button variant="outline" size="small" onClick={handleSave} loading={loading}>
               {t('common.utils.save')}
             </Button>
           </div>
