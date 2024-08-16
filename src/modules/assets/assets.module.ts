@@ -11,6 +11,7 @@ import { AssetsReferenceService } from './assets.reference.service';
 import { AssetsTagController } from './assets.tag.controller';
 import { AssetsTagService } from './assets.tag.service';
 import { CanvasModule } from './canvas/canvas.module';
+import { ComfyuiModelModule } from './comfyui-model/comfyui-model.module';
 import { ConversationAppModule } from './conversation-app/conversation-app.module';
 import { KnowledgeBaseModule } from './knowledge-base/knowledge-base.module';
 import { LlmModelModule } from './llm-model/llm-model.module';
@@ -21,7 +22,7 @@ import { SqlKnowledgeBaseModule } from './sql-knowledge-base/sql-knowledge-base.
 @Module({
   controllers: [AssetsFiltersController, AssetsPublishController, AssetsTagController, AssetsReferenceController, AssetsMarketplaceController],
   providers: [AssetsFilterService, AssetsPublishService, AssetsTagService, AssetsMapperService, AssetsReferenceService, AssetsMarketplaceService],
-  imports: [CanvasModule, MediaModule, KnowledgeBaseModule, SqlKnowledgeBaseModule, LlmModelModule, SdModelModule, ConversationAppModule],
+  imports: [CanvasModule, MediaModule, KnowledgeBaseModule, SqlKnowledgeBaseModule, LlmModelModule, SdModelModule, ConversationAppModule, ComfyuiModelModule],
   exports: [AssetsMarketplaceService],
 })
 export class AssetsModule {}
