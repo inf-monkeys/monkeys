@@ -6,8 +6,8 @@ import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import { VinesImage } from '@/components/ui/image';
 import { IImageMaskEditorEvent, ImageMaskEditor } from '@/components/ui/image-mask-editor';
-import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
 import { cn } from '@/utils';
 
@@ -37,7 +37,7 @@ export const FieldImageMaskEditor: React.FC<IFieldImageMaskEditorProps> = ({
   return (
     <div className="relative size-full">
       <ImageMaskEditor
-        className="h-64 w-full max-w-full"
+        className="h-40 w-full max-w-full"
         maxWidth={maxWidth}
         onFinished={(urls) => {
           form.setValue(name, isMultiple ? urls : urls[0]);
@@ -48,6 +48,7 @@ export const FieldImageMaskEditor: React.FC<IFieldImageMaskEditorProps> = ({
       >
         <Button
           variant="outline"
+          size="small"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -59,7 +60,7 @@ export const FieldImageMaskEditor: React.FC<IFieldImageMaskEditorProps> = ({
       </ImageMaskEditor>
       <motion.div
         className={cn(
-          'vines-center absolute left-0 top-0 z-10 size-full flex-col gap-4 overflow-hidden rounded-md bg-background p-4',
+          'vines-center absolute left-0 top-0 z-10 size-full flex-col gap-2 overflow-hidden rounded-md bg-background',
           maskEditorVisible && 'pointer-events-none z-0',
         )}
         initial={{ opacity: 0 }}
@@ -74,13 +75,11 @@ export const FieldImageMaskEditor: React.FC<IFieldImageMaskEditorProps> = ({
           )}
         >
           {value ? (
-            <ScrollArea style={{ height: maxHeight }}>
-              <img
-                src={value}
-                alt="mask"
-                className="aspect-square w-full transform rounded-lg object-cover object-center shadow transition-transform duration-200 ease-in-out"
-              />
-            </ScrollArea>
+            <VinesImage
+              src={value}
+              alt="mask"
+              className="aspect-square !h-40 !w-auto transform rounded-lg object-cover object-center shadow transition-transform duration-200 ease-in-out"
+            />
           ) : (
             <span className="text-sm text-gray-10">
               {t('workspace.pre-view.actuator.execution-form.mask-editor.empty')}

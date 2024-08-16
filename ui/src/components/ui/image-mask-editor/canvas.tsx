@@ -199,10 +199,10 @@ export const ImageMaskEditorCanvas: React.FC<IImageMaskEditorCanvasProps> = ({
     }
   };
 
-  const maskPointerOverHandler: PointerEventHandler<HTMLCanvasElement> = (event) => {
+  const maskPointerOverHandler: PointerEventHandler<HTMLCanvasElement> = () => {
     brushPreviewDivRef.current && (brushPreviewDivRef.current.style.display = 'block');
   };
-  const maskPointerLeaveHandler: PointerEventHandler<HTMLCanvasElement> = (event) => {
+  const maskPointerLeaveHandler: PointerEventHandler<HTMLCanvasElement> = () => {
     brushPreviewDivRef.current && (brushPreviewDivRef.current.style.display = 'none');
   };
 
@@ -326,9 +326,9 @@ export const ImageMaskEditorCanvas: React.FC<IImageMaskEditorCanvasProps> = ({
         className={cn('h-96 w-[40rem] overflow-hidden rounded-lg bg-slate-2 shadow', className)}
         style={{ maxWidth: `${maxWidth}px` }}
       >
+        <input type="file" accept="image/*" onChange={fileInputHandler} ref={fileInputRef} className="hidden" />
         <TransformComponent wrapperClass="max-h-full max-w-full">
           <div ref={canvasDivRef}>
-            <input type="file" accept="image/*" onChange={fileInputHandler} ref={fileInputRef} className="hidden" />
             <div
               ref={brushPreviewDivRef}
               id="brush-preview"
