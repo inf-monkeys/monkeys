@@ -44,7 +44,7 @@ export const MetadataFilter: React.FC<IMetadataFilterProps> = ({ metadata, onFil
   const { isDirty, isValid, errors } = form.formState;
   const isSubmittable = isDirty && isValid;
 
-  const finalMetadata = metadata.filter((it) => !fields.map((field) => field.key).includes(it.name));
+  const finalMetadata = metadata?.filter((it) => !fields?.map((field) => field.key)?.includes(it.name)) ?? [];
 
   return (
     <Tooltip>

@@ -93,7 +93,7 @@ export const ParagraphEditor: React.FC<IImportParagraphProps> = ({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={handleOnConfirm}>
-            {t('common.utils.save')}ƒ
+            {t('common.utils.save')}
           </Button>
         </DialogFooter>
       </DialogContent>
