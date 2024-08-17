@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { t } from 'i18next';
 import { FileText, FileType, FileUp, Import, UploadCloud } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 

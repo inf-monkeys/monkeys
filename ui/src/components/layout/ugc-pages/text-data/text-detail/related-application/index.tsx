@@ -54,7 +54,7 @@ export const RelatedApplication: React.FC<IRelatedApplicationProps> = ({ textId 
             </TableCell>
             <TableCell className="font-medium">
               <a
-                className="transition-colors hover:text-primary-500"
+                className="hover:text-primary-500 transition-colors"
                 href={`/${teamId}/workspace/${workflowId}`}
                 target="_blank"
                 rel="noreferrer"

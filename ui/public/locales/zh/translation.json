@@ -1107,34 +1107,34 @@
         },
         "subtitle": {
           "external-account": {
-            "button": "Credentials",
-            "title": "Credentials",
+            "button": "凭证",
+            "title": "凭证",
             "manage": {
-              "content": "All account information will be encrypted and stored without disclosing your key information (e.g. keys) and will not be sent back to the page",
+              "content": "所有账户信息将被加密存储，不会泄露您的密钥信息（例如密钥），也不会发送回页面",
               "columns": {
-                "name": "Name",
-                "operate": "Operations"
+                "name": "名称",
+                "operate": "操作"
               },
               "delete": {
-                "title": "Delete confirmation of third party account",
-                "content": "Are you sure you want to delete the third party account?\nDeleting this account will prevent it from being used properly in the workflow.\nThe operation cannot be undone."
+                "title": "删除第三方账户确认",
+                "content": "您确定要删除第三方账户吗？\n删除此账户将导致其无法在工作流中正常使用。\n此操作无法撤消。"
               },
               "create": {
-                "title": "Add {{name}}",
+                "title": "添加 {{name}}",
                 "columns": {
-                  "displayName": "Account Name"
+                  "displayName": "帐户名称"
                 },
                 "utils": {
-                  "name": "{{name}} account"
+                  "name": "{{name}} 帐户"
                 }
               }
             },
             "list": {
-              "create": "Add Account",
+              "create": "添加帐户",
               "count": {
-                "total_one": "Total {{count}} account, click to manage",
-                "total_other": "Total {{count}} accounts, click to manage",
-                "none": "No account, click to add one"
+                "total_one": "共 {{count}} 个帐户，点击即可管理",
+                "total_other": "共 {{count}} 个帐户，点击即可管理",
+                "none": "没有帐户，点击即可添加一个"
               }
             }
           }
@@ -1808,7 +1808,7 @@
             "content": {
               "label": "段落内容",
               "placeholder": "请输入段落内容",
-              "stats_one": "共计 {{count}} 字符"
+              "stats": "共计 {{count}} 字符"
             },
             "metadata": {
               "label": "段落元数据",
