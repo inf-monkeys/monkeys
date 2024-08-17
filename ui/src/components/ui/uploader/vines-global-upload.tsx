@@ -5,7 +5,6 @@ import { set } from 'lodash';
 import { CheckCircle2, FileClock, FileSearch, FileX2, Loader2 } from 'lucide-react';
 import { FileWithPath } from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 
 import { createMediaFile, getResourceByMd5 } from '@/apis/resources';
 import { VinesResourceImageParams, VinesResourceSource, VinesResourceType } from '@/apis/resources/typting.ts';
@@ -142,7 +141,6 @@ export const VinesGlobalUpload: React.FC<IVinesGlobalUploadProps> = () => {
       const fileNameArray = file.name.split('.');
       const fileNameWithoutSuffix = fileNameArray.length > 1 ? fileNameArray.slice(0, -1).join('.') : fileNameArray[0];
       const suffix = fileNameArray.length > 1 ? fileNameArray.pop() : null;
-      // const filename = `user-files/other/${it.id}_${escapeFileName(fileNameWithoutSuffix)}${suffix ? '.'.concat(suffix) : ''}`;
       const filename = `user-files/other/${it.id}_${fileNameWithoutSuffix}${suffix ? '.'.concat(suffix) : ''}`;
 
       it.status = 'busy';
@@ -187,7 +185,6 @@ export const VinesGlobalUpload: React.FC<IVinesGlobalUploadProps> = () => {
       setHiddenList([]);
       setIsUploading(false);
 
-      toast.success('上传完毕！');
       setTimeout(() => {
         onFinishRef.current?.(finalLists.map((it) => it?.url ?? '').filter((it) => it));
         setTimeout(() => {
@@ -223,7 +220,7 @@ export const VinesGlobalUpload: React.FC<IVinesGlobalUploadProps> = () => {
             <Separator />
             <div className="flex items-center gap-2">
               <Loader2 size={16} className="animate-spin" />
-              <span className="text-xs">共计 {filesCount} 份文件等待上传</span>
+              <span className="text-xs">{t('components.ui.updater.wait-to-upload', { filesCount })}</span>
             </div>
             <ScrollArea className="max-h-12">
               <div className="space-y-1">

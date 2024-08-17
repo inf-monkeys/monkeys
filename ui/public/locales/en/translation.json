@@ -196,26 +196,22 @@
         "upload-others": "Upload others"
       },
       "updater": {
-        "title_one": "Upload file",
-        "title_other": "Upload files",
-        "click-or-drag-area_one": "Click or drag to upload file",
-        "click-or-drag-area_other": "Click or drag to upload files",
+        "title": "Upload files",
+        "click-or-drag-area": "Click or drag to upload files",
         "toast": {
-          "file-too-small": "The file \"{{ filename }}\" size is too large",
-          "file-too-big": "The file \"{{ filename }}\" size is too small",
-          "too-many-files": "Too many files",
-          "filename-invalid": "The file \"{{ filename }}\"'s name is invalid.",
-          "file-invalid-type": "The file \"{{ filename }}\"'s type is invalid."
+          "file-too-small": "File '{{ filename }}' is too large",
+          "file-too-big": "File '{{ filename }}' is too small",
+          "too-many-files": "Too many files selected",
+          "filename-invalid": "File '{{ filename }}' has an invalid file name",
+          "file-invalid-type": "File '{{ filename }}' is not supported"
         },
         "hint": {
           "accept": {
-            "custom_one": "Only {{acceptString}} file can be uploaded.",
-            "custom_other": "Only {{acceptString}} files can be uploaded.",
-            "any": "Any file can be uploaded."
+            "custom": "Only support files in {{acceptString}} format",
+            "any": "Support uploading files of any format"
           },
-          "max-size": " Up to {{maxSize}}MB.",
-          "limit_one": "  Up to {{limit}} file.",
-          "limit_other": "  Up to {{limit}} files."
+          "max-size": "No more than {{maxSize}}MB",
+          "limit": "Upload up to {{limit}} files"
         },
         "file-list": {
           "toast": {
@@ -223,38 +219,35 @@
           },
           "info-table": {
             "caption": {
-              "remaining_one": "Can upload {{remaining}} file",
-              "remaining_other": "Can upload {{remaining}} files",
-              "none": "-"
+              "remaining": "Can continue to upload {{remaining}} files",
+              "none": "The end~"
             },
             "columns": {
-              "name": "Name",
+              "name": "File name",
               "type": "Type",
               "size": "Size",
               "status": "Status",
-              "operate": "Operations"
+              "operate": "Operation"
             }
           },
           "info-tooltip": {
-            "name": "Filename: ",
+            "name": "File name:",
             "md5": {
-              "index": "MD5: ",
+              "index": "MD5:",
               "in-progress": "Calculating ({{progress}}%)",
-              "waiting": "Waiting for calculating"
+              "waiting": "Waiting for calculation"
             }
           },
-          "count": "Total {{count}} files",
           "status": {
-            "waiting-for-file_one": "Waiting for file",
-            "waiting-for-file_other": "Waiting for files",
-            "waiting-for-uploading": "Waiting for uploading",
+            "waiting-for-file": "Waiting for file",
+            "waiting-for-uploading": "Waiting for operation upload",
             "upload-successful": "Upload successful",
-            "waiting-for-uploading-description": "(Click to upload)",
+            "waiting-for-uploading-description": "（Click here to upload）",
+            "count": "Total {{count}} files",
             "status": {
-              "upload": "Uploading",
-              "calculate": "Calculating",
-              "hint_one": "{{operate}} file",
-              "hint_other": "{{operate}} files"
+              "upload": "Upload",
+              "calculate": "Calculate",
+              "hint": "Operating files"
             }
           },
           "item-status": {
@@ -266,7 +259,8 @@
             "success": "File uploaded"
           }
         },
-        "remove": "Remove"
+        "remove": "Remove",
+        "wait-to-upload": "A total of {{filesCount}} files are waiting to be uploaded"
       },
       "vines-variable-editor": {
         "cannot-parse-toast": "VinesVariableEditor can't parse text!"
@@ -275,28 +269,39 @@
         "select-date": "Select date"
       },
       "vines-image-mask-editor": {
-        "title": "Image mask editor",
-        "label": {
-          "brush-size": "Brush size",
-          "opacity": "Opacity"
+        "preview": {
+          "label": "Edit mask",
+          "back": "Back"
         },
-        "operate": {
-          "select-image": "Select another image",
-          "mask-color": {
-            "placeholder": "Select mask color"
-          }
-        },
-        "toast": {
-          "no-file": "Please select a image file!"
+        "init": {
+          "failed-to-fetch": "Failed to fetch image!",
+          "failed-to-optimize": "Failed to optimize image!",
+          "optimize": "Optimizing image ({{progress}}%)",
+          "export": "Exporting image ({{progress}}%)",
+          "upload": "Uploading"
         },
         "toolbar": {
+          "select-image": "Select image from local",
+          "zoom-in": "Zoom in",
+          "fit-view": "Fit view",
+          "zoom-out": "Zoom out",
+          "editable": "Edit mode",
+          "move": "View mode",
           "brush": "Brush",
           "eraser": "Eraser",
-          "move": "Move Canvas",
-          "clear": "Clear Mask",
-          "brush-color": "Brush Color",
-          "more": "Brush Options"
-        }
+          "clear": "Clear canvas",
+          "preview": {
+            "label": "Preview window: {{status}}",
+            "open": "Show",
+            "close": "Hide"
+          },
+          "save": "Save mask"
+        },
+        "brush-bar": {
+          "rectangle": "Rectangular brush"
+        },
+        "failed-to-gen-mask": "Failed to generate mask!",
+        "finish": "Mask updated"
       },
       "multi-select": {
         "clear": "Clear All",
