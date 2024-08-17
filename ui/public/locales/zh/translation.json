@@ -253,7 +253,8 @@
             "success": "文件已上传"
           }
         },
-        "remove": "移除"
+        "remove": "移除",
+        "wait-to-upload": "共计 {{filesCount}} 份文件等待上传"
       },
       "vines-variable-editor": {
         "cannot-parse-toast": "VinesVariableEditor 无法解析文本！"
@@ -262,28 +263,40 @@
         "select-date": "选择日期"
       },
       "vines-image-mask-editor": {
-        "title": "图像遮罩编辑器",
-        "label": {
-          "brush-size": "笔刷尺寸",
-          "opacity": "不透明度"
+        "preview": {
+          "label": "编辑遮罩",
+          "back": "返回"
         },
-        "operate": {
-          "select-image": "重新选择图像",
-          "mask-color": {
-            "placeholder": "选择遮罩颜色"
-          }
-        },
-        "toast": {
-          "no-file": "请先选择图像文件！"
+        "init": {
+          "failed-to-fetch": "获取图片失败！",
+          "failed-to-optimize": "图片优化失败！",
+
+          "optimize": "正在优化图像（{{progress}}%）",
+          "export": "正在导出图像（{{progress}}%）",
+          "upload": "正在上传中"
         },
         "toolbar": {
+          "select-image": "从本地选择图片",
+          "zoom-in": "放大",
+          "fit-view": "适应视图",
+          "zoom-out": "缩小",
+          "editable": "编辑模式",
+          "move": "查看模式",
           "brush": "画笔",
           "eraser": "橡皮擦",
-          "move": "移动画布",
-          "clear": "清空涂层",
-          "brush-color": "画笔颜色",
-          "more": "画笔设置"
-        }
+          "clear": "清空画布",
+          "preview": {
+            "label": "预览窗口：{{status}}",
+            "open": "显示",
+            "close": "隐藏"
+          },
+          "save": "保存遮罩"
+        },
+        "brush-bar": {
+          "rectangle": "矩形画笔"
+        },
+        "failed-to-gen-mask": "生成遮罩失败！",
+        "finish": "遮罩已更新"
       },
       "multi-select": {
         "clear": "清空全部",

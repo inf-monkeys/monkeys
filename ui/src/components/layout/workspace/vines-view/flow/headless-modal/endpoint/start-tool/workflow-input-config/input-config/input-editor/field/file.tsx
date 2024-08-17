@@ -4,16 +4,14 @@ import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Uploader } from 'src/components/ui/uploader';
 
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card.tsx';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
-import { VinesImage } from '@/components/ui/image';
-import { VinesImageMaskEditor } from '@/components/ui/image-mask-editor';
+import { VinesImageMaskPreview } from '@/components/ui/image-editor/mask/preview.tsx';
 import { Label } from '@/components/ui/label.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Switch } from '@/components/ui/switch';
 import { IWorkflowInput } from '@/schema/workspace/workflow-input.ts';
 import { useFlowStore } from '@/store/useFlowStore';
-import { cn } from '@/utils';
 
 interface IFieldFileProps extends React.ComponentPropsWithoutRef<'div'> {
   form: UseFormReturn<IWorkflowInput>;
@@ -33,37 +31,21 @@ export const FieldFile: React.FC<IFieldFileProps> = ({ form }) => {
         <Separator orientation="vertical" className="mx-2" />
         <div className="space-y-2">
           {enableImageMask ? (
-            <div className="flex w-96 flex-col gap-4">
+            <div className="flex w-[30rem] flex-col gap-4">
               <Label>{t('workspace.flow-view.endpoint.start-tool.input.config-form.file.label', { extra: '' })}</Label>
               <FormField
                 name="default"
                 control={form.control}
-                render={({ field: { value } }) => {
-                  const src = value?.toString();
-                  return (
-                    <>
-                      {src && (
-                        <VinesImage
-                          src={src}
-                          alt="image"
-                          className={cn(
-                            '!h-52 !w-auto rounded-md border border-input bg-background object-cover shadow-md',
-                            !src && 'hidden',
-                          )}
-                        />
-                      )}
-                      <div className={cn('vines-center w-full', !src && 'rounded-md border border-input py-16')}>
-                        <VinesImageMaskEditor onFinished={(urls) => form.setValue('default', urls[0])}>
-                          <Button variant="outline" size="small" className="-mr-1 scale-90">
-                            {t(
-                              'workspace.pre-view.actuator.execution-form.file.click-to-open-in-image-mask-editor-and-upload',
-                            )}
-                          </Button>
-                        </VinesImageMaskEditor>
-                      </div>
-                    </>
-                  );
-                }}
+                render={({ field: { value } }) => (
+                  <Card className="w-full overflow-hidden">
+                    <CardContent className="relative p-2">
+                      <VinesImageMaskPreview
+                        src={value?.toString() ?? ''}
+                        onFinished={(val) => form.setValue('default', val)}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
               />
             </div>
           ) : (

@@ -1,15 +1,14 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { isArray, isString, set } from 'lodash';
 import { FileWithPath } from 'react-dropzone';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { IUpdaterProps, Uploader, VinesUploader } from 'src/components/ui/uploader';
 
-import { FieldImageMaskEditor } from '@/components/layout/workspace/vines-view/form/tabular/render/field/file/field-image-mask-editor.tsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card.tsx';
-import { VinesImageMaskEditor } from '@/components/ui/image-mask-editor';
-import { IUpdaterProps, Uploader, VinesUploader } from 'src/components/ui/uploader';
+import { VinesImageMaskPreview, VinesImageMaskPreviewDialog } from '@/components/ui/image-editor/mask/preview.tsx';
 import { getFileNameByOssUrl } from '@/components/ui/uploader/utils.ts';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
@@ -60,15 +59,6 @@ export const FieldFile: React.FC<IFieldFileProps> = ({
     setFiles(newFiles);
   }, [value]);
 
-  const [width, setWidth] = useState<number>();
-  const [height, setHeight] = useState<number>();
-  const containerRef = useCallback((node: HTMLDivElement) => {
-    if (node) {
-      setWidth(node.getBoundingClientRect().width - 40);
-      setHeight(node.getBoundingClientRect().height - 116);
-    }
-  }, []);
-
   const updaterProps: IUpdaterProps = {
     files,
     onFilesUpdate: (_files) => {
@@ -103,11 +93,14 @@ export const FieldFile: React.FC<IFieldFileProps> = ({
             <span className="text-xs text-opacity-70">
               {t('workspace.pre-view.actuator.execution-form.file.label')}
             </span>
-            <VinesImageMaskEditor onFinished={(urls) => form.setValue(name, isMultiple ? urls : urls[0])}>
+            <VinesImageMaskPreviewDialog
+              src={value}
+              onFinished={(val) => form.setValue(name, isMultiple ? [val] : val)}
+            >
               <Button variant="outline" size="small" className="-mr-1 scale-90">
                 {t('workspace.pre-view.actuator.execution-form.file.click-to-open-in-image-mask-editor-and-upload')}
               </Button>
-            </VinesImageMaskEditor>
+            </VinesImageMaskPreviewDialog>
           </div>
         ) : (
           <div className="flex items-center justify-between">
@@ -123,17 +116,10 @@ export const FieldFile: React.FC<IFieldFileProps> = ({
         )}
       </>
     ) : (
-      <Card className="w-full overflow-hidden max-sm:max-w-[calc(100vw-3rem)]" ref={containerRef}>
+      <Card className="w-full overflow-hidden max-sm:max-w-[calc(100vw-3rem)]">
         <CardContent className="relative p-2">
           {enableImageMask ? (
-            <FieldImageMaskEditor
-              form={form}
-              name={name}
-              value={value}
-              isMultiple={isMultiple}
-              maxHeight={height}
-              maxWidth={width}
-            />
+            <VinesImageMaskPreview src={value} onFinished={(val) => form.setValue(name, isMultiple ? [val] : val)} />
           ) : (
             <Uploader mode="embed" {...updaterProps} />
           )}
