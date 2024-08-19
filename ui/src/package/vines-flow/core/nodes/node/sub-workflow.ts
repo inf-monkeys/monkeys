@@ -98,7 +98,7 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
   }
 
   override get needRenderChildren() {
-    return !this.isNested || this._vinesCore.executionStatus === 'RUNNING';
+    return !this.isNested || this._vinesCore.executionStatus() === 'RUNNING';
   }
 
   // region Render
@@ -303,9 +303,9 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
   // endregion
 
   private _prevExecutionData: Partial<VinesWorkflowExecution> | undefined;
-  override async updateStatus(task: VinesNodeExecutionTask): Promise<boolean> {
-    await super.updateStatus(task);
-    if (['IN_PROGRESS', 'COMPLETED', 'SCHEDULED'].includes(this.executionStatus ?? '')) {
+  override async updateExecutionTask(instanceId: string, task: VinesNodeExecutionTask): Promise<boolean> {
+    await super.updateExecutionTask(instanceId, task, true);
+    if (['IN_PROGRESS', 'COMPLETED', 'SCHEDULED'].includes(this.getExecutionTask(instanceId)?.status ?? '')) {
       const instanceId = task.outputData?.subWorkflowId;
       if (!instanceId) return false;
 
@@ -329,7 +329,7 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
         const taskId = _task.workflowTask?.taskReferenceName;
         if (!taskId) continue;
         const childNode = this.findChildById(taskId);
-        if ((await childNode?.updateStatus(_task)) && !needRender) {
+        if ((await childNode?.updateExecutionTask(instanceId, _task, true)) && !needRender) {
           needRender = true;
         }
       }

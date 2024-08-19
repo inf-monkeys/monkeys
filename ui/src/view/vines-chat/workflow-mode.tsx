@@ -27,7 +27,7 @@ export const VinesWorkflowMode: React.FC<IVinesWorkflowModeProps> = ({ height, d
 
   const { vines } = useVinesFlow();
 
-  const isExecutionStatus = vines.executionStatus;
+  const isExecutionStatus = vines.executionStatus();
   const isExecutionPaused = isExecutionStatus === 'PAUSED';
   const isExecutionRunning = isExecutionStatus === 'RUNNING' || isExecutionPaused;
 
@@ -35,7 +35,6 @@ export const VinesWorkflowMode: React.FC<IVinesWorkflowModeProps> = ({ height, d
 
   const handleExecutionWorkflow = (inputData: Record<string, any> = {}) => {
     vines.start({ inputData, chatSessionId: sessions[workflowId] });
-    vines.executionStatus = 'RUNNING';
     vines.emit('refresh');
 
     setTimeout(() => void mutate((key) => isArray(key) && key?.[0] === '/api/workflow/executions/search'), 1000);

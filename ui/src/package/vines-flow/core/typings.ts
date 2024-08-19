@@ -46,7 +46,8 @@ export type VinesWorkflowExecutionType =
   | 'PAUSED'
   | 'CANCELED'; // Vines 内置状态
 
-export type VinesWorkflowExecution = Omit<WorkflowExecution, 'tasks'> & {
+export type VinesWorkflowExecution = Omit<WorkflowExecution, 'tasks' | 'status'> & {
+  status?: VinesWorkflowExecutionType;
   tasks: VinesNodeExecutionTask[];
   originTasks: Array<Task>;
   triggerType?: WorkflowTriggerType;
