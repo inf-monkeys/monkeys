@@ -38,7 +38,7 @@ export const ChatSession: React.FC<IChatSessionProps> = ({ session, active, onCl
     >
       <MessageSquare size={16} />
       <span className="text-sm">{sessionDisplayName}</span>
-      {disableDelete && (
+      {!disableDelete && (
         <div
           className={cn(
             'flex flex-1 justify-end opacity-0 transition-opacity group-hover:opacity-100',

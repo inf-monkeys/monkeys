@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { updateWorkflow } from '@/apis/workflow';
-import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
+import { useVinesOriginWorkflow } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
@@ -34,7 +34,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const { workflow: vinesPageWorkflow, mutateWorkflow } = useVinesPage();
+  const { workflow: vinesPageWorkflow, mutateWorkflow } = useVinesOriginWorkflow();
 
   const [open, setOpen] = useState(visible ?? false);
   const [isLoading, setIsLoading] = useState(false);
