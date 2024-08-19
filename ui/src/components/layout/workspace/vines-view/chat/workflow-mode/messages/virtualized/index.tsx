@@ -9,9 +9,10 @@ import { VinesRealTimeChatMessage } from '@/components/layout/workspace/vines-vi
 
 interface IVirtualizedListProps {
   data: IVinesChatListItem[];
+  useSimple?: boolean;
 }
 
-export const VirtualizedList = memo<IVirtualizedListProps>(({ data }) => {
+export const VirtualizedList = memo<IVirtualizedListProps>(({ data, useSimple }) => {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const [atBottom, setAtBottom] = useState(true);
 
@@ -35,11 +36,15 @@ export const VirtualizedList = memo<IVirtualizedListProps>(({ data }) => {
         followOutput={'auto'}
         initialTopMostItemIndex={LastItemIndex}
         itemContent={(index: number, data: IVinesChatListItem) => {
-          return <ChatMessage data={data} isLast={index === LastItemIndex} />;
+          return <ChatMessage data={data} isLast={index === LastItemIndex} useSimple={useSimple} />;
         }}
-        components={{
-          Footer: VinesRealTimeChatMessage,
-        }}
+        components={
+          useSimple
+            ? {}
+            : {
+                Footer: VinesRealTimeChatMessage,
+              }
+        }
         overscan={overScan}
         ref={virtuosoRef}
       />

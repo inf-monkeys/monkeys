@@ -2926,7 +2926,14 @@
           "completed": "No input has been configured yet, you can execute it directly"
         },
         "instance-id-tips": "Instance ID",
-        "manually-trigger": "Manual or automatic execution trigger"
+        "manually-trigger": "Manual or automatic execution trigger",
+        "options": {
+          "label": "Preferences",
+          "hide-execution-process": {
+            "label": "Hide workflow execution process",
+            "tips": "After hiding, the detailed process will no longer be displayed when the workflow is executed"
+          }
+        }
       },
       "empty": "No conversation yet",
       "back-to-bottom": "Back to bottom"

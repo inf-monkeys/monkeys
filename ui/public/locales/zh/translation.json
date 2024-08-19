@@ -2920,7 +2920,14 @@
           "completed": "暂未配置输入，可直接运行"
         },
         "instance-id-tips": "运行实例 ID",
-        "manually-trigger": "手动或自动执行触发"
+        "manually-trigger": "手动或自动执行触发",
+        "options": {
+          "label": "偏好设置",
+          "hide-execution-process": {
+            "label": "隐藏工作流执行过程",
+            "tips": "隐藏后，工作流执行时将不再显示详细过程"
+          }
+        }
       },
       "empty": "暂无对话",
       "back-to-bottom": "回到底部"
