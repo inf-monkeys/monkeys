@@ -1,7 +1,7 @@
 import { AssetFilter, ListDto } from '@/common/dto/list.dto';
 import { generateDbId } from '@/common/utils';
 import { AssetType } from '@inf-monkeys/monkeys';
-import { Between, FindOptionsOrder, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { Between, FindManyOptions, FindOptionsOrder, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { AssetPublishConfig, BaseAssetEntity } from '../entities/assets/base-asset';
 import { AssetsCommonRepository, AssetsFillAdditionalInfoOptions } from './assets-common.repository';
 
@@ -70,6 +70,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     teamId: string,
     dto: ListDto,
     options?: AssetsFillAdditionalInfoOptions,
+    findOptions?: FindManyOptions<E>,
   ): Promise<{
     list: E[];
     totalCount: number;
@@ -105,6 +106,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
       } as FindOptionsOrder<E>,
       take: +limit,
       skip: (+page - 1) * +limit,
+      ...findOptions,
     });
     const totalCount = await this.repository.count({
       where: [

@@ -240,7 +240,11 @@ export class ComfyUIService {
     return await this.comfyuiWorkflowRepository.listServers(teamId);
   }
 
-  private async testComfyuiServerConnection(address: string): Promise<{ success: boolean; errMsg: string }> {
+  public async getComfyuiServerById(teamId: string, serverId: string) {
+    return await this.comfyuiWorkflowRepository.getComfyuiServerById(teamId, serverId);
+  }
+
+  public async testComfyuiServerConnection(address: string): Promise<{ success: boolean; errMsg: string }> {
     try {
       await axios({
         method: 'GET',

@@ -178,4 +178,13 @@ export class ComfyuiRepository {
       },
     );
   }
+
+  public async getComfyuiServerById(teamId: string, serverId: string) {
+    return await this.comfyuiServerRepository.findOne({
+      where: {
+        teamId,
+        id: serverId,
+      },
+    });
+  }
 }

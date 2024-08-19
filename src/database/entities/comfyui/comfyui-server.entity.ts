@@ -1,4 +1,5 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
+import { ComfyuiModelServerRelationEntity } from '../assets/model/comfyui-model/comfyui-model-server-relation.entity';
 import { BaseEntity } from '../base/base';
 
 export enum ComfyuiServerStatus {
@@ -53,4 +54,7 @@ export class ComfyuiServerEntity extends BaseEntity {
     default: false,
   })
   isDefault: boolean;
+
+  @OneToMany(() => ComfyuiModelServerRelationEntity, (models) => models.server)
+  models: ComfyuiModelServerRelationEntity[];
 }
