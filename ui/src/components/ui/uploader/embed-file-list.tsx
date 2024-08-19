@@ -212,9 +212,9 @@ export const EmbedFileList: React.FC<IEmbedFileListProps> = ({
               <Label className="text-xs">
                 {t('components.ui.updater.file-list.status.count', { count: needUpdateListLength })}
               </Label>
-              <div className="-my-2 -mr-8 flex flex-1 scale-90 justify-end">
+              <div className="-my-2 -mr-3 flex flex-1 justify-end">
                 {isWaitToUpload && !isUploading && (
-                  <Button variant="outline" size="small" onClick={handleOnClickUpload}>
+                  <Button className="h-7" variant="outline" size="small" onClick={handleOnClickUpload}>
                     {t('components.ui.updater.file-list.status.status.upload')}
                   </Button>
                 )}

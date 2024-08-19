@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { Uploader } from 'src/components/ui/uploader';
 
 import { useUploadDocumentToKnowledgeBase } from '@/apis/vector';
 import { IUploadDocument } from '@/apis/vector/typings.ts';
@@ -24,7 +25,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
-import { Uploader } from 'src/components/ui/uploader';
 import { IImportFile, importFileSchema, PRE_PROCESS_RULES } from '@/schema/text-dataset/import-file.ts';
 
 interface IImportFileProps {

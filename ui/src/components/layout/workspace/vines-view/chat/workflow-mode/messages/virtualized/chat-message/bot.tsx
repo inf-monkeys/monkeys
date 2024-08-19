@@ -3,7 +3,7 @@ import React, { memo } from 'react';
 import { Copy, Workflow } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { ExecutionStatusIcon } from '@/components/layout/workspace/vines-view/execution/status-icon';
+import { ExecutionStatusIcon } from '@/components/layout/workspace/vines-view/_common/status-icon';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription } from '@/components/ui/card.tsx';
 import { Separator } from '@/components/ui/separator.tsx';

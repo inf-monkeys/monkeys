@@ -46,8 +46,7 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
 
     // ... other methods
     private checkoutData() {
-      // this.tools = this.vinesTools.concat(this.vinesSubWorkflowTools);
-      this.tools = this.vinesTools;
+      this.tools = this.vinesTools.concat(this.vinesSubWorkflowTools);
       if (this.status !== VINES_STATUS.IDLE) return;
       if (this.toolInitialized && this.subWorkflowInitialized && this.comfyUIInitialized) {
         this.status = VINES_STATUS.READY;

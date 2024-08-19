@@ -1,4 +1,4 @@
-import { get, merge, set, setWith } from 'lodash';
+import { get, merge, setWith } from 'lodash';
 import { customAlphabet } from 'nanoid';
 
 import { VinesNode, VinesSubWorkflowTaskDef } from '@/package/vines-flow/core/nodes';
@@ -10,7 +10,6 @@ import {
   type SubWorkflowTaskDef,
   SwitchTaskDef,
   TaskType,
-  WorkflowTask,
 } from '@/package/vines-flow/share/types.ts';
 
 export const createNanoId = customAlphabet('6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz', 8);
@@ -61,90 +60,63 @@ export function createSubWorkflowDef(tasks: VinesTask[]) {
   return subWorkflowTaskDef as VinesSubWorkflowTaskDef;
 }
 
-// TODO: SHIT OF CODE !!!
-// region SHIT OF CODE !!!
-export const createTask = (tool: VinesToolDef, extendObject = {}) => {
+const createFakeNode = () => {
+  return {
+    name: 'fake_node',
+    taskReferenceName: `fake_node_${createNanoId()}`,
+    type: 'SIMPLE' as TaskType.SIMPLE,
+  };
+};
+
+export const createTask = (tool: VinesToolDef, extendObject = {}): VinesTask => {
   const { name, type, input: properties } = tool;
-  const inputParameters = autoTypeTransform(properties, {});
   const newTaskRefName = `${name}_${createNanoId()}`;
+  const inputParameters = autoTypeTransform(properties, {});
+
   const newTask: VinesTask = {
     name,
     type: type as never,
     taskReferenceName: newTaskRefName,
-    inputParameters,
+    inputParameters: {
+      ...inputParameters,
+      __advancedConfig: {
+        timeout: get(tool, 'extra.defaultTimeout', 3600),
+      },
+    },
   };
 
-  set(newTask, 'inputParameters.__advancedConfig.timeout', get(tool, 'extra.defaultTimeout', 3600));
+  merge(newTask, get(tool, '_preset', {}), extendObject);
 
-  merge(newTask, merge(get(tool, '_preset', {}), extendObject));
-
-  // 将特殊的字段提取到 inputParameters 外
+  // 提取特殊字段
   const { loopCondition, evaluatorType, expression, ...rest } = newTask.inputParameters as any;
   newTask.inputParameters = rest;
-  if (typeof loopCondition !== 'undefined') {
-    (newTask as WorkflowTask).loopCondition = loopCondition as string;
-  }
-  if (typeof evaluatorType !== 'undefined') {
-    (newTask as WorkflowTask).evaluatorType = evaluatorType as never;
-  }
-  if (typeof expression !== 'undefined') {
-    (newTask as WorkflowTask).expression = expression as never;
-  }
 
-  // 补充 fake 节点
-  if (type === 'DO_WHILE') {
-    (newTask as unknown as DoWhileTaskDef).loopOver = [
-      {
-        name: 'fake_node',
-        taskReferenceName: `fake_node_${createNanoId()}`,
-        type: 'SIMPLE' as TaskType.SIMPLE,
-      },
-    ];
-  }
-  if (type === 'SWITCH') {
-    (newTask as unknown as SwitchTaskDef).decisionCases = {
-      switchTrue: [
-        {
-          name: 'fake_node',
-          taskReferenceName: `fake_node_${createNanoId()}`,
-          type: 'SIMPLE' as TaskType.SIMPLE,
-        },
-      ],
-      switchFalse: [
-        {
-          name: 'fake_node',
-          taskReferenceName: `fake_node_${createNanoId()}`,
-          type: 'SIMPLE' as TaskType.SIMPLE,
-        },
-      ],
-    };
-  }
-  if (type === 'FORK_JOIN') {
-    (newTask as unknown as ForkJoinTaskDef).forkTasks = [
-      [
-        {
-          name: 'fake_node',
-          taskReferenceName: `fake_node_${createNanoId()}`,
-          type: 'SIMPLE' as TaskType.SIMPLE,
-        },
-      ],
-      [
-        {
-          name: 'fake_node',
-          taskReferenceName: `fake_node_${createNanoId()}`,
-          type: 'SIMPLE' as TaskType.SIMPLE,
-        },
-      ],
-    ];
-  }
-
-  const reNewTask = replaceBuiltInValue(newTask, {
-    _TaskRefName_: newTaskRefName,
+  Object.assign(newTask, {
+    ...(loopCondition !== undefined && { loopCondition }),
+    ...(evaluatorType !== undefined && { evaluatorType: evaluatorType as never }),
+    ...(expression !== undefined && { expression: expression as never }),
   });
 
-  return reNewTask as VinesTask;
+  // 补充特定类型的 fake 节点
+  switch (type) {
+    case 'DO_WHILE':
+      (newTask as unknown as DoWhileTaskDef).loopOver = [createFakeNode()];
+      break;
+    case 'SWITCH':
+      (newTask as unknown as SwitchTaskDef).decisionCases = {
+        switchTrue: [createFakeNode()],
+        switchFalse: [createFakeNode()],
+      };
+      break;
+    case 'FORK_JOIN':
+      (newTask as unknown as ForkJoinTaskDef).forkTasks = [[createFakeNode()], [createFakeNode()]];
+      break;
+  }
+
+  return replaceBuiltInValue(newTask, { _TaskRefName_: newTaskRefName }) as VinesTask;
 };
-export const VARIABLE_REGEXP = /\$\{[a-zA-Z0-9_]+\.[a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)*}/g;
+
+export const VARIABLE_REGEXP = /\$\{[a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)*}/g;
 
 export const autoTypeTransform = (
   properties: VinesToolDefProperties[] | undefined,
@@ -153,46 +125,34 @@ export const autoTypeTransform = (
   properties?.forEach(({ name, type, default: defaultValue, typeOptions }) => {
     const value = get(obj, name);
 
-    if (value !== undefined) {
-      const valueType = typeof value;
+    if (value !== undefined && !VARIABLE_REGEXP.test(value as string)) {
+      const setValue = (val: unknown) => setWith(obj, name, val);
 
-      // 跳过含有变量的情况
-      if (!VARIABLE_REGEXP.test(value as string)) {
-        switch (type) {
-          case 'boolean':
-            if (valueType === 'string') {
-              setWith(obj, name, value === 'true');
-            }
-            break;
-          case 'number':
-            if (!Number.isNaN(Number(value))) {
-              setWith(obj, name, Number(value));
-            }
-            break;
-          case 'string':
-            setWith(obj, name, (value as unknown)?.toString()?.trim() ?? null);
-            break;
-          default:
-            break;
-        }
-
-        if (typeOptions?.multipleValues) {
-          if (!Array.isArray(value)) {
-            setWith(obj, name, (value as unknown)?.toString()?.split(',') ?? defaultValue);
+      switch (type) {
+        case 'boolean':
+          if (typeof value === 'string') setValue(value === 'true');
+          break;
+        case 'number':
+          // eslint-disable-next-line no-case-declarations
+          const num = Number(value);
+          if (!Number.isNaN(num)) {
+            setValue(num);
           }
-        }
+          break;
+        case 'string':
+          setValue((value as unknown)?.toString()?.trim() ?? null);
+          break;
       }
-    } else if (defaultValue !== void 0) {
+
+      if (typeOptions?.multipleValues && !Array.isArray(value)) {
+        setValue((value as unknown)?.toString()?.split(',') ?? defaultValue);
+      }
+    } else if (defaultValue !== undefined) {
       setWith(obj, name, defaultValue);
-    } else {
-      // 最次最次用系统默认值
-      if (type === 'string') {
-        // setWith(obj, name, null);
-      } else if (typeOptions?.multipleValues) {
-        setWith(obj, name, []);
-      } else if (type === 'boolean') {
-        setWith(obj, name, false);
-      }
+    } else if (type === 'boolean') {
+      setWith(obj, name, false);
+    } else if (typeOptions?.multipleValues) {
+      setWith(obj, name, []);
     }
   });
 
@@ -200,19 +160,21 @@ export const autoTypeTransform = (
 };
 
 export const replaceBuiltInValue = (obj: any, builtValues: Record<string, string>): any => {
-  for (const [key, value] of Object.entries(obj)) {
-    if (typeof value === 'string') {
-      for (const [builtInKey, builtInValue] of Object.entries(builtValues)) {
-        if (value.includes(builtInKey)) {
-          obj[key] = value.replace(builtInKey, builtInValue);
-        }
-      }
-    } else if (typeof value === 'object' && value !== null) {
-      replaceBuiltInValue(value, builtValues);
-    } else if (Array.isArray(value) && value) {
-      value.forEach((v) => replaceBuiltInValue(v, builtValues));
+  const replace = (value: string) =>
+    Object.entries(builtValues).reduce((acc, [key, val]) => acc.replace(key, val), value);
+
+  const traverse = (item: any): any => {
+    if (typeof item === 'string') {
+      return replace(item);
     }
-  }
-  return obj;
+    if (Array.isArray(item)) {
+      return item.map(traverse);
+    }
+    if (typeof item === 'object' && item !== null) {
+      return Object.fromEntries(Object.entries(item).map(([key, val]) => [key, traverse(val)]));
+    }
+    return item;
+  };
+
+  return traverse(obj);
 };
-// endregion SHIT OF CODE !!!

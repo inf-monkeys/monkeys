@@ -29,7 +29,7 @@ export const StartTool: React.FC<IStartToolProps> = () => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen} modal={false}>
-      <DialogContent>
+      <DialogContent className="h-[38rem]">
         <DialogTitle>{t('workspace.flow-view.endpoint.start-tool.title')}</DialogTitle>
         <WorkflowInputConfig />
       </DialogContent>

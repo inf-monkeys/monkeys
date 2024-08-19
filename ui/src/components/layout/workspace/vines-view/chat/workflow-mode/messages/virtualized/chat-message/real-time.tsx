@@ -2,9 +2,9 @@ import React, { memo, RefObject, useEffect, useState } from 'react';
 
 import { VirtuosoHandle } from 'react-virtuoso';
 
+import { VinesActuatorDetailData } from '@/components/layout/workspace/vines-view/_common/actuator/detail/content/data.tsx';
+import { ExecutionStatusIcon } from '@/components/layout/workspace/vines-view/_common/status-icon';
 import { VinesBotChatMessage } from '@/components/layout/workspace/vines-view/chat/workflow-mode/messages/virtualized/chat-message/bot.tsx';
-import { VinesActuatorDetailData } from '@/components/layout/workspace/vines-view/execution/actuator/detail/content/data.tsx';
-import { ExecutionStatusIcon } from '@/components/layout/workspace/vines-view/execution/status-icon';
 import { Card, CardContent, CardHeader } from '@/components/ui/card.tsx';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';

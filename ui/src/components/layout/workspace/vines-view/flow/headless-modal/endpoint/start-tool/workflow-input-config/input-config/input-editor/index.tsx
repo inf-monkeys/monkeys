@@ -192,7 +192,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen} modal={false}>
-      <DialogContent className="w-auto max-w-5xl">
+      <DialogContent className="w-auto max-w-6xl">
         <DialogTitle>{t('workspace.flow-view.endpoint.start-tool.input.config-form.title')}</DialogTitle>
         <Form {...form}>
           <form
@@ -201,8 +201,8 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
             onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
           >
             <div className="flex gap-2">
-              <ScrollArea className="-mx-3 h-80 px-3">
-                <div className="flex w-80 max-w-md flex-col gap-2 px-1">
+              <ScrollArea className="-mx-3 h-[25rem] px-3">
+                <div className="flex w-96 max-w-md flex-col gap-2 px-1">
                   <FieldDisplayName form={form} />
                   <FieldType form={form} forceUpdate={forceUpdate} />
                   <FieldDefaultValue form={form} />

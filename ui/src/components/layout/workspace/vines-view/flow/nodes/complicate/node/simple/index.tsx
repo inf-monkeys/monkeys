@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { CircleEllipsisIcon, Save } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { ExecutionStatusIcon } from '@/components/layout/workspace/vines-view/execution/status-icon';
+import { ExecutionStatusIcon } from '@/components/layout/workspace/vines-view/_common/status-icon';
 import { ToolAdvancedConfig } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/advanced-config';
 import { ToolInput } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input';
 import { ToolCustomDataEditor } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/header/node-custom-editor/editor.tsx';
