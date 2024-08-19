@@ -26,8 +26,15 @@ export const useVinesPage = () => {
     teamId,
   } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
 
-  const storeWorkflowId = useFlowStore((s) => s.workflowId);
-  const workflowId = routeWorkflowId ?? storeWorkflowId;
+  let workflowId = routeWorkflowId;
+  try {
+    const storeWorkflowId = useFlowStore((s) => s.workflowId);
+    if (storeWorkflowId) {
+      workflowId = storeWorkflowId;
+    }
+  } catch {
+    /* empty */
+  }
 
   const page = usePageStore((s) => s.page);
   const pageId = routePageId ?? page?.id ?? '';
