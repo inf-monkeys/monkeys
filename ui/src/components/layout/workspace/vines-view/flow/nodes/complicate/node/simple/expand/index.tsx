@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { has } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import { VinesActuatorDetail } from '@/components/layout/workspace/vines-view/execution/actuator/detail';
+import { VinesActuatorDetail } from '@/components/layout/workspace/vines-view/_common/actuator/detail';
 import { ToolOutput } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-output';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
 
