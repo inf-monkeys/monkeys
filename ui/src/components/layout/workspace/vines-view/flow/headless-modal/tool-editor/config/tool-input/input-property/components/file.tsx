@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 
 import { get, isArray, isString, set } from 'lodash';
 import { FileWithPath } from 'react-dropzone';
+import { Uploader } from 'src/components/ui/uploader';
 
 import { IVinesInputPropertyProps } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
-import { Uploader } from 'src/components/ui/uploader';
+import { Card, CardContent } from '@/components/ui/card.tsx';
 import { getFileNameByOssUrl } from '@/components/ui/uploader/utils.ts';
 
 export const FileInput: React.FC<IVinesInputPropertyProps> = ({ def, value, onChange }) => {
@@ -44,31 +45,33 @@ export const FileInput: React.FC<IVinesInputPropertyProps> = ({ def, value, onCh
   }, [value]);
 
   return (
-    <>
-      <Uploader
-        files={files}
-        onFilesUpdate={(_files) => {
-          const updateFilesLength = _files.length;
-          if (!updateFilesLength) return;
-          if (updateFilesLength < files.length) {
-            if (multipleValues) {
-              onChange(_files.map((it) => it.path));
-            } else {
-              onChange(_files.map((it) => it.path)[0]);
+    <Card>
+      <CardContent className="p-2">
+        <Uploader
+          files={files}
+          onFilesUpdate={(_files) => {
+            const updateFilesLength = _files.length;
+            if (!updateFilesLength) return;
+            if (updateFilesLength < files.length) {
+              if (multipleValues) {
+                onChange(_files.map((it) => it.path));
+              } else {
+                onChange(_files.map((it) => it.path)[0]);
+              }
             }
+          }}
+          accept={finalAccept}
+          maxSize={finalMaxSize}
+          limit={multipleValues ? void 0 : 1}
+          onFinished={(urls) =>
+            onChange(
+              multipleValues ? [...files.map((it) => it.path), ...urls] : [...files.map((it) => it.path), ...urls][0],
+            )
           }
-        }}
-        accept={finalAccept}
-        maxSize={finalMaxSize}
-        limit={multipleValues ? void 0 : 1}
-        onFinished={(urls) =>
-          onChange(
-            multipleValues ? [...files.map((it) => it.path), ...urls] : [...files.map((it) => it.path), ...urls][0],
-          )
-        }
-        basePath="user-files/workflow-input"
-        mode="embed"
-      />
-    </>
+          basePath="user-files/workflow-input"
+          mode="embed"
+        />
+      </CardContent>
+    </Card>
   );
 };
