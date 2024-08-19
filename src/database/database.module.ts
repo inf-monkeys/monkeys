@@ -25,6 +25,7 @@ import { CanvasApplicationEntity } from './entities/assets/canvas/canvas';
 import { SqlKnowLedgeBaseEntity } from './entities/assets/knowledge-base/knowledge-base-sql.entity';
 import { KnowLedgeBaseEntity } from './entities/assets/knowledge-base/knowledge-base.entity';
 import { MediaFileEntity } from './entities/assets/media/media-file';
+import { ComfyuiModelServerRelationEntity } from './entities/assets/model/comfyui-model/comfyui-model-server-relation.entity';
 import { ComfyuiModelTypeEntity } from './entities/assets/model/comfyui-model/comfyui-model-type.entity';
 import { ComfyuiModelEntity } from './entities/assets/model/comfyui-model/comfyui-model.entity';
 import { LlmChannelEntity } from './entities/assets/model/llm-channel/llm-channel.entity';
@@ -80,6 +81,7 @@ export const entities: EntityClassOrSchema[] = [
   ComfyuiServerEntity,
   ComfyuiModelEntity,
   ComfyuiModelTypeEntity,
+  ComfyuiModelServerRelationEntity,
   OneApiUsersEntity,
   ConversationAppEntity,
   ConversationExecutionEntity,
