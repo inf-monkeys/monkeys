@@ -14,28 +14,25 @@ import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
-import { useCanvasStore } from '@/store/useCanvasStore';
-import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { cn } from '@/utils';
-import VinesEvent from '@/utils/events.ts';
 
 interface IVinesActuatorProps {
   height: number;
   children?: React.ReactNode;
+  instanceId?: string;
+  onRestart?: () => void;
 }
 
-export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height, children }) => {
+export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height, instanceId, children, onRestart }) => {
   const [activeTool, setActiveTool] = useState<VinesNode>();
-
-  const setCanvasMode = useCanvasStore((s) => s.setCanvasMode);
 
   const [sidebarVisible, setSidebarVisible] = useState(document.body.clientWidth > 520);
 
   const { vines } = useVinesFlow();
 
-  const workflowExecution = vines.executionWorkflowExecution;
+  const workflowExecution = vines.getWorkflowExecution(instanceId);
 
-  const workflowStatus = workflowExecution?.status ?? '';
+  const workflowStatus = workflowExecution?.status ?? 'SCHEDULED';
   const isExecutionPaused = workflowStatus === 'PAUSED';
   const isExecutionRunning = workflowStatus === 'RUNNING' || isExecutionPaused;
 
@@ -55,7 +52,10 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height, children 
       transition={{ duration: 0.2 }}
       className="absolute left-0 top-0 flex size-full flex-col gap-4"
     >
-      <ActuatorHeader workflowStatus={workflowStatus} instanceId={vines.executionInstanceId}>
+      <ActuatorHeader
+        workflowStatus={workflowStatus}
+        instanceId={workflowExecution?.workflowId ?? instanceId ?? vines.executionInstanceId}
+      >
         <div className="flex gap-2">
           {children}
           <Tooltip>
@@ -69,13 +69,12 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height, children 
                     vines.stop();
                   } else {
                     if (hasWorkflowVariables) {
-                      vines.executionWorkflowExecution = null;
                       toast.info(t('workspace.pre-view.actuator.execution.form-empty'));
                     } else {
-                      vines.start({});
-                      setTimeout(() => VinesEvent.emit('canvas-auto-zoom'));
+                      vines.executionInstanceId = '';
+                      vines.start();
+                      onRestart?.();
                     }
-                    setCanvasMode(hasWorkflowVariables ? CanvasStatus.WAIT_TO_RUNNING : CanvasStatus.RUNNING);
                   }
                 }}
               />
@@ -105,7 +104,12 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height, children 
             transition: { duration: 0.2 },
           }}
         >
-          <ActuatorToolList height={actuatorHeight} activeTool={activeTool} setActiveTool={setActiveTool} />
+          <ActuatorToolList
+            height={actuatorHeight}
+            activeTool={activeTool}
+            setActiveTool={setActiveTool}
+            instanceId={instanceId}
+          />
         </motion.div>
         <Separator orientation="vertical" className="vines-center ml-2 mr-6">
           <Tooltip>
@@ -120,7 +124,7 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height, children 
             <TooltipContent>{sidebarVisible ? t('common.sidebar.hide') : t('common.sidebar.show')}</TooltipContent>
           </Tooltip>
         </Separator>
-        <VinesActuatorDetail executionTask={activeTool?.executionTask} height={actuatorHeight} />
+        <VinesActuatorDetail executionTask={activeTool?.getExecutionTask(instanceId)} height={actuatorHeight} />
       </div>
     </motion.div>
   );

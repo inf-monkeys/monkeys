@@ -2182,7 +2182,7 @@
                 "create-field": "新增参数"
               },
               "collection": {
-                "placeholder": "请选择 {{name}}"
+                "placeholder": "请输入 {{name}}，回车新增"
               },
               "editor": {
                 "check-json-failed": "必须为 JSON 数组",
@@ -2735,6 +2735,7 @@
         }
       },
       "loading": "查询中...",
+      "success": "查询成功",
       "error": "查询失败，请检查网络是否通畅",
       "workflow-id-error": "请等待页面加载完毕"
     },

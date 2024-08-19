@@ -70,15 +70,14 @@ export class VinesCore extends VinesTools(VinesBase) {
 
   public canvasSize = { width: 0, height: 0 };
 
-  public executionStatus: VinesWorkflowExecutionType = 'SCHEDULED';
-
-  public executionInstanceId = '';
-
-  public executionWorkflowExecution: VinesWorkflowExecution | null = null;
-
   public executionWorkflowDisableRestore = false;
 
-  private executionTimeout: ReturnType<typeof setTimeout> | null = null;
+  // 当前执行的工作流实例
+  public executionInstanceId = '';
+
+  public executions: Map<string, VinesWorkflowExecution> = new Map();
+
+  private executionTimeouts: Map<string, ReturnType<typeof setTimeout>> = new Map();
 
   private position: IVinesNodePosition = { x: 0, y: 0 };
 
@@ -474,11 +473,22 @@ export class VinesCore extends VinesTools(VinesBase) {
   // endregion
 
   // region RUNNER
-  public usedOpenAIInterface() {
-    return {
-      enable: this.enableOpenAIInterface,
-      multipleChat: !!this.workflowInput.find((variable) => variable.name === 'messages'),
-    };
+  public executionStatus(instanceId = this.executionInstanceId): VinesWorkflowExecutionType {
+    return this.executions.get(instanceId)?.status ?? 'SCHEDULED';
+  }
+
+  private updateExecutionWithInstance(instanceId: string, data: Partial<VinesWorkflowExecution>, cover = false) {
+    if (cover) {
+      this.executions.set(instanceId, data as VinesWorkflowExecution);
+    } else {
+      const execution = this.executions.get(instanceId);
+      if (!execution) {
+        this.executions.set(instanceId, data as VinesWorkflowExecution);
+        return false;
+      }
+      this.executions.set(instanceId, { ...execution, ...data });
+    }
+    return true;
   }
 
   public async start({
@@ -487,7 +497,7 @@ export class VinesCore extends VinesTools(VinesBase) {
     version = this.version,
     debug = false,
     chatSessionId,
-  }: IVinesFlowRunParams): Promise<boolean> {
+  }: IVinesFlowRunParams = {}): Promise<boolean> {
     if (this.enableOpenAIInterface) {
       toast.warning('启动运行失败！请先关闭 OpenAI 接口');
       return false;
@@ -500,7 +510,7 @@ export class VinesCore extends VinesTools(VinesBase) {
       return false;
     }
 
-    if (['RUNNING', 'PAUSED'].includes(this.executionStatus) || !this.nodes.length) {
+    if (['RUNNING', 'PAUSED'].includes(this.executionStatus()) || !this.nodes.length) {
       toast.warning('启动运行失败！已有工作流在运行中或工作流为空');
       return false;
     }
@@ -516,10 +526,7 @@ export class VinesCore extends VinesTools(VinesBase) {
       return false;
     }
 
-    nodes.forEach((it) => {
-      it.clearExecutionStatus();
-      it.clearRunningTask();
-    });
+    nodes.forEach((it) => it.clearExecutionTask(instanceId ?? this.executionInstanceId));
 
     if (!instanceId) {
       if (debug) {
@@ -534,32 +541,62 @@ export class VinesCore extends VinesTools(VinesBase) {
       return false;
     }
 
-    this.executionInstanceId = instanceId;
-    this.executionStatus = 'RUNNING';
-    this.nodes[0].executionStatus = 'COMPLETED';
+    await this.nodes[0].updateExecutionTask(instanceId, { status: 'COMPLETED' });
 
-    this.executionTimeout = setTimeout(this.handleExecution.bind(this), 0);
+    this.executionInstanceId = instanceId;
+    if (!this.executionTimeouts.has(instanceId)) {
+      this.executionTimeouts.set(instanceId, setTimeout(this.handleExecution.bind(this, instanceId), 0));
+    } else {
+      // 实例已存在，询问是否重新运行
+    }
 
     return true;
   }
 
-  public swapExecutionInstance({ workflowId }: Pick<VinesWorkflowExecution, 'workflowId' | 'workflowDefinition'>) {
-    const isExecuteIdSame = workflowId === this.executionInstanceId;
-    if (isExecuteIdSame) {
-      return false;
+  private async handleExecution(instanceId: string) {
+    const waitTimeout = new Promise((resolve) => setTimeout(resolve, 1000));
+    const workPromise = this.fetchWorkflowExecution(instanceId);
+    await Promise.all([workPromise, waitTimeout]);
+    if (this.executionStatus(instanceId) === 'RUNNING') {
+      this.executionTimeouts.set(instanceId, setTimeout(this.handleExecution.bind(this, instanceId), 0));
+    } else if (this.executionStatus(instanceId) !== 'PAUSED') {
+      this.executionWorkflowDisableRestore && this.restoreSubWorkflowChildren();
+    }
+  }
+
+  private _executionDataPrevious: Map<string, Partial<VinesWorkflowExecution>> = new Map();
+  public async fetchWorkflowExecution(instanceId: string) {
+    const data = await getWorkflowExecution(instanceId);
+    if (!data) return;
+
+    const equalData = omit(data, [
+      'createTime',
+      'updateTime',
+      'startTime',
+      'workflowVersion',
+      'workflowName',
+      'workflowDefinition',
+      'startBy',
+      'triggerType',
+    ]);
+
+    const needRender = !equal(equalData, this._executionDataPrevious.get(instanceId));
+
+    await this.updateWorkflowExecution(instanceId, data, needRender);
+    this._executionDataPrevious.set(instanceId, equalData);
+
+    if (needRender) {
+      this.sendEvent('update-execution', instanceId, data);
     }
 
-    if (this.executionStatus === 'RUNNING') {
-      if (!isExecuteIdSame) {
-        toast.warning(
-          this.t?.('workspace.flow-view.vines.execution.swap.workflow-is-running') ||
-            '无法切换运行实例！当前工作流正在运行中',
-        );
-      }
-      return false;
-    }
+    return data.status;
+  }
 
-    if (!workflowId) {
+  public swapExecutionInstance(
+    { workflowId: instanceId }: Pick<VinesWorkflowExecution, 'workflowId' | 'workflowDefinition'>,
+    disableToast = false,
+  ) {
+    if (!instanceId) {
       toast.error(
         this.t?.('workspace.flow-view.vines.execution.swap.workflow-id-is-empty') || '切换失败！无法获取工作流实例 ID',
       );
@@ -570,16 +607,15 @@ export class VinesCore extends VinesTools(VinesBase) {
 
     this.update({ renderDirection: 'vertical' });
 
-    this.executionInstanceId = workflowId;
-    this.executionStatus = 'RUNNING';
-    this.nodes[0].executionStatus = 'COMPLETED';
+    this.executionInstanceId = instanceId;
+    // this.nodes[0].executionStatus = 'COMPLETED';
 
     setTimeout(() => {
-      this.fetchWorkflowExecution().then((status) => {
-        if (['RUNNING', 'PAUSED', 'SCHEDULED'].includes(status ?? '')) {
+      this.fetchWorkflowExecution(instanceId).then((status) => {
+        if (['RUNNING', 'PAUSED', 'SCHEDULED'].includes(status ?? '') && !disableToast) {
           toast.success(
-            this.t?.('workspace.flow-view.vines.execution.swap.success', { workflowId }) ||
-              `工作流运行实例「${workflowId}」已恢复！`,
+            this.t?.('workspace.flow-view.vines.execution.swap.success', { workflowId: instanceId }) ||
+              `工作流运行实例「${instanceId}」已恢复！`,
           );
         }
       });
@@ -588,21 +624,21 @@ export class VinesCore extends VinesTools(VinesBase) {
     return true;
   }
 
-  public async stop() {
-    if (['RUNNING', 'PAUSED'].includes(this.executionStatus) && this.executionInstanceId) {
-      this.executionStatus = 'CANCELED';
+  public async stop(instanceId = this.executionInstanceId) {
+    if (instanceId && ['RUNNING', 'PAUSED'].includes(this.executionStatus(instanceId))) {
+      this.updateExecutionWithInstance(instanceId, { status: 'CANCELED' });
 
       try {
-        await executionWorkflowTerminate(this.executionInstanceId);
+        await executionWorkflowTerminate(instanceId);
       } catch (_) {
         toast.error(this.t?.('workspace.flow-view.vines.execution.stop.error') || '终止运行异常！（可能未能成功停止）');
-        this.executionStatus = 'SCHEDULED';
+        this.updateExecutionWithInstance(instanceId, { status: 'SCHEDULED' });
         this.restoreSubWorkflowChildren();
       }
 
-      this.executionTimeout = setTimeout(this.handleExecution.bind(this), 0);
+      this.executionTimeouts.set(instanceId, setTimeout(this.handleExecution.bind(this, instanceId), 0));
 
-      this.clearExecutionStatus();
+      this.clearExecutionStatus(instanceId);
     } else {
       toast.warning(
         this.t?.('workspace.flow-view.vines.execution.stop.workflow-is-un-exec') ||
@@ -611,21 +647,22 @@ export class VinesCore extends VinesTools(VinesBase) {
     }
   }
 
-  public async pause() {
-    if (this.executionStatus === 'RUNNING' && this.executionInstanceId) {
+  public async pause(instanceId = this.executionInstanceId) {
+    if (instanceId && this.executionStatus(instanceId) === 'RUNNING') {
       try {
-        await executionWorkflowPause(this.executionInstanceId);
+        await executionWorkflowPause(instanceId);
         toast.warning(this.t?.('workspace.flow-view.vines.execution.pause.success') || '工作流运行已暂停');
       } catch (_) {
         toast.error(
           this.t?.('workspace.flow-view.vines.execution.pause.error') || '暂停运行异常！（可能未能成功暂停）',
         );
-        this.executionStatus = 'SCHEDULED';
+        this.updateExecutionWithInstance(instanceId, { status: 'SCHEDULED' });
+
         this.restoreSubWorkflowChildren();
       }
-      this.executionStatus = 'PAUSED';
+      this.updateExecutionWithInstance(instanceId, { status: 'PAUSED' });
 
-      this.executionTimeout = setTimeout(this.handleExecution.bind(this), 0);
+      this.executionTimeouts.set(instanceId, setTimeout(this.handleExecution.bind(this, instanceId), 0));
     } else {
       toast.warning(
         this.t?.('workspace.flow-view.vines.execution.pause.workflow-is-un-exec') ||
@@ -634,8 +671,8 @@ export class VinesCore extends VinesTools(VinesBase) {
     }
   }
 
-  public async resume() {
-    if (this.executionStatus === 'PAUSED' && this.executionInstanceId) {
+  public async resume(instanceId = this.executionInstanceId) {
+    if (instanceId && this.executionStatus(instanceId) === 'PAUSED') {
       try {
         await executionWorkflowResume(this.executionInstanceId);
         toast.success(this.t?.('workspace.flow-view.vines.execution.resume.success') || '运行已恢复');
@@ -643,12 +680,12 @@ export class VinesCore extends VinesTools(VinesBase) {
         toast.error(
           this.t?.('workspace.flow-view.vines.execution.resume.error') || '恢复运行异常！（可能未能成功恢复）',
         );
-        this.executionStatus = 'SCHEDULED';
+        this.updateExecutionWithInstance(instanceId, { status: 'SCHEDULED' });
         this.restoreSubWorkflowChildren();
       }
-      this.executionStatus = 'RUNNING';
+      this.updateExecutionWithInstance(instanceId, { status: 'RUNNING' });
 
-      this.executionTimeout = setTimeout(this.handleExecution.bind(this), 0);
+      this.executionTimeouts.set(instanceId, setTimeout(this.handleExecution.bind(this, instanceId), 0));
     } else {
       toast.warning(
         this.t?.('workspace.flow-view.vines.execution.resume.workflow-is-un-pause') ||
@@ -657,14 +694,17 @@ export class VinesCore extends VinesTools(VinesBase) {
     }
   }
 
-  public async updateWorkflowExecution(data: VinesWorkflowExecution, render = true) {
-    if (!this.executionInstanceId || !('status' in data) || !('tasks' in data)) return;
-    this.executionWorkflowExecution = data;
+  public async updateWorkflowExecution(instanceId: string, data: VinesWorkflowExecution, render = true) {
+    if (!('status' in data) || !('tasks' in data)) return;
+    this.updateExecutionWithInstance(instanceId, data, true);
 
     const newExecutionStatus = data.status;
-    if (newExecutionStatus !== 'RUNNING' && newExecutionStatus !== this.executionStatus) {
+    if (newExecutionStatus !== 'RUNNING' && newExecutionStatus !== this.executionStatus(instanceId)) {
       const lastNode = this.nodes.at(-1);
-      lastNode && (lastNode.executionStatus = 'COMPLETED');
+
+      if (lastNode) {
+        await lastNode.updateExecutionTask(instanceId, { status: 'COMPLETED' });
+      }
 
       if (this.executionWorkflowDisableRestore) {
         switch (newExecutionStatus) {
@@ -686,10 +726,10 @@ export class VinesCore extends VinesTools(VinesBase) {
       }
 
       if (newExecutionStatus !== 'PAUSED') {
-        this.executionStatus = 'SCHEDULED';
+        this.updateExecutionWithInstance(instanceId, { status: 'SCHEDULED' });
       }
     }
-    this.executionStatus = newExecutionStatus!;
+    this.updateExecutionWithInstance(instanceId, { status: newExecutionStatus! });
 
     for (const task of data.tasks) {
       const taskId = task.workflowTask?.taskReferenceName;
@@ -701,7 +741,7 @@ export class VinesCore extends VinesTools(VinesBase) {
         continue;
       }
 
-      if ((await node.updateStatus(task)) && !render) {
+      if ((await node.updateExecutionTask(instanceId, task)) && !render) {
         render = true;
       }
     }
@@ -709,61 +749,32 @@ export class VinesCore extends VinesTools(VinesBase) {
     render && this.sendEvent('refresh');
   }
 
-  private _prevExecutionData: Partial<VinesWorkflowExecution> | undefined;
-  public async fetchWorkflowExecution() {
-    const data = await getWorkflowExecution(this.executionInstanceId);
-    if (!data) return;
-
-    const equalData = omit(data, [
-      'createTime',
-      'updateTime',
-      'startTime',
-      'workflowVersion',
-      'workflowName',
-      'workflowDefinition',
-      'startBy',
-      'triggerType',
-    ]);
-
-    const needRender = !equal(equalData, this._prevExecutionData);
-
-    await this.updateWorkflowExecution(data, needRender);
-    this._prevExecutionData = equalData;
-
-    if (needRender) {
-      this.sendEvent('update-execution', this.executionInstanceId, data);
-    }
-
-    return data.status;
-  }
-
-  private async handleExecution() {
-    const waitTimeout = new Promise((resolve) => setTimeout(resolve, 1000));
-    const workPromise = this.fetchWorkflowExecution();
-    await Promise.all([workPromise, waitTimeout]);
-    if (this.executionStatus === 'RUNNING') {
-      this.executionTimeout = setTimeout(this.handleExecution.bind(this), 0);
-    } else if (this.executionStatus !== 'PAUSED') {
-      this.executionWorkflowDisableRestore && this.restoreSubWorkflowChildren();
-      this.clearExecutionStatus();
-    }
-  }
-
-  public clearExecutionStatus(refresh = true) {
+  public clearExecutionStatus(instanceId: string, refresh = true) {
     const allNodes = this.getAllNodes();
-    allNodes.forEach((it) => it.executionStatus !== 'SCHEDULED' && (it.executionTask.status = 'CANCELED'));
-    void (this.executionStatus !== 'SCHEDULED' && (this.executionStatus = 'CANCELED'));
+    allNodes.forEach(
+      (it) =>
+        it.getExecutionTask(instanceId)?.status !== 'SCHEDULED' &&
+        it.updateExecutionTask(instanceId, { status: 'CANCELED' }),
+    );
+
+    if (this.executionStatus(instanceId) !== 'SCHEDULED') {
+      this.updateExecutionWithInstance(instanceId, { status: 'CANCELED' });
+    }
+
     refresh && this.sendEvent('refresh');
     setTimeout(
       () => {
-        allNodes.forEach((it) => it.clearExecutionStatus());
         requestAnimationFrame(() => {
-          this.executionStatus = 'SCHEDULED';
+          this.updateExecutionWithInstance(instanceId, { status: 'SCHEDULED' });
           refresh && this.sendEvent('refresh');
         });
       },
       refresh ? 80 : 0,
     );
+  }
+
+  public getWorkflowExecution(instanceId = this.executionInstanceId) {
+    return this.executions.get(instanceId);
   }
 
   public fillUpSubWorkflowChildren(render = true) {
@@ -787,6 +798,13 @@ export class VinesCore extends VinesTools(VinesBase) {
       this.render();
       this.sendEvent('refresh');
     }
+  }
+
+  public usedOpenAIInterface() {
+    return {
+      enable: this.enableOpenAIInterface,
+      multipleChat: !!this.workflowInput.find((variable) => variable.name === 'messages'),
+    };
   }
   // endregion
 }

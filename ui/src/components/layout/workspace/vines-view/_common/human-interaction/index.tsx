@@ -37,16 +37,16 @@ export const VinesExecutionHumanInteraction: React.FC<IVinesExecutionHumanIntera
     useEffect(() => {
       const tempTextList: string[] = [];
       const tempImageList: string[] = [];
-      objectToArray(
-        (inputData as unknown as { displayContent: Record<string, unknown> })?.displayContent ?? {},
-      ).forEach(({ value: it }) => {
-        if (typeof it !== 'string') return;
-        if (IMG_REGEXP.test(it)) {
-          tempImageList.push(it);
-        } else {
-          tempTextList.push(it);
-        }
-      });
+      objectToArray((inputData as unknown as { diplayContent: Record<string, unknown> })?.diplayContent ?? {}).forEach(
+        ({ value: it }) => {
+          if (typeof it !== 'string') return;
+          if (IMG_REGEXP.test(it)) {
+            tempImageList.push(it);
+          } else {
+            tempTextList.push(it);
+          }
+        },
+      );
       setImageInteracts(tempImageList);
       setTextInteracts(tempTextList);
     }, [inputData]);

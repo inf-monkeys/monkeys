@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useMutationSearchWorkflowExecutions } from '@/apis/workflow/execution';
+import { VinesWorkflowExecutionLists } from '@/apis/workflow/execution/typings.ts';
 import { VinesLogViewLogFilter } from '@/components/layout/workspace/vines-view/log/log/filter';
 import { VinesLogViewLogList } from '@/components/layout/workspace/vines-view/log/log/list';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
@@ -45,17 +46,10 @@ export const VinesLogViewLogTab: React.FC = () => {
 
   const workflowPageRef = useRef(1);
 
-  useEffect(() => {
-    if (vines.workflowId && visible) {
-      void handleSubmit();
-    }
-    if (!visible) {
-      vines.executionInstanceId = '';
-      setActiveTab('');
-    }
-  }, [vines.workflowId, visible]);
-
-  const handleSubmit = (loadNextPage?: boolean) => {
+  const handleSubmit = async (
+    loadNextPage?: boolean,
+    useToast = true,
+  ): Promise<VinesWorkflowExecutionLists | undefined> => {
     if (vines.workflowId) {
       form.setValue('workflowId', vines.workflowId);
       if (loadNextPage) {
@@ -67,16 +61,40 @@ export const VinesLogViewLogTab: React.FC = () => {
         page: 1,
         limit: workflowPageRef.current * 10,
       });
-      form.handleSubmit((params) => {
-        toast.promise(trigger(params), {
-          loading: t('workspace.logs-view.loading'),
-          error: t('workspace.logs-view.error'),
-        });
-      })();
-    } else {
-      toast.warning(t('workspace.logs-view.workflow-id-error'));
+
+      const result = new Promise((resolve) => {
+        form.handleSubmit((params) => {
+          if (useToast) {
+            toast.promise(trigger(params), {
+              loading: t('workspace.logs-view.loading'),
+              success: (res) => {
+                resolve(res);
+                return t('workspace.logs-view.success');
+              },
+              error: t('workspace.logs-view.error'),
+            });
+          } else {
+            trigger(params).then((it) => resolve(it));
+          }
+        })();
+      }) as Promise<VinesWorkflowExecutionLists | undefined>;
+
+      return await result;
     }
+
+    toast.warning(t('workspace.logs-view.workflow-id-error'));
+    return;
   };
+
+  useEffect(() => {
+    if (vines.workflowId && visible) {
+      void handleSubmit(void 0, false);
+    }
+    if (!visible) {
+      vines.executionInstanceId = '';
+      setActiveTab('');
+    }
+  }, [vines.workflowId, visible]);
 
   const finalHeight = containerHeight - 52 - 40;
 

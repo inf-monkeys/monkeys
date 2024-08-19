@@ -69,7 +69,7 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ workflowId }) => 
 
     const workingList = executionData?.filter(({ status }) => ['RUNNING', 'PAUSED'].includes(status ?? ''));
     if (workingList?.length) {
-      vines.swapExecutionInstance(workingList[0]);
+      vines.swapExecutionInstance(workingList[0], true);
     }
 
     const newList: IVinesChatListItem[] = [];

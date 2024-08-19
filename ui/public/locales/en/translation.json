@@ -2188,7 +2188,7 @@
                 "create-field": "New Parameter"
               },
               "collection": {
-                "placeholder": "Select {{name}}"
+                "placeholder": "Please enter {{name}}, press Enter to add"
               },
               "editor": {
                 "check-json-failed": "Must be a JSON array",
@@ -2742,6 +2742,7 @@
         }
       },
       "loading": "Searching...",
+      "success": "Search successful",
       "error": "Query failed, please check whether the network is unobstructed",
       "workflow-id-error": "Please wait for the page to load"
     },

@@ -25,7 +25,7 @@ export const VinesChatView: React.FC = () => {
 
   const hasMoreThanOneInput = workflowInputLength > 1;
 
-  const disabled = vines.executionStatus === 'RUNNING';
+  const disabled = vines.executionStatus() === 'RUNNING';
 
   const useOpenAIInterface = vines.usedOpenAIInterface();
   const openAIInterfaceEnabled = useOpenAIInterface.enable;
