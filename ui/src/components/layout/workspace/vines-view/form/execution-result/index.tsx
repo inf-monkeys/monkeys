@@ -11,7 +11,7 @@ import { useSearchWorkflowExecutions } from '@/apis/workflow/execution';
 import {
   extractImageUrls,
   extractVideoUrls,
-} from '@/components/layout/workspace/vines-view/execution/data-display/abstract/utils.ts';
+} from '@/components/layout/workspace/vines-view/_common/data-display/abstract/utils.ts';
 import {
   IVinesExecutionResultItem,
   VinesExecutionResultItem,

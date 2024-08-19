@@ -14,6 +14,8 @@ import { FileList } from '@/components/ui/uploader/file-list.tsx';
 import { cn } from '@/utils';
 
 export interface IUpdaterProps {
+  className?: string;
+
   files?: FileWithPath[]; // 文件列表
   limit?: number; // 文件数量限制
   maxSize?: number; // 文件大小限制 (MB)
@@ -28,6 +30,7 @@ export interface IUpdaterProps {
 }
 
 export const Uploader: React.FC<IUpdaterProps> = ({
+  className,
   files: initialFiles = [],
   accept,
   maxSize = 30,
@@ -134,6 +137,7 @@ export const Uploader: React.FC<IUpdaterProps> = ({
                 isSimpleMode && disabledComp && 'pointer-events-none cursor-not-allowed opacity-60',
                 isEmbedMode && filesLength && 'cursor-default border-transparent hover:border-input',
                 disabledComp && 'hover:border-transparent',
+                className,
               ])}
             >
               <div className="vines-center min-h-40 flex-col overflow-hidden">
@@ -224,6 +228,7 @@ export const VinesUploader: React.FC<
           <DialogTitle>{t('components.ui.updater.title', { count: limit ?? 2 })}</DialogTitle>
         </DialogHeader>
         <Uploader
+          className="border-input"
           onBeforeUpload={() => {
             setIsUploading(true);
             onBeforeUpload?.();

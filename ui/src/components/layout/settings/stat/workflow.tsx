@@ -8,13 +8,13 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { exportSearchWorkflowExecutionStats, useMutationSearchWorkflowExecutionStats } from '@/apis/workflow/execution';
-import { VinesLogViewStatChart } from '@/components/layout/workspace/vines-view/execution-log/stat/chart';
-import { VinesLogViewStatFilter } from '@/components/layout/workspace/vines-view/execution-log/stat/filter';
+import { VinesLogViewStatChart } from '@/components/layout/workspace/vines-view/log/stat/chart';
+import { VinesLogViewStatFilter } from '@/components/layout/workspace/vines-view/log/stat/filter';
 import {
   getDayBegin,
   getDayEnd,
   getRelativeDate,
-} from '@/components/layout/workspace/vines-view/execution-log/stat/utils.ts';
+} from '@/components/layout/workspace/vines-view/log/stat/utils.ts';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';

@@ -65,7 +65,7 @@ export const FieldType: React.FC<IFieldTypeProps> = ({ form, forceUpdate }) => {
                   <CommandEmpty>
                     {t('workspace.flow-view.endpoint.start-tool.input.config-form.type.search-empty')}
                   </CommandEmpty>
-                  <ScrollArea className="h-40">
+                  <ScrollArea className="h-56">
                     <CommandGroup>
                       {WORKFLOW_INPUT_TYPE_OPTION_LIST.map((it, i) => {
                         const labelVal = t(

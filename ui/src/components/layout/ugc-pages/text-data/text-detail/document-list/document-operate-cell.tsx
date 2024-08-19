@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import { useSWRConfig } from 'swr';
 
@@ -28,14 +28,12 @@ export const DocumentOperateCell: React.FC<IParagraphOperateCellProps> = ({ cell
   const { textId } = Route.useParams();
   const { mutate } = useSWRConfig();
 
-  const [visible, setVisible] = useState(false);
   const value = (cell.getValue() as IKnowledgeBaseDocument) ?? {};
 
   const handleDelete = () => {
     toast.promise(deleteKnowledgeBaseDocument(textId, value.id), {
       loading: '删除中',
       success: () => {
-        setVisible(false);
         setTimeout(
           () =>
             mutate(

@@ -49,7 +49,7 @@ export const InputConfig: React.FC<IInputConfigProps> = ({ className, contentWid
   };
 
   return (
-    <div className={cn('relative flex h-80 w-full flex-col gap-4 py-2', className)}>
+    <div className={cn('relative flex h-[30rem] w-full flex-col gap-4 py-2', className)}>
       <WorkflowInputList
         inputs={inputs}
         className="px-2"

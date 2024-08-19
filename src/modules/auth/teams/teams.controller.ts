@@ -2,11 +2,11 @@ import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { CustomTheme } from '@/database/entities/identity/team';
+import { InviteUser2TeamDto } from '@/modules/auth/teams/dto';
 import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { DEFAULT_TEAM_DESCRIPTION, DEFAULT_TEAM_PHOTO, TeamsService } from './teams.service';
-import { InviteUser2TeamDto } from '@/modules/auth/teams/dto';
 import { omit } from 'lodash';
+import { DEFAULT_TEAM_DESCRIPTION, DEFAULT_TEAM_PHOTO, TeamsService } from './teams.service';
 
 @Controller('/teams')
 @ApiTags('Auth/Teams')
@@ -30,10 +30,16 @@ export class TeamsController {
       teams = await this.service.getUserTeams(userId);
     }
     return new SuccessResponse({
-      data: teams.map((t) => ({
-        ...t,
-        id: String(t.id),
-      })),
+      data: teams
+        .sort((a, b) => {
+          if (a.ownerUserId === userId && b.ownerUserId !== userId) return -1;
+          if (a.ownerUserId !== userId && b.ownerUserId === userId) return 1;
+          return Number(b.createdTimestamp) - Number(a.createdTimestamp);
+        })
+        .map((t) => ({
+          ...t,
+          id: String(t.id),
+        })),
     });
   }
 
