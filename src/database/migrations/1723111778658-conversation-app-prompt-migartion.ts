@@ -3,7 +3,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 
 const appId = config.server.appId;
 
-export class UpdateColumnType1685218764031 implements MigrationInterface {
+export class MigartionConversationAppPromptMigartion1723111778658 implements MigrationInterface {
   tableName = `${appId}_conversation_apps`;
 
   public async up(queryRunner: QueryRunner): Promise<void> {
