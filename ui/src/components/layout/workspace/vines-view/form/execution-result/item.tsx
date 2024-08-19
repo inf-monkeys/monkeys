@@ -6,8 +6,8 @@ import { Eye } from 'lucide-react';
 import Image from 'rc-image';
 import { useTranslation } from 'react-i18next';
 
-import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/execution/data-display/abstract';
-import { VinesAbstractVideo } from '@/components/layout/workspace/vines-view/execution/data-display/abstract/node/video.tsx';
+import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
+import { VinesAbstractVideo } from '@/components/layout/workspace/vines-view/_common/data-display/abstract/node/video.tsx';
 import { CodeEditor, JSONValue } from '@/components/ui/code-editor';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { VinesLoading } from '@/components/ui/loading';

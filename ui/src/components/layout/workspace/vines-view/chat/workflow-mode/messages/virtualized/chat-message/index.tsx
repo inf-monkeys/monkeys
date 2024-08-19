@@ -3,9 +3,9 @@ import React, { memo } from 'react';
 import { isEmpty } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
+import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
 import { IVinesChatListItem } from '@/components/layout/workspace/vines-view/chat/workflow-mode/messages/typings.ts';
 import { VinesBotChatMessage } from '@/components/layout/workspace/vines-view/chat/workflow-mode/messages/virtualized/chat-message/bot.tsx';
-import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/execution/data-display/abstract';
 import { WorkflowInputList } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-list';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Card } from '@/components/ui/card.tsx';

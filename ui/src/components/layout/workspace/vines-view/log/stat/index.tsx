@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { exportAgentExecutionStats, useMutationAgentExecutionStats } from '@/apis/workflow/execution';
+import { exportSearchWorkflowExecutionStats, useMutationSearchWorkflowExecutionStats } from '@/apis/workflow/execution';
 import { VinesLogViewStatChart } from '@/components/layout/workspace/vines-view/log/stat/chart';
 import { VinesLogViewStatFilter } from '@/components/layout/workspace/vines-view/log/stat/filter';
 import {
@@ -23,20 +23,22 @@ import {
   IVinesSearchWorkflowExecutionStatParams,
   vinesSearchWorkflowExecutionStatSchema,
 } from '@/schema/workspace/workflow-execution-stat.ts';
-import { useAgentStore } from '@/store/useAgentStore';
+import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 
-interface IAgentLogsViewProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface IVinesLogViewStatTabProps {}
 
-export const AgentLogsView: React.FC<IAgentLogsViewProps> = () => {
+export const VinesLogViewStatTab: React.FC<IVinesLogViewStatTabProps> = () => {
   const { t } = useTranslation();
 
   const visible = useViewStore((s) => s.visible);
 
   const containerHeight = usePageStore((s) => s.containerHeight);
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
+
+  const workflowId = useFlowStore((s) => s.workflowId);
 
   const [sidebarVisible, setSidebarVisible] = useState(!workbenchVisible);
 
@@ -55,41 +57,44 @@ export const AgentLogsView: React.FC<IAgentLogsViewProps> = () => {
     defaultValues,
   });
 
-  const agentId = useAgentStore((s) => s.agentId);
-
   const {
     data: searchWorkflowExecutionStatData,
     trigger,
     isMutating,
-  } = useMutationAgentExecutionStats({
-    agentId,
+  } = useMutationSearchWorkflowExecutionStats({
+    workflowId,
   });
 
   useEffect(() => {
-    if (agentId && visible) {
+    if (workflowId && visible) {
       void handleSubmit();
     }
-  }, [agentId, visible]);
+  }, [workflowId, visible]);
 
-  const handleSubmit = () =>
-    form.handleSubmit((params) => {
-      toast.promise(trigger(params), {
-        loading: t('workspace.logs-view.loading'),
-        error: t('workspace.logs-view.error'),
-      });
-    });
+  const handleSubmit = () => {
+    if (workflowId) {
+      form.handleSubmit((params) => {
+        toast.promise(trigger(params), {
+          loading: t('workspace.logs-view.loading'),
+          error: t('workspace.logs-view.error'),
+        });
+      })();
+    } else {
+      toast.warning(t('workspace.logs-view.workflow-id-error'));
+    }
+  };
 
   const finalHeight = containerHeight - 52 - 40;
 
   const handleDownload = () => {
-    if (!agentId) {
+    if (!workflowId) {
       toast.warning('common.toast.loading');
       return;
     }
     toast.promise(
-      exportAgentExecutionStats(
+      exportSearchWorkflowExecutionStats(
         {
-          agentId,
+          workflowId,
         },
         {
           ...form.getValues(),
@@ -105,7 +110,7 @@ export const AgentLogsView: React.FC<IAgentLogsViewProps> = () => {
   };
 
   return (
-    <div className="relative flex h-full max-h-full p-6">
+    <div className="relative flex h-full max-h-full">
       <motion.div
         initial={{ width: sidebarVisible ? 320 : 0, paddingRight: sidebarVisible ? 4 : 0 }}
         animate={{
