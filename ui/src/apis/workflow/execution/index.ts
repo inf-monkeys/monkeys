@@ -139,11 +139,7 @@ export const useMutationAgentExecutionStats = ({ agentId, isTeam = false }: { ag
     string | null,
     IVinesSearchWorkflowExecutionStatParams
   >(
-    agentId && !isTeam
-      ? `/api/conversation-apps/${agentId}/statistics`
-      : isTeam
-        ? `/api/conversation-apps/statistics`
-        : null,
+    isTeam ? `/api/conversation-apps/statistics` : agentId ? `/api/conversation-apps/${agentId}/statistics` : null,
     vinesFetcher({
       method: 'GET',
       requestResolver: ({ rawUrl, params }) => {
