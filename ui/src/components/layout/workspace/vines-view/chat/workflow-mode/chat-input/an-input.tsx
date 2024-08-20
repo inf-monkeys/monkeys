@@ -35,7 +35,7 @@ export const AnInput: React.FC<IAnInputProps> = ({ inputs, onClick, disabled, lo
     >
       <div className="flex items-center gap-2">
         {isInputNotEmpty && <ChatInputMoreOperations tabular$={tabular$} />}
-        <Button variant="outline" icon={<Play />} type="submit" disabled={disabled} loading={loading}>
+        <Button variant="outline" icon={<Play />} type="submit" disabled={disabled} loading={loading || disabled}>
           {t('workspace.chat-view.workflow-mode.execution')}
         </Button>
       </div>

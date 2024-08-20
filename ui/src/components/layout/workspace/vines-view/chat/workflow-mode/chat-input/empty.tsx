@@ -23,7 +23,7 @@ export const EmptyInput: React.FC<IEmptyInputProps> = ({ disabled, onClick, load
             : t('workspace.chat-view.workflow-mode.empty-input.completed')}
         </p>
       </div>
-      <Button disabled={disabled} variant="outline" icon={<Play />} onClick={() => onClick()} loading={loading}>
+      <Button disabled={disabled} variant="outline" icon={<Play />} onClick={() => onClick()} loading={loading || disabled}>
         {t('workspace.chat-view.workflow-mode.execution')}
       </Button>
     </div>

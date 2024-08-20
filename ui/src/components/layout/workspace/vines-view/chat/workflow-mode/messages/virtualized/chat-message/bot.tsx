@@ -74,6 +74,7 @@ export const VinesBotChatMessage = memo<IVinesBotChatMessageProps>(
                     className="-mb-4 -ml-4 -mt-2.5 scale-75"
                     status={status as VinesNodeExecutionTask['status']}
                     workflowStatus={status as string}
+                    loadingSize="sm"
                   />
                 </div>
               </>

@@ -497,6 +497,7 @@ export class VinesCore extends VinesTools(VinesBase) {
     version = this.version,
     debug = false,
     chatSessionId,
+    onlyStart = false,
   }: IVinesFlowRunParams = {}): Promise<boolean> {
     if (this.enableOpenAIInterface) {
       toast.warning('启动运行失败！请先关闭 OpenAI 接口');
@@ -539,6 +540,10 @@ export class VinesCore extends VinesTools(VinesBase) {
     if (!instanceId) {
       toast.error('启动运行失败！无法获取工作流实例 ID');
       return false;
+    }
+
+    if (onlyStart) {
+      return true;
     }
 
     await this.nodes[0].updateExecutionTask(instanceId, { status: 'COMPLETED' });
@@ -608,15 +613,19 @@ export class VinesCore extends VinesTools(VinesBase) {
     this.update({ renderDirection: 'vertical' });
 
     this.executionInstanceId = instanceId;
-    // this.nodes[0].executionStatus = 'COMPLETED';
 
     setTimeout(() => {
       this.fetchWorkflowExecution(instanceId).then((status) => {
-        if (['RUNNING', 'PAUSED', 'SCHEDULED'].includes(status ?? '') && !disableToast) {
-          toast.success(
-            this.t?.('workspace.flow-view.vines.execution.swap.success', { workflowId: instanceId }) ||
-              `工作流运行实例「${instanceId}」已恢复！`,
-          );
+        if (['RUNNING', 'PAUSED', 'SCHEDULED'].includes(status ?? '')) {
+          if (!this.executionTimeouts.has(instanceId)) {
+            this.executionTimeouts.set(instanceId, setTimeout(this.handleExecution.bind(this, instanceId), 0));
+          }
+          if (!disableToast) {
+            toast.success(
+              this.t?.('workspace.flow-view.vines.execution.swap.success', { workflowId: instanceId }) ||
+                `工作流运行实例「${instanceId}」已恢复！`,
+            );
+          }
         }
       });
     }, 200);

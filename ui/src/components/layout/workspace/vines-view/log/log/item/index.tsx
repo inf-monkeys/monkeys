@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
@@ -44,7 +44,7 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({
   const { t } = useTranslation();
   const { copy } = useCopy({ timeout: 500 });
 
-  const { vines } = useVinesFlow();
+  const { vines, VINES_REFRESHER } = useVinesFlow();
 
   const statusMapper = useMemo(() => {
     const mapper: Record<string, string> = {};
@@ -79,6 +79,18 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({
   });
 
   const instanceId = workflowExecution.workflowId!;
+
+  const needRefresh = useRef(false);
+  useEffect(() => {
+    const status = vines.executionStatus(instanceId);
+
+    if (status === 'RUNNING') {
+      needRefresh.current = true;
+    } else if (needRefresh.current) {
+      handleSubmit?.(void 0, false);
+      needRefresh.current = false;
+    }
+  }, [VINES_REFRESHER]);
 
   return (
     <AccordionItem value={instanceId}>
