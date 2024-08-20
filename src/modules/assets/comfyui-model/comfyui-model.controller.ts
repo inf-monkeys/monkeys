@@ -2,10 +2,11 @@ import { ListDto } from '@/common/dto/list.dto';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { UpdateComfyuiModelParams } from '@/database/entities/assets/model/comfyui-model/comfyui-model.entity';
+import { Body, Controller, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ComfyuiModelService } from './comfyui-model.service';
 
-@Controller('/comfyui-models')
+@Controller('comfyui-models')
 @UseGuards(CompatibleAuthGuard)
 export class ComfyuiModelController {
   constructor(private readonly service: ComfyuiModelService) {}
@@ -22,7 +23,7 @@ export class ComfyuiModelController {
     });
   }
 
-  @Get('/list')
+  @Get('list')
   public async getModelsByTypeAndServerId(@Req() req: IRequest, @Query() query: { typeId?: string; typeName?: string; serverId?: string }) {
     const { teamId } = req;
     const { typeId, serverId, typeName } = query;
@@ -32,12 +33,28 @@ export class ComfyuiModelController {
     });
   }
 
-  @Post('/manual-update')
+  @Post('manual-update')
   public async manualUpdate(@Req() req: IRequest, @Body() body: { serverId: string }) {
     const { teamId } = req;
     const { serverId } = body;
     return new SuccessResponse({
       data: await this.service.updateModels(teamId, serverId),
+    });
+  }
+
+  @Get(':id')
+  public async getModelById(@Req() req: IRequest, @Param('id') modelId: string) {
+    const { teamId } = req;
+    return new SuccessResponse({
+      data: await this.service.getModelById(teamId, modelId),
+    });
+  }
+
+  @Put(':id')
+  public async updateModel(@Req() req: IRequest, @Param('id') modelId: string, @Body() body: UpdateComfyuiModelParams) {
+    const { teamId } = req;
+    return new SuccessResponse({
+      data: await this.service.updateModel(teamId, modelId, body),
     });
   }
 }

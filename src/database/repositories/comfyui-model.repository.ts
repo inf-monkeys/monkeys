@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, In, Repository } from 'typeorm';
 import { ComfyuiModelServerRelationEntity } from '../entities/assets/model/comfyui-model/comfyui-model-server-relation.entity';
 import { ComfyuiModelTypeEntity, CreateComfyuiModelTypeParams, UpdateComfyuiModelTypeParams } from '../entities/assets/model/comfyui-model/comfyui-model-type.entity';
-import { ComfyuiModelEntity, CreateComfyuiModelParams } from '../entities/assets/model/comfyui-model/comfyui-model.entity';
+import { ComfyuiModelEntity, CreateComfyuiModelParams, UpdateComfyuiModelParams } from '../entities/assets/model/comfyui-model/comfyui-model.entity';
 import { ComfyuiModelTypeAssetRepositroy } from './assets-comfyui-model-type.repositor';
 import { ComfyuiModelAssetRepositroy } from './assets-comfyui-model.repository';
 
@@ -92,21 +92,13 @@ export class ComfyuiModelRepository {
 
   public async updateType(teamId: string, id: string, updates: UpdateComfyuiModelTypeParams) {
     const entity = await this.getTypeById(teamId, id);
-    if (!entity) {
-      return null;
-    }
-    if (updates.displayName) {
-      entity.displayName = updates.displayName;
-    }
-    if (updates.description != undefined) {
-      entity.description = updates.description;
-    }
-    if (updates.name) {
-      entity.name = updates.name;
-    }
-    if (updates.path) {
-      entity.path = updates.path;
-    }
+    if (!entity) throw new Error('ComfyUI model type not found');
+
+    if (updates.displayName) entity.displayName = updates.displayName;
+    if (updates.description) entity.description = updates.description;
+    if (updates.name) entity.name = updates.name;
+    if (updates.path) entity.path = updates.path;
+
     entity.updatedTimestamp = Date.now();
     return await this.modelTypeRepository.save(entity);
   }
@@ -316,6 +308,18 @@ export class ComfyuiModelRepository {
 
   public async saveModels(models: Pick<ComfyuiModelEntity, 'sha256' | 'id' | 'serverRelations'>[]) {
     return await this.modelRepository.save(models);
+  }
+
+  public async updateModel(teamId: string, modelId: string, updates: UpdateComfyuiModelParams) {
+    const entity = await this.getModelById(teamId, modelId);
+    if (!entity) throw new Error('ComfyUI model not found');
+
+    if (updates.displayName) entity.displayName = updates.displayName;
+    if (updates.description) entity.description = updates.description;
+    if (updates.iconUrl) entity.iconUrl = updates.iconUrl;
+
+    entity.updatedTimestamp = Date.now();
+    return await this.modelRepository.save(entity);
   }
 
   public async saveRelation(relation: ComfyuiModelServerRelationEntity) {
