@@ -9,10 +9,14 @@ import { cn } from '@/utils';
 export interface ScrollAreaProps extends React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> {
   scrollBarDisabled?: boolean;
   disabledOverflowMask?: boolean;
+  onScrollPositionChange?: (position: { x: number; y: number }) => void;
 }
 
 const ScrollArea = React.forwardRef<React.ElementRef<typeof ScrollAreaPrimitive.Root>, ScrollAreaProps>(
-  ({ className, children, scrollBarDisabled = false, disabledOverflowMask = false, ...props }, ref) => {
+  (
+    { className, children, scrollBarDisabled = false, disabledOverflowMask = false, onScrollPositionChange, ...props },
+    ref,
+  ) => {
     const scrollAreaRef = useRef<HTMLDivElement | null>(null);
 
     useDataScrollOverflow({
@@ -30,6 +34,9 @@ const ScrollArea = React.forwardRef<React.ElementRef<typeof ScrollAreaPrimitive.
         <ScrollAreaPrimitive.Viewport
           ref={scrollAreaRef}
           className="size-full rounded-[inherit] data-[top-bottom-scroll=true]:[mask-image:linear-gradient(#000,#000,transparent_0,#000_40px,#000_calc(100%_-_40px),transparent)] data-[top-scroll=true]:[mask-image:linear-gradient(0deg,#000_calc(100%_-_40px),transparent)] data-[bottom-scroll=true]:[mask-image:linear-gradient(180deg,#000_calc(100%_-_40px),transparent)]"
+          onScroll={(e) => {
+            onScrollPositionChange?.({ x: e.currentTarget.scrollLeft, y: e.currentTarget.scrollTop });
+          }}
         >
           {children}
         </ScrollAreaPrimitive.Viewport>
