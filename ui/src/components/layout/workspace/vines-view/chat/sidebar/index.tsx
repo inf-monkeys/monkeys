@@ -37,6 +37,10 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = ({ id, isWorkflowMode })
 
   const activeSessionId = chatSessions[id] ?? data?.[0]?.id;
 
+  const hasDefaultSessions = data?.some(
+    ({ displayName }) => displayName.startsWith('默认对话') || displayName.startsWith('Default Session'),
+  );
+
   return (
     <div className="flex h-full max-w-64">
       <motion.div
@@ -54,7 +58,7 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = ({ id, isWorkflowMode })
         </div>
         <ScrollArea className="h-full max-h-[calc(100%-3rem)]">
           <div className="grid gap-2 py-1 pl-1 pr-3">
-            {isWorkflowMode && (
+            {isWorkflowMode && !hasDefaultSessions && (
               <ChatSession
                 active={isEmpty(activeSessionId)}
                 session={{ id: '', displayName: t('workspace.chat-view.sidebar.create.def-label') }}
