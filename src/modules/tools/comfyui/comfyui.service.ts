@@ -240,6 +240,10 @@ export class ComfyUIService {
     return await this.comfyuiWorkflowRepository.listServers(teamId);
   }
 
+  public async listAllServers() {
+    return await this.comfyuiWorkflowRepository.listAllServers();
+  }
+
   public async getComfyuiServerById(teamId: string, serverId: string) {
     return await this.comfyuiWorkflowRepository.getComfyuiServerById(teamId, serverId);
   }

@@ -160,6 +160,19 @@ export class ComfyuiModelRepository {
     };
   }
 
+  public async getModelsWithoutType() {
+    return await this.modelRepository.find({
+      where: {
+        isDeleted: false,
+      },
+      relations: {
+        serverRelations: {
+          server: true,
+        },
+      },
+    });
+  }
+
   public async getModelsByServerId(teamId: string, serverId: string) {
     const rawModels = await this.modelRepository.find({
       where: {

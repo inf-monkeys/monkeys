@@ -38,7 +38,7 @@ export class ComfyuiModelController {
     const { teamId } = req;
     const { serverId } = body;
     return new SuccessResponse({
-      data: await this.service.updateModels(teamId, serverId),
+      data: await this.service.updateModelsByTeamIdAndServerId(teamId, serverId),
     });
   }
 

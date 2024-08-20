@@ -10,5 +10,6 @@ import { ComfyuiWorkflowController } from './comfyui.workflow.controller';
   // imports: [ComfyuiModelModule],
   providers: [ComfyUIService],
   controllers: [ComfyuiWorkflowController, ComfyuiServerController, ComfyuiExecutionController, ComfyuiDependencyController],
+  exports: [ComfyUIService],
 })
 export class ComfyUIModule {}

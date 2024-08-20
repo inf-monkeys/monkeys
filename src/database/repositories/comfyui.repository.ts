@@ -127,6 +127,14 @@ export class ComfyuiRepository {
     });
   }
 
+  public async listAllServers() {
+    return await this.comfyuiServerRepository.find({
+      where: {
+        isDeleted: false,
+      },
+    });
+  }
+
   public async createDefaultServer(address: string) {
     const exists = await this.comfyuiServerRepository.findOne({
       where: {

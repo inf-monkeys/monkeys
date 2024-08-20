@@ -8,7 +8,7 @@ export class ComfyuiModelServerRelationEntity extends BaseEntity {
   @ManyToOne(() => ComfyuiModelEntity, (model) => model.serverRelations)
   model: ComfyuiModelEntity;
 
-  @ManyToOne(() => ComfyuiServerEntity, (server) => server.models)
+  @ManyToOne(() => ComfyuiServerEntity, (server) => server.modelRelations)
   server: ComfyuiServerEntity;
 
   @Column({

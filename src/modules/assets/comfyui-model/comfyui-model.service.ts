@@ -48,6 +48,10 @@ export class ComfyuiModelService {
     return await this.repository.listModels(teamId, dto);
   }
 
+  public async getModelsWithoutType() {
+    return await this.repository.getModelsWithoutType();
+  }
+
   public async getModelsByServerId(teamId: string, serverId: string) {
     return await this.repository.getModelsByServerId(teamId, serverId);
   }
@@ -66,7 +70,7 @@ export class ComfyuiModelService {
     return data;
   }
 
-  public async updateModels(teamId: string, serverId: string) {
+  public async updateModelsByTeamIdAndServerId(teamId: string, serverId: string) {
     const server = await this.comfyuiService.getComfyuiServerById(teamId, serverId);
     if (!server) throw new Error('ComfyUI server not found');
 
