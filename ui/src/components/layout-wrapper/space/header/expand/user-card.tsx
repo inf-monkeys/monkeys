@@ -29,6 +29,8 @@ export const UserCard: React.FC<IUserCardProps> = () => {
   const { userPhoto, userName } = useVinesUser();
   const { teamId, team } = useVinesTeam();
 
+  const teamName = team?.name ?? '默认团队';
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -41,7 +43,7 @@ export const UserCard: React.FC<IUserCardProps> = () => {
         <DropdownMenuLabel>
           {userName}
           <br />
-          {team?.name}
+          {t([`components.layout.main.sidebar.teams.${teamName ?? ''}`, teamName ?? ''])}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
