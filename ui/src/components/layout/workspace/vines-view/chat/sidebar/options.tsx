@@ -16,7 +16,7 @@ export const WorkflowChatViewOptions: React.FC<IChatViewOptionsProps> = () => {
   const { t } = useTranslation();
   const { page, setCustomOptions } = useVinesPage();
 
-  const isHideExecutionProcessEnabled = page?.customOptions?.isHideExecutionProcess ?? false;
+  const isHideExecutionProcessEnabled = page?.customOptions?.showExecutionProcess ?? false;
 
   return (
     <Popover>
@@ -39,14 +39,14 @@ export const WorkflowChatViewOptions: React.FC<IChatViewOptionsProps> = () => {
             id="airplane-mode"
             size="small"
             checked={isHideExecutionProcessEnabled}
-            onCheckedChange={(val) => setCustomOptions({ isHideExecutionProcess: val })}
+            onCheckedChange={(val) => setCustomOptions({ showExecutionProcess: val })}
           />
           <Label className="text-sm">
-            {t('workspace.chat-view.workflow-mode.options.hide-execution-process.label')}
+            {t('workspace.chat-view.workflow-mode.options.show-execution-process.label')}
           </Label>
         </div>
         <span className="text-xs text-muted-foreground">
-          {t('workspace.chat-view.workflow-mode.options.hide-execution-process.tips')}
+          {t('workspace.chat-view.workflow-mode.options.show-execution-process.tips')}
         </span>
       </PopoverContent>
     </Popover>
