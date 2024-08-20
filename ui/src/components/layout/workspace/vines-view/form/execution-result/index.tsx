@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 
 import { useSetState, useThrottleEffect } from 'ahooks';
 import { type EventEmitter } from 'ahooks/lib/useEventEmitter';
@@ -21,6 +21,7 @@ import { JSONValue } from '@/components/ui/code-editor';
 import { VinesImageGroup } from '@/components/ui/image';
 import { Label } from '@/components/ui/label.tsx';
 import { VinesLoading } from '@/components/ui/loading';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
@@ -174,33 +175,49 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   const totalCount = list.length;
   const itemSize = size.width / 3;
 
+  const gridRef = useRef<Grid>(null);
+
   return (
     <Card className={cn('relative', className)}>
       <CardContent className="p-0">
         <VinesImageGroup>
-          {gridVisible && (
-            <Grid
-              className="!overflow-x-hidden"
-              height={size.height}
-              width={size.width}
-              columnCount={3}
-              columnWidth={() => itemSize}
-              rowCount={Math.ceil(totalCount / 3)}
-              rowHeight={() => itemSize}
-              itemData={list}
-            >
-              {({ columnIndex, rowIndex, style: { width, ...style }, data }) => {
-                const item = data[rowIndex * 3 + columnIndex];
-                const type = item?.render?.type;
-                if (!item || type === 'empty') return null;
-                return (
-                  <div style={{ ...style, width: type === 'raw' ? size.width : width }}>
-                    <VinesExecutionResultItem data={item} height={itemSize - 16} />
-                  </div>
-                );
-              }}
-            </Grid>
-          )}
+          <ScrollArea
+            className="p-1"
+            onScrollPositionChange={({ y }) => gridRef.current?.scrollTo({ scrollTop: y })}
+            style={{ height: size.height }}
+            disabledOverflowMask
+          >
+            {gridVisible && (
+              <Grid
+                ref={gridRef}
+                className="!overflow-visible"
+                height={size.height}
+                width={size.width}
+                columnCount={3}
+                columnWidth={() => itemSize - (miniGap ? 6 : workbenchGap ? 3 : 6)}
+                rowCount={Math.ceil(totalCount / 3)}
+                rowHeight={() => itemSize}
+                itemData={list}
+              >
+                {({ columnIndex, rowIndex, style: { width, ...style }, data }) => {
+                  const item = data[rowIndex * 3 + columnIndex];
+                  const type = item?.render?.type;
+                  const isRaw = type === 'raw';
+                  if (!item || type === 'empty') return null;
+                  return (
+                    <div
+                      style={{ ...style, width: isRaw ? size.width - (miniGap ? 18 : workbenchGap ? 8 : 16) : width }}
+                    >
+                      <VinesExecutionResultItem
+                        data={item}
+                        height={isRaw ? itemSize : itemSize - (workbenchGap ? 8 : 4)}
+                      />
+                    </div>
+                  );
+                }}
+              </Grid>
+            )}
+          </ScrollArea>
         </VinesImageGroup>
 
         <AnimatePresence>

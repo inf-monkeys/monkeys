@@ -39,7 +39,7 @@ export const VinesExecutionResultItem: React.FC<IVinesExecutionResultItemProps> 
   const isRUNNING = data.status === 'RUNNING';
 
   return type === 'image' ? (
-    <div className="box-border flex-none content-stretch p-3">
+    <div className="box-border flex-none content-stretch p-1">
       <div className="vines-center overflow-hidden rounded-lg" style={{ height }}>
         <Image
           src={renderData as string}
@@ -57,13 +57,12 @@ export const VinesExecutionResultItem: React.FC<IVinesExecutionResultItemProps> 
       <Tooltip>
         <TooltipTrigger asChild>
           <DialogTrigger asChild>
-            <div className="box-border flex-none content-stretch p-3">
+            <div className="box-border flex flex-none content-stretch p-1" style={{ height }}>
               <div
                 className={cn(
                   'relative cursor-pointer overflow-hidden rounded-lg border border-input bg-background shadow-sm',
                   isRenderRaw ? 'w-full p-2' : 'size-full',
                 )}
-                style={{ height }}
               >
                 <AnimatePresence>
                   {isRUNNING ? (
