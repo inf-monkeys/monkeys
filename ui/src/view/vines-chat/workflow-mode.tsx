@@ -13,7 +13,7 @@ interface IVinesWorkflowModeProps {
 
 export const VinesWorkflowMode: React.FC<IVinesWorkflowModeProps> = ({ height, disabled = false }) => {
   const { page } = useVinesPage();
-  const isSimple = page?.customOptions?.isHideExecutionProcess ?? false;
+  const isSimple = !(page?.customOptions?.showExecutionProcess ?? false);
 
   const visible = useViewStore((s) => s.visible);
   const workflowId = useFlowStore((s) => s.workflowId);

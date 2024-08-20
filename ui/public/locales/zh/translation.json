@@ -2923,9 +2923,9 @@
         "manually-trigger": "手动或自动执行触发",
         "options": {
           "label": "偏好设置",
-          "hide-execution-process": {
-            "label": "隐藏工作流执行过程",
-            "tips": "隐藏后，工作流执行时将不再显示详细过程"
+          "show-execution-process": {
+            "label": "显示工作流执行过程",
+            "tips": "工作流执行时将显示详细过程"
           }
         }
       },

@@ -2929,9 +2929,9 @@
         "manually-trigger": "Manual or automatic execution trigger",
         "options": {
           "label": "Preferences",
-          "hide-execution-process": {
-            "label": "Hide workflow execution process",
-            "tips": "After hiding, the detailed process will no longer be displayed when the workflow is executed"
+          "show-execution-process": {
+            "label": "Show workflow execution process",
+            "tips": "Detailed process will be displayed when the workflow is executed"
           }
         }
       },
