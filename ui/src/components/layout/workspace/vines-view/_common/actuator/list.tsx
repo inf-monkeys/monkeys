@@ -39,7 +39,7 @@ export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({
 
   const [tools, setTools] = useState<IActuatorToolList[]>([]);
 
-  const workflowStatus = vines.executionStatus();
+  const workflowStatus = vines.executionStatus(instanceId);
 
   useEffect(() => {
     const nodes = vines.getAllNodes();
@@ -68,16 +68,22 @@ export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({
     }
 
     if (setActiveTool) {
-      const activeNode = nodes
-        .filter((node) => ['IN_PROGRESS', 'SCHEDULED'].includes(node.getExecutionTask(instanceId)?.status ?? ''))
-        .sort(
-          (a, b) => (a.getExecutionTask(instanceId)?.startTime ?? 0) - (b.getExecutionTask(instanceId)?.startTime ?? 0),
-        )
-        .sort((a) => (['SUB_WORKFLOW', 'DO_WHILE'].includes(a.type) ? 1 : -1));
-      if (activeNode?.[0]) {
-        setActiveTool(activeNode[0]);
-      } else if (nodes?.[1]) {
-        setActiveTool(nodes[1]);
+      if (
+        !activeTool ||
+        (vines.executionInstanceId === instanceId && ['IN_PROGRESS', 'SCHEDULED', 'RUNNING'].includes(workflowStatus))
+      ) {
+        const activeNode = nodes
+          .filter((node) => ['IN_PROGRESS', 'SCHEDULED'].includes(node.getExecutionTask(instanceId)?.status ?? ''))
+          .sort(
+            (a, b) =>
+              (a.getExecutionTask(instanceId)?.startTime ?? 0) - (b.getExecutionTask(instanceId)?.startTime ?? 0),
+          )
+          .sort((a) => (['SUB_WORKFLOW', 'DO_WHILE'].includes(a.type) ? 1 : -1));
+        if (activeNode?.[0]) {
+          setActiveTool(activeNode[0]);
+        } else if (nodes?.[1]) {
+          setActiveTool(nodes[1]);
+        }
       }
     }
 
