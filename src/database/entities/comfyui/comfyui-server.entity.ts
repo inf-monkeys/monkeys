@@ -56,5 +56,5 @@ export class ComfyuiServerEntity extends BaseEntity {
   isDefault: boolean;
 
   @OneToMany(() => ComfyuiModelServerRelationEntity, (models) => models.server)
-  models: ComfyuiModelServerRelationEntity[];
+  modelRelations?: ComfyuiModelServerRelationEntity[];
 }
