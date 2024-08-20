@@ -7,8 +7,9 @@ import { useTranslation } from 'react-i18next';
 import { VinesExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result';
 import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
 import { IframeHeader } from '@/components/layout/workspace/vines-view/form/tabular/iframe-header.tsx';
+import { useVinesOriginWorkflow } from '@/components/layout-wrapper/workspace/utils.ts';
 import useUrlState from '@/hooks/use-url-state.ts';
-import { useVinesFlow } from '@/package/vines-flow';
+import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
@@ -26,9 +27,9 @@ export const VinesForm: React.FC<IVinesFormProps> = () => {
 
   const event$ = useEventEmitter();
 
-  const { vines } = useVinesFlow();
-  const useOpenAIInterface = vines.usedOpenAIInterface();
-  const openAIInterfaceEnabled = useOpenAIInterface.enable;
+  const workflowId = useFlowStore((s) => s.workflowId);
+  const { workflow } = useVinesOriginWorkflow(workflowId);
+  const openAIInterfaceEnabled = workflow?.exposeOpenaiCompatibleInterface ?? false;
 
   const isMiniFrame = mode === 'mini';
 

@@ -94,7 +94,7 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
             <TooltipContent>{t('workspace.flow-view.headless-modal.tool-editor.header.more')}</TooltipContent>
           </Tooltip>
           {isWorkflowRUNNING && (
-            <ExecutionStatusIcon className="mr-2" status={status} workflowStatus={workflowStatus} />
+            <ExecutionStatusIcon className="mr-2" status={status} workflowStatus={workflowStatus} loadingSize="sm" />
           )}
         </div>
       </ComplicateNodeHeader>

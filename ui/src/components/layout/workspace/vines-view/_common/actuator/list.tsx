@@ -150,7 +150,7 @@ export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({
                   </div>
                 </div>
                 <div className="mx-2">
-                  <ExecutionStatusIcon status={status} workflowStatus={workflowStatus} />
+                  <ExecutionStatusIcon status={status} workflowStatus={workflowStatus} loadingSize="sm" />
                 </div>
               </Card>
             </motion.div>

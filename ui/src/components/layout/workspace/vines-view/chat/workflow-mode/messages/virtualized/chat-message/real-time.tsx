@@ -117,7 +117,7 @@ export const VinesRealTimeChatMessage = memo((props) => {
                   </div>
                 </div>
                 <div className="mx-2 flex flex-1 justify-end">
-                  <ExecutionStatusIcon status={workflowStatus} workflowStatus={workflowStatus} />
+                  <ExecutionStatusIcon status={workflowStatus} workflowStatus={workflowStatus} loadingSize="sm" />
                 </div>
               </CardHeader>
               <CardContent className="p-0">

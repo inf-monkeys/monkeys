@@ -9,7 +9,7 @@ import { useIsMounted } from '@/hooks/use-is-mounted.ts';
 import { cn } from '@/utils';
 import { clampPercentage } from '@/utils/number.ts';
 
-interface IVinesLoadingProps {
+export interface IVinesLoadingProps {
   strokeWidth?: number;
   color?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger';
   value?: number;
