@@ -2,7 +2,7 @@ import { ListDto } from '@/common/dto/list.dto';
 import { generateDbId } from '@/common/utils';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { ILike, In, Repository } from 'typeorm';
 import { ComfyuiModelServerRelationEntity } from '../entities/assets/model/comfyui-model/comfyui-model-server-relation.entity';
 import { ComfyuiModelTypeEntity, CreateComfyuiModelTypeParams, UpdateComfyuiModelTypeParams } from '../entities/assets/model/comfyui-model/comfyui-model-type.entity';
 import { ComfyuiModelEntity, CreateComfyuiModelParams } from '../entities/assets/model/comfyui-model/comfyui-model.entity';
@@ -210,6 +210,48 @@ export class ComfyuiModelRepository {
     });
   }
 
+  public async getModelsByTypeAndServerId(teamId: string, serverId: string, typeInfo: { typeId?: string; typeName?: string }) {
+    const modelType = typeInfo.typeId ? await this.getTypeById(teamId, typeInfo.typeId) : typeInfo.typeName && (await this.getTypeByName(teamId, typeInfo.typeName));
+    if (!modelType) throw new Error('Model type not found');
+
+    const rawModels = await this.modelRepository.find({
+      where: {
+        teamId,
+        serverRelations: {
+          server: {
+            id: In([serverId]),
+          },
+          path: ILike(`${modelType.path}%`),
+        },
+        isDeleted: false,
+      },
+      relations: {
+        serverRelations: {
+          server: true,
+        },
+      },
+    });
+
+    return rawModels.map((model) => {
+      const { serverRelations } = model;
+      return {
+        ...model,
+        serverRelations: serverRelations
+          ? serverRelations.map((relation) => {
+              return {
+                ...relation,
+                type: modelType,
+              };
+            })
+          : undefined,
+      };
+    });
+  }
+
+  public async getModelsBySha256List(teamId: string, sha256List: string[]) {
+    return await this.modelRepository.find({ where: { sha256: In(sha256List), teamId, isDeleted: false } });
+  }
+
   public async getModelById(teamId: string, modelId: string) {
     const rawModel = await this.modelRepository.findOne({
       where: {
@@ -242,10 +284,6 @@ export class ComfyuiModelRepository {
     }
 
     return rawModel;
-  }
-
-  public async getModelsBySha256List(teamId: string, sha256List: string[]) {
-    return await this.modelRepository.find({ where: { sha256: In(sha256List), teamId, isDeleted: false } });
   }
 
   public async createModel(teamId: string, params: CreateComfyuiModelParams) {
