@@ -1707,6 +1707,14 @@
             "label": "Documents",
             "stats": {
               "file-count": "Documents: {{count}}"
+            },
+            "table": {
+              "id": "Document ID",
+              "filename": "Document name",
+              "file-url": "File url",
+              "index-status": "Index status",
+              "failed-message": "Error message",
+              "operate": "Operation"
             }
           },
           "segments": {
@@ -1736,6 +1744,12 @@
               "dimension": "Vector Dimension: {{dimensionCount}}",
               "model": "Embedding Model: {{model}}",
               "id": "Vector Database ID: {{id}}"
+            },
+            "table": {
+              "rank": "Similarity ranking",
+              "page-content": "Paragraph content",
+              "char-count": "Number of characters",
+              "operate": "Operation"
             }
           },
           "settings": {

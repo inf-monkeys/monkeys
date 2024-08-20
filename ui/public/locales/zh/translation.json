@@ -1556,6 +1556,12 @@
               "label": "任务列表{{status}}",
               "loading": "（加载中）",
               "processing": "（处理文件中）"
+            },
+
+            "message": {
+              "No logs": "暂无日志",
+              "Added to queue": "已添加到队列",
+              "Loaded to vector store": "已加载到向量库"
             }
           },
           "import": {
@@ -1707,6 +1713,14 @@
             "label": "文档",
             "stats": {
               "file-count": "文件数：{{count}}"
+            },
+            "table": {
+              "id": "文档 ID",
+              "filename": "文档名称",
+              "file-url": "文件链接",
+              "index-status": "索引状态",
+              "failed-message": "错误信息",
+              "operate": "操作"
             }
           },
           "segments": {
@@ -1736,6 +1750,12 @@
               "dimension": "向量维度：{{dimensionCount}}",
               "model": "Embedding 模型：{{model}}",
               "id": "知识库 ID：{{id}}"
+            },
+            "table": {
+              "rank": "相似度排名",
+              "page-content": "段落内容",
+              "char-count": "字符数",
+              "operate": "操作"
             }
           },
           "settings": {

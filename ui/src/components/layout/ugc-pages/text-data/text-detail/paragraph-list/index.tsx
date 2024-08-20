@@ -6,8 +6,8 @@ import { toast } from 'sonner';
 
 import { useKnowledgeBase, useKnowledgeBaseMetadataFields, useSearchKnowledgeBase } from '@/apis/vector';
 import { IFullTextSearchParams, IVectorRecord } from '@/apis/vector/typings.ts';
-import { columns } from '@/components/layout/ugc-pages/text-data/text-detail/paragraph-list/consts.tsx';
 import { MetadataFilter } from '@/components/layout/ugc-pages/text-data/text-detail/paragraph-list/metadata-filter.tsx';
+import { ParagraphOperateCell } from '@/components/layout/ugc-pages/text-data/text-detail/paragraph-list/paragraph-operate-cell.tsx';
 import { Button } from '@/components/ui/button';
 import { InfiniteScrollingDataTable } from '@/components/ui/data-table/infinite.tsx';
 import { Input } from '@/components/ui/input';
@@ -123,7 +123,37 @@ export const ParagraphList: React.FC<IParagraphListProps> = ({ textId }) => {
       </div>
       <InfiniteScrollingDataTable
         className="h-[calc(100vh-14rem)]"
-        columns={columns}
+        columns={[
+          {
+            id: 'rank',
+            header: t('ugc-page.text-data.detail.tabs.segments.table.rank'),
+            size: 32,
+            cell: ({ row }) => <span>{row.index + 1}</span>,
+          },
+          {
+            accessorKey: 'page_content',
+            header: t('ugc-page.text-data.detail.tabs.segments.table.page-content'),
+            id: 'text',
+            cell: ({ cell }) => {
+              const text = (cell.getValue() as string) ?? '';
+              return <span>{text?.length > 200 ? text.slice(0, 200) + '...' : text}</span>;
+            },
+          },
+          {
+            accessorKey: 'page_content',
+            header: t('ugc-page.text-data.detail.tabs.segments.table.char-count'),
+            id: 'charCount',
+            size: 24,
+            cell: ({ cell }) => <span>{(cell.getValue() as string)?.length}</span>,
+          },
+          {
+            accessorFn: (row) => row,
+            id: 'operate',
+            header: t('ugc-page.text-data.detail.tabs.segments.table.operate'),
+            size: 64,
+            cell: ParagraphOperateCell,
+          },
+        ]}
         data={hits}
         loading={isLoading}
         tfoot={

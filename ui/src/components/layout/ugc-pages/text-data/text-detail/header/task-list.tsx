@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, CircleX } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useKnowledgeBaseTasks } from '@/apis/vector';
@@ -22,7 +22,7 @@ export const TaskList: React.FC<ITaskListProps> = ({ knowledgeBaseId }) => {
 
   const { data, isLoading } = useKnowledgeBaseTasks(knowledgeBaseId);
   const isActiveTask = data?.list?.filter(
-    (task) => task.status !== KnowledgebaseTaskStatus.COMPLETED && KnowledgebaseTaskStatus.FAILED,
+    (task) => ![KnowledgebaseTaskStatus.FAILED, KnowledgebaseTaskStatus.COMPLETED].includes(task?.status ?? ''),
   )?.[0];
 
   const getColor = (
@@ -49,7 +49,7 @@ export const TaskList: React.FC<ITaskListProps> = ({ knowledgeBaseId }) => {
           <TooltipTrigger asChild>
             <Card
               className={cn(
-                'flex h-8 cursor-pointer items-center justify-center gap-2 px-2 py-1 hover:bg-accent hover:text-accent-foreground',
+                'flex h-8 max-w-96 cursor-pointer items-center justify-center gap-2 px-2 py-1 hover:bg-accent hover:text-accent-foreground',
                 !isActiveTask && 'pointer-events-none',
               )}
             >
@@ -66,29 +66,39 @@ export const TaskList: React.FC<ITaskListProps> = ({ knowledgeBaseId }) => {
             </Card>
           </TooltipTrigger>
         </PopoverTrigger>
-        <PopoverContent className="w-[24rem]">
-          <ScrollArea className="h-52">
-            <div className="flex flex-col gap-2">
-              {data?.list?.map((task, i) => {
-                const currentProgress = (task?.progress ?? 0) * 100;
-                return (
-                  <Card className="flex items-center gap-2 p-2" key={i}>
-                    {currentProgress === 100 ? (
-                      <CheckCircle size={28} />
-                    ) : (
-                      <VinesLoading color={getColor(task.status)} value={currentProgress} size="md" />
-                    )}
-                    <div className="flex flex-col">
-                      <h1 className="text-sm">{task.id}</h1>
-                      <span className="text-xs leading-tight text-muted-foreground">{task?.latestMessage}</span>
-                    </div>
-                  </Card>
-                );
-              })}
-              <p className="mt-2 w-full text-center text-xs text-muted-foreground">{t('common.load.no-more')}</p>
-            </div>
-          </ScrollArea>
-        </PopoverContent>
+        {isActiveTask && (
+          <PopoverContent className="w-full min-w-[24rem] max-w-[30rem]">
+            <ScrollArea className="h-52">
+              <div className="flex flex-col gap-2">
+                {data?.list?.map((task, i) => {
+                  const currentProgress = (task?.progress ?? 0) * 100;
+                  const currentStatus = task?.status ?? KnowledgebaseTaskStatus.PENDING;
+                  const latestMessage = task?.latestMessage ?? 'No logs';
+                  return (
+                    <Card className="flex items-start gap-2 p-2" key={i}>
+                      <div className="pt-1">
+                        {currentProgress === 100 ? (
+                          <CheckCircle size={28} strokeWidth={2.5} className="stroke-vines-500" />
+                        ) : currentStatus === KnowledgebaseTaskStatus.FAILED ? (
+                          <CircleX size={28} strokeWidth={2.5} className="stroke-red-10" />
+                        ) : (
+                          <VinesLoading color={getColor(currentStatus)} value={currentProgress} size="md" />
+                        )}
+                      </div>
+                      <div className="flex flex-col">
+                        <h1 className="text-sm">{task.id}</h1>
+                        <span className="text-xs leading-tight text-muted-foreground">
+                          {t([`ugc-page.text-data.detail.header.task-list.message.${latestMessage}`, latestMessage])}
+                        </span>
+                      </div>
+                    </Card>
+                  );
+                })}
+                <p className="mt-2 w-full text-center text-xs text-muted-foreground">{t('common.load.no-more')}</p>
+              </div>
+            </ScrollArea>
+          </PopoverContent>
+        )}
       </Popover>
       <TooltipContent>
         {t('ugc-page.text-data.detail.header.task-list.tooltip.label', {
