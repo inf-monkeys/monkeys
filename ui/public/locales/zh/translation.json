@@ -1561,7 +1561,8 @@
             "message": {
               "No logs": "暂无日志",
               "Added to queue": "已添加到队列",
-              "Loaded to vector store": "已加载到向量库"
+              "Loaded to vector store": "已加载到向量库",
+              "Failed to process task: Failed to download file": "下载文件失败"
             }
           },
           "import": {
