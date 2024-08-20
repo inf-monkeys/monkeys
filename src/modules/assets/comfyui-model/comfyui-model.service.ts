@@ -51,6 +51,10 @@ export class ComfyuiModelService {
     return await this.repository.getModelsByServerId(teamId, serverId);
   }
 
+  public async getModelsByTypeAndServerId(teamId: string, serverId: string, typeInfo: { typeId?: string; typeName?: string }) {
+    return await this.repository.getModelsByTypeAndServerId(teamId, serverId, typeInfo);
+  }
+
   public async getModelsFromServer(serverAddress: string) {
     const { data } = await axios<{ path: string; sha256: string }[]>({
       method: 'GET',

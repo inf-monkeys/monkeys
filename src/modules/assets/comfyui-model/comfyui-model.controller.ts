@@ -22,6 +22,16 @@ export class ComfyuiModelController {
     });
   }
 
+  @Get('/list')
+  public async getModelsByTypeAndServerId(@Req() req: IRequest, @Query() query: { typeId?: string; typeName?: string; serverId?: string }) {
+    const { teamId } = req;
+    const { typeId, serverId, typeName } = query;
+    if (!(typeId || typeName) || !serverId) throw new Error('typeId or typeName with serverId are required');
+    return new SuccessResponse({
+      data: await this.service.getModelsByTypeAndServerId(teamId, serverId, { typeId, typeName }),
+    });
+  }
+
   @Post('/manual-update')
   public async manualUpdate(@Req() req: IRequest, @Body() body: { serverId: string }) {
     const { teamId } = req;
