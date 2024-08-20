@@ -2,6 +2,7 @@ import { ListDto } from '@/common/dto/list.dto';
 import { generateDbId } from '@/common/utils';
 import { ComfyuiModelServerRelationEntity } from '@/database/entities/assets/model/comfyui-model/comfyui-model-server-relation.entity';
 import { CreateComfyuiModelTypeParams, UpdateComfyuiModelTypeParams } from '@/database/entities/assets/model/comfyui-model/comfyui-model-type.entity';
+import { UpdateComfyuiModelParams } from '@/database/entities/assets/model/comfyui-model/comfyui-model.entity';
 import { ComfyuiModelRepository } from '@/database/repositories/comfyui-model.repository';
 import { ComfyUIService } from '@/modules/tools/comfyui/comfyui.service';
 import { Injectable } from '@nestjs/common';
@@ -75,6 +76,8 @@ export class ComfyuiModelService {
         `Failed to connect to ComfyUI server: ${errMsg}, have you installed the Comfyfile plugin (https://github.com/inf-monkeys/Comfyfile)? And make sure comfyui is listening on 0.0.0.0`,
       );
 
+    const ts = +new Date();
+
     // 从服务器获取的 model
     const rawModelList = await this.getModelsFromServer(server.address);
     const rawModelSha256List = rawModelList.map((model) => model.sha256);
@@ -92,6 +95,7 @@ export class ComfyuiModelService {
     // 更新需要删除的
     toRemove.forEach((model) => {
       model.serverRelations = model.serverRelations.filter(({ server }) => server.id !== serverId);
+      model.updatedTimestamp = ts;
     });
     const toRemoveUpdateResult = await this.repository.saveModels(toRemove);
 
@@ -110,6 +114,7 @@ export class ComfyuiModelService {
       relationEntity.path = path;
       relationEntity.filename = filename;
       relationEntity.teamId = teamId;
+      model.updatedTimestamp = ts;
       // model.servers ? model.servers.push(relationEntity) : (model.servers = [relationEntity]);
       await this.repository.saveRelation(relationEntity);
     });
@@ -145,5 +150,13 @@ export class ComfyuiModelService {
       update: toUpdateUpdateResult.length,
       create: toCreateUpdateResult.length,
     };
+  }
+
+  public async getModelById(teamId: string, modelId: string) {
+    return await this.repository.getModelById(teamId, modelId);
+  }
+
+  public async updateModel(teamId: string, modelId: string, updates: UpdateComfyuiModelParams) {
+    return await this.repository.updateModel(teamId, modelId, updates);
   }
 }

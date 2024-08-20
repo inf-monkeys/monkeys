@@ -5,6 +5,8 @@ import { ComfyuiModelServerRelationEntity } from './comfyui-model-server-relatio
 
 export type CreateComfyuiModelParams = Pick<ComfyuiModelEntity, 'sha256'> & Partial<Pick<ComfyuiModelEntity, 'id' | 'displayName' | 'description' | 'serverRelations'>>;
 
+export type UpdateComfyuiModelParams = Partial<Pick<ComfyuiModelEntity, 'displayName' | 'description' | 'iconUrl'>>;
+
 @Entity({ name: 'comfyui_model' })
 export class ComfyuiModelEntity extends BaseAssetEntity {
   assetType: AssetType = 'comfyui-model';
