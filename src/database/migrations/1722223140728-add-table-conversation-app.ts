@@ -24,8 +24,7 @@ export class MigartionAddTableConversationApp1722223140728 implements MigrationI
           },
           {
             name: 'system_prompt',
-            type: 'varchar',
-            length: '255',
+            type: 'text',
             isNullable: true,
           },
           {

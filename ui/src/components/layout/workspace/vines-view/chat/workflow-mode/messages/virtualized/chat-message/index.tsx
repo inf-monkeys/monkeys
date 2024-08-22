@@ -11,9 +11,16 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
 import { Card } from '@/components/ui/card.tsx';
 import { JSONValue } from '@/components/ui/code-editor';
 import { VinesHighlighter } from '@/components/ui/highlighter';
+import { VinesLoading } from '@/components/ui/loading';
 import { cn } from '@/utils';
 
-export const ChatMessage = memo<{ data: IVinesChatListItem; isLast?: boolean }>(({ data, isLast = false }) => {
+interface IVinesChatMessageProps {
+  data: IVinesChatListItem;
+  isLast?: boolean;
+  useSimple?: boolean;
+}
+
+export const ChatMessage = memo<IVinesChatMessageProps>(({ data, isLast = false, useSimple = false }) => {
   const { t } = useTranslation();
 
   const status = data.status;
@@ -31,6 +38,7 @@ export const ChatMessage = memo<{ data: IVinesChatListItem; isLast?: boolean }>(
   const endTime = data.endTime;
 
   const finalData = data.output as JSONValue;
+  const isRUNNING = ['RUNNING', 'PAUSED'].includes(status ?? '');
 
   return (
     <div className="flex flex-col gap-6 py-4">
@@ -64,9 +72,20 @@ export const ChatMessage = memo<{ data: IVinesChatListItem; isLast?: boolean }>(
         botPhoto={botPhoto}
         endTime={endTime}
         instanceId={instanceId}
-        className={['RUNNING', 'PAUSED'].includes(status ?? '') && isLast ? 'hidden' : ''}
+        className={isRUNNING && isLast && !useSimple ? 'hidden' : ''}
+        useSimple={useSimple}
       >
-        <VinesAbstractDataPreview data={finalData} />
+        {useSimple ? (
+          isRUNNING ? (
+            <div className="vines-center w-full">
+              <VinesLoading size="md" />
+            </div>
+          ) : (
+            <VinesAbstractDataPreview data={finalData} />
+          )
+        ) : (
+          <VinesAbstractDataPreview data={finalData} />
+        )}
       </VinesBotChatMessage>
     </div>
   );

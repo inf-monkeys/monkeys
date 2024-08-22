@@ -507,6 +507,8 @@ ORDER BY
   }
 
   public async getWorkflowExecutionStatisticsByTeamId(teamId: string, startTimestamp: number, endTimestamp: number) {
+    const dateList = this.getDateList(startTimestamp, endTimestamp);
+
     const appId = config.server.appId;
     const workflowIds = _.uniq(
       (
@@ -518,6 +520,19 @@ ORDER BY
         })
       ).map((x) => x.workflowId),
     );
+
+    if (workflowIds.length === 0) {
+      return dateList.map((date) => {
+        return {
+          date,
+          totalCount: 0,
+          successCount: 0,
+          failedCount: 0,
+          averageTime: 0,
+        };
+      });
+    }
+
     const workflowIdsStr = workflowIds.map((x) => `'${x}'`).join(',');
     const callsPerDateSql = `
 SELECT
@@ -584,7 +599,6 @@ ORDER BY
   date;
     `;
 
-    const dateList = this.getDateList(startTimestamp, endTimestamp);
     const [callsPerDayResult, successPerDayResult, failedPerDayResult, averageTakesPerDayResult] = await Promise.all([
       this.workflowExecutionRepository.query(callsPerDateSql),
       this.workflowExecutionRepository.query(successPerDateSql),

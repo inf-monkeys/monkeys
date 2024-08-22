@@ -2,29 +2,52 @@ import { useEffect, useRef } from 'react';
 
 import { useNavigate, useParams } from '@tanstack/react-router';
 
+import { useMemoizedFn } from 'ahooks';
 import { differenceWith, isEqual, omit, set } from 'lodash';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 import { updateWorkspacePages, useWorkspacePagesWithWorkflowId } from '@/apis/pages';
 import { IPageType } from '@/apis/pages/typings.ts';
 import { useGetWorkflow } from '@/apis/workflow';
 import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId';
+import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cloneDeep } from '@/utils';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 export const useVinesPage = () => {
+  const { t } = useTranslation();
+
   const navigate = useNavigate({ from: Route.fullPath });
-  const { workflowId, pageId, teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
-  const { data: pages, mutate: pagesMutate } = useWorkspacePagesWithWorkflowId(workflowId);
+  const {
+    workflowId: routeWorkflowId,
+    pageId: routePageId,
+    teamId,
+  } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
+
+  let workflowId = routeWorkflowId;
+  try {
+    const storeWorkflowId = useFlowStore((s) => s.workflowId);
+    if (storeWorkflowId) {
+      workflowId = storeWorkflowId;
+    }
+  } catch {
+    /* empty */
+  }
 
   const page = usePageStore((s) => s.page);
+  const pageId = routePageId ?? page?.id ?? '';
+
+  const { data: pages, mutate: pagesMutate } = useWorkspacePagesWithWorkflowId(workflowId);
+
   const setPage = usePageStore((s) => s.setPage);
 
   const { data: workflow, mutate: mutateWorkflow } = useGetWorkflow(workflowId);
 
   const originPagesRef = useRef<IPageType[] | null>(null);
   const isUpdatePageLocker = useRef(false);
-  const setPages = async (pages: IPageType[]) => {
+  const setPages = useMemoizedFn(async (pages: IPageType[]) => {
     await pagesMutate(pages, {
       revalidate: false,
     });
@@ -71,7 +94,7 @@ export const useVinesPage = () => {
     }
 
     setTimeout(() => (isUpdatePageLocker.current = false), 100);
-  };
+  });
 
   useEffect(() => {
     if (!pages) return;
@@ -91,7 +114,7 @@ export const useVinesPage = () => {
       },
     });
 
-  const updatePageData = async (key: string, value: unknown) => {
+  const updatePageData = useMemoizedFn(async (key: string, value: unknown) => {
     if (!page) return;
     const pageIndex = pages?.findIndex((it) => it.id === page.id) ?? -1;
     if (pageIndex === -1) return;
@@ -99,7 +122,27 @@ export const useVinesPage = () => {
     if (!newPages?.[pageIndex]) return;
     set(newPages[pageIndex], key, value);
     return setPages(newPages);
-  };
+  });
+
+  const setCustomOptions = useMemoizedFn(async (options: Record<string, any>) => {
+    if (!pages) return;
+    const currentPage = pages.findIndex(({ id }) => id === pageId);
+    if (currentPage === -1) return;
+
+    const newPages = cloneDeep(pages);
+
+    const prevOptions = newPages[currentPage]?.customOptions;
+    newPages[currentPage].customOptions = {
+      ...prevOptions,
+      ...options,
+    };
+
+    toast.promise(setPages(newPages), {
+      loading: t('common.save.loading'),
+      success: t('common.save.success'),
+      error: t('common.save.error'),
+    });
+  });
 
   return {
     workflow,
@@ -114,6 +157,7 @@ export const useVinesPage = () => {
     pageId,
     teamId,
     navigateTo,
+    setCustomOptions,
   };
 };
 

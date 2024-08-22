@@ -10,11 +10,7 @@ import { toast } from 'sonner';
 import { exportAgentExecutionStats, useMutationAgentExecutionStats } from '@/apis/workflow/execution';
 import { VinesLogViewStatChart } from '@/components/layout/workspace/vines-view/log/stat/chart';
 import { VinesLogViewStatFilter } from '@/components/layout/workspace/vines-view/log/stat/filter';
-import {
-  getDayBegin,
-  getDayEnd,
-  getRelativeDate,
-} from '@/components/layout/workspace/vines-view/log/stat/utils.ts';
+import { getDayBegin, getDayEnd, getRelativeDate } from '@/components/layout/workspace/vines-view/log/stat/utils.ts';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -71,13 +67,12 @@ export const AgentLogsView: React.FC<IAgentLogsViewProps> = () => {
     }
   }, [agentId, visible]);
 
-  const handleSubmit = () =>
-    form.handleSubmit((params) => {
-      toast.promise(trigger(params), {
-        loading: t('workspace.logs-view.loading'),
-        error: t('workspace.logs-view.error'),
-      });
+  const handleSubmit = form.handleSubmit((params) => {
+    toast.promise(trigger(params), {
+      loading: t('workspace.logs-view.loading'),
+      error: t('workspace.logs-view.error'),
     });
+  });
 
   const finalHeight = containerHeight - 52 - 40;
 

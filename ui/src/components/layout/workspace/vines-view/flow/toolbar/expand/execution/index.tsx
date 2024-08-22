@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { get } from 'lodash';
 import { LogOut, Play, RotateCcw, StopCircle } from 'lucide-react';
@@ -28,16 +28,37 @@ export const VinesRunInsideToolbar: React.FC<IVinesRunInsideToolbarProps> = () =
   const setCanvasMode = useCanvasStore((s) => s.setCanvasMode);
   const setIsUserInteraction = useCanvasInteractionStore((s) => s.setIsUserInteraction);
 
-  const { vines } = useVinesFlow();
+  const { vines, VINES_REFRESHER } = useVinesFlow();
 
-  const workflowExecution = vines.executionWorkflowExecution;
+  const workflowExecution = vines.getWorkflowExecution();
 
   const disabled = vines.renderOptions.type !== IVinesFlowRenderType.COMPLICATE;
 
   const hasExecution = workflowExecution !== null;
-  const isExecutionStatus = vines.executionStatus;
+  const isExecutionStatus = vines.executionStatus();
   const isExecutionPaused = isExecutionStatus === 'PAUSED';
   const isExecutionRunning = isExecutionStatus === 'RUNNING' || isExecutionPaused;
+
+  useEffect(() => {
+    if (isExecutionRunning) {
+      const nodes = vines.getAllNodes();
+      const activeNode = nodes
+        .filter((node) => ['IN_PROGRESS', 'SCHEDULED'].includes(node.getExecutionTask()?.status ?? ''))
+        .sort((a, b) => (a.getExecutionTask()?.startTime ?? 0) - (b.getExecutionTask()?.startTime ?? 0))
+        .sort((a) => (['SUB_WORKFLOW', 'DO_WHILE'].includes(a.type) ? 1 : -1));
+
+      let nodeId = '';
+      if (activeNode?.[0]) {
+        nodeId = activeNode[0]?.id;
+      } else if (nodes?.[1]) {
+        nodeId = nodes[1]?.id;
+      }
+
+      if (nodeId) {
+        VinesEvent.emit('canvas-zoom-to-node', 'complicate-' + nodeId);
+      }
+    }
+  }, [VINES_REFRESHER]);
 
   const executionStartTime = get(workflowExecution, 'startTime', 0);
   const executionEndTime = get(workflowExecution, 'endTime', 0);

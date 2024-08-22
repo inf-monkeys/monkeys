@@ -1556,6 +1556,13 @@
               "label": "任务列表{{status}}",
               "loading": "（加载中）",
               "processing": "（处理文件中）"
+            },
+
+            "message": {
+              "No logs": "暂无日志",
+              "Added to queue": "已添加到队列",
+              "Loaded to vector store": "已加载到向量库",
+              "Failed to process task: Failed to download file": "下载文件失败"
             }
           },
           "import": {
@@ -1707,6 +1714,14 @@
             "label": "文档",
             "stats": {
               "file-count": "文件数：{{count}}"
+            },
+            "table": {
+              "id": "文档 ID",
+              "filename": "文档名称",
+              "file-url": "文件链接",
+              "index-status": "索引状态",
+              "failed-message": "错误信息",
+              "operate": "操作"
             }
           },
           "segments": {
@@ -1736,6 +1751,12 @@
               "dimension": "向量维度：{{dimensionCount}}",
               "model": "Embedding 模型：{{model}}",
               "id": "知识库 ID：{{id}}"
+            },
+            "table": {
+              "rank": "相似度排名",
+              "page-content": "段落内容",
+              "char-count": "字符数",
+              "operate": "操作"
             }
           },
           "settings": {
@@ -2182,7 +2203,7 @@
                 "create-field": "新增参数"
               },
               "collection": {
-                "placeholder": "请选择 {{name}}"
+                "placeholder": "请输入 {{name}}，回车新增"
               },
               "editor": {
                 "check-json-failed": "必须为 JSON 数组",
@@ -2735,6 +2756,7 @@
         }
       },
       "loading": "查询中...",
+      "success": "查询成功",
       "error": "查询失败，请检查网络是否通畅",
       "workflow-id-error": "请等待页面加载完毕"
     },
@@ -2919,7 +2941,14 @@
           "completed": "暂未配置输入，可直接运行"
         },
         "instance-id-tips": "运行实例 ID",
-        "manually-trigger": "手动或自动执行触发"
+        "manually-trigger": "手动或自动执行触发",
+        "options": {
+          "label": "偏好设置",
+          "show-execution-process": {
+            "label": "显示工作流执行过程",
+            "tips": "工作流执行时将显示详细过程"
+          }
+        }
       },
       "empty": "暂无对话",
       "back-to-bottom": "回到底部"

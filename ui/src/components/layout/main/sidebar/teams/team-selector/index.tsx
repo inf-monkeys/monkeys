@@ -19,6 +19,8 @@ import {
   CommandSeparator,
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn } from '@/utils';
 
@@ -61,12 +63,7 @@ export const TeamSelector: React.FC = () => {
           aria-expanded={open}
           aria-label="Select a team"
         >
-          <Team
-            className="w-32"
-            logo={currentTeam?.iconUrl}
-            name={currentTeam?.name}
-            description={currentTeam?.description}
-          />
+          <Team className="w-32" logo={currentTeam?.iconUrl} name={currentTeam?.name} />
           <ChevronsUpDown className="h-4 w-4 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -79,19 +76,40 @@ export const TeamSelector: React.FC = () => {
           <CommandSeparator />
           <CommandList>
             <CommandGroup>
-              {teams?.map(({ id, iconUrl, name, description }) => (
-                <CommandItem
-                  key={id}
-                  className="cursor-pointer"
-                  onSelect={() => {
-                    void handleSwapTeam(id);
-                    setOpen(false);
-                  }}
-                >
-                  <Team logo={iconUrl} name={name} description={description} />
-                  <CheckIcon className={cn('ml-auto', teamId === id ? 'opacity-100' : 'opacity-0')} size={18} />
-                </CommandItem>
-              ))}
+              <ScrollArea className="flex max-h-60 flex-col overflow-y-auto" disabledOverflowMask>
+                {teams?.map(({ id, iconUrl, name, description }) => {
+                  const teamName = t([`components.layout.main.sidebar.teams.${name ?? ''}`, name ?? '']);
+
+                  return (
+                    <Tooltip key={id}>
+                      <CommandItem
+                        value={`${teamName}-${description}-${id}`}
+                        className="p-0"
+                        onSelect={() => {
+                          void handleSwapTeam(id);
+                          setOpen(false);
+                        }}
+                      >
+                        <TooltipTrigger asChild>
+                          <div className="group flex w-full cursor-pointer select-none items-center px-2 py-1.5 text-sm">
+                            <Team logo={iconUrl} name={teamName} description={description} />
+                            <CheckIcon
+                              className={cn('ml-auto', teamId === id ? 'opacity-100' : 'opacity-0')}
+                              size={18}
+                            />
+                          </div>
+                        </TooltipTrigger>
+                      </CommandItem>
+
+                      <TooltipContent side="right" sideOffset={14}>
+                        {teamName}
+                        <br />
+                        <span className="text-xxs text-muted-foreground">{id}</span>
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                })}
+              </ScrollArea>
             </CommandGroup>
           </CommandList>
         </Command>

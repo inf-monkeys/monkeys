@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 
-import { useDebounceEffect } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { GitBranchPlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
 import { WorkbenchViewHeader } from '@/components/layout/workbench/view/header.tsx';
-import { useVinesOriginWorkflow } from '@/components/layout-wrapper/workspace/utils.ts';
 import { VinesIFrame } from '@/components/ui/vines-iframe';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
@@ -39,6 +37,13 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ groupId, mode }) 
     setContainerWidth(width);
     setContainerHeight(height - 52);
   }, [width, height]);
+
+  const setPage = usePageStore((s) => s.setPage);
+  useEffect(() => {
+    if (page?.id && page?.customOptions) {
+      setPage({ id: page.id, customOptions: page.customOptions } as any);
+    }
+  }, [page]);
 
   return (
     <div ref={ref} className="relative w-full flex-1 overflow-hidden">

@@ -22,7 +22,7 @@ export const VirtualizedList: React.FC<IVirtualizedListProps> = ({
   isLoading,
   userPhoto,
   botPhoto,
-  resend
+  resend,
 }) => {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const [atBottom, setAtBottom] = useState(true);

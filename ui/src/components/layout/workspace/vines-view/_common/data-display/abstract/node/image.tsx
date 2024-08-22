@@ -1,5 +1,8 @@
 import React from 'react';
 
+import { Eye } from 'lucide-react';
+import Image from 'rc-image';
+
 import { JSONValue } from '@/components/ui/code-editor';
 
 interface IVinesAbstractImageProps {
@@ -8,10 +11,14 @@ interface IVinesAbstractImageProps {
 
 export const VinesAbstractImage: React.FC<IVinesAbstractImageProps> = ({ children }) => {
   return (
-    <img
+    <Image
       src={children?.toString()}
       alt="image"
       className="max-w-96 rounded-md border border-input bg-background object-cover shadow-md"
+      loading="lazy"
+      preview={{
+        mask: <Eye className="stroke-white" />,
+      }}
     />
   );
 };

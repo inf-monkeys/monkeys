@@ -75,7 +75,7 @@ export const ViewGroup: React.FC<IViewGroupProps> = ({ pageId, pagesMutate }) =>
           {isLoading && <DropdownMenuItem disabled>{t('common.load.loading')}</DropdownMenuItem>}
           <Virtuoso
             className="w-52"
-            style={{ height: 384 }}
+            style={{ height: 120 }}
             data={finalGroups}
             itemContent={(_, data) => {
               return <GroupItem group={data} key={_} pageId={pageId} mutate={pageGroupMutate} />;

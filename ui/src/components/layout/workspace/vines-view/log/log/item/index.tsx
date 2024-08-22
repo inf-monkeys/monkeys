@@ -1,10 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
+import { useMemoizedFn } from 'ahooks';
 import { Copy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { VinesWorkflowExecutionLists } from '@/apis/workflow/execution/typings.ts';
 import { WorkflowTriggerType } from '@/apis/workflow/trigger/typings.ts';
 import { getDescOfTriggerType } from '@/apis/workflow/trigger/utils.ts';
 import { VinesActuator } from '@/components/layout/workspace/vines-view/_common/actuator';
@@ -27,13 +29,22 @@ interface IVinesLogItemProps {
   workflowExecution: VinesWorkflowExecution;
   workflowDefinition: MonkeyWorkflow;
   disabled?: boolean;
+
+  handleSubmit?: (loadNextPage?: boolean, useToast?: boolean) => Promise<VinesWorkflowExecutionLists | undefined>;
+  setActiveTab?: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition, workflowExecution, disabled }) => {
+export const VinesLogItem: React.FC<IVinesLogItemProps> = ({
+  workflowDefinition,
+  workflowExecution,
+  disabled,
+  handleSubmit,
+  setActiveTab,
+}) => {
   const { t } = useTranslation();
   const { copy } = useCopy({ timeout: 500 });
 
-  const { vines } = useVinesFlow();
+  const { vines, VINES_REFRESHER } = useVinesFlow();
 
   const statusMapper = useMemo(() => {
     const mapper: Record<string, string> = {};
@@ -54,7 +65,32 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
     }
   }, [timelapse, workflowExecution]);
 
+  const onRestart = useMemoizedFn(() => {
+    setActiveTab?.('');
+    setTimeout(() => {
+      handleSubmit?.(void 0, false).then((it) => {
+        if (it) {
+          const instance = it?.data?.[0] ?? {};
+          setActiveTab?.(instance?.workflowId ?? '');
+          vines.swapExecutionInstance(instance);
+        }
+      });
+    }, 1500);
+  });
+
   const instanceId = workflowExecution.workflowId!;
+
+  const needRefresh = useRef(false);
+  useEffect(() => {
+    const status = vines.executionStatus(instanceId);
+
+    if (status === 'RUNNING') {
+      needRefresh.current = true;
+    } else if (needRefresh.current) {
+      handleSubmit?.(void 0, false);
+      needRefresh.current = false;
+    }
+  }, [VINES_REFRESHER]);
 
   return (
     <AccordionItem value={instanceId}>
@@ -64,7 +100,7 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
             <TooltipTrigger asChild disabled={disabled}>
               <CardContent
                 className="flex cursor-pointer items-center p-4 text-xs hover:bg-gray-10/5 active:bg-gray-10/10"
-                onClick={() => vines.swapExecutionInstance(workflowExecution)}
+                onClick={() => vines.swapExecutionInstance(workflowExecution, true)}
               >
                 <div className="flex flex-1 items-center gap-4">
                   <div className="flex-shrink-0">
@@ -129,7 +165,7 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({ workflowDefinition,
         <AccordionContent className="space-y-1 p-4 pt-0">
           <Separator className="mb-4" />
           <div className="relative h-[32rem] w-full">
-            <VinesActuator height={512} />
+            <VinesActuator height={512} instanceId={instanceId} onRestart={onRestart} />
           </div>
         </AccordionContent>
       </Card>

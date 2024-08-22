@@ -32,15 +32,7 @@ export interface IPageType {
   apiKey?: string;
   sortIndex?: number;
   pinned?: boolean;
-  customOptions?: {
-    parameterOptions?: {
-      type?: 'all' | 'endpoint-only';
-    };
-    render?: {
-      // type?: CanvasRenderType;
-      useHorizontal?: boolean;
-    };
-  };
+  customOptions?: Record<string, any>;
   instance: IPageInstance;
 }
 

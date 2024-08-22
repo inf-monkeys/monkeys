@@ -72,7 +72,7 @@ export const ExecutionRecover: React.FC<IExecutionRecoverProps> = ({ className }
                 variant="outline"
                 role="combobox"
                 aria-expanded={open}
-                disabled={vines.executionStatus === 'RUNNING'}
+                disabled={vines.executionStatus() === 'RUNNING'}
                 className={cn('w-60 justify-between', className)}
               >
                 <span className="line-clamp-1">

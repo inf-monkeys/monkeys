@@ -34,7 +34,7 @@ export const VinesRealTimeChatMessage = memo((props) => {
   const {
     context: { virtuosoRef },
   } = props as IVinesRealTimeChatMessageProps;
-  const workflowStatus = vines.executionStatus;
+  const workflowStatus = vines.executionStatus();
 
   const [outputs, setOutputs] = useState<IRealTimeToolOutputs[]>([]);
 
@@ -43,16 +43,15 @@ export const VinesRealTimeChatMessage = memo((props) => {
 
     const toolOutputs: IRealTimeToolOutputs[] = [];
     for (const node of nodes.slice(1, nodes.length - 1)) {
-      if (node.executionStatus === 'DEFAULT' && workflowStatus !== 'SCHEDULED') continue;
+      const execution = node.getExecutionTask();
+      const nodeStatus = execution?.status;
+      if (nodeStatus === 'DEFAULT' && workflowStatus !== 'SCHEDULED') continue;
       const { name: toolName } = node.getRaw();
       const tool = vines.getTool(toolName);
       const customData = node.customData;
 
-      const toolDesc = tool?.description ?? '';
+      const toolDesc = getI18nContent(tool?.description ?? '');
       const customDesc = customData?.description ?? '';
-
-      const nodeStatus = node.executionStatus;
-      const execution = node.executionTask;
 
       toolOutputs.push({
         status: nodeStatus,
@@ -118,7 +117,7 @@ export const VinesRealTimeChatMessage = memo((props) => {
                   </div>
                 </div>
                 <div className="mx-2 flex flex-1 justify-end">
-                  <ExecutionStatusIcon status={workflowStatus} workflowStatus={workflowStatus} />
+                  <ExecutionStatusIcon status={workflowStatus} workflowStatus={workflowStatus} loadingSize="sm" />
                 </div>
               </CardHeader>
               <CardContent className="p-0">
