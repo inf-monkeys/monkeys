@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 
 import { useHighlight } from '@/components/ui/highlighter/useHighlight.ts';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { useAppStore } from '@/store/useAppStore';
 import { cn } from '@/utils';
 
@@ -24,13 +25,15 @@ export const SyntaxHighlighter = memo<ISyntaxHighlighterProps>(({ children, lang
           </pre>
         </div>
       ) : (
-        <div
-          className={cn('[&>pre]:!bg-transparent', className)}
-          dangerouslySetInnerHTML={{
-            __html: data as string,
-          }}
-          style={style}
-        />
+        <ScrollArea orientation="horizontal">
+          <div
+            className={cn('[&>pre]:!bg-transparent', className)}
+            dangerouslySetInnerHTML={{
+              __html: data as string,
+            }}
+            style={style}
+          />
+        </ScrollArea>
       )}
     </>
   );
