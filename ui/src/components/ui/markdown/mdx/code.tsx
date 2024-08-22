@@ -29,7 +29,7 @@ export const MdxCode: React.FC<IMdxCodeProps> = ({ children, language }) => {
         icon={copied ? <CopyCheck /> : <Copy />}
         variant="outline"
         size="small"
-        className="absolute right-1 top-1 scale-80 opacity-0 group-hover/codeblock:opacity-75"
+        className="scale-80 absolute right-1 top-1 opacity-0 group-hover/codeblock:opacity-75"
         onClick={() => copy(children)}
       />
       {showLanguage && (
