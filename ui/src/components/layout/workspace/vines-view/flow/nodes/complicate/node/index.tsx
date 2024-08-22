@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 
-import { useClickAway } from 'ahooks';
+import { useClickAway, useMemoizedFn } from 'ahooks';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
@@ -32,8 +32,6 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
     position: { x: nodeX, y: nodeY },
     size: { width, height },
     customData,
-    executionTask,
-    executionStatus,
   } = node;
   const { name: toolName } = node.getRaw();
 
@@ -57,18 +55,15 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
     }
   }, ref);
 
-  const handleNodeClick = () => {
+  const handleNodeClick = useMemoizedFn(() => {
     setIsUserInteraction(nodeId);
     if (isNodeFocus) return;
 
     setIsNodeFocus(true);
     setTimeout(() => VinesEvent.emit('canvas-zoom-to-node', 'complicate-' + nodeId));
+  });
 
-    // TODO: 激活运行时自动跟随
-    // void (canvasMode === CanvasStatus.RUNNING && setAutoFollow(false));
-  };
-
-  const handleRawUpdate = (data: string) => {
+  const handleRawUpdate = useMemoizedFn((data: string) => {
     try {
       const task = JSON.parse(data);
       if (node) {
@@ -79,7 +74,7 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
     } catch {
       /* empty */
     }
-  };
+  });
 
   const tool = vines.getTool(toolName);
   const isStartNode = nodeId === 'workflow_start';
@@ -88,7 +83,9 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
   const isSimpleNode = !isStartNode && !isEndNode && !isFakeNode;
 
   const variableMapper = Object.fromEntries(vines.variablesMapper.entries());
-  const nodeExecutionStatus = executionTask?.originStatus ?? executionStatus;
+
+  const executionTask = node.getExecutionTask(vines.executionInstanceId ?? '');
+  const nodeExecutionStatus = executionTask?.originStatus ?? executionTask?.status ?? 'DEFAULT';
 
   return (
     <div
@@ -144,7 +141,7 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
                   vinesUpdateRaw={(nodeId: string, task: VinesTask, update: boolean) =>
                     vines.updateRaw(nodeId, task, update)
                   }
-                  workflowStatus={vines.executionStatus}
+                  workflowStatus={vines.executionStatus()}
                   status={nodeExecutionStatus}
                 />
               )}

@@ -12,7 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 
 interface IVinesLogViewLogListProps {
   searchWorkflowExecutionsData?: VinesWorkflowExecutionLists;
-  handleSubmit: (loadNextPage?: boolean) => void;
+  handleSubmit: (loadNextPage?: boolean, useToast?: boolean) => Promise<VinesWorkflowExecutionLists | undefined>;
 
   activeTab: string;
   setActiveTab: React.Dispatch<React.SetStateAction<string>>;
@@ -55,6 +55,8 @@ export const VinesLogViewLogList: React.FC<IVinesLogViewLogListProps> = ({
                   key={index}
                   workflowExecution={workflowExecution}
                   workflowDefinition={workflowDefinitionIdMapper[workflowExecution.workflowName!]}
+                  handleSubmit={handleSubmit}
+                  setActiveTab={setActiveTab}
                 />
               ))
             : null}

@@ -117,7 +117,10 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
         wrapperTool = this.getTool('comfyui:run_comfyui_workflow');
         if (!wrapperTool) {
           if (skip || this.tools.length) {
-            break;
+            wrapperTool = this.getTool('comfyui:run_comfyui_workflow');
+            if (wrapperTool) {
+              break;
+            }
           }
           await new Promise((resolve) => setTimeout(resolve, 80));
         } else {
@@ -127,7 +130,7 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
 
       this.vinesComfyUITools = comfyUIWorkflows.map(({ id, displayName, description, iconUrl }) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { input, ...attr } = cloneDeep(wrapperTool as VinesToolDef);
+        const { input = [], ...attr } = cloneDeep(wrapperTool as VinesToolDef);
 
         const workflowIdInput = input.find((it) => it.name === 'workflow') ?? {
           displayName: 'comfyUIWorkflowId',

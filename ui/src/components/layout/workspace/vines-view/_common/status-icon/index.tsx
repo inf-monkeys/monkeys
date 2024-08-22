@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { AlertCircle, CheckCircle2, Circle, CircleDashed, CircleSlash, PauseCircle } from 'lucide-react';
 
 import { getExecutionStatusText } from '@/components/layout/workspace/vines-view/_common/status-icon/utils.ts';
-import { VinesLoading } from '@/components/ui/loading';
+import { IVinesLoadingProps, VinesLoading } from '@/components/ui/loading';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesWorkflowExecutionType } from '@/package/vines-flow/core/typings.ts';
@@ -15,10 +15,11 @@ interface IExecutionStatusIconProps {
   size?: number;
   status: VinesNodeExecutionTask['status'] | string;
   workflowStatus: VinesWorkflowExecutionType | string;
+  loadingSize?: IVinesLoadingProps['size'];
 }
 
 export const ExecutionStatusIcon: React.FC<IExecutionStatusIconProps> = memo(
-  ({ className, status = '', workflowStatus, size = 20 }) => {
+  ({ className, status = '', workflowStatus, size = 20, loadingSize }) => {
     return (
       <Tooltip>
         <TooltipTrigger asChild>
@@ -33,7 +34,7 @@ export const ExecutionStatusIcon: React.FC<IExecutionStatusIconProps> = memo(
                   className="flex"
                   style={{ width: size, height: size }}
                 >
-                  <VinesLoading size="sm" />
+                  <VinesLoading size={loadingSize} />
                 </motion.div>
               ) : status === 'COMPLETED' ? (
                 <motion.div

@@ -147,7 +147,7 @@ export const Uploader: React.FC<IUpdaterProps> = ({
                   {(isEmbedMode ? !filesLength : true) ? (
                     <motion.div
                       key="vines-uploader-hint"
-                      className="absolute flex items-center gap-4"
+                      className="absolute flex items-center justify-center gap-4"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}

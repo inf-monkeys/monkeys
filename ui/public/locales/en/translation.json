@@ -1707,6 +1707,14 @@
             "label": "Documents",
             "stats": {
               "file-count": "Documents: {{count}}"
+            },
+            "table": {
+              "id": "Document ID",
+              "filename": "Document name",
+              "file-url": "File url",
+              "index-status": "Index status",
+              "failed-message": "Error message",
+              "operate": "Operation"
             }
           },
           "segments": {
@@ -1736,6 +1744,12 @@
               "dimension": "Vector Dimension: {{dimensionCount}}",
               "model": "Embedding Model: {{model}}",
               "id": "Vector Database ID: {{id}}"
+            },
+            "table": {
+              "rank": "Similarity ranking",
+              "page-content": "Paragraph content",
+              "char-count": "Number of characters",
+              "operate": "Operation"
             }
           },
           "settings": {
@@ -2188,7 +2202,7 @@
                 "create-field": "New Parameter"
               },
               "collection": {
-                "placeholder": "Select {{name}}"
+                "placeholder": "Please enter {{name}}, press Enter to add"
               },
               "editor": {
                 "check-json-failed": "Must be a JSON array",
@@ -2742,6 +2756,7 @@
         }
       },
       "loading": "Searching...",
+      "success": "Search successful",
       "error": "Query failed, please check whether the network is unobstructed",
       "workflow-id-error": "Please wait for the page to load"
     },
@@ -2925,7 +2940,14 @@
           "completed": "No input has been configured yet, you can execute it directly"
         },
         "instance-id-tips": "Instance ID",
-        "manually-trigger": "Manual or automatic execution trigger"
+        "manually-trigger": "Manual or automatic execution trigger",
+        "options": {
+          "label": "Preferences",
+          "show-execution-process": {
+            "label": "Show workflow execution process",
+            "tips": "Detailed process will be displayed when the workflow is executed"
+          }
+        }
       },
       "empty": "No conversation yet",
       "back-to-bottom": "Back to bottom"

@@ -15,7 +15,6 @@ import {
   IVinesNodeSize,
   VinesEdgePath,
   VinesNodeExecutionTask,
-  VinesNodeStatus,
   VinesTask,
 } from '@/package/vines-flow/core/nodes/typings.ts';
 import { IVinesVariable, VinesVariableMapper } from '@/package/vines-flow/core/tools/typings.ts';
@@ -44,9 +43,7 @@ export class VinesNode<T extends VinesTask = VinesTask> {
 
   public children: VinesNode[];
 
-  public executionStatus: VinesNodeStatus = 'DEFAULT';
-
-  public executionTask: VinesNodeExecutionTask = this.defaultRunningTask;
+  public executionsTask: Map<string, VinesNodeExecutionTask> = new Map();
 
   protected readonly _vinesCore: VinesCore;
 
@@ -467,27 +464,35 @@ export class VinesNode<T extends VinesTask = VinesTask> {
   // endregion
 
   // region Runner
-  public clearExecutionStatus() {
-    this.executionStatus = 'DEFAULT';
+  public async updateExecutionTask(
+    instanceId: string,
+    task: Partial<VinesNodeExecutionTask>,
+    cover = false,
+  ): Promise<boolean> {
+    const currentTask = this.executionsTask.get(instanceId);
+    if (currentTask) {
+      this.executionsTask.set(instanceId, cover ? (task as VinesNodeExecutionTask) : { ...currentTask, ...task });
+    } else {
+      this.executionsTask.set(instanceId, task as VinesNodeExecutionTask);
+    }
+    return true;
   }
 
-  public clearRunningTask() {
-    this.executionTask = this.defaultRunningTask;
+  public clearExecutionTask(instanceId: string) {
+    this.executionsTask.delete(instanceId);
   }
 
-  public async updateStatus(task: VinesNodeExecutionTask): Promise<boolean> {
-    this.executionTask = { ...task, originStatus: task.status };
-    this.executionStatus = task.status;
-    return false;
+  public getExecutionTask(instanceId = this._vinesCore.executionInstanceId): VinesNodeExecutionTask | undefined {
+    return this.executionsTask.get(instanceId);
   }
 
-  private get defaultRunningTask(): VinesNodeExecutionTask {
-    return {
-      ...this._task,
-      status: 'DEFAULT',
-      originStatus: 'SCHEDULED',
-    };
-  }
+  // private get defaultRunningTask(): VinesNodeExecutionTask {
+  //   return {
+  //     ...this._task,
+  //     status: 'DEFAULT',
+  //     originStatus: 'SCHEDULED',
+  //   };
+  // }
   // endregion
 
   public checkChildren(path: VinesNode[] = []): boolean {

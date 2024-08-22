@@ -13,8 +13,6 @@ import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vine
 import { Button } from '@/components/ui/button';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useVinesFlow } from '@/package/vines-flow';
-import { useCanvasStore } from '@/store/useCanvasStore';
-import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
@@ -39,8 +37,6 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
 
   const containerHeight = usePageStore((s) => s.containerHeight);
-  const setCanvasMode = useCanvasStore((s) => s.setCanvasMode);
-
   const { vines } = useVinesFlow();
 
   const submitButton = useRef<HTMLButtonElement>(null);
@@ -60,9 +56,8 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
           inputs={vines.workflowInput}
           height={containerHeight - 115 - (isMiniFrame ? 64 : 0) - (mode === 'fast' ? 30 : 0)}
           onSubmit={(inputData) => {
-            vines.start({ inputData }).then((status) => {
+            vines.start({ inputData, onlyStart: true }).then((status) => {
               if (status) {
-                setCanvasMode(CanvasStatus.RUNNING);
                 toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
                 setHistoryVisible(true);
                 void mutate(

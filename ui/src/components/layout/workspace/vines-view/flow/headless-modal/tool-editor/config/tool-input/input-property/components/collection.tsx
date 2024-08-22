@@ -4,7 +4,8 @@ import { get, isArray } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { IVinesInputPropertyProps } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property';
-import { MultiSelect, MultiSelectProps } from '@/components/ui/multi-select';
+import { TagInput } from '@/components/ui/input/tag';
+import { MultiSelectProps } from '@/components/ui/multi-select';
 import { getI18nContent } from '@/utils';
 
 export const CollectionInput: React.FC<
@@ -31,9 +32,9 @@ export const CollectionInput: React.FC<
   const placeholder = getI18nContent(def?.placeholder);
 
   return (
-    <MultiSelect
+    <TagInput
       value={valueArray}
-      onValueChange={(value) =>
+      onChange={(value) =>
         onChange?.(
           type === 'number'
             ? value.map((it) => Number(it)).filter((it) => it)
@@ -43,7 +44,6 @@ export const CollectionInput: React.FC<
         )
       }
       disabled={disabled}
-      options={options}
       placeholder={
         placeholder
           ? placeholder
@@ -51,7 +51,6 @@ export const CollectionInput: React.FC<
               name: getI18nContent(def.displayName),
             })
       }
-      {...attr}
     />
   );
 };

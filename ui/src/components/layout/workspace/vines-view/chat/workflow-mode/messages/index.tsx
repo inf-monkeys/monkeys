@@ -20,9 +20,10 @@ import { useViewStore } from '@/store/useViewStore';
 interface IVinesChatListProps {
   visible: boolean;
   workflowId: string;
+  useSimple?: boolean;
 }
 
-export const VinesChatList: React.FC<IVinesChatListProps> = ({ workflowId }) => {
+export const VinesChatList: React.FC<IVinesChatListProps> = ({ workflowId, useSimple }) => {
   const { t } = useTranslation();
 
   const visible = useViewStore((s) => s.visible);
@@ -67,9 +68,11 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ workflowId }) => 
     if (equal(prevData.current, dirtyData)) return;
     prevData.current = dirtyData;
 
-    const workingList = executionData?.filter(({ status }) => ['RUNNING', 'PAUSED'].includes(status ?? ''));
-    if (workingList?.length) {
-      vines.swapExecutionInstance(workingList[0]);
+    if (!useSimple) {
+      const workingList = executionData?.filter(({ status }) => ['RUNNING', 'PAUSED'].includes(status ?? ''));
+      if (workingList?.length) {
+        vines.swapExecutionInstance(workingList[0], true);
+      }
     }
 
     const newList: IVinesChatListItem[] = [];
@@ -90,12 +93,12 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ workflowId }) => 
         userName,
         botPhoto,
         startTime: dayjs(it.startTime).format('YY-MM-DD HH:mm:ss'),
-        endTime: dayjs(it.endTime).format('YY-MM-DD HH:mm:ss'),
+        endTime: dayjs(it.endTime || it.startTime).format('YY-MM-DD HH:mm:ss'),
       });
     }
 
     setList(newList);
-  }, [executionData]);
+  }, [executionData, useSimple]);
 
   return (
     <AnimatePresence>
@@ -119,7 +122,7 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ workflowId }) => 
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2, delay: 0.35 }}
         >
-          <VirtualizedList data={list} />
+          <VirtualizedList data={list} useSimple={useSimple} />
         </motion.div>
       ) : (
         <motion.div

@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 
 import { useCreateWorkflowChatSession, useWorkflowChatSessions } from '@/apis/workflow/chat';
 import { ChatSession } from '@/components/layout/workspace/vines-view/chat/sidebar/chat-session.tsx';
+import { WorkflowChatViewOptions } from '@/components/layout/workspace/vines-view/chat/sidebar/options.tsx';
 import { Button } from '@/components/ui/button';
 import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
@@ -19,10 +20,10 @@ import { cn } from '@/utils';
 
 interface IChatSidebarProps {
   id: string;
-  showDefaultSession?: boolean; // !!! 只能给工作流模式使用
+  isWorkflowMode?: boolean; // !!! 只能给工作流模式使用
 }
 
-export const ChatSidebar: React.FC<IChatSidebarProps> = ({ id, showDefaultSession }) => {
+export const ChatSidebar: React.FC<IChatSidebarProps> = ({ id, isWorkflowMode }) => {
   const { t } = useTranslation();
 
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
@@ -36,6 +37,10 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = ({ id, showDefaultSessio
 
   const activeSessionId = chatSessions[id] ?? data?.[0]?.id;
 
+  const hasDefaultSessions = data?.some(
+    ({ displayName }) => displayName.startsWith('默认对话') || displayName.startsWith('Default Session'),
+  );
+
   return (
     <div className="flex h-full max-w-64">
       <motion.div
@@ -47,10 +52,13 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = ({ id, showDefaultSessio
           transition: { duration: 0.2 },
         }}
       >
-        <h1 className="text-sm font-bold">{t('workspace.chat-view.sidebar.title')}</h1>
+        <div className="flex w-full items-center justify-between">
+          <h1 className="text-sm font-bold">{t('workspace.chat-view.sidebar.title')}</h1>
+          {isWorkflowMode && <WorkflowChatViewOptions />}
+        </div>
         <ScrollArea className="h-full max-h-[calc(100%-3rem)]">
           <div className="grid gap-2 py-1 pl-1 pr-3">
-            {showDefaultSession && (
+            {isWorkflowMode && !hasDefaultSessions && (
               <ChatSession
                 active={isEmpty(activeSessionId)}
                 session={{ id: '', displayName: t('workspace.chat-view.sidebar.create.def-label') }}
@@ -60,6 +68,7 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = ({ id, showDefaultSessio
                     [id]: '',
                   });
                 }}
+                disableDelete
               />
             )}
             {data?.map((session) => (

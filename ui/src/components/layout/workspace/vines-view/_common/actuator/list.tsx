@@ -26,21 +26,29 @@ interface IActuatorToolListProps {
   height: number;
   activeTool?: VinesNode;
   setActiveTool?: React.Dispatch<React.SetStateAction<VinesNode | undefined>>;
+  instanceId?: string;
 }
 
-export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({ height, activeTool, setActiveTool }) => {
+export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({
+  height,
+  activeTool,
+  setActiveTool,
+  instanceId,
+}) => {
   const { vines, VINES_REFRESHER } = useVinesFlow();
 
   const [tools, setTools] = useState<IActuatorToolList[]>([]);
 
-  const workflowStatus = vines.executionStatus;
+  const workflowStatus = vines.executionStatus(instanceId);
 
   useEffect(() => {
     const nodes = vines.getAllNodes();
 
     const newTools: IActuatorToolList[] = [];
     for (const node of nodes.slice(1, nodes.length - 1)) {
-      if (node.executionStatus === 'DEFAULT' && workflowStatus !== 'SCHEDULED') continue;
+      const nodeStatus = node.getExecutionTask(instanceId)?.status ?? 'DEFAULT';
+
+      if (nodeStatus === 'DEFAULT' && workflowStatus !== 'SCHEDULED') continue;
       const { name: toolName } = node.getRaw();
       const tool = vines.getTool(toolName);
       const customData = node.customData;
@@ -51,7 +59,7 @@ export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({ height, act
       newTools.push({
         node,
         id: node.id,
-        status: node.executionStatus,
+        status: nodeStatus,
         icon: customData?.icon ?? tool?.icon ?? '',
         name: getI18nContent(tool?.displayName) ?? toolName,
         customName: customData?.title ?? '',
@@ -60,14 +68,22 @@ export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({ height, act
     }
 
     if (setActiveTool) {
-      const activeNode = nodes
-        .filter((node) => ['IN_PROGRESS', 'SCHEDULED'].includes(node.executionTask?.status ?? ''))
-        .sort((a, b) => (a.executionTask?.startTime ?? 0) - (b.executionTask?.startTime ?? 0))
-        .sort((a) => (['SUB_WORKFLOW', 'DO_WHILE'].includes(a.type) ? 1 : -1));
-      if (activeNode?.[0]) {
-        setActiveTool(activeNode[0]);
-      } else if (nodes?.[1]) {
-        setActiveTool(nodes[1]);
+      if (
+        !activeTool ||
+        (vines.executionInstanceId === instanceId && ['IN_PROGRESS', 'SCHEDULED', 'RUNNING'].includes(workflowStatus))
+      ) {
+        const activeNode = nodes
+          .filter((node) => ['IN_PROGRESS', 'SCHEDULED'].includes(node.getExecutionTask(instanceId)?.status ?? ''))
+          .sort(
+            (a, b) =>
+              (a.getExecutionTask(instanceId)?.startTime ?? 0) - (b.getExecutionTask(instanceId)?.startTime ?? 0),
+          )
+          .sort((a) => (['SUB_WORKFLOW', 'DO_WHILE'].includes(a.type) ? 1 : -1));
+        if (activeNode?.[0]) {
+          setActiveTool(activeNode[0]);
+        } else if (nodes?.[1]) {
+          setActiveTool(nodes[1]);
+        }
       }
     }
 
@@ -140,7 +156,7 @@ export const ActuatorToolList: React.FC<IActuatorToolListProps> = ({ height, act
                   </div>
                 </div>
                 <div className="mx-2">
-                  <ExecutionStatusIcon status={status} workflowStatus={workflowStatus} />
+                  <ExecutionStatusIcon status={status} workflowStatus={workflowStatus} loadingSize="sm" />
                 </div>
               </Card>
             </motion.div>

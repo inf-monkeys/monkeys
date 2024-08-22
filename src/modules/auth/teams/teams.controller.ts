@@ -31,10 +31,11 @@ export class TeamsController {
     }
     return new SuccessResponse({
       data: teams
+        .sort((a, b) => Number(b.createdTimestamp) - Number(a.createdTimestamp))
         .sort((a, b) => {
-          if (a.ownerUserId === userId && b.ownerUserId !== userId) return -1;
-          if (a.ownerUserId !== userId && b.ownerUserId === userId) return 1;
-          return Number(b.createdTimestamp) - Number(a.createdTimestamp);
+          if (a.ownerUserId === userId) return -1;
+          if (b.ownerUserId === userId) return 1;
+          return 0;
         })
         .map((t) => ({
           ...t,

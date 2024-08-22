@@ -271,7 +271,7 @@ export class DoWhileNode extends ControlFlowVinesNode<DoWhileTaskDef> {
     // 如果插入的节点是嵌套子流程，那么就插入到子流程中
     const subWorkflowList = this.children.filter(
       (childNode) => childNode instanceof SubWorkflowNode && childNode.isNested,
-    ) as SubWorkflowNode[];
+    ) as unknown as SubWorkflowNode[];
     const batchInsertResults = subWorkflowList.map((it) =>
       it.insertChild({
         targetId,
