@@ -8,8 +8,8 @@ import { MessageSquareDashed } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useSearchWorkflowExecutions } from '@/apis/workflow/execution';
-import { IVinesChatListItem } from '@/components/layout/workspace/vines-view/chat/workflow-mode/messages/typings.ts';
-import { VirtualizedList } from '@/components/layout/workspace/vines-view/chat/workflow-mode/messages/virtualized';
+import { IVinesChatListItem } from '@/components/layout/workspace/vines-view/chat/workflow-mode/typings.ts';
+import { VirtuaWorkflowChatMessages } from '@/components/layout/workspace/vines-view/chat/workflow-mode/virtua-messages';
 import { useVinesUser } from '@/components/router/guard/user.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import { useLocalStorage } from '@/hooks/use-local-storage';
@@ -18,12 +18,12 @@ import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.t
 import { useViewStore } from '@/store/useViewStore';
 
 interface IVinesChatListProps {
-  visible: boolean;
   workflowId: string;
+  height: number;
   useSimple?: boolean;
 }
 
-export const VinesChatList: React.FC<IVinesChatListProps> = ({ workflowId, useSimple }) => {
+export const VinesChatList: React.FC<IVinesChatListProps> = ({ workflowId, height, useSimple }) => {
   const { t } = useTranslation();
 
   const visible = useViewStore((s) => s.visible);
@@ -122,7 +122,7 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ workflowId, useSi
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2, delay: 0.35 }}
         >
-          <VirtualizedList data={list} useSimple={useSimple} />
+          <VirtuaWorkflowChatMessages data={list} height={height} useSimple={useSimple} />
         </motion.div>
       ) : (
         <motion.div

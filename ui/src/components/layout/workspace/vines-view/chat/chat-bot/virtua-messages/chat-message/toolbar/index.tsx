@@ -3,10 +3,10 @@ import React from 'react';
 import { Copy, CopyCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { DeleteMessage } from '@/components/layout/workspace/vines-view/chat/chat-bot/messages/chat-message/toolbar/delete-message.tsx';
-import { EditMessage } from '@/components/layout/workspace/vines-view/chat/chat-bot/messages/chat-message/toolbar/edit-message.tsx';
-import { ResendMessage } from '@/components/layout/workspace/vines-view/chat/chat-bot/messages/chat-message/toolbar/resend-message.tsx';
 import { IVinesMessage } from '@/components/layout/workspace/vines-view/chat/chat-bot/use-chat.ts';
+import { DeleteMessage } from '@/components/layout/workspace/vines-view/chat/chat-bot/virtua-messages/chat-message/toolbar/delete-message.tsx';
+import { EditMessage } from '@/components/layout/workspace/vines-view/chat/chat-bot/virtua-messages/chat-message/toolbar/edit-message.tsx';
+import { ResendMessage } from '@/components/layout/workspace/vines-view/chat/chat-bot/virtua-messages/chat-message/toolbar/resend-message.tsx';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCopy } from '@/hooks/use-copy.ts';

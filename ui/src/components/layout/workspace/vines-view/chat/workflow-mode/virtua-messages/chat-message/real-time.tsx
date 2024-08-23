@@ -1,10 +1,8 @@
-import React, { memo, RefObject, useEffect, useState } from 'react';
-
-import { VirtuosoHandle } from 'react-virtuoso';
+import React, { memo, useEffect, useState } from 'react';
 
 import { VinesActuatorDetailData } from '@/components/layout/workspace/vines-view/_common/actuator/detail/content/data.tsx';
 import { ExecutionStatusIcon } from '@/components/layout/workspace/vines-view/_common/status-icon';
-import { VinesBotChatMessage } from '@/components/layout/workspace/vines-view/chat/workflow-mode/messages/virtualized/chat-message/bot.tsx';
+import { VinesBotChatMessage } from '@/components/layout/workspace/vines-view/chat/workflow-mode/virtua-messages/chat-message/bot.tsx';
 import { Card, CardContent, CardHeader } from '@/components/ui/card.tsx';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -24,16 +22,11 @@ interface IRealTimeToolOutputs {
 }
 
 interface IVinesRealTimeChatMessageProps {
-  context: {
-    virtuosoRef: RefObject<VirtuosoHandle>;
-  };
+  onActive?: () => void;
 }
 
-export const VinesRealTimeChatMessage = memo((props) => {
+export const VinesRealTimeChatMessage = memo(({ onActive }: IVinesRealTimeChatMessageProps) => {
   const { vines, VINES_REFRESHER } = useVinesFlow();
-  const {
-    context: { virtuosoRef },
-  } = props as IVinesRealTimeChatMessageProps;
   const workflowStatus = vines.executionStatus();
 
   const [outputs, setOutputs] = useState<IRealTimeToolOutputs[]>([]);
@@ -71,17 +64,12 @@ export const VinesRealTimeChatMessage = memo((props) => {
 
   return (
     <VinesBotChatMessage
-      className={cn('pt-4', !['RUNNING', 'PAUSED'].includes(workflowStatus) && 'hidden')}
+      className={cn('visible pt-4', !['RUNNING', 'PAUSED'].includes(workflowStatus) && 'hidden')}
       status={workflowStatus as VinesWorkflowExecution['status']}
       botPhoto={botPhoto}
       instanceId={instanceId}
     >
-      <SmoothTransition
-        className="overflow-hidden"
-        onAnimationComplete={() =>
-          setTimeout(() => virtuosoRef.current?.scrollToIndex({ align: 'end', behavior: 'smooth', index: 'LAST' }), 32)
-        }
-      >
+      <SmoothTransition className="overflow-hidden" onAnimationComplete={onActive}>
         <div className="flex flex-col gap-4">
           {outputs.map(({ icon, name, customName, description, execution }, i) => (
             <Card className="flex flex-col gap-2 p-2" key={i}>

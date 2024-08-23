@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { useThrottleEffect } from 'ahooks';
 import { ChevronLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -7,6 +8,7 @@ import { useGetAgent } from '@/apis/agents';
 import { ChatSidebar } from '@/components/layout/workspace/vines-view/chat/sidebar';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { useAgentStore } from '@/store/useAgentStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
@@ -22,10 +24,21 @@ export const AgentChatView: React.FC = () => {
 
   const { data: agentData } = useGetAgent(agentId);
 
+  const { ref, height: wrapperHeight } = useElementSize();
+  const [height, setHeight] = useState(500);
+  useThrottleEffect(
+    () => {
+      if (!wrapperHeight) return;
+      setHeight(wrapperHeight - 6);
+    },
+    [wrapperHeight],
+    { wait: 64 },
+  );
+
   return (
     <div className={cn('relative flex h-full max-h-full', workbenchVisible ? 'p-0' : 'p-6 pr-2')}>
-      <div className={cn('flex flex-1 flex-col gap-4 overflow-hidden', workbenchVisible ? 'p-4' : 'pr-4')}>
-        <VinesChatMode multipleChat id={agentId} botPhoto={agentData?.iconUrl} />
+      <div ref={ref} className={cn('flex flex-1 flex-col overflow-hidden', workbenchVisible ? 'p-4' : 'pr-4')}>
+        <VinesChatMode multipleChat id={agentId} botPhoto={agentData?.iconUrl} height={height} />
       </div>
       <Separator orientation="vertical" className="vines-center">
         <Tooltip>

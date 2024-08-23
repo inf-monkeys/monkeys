@@ -9,7 +9,7 @@ import { nanoIdLowerCase } from '@/utils';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 import { parseOpenAIStream } from '@/utils/openai.ts';
 
-import { ChatCompletionLog } from './messages/chat-message/tool-display';
+import { ChatCompletionLog } from '@/components/layout/workspace/vines-view/chat/chat-bot/virtua-messages/chat-message/tool-display';
 
 export interface IVinesMessage {
   id?: string;
