@@ -7,9 +7,10 @@ import { Server } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { ComfyUIServerListModal } from 'src/components/layout/ugc-pages/comfyui/comfyui-server-list';
+import { Uploader } from 'src/components/ui/uploader';
 
 import { importComfyuiWorkflow } from '@/apis/comfyui';
-import { ComfyUIServerListModal } from '@/components/layout/ugc-pages/tools/comfyui-server-list';
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';
 import {
@@ -24,7 +25,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Textarea } from '@/components/ui/textarea.tsx';
-import { Uploader } from 'src/components/ui/uploader';
 import { MIME_TYPES } from '@/components/ui/uploader/mime-types.ts';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
 import { IImportComfyUIWorkflow, importComfyUIWorkflowSchema } from '@/schema/workspace/import-comfyui-workflow.ts';
@@ -241,7 +241,7 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
         <DialogFooter className="sm:justify-between">
           <ComfyUIServerListModal>
             <Button variant="outline" size="small" icon={<Server />}>
-              {t('ugc-page.tools.import.comfyui-server.title')}
+              {t('comfyui.comfyui-server.title')}
             </Button>
           </ComfyUIServerListModal>
           <Button type="submit" loading={isLoading} variant="solid" size="small">

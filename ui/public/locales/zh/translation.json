@@ -56,6 +56,8 @@
       "workflow": "工作流",
       "agent": "智能体",
       "comfyui-workflow": "ComfyUI 工作流",
+      "image-model": "图像模型",
+      "comfyui-server": "ComfyUI 服务",
       "filter-group": "筛选分组",
       "text-data": "文本数据",
       "table-data": "表格数据"
@@ -105,7 +107,8 @@
     "dialog": {
       "delete-confirm": {
         "title": "{{type}}删除确认",
-        "content": "确定要删除{{type}}「{{name}}」？此操作不可撤销。"
+        "content": "确定要删除 {{type}}「{{name}}」？此操作不可撤销。",
+        "content-without-name": "确定要删除 {{type}}？此操作不可撤销。"
       }
     },
     "sidebar": {
@@ -270,7 +273,6 @@
         "init": {
           "failed-to-fetch": "获取图片失败！",
           "failed-to-optimize": "图片优化失败！",
-
           "optimize": "正在优化图像（{{progress}}%）",
           "export": "正在导出图像（{{progress}}%）",
           "upload": "正在上传中"
@@ -303,11 +305,9 @@
         "close": "关闭",
         "remove": "移除",
         "select-all": "「全选」",
-
         "empty": "暂无选项",
         "search-placeholder": "搜索...",
         "search-empty": "无匹配项",
-
         "more": "+ {{count}} 选项",
         "expand": "展开",
         "collapse": "收起"
@@ -1183,36 +1183,6 @@
             }
           }
         },
-        "comfyui-server": {
-          "title": "ComfyUI 服务",
-          "table": {
-            "columns": {
-              "address": {
-                "label": "服务地址"
-              },
-              "description": {
-                "label": "描述"
-              },
-              "status": {
-                "label": "状态"
-              },
-              "operate": {
-                "label": "操作"
-              }
-            }
-          },
-          "import-label": "添加 ComfyUI 服务",
-          "form": {
-            "address": {
-              "label": "服务地址",
-              "placeholder": "请输入服务地址"
-            },
-            "description": {
-              "label": "描述",
-              "placeholder": "请输入描述"
-            }
-          }
-        },
         "restful-api": {
           "form": {
             "display-name": {
@@ -1480,8 +1450,8 @@
           "description": {
             "label": "描述"
           },
-          "assetTags": {
-            "label": "标签"
+          "types": {
+            "label": "类型"
           },
           "createdTimestamp": {
             "label": "创建时间"
@@ -1496,6 +1466,9 @@
             "publish": "发布到市场"
           }
         }
+      },
+      "types": {
+        "other": "其他类型"
       }
     },
     "text-data": {
@@ -1557,7 +1530,6 @@
               "loading": "（加载中）",
               "processing": "（处理文件中）"
             },
-
             "message": {
               "No logs": "暂无日志",
               "Added to queue": "已添加到队列",
@@ -1999,7 +1971,6 @@
             },
             "other": "其他视图 iframe 嵌入链接",
             "copy-other-view": "复制 {{name}} 嵌入链接",
-
             "entry-edit": "进入应用编辑模式"
           }
         }
@@ -2957,7 +2928,6 @@
       "not-support": "该工作流不支持表单视图",
       "quick-toolbar": {
         "more": "更多操作",
-
         "reset": "恢复默认参数",
         "restore-previous-param": {
           "label": "恢复上次生成参数",
@@ -3000,7 +2970,6 @@
         "label": "配置智能体",
         "desc": "你可以在这里配置智能体相关的参数",
         "advanced-configuration": "高级配置",
-
         "model": {
           "label": "大语言模型"
         },
@@ -3040,8 +3009,82 @@
           "placeholder": "请输入自定义模型名称",
           "desc": "该配置一般用于 API 调用时传入的模型名称，如果不填写则使用默认模型"
         },
-
         "submit": "保存"
+      }
+    }
+  },
+  "comfyui-server": {
+    "title": "ComfyUI 服务",
+    "table": {
+      "columns": {
+        "address": {
+          "label": "服务地址"
+        },
+        "description": {
+          "label": "描述"
+        },
+        "status": {
+          "label": "状态"
+        },
+        "operate": {
+          "label": "操作"
+        }
+      }
+    },
+    "import-label": "添加 ComfyUI 服务",
+    "form": {
+      "address": {
+        "label": "服务地址",
+        "placeholder": "请输入服务地址"
+      },
+      "description": {
+        "label": "描述",
+        "placeholder": "请输入描述"
+      }
+    }
+  },
+  "comfyui": {
+    "comfyui-server": {
+      "title": "ComfyUI 服务",
+      "table": {
+        "columns": {
+          "address": {
+            "label": "服务地址"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "status": {
+            "label": "状态"
+          },
+          "is-default": {
+            "label": "默认"
+          },
+          "operate": {
+            "label": "操作"
+          }
+        }
+      },
+      "operate": {
+        "dropdown-label": "ComfyUI 服务操作",
+        "options": {
+          "manual-update": "从服务更新模型列表",
+          "delete": "删除 ComfyUI 服务"
+        },
+        "manual-update": {
+          "success": "更新成功！新增：{{create}}；更新：{{update}}；删除：{{remove}}"
+        }
+      },
+      "import-label": "添加 ComfyUI 服务",
+      "form": {
+        "address": {
+          "label": "服务地址",
+          "placeholder": "请输入服务地址"
+        },
+        "description": {
+          "label": "描述",
+          "placeholder": "请输入描述"
+        }
       }
     }
   }

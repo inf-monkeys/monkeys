@@ -1,6 +1,8 @@
 import { I18nValue, ToolProperty } from '@inf-monkeys/monkeys';
 
-export interface IComfyuiModel {
+import { IBaseEntity } from '@/apis/typings.ts';
+
+export interface IComfyuiModelLegacy {
   [x: string]: string[];
 }
 
@@ -10,7 +12,7 @@ export enum ComfyuiServerStatus {
   DOWN = 'DOWN',
 }
 
-export interface IComfyuiServer {
+export interface IComfyuiServer extends Omit<IBaseEntity, 'uuid'> {
   address: string;
   status: ComfyuiServerStatus;
   description: string;
