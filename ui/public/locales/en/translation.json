@@ -56,6 +56,8 @@
       "workflow": "workflow",
       "agent": "agent",
       "comfyui-workflow": "ComfyUI workflow",
+      "image-model": "image model",
+      "comfyui-server": "ComfyUI server",
       "filter-group": "filter group",
       "text-data": "text data"
     },
@@ -111,7 +113,8 @@
     "dialog": {
       "delete-confirm": {
         "title": "Delete confirmation of {{type}}",
-        "content": "Are you sure you want to delete the {{type}} \"{{name}}\"?\nThe operation cannot be undone."
+        "content": "Are you sure you want to delete the {{type}} \"{{name}}\"?\nThe operation cannot be undone.",
+        "content-without-name": "Are you sure you want to delete the {{type}} ?\nThe operation cannot be undone."
       }
     },
     "sidebar": {
@@ -308,11 +311,9 @@
         "close": "Close",
         "remove": "Remove",
         "select-all": "(Select All)",
-
         "empty": "No data",
         "search-placeholder": "Search...",
         "search-empty": "No results found.",
-
         "more": "+ {{count}} more",
         "expand": "Expand",
         "collapse": "Collapse"
@@ -1188,36 +1189,6 @@
             }
           }
         },
-        "comfyui-server": {
-          "title": "ComfyUI Server",
-          "table": {
-            "columns": {
-              "address": {
-                "label": "Server Address"
-              },
-              "description": {
-                "label": "Description"
-              },
-              "status": {
-                "label": "Status"
-              },
-              "operate": {
-                "label": "Operations"
-              }
-            }
-          },
-          "import-label": "Add ComfyUI Server",
-          "form": {
-            "address": {
-              "label": "Server Address",
-              "placeholder": "Please enter the server address"
-            },
-            "description": {
-              "label": "Description",
-              "placeholder": "Please enter the server description"
-            }
-          }
-        },
         "restful-api": {
           "form": {
             "display-name": {
@@ -1480,8 +1451,8 @@
           "description": {
             "label": "Description"
           },
-          "assetTags": {
-            "label": "Tags"
+          "types": {
+            "label": "Types"
           },
           "createdTimestamp": {
             "label": "Created Time"
@@ -1496,6 +1467,9 @@
             "publish": "Publish to Market"
           }
         }
+      },
+      "types": {
+        "other": "Other type"
       }
     },
     "text-data": {
@@ -1998,7 +1972,6 @@
             },
             "other": "Other views iframe embed link",
             "copy-other-view": "Copy {{name}} Embed link",
-
             "entry-edit": "Enter application editing mode"
           }
         }
@@ -2998,7 +2971,6 @@
         "label": "Configure Agent",
         "desc": "You can configure agent-related parameters here",
         "advanced-configuration": "Advanced Configuration",
-
         "model": {
           "label": "Large Language Model"
         },
@@ -3038,8 +3010,52 @@
           "placeholder": "Please enter a custom model name",
           "desc": "This configuration is generally used for the model name passed in when calling the API. If not filled in, the default model is used"
         },
-
         "submit": "Save"
+      }
+    }
+  },
+  "comfyui": {
+    "comfyui-server": {
+      "title": "ComfyUI Server",
+      "table": {
+        "columns": {
+          "address": {
+            "label": "Server Address"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "status": {
+            "label": "Status"
+          },
+          "is-default": {
+            "label": "Default"
+          },
+          "operate": {
+            "label": "Operations"
+          }
+        }
+      },
+      "operate": {
+        "dropdown-label": "ComfyUI Server Operate",
+        "options": {
+          "manual-update": "Update Model List from Server",
+          "delete": "Delete ComfyUI Server"
+        },
+        "manual-update": {
+          "success": "Update successful! Create: {{create}}, Update: {{update}}, Remove: {{remove}}"
+        }
+      },
+      "import-label": "Add ComfyUI Server",
+      "form": {
+        "address": {
+          "label": "Server Address",
+          "placeholder": "Please enter the server address"
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Please enter the server description"
+        }
       }
     }
   }
