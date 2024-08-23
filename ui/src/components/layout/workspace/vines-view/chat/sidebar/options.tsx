@@ -33,7 +33,7 @@ export const WorkflowChatViewOptions: React.FC<IChatViewOptionsProps> = () => {
         </TooltipTrigger>
         <TooltipContent>{t('workspace.chat-view.workflow-mode.options.label')}</TooltipContent>
       </Tooltip>
-      <PopoverContent side="right" align="start" className="w-auto">
+      <PopoverContent side="left" align="start" className="w-auto">
         <div className="flex items-center space-x-2">
           <Switch
             id="airplane-mode"

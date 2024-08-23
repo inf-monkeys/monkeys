@@ -35,7 +35,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ groupId, mode }) 
   const setContainerHeight = usePageStore((s) => s.setContainerHeight);
   useEffect(() => {
     setContainerWidth(width);
-    setContainerHeight(height - 52);
+    setContainerHeight(height - 65);
   }, [width, height]);
 
   const setPage = usePageStore((s) => s.setPage);
@@ -60,8 +60,8 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ groupId, mode }) 
             {mode !== 'mini' && <WorkbenchViewHeader page={page} groupId={groupId} />}
             <div
               className={cn(
-                'relative size-full overflow-hidden rounded-lg',
-                mode === 'mini' ? 'm-2 size-[calc(100%-1rem)]' : 'max-h-[calc(100%-4.3rem)]',
+                'relative size-full overflow-hidden',
+                mode === 'mini' ? 'm-2 size-[calc(100%-1rem)]' : 'max-h-[calc(100%-4rem)]',
               )}
             >
               <VinesIFrame pages={pages ?? []} page={page} />

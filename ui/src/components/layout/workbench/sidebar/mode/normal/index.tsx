@@ -5,7 +5,7 @@ import { Link } from '@tanstack/react-router';
 import { useDebounceEffect, useThrottleEffect } from 'ahooks';
 import { motion } from 'framer-motion';
 import { keyBy, map } from 'lodash';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { ChevronRight, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { GroupedVirtuoso } from 'react-virtuoso';
 
@@ -15,7 +15,6 @@ import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label.tsx';
-import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
@@ -101,13 +100,11 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   useThrottleEffect(
     () => {
       if (!wrapperHeight) return;
-      setHeight(wrapperHeight - 96);
+      setHeight(wrapperHeight - 74);
     },
     [wrapperHeight],
     { wait: 64 },
   );
-
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="flex h-full max-w-64" ref={ref}>
@@ -120,76 +117,59 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
           transition: { duration: 0.2 },
         }}
       >
-        <div className="flex items-center gap-2 px-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                icon={<ChevronLeft />}
-                className="!size-8 !p-1"
-                onClick={() => setVisible(false)}
-                variant="outline"
-              />
-            </TooltipTrigger>
-            <TooltipContent>{visible ? t('common.sidebar.hide') : t('common.sidebar.show')}</TooltipContent>
-          </Tooltip>
-          <h1 className="text-base font-bold">{t('components.layout.main.sidebar.list.workbench.label')}</h1>
-        </div>
-        <div className="grid">
-          <ScrollArea ref={scrollAreaRef} style={{ height }} disabledOverflowMask>
-            <GroupedVirtuoso
-              groupCounts={lists.map((g) => g.pages.length)}
-              style={{ height }}
-              customScrollParent={scrollAreaRef.current as HTMLElement}
-              groupContent={(i) => {
-                const { displayName } = lists[i];
-                return (
-                  <div className="w-full bg-slate-1">
-                    <Label className="text-xs">
-                      {t([`workspace.wrapper.space.menu.group.name-${displayName}`, displayName])}
-                    </Label>
-                  </div>
-                );
-              }}
-              itemContent={(i) => {
-                const page = pages[i];
-                if (!page) {
-                  return null;
-                }
+        <div className="grid p-4 pr-0">
+          <GroupedVirtuoso
+            groupCounts={lists.map((g) => g.pages.length)}
+            style={{ height }}
+            groupContent={(i) => {
+              const { displayName } = lists[i];
+              return (
+                <div className="w-full bg-slate-1 pb-2 leading-none">
+                  <Label className="text-sm leading-none text-muted-foreground">
+                    {t([`workspace.wrapper.space.menu.group.name-${displayName}`, displayName])}
+                  </Label>
+                </div>
+              );
+            }}
+            itemContent={(i) => {
+              const page = pages[i];
+              if (!page) {
+                return null;
+              }
 
-                const info = page?.workflow || page?.agent;
-                const viewIcon = page?.instance?.icon ?? '';
-                const pageId = page?.id ?? '';
-                return (
-                  <div
-                    key={pageId}
-                    className={cn(
-                      'mt-1 flex cursor-pointer items-start space-x-2 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
-                      currentPage?.id === pageId && page.groupId === groupId
-                        ? 'border border-input bg-background p-2 text-accent-foreground'
-                        : 'p-[calc(0.5rem+1px)]',
-                    )}
-                    onClick={() => {
-                      setCurrentPage(page);
-                      setGroupId(page.groupId);
-                    }}
-                  >
-                    <VinesIcon size="sm">{info?.iconUrl}</VinesIcon>
-                    <div className="flex max-w-44 flex-col gap-0.5">
-                      <h1 className="text-sm font-bold leading-tight">
-                        {getI18nContent(info?.displayName) ?? t('common.utils.untitled')}
-                      </h1>
-                      <div className="flex items-center gap-0.5">
-                        <VinesLucideIcon className="size-3" size={12} src={EMOJI2LUCIDE_MAPPER[viewIcon] ?? viewIcon} />
-                        <span className="text-xxs">
-                          {t([`workspace.wrapper.space.tabs.${page?.displayName ?? ''}`, page?.displayName ?? ''])}
-                        </span>
-                      </div>
+              const info = page?.workflow || page?.agent;
+              const viewIcon = page?.instance?.icon ?? '';
+              const pageId = page?.id ?? '';
+              return (
+                <div
+                  key={pageId}
+                  className={cn(
+                    'mt-1 flex cursor-pointer items-start space-x-2 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
+                    currentPage?.id === pageId && page.groupId === groupId
+                      ? 'border border-input bg-background p-2 text-accent-foreground'
+                      : 'p-[calc(0.5rem+1px)]',
+                  )}
+                  onClick={() => {
+                    setCurrentPage(page);
+                    setGroupId(page.groupId);
+                  }}
+                >
+                  <VinesIcon size="sm">{info?.iconUrl}</VinesIcon>
+                  <div className="flex max-w-44 flex-col gap-0.5">
+                    <h1 className="text-sm font-bold leading-tight">
+                      {getI18nContent(info?.displayName) ?? t('common.utils.untitled')}
+                    </h1>
+                    <div className="flex items-center gap-0.5">
+                      <VinesLucideIcon className="size-3" size={12} src={EMOJI2LUCIDE_MAPPER[viewIcon] ?? viewIcon} />
+                      <span className="text-xxs">
+                        {t([`workspace.wrapper.space.tabs.${page?.displayName ?? ''}`, page?.displayName ?? ''])}
+                      </span>
                     </div>
                   </div>
-                );
-              }}
-            />
-          </ScrollArea>
+                </div>
+              );
+            }}
+          />
           <Tooltip>
             <TooltipTrigger asChild>
               <Link to="/$teamId/workflows/" params={{ teamId }}>
@@ -204,10 +184,10 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
         <Tooltip>
           <TooltipTrigger asChild>
             <div
-              className="group z-10 flex h-4 w-3.5 cursor-pointer items-center justify-center rounded-sm border bg-border px-0.5 transition-opacity hover:opacity-75 active:opacity-95"
+              className="group z-10 -mr-4 flex h-6 w-4 cursor-pointer items-center justify-center rounded-r-sm border bg-border px-0.5 transition-opacity hover:opacity-75 active:opacity-95"
               onClick={() => setVisible(!visible)}
             >
-              <ChevronRight className={cn(visible && 'scale-x-[-1]')} />
+              <ChevronRight className={cn('size-3', visible && 'scale-x-[-1]')} />
             </div>
           </TooltipTrigger>
           <TooltipContent>{visible ? t('common.sidebar.hide') : t('common.sidebar.show')}</TooltipContent>
