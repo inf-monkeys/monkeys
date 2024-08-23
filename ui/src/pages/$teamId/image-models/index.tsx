@@ -2,7 +2,7 @@ import React from 'react';
 
 import { createFileRoute } from '@tanstack/react-router';
 
-import { Server } from 'lucide-react';
+import { LibraryBig, Server } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ComfyUIServerListModal } from 'src/components/layout/ugc-pages/comfyui/comfyui-server-list';
 
@@ -11,6 +11,7 @@ import { preloadUgcImageModels, useUgcImageModels } from '@/apis/ugc';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createImageModelsColumns } from '@/components/layout/ugc-pages/image-models/consts.tsx';
+import { ImageModelTypeModal } from '@/components/layout/ugc-pages/image-models/model-type-modal';
 import { OperateArea } from '@/components/layout/ugc-pages/image-models/operate-area';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
@@ -77,6 +78,11 @@ export const ImageModels: React.FC = () => {
                 {tHook('comfyui.comfyui-server.title')}
               </Button>
             </ComfyUIServerListModal>
+            <ImageModelTypeModal>
+              <Button variant="outline" size="small" icon={<LibraryBig />}>
+                {tHook('comfyui.comfyui-model-type.title')}
+              </Button>
+            </ImageModelTypeModal>
           </>
         }
       />

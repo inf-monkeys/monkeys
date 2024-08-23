@@ -57,6 +57,7 @@
       "agent": "agent",
       "comfyui-workflow": "ComfyUI workflow",
       "image-model": "image model",
+      "image-model-type": "image model type",
       "comfyui-server": "ComfyUI server",
       "filter-group": "filter group",
       "text-data": "text data"
@@ -3055,6 +3056,51 @@
         "description": {
           "label": "Description",
           "placeholder": "Please enter the server description"
+        }
+      }
+    },
+    "comfyui-model-type": {
+      "title": "Model Type",
+      "table": {
+        "columns": {
+          "display-name": {
+            "label": "Display Name"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "path": {
+            "label": "Path"
+          },
+          "name": {
+            "label": "Name"
+          },
+          "operate": {
+            "label": "Operate"
+          }
+        }
+      },
+      "operate": {
+        "dropdown-label": "Model Type Operate",
+        "options": {
+          "delete": "删除模型类型"
+        }
+      },
+      "create-label": "Create Model Type",
+      "form": {
+        "name": {
+          "placeholder": "Please enter name",
+          "description": "e.g. \"lora-sdxl\""
+        },
+        "path": {
+          "placeholder": "Please enter path",
+          "description": "Relative path in the models folder, e.g. \"loras/sdxl\""
+        },
+        "display-name": {
+          "placeholder": "Please enter display name"
+        },
+        "description": {
+          "placeholder": "Please enter description"
         }
       }
     }

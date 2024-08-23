@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { KeyedMutator } from 'swr/_internal';
+import { mutate } from 'swr';
 
 import { CloudDownload, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -36,24 +36,24 @@ interface IComfyuiServerListOperateDropdownProps {
   item: IComfyuiServer;
   trigger: React.ReactNode;
   tooltipTriggerContent?: string;
-  mutate: KeyedMutator<IComfyuiServer[] | undefined>;
 }
 
 export const ComfyuiServerListOperateDropdown: React.FC<IComfyuiServerListOperateDropdownProps> = ({
   item,
   trigger,
   tooltipTriggerContent,
-  mutate,
 }) => {
   const { t } = useTranslation();
 
   const [updating, setUpdating] = useState(false);
+  const mutateModelList = () => mutate((key) => typeof key === 'string' && key.startsWith('/api/comfyui/servers'));
+  const mutateServerList = () => mutate((key) => typeof key === 'string' && key.startsWith('/api/comfyui-models'));
 
   const handleDelete = async (address: string) => {
     toast.promise(deleteComfyuiServer(address), {
       loading: t('common.operate.loading'),
       success: () => {
-        mutate();
+        mutateServerList();
         return t('common.operate.success');
       },
       error: t('common.operate.error'),
@@ -65,6 +65,7 @@ export const ComfyuiServerListOperateDropdown: React.FC<IComfyuiServerListOperat
     toast.promise(manualUpdateModelListFromServer(serverId), {
       loading: t('common.update.loading'),
       success: (data) => {
+        mutateModelList();
         return t('comfyui.comfyui-server.operate.manual-update.success', {
           ...data,
         });

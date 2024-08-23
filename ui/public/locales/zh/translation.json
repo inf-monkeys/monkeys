@@ -57,6 +57,7 @@
       "agent": "智能体",
       "comfyui-workflow": "ComfyUI 工作流",
       "image-model": "图像模型",
+      "image-model-type": "图像模型类型",
       "comfyui-server": "ComfyUI 服务",
       "filter-group": "筛选分组",
       "text-data": "文本数据",
@@ -3083,6 +3084,51 @@
         },
         "description": {
           "label": "描述",
+          "placeholder": "请输入描述"
+        }
+      }
+    },
+    "comfyui-model-type": {
+      "title": "模型类型",
+      "table": {
+        "columns": {
+          "display-name": {
+            "label": "显示名称"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "path": {
+            "label": "模型路径"
+          },
+          "name": {
+            "label": "类型标识"
+          },
+          "operate": {
+            "label": "操作"
+          }
+        }
+      },
+      "operate": {
+        "dropdown-label": "模型类型操作",
+        "options": {
+          "delete": "删除模型类型"
+        }
+      },
+      "create-label": "创建模型类型",
+      "form": {
+        "name": {
+          "placeholder": "请输入类型标识",
+          "description": "如「lora-sdxl」"
+        },
+        "path": {
+          "placeholder": "请输入路径",
+          "description": "models 文件夹中的相对路径，如「loras/sdxl」"
+        },
+        "display-name": {
+          "placeholder": "请输入显示名称"
+        },
+        "description": {
           "placeholder": "请输入描述"
         }
       }
