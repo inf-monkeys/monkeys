@@ -1,18 +1,27 @@
 import React from 'react';
 
+import { UseNavigateResult } from '@tanstack/react-router';
+
 import { I18nValue } from '@inf-monkeys/monkeys';
 import { createColumnHelper } from '@tanstack/react-table';
 import { t } from 'i18next';
 
 import { IComfyuiModel, IComfyuiModelType } from '@/apis/comfyui-model/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
+import { IUgcCreateColumnsProps } from '@/components/layout/ugc/typings.ts';
 import { RenderDescription, RenderIcon, RenderTime } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { Tag } from '@/components/ui/tag';
 import { getI18nContent } from '@/utils';
 
 const columnHelper = createColumnHelper<IAssetItem<IComfyuiModel>>();
 
-export const createImageModelsColumns = () => [
+interface ICreateImageModelsColumnsProps extends IUgcCreateColumnsProps {
+  hooks: {
+    navigate: UseNavigateResult<string>;
+  };
+}
+
+export const createImageModelsColumns = ({ hooks }: ICreateImageModelsColumnsProps) => [
   columnHelper.accessor('iconUrl', {
     id: 'logo',
     cell: ({ getValue }) => RenderIcon({ iconUrl: getValue() as string }),
@@ -21,9 +30,17 @@ export const createImageModelsColumns = () => [
   columnHelper.accessor('displayName', {
     id: 'title',
     cell: ({ getValue }) => (
-      <a className="hover:text-primary-500 transition-colors" target="_blank" rel="noreferrer">
+      <span
+        className="hover:text-primary-500 cursor-pointer transition-colors"
+        onClick={() => {
+          void hooks.navigate({
+            // @ts-ignore
+            to: `/$teamId/image-models/${row.original.id}`,
+          });
+        }}
+      >
         {getI18nContent(getValue() as string | I18nValue)}
-      </a>
+      </span>
     ),
   }),
   columnHelper.accessor('description', {
@@ -59,6 +76,9 @@ export const createImageModelsColumns = () => [
         </>
       );
     },
+  }),
+  columnHelper.accessor('sha256', {
+    id: 'sha256',
   }),
   columnHelper.accessor('createdTimestamp', {
     id: 'createdTimestamp',

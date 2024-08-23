@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { LibraryBig, Server } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +21,8 @@ import { formatTimeDiffPrevious } from '@/utils/time.ts';
 export const ImageModels: React.FC = () => {
   const { t: tHook } = useTranslation();
 
+  const navigate = useNavigate();
+
   return (
     <main className="size-full">
       <UgcView
@@ -29,7 +31,13 @@ export const ImageModels: React.FC = () => {
         assetName={tHook('components.layout.main.sidebar.list.model.image-models.label')}
         useUgcFetcher={useUgcImageModels}
         preloadUgcFetcher={preloadUgcImageModels}
-        createColumns={() => createImageModelsColumns()}
+        createColumns={() =>
+          createImageModelsColumns({
+            hooks: {
+              navigate,
+            },
+          })
+        }
         renderOptions={{
           subtitle: (item) => (
             <span className="line-clamp-1">
@@ -85,6 +93,11 @@ export const ImageModels: React.FC = () => {
             </ImageModelTypeModal>
           </>
         }
+        onItemClick={(item) => {
+          void navigate({
+            to: `/$teamId/image-models/${item.id}`,
+          });
+        }}
       />
     </main>
   );
