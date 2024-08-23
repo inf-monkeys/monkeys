@@ -6,7 +6,7 @@ import { ComfyuiModelTypeController } from './comfyui-model.type.controller';
 
 @Module({
   providers: [ComfyuiModelService, ComfyUIService],
-  controllers: [ComfyuiModelController, ComfyuiModelTypeController],
+  controllers: [ComfyuiModelTypeController, ComfyuiModelController],
   exports: [ComfyuiModelService],
 })
 export class ComfyuiModelModule {}
