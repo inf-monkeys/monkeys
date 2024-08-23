@@ -39,7 +39,7 @@ export const VinesForm: React.FC<IVinesFormProps> = () => {
       <div
         className={cn(
           'relative grid size-full grid-cols-2 p-6',
-          workbenchVisible && 'px-4 py-0',
+          workbenchVisible && 'p-4',
           isMiniFrame && 'h-[calc(100%-3rem)] grid-cols-1 p-2',
           vinesIFrameVisible && 'p-4',
         )}

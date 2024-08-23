@@ -9,12 +9,21 @@ import { cn } from '@/utils';
 export interface ScrollAreaProps extends React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> {
   scrollBarDisabled?: boolean;
   disabledOverflowMask?: boolean;
+  orientation?: 'vertical' | 'horizontal';
   onScrollPositionChange?: (position: { x: number; y: number }) => void;
 }
 
 const ScrollArea = React.forwardRef<React.ElementRef<typeof ScrollAreaPrimitive.Root>, ScrollAreaProps>(
   (
-    { className, children, scrollBarDisabled = false, disabledOverflowMask = false, onScrollPositionChange, ...props },
+    {
+      className,
+      children,
+      orientation,
+      scrollBarDisabled = false,
+      disabledOverflowMask = false,
+      onScrollPositionChange,
+      ...props
+    },
     ref,
   ) => {
     const scrollAreaRef = useRef<HTMLDivElement | null>(null);
@@ -40,7 +49,7 @@ const ScrollArea = React.forwardRef<React.ElementRef<typeof ScrollAreaPrimitive.
         >
           {children}
         </ScrollAreaPrimitive.Viewport>
-        <ScrollBar className={cn(scrollBarDisabled && 'size-0 p-0')} />
+        <ScrollBar orientation={orientation} className={cn(scrollBarDisabled && 'size-0 p-0')} />
         <ScrollAreaPrimitive.Corner />
       </ScrollAreaPrimitive.Root>
     );

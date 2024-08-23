@@ -63,8 +63,8 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page,
   const isWorkflowPage = !!page?.workflowId;
 
   return (
-    <header className="z-50 flex w-full flex-col justify-center  px-4">
-      <div className="flex items-center justify-between">
+    <header className="z-50 flex w-full flex-col justify-center pt-4">
+      <div className="flex items-center justify-between px-4 pb-4">
         <div className="flex gap-2">
           <VinesIcon size="sm">{info?.iconUrl}</VinesIcon>
           <div className="flex flex-col gap-0.5">
@@ -106,7 +106,7 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page,
           </Link>
         </div>
       </div>
-      <Separator className="my-4" />
+      <Separator />
     </header>
   );
 };

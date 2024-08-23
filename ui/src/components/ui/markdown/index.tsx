@@ -75,11 +75,11 @@ export const VinesMarkdown: React.FC<IVinesMarkdownProps> = ({ allowHtml, classN
               icon={copied ? <CopyCheck /> : <Copy />}
               variant="outline"
               size="small"
-              className="scale-80 absolute right-1 top-1 opacity-0 group-hover/codeblock:opacity-75"
+              className="absolute right-1 top-1 !p-1 opacity-0 group-hover/codeblock:opacity-75 [&_svg]:!size-3"
               onClick={() => copy(code)}
             />
             {showLanguage && (
-              <Label className="pointer-events-none absolute bottom-2 right-2 opacity-0 transition-opacity group-hover/codeblock:opacity-70">
+              <Label className="pointer-events-none absolute bottom-2 right-2 text-xs opacity-0 transition-opacity group-hover/codeblock:opacity-70">
                 {language}
               </Label>
             )}

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useLayoutEffect } from 'react';
 
 import { Outlet } from '@tanstack/react-router';
 
@@ -12,7 +12,7 @@ import { usePageStore } from '@/store/usePageStore';
 export const WorkbenchFastModeLayout: React.FC = () => {
   const setWorkbenchVisible = usePageStore((s) => s.setWorkbenchVisible);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setWorkbenchVisible(true);
   }, []);
 
@@ -26,7 +26,7 @@ export const WorkbenchFastModeLayout: React.FC = () => {
           </div>
         }
       />
-      <VinesSpace>
+      <VinesSpace className="p-0">
         <Outlet />
       </VinesSpace>
     </ViewGuard>
