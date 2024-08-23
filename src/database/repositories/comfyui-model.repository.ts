@@ -270,6 +270,9 @@ export class ComfyuiModelRepository {
         },
       },
     });
+
+    if (!rawModel) throw new Error('ComfyUI model not found');
+
     const modelTypes = (
       await this.modelTypeRepository.find({
         where: {
