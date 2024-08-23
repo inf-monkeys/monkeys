@@ -45,7 +45,7 @@
     "@nestjs/swagger": "^7.3.0",
     "@nestjs/typeorm": "^10.0.2",
     "ai": "^3.0.24",
-    "axios": "^1.6.7",
+    "axios": "^1.7.4",
     "better-sqlite3": "^9.4.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
