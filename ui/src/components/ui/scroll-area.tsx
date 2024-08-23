@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useRef } from 'react';
 
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area';
+import { useMemoizedFn } from 'ahooks';
 
 import { useDataScrollOverflow } from '@/hooks/use-data-scroll-overflow.ts';
 import { cn } from '@/utils';
@@ -34,14 +35,22 @@ const ScrollArea = React.forwardRef<React.ElementRef<typeof ScrollAreaPrimitive.
       isEnabled: !disabledOverflowMask,
     });
 
+    const mergeRefs = useMemoizedFn((element: HTMLDivElement | null) => {
+      if (typeof ref === 'function') {
+        ref(element);
+      } else if (ref) {
+        ref.current = element;
+      }
+      scrollAreaRef.current = element;
+    });
+
     return (
       <ScrollAreaPrimitive.Root
-        ref={ref}
         className={cn('relative overflow-hidden', className, scrollBarDisabled && 'no-scrollbar')}
         {...props}
       >
         <ScrollAreaPrimitive.Viewport
-          ref={scrollAreaRef}
+          ref={mergeRefs}
           className="size-full rounded-[inherit] data-[top-bottom-scroll=true]:[mask-image:linear-gradient(#000,#000,transparent_0,#000_40px,#000_calc(100%_-_40px),transparent)] data-[top-scroll=true]:[mask-image:linear-gradient(0deg,#000_calc(100%_-_40px),transparent)] data-[bottom-scroll=true]:[mask-image:linear-gradient(180deg,#000_calc(100%_-_40px),transparent)]"
           onScroll={(e) => {
             onScrollPositionChange?.({ x: e.currentTarget.scrollLeft, y: e.currentTarget.scrollTop });
@@ -65,7 +74,7 @@ const ScrollBar = React.forwardRef<
     ref={ref}
     orientation={orientation}
     className={cn(
-      'flex touch-none select-none transition-colors',
+      'z-50 flex touch-none select-none transition-colors',
       orientation === 'vertical' && 'h-full w-2.5 border-l border-l-transparent p-[1px]',
       orientation === 'horizontal' && 'h-2.5 flex-col border-t border-t-transparent p-[1px]',
       className,

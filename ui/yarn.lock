@@ -9044,6 +9044,11 @@ victory-vendor@^36.6.8:
     d3-time "^3.0.0"
     d3-timer "^3.0.1"
 
+virtua@^0.33.7:
+  version "0.33.7"
+  resolved "https://registry.npmmirror.com/virtua/-/virtua-0.33.7.tgz#bd46d7d31f257886e6245347354fb4e80e27441f"
+  integrity sha512-IepZaMD/oeEh/ymTqokeQGLrMuRV25+lizPegxVIhOwqX+dEeV9ml1P57Eosok4qiZaeBeQIbIkF9QZrT+EeRQ==
+
 vite-plugin-svgr@^4.2.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/vite-plugin-svgr/-/vite-plugin-svgr-4.2.0.tgz#9f3bf5206b0ec510287e56d16f1915e729bb4e6b"
