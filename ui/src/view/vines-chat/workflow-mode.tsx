@@ -1,10 +1,9 @@
 import React from 'react';
 
+import { VinesChatList } from '@/components/layout/workspace/vines-view/chat/workflow-mode';
 import { VinesChatWorkflowModeInput } from '@/components/layout/workspace/vines-view/chat/workflow-mode/chat-input';
-import { VinesChatList } from '@/components/layout/workspace/vines-view/chat/workflow-mode/messages';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { useFlowStore } from '@/store/useFlowStore';
-import { useViewStore } from '@/store/useViewStore';
 
 interface IVinesWorkflowModeProps {
   height: number;
@@ -15,13 +14,12 @@ export const VinesWorkflowMode: React.FC<IVinesWorkflowModeProps> = ({ height, d
   const { page } = useVinesPage();
   const isSimple = !(page?.customOptions?.showExecutionProcess ?? false);
 
-  const visible = useViewStore((s) => s.visible);
   const workflowId = useFlowStore((s) => s.workflowId);
 
   return (
     <>
       <div className="size-full flex-1">
-        <VinesChatList visible={visible} workflowId={workflowId} useSimple={isSimple} />
+        <VinesChatList workflowId={workflowId} useSimple={isSimple} height={height} />
       </div>
       <VinesChatWorkflowModeInput workflowId={workflowId} height={height} isSimple={isSimple} disabled={disabled} />
     </>

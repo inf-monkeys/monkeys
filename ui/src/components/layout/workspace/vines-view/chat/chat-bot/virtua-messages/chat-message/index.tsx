@@ -2,9 +2,9 @@ import React from 'react';
 
 import { isEmpty } from 'lodash';
 
-import { ToolDisplay } from '@/components/layout/workspace/vines-view/chat/chat-bot/messages/chat-message/tool-display.tsx';
-import { MessageToolbar } from '@/components/layout/workspace/vines-view/chat/chat-bot/messages/chat-message/toolbar';
 import { IVinesMessage } from '@/components/layout/workspace/vines-view/chat/chat-bot/use-chat.ts';
+import { ToolDisplay } from '@/components/layout/workspace/vines-view/chat/chat-bot/virtua-messages/chat-message/tool-display.tsx';
+import { MessageToolbar } from '@/components/layout/workspace/vines-view/chat/chat-bot/virtua-messages/chat-message/toolbar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Card } from '@/components/ui/card.tsx';
 import { VinesMarkdown } from '@/components/ui/markdown';

@@ -69,6 +69,7 @@ export const VinesChatView: React.FC = () => {
             id={workflowId}
             extraBody={extraBody}
             botPhoto={vines.workflowIcon}
+            height={finalHeight}
           />
         ) : (
           <VinesWorkflowMode height={finalHeight} disabled={disabled} />
