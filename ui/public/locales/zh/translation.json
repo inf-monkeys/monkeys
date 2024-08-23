@@ -1454,6 +1454,9 @@
           "types": {
             "label": "类型"
           },
+          "sha256": {
+            "label": "sha256"
+          },
           "createdTimestamp": {
             "label": "创建时间"
           },
@@ -1470,6 +1473,9 @@
       },
       "types": {
         "other": "其他类型"
+      },
+      "detail": {
+        "title": "图像模型详情"
       }
     },
     "text-data": {
@@ -3053,7 +3059,7 @@
             "label": "服务地址"
           },
           "description": {
-            "label": "描述"
+            "label": "服务描述"
           },
           "status": {
             "label": "状态"
@@ -3130,6 +3136,21 @@
         },
         "description": {
           "placeholder": "请输入描述"
+        }
+      }
+    },
+    "comfyui-model": {
+      "table": {
+        "columns": {
+          "path": {
+            "label": "模型路径"
+          },
+          "filename": {
+            "label": "模型文件名"
+          },
+          "type": {
+            "label": "模型类型"
+          }
         }
       }
     }

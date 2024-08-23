@@ -1455,6 +1455,9 @@
           "types": {
             "label": "Types"
           },
+          "sha256": {
+            "label": "sha256"
+          },
           "createdTimestamp": {
             "label": "Created Time"
           },
@@ -1471,6 +1474,9 @@
       },
       "types": {
         "other": "Other type"
+      },
+      "detail": {
+        "title": "Image Model Detail"
       }
     },
     "text-data": {
@@ -3024,7 +3030,7 @@
             "label": "Server Address"
           },
           "description": {
-            "label": "Description"
+            "label": "Server Description"
           },
           "status": {
             "label": "Status"
@@ -3083,7 +3089,7 @@
       "operate": {
         "dropdown-label": "Model Type Operate",
         "options": {
-          "delete": "删除模型类型"
+          "delete": "Delete Model Type"
         }
       },
       "create-label": "Create Model Type",
@@ -3101,6 +3107,21 @@
         },
         "description": {
           "placeholder": "Please enter description"
+        }
+      }
+    },
+    "comfyui-model": {
+      "table": {
+        "columns": {
+          "path": {
+            "label": "Model Path"
+          },
+          "filename": {
+            "label": "Model Filename"
+          },
+          "type": {
+            "label": "Model Type"
+          }
         }
       }
     }

@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 
-import { IComfyuiModelType } from '@/apis/comfyui-model/typings.ts';
+import { IComfyuiModel, IComfyuiModelType } from '@/apis/comfyui-model/typings.ts';
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { ICreateComfyuiModelType } from '@/schema/workspace/create-comfyui-model-type.ts';
 
@@ -21,3 +21,8 @@ export const createComfyuiModelType = (params: ICreateComfyuiModelType) =>
 
 export const deleteComfyuiModelType = (typeId: string) =>
   vinesFetcher({ method: 'DELETE', simple: true })(`/api/comfyui-models/types/${typeId}`);
+
+export const useComfyuiModel = (id?: string) =>
+  useSWR<IComfyuiModel | undefined>(id ? `/api/comfyui-models/${id}` : null, vinesFetcher(), {
+    refreshInterval: 600000,
+  });
