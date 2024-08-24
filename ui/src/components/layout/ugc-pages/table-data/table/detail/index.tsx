@@ -30,13 +30,14 @@ interface ITableDatabaseProps {
   tableId: string;
 }
 
+const size = 30;
+
 export const TableDatabase: React.FC<ITableDatabaseProps> = ({ database, tableId }) => {
   const { t } = useTranslation();
   const { mutate } = useSWRConfig();
   const isExternalDatabase = database?.createType === SqlKnowledgeBaseCreateType.external;
   const databaseId = database?.uuid;
   const [page, setPage] = useState(1);
-  const size = 30;
   const { data, isLoading } = useDatabaseData(databaseId, tableId, page, size);
 
   const [columns, setColumns] = useState<ColumnDef<IDatabaseData>[]>([]);
@@ -142,7 +143,7 @@ export const TableDatabase: React.FC<ITableDatabaseProps> = ({ database, tableId
             <tr>
               <td className="absolute w-full py-4 text-center">
                 {hits.length < size ? (
-                  <span>{t('common.utils.all-loaded')}</span>
+                  <span className="text-sm">{t('common.utils.all-loaded')}</span>
                 ) : (
                   <Button
                     variant="outline"
