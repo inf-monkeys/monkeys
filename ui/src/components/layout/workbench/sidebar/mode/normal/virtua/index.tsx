@@ -60,7 +60,7 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
       <WorkbenchViewListStickyIndexesContext.Provider value={stickyIndexes}>
         <WorkbenchViewItemCurrentData.Provider value={{ pageId: currentPageId, groupId: currentGroupId }}>
           <ScrollArea
-            className="-mb-2 [&>[data-radix-scroll-area-viewport]]:-mt-2"
+            className="-mb-2 -mr-3 pr-3 [&>[data-radix-scroll-area-viewport]]:-mt-2"
             ref={scrollRef}
             style={{ height: height + 8 }}
             disabledOverflowMask

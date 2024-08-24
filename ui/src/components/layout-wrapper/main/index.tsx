@@ -20,7 +20,7 @@ export const MainWrapper: React.FC<IProps> = ({ layoutId }) => {
         <div
           className={cn(
             'm-4 ml-0 flex h-[calc(100vh-2rem)] w-full max-w-[calc(100vw-15rem)] flex-1 rounded-md border bg-slate-1 p-6 shadow-sm',
-            layoutId === 'vines-outlet-main-$teamId' && 'p-2',
+            layoutId === 'vines-outlet-main-$teamId' && 'p-0',
           )}
         >
           <motion.div

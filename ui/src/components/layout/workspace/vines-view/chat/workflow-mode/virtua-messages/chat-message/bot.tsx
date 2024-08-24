@@ -39,7 +39,7 @@ export const VinesBotChatMessage = memo<IVinesBotChatMessageProps>(
               {endTime}
             </span>
           )}
-          <Card className={cn('min-w-72 p-4')}>
+          <Card className={cn('mr-12 p-4')}>
             {children}
             {!useSimple && (
               <>
