@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useSWRConfig } from 'swr';
 
-import { useMemoizedFn } from 'ahooks';
+import { useMemoizedFn, useThrottleEffect } from 'ahooks';
 import { isArray } from 'lodash';
 
 import { AnInput } from '@/components/layout/workspace/vines-view/chat/workflow-mode/chat-input/an-input.tsx';
@@ -10,6 +10,7 @@ import { EmptyInput } from '@/components/layout/workspace/vines-view/chat/workfl
 import { FormInput } from '@/components/layout/workspace/vines-view/chat/workflow-mode/chat-input/form.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { useVinesFlow } from '@/package/vines-flow';
 
 interface IVinesChatWorkflowModeInputProps {
@@ -17,6 +18,7 @@ interface IVinesChatWorkflowModeInputProps {
   workflowId: string;
   height: number;
   disabled: boolean;
+  setInputHeight: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export const VinesChatWorkflowModeInput: React.FC<IVinesChatWorkflowModeInputProps> = ({
@@ -24,6 +26,7 @@ export const VinesChatWorkflowModeInput: React.FC<IVinesChatWorkflowModeInputPro
   workflowId,
   height,
   disabled,
+  setInputHeight,
 }) => {
   const { mutate } = useSWRConfig();
 
@@ -42,32 +45,42 @@ export const VinesChatWorkflowModeInput: React.FC<IVinesChatWorkflowModeInputPro
     setTimeout(() => void mutate((key) => isArray(key) && key?.[0] === '/api/workflow/executions/search'), 1000);
   });
 
+  const { ref: inputRef, height: wrapperHeight } = useElementSize();
+  useThrottleEffect(
+    () => {
+      if (!wrapperHeight) return;
+      setInputHeight(wrapperHeight - 28);
+    },
+    [wrapperHeight],
+    { wait: 64 },
+  );
+
   const workflowInput = vines.workflowInput;
   const workflowInputLength = workflowInput.length;
 
-  const hasMoreThanOneInput = workflowInputLength > 1;
-
-  return workflowInputLength ? (
-    hasMoreThanOneInput ? (
-      <>
-        <Separator orientation="vertical" />
-        <FormInput
-          height={height}
-          loading={isExecutionRunning}
-          disabled={disabled}
-          inputs={workflowInput}
-          onClick={handleExecutionWorkflow}
-        />
-      </>
-    ) : (
-      <AnInput
+  return workflowInputLength > 1 ? (
+    <>
+      <Separator orientation="vertical" />
+      <FormInput
+        height={height}
         loading={isExecutionRunning}
         disabled={disabled}
         inputs={workflowInput}
         onClick={handleExecutionWorkflow}
       />
-    )
+    </>
   ) : (
-    <EmptyInput loading={isExecutionRunning} disabled={disabled} onClick={handleExecutionWorkflow} />
+    <div ref={inputRef}>
+      {workflowInputLength ? (
+        <AnInput
+          loading={isExecutionRunning}
+          disabled={disabled}
+          inputs={workflowInput}
+          onClick={handleExecutionWorkflow}
+        />
+      ) : (
+        <EmptyInput loading={isExecutionRunning} disabled={disabled} onClick={handleExecutionWorkflow} />
+      )}
+    </div>
   );
 };

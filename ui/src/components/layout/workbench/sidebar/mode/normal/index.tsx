@@ -7,24 +7,18 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { keyBy, map } from 'lodash';
 import { ChevronRight, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { GroupedVirtuoso } from 'react-virtuoso';
 
 import { useWorkspacePages } from '@/apis/pages';
-import { IPinPage } from '@/apis/pages/typings.ts';
 import { VirtuaWorkbenchViewList } from '@/components/layout/workbench/sidebar/mode/normal/virtua';
 import { IWorkbenchViewItemPage } from '@/components/layout/workbench/sidebar/mode/normal/virtua/item.tsx';
-import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label.tsx';
 import { VinesFullLoading } from '@/components/ui/loading';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { VinesIcon } from '@/components/ui/vines-icon';
-import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer';
-import { cn, getI18nContent } from '@/utils';
+import { cn } from '@/utils';
 
 interface IWorkbenchNormalModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
   groupId: string;
@@ -49,17 +43,6 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   }))
     .filter((it) => it.pages?.length)
     .toSorted((a) => (a.isBuiltIn ? -1 : 1));
-
-  const pages = lists.reduce((acc: (Partial<IPinPage> & { groupId: string })[], list) => {
-    return acc.concat(
-      list.pages.map((page) => {
-        return {
-          ...page,
-          groupId: list.id,
-        };
-      }),
-    );
-  }, []);
 
   const [currentPage, setCurrentPage] = useLocalStorage<Partial<IWorkbenchViewItemPage>>('vines-ui-workbench-page', {});
 
@@ -145,60 +128,6 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
               setGroupId(page.groupId);
             }}
           />
-          <div className="hidden">
-            <GroupedVirtuoso
-              groupCounts={lists.map((g) => g.pages.length)}
-              style={{ height }}
-              groupContent={(i) => {
-                const { displayName } = lists[i];
-                return (
-                  <div className="w-full bg-slate-1 pb-2 leading-none">
-                    <Label className="text-sm leading-none text-muted-foreground">
-                      {t([`workspace.wrapper.space.menu.group.name-${displayName}`, displayName])}
-                    </Label>
-                  </div>
-                );
-              }}
-              itemContent={(i) => {
-                const page = pages[i];
-                if (!page) {
-                  return null;
-                }
-
-                const info = page?.workflow || page?.agent;
-                const viewIcon = page?.instance?.icon ?? '';
-                const pageId = page?.id ?? '';
-                return (
-                  <div
-                    key={pageId}
-                    className={cn(
-                      'mt-1 flex cursor-pointer items-start space-x-2 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
-                      currentPage?.id === pageId && page.groupId === groupId
-                        ? 'border border-input bg-background p-2 text-accent-foreground'
-                        : 'p-[calc(0.5rem+1px)]',
-                    )}
-                    onClick={() => {
-                      setCurrentPage(page);
-                      setGroupId(page.groupId);
-                    }}
-                  >
-                    <VinesIcon size="sm">{info?.iconUrl}</VinesIcon>
-                    <div className="flex max-w-44 flex-col gap-0.5">
-                      <h1 className="text-sm font-bold leading-tight">
-                        {getI18nContent(info?.displayName) ?? t('common.utils.untitled')}
-                      </h1>
-                      <div className="flex items-center gap-0.5">
-                        <VinesLucideIcon className="size-3" size={12} src={EMOJI2LUCIDE_MAPPER[viewIcon] ?? viewIcon} />
-                        <span className="text-xxs">
-                          {t([`workspace.wrapper.space.tabs.${page?.displayName ?? ''}`, page?.displayName ?? ''])}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              }}
-            />
-          </div>
           <Tooltip>
             <TooltipTrigger asChild>
               <Link to="/$teamId/workflows/" params={{ teamId }}>
@@ -209,19 +138,25 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
           </Tooltip>
         </div>
       </motion.div>
-      <Separator orientation="vertical" className="vines-center">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div
-              className="group z-10 -mr-4 flex h-6 w-4 cursor-pointer items-center justify-center rounded-r-sm border bg-border px-0.5 transition-opacity hover:opacity-75 active:opacity-95"
-              onClick={() => setVisible(!visible)}
-            >
-              <ChevronRight className={cn('size-3', visible && 'scale-x-[-1]')} />
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>{visible ? t('common.sidebar.hide') : t('common.sidebar.show')}</TooltipContent>
-        </Tooltip>
-      </Separator>
+      <div className="group z-10 -mr-4 h-full w-4">
+        <Separator
+          orientation="vertical"
+          className={cn(
+            'vines-center before:absolute before:z-20 before:h-full before:w-1 before:cursor-pointer before:transition-all before:hover:bg-border',
+            !visible && 'bg-transparent',
+          )}
+          onClick={() => setVisible(!visible)}
+        >
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="-mr-4 flex h-6 w-4 cursor-pointer items-center justify-center rounded-r-sm border bg-border px-0.5 opacity-0 transition-opacity hover:opacity-75 active:opacity-95 group-hover:opacity-100">
+                <ChevronRight className={cn('size-3', visible && 'scale-x-[-1]')} />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>{visible ? t('common.sidebar.hide') : t('common.sidebar.show')}</TooltipContent>
+          </Tooltip>
+        </Separator>
+      </div>
     </div>
   );
 };

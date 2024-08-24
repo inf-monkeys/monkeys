@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { VinesChatList } from '@/components/layout/workspace/vines-view/chat/workflow-mode';
 import { VinesChatWorkflowModeInput } from '@/components/layout/workspace/vines-view/chat/workflow-mode/chat-input';
@@ -16,12 +16,18 @@ export const VinesWorkflowMode: React.FC<IVinesWorkflowModeProps> = ({ height, d
 
   const workflowId = useFlowStore((s) => s.workflowId);
 
+  const [inputHeight, setInputHeight] = useState(0);
+
   return (
     <>
-      <div className="size-full flex-1">
-        <VinesChatList workflowId={workflowId} useSimple={isSimple} height={height} />
-      </div>
-      <VinesChatWorkflowModeInput workflowId={workflowId} height={height} isSimple={isSimple} disabled={disabled} />
+      <VinesChatList workflowId={workflowId} useSimple={isSimple} height={height - inputHeight} />
+      <VinesChatWorkflowModeInput
+        workflowId={workflowId}
+        height={height}
+        setInputHeight={setInputHeight}
+        isSimple={isSimple}
+        disabled={disabled}
+      />
     </>
   );
 };

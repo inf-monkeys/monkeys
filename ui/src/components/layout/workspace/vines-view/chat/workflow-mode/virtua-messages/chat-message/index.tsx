@@ -47,7 +47,7 @@ export const ChatMessage = memo<IVinesChatMessageProps>(({ data, isLast = false,
           <AvatarImage className="aspect-auto" src={userPhoto} alt={userName} />
           <AvatarFallback className="rounded-none p-2 text-xs">{userName.substring(0, 2)}</AvatarFallback>
         </Avatar>
-        <div className="-mt-5 flex flex-col gap-1">
+        <div className="-mt-5 ml-12 flex flex-col gap-1">
           <span className="text-end text-xs text-gray-400 opacity-0 transition-opacity group-hover:opacity-100">
             {startTime}
           </span>
