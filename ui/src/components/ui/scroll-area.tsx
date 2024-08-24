@@ -2,10 +2,10 @@ import * as React from 'react';
 import { useRef } from 'react';
 
 import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area';
-import { useMemoizedFn } from 'ahooks';
 
 import { useDataScrollOverflow } from '@/hooks/use-data-scroll-overflow.ts';
 import { cn } from '@/utils';
+import { mergeRefs } from '@/utils/merge-refs.ts';
 
 export interface ScrollAreaProps extends React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> {
   scrollBarDisabled?: boolean;
@@ -35,22 +35,13 @@ const ScrollArea = React.forwardRef<React.ElementRef<typeof ScrollAreaPrimitive.
       isEnabled: !disabledOverflowMask,
     });
 
-    const mergeRefs = useMemoizedFn((element: HTMLDivElement | null) => {
-      if (typeof ref === 'function') {
-        ref(element);
-      } else if (ref) {
-        ref.current = element;
-      }
-      scrollAreaRef.current = element;
-    });
-
     return (
       <ScrollAreaPrimitive.Root
         className={cn('relative overflow-hidden', className, scrollBarDisabled && 'no-scrollbar')}
         {...props}
       >
         <ScrollAreaPrimitive.Viewport
-          ref={mergeRefs}
+          ref={mergeRefs([scrollAreaRef, ref])}
           className="size-full rounded-[inherit] data-[top-bottom-scroll=true]:[mask-image:linear-gradient(#000,#000,transparent_0,#000_40px,#000_calc(100%_-_40px),transparent)] data-[top-scroll=true]:[mask-image:linear-gradient(0deg,#000_calc(100%_-_40px),transparent)] data-[bottom-scroll=true]:[mask-image:linear-gradient(180deg,#000_calc(100%_-_40px),transparent)]"
           onScroll={(e) => {
             onScrollPositionChange?.({ x: e.currentTarget.scrollLeft, y: e.currentTarget.scrollTop });
