@@ -16,6 +16,7 @@
     "@dnd-kit/sortable": "^8.0.0",
     "@emoji-mart/data": "^1.1.2",
     "@emoji-mart/react": "^1.1.1",
+    "@formkit/auto-animate": "^0.8.2",
     "@hookform/resolvers": "^3.3.4",
     "@inf-monkeys/monkeys": "0.0.5",
     "@mdx-js/loader": "^3.0.1",
