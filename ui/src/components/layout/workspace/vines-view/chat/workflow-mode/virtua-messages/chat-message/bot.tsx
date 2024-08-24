@@ -30,16 +30,16 @@ export const VinesBotChatMessage = memo<IVinesBotChatMessageProps>(
     const { copy } = useCopy({ timeout: 500 });
 
     return (
-      <div className={cn('group flex flex-row items-start gap-4', className)}>
+      <div className={cn('group relative flex flex-row items-start gap-4', className)}>
         <VinesIcon size="sm">{botPhoto}</VinesIcon>
 
-        <div className={cn('flex flex-col gap-1', endTime && '-mt-5')}>
+        <div className="flex max-w-[calc(100%-6rem)] flex-col gap-1">
           {endTime && (
-            <span className="text-xs text-gray-400 opacity-0 transition-opacity group-hover:opacity-100">
+            <span className="absolute -mt-5 w-full text-xs text-gray-400 opacity-0 transition-opacity group-hover:opacity-100">
               {endTime}
             </span>
           )}
-          <Card className={cn('mr-12 p-4')}>
+          <Card className="w-full p-4">
             {children}
             {!useSimple && (
               <>

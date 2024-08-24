@@ -12,7 +12,6 @@ import { Card } from '@/components/ui/card.tsx';
 import { JSONValue } from '@/components/ui/code-editor';
 import { VinesHighlighter } from '@/components/ui/highlighter';
 import { VinesLoading } from '@/components/ui/loading';
-import { cn } from '@/utils';
 
 interface IVinesChatMessageProps {
   data: IVinesChatListItem;
@@ -47,11 +46,11 @@ export const ChatMessage = memo<IVinesChatMessageProps>(({ data, isLast = false,
           <AvatarImage className="aspect-auto" src={userPhoto} alt={userName} />
           <AvatarFallback className="rounded-none p-2 text-xs">{userName.substring(0, 2)}</AvatarFallback>
         </Avatar>
-        <div className="-mt-5 ml-12 flex flex-col gap-1">
+        <div className="-mt-5 ml-12 flex min-w-[calc(50%-3rem)] flex-col gap-1">
           <span className="text-end text-xs text-gray-400 opacity-0 transition-opacity group-hover:opacity-100">
             {startTime}
           </span>
-          <Card className={cn('p-4 text-sm', hasInput && 'min-w-80')}>
+          <Card className="p-4 text-sm">
             {hasInput ? (
               <WorkflowInputList
                 inputs={inputs}

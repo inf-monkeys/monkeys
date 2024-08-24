@@ -35,7 +35,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ groupId, mode }) 
   const setContainerHeight = usePageStore((s) => s.setContainerHeight);
   useEffect(() => {
     setContainerWidth(width);
-    setContainerHeight(height - 65);
+    setContainerHeight(height);
   }, [width, height]);
 
   const setPage = usePageStore((s) => s.setPage);
