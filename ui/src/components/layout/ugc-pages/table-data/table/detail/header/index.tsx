@@ -6,9 +6,9 @@ import { Import, Plus, RefreshCwIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { ITableData, SqlKnowledgeBaseCreateType } from '@/apis/table-data/typings';
-import { CreateTable } from '@/components/layout/ugc-pages/table-data/table-detail/header/create-table.tsx';
-import { ImportTableData } from '@/components/layout/ugc-pages/table-data/table-detail/header/import-table-data.tsx';
+import { ITableData, SqlKnowledgeBaseCreateType } from '@/apis/table-data/typings.ts';
+import { CreateTable } from '@/components/layout/ugc-pages/table-data/table/detail/header/create-table.tsx';
+import { ImportTableData } from '@/components/layout/ugc-pages/table-data/table/detail/header/import-table-data.tsx';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
