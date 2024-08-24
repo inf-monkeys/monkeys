@@ -93,7 +93,7 @@ export const ToolsSelector: React.FC<IToolsSelectorProps> = () => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-[50rem]">
+      <DialogContent className="max-w-[51.6rem]">
         <DialogTitle>{t('workspace.flow-view.headless-modal.tool-selector.title')}</DialogTitle>
         <div className="relative flex w-full items-center">
           <Search className="absolute ml-3 size-4 shrink-0 opacity-50" />

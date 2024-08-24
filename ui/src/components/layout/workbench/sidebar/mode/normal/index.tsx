@@ -18,7 +18,7 @@ import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer';
-import { cn } from '@/utils';
+import { cloneDeep, cn } from '@/utils';
 
 interface IWorkbenchNormalModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
   groupId: string;
@@ -42,7 +42,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     pages: map(pageIds, (pageId) => pagesMap[pageId]).filter(Boolean),
   }))
     .filter((it) => it.pages?.length)
-    .toSorted((a) => (a.isBuiltIn ? -1 : 1));
+    .sort((a) => (a.isBuiltIn ? -1 : 1));
 
   const [currentPage, setCurrentPage] = useLocalStorage<Partial<IWorkbenchViewItemPage>>('vines-ui-workbench-page', {});
 
@@ -56,18 +56,17 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
       const setEmptyOrFirstPage = () => {
         if (pagesLength && groupsLength) {
-          originalGroups
-            .toSorted((a) => (a.isBuiltIn ? 1 : -1))
-            .forEach(({ id, pageIds }) => {
-              if (pageIds.length) {
-                const firstPage = originalPages.find((it) => it.id === pageIds[0]);
-                if (firstPage) {
-                  setCurrentPage(firstPage);
-                  setGroupId(id);
-                  return;
-                }
+          const sortedGroups = cloneDeep(originalGroups).sort((a) => (a.isBuiltIn ? 1 : -1));
+          sortedGroups.forEach(({ id, pageIds }) => {
+            if (pageIds.length) {
+              const firstPage = originalPages.find((it) => it.id === pageIds[0]);
+              if (firstPage) {
+                setCurrentPage(firstPage);
+                setGroupId(id);
+                return;
               }
-            });
+            }
+          });
           return;
         }
 
