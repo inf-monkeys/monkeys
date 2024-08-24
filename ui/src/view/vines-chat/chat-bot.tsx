@@ -18,6 +18,7 @@ import { VinesLoading } from '@/components/ui/loading';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
+import { usePageStore } from '@/store/usePageStore';
 
 interface IVinesChatModeProps {
   multipleChat?: boolean;
@@ -110,12 +111,13 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({
 
   const isEmptyMessages = !messages?.length;
 
+  const workbenchVisible = usePageStore((s) => s.workbenchVisible);
   const { ref: inputRef, height: wrapperHeight } = useElementSize();
   const [inputHeight, setInputHeight] = useState(500);
   useThrottleEffect(
     () => {
       if (!wrapperHeight) return;
-      setInputHeight(wrapperHeight);
+      setInputHeight(wrapperHeight - (workbenchVisible ? 28 : 58));
     },
     [wrapperHeight],
     { wait: 64 },
@@ -147,14 +149,6 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({
                 resend={resend}
                 height={height - inputHeight}
               />
-              {/*<VirtualizedList*/}
-              {/*  data={messages ?? []}*/}
-              {/*  setMessages={setMessages}*/}
-              {/*  userPhoto={userPhoto}*/}
-              {/*  botPhoto={botPhoto}*/}
-              {/*  isLoading={isLoading}*/}
-              {/*  resend={resend}*/}
-              {/*/>*/}
               {isEmptyMessages && (
                 <motion.div
                   key="vines-chat-empty"

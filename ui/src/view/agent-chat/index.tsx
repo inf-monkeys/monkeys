@@ -29,7 +29,7 @@ export const AgentChatView: React.FC = () => {
   useThrottleEffect(
     () => {
       if (!wrapperHeight) return;
-      setHeight(wrapperHeight - 6);
+      setHeight(wrapperHeight - 68);
     },
     [wrapperHeight],
     { wait: 64 },

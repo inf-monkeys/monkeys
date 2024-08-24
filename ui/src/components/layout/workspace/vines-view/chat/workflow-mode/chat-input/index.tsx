@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator.tsx';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { useVinesFlow } from '@/package/vines-flow';
+import { usePageStore } from '@/store/usePageStore';
 
 interface IVinesChatWorkflowModeInputProps {
   isSimple: boolean;
@@ -45,11 +46,13 @@ export const VinesChatWorkflowModeInput: React.FC<IVinesChatWorkflowModeInputPro
     setTimeout(() => void mutate((key) => isArray(key) && key?.[0] === '/api/workflow/executions/search'), 1000);
   });
 
+  const workbenchVisible = usePageStore((s) => s.workbenchVisible);
+
   const { ref: inputRef, height: wrapperHeight } = useElementSize();
   useThrottleEffect(
     () => {
       if (!wrapperHeight) return;
-      setInputHeight(wrapperHeight - 28);
+      setInputHeight(wrapperHeight - (workbenchVisible ? 28 : 58));
     },
     [wrapperHeight],
     { wait: 64 },

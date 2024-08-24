@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx'
 import { Card } from '@/components/ui/card.tsx';
 import { VinesMarkdown } from '@/components/ui/markdown';
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { cn } from '@/utils';
 
 interface IVinesChatMessageProps {
   data: IVinesMessage;
@@ -49,7 +50,7 @@ export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
             <AvatarImage className="aspect-auto" src={userPhoto} alt={isUser ? 'user' : 'assistant'} />
             <AvatarFallback className="rounded-none p-2 text-xs">{isUser ? 'user' : 'assistant'}</AvatarFallback>
           </Avatar>
-          <div className="flex-full flex items-end">
+          <div className="flex-full flex max-w-[calc(100%-5rem)] items-end">
             <MessageToolbar
               className="-mr-3 ml-0"
               setMessageByIndex={setMessageByIndex}
@@ -58,17 +59,20 @@ export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
               messageIndex={index}
             />
             <Card className="p-4 text-sm">
-              <VinesMarkdown>{content}</VinesMarkdown>
+              <VinesMarkdown className="max-w-full">{content}</VinesMarkdown>
             </Card>
           </div>
         </div>
       ) : (
         <div className="group flex flex-row items-start gap-4">
           <VinesIcon size="sm">{botPhoto}</VinesIcon>
-          <div className="flex w-full items-end">
-            <Card className="relative max-w-[calc(100%-3rem)] p-4 text-sm">
+          <div className="flex w-full max-w-[calc(100%-5rem)] items-end">
+            <Card className="relative p-4 text-sm">
               <ToolDisplay data={extra} />
-              <VinesMarkdown className={isLoading && LastItemIndex === index ? 'vines-result-streaming' : ''} allowHtml>
+              <VinesMarkdown
+                className={cn('max-w-full', isLoading && LastItemIndex === index ? 'vines-result-streaming' : '')}
+                allowHtml
+              >
                 {content + (isEmptyMessage ? EMPTY_CONTENT : '')}
               </VinesMarkdown>
             </Card>
