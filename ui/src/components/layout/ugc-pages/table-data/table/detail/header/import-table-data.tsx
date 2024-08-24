@@ -19,7 +19,7 @@ import {
   FormMessage,
 } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input';
-import { Uploader } from 'src/components/ui/uploader';
+import { Uploader } from '@/components/ui/uploader';
 import { MIME_TYPES } from '@/components/ui/uploader/mime-types.ts';
 import { IImportFile, importFileSchema } from '@/schema/table-database/import-file.ts';
 

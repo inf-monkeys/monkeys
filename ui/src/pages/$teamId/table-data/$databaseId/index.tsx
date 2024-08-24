@@ -5,15 +5,15 @@ import { createFileRoute } from '@tanstack/react-router';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronRight, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Virtuoso } from 'react-virtuoso';
+import { TableDatabase } from 'src/components/layout/ugc-pages/table-data/table/detail';
 
 import { useDatabase, useDatabaseTables } from '@/apis/table-data';
-import { TableDatabase } from '@/components/layout/ugc-pages/table-data/table-detail';
-import { TableDetailHeader } from '@/components/layout/ugc-pages/table-data/table-detail/header';
+import { TableDetailHeader } from '@/components/layout/ugc-pages/table-data/table/detail/header';
+import { VirtuaDatabaseTableList } from '@/components/layout/ugc-pages/table-data/table/virtua-sidebar';
 import { Button } from '@/components/ui/button';
 import { VinesLoading } from '@/components/ui/loading';
 import { Separator } from '@/components/ui/separator.tsx';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { Tabs, TabsList } from '@/components/ui/tabs.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn, getI18nContent } from '@/utils';
 
@@ -83,19 +83,7 @@ const TableDataDetail: React.FC = () => {
                 <p className="text-gray-500">{t('common.load.empty')}</p>
               </div>
             ) : height ? (
-              <Virtuoso
-                className="w-full"
-                style={{ height }}
-                data={tableList}
-                itemContent={(_, table) => (
-                  <TabsTrigger
-                    value={table.name}
-                    className="mb-2 h-10 w-full justify-start data-[state=active]:border data-[state=active]:border-input data-[state=active]:font-normal"
-                  >
-                    {table.name}
-                  </TabsTrigger>
-                )}
-              />
+              <VirtuaDatabaseTableList data={tableList} height={height} />
             ) : null}
           </TabsList>
         </motion.div>
