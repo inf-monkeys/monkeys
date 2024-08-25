@@ -95,6 +95,7 @@
     "react-markdown": "^9.0.1",
     "react-qr-code": "^2.0.15",
     "react-resizable-panels": "^2.0.16",
+    "react-virtuoso": "^4.10.1",
     "react-zoom-pan-pinch": "^3.4.4",
     "recharts": "^2.12.7",
     "rehype-katex": "^7.0.0",
