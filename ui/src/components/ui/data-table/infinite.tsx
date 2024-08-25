@@ -1,13 +1,19 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-import { ColumnDef, getCoreRowModel, getSortedRowModel, TableState, useReactTable } from '@tanstack/react-table';
-import { useThrottleEffect } from 'ahooks';
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getSortedRowModel,
+  TableState,
+  useReactTable,
+} from '@tanstack/react-table';
 import { CircleSlash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { TableVirtuoso } from 'react-virtuoso';
 
-import { VirtuaInfiniteTable } from '@/components/ui/data-table/virtua';
 import { VinesLoading } from '@/components/ui/loading';
-import { useElementSize } from '@/hooks/use-resize-observer.ts';
+import { TableCell, TableHead, TableRow } from '@/components/ui/table.tsx';
 import { cn } from '@/utils';
 
 interface IInfiniteScrollingDataTableProps<TData, TValue> {
@@ -17,6 +23,8 @@ interface IInfiniteScrollingDataTableProps<TData, TValue> {
   data: TData[];
   state?: Partial<TableState>;
 
+  increaseViewportBy?: number;
+  loadMore?: () => void;
   loading?: boolean;
 
   tfoot?: React.ReactNode;
@@ -29,6 +37,8 @@ export function InfiniteScrollingDataTable<TData, TValue>({
   data,
   state,
 
+  increaseViewportBy = 200,
+  loadMore,
   loading,
 
   tfoot,
@@ -46,21 +56,41 @@ export function InfiniteScrollingDataTable<TData, TValue>({
   const { rows } = table.getRowModel();
   const hastData = rows.length > 0;
 
-  const { ref, height: wrapperHeight } = useElementSize();
-  const [height, setHeight] = useState(500);
-  useThrottleEffect(
-    () => {
-      if (!wrapperHeight) return;
-      setHeight(wrapperHeight - 42);
-    },
-    [wrapperHeight],
-    { wait: 64 },
-  );
-
   return (
-    <div ref={ref} className={cn('relative overflow-auto rounded-md border', className)}>
+    <div className={cn('relative overflow-auto rounded-md border', className)}>
       {hastData ? (
-        <VirtuaInfiniteTable table={table} rows={rows} height={height} tfoot={tfoot} />
+        <TableVirtuoso
+          data={rows}
+          components={{
+            Table: ({ children, ...props }) => (
+              <table className="w-full caption-bottom text-sm [&>thead]:bg-slate-1 " {...props}>
+                {children}
+                {tfoot}
+              </table>
+            ),
+            TableRow: TableRow,
+          }}
+          endReached={loadMore}
+          increaseViewportBy={increaseViewportBy}
+          fixedHeaderContent={() =>
+            table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id} style={{ width: header.getSize() }}>
+                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))
+          }
+          itemContent={(_index, row) =>
+            row
+              .getVisibleCells()
+              .map((cell) => (
+                <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+              ))
+          }
+        />
       ) : (
         <div className="vines-center size-full flex-col gap-4">
           {loading ? (
