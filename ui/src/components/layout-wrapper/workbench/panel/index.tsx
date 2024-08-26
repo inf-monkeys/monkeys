@@ -5,6 +5,7 @@ import { Outlet } from '@tanstack/react-router';
 import { Bolt } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { TeamSelector } from '@/components/layout/main/sidebar/teams/team-selector';
 import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { VinesSpace } from '@/components/layout-wrapper/space';
 import { SpaceHeader } from '@/components/layout-wrapper/space/header';
@@ -12,6 +13,7 @@ import { ViewGuard } from '@/components/layout-wrapper/view-guard.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { I18nSelector } from '@/components/ui/i18n-selector';
+import { Separator } from '@/components/ui/separator.tsx';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { usePageStore } from '@/store/usePageStore';
@@ -41,6 +43,8 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
           <div className="flex items-center gap-2">
             <VinesDarkMode />
             <I18nSelector />
+            <Separator orientation="vertical" className="mx-2 h-6" />
+            <TeamSelector />
           </div>
         }
         disableSeparator
@@ -61,7 +65,7 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
           <TabsList className="!h-9">
             <TabsTrigger className="py-1 [&[data-state=inactive]>div]:w-0" value="workbench">
               {t('components.layout.main.sidebar.list.workbench.label')}
-              <div className="-mr-1 ml-1.5 overflow-hidden transition-all">
+              <div className="-my-1 -mr-2 ml-1.5 overflow-hidden transition-all">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
