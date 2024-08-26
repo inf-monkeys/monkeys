@@ -11,6 +11,7 @@ import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { IUgcCreateColumnsProps } from '@/components/layout/ugc/typings.ts';
 import { RenderDescription, RenderIcon, RenderTime } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { Tag } from '@/components/ui/tag';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { getI18nContent } from '@/utils';
 
 const columnHelper = createColumnHelper<IAssetItem<IComfyuiModel>>();
@@ -18,6 +19,7 @@ const columnHelper = createColumnHelper<IAssetItem<IComfyuiModel>>();
 interface ICreateImageModelsColumnsProps extends IUgcCreateColumnsProps {
   hooks: {
     navigate: UseNavigateResult<string>;
+    copy: (valueToCopy: any) => void;
   };
 }
 
@@ -79,6 +81,17 @@ export const createImageModelsColumns = ({ hooks }: ICreateImageModelsColumnsPro
   }),
   columnHelper.accessor('sha256', {
     id: 'sha256',
+    cell: ({ getValue }) => {
+      const sha256 = getValue() as string;
+      return (
+        <Tooltip>
+          <TooltipTrigger onClick={() => hooks.copy(sha256)}>
+            {sha256.slice(0, 6)}...{sha256.slice(-6)}
+          </TooltipTrigger>
+          <TooltipContent>{sha256}</TooltipContent>
+        </Tooltip>
+      );
+    },
   }),
   columnHelper.accessor('createdTimestamp', {
     id: 'createdTimestamp',

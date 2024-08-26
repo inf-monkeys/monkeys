@@ -16,10 +16,13 @@ import { OperateArea } from '@/components/layout/ugc-pages/image-models/operate-
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
 import { Tag } from '@/components/ui/tag';
+import { useCopy } from '@/hooks/use-copy.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const ImageModels: React.FC = () => {
   const { t: tHook } = useTranslation();
+
+  const { copy } = useCopy({ timeout: 500 });
 
   const navigate = useNavigate();
 
@@ -35,6 +38,7 @@ export const ImageModels: React.FC = () => {
           createImageModelsColumns({
             hooks: {
               navigate,
+              copy,
             },
           })
         }
