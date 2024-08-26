@@ -279,15 +279,15 @@ export const UgcView = <E extends object>({
             onChange: setFilter,
           }}
         />
-        <div className="relative overflow-hidden">
+        <div className="relative size-full overflow-hidden">
           <AnimatePresence>
             {(isLoading || isNull(displayMode)) && <VinesFullLoading motionKey={`vines-assets-${assetKey}-loading`} />}
           </AnimatePresence>
-          <div className="flex flex-col">
+          <div className="flex size-full flex-col">
             <ScrollArea
               className={cn(
-                'relative  w-full rounded-r-lg px-4 py-2',
-                showPagination ? 'h-[calc(100vh-9.5rem)]' : 'h-[calc(100vh-7.5rem)]',
+                'relative w-full rounded-r-lg px-4 py-2',
+                showPagination ? 'h-[calc(100%-4.5rem)]' : 'h-[calc(100%-2.1rem)]',
               )}
               disabledOverflowMask
             >

@@ -24,6 +24,7 @@ import { Route as TeamIdTextModelStoreIndexImport } from './pages/$teamId/text-m
 import { Route as TeamIdTextDataIndexImport } from './pages/$teamId/text-data/index'
 import { Route as TeamIdTextDataStoreIndexImport } from './pages/$teamId/text-data-store/index'
 import { Route as TeamIdTableDataIndexImport } from './pages/$teamId/table-data/index'
+import { Route as TeamIdStoreIndexImport } from './pages/$teamId/store/index'
 import { Route as TeamIdSettingsIndexImport } from './pages/$teamId/settings/index'
 import { Route as TeamIdRenderToolsIndexImport } from './pages/$teamId/render-tools/index'
 import { Route as TeamIdMediaDataIndexImport } from './pages/$teamId/media-data/index'
@@ -110,6 +111,11 @@ const TeamIdTextDataStoreIndexRoute = TeamIdTextDataStoreIndexImport.update({
 
 const TeamIdTableDataIndexRoute = TeamIdTableDataIndexImport.update({
   path: '/$teamId/table-data/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TeamIdStoreIndexRoute = TeamIdStoreIndexImport.update({
+  path: '/$teamId/store/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -296,6 +302,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdSettingsIndexImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/store/': {
+      preLoaderRoute: typeof TeamIdStoreIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/table-data/': {
       preLoaderRoute: typeof TeamIdTableDataIndexImport
       parentRoute: typeof rootRoute
@@ -390,6 +400,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdMediaDataIndexRoute,
   TeamIdRenderToolsIndexRoute,
   TeamIdSettingsIndexRoute,
+  TeamIdStoreIndexRoute,
   TeamIdTableDataIndexRoute,
   TeamIdTextDataStoreIndexRoute,
   TeamIdTextDataIndexRoute,
