@@ -33,16 +33,10 @@ const EMPTY_ITEM: IVinesExecutionResultItem = {
 
 interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {
   event$: EventEmitter<void>;
-  miniGap?: boolean;
   workbenchGap?: boolean;
 }
 
-export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
-  className,
-  event$,
-  miniGap,
-  workbenchGap,
-}) => {
+export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ className, event$, workbenchGap }) => {
   const { t } = useTranslation();
 
   const visible = useViewStore((s) => s.visible);
@@ -157,7 +151,10 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
     <Card className={cn('relative', className)}>
       <CardContent className="p-0">
         <VinesImageGroup>
-          <VirtuaExecutionResultGrid data={list} height={containerHeight - 33} />
+          <VirtuaExecutionResultGrid
+            data={list}
+            height={containerHeight - (mode === 'fast' ? 115 : workbenchGap ? 100 : 52)}
+          />
         </VinesImageGroup>
 
         <AnimatePresence>
