@@ -5,11 +5,11 @@ import { createRootRoute, Outlet, ScrollRestoration } from '@tanstack/react-rout
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { WorkspaceIframe } from 'src/components/layout-wrapper/space/iframe';
+import { WorkbenchPanelLayout } from 'src/components/layout-wrapper/workbench/panel';
 
 import { OEM } from '@/components/layout/oem';
 import { AgentLayout } from '@/components/layout-wrapper/agent';
 import { MainWrapper } from '@/components/layout-wrapper/main';
-import { WorkbenchFastModeLayout } from '@/components/layout-wrapper/workbench/fast-mode';
 import { WorkbenchMiniModeLayout } from '@/components/layout-wrapper/workbench/mini-mode';
 import { WorkspaceLayout } from '@/components/layout-wrapper/workspace';
 import { WorkspaceShareView } from '@/components/layout-wrapper/workspace/share-view';
@@ -37,6 +37,7 @@ const RootComponent: React.FC = () => {
     isUseIFrame,
     isUseAgent,
     isUseWorkbench,
+    isUsePanel,
   } = useVinesRoute();
 
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
@@ -71,7 +72,8 @@ const RootComponent: React.FC = () => {
     !isUseShareView &&
     !isUseIFrame &&
     !isUseAgent &&
-    (!['mini', 'fast'].includes(mode) || !isUseWorkbench);
+    !isUsePanel &&
+    (mode !== 'mini' || !isUseWorkbench);
 
   const { teamId } = useVinesTeam();
   const [visible, setVisible] = useState(true);
@@ -85,6 +87,8 @@ const RootComponent: React.FC = () => {
     }
     currentTeamId.current = teamId;
   }, [teamId]);
+
+  const layoutId = 'vines-outlet-main-' + routeIds?.join('-');
 
   return (
     <>
@@ -106,13 +110,9 @@ const RootComponent: React.FC = () => {
                 {isUseOutside && <Outlet />}
                 {isUseWorkSpace && <WorkspaceLayout />}
                 {isUseAgent && <AgentLayout />}
-                {isUseWorkbench && (
-                  <>
-                    {mode === 'fast' && <WorkbenchFastModeLayout />}
-                    {mode === 'mini' && <WorkbenchMiniModeLayout />}
-                  </>
-                )}
-                {isUseDefault && <MainWrapper layoutId={'vines-outlet-main-' + routeIds?.join('-')} />}
+                {isUsePanel && <WorkbenchPanelLayout layoutId={layoutId} />}
+                {isUseWorkbench && mode === 'mini' && <WorkbenchMiniModeLayout />}
+                {isUseDefault && <MainWrapper layoutId={layoutId} />}
               </motion.div>
             )}
           </AnimatePresence>

@@ -340,7 +340,8 @@
         "sidebar": {
           "list": {
             "workbench": {
-              "label": "Workbench"
+              "label": "Workbench",
+              "switch": "Switch to the dashboard management"
             },
             "agent": {
               "label": "Agents"
