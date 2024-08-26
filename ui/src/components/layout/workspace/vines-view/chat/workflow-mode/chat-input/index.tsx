@@ -8,7 +8,7 @@ import { isArray } from 'lodash';
 import { AnInput } from '@/components/layout/workspace/vines-view/chat/workflow-mode/chat-input/an-input.tsx';
 import { EmptyInput } from '@/components/layout/workspace/vines-view/chat/workflow-mode/chat-input/empty.tsx';
 import { FormInput } from '@/components/layout/workspace/vines-view/chat/workflow-mode/chat-input/form.tsx';
-import { Separator } from '@/components/ui/separator.tsx';
+import { ResizableHandle, ResizablePanel } from '@/components/ui/resizable.tsx';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { useVinesFlow } from '@/package/vines-flow';
@@ -63,14 +63,16 @@ export const VinesChatWorkflowModeInput: React.FC<IVinesChatWorkflowModeInputPro
 
   return workflowInputLength > 1 ? (
     <>
-      <Separator orientation="vertical" />
-      <FormInput
-        height={height}
-        loading={isExecutionRunning}
-        disabled={disabled}
-        inputs={workflowInput}
-        onClick={handleExecutionWorkflow}
-      />
+      <ResizableHandle className="mx-4" />
+      <ResizablePanel defaultSize={32} minSize={32}>
+        <FormInput
+          height={height}
+          loading={isExecutionRunning}
+          disabled={disabled}
+          inputs={workflowInput}
+          onClick={handleExecutionWorkflow}
+        />
+      </ResizablePanel>
     </>
   ) : (
     <div ref={inputRef}>
