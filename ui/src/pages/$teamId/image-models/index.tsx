@@ -97,11 +97,6 @@ export const ImageModels: React.FC = () => {
             </ImageModelTypeModal>
           </>
         }
-        onItemClick={(item) => {
-          void navigate({
-            to: `/$teamId/image-models/${item.id}`,
-          });
-        }}
       />
     </main>
   );

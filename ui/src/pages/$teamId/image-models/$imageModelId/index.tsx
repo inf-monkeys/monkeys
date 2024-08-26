@@ -12,6 +12,7 @@ import { ImageModelServerRelations } from '@/components/layout/ugc-pages/image-m
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useCopy } from '@/hooks/use-copy.ts';
 
 interface IImageModelDetailProps {}
 
@@ -19,6 +20,7 @@ export const ImageModelDetail: React.FC<IImageModelDetailProps> = () => {
   const { t } = useTranslation();
 
   const navigate = useNavigate();
+  const { copy } = useCopy();
   const { history } = useRouter();
 
   const { imageModelId } = Route.useParams();
@@ -47,6 +49,7 @@ export const ImageModelDetail: React.FC<IImageModelDetailProps> = () => {
         columns={createImageModelsColumns({
           hooks: {
             navigate,
+            copy,
           },
         })}
         data={imageModel}
