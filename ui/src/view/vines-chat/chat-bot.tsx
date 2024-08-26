@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { useDebounceEffect, useLatest } from 'ahooks';
+import { useDebounceEffect, useLatest, useThrottleEffect } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { isEmpty } from 'lodash';
 import { MessageSquareDashed } from 'lucide-react';
@@ -11,18 +11,21 @@ import { IApiKeyStatus } from '@/apis/api-keys/typings.ts';
 import { getVinesToken } from '@/apis/utils.ts';
 import { useChatBotHistory, useWorkflowChatSessions } from '@/apis/workflow/chat';
 import { VinesChatInput } from '@/components/layout/workspace/vines-view/chat/chat-bot/input';
-import { VirtualizedList } from '@/components/layout/workspace/vines-view/chat/chat-bot/messages';
 import { useChat } from '@/components/layout/workspace/vines-view/chat/chat-bot/use-chat.ts';
+import { VirtuaChatBotMessages } from '@/components/layout/workspace/vines-view/chat/chat-bot/virtua-messages';
 import { useVinesUser } from '@/components/router/guard/user.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import { useElementSize } from '@/hooks/use-resize-observer.ts';
+import { usePageStore } from '@/store/usePageStore';
 
 interface IVinesChatModeProps {
   multipleChat?: boolean;
   id: string;
   extraBody?: Record<string, any>;
   botPhoto?: string;
+  height: number;
 }
 
 export const VinesChatMode: React.FC<IVinesChatModeProps> = ({
@@ -30,6 +33,7 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({
   id,
   extraBody,
   botPhoto = 'emoji:🤖:#f2c1be',
+  height,
 }) => {
   const { t } = useTranslation();
 
@@ -107,6 +111,18 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({
 
   const isEmptyMessages = !messages?.length;
 
+  const workbenchVisible = usePageStore((s) => s.workbenchVisible);
+  const { ref: inputRef, height: wrapperHeight } = useElementSize();
+  const [inputHeight, setInputHeight] = useState(500);
+  useThrottleEffect(
+    () => {
+      if (!wrapperHeight) return;
+      setInputHeight(wrapperHeight - (workbenchVisible ? 28 : 58));
+    },
+    [wrapperHeight],
+    { wait: 64 },
+  );
+
   return (
     <>
       <div className="size-full flex-1">
@@ -124,13 +140,14 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2, delay: 0.15 }}
             >
-              <VirtualizedList
+              <VirtuaChatBotMessages
                 data={messages ?? []}
                 setMessages={setMessages}
                 userPhoto={userPhoto}
                 botPhoto={botPhoto}
                 isLoading={isLoading}
                 resend={resend}
+                height={height - inputHeight}
               />
               {isEmptyMessages && (
                 <motion.div
@@ -150,7 +167,7 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({
           )}
         </AnimatePresence>
       </div>
-      <div className="z-20">
+      <div ref={inputRef} className="z-20">
         <VinesChatInput
           chatId={chatId}
           id={id}

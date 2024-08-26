@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Link, useParams } from '@tanstack/react-router';
+import { Link } from '@tanstack/react-router';
 
 import { LogIn } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { getVinesToken } from '@/apis/utils.ts';
 import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
 import { UserCard } from '@/components/layout-wrapper/space/header/expand/user-card.tsx';
+import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import useUrlState from '@/hooks/use-url-state.ts';
@@ -21,7 +22,7 @@ interface ISpaceHeaderProps extends React.ComponentPropsWithoutRef<'header'> {
 export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({ children, tail, tailWithAuth }) => {
   const { t } = useTranslation();
 
-  const { teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
+  const { teamId } = useVinesTeam();
 
   const [mode, setMode] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>();
 

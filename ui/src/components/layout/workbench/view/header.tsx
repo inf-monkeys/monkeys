@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useSWRConfig } from 'swr';
-import { Link, useParams } from '@tanstack/react-router';
+import { Link } from '@tanstack/react-router';
 
 import { PinOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { useUpdateGroupPages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
 import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab.tsx';
+import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -26,7 +27,7 @@ interface IWorkbenchViewHeaderProps extends React.ComponentPropsWithoutRef<'div'
 export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page, groupId }) => {
   const { t } = useTranslation();
 
-  const { teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
+  const { teamId } = useVinesTeam();
 
   const { mutate } = useSWRConfig();
   const info = page?.workflow || page?.agent;
@@ -46,7 +47,7 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page,
         loading: t('workspace.wrapper.space.menu.group.update.loading'),
         success: () => {
           void mutate('/api/workflow/pages/pinned').then((it) => {
-            setCurrentPage(it.pages?.[0] ?? {});
+            setCurrentPage((prev) => ({ ...prev, [teamId]: it?.pages?.[0] ?? {} }));
           });
 
           return t('workspace.wrapper.space.menu.group.update.success');

@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
 
+import { useMemoizedFn } from 'ahooks';
 import { CheckIcon, ChevronsUpDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useTeams } from '@/apis/authz/team';
 import { Team } from '@/components/layout/main/sidebar/teams/team-selector/team.tsx';
+import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,8 +22,9 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn } from '@/utils';
+
+const NEED_FORCE_REFRESH = ['text-data', 'table-data', 'image-models'];
 
 export const TeamSelector: React.FC = () => {
   const { t } = useTranslation();
@@ -30,28 +32,32 @@ export const TeamSelector: React.FC = () => {
   const { routeId } = useVinesRoute();
   const navigate = useNavigate({ from: location.pathname });
 
-  const { data: teams } = useTeams();
-  const [teamId, setTeamId] = useLocalStorage<string>('vines-team-id', (teams ?? [])[0]?.id ?? '', false);
-
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    if (!teams || teamId) return;
-    teams.length && setTeamId(teams[0].id);
-  }, [teams]);
-
+  const { teams, teamId, setTeamId } = useVinesTeam();
   const currentTeam = (teams ?? []).find((team) => team.id === teamId);
 
-  const handleSwapTeam = async (id: string) => {
+  const handleSwapTeam = useMemoizedFn(async (id: string) => {
     setTeamId(id);
-    localStorage.removeItem('vines-ui-workbench-page');
-    await navigate({
-      to: routeId?.replace(/.$/, ''),
-      params: {
-        teamId: id,
-      },
-    });
-  };
+
+    const navRouteId = routeId?.replace(/.$/, '');
+    const splitRouteId = navRouteId.split('/').filter(Boolean);
+    if (NEED_FORCE_REFRESH.includes(splitRouteId?.[1])) {
+      await navigate({
+        to: `/${splitRouteId.slice(0, 2).join('/')}`,
+        params: {
+          teamId: id,
+        },
+      });
+    } else {
+      await navigate({
+        to: `${navRouteId}${navRouteId.endsWith('$teamId') ? '/' : ''}`,
+        params: {
+          teamId: id,
+        },
+      });
+    }
+  });
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

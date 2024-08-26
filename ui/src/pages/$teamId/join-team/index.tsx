@@ -7,14 +7,14 @@ import { toast } from 'sonner';
 
 import { acceptTeamInvite, useInviteTeam } from '@/apis/authz/team';
 import { authGuard } from '@/components/router/guard/auth.ts';
+import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
-import { useLocalStorage } from '@/hooks/use-local-storage';
 
 const JoinTeamPage: React.FC = () => {
   const { mutate } = useSWRConfig();
   const navigate = useNavigate();
-  const [teamId] = useLocalStorage<string>('vines-team-id', '', false);
+  const { teamId } = useVinesTeam();
   const { teamId: inviteId } = Route.useParams();
 
   const [loading, setLoading] = useState(false);

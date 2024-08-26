@@ -1,8 +1,11 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { useSWRConfig } from 'swr';
 import { useNavigate } from '@tanstack/react-router';
+
+import { useCreation, useMemoizedFn } from 'ahooks';
+import { isArray } from 'lodash';
 
 import { useTeams } from '@/apis/authz/team';
 import { IVinesTeam } from '@/apis/authz/team/typings.ts';
@@ -18,7 +21,7 @@ export const TeamsGuard: React.FC = () => {
   const hasPayment = (oem?.module || []).includes('payment');
 
   const [token] = useLocalStorage<string>('vines-token', '', false);
-  const [teamId, setTeamId] = useLocalStorage<string>('vines-team-id', '', false);
+  const { teamId } = useVinesTeam();
   const [, setLocalTeams] = useLocalStorage<IVinesTeam[]>('vines-teams', []);
   const { data: teams, mutate: teamsMutate } = useTeams(!!token);
 
@@ -37,7 +40,8 @@ export const TeamsGuard: React.FC = () => {
     setLocalTeams(teams);
     if (!teams.find(({ id }) => id === teamId)) {
       const latestTeamId = teams[0].id;
-      setTeamId(latestTeamId);
+      localStorage.setItem('vines-team-id', latestTeamId);
+      window['vinesTeamId'] = latestTeamId;
       navigate({
         params: {
           teamId: latestTeamId,
@@ -68,18 +72,52 @@ export const TeamsGuard: React.FC = () => {
   return null;
 };
 
+export const getVinesTeamId = () => {
+  const windowTeamId = window['vinesTeamId'];
+  if (!windowTeamId) {
+    const localTeamId = localStorage.getItem('vines-team-id');
+    if (localTeamId) {
+      window['vinesTeamId'] = localTeamId;
+    }
+    return localTeamId;
+  }
+  return windowTeamId;
+};
+
 export const useVinesTeam = () => {
-  const { data: teams } = useTeams();
-  const [teamId] = useLocalStorage<string>('vines-team-id', (teams ?? [])[0]?.id ?? '', false);
+  const [localTeams, setLocalTeams] = useLocalStorage<IVinesTeam[]>('vines-teams', []);
 
-  const team = useMemo(() => (teams ?? []).find((team) => team.id === teamId), [teamId, teams]);
+  const windowTeamId = window['vinesTeamId'];
+  const [localTeamId, setLocalTeamId] = useLocalStorage<string>('vines-team-id', windowTeamId, false);
 
-  const isTeamOwner = (userId: string) => team?.ownerUserId === userId;
+  const teamId = windowTeamId || localTeamId;
+
+  const { data } = useTeams(!teamId && !localTeams.length);
+  useEffect(() => {
+    if (data) {
+      setLocalTeams(data);
+    }
+  }, [data]);
+
+  const teams = data ?? localTeams ?? [];
+  const team = useCreation(
+    () => ((isArray(teams) ? teams : []) ?? [])?.find((team) => team.id === teamId),
+    [teamId, teams],
+  );
+
+  const isTeamOwner = useMemoizedFn((userId: string) => team?.ownerUserId === userId);
+
+  const setTeamId = useMemoizedFn((id: string) => {
+    setLocalTeamId(id);
+    window['vinesTeamId'] = id;
+  });
 
   return {
     team,
     teamId,
     teams,
+    setTeamId,
+    setLocalTeams,
     isTeamOwner,
   };
 };

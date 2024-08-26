@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { forkApplicationFromTemplate } from '@/apis/application-store';
 import { IApplicationStoreItemDetail } from '@/apis/ugc/asset-typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
+import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { VinesIcon } from '@/components/ui/vines-icon';
@@ -24,7 +25,7 @@ export const UgcApplicationStoreUseTemplateDialog: React.FC<IUgcApplicationStore
 
   const [visible, setVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const teamId = localStorage.getItem('vines-team-id');
+  const { teamId } = useVinesTeam();
 
   const handleUse = async () => {
     if (!item.id) return;

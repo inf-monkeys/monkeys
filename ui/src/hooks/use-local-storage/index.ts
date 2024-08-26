@@ -37,7 +37,7 @@ export const setLocalStorage = <T>(key: string, value: T) => {
   dispatchLocalStorageEvent(key, value);
 };
 
-export const deleteLocalStorage = (key: string, dispatch = true, value = '') => {
+export const deleteLocalStorage = (key: string, dispatch = true, value?: any) => {
   localStorage.removeItem(key);
   dispatch && dispatchLocalStorageEvent(key, value);
 };

@@ -43,7 +43,7 @@ export const CreateTeam: React.FC<ICreateTeamProps> = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const { data: teams } = useTeams();
-  const [teamId, setTeamId] = useLocalStorage<string>('vines-team-id', (teams ?? [])[0]?.id ?? '', false);
+  const [, setTeamId] = useLocalStorage<string>('vines-team-id', (teams ?? [])[0]?.id ?? '', false);
 
   const handleSubmit = form.handleSubmit(({ name, description, iconUrl }) => {
     setIsLoading(true);
@@ -55,7 +55,7 @@ export const CreateTeam: React.FC<ICreateTeamProps> = () => {
       }),
       {
         loading: t('common.create.loading'),
-        success: (data) => {
+        success: () => {
           const previousData = teams;
           mutateTeams().then((data) => {
             const newData = data;
@@ -65,7 +65,7 @@ export const CreateTeam: React.FC<ICreateTeamProps> = () => {
               .filter((n) => !previousData.map((raw) => raw.id).includes(n));
             if (newTeamIds.length === 0) return;
             setTeamId(newTeamIds[0]);
-            localStorage.removeItem('vines-ui-workbench-page');
+            window['vinesTeamId'] = newTeamIds[0];
             void navigate({
               to: routeId?.replace(/.$/, ''),
               params: {
