@@ -1,7 +1,13 @@
 {
   "system": {
     "network-error": "System maintenance",
-    "empty-auth-methods": "Login is not enabled"
+    "empty-auth-methods": "Login is not enabled",
+
+    "error": {
+      "title": "Something went wrong",
+      "desc": "Please clean all caches and refresh the page to try again",
+      "try-to-fix": "Try to fix"
+    }
   },
   "common": {
     "utils": {
