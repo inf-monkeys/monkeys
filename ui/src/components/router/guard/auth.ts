@@ -76,7 +76,7 @@ export const logout = () => {
   deleteLocalStorage('vines-token', false);
   deleteLocalStorage('vines-account', false);
   deleteLocalStorage('vines-team-id', false);
-  deleteLocalStorage('vines-teams', true, '{"json":[]}');
+  deleteLocalStorage('vines-teams');
 
   return user;
 };

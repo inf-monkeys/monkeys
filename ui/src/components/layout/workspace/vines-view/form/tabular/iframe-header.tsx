@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { IPinPage } from '@/apis/pages/typings.ts';
 import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { useVinesOriginWorkflow } from '@/components/layout-wrapper/workspace/utils.ts';
+import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { I18nSelector } from '@/components/ui/i18n-selector';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -25,6 +26,7 @@ export const IframeHeader: React.FC<IIframeHeaderProps> = ({ historyVisible, set
 
   const { workflow: data } = useVinesOriginWorkflow();
 
+  const { teamId } = useVinesTeam();
   const [page] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
 
   const [{ hidden: routeHidden }] = useUrlState<{ hidden?: string }>();
@@ -33,7 +35,7 @@ export const IframeHeader: React.FC<IIframeHeaderProps> = ({ historyVisible, set
   const moreBtnVisible = !hidden.includes('form-header-more-btn');
   const historyBtnVisible = !hidden.includes('form-header-history-btn');
 
-  const workflow = page?.workflow ?? data;
+  const workflow = page?.[teamId]?.workflow ?? data;
 
   return (
     <>

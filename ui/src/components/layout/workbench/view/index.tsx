@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
 import { WorkbenchViewHeader } from '@/components/layout/workbench/view/header.tsx';
+import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { VinesIFrame } from '@/components/ui/vines-iframe';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
@@ -26,10 +27,13 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ groupId, mode }) 
 
   const { ref, width, height } = useElementSize();
 
+  const { teamId } = useVinesTeam();
   const [page] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
 
   const hasPages = (pages?.length ?? 0) > 0;
-  const hasPage = !!(page?.id && page?.type);
+
+  const teamPage = page?.[teamId] ?? {};
+  const hasPage = !!(teamPage?.id && teamPage?.type);
 
   const setContainerWidth = usePageStore((s) => s.setContainerWidth);
   const setContainerHeight = usePageStore((s) => s.setContainerHeight);
@@ -40,10 +44,10 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ groupId, mode }) 
 
   const setPage = usePageStore((s) => s.setPage);
   useEffect(() => {
-    if (page?.id && page?.customOptions) {
-      setPage({ id: page.id, customOptions: page.customOptions } as any);
+    if (teamPage?.id && teamPage?.customOptions) {
+      setPage({ id: teamPage.id, customOptions: teamPage.customOptions } as any);
     }
-  }, [page]);
+  }, [teamPage]);
 
   return (
     <div ref={ref} className="relative w-full flex-1 overflow-hidden">
@@ -57,14 +61,14 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ groupId, mode }) 
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
           >
-            {mode !== 'mini' && <WorkbenchViewHeader page={page} groupId={groupId} />}
+            {mode !== 'mini' && <WorkbenchViewHeader page={teamPage} groupId={groupId} />}
             <div
               className={cn(
                 'relative size-full overflow-hidden',
                 mode === 'mini' ? 'm-2 size-[calc(100%-1rem)]' : 'max-h-[calc(100%-4rem)]',
               )}
             >
-              <VinesIFrame pages={pages ?? []} page={page} />
+              <VinesIFrame pages={pages ?? []} page={teamPage} />
             </div>
           </motion.div>
         ) : (

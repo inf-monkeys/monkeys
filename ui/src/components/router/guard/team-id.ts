@@ -1,8 +1,8 @@
-import { ParsedLocation, redirect } from '@tanstack/react-router';
+import { ParsedLocation } from '@tanstack/react-router';
 
 import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { authGuard } from '@/components/router/guard/auth.ts';
-import { readLocalStorageValue, setLocalStorage } from '@/hooks/use-local-storage';
+import { readLocalStorageValue } from '@/hooks/use-local-storage';
 import { Route } from '@/pages/$teamId';
 import VinesEvent from '@/utils/events.ts';
 
@@ -23,15 +23,13 @@ export const teamIdGuard = async (props: {
   }
 
   if (!teams.find((it) => it.id === teamId)) {
-    throw redirect({
-      to: '/$teamId',
-      params: {
-        teamId: teams[0].id,
-      },
+    VinesEvent.emit('vines-nav', '/$teamId', {
+      teamId: teams[0].id,
     });
   }
 
-  setLocalStorage('vines-team-id', teamId);
+  localStorage.setItem('vines-team-id', teamId);
+  window['vinesTeamId'] = teamId;
 
   return authGuard({ location });
 };

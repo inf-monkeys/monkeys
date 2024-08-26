@@ -6,14 +6,13 @@ import { motion } from 'framer-motion';
 import { DoorOpen, LogIn } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useTeams } from '@/apis/authz/team';
-import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { isAuthed } from '@/components/router/guard/auth';
+import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { I18nSelector } from '@/components/ui/i18n-selector';
 import { VinesLoading } from '@/components/ui/loading';
-import { clearAllLocalData, useLocalStorage } from '@/hooks/use-local-storage';
+import { clearAllLocalData } from '@/hooks/use-local-storage';
 import VinesEvent from '@/utils/events.ts';
 
 const TeamsIdPage: React.FC = () => {
@@ -21,13 +20,10 @@ const TeamsIdPage: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const { data: teams } = useTeams();
-  const [teamId] = useLocalStorage<string>('vines-team-id', '', false);
-  const [, setLocalTeams] = useLocalStorage<IVinesTeam[]>('vines-teams', []);
+  const { teamId, teams } = useVinesTeam();
 
   useEffect(() => {
-    if (!teams) return;
-    setLocalTeams(teams);
+    if (!teams?.length) return;
     void navigate({
       to: '/$teamId/',
       params: {

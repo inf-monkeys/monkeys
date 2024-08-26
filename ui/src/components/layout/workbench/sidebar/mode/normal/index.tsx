@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { Link } from '@tanstack/react-router';
 
-import { useDebounceEffect, useThrottleEffect } from 'ahooks';
+import { useCreation, useDebounceEffect, useThrottleEffect } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { keyBy, map } from 'lodash';
 import { ChevronRight, Plus } from 'lucide-react';
@@ -34,7 +34,16 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   const [visible, setVisible] = useState(true);
 
   const originalPages = data?.pages ?? [];
-  const originalGroups = data?.groups ?? [];
+  const originalGroups = useCreation(() => {
+    return (
+      data?.groups
+        ?.map((group) => ({
+          ...group,
+          pageIds: group.pageIds.filter((pageId) => originalPages.some((it) => it.id === pageId)),
+        }))
+        ?.filter((group) => group.pageIds.length) ?? []
+    );
+  }, [data?.groups, originalPages]);
 
   const pagesMap = keyBy(originalPages, 'id');
   const lists = map(originalGroups, ({ pageIds, ...attr }) => ({
@@ -48,11 +57,14 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   useDebounceEffect(
     () => {
+      if (!teamId) return;
+
       const pagesLength = originalPages.length;
       const groupsLength = originalGroups.length;
       if (!pagesLength) return;
 
-      const currentPageId = currentPage?.id;
+      const currentTeamPage = currentPage?.[teamId] ?? {};
+      const currentPageId = currentTeamPage?.id;
 
       const setEmptyOrFirstPage = () => {
         if (pagesLength && groupsLength) {
@@ -61,7 +73,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
             if (pageIds.length) {
               const firstPage = originalPages.find((it) => it.id === pageIds[0]);
               if (firstPage) {
-                setCurrentPage(firstPage);
+                setCurrentPage((prev) => ({ ...prev, [teamId]: firstPage }));
                 setGroupId(id);
                 return;
               }
@@ -70,7 +82,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
           return;
         }
 
-        setCurrentPage({});
+        setCurrentPage((prev) => ({ ...prev, [teamId]: {} }));
       };
 
       if (currentPageId) {
@@ -78,7 +90,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
         if (!page) {
           setEmptyOrFirstPage();
         } else {
-          const groupIdWithPage = originalGroups.find((it) => it.id === currentPage?.groupId ?? currentPageId);
+          const groupIdWithPage = originalGroups.find((it) => it.id === (currentTeamPage?.groupId || currentPageId));
           if (groupIdWithPage) {
             setGroupId(groupIdWithPage.id);
           } else {
@@ -89,7 +101,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
         setEmptyOrFirstPage();
       }
     },
-    [currentPage, data],
+    [currentPage?.[teamId], data, teamId],
     { wait: 180 },
   );
 
@@ -120,10 +132,10 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
           <VirtuaWorkbenchViewList
             height={height}
             data={lists}
-            currentPageId={currentPage?.id}
+            currentPageId={currentPage?.[teamId]?.id}
             currentGroupId={groupId}
             onChildClick={(page) => {
-              setCurrentPage(page);
+              setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
               setGroupId(page.groupId);
             }}
           />
