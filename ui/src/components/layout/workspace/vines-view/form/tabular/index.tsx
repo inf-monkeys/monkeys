@@ -21,15 +21,16 @@ interface IVinesTabularProps extends React.ComponentPropsWithoutRef<'div'> {
   isMiniFrame?: boolean;
   event$: EventEmitter<void>;
   minimalGap?: boolean;
+  workbenchGap?: boolean;
 }
 
 export const VinesTabular: React.FC<IVinesTabularProps> = ({
   className,
   style,
   setHistoryVisible,
-  isMiniFrame = false,
   event$,
   minimalGap,
+  workbenchGap,
 }) => {
   const { mutate } = useSWRConfig();
   const { t } = useTranslation();
@@ -54,7 +55,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
         <TabularRender
           formClassName={cn(minimalGap && 'gap-0')}
           inputs={vines.workflowInput}
-          height={containerHeight - 115 - (isMiniFrame ? 64 : 0) - (mode === 'fast' ? 30 : 0)}
+          height={containerHeight - (mode === 'fast' ? 176 : workbenchGap ? 160 : 112)}
           onSubmit={(inputData) => {
             vines.start({ inputData, onlyStart: true }).then((status) => {
               if (status) {

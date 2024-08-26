@@ -75,7 +75,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
               e.preventDefault();
             }}
           >
-            <DropdownMenuLabel>{t('table-data.ugc-view.operate-area.dropdown-label')}</DropdownMenuLabel>
+            <DropdownMenuLabel>{t('ugc-page.table-data.ugc-view.operate-area.dropdown-label')}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <UgcPublishDialog ugcId={item?.id} item={item ?? {}}>
@@ -88,7 +88,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <FileUp size={15} />
                   </DropdownMenuShortcut>
-                  {t('table-data.ugc-view.operate-area.options.publish')}
+                  {t('ugc-page.table-data.ugc-view.operate-area.options.publish')}
                 </DropdownMenuItem>
               </UgcPublishDialog>
               <DropdownMenuSeparator />
