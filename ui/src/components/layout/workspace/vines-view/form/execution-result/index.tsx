@@ -1,27 +1,23 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useState } from 'react';
 
-import { useSetState, useThrottleEffect } from 'ahooks';
+import { useCreation } from 'ahooks';
 import { type EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { AnimatePresence, motion } from 'framer-motion';
 import { History } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { VariableSizeGrid as Grid } from 'react-window';
 
 import { useSearchWorkflowExecutions } from '@/apis/workflow/execution';
 import {
   extractImageUrls,
   extractVideoUrls,
 } from '@/components/layout/workspace/vines-view/_common/data-display/abstract/utils.ts';
-import {
-  IVinesExecutionResultItem,
-  VinesExecutionResultItem,
-} from '@/components/layout/workspace/vines-view/form/execution-result/item.tsx';
+import { VirtuaExecutionResultGrid } from '@/components/layout/workspace/vines-view/form/execution-result/virtua';
+import { IVinesExecutionResultItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item';
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { JSONValue } from '@/components/ui/code-editor';
 import { VinesImageGroup } from '@/components/ui/image';
 import { Label } from '@/components/ui/label.tsx';
 import { VinesLoading } from '@/components/ui/loading';
-import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
@@ -65,7 +61,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   const [refresh, setRefresh] = useState(0);
 
   const executions = result?.data;
-  const list = useMemo(() => {
+  const list = useCreation(() => {
     const result: IVinesExecutionResultItem[][] = [[]];
 
     let rowIndex = 0;
@@ -146,7 +142,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
       }
     }
 
-    return result.flat();
+    return result.filter((it) => it.length).map((it) => it.filter((it) => it.render.type !== 'empty'));
   }, [executions, refresh]);
 
   event$.useSubscription(() => setRefresh((it) => it + 1));
@@ -154,70 +150,14 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
 
   const containerHeight = usePageStore((s) => s.containerHeight);
-  const containerWidth = usePageStore((s) => s.containerWidth);
-
-  const [size, setSize] = useSetState({ width: 512, height: 512 });
-  const [gridVisible, setGridVisible] = useState(true);
-  useThrottleEffect(
-    () => {
-      if (!containerHeight || !containerWidth) return;
-      setSize({
-        width: miniGap ? containerWidth - 25 : containerWidth / 2 - (mode === 'fast' ? 140 : 18),
-        height: containerHeight - (workbenchGap ? (mode === 'fast' ? 72 : 32) : miniGap ? 84 : 50),
-      });
-      setGridVisible(false);
-      setTimeout(() => setGridVisible(true), 16);
-    },
-    [containerHeight, containerWidth, miniGap, workbenchGap, mode],
-    { wait: 64 },
-  );
 
   const totalCount = list.length;
-  const itemSize = size.width / 3;
-
-  const gridRef = useRef<Grid>(null);
 
   return (
     <Card className={cn('relative', className)}>
       <CardContent className="p-0">
         <VinesImageGroup>
-          <ScrollArea
-            className="p-1"
-            onScrollPositionChange={({ y }) => gridRef.current?.scrollTo({ scrollTop: y })}
-            style={{ height: size.height }}
-            disabledOverflowMask
-          >
-            {gridVisible && (
-              <Grid
-                ref={gridRef}
-                className="!overflow-visible"
-                height={size.height}
-                width={size.width}
-                columnCount={3}
-                columnWidth={() => itemSize - (miniGap ? 6 : workbenchGap ? 3 : 6)}
-                rowCount={Math.ceil(totalCount / 3)}
-                rowHeight={() => itemSize}
-                itemData={list}
-              >
-                {({ columnIndex, rowIndex, style: { width, ...style }, data }) => {
-                  const item = data[rowIndex * 3 + columnIndex];
-                  const type = item?.render?.type;
-                  const isRaw = type === 'raw';
-                  if (!item || type === 'empty') return null;
-                  return (
-                    <div
-                      style={{ ...style, width: isRaw ? size.width - (miniGap ? 18 : workbenchGap ? 8 : 16) : width }}
-                    >
-                      <VinesExecutionResultItem
-                        data={item}
-                        height={isRaw ? itemSize : itemSize - (workbenchGap ? 8 : 4)}
-                      />
-                    </div>
-                  );
-                }}
-              </Grid>
-            )}
-          </ScrollArea>
+          <VirtuaExecutionResultGrid data={list} height={containerHeight - 33} />
         </VinesImageGroup>
 
         <AnimatePresence>

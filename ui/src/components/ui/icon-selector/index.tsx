@@ -1,18 +1,16 @@
-import React, { forwardRef, memo, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 
 import { I18nValue } from '@inf-monkeys/monkeys';
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { VirtuosoGrid } from 'react-virtuoso';
 
 import { Button } from '@/components/ui/button';
 import { ICONS_CATEGORIES } from '@/components/ui/icon-selector/consts.ts';
+import { VirtuaIconGrid } from '@/components/ui/icon-selector/virtua';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { LucideIconRender } from '@/components/ui/vines-icon/lucide/render.tsx';
 import { useAppStore } from '@/store/useAppStore';
-import { cn, getI18nContent } from '@/utils';
+import { getI18nContent } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IVinesIconSelectorProps extends Omit<React.ComponentPropsWithoutRef<'div'>, 'onChange'> {
@@ -34,38 +32,46 @@ export const VinesIconSelector: React.FC<IVinesIconSelectorProps> = memo(({ onIc
   const iconMetadata = useAppStore((s) => s.iconMetadata);
 
   const iconCateMap = useMemo(() => {
+    const iconKeys = Object.keys(iconMetadata);
+
     return ICONS_CATEGORIES.reduce(
       (acc, { name: cateName, label }) => {
-        acc[cateName] =
-          cateName === 'all'
-            ? {
-                icons: Object.keys(iconMetadata).reduce((acc2, iconName) => {
-                  if (searchValue != '') {
-                    if (iconName.includes(searchValue) || iconMetadata[iconName].tags.includes(searchValue)) {
-                      acc2.push(iconName);
-                    }
-                  } else {
-                    acc2.push(iconName);
-                  }
-                  return acc2;
-                }, [] as string[]),
-                label,
+        if (cateName === 'all') {
+          const icons = iconKeys.reduce((acc2, iconName) => {
+            if (searchValue != '') {
+              if (iconName.includes(searchValue) || iconMetadata[iconName].tags.includes(searchValue)) {
+                acc2.push(iconName);
               }
-            : {
-                icons: Object.keys(iconMetadata).reduce((acc2, iconName) => {
-                  if (iconMetadata[iconName].categories.includes(cateName)) {
-                    if (searchValue != '') {
-                      if (iconName.includes(searchValue) || iconMetadata[iconName].tags.includes(searchValue)) {
-                        acc2.push(iconName);
-                      }
-                    } else {
-                      acc2.push(iconName);
-                    }
-                  }
-                  return acc2;
-                }, [] as string[]),
-                label,
-              };
+            } else {
+              acc2.push(iconName);
+            }
+            return acc2;
+          }, [] as string[]);
+
+          acc[cateName] = {
+            icons,
+            label,
+          };
+        } else {
+          const icons = iconKeys.reduce((acc2, iconName) => {
+            if (iconMetadata[iconName].categories.includes(cateName)) {
+              if (searchValue != '') {
+                if (iconName.includes(searchValue) || iconMetadata[iconName].tags.includes(searchValue)) {
+                  acc2.push(iconName);
+                }
+              } else {
+                acc2.push(iconName);
+              }
+            }
+            return acc2;
+          }, [] as string[]);
+
+          acc[cateName] = {
+            icons,
+            label,
+          };
+        }
+
         return acc;
       },
       {} as Record<string, { icons: string[]; label: I18nValue }>,
@@ -113,38 +119,9 @@ export const VinesIconSelector: React.FC<IVinesIconSelectorProps> = memo(({ onIc
             />
           </div>
         </div>
-        {Object.keys(iconCateMap).map((cateName) => (
+        {Object.entries(iconCateMap).map(([cateName, { icons }]) => (
           <TabsContent value={cateName} key={cateName}>
-            <VirtuosoGrid
-              style={{ height: 288 }}
-              data={iconCateMap[cateName].icons}
-              components={{
-                // eslint-disable-next-line react/display-name
-                List: forwardRef(({ children, className, ...props }, ref) => (
-                  <div ref={ref} className={cn('flex flex-wrap gap-2', className)} {...props}>
-                    {children}
-                  </div>
-                )),
-                Item: ({ children }) => children,
-              }}
-              itemContent={(_, iconName) => {
-                return (
-                  <Tooltip key={iconName}>
-                    <TooltipTrigger>
-                      <div
-                        className="cursor-pointer rounded-md bg-gray-3 bg-opacity-60 p-3 transition-all hover:bg-opacity-15"
-                        onClick={() => {
-                          onIconSelect?.(iconName);
-                        }}
-                      >
-                        <LucideIconRender src={iconName} className="size-6" />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom">{iconName}</TooltipContent>
-                  </Tooltip>
-                );
-              }}
-            />
+            <VirtuaIconGrid data={icons} rowCount={8} height={288} onIconSelect={onIconSelect} />
           </TabsContent>
         ))}
       </Tabs>

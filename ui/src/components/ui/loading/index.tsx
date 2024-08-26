@@ -116,9 +116,10 @@ interface ILoadingProps {
   motionKey?: React.Key | null;
   immediately?: boolean;
   tips?: string;
+  disableCard?: boolean;
 }
 
-export const VinesFullLoading: React.FC<ILoadingProps> = ({ motionKey, className, immediately, tips }) => {
+export const VinesFullLoading: React.FC<ILoadingProps> = ({ motionKey, disableCard, className, immediately, tips }) => {
   return (
     <motion.div
       key={motionKey}
@@ -128,12 +129,16 @@ export const VinesFullLoading: React.FC<ILoadingProps> = ({ motionKey, className
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
     >
-      <Card className="shadow-md">
-        <CardContent className="vines-center flex-col gap-2 p-4">
-          <VinesLoading immediately />
-          {tips && <span className="text-sm font-bold">{tips}</span>}
-        </CardContent>
-      </Card>
+      {disableCard ? (
+        <VinesLoading immediately />
+      ) : (
+        <Card className="shadow-md">
+          <CardContent className="vines-center flex-col gap-2 p-4">
+            <VinesLoading immediately />
+            {tips && <span className="text-sm font-bold">{tips}</span>}
+          </CardContent>
+        </Card>
+      )}
     </motion.div>
   );
 };

@@ -5,11 +5,11 @@ import useSWR from 'swr';
 import { isEmpty, omit } from 'lodash';
 import { toast } from 'sonner';
 
+import { ChatCompletionLog } from '@/components/layout/workspace/vines-view/chat/chat-bot/virtua-messages/chat-message/tool-display';
+import { getVinesTeamId } from '@/components/router/guard/team.tsx';
 import { nanoIdLowerCase } from '@/utils';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 import { parseOpenAIStream } from '@/utils/openai.ts';
-
-import { ChatCompletionLog } from './messages/chat-message/tool-display';
 
 export interface IVinesMessage {
   id?: string;
@@ -104,7 +104,7 @@ export const useChat = ({
         const finalMultipleChat = multipleChat ?? requestCredentials?.multipleChat;
         const finalChatId = chatIdRef.current;
 
-        const teamId = localStorage.getItem('vines-team-id');
+        const teamId = getVinesTeamId();
 
         const response = await fetch(`/v1/${finalMultipleChat ? 'chat/' : ''}completions`, {
           method: 'POST',

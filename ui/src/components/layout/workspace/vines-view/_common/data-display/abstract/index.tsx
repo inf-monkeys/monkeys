@@ -33,7 +33,7 @@ export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
     const previewDataLength = previewData.length;
     const visibleKey = previewDataLength > 1;
 
-    const isValueEmpty = previewDataLength === 1 && isEmpty(previewData?.[0]?.value);
+    const isValueEmpty = previewDataLength === 1 && isEmpty(previewData?.[0]?.value?.toString());
 
     return (
       <ScrollArea

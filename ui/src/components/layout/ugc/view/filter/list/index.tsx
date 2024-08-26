@@ -1,10 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { ToolCategory } from '@inf-monkeys/monkeys';
-import { useThrottleEffect } from 'ahooks';
-import { ChevronRightIcon, LayoutGrid, Trash } from 'lucide-react';
+import { useCreation, useThrottleEffect } from 'ahooks';
+import { ChevronRightIcon, LayoutGrid } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Virtuoso } from 'react-virtuoso';
 import { toast } from 'sonner';
 
 import {
@@ -19,21 +18,10 @@ import { ACTION_TOOLS_CATEGORIES_MAP } from '@/apis/workflow/typings';
 import { NON_FILTER_TYPE_LIST } from '@/components/layout/ugc/consts.ts';
 import { IUgcCustomProps } from '@/components/layout/ugc/typings.ts';
 import { IUgcViewFilterButtonProps, UgcViewFilterButton } from '@/components/layout/ugc/view/filter/button';
+import { VirtuaUgcFilterList } from '@/components/layout/ugc/view/filter/list/virtua';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog.tsx';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { cn, getI18nContent } from '@/utils';
 
@@ -59,33 +47,33 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
   const { data: assetPublicCategories } = useAssetPublicCategories(assetType, isMarket);
 
   const filterAreaVisible = !NON_FILTER_TYPE_LIST.includes(assetType) && !isMarket;
-  const [current, setCurrent] = useState('all');
+  const [currentRuleId, setCurrentRuleId] = useState('all');
   const [searchValue, setSearchValue] = useState('');
 
   const [activeIndex, setActiveIndex] = useState<string[]>([]);
 
   useEffect(() => {
-    if (current === 'all') {
+    if (currentRuleId === 'all') {
       onChange({});
       return;
     }
     if (assetType === 'tools') {
       onChange({
-        cate: current,
+        cate: currentRuleId,
       });
     } else if (isMarket) {
       onChange({
-        categoryIds: [current],
+        categoryIds: [currentRuleId],
       });
     } else if (assetFilterRules) {
-      const rule = assetFilterRules.find((r) => r.id === current);
+      const rule = assetFilterRules.find((r) => r.id === currentRuleId);
       if (!rule) {
         toast.error(t('components.layout.ugc.view.filter.list.toast.filter-group-not-found'));
       } else {
         onChange(rule.rules);
       }
     }
-  }, [current]);
+  }, [currentRuleId]);
 
   // special for tools
   const toolsData = useMemo(() => {
@@ -132,6 +120,14 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
     { wait: 64 },
   );
 
+  const categoryList = useCreation(() => {
+    return ((isMarket && assetPublicCategories
+      ? assetPublicCategories
+      : searchValue != '' && assetFilterRules
+        ? assetFilterRules.filter((r) => r.name.includes(searchValue))
+        : assetFilterRules || []) ?? []) as Partial<IUgcFilterRules>[];
+  }, [assetFilterRules, searchValue, assetPublicCategories]);
+
   return (
     <div ref={ref} className="flex flex-col gap-2 p-1">
       {filterAreaVisible && (
@@ -147,9 +143,9 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
       <div
         className={cn(
           'group flex h-10 cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
-          current === 'all' ? 'border border-input bg-background text-accent-foreground shadow-sm' : 'p-[1px]',
+          currentRuleId === 'all' ? 'border border-input bg-background text-accent-foreground shadow-sm' : 'p-[1px]',
         )}
-        onClick={() => setCurrent('all')}
+        onClick={() => setCurrentRuleId('all')}
       >
         <div className="flex w-full items-center justify-between px-4 text-sm">
           <div className="flex items-center gap-2">
@@ -208,11 +204,11 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
                             <div
                               className={cn(
                                 'group flex h-10 cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
-                                current === cateName
+                                currentRuleId === cateName
                                   ? 'border border-input bg-background text-accent-foreground shadow-sm'
                                   : 'p-[1px]',
                               )}
-                              onClick={() => setCurrent(cateName)}
+                              onClick={() => setCurrentRuleId(cateName)}
                               key={cateName}
                             >
                               <span className="pl-[calc(1rem+20px+0.5rem)] pr-4 text-sm !font-normal">
@@ -232,88 +228,21 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
             </Accordion>
           ) : (
             (assetFilterRules || assetPublicCategories) && (
-              <Virtuoso
-                className="w-full"
-                style={{ height }}
-                data={
-                  ((isMarket && assetPublicCategories
-                    ? assetPublicCategories
-                    : searchValue != '' && assetFilterRules
-                      ? assetFilterRules.filter((r) => r.name.includes(searchValue))
-                      : assetFilterRules || []) ?? []) as Partial<IUgcFilterRules>[]
-                }
-                itemContent={(_, rule) => {
-                  return (
-                    <div
-                      key={rule.id}
-                      className={cn(
-                        'group flex h-10 cursor-pointer items-center rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
-                        current === rule.id
-                          ? 'border border-input bg-background text-accent-foreground shadow-sm'
-                          : 'p-[1px]',
-                      )}
-                      onClick={() => setCurrent(rule.id!)}
-                    >
-                      <div className="flex w-full items-center justify-between px-4 text-sm">
-                        <span>{rule.name}</span>
-                        {!isMarket && (
-                          <AlertDialog>
-                            <Tooltip content={t('common.utils.delete')}>
-                              <TooltipTrigger asChild>
-                                <AlertDialogTrigger asChild>
-                                  <div
-                                    className="p-2"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                    }}
-                                  >
-                                    <Trash size={14} className="opacity-0 transition-opacity group-hover:opacity-75" />
-                                  </div>
-                                </AlertDialogTrigger>
-                              </TooltipTrigger>
-                            </Tooltip>
-                            <AlertDialogContent
-                              onClick={(e) => {
-                                e.stopPropagation();
-                              }}
-                            >
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  {t('common.dialog.delete-confirm.title', {
-                                    type: t('common.type.filter-group'),
-                                  })}
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  {t('common.dialog.delete-confirm.content', {
-                                    name: rule.name,
-                                    type: t('common.type.filter-group'),
-                                  })}
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>{t('common.utils.cancel')}</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => {
-                                    toast.promise(removeAssetFilterRules(rule.id!), {
-                                      loading: t('common.delete.loading'),
-                                      success: () => {
-                                        void mutateAssetFilterRules();
-                                        (current === rule.id || current === rule.id) && setCurrent('all');
-                                        return t('common.delete.success');
-                                      },
-                                      error: t('common.delete.error'),
-                                    });
-                                  }}
-                                >
-                                  {t('common.utils.confirm')}
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        )}
-                      </div>
-                    </div>
-                  );
+              <VirtuaUgcFilterList
+                data={categoryList}
+                height={height}
+                currentRuleId={currentRuleId}
+                onItemClicked={(ruleId) => setCurrentRuleId(ruleId)}
+                onItemDeleteClicked={(ruleId) => {
+                  toast.promise(removeAssetFilterRules(ruleId), {
+                    loading: t('common.delete.loading'),
+                    success: () => {
+                      void mutateAssetFilterRules();
+                      (currentRuleId === ruleId || currentRuleId === ruleId) && setCurrentRuleId('all');
+                      return t('common.delete.success');
+                    },
+                    error: t('common.delete.error'),
+                  });
                 }}
               />
             )

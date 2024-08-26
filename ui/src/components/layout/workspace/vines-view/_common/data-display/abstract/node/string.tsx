@@ -8,5 +8,9 @@ interface IVinesAbstractStringProps {
 }
 
 export const VinesAbstractString: React.FC<IVinesAbstractStringProps> = ({ children }) => {
-  return <VinesMarkdown allowHtml>{children?.toString()}</VinesMarkdown>;
+  return (
+    <VinesMarkdown className="max-w-full" allowHtml>
+      {children?.toString()}
+    </VinesMarkdown>
+  );
 };

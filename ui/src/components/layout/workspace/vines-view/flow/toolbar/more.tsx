@@ -1,12 +1,13 @@
 import React from 'react';
 
-import { useNavigate, useParams } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 
 import { MoreHorizontal, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { deleteWorkflow } from '@/apis/workflow';
+import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,7 +37,7 @@ export const MoreToolbar: React.FC<IMoreToolbarProps> = () => {
 
   const workflowId = useFlowStore((s) => s.workflowId);
 
-  const { teamId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId' });
+  const { teamId } = useVinesTeam();
   const navigate = useNavigate({ from: Route.fullPath });
 
   const handleDeleteWorkflow = () => {

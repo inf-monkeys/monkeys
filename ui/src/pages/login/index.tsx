@@ -13,6 +13,7 @@ import { AuthMethod } from '@/apis/common/typings.ts';
 import { getVinesToken } from '@/apis/utils.ts';
 import { AuthContainer } from '@/components/layout/login';
 import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
+import { getVinesTeamId } from '@/components/router/guard/team.tsx';
 import { I18nSelector } from '@/components/ui/i18n-selector';
 import { AppLogo } from '@/components/ui/logo';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
@@ -46,7 +47,7 @@ const Login: React.FC = () => {
         if (isEmpty(getVinesToken())) {
           handleOidcLogin();
         } else {
-          const teamId = localStorage.getItem('vines-team-id');
+          const teamId = getVinesTeamId();
           if (isEmpty(teamId)) {
             VinesEvent.emit('vines-nav', '/');
           } else {
