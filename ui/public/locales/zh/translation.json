@@ -1,7 +1,13 @@
 {
   "system": {
     "network-error": "系统维护中",
-    "empty-auth-methods": "系统未启用身份验证"
+    "empty-auth-methods": "系统未启用身份验证",
+
+    "error": {
+      "title": "出现了一些问题",
+      "desc": "请清理所有缓存后刷新页面重试",
+      "try-to-fix": "尝试修复"
+    }
   },
   "common": {
     "utils": {
