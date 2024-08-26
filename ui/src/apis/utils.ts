@@ -1,6 +1,8 @@
 import { t } from 'i18next';
 import { toast } from 'sonner';
 
+import { getVinesTeamId } from '@/components/router/guard/team.tsx';
+
 export interface IVinesHeaderOptions {
   apikey?: string;
   useToast?: boolean;
@@ -9,7 +11,7 @@ export interface IVinesHeaderOptions {
 export const getVinesToken = () => localStorage.getItem('vines-token');
 
 export const vinesHeader = ({ apikey, useToast = false }: IVinesHeaderOptions) => {
-  const teamId = localStorage.getItem('vines-team-id');
+  const teamId = getVinesTeamId();
   if (apikey) {
     return { 'X-Vines-Apikey': apikey, ...(teamId && { 'x-monkeys-teamid': teamId }) };
   }

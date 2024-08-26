@@ -47,7 +47,7 @@ export const TableDatabase: React.FC<ITableDatabaseProps> = ({ database, tableId
 
   const [query, setQuery] = useState<string>('');
 
-  const displayName = database.displayName;
+  const displayName = database?.displayName;
 
   const isEmpty = !data?.length;
   useEffect(() => {

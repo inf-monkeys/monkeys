@@ -4,6 +4,7 @@ import { CircleSlash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useSearchReferenceWorkflows } from '@/apis/ugc';
+import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
 import { VinesIcon } from '@/components/ui/vines-icon';
@@ -19,7 +20,7 @@ export const RelatedApplication: React.FC<IRelatedApplicationProps> = ({ textId 
   const { data, isLoading } = useSearchReferenceWorkflows('knowledge-base', textId);
 
   const isEmpty = !data || data.length === 0;
-  const teamId = localStorage.getItem('vines-team-id');
+  const { teamId } = useVinesTeam();
 
   return isEmpty || isLoading ? (
     <div className="vines-center size-full flex-col">

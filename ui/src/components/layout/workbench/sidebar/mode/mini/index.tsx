@@ -1,11 +1,11 @@
 import React, { useRef, useState } from 'react';
 
 import { useCreation, useDebounceEffect, useThrottleEffect } from 'ahooks';
-import { useTranslation } from 'react-i18next';
 
 import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
 import { VirtuaWorkbenchMiniViewList } from '@/components/layout/workbench/sidebar/mode/mini/virtua';
+import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { VINES_IFRAME_PAGE_TYPE2ID_MAPPER } from '@/components/ui/vines-iframe/consts.ts';
 import { useLocalStorage } from '@/hooks/use-local-storage';
@@ -15,8 +15,6 @@ import useUrlState from '@/hooks/use-url-state.ts';
 interface IWorkbenchMiniModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> = () => {
-  const { t } = useTranslation();
-
   const { data } = useWorkspacePages();
 
   const [{ sidebarFilter: routeSidebarFilter, sidebarReserve: routeSidebarReserve }] = useUrlState<{
@@ -43,21 +41,24 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
     return data?.pages ?? [];
   }, [routeSidebarFilter, routeSidebarReserve, data?.pages]);
 
+  const { teamId } = useVinesTeam();
   const [currentPage, setCurrentPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
 
   const prevPageRef = useRef<string>();
   useDebounceEffect(
     () => {
-      const currentPageId = currentPage?.id;
+      if (!teamId) return;
+
+      const currentPageId = currentPage?.[teamId]?.id;
 
       if (currentPageId) {
         if (!originalPages?.find((page) => page.id === currentPageId)) {
-          setCurrentPage({});
+          setCurrentPage((prev) => ({ ...prev, [teamId]: {} }));
         }
       } else {
         const page = originalPages.find((it) => it.id !== currentPageId);
         if (page && prevPageRef.current !== page.id) {
-          setCurrentPage(page);
+          setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
           prevPageRef.current = page.id;
         }
       }
@@ -83,8 +84,8 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
         <VirtuaWorkbenchMiniViewList
           data={originalPages}
           height={height}
-          currentPageId={currentPage?.id}
-          onItemClicked={setCurrentPage}
+          currentPageId={currentPage?.[teamId]?.id}
+          onItemClicked={(page) => setCurrentPage((prev) => ({ ...prev, [teamId]: page }))}
         />
       </div>
       <Separator orientation="vertical" />

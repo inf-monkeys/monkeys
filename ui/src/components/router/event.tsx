@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 
 import { useMatches, useNavigate } from '@tanstack/react-router';
 
@@ -25,7 +25,7 @@ export const RouteEvent: React.FC = () => {
     };
   }, [routeId, routeParams]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const handleVinesNav = (to: string, params?: Record<string, any>, search?: Record<string, any>) => {
       if (to === '/login') {
         const metadata = routeMetadata.current;
@@ -39,7 +39,7 @@ export const RouteEvent: React.FC = () => {
         });
       } else {
         return navigate({
-          to,
+          to: to.endsWith('/') && !to.endsWith('$teamId/') ? to.slice(0, -1) : to,
           params: {
             ...routeMetadata.current.params,
             ...params,
