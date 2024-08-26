@@ -85,7 +85,7 @@ export const VinesChatInput: React.FC<IVinesChatInputProps> = ({
   const hasMessages = messages?.length > 0;
 
   return (
-    <div className="space-y-1.5 pb-1">
+    <div className="space-y-1.5 pb-1 pt-2">
       <div className="flex items-center gap-2">
         {hasMessages && (
           <>

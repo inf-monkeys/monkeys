@@ -1,8 +1,8 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { useSWRConfig } from 'swr';
 
-import { useEventEmitter } from 'ahooks';
+import { useEventEmitter, useThrottleEffect } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { isArray } from 'lodash';
 import { RotateCcw, Sparkles, Undo2 } from 'lucide-react';
@@ -11,33 +11,24 @@ import { toast } from 'sonner';
 
 import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
+import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useVinesFlow } from '@/package/vines-flow';
-import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
 interface IVinesTabularProps extends React.ComponentPropsWithoutRef<'div'> {
   setHistoryVisible: React.Dispatch<React.SetStateAction<boolean>>;
   isMiniFrame?: boolean;
   event$: EventEmitter<void>;
-  minimalGap?: boolean;
-  workbenchGap?: boolean;
+  height: number;
 }
 
-export const VinesTabular: React.FC<IVinesTabularProps> = ({
-  className,
-  style,
-  setHistoryVisible,
-  event$,
-  minimalGap,
-  workbenchGap,
-}) => {
+export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, setHistoryVisible, event$, height }) => {
   const { mutate } = useSWRConfig();
   const { t } = useTranslation();
 
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
 
-  const containerHeight = usePageStore((s) => s.containerHeight);
   const { vines } = useVinesFlow();
 
   const submitButton = useRef<HTMLButtonElement>(null);
@@ -49,13 +40,24 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
 
   const isInputNotEmpty = vines.workflowInput.length > 0;
 
+  const { ref: inputRef, height: wrapperHeight } = useElementSize();
+  const [inputHeight, setInputHeight] = useState(500);
+  useThrottleEffect(
+    () => {
+      if (!wrapperHeight) return;
+      setInputHeight(wrapperHeight + 8);
+    },
+    [wrapperHeight],
+    { wait: 64 },
+  );
+
   return (
     <div className={cn('flex flex-col pr-6', className)} style={style}>
       <div className="flex-1">
         <TabularRender
-          formClassName={cn(minimalGap && 'gap-0')}
+          formClassName={cn(mode === 'mini' && 'gap-0')}
           inputs={vines.workflowInput}
-          height={containerHeight - (mode === 'fast' ? 176 : workbenchGap ? 160 : 112)}
+          height={height - inputHeight}
           onSubmit={(inputData) => {
             vines.start({ inputData, onlyStart: true }).then((status) => {
               if (status) {
@@ -81,7 +83,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({
           <Button ref={submitButton} className="hidden" type="submit" />
         </TabularRender>
       </div>
-      <div className="flex gap-2">
+      <div ref={inputRef} className="flex gap-2">
         {isInputNotEmpty && (
           <div className="flex flex-col gap-1">
             <Button

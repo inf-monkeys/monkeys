@@ -18,7 +18,6 @@ import { VinesLoading } from '@/components/ui/loading';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
-import { usePageStore } from '@/store/usePageStore';
 
 interface IVinesChatModeProps {
   multipleChat?: boolean;
@@ -111,13 +110,12 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({
 
   const isEmptyMessages = !messages?.length;
 
-  const workbenchVisible = usePageStore((s) => s.workbenchVisible);
   const { ref: inputRef, height: wrapperHeight } = useElementSize();
   const [inputHeight, setInputHeight] = useState(500);
   useThrottleEffect(
     () => {
       if (!wrapperHeight) return;
-      setInputHeight(wrapperHeight - (workbenchVisible ? 28 : 58));
+      setInputHeight(wrapperHeight);
     },
     [wrapperHeight],
     { wait: 64 },

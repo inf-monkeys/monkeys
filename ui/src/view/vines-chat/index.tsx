@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next';
 import { ChatSidebar } from '@/components/layout/workspace/vines-view/chat/sidebar';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
@@ -18,8 +17,6 @@ import { VinesWorkflowMode } from '@/view/vines-chat/workflow-mode.tsx';
 
 export const VinesChatView: React.FC = () => {
   const { t } = useTranslation();
-
-  const { ref, height } = useElementSize();
 
   const { vines } = useVinesFlow();
 
@@ -36,8 +33,6 @@ export const VinesChatView: React.FC = () => {
   const useOpenAIInterface = vines.usedOpenAIInterface();
   const openAIInterfaceEnabled = useOpenAIInterface.enable;
 
-  const finalHeight = height - 68;
-
   const extraBody = reduce(
     vines.workflowInput.filter((it) => it.default !== void 0 && !['stream', 'messages'].includes(it.name)),
     function (acc, curr) {
@@ -49,8 +44,10 @@ export const VinesChatView: React.FC = () => {
 
   const [sidebarVisible, setSidebarVisible] = useState(!workbenchVisible);
 
+  const containerHeight = usePageStore((s) => s.containerHeight);
+
   return (
-    <div ref={ref} className={cn('relative flex h-full max-h-full p-6', workbenchVisible && 'p-0 pl-4')}>
+    <div className={cn('relative flex h-full max-h-full p-6', workbenchVisible && 'p-0 pl-4')}>
       <motion.div
         key="vines-view-chat"
         className={cn(
@@ -69,10 +66,10 @@ export const VinesChatView: React.FC = () => {
             id={workflowId}
             extraBody={extraBody}
             botPhoto={vines.workflowIcon}
-            height={finalHeight}
+            height={containerHeight}
           />
         ) : (
-          <VinesWorkflowMode height={finalHeight} disabled={disabled} />
+          <VinesWorkflowMode height={containerHeight - (workbenchVisible ? 36 : 48)} disabled={disabled} />
         )}
       </motion.div>
 

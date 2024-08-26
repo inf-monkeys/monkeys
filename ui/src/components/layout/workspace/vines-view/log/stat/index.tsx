@@ -10,11 +10,7 @@ import { toast } from 'sonner';
 import { exportSearchWorkflowExecutionStats, useMutationSearchWorkflowExecutionStats } from '@/apis/workflow/execution';
 import { VinesLogViewStatChart } from '@/components/layout/workspace/vines-view/log/stat/chart';
 import { VinesLogViewStatFilter } from '@/components/layout/workspace/vines-view/log/stat/filter';
-import {
-  getDayBegin,
-  getDayEnd,
-  getRelativeDate,
-} from '@/components/layout/workspace/vines-view/log/stat/utils.ts';
+import { getDayBegin, getDayEnd, getRelativeDate } from '@/components/layout/workspace/vines-view/log/stat/utils.ts';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -24,19 +20,20 @@ import {
   vinesSearchWorkflowExecutionStatSchema,
 } from '@/schema/workspace/workflow-execution-stat.ts';
 import { useFlowStore } from '@/store/useFlowStore';
-import { usePageStore } from '@/store/usePageStore';
-import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 
-interface IVinesLogViewStatTabProps {}
+interface IVinesLogViewStatTabProps {
+  visible: boolean;
+  workbenchVisible: boolean;
+  containerHeight: number;
+}
 
-export const VinesLogViewStatTab: React.FC<IVinesLogViewStatTabProps> = () => {
+export const VinesLogViewStatTab: React.FC<IVinesLogViewStatTabProps> = ({
+  visible,
+  workbenchVisible,
+  containerHeight,
+}) => {
   const { t } = useTranslation();
-
-  const visible = useViewStore((s) => s.visible);
-
-  const containerHeight = usePageStore((s) => s.containerHeight);
-  const workbenchVisible = usePageStore((s) => s.workbenchVisible);
 
   const workflowId = useFlowStore((s) => s.workflowId);
 
@@ -84,8 +81,6 @@ export const VinesLogViewStatTab: React.FC<IVinesLogViewStatTabProps> = () => {
     }
   };
 
-  const finalHeight = containerHeight - 52 - 40;
-
   const handleDownload = () => {
     if (!workflowId) {
       toast.warning('common.toast.loading');
@@ -119,7 +114,7 @@ export const VinesLogViewStatTab: React.FC<IVinesLogViewStatTabProps> = () => {
           transition: { duration: 0.2 },
         }}
       >
-        <ScrollArea style={{ height: finalHeight }}>
+        <ScrollArea style={{ height: containerHeight }}>
           <div className="flex flex-col gap-2">
             <VinesLogViewStatFilter form={form} handleSubmit={handleSubmit} isMutating={isMutating} />
             <Button onClick={handleDownload} variant="outline" className="mx-2 flex-1" disabled={isMutating}>
@@ -128,7 +123,7 @@ export const VinesLogViewStatTab: React.FC<IVinesLogViewStatTabProps> = () => {
           </div>
         </ScrollArea>
       </motion.div>
-      <Separator orientation="vertical" className="vines-center mx-4">
+      <Separator orientation="vertical" className="vines-center mx-4" style={{ height: containerHeight }}>
         <Tooltip>
           <TooltipTrigger asChild>
             <div
@@ -142,7 +137,7 @@ export const VinesLogViewStatTab: React.FC<IVinesLogViewStatTabProps> = () => {
         </Tooltip>
       </Separator>
       <div className="h-full flex-1">
-        <ScrollArea className="pr-1 [&>div>div]:h-full" style={{ height: finalHeight }}>
+        <ScrollArea className="pr-1 [&>div>div]:h-full" style={{ height: containerHeight }} disabledOverflowMask>
           <div className="mx-4 flex flex-col gap-3">
             <VinesLogViewStatChart
               handleSubmit={handleSubmit}

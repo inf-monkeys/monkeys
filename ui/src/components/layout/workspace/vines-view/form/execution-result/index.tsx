@@ -18,9 +18,7 @@ import { JSONValue } from '@/components/ui/code-editor';
 import { VinesImageGroup } from '@/components/ui/image';
 import { Label } from '@/components/ui/label.tsx';
 import { VinesLoading } from '@/components/ui/loading';
-import useUrlState from '@/hooks/use-url-state.ts';
 import { useFlowStore } from '@/store/useFlowStore';
-import { usePageStore } from '@/store/usePageStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 import { flattenKeys } from '@/utils/flat.ts';
@@ -33,10 +31,10 @@ const EMPTY_ITEM: IVinesExecutionResultItem = {
 
 interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {
   event$: EventEmitter<void>;
-  workbenchGap?: boolean;
+  height: number;
 }
 
-export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ className, event$, workbenchGap }) => {
+export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ className, event$, height }) => {
   const { t } = useTranslation();
 
   const visible = useViewStore((s) => s.visible);
@@ -141,20 +139,13 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
 
   event$.useSubscription(() => setRefresh((it) => it + 1));
 
-  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
-
-  const containerHeight = usePageStore((s) => s.containerHeight);
-
   const totalCount = list.length;
 
   return (
     <Card className={cn('relative', className)}>
       <CardContent className="p-0">
         <VinesImageGroup>
-          <VirtuaExecutionResultGrid
-            data={list}
-            height={containerHeight - (mode === 'fast' ? 115 : workbenchGap ? 100 : 52)}
-          />
+          <VirtuaExecutionResultGrid data={list} height={height} />
         </VinesImageGroup>
 
         <AnimatePresence>
