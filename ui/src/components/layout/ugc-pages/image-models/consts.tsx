@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { UseNavigateResult } from '@tanstack/react-router';
+import { Link, UseNavigateResult } from '@tanstack/react-router';
 
 import { I18nValue } from '@inf-monkeys/monkeys';
 import { createColumnHelper } from '@tanstack/react-table';
@@ -31,18 +31,13 @@ export const createImageModelsColumns = ({ hooks }: ICreateImageModelsColumnsPro
   }),
   columnHelper.accessor('displayName', {
     id: 'title',
-    cell: ({ getValue }) => (
-      <span
+    cell: ({ getValue, row }) => (
+      <Link
         className="hover:text-primary-500 cursor-pointer transition-colors"
-        onClick={() => {
-          void hooks.navigate({
-            // @ts-ignore
-            to: `/$teamId/image-models/${row.original.id}`,
-          });
-        }}
+        to={`/$teamId/image-models/${row.original.id}`}
       >
         {getI18nContent(getValue() as string | I18nValue)}
-      </span>
+      </Link>
     ),
   }),
   columnHelper.accessor('description', {

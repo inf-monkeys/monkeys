@@ -2,7 +2,6 @@
   "system": {
     "network-error": "System maintenance",
     "empty-auth-methods": "Login is not enabled",
-
     "error": {
       "title": "Something went wrong",
       "desc": "Please clean all caches and refresh the page to try again",
@@ -1474,7 +1473,12 @@
         "operate-area": {
           "dropdown-label": "Operations",
           "options": {
-            "publish": "Publish to Market"
+            "edit-info": "Edit Info"
+          },
+          "info-editor": {
+            "title": "Image Model Information",
+            "info-updated": "Image model information has been updated",
+            "info-update-failed": "Image model information update failure"
           }
         }
       },
@@ -3117,6 +3121,19 @@
       }
     },
     "comfyui-model": {
+      "form": {
+        "icon-url": {
+          "label": "Thumbnail"
+        },
+        "display-name": {
+          "label": "Display Name",
+          "placeholder": "Please enter display name"
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Please enter description"
+        }
+      },
       "table": {
         "columns": {
           "path": {

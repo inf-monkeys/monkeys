@@ -2,7 +2,6 @@
   "system": {
     "network-error": "系统维护中",
     "empty-auth-methods": "系统未启用身份验证",
-
     "error": {
       "title": "出现了一些问题",
       "desc": "请清理所有缓存后刷新页面重试",
@@ -1473,7 +1472,12 @@
         "operate-area": {
           "dropdown-label": "图像模型操作",
           "options": {
-            "publish": "发布到市场"
+            "edit-info": "编辑信息"
+          },
+          "info-editor": {
+            "title": "图像模型信息",
+            "info-updated": "图像模型信息已更新",
+            "info-update-failed": "图像模型信息更新失败"
           }
         }
       },
@@ -3146,6 +3150,19 @@
       }
     },
     "comfyui-model": {
+      "form": {
+        "icon-url": {
+          "label": "缩略图"
+        },
+        "display-name": {
+          "label": "显示名称",
+          "placeholder": "请输入显示名称"
+        },
+        "description": {
+          "label": "描述",
+          "placeholder": "请输入描述"
+        }
+      },
       "table": {
         "columns": {
           "path": {
