@@ -19,16 +19,20 @@ import {
   IVinesSearchWorkflowExecutionsParams,
   vinesSearchWorkflowExecutionsSchema,
 } from '@/schema/workspace/workflow-execution.ts';
-import { usePageStore } from '@/store/usePageStore';
-import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 
-export const VinesLogViewLogTab: React.FC = () => {
-  const { t } = useTranslation();
+interface IVinesLogViewLogTabProps {
+  visible: boolean;
+  workbenchVisible: boolean;
+  containerHeight: number;
+}
 
-  const visible = useViewStore((s) => s.visible);
-  const containerHeight = usePageStore((s) => s.containerHeight);
-  const workbenchVisible = usePageStore((s) => s.workbenchVisible);
+export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
+  visible,
+  workbenchVisible,
+  containerHeight,
+}) => {
+  const { t } = useTranslation();
 
   const { vines } = useVinesFlow();
 
@@ -96,8 +100,6 @@ export const VinesLogViewLogTab: React.FC = () => {
     }
   }, [vines.workflowId, visible]);
 
-  const finalHeight = containerHeight - 52 - 40;
-
   return (
     <div className="relative flex h-full max-h-full">
       <motion.div
@@ -108,11 +110,11 @@ export const VinesLogViewLogTab: React.FC = () => {
           transition: { duration: 0.2 },
         }}
       >
-        <ScrollArea style={{ height: finalHeight }}>
+        <ScrollArea style={{ height: containerHeight }}>
           <VinesLogViewLogFilter form={form} handleSubmit={handleSubmit} isMutating={isMutating} />
         </ScrollArea>
       </motion.div>
-      <Separator orientation="vertical" className="vines-center mx-4">
+      <Separator orientation="vertical" className="vines-center mx-4" style={{ height: containerHeight }}>
         <Tooltip>
           <TooltipTrigger asChild>
             <div
@@ -131,7 +133,7 @@ export const VinesLogViewLogTab: React.FC = () => {
           handleSubmit={handleSubmit}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          height={finalHeight}
+          height={containerHeight}
         />
       </div>
     </div>

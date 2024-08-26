@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 
+import { useThrottleEffect } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { GitBranchPlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -37,10 +38,17 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ groupId, mode }) 
 
   const setContainerWidth = usePageStore((s) => s.setContainerWidth);
   const setContainerHeight = usePageStore((s) => s.setContainerHeight);
-  useEffect(() => {
-    setContainerWidth(width);
-    setContainerHeight(height);
-  }, [width, height]);
+
+  useThrottleEffect(
+    () => {
+      setContainerWidth(width);
+      if (height) {
+        setContainerHeight(height - (mode === 'mini' ? 16 : 64));
+      }
+    },
+    [width, height, mode],
+    { wait: 64 },
+  );
 
   const setPage = usePageStore((s) => s.setPage);
   useEffect(() => {
