@@ -31,6 +31,9 @@ export const VinesForm: React.FC<IVinesFormProps> = () => {
   const { workflow } = useVinesOriginWorkflow(workflowId);
   const openAIInterfaceEnabled = workflow?.exposeOpenaiCompatibleInterface ?? false;
 
+  const containerHeight = usePageStore((s) => s.containerHeight);
+  const height = containerHeight - (workbenchVisible ? 32 : 48);
+
   const isMiniFrame = mode === 'mini';
 
   return (
@@ -53,10 +56,10 @@ export const VinesForm: React.FC<IVinesFormProps> = () => {
           isMiniFrame={isMiniFrame}
           setHistoryVisible={setHistoryVisible}
           event$={event$}
-          minimalGap={vinesIFrameVisible}
+          height={height}
         />
 
-        <VinesExecutionResult event$={event$} miniGap={isMiniFrame} workbenchGap={workbenchVisible} />
+        <VinesExecutionResult event$={event$} height={height} />
       </div>
       {openAIInterfaceEnabled && (
         <div className="vines-center absolute inset-1 size-full flex-col gap-4 backdrop-blur">

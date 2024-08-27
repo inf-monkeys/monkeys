@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 
-import { useThrottleEffect } from 'ahooks';
 import { ChevronLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -8,7 +7,6 @@ import { useGetAgent } from '@/apis/agents';
 import { ChatSidebar } from '@/components/layout/workspace/vines-view/chat/sidebar';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { useAgentStore } from '@/store/useAgentStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
@@ -16,6 +14,8 @@ import { VinesChatMode } from '@/view/vines-chat/chat-bot.tsx';
 
 export const AgentChatView: React.FC = () => {
   const { t } = useTranslation();
+
+  const containerHeight = usePageStore((s) => s.containerHeight);
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
 
   const [sidebarVisible, setSidebarVisible] = useState(!workbenchVisible);
@@ -24,21 +24,15 @@ export const AgentChatView: React.FC = () => {
 
   const { data: agentData } = useGetAgent(agentId);
 
-  const { ref, height: wrapperHeight } = useElementSize();
-  const [height, setHeight] = useState(500);
-  useThrottleEffect(
-    () => {
-      if (!wrapperHeight) return;
-      setHeight(wrapperHeight - 68);
-    },
-    [wrapperHeight],
-    { wait: 64 },
-  );
-
   return (
     <div className={cn('relative flex h-full max-h-full', workbenchVisible ? 'p-0' : 'p-6 pr-2')}>
-      <div ref={ref} className={cn('flex flex-1 flex-col overflow-hidden', workbenchVisible ? 'p-4' : 'pr-4')}>
-        <VinesChatMode multipleChat id={agentId} botPhoto={agentData?.iconUrl} height={height} />
+      <div className={cn('flex flex-1 flex-col overflow-hidden', workbenchVisible ? 'p-4' : 'pr-4')}>
+        <VinesChatMode
+          multipleChat
+          id={agentId}
+          botPhoto={agentData?.iconUrl}
+          height={containerHeight - (workbenchVisible ? 32 : 48)}
+        />
       </div>
       <div className="group z-10 -mr-4 h-full w-4 after:absolute after:top-0 after:-ml-4 after:h-full after:w-4">
         <Separator

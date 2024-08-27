@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { VinesChatList } from '@/components/layout/workspace/vines-view/chat/workflow-mode';
 import { VinesChatWorkflowModeInput } from '@/components/layout/workspace/vines-view/chat/workflow-mode/chat-input';
 import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
+import { ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable.tsx';
 import { useFlowStore } from '@/store/useFlowStore';
 
 interface IVinesWorkflowModeProps {
@@ -18,16 +19,23 @@ export const VinesWorkflowMode: React.FC<IVinesWorkflowModeProps> = ({ height, d
 
   const [inputHeight, setInputHeight] = useState(0);
 
+  const [direction, setDirection] = useState<'horizontal' | 'vertical'>('vertical');
+
   return (
     <>
-      <VinesChatList workflowId={workflowId} useSimple={isSimple} height={height - inputHeight} />
-      <VinesChatWorkflowModeInput
-        workflowId={workflowId}
-        height={height}
-        setInputHeight={setInputHeight}
-        isSimple={isSimple}
-        disabled={disabled}
-      />
+      <ResizablePanelGroup direction={direction}>
+        <ResizablePanel defaultSize={75} minSize={50}>
+          <VinesChatList workflowId={workflowId} useSimple={isSimple} height={height - inputHeight} />
+        </ResizablePanel>
+        <VinesChatWorkflowModeInput
+          workflowId={workflowId}
+          height={height}
+          setInputHeight={setInputHeight}
+          isSimple={isSimple}
+          disabled={disabled}
+          setDirection={setDirection}
+        />
+      </ResizablePanelGroup>
     </>
   );
 };
