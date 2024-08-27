@@ -19,6 +19,7 @@ import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
 import { cn, getI18nContent } from '@/utils';
+import { FieldImageModel } from '@/components/layout/workspace/vines-view/form/tabular/render/field/image-model.tsx';
 
 interface IVinesFormFieldItemProps extends React.ComponentPropsWithoutRef<'div'> {
   itemClassName?: string;
@@ -127,6 +128,10 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
                   <FieldFile input={it} form={form} value={value} miniMode={miniMode} />
 
                   <FieldOptions input={it} value={value} onChange={onChange} />
+
+                  {typeOptions?.assetType === 'comfyui-model' && (
+                    <FieldImageModel input={it} value={value} onChange={onChange} field={field} />
+                  )}
                 </>
               )}
             </>

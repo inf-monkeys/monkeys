@@ -2813,6 +2813,13 @@
             "empty-action": "选择图片并编辑",
             "re-edit": "重新编辑",
             "clear": "清除"
+          },
+          "image-model": {
+            "placeholder": "请选择图像模型",
+            "command": {
+              "placeholder": "搜索图像模型...",
+              "empty": "找不到图像模型"
+            }
           }
         },
         "detail": {

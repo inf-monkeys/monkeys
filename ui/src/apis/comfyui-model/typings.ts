@@ -32,3 +32,7 @@ export interface IComfyuiModel extends IBaseEntity {
   sha256: string;
   serverRelations: IComfyuiServerRelation[];
 }
+
+export type IComfyuiModelWithOneServer = Omit<IComfyuiModel, 'serverRelations'> & {
+  serverRelation: IComfyuiServerRelation;
+};
