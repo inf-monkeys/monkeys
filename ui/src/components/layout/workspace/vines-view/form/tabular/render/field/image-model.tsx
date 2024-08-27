@@ -83,23 +83,25 @@ export const FieldImageModel: React.FC<IFieldImageModelProps> = ({ input: { type
                       onChange(it.serverRelation.path);
                       setVisible(false);
                     }}
-                    className="flex gap-2"
+                    className="flex justify-between gap-2"
                   >
-                    <Check className={cn('h-4 w-4', it.serverRelation.path === value ? 'opacity-100' : 'opacity-0')} />
-                    <VinesIcon src={it.iconUrl || 'emoji:🍀:#ceefc5'} size="xs" />
-                    <div>
-                      <div className="flex gap-1">
-                        <p>{it.displayName}</p>
-                        {it.serverRelation.type && (
-                          <Tag color="tertiary" size="xs">
-                            {it.serverRelation.type.displayName || it.serverRelation.type.name}
-                          </Tag>
-                        )}
+                    <div className="flex items-center gap-2">
+                      <VinesIcon src={it.iconUrl || 'emoji:🍀:#ceefc5'} size="xs" />
+                      <div>
+                        <div className="flex gap-1">
+                          <p>{it.displayName}</p>
+                          {it.serverRelation.type && (
+                            <Tag color="tertiary" size="xs">
+                              {it.serverRelation.type.displayName || it.serverRelation.type.name}
+                            </Tag>
+                          )}
+                        </div>
+                        <p className="text-xs opacity-70">
+                          {it.description || t('components.layout.ugc.utils.no-description')}
+                        </p>
                       </div>
-                      <p className="text-xs opacity-70">
-                        {it.description || t('components.layout.ugc.utils.no-description')}
-                      </p>
                     </div>
+                    <Check className={cn('h-4 w-4', it.serverRelation.path === value ? 'opacity-100' : 'opacity-0')} />
                   </CommandItem>
                 );
               })}
