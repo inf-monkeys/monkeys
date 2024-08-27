@@ -2814,6 +2814,13 @@
             "empty-action": "Select image and edit mask",
             "re-edit": "Re-edit image mask",
             "clear": "Clear"
+          },
+          "image-model": {
+            "placeholder": "Please select image model",
+            "command": {
+              "placeholder": "Search image model...",
+              "empty": "No image model found"
+            }
           }
         },
         "detail": {

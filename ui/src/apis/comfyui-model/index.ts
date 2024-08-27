@@ -27,6 +27,15 @@ export const useComfyuiModel = (id?: string) =>
     refreshInterval: 600000,
   });
 
+export const useComfyuiModelListByTypeNameAndServerId = (typeName?: string, serverId?: string) =>
+  useSWR<IComfyuiModel[] | undefined>(
+    typeName && serverId ? `/api/comfyui-models/list?typeName=${typeName}&serverId=${serverId}` : null,
+    vinesFetcher(),
+    {
+      refreshInterval: 600000,
+    },
+  );
+
 export const updateComfyuiModel = (modelId: string, model: Partial<IComfyuiModel>) =>
   vinesFetcher<IComfyuiModel, Partial<IComfyuiModel>>({ method: 'PUT', simple: true })(
     `/api/comfyui-models/${modelId}`,
