@@ -32,7 +32,7 @@ export const VinesForm: React.FC<IVinesFormProps> = () => {
   const openAIInterfaceEnabled = workflow?.exposeOpenaiCompatibleInterface ?? false;
 
   const containerHeight = usePageStore((s) => s.containerHeight);
-  const height = containerHeight - (workbenchVisible ? 32 : 48);
+  const height = containerHeight - (vinesIFrameVisible ? 0 : workbenchVisible ? 32 : 48);
 
   const isMiniFrame = mode === 'mini';
 
