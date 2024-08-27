@@ -18,6 +18,7 @@ interface ISpaceHeaderProps extends React.ComponentPropsWithoutRef<'header'> {
   tail?: React.ReactNode;
   tailWithAuth?: React.ReactNode;
   disableSeparator?: boolean;
+  redirect?: 'workbench' | 'panel';
 }
 
 export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
@@ -25,6 +26,7 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
   tail,
   disableSeparator = false,
   tailWithAuth,
+  redirect = 'workbench',
 }) => {
   const { t } = useTranslation();
 
@@ -38,7 +40,7 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
     <header className="flex h-14 w-full items-center justify-between bg-slate-1 px-6 shadow-sm">
       <div className="z-20 flex h-full items-center gap-5">
         <Link
-          to="/$teamId/"
+          to={redirect === 'workbench' ? '/$teamId/workbench' : '/$teamId'}
           params={{ teamId }}
           disabled={!hasToken}
           onClick={() => Object.keys(mode).length && setMode({ mode: 'normal' })}
