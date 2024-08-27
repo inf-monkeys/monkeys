@@ -2396,7 +2396,24 @@
                 "number": "数字{{extra}}",
                 "boolean": "逻辑值{{extra}}",
                 "file": "文件{{extra}}",
-                "workflow": "工作流{{extra}}"
+                "workflow": "工作流{{extra}}",
+                "comfyui-model": "图像模型{{extra}}"
+              },
+              "comfyui-model-server-id": {
+                "label": "ComfyUI 服务",
+                "placeholder": "请选择 ComfyUI 服务",
+                "command": {
+                  "placeholder": "搜索 ComfyUI 服务...",
+                  "empty": "找不到 ComfyUI 服务"
+                }
+              },
+              "comfyui-model-type-name": {
+                "label": "图像模型类型",
+                "placeholder": "请选择图像模型类型",
+                "command": {
+                  "placeholder": "搜索图像模型类型...",
+                  "empty": "找不到图像模型类型"
+                }
               },
               "default": {
                 "label": "默认值",

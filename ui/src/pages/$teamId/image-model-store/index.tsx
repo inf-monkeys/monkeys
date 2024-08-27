@@ -37,7 +37,7 @@ export const ImageModelStore: React.FC = () => {
       <UgcView
         assetKey="image-model-store"
         assetType="sd-model"
-        assetName={tHook('components.layout.main.sidebar.list.store.image-model-store.label')}
+        assetName={tHook('components.layout.main.sidebar.list.store.comfyui-model-store.label')}
         isMarket
         useUgcFetcher={useUgcImageModelStore}
         preloadUgcFetcher={preloadUgcImageModelStore}

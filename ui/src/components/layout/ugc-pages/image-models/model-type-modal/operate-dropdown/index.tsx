@@ -96,12 +96,12 @@ export const ModelTypeOperateDropdown: React.FC<IModelTypeOperateDropdownProps> 
         <AlertDialogHeader>
           <AlertDialogTitle>
             {t('common.dialog.delete-confirm.title', {
-              type: t('common.type.image-model-type'),
+              type: t('common.type.comfyui-model-type'),
             })}
           </AlertDialogTitle>
           <AlertDialogDescription>
             {t('common.dialog.delete-confirm.content-without-name', {
-              type: t('common.type.image-model-type'),
+              type: t('common.type.comfyui-model-type'),
             })}
           </AlertDialogDescription>
         </AlertDialogHeader>

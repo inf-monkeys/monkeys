@@ -2397,7 +2397,24 @@
                 "number": "number {{extra}}",
                 "boolean": "boolean {{extra}}",
                 "file": "file {{extra}}",
-                "workflow": "workflow {{extra}}"
+                "workflow": "workflow {{extra}}",
+                "comfyui-model": "image model {{extra}}"
+              },
+              "comfyui-model-server-id": {
+                "label": "ComfyUI Server",
+                "placeholder": "Please select ComfyUI server",
+                "command": {
+                  "placeholder": "Search ComfyUI server...",
+                  "empty": "No ComfyUI server found"
+                }
+              },
+              "comfyui-model-type-name": {
+                "label": "Image Model Type",
+                "placeholder": "Please select image model type",
+                "command": {
+                  "placeholder": "Search image model type...",
+                  "empty": "No image model type found"
+                }
               },
               "default": {
                 "label": "Default Value",

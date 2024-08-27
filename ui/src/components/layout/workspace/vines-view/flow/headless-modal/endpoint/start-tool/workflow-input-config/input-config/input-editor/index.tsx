@@ -6,6 +6,8 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { FieldAccordion } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion';
+import { FieldImageModelServerSelector } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/comfyui-model/server-selector.tsx';
+import { FieldImageModelTypeSelector } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/comfyui-model/type-selector.tsx';
 import { FieldDefaultValue } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/default-value.tsx';
 import { FieldDisplayName } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/display-name.tsx';
 import { FieldFile } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/file.tsx';
@@ -90,6 +92,8 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       foldUp: get(currentVariable, 'typeOptions.foldUp', false),
       enableReset: get(currentVariable, 'typeOptions.enableReset', false),
       singleColumn: get(currentVariable, 'typeOptions.singleColumn', false),
+      comfyuiModelServerId: get(currentVariable, 'typeOptions.comfyuiModelServerId', undefined),
+      comfyuiModelTypeName: get(currentVariable, 'typeOptions.comfyuiModelTypeName', undefined),
     };
 
     form.reset(defaultValues);
@@ -110,6 +114,8 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       foldUp,
       enableReset,
       singleColumn,
+      comfyuiModelServerId,
+      comfyuiModelTypeName,
     } = pick(data, [
       'multipleValues',
       'assetType',
@@ -124,6 +130,8 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       'foldUp',
       'enableReset',
       'singleColumn',
+      'comfyuiModelServerId',
+      'comfyuiModelTypeName',
     ]);
 
     const finalVariable = omit(data, [
@@ -140,6 +148,8 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       'foldUp',
       'enableReset',
       'singleColumn',
+      'comfyuiModelServerId',
+      'comfyuiModelTypeName',
     ]);
 
     const setOption = (key: string, value: unknown) => {
@@ -160,6 +170,8 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
     setOption('foldUp', foldUp);
     setOption('enableReset', enableReset);
     setOption('singleColumn', singleColumn);
+    setOption('comfyuiModelServerId', comfyuiModelServerId);
+    setOption('comfyuiModelTypeName', comfyuiModelTypeName);
 
     if (Default) {
       set(finalVariable, 'default', Default);
@@ -188,7 +200,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
     setOpen(false);
   });
 
-  const { type } = form.getValues();
+  const { type, assetType } = form.getValues();
 
   return (
     <Dialog open={open} onOpenChange={setOpen} modal={false}>
@@ -205,6 +217,14 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
                 <div className="flex w-96 max-w-md flex-col gap-2 px-1">
                   <FieldDisplayName form={form} />
                   <FieldType form={form} forceUpdate={forceUpdate} />
+
+                  {assetType === 'comfyui-model' && (
+                    <>
+                      <FieldImageModelServerSelector form={form} />
+                      <FieldImageModelTypeSelector form={form} />
+                    </>
+                  )}
+
                   <FieldDefaultValue form={form} />
 
                   <FieldAccordion form={form} />
