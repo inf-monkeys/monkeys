@@ -21,6 +21,8 @@ export const VinesChatView: React.FC = () => {
   const { vines } = useVinesFlow();
 
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
+  const vinesIFrameVisible = usePageStore((s) => s.vinesIFrameVisible);
+
   const workflowId = useFlowStore((s) => s.workflowId);
 
   const workflowInput = vines.workflowInput;
@@ -45,7 +47,7 @@ export const VinesChatView: React.FC = () => {
   const [sidebarVisible, setSidebarVisible] = useState(!workbenchVisible);
 
   const containerHeight = usePageStore((s) => s.containerHeight);
-  const height = containerHeight - (workbenchVisible ? 36 : 48);
+  const height = containerHeight - (vinesIFrameVisible ? 70 : workbenchVisible ? 36 : 48);
 
   return (
     <div className={cn('relative flex h-full max-h-full p-6', workbenchVisible && 'p-0 pl-4')}>
