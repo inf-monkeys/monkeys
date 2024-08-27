@@ -101,7 +101,7 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
   }, [vines.workflowId, visible]);
 
   return (
-    <div className="relative flex h-full max-h-full">
+    <div className="relative flex h-full max-h-full items-center">
       <motion.div
         initial={{ width: sidebarVisible ? 320 : 0, paddingRight: sidebarVisible ? 4 : 0 }}
         animate={{

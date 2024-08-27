@@ -15,9 +15,11 @@ export const VinesLogView: React.FC = () => {
 
   const visible = useViewStore((s) => s.visible);
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
+  const vinesIFrameVisible = usePageStore((s) => s.vinesIFrameVisible);
+
   const containerHeight = usePageStore((s) => s.containerHeight);
 
-  const height = containerHeight - (workbenchVisible ? 32 : 48) - 60;
+  const height = containerHeight - (vinesIFrameVisible ? 0 : workbenchVisible ? 32 : 48) - 60;
 
   const [{ tab }, setTab] = useUrlState({ tab: 'log' });
 
