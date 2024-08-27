@@ -13,6 +13,7 @@ import { ViewGuard } from '@/components/layout-wrapper/view-guard.tsx';
 import { WorkflowInfoCard } from '@/components/layout-wrapper/workspace/header/workflow-info-card.tsx';
 import { Button } from '@/components/ui/button';
 import { I18nSelector } from '@/components/ui/i18n-selector';
+import { Separator } from '@/components/ui/separator.tsx';
 import { VINES_VIEW_ID_MAPPER } from '@/components/ui/vines-iframe/consts.ts';
 import { usePageStore } from '@/store/usePageStore';
 import VinesEvent from '@/utils/events.ts';
@@ -47,6 +48,7 @@ export const WorkspaceShareView: React.FC<IWorkspaceShareViewProps> = () => {
   return (
     <ViewGuard className="bg-slate-3">
       <SpaceHeader
+        redirect="panel"
         tail={
           <div className="flex items-center gap-2">
             <VinesDarkMode />
@@ -54,17 +56,20 @@ export const WorkspaceShareView: React.FC<IWorkspaceShareViewProps> = () => {
           </div>
         }
         tailWithAuth={
-          <Button
-            variant="outline"
-            size="small"
-            icon={<PencilRuler />}
-            onClick={() => {
-              VinesEvent.emit('vines-nav', '/$teamId/workspace/$workflowId', { teamId, workflowId });
-              setVinesIFrameVisible(false);
-            }}
-          >
-            {t('workspace.wrapper.settings.common.iframe.entry-edit')}
-          </Button>
+          <>
+            <Separator orientation="vertical" className="h-6" />
+            <Button
+              variant="outline"
+              size="small"
+              icon={<PencilRuler />}
+              onClick={() => {
+                VinesEvent.emit('vines-nav', '/$teamId/workspace/$workflowId', { teamId, workflowId });
+                setVinesIFrameVisible(false);
+              }}
+            >
+              {t('workspace.wrapper.settings.common.iframe.entry-edit')}
+            </Button>
+          </>
         }
       >
         <WorkflowInfoCard />

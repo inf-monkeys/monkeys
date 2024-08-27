@@ -15,7 +15,7 @@ export interface NavItemWithoutLabel {
 
 export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
   {
-    path: '/$teamId/',
+    path: '/$teamId/workbench',
     name: 'workbench',
     icon: <Rocket />,
   },
