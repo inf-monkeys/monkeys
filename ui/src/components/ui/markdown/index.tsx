@@ -68,7 +68,7 @@ export const VinesMarkdown: React.FC<IVinesMarkdownProps> = ({ allowHtml, classN
 
         return (
           <Card className="group/codeblock relative my-2 px-3">
-            <VinesHighlighter className="px-3 [&>pre]:m-2 [&>pre]:text-start" language={language}>
+            <VinesHighlighter className="px-2 [&>pre]:my-2 [&>pre]:text-start [&_*]:!text-sm" language={language}>
               {code}
             </VinesHighlighter>
             <Button
