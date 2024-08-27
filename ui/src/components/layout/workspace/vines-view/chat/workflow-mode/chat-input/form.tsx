@@ -30,13 +30,19 @@ export const FormInput: React.FC<IFormInputProps> = ({ inputs, height, onClick, 
   return (
     <motion.div
       ref={ref}
-      className={cn('w-2/6 max-w-80 overflow-hidden px-3', disabled && 'pointer-events-none opacity-85')}
+      className={cn('w-full overflow-hidden px-3', disabled && 'pointer-events-none opacity-85')}
       animate={{ marginRight: disabled ? -width - 35 : 0 }}
     >
-      <TabularRender inputs={inputs} height={height} onSubmit={onClick} event$={tabular$} miniMode>
+      <TabularRender inputs={inputs} height={height} onSubmit={onClick} event$={tabular$}>
         <div className="flex w-full items-center gap-2">
           {isInputNotEmpty && <ChatInputMoreOperations tabular$={tabular$} />}
-          <Button variant="outline" type="submit" className="line-clamp-1 w-full" loading={loading || disabled} disabled={disabled}>
+          <Button
+            variant="outline"
+            type="submit"
+            className="line-clamp-1 w-full"
+            loading={loading || disabled}
+            disabled={disabled}
+          >
             {t('workspace.chat-view.workflow-mode.execution')}
           </Button>
         </div>

@@ -17,9 +17,15 @@ import VinesEvent from '@/utils/events.ts';
 interface ISpaceHeaderProps extends React.ComponentPropsWithoutRef<'header'> {
   tail?: React.ReactNode;
   tailWithAuth?: React.ReactNode;
+  disableSeparator?: boolean;
 }
 
-export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({ children, tail, tailWithAuth }) => {
+export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
+  children,
+  tail,
+  disableSeparator = false,
+  tailWithAuth,
+}) => {
   const { t } = useTranslation();
 
   const { teamId } = useVinesTeam();
@@ -42,7 +48,7 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({ children, tail, tailW
 
         {children && (
           <>
-            <Separator orientation="vertical" className="h-1/2" />
+            {!disableSeparator && <Separator orientation="vertical" className="h-1/2" />}
             {children}
           </>
         )}

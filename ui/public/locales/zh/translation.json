@@ -335,7 +335,8 @@
         "sidebar": {
           "list": {
             "workbench": {
-              "label": "工作台"
+              "label": "工作台",
+              "switch": "切换到管理台"
             },
             "agent": {
               "label": "智能体"

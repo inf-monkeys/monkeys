@@ -7,12 +7,17 @@ import { VinesLogViewStatTab } from '@/components/layout/workspace/vines-view/lo
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { usePageStore } from '@/store/usePageStore';
+import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 
 export const VinesLogView: React.FC = () => {
   const { t } = useTranslation();
 
+  const visible = useViewStore((s) => s.visible);
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
+  const containerHeight = usePageStore((s) => s.containerHeight);
+
+  const height = containerHeight - (workbenchVisible ? 32 : 48) - 60;
 
   const [{ tab }, setTab] = useUrlState({ tab: 'log' });
 
@@ -21,7 +26,7 @@ export const VinesLogView: React.FC = () => {
       <Tabs
         value={tab}
         onValueChange={(val) => setTab({ tab: val })}
-        className="h-full w-full [&>[role='tabpanel']]:mt-4 [&>[role='tabpanel']]:h-[calc(100vh-11rem)] [&>[role='tabpanel']]:overflow-hidden"
+        className="h-full w-full [&>[role='tabpanel']]:mt-4 [&>[role='tabpanel']]:overflow-hidden"
       >
         <TabsList>
           <TabsTrigger value="log" className="text-xs">
@@ -32,10 +37,10 @@ export const VinesLogView: React.FC = () => {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="log">
-          <VinesLogViewLogTab />
+          <VinesLogViewLogTab visible={visible} containerHeight={height} workbenchVisible={workbenchVisible} />
         </TabsContent>
         <TabsContent value="stat">
-          <VinesLogViewStatTab />
+          <VinesLogViewStatTab visible={visible} containerHeight={height} workbenchVisible={workbenchVisible} />
         </TabsContent>
       </Tabs>
     </main>

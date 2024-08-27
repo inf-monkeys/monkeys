@@ -2,13 +2,13 @@ import React from 'react';
 
 import { useSWRConfig } from 'swr';
 
-import { useMemoizedFn, useThrottleEffect } from 'ahooks';
+import { useCreation, useMemoizedFn, useThrottleEffect } from 'ahooks';
 import { isArray } from 'lodash';
 
 import { AnInput } from '@/components/layout/workspace/vines-view/chat/workflow-mode/chat-input/an-input.tsx';
 import { EmptyInput } from '@/components/layout/workspace/vines-view/chat/workflow-mode/chat-input/empty.tsx';
 import { FormInput } from '@/components/layout/workspace/vines-view/chat/workflow-mode/chat-input/form.tsx';
-import { Separator } from '@/components/ui/separator.tsx';
+import { ResizableHandle, ResizablePanel } from '@/components/ui/resizable.tsx';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { useVinesFlow } from '@/package/vines-flow';
@@ -20,6 +20,8 @@ interface IVinesChatWorkflowModeInputProps {
   height: number;
   disabled: boolean;
   setInputHeight: React.Dispatch<React.SetStateAction<number>>;
+
+  setDirection?: React.Dispatch<React.SetStateAction<'horizontal' | 'vertical'>>;
 }
 
 export const VinesChatWorkflowModeInput: React.FC<IVinesChatWorkflowModeInputProps> = ({
@@ -28,6 +30,7 @@ export const VinesChatWorkflowModeInput: React.FC<IVinesChatWorkflowModeInputPro
   height,
   disabled,
   setInputHeight,
+  setDirection,
 }) => {
   const { mutate } = useSWRConfig();
 
@@ -48,29 +51,39 @@ export const VinesChatWorkflowModeInput: React.FC<IVinesChatWorkflowModeInputPro
 
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
 
+  const workflowInput = vines.workflowInput;
+  const workflowInputLength = workflowInput.length;
+  const isUseTabular = useCreation(() => {
+    setDirection?.(workflowInputLength > 1 ? 'horizontal' : 'vertical');
+
+    return workflowInputLength > 1;
+  }, [workflowInputLength]);
+
   const { ref: inputRef, height: wrapperHeight } = useElementSize();
   useThrottleEffect(
     () => {
-      if (!wrapperHeight) return;
-      setInputHeight(wrapperHeight - (workbenchVisible ? 28 : 58));
+      if (!wrapperHeight || isUseTabular) {
+        setInputHeight(0);
+        return;
+      }
+      setInputHeight(wrapperHeight + (workbenchVisible ? 0 : 6));
     },
-    [wrapperHeight],
+    [wrapperHeight, isUseTabular],
     { wait: 64 },
   );
 
-  const workflowInput = vines.workflowInput;
-  const workflowInputLength = workflowInput.length;
-
   return workflowInputLength > 1 ? (
     <>
-      <Separator orientation="vertical" />
-      <FormInput
-        height={height}
-        loading={isExecutionRunning}
-        disabled={disabled}
-        inputs={workflowInput}
-        onClick={handleExecutionWorkflow}
-      />
+      <ResizableHandle className="mx-4" />
+      <ResizablePanel defaultSize={32} minSize={32}>
+        <FormInput
+          height={height}
+          loading={isExecutionRunning}
+          disabled={disabled}
+          inputs={workflowInput}
+          onClick={handleExecutionWorkflow}
+        />
+      </ResizablePanel>
     </>
   ) : (
     <div ref={inputRef}>

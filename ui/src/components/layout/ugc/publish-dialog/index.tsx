@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { AssetType } from '@inf-monkeys/monkeys';
+import { AssetType, I18nValue } from '@inf-monkeys/monkeys';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -14,7 +14,7 @@ interface IUgcPublishDialogProps {
   item: {
     assetType?: AssetType;
     name?: string;
-    description?: string;
+    description?: string | I18nValue;
     iconUrl?: string;
     prevName?: string;
   };
