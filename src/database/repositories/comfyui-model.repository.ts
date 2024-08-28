@@ -2,6 +2,7 @@ import { ListDto } from '@/common/dto/list.dto';
 import { generateDbId } from '@/common/utils';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import _ from 'lodash';
 import { ILike, In, Repository } from 'typeorm';
 import { ComfyuiModelServerRelationEntity } from '../entities/assets/model/comfyui-model/comfyui-model-server-relation.entity';
 import { ComfyuiModelTypeEntity, CreateComfyuiModelTypeParams, UpdateComfyuiModelTypeParams } from '../entities/assets/model/comfyui-model/comfyui-model-type.entity';
@@ -111,6 +112,47 @@ export class ComfyuiModelRepository {
     entity.isDeleted = true;
     entity.updatedTimestamp = Date.now();
     await this.modelTypeRepository.save(entity);
+  }
+
+  public async updateTypesFromTeamIdToTeamId(originTeamId: string, targetTeamId: string) {
+    const originTypes = await this.listTypes(originTeamId);
+    const targetTypes = await this.listTypes(targetTeamId);
+
+    const originTypeNameList = originTypes.map((t) => t.name);
+
+    // update
+    let toUpdateResultLength = 0;
+    targetTypes
+      .filter((t) => originTypeNameList.includes(t.name))
+      .map((t) => {
+        const newParams = _.pick(originTypes.find((ot) => ot.name === t.name) ?? {}, ['displayName', 'description', 'path']);
+        return {
+          ...t,
+          ...newParams,
+        };
+      })
+      .forEach(async (t) => {
+        await this.updateType(targetTeamId, t.id, t);
+        toUpdateResultLength++;
+      });
+
+    // remove
+    const toRemove = targetTypes.filter((t) => !originTypeNameList.includes(t.name));
+    const toRemoveResult = await this.modelTypeRepository.remove(toRemove);
+
+    // create
+    let toCreateResultLength = 0;
+    const toCreate = originTypes.filter((t) => !targetTeamId.includes(t.name));
+    toCreate.forEach(async (t) => {
+      await this.createType(targetTeamId, t.creatorUserId, _.pick(t, ['name', 'description', 'displayName', 'path']));
+      toCreateResultLength++;
+    });
+
+    return {
+      remove: toRemoveResult.length,
+      update: toUpdateResultLength,
+      create: toCreateResultLength,
+    };
   }
 
   public async listModels(teamId: string, dto: ListDto) {
