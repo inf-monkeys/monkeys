@@ -4,12 +4,14 @@ import { IComfyuiModel, IComfyuiModelType } from '@/apis/comfyui-model/typings.t
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { ICreateComfyuiModelType } from '@/schema/workspace/create-comfyui-model-type.ts';
 
+interface IManualUpdateResult {
+  remove: number;
+  update: number;
+  create: number;
+}
+
 export const manualUpdateModelListFromServer = (serverId: string) =>
-  vinesFetcher<{
-    remove: number;
-    update: number;
-    create: number;
-  }>({ method: 'POST', simple: true })(`/api/comfyui-models/manual-update`, {
+  vinesFetcher<IManualUpdateResult>({ method: 'POST', simple: true })(`/api/comfyui-models/manual-update`, {
     serverId,
   });
 
@@ -21,6 +23,14 @@ export const createComfyuiModelType = (params: ICreateComfyuiModelType) =>
 
 export const deleteComfyuiModelType = (typeId: string) =>
   vinesFetcher({ method: 'DELETE', simple: true })(`/api/comfyui-models/types/${typeId}`);
+
+export const updateComfyuiModelTypeToInternals = () =>
+  vinesFetcher<IManualUpdateResult>({ method: 'POST', simple: true })(`/api/comfyui-models/types/update-to-internals`);
+
+export const updateComfyuiModelTypeFromInternals = () =>
+  vinesFetcher<IManualUpdateResult>({ method: 'POST', simple: true })(
+    `/api/comfyui-models/types/update-from-internals`,
+  );
 
 export const useComfyuiModel = (id?: string) =>
   useSWR<IComfyuiModel | undefined>(id ? `/api/comfyui-models/${id}` : null, vinesFetcher(), {
