@@ -66,7 +66,7 @@ export const ComfyuiServerListOperateDropdown: React.FC<IComfyuiServerListOperat
       loading: t('common.update.loading'),
       success: (data) => {
         mutateModelList();
-        return t('comfyui.comfyui-server.operate.manual-update.success', {
+        return t('comfyui.utils.toast.update-result', {
           ...data,
         });
       },

@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
 
-import { Ellipsis, Plus } from 'lucide-react';
+import { Ellipsis, HardDriveDownload, HardDriveUpload, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useComfyuiModelTypes } from '@/apis/comfyui-model';
+import {
+  updateComfyuiModelTypeFromInternals,
+  updateComfyuiModelTypeToInternals,
+  useComfyuiModelTypes,
+} from '@/apis/comfyui-model';
 import { CreateTypeModal } from '@/components/layout/ugc-pages/image-models/model-type-modal/create-type-modal';
 import { ModelTypeOperateDropdown } from '@/components/layout/ugc-pages/image-models/model-type-modal/operate-dropdown';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
+import { toast } from 'sonner';
 
 interface IImageModelTypeModalProps {
   children?: React.ReactNode;
@@ -19,6 +24,8 @@ export const ImageModelTypeModal: React.FC<IImageModelTypeModalProps> = ({ child
 
   const [open, setOpen] = useState(false);
   const { data, mutate } = useComfyuiModelTypes();
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const rows = [
     {
@@ -42,6 +49,36 @@ export const ImageModelTypeModal: React.FC<IImageModelTypeModalProps> = ({ child
       key: 'operate',
     },
   ];
+
+  const handleUpdateToInternals = () => {
+    setIsLoading(true);
+    toast.promise(updateComfyuiModelTypeToInternals(), {
+      loading: t('common.operate.loading'),
+      success: (data) => {
+        void mutate();
+        return t('comfyui.utils.toast.update-result', {
+          ...data,
+        });
+      },
+      error: t('common.operate.error'),
+      finally: () => setIsLoading(false),
+    });
+  };
+
+  const handleUpdateFromInternals = () => {
+    setIsLoading(true);
+    toast.promise(updateComfyuiModelTypeFromInternals(), {
+      loading: t('common.operate.loading'),
+      success: (data) => {
+        void mutate();
+        return t('comfyui.utils.toast.update-result', {
+          ...data,
+        });
+      },
+      error: t('common.operate.error'),
+      finally: () => setIsLoading(false),
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -81,12 +118,35 @@ export const ImageModelTypeModal: React.FC<IImageModelTypeModalProps> = ({ child
             ))}
           </TableBody>
         </Table>
-        <DialogFooter>
-          <CreateTypeModal mutate={mutate}>
-            <Button variant="outline" size="small" icon={<Plus />}>
-              {t('common.utils.create')}
+        <DialogFooter className="flex w-full justify-between">
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              size="small"
+              icon={<HardDriveDownload />}
+              loading={isLoading}
+              onClick={handleUpdateToInternals}
+            >
+              {t('comfyui.comfyui-model-type.update-to-internals')}
             </Button>
-          </CreateTypeModal>
+            <Button
+              variant="outline"
+              size="small"
+              icon={<HardDriveUpload />}
+              loading={isLoading}
+              onClick={handleUpdateFromInternals}
+            >
+              {t('comfyui.comfyui-model-type.update-from-internals')}
+            </Button>
+          </div>
+          <div className="flex-1" />
+          <div>
+            <CreateTypeModal mutate={mutate}>
+              <Button variant="outline" size="small" icon={<Plus />} loading={isLoading}>
+                {t('common.utils.create')}
+              </Button>
+            </CreateTypeModal>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

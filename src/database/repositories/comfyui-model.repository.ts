@@ -119,10 +119,10 @@ export class ComfyuiModelRepository {
     const targetTypes = await this.listTypes(targetTeamId);
 
     const originTypeNameList = originTypes.map((t) => t.name);
+    const targetTypeNameList = targetTypes.map((t) => t.name);
 
     // update
-    let toUpdateResultLength = 0;
-    targetTypes
+    const toUpdate = targetTypes
       .filter((t) => originTypeNameList.includes(t.name))
       .map((t) => {
         const newParams = _.pick(originTypes.find((ot) => ot.name === t.name) ?? {}, ['displayName', 'description', 'path']);
@@ -130,28 +130,25 @@ export class ComfyuiModelRepository {
           ...t,
           ...newParams,
         };
-      })
-      .forEach(async (t) => {
-        await this.updateType(targetTeamId, t.id, t);
-        toUpdateResultLength++;
       });
+    toUpdate.forEach(async (t) => {
+      await this.updateType(targetTeamId, t.id, t);
+    });
 
     // remove
     const toRemove = targetTypes.filter((t) => !originTypeNameList.includes(t.name));
     const toRemoveResult = await this.modelTypeRepository.remove(toRemove);
 
     // create
-    let toCreateResultLength = 0;
-    const toCreate = originTypes.filter((t) => !targetTeamId.includes(t.name));
+    const toCreate = originTypes.filter((t) => !targetTypeNameList.includes(t.name));
     toCreate.forEach(async (t) => {
       await this.createType(targetTeamId, t.creatorUserId, _.pick(t, ['name', 'description', 'displayName', 'path']));
-      toCreateResultLength++;
     });
 
     return {
       remove: toRemoveResult.length,
-      update: toUpdateResultLength,
-      create: toCreateResultLength,
+      update: toUpdate.length,
+      create: toCreate.length,
     };
   }
 

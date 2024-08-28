@@ -3086,6 +3086,11 @@
     }
   },
   "comfyui": {
+    "utils": {
+      "toast": {
+        "update-result": "更新成功！新增：{{create}}；更新：{{update}}；删除：{{remove}}"
+      }
+    },
     "comfyui-server": {
       "title": "ComfyUI 服务",
       "table": {
@@ -3112,9 +3117,6 @@
         "options": {
           "manual-update": "从服务更新模型列表",
           "delete": "删除 ComfyUI 服务"
-        },
-        "manual-update": {
-          "success": "更新成功！新增：{{create}}；更新：{{update}}；删除：{{remove}}"
         }
       },
       "import-label": "添加 ComfyUI 服务",
@@ -3156,6 +3158,8 @@
           "delete": "删除模型类型"
         }
       },
+      "update-to-internals": "同步到内置类型",
+      "update-from-internals": "从内置类型获取",
       "create-label": "创建模型类型",
       "form": {
         "name": {

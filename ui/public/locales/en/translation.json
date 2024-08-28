@@ -3057,6 +3057,11 @@
     }
   },
   "comfyui": {
+    "utils": {
+      "toast": {
+        "update-result": "Update successful! Create: {{create}}, Update: {{update}}, Remove: {{remove}}"
+      }
+    },
     "comfyui-server": {
       "title": "ComfyUI Server",
       "table": {
@@ -3083,9 +3088,6 @@
         "options": {
           "manual-update": "Update Model List from Server",
           "delete": "Delete ComfyUI Server"
-        },
-        "manual-update": {
-          "success": "Update successful! Create: {{create}}, Update: {{update}}, Remove: {{remove}}"
         }
       },
       "import-label": "Add ComfyUI Server",
@@ -3127,6 +3129,8 @@
           "delete": "Delete Model Type"
         }
       },
+      "update-to-internals": "Update to Internals",
+      "update-from-internals": "Update from Internals",
       "create-label": "Create Model Type",
       "form": {
         "name": {
