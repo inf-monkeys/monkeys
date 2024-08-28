@@ -57,4 +57,22 @@ export class ComfyuiModelController {
       data: await this.service.updateModel(teamId, modelId, body),
     });
   }
+
+  // HACK: 临时业务
+  @Post('update-from-internals')
+  public async updateFromInternals(@Req() req: IRequest) {
+    const { teamId } = req;
+    return new SuccessResponse({
+      data: await this.service.updateModelsFromInternals(teamId),
+    });
+  }
+
+  // HACK: 临时业务
+  @Post('update-to-internals')
+  public async updateToInternals(@Req() req: IRequest) {
+    const { teamId } = req;
+    return new SuccessResponse({
+      data: await this.service.updateModelsToInternals(teamId),
+    });
+  }
 }
