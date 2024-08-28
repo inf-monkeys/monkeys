@@ -3204,6 +3204,13 @@
             "label": "模型类型"
           }
         }
+      },
+      "manage-dropdown": {
+        "label": "模型管理",
+        "options": {
+          "update-to-internals": "同步到内置模型信息",
+          "update-from-internals": "从内置模型信息获取"
+        }
       }
     }
   }

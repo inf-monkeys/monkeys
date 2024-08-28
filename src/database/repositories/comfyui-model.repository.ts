@@ -212,6 +212,44 @@ export class ComfyuiModelRepository {
     });
   }
 
+  public async getModelsByTeamId(teamId: string) {
+    const rawModels = await this.modelRepository.find({
+      where: {
+        teamId,
+        isDeleted: false,
+      },
+      relations: {
+        serverRelations: {
+          server: true,
+        },
+      },
+    });
+    const modelTypes = (
+      await this.modelTypeRepository.find({
+        where: {
+          teamId,
+          isDeleted: false,
+        },
+      })
+    ).sort((a, b) => a.path.split('/').length - b.path.split('/').length);
+
+    const list = rawModels.map((model) => {
+      const { serverRelations } = model;
+      return {
+        ...model,
+        serverRelations: serverRelations
+          ? serverRelations.map((relation) => {
+              return {
+                ...relation,
+                type: modelTypes.find((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
+              };
+            })
+          : undefined,
+      };
+    });
+    return list;
+  }
+
   public async getModelsByServerId(teamId: string, serverId: string) {
     const rawModels = await this.modelRepository.find({
       where: {
@@ -379,5 +417,39 @@ export class ComfyuiModelRepository {
 
   public async saveRelation(relation: ComfyuiModelServerRelationEntity) {
     return await this.relationRepository.save(relation);
+  }
+
+  public async updateModelsFromTeamIdToTeamId(originTeamId: string, targetTeamId: string) {
+    const originModels = await this.getModelsByTeamId(originTeamId);
+    const targetModels = await this.getModelsByTeamId(targetTeamId);
+
+    const originModelSha256List = originModels.map((m) => m.sha256);
+    const targetModelSha256List = targetModels.map((m) => m.sha256);
+
+    // update
+    const toUpdate = targetModels
+      .filter((m) => originModelSha256List.includes(m.sha256))
+      .map((m) => {
+        const newParams = _.pick(originModels.find((om) => om.sha256 === m.sha256) ?? {}, ['displayName', 'description', 'iconUrl']);
+        return {
+          ...m,
+          ...newParams,
+        };
+      });
+    toUpdate.forEach(async (m) => {
+      await this.updateModel(targetTeamId, m.id, m);
+    });
+
+    // create
+    const toCreate = originModels.filter((m) => !targetModelSha256List.includes(m.sha256));
+    toCreate.forEach(async (m) => {
+      await this.createModel(targetTeamId, _.pick(m, ['iconUrl', 'description', 'displayName', 'sha256']));
+    });
+
+    return {
+      remove: 0,
+      update: toUpdate.length,
+      create: toCreate.length,
+    };
   }
 }

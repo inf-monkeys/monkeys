@@ -2,7 +2,7 @@ import React from 'react';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
-import { LibraryBig, Server } from 'lucide-react';
+import { LibraryBig, Package, Server } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ComfyUIServerListModal } from 'src/components/layout/ugc-pages/comfyui/comfyui-server-list';
 
@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Tag } from '@/components/ui/tag';
 import { useCopy } from '@/hooks/use-copy.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
+import { ImageModelManageDropdown } from '@/components/layout/ugc-pages/image-models/model-manage-dropdown';
 
 export const ImageModels: React.FC = () => {
   const { t: tHook } = useTranslation();
@@ -95,6 +96,11 @@ export const ImageModels: React.FC = () => {
                 {tHook('comfyui.comfyui-model-type.title')}
               </Button>
             </ImageModelTypeModal>
+            <ImageModelManageDropdown>
+              <Button variant="outline" size="small" icon={<Package />}>
+                {tHook('comfyui.comfyui-model.manage-dropdown.label')}
+              </Button>
+            </ImageModelManageDropdown>
           </>
         }
       />

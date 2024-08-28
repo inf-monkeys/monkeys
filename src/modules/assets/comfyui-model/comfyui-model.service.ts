@@ -171,4 +171,12 @@ export class ComfyuiModelService {
   public async updateModel(teamId: string, modelId: string, updates: UpdateComfyuiModelParams) {
     return await this.repository.updateModel(teamId, modelId, updates);
   }
+
+  public async updateModelsFromInternals(teamId: string) {
+    return await this.repository.updateModelsFromTeamIdToTeamId('internals', teamId);
+  }
+
+  public async updateModelsToInternals(teamId: string) {
+    return await this.repository.updateModelsFromTeamIdToTeamId(teamId, 'internals');
+  }
 }

@@ -3175,6 +3175,13 @@
             "label": "Model Type"
           }
         }
+      },
+      "manage-dropdown": {
+        "label": "Model Manage",
+        "options": {
+          "update-to-internals": "Update Info to Internals",
+          "update-from-internals": "Update Info from Internals"
+        }
       }
     }
   }

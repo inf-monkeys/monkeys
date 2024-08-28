@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 
 import { Ellipsis, HardDriveDownload, HardDriveUpload, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 import {
-  updateComfyuiModelTypeFromInternals,
-  updateComfyuiModelTypeToInternals,
+  updateComfyuiModelTypesFromInternals,
+  updateComfyuiModelTypesToInternals,
   useComfyuiModelTypes,
 } from '@/apis/comfyui-model';
 import { CreateTypeModal } from '@/components/layout/ugc-pages/image-models/model-type-modal/create-type-modal';
@@ -13,7 +14,7 @@ import { ModelTypeOperateDropdown } from '@/components/layout/ugc-pages/image-mo
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
-import { toast } from 'sonner';
+import { mutate } from 'swr';
 
 interface IImageModelTypeModalProps {
   children?: React.ReactNode;
@@ -22,8 +23,11 @@ interface IImageModelTypeModalProps {
 export const ImageModelTypeModal: React.FC<IImageModelTypeModalProps> = ({ children }) => {
   const { t } = useTranslation();
 
+  const mutateComfyuiModelsAndTypes = () =>
+    mutate((key) => typeof key === 'string' && key.startsWith('/api/comfyui-models'));
+
   const [open, setOpen] = useState(false);
-  const { data, mutate } = useComfyuiModelTypes();
+  const { data } = useComfyuiModelTypes();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -52,10 +56,10 @@ export const ImageModelTypeModal: React.FC<IImageModelTypeModalProps> = ({ child
 
   const handleUpdateToInternals = () => {
     setIsLoading(true);
-    toast.promise(updateComfyuiModelTypeToInternals(), {
+    toast.promise(updateComfyuiModelTypesToInternals(), {
       loading: t('common.operate.loading'),
       success: (data) => {
-        void mutate();
+        void mutateComfyuiModelsAndTypes();
         return t('comfyui.utils.toast.update-result', {
           ...data,
         });
@@ -67,10 +71,10 @@ export const ImageModelTypeModal: React.FC<IImageModelTypeModalProps> = ({ child
 
   const handleUpdateFromInternals = () => {
     setIsLoading(true);
-    toast.promise(updateComfyuiModelTypeFromInternals(), {
+    toast.promise(updateComfyuiModelTypesFromInternals(), {
       loading: t('common.operate.loading'),
       success: (data) => {
-        void mutate();
+        void mutateComfyuiModelsAndTypes();
         return t('comfyui.utils.toast.update-result', {
           ...data,
         });

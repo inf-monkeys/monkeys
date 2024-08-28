@@ -24,10 +24,10 @@ export const createComfyuiModelType = (params: ICreateComfyuiModelType) =>
 export const deleteComfyuiModelType = (typeId: string) =>
   vinesFetcher({ method: 'DELETE', simple: true })(`/api/comfyui-models/types/${typeId}`);
 
-export const updateComfyuiModelTypeToInternals = () =>
+export const updateComfyuiModelTypesToInternals = () =>
   vinesFetcher<IManualUpdateResult>({ method: 'POST', simple: true })(`/api/comfyui-models/types/update-to-internals`);
 
-export const updateComfyuiModelTypeFromInternals = () =>
+export const updateComfyuiModelTypesFromInternals = () =>
   vinesFetcher<IManualUpdateResult>({ method: 'POST', simple: true })(
     `/api/comfyui-models/types/update-from-internals`,
   );
@@ -51,3 +51,9 @@ export const updateComfyuiModel = (modelId: string, model: Partial<IComfyuiModel
     `/api/comfyui-models/${modelId}`,
     model,
   );
+
+export const updateComfyuiModelsToInternals = () =>
+  vinesFetcher<IManualUpdateResult>({ method: 'POST', simple: true })(`/api/comfyui-models/update-to-internals`);
+
+export const updateComfyuiModelsFromInternals = () =>
+  vinesFetcher<IManualUpdateResult>({ method: 'POST', simple: true })(`/api/comfyui-models/update-from-internals`);
