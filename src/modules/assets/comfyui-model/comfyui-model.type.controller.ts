@@ -62,4 +62,22 @@ export class ComfyuiModelTypeController {
     await this.service.deleteType(teamId, typeId);
     return new SuccessResponse();
   }
+
+  // HACK: 临时业务
+  @Post('update-from-internals')
+  public async updateFromInternals(@Req() req: IRequest) {
+    const { teamId } = req;
+    return new SuccessResponse({
+      data: await this.service.updateTypesFromInternals(teamId),
+    });
+  }
+
+  // HACK: 临时业务
+  @Post('update-to-internals')
+  public async updateToInternals(@Req() req: IRequest) {
+    const { teamId } = req;
+    return new SuccessResponse({
+      data: await this.service.updateTypesToInternals(teamId),
+    });
+  }
 }

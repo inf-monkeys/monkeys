@@ -44,6 +44,14 @@ export class ComfyuiModelService {
     await this.repository.deleteType(teamId, id);
   }
 
+  public async updateTypesFromInternals(teamId: string) {
+    return await this.repository.updateTypesFromTeamIdToTeamId('internals', teamId);
+  }
+
+  public async updateTypesToInternals(teamId: string) {
+    return await this.repository.updateTypesFromTeamIdToTeamId(teamId, 'internals');
+  }
+
   public async listModels(teamId: string, dto: ListDto) {
     return await this.repository.listModels(teamId, dto);
   }
