@@ -40,7 +40,7 @@ export const VirtuaExecutionResultRawDataDialog: React.FC<IVirtuaExecutionResult
             <TabsTrigger value="logs">{t('workspace.pre-view.actuator.detail.form-render.tabs.logs')}</TabsTrigger>
           </TabsList>
           <TabsContent value="data">
-            <VinesAbstractDataPreview className="h-96" data={data.render.data} disabledOverflowMask />
+            <VinesAbstractDataPreview className="h-96" data={data.render.data} />
           </TabsContent>
           <TabsContent value="logs">
             <CodeEditor className="h-96 w-full" readonly data={omit(data, 'render') as JSONValue} />

@@ -21,11 +21,11 @@ interface IVinesAbstractDataPreviewProps {
   className?: string;
   style?: React.CSSProperties;
   data: JSONValue;
-  disabledOverflowMask?: boolean;
+  overflowMask?: boolean;
 }
 
 export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
-  ({ data, className, style, disabledOverflowMask }) => {
+  ({ data, className, style, overflowMask = false }) => {
     const { t } = useTranslation();
 
     const previewData = previewDataGenerator(data);
@@ -36,11 +36,7 @@ export const VinesAbstractDataPreview = memo<IVinesAbstractDataPreviewProps>(
     const isValueEmpty = previewDataLength === 1 && isEmpty(previewData?.[0]?.value?.toString());
 
     return (
-      <ScrollArea
-        className={cn('[&>div>div]:h-full', className)}
-        style={style}
-        disabledOverflowMask={disabledOverflowMask}
-      >
+      <ScrollArea className={cn('[&>div>div]:h-full', className)} style={style} disabledOverflowMask={!overflowMask}>
         <div className="flex h-full w-full flex-col gap-1">
           <VinesImageGroup>
             {previewData.map(({ name, type, value }, i) => {
