@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { KeyedMutator } from 'swr/_internal';
+import { mutate } from 'swr';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { createComfyuiModelType } from '@/apis/comfyui-model';
-import { IComfyuiModelType } from '@/apis/comfyui-model/typings.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import {
@@ -25,11 +24,13 @@ import { createComfyuiModelTypeSchema, ICreateComfyuiModelType } from '@/schema/
 
 interface ICreateTypeModalProps {
   children?: React.ReactNode;
-  mutate: KeyedMutator<IComfyuiModelType[] | undefined>;
 }
 
-export const CreateTypeModal: React.FC<ICreateTypeModalProps> = ({ children, mutate }) => {
+export const CreateTypeModal: React.FC<ICreateTypeModalProps> = ({ children }) => {
   const { t } = useTranslation();
+
+  const mutateComfyuiModelsAndTypes = () =>
+    mutate((key) => typeof key === 'string' && key.startsWith('/api/comfyui-models'));
 
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -45,7 +46,7 @@ export const CreateTypeModal: React.FC<ICreateTypeModalProps> = ({ children, mut
       loading: t('common.create.loading'),
       success: () => {
         setOpen(false);
-        mutate();
+        void mutateComfyuiModelsAndTypes();
         return t('common.create.success');
       },
       error: t('common.create.error'),

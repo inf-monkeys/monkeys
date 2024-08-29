@@ -46,8 +46,8 @@ export const ComfyuiServerListOperateDropdown: React.FC<IComfyuiServerListOperat
   const { t } = useTranslation();
 
   const [updating, setUpdating] = useState(false);
-  const mutateModelList = () => mutate((key) => typeof key === 'string' && key.startsWith('/api/comfyui/servers'));
-  const mutateServerList = () => mutate((key) => typeof key === 'string' && key.startsWith('/api/comfyui-models'));
+  const mutateServerList = () => mutate((key) => typeof key === 'string' && key.startsWith('/api/comfyui/servers'));
+  const mutateModelList = () => mutate((key) => typeof key === 'string' && key.startsWith('/api/comfyui-models'));
 
   const handleDelete = async (address: string) => {
     toast.promise(deleteComfyuiServer(address), {
