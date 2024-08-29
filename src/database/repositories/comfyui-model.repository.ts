@@ -169,6 +169,13 @@ export class ComfyuiModelRepository {
           },
         },
       },
+      {
+        serverRelations: {
+          server: {
+            isDeleted: false,
+          },
+        },
+      },
     );
     const modelTypes = (
       await this.modelTypeRepository.find({
@@ -217,6 +224,11 @@ export class ComfyuiModelRepository {
       where: {
         teamId,
         isDeleted: false,
+        serverRelations: {
+          server: {
+            isDeleted: false,
+          },
+        },
       },
       relations: {
         serverRelations: {
@@ -257,6 +269,7 @@ export class ComfyuiModelRepository {
         serverRelations: {
           server: {
             id: In([serverId]),
+            isDeleted: false,
           },
         },
         isDeleted: false,
@@ -302,6 +315,7 @@ export class ComfyuiModelRepository {
         serverRelations: {
           server: {
             id: In([serverId]),
+            isDeleted: false,
           },
           path: ILike(`${modelType.path}%`),
         },
@@ -340,6 +354,11 @@ export class ComfyuiModelRepository {
         teamId,
         id: modelId,
         isDeleted: false,
+        serverRelations: {
+          server: {
+            isDeleted: false,
+          },
+        },
       },
       relations: {
         serverRelations: {
