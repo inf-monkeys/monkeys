@@ -30,7 +30,10 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
   const isNumber = type === 'number';
   const isMultiple = typeOptions?.multipleValues ?? false;
 
-  const visible = useMemo(() => type === 'string' || (miniMode && type === 'file'), [type, typeOptions, miniMode]);
+  const visible = useMemo(
+    () => (type === 'string' || (miniMode && type === 'file')) && typeOptions?.assetType != 'comfyui-model',
+    [type, typeOptions, miniMode],
+  );
 
   return (
     visible &&

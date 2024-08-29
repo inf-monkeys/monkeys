@@ -53,6 +53,7 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
     setIsLoggingIn(true);
 
     localStorage.removeItem('vines-team-id');
+    window['vinesTeamId'] = void 0;
 
     toast.promise(
       (method === AuthMethod.phone ? triggerPhone : (triggerPassword as any))(params).catch(() => {

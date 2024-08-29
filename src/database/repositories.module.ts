@@ -3,6 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { entities } from './database.module';
 import { ApikeyRepository } from './repositories/apikey.repository';
 import { CanvasAssetRepositroy } from './repositories/assets-canvas.repository';
+import { ComfyuiModelTypeAssetRepositroy } from './repositories/assets-comfyui-model-type.repositor';
+import { ComfyuiModelAssetRepositroy } from './repositories/assets-comfyui-model.repository';
 import { ComfyuiWorkflowAssetRepositroy } from './repositories/assets-comfyui-workflow.respository';
 import { AssetsCommonRepository } from './repositories/assets-common.repository';
 import { ConversationAppAssetRepositroy } from './repositories/assets-conversation-app.repository';
@@ -14,6 +16,7 @@ import { AssetsMarketPlaceRepository } from './repositories/assets-marketplace.r
 import { MediaFileAssetRepositroy } from './repositories/assets-media-file.repository';
 import { SdModelAssetRepositroy } from './repositories/assets-sd-model.repository';
 import { WorkflowAssetRepositroy } from './repositories/assets-workflow.respository';
+import { ComfyuiModelRepository } from './repositories/comfyui-model.repository';
 import { ComfyuiRepository } from './repositories/comfyui.repository';
 import { ConversationAppRepository } from './repositories/conversation-app.repository';
 import { CredentialsRepository } from './repositories/credential.repository';
@@ -58,6 +61,9 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     AssetsMarketPlaceRepository,
     ComfyuiRepository,
     ComfyuiWorkflowAssetRepositroy,
+    ComfyuiModelRepository,
+    ComfyuiModelAssetRepositroy,
+    ComfyuiModelTypeAssetRepositroy,
     OneApiRepository,
     ConversationAppRepository,
     ConversationAppAssetRepositroy,
@@ -88,6 +94,9 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     AssetsMarketPlaceRepository,
     ComfyuiRepository,
     ComfyuiWorkflowAssetRepositroy,
+    ComfyuiModelRepository,
+    ComfyuiModelAssetRepositroy,
+    ComfyuiModelTypeAssetRepositroy,
     OneApiRepository,
     ConversationAppRepository,
     ConversationAppAssetRepositroy,

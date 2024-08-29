@@ -2,7 +2,6 @@
   "system": {
     "network-error": "System maintenance",
     "empty-auth-methods": "Login is not enabled",
-
     "error": {
       "title": "Something went wrong",
       "desc": "Please clean all caches and refresh the page to try again",
@@ -62,6 +61,9 @@
       "workflow": "workflow",
       "agent": "agent",
       "comfyui-workflow": "ComfyUI workflow",
+      "image-model": "image model",
+      "image-model-type": "image model type",
+      "comfyui-server": "ComfyUI server",
       "filter-group": "filter group",
       "text-data": "text data"
     },
@@ -117,7 +119,8 @@
     "dialog": {
       "delete-confirm": {
         "title": "Delete confirmation of {{type}}",
-        "content": "Are you sure you want to delete the {{type}} \"{{name}}\"?\nThe operation cannot be undone."
+        "content": "Are you sure you want to delete the {{type}} \"{{name}}\"?\nThe operation cannot be undone.",
+        "content-without-name": "Are you sure you want to delete the {{type}} ?\nThe operation cannot be undone."
       }
     },
     "sidebar": {
@@ -314,11 +317,9 @@
         "close": "Close",
         "remove": "Remove",
         "select-all": "(Select All)",
-
         "empty": "No data",
         "search-placeholder": "Search...",
         "search-empty": "No results found.",
-
         "more": "+ {{count}} more",
         "expand": "Expand",
         "collapse": "Collapse"
@@ -1195,36 +1196,6 @@
             }
           }
         },
-        "comfyui-server": {
-          "title": "ComfyUI Server",
-          "table": {
-            "columns": {
-              "address": {
-                "label": "Server Address"
-              },
-              "description": {
-                "label": "Description"
-              },
-              "status": {
-                "label": "Status"
-              },
-              "operate": {
-                "label": "Operations"
-              }
-            }
-          },
-          "import-label": "Add ComfyUI Server",
-          "form": {
-            "address": {
-              "label": "Server Address",
-              "placeholder": "Please enter the server address"
-            },
-            "description": {
-              "label": "Description",
-              "placeholder": "Please enter the server description"
-            }
-          }
-        },
         "restful-api": {
           "form": {
             "display-name": {
@@ -1487,8 +1458,11 @@
           "description": {
             "label": "Description"
           },
-          "assetTags": {
-            "label": "Tags"
+          "types": {
+            "label": "Types"
+          },
+          "sha256": {
+            "label": "sha256"
           },
           "createdTimestamp": {
             "label": "Created Time"
@@ -1500,9 +1474,20 @@
         "operate-area": {
           "dropdown-label": "Operations",
           "options": {
-            "publish": "Publish to Market"
+            "edit-info": "Edit Info"
+          },
+          "info-editor": {
+            "title": "Image Model Information",
+            "info-updated": "Image model information has been updated",
+            "info-update-failed": "Image model information update failure"
           }
         }
+      },
+      "types": {
+        "other": "Other type"
+      },
+      "detail": {
+        "title": "Image Model Detail"
       }
     },
     "text-data": {
@@ -2005,7 +1990,6 @@
             },
             "other": "Other views iframe embed link",
             "copy-other-view": "Copy {{name}} Embed link",
-
             "entry-edit": "Enter application editing mode"
           }
         }
@@ -2413,7 +2397,24 @@
                 "number": "number {{extra}}",
                 "boolean": "boolean {{extra}}",
                 "file": "file {{extra}}",
-                "workflow": "workflow {{extra}}"
+                "workflow": "workflow {{extra}}",
+                "comfyui-model": "image model {{extra}}"
+              },
+              "comfyui-model-server-id": {
+                "label": "ComfyUI Server",
+                "placeholder": "Please select ComfyUI server",
+                "command": {
+                  "placeholder": "Search ComfyUI server...",
+                  "empty": "No ComfyUI server found"
+                }
+              },
+              "comfyui-model-type-name": {
+                "label": "Image Model Type",
+                "placeholder": "Please select image model type",
+                "command": {
+                  "placeholder": "Search image model type...",
+                  "empty": "No image model type found"
+                }
               },
               "default": {
                 "label": "Default Value",
@@ -2813,6 +2814,13 @@
             "empty-action": "Select image and edit mask",
             "re-edit": "Re-edit image mask",
             "clear": "Clear"
+          },
+          "image-model": {
+            "placeholder": "Please select image model",
+            "command": {
+              "placeholder": "Search image model...",
+              "empty": "No image model found"
+            }
           }
         },
         "detail": {
@@ -3005,7 +3013,6 @@
         "label": "Configure Agent",
         "desc": "You can configure agent-related parameters here",
         "advanced-configuration": "Advanced Configuration",
-
         "model": {
           "label": "Large Language Model"
         },
@@ -3045,8 +3052,136 @@
           "placeholder": "Please enter a custom model name",
           "desc": "This configuration is generally used for the model name passed in when calling the API. If not filled in, the default model is used"
         },
-
         "submit": "Save"
+      }
+    }
+  },
+  "comfyui": {
+    "utils": {
+      "toast": {
+        "update-result": "Update successful! Create: {{create}}, Update: {{update}}, Remove: {{remove}}"
+      }
+    },
+    "comfyui-server": {
+      "title": "ComfyUI Server",
+      "table": {
+        "columns": {
+          "address": {
+            "label": "Server Address"
+          },
+          "description": {
+            "label": "Server Description"
+          },
+          "status": {
+            "label": "Status"
+          },
+          "is-default": {
+            "label": "Default"
+          },
+          "operate": {
+            "label": "Operations"
+          }
+        }
+      },
+      "operate": {
+        "dropdown-label": "ComfyUI Server Operate",
+        "options": {
+          "manual-update": "Update Model List from Server",
+          "delete": "Delete ComfyUI Server"
+        }
+      },
+      "import-label": "Add ComfyUI Server",
+      "form": {
+        "address": {
+          "label": "Server Address",
+          "placeholder": "Please enter the server address"
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Please enter the server description"
+        }
+      }
+    },
+    "comfyui-model-type": {
+      "title": "Model Type",
+      "table": {
+        "columns": {
+          "display-name": {
+            "label": "Display Name"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "path": {
+            "label": "Path"
+          },
+          "name": {
+            "label": "Name"
+          },
+          "operate": {
+            "label": "Operate"
+          }
+        }
+      },
+      "operate": {
+        "dropdown-label": "Model Type Operate",
+        "options": {
+          "delete": "Delete Model Type"
+        }
+      },
+      "update-to-internals": "Update to Internals",
+      "update-from-internals": "Update from Internals",
+      "create-label": "Create Model Type",
+      "form": {
+        "name": {
+          "placeholder": "Please enter name",
+          "description": "e.g. \"lora-sdxl\""
+        },
+        "path": {
+          "placeholder": "Please enter path",
+          "description": "Relative path in the models folder, e.g. \"loras/sdxl\""
+        },
+        "display-name": {
+          "placeholder": "Please enter display name"
+        },
+        "description": {
+          "placeholder": "Please enter description"
+        }
+      }
+    },
+    "comfyui-model": {
+      "form": {
+        "icon-url": {
+          "label": "Thumbnail"
+        },
+        "display-name": {
+          "label": "Display Name",
+          "placeholder": "Please enter display name"
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Please enter description"
+        }
+      },
+      "table": {
+        "columns": {
+          "path": {
+            "label": "Model Path"
+          },
+          "filename": {
+            "label": "Model Filename"
+          },
+          "type": {
+            "label": "Model Type"
+          }
+        }
+      },
+      "manage-dropdown": {
+        "label": "Model Manage",
+        "options": {
+          "update-to-internals": "Update Info to Internals",
+          "update-from-internals": "Update Info from Internals"
+        }
       }
     }
   }

@@ -41,6 +41,7 @@ import { Route as TeamIdWorkspaceWorkflowIdIndexImport } from './pages/$teamId/w
 import { Route as TeamIdTextModelsLlmModelIdIndexImport } from './pages/$teamId/text-models/$llmModelId/index'
 import { Route as TeamIdTextDataTextIdIndexImport } from './pages/$teamId/text-data/$textId/index'
 import { Route as TeamIdTableDataDatabaseIdIndexImport } from './pages/$teamId/table-data/$databaseId/index'
+import { Route as TeamIdImageModelsImageModelIdIndexImport } from './pages/$teamId/image-models/$imageModelId/index'
 import { Route as TeamIdComfyuiComfyuiWorkflowIdIndexImport } from './pages/$teamId/comfyui/$comfyuiWorkflowId/index'
 import { Route as TeamIdAgentAgentIdIndexImport } from './pages/$teamId/agent/$agentId/index'
 import { Route as TeamIdActionToolsActionToolNameIndexImport } from './pages/$teamId/action-tools/$actionToolName/index'
@@ -205,6 +206,12 @@ const TeamIdTableDataDatabaseIdIndexRoute =
     getParentRoute: () => rootRoute,
   } as any)
 
+const TeamIdImageModelsImageModelIdIndexRoute =
+  TeamIdImageModelsImageModelIdIndexImport.update({
+    path: '/$teamId/image-models/$imageModelId/',
+    getParentRoute: () => rootRoute,
+  } as any)
+
 const TeamIdComfyuiComfyuiWorkflowIdIndexRoute =
   TeamIdComfyuiComfyuiWorkflowIdIndexImport.update({
     path: '/$teamId/comfyui/$comfyuiWorkflowId/',
@@ -354,6 +361,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdComfyuiComfyuiWorkflowIdIndexImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/image-models/$imageModelId/': {
+      preLoaderRoute: typeof TeamIdImageModelsImageModelIdIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/table-data/$databaseId/': {
       preLoaderRoute: typeof TeamIdTableDataDatabaseIdIndexImport
       parentRoute: typeof rootRoute
@@ -413,6 +424,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdActionToolsActionToolNameIndexRoute,
   TeamIdAgentAgentIdIndexRoute,
   TeamIdComfyuiComfyuiWorkflowIdIndexRoute,
+  TeamIdImageModelsImageModelIdIndexRoute,
   TeamIdTableDataDatabaseIdIndexRoute,
   TeamIdTextDataTextIdIndexRoute,
   TeamIdTextModelsLlmModelIdIndexRoute,
