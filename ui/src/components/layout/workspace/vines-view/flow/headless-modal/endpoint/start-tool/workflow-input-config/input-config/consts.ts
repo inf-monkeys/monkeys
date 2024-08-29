@@ -68,6 +68,12 @@ export const WORKFLOW_INPUT_TYPE_OPTION_LIST: IWorkflowInputTypeOption[] = [
     multipleValues: true,
     assetType: 'workflow',
   },
+  {
+    value: 'string',
+    label: 'comfyui-model',
+    multipleValues: false,
+    assetType: 'comfyui-model',
+  },
 ];
 
 export const VINES_WORKFLOW_INPUT_TYPE_DISPLAY_MAPPER = WORKFLOW_INPUT_TYPE_OPTION_LIST.reduce(

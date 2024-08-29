@@ -47,6 +47,8 @@ export const workflowInputSchema = z.object({
   foldUp: z.boolean().optional(),
   enableReset: z.boolean().optional(),
   singleColumn: z.boolean().optional(),
+  comfyuiModelServerId: z.string().optional(),
+  comfyuiModelTypeName: z.string().optional(),
 });
 
 export type IWorkflowInput = z.infer<typeof workflowInputSchema>;

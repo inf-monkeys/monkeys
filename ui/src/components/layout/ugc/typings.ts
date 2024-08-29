@@ -30,7 +30,7 @@ export type IUgcCustomProps = {
   isMarket?: boolean;
 };
 
-export type IRenderKey = 'title' | 'subtitle' | 'description' | 'tags' | 'time' | 'logo' | 'cover';
+export type IRenderKey = 'title' | 'subtitle' | 'description' | 'tags' | 'time' | 'logo' | 'cover' | 'assetTags';
 
 export type IDisplayMode = 'table' | 'gallery' | 'card' | null;
 export type ISortConditionOrderBy = 'DESC' | 'ASC';

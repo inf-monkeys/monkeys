@@ -2,13 +2,13 @@ import React, { createRef, useEffect, useState } from 'react';
 
 import { Cropper, ReactCropperElement } from 'react-cropper';
 import { useTranslation } from 'react-i18next';
+import { VinesUploader } from 'src/components/ui/uploader';
 
 import { getResourceByMd5 } from '@/apis/resources';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { base64toFile } from '@/components/ui/image-editor/utils.ts';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { VinesUploader } from 'src/components/ui/uploader';
 import { calculateMD5, uploadFile } from '@/components/ui/uploader/utils.ts';
 import { nanoIdLowerCase } from '@/utils';
 
@@ -18,6 +18,7 @@ interface IVinesImageEditorProps {
   value?: string;
   onChange?: (value: string) => void;
   children?: React.ReactNode;
+  aspectRatio?: number;
 }
 
 export const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
@@ -26,6 +27,7 @@ export const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
   value,
   onChange,
   children,
+  aspectRatio,
 }) => {
   const { t } = useTranslation();
 
@@ -81,11 +83,12 @@ export const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
     <Tooltip>
       <Dialog open={visible} onOpenChange={setVisible}>
         <DialogTrigger asChild>
-          <TooltipTrigger asChild>{children}</TooltipTrigger>
+          <TooltipTrigger>{children}</TooltipTrigger>
         </DialogTrigger>
         <DialogContent>
           <DialogTitle>{t('components.ui.image-editor.title')}</DialogTitle>
           <Cropper
+            aspectRatio={aspectRatio}
             width={width}
             ref={cropperRef}
             src={tempImage}

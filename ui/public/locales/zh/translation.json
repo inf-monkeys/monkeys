@@ -2,7 +2,6 @@
   "system": {
     "network-error": "系统维护中",
     "empty-auth-methods": "系统未启用身份验证",
-
     "error": {
       "title": "出现了一些问题",
       "desc": "请清理所有缓存后刷新页面重试",
@@ -62,6 +61,9 @@
       "workflow": "工作流",
       "agent": "智能体",
       "comfyui-workflow": "ComfyUI 工作流",
+      "image-model": "图像模型",
+      "image-model-type": "图像模型类型",
+      "comfyui-server": "ComfyUI 服务",
       "filter-group": "筛选分组",
       "text-data": "文本数据",
       "table-data": "表格数据"
@@ -111,7 +113,8 @@
     "dialog": {
       "delete-confirm": {
         "title": "{{type}}删除确认",
-        "content": "确定要删除{{type}}「{{name}}」？此操作不可撤销。"
+        "content": "确定要删除 {{type}}「{{name}}」？此操作不可撤销。",
+        "content-without-name": "确定要删除 {{type}}？此操作不可撤销。"
       }
     },
     "sidebar": {
@@ -276,7 +279,6 @@
         "init": {
           "failed-to-fetch": "获取图片失败！",
           "failed-to-optimize": "图片优化失败！",
-
           "optimize": "正在优化图像（{{progress}}%）",
           "export": "正在导出图像（{{progress}}%）",
           "upload": "正在上传中"
@@ -309,11 +311,9 @@
         "close": "关闭",
         "remove": "移除",
         "select-all": "「全选」",
-
         "empty": "暂无选项",
         "search-placeholder": "搜索...",
         "search-empty": "无匹配项",
-
         "more": "+ {{count}} 选项",
         "expand": "展开",
         "collapse": "收起"
@@ -1190,36 +1190,6 @@
             }
           }
         },
-        "comfyui-server": {
-          "title": "ComfyUI 服务",
-          "table": {
-            "columns": {
-              "address": {
-                "label": "服务地址"
-              },
-              "description": {
-                "label": "描述"
-              },
-              "status": {
-                "label": "状态"
-              },
-              "operate": {
-                "label": "操作"
-              }
-            }
-          },
-          "import-label": "添加 ComfyUI 服务",
-          "form": {
-            "address": {
-              "label": "服务地址",
-              "placeholder": "请输入服务地址"
-            },
-            "description": {
-              "label": "描述",
-              "placeholder": "请输入描述"
-            }
-          }
-        },
         "restful-api": {
           "form": {
             "display-name": {
@@ -1487,8 +1457,11 @@
           "description": {
             "label": "描述"
           },
-          "assetTags": {
-            "label": "标签"
+          "types": {
+            "label": "类型"
+          },
+          "sha256": {
+            "label": "sha256"
           },
           "createdTimestamp": {
             "label": "创建时间"
@@ -1500,9 +1473,20 @@
         "operate-area": {
           "dropdown-label": "图像模型操作",
           "options": {
-            "publish": "发布到市场"
+            "edit-info": "编辑信息"
+          },
+          "info-editor": {
+            "title": "图像模型信息",
+            "info-updated": "图像模型信息已更新",
+            "info-update-failed": "图像模型信息更新失败"
           }
         }
+      },
+      "types": {
+        "other": "其他类型"
+      },
+      "detail": {
+        "title": "图像模型详情"
       }
     },
     "text-data": {
@@ -1564,7 +1548,6 @@
               "loading": "（加载中）",
               "processing": "（处理文件中）"
             },
-
             "message": {
               "No logs": "暂无日志",
               "Added to queue": "已添加到队列",
@@ -2006,7 +1989,6 @@
             },
             "other": "其他视图 iframe 嵌入链接",
             "copy-other-view": "复制 {{name}} 嵌入链接",
-
             "entry-edit": "进入应用编辑模式"
           }
         }
@@ -2414,7 +2396,24 @@
                 "number": "数字{{extra}}",
                 "boolean": "逻辑值{{extra}}",
                 "file": "文件{{extra}}",
-                "workflow": "工作流{{extra}}"
+                "workflow": "工作流{{extra}}",
+                "comfyui-model": "图像模型{{extra}}"
+              },
+              "comfyui-model-server-id": {
+                "label": "ComfyUI 服务",
+                "placeholder": "请选择 ComfyUI 服务",
+                "command": {
+                  "placeholder": "搜索 ComfyUI 服务...",
+                  "empty": "找不到 ComfyUI 服务"
+                }
+              },
+              "comfyui-model-type-name": {
+                "label": "图像模型类型",
+                "placeholder": "请选择图像模型类型",
+                "command": {
+                  "placeholder": "搜索图像模型类型...",
+                  "empty": "找不到图像模型类型"
+                }
               },
               "default": {
                 "label": "默认值",
@@ -2814,6 +2813,13 @@
             "empty-action": "选择图片并编辑",
             "re-edit": "重新编辑",
             "clear": "清除"
+          },
+          "image-model": {
+            "placeholder": "请选择图像模型",
+            "command": {
+              "placeholder": "搜索图像模型...",
+              "empty": "找不到图像模型"
+            }
           }
         },
         "detail": {
@@ -2964,7 +2970,6 @@
       "not-support": "该工作流不支持表单视图",
       "quick-toolbar": {
         "more": "更多操作",
-
         "reset": "恢复默认参数",
         "restore-previous-param": {
           "label": "恢复上次生成参数",
@@ -3007,7 +3012,6 @@
         "label": "配置智能体",
         "desc": "你可以在这里配置智能体相关的参数",
         "advanced-configuration": "高级配置",
-
         "model": {
           "label": "大语言模型"
         },
@@ -3047,8 +3051,166 @@
           "placeholder": "请输入自定义模型名称",
           "desc": "该配置一般用于 API 调用时传入的模型名称，如果不填写则使用默认模型"
         },
-
         "submit": "保存"
+      }
+    }
+  },
+  "comfyui-server": {
+    "title": "ComfyUI 服务",
+    "table": {
+      "columns": {
+        "address": {
+          "label": "服务地址"
+        },
+        "description": {
+          "label": "描述"
+        },
+        "status": {
+          "label": "状态"
+        },
+        "operate": {
+          "label": "操作"
+        }
+      }
+    },
+    "import-label": "添加 ComfyUI 服务",
+    "form": {
+      "address": {
+        "label": "服务地址",
+        "placeholder": "请输入服务地址"
+      },
+      "description": {
+        "label": "描述",
+        "placeholder": "请输入描述"
+      }
+    }
+  },
+  "comfyui": {
+    "utils": {
+      "toast": {
+        "update-result": "更新成功！新增：{{create}}；更新：{{update}}；删除：{{remove}}"
+      }
+    },
+    "comfyui-server": {
+      "title": "ComfyUI 服务",
+      "table": {
+        "columns": {
+          "address": {
+            "label": "服务地址"
+          },
+          "description": {
+            "label": "服务描述"
+          },
+          "status": {
+            "label": "状态"
+          },
+          "is-default": {
+            "label": "默认"
+          },
+          "operate": {
+            "label": "操作"
+          }
+        }
+      },
+      "operate": {
+        "dropdown-label": "ComfyUI 服务操作",
+        "options": {
+          "manual-update": "从服务更新模型列表",
+          "delete": "删除 ComfyUI 服务"
+        }
+      },
+      "import-label": "添加 ComfyUI 服务",
+      "form": {
+        "address": {
+          "label": "服务地址",
+          "placeholder": "请输入服务地址"
+        },
+        "description": {
+          "label": "描述",
+          "placeholder": "请输入描述"
+        }
+      }
+    },
+    "comfyui-model-type": {
+      "title": "模型类型",
+      "table": {
+        "columns": {
+          "display-name": {
+            "label": "显示名称"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "path": {
+            "label": "模型路径"
+          },
+          "name": {
+            "label": "类型标识"
+          },
+          "operate": {
+            "label": "操作"
+          }
+        }
+      },
+      "operate": {
+        "dropdown-label": "模型类型操作",
+        "options": {
+          "delete": "删除模型类型"
+        }
+      },
+      "update-to-internals": "同步到内置类型",
+      "update-from-internals": "从内置类型获取",
+      "create-label": "创建模型类型",
+      "form": {
+        "name": {
+          "placeholder": "请输入类型标识",
+          "description": "如「lora-sdxl」"
+        },
+        "path": {
+          "placeholder": "请输入路径",
+          "description": "models 文件夹中的相对路径，如「loras/sdxl」"
+        },
+        "display-name": {
+          "placeholder": "请输入显示名称"
+        },
+        "description": {
+          "placeholder": "请输入描述"
+        }
+      }
+    },
+    "comfyui-model": {
+      "form": {
+        "icon-url": {
+          "label": "缩略图"
+        },
+        "display-name": {
+          "label": "显示名称",
+          "placeholder": "请输入显示名称"
+        },
+        "description": {
+          "label": "描述",
+          "placeholder": "请输入描述"
+        }
+      },
+      "table": {
+        "columns": {
+          "path": {
+            "label": "模型路径"
+          },
+          "filename": {
+            "label": "模型文件名"
+          },
+          "type": {
+            "label": "模型类型"
+          }
+        }
+      },
+      "manage-dropdown": {
+        "label": "模型管理",
+        "options": {
+          "update-to-internals": "同步到内置模型信息",
+          "update-from-internals": "从内置模型信息获取"
+        }
       }
     }
   }

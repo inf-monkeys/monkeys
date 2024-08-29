@@ -3,7 +3,7 @@ import useSWR from 'swr';
 import { ToolProperty } from '@inf-monkeys/monkeys';
 
 import {
-  IComfyuiModel,
+  IComfyuiModelLegacy,
   IComfyuiServer,
   IComfyuiWorkflow,
   IComfyuiWorkflowDependency,
@@ -20,7 +20,8 @@ export interface ImportComfyuiWorkflowParams {
   [x: string]: any;
 }
 
-export const useComfyuiModels = () => useSWR<IComfyuiModel | undefined>('/api/comfyui/all-models', vinesFetcher());
+export const useComfyuiModels = () =>
+  useSWR<IComfyuiModelLegacy | undefined>('/api/comfyui/all-models', vinesFetcher());
 
 export const importComfyuiWorkflow = (params: ImportComfyuiWorkflowParams) =>
   vinesFetcher({ method: 'POST', simple: true })(`/api/comfyui/workflows`, params);

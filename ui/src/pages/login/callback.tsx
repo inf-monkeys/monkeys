@@ -39,6 +39,7 @@ const LoginCallback: React.FC = () => {
         toast.warning(t('auth.oidc.auth-failed'));
         localStorage.removeItem('vines-token');
         localStorage.removeItem('vines-team-id');
+        window['vinesTeamId'] = void 0;
         VinesEvent.emit('vines-nav', '/login');
         return;
       }
