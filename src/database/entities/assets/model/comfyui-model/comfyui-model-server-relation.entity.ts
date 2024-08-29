@@ -5,18 +5,19 @@ import { ComfyuiModelEntity } from './comfyui-model.entity';
 
 @Entity({ name: 'comfyui_model_server_relations' })
 export class ComfyuiModelServerRelationEntity extends BaseEntity {
-  @ManyToOne(() => ComfyuiModelEntity, (model) => model.serverRelations)
+  @ManyToOne(() => ComfyuiModelEntity, (model) => model.serverRelations, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   model: ComfyuiModelEntity;
 
-  @ManyToOne(() => ComfyuiServerEntity, (server) => server.modelRelations)
+  @ManyToOne(() => ComfyuiServerEntity, (server) => server.modelRelations, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   server: ComfyuiServerEntity;
 
   @Column({
     name: 'team_id',
     type: 'varchar',
     length: 255,
+    nullable: true,
   })
-  teamId: string;
+  teamId: string | null;
 
   @Column({
     name: 'path',
