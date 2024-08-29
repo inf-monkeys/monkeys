@@ -146,7 +146,7 @@ export const ImageModelTypeModal: React.FC<IImageModelTypeModalProps> = ({ child
           </div>
           <div className="flex-1" />
           <div>
-            <CreateTypeModal mutate={mutate}>
+            <CreateTypeModal>
               <Button variant="outline" size="small" icon={<Plus />} loading={isLoading}>
                 {t('common.utils.create')}
               </Button>

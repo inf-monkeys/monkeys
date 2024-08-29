@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 
+import { KeyedMutator } from 'swr/_internal';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { importComfyuiServer } from '@/apis/comfyui';
+import { IComfyuiServer } from '@/apis/comfyui/typings.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
@@ -14,9 +17,10 @@ import { IImportComfyuiServer, importComfyuiServerSchema } from '@/schema/worksp
 
 interface IImportComfyUIServerModalProps {
   children?: React.ReactNode;
+  mutate: KeyedMutator<IComfyuiServer[] | undefined>;
 }
 
-export const ImportComfyUIServerModal: React.FC<IImportComfyUIServerModalProps> = ({ children }) => {
+export const ImportComfyUIServerModal: React.FC<IImportComfyUIServerModalProps> = ({ children, mutate }) => {
   const { t } = useTranslation();
 
   const [open, setOpen] = useState(false);
@@ -32,6 +36,7 @@ export const ImportComfyUIServerModal: React.FC<IImportComfyUIServerModalProps> 
     toast.promise(importComfyuiServer(data), {
       loading: t('common.operate.loading'),
       success: () => {
+        void mutate();
         setOpen(false);
         return t('common.operate.success');
       },

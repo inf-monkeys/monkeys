@@ -82,7 +82,7 @@ export const ComfyUIServerListModal: React.FC<IImportToolModalProps> = ({ childr
           </TableBody>
         </Table>
         <DialogFooter>
-          <ImportComfyUIServerModal>
+          <ImportComfyUIServerModal mutate={mutate}>
             <Button variant="outline" size="small" icon={<Plus />}>
               {t('common.utils.add')}
             </Button>
