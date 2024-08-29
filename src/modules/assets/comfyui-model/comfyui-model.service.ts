@@ -79,7 +79,7 @@ export class ComfyuiModelService {
   }
 
   public async updateModelsByTeamIdAndServerId(teamId: string, serverId: string) {
-    const server = await this.comfyuiService.getComfyuiServerById(teamId, serverId);
+    const server = await this.comfyuiService.getComfyuiServerById(serverId === 'default' ? null : teamId, serverId);
     if (!server) throw new Error('ComfyUI server not found');
 
     const { success, errMsg } = await this.comfyuiService.testComfyuiServerConnection(server.address);
