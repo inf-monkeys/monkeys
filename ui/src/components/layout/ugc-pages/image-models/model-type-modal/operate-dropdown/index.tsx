@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import { mutate } from 'swr';
 
@@ -43,8 +43,6 @@ export const ModelTypeOperateDropdown: React.FC<IModelTypeOperateDropdownProps> 
   tooltipTriggerContent,
 }) => {
   const { t } = useTranslation();
-
-  const [updating, setUpdating] = useState(false);
 
   const mutateModelList = () => mutate((key) => typeof key === 'string' && key.startsWith('/api/comfyui-models'));
 

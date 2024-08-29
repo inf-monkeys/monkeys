@@ -76,34 +76,34 @@ export const ComfyuiServerListOperateDropdown: React.FC<IComfyuiServerListOperat
   };
 
   return (
-    <DropdownMenu>
-      {tooltipTriggerContent ? (
-        <Tooltip content={tooltipTriggerContent}>
-          <TooltipTrigger asChild>
-            <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
-          </TooltipTrigger>
-        </Tooltip>
-      ) : (
-        <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
-      )}
+    <AlertDialog>
+      <DropdownMenu>
+        {tooltipTriggerContent ? (
+          <Tooltip content={tooltipTriggerContent}>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+            </TooltipTrigger>
+          </Tooltip>
+        ) : (
+          <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+        )}
 
-      <DropdownMenuContent
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-        }}
-      >
-        <DropdownMenuLabel>{t('comfyui.comfyui-server.operate.dropdown-label')}</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem onSelect={() => handleManualUpdate(item.id)} disabled={updating}>
-            <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
-              <CloudDownload size={15} />
-            </DropdownMenuShortcut>
-            {t('comfyui.comfyui-server.operate.options.manual-update')}
-          </DropdownMenuItem>
+        <DropdownMenuContent
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+        >
+          <DropdownMenuLabel>{t('comfyui.comfyui-server.operate.dropdown-label')}</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <AlertDialog>
+          <DropdownMenuGroup>
+            <DropdownMenuItem onSelect={() => handleManualUpdate(item.id)} disabled={updating}>
+              <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                <CloudDownload size={15} />
+              </DropdownMenuShortcut>
+              {t('comfyui.comfyui-server.operate.options.manual-update')}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <AlertDialogTrigger asChild>
               <DropdownMenuItem className="text-red-10" disabled={item.isDefault}>
                 <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
@@ -112,29 +112,27 @@ export const ComfyuiServerListOperateDropdown: React.FC<IComfyuiServerListOperat
                 {t('comfyui.comfyui-server.operate.options.delete')}
               </DropdownMenuItem>
             </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>
-                  {t('common.dialog.delete-confirm.title', {
-                    type: t('common.type.comfyui-server'),
-                  })}
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t('common.dialog.delete-confirm.content-without-name', {
-                    type: t('common.type.comfyui-server'),
-                  })}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t('common.utils.cancel')}</AlertDialogCancel>
-                <AlertDialogAction onClick={() => handleDelete(item.address)}>
-                  {t('common.utils.confirm')}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            {t('common.dialog.delete-confirm.title', {
+              type: t('common.type.comfyui-server'),
+            })}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            {t('common.dialog.delete-confirm.content-without-name', {
+              type: t('common.type.comfyui-server'),
+            })}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{t('common.utils.cancel')}</AlertDialogCancel>
+          <AlertDialogAction onClick={() => handleDelete(item.address)}>{t('common.utils.confirm')}</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
