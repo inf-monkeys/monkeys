@@ -5,7 +5,7 @@ import { ControllerRenderProps, FieldValues, UseFormReturn } from 'react-hook-fo
 import { useTranslation } from 'react-i18next';
 
 import { useComfyuiModelListByTypeNameAndServerId } from '@/apis/comfyui-model';
-import { IComfyuiModelWithOneServer } from '@/apis/comfyui-model/typings.ts';
+import { IComfyuiModelWithOneServerWithApiPath } from '@/apis/comfyui-model/typings.ts';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { FormControl } from '@/components/ui/form.tsx';
@@ -43,9 +43,9 @@ export const FieldImageModel: React.FC<IFieldImageModelProps> = ({ input: { type
         serverRelation,
       };
     })
-    .filter((m) => m.serverRelation) as IComfyuiModelWithOneServer[];
+    .filter((m) => m.serverRelation) as IComfyuiModelWithOneServerWithApiPath[];
 
-  const selectedModel = models?.find((m) => m.serverRelation?.path === value);
+  const selectedModel = models?.find((m) => m.serverRelation?.apiPath === value);
 
   return (
     <Popover open={visible} onOpenChange={setVisible}>
@@ -80,7 +80,7 @@ export const FieldImageModel: React.FC<IFieldImageModelProps> = ({ input: { type
                     value={it.id}
                     key={it.id}
                     onSelect={() => {
-                      onChange(it.serverRelation.path);
+                      onChange(it.serverRelation.apiPath);
                       setVisible(false);
                     }}
                     className="flex justify-between gap-2"
@@ -101,7 +101,9 @@ export const FieldImageModel: React.FC<IFieldImageModelProps> = ({ input: { type
                         </p>
                       </div>
                     </div>
-                    <Check className={cn('h-4 w-4', it.serverRelation.path === value ? 'opacity-100' : 'opacity-0')} />
+                    <Check
+                      className={cn('h-4 w-4', it.serverRelation.apiPath === value ? 'opacity-100' : 'opacity-0')}
+                    />
                   </CommandItem>
                 );
               })}

@@ -33,6 +33,14 @@ export interface IComfyuiModel extends IBaseEntity {
   serverRelations: IComfyuiServerRelation[];
 }
 
-export type IComfyuiModelWithOneServer = Omit<IComfyuiModel, 'serverRelations'> & {
-  serverRelation: IComfyuiServerRelation;
+interface IComfyuiServerRelationWithApiPath extends IComfyuiServerRelation {
+  apiPath: string;
+}
+
+export interface IComfyuiModelWithApiPath extends IComfyuiModel {
+  serverRelations: IComfyuiServerRelationWithApiPath[];
+}
+
+export type IComfyuiModelWithOneServerWithApiPath = Omit<IComfyuiModel, 'serverRelations'> & {
+  serverRelation: IComfyuiServerRelationWithApiPath;
 };

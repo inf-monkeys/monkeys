@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 
-import { IComfyuiModel, IComfyuiModelType } from '@/apis/comfyui-model/typings.ts';
+import { IComfyuiModel, IComfyuiModelType, IComfyuiModelWithApiPath } from '@/apis/comfyui-model/typings.ts';
 import { vinesFetcher } from '@/apis/fetcher.ts';
 import { ICreateComfyuiModelType } from '@/schema/workspace/create-comfyui-model-type.ts';
 
@@ -38,7 +38,7 @@ export const useComfyuiModel = (id?: string) =>
   });
 
 export const useComfyuiModelListByTypeNameAndServerId = (typeName?: string, serverId?: string) =>
-  useSWR<IComfyuiModel[] | undefined>(
+  useSWR<IComfyuiModelWithApiPath[] | undefined>(
     typeName && serverId ? `/api/comfyui-models/list?typeName=${typeName}&serverId=${serverId}` : null,
     vinesFetcher(),
     {

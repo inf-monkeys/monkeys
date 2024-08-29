@@ -334,8 +334,10 @@ export class ComfyuiModelRepository {
         ...model,
         serverRelations: serverRelations
           ? serverRelations.map((relation) => {
+              const pathArr = relation.path.split('/');
               return {
                 ...relation,
+                apiPath: pathArr.length > 1 ? pathArr.slice(1).join('/') : relation.path,
                 type: modelType,
               };
             })
