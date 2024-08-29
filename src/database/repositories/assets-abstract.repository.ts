@@ -71,6 +71,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     dto: ListDto,
     options?: AssetsFillAdditionalInfoOptions,
     findOptions?: FindManyOptions<E>,
+    extraWhere?: FindOptionsWhere<E>,
   ): Promise<{
     list: E[];
     totalCount: number;
@@ -95,10 +96,12 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
           teamId,
           isDeleted: false,
           id: idsConstraints.length ? In(idsConstraints) : undefined,
+          ...extraWhere,
         },
         {
           id: In(authorizedIds),
           isDeleted: false,
+          ...extraWhere,
         },
       ] as FindOptionsWhere<E>[],
       order: {
