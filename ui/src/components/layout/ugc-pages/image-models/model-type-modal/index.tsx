@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+import { mutate } from 'swr';
+
 import { Ellipsis, HardDriveDownload, HardDriveUpload, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -14,7 +16,6 @@ import { ModelTypeOperateDropdown } from '@/components/layout/ugc-pages/image-mo
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
-import { mutate } from 'swr';
 
 interface IImageModelTypeModalProps {
   children?: React.ReactNode;
