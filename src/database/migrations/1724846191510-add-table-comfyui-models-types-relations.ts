@@ -8,6 +8,7 @@ export class MigartionAddComfyuiModel1724846191510 implements MigrationInterface
   table1Name = `${appId}_comfyui_model`;
   table2Name = `${appId}_comfyui_model_type`;
   table3Name = `${appId}_comfyui_model_server_relations`;
+  serverTable = `${appId}_comfyui_servers`;
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
@@ -77,14 +78,14 @@ export class MigartionAddComfyuiModel1724846191510 implements MigrationInterface
         foreignKeys: [
           {
             columnNames: ['modelId'],
-            referencedTableName: 'monkeys_comfyui_model',
+            referencedTableName: this.table1Name,
             referencedColumnNames: ['id'],
             onDelete: 'NO ACTION',
             onUpdate: 'NO ACTION',
           },
           {
             columnNames: ['serverId'],
-            referencedTableName: 'monkeys_comfyui_servers',
+            referencedTableName: this.serverTable,
             referencedColumnNames: ['id'],
             onDelete: 'NO ACTION',
             onUpdate: 'NO ACTION',
