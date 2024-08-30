@@ -110,7 +110,19 @@ export class ComfyUIService {
           },
         };
       } else if (MODEL_FILETYPES.some((x) => value.endsWith(x))) {
-        // Ignore Models
+        return {
+          displayName: `${nodeName} - ${key} 模型`,
+          name: `${node.id}_${key}`,
+          type: 'string',
+          default: value,
+          required: true,
+          typeOptions: {
+            comfyOptions: {
+              node: node.id,
+              key,
+            },
+          },
+        };
       } else {
         return {
           displayName: `${nodeName} - ${key}`,
