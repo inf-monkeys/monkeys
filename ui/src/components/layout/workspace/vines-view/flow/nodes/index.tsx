@@ -1,12 +1,12 @@
 import React, { memo, useEffect, useRef, useState } from 'react';
 
+import { ComplicateNodes } from '@/components/layout/workspace/vines-view/flow/nodes/complicate';
+import { NodeController } from '@/components/layout/workspace/vines-view/flow/nodes/controller.tsx';
+import { SimplifyNodes } from '@/components/layout/workspace/vines-view/flow/nodes/simplify';
+import { useRetimer } from '@/hooks/use-retimer.ts';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
-import { useRetimer } from '@/hooks/use-retimer.ts';
-import { NodeController } from '@/components/layout/workspace/vines-view/flow/nodes/controller.tsx';
-import { ComplicateNodes } from '@/components/layout/workspace/vines-view/flow/nodes/complicate';
-import { SimplifyNodes } from '@/components/layout/workspace/vines-view/flow/nodes/simplify';
 
 interface IVinesNodesProps extends React.ComponentPropsWithoutRef<'div'> {}
 

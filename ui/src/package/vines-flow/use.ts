@@ -4,8 +4,7 @@ import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 
 import { createWorkflow as createWorkflowFromAPI } from '@/apis/workflow';
 import { useVinesRefresher } from '@/package/vines-flow';
-import { VINES_DEF_NODE } from '@/package/vines-flow/core/consts.ts';
-import { IVinesFlowRenderType } from '@/package/vines-flow/core/typings.ts';
+import { VINES_CANVAS_PADDING } from '@/package/vines-flow/core/consts.ts';
 import { TaskType, WorkflowDef } from '@/package/vines-flow/share/types.ts';
 
 export const useVinesFlow = () => {
@@ -15,29 +14,20 @@ export const useVinesFlow = () => {
     const {
       canvasSize: { width, height },
     } = _vines;
+
     const vinesNodeLength = _vines.getAllNodes().length;
     if (!vinesNodeLength) return 0;
 
     const useHorizontal = _vines.renderDirection === 'horizontal';
-    const vinesRenderType = _vines.renderOptions.type;
+    const padding =
+      (useHorizontal ? 30 : 0) + VINES_CANVAS_PADDING + Math.max((6 - vinesNodeLength) * VINES_CANVAS_PADDING, 0);
 
-    const { padding: canvasPadding } = VINES_DEF_NODE[vinesRenderType];
+    // 计算画布和容器的宽高比
+    const ratioWidth = containerWidth / (width + 2 * padding);
+    const ratioHeight = containerHeight / (height + 2 * padding);
 
-    const padding = useHorizontal
-      ? containerWidth / canvasPadding.horizontal
-      : containerHeight / canvasPadding.vertical;
-
-    const containerSize = useHorizontal ? containerWidth : containerHeight;
-    const canvasSize = useHorizontal ? width : height;
-
-    if (vinesRenderType !== IVinesFlowRenderType.COMPLICATE) {
-      const zoomRatio = (containerSize - padding - Math.max((6 - vinesNodeLength) * padding, 0)) / canvasSize;
-      if (!Number.isNaN(zoomRatio)) {
-        return zoomRatio;
-      }
-    }
-
-    return (containerSize - padding) / canvasSize;
+    // 返回较小的比例，以确保画布能够完全适应容器
+    return Math.min(ratioWidth, ratioHeight);
   };
 
   return {
