@@ -200,8 +200,7 @@ export class SwitchNode extends ControlFlowVinesNode<SwitchTaskDef> {
 
     const { leftBranches: topBranches, rightBranches: bottomBranches, middleBranches } = this.getDecisionChildren();
 
-    const offset =
-      nodeHeight + (this.size.height !== 80 ? (decisionLength === 2 ? 0 : 80) : 200 + (decisionLength === 2 ? 0 : 190));
+    const offset = nodeHeight + 80;
 
     let originPosition = { ...position };
 
