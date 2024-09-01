@@ -201,8 +201,7 @@ export class ForkJoinNode extends ControlFlowVinesNode<VinesForkJoinTaskDef> {
 
     const { leftBranches: topBranches, rightBranches: bottomBranches, middleBranches } = this.getDecisionChildren();
 
-    const offset =
-      nodeHeight + (this.size.width !== 80 ? (branchLength === 2 ? 0 : 80) : 110 + (branchLength === 2 ? 0 : 190));
+    const offset = nodeHeight + 80;
 
     let originPosition = { ...position };
 
