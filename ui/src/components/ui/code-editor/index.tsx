@@ -60,6 +60,7 @@ export interface ICodeEditorProps {
 
 const DEFAULT_OPTIONS: EditorProps['options'] = {
   wordWrap: 'on',
+  automaticLayout: true,
 };
 
 const READONLY_OPTIONS: EditorProps['options'] = {
@@ -145,6 +146,7 @@ export const CodeEditor: React.FC<ICodeEditorProps> = ({
 
   return (
     <MonacoEditor
+      language={language}
       defaultLanguage={language}
       value={useRealtimeData.current ? finalData : void 0}
       height={height}
