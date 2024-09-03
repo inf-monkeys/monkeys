@@ -4,10 +4,11 @@ import { t } from 'i18next';
 import { isArray } from 'lodash';
 import { ControllerRenderProps, FieldValues, UseFormReturn } from 'react-hook-form';
 
+import { AutosizeTextarea } from '@/components/ui/autosize-textarea.tsx';
 import { TagInput } from '@/components/ui/input/tag';
-import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
+import { getI18nContent } from '@/utils';
 
 interface IFieldTagInputAndTextareaProps {
   input: VinesWorkflowVariable;
@@ -20,7 +21,7 @@ interface IFieldTagInputAndTextareaProps {
 }
 
 export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> = ({
-  input: { name, type, typeOptions, displayName },
+  input: { name, type, typeOptions, displayName: inputDisplayName },
   value,
   onChange,
   form,
@@ -30,10 +31,9 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
   const isNumber = type === 'number';
   const isMultiple = typeOptions?.multipleValues ?? false;
 
-  const visible = useMemo(
-    () => (type === 'string' || (miniMode && type === 'file')) && typeOptions?.assetType != 'comfyui-model',
-    [type, typeOptions, miniMode],
-  );
+  const visible = useMemo(() => type === 'string' || (miniMode && type === 'file'), [type, typeOptions, miniMode]);
+
+  const displayName = getI18nContent(inputDisplayName);
 
   return (
     visible &&
@@ -49,7 +49,7 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
         placeholder={t('workspace.pre-view.actuator.execution-form.string', { displayName })}
       />
     ) : (
-      <Textarea
+      <AutosizeTextarea
         placeholder={t('workspace.pre-view.actuator.execution-form.string', { displayName })}
         value={(value as string) ?? ''}
         onChange={(value) => {
@@ -60,7 +60,8 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
             onChange(value);
           }
         }}
-        className="grow"
+        minHeight={40}
+        maxHeight={200}
         {...field}
       />
     ))

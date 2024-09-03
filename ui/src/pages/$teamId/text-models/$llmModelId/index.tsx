@@ -6,8 +6,8 @@ import { Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useLLMModel } from '@/apis/llm';
-import { createTextModelsColumns } from '@/components/layout/ugc-pages/text-models/consts';
 import { UgcDetailInfo } from '@/components/layout/ugc/detail/info';
+import { createTextModelsColumns } from '@/components/layout/ugc-pages/text-models/consts';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
@@ -30,7 +30,7 @@ export const IComfyUIWorkflowDetail: React.FC<IComfyUIWorkflowDetailProps> = () 
               icon={<Undo2 />}
               variant="outline"
               size="small"
-              className="-m-1 -ml-0.5 -mr-2 scale-85"
+              className="scale-85 -m-1 -ml-0.5 -mr-2"
               onClick={() => {
                 history.back();
               }}

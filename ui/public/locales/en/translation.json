@@ -55,7 +55,8 @@
       "upload": "Upload",
       "click-to-copy": "Click to copy",
       "coming-soon": "Coming soon",
-      "counter": " ({{count}})"
+      "counter": " ({{count}})",
+      "fill-required": "Please fill in the required fields"
     },
     "type": {
       "workflow": "workflow",

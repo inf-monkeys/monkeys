@@ -79,6 +79,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
             });
           }}
           event$={tabular$}
+          workflowId={vines.workflowId}
         >
           <Button ref={submitButton} className="hidden" type="submit" />
         </TabularRender>

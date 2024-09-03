@@ -8,7 +8,7 @@ import { getI18nContent } from '@/utils';
 
 export const NoticeInput: React.FC<{ def: Pick<VinesToolDefProperties, 'displayName'> }> = ({ def }) => {
   return (
-    <div className="mb-3 flex max-h-96 overflow-y-auto rounded bg-slate-3 p-4 shadow-sm">
+    <div className="col-span-2 mb-3 flex max-h-96 w-full overflow-y-auto rounded bg-slate-3 p-4">
       <MemoizedReactMarkdown
         className="prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
         remarkPlugins={[remarkGfm]}

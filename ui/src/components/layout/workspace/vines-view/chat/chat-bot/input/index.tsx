@@ -67,19 +67,7 @@ export const VinesChatInput: React.FC<IVinesChatInputProps> = ({
     }
   };
 
-  const { submitKey, shouldSubmit } = useSubmitHandler();
-
-  const onInputKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // if ArrowUp and no userInput, fill with last input
-    if (e.key === 'ArrowUp' && input.length <= 0 && !(e.metaKey || e.altKey || e.ctrlKey)) {
-      e.preventDefault();
-      return;
-    }
-    if (shouldSubmit(e)) {
-      handleSend();
-      e.preventDefault();
-    }
-  };
+  const { submitKey } = useSubmitHandler();
 
   const isInputEmpty = isEmpty(input.trim());
   const hasMessages = messages?.length > 0;
@@ -110,7 +98,7 @@ export const VinesChatInput: React.FC<IVinesChatInputProps> = ({
       </div>
       <div className="relative overflow-hidden">
         <AutosizeTextarea
-          onKeyDown={onInputKeyDown}
+          onSubmit={handleSend}
           placeholder={t('workspace.chat-view.chat-bot.chat.placeholder')}
           maxHeight={150}
           minHeight={80}

@@ -13,7 +13,7 @@ export const CollectionInput: React.FC<
     Omit<MultiSelectProps, 'options' | 'onValueChange' | 'value'> & {
       options?: MultiSelectProps['options'];
     }
-> = ({ def, value, onChange, disabled, options = [], ...attr }) => {
+> = ({ def, value, onChange, disabled }) => {
   const { t } = useTranslation();
 
   const type = get(def, 'type', 'string');

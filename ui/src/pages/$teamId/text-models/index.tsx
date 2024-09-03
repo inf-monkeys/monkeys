@@ -5,10 +5,10 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
 import { preloadUgcTextModels, useUgcTextModels } from '@/apis/ugc';
-import { createTextModelsColumns } from '@/components/layout/ugc-pages/text-models/consts.tsx';
-import { OperateArea } from '@/components/layout/ugc-pages/text-models/operate-area';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { createTextModelsColumns } from '@/components/layout/ugc-pages/text-models/consts.tsx';
+import { OperateArea } from '@/components/layout/ugc-pages/text-models/operate-area';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
@@ -40,14 +40,6 @@ export const TextModels: React.FC = () => {
         operateArea={(item, trigger, tooltipTriggerContent) => (
           <OperateArea item={item} trigger={trigger} tooltipTriggerContent={tooltipTriggerContent} />
         )}
-        onItemClick={(item) => {
-          if (item.id === '0') {
-            return;
-          }
-          void navigate({
-            to: `/$teamId/text-models/${item.id}`,
-          });
-        }}
       />
     </main>
   );

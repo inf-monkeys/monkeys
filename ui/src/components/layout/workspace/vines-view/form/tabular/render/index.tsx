@@ -19,12 +19,11 @@ import { Label } from '@/components/ui/label.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
-import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
 
 export const BOOLEAN_VALUES = ['true', 'yes', '是', '1'];
 
-export type TTabularEvent = 'reset' | 'restore-previous-param';
+export type TTabularEvent = 'reset' | 'restore-previous-param' | 'submit';
 
 interface ITabularRenderProps {
   inputs: VinesWorkflowVariable[];
@@ -39,6 +38,9 @@ interface ITabularRenderProps {
   miniMode?: boolean;
 
   event$?: EventEmitter<TTabularEvent>;
+  workflowId?: string;
+
+  extra?: Record<string, any>;
 }
 
 export const TabularRender: React.FC<ITabularRenderProps> = ({
@@ -54,6 +56,9 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
   miniMode = false,
 
   event$,
+  workflowId,
+
+  extra = {},
 }) => {
   const { t } = useTranslation();
 
@@ -98,41 +103,6 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
     form.reset(defaultValues);
   }, [inputs]);
 
-  const { trigger: triggerGetExecutions } = useMutationSearchWorkflowExecutions();
-
-  const workflowId = useFlowStore((s) => s.workflowId);
-
-  const latestValues = useLatest(defValues);
-  event$?.useSubscription((event) => {
-    switch (event) {
-      case 'reset':
-        form.reset(latestValues.current);
-        break;
-      case 'restore-previous-param':
-        toast.promise(
-          triggerGetExecutions({
-            pagination: { page: 1, limit: 10 },
-            orderBy: { filed: 'startTime', order: 'DESC' },
-            workflowId,
-          }),
-          {
-            loading: t('workspace.form-view.quick-toolbar.restore-previous-param.loading'),
-            success: (data) => {
-              if (data) {
-                form.reset(omit(data?.data?.[0]?.input, '__context'));
-                return t('workspace.form-view.quick-toolbar.restore-previous-param.success');
-              }
-              return t('workspace.form-view.quick-toolbar.restore-previous-param.prev-param-empty');
-            },
-            error: t('workspace.form-view.quick-toolbar.restore-previous-param.error'),
-          },
-        );
-        break;
-      default:
-        break;
-    }
-  });
-
   const handleSubmit = form.handleSubmit((data) => {
     for (const [key, value] of Object.entries(data)) {
       if (isArray(value)) {
@@ -142,6 +112,45 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
       }
     }
     onSubmit?.(data);
+  });
+
+  const { trigger: triggerGetExecutions } = useMutationSearchWorkflowExecutions();
+  const latestValues = useLatest(defValues);
+  event$?.useSubscription((event) => {
+    switch (event) {
+      case 'reset':
+        form.reset(latestValues.current);
+        break;
+      case 'restore-previous-param':
+        if (workflowId) {
+          toast.promise(
+            triggerGetExecutions({
+              pagination: { page: 1, limit: 10 },
+              orderBy: { filed: 'startTime', order: 'DESC' },
+              workflowId,
+            }),
+            {
+              loading: t('workspace.form-view.quick-toolbar.restore-previous-param.loading'),
+              success: (data) => {
+                if (data) {
+                  form.reset(omit(data?.data?.[0]?.input, '__context'));
+                  return t('workspace.form-view.quick-toolbar.restore-previous-param.success');
+                }
+                return t('workspace.form-view.quick-toolbar.restore-previous-param.prev-param-empty');
+              },
+              error: t('workspace.form-view.quick-toolbar.restore-previous-param.error'),
+            },
+          );
+        } else {
+          toast.error(t('workspace.wrapper.workflow-info-card.workflow-id-empty'));
+        }
+        break;
+      case 'submit':
+        void handleSubmit();
+        break;
+      default:
+        break;
+    }
   });
 
   const { foldInputs, defInputs } = useMemo(
@@ -187,6 +196,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
                 key={i}
                 defValues={defValues}
                 miniMode={miniMode}
+                extra={extra}
               />
             ))}
             {hasFoldInputs && (
@@ -205,6 +215,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
                         key={'fold_' + i}
                         defValues={defValues}
                         miniMode={miniMode}
+                        extra={extra}
                       />
                     ))}
                   </AccordionContent>

@@ -3,6 +3,9 @@
 import * as React from 'react';
 import { useImperativeHandle } from 'react';
 
+import { useMemoizedFn } from 'ahooks';
+
+import { useSubmitHandler } from '@/hooks/use-submit-handler.ts';
 import { cn } from '@/utils';
 
 interface UseAutosizeTextAreaProps {
@@ -52,6 +55,7 @@ export type AutosizeTextAreaRef = {
 type AutosizeTextAreaProps = {
   maxHeight?: number;
   minHeight?: number;
+  onSubmit?: (e: React.FormEvent<HTMLTextAreaElement>) => void;
 } & React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 
 export const AutosizeTextarea = React.forwardRef<AutosizeTextAreaRef, AutosizeTextAreaProps>(
@@ -62,6 +66,8 @@ export const AutosizeTextarea = React.forwardRef<AutosizeTextAreaRef, AutosizeTe
       className,
       onChange,
       value,
+      onKeyDown,
+      onSubmit,
       ...props
     }: AutosizeTextAreaProps,
     ref: React.Ref<AutosizeTextAreaRef>,
@@ -87,9 +93,28 @@ export const AutosizeTextarea = React.forwardRef<AutosizeTextAreaRef, AutosizeTe
       setTriggerAutoSize(value as string);
     }, [props?.defaultValue, value]);
 
+    const { shouldSubmit } = useSubmitHandler();
+
+    const handleKeyDown = useMemoizedFn((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      // if ArrowUp and no userInput, fill with last input
+      if (e.key === 'ArrowUp' && triggerAutoSize.length <= 0 && !(e.metaKey || e.altKey || e.ctrlKey)) {
+        e.preventDefault();
+        return;
+      }
+      if (onSubmit) {
+        if (shouldSubmit(e)) {
+          e.preventDefault();
+          onSubmit(e);
+        }
+      }
+
+      onKeyDown?.(e);
+    });
+
     return (
       <textarea
         {...props}
+        onKeyDown={handleKeyDown}
         value={value}
         ref={textAreaRef}
         className={cn(

@@ -55,7 +55,8 @@
       "upload": "上传",
       "click-to-copy": "点击复制",
       "coming-soon": "即将上线",
-      "counter": "（{{count}}）"
+      "counter": "（{{count}}）",
+      "fill-required": "请填写必填项"
     },
     "type": {
       "workflow": "工作流",
@@ -1441,6 +1442,11 @@
           "dropdown-label": "语言模型操作",
           "options": {
             "publish": "发布到市场"
+          },
+          "info-editor": {
+            "title": "文本模型信息",
+            "info-updated": "文本模型信息已更新",
+            "info-update-failed": "文本模型信息更新失败"
           }
         }
       }
@@ -2192,7 +2198,7 @@
                 "create-field": "新增参数"
               },
               "collection": {
-                "placeholder": "请输入 {{name}}，回车新增"
+                "placeholder": "请输入{{name}}，回车新增"
               },
               "editor": {
                 "check-json-failed": "必须为 JSON 数组",
