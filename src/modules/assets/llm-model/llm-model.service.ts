@@ -1,4 +1,5 @@
 import { ListDto } from '@/common/dto/list.dto';
+import { UpdateLlmModelParams } from '@/database/entities/assets/model/llm-model/llm-model';
 import { LlmModelRepository } from '@/database/repositories/llm-model.repository';
 import { Injectable } from '@nestjs/common';
 
@@ -16,5 +17,9 @@ export class LlmModelService {
 
   public async getLLMModel(teamId: string, id: string) {
     return await this.llmModelRepository.getLLMModel(teamId, id);
+  }
+
+  public async updateLLMModel(teamId: string, id: string, dto: UpdateLlmModelParams) {
+    return await this.llmModelRepository.updateLLMModel(teamId, id, dto);
   }
 }

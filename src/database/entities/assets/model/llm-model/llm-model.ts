@@ -2,6 +2,7 @@ import { BaseAssetEntity } from '@/database/entities/assets/base-asset';
 import { AssetType } from '@inf-monkeys/monkeys';
 import { Column, Entity } from 'typeorm';
 
+
 /** OneAPI Model Mapping, for example
  
 {
@@ -36,3 +37,5 @@ export class LlmModelEntity extends BaseAssetEntity {
   })
   models: LlmOneapiModel;
 }
+
+export type UpdateLlmModelParams = Partial<Pick<LlmModelEntity, 'displayName' | 'description' | 'iconUrl'>>;

@@ -1,6 +1,7 @@
 import { config } from '@/common/config';
 import { logger } from '@/common/logger';
 import { OneApiClient, OneApiSystemApiClient, generateOneApiTokenByUsernamePassword } from '@/common/oneapi';
+import { CHANNEL_OPTIONS } from '@/common/oneapi/consts';
 import { generatePassword, generateShortId } from '@/common/utils';
 import { LlmModelRepository } from '@/database/repositories/llm-model.repository';
 import { OneApiRepository } from '@/database/repositories/oneapi.respository';
@@ -46,12 +47,32 @@ export class OneAPIService {
       throw new Error('One team can only have one LLM channel of the same type');
     }
 
+    const { icon, displayName, description, ...rest } = data;
+
     const oneapiUser = await this.getOrCreateOneapiUser(teamId);
     const systemClient = await this.getSystemClient();
-    const channel = await systemClient.createChannel(channelType, teamId, data);
+    const channel = await systemClient.createChannel(channelType, teamId, rest);
     const userClient = new OneApiClient(config.oneapi.baseURL, oneapiUser.userToken);
     await userClient.updateTokenModelScope(channel.models.split(','));
-    await this.llmModelRepository.createLLMModel(teamId, userId, channelType, channel.id, JSON.parse(channel.model_mapping));
+    await this.llmModelRepository.createLLMModel(teamId, userId, channelType, channel.id, JSON.parse(channel.model_mapping), icon, displayName, description);
     return channel;
+  }
+
+  public async getModels() {
+    const systemClient = await this.getSystemClient();
+    const systemModels = await systemClient.loadModels();
+
+    return Object.values(CHANNEL_OPTIONS)
+      .map((channel) => ({
+        ...channel,
+        models: systemModels[channel.value] || [],
+      }))
+      .filter((channel) => channel.models.length > 0);
+  }
+
+  public async testChannel(teamId: string, channelId: number, modelId: string) {
+    const oneapiUser = await this.getOrCreateOneapiUser(teamId);
+    const systemClient = await this.getSystemClient();
+    return await systemClient.testChannel(channelId, modelId);
   }
 }

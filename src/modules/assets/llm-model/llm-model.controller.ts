@@ -1,12 +1,12 @@
 import { ListDto } from '@/common/dto/list.dto';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
+import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { LlmModelEntity } from '@/database/entities/assets/model/llm-model/llm-model';
+import { LlmModelEntity, UpdateLlmModelParams } from '@/database/entities/assets/model/llm-model/llm-model';
 import { getModels } from '@/modules/tools/llm/llm.service';
-import { Controller, Delete, Get, Param, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { LlmModelService } from './llm-model.service';
-import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 
 @Controller('llm-models')
 @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
@@ -34,7 +34,7 @@ export class LlmModelController {
           'en-US': 'System Built-in',
         },
         models: systemModesValue,
-        iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/OpenAI_Logo.svg/2560px-OpenAI_Logo.svg.png',
+        iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/openai.webp',
       } as LlmModelEntity;
       list = [systemChannel, ...list];
     }
@@ -60,6 +60,17 @@ export class LlmModelController {
   public async deleteLLMModel(@Req() req: IRequest, @Param('id') id: string) {
     const { teamId } = req;
     await this.service.deleteLLMModel(teamId, id);
+    return new SuccessResponse({
+      data: {
+        success: true,
+      },
+    });
+  }
+
+  @Put('/:id')
+  public async updateLLMModel(@Req() req: IRequest, @Param('id') id: string, @Body() dto: UpdateLlmModelParams) {
+    const { teamId } = req;
+    await this.service.updateLLMModel(teamId, id, dto);
     return new SuccessResponse({
       data: {
         success: true,

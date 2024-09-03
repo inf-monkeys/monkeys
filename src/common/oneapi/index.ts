@@ -131,18 +131,21 @@ export class OneApiSystemApiClient extends OneApiBaseClient {
   }
 
   public async createChannel(type: number, modelPrefix: string, data: { [x: string]: any }): Promise<OneapiChannel> {
-    const allModels = await this.loadModels();
-    const channelModels = allModels[type];
-    const channelModelsWithPrefix = channelModels.map((model) => `${modelPrefix}_${model}`);
+    const models = data?.models as string[] ?? [];
+    if (!models || models?.length === 0) {
+      throw new Error('No models provided');
+    }
+
+    const channelModelsWithPrefix = models.map((model) => `${modelPrefix}_${model}`).join(',');
     const modelMappings = {};
-    channelModels.forEach((model) => {
+    models.forEach((model) => {
       modelMappings[`${modelPrefix}_${model}`] = model;
     });
     const reqData = {
       ...data,
       groups: ['default'],
       model_mapping: JSON.stringify(modelMappings),
-      models: [...channelModelsWithPrefix].join(','),
+      models: channelModelsWithPrefix,
       type: parseInt(type.toString(), 10),
       other: '',
       group: 'default',
@@ -171,6 +174,24 @@ export class OneApiSystemApiClient extends OneApiBaseClient {
       throw new Error('Failed to create channel');
     }
     return channel;
+  }
+
+  public async testChannel(channelId: number, modelId: string) {
+    const { data } = await this.request<{
+      success: boolean;
+      message: string;
+      time: number;
+      model: string;
+    }>({
+      method: 'GET',
+      url: `/api/channel/test/${channelId}?model=${modelId}`,
+    });
+
+    if (!data.success) {
+      throw new Error(data.message);
+    }
+
+    return data;
   }
 }
 
