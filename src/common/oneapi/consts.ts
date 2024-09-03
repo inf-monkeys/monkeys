@@ -10,13 +10,60 @@ export interface OneAPIChannel {
   properites: ToolProperty[];
 }
 
+export const COMMON_DEFAULT_CHANNEL_PROPERITIES: ToolProperty[] = [
+  {
+    displayName: {
+      'zh-CN': '自定义模型供应商名称',
+      'en-US': 'Custom Model Supplier Name',
+    },
+    name: 'displayName',
+    type: 'string',
+    required: false,
+    typeOptions: {
+      foldUp: true, 
+    },
+  },
+  {
+    displayName: {
+      'zh-CN': '自定义模型供应商描述',
+      'en-US': 'Custom Model Supplier Description',
+    },
+    name: 'description',
+    type: 'string',
+    required: false,
+    typeOptions: {
+      foldUp: true, 
+    },
+  },
+]
+
 export const DEFAULT_ONEAPI_CHANNEL_PROPERITIES: ToolProperty[] = [
   {
-    displayName: 'API Key',
+    displayName: {
+      'zh-CN': '密钥',
+      'en-US': 'Key',
+    },
     name: 'key',
     type: 'string',
     required: true,
-    description: 'API Key',
+    description: {
+      'zh-CN': '在此处填写模型供应商提供的 APIKEY',
+      'en-US': 'Enter the APIKEY provided by the model supplier here',
+    },
+  },
+  {
+    displayName: {
+      'zh-CN': '模型列表',
+      'en-US': 'Model List',
+    },
+    name: 'models',
+    type: 'string',
+    required: true,
+    default: [],
+    typeOptions: {
+      assetType: 'oneapi-model',
+      multipleValues: true,
+    },
   },
   {
     displayName: 'Base URL',
@@ -27,7 +74,11 @@ export const DEFAULT_ONEAPI_CHANNEL_PROPERITIES: ToolProperty[] = [
       'zh-CN': '可选，不填默认使用官方的默认地址',
       'en-US': 'Optional, if not filled in, the official default address will be used by default',
     },
+    typeOptions: {
+      foldUp: true, 
+    },
   },
+  ...COMMON_DEFAULT_CHANNEL_PROPERITIES,
 ];
 
 export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
@@ -40,7 +91,7 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
       'zh-CN':
         'OpenAI 是一家成立于 2015 年 12 月的美国人工智能研究组织，研究人工智能的目标是开发“安全和有益”的人工智能通用智能，OpenAI 将其定义为“高度自主的系统，在大多数经济上有价值的工作中胜过人类。',
     },
-    iconUrl: 'https://static.infmonkeys.com/logo/llm/OpenAI.png',
+    iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/openai.webp',
     properites: DEFAULT_ONEAPI_CHANNEL_PROPERITIES,
   },
   {
@@ -50,7 +101,7 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
       'en-US': 'Claude is a family of large language models developed by Anthropic. The first model was released in March 2023. Claude 3, released in March 2024, can also analyze images',
       'zh-CN': 'Claude 是由 Anthropic 开发的大型语言模型系列。第一个模型于 2023 年 3 月发布。2024 年 3 月发布的 Claude 3 还可以分析图像。',
     },
-    iconUrl: 'https://static.infmonkeys.com/logo/llm/Claude.svg',
+    iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/claude.webp',
     properites: DEFAULT_ONEAPI_CHANNEL_PROPERITIES,
   },
   {
@@ -60,7 +111,7 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
       'en-US': 'Azure OpenAI offers private networking, regional availability, and responsible AI content filtering',
       'zh-CN': 'Azure OpenAI 提供私有网络、区域可用性和负责任的 AI 内容过滤。',
     },
-    iconUrl: 'https://sp-ao.shortpixel.ai/client/to_auto,q_lossy,ret_img,w_869,h_480/https://answerrocket.com/wp-content/uploads/azure-openai-logo-625x345-1.png',
+    iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/azure.webp',
     properites: [
       {
         displayName: 'Azure Base URL',
@@ -92,6 +143,15 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
         required: true,
         description: 'API Key',
       },
+      {
+        displayName: {
+          'zh-CN': '注意，模型部署名称必须和模型名称保持一致，因为系统会把请求体中的 model 参数替换为你的部署名称（模型名称中的点会被剔除）',
+          'en-US': 'Note that the model deployment name must be consistent with the model name, because the system will replace the model parameter in the request body with your deployment name (the dot in the model name will be removed)',
+        },
+        type: 'notice',
+        name: 'docs',
+      },
+      ...COMMON_DEFAULT_CHANNEL_PROPERITIES,
     ],
   },
   {
@@ -101,13 +161,13 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
       'en-US': "PaLM 2 is our next generation language model with improved multilingual, reasoning and coding capabilities that builds on Google's legacy of breakthrough ...",
       'zh-CN': 'PaLM 2 是我们的下一代语言模型，具有改进的多语言、推理和编码能力，是基于谷歌突破性的遗产构建的...',
     },
-    iconUrl: 'https://static.infmonkeys.com/logo/llm/PaLM2.png',
+    iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/GooglePaLM2.webp',
     properites: DEFAULT_ONEAPI_CHANNEL_PROPERITIES,
   },
   {
     id: '24',
     displayName: 'Google Gemini',
-    iconUrl: 'https://static.infmonkeys.com/logo/llm/Gemini.png',
+    iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/google_gemini.webp',
     properites: DEFAULT_ONEAPI_CHANNEL_PROPERITIES,
     description: {
       'en-US':
@@ -119,8 +179,8 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
   {
     id: '28',
     displayName: 'Mistral AI',
-    iconUrl: 'https://static.infmonkeys.com/logo/llm/MiniMax.webp',
-    properites: [...DEFAULT_ONEAPI_CHANNEL_PROPERITIES],
+    iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/MistralAI.webp',
+    properites: DEFAULT_ONEAPI_CHANNEL_PROPERITIES,
     description: {
       'en-US':
         'Mistral AI is a French company specializing in artificial intelligence products. Founded in April 2023 by former employees of Meta Platforms and Google DeepMind, the company has quickly risen to prominence in the AI sector.',
@@ -133,8 +193,24 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
       'en-US': 'Baidu WenXinQianFan',
       'zh-CN': '百度文心千帆',
     },
-    iconUrl: 'https://static.infmonkeys.com/logo/llm/WenXinQianFan.jpeg',
-    properites: DEFAULT_ONEAPI_CHANNEL_PROPERITIES,
+    iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/baidu.webp',
+    properites: [
+      {
+        displayName: {
+          'zh-CN': '密钥',
+          'en-US': 'Key',
+        },
+        name: 'key',
+        type: 'string',
+        required: true,
+        placeholder: 'APIKey|SecretKey',
+        description: {
+          'zh-CN': '在此处填写模型供应商提供的 APIKEY',
+          'en-US': 'Enter the APIKEY provided by the model supplier here',
+        },
+      },
+      ...DEFAULT_ONEAPI_CHANNEL_PROPERITIES.slice(1)
+    ],
     description: {
       'zh-CN': '百度智能云千帆AppBuilder. 分钟级超低门槛AI原生应用搭建 ; BML全功能AI开发平台. 基于文心大模型完成一站式AI开发',
       'en-US':
@@ -147,8 +223,24 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
       'zh-CN': '阿里通义千问',
       'en-US': 'Alibaba TongYiQianWen',
     },
-    iconUrl: 'https://static.infmonkeys.com/logo/llm/TongYiQianWen.webp',
-    properites: DEFAULT_ONEAPI_CHANNEL_PROPERITIES,
+    iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/qianwen.webp',
+    properites: [     
+      {
+        displayName: {
+          'zh-CN': '插件参数',
+          'en-US': 'Plugin Parameters',
+        },
+        name: 'other',
+        placeholder: '请输入插件参数，即 X-DashScope-Plugin 请求头的取值',
+        type: 'string',
+        required: true,
+        description: {
+          'zh-CN': '插件参数，即 X-DashScope-Plugin 请求头的取值',
+          'en-US': 'Plugin parameters, that is, the value of the X-DashScope-Plugin request header'
+        }
+      },
+      ...DEFAULT_ONEAPI_CHANNEL_PROPERITIES
+    ],
     description: {
       'zh-CN': '通义千问（英语：Tongyi Qianwen）是由阿里巴巴集团旗下的云端运算服务的科技公司阿里云开发的聊天机器人，能够与人交互、回答问题及协作创作。',
       'en-US':
@@ -161,8 +253,38 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
       'zh-CN': '讯飞星火认知',
       'en-US': 'Xunfei Xinhuo',
     },
-    iconUrl: 'https://static.infmonkeys.com/logo/llm/XunfeiXinhuo.webp',
-    properites: DEFAULT_ONEAPI_CHANNEL_PROPERITIES,
+    iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/xunfei.webp',
+    properites: [
+      {
+        displayName: {
+          'zh-CN': '密钥',
+          'en-US': 'Key',
+        },
+        name: 'key',
+        type: 'string',
+        required: true,
+        placeholder: 'APPID|APISecret|APIKey',
+        description: {
+          'zh-CN': '在此处填写模型供应商提供的 APIKEY',
+          'en-US': 'Enter the APIKEY provided by the model supplier here',
+        },
+      },
+      {
+        displayName: {
+          'zh-CN': '模型版本',
+          'en-US': 'Model Version',
+        },
+        name: 'other',
+        placeholder: '请输入星火大模型版本，注意是接口地址中的版本号，例如：v2.1',
+        type: 'string',
+        required: true,
+        description: {
+          'zh-CN': '星火大模型版本，注意是接口地址中的版本号，例如：v2.1',
+          'en-US': 'model version, note that it is the version number in the interface address, for example: v2.1'
+        }
+      },
+      ...DEFAULT_ONEAPI_CHANNEL_PROPERITIES.slice(1)
+    ],
     description: {
       'zh-CN': '讯飞星火大模型，是由科大讯飞推出的新一代认知智能大模型，拥有跨领域的知识和语言理解能力，能够基于自然对话方式理解与执行任务，提供语言理解、知识问答、逻辑',
       'en-US':
@@ -175,7 +297,7 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
       'zh-CN': '智谱 ChatGLM',
       'en-US': 'Zhipu ChatGLM',
     },
-    iconUrl: 'https://static.infmonkeys.com/logo/llm/ChatGLM.png',
+    iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/zhipuqingyan.webp',
     properites: DEFAULT_ONEAPI_CHANNEL_PROPERITIES,
     description: {
       'zh-CN': '基于GLM模型开发，支持多轮对话，具备内容创作、信息归纳总结等能力. APP下载. 立即体验. 联系我们. chatglm@zhipuai.cn. 公众号. 企业合作. 大模型. ChatGLM-6B.',
@@ -188,7 +310,7 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
       'en-US': '360 ZhiNao',
     },
     id: '19',
-    iconUrl: 'https://static.infmonkeys.com/logo/llm/360ZhiNao.jpeg',
+    iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/360.webp',
     properites: DEFAULT_ONEAPI_CHANNEL_PROPERITIES,
     description: {
       'zh-CN': '以人为本，安全可信 · 360智脑. 新一代有形象、有灵魂、有智慧的智脑大模型驱动数字人，帮您查找资料、分析总结、答疑解惑，与您伴读交流，共同成长，是您的知识学习和决策',
@@ -199,7 +321,7 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
   {
     id: '25',
     displayName: 'Moonshot AI',
-    iconUrl: 'https://static.infmonkeys.com/logo/llm/Moonshot.jpeg',
+    iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/kimi.webp',
     properites: DEFAULT_ONEAPI_CHANNEL_PROPERITIES,
     description: {
       'en-US': "Moonshot AI's tool can increase conversion rates, significantly elevate average order value, decrease abandoned carts, and make any store a real money-maker.",
@@ -212,8 +334,24 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
       'zh-CN': '腾讯混元',
       'en-US': 'Tencent HunYun',
     },
-    iconUrl: 'https://static.infmonkeys.com/logo/llm/TengXunHunYun.jpeg',
-    properites: DEFAULT_ONEAPI_CHANNEL_PROPERITIES,
+    iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/hunyuan.webp',
+    properites: [
+      {
+        displayName: {
+          'zh-CN': '密钥',
+          'en-US': 'Key',
+        },
+        name: 'key',
+        type: 'string',
+        required: true,
+        placeholder: 'AppId|SecretId|SecretKey',
+        description: {
+          'zh-CN': '在此处填写模型供应商提供的 APIKEY',
+          'en-US': 'Enter the APIKEY provided by the model supplier here',
+        },
+      },
+      ...DEFAULT_ONEAPI_CHANNEL_PROPERITIES.slice(1)
+    ],
     description: {
       'zh-CN': '腾讯混元大模型是由腾讯研发的大语言模型，具备跨领域知识和自然语言理解能力，实现基于人机自然语言对话的方式，理解用户指令并执行任务，帮助用户实现人获取信息。',
       'en-US':
@@ -226,7 +364,7 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
       'zh-CN': '百川大模型',
       'en-US': 'BaiChuan',
     },
-    iconUrl: 'https://static.infmonkeys.com/logo/llm/BaiChuan.jpeg',
+    iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/baichuan.webp',
     properites: DEFAULT_ONEAPI_CHANNEL_PROPERITIES,
     description: {
       'zh-CN': '百川智能以帮助大众轻松、普惠地获取世界知识和专业服务为使命，致力于通过语言AI的突破，构建中国最优秀的大模型底座。百川大模型，融合了意图理解、信息检索以及强化 ...',
@@ -237,7 +375,7 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
   {
     id: '27',
     displayName: 'MiniMax',
-    iconUrl: 'https://static.infmonkeys.com/logo/llm/MiniMax.webp',
+    iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/minimax.webp',
     properites: DEFAULT_ONEAPI_CHANNEL_PROPERITIES,
     description: {
       'zh-CN':
@@ -249,7 +387,7 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
   {
     id: '29',
     displayName: 'Groq',
-    iconUrl: 'https://static.infmonkeys.com/logo/llm/Groq.png',
+    iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/groq.webp',
     properites: DEFAULT_ONEAPI_CHANNEL_PROPERITIES,
     description: {
       'en-US':
@@ -260,7 +398,7 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
   {
     id: '30',
     displayName: 'Ollama',
-    iconUrl: 'https://static.infmonkeys.com/logo/llm/Ollama.png',
+    iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/ollama.webp',
     properites: DEFAULT_ONEAPI_CHANNEL_PROPERITIES,
     description: {
       'zh-CN': '使用大型语言模型快速启动和运行。',
@@ -273,7 +411,7 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
       'zh-CN': '零一万物',
       'en-US': 'LingYi WanWu',
     },
-    iconUrl: 'https://static.infmonkeys.com/logo/llm/LingYiWanWu.png',
+    iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/01wanwu.webp',
     properites: DEFAULT_ONEAPI_CHANNEL_PROPERITIES,
     description: {
       'zh-CN': '零一万物致力于成为一家由技术愿景驱动、拥有卓越中国工程底蕴的创新企业，推动以基座大模型为突破的AI 2.0掀起技术、平台到应用多个层面的革命。',
@@ -281,4 +419,75 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
         'LingYi WanWu is committed to becoming an innovative enterprise driven by technical vision and possessing outstanding Chinese engineering heritage, promoting the revolution of AI 2.0 from technology, platform to application at multiple levels with the large model as the breakthrough.',
     },
   },
+  {
+    id: '40',
+    displayName: {
+      'zh-CN': '字节跳动豆包',
+      'en-US': 'ByteDance Doubao',
+    },
+    iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/doubao.webp',
+    properites: [ 
+      {
+        displayName: {
+          'zh-CN': '对于豆包而言，需要手动去「模型推理页面」创建推理接入点，以接入点名称作为模型名称，例如：ep-20240608051426-tkxvl',
+          'en-US': 'For Doubao, you need to manually go to the "Model Inference Page" to create an inference access point, and use the access point name as the model name, for example: ep-20240608051426-tkxvl',
+        },
+        type: 'notice',
+        name: 'docs',
+      },
+      ...DEFAULT_ONEAPI_CHANNEL_PROPERITIES
+    ],
+    description: {
+      'zh-CN': '字节跳动推出的自研大模型。通过字节跳动内部50+业务场景实践验证，每日千亿级 tokens 大使用量持续打磨，提供多模态能力，以优质模型效果为企业打造丰富的业务体验。',
+      'en-US':
+        'Doubao is a self-developed large model launched by ByteDance. It has been verified through 50+ business scenarios within ByteDance, with a daily usage of over 100 billion tokens, continuously polishing with high-quality model effects to provide rich business experiences for enterprises.',
+    },
+  },
+];
+
+export const CHANNEL_OPTIONS = [
+  { key: 1, text: 'OpenAI', displayName: { 'zh-CN': 'OpenAI', 'en-US': 'OpenAI' }, value: 1, color: 'green' },
+  { key: 14, text: 'Anthropic Claude', displayName: { 'zh-CN': 'Anthropic Claude', 'en-US': 'Anthropic Claude' }, value: 14, color: 'black' },
+  { key: 33, text: 'AWS', displayName: { 'zh-CN': 'AWS', 'en-US': 'AWS' }, value: 33, color: 'black' },
+  { key: 3, text: 'Azure OpenAI', displayName: { 'zh-CN': 'Azure OpenAI', 'en-US': 'Azure OpenAI' }, value: 3, color: 'olive' },
+  { key: 11, text: 'Google PaLM2', displayName: { 'zh-CN': 'Google PaLM2', 'en-US': 'Google PaLM2' }, value: 11, color: 'orange' },
+  { key: 24, text: 'Google Gemini', displayName: { 'zh-CN': 'Google Gemini', 'en-US': 'Google Gemini' }, value: 24, color: 'orange' },
+  { key: 28, text: 'Mistral AI', displayName: { 'zh-CN': 'Mistral AI', 'en-US': 'Mistral AI' }, value: 28, color: 'orange' },
+  { key: 41, text: 'Novita', displayName: { 'zh-CN': 'Novita', 'en-US': 'Novita' }, value: 41, color: 'purple' },
+  { key: 40, text: '字节跳动豆包', displayName: { 'zh-CN': '字节跳动豆包', 'en-US': 'ByteDance Doubao' }, value: 40, color: 'blue' },
+  { key: 15, text: '百度文心千帆', displayName: { 'zh-CN': '百度文心千帆', 'en-US': 'Baidu Qianfan' }, value: 15, color: 'blue' },
+  { key: 17, text: '阿里通义千问', displayName: { 'zh-CN': '阿里通义千问', 'en-US': 'Tongyi Qwen' }, value: 17, color: 'orange' },
+  { key: 18, text: '讯飞星火认知', displayName: { 'zh-CN': '讯飞星火认知', 'en-US': 'XunFei XingHuo' }, value: 18, color: 'blue' },
+  { key: 16, text: '智谱 ChatGLM', displayName: { 'zh-CN': '智谱 ChatGLM', 'en-US': 'ZhiPuAI ChatGLM' }, value: 16, color: 'violet' },
+  { key: 19, text: '360 智脑', displayName: { 'zh-CN': '360 智脑', 'en-US': '360 AI' }, value: 19, color: 'blue' },
+  { key: 25, text: 'Moonshot AI', displayName: { 'zh-CN': 'Moonshot AI', 'en-US': 'Moonshot AI' }, value: 25, color: 'black' },
+  { key: 23, text: '腾讯混元', displayName: { 'zh-CN': '腾讯混元', 'en-US': 'Tencent HunYuan' }, value: 23, color: 'teal' },
+  { key: 26, text: '百川大模型', displayName: { 'zh-CN': '百川大模型', 'en-US': 'BaiChuan AI' }, value: 26, color: 'orange' },
+  { key: 27, text: 'MiniMax', displayName: { 'zh-CN': 'MiniMax', 'en-US': 'MiniMax' }, value: 27, color: 'red' },
+  { key: 29, text: 'Groq', displayName: { 'zh-CN': 'Groq', 'en-US': 'Groq' }, value: 29, color: 'orange' },
+  { key: 30, text: 'Ollama', displayName: { 'zh-CN': 'Ollama', 'en-US': 'Ollama' }, value: 30, color: 'black' },
+  { key: 31, text: '零一万物', displayName: { 'zh-CN': '零一万物', 'en-US': 'LingYiWanWu' }, value: 31, color: 'green' },
+  { key: 32, text: '阶跃星辰', displayName: { 'zh-CN': '阶跃星辰', 'en-US': 'StepFun' }, value: 32, color: 'blue' },
+  { key: 34, text: 'Coze', displayName: { 'zh-CN': '扣子 Coze', 'en-US': 'Coze' }, value: 34, color: 'blue' },
+  { key: 35, text: 'Cohere', displayName: { 'zh-CN': 'Cohere', 'en-US': 'Cohere' }, value: 35, color: 'blue' },
+  { key: 36, text: 'DeepSeek', displayName: { 'zh-CN': '深度求索 DeepSeek', 'en-US': 'DeepSeek' }, value: 36, color: 'black' },
+  { key: 37, text: 'Cloudflare', displayName: { 'zh-CN': 'Cloudflare', 'en-US': 'Cloudflare' }, value: 37, color: 'orange' },
+  { key: 38, text: 'DeepL', displayName: { 'zh-CN': 'DeepL', 'en-US': 'DeepL' }, value: 38, color: 'black' },
+  { key: 39, text: 'together.ai', displayName: { 'zh-CN': 'together.ai', 'en-US': 'together.ai' }, value: 39, color: 'blue' },
+  { key: 42, text: 'VertexAI', displayName: { 'zh-CN': 'VertexAI', 'en-US': 'VertexAI' }, value: 42, color: 'blue' },
+  { key: 43, text: 'Proxy', displayName: { 'zh-CN': 'Proxy', 'en-US': 'Proxy' }, value: 43, color: 'blue' },
+  { key: 44, text: 'SiliconFlow', displayName: { 'zh-CN': 'SiliconFlow', 'en-US': 'SiliconFlow' }, value: 44, color: 'blue' },
+  { key: 8, text: '自定义渠道', displayName: { 'zh-CN': '自定义渠道', 'en-US': 'Custom Channel' }, value: 8, color: 'pink' },
+  { key: 22, text: '知识库：FastGPT', displayName: { 'zh-CN': '知识库：FastGPT', 'en-US': 'Knowledge Base: FastGPT' }, value: 22, color: 'blue' },
+  { key: 21, text: '知识库：AI Proxy', displayName: { 'zh-CN': '知识库：AI Proxy', 'en-US': 'Knowledge Base: AI Proxy' }, value: 21, color: 'purple' },
+  { key: 20, text: '代理：OpenRouter', displayName: { 'zh-CN': '代理：OpenRouter', 'en-US': 'Proxy: OpenRouter' }, value: 20, color: 'black' },
+  { key: 2, text: '代理：API2D', displayName: { 'zh-CN': '代理：API2D', 'en-US': 'Proxy: API2D' }, value: 2, color: 'blue' },
+  { key: 5, text: '代理：OpenAI-SB', displayName: { 'zh-CN': '代理：OpenAI-SB', 'en-US': 'Proxy: OpenAI-SB' }, value: 5, color: 'brown' },
+  { key: 7, text: '代理：OhMyGPT', displayName: { 'zh-CN': '代理：OhMyGPT', 'en-US': 'Proxy: OhMyGPT' }, value: 7, color: 'purple' },
+  { key: 10, text: '代理：AI Proxy', displayName: { 'zh-CN': '代理：AI Proxy', 'en-US': 'Proxy: AI Proxy' }, value: 10, color: 'purple' },
+  { key: 4, text: '代理：CloseAI', displayName: { 'zh-CN': '代理：CloseAI', 'en-US': 'Proxy: CloseAI' }, value: 4, color: 'teal' },
+  { key: 6, text: '代理：OpenAI Max', displayName: { 'zh-CN': '代理：OpenAI Max', 'en-US': 'Proxy: OpenAI Max' }, value: 6, color: 'violet' },
+  { key: 9, text: '代理：AI.LS', displayName: { 'zh-CN': '代理：AI.LS', 'en-US': 'Proxy: AI.LS' }, value: 9, color: 'yellow' },
+  { key: 12, text: '代理：API2GPT', displayName: { 'zh-CN': '代理：API2GPT', 'en-US': 'Proxy: API2GPT' }, value: 12, color: 'blue' },
+  { key: 13, text: '代理：AIGC2D', displayName: { 'zh-CN': '代理：AIGC2D', 'en-US': 'Proxy: AIGC2D' }, value: 13, color: 'purple' }
 ];

@@ -4,7 +4,7 @@ import { generateDbId } from '@/common/utils';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { LlmModelEntity, LlmOneapiModel } from '../entities/assets/model/llm-model/llm-model';
+import { LlmModelEntity, LlmOneapiModel, UpdateLlmModelParams } from '../entities/assets/model/llm-model/llm-model';
 import { LlmModelAssetRepositroy } from './assets-llm-model.respository';
 
 @Injectable()
@@ -46,12 +46,16 @@ export class LlmModelRepository {
     });
   }
 
-  public async createLLMModel(teamId: string, creatorUserId: string, channelType: number, channelId: number, models: LlmOneapiModel) {
+  public async createLLMModel(teamId: string, creatorUserId: string, channelType: number, channelId: number, models: LlmOneapiModel, icon?: string, displayName?: string, description?: string) {
     const oneapiChannel = ONEAPI_CHANNELS.find((channel) => channel.id === channelType.toString());
 
     if (!oneapiChannel) {
       throw new Error('Invalid LLM Model type');
     }
+
+    const finalDisplayName = displayName?.toString() || oneapiChannel.displayName;
+    const finalDescription = description ? `${description?.toString()} | ` : '';
+
     const entity: Partial<LlmModelEntity> = {
       id: generateDbId(),
       teamId,
@@ -59,9 +63,12 @@ export class LlmModelRepository {
       isDeleted: false,
       createdTimestamp: +new Date(),
       updatedTimestamp: +new Date(),
-      iconUrl: oneapiChannel.iconUrl,
-      displayName: oneapiChannel.displayName,
-      description: oneapiChannel.description,
+      iconUrl: icon || oneapiChannel.iconUrl,
+      displayName: finalDisplayName,
+      description: {
+        'zh-CN': `${finalDescription}由 ${typeof finalDisplayName === 'object' ? Object.values(finalDisplayName)[0] : finalDisplayName} 提供，支持 ${Object.values(models).join(', ')} 模型`,
+        'en-US': `${finalDescription}Provided by ${finalDisplayName}, support ${Object.values(models).join(', ')} models`,
+      },
       channelType,
       channelId,
       models,
@@ -86,6 +93,13 @@ export class LlmModelRepository {
         channelId,
         isDeleted: false,
       },
+    });
+  }
+
+  public async updateLLMModel(teamId: string, id: string, dto: UpdateLlmModelParams) {
+    return await this.llmModelRepository.update(id, {
+      ...dto,
+      updatedTimestamp: +new Date(),
     });
   }
 }
