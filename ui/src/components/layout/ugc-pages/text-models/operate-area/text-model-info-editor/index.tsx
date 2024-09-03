@@ -7,8 +7,9 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { updateComfyuiModel } from '@/apis/comfyui-model';
-import { IComfyuiModel } from '@/apis/comfyui-model/typings.ts';
+import { updateTextModel } from '@/apis/llm';
+import { ILLMModel } from '@/apis/llm/typings.ts';
+import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
@@ -19,15 +20,15 @@ import { VinesIcon } from '@/components/ui/vines-icon';
 import { comfyuiModelInfoSchema, IComfyuiModelInfo } from '@/schema/workspace/comfyui-model-info.ts';
 import { getI18nContent } from '@/utils';
 
-interface IImageModelInfoEditorProps {
-  model?: IComfyuiModel;
+interface ITextModelInfoEditorProps {
+  model?: IAssetItem<ILLMModel>;
   children?: React.ReactNode;
   visible?: boolean;
   setVisible?: (v: boolean) => void;
   afterUpdate?: () => void;
 }
 
-export const ImageModelInfoEditor: React.FC<IImageModelInfoEditorProps> = ({
+export const TextModelInfoEditor: React.FC<ITextModelInfoEditorProps> = ({
   model,
   children,
   visible,
@@ -39,7 +40,7 @@ export const ImageModelInfoEditor: React.FC<IImageModelInfoEditorProps> = ({
   const [open, setOpen] = useState(visible ?? false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const mutateModelList = () => mutate((key) => typeof key === 'string' && key.startsWith('/api/comfyui/servers'));
+  const mutateModelList = () => mutate((key) => typeof key === 'string' && key.startsWith('/api/llm-models'));
 
   useEffect(() => {
     typeof visible != 'undefined' && setOpen(visible);
@@ -70,14 +71,14 @@ export const ImageModelInfoEditor: React.FC<IImageModelInfoEditorProps> = ({
       return;
     }
     setIsLoading(true);
-    const newModel = await updateComfyuiModel(model.id, data);
+    const newModel = await updateTextModel(model.id, data);
     if (newModel) {
       afterUpdate ? afterUpdate() : await mutateModelList();
       setOpen(false);
       setIsLoading(false);
-      toast.success(t('ugc-page.image-models.ugc-view.operate-area.info-editor.info-updated'));
+      toast.success(t('ugc-page.text-models.ugc-view.operate-area.info-editor.info-updated'));
     } else {
-      toast.error(t('ugc-page.image-models.ugc-view.operate-area.info-editor.info-update-failed'));
+      toast.error(t('ugc-page.text-models.ugc-view.operate-area.info-editor.info-update-failed'));
     }
   });
 
@@ -86,7 +87,7 @@ export const ImageModelInfoEditor: React.FC<IImageModelInfoEditorProps> = ({
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t('ugc-page.image-models.ugc-view.operate-area.info-editor.title')}</DialogTitle>
+          <DialogTitle>{t('ugc-page.text-models.ugc-view.operate-area.info-editor.title')}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={handleSubmit} className="flex flex-col gap-2">

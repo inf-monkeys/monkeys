@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
 import { useTriggers, useTriggerTypes } from '@/apis/workflow/trigger';
+import { WorkflowApiConfig } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/api-config';
 import { InputConfig } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config';
 import { WorkflowTrigger } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/triggers';
 import { InputPreview } from '@/components/layout/workspace/vines-view/flow/nodes/complicate/node/endpoint/start/input-preview.tsx';
@@ -17,9 +18,6 @@ import { useCanvasStore } from '@/store/useCanvasStore';
 import { useCanvasInteractionStore } from '@/store/useCanvasStore/interaction.ts';
 import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import VinesEvent from '@/utils/events.ts';
-import {
-  WorkflowApiConfig
-} from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/api-config';
 
 export const ComplicateTriggerNode: React.FC = () => {
   const { t } = useTranslation();

@@ -19,7 +19,10 @@ const I18N_MAPPER = {
 };
 export const getI18nContent = (content: string | I18nValue | null | undefined): string | undefined => {
   if (!content) return;
-  if (typeof content === 'string') return content;
+  const contentType = typeof content;
+  if (contentType === 'string' || contentType === 'number') {
+    return content.toString();
+  }
   return content[I18N_MAPPER[i18n.language] ?? 'en-US'] ?? content['en-US'];
 };
 

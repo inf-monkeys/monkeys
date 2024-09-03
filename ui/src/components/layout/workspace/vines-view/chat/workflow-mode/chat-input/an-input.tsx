@@ -8,6 +8,7 @@ import { ChatInputMoreOperations } from '@/components/layout/workspace/vines-vie
 import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
+import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
 
 interface IAnInputProps {
@@ -23,6 +24,8 @@ export const AnInput: React.FC<IAnInputProps> = ({ inputs, onClick, disabled, lo
   const tabular$ = useEventEmitter<TTabularEvent>();
   const isInputNotEmpty = inputs.length > 0;
 
+  const workflowId = useFlowStore((s) => s.workflowId);
+
   return (
     <TabularRender
       inputs={inputs}
@@ -31,6 +34,7 @@ export const AnInput: React.FC<IAnInputProps> = ({ inputs, onClick, disabled, lo
       itemClassName="w-full border-transparent bg-transparent py-0 space-y-1 [&_input]:bg-transparent"
       onSubmit={onClick}
       event$={tabular$}
+      workflowId={workflowId}
       miniMode
     >
       <div className="flex items-center gap-2">

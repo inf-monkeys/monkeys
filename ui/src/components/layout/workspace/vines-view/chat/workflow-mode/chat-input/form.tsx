@@ -9,6 +9,7 @@ import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vine
 import { Button } from '@/components/ui/button';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
+import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
 
 interface IFormInputProps {
@@ -25,6 +26,8 @@ export const FormInput: React.FC<IFormInputProps> = ({ inputs, height, onClick, 
   const { ref, width } = useElementSize();
 
   const tabular$ = useEventEmitter<TTabularEvent>();
+  const workflowId = useFlowStore((s) => s.workflowId);
+
   const isInputNotEmpty = inputs.length > 0;
 
   return (
@@ -33,7 +36,7 @@ export const FormInput: React.FC<IFormInputProps> = ({ inputs, height, onClick, 
       className={cn('w-full overflow-hidden px-3', disabled && 'pointer-events-none opacity-85')}
       animate={{ marginRight: disabled ? -width - 35 : 0 }}
     >
-      <TabularRender inputs={inputs} height={height} onSubmit={onClick} event$={tabular$}>
+      <TabularRender inputs={inputs} height={height} onSubmit={onClick} event$={tabular$} workflowId={workflowId}>
         <div className="flex w-full items-center gap-2">
           {isInputNotEmpty && <ChatInputMoreOperations tabular$={tabular$} />}
           <Button

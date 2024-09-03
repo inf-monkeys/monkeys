@@ -1,3 +1,5 @@
+import { Link } from '@tanstack/react-router';
+
 import { I18nValue } from '@inf-monkeys/monkeys';
 import { createColumnHelper } from '@tanstack/react-table';
 
@@ -16,10 +18,14 @@ export const createTextModelsColumns = () => [
   }),
   columnHelper.accessor('displayName', {
     id: 'title',
-    cell: ({ getValue }) => (
-      <a className="transition-colors hover:text-primary-500" target="_blank" rel="noreferrer">
+    cell: ({ getValue, row }) => (
+      <Link
+        className="hover:text-primary-500 cursor-pointer transition-colors"
+        to={`/$teamId/text-models/${row.original.id}`}
+        disabled={row.original.id === '0'}
+      >
         {getI18nContent(getValue() as string | I18nValue)}
-      </a>
+      </Link>
     ),
   }),
   columnHelper.accessor('description', {

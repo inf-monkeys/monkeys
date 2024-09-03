@@ -29,8 +29,6 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
 
   const [imageModelInfoEditorVisible, setImageModelInfoEditorVisible] = useState(false);
 
-  const id = item?.id;
-
   return (
     <>
       <DropdownMenu>

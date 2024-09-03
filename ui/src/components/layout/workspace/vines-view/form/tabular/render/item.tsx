@@ -6,6 +6,8 @@ import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { NoticeInput } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/notice.tsx';
+import { FieldImageModel } from '@/components/layout/workspace/vines-view/form/tabular/render/field/assets/image-model.tsx';
+import { FieldOneApiModels } from '@/components/layout/workspace/vines-view/form/tabular/render/field/assets/oneapi-models.tsx';
 import { FieldBoolean } from '@/components/layout/workspace/vines-view/form/tabular/render/field/boolean.tsx';
 import { FieldFile } from '@/components/layout/workspace/vines-view/form/tabular/render/field/file';
 import { FieldNumber } from '@/components/layout/workspace/vines-view/form/tabular/render/field/number.tsx';
@@ -19,7 +21,6 @@ import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
 import { cn, getI18nContent } from '@/utils';
-import { FieldImageModel } from '@/components/layout/workspace/vines-view/form/tabular/render/field/image-model.tsx';
 
 interface IVinesFormFieldItemProps extends React.ComponentPropsWithoutRef<'div'> {
   itemClassName?: string;
@@ -27,6 +28,7 @@ interface IVinesFormFieldItemProps extends React.ComponentPropsWithoutRef<'div'>
   form: UseFormReturn<IWorkflowInputForm>;
   defValues: IWorkflowInputForm;
   miniMode?: boolean;
+  extra?: Record<string, any>;
 }
 
 export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
@@ -35,6 +37,7 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
   defValues,
   itemClassName,
   miniMode = false,
+  extra = {},
 }) => {
   const { t } = useTranslation();
 
@@ -53,16 +56,23 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
   const enableReset = (typeOptions?.enableReset ?? false) && !isUndefined(defValues?.[name]);
   const singleColumn = typeOptions?.singleColumn ?? false;
 
+  const assetType = typeOptions?.assetType;
+  const required = it?.required;
+
   return (
     <FormField
       key={name}
       name={name}
       control={form.control}
+      rules={{ required }}
       render={({ field: { value, onChange, ...field } }) => (
         <FormItem className={cn('col-span-2 px-3', singleColumn && 'col-span-1', itemClassName)}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
-              <FormLabel className="font-bold">{getI18nContent(displayName)}</FormLabel>
+              <FormLabel className="font-bold">
+                {required && <span className="text-red-10">* </span>}
+                {getI18nContent(displayName)}
+              </FormLabel>
               {tips && (
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -112,14 +122,27 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
                 </Select>
               ) : (
                 <>
-                  <FieldTagInputAndTextarea
-                    input={it}
-                    value={value}
-                    onChange={onChange}
-                    form={form}
-                    field={field}
-                    miniMode={miniMode}
-                  />
+                  {assetType === 'comfyui-model' ? (
+                    <FieldImageModel input={it} form={form} value={value} onChange={onChange} field={field} />
+                  ) : assetType === 'oneapi-model' ? (
+                    <FieldOneApiModels
+                      input={it}
+                      form={form}
+                      value={value}
+                      onChange={onChange}
+                      field={field}
+                      extra={extra}
+                    />
+                  ) : (
+                    <FieldTagInputAndTextarea
+                      input={it}
+                      value={value}
+                      onChange={onChange}
+                      form={form}
+                      field={field}
+                      miniMode={miniMode}
+                    />
+                  )}
 
                   <FieldNumber input={it} value={value} onChange={onChange} field={field} />
 
@@ -128,10 +151,6 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
                   <FieldFile input={it} form={form} value={value} miniMode={miniMode} />
 
                   <FieldOptions input={it} value={value} onChange={onChange} />
-
-                  {typeOptions?.assetType === 'comfyui-model' && (
-                    <FieldImageModel input={it} value={value} onChange={onChange} field={field} />
-                  )}
                 </>
               )}
             </>
