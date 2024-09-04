@@ -1,5 +1,7 @@
 import React, { useRef, useState } from 'react';
 
+import { mutate } from 'swr';
+
 import { useCreation } from 'ahooks';
 import { Package } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -32,10 +34,12 @@ export const ModelSupplier: React.FC<IModelSupplierProps> = () => {
     return data?.data?.sort((a, b) => Number(a.id) - Number(b.id)) ?? [];
   }, [data?.data]);
 
+  const [open, setOpen] = useState(false);
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button icon={<Package />} variant="outline" size="small">
           {t('ugc-page.text-models.ugc-view.import-channel.label')}
@@ -75,9 +79,21 @@ export const ModelSupplier: React.FC<IModelSupplierProps> = () => {
             </Virtualizer>
           </ScrollArea>
           <Separator orientation="vertical" className="h-full" />
-          <div className="ml-4 w-full space-y-4">
+          <div
+            className="ml-4 w-full space-y-4"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+          >
             <h1 className="font-bold">{getI18nContent(channel?.displayName)}</h1>
-            <LLMChannelImportForm channel={channel} />
+            <LLMChannelImportForm
+              channel={channel}
+              afterOperate={() => {
+                setOpen(false);
+                void mutate((key) => typeof key === 'string' && key.startsWith('/api/llm-models'));
+              }}
+            />
           </div>
         </div>
       </DialogContent>

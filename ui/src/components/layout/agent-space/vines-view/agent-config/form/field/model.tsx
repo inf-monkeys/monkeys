@@ -6,9 +6,11 @@ import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { useLLMModels } from '@/apis/llm';
+import { ILLMModel } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/llm-model.tsx';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { IAgentConfig } from '@/schema/agent/agent-config.ts';
 import { getI18nContent } from '@/utils';
 
@@ -24,11 +26,15 @@ export const AgentConfigFormFieldModel: React.FC<IAgentConfigFormFieldModelProps
   const modelList = useCreation(() => {
     return data
       ? data.reduce(
-          (acc: { name: string; value: string }[], item) =>
+          (acc: ILLMModel[], item) =>
             acc.concat(
-              Object.entries(item.models).map(([key, value]) => ({
-                name: `${getI18nContent(item.displayName)} - ${value}`,
-                value: key,
+              Object.entries(item.models).map(([, model]) => ({
+                displayName: `${item.channelId === 0 ? '' : `${model} - `}${getI18nContent(item.displayName) ?? model}`,
+                description: getI18nContent(item.description),
+                iconUrl: item?.iconUrl ?? '',
+                channelId: item.channelId,
+                model: model,
+                value: item.channelId === 0 ? model : `${item.channelId}:${model}`,
               })),
             ),
           [],
@@ -72,10 +78,27 @@ export const AgentConfigFormFieldModel: React.FC<IAgentConfigFormFieldModelProps
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {modelList.map(({ name, value }, i) => (
-                        <SelectItem value={value} key={i}>
-                          {name}
-                        </SelectItem>
+                      {modelList.map(({ displayName, value, iconUrl, channelId, description, model }, i) => (
+                        <Tooltip key={i}>
+                          <TooltipTrigger asChild>
+                            <SelectItem value={value}>
+                              <div className="flex items-center gap-2">
+                                {iconUrl && <img src={iconUrl} alt={displayName} className="size-6" />}
+                                <p className="text-sm font-bold">{displayName}</p>
+                                {channelId === 0 && (
+                                  <p className="text-xxs rounded border border-input bg-muted p-1 text-gray-500">
+                                    {t('common.utils.system')}
+                                  </p>
+                                )}
+                              </div>
+                            </SelectItem>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-72" side={i === 0 ? 'bottom' : 'top'}>
+                            <span className="text-sm font-bold">{model}</span>
+                            <br />
+                            {description}
+                          </TooltipContent>
+                        </Tooltip>
                       ))}
                     </SelectContent>
                   </Select>

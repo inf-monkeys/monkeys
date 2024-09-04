@@ -1,12 +1,13 @@
 import React, { useCallback, useMemo } from 'react';
 
+import { useEventEmitter } from 'ahooks';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { createLLMChannel } from '@/apis/llm';
 import { ILLMChannel } from '@/apis/llm/typings.ts';
 import { calculateDisplayInputs } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input/utils.ts';
-import { TabularRender } from '@/components/layout/workspace/vines-view/form/tabular/render';
+import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
 
 interface ILLMChannelImportFormProps {
@@ -45,6 +46,8 @@ export const LLMChannelImportForm: React.FC<ILLMChannelImportFormProps> = ({ cha
     [channel, finalInputs],
   );
 
+  const tabular$ = useEventEmitter<TTabularEvent>();
+
   return (
     <TabularRender
       inputs={finalInputs}
@@ -52,8 +55,14 @@ export const LLMChannelImportForm: React.FC<ILLMChannelImportFormProps> = ({ cha
       onSubmit={handleImport}
       miniMode
       extra={{ modelId: Number(channel?.id ?? '') }}
+      event$={tabular$}
     >
-      <Button className="mx-3 min-h-10 w-[calc(100%-1.5rem)]" variant="outline" type="submit">
+      <Button
+        className="mx-3 min-h-10 w-[calc(100%-1.5rem)]"
+        variant="outline"
+        type="submit"
+        onClick={() => tabular$.emit('submit')}
+      >
         {t('common.utils.save')}
       </Button>
     </TabularRender>
