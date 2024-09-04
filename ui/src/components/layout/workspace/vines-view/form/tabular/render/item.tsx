@@ -45,7 +45,11 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
 
   const { displayName, name, type, description, typeOptions } = it;
   if (type === 'notice') {
-    return <NoticeInput key={name} def={{ displayName }} />;
+    return (
+      <div className="col-span-2 w-full px-3">
+        <NoticeInput key={name} def={{ displayName }} />
+      </div>
+    );
   }
 
   const tips = typeOptions?.tips;

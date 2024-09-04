@@ -1440,10 +1440,19 @@
           }
         },
         "operate-area": {
-          "dropdown-label": "Operations",
+          "dropdown-label": "Language model operation",
           "options": {
-            "publish": "Publish to Market"
+            "publish": "Publish to the market"
+          },
+          "info-editor": {
+            "title": "Text model information",
+            "info-updated": "Text model information updated",
+            "info-update-failed": "Text model information update failed"
           }
+        },
+        "import-channel": {
+          "label": "Model Supplier",
+          "select-channel-tip": "Select this supplier"
         }
       }
     },

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 
 import { useTranslation } from 'react-i18next';
 
@@ -8,13 +8,13 @@ import { preloadUgcTextModels, useUgcTextModels } from '@/apis/ugc';
 import { UgcView } from '@/components/layout/ugc/view';
 import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createTextModelsColumns } from '@/components/layout/ugc-pages/text-models/consts.tsx';
+import { ModelSupplier } from '@/components/layout/ugc-pages/text-models/model-supplier';
 import { OperateArea } from '@/components/layout/ugc-pages/text-models/operate-area';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const TextModels: React.FC = () => {
   const { t: tHook } = useTranslation();
-  const navigate = useNavigate();
 
   return (
     <main className="size-full">
@@ -40,6 +40,7 @@ export const TextModels: React.FC = () => {
         operateArea={(item, trigger, tooltipTriggerContent) => (
           <OperateArea item={item} trigger={trigger} tooltipTriggerContent={tooltipTriggerContent} />
         )}
+        subtitle={<ModelSupplier />}
       />
     </main>
   );
