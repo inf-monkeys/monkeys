@@ -1448,6 +1448,10 @@
             "info-updated": "文本模型信息已更新",
             "info-update-failed": "文本模型信息更新失败"
           }
+        },
+        "import-channel": {
+          "label": "模型供应商",
+          "select-channel-tip": "选择此供应商"
         }
       }
     },
