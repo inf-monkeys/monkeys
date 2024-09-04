@@ -114,6 +114,37 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
     iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/azure.webp',
     properites: [
       {
+        displayName: {
+          'zh-CN': '密钥',
+          'en-US': 'Key',
+        },
+        name: 'apiKey',
+        type: 'string',
+        required: true,
+        description: {
+          'zh-CN': '在此处填写模型 Azure 供应商提供的 APIKEY',
+          'en-US': 'Enter the APIKEY provided by the Azure model supplier here',
+        },
+      },
+      {
+        displayName: {
+          'zh-CN': '模型列表',
+          'en-US': 'Model List',
+        },
+        description: {
+          'zh-CN': '模型部署名称必须和模型名称保持一致，因为系统会把请求体中的 model 参数替换为你的部署名称（模型名称中的点会被剔除）',
+          'en-US': 'The model deployment name must be consistent with the model name, because the system will replace the model parameter in the request body with your deployment name (the dot in the model name will be removed)',
+        },
+        name: 'models',
+        type: 'string',
+        required: true,
+        default: [],
+        typeOptions: {
+          assetType: 'oneapi-model',
+          multipleValues: true,
+        },
+      },
+      {
         displayName: 'Azure Base URL',
         name: 'azure_base_url',
         description: {
@@ -122,6 +153,9 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
         },
         type: 'string',
         required: false,
+        typeOptions: {
+          foldUp: true, 
+        },
       },
       {
         displayName: {
@@ -135,21 +169,9 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
         },
         type: 'string',
         required: false,
-      },
-      {
-        displayName: 'API Key',
-        name: 'apiKey',
-        type: 'string',
-        required: true,
-        description: 'API Key',
-      },
-      {
-        displayName: {
-          'zh-CN': '注意，模型部署名称必须和模型名称保持一致，因为系统会把请求体中的 model 参数替换为你的部署名称（模型名称中的点会被剔除）',
-          'en-US': 'Note that the model deployment name must be consistent with the model name, because the system will replace the model parameter in the request body with your deployment name (the dot in the model name will be removed)',
+        typeOptions: {
+          foldUp: true, 
         },
-        type: 'notice',
-        name: 'docs',
       },
       ...COMMON_DEFAULT_CHANNEL_PROPERITIES,
     ],
