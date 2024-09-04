@@ -14,25 +14,32 @@ import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
 export const TextModels: React.FC = () => {
-  const { t: tHook } = useTranslation();
+  const { t } = useTranslation();
 
   return (
     <main className="size-full">
       <UgcView
         assetKey="text-models"
         assetType="llm-model"
-        assetName={tHook('components.layout.main.sidebar.list.model.text-models.label')}
+        assetName={t('components.layout.main.sidebar.list.model.text-models.label')}
         useUgcFetcher={useUgcTextModels}
         preloadUgcFetcher={preloadUgcTextModels}
-        createColumns={() => createTextModelsColumns()}
+        createColumns={createTextModelsColumns}
         renderOptions={{
-          subtitle: (item) => (
-            <span className="line-clamp-1">
-              {`${item.user?.name ?? tHook('common.utils.system')} ${tHook('common.utils.created-at', {
-                time: formatTimeDiffPrevious(item.createdTimestamp),
-              })}`}
-            </span>
-          ),
+          subtitle: (item) => {
+            const userName = item.user?.name;
+            return (
+              <span className="line-clamp-1">
+                {(userName ?? t('common.utils.system')).concat(
+                  userName
+                    ? t('common.utils.created-at', {
+                        time: formatTimeDiffPrevious(item.createdTimestamp),
+                      })
+                    : '',
+                )}
+              </span>
+            );
+          },
           cover: (item) => {
             return RenderIcon({ iconUrl: item.iconUrl, size: 'gallery' });
           },

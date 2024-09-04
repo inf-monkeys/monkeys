@@ -18,6 +18,8 @@ interface IPresetWrapperProps<T extends Array<IVinesToolPropertiesOption>> {
   isLoading?: boolean;
   options: T;
   optionsVariableMapper: Record<string, VinesToolDefProperties>;
+
+  children?: React.ReactNode;
 }
 
 export const PresetWrapper = <T extends Array<IVinesToolPropertiesOption>>({
@@ -34,6 +36,8 @@ export const PresetWrapper = <T extends Array<IVinesToolPropertiesOption>>({
 
   options,
   optionsVariableMapper,
+
+  children,
 
   ...rest
 }: IVinesInputPropertyProps & IVinesInputPresetProps & IPresetWrapperProps<T>): React.ReactNode => {
@@ -102,17 +106,21 @@ export const PresetWrapper = <T extends Array<IVinesToolPropertiesOption>>({
               />
             </SelectTrigger>
             <SelectContent>
-              <SelectGroup>
-                {options.map((option, index) => (
-                  <SelectItem
-                    key={index}
-                    value={option.value as string}
-                    disabled={disabled || (multipleValues && isArrayValue && value.includes(option.value))}
-                  >
-                    {option.name}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
+              {children ? (
+                children
+              ) : (
+                <SelectGroup>
+                  {options.map((option, index) => (
+                    <SelectItem
+                      key={index}
+                      value={option.value as string}
+                      disabled={disabled || (multipleValues && isArrayValue && value.includes(option.value))}
+                    >
+                      {option.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              )}
             </SelectContent>
           </Select>
         </motion.div>

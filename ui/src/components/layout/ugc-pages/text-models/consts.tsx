@@ -22,7 +22,7 @@ export const createTextModelsColumns = () => [
       <Link
         className="hover:text-primary-500 cursor-pointer transition-colors"
         to={`/$teamId/text-models/${row.original.id}`}
-        disabled={row.original.id === '0'}
+        disabled={row.original.channelId === 0}
       >
         {getI18nContent(getValue() as string | I18nValue)}
       </Link>

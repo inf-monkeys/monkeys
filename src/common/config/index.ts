@@ -161,6 +161,7 @@ export interface LlmModelConfig {
   baseURL: string;
   apiKey?: string;
   displayName?: string;
+  description?: string;
   iconUrl?: string;
   defaultParams?: { [x: string]: any };
   autoMergeConsecutiveMessages?: boolean;

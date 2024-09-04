@@ -20,23 +20,25 @@ export class LlmModelController {
     const systemModels = getModels();
 
     if (systemModels.length) {
-      const systemModesValue = {};
-      for (const model of systemModels) {
-        systemModesValue[model.value] = model.value;
+      const systemChannels = [] as LlmModelEntity[];
+
+      for (const { name, value, icon, desc } of systemModels) {
+        systemChannels.push({
+          assetType: 'llm-model',
+          channelId: 0,
+          channelType: 1,
+          displayName: name,
+          description: desc || {
+            'zh-CN': '系统内置大语言模型，由 OpenAI 标准接口提供',
+            'en-US': 'The system has a built-in large language model, provided by the OpenAI standard interface'
+          },
+          iconUrl: icon || 'https://monkeyminio01.daocloud.cn/monkeys/icons/openai.webp',
+          models: { [value]: value },
+          id: `0-${value}`
+        } as LlmModelEntity)
       }
-      const systemChannel = {
-        id: '0',
-        assetType: 'llm-model',
-        channelId: 0,
-        channelType: 1,
-        displayName: {
-          'zh-CN': '系统内置',
-          'en-US': 'System Built-in',
-        },
-        models: systemModesValue,
-        iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/openai.webp',
-      } as LlmModelEntity;
-      list = [systemChannel, ...list];
+
+      list = [...list, ...systemChannels];
     }
 
     return new SuccessListResponse({

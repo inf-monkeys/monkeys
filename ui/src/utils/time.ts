@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
+import _ from 'lodash';
 
 import i18n from '@/i18n.ts';
-import _ from 'lodash';
 
 export const formatTimeDiff = (diffValue: number) => {
   const duration = dayjs.duration(diffValue);

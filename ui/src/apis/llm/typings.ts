@@ -8,6 +8,7 @@ export interface ILLMModel extends IBaseEntity {
   teamId?: string;
   displayName: string | I18nValue;
   description: string | I18nValue;
+  iconUrl: string;
   logo: string;
   models: { [x: string]: any };
   channelId: number;

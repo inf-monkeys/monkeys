@@ -53,15 +53,43 @@ export interface CreateChatCompelitionsResponseOptions {
   onFailed?: (error: string) => void;
 }
 
-export const getModels = (
-  type?: LlmModelEndpointType,
-): Array<{
+const getNameByModelName = (name?: string | string[], modelName?: string, defaultValue?: string) => {
+  if (!name) {
+    return;
+  }
+
+  if (typeof defaultValue === 'undefined' && modelName) {
+    defaultValue = modelName;
+  }
+
+  if (typeof name === 'string') {
+    return name;
+  }
+  if (Array.isArray(name) && modelName) {
+    for (const mapperName of name) {
+      const targetModelMapper = mapperName?.split('|')
+      if ((targetModelMapper?.[0] ?? '') === modelName) {
+        return targetModelMapper?.[1] ?? defaultValue;
+      }
+    }
+    return defaultValue;
+  }
+  return modelName ?? defaultValue;
+}
+
+type BuiltModel = {
   name: string;
   value: string;
   type: LlmModelEndpointType[];
   isDefault?: boolean;
-}> => {
-  const result: Array<{ name: string; value: string; type: LlmModelEndpointType[]; isDefault?: boolean }> = [];
+  icon?: string;
+  desc?: string;
+}
+
+export const getModels = (
+  type?: LlmModelEndpointType,
+): Array<BuiltModel> => {
+  const result: Array<BuiltModel> = [];
   for (const model of config.models) {
     if (type) {
       if (model.type && !model.type.includes(type)) {
@@ -71,20 +99,26 @@ export const getModels = (
     if (typeof model.model === 'string') {
       const splittedModels = model.model.split(',');
       for (const modelValue of splittedModels) {
+        const finalModelValue = modelValue.trim()
         result.push({
-          name: model.displayName || model.model,
-          value: modelValue.trim(),
+          name: getNameByModelName(model.displayName, finalModelValue) || model.model,
+          value: finalModelValue,
           type: model.type,
-          isDefault: model.use_as_default,
+          icon: getNameByModelName(model.iconUrl, finalModelValue, null),
+          desc: getNameByModelName(model.description, finalModelValue, null),
+          isDefault: model.use_as_default ?? false,
         });
       }
     } else if (Array.isArray(model.model)) {
       for (const modelName of model.model) {
+        const finalModelName = modelName.trim()
         result.push({
-          name: model.displayName || modelName,
-          value: modelName.trim(),
+          name: getNameByModelName(model.displayName, finalModelName) || modelName,
+          value: finalModelName,
           type: model.type,
-          isDefault: model.use_as_default,
+          icon: getNameByModelName(model.iconUrl, finalModelName, null),
+          desc: getNameByModelName(model.description, finalModelName, null),
+          isDefault: model.use_as_default ?? false,
         });
       }
     }
