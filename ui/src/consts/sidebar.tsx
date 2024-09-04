@@ -80,10 +80,10 @@ export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
       //   path: '/$teamId/text-model-store',
       //   name: 'text-model-store',
       // },
-      {
-        path: '/$teamId/image-model-store',
-        name: 'image-model-store',
-      },
+      // {
+      //   path: '/$teamId/image-model-store',
+      //   name: 'image-model-store',
+      // },
       {
         path: '/$teamId/comfyui-store',
         name: 'comfyui-store',
