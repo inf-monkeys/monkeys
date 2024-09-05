@@ -3,11 +3,12 @@ import { logger } from '@/common/logger';
 import { OneApiClient, OneApiSystemApiClient, generateOneApiTokenByUsernamePassword } from '@/common/oneapi';
 import { CHANNEL_OPTIONS } from '@/common/oneapi/consts';
 import { generatePassword, generateShortId } from '@/common/utils';
+import { UpdateLlmModelParams } from '@/database/entities/assets/model/llm-model/llm-model';
 import { LlmModelRepository } from '@/database/repositories/llm-model.repository';
 import { OneApiRepository } from '@/database/repositories/oneapi.respository';
 import { SystemConfigurationRepository } from '@/database/repositories/system-configuration.repository';
 import { Injectable } from '@nestjs/common';
-import { omit } from 'lodash';
+import { omit, set } from 'lodash';
 
 @Injectable()
 export class OneAPIService {
@@ -91,11 +92,24 @@ export class OneAPIService {
       throw new Error('Channel not found');
     }
 
+    const llmModelId = data.id;
+    const llmModelUpdateParams = {
+      displayName: data.displayName,
+      description: data.description,
+      iconUrl: data.icon,
+    } as unknown as UpdateLlmModelParams;
+
     data = {
       ...omit(data, ['displayName', 'description', 'icon', 'id']),
       id: channel.id,
     };
 
-    return await systemClient.updateChannel(channelType, teamId, data);
+    const newChannel = await systemClient.updateChannel(channelType, teamId, data);
+
+    set(llmModelUpdateParams, 'models', JSON.parse(newChannel.model_mapping));
+
+    await this.llmModelRepository.updateLLMModel(llmModelId, llmModelUpdateParams);
+
+    return newChannel;
   }
 }

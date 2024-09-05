@@ -11,6 +11,13 @@ export interface ILLMModel extends IBaseEntity {
   iconUrl: string;
   logo: string;
   models: { [x: string]: any };
+  metadata: {
+    properites: ToolProperty[];
+    displayName: string | I18nValue;
+    description: string | I18nValue;
+    iconUrl: string;
+    id: string;
+  };
   channelId: number;
   channelType: string;
 }

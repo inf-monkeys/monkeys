@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { mutate } from 'swr';
 import { createFileRoute } from '@tanstack/react-router';
 
 import { Undo2 } from 'lucide-react';
@@ -8,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useLLMModel } from '@/apis/llm';
 import { UgcDetailInfo } from '@/components/layout/ugc/detail/info';
 import { createTextModelsColumns } from '@/components/layout/ugc-pages/text-models/consts';
-import { TextModelsList } from '@/components/layout/ugc-pages/text-models/models/TextModelsList.tsx';
+import { TextModelsList } from '@/components/layout/ugc-pages/text-models/models/list.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -20,6 +21,8 @@ export const IComfyUIWorkflowDetail: React.FC<IComfyUIWorkflowDetailProps> = () 
   const { t } = useTranslation();
   const { llmModelId } = Route.useParams();
   const { data: llmModel } = useLLMModel(llmModelId);
+
+  const modelMetadata = llmModel?.metadata;
 
   return (
     <main className="flex size-full flex-col gap-4">
@@ -47,7 +50,15 @@ export const IComfyUIWorkflowDetail: React.FC<IComfyUIWorkflowDetailProps> = () 
           data={llmModel}
           assetKey="llm-model"
         />
-        <TextModelsList models={llmModel?.models ?? {}} />
+        <TextModelsList
+          models={llmModel?.models ?? {}}
+          properites={modelMetadata?.properites ?? []}
+          modelType={modelMetadata?.id}
+          modelId={llmModelId}
+          afterOperate={() =>
+            mutate((key) => typeof key === 'string' && key.startsWith(`/api/llm-models/${llmModelId}`))
+          }
+        />
       </div>
     </main>
   );

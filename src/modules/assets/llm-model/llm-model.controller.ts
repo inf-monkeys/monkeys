@@ -46,8 +46,7 @@ export class LlmModelController {
 
   @Put('/:id')
   public async updateLLMModel(@Req() req: IRequest, @Param('id') id: string, @Body() dto: UpdateLlmModelParams) {
-    const { teamId } = req;
-    await this.service.updateLLMModel(teamId, id, dto);
+    await this.service.updateLLMModel(id, dto);
     return new SuccessResponse({
       data: {
         success: true,

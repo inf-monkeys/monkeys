@@ -150,6 +150,23 @@ export class OneApiSystemApiClient extends OneApiBaseClient {
     return data.data;
   }
 
+  public async getChannel(channelId: number) {
+    const { data } = await this.request<{
+      success: boolean;
+      message: string;
+      data: OneapiChannel;
+    }>({
+      method: 'GET',
+      url: `/api/channel/${channelId}`,
+    });
+
+    if (!data.success) {
+      throw new Error(data.message);
+    }
+
+    return data.data;
+  }
+
   private data2channel(channelType: number, modelPrefix: string, data: { [x: string]: any }) {
     const models = (data?.models as string[]) ?? [];
     if (!models || models?.length === 0) {

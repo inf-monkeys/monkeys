@@ -2,7 +2,6 @@ import { BaseAssetEntity } from '@/database/entities/assets/base-asset';
 import { AssetType } from '@inf-monkeys/monkeys';
 import { Column, Entity } from 'typeorm';
 
-
 /** OneAPI Model Mapping, for example
  
 {
