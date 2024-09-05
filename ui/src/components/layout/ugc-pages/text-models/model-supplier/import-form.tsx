@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { useEventEmitter } from 'ahooks';
+import { isEmpty } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -28,7 +29,7 @@ export const LLMChannelImportForm: React.FC<ILLMChannelImportFormProps> = ({ cha
         return;
       }
 
-      if (channel.properites.some((it) => it.required && !data[it.name])) {
+      if (channel.properites.some((it) => it.required && isEmpty(data[it.name]))) {
         toast.error(t('common.utils.fill-required'));
         return;
       }

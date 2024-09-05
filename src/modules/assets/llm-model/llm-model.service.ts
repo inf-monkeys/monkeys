@@ -7,7 +7,7 @@ import { LlmModelRepository } from '@/database/repositories/llm-model.repository
 import { SystemConfigurationRepository } from '@/database/repositories/system-configuration.repository';
 import { getModels } from '@/modules/tools/llm/llm.service';
 import { Injectable } from '@nestjs/common';
-import { set } from 'lodash';
+import { omit, set } from 'lodash';
 
 @Injectable()
 export class LlmModelService {
@@ -68,16 +68,63 @@ export class LlmModelService {
   public async getLLMModel(teamId: string, id: string) {
     const model = await this.llmModelRepository.getLLMModel(teamId, id);
 
-    set(
-      model,
-      'metadata',
-      ONEAPI_CHANNELS.find((channel) => channel.id === model.channelType.toString()),
-    );
+    const client = await this.getSystemClient();
+    const channelConfig = omit(await client.getChannel(model.channelId), [
+      'id',
+      'type',
+      'key',
+      'name',
+      'group',
+      'model_mapping',
+      'config',
+      'balance',
+      'balance_updated_time',
+      'response_time',
+      'created_time',
+      'test_time',
+      'used_quota',
+      'status',
+      'weight',
+      'priority',
+    ]);
+    if (typeof model.displayName === 'string') {
+      set(channelConfig, 'displayName', model.displayName);
+    }
+    if (typeof model.description === 'string') {
+      set(channelConfig, 'description', model.description);
+    }
+
+    const channelMetadata = ONEAPI_CHANNELS.find((channel) => channel.id === model.channelType.toString());
+
+    for (const [key, value] of Object.entries(channelConfig)) {
+      const property = channelMetadata.properites.find((it) => it.name === key);
+      if (property) {
+        if (key === 'models') {
+          set(
+            property,
+            'default',
+            value
+              .toString()
+              .split(',')
+              .map((it) => it.replace(/^.*_/, '')),
+          );
+        } else {
+          set(property, 'default', value);
+        }
+      }
+    }
+
+    const keyProperty = channelMetadata.properites.find((it) => it.name === 'key');
+    if (keyProperty) {
+      set(keyProperty, 'required', false);
+    }
+
+    set(model, 'metadata', channelMetadata);
 
     return model;
   }
 
-  public async updateLLMModel(teamId: string, id: string, dto: UpdateLlmModelParams) {
-    return await this.llmModelRepository.updateLLMModel(teamId, id, dto);
+  public async updateLLMModel(id: string, dto: UpdateLlmModelParams) {
+    return await this.llmModelRepository.updateLLMModel(id, dto);
   }
 }

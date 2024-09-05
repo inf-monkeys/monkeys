@@ -96,7 +96,7 @@ export class LlmModelRepository {
     });
   }
 
-  public async updateLLMModel(teamId: string, id: string, dto: UpdateLlmModelParams) {
+  public async updateLLMModel(id: string, dto: UpdateLlmModelParams) {
     return await this.llmModelRepository.update(id, {
       ...dto,
       updatedTimestamp: +new Date(),

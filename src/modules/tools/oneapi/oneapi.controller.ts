@@ -21,10 +21,7 @@ export class OneAPIController {
   @Put('/channels/:channelId')
   public async updateChannel(@Req() req: IRequest, @Param('channelId') channelId: number, @Body() body: { [x: string]: any }) {
     const { teamId } = req;
-    console.log(body);
-
     const result = await this.oneAPIService.updateChannel(teamId, channelId, body);
-    console.log(result);
     return new SuccessResponse({
       data: result,
     });

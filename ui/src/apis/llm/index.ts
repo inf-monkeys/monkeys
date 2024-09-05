@@ -8,12 +8,18 @@ import { IAssetItem } from '@/apis/ugc/typings.ts';
 
 export const useLLMModels = () => useSWR<ILLMModel[] | undefined>('/api/llm-models', vinesFetcher());
 
-export const createLLMChannel = (channelId: string, data: { [x: string]: any }) => {
-  return vinesFetcher({ method: 'POST', simple: true })(`/api/oneapi/channels/${channelId}`, data);
+export const createLLMChannel = (modelType: string, data: { [x: string]: any }) => {
+  return vinesFetcher({ method: 'POST', simple: true })(`/api/oneapi/channels/${modelType}`, data);
 };
 
 export const deleteLLMModel = (modelId: string) =>
   vinesFetcher({ method: 'DELETE', simple: true })(`/api/llm-models/${modelId}`);
+
+export const updateLLMModel = (modelType: string, model: Partial<IAssetItem<ILLMModel>>) =>
+  vinesFetcher<IAssetItem<ILLMModel>, Partial<IAssetItem<ILLMModel>>>({ method: 'PUT', simple: true })(
+    `/api/oneapi/channels/${modelType}`,
+    model,
+  );
 
 export const useLLMModel = (id?: string) =>
   useSWR<ILLMModel | undefined>(id ? `/api/llm-models/${id}` : null, vinesFetcher(), {
