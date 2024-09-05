@@ -20,7 +20,7 @@ export const COMMON_DEFAULT_CHANNEL_PROPERITIES: ToolProperty[] = [
     type: 'string',
     required: false,
     typeOptions: {
-      foldUp: true, 
+      foldUp: true,
     },
   },
   {
@@ -32,10 +32,10 @@ export const COMMON_DEFAULT_CHANNEL_PROPERITIES: ToolProperty[] = [
     type: 'string',
     required: false,
     typeOptions: {
-      foldUp: true, 
+      foldUp: true,
     },
   },
-]
+];
 
 export const DEFAULT_ONEAPI_CHANNEL_PROPERITIES: ToolProperty[] = [
   {
@@ -75,7 +75,7 @@ export const DEFAULT_ONEAPI_CHANNEL_PROPERITIES: ToolProperty[] = [
       'en-US': 'Optional, if not filled in, the official default address will be used by default',
     },
     typeOptions: {
-      foldUp: true, 
+      foldUp: true,
     },
   },
   ...COMMON_DEFAULT_CHANNEL_PROPERITIES,
@@ -133,7 +133,8 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
         },
         description: {
           'zh-CN': '模型部署名称必须和模型名称保持一致，因为系统会把请求体中的 model 参数替换为你的部署名称（模型名称中的点会被剔除）',
-          'en-US': 'The model deployment name must be consistent with the model name, because the system will replace the model parameter in the request body with your deployment name (the dot in the model name will be removed)',
+          'en-US':
+            'The model deployment name must be consistent with the model name, because the system will replace the model parameter in the request body with your deployment name (the dot in the model name will be removed)',
         },
         name: 'models',
         type: 'string',
@@ -154,7 +155,7 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
         type: 'string',
         required: false,
         typeOptions: {
-          foldUp: true, 
+          foldUp: true,
         },
       },
       {
@@ -170,7 +171,7 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
         type: 'string',
         required: false,
         typeOptions: {
-          foldUp: true, 
+          foldUp: true,
         },
       },
       ...COMMON_DEFAULT_CHANNEL_PROPERITIES,
@@ -231,7 +232,7 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
           'en-US': 'Enter the APIKEY provided by the model supplier here',
         },
       },
-      ...DEFAULT_ONEAPI_CHANNEL_PROPERITIES.slice(1)
+      ...DEFAULT_ONEAPI_CHANNEL_PROPERITIES.slice(1),
     ],
     description: {
       'zh-CN': '百度智能云千帆AppBuilder. 分钟级超低门槛AI原生应用搭建 ; BML全功能AI开发平台. 基于文心大模型完成一站式AI开发',
@@ -246,7 +247,7 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
       'en-US': 'Alibaba TongYiQianWen',
     },
     iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/qianwen.webp',
-    properites: [     
+    properites: [
       {
         displayName: {
           'zh-CN': '插件参数',
@@ -258,10 +259,10 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
         required: true,
         description: {
           'zh-CN': '插件参数，即 X-DashScope-Plugin 请求头的取值',
-          'en-US': 'Plugin parameters, that is, the value of the X-DashScope-Plugin request header'
-        }
+          'en-US': 'Plugin parameters, that is, the value of the X-DashScope-Plugin request header',
+        },
       },
-      ...DEFAULT_ONEAPI_CHANNEL_PROPERITIES
+      ...DEFAULT_ONEAPI_CHANNEL_PROPERITIES,
     ],
     description: {
       'zh-CN': '通义千问（英语：Tongyi Qianwen）是由阿里巴巴集团旗下的云端运算服务的科技公司阿里云开发的聊天机器人，能够与人交互、回答问题及协作创作。',
@@ -302,10 +303,10 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
         required: true,
         description: {
           'zh-CN': '星火大模型版本，注意是接口地址中的版本号，例如：v2.1',
-          'en-US': 'model version, note that it is the version number in the interface address, for example: v2.1'
-        }
+          'en-US': 'model version, note that it is the version number in the interface address, for example: v2.1',
+        },
       },
-      ...DEFAULT_ONEAPI_CHANNEL_PROPERITIES.slice(1)
+      ...DEFAULT_ONEAPI_CHANNEL_PROPERITIES.slice(1),
     ],
     description: {
       'zh-CN': '讯飞星火大模型，是由科大讯飞推出的新一代认知智能大模型，拥有跨领域的知识和语言理解能力，能够基于自然对话方式理解与执行任务，提供语言理解、知识问答、逻辑',
@@ -372,7 +373,7 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
           'en-US': 'Enter the APIKEY provided by the model supplier here',
         },
       },
-      ...DEFAULT_ONEAPI_CHANNEL_PROPERITIES.slice(1)
+      ...DEFAULT_ONEAPI_CHANNEL_PROPERITIES.slice(1),
     ],
     description: {
       'zh-CN': '腾讯混元大模型是由腾讯研发的大语言模型，具备跨领域知识和自然语言理解能力，实现基于人机自然语言对话的方式，理解用户指令并执行任务，帮助用户实现人获取信息。',
@@ -448,16 +449,17 @@ export const ONEAPI_CHANNELS: Partial<LlmChannelEntity>[] = [
       'en-US': 'ByteDance Doubao',
     },
     iconUrl: 'https://monkeyminio01.daocloud.cn/monkeys/icons/doubao.webp',
-    properites: [ 
+    properites: [
       {
         displayName: {
           'zh-CN': '对于豆包而言，需要手动去「模型推理页面」创建推理接入点，以接入点名称作为模型名称，例如：ep-20240608051426-tkxvl',
-          'en-US': 'For Doubao, you need to manually go to the "Model Inference Page" to create an inference access point, and use the access point name as the model name, for example: ep-20240608051426-tkxvl',
+          'en-US':
+            'For Doubao, you need to manually go to the "Model Inference Page" to create an inference access point, and use the access point name as the model name, for example: ep-20240608051426-tkxvl',
         },
         type: 'notice',
         name: 'docs',
       },
-      ...DEFAULT_ONEAPI_CHANNEL_PROPERITIES
+      ...DEFAULT_ONEAPI_CHANNEL_PROPERITIES,
     ],
     description: {
       'zh-CN': '字节跳动推出的自研大模型。通过字节跳动内部50+业务场景实践验证，每日千亿级 tokens 大使用量持续打磨，提供多模态能力，以优质模型效果为企业打造丰富的业务体验。',
@@ -511,5 +513,5 @@ export const CHANNEL_OPTIONS = [
   { key: 6, text: '代理：OpenAI Max', displayName: { 'zh-CN': '代理：OpenAI Max', 'en-US': 'Proxy: OpenAI Max' }, value: 6, color: 'violet' },
   { key: 9, text: '代理：AI.LS', displayName: { 'zh-CN': '代理：AI.LS', 'en-US': 'Proxy: AI.LS' }, value: 9, color: 'yellow' },
   { key: 12, text: '代理：API2GPT', displayName: { 'zh-CN': '代理：API2GPT', 'en-US': 'Proxy: API2GPT' }, value: 12, color: 'blue' },
-  { key: 13, text: '代理：AIGC2D', displayName: { 'zh-CN': '代理：AIGC2D', 'en-US': 'Proxy: AIGC2D' }, value: 13, color: 'purple' }
+  { key: 13, text: '代理：AIGC2D', displayName: { 'zh-CN': '代理：AIGC2D', 'en-US': 'Proxy: AIGC2D' }, value: 13, color: 'purple' },
 ];

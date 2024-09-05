@@ -4,14 +4,16 @@ import { ColumnDef, flexRender, getCoreRowModel, Row, useReactTable } from '@tan
 import { useTranslation } from 'react-i18next';
 
 import { DataTable } from '@/components/ui/data-table';
+import { cn } from '@/utils';
 
 interface IUgcDetailInfoProps {
   columns: ColumnDef<any, any>[];
   data?: any;
   assetKey?: string;
+  className?: string;
 }
 
-export const UgcDetailInfo: React.FC<IUgcDetailInfoProps> = ({ columns, data: rawData, assetKey }) => {
+export const UgcDetailInfo: React.FC<IUgcDetailInfoProps> = ({ columns, data: rawData, assetKey, className }) => {
   const { t } = useTranslation();
 
   const [data, setData] = useState<any[]>([]);
@@ -43,7 +45,7 @@ export const UgcDetailInfo: React.FC<IUgcDetailInfoProps> = ({ columns, data: ra
   }, [data]);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className={cn('flex flex-col gap-2', className)}>
       <DataTable
         columns={[
           {

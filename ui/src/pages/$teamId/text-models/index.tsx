@@ -44,9 +44,11 @@ export const TextModels: React.FC = () => {
             return RenderIcon({ iconUrl: item.iconUrl, size: 'gallery' });
           },
         }}
-        operateArea={(item, trigger, tooltipTriggerContent) => (
-          <OperateArea item={item} trigger={trigger} tooltipTriggerContent={tooltipTriggerContent} />
-        )}
+        operateArea={(item, trigger, tooltipTriggerContent) =>
+          item.channelId !== 0 && (
+            <OperateArea item={item} trigger={trigger} tooltipTriggerContent={tooltipTriggerContent} />
+          )
+        }
         subtitle={<ModelSupplier />}
       />
     </main>

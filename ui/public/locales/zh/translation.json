@@ -422,10 +422,10 @@
           "info": {
             "columns": {
               "displayName": {
-                "label": "键"
+                "label": "名称"
               },
               "value": {
-                "label": "值"
+                "label": "内容"
               }
             }
           },
@@ -1452,6 +1452,11 @@
         "import-channel": {
           "label": "模型供应商",
           "select-channel-tip": "选择此供应商"
+        }
+      },
+      "detail": {
+        "models": {
+          "label": "模型列表"
         }
       }
     },

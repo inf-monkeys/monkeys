@@ -8,9 +8,9 @@ import { useTranslation } from 'react-i18next';
 import { useLLMModel } from '@/apis/llm';
 import { UgcDetailInfo } from '@/components/layout/ugc/detail/info';
 import { createTextModelsColumns } from '@/components/layout/ugc-pages/text-models/consts';
+import { TextModelsList } from '@/components/layout/ugc-pages/text-models/models/TextModelsList.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { getI18nContent } from '@/utils';
 
@@ -40,19 +40,15 @@ export const IComfyUIWorkflowDetail: React.FC<IComfyUIWorkflowDetailProps> = () 
         </Tooltip>
         <h1 className="line-clamp-1 text-2xl font-bold">{getI18nContent(llmModel?.displayName)}</h1>
       </header>
-      <Tabs
-        defaultValue="info"
-        className="[&_[role='tabpanel']]:mt-4 [&_[role='tabpanel']]:h-[calc(100vh-11.5rem)] [&_[role='tabpanel']]:overflow-y-auto [&_[role='tabpanel']]:overflow-x-hidden"
-      >
-        <TabsList>
-          <TabsTrigger value="info" className="text-xs">
-            {t('ugc-page.comfyui-workflow.detail.tabs.info.label')}
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="info">
-          <UgcDetailInfo columns={createTextModelsColumns()} data={llmModel} assetKey="llm-model" />
-        </TabsContent>
-      </Tabs>
+      <div className="grid grid-cols-3 gap-4">
+        <UgcDetailInfo
+          className="col-span-2"
+          columns={createTextModelsColumns()}
+          data={llmModel}
+          assetKey="llm-model"
+        />
+        <TextModelsList models={llmModel?.models ?? {}} />
+      </div>
     </main>
   );
 };
