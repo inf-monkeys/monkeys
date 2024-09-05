@@ -72,9 +72,16 @@ export class OneAPIService {
       .filter((channel) => channel.models.length > 0);
   }
 
-  public async testChannel(channelId: number, modelId: string) {
+  public async testChannel(teamId: string, channelType: number, modelId: string) {
     const systemClient = await this.getSystemClient();
-    return await systemClient.testChannel(channelId, modelId);
+    const channels = await systemClient.searchChannelByKeyword(`${teamId}_channel`);
+
+    const channel = channels.find((channel) => channel.type === parseInt(channelType.toString(), 10));
+    if (!channel) {
+      throw new Error('Channel not found');
+    }
+
+    return await systemClient.testChannel(channel.id, modelId);
   }
 
   public async getChannel(teamId: string, channelType: number) {

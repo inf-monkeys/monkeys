@@ -1457,7 +1457,12 @@
       },
       "detail": {
         "models": {
-          "label": "Model List"
+          "label": "Model List",
+          "test": "Test",
+          "time-consuming": "Test passed, total time consumed: {{time}}s"
+        },
+        "edit-model-supplier": {
+          "label": "Model Supplier Configuration"
         }
       }
     },

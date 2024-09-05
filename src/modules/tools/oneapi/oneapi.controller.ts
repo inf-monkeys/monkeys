@@ -37,7 +37,8 @@ export class OneAPIController {
 
   @Post('/channel/test/:channelId')
   public async testChannel(@Req() req: IRequest, @Param('channelId') channelId: number, @Body() body: { modelId: string }) {
-    const result = await this.oneAPIService.testChannel(channelId, body.modelId);
+    const { teamId } = req;
+    const result = await this.oneAPIService.testChannel(teamId, channelId, body.modelId);
     return new SuccessResponse({
       data: result,
     });

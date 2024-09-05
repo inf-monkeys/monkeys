@@ -43,9 +43,9 @@ export const IComfyUIWorkflowDetail: React.FC<IComfyUIWorkflowDetailProps> = () 
         </Tooltip>
         <h1 className="line-clamp-1 text-2xl font-bold">{getI18nContent(llmModel?.displayName)}</h1>
       </header>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-5 gap-4">
         <UgcDetailInfo
-          className="col-span-2"
+          className="col-span-3"
           columns={createTextModelsColumns()}
           data={llmModel}
           assetKey="llm-model"
