@@ -30,12 +30,12 @@ export class LlmModelController {
           displayName: name,
           description: desc || {
             'zh-CN': '系统内置大语言模型，由 OpenAI 标准接口提供',
-            'en-US': 'The system has a built-in large language model, provided by the OpenAI standard interface'
+            'en-US': 'The system has a built-in large language model, provided by the OpenAI standard interface',
           },
           iconUrl: icon || 'https://monkeyminio01.daocloud.cn/monkeys/icons/openai.webp',
           models: { [value]: value },
-          id: `0-${value}`
-        } as LlmModelEntity)
+          id: `0-${value}`,
+        } as LlmModelEntity);
       }
 
       list = [...list, ...systemChannels];

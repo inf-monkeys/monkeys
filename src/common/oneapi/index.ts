@@ -130,8 +130,28 @@ export class OneApiSystemApiClient extends OneApiBaseClient {
     return data.data;
   }
 
-  public async createChannel(type: number, modelPrefix: string, data: { [x: string]: any }): Promise<OneapiChannel> {
-    const models = data?.models as string[] ?? [];
+  public async searchChannelByKeyword(keyword: string) {
+    const { data } = await this.request<{
+      success: boolean;
+      message: string;
+      data: OneapiChannel[];
+    }>({
+      method: 'GET',
+      url: '/api/channel/search',
+      params: {
+        keyword,
+      },
+    });
+
+    if (!data.success) {
+      throw new Error(data.message);
+    }
+
+    return data.data;
+  }
+
+  private data2channel(channelType: number, modelPrefix: string, data: { [x: string]: any }) {
+    const models = (data?.models as string[]) ?? [];
     if (!models || models?.length === 0) {
       throw new Error('No models provided');
     }
@@ -141,17 +161,22 @@ export class OneApiSystemApiClient extends OneApiBaseClient {
     models.forEach((model) => {
       modelMappings[`${modelPrefix}_${model}`] = model;
     });
-    const reqData = {
+
+    return {
       ...data,
       groups: ['default'],
       model_mapping: JSON.stringify(modelMappings),
       models: channelModelsWithPrefix,
-      type: parseInt(type.toString(), 10),
+      type: parseInt(channelType.toString(), 10),
       other: '',
       group: 'default',
       config: '{"region":"","sk":"","ak":"","user_id":""}',
       name: `${modelPrefix}_channel`,
     };
+  }
+
+  public async createChannel(channelType: number, modelPrefix: string, data: { [x: string]: any }): Promise<OneapiChannel> {
+    const channelData = this.data2channel(channelType, modelPrefix, data);
 
     const {
       data: { success, message },
@@ -161,7 +186,7 @@ export class OneApiSystemApiClient extends OneApiBaseClient {
     }>({
       method: 'POST',
       url: '/api/channel',
-      data: reqData,
+      data: channelData,
     });
 
     if (!success) {
@@ -169,11 +194,54 @@ export class OneApiSystemApiClient extends OneApiBaseClient {
     }
 
     const channels = await this.listChannels();
-    const channel = channels.find((channel) => channel.name === reqData.name);
+    const channel = channels.find((channel) => channel.name === channelData.name);
     if (!channel) {
       throw new Error('Failed to create channel');
     }
     return channel;
+  }
+
+  public async updateChannel(channelType: number, modelPrefix: string, data: { [x: string]: any }) {
+    const channelData = this.data2channel(channelType, modelPrefix, data);
+
+    const {
+      data: { success, message },
+    } = await this.request<{
+      success: boolean;
+      message: string;
+    }>({
+      method: 'PUT',
+      url: '/api/channel',
+      data: channelData,
+    });
+
+    if (!success) {
+      throw new Error(message);
+    }
+
+    const channels = await this.listChannels();
+    const channel = channels.find((channel) => channel.name === channelData.name);
+    if (!channel) {
+      throw new Error('Failed to update channel');
+    }
+    return channel;
+  }
+
+  public async deleteChannel(channelId: number) {
+    const { data } = await this.request<{
+      success: boolean;
+      message: string;
+    }>({
+      method: 'DELETE',
+      url: `/api/channel/${channelId}`,
+    });
+
+    if (!data.success) {
+      console.error(data.message);
+      return false;
+    }
+
+    return true;
   }
 
   public async testChannel(channelId: number, modelId: string) {

@@ -67,7 +67,7 @@ const getNameByModelName = (name?: string | string[], modelName?: string, defaul
   }
   if (Array.isArray(name) && modelName) {
     for (const mapperName of name) {
-      const targetModelMapper = mapperName?.split('|')
+      const targetModelMapper = mapperName?.split('|');
       if ((targetModelMapper?.[0] ?? '') === modelName) {
         return targetModelMapper?.[1] ?? defaultValue;
       }
@@ -75,7 +75,7 @@ const getNameByModelName = (name?: string | string[], modelName?: string, defaul
     return defaultValue;
   }
   return modelName ?? defaultValue;
-}
+};
 
 type BuiltModel = {
   name: string;
@@ -84,11 +84,9 @@ type BuiltModel = {
   isDefault?: boolean;
   icon?: string;
   desc?: string;
-}
+};
 
-export const getModels = (
-  type?: LlmModelEndpointType,
-): Array<BuiltModel> => {
+export const getModels = (type?: LlmModelEndpointType): Array<BuiltModel> => {
   const result: Array<BuiltModel> = [];
   for (const model of config.models) {
     if (type) {
@@ -99,7 +97,7 @@ export const getModels = (
     if (typeof model.model === 'string') {
       const splittedModels = model.model.split(',');
       for (const modelValue of splittedModels) {
-        const finalModelValue = modelValue.trim()
+        const finalModelValue = modelValue.trim();
         result.push({
           name: getNameByModelName(model.displayName, finalModelValue) || model.model,
           value: finalModelValue,
@@ -111,7 +109,7 @@ export const getModels = (
       }
     } else if (Array.isArray(model.model)) {
       for (const modelName of model.model) {
-        const finalModelName = modelName.trim()
+        const finalModelName = modelName.trim();
         result.push({
           name: getNameByModelName(model.displayName, finalModelName) || modelName,
           value: finalModelName,
@@ -171,18 +169,7 @@ export class LlmService {
     };
 
     const isSystemModel = checkIsSystemModel();
-    if (!isSystemModel) {
-      const [channelIdStr, realModelName] = modelName.split(':');
-      const channelId = parseInt(channelIdStr);
-      const modelEntity = await this.llmModelRepository.getLLMModelByChannelId(channelId);
-      const modelMappings = modelEntity.models;
-      const oneApiUser = await this.oneApiRepository.getOneapiUserByTeamId(teamId);
-      return {
-        realModelName: this.getModelNameByModelMappings(modelMappings, realModelName),
-        baseURL: `${config.oneapi.baseURL}/v1`,
-        apiKey: `sk-${oneApiUser.apiKey}`,
-      };
-    } else {
+    if (isSystemModel) {
       const model = config.models.find((x) => {
         if (typeof x.model === 'string') {
           const splittedModels = x.model.split(',');
@@ -200,6 +187,17 @@ export class LlmService {
         defaultParams: model.defaultParams,
         promptTemplate: model.promptTemplate,
         autoMergeConsecutiveMessages: model.autoMergeConsecutiveMessages,
+      };
+    } else {
+      const [channelIdStr, realModelName] = modelName.split(':');
+      const channelId = parseInt(channelIdStr);
+      const modelEntity = await this.llmModelRepository.getLLMModelByChannelId(channelId);
+      const modelMappings = modelEntity.models;
+      const oneApiUser = await this.oneApiRepository.getOneapiUserByTeamId(teamId);
+      return {
+        realModelName: this.getModelNameByModelMappings(modelMappings, realModelName),
+        baseURL: `${config.oneapi.baseURL}/v1`,
+        apiKey: `sk-${oneApiUser.apiKey}`,
       };
     }
   }
