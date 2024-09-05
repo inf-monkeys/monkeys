@@ -7,6 +7,7 @@ import { LlmModelRepository } from '@/database/repositories/llm-model.repository
 import { OneApiRepository } from '@/database/repositories/oneapi.respository';
 import { SystemConfigurationRepository } from '@/database/repositories/system-configuration.repository';
 import { Injectable } from '@nestjs/common';
+import { omit } from 'lodash';
 
 @Injectable()
 export class OneAPIService {
@@ -70,9 +71,31 @@ export class OneAPIService {
       .filter((channel) => channel.models.length > 0);
   }
 
-  public async testChannel(teamId: string, channelId: number, modelId: string) {
-    const oneapiUser = await this.getOrCreateOneapiUser(teamId);
+  public async testChannel(channelId: number, modelId: string) {
     const systemClient = await this.getSystemClient();
     return await systemClient.testChannel(channelId, modelId);
+  }
+
+  public async getChannel(teamId: string, channelType: number) {
+    const systemClient = await this.getSystemClient();
+    const channels = await systemClient.searchChannelByKeyword(`${teamId}_channel`);
+    return channels.find((channel) => channel.type === channelType);
+  }
+
+  public async updateChannel(teamId: string, channelType: number, data: { [x: string]: any }) {
+    const systemClient = await this.getSystemClient();
+
+    const channel = await this.getChannel(teamId, parseInt(channelType.toString(), 10));
+
+    if (!channel) {
+      throw new Error('Channel not found');
+    }
+
+    data = {
+      ...omit(data, ['displayName', 'description', 'icon', 'id']),
+      id: channel.id,
+    };
+
+    return await systemClient.updateChannel(channelType, teamId, data);
   }
 }
