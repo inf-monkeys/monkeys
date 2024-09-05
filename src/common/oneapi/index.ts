@@ -173,10 +173,12 @@ export class OneApiSystemApiClient extends OneApiBaseClient {
       throw new Error('No models provided');
     }
 
-    const channelModelsWithPrefix = models.map((model) => `${modelPrefix}_${model}`).join(',');
+    // const channelModelsWithPrefix = models.map((model) => `${modelPrefix}_${model}`).join(',');
+    const channelModelsWithPrefix = models.join(',');
     const modelMappings = {};
     models.forEach((model) => {
-      modelMappings[`${modelPrefix}_${model}`] = model;
+      // modelMappings[`${modelPrefix}_${model}`] = model;
+      modelMappings[model] = model;
     });
 
     return {

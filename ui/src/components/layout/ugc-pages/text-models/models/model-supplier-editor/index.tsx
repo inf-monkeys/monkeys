@@ -7,7 +7,7 @@ import { Package } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { updateLLMModel } from '@/apis/llm';
+import { updateLLMChannel } from '@/apis/llm';
 import { calculateDisplayInputs } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input/utils.ts';
 import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
@@ -48,7 +48,7 @@ export const ModelSupplierEditor: React.FC<IModelSupplierEditorProps> = ({
 
     set(data, 'id', modelId);
 
-    toast.promise(updateLLMModel(modelType, data), {
+    toast.promise(updateLLMChannel(modelType, data), {
       success: () => {
         setOpen(false);
         afterOperate?.();
@@ -63,7 +63,7 @@ export const ModelSupplierEditor: React.FC<IModelSupplierEditorProps> = ({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="-my-2 -mr-1 !h-7" variant="outline" size="small" icon={<Package />}>
-          编辑模型供应商
+          {t('ugc-page.text-models.detail.edit-model-supplier.label')}
         </Button>
       </DialogTrigger>
       <DialogContent
@@ -73,7 +73,7 @@ export const ModelSupplierEditor: React.FC<IModelSupplierEditorProps> = ({
         }}
       >
         <DialogHeader>
-          <DialogTitle>编辑模型供应商</DialogTitle>
+          <DialogTitle>{t('ugc-page.text-models.detail.edit-model-supplier.label')}</DialogTitle>
         </DialogHeader>
         <TabularRender
           inputs={finalInputs}

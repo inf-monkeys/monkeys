@@ -1456,7 +1456,17 @@
       },
       "detail": {
         "models": {
-          "label": "模型列表"
+          "label": "模型列表",
+          "test": "测试",
+          "time-consuming": {
+            "context": "测试通过，共计耗时：{{time}} 秒",
+            "loading": "正在测试...",
+            "error": "测试失败",
+            "success": "测试通过"
+          }
+        },
+        "edit-model-supplier": {
+          "label": "编辑模型供应商配置"
         }
       }
     },

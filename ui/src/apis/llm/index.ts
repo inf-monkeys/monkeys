@@ -1,4 +1,5 @@
 import useSWR from 'swr';
+import useSWRMutation from 'swr/mutation';
 
 import { I18nValue } from '@inf-monkeys/monkeys';
 
@@ -15,11 +16,19 @@ export const createLLMChannel = (modelType: string, data: { [x: string]: any }) 
 export const deleteLLMModel = (modelId: string) =>
   vinesFetcher({ method: 'DELETE', simple: true })(`/api/llm-models/${modelId}`);
 
-export const updateLLMModel = (modelType: string, model: Partial<IAssetItem<ILLMModel>>) =>
+export const updateLLMChannel = (modelType: string, model: Partial<IAssetItem<ILLMModel>>) =>
   vinesFetcher<IAssetItem<ILLMModel>, Partial<IAssetItem<ILLMModel>>>({ method: 'PUT', simple: true })(
     `/api/oneapi/channels/${modelType}`,
     model,
   );
+
+export const useLLMChannelTest = (modelType?: string) =>
+  useSWRMutation<
+    { message: string; model: string; success: boolean; time: number } | undefined,
+    unknown,
+    string | null,
+    { modelId: string }
+  >(modelType ? `/api/oneapi/channel/test/${modelType}` : null, vinesFetcher({ method: 'POST' }));
 
 export const useLLMModel = (id?: string) =>
   useSWR<ILLMModel | undefined>(id ? `/api/llm-models/${id}` : null, vinesFetcher(), {
