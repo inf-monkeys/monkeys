@@ -1454,6 +1454,11 @@
           "label": "Model Supplier",
           "select-channel-tip": "Select this supplier"
         }
+      },
+      "detail": {
+        "models": {
+          "label": "Model List"
+        }
       }
     },
     "image-models": {
