@@ -16,7 +16,7 @@ export interface IComfyuiModelType extends IBaseEntity {
 
 export interface IComfyuiServerRelation {
   server: IComfyuiServer;
-  type?: IComfyuiModelType;
+  type?: IComfyuiModelType[];
   path: string;
   filename: string;
 }

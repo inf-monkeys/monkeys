@@ -40,43 +40,47 @@ export const ImageModelServerRelations: React.FC<IImageModelServerRelationsProps
           accessorKey: 'type',
           header: t('comfyui.comfyui-model.table.columns.type.label'),
           cell: ({ getValue }) => {
-            const type = getValue() as IComfyuiModelType | undefined;
-            return type ? (
-              <Tooltip>
-                <TooltipTrigger>{type?.displayName || type.name}</TooltipTrigger>
-                <TooltipContent>
-                  <div className="flex flex-col gap-1 p-1">
-                    <div className="grid grid-cols-5 text-sm">
-                      <span className="col-span-2 flex justify-start font-bold">
-                        {t('comfyui.comfyui-model-type.table.columns.name.label')}
-                      </span>
-                      <span className="col-span-3 flex flex-wrap justify-end">{type.name}</span>
-                    </div>
-                    <div className="grid grid-cols-5 text-sm">
-                      <span className="col-span-2 flex justify-start font-bold">
-                        {t('comfyui.comfyui-model-type.table.columns.path.label')}
-                      </span>
-                      <span className="col-span-3 flex flex-wrap justify-end">{type.path}</span>
-                    </div>
-                    {type.displayName && (
-                      <div className="grid grid-cols-5 text-sm">
-                        <span className="col-span-2 flex justify-start font-bold">
-                          {t('comfyui.comfyui-model-type.table.columns.display-name.label')}
-                        </span>
-                        <span className="col-span-3 flex flex-wrap justify-end">{type.displayName}</span>
+            const types = getValue() as IComfyuiModelType[] | undefined;
+            return types && types.length > 0 ? (
+              <div className="flex gap-2">
+                {types.map((type) => (
+                  <Tooltip key={type.id}>
+                    <TooltipTrigger>{type?.displayName || type.name}</TooltipTrigger>
+                    <TooltipContent>
+                      <div className="flex flex-col gap-1 p-1">
+                        <div className="grid grid-cols-5 text-sm">
+                          <span className="col-span-2 flex justify-start font-bold">
+                            {t('comfyui.comfyui-model-type.table.columns.name.label')}
+                          </span>
+                          <span className="col-span-3 flex flex-wrap justify-end">{type.name}</span>
+                        </div>
+                        <div className="grid grid-cols-5 text-sm">
+                          <span className="col-span-2 flex justify-start font-bold">
+                            {t('comfyui.comfyui-model-type.table.columns.path.label')}
+                          </span>
+                          <span className="col-span-3 flex flex-wrap justify-end">{type.path}</span>
+                        </div>
+                        {type.displayName && (
+                          <div className="grid grid-cols-5 text-sm">
+                            <span className="col-span-2 flex justify-start font-bold">
+                              {t('comfyui.comfyui-model-type.table.columns.display-name.label')}
+                            </span>
+                            <span className="col-span-3 flex flex-wrap justify-end">{type.displayName}</span>
+                          </div>
+                        )}
+                        {type.description && (
+                          <div className="grid grid-cols-5 text-sm">
+                            <span className="col-span-2 flex justify-start font-bold">
+                              {t('comfyui.comfyui-model-type.table.columns.description.label')}
+                            </span>
+                            <span className="col-span-3 flex flex-wrap justify-end">{type.description}</span>
+                          </div>
+                        )}
                       </div>
-                    )}
-                    {type.description && (
-                      <div className="grid grid-cols-5 text-sm">
-                        <span className="col-span-2 flex justify-start font-bold">
-                          {t('comfyui.comfyui-model-type.table.columns.description.label')}
-                        </span>
-                        <span className="col-span-3 flex flex-wrap justify-end">{type.description}</span>
-                      </div>
-                    )}
-                  </div>
-                </TooltipContent>
-              </Tooltip>
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+              </div>
             ) : (
               t('ugc-page.image-models.types.other')
             );
