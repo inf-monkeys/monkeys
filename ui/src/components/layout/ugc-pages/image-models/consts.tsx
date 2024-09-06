@@ -46,12 +46,13 @@ export const createImageModelsColumns = ({ hooks }: ICreateImageModelsColumnsPro
   }),
   columnHelper.accessor('serverRelations', {
     id: 'types',
-    maxSize: 96,
     cell: ({ getValue }) => {
       const rawRelations = getValue();
       const types = rawRelations.reduce((acc: IComfyuiModelType[], { type }) => {
-        if (type && !acc.find((t) => t.name === type.name)) {
-          acc.push(type);
+        if (type && type.length > 0) {
+          type.forEach((t) => {
+            if (!acc.find((t1) => t1.name === t.name)) acc.push(t);
+          });
         }
         return acc;
       }, []);

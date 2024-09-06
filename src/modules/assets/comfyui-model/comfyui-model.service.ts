@@ -92,17 +92,25 @@ export class ComfyuiModelService {
 
     // 从服务器获取的 model
     const rawModelList = await this.getModelsFromServer(server.address);
-    const rawModelSha256List = rawModelList.map((model) => model.sha256);
+    const rawModelRecords = rawModelList.reduce<Record<string, string[]>>((acc, model) => {
+      if (!acc[model.sha256]) {
+        acc[model.sha256] = [];
+      }
+      acc[model.sha256].push(model.path);
+      return acc;
+    }, {});
+    // const rawModelSha256List = rawModelList.map((model) => model.sha256);
 
     // 数据库中原有的 model
     const originModelList = await this.getModelsByServerId(teamId, serverId);
     const originModelSha256List = originModelList.map((model) => model.sha256);
 
     // 需要删除的 model
-    const toRemove = originModelList.filter((model) => !rawModelSha256List.includes(model.sha256));
+    const toRemove = originModelList.filter((model) => !Object.keys(rawModelRecords).includes(model.sha256));
+    // const toRemove = originModelList.filter((model) => !rawModelSha256List.includes(model.sha256));
 
     // 需要添加的 model
-    const toAdd = rawModelList.filter((model) => !originModelSha256List.includes(model.sha256));
+    const toAdd = Object.keys(rawModelRecords).filter((sha256) => !originModelSha256List.includes(sha256));
 
     // 更新需要删除的
     toRemove.forEach((model) => {
@@ -112,49 +120,52 @@ export class ComfyuiModelService {
     const toRemoveUpdateResult = await this.repository.saveModels(toRemove);
 
     // 更新需要添加的
-    const toUpdate = await this.repository.getModelsBySha256List(
-      teamId,
-      toAdd.map((model) => model.sha256),
-    );
+    const toUpdate = await this.repository.getModelsBySha256List(teamId, toAdd);
     toUpdate.forEach(async (model) => {
-      const relationEntity = new ComfyuiModelServerRelationEntity();
-      relationEntity.id = generateDbId();
-      relationEntity.server = server;
-      relationEntity.model = model;
-      const { path } = rawModelList.find((raw) => raw.sha256 === model.sha256);
-      const filename = basename(path);
-      relationEntity.path = path;
-      relationEntity.filename = filename;
-      relationEntity.teamId = teamId;
-      model.updatedTimestamp = ts;
-      // model.servers ? model.servers.push(relationEntity) : (model.servers = [relationEntity]);
-      await this.repository.saveRelation(relationEntity);
+      const paths = rawModelRecords[model.sha256];
+      for (let i = 0; i < paths.length; i++) {
+        const path = paths[i];
+        const relationEntity = new ComfyuiModelServerRelationEntity();
+        relationEntity.id = generateDbId();
+        relationEntity.server = server;
+        relationEntity.model = model;
+        const filename = basename(path);
+        relationEntity.path = path;
+        relationEntity.filename = filename;
+        relationEntity.teamId = teamId;
+        model.updatedTimestamp = ts;
+        // model.servers ? model.servers.push(relationEntity) : (model.servers = [relationEntity]);
+        await this.repository.saveRelation(relationEntity);
+      }
     });
     const toUpdateUpdateResult = await this.repository.saveModels(toUpdate);
 
     // 更新需要新增的
     const toCreate = toAdd
-      .filter(({ sha256 }) => !toUpdate.some((model) => model.sha256 === sha256))
-      .map((model) => {
+      .filter((sha256) => !toUpdate.some((model) => model.sha256 === sha256))
+      .map((sha256) => {
         return {
-          ...model,
+          sha256,
           id: generateDbId(),
-          displayName: basename(model.path),
+          displayName: basename(rawModelRecords[sha256][0]),
           // servers: [relationEntity],
         };
       });
     const toCreateUpdateResult = await this.repository.createModels(teamId, toCreate);
-    toCreate.forEach(async (model) => {
-      const relationEntity = new ComfyuiModelServerRelationEntity();
-      relationEntity.id = generateDbId();
-      relationEntity.server = server;
-      relationEntity.model = await this.repository.getModelById(teamId, model.id);
-      const { path } = rawModelList.find((raw) => raw.sha256 === model.sha256);
-      const filename = basename(path);
-      relationEntity.path = path;
-      relationEntity.filename = filename;
-      relationEntity.teamId = teamId;
-      await this.repository.saveRelation(relationEntity);
+    toCreateUpdateResult.forEach(async (model) => {
+      const paths = rawModelRecords[model.sha256];
+      for (let i = 0; i < paths.length; i++) {
+        const path = paths[i];
+        const relationEntity = new ComfyuiModelServerRelationEntity();
+        relationEntity.id = generateDbId();
+        relationEntity.server = server;
+        relationEntity.model = model;
+        const filename = basename(path);
+        relationEntity.path = path;
+        relationEntity.filename = filename;
+        relationEntity.teamId = teamId;
+        await this.repository.saveRelation(relationEntity);
+      }
     });
 
     return {

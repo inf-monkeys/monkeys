@@ -177,14 +177,12 @@ export class ComfyuiModelRepository {
         },
       },
     );
-    const modelTypes = (
-      await this.modelTypeRepository.find({
-        where: {
-          teamId,
-          isDeleted: false,
-        },
-      })
-    ).sort((a, b) => a.path.split('/').length - b.path.split('/').length);
+    const modelTypes = await this.modelTypeRepository.find({
+      where: {
+        teamId,
+        isDeleted: false,
+      },
+    });
 
     const list = rawModels.list.map((model) => {
       const { serverRelations } = model;
@@ -194,7 +192,7 @@ export class ComfyuiModelRepository {
           ? serverRelations.map((relation) => {
               return {
                 ...relation,
-                type: modelTypes.find((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
+                type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
               };
             })
           : undefined,
@@ -236,14 +234,12 @@ export class ComfyuiModelRepository {
         },
       },
     });
-    const modelTypes = (
-      await this.modelTypeRepository.find({
-        where: {
-          teamId,
-          isDeleted: false,
-        },
-      })
-    ).sort((a, b) => a.path.split('/').length - b.path.split('/').length);
+    const modelTypes = await this.modelTypeRepository.find({
+      where: {
+        teamId,
+        isDeleted: false,
+      },
+    });
 
     const list = rawModels.map((model) => {
       const { serverRelations } = model;
@@ -253,7 +249,7 @@ export class ComfyuiModelRepository {
           ? serverRelations.map((relation) => {
               return {
                 ...relation,
-                type: modelTypes.find((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
+                type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
               };
             })
           : undefined,
@@ -280,14 +276,12 @@ export class ComfyuiModelRepository {
         },
       },
     });
-    const modelTypes = (
-      await this.modelTypeRepository.find({
-        where: {
-          teamId,
-          isDeleted: false,
-        },
-      })
-    ).sort((a, b) => a.path.split('/').length - b.path.split('/').length);
+    const modelTypes = await this.modelTypeRepository.find({
+      where: {
+        teamId,
+        isDeleted: false,
+      },
+    });
 
     return rawModels.map((model) => {
       const { serverRelations } = model;
@@ -297,7 +291,7 @@ export class ComfyuiModelRepository {
           ? serverRelations.map((relation) => {
               return {
                 ...relation,
-                type: modelTypes.find((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
+                type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
               };
             })
           : undefined,
@@ -328,6 +322,13 @@ export class ComfyuiModelRepository {
       },
     });
 
+    const modelTypes = await this.modelTypeRepository.find({
+      where: {
+        teamId,
+        isDeleted: false,
+      },
+    });
+
     return rawModels.map((model) => {
       const { serverRelations } = model;
       return {
@@ -338,7 +339,7 @@ export class ComfyuiModelRepository {
               return {
                 ...relation,
                 apiPath: pathArr.length > 1 ? pathArr.slice(1).join('/') : relation.path,
-                type: modelType,
+                type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
               };
             })
           : undefined,
@@ -352,16 +353,24 @@ export class ComfyuiModelRepository {
 
   public async getModelById(teamId: string, modelId: string) {
     const rawModel = await this.modelRepository.findOne({
-      where: {
-        teamId,
-        id: modelId,
-        isDeleted: false,
-        serverRelations: {
-          server: {
-            isDeleted: false,
+      where: [
+        {
+          teamId,
+          id: modelId,
+          isDeleted: false,
+          serverRelations: {
+            server: {
+              isDeleted: false,
+            },
           },
         },
-      },
+        {
+          teamId,
+          id: modelId,
+          isDeleted: false,
+          serverRelations: null,
+        },
+      ],
       relations: {
         serverRelations: {
           server: true,
@@ -371,20 +380,18 @@ export class ComfyuiModelRepository {
 
     if (!rawModel) throw new Error('ComfyUI model not found');
 
-    const modelTypes = (
-      await this.modelTypeRepository.find({
-        where: {
-          teamId,
-          isDeleted: false,
-        },
-      })
-    ).sort((a, b) => a.path.split('/').length - b.path.split('/').length);
+    const modelTypes = await this.modelTypeRepository.find({
+      where: {
+        teamId,
+        isDeleted: false,
+      },
+    });
 
     if (rawModel.serverRelations) {
       rawModel.serverRelations = rawModel.serverRelations.map((relation) => {
         return {
           ...relation,
-          type: modelTypes.find((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
+          type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
         };
       });
     }
@@ -411,9 +418,11 @@ export class ComfyuiModelRepository {
   }
 
   public async createModels(teamId: string, params: CreateComfyuiModelParams[]) {
-    return params.map(async (p) => {
-      return await this.createModel(teamId, p);
-    });
+    const r: ComfyuiModelEntity[] = [];
+    for (const p of params) {
+      r.push(await this.createModel(teamId, p));
+    }
+    return r;
   }
 
   public async saveModel(model: Pick<ComfyuiModelEntity, 'sha256' | 'id' | 'serverRelations'>) {

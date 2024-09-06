@@ -77,10 +77,17 @@ export const FieldImageModel: React.FC<IFieldImageModelProps> = ({ input: { type
                         <div className="flex items-center gap-2">
                           <VinesIcon src={iconUrl || 'emoji:🍀:#ceefc5'} size="xs" />
                           <p className="text-sm font-bold">{displayName ?? 'unknown'}</p>
-                          {serverRelation.type && (
-                            <p className="text-xxs rounded border border-input bg-muted p-1 text-gray-500">
-                              {serverRelation.type?.displayName ?? serverRelation.type?.name}
-                            </p>
+                          {serverRelation.type && serverRelation.type.length > 0 && (
+                            <div className="flex gap-1">
+                              {serverRelation.type.map((type) => (
+                                <p
+                                  key={type.id}
+                                  className="text-xxs rounded border border-input bg-muted p-1 text-gray-500"
+                                >
+                                  {type?.displayName ?? type?.name}
+                                </p>
+                              ))}
+                            </div>
                           )}
                         </div>
                       </SelectItem>
@@ -88,7 +95,7 @@ export const FieldImageModel: React.FC<IFieldImageModelProps> = ({ input: { type
                     <TooltipContent side={i === 0 ? 'bottom' : 'top'}>
                       <span className="text-sm font-bold">
                         {t('workspace.pre-view.actuator.execution-form.image-model.tooltip.file-path') +
-                          serverRelation.apiPath}
+                          serverRelation.path}
                       </span>
                       <br />
                       {description}
