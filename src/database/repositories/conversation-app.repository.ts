@@ -10,6 +10,8 @@ import { Repository } from 'typeorm';
 import { ConversationAppEntity, CreateConversationAppParams, UpdateConversationAppParams } from '../entities/conversation-app/conversation-app.entity';
 import { ConversationExecutionEntity } from '../entities/conversation-app/conversation-executions.entity';
 import { ConversationAppAssetRepositroy } from './assets-conversation-app.repository';
+import { LlmModelRepository } from './llm-model.repository';
+import { OneApiRepository } from './oneapi.respository';
 
 @Injectable()
 export class ConversationAppRepository {
@@ -19,6 +21,8 @@ export class ConversationAppRepository {
     @InjectRepository(ConversationExecutionEntity)
     private readonly executionRepository: Repository<ConversationExecutionEntity>,
     private readonly assetRepository: ConversationAppAssetRepositroy,
+    private readonly llmModelRepository: LlmModelRepository,
+    private readonly oneapiRepository: OneApiRepository,
   ) {}
 
   public async listConversationApps(teamId: string, dto: ListDto) {
@@ -29,11 +33,23 @@ export class ConversationAppRepository {
     });
   }
 
-  private checkModel(model: string) {
-    const avaliableModels = getModels(LlmModelEndpointType.CHAT_COMPLETIONS);
-    if (!avaliableModels.map((x) => x.value).includes(model)) {
+  private async checkModel(model: string, teamId: string): Promise<'BUILT_IN' | 'ONEAPI'> {
+    const avaliableModels = getModels(LlmModelEndpointType.CHAT_COMPLETIONS).map((x) => x.value);
+
+    const [modelChannelId, modelName] = model.split(':');
+    if (modelChannelId) {
+      const llmModel = await this.llmModelRepository.getLLMModelByChannelId(Number(modelChannelId));
+      if (!Object.values(llmModel?.models ?? {}).includes(modelName) || (llmModel?.isDeleted && llmModel?.teamId !== teamId)) {
+        throw new Error('Model not found !');
+      }
+
+      return 'ONEAPI';
+    }
+
+    if (!avaliableModels.includes(model)) {
       throw new Error(`Model ${model} is not available`);
     }
+    return 'BUILT_IN';
   }
 
   private async checkCustomModelUnique(teamId: string, customModelName: string) {
@@ -56,7 +72,7 @@ export class ConversationAppRepository {
       throw new Error('Model is required');
     }
 
-    this.checkModel(model);
+    await this.checkModel(model, teamId);
 
     if (params.customModelName) {
       await this.checkCustomModelUnique(teamId, params.customModelName);
@@ -129,7 +145,7 @@ export class ConversationAppRepository {
       entity.iconUrl = updates.iconUrl;
     }
     if (updates.model) {
-      this.checkModel(updates.model);
+      await this.checkModel(updates.model, teamId);
       entity.model = updates.model;
     }
     if (updates.customModelName != undefined) {
