@@ -8,17 +8,17 @@ import { ComfyUIServerListModal } from 'src/components/layout/ugc-pages/comfyui/
 
 import { IComfyuiModelType } from '@/apis/comfyui-model/typings.ts';
 import { preloadUgcImageModels, useUgcImageModels } from '@/apis/ugc';
-import { UgcView } from '@/components/layout/ugc/view';
-import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createImageModelsColumns } from '@/components/layout/ugc-pages/image-models/consts.tsx';
+import { ImageModelManageDropdown } from '@/components/layout/ugc-pages/image-models/model-manage-dropdown';
 import { ImageModelTypeModal } from '@/components/layout/ugc-pages/image-models/model-type-modal';
 import { OperateArea } from '@/components/layout/ugc-pages/image-models/operate-area';
+import { UgcView } from '@/components/layout/ugc/view';
+import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
 import { Tag } from '@/components/ui/tag';
 import { useCopy } from '@/hooks/use-copy.ts';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
-import { ImageModelManageDropdown } from '@/components/layout/ugc-pages/image-models/model-manage-dropdown';
 
 export const ImageModels: React.FC = () => {
   const { t: tHook } = useTranslation();
@@ -55,10 +55,11 @@ export const ImageModels: React.FC = () => {
             return RenderIcon({ iconUrl: item.iconUrl, size: 'gallery' });
           },
           assetTags: (item) => {
-            const rawRelations = item.serverRelations;
-            const types = rawRelations.reduce((acc: IComfyuiModelType[], { type }) => {
-              if (type && !acc.find((t) => t.name === type.name)) {
-                acc.push(type);
+            const types = item.serverRelations.reduce((acc: IComfyuiModelType[], { type }) => {
+              if (type && type.length > 0) {
+                type.forEach((t) => {
+                  if (!acc.find((t1) => t1.name === t.name)) acc.push(t);
+                });
               }
               return acc;
             }, []);
