@@ -2844,6 +2844,9 @@
             "command": {
               "placeholder": "搜索图像模型...",
               "empty": "找不到图像模型"
+            },
+            "tooltip": {
+              "file-path": "文件路径："
             }
           }
         },

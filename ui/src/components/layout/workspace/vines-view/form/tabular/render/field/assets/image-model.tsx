@@ -1,21 +1,18 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ControllerRenderProps, FieldValues, UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { useComfyuiModelListByTypeNameAndServerId } from '@/apis/comfyui-model';
 import { IComfyuiModelWithOneServerWithApiPath } from '@/apis/comfyui-model/typings.ts';
-import { Button } from '@/components/ui/button';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
-import { FormControl } from '@/components/ui/form.tsx';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { Tag } from '@/components/ui/tag';
+import { FormControl, FormMessage } from '@/components/ui/form.tsx';
+import { VinesLoading } from '@/components/ui/loading';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
-import { cn } from '@/utils';
 
 interface IFieldImageModelProps {
   input: VinesWorkflowVariable;
@@ -28,9 +25,7 @@ interface IFieldImageModelProps {
 export const FieldImageModel: React.FC<IFieldImageModelProps> = ({ input: { typeOptions }, value, onChange }) => {
   const { t } = useTranslation();
 
-  const [visible, setVisible] = useState(false);
-
-  const { data: rawModels } = useComfyuiModelListByTypeNameAndServerId(
+  const { data: rawModels, isLoading } = useComfyuiModelListByTypeNameAndServerId(
     typeOptions?.comfyuiModelTypeName,
     typeOptions?.comfyuiModelServerId,
   );
@@ -45,72 +40,67 @@ export const FieldImageModel: React.FC<IFieldImageModelProps> = ({ input: { type
     })
     .filter((m) => m.serverRelation) as IComfyuiModelWithOneServerWithApiPath[];
 
-  const selectedModel = models?.find((m) => m.serverRelation?.apiPath === value);
-
   return (
-    <Popover open={visible} onOpenChange={setVisible}>
-      <PopoverTrigger asChild>
-        <FormControl>
-          <Button
-            variant="outline"
-            role="combobox"
-            className={cn('w-full justify-between', !value && 'text-muted-foreground')}
-          >
-            {value ? (
-              <div className="flex items-center gap-2">
-                <VinesIcon src={selectedModel?.iconUrl || 'emoji:🍀:#ceefc5'} size="xs" />
-                <span>{selectedModel?.displayName}</span>
-              </div>
-            ) : (
-              t('workspace.pre-view.actuator.execution-form.image-model.placeholder')
-            )}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </FormControl>
-      </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
-        <Command>
-          <CommandInput placeholder={t('workspace.pre-view.actuator.execution-form.image-model.command.placeholder')} />
-          <CommandEmpty>{t('workspace.pre-view.actuator.execution-form.image-model.command.empty')}</CommandEmpty>
-          <ScrollArea className="h-56">
-            <CommandGroup>
-              {(models ?? []).map((it) => {
-                return (
-                  <CommandItem
-                    value={it.id}
-                    key={it.id}
-                    onSelect={() => {
-                      onChange(it.serverRelation.apiPath);
-                      setVisible(false);
-                    }}
-                    className="flex justify-between gap-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      <VinesIcon src={it.iconUrl || 'emoji:🍀:#ceefc5'} size="xs" />
-                      <div>
-                        <div className="flex gap-1">
-                          <p>{it.displayName}</p>
-                          {it.serverRelation.type && (
-                            <Tag color="tertiary" size="xs">
-                              {it.serverRelation.type.displayName || it.serverRelation.type.name}
-                            </Tag>
+    <AnimatePresence mode="popLayout">
+      {isLoading ? (
+        <motion.div
+          key="vines-image-model-loading"
+          className="flex h-[76px] w-full items-center justify-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.1 }}
+        >
+          <VinesLoading size="md" />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="vines-image-model"
+          className="w-full"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.1 }}
+        >
+          <FormControl>
+            <Select onValueChange={onChange} value={value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder={t('workspace.pre-view.actuator.execution-form.image-model.placeholder')} />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {models.map(({ id, displayName, iconUrl, serverRelation, description }, i) => (
+                  <Tooltip key={id}>
+                    <TooltipTrigger asChild>
+                      <SelectItem value={serverRelation.apiPath}>
+                        <div className="flex items-center gap-2">
+                          <VinesIcon src={iconUrl || 'emoji:🍀:#ceefc5'} size="xs" />
+                          <p className="text-sm font-bold">{displayName ?? 'unknown'}</p>
+                          {serverRelation.type && (
+                            <p className="text-xxs rounded border border-input bg-muted p-1 text-gray-500">
+                              {serverRelation.type?.displayName ?? serverRelation.type?.name}
+                            </p>
                           )}
                         </div>
-                        <p className="text-xs opacity-70">
-                          {it.description || t('components.layout.ugc.utils.no-description')}
-                        </p>
-                      </div>
-                    </div>
-                    <Check
-                      className={cn('h-4 w-4', it.serverRelation.apiPath === value ? 'opacity-100' : 'opacity-0')}
-                    />
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
-          </ScrollArea>
-        </Command>
-      </PopoverContent>
-    </Popover>
+                      </SelectItem>
+                    </TooltipTrigger>
+                    <TooltipContent side={i === 0 ? 'bottom' : 'top'}>
+                      <span className="text-sm font-bold">
+                        {t('workspace.pre-view.actuator.execution-form.image-model.tooltip.file-path') +
+                          serverRelation.apiPath}
+                      </span>
+                      <br />
+                      {description}
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormControl>
+          <FormMessage />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };

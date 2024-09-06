@@ -2845,6 +2845,9 @@
             "command": {
               "placeholder": "Search image model...",
               "empty": "No image model found"
+            },
+            "tooltip": {
+              "file-path": "File Path: "
             }
           }
         },
