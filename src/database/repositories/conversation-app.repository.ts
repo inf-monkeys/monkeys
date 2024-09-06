@@ -31,7 +31,7 @@ export class ConversationAppRepository {
 
   private checkModel(model: string) {
     const avaliableModels = getModels(LlmModelEndpointType.CHAT_COMPLETIONS);
-    if (!avaliableModels.map((x) => x.name).includes(model)) {
+    if (!avaliableModels.map((x) => x.value).includes(model)) {
       throw new Error(`Model ${model} is not available`);
     }
   }
