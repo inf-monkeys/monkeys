@@ -37,7 +37,7 @@ export class ConversationAppRepository {
     const avaliableModels = getModels(LlmModelEndpointType.CHAT_COMPLETIONS).map((x) => x.value);
 
     const [modelChannelId, modelName] = model.split(':');
-    if (modelChannelId) {
+    if (!isNaN(Number(modelChannelId))) {
       const llmModel = await this.llmModelRepository.getLLMModelByChannelId(Number(modelChannelId));
       if (!Object.values(llmModel?.models ?? {}).includes(modelName) || (llmModel?.isDeleted && llmModel?.teamId !== teamId)) {
         throw new Error('Model not found !');
