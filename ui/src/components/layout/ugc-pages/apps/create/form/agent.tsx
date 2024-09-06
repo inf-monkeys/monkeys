@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 
 import { createAgent } from '@/apis/agents';
 import { useLLMModels } from '@/apis/llm';
+import { ILLMModel } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config/tool-input/input-property/components/preset/llm-model.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx';
 import { Button } from '@/components/ui/button';
@@ -27,7 +28,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { Textarea } from '@/components/ui/textarea.tsx';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
+import i18n from '@/i18n.ts';
 import { createAgentSchema, ICreateAgentInfo } from '@/schema/workspace/create-agent.ts';
 import { getI18nContent } from '@/utils';
 
@@ -50,17 +53,21 @@ export const AgentCreateForm: React.FC<{
   const modelList = useCreation(() => {
     return llmModelsData
       ? llmModelsData.reduce(
-          (acc: { name: string; value: string }[], item) =>
+          (acc: ILLMModel[], item) =>
             acc.concat(
-              Object.entries(item.models).map(([key, value]) => ({
-                name: `${getI18nContent(item.displayName)} - ${value}`,
-                value: key,
+              Object.entries(item.models).map(([, model]) => ({
+                displayName: `${item.channelId === 0 ? '' : `${model} - `}${getI18nContent(item.displayName) ?? model}`,
+                description: getI18nContent(item.description),
+                iconUrl: item?.iconUrl ?? '',
+                channelId: item.channelId,
+                model: model,
+                value: item.channelId === 0 ? model : `${item.channelId}:${model}`,
               })),
             ),
           [],
         )
       : [];
-  }, [llmModelsData]);
+  }, [llmModelsData, i18n.language]);
 
   const mutateAgents = () => mutate((key) => typeof key === 'string' && key.startsWith('/api/conversation-app'));
 
@@ -77,9 +84,13 @@ export const AgentCreateForm: React.FC<{
 
     toast.promise(createAgent(data), {
       success: (agent) => {
-        if (agent) open(`/${teamId}/agent/${agent.id}`, '_blank');
-        setOpen(false);
-        return t('common.create.success');
+        if (agent) {
+          open(`/${teamId}/agent/${agent.id}`, '_blank');
+          setOpen(false);
+          return t('common.create.success');
+        } else {
+          return t('common.create.error');
+        }
       },
       loading: t('common.create.loading'),
       error: t('common.create.error'),
@@ -161,10 +172,27 @@ export const AgentCreateForm: React.FC<{
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {modelList.map(({ name, value }, i) => (
-                      <SelectItem value={value} key={i}>
-                        {name}
-                      </SelectItem>
+                    {modelList.map(({ displayName, value, iconUrl, channelId, description, model }, i) => (
+                      <Tooltip key={i}>
+                        <TooltipTrigger asChild>
+                          <SelectItem value={value}>
+                            <div className="flex items-center gap-2">
+                              {iconUrl && <img src={iconUrl} alt={displayName} className="size-6" />}
+                              <p className="text-sm font-bold">{displayName}</p>
+                              {channelId === 0 && (
+                                <p className="text-xxs rounded border border-input bg-muted p-1 text-gray-500">
+                                  {t('common.utils.system')}
+                                </p>
+                              )}
+                            </div>
+                          </SelectItem>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-72" side={i === 0 ? 'bottom' : 'top'}>
+                          <span className="text-sm font-bold">{model}</span>
+                          <br />
+                          {description}
+                        </TooltipContent>
+                      </Tooltip>
                     ))}
                   </SelectContent>
                 </Select>

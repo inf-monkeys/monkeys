@@ -115,6 +115,10 @@ export class OneAPIService {
 
     set(llmModelUpdateParams, 'models', JSON.parse(newChannel.model_mapping));
 
+    const oneapiUser = await this.getOrCreateOneapiUser(teamId);
+    const userClient = new OneApiClient(config.oneapi.baseURL, oneapiUser.userToken);
+    await userClient.updateTokenModelScope(newChannel.models.split(','));
+
     await this.llmModelRepository.updateLLMModel(llmModelId, llmModelUpdateParams);
 
     return newChannel;
