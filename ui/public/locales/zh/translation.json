@@ -2271,7 +2271,8 @@
             "parse-error": "工具数据解析失败！",
             "output": {
               "label": "输出模式",
-              "placeholder": "选择输出模式"
+              "placeholder": "选择输出模式",
+              "tips": "此配置一般无需更改"
             },
             "timeout": {
               "label": "超时时间（秒）",

@@ -52,27 +52,6 @@ export const ToolAdvancedConfig: React.FC<INodeConfigProps> = ({ nodeId, task })
 
   return (
     <main className="flex size-full flex-col gap-4 overflow-hidden px-4">
-      <Label>{t('workspace.flow-view.headless-modal.tool-editor.advanced-config.output.label')}</Label>
-      <Select
-        value={outputAsSelect}
-        onValueChange={(val) => {
-          setOutputAsSelect(val);
-          handleUpdate('outputAs', val);
-        }}
-      >
-        <SelectTrigger>
-          <SelectValue
-            placeholder={t('workspace.flow-view.headless-modal.tool-editor.advanced-config.output.placeholder')}
-          />
-        </SelectTrigger>
-        <SelectContent>
-          {['json', 'stream'].map((it) => (
-            <SelectItem value={it} key={it} className="cursor-pointer">
-              {it}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
       <Label>{t('workspace.flow-view.headless-modal.tool-editor.advanced-config.timeout.label')}</Label>
       <Input
         placeholder={t('workspace.flow-view.headless-modal.tool-editor.advanced-config.timeout.placeholder')}
@@ -92,6 +71,31 @@ export const ToolAdvancedConfig: React.FC<INodeConfigProps> = ({ nodeId, task })
           handleUpdate('timeout', number);
         }}
       />
+      <Label>{t('workspace.flow-view.headless-modal.tool-editor.advanced-config.output.label')}</Label>
+      <Select
+        value={outputAsSelect}
+        onValueChange={(val) => {
+          setOutputAsSelect(val);
+          handleUpdate('outputAs', val);
+        }}
+        defaultValue="json"
+      >
+        <SelectTrigger>
+          <SelectValue
+            placeholder={t('workspace.flow-view.headless-modal.tool-editor.advanced-config.output.placeholder')}
+          />
+        </SelectTrigger>
+        <SelectContent>
+          {['json', 'stream'].map((it) => (
+            <SelectItem value={it} key={it} className="cursor-pointer">
+              {it}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <span className="-mt-2 text-xs text-gray-10">
+        {t('workspace.flow-view.headless-modal.tool-editor.advanced-config.output.tips')}
+      </span>
     </main>
   );
 };
