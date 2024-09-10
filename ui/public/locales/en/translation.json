@@ -2272,7 +2272,8 @@
             "parse-error": "Tool data parsing failed!",
             "output": {
               "label": "Output Mode",
-              "placeholder": "Select output mode"
+              "placeholder": "Select output mode",
+              "tips": "This configuration generally does not need to be changed"
             },
             "timeout": {
               "label": "Timeout (seconds)",

@@ -495,9 +495,9 @@ export class VinesCore extends VinesTools(VinesBase) {
     inputData = {},
     instanceId,
     version = this.version,
-    debug = false,
     chatSessionId,
     onlyStart = false,
+    tasks,
   }: IVinesFlowRunParams = {}): Promise<boolean> {
     if (this.enableOpenAIInterface) {
       toast.warning('启动运行失败！请先关闭 OpenAI 接口');
@@ -530,8 +530,8 @@ export class VinesCore extends VinesTools(VinesBase) {
     nodes.forEach((it) => it.clearExecutionTask(instanceId ?? this.executionInstanceId));
 
     if (!instanceId) {
-      if (debug) {
-        instanceId = await executionWorkflowWithDebug(this.workflowId, inputData, this.getRaw(), version);
+      if (tasks) {
+        instanceId = await executionWorkflowWithDebug(this.workflowId, inputData, tasks.length ? tasks : this.getRaw());
       } else {
         instanceId = await executionWorkflow(this.workflowId, inputData, version, chatSessionId);
       }

@@ -36,7 +36,6 @@ export const executionWorkflowWithDebug = (
   workflowId: string,
   inputData: Record<string, unknown>,
   tasks: VinesTask[],
-  version = 1,
 ) =>
   vinesFetcher<string>({
     method: 'POST',
@@ -45,7 +44,6 @@ export const executionWorkflowWithDebug = (
   })(`/api/workflow/executions/${workflowId}/debug`, {
     inputData,
     tasks,
-    version,
   });
 
 export const useWorkflowExecution = (instanceId: string) =>

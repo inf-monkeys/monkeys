@@ -2,6 +2,7 @@ import { WorkflowTriggerType } from '@/apis/workflow/trigger/typings.ts';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import type { Task, Workflow as WorkflowExecution } from '@/package/vines-flow/share/types.ts';
+import { MonkeyTaskDefTypes } from '@inf-monkeys/monkeys';
 
 export type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -32,9 +33,9 @@ export interface IVinesFlowRunParams {
   inputData?: Record<string, unknown>;
   instanceId?: string;
   version?: number;
-  debug?: boolean;
   chatSessionId?: string;
   onlyStart?: boolean;
+  tasks?: MonkeyTaskDefTypes[];
 }
 
 export type VinesWorkflowExecutionType =
