@@ -9,6 +9,7 @@ import { SearchWorkflowExecutionsDto } from './dto/req/search-workflow-execution
 import { StartWorkflowSyncDto } from './dto/req/start-workflow-sync.dto';
 import { StartWorkflowDto } from './dto/req/start-workflow.dto';
 import { UpdateTaskStatusDto } from './dto/req/update-task-status.dto';
+import { DebugWorkflowDto } from './interfaces';
 import { WorkflowExecutionService } from './workflow.execution.service';
 
 @Controller('/workflow')
@@ -94,6 +95,26 @@ export class WorkflowExecutionController {
         },
       });
     }
+  }
+
+  @Post('/executions/:workflowId/debug')
+  @ApiOperation({
+    summary: '调试 workflow',
+    description: '调试 workflow',
+  })
+  public async debugWorkflow(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Body() body: DebugWorkflowDto) {
+    const { teamId, userId } = req;
+    const { inputData, tasks } = body;
+    const workflowInstanceId = await this.service.debugWorkflow({
+      teamId,
+      userId,
+      workflowId,
+      inputData,
+      tasks,
+    });
+    return new SuccessResponse({
+      data: workflowInstanceId,
+    });
   }
 
   @Post('/executions/:workflowInstanceId/pause')

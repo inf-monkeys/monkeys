@@ -214,3 +214,14 @@ export interface StartWorkflowRequest {
   triggerType: WorkflowTriggerType;
   chatSessionId?: string;
 }
+
+export interface DebugWorkflowRequest {
+  teamId: string;
+  userId: string;
+  workflowId: string;
+  inputData: { [x: string]: any };
+  output?: WorkflowOutputValue[];
+  tasks: MonkeyTaskDefTypes[];
+}
+
+export type DebugWorkflowDto = Omit<DebugWorkflowRequest, 'teamId' | 'userId' | 'workflowId'>;

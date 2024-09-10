@@ -17,7 +17,7 @@ import { FindWorkflowCondition, WorkflowRepository } from '../../database/reposi
 import { ConductorService } from './conductor/conductor.service';
 import { SearchWorkflowExecutionsDto, SearchWorkflowExecutionsOrderDto, WorkflowExecutionSearchableField } from './dto/req/search-workflow-execution.dto';
 import { UpdateTaskStatusDto } from './dto/req/update-task-status.dto';
-import { StartWorkflowRequest } from './interfaces';
+import { DebugWorkflowRequest, StartWorkflowRequest } from './interfaces';
 
 export interface WorkflowWithMetadata extends Workflow {
   startBy: string;
@@ -259,6 +259,40 @@ export class WorkflowExecutionService {
       input: inputData,
     });
     await this.workflowRepository.saveWorkflowExecution(workflowId, version, workflowInstanceId, userId, triggerType, chatSessionId, apiKey);
+    return workflowInstanceId;
+  }
+
+  public async debugWorkflow(request: DebugWorkflowRequest) {
+    const { teamId, userId, workflowId, tasks, output = [] } = request;
+
+    await this.conductorService.saveWorkflowInConductor({
+      workflowId,
+      description: 'Temporary debugging workflow',
+      version: -1,
+      tasks,
+      output,
+      teamId,
+    });
+
+    let { inputData } = request;
+
+    if (inputData?.__context) {
+      throw new Error('inputData 不能包含内置参数 __context');
+    }
+    inputData = {
+      ...inputData,
+      __context: {
+        userId,
+        teamId,
+        appId: config.server.appId,
+      },
+    };
+
+    const workflowInstanceId = await conductorClient.workflowResource.startWorkflow({
+      name: workflowId,
+      version: -1,
+      input: inputData,
+    });
     return workflowInstanceId;
   }
 
