@@ -36,7 +36,7 @@ export const FormInput: React.FC<IFormInputProps> = ({ inputs, height, onClick, 
       className={cn('w-full overflow-hidden px-3', disabled && 'pointer-events-none opacity-85')}
       animate={{ marginRight: disabled ? -width - 35 : 0 }}
     >
-      <TabularRender inputs={inputs} height={height} onSubmit={onClick} event$={tabular$} workflowId={workflowId}>
+      <TabularRender inputs={inputs} height={height - 52} onSubmit={onClick} event$={tabular$} workflowId={workflowId}>
         <div className="flex w-full items-center gap-2">
           {isInputNotEmpty && <ChatInputMoreOperations tabular$={tabular$} />}
           <Button

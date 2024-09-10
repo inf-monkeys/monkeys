@@ -72,7 +72,7 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
 
   return (
     <Dialog modal={false} open={open} onOpenChange={(val) => !disableDialogClose && setOpen(val)}>
-      <DialogContent className="flex h-full max-h-[calc(100%-15rem)] min-w-[55rem] max-w-[calc(100%-40%)] flex-col">
+      <DialogContent className="flex h-full max-h-[calc(100%-20%)] min-w-[55rem] max-w-[calc(100%-40%)] flex-col">
         <DialogTitle asChild>
           <Header node={node} />
         </DialogTitle>
