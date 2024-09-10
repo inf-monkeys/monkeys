@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 
 import { ToolAdvancedConfig } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/advanced-config';
 import { ToolConfig } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/config';
+import { ToolDebug } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/debug';
 import { Header } from '@/components/layout/workspace/vines-view/flow/headless-modal/tool-editor/header';
 import { Button } from '@/components/ui/button';
 import { CodeEditor, JSONValue } from '@/components/ui/code-editor';
@@ -79,6 +80,7 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="inset-1 h-[calc(100%-8.3rem)]">
           <TabsList>
             <TabsTrigger value="config">{t('workspace.flow-view.headless-modal.tool-editor.tabs.config')}</TabsTrigger>
+            {/*<TabsTrigger value="debug">{t('workspace.flow-view.headless-modal.tool-editor.tabs.debug')}</TabsTrigger>*/}
             <TabsTrigger value="dev">{t('workspace.flow-view.headless-modal.tool-editor.tabs.dev')}</TabsTrigger>
             <TabsTrigger value="more-config">
               {t('workspace.flow-view.headless-modal.tool-editor.tabs.more-config')}
@@ -106,6 +108,11 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
               {activeTab === 'more-config' && (
                 <TabsContent value="more-config">
                   <ToolAdvancedConfig nodeId={node?.id ?? ''} task={node?.getRaw()} />
+                </TabsContent>
+              )}
+              {activeTab === 'debug' && (
+                <TabsContent value="debug">
+                  <ToolDebug />
                 </TabsContent>
               )}
               {activeTab === 'empty' && <TabsContent value="empty"></TabsContent>}
