@@ -71,7 +71,6 @@ export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
               <ToolDisplay data={extra} />
               <VinesMarkdown
                 className={cn('max-w-full', isLoading && LastItemIndex === index ? 'vines-result-streaming' : '')}
-                allowHtml
               >
                 {content + (isEmptyMessage ? EMPTY_CONTENT : '')}
               </VinesMarkdown>
