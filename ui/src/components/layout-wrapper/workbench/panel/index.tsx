@@ -69,7 +69,7 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      className=" border-transparent !p-1 shadow-none [&_svg]:size-3"
+                      className="border-transparent !p-1 shadow-none [&_svg]:size-3"
                       size="small"
                       variant="outline"
                       icon={<Bolt />}
