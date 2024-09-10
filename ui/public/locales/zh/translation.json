@@ -2150,7 +2150,8 @@
             "config": "配置参数",
             "dev": "原始数据",
             "more-config": "高级配置",
-            "custom-config": "自定义配置"
+            "custom-config": "自定义配置",
+            "debug": "工具调试"
           },
           "header": {
             "quick-options": {

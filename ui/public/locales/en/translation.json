@@ -2151,7 +2151,8 @@
             "config": "Config",
             "dev": "Raw Data",
             "more-config": "Advanced Config",
-            "custom-config": "Custom Config"
+            "custom-config": "Custom Config",
+            "debug": "Debug"
           },
           "header": {
             "quick-options": {
