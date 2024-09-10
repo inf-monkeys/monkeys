@@ -235,16 +235,22 @@ export class ConductorService {
     }
   }
 
-  public async saveWorkflowInConductor(workflowEntity: WorkflowMetadataEntity) {
-    const { tasks, teamId, workflowId, version, output } = workflowEntity;
+  public async saveWorkflowInConductor(workflowEntity: Pick<WorkflowMetadataEntity, 'tasks' | 'teamId' | 'workflowId' | 'version' | 'output' | 'description'>) {
+    const { tasks, teamId, workflowId, version, output, description = '' } = workflowEntity;
 
     try {
       await this.convertVinesTasksToConductorTasks(teamId, output, tasks, {});
+
+      let desc = typeof description === 'string' ? description : '';
+      if ('getDisplayNameStr' in workflowEntity && typeof (workflowEntity as unknown as WorkflowMetadataEntity)?.getDisplayNameStr === 'function') {
+        desc = (workflowEntity as unknown as WorkflowMetadataEntity)?.getDisplayNameStr();
+      }
+
       const res = await conductorClient.metadataResource.update(
         [
           {
             name: workflowId,
-            description: workflowEntity.getDisplayNameStr(),
+            description: desc,
             version: version,
             restartable: true,
             workflowStatusListenerEnabled: true,
@@ -261,8 +267,9 @@ export class ConductorService {
         throw new Error('Save workflow in conductor failed');
       }
     } catch (error) {
-      const message = JSON.stringify(error.body.validationErrors);
-      throw new Error(message);
+      console.log(error);
+      const message = JSON.stringify(error?.body?.validationErrors);
+      throw new Error(message ?? error.message);
     }
   }
 
