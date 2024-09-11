@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useCreation } from 'ahooks';
+import { isArray } from 'lodash';
 import { Filter, Plus, Trash2 } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
 
@@ -44,7 +46,10 @@ export const MetadataFilter: React.FC<IMetadataFilterProps> = ({ metadata, onFil
   const { isDirty, isValid, errors } = form.formState;
   const isSubmittable = isDirty && isValid;
 
-  const finalMetadata = metadata?.filter((it) => !fields?.map((field) => field.key)?.includes(it.name)) ?? [];
+  const finalMetadata = useCreation(() => {
+    if (!isArray(metadata)) return [];
+    return (metadata ?? [])?.filter((it) => !fields?.map((field) => field.key)?.includes(it.name)) ?? [];
+  }, [metadata]);
 
   return (
     <Tooltip>

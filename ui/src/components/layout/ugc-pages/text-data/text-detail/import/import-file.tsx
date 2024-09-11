@@ -84,12 +84,18 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
                     <FormControl>
                       <Uploader
                         accept={[
-                          'text/plain',
+                          'text/txt',
+                          'text/markdown',
                           'application/pdf',
                           'text/csv',
                           'application/json',
-                          'application/ld+json',
                           'application/zip',
+                          'application/ld+json',
+                          'text/plain',
+                          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // xlsx
+                          'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // docx
+                          'message/rfc822', // eml
+                          'application/x-ndjson', // jsonl
                         ]}
                         maxSize={400}
                         limit={1}
