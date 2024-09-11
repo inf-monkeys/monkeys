@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 
 import { useSWRConfig } from 'swr';
-import { useSearch } from '@tanstack/react-router';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 
 import { has } from 'lodash';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,7 @@ import VinesEvent from '@/utils/events.ts';
 export const AuthWithRouteSearch: React.FC = () => {
   const { t } = useTranslation();
   const { mutate } = useSWRConfig();
+  const navigate = useNavigate();
 
   const search = useSearch({
     strict: false,
@@ -40,6 +41,13 @@ export const AuthWithRouteSearch: React.FC = () => {
         delete redirect_search['auth_pwd'];
         delete redirect_search['auth_token'];
         VinesEvent.emit('vines-nav', redirect_id, redirect_params, redirect_search);
+      } else {
+        const currentTeamId = it?.[0]?.id;
+        if (currentTeamId) {
+          VinesEvent.emit('vines-nav', '/$teamId', { teamId: currentTeamId });
+        } else {
+          void navigate({ to: '/' });
+        }
       }
     });
   };
