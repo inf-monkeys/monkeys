@@ -2,7 +2,7 @@ import { isEmpty, isObject } from 'lodash';
 import { create, StateCreator, StoreApi } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
-import { setTailwindTheme } from '@/package/palette/usePalette.ts';
+import { setTailwindTheme } from '@/package/palette/use-palette.ts';
 
 const autoTogglePalette =
   <T>(config: StateCreator<T>) =>

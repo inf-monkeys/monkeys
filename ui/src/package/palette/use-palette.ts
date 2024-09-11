@@ -8,7 +8,16 @@ const COLOR_STOPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
 // 纯色色阶推导
 export const createSolidColorScale = (color: string, mode = 'light') => {
   const isDark = mode === 'dark';
-  const hsv = chroma(isDark ? markDarkColor(color) : color).hsv();
+  let baseColor = isDark ? markDarkColor(color) : color;
+
+  // 检查颜色是否过暗
+  const luminance = chroma(baseColor).luminance();
+  if (isDark && luminance < 0.1) {
+    // 如果颜色过暗，将其反转为亮色
+    baseColor = chroma(baseColor).set('hsl.l', 0.4).hex();
+  }
+
+  const hsv = chroma(baseColor).hsv();
 
   const colors = COLOR_STOPS.map((stop) => {
     const h = calculateHue(hsv, stop, 500);
