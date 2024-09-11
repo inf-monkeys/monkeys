@@ -85,9 +85,11 @@ export const ToolDebugExecution: React.FC<IToolDebugExecutionProps> = ({
               workflowId={workflowId}
               onSubmit={handleSubmit}
               fieldChildren={
-                <div className="col-span-2 -mt-2 w-full text-center text-xs text-gray-10">
-                  {t('workspace.flow-view.headless-modal.tool-editor.debug.form-tips')}
-                </div>
+                inputs.length ? (
+                  <div className="col-span-2 -mt-2 w-full text-center text-xs text-gray-10">
+                    {t('workspace.flow-view.headless-modal.tool-editor.debug.form-tips')}
+                  </div>
+                ) : null
               }
             >
               <Button ref={submitButton} className="hidden" type="submit" />
