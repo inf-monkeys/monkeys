@@ -2283,6 +2283,14 @@
               "zero-error": "Please enter a number greater than or equal to 0"
             }
           },
+          "debug": {
+            "form-tips": "This is the workflow execution parameter, which can be left blank",
+            "single-instance": {
+              "label": "Single-instance test",
+              "tips": "After enabling, only the current tool will be executed. If you reference data from other tools, please do not enable this option"
+            },
+            "execution": "Execute test"
+          },
           "save": "Save"
         },
         "tool-selector": {
@@ -2897,7 +2905,8 @@
               "data": "Data",
               "logs": "Raw Data"
             }
-          }
+          },
+          "empty": "Please select a tool first"
         },
         "frame": {
           "history": "{{status}}History",

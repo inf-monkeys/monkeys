@@ -40,7 +40,6 @@ export const executionWorkflowWithDebug = (
   vinesFetcher<string>({
     method: 'POST',
     simple: true,
-    wrapper: (it) => (it as unknown as { workflowInstanceId: string })?.workflowInstanceId ?? '',
   })(`/api/workflow/executions/${workflowId}/debug`, {
     inputData,
     tasks,

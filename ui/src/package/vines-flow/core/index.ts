@@ -498,7 +498,7 @@ export class VinesCore extends VinesTools(VinesBase) {
     chatSessionId,
     onlyStart = false,
     tasks,
-  }: IVinesFlowRunParams = {}): Promise<boolean> {
+  }: IVinesFlowRunParams = {}): Promise<boolean | string> {
     if (this.enableOpenAIInterface) {
       toast.warning('启动运行失败！请先关闭 OpenAI 接口');
       return false;
@@ -543,7 +543,7 @@ export class VinesCore extends VinesTools(VinesBase) {
     }
 
     if (onlyStart) {
-      return true;
+      return instanceId;
     }
 
     await this.nodes[0].updateExecutionTask(instanceId, { status: 'COMPLETED' });
@@ -555,7 +555,7 @@ export class VinesCore extends VinesTools(VinesBase) {
       // 实例已存在，询问是否重新运行
     }
 
-    return true;
+    return instanceId;
   }
 
   private async handleExecution(instanceId: string) {

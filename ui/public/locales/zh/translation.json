@@ -2282,6 +2282,14 @@
               "zero-error": "请输入大于等于 0 的数字"
             }
           },
+          "debug": {
+            "form-tips": "此处为工作流执行参数，可不填写",
+            "single-instance": {
+              "label": "单例测试",
+              "tips": "启用后，执行时将只执行当前工具。如有引用其他工具执行后的数据，请不要开启此选项"
+            },
+            "execution": "执行测试"
+          },
           "save": "保存"
         },
         "tool-selector": {
@@ -2896,7 +2904,8 @@
               "data": "数据",
               "logs": "原始数据"
             }
-          }
+          },
+          "empty": "请先选择一个工具"
         },
         "frame": {
           "history": "{{status}}历史记录",
