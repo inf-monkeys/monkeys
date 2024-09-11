@@ -21,9 +21,16 @@ interface IVinesActuatorProps {
   children?: React.ReactNode;
   instanceId?: string;
   onRestart?: () => void;
+  onManualRestart?: () => void;
 }
 
-export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height, instanceId, children, onRestart }) => {
+export const VinesActuator: React.FC<IVinesActuatorProps> = ({
+  height,
+  instanceId,
+  children,
+  onRestart,
+  onManualRestart,
+}) => {
   const [activeTool, setActiveTool] = useState<VinesNode>();
 
   const [sidebarVisible, setSidebarVisible] = useState(document.body.clientWidth > 520);
@@ -61,7 +68,7 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height, instanceI
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                className={hasWorkflowVariables || openAIInterfaceEnabled ? 'hidden' : ''}
+                className={(onManualRestart ? false : hasWorkflowVariables) || openAIInterfaceEnabled ? 'hidden' : ''}
                 variant="outline"
                 icon={isExecutionRunning ? <StopCircle size={16} /> : <RotateCcw size={16} />}
                 onClick={() => {
@@ -70,10 +77,15 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({ height, instanceI
                   } else {
                     if (hasWorkflowVariables) {
                       toast.info(t('workspace.pre-view.actuator.execution.form-empty'));
+                      onManualRestart?.();
                     } else {
-                      vines.executionInstanceId = '';
-                      vines.start();
-                      onRestart?.();
+                      if (onManualRestart) {
+                        onManualRestart();
+                      } else {
+                        vines.executionInstanceId = '';
+                        vines.start();
+                        onRestart?.();
+                      }
                     }
                   }
                 }}

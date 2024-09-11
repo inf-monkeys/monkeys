@@ -67,7 +67,8 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
     }
   };
 
-  const task = (node?.getRaw() || {}) as JSONValue;
+  const nodeTask = node?.getRaw();
+  const task = (nodeTask || {}) as JSONValue;
 
   const disabled = !isLatestWorkflowVersion;
 
@@ -80,7 +81,7 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="inset-1 h-[calc(100%-8.3rem)]">
           <TabsList>
             <TabsTrigger value="config">{t('workspace.flow-view.headless-modal.tool-editor.tabs.config')}</TabsTrigger>
-            {/*<TabsTrigger value="debug">{t('workspace.flow-view.headless-modal.tool-editor.tabs.debug')}</TabsTrigger>*/}
+            <TabsTrigger value="debug">{t('workspace.flow-view.headless-modal.tool-editor.tabs.debug')}</TabsTrigger>
             <TabsTrigger value="dev">{t('workspace.flow-view.headless-modal.tool-editor.tabs.dev')}</TabsTrigger>
             <TabsTrigger value="more-config">
               {t('workspace.flow-view.headless-modal.tool-editor.tabs.more-config')}
@@ -97,7 +98,7 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
             >
               {activeTab === 'config' && (
                 <TabsContent value="config">
-                  <ToolConfig nodeId={node?.id ?? ''} task={node?.getRaw()} />
+                  <ToolConfig nodeId={node?.id ?? ''} task={nodeTask} />
                 </TabsContent>
               )}
               {activeTab === 'dev' && (
@@ -107,15 +108,15 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
               )}
               {activeTab === 'more-config' && (
                 <TabsContent value="more-config">
-                  <ToolAdvancedConfig nodeId={node?.id ?? ''} task={node?.getRaw()} />
+                  <ToolAdvancedConfig nodeId={node?.id ?? ''} task={nodeTask} />
                 </TabsContent>
               )}
               {activeTab === 'debug' && (
                 <TabsContent value="debug">
-                  <ToolDebug />
+                  <ToolDebug task={nodeTask} workflowId={workflowId} />
                 </TabsContent>
               )}
-              {activeTab === 'empty' && <TabsContent value="empty"></TabsContent>}
+              {activeTab === 'empty' && <TabsContent value="empty" />}
             </motion.div>
           </AnimatePresence>
         </Tabs>

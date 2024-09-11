@@ -91,6 +91,8 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
     };
 
     for (const execution of executions ?? []) {
+      if (execution.workflowVersion === -1) continue;
+
       const output: JSONValue = execution.output ?? {};
 
       const flattenOutput = flattenKeys(output);

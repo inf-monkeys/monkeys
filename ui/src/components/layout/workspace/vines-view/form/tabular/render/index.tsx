@@ -28,7 +28,10 @@ export type TTabularEvent = 'reset' | 'restore-previous-param' | 'submit';
 interface ITabularRenderProps {
   inputs: VinesWorkflowVariable[];
   height?: number;
+
   children?: React.ReactNode;
+  fieldChildren?: React.ReactNode;
+
   onSubmit?: (data: IWorkflowInputForm) => void;
 
   formClassName?: string;
@@ -46,7 +49,10 @@ interface ITabularRenderProps {
 export const TabularRender: React.FC<ITabularRenderProps> = ({
   inputs,
   height,
+
   children,
+  fieldChildren,
+
   onSubmit,
 
   formClassName,
@@ -222,6 +228,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
                 </AccordionItem>
               </Accordion>
             )}
+            {fieldChildren}
           </div>
         </ScrollArea>
         {children}

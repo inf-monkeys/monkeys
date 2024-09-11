@@ -52,7 +52,7 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ workflowId, heigh
   useEffect(() => {
     const dirtyData =
       executionData
-        ?.filter((it) => !it.tasks?.length)
+        ?.filter((it) => !it.tasks?.length && it.workflowVersion !== -1)
         ?.map(
           ({ workflowId, output, input, status, startTime, endTime }) =>
             ({
