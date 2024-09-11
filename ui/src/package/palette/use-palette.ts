@@ -10,13 +10,12 @@ export const createSolidColorScale = (color: string, mode = 'light') => {
   const isDark = mode === 'dark';
   let baseColor = isDark ? markDarkColor(color) : color;
 
-  // 检查颜色是否过暗
   const luminance = chroma(baseColor).luminance();
-  if (isDark && luminance < 0.1) {
-    // 如果颜色过暗，将其反转为亮色
+  if (luminance < 0.1) {
     baseColor = chroma(baseColor).set('hsl.l', 0.4).hex();
+  } else if (luminance > 0.9) {
+    baseColor = chroma(baseColor).set('hsl.l', 0.6).hex();
   }
-
   const hsv = chroma(baseColor).hsv();
 
   const colors = COLOR_STOPS.map((stop) => {
