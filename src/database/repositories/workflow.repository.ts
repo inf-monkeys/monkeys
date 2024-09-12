@@ -95,10 +95,14 @@ export class WorkflowRepository {
       validationIssues?: WorkflowValidationIssue[];
       validated?: boolean;
     },
+    useNewId = false,
   ) {
     const { displayName, description, iconUrl, tasks, variables, output, exposeOpenaiCompatibleInterface, rateLimiter, validationIssues = [], validated = true } = data;
+
+    const id = useNewId ? generateDbId() : workflowId;
+
     await this.workflowMetadataRepository.save({
-      id: workflowId,
+      id,
       createdTimestamp: Date.now(),
       updatedTimestamp: Date.now(),
       isDeleted: false,

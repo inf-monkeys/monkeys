@@ -78,6 +78,7 @@ export class WorkflowCrudController {
     const { teamId, userId } = req;
     const result = await this.service.createWorkflowDef(teamId, userId, body, {
       useExistId: workflowId,
+      useNewId: true,
     });
     return new SuccessResponse({
       data: result,
