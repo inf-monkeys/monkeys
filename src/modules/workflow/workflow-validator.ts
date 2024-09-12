@@ -240,7 +240,7 @@ export class WorkflowValidator {
             issueType: ValidationIssueType.ERROR,
             humanMessage: {
               en: `Properity ${name} require ${type} type, but received ${typeof value}`,
-              zh: `${displayName}参数需要 ${type} 类型数据，但是填入的数据类型为 ${typeof value}`,
+              zh: `${getI18NValue(displayName)}参数需要 ${type} 类型数据，但是填入的数据类型为 ${typeof value}`,
             },
             detailReason: {
               name: name,
