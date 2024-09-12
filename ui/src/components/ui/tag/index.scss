@@ -32,3 +32,7 @@
   --bg-color: rgba(var(--tomato9) / var(--tw-bg-opacity, 1));
   --text-color: rgba(var(--tomato12) / var(--tw-text-opacity, 1))
 }
+
+.model-tag {
+  --text-color: rgba(var(--gray10) / var(--tw-text-opacity, 0.6))
+}
