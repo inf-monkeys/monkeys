@@ -55,14 +55,16 @@ export const AgentCreateForm: React.FC<{
       ? llmModelsData.reduce(
           (acc: ILLMModel[], item) =>
             acc.concat(
-              Object.entries(item.models).map(([, model]) => ({
-                displayName: `${item.channelId === 0 ? '' : `${model} - `}${getI18nContent(item.displayName) ?? model}`,
-                description: getI18nContent(item.description),
-                iconUrl: item?.iconUrl ?? '',
-                channelId: item.channelId,
-                model: model,
-                value: item.channelId === 0 ? model : `${item.channelId}:${model}`,
-              })),
+              Object.entries(item.models)
+                .filter(([, model]) => model != 'davinci-002')
+                .map(([, model]) => ({
+                  displayName: `${item.channelId === 0 ? '' : `${model} - `}${getI18nContent(item.displayName) ?? model}`,
+                  description: getI18nContent(item.description),
+                  iconUrl: item?.iconUrl ?? '',
+                  channelId: item.channelId,
+                  model: model,
+                  value: item.channelId === 0 ? model : `${item.channelId}:${model}`,
+                })),
             ),
           [],
         )
