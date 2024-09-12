@@ -71,7 +71,7 @@ export const VinesLogViewLogFilter: React.FC<IVinesLogViewLogFilterProps> = ({ f
             control={form.control}
             name="versions"
             render={({ field }) => (
-              <FormItem className="hidden">
+              <FormItem>
                 <FormLabel>{t('workspace.logs-view.log.filter.form.versions.label')}</FormLabel>
                 <FormControl>
                   <MultiSelect

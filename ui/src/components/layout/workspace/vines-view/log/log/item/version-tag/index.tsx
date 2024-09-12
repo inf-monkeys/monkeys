@@ -12,15 +12,14 @@ interface IWorkflowVersionTagProps {
 }
 
 export const WorkflowVersionTag: React.FC<IWorkflowVersionTagProps> = ({ version, onClick }) => {
-  const isTemporary = version === -1;
-
-  const displayName = isTemporary
-    ? t('workspace.logs-view.log.list.item.temporary-workflow')
-    : t('workspace.logs-view.log.list.item.version', { version });
+  const displayName =
+    version === -1
+      ? t('workspace.logs-view.log.list.item.temporary-workflow')
+      : t('workspace.logs-view.log.list.item.version', { version });
   const color = version === -1 ? 'warning' : 'primary';
   return (
     <Tag
-      className={cn(!!onClick && 'cursor-pointer', !isTemporary && 'hidden')}
+      className={cn(!!onClick && 'cursor-pointer')}
       color={color}
       onClick={onClick ? () => onClick(version) : undefined}
       size="xs"

@@ -81,7 +81,9 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="inset-1 h-[calc(100%-8.3rem)]">
           <TabsList>
             <TabsTrigger value="config">{t('workspace.flow-view.headless-modal.tool-editor.tabs.config')}</TabsTrigger>
-            <TabsTrigger value="debug">{t('workspace.flow-view.headless-modal.tool-editor.tabs.debug')}</TabsTrigger>
+            {!disabled && (
+              <TabsTrigger value="debug">{t('workspace.flow-view.headless-modal.tool-editor.tabs.debug')}</TabsTrigger>
+            )}
             <TabsTrigger value="dev">{t('workspace.flow-view.headless-modal.tool-editor.tabs.dev')}</TabsTrigger>
             <TabsTrigger value="more-config">
               {t('workspace.flow-view.headless-modal.tool-editor.tabs.more-config')}
@@ -111,7 +113,7 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
                   <ToolAdvancedConfig nodeId={node?.id ?? ''} task={nodeTask} />
                 </TabsContent>
               )}
-              {activeTab === 'debug' && (
+              {activeTab === 'debug' && !disabled && (
                 <TabsContent value="debug">
                   <ToolDebug task={nodeTask} workflowId={workflowId} />
                 </TabsContent>

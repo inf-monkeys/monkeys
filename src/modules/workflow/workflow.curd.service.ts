@@ -219,18 +219,25 @@ export class WorkflowCrudService {
     const validationIssues = await this.workflowValidateService.validateWorkflow(teamId, tasks || [], output || []);
     const errors = validationIssues.filter((i) => i.issueType === ValidationIssueType.ERROR);
     const validated = errors.length === 0;
-    const workflowEntity = await this.workflowRepository.createWorkflow(teamId, userId, workflowId, version, {
-      displayName,
-      description,
-      iconUrl,
-      tasks,
-      output,
-      variables,
-      exposeOpenaiCompatibleInterface,
-      rateLimiter,
-      validationIssues,
-      validated,
-    });
+    const workflowEntity = await this.workflowRepository.createWorkflow(
+      teamId,
+      userId,
+      workflowId,
+      version,
+      {
+        displayName,
+        description,
+        iconUrl,
+        tasks,
+        output,
+        variables,
+        exposeOpenaiCompatibleInterface,
+        rateLimiter,
+        validationIssues,
+        validated,
+      },
+      options?.useNewId ?? false,
+    );
     await this.conductorService.saveWorkflowInConductor(workflowEntity);
 
     // const chain = await this.getSubWorkflowChain(masterWorkflowId, 1);

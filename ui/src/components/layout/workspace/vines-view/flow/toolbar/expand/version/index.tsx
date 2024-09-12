@@ -30,7 +30,7 @@ export const VinesVersionToolbar: React.FC<IVinesVersionToolbarProps> = ({ versi
 
   const vinesVersion = version.toString();
 
-  const workflowVersion = data?.map((it) => it.version) || [];
+  const workflowVersion = data?.map((it) => it.version).sort((a, b) => b - a) || [];
 
   useEffect(() => {
     if (data) {

@@ -164,6 +164,7 @@ export interface AssetsPolicyValue {
 export interface CreateWorkflowOptions {
   useExistId?: string;
   forkFromId?: string;
+  useNewId?: boolean;
   // key 是资产 id
   assetsPolicy?: { [x: string]: string | AssetsPolicyValue };
   isTheSameTeam?: boolean;
