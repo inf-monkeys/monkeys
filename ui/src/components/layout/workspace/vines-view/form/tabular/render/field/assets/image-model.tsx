@@ -82,7 +82,7 @@ export const FieldImageModel: React.FC<IFieldImageModelProps> = ({ input: { type
                               {serverRelation.type.map((type) => (
                                 <p
                                   key={type.id}
-                                  className="text-xxs rounded border border-input bg-muted p-1 text-gray-500"
+                                  className="text-xxs model-tag rounded border border-input bg-muted p-1"
                                 >
                                   {type?.displayName ?? type?.name}
                                 </p>

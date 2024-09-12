@@ -88,7 +88,7 @@ export const AgentConfigFormFieldModel: React.FC<IAgentConfigFormFieldModelProps
                                 {iconUrl && <img src={iconUrl} alt={displayName} className="size-6" />}
                                 <p className="text-sm font-bold">{displayName}</p>
                                 {channelId === 0 && (
-                                  <p className="text-xxs rounded border border-input bg-muted p-1 text-gray-500">
+                                  <p className="text-xxs model-tag rounded border border-input bg-muted p-1">
                                     {t('common.utils.system')}
                                   </p>
                                 )}
