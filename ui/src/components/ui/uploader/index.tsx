@@ -19,7 +19,10 @@ export interface IUpdaterProps {
   files?: FileWithPath[]; // 文件列表
   limit?: number; // 文件数量限制
   maxSize?: number; // 文件大小限制 (MB)
+
   accept?: string[]; // 文件类型限制
+  extensionAccept?: string[]; // 基于扩展名的文件类型限制
+
   onBeforeUpload?: () => void; // 上传前回调
   onFinished?: (urls: string[]) => void; // 上传完成回调
   onFilesUpdate?: (files: FileWithPath[]) => void; // 文件列表更新回调
@@ -33,6 +36,7 @@ export const Uploader: React.FC<IUpdaterProps> = ({
   className,
   files: initialFiles = [],
   accept,
+  extensionAccept,
   maxSize = 30,
   limit,
   onFinished,
@@ -73,6 +77,8 @@ export const Uploader: React.FC<IUpdaterProps> = ({
   const filesLength = files.length;
   const disabledComp = isUploading || filesLength >= (limit ?? 999) || disabled;
 
+  const hasExtensionAccept = extensionAccept?.length;
+
   return (
     <div className="flex w-full flex-col gap-4">
       <Dropzone
@@ -81,12 +87,14 @@ export const Uploader: React.FC<IUpdaterProps> = ({
           !isInteracted && setIsInteracted(true);
         }}
         accept={
-          accept
-            ? accept.reduce((acc, mimeType) => {
-                acc[mimeType] = [];
-                return acc;
-              }, {})
-            : undefined
+          hasExtensionAccept
+            ? undefined
+            : accept
+              ? accept.reduce((acc, mimeType) => {
+                  acc[mimeType] = [];
+                  return acc;
+                }, {})
+              : undefined
         }
         maxSize={maxSize * 1024 ** 2}
         maxFiles={limit}
@@ -98,6 +106,15 @@ export const Uploader: React.FC<IUpdaterProps> = ({
               message: '',
             };
           }
+
+          const ext = file.name.split('.').pop();
+          if (!extensionAccept?.includes(ext ?? '')) {
+            return {
+              code: 'file-invalid-type',
+              message: '',
+            };
+          }
+
           return null;
         }}
         onDropRejected={(file) =>
@@ -161,12 +178,17 @@ export const Uploader: React.FC<IUpdaterProps> = ({
                           })}
                         </h1>
                         <p className="text-xs text-opacity-85">
-                          {accept
+                          {hasExtensionAccept
                             ? t('components.ui.updater.hint.accept.custom', {
-                                acceptString: accept.map((it) => `.${it?.split('/')?.[1] ?? it}`).join('、'),
+                                acceptString: extensionAccept.map((it) => `.${it}`).join('、'),
                                 count: limit ?? 2,
                               })
-                            : t('components.ui.updater.hint.accept.any')}
+                            : hasExtensionAccept && accept
+                              ? t('components.ui.updater.hint.accept.custom', {
+                                  acceptString: accept.map((it) => `.${it?.split('/')?.[1] ?? it}`).join('、'),
+                                  count: limit ?? 2,
+                                })
+                              : t('components.ui.updater.hint.accept.any')}
                           {t('components.ui.updater.hint.max-size', { maxSize })}
                           {limit ? t('components.ui.updater.hint.limit', { limit, count: limit }) : ''}
                         </p>
