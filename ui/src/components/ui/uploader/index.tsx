@@ -108,7 +108,7 @@ export const Uploader: React.FC<IUpdaterProps> = ({
           }
 
           const ext = file.name.split('.').pop();
-          if (!extensionAccept?.includes(ext ?? '')) {
+          if (extensionAccept && !extensionAccept?.includes(ext ?? '')) {
             return {
               code: 'file-invalid-type',
               message: '',
