@@ -3,7 +3,7 @@ import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
 import { BUILT_IN_PAGE_INSTANCES, WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { keyBy, partition, pick, pickBy, set, uniq } from 'lodash';
+import { isEmpty, keyBy, partition, pick, pickBy, set, uniq } from 'lodash';
 import { In, Repository } from 'typeorm';
 import { CreatePageDto } from './dto/req/create-page.dto';
 import { UpdatePageGroupDto, UpdatePagesDto } from './dto/req/update-pages.dto';
@@ -143,6 +143,10 @@ export class WorkflowPageService {
   }
 
   public async getPinnedPages(teamId: string) {
+    if (isEmpty(teamId)) {
+      return { pages: [], groups: [] };
+    }
+
     const groups = await this.pageGroupRepository.find({
       where: {
         teamId,
