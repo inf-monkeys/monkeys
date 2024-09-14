@@ -6,6 +6,7 @@ import { useNavigate, useSearch } from '@tanstack/react-router';
 import { has } from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { isMongoId } from 'validator';
 
 import { useLoginByPassword } from '@/apis/authz';
 import { getVinesToken } from '@/apis/utils.ts';
@@ -30,10 +31,18 @@ export const AuthWithRouteSearch: React.FC = () => {
     let needRedirect = false;
     if (redirect_id && redirect_params) {
       needRedirect = true;
-    } else {
-      void mutate((k: any) => k);
     }
+
     mutate('/api/teams').then((it) => {
+      const splitPath = location.pathname?.split('/') ?? [];
+      const teamIdWithPath = splitPath?.find((it) => isMongoId(it));
+      const teamId = teamIdWithPath ?? it?.[0]?.id;
+      if (teamId) {
+        localStorage.setItem('vines-team-id', teamId);
+        window['vinesTeamId'] = teamId;
+        void mutate((k: any) => k);
+      }
+
       setLocalStorage('vines-teams', it);
       if (needRedirect) {
         delete redirect_search['auth_mode'];
@@ -42,9 +51,8 @@ export const AuthWithRouteSearch: React.FC = () => {
         delete redirect_search['auth_token'];
         VinesEvent.emit('vines-nav', redirect_id, redirect_params, redirect_search);
       } else {
-        const currentTeamId = it?.[0]?.id;
-        if (currentTeamId) {
-          VinesEvent.emit('vines-nav', '/$teamId', { teamId: currentTeamId });
+        if (teamId) {
+          VinesEvent.emit('vines-nav', '/$teamId/', { teamId });
         } else {
           void navigate({ to: '/' });
         }
@@ -70,7 +78,7 @@ export const AuthWithRouteSearch: React.FC = () => {
         }
 
         handelRedirect();
-        toast.success(t('auth.login.success'));
+        // toast.success(t('auth.login.success'));
       });
     }
   }, [search]);
@@ -82,7 +90,7 @@ export const AuthWithRouteSearch: React.FC = () => {
       if (result) {
         handelRedirect();
       }
-      toast.success(t('auth.login.success'));
+      // toast.success(t('auth.login.success'));
     });
   }, [data]);
 

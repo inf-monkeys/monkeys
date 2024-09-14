@@ -16,6 +16,9 @@ export const teamIdGuard = async (props: {
     params: { teamId },
   } = props;
 
+  localStorage.setItem('vines-team-id', teamId);
+  window['vinesTeamId'] = teamId;
+
   const teams = readLocalStorageValue<IVinesTeam[]>('vines-teams', []);
   if (!teams || !teams.length) {
     setTimeout(() => VinesEvent.emit('vines-nav', '/'), 500);
@@ -27,9 +30,6 @@ export const teamIdGuard = async (props: {
       teamId: teams[0].id,
     });
   }
-
-  localStorage.setItem('vines-team-id', teamId);
-  window['vinesTeamId'] = teamId;
 
   return authGuard({ location });
 };
