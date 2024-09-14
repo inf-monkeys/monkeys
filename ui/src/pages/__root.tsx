@@ -110,7 +110,7 @@ const RootComponent: React.FC = () => {
                 {isUseOutside && <Outlet />}
                 {isUseWorkSpace && <WorkspaceLayout />}
                 {isUseAgent && <AgentLayout />}
-                {isUsePanel && <WorkbenchPanelLayout layoutId={layoutId} />}
+                {isUsePanel && mode !== 'mini' && <WorkbenchPanelLayout layoutId={layoutId} />}
                 {isUseWorkbench && mode === 'mini' && <WorkbenchMiniModeLayout />}
                 {isUseDefault && <MainWrapper layoutId={layoutId} />}
               </motion.div>
