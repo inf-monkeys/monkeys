@@ -11,7 +11,7 @@ void i18n
     fallbackLng: 'en',
     debug: false,
     detection: {
-      order: ['localStorage', 'navigator'],
+      order: ['querystring', 'localStorage', 'navigator'],
     },
     supportedLngs: ['zh', 'en'],
 
