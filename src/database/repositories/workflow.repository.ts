@@ -946,6 +946,50 @@ ORDER BY
     return defaultGroup;
   }
 
+  public async getPageGroupsAndCreateIfNotExists(teamId: string, groupDisplayNames: string[]) {
+    const existsGroups = await this.pageGroupRepository.find({
+      where: {
+        teamId,
+        isBuiltIn: false,
+      },
+    });
+    const defaultGroup = await this.getDefaultPageGroupAndCreateIfNotExists(teamId);
+
+    const groups = groupDisplayNames.map((displayName) => {
+      if (displayName === 'default') {
+        return defaultGroup;
+      }
+
+      const existsGroup = existsGroups.find((group) => group.displayName === displayName);
+      if (existsGroup) {
+        return existsGroup;
+      }
+
+      return this.pageGroupRepository.create({
+        id: generateDbId(),
+        displayName,
+        isBuiltIn: false,
+        teamId,
+        pageIds: [],
+        createdTimestamp: Date.now(),
+        updatedTimestamp: Date.now(),
+      });
+    });
+
+    await this.pageGroupRepository.save(groups);
+
+    return groups;
+  }
+
+  public async updatePageGroup(groupId: string, updates: Partial<WorkflowPageGroupEntity>) {
+    await this.pageGroupRepository.update(
+      {
+        id: groupId,
+      },
+      updates,
+    );
+  }
+
   public async listAllOpenAICompatibleWorkflows(teamId: string) {
     return await this.workflowMetadataRepository.find({
       where: {

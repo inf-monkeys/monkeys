@@ -6,13 +6,13 @@ import { LLM_CHAT_COMPLETION_TOOL, LLM_COMPLETION_TOOL, LLM_NAMESPACE } from '..
 
 export interface WorkflowMarketplaceData extends WorkflowMetadataEntity {
   tags: string[];
-  autoPinPage?: PageInstanceType[];
+  autoPinPage?: Record<'default' | string, PageInstanceType[]>[];
 }
 
 export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketplaceData>> = [
   {
     tags: ['模型调用（AutoInfer）'],
-    autoPinPage: ['chat'],
+    autoPinPage: [{ default: ['chat'] }],
     id: '662a1c620b9fd2739ab8d3a6',
     displayName: {
       'zh-CN': '文本对话',
@@ -85,7 +85,7 @@ export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketpla
   },
   {
     tags: ['模型调用（AutoInfer）'],
-    autoPinPage: ['chat'],
+    autoPinPage: [{ default: ['chat'] }],
     id: '662a1c620b9fd2739ab8d3a7',
     displayName: {
       'zh-CN': '文本补全',
@@ -148,7 +148,7 @@ export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketpla
   },
   {
     tags: ['模型调用（AutoInfer）'],
-    autoPinPage: ['chat'],
+    autoPinPage: [{ default: ['chat'] }],
     id: '664f1e0db10cb3ffc558437a',
     displayName: {
       'zh-CN': '文本生成',
@@ -200,7 +200,7 @@ export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketpla
   },
   {
     tags: ['图像生成'],
-    autoPinPage: ['preview'],
+    autoPinPage: [{ default: ['preview'] }],
     id: '665569753c72460540612445',
     displayName: {
       'zh-CN': '图像生成',
