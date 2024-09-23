@@ -63,7 +63,7 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
       });
     } else if (isMarket) {
       onChange({
-        categoryIds: [currentRuleId],
+        marketPlaceTagIds: [currentRuleId],
       });
     } else if (assetFilterRules) {
       const rule = assetFilterRules.find((r) => r.id === currentRuleId);

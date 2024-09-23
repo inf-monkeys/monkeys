@@ -41,9 +41,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     }
     if (filter.marketPlaceTagIds?.length) {
       const assetIds = await this.assetCommonRepository.findAssetIdsByMarketplaceTagIds(assetType, filter.marketPlaceTagIds);
-      if (assetIds.length) {
-        condition[assetIdField] = In(assetIds);
-      }
+      if (assetIds.length) condition[assetIdField] = In(assetIds);
     }
     if (filter.userIds?.length) {
       condition.creatorUserId = In(filter.userIds);
@@ -175,6 +173,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
       where: [
         {
           isDeleted: false,
+          id: idsConstraints.length ? In(idsConstraints) : undefined,
           isPublished: true,
         },
       ] as FindOptionsWhere<E>[],
