@@ -276,6 +276,54 @@ export class AssetsCommonRepository {
     ).map((x) => x.assetId);
   }
 
+  public async updateAssetMarketplaceTags(assetType: AssetType, assetId: string, tagIds: string[]) {
+    const originalTags = await this.assetsMarketPlaceTagRelationsRepo.find({
+      where: {
+        isDeleted: false,
+        assetType,
+        assetId,
+      },
+    });
+    const originalTagIds = originalTags.map((x) => x.tagId);
+    const toDelete = originalTags.filter((x) => !tagIds.includes(x.tagId));
+    const toAdd = tagIds.filter((x) => !originalTagIds.includes(x));
+    for (const tag of toDelete) {
+      await this.assetsMarketPlaceTagRelationsRepo.update(
+        {
+          id: tag.id,
+        },
+        {
+          isDeleted: true,
+        },
+      );
+    }
+    for (const tagId of toAdd) {
+      await this.assetsMarketPlaceTagRelationsRepo.save({
+        id: generateDbId(),
+        isDeleted: false,
+        createdTimestamp: Date.now(),
+        updatedTimestamp: Date.now(),
+        assetType,
+        assetId,
+        tagId,
+      });
+    }
+  }
+
+  public async removeAssetMarketplaceTags(assetType: AssetType, assetId: string, tagIds: string[]) {
+    if (tagIds.length) {
+      await this.assetsMarketPlaceTagRelationsRepo.update(
+        {
+          assetType,
+          assetId,
+        },
+        {
+          isDeleted: true,
+        },
+      );
+    }
+  }
+
   public async findAssetIdsByMarketplaceTagIds(assetType: AssetType, tagIds: string[]) {
     if (!tagIds.length) {
       return [];
