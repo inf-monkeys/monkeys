@@ -265,7 +265,7 @@ export const Workflows: React.FC = () => {
             <AlertDialogDescription>
               {t('common.dialog.delete-confirm.content', {
                 type: t('common.type.workflow'),
-                name: currentWorkflow?.name ?? t('common.utils.unknown'),
+                name: getI18nContent(currentWorkflow?.displayName) ?? t('common.utils.unknown'),
               })}
             </AlertDialogDescription>
           </AlertDialogHeader>

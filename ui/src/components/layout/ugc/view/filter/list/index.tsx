@@ -18,7 +18,7 @@ import { ACTION_TOOLS_CATEGORIES_MAP } from '@/apis/workflow/typings';
 import { NON_FILTER_TYPE_LIST } from '@/components/layout/ugc/consts.ts';
 import { IUgcCustomProps } from '@/components/layout/ugc/typings.ts';
 import { IUgcViewFilterButtonProps, UgcViewFilterButton } from '@/components/layout/ugc/view/filter/button';
-import { VirtuaUgcFilterList } from '@/components/layout/ugc/view/filter/list/virtua';
+import { VirtualUgcFilterList } from '@/components/layout/ugc/view/filter/list/virtua';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
@@ -228,22 +228,26 @@ export const UgcViewFilterList: React.FC<IUgcViewFilterListProps> = ({
             </Accordion>
           ) : (
             (assetFilterRules || assetPublicCategories) && (
-              <VirtuaUgcFilterList
+              <VirtualUgcFilterList
                 data={categoryList}
                 height={height}
                 currentRuleId={currentRuleId}
                 onItemClicked={(ruleId) => setCurrentRuleId(ruleId)}
-                onItemDeleteClicked={(ruleId) => {
-                  toast.promise(removeAssetFilterRules(ruleId), {
-                    loading: t('common.delete.loading'),
-                    success: () => {
-                      void mutateAssetFilterRules();
-                      (currentRuleId === ruleId || currentRuleId === ruleId) && setCurrentRuleId('all');
-                      return t('common.delete.success');
-                    },
-                    error: t('common.delete.error'),
-                  });
-                }}
+                onItemDeleteClicked={
+                  isMarket
+                    ? undefined
+                    : (ruleId) => {
+                        toast.promise(removeAssetFilterRules(ruleId), {
+                          loading: t('common.delete.loading'),
+                          success: () => {
+                            void mutateAssetFilterRules();
+                            (currentRuleId === ruleId || currentRuleId === ruleId) && setCurrentRuleId('all');
+                            return t('common.delete.success');
+                          },
+                          error: t('common.delete.error'),
+                        });
+                      }
+                }
               />
             )
           )}
