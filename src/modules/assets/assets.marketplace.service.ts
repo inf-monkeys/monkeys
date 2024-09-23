@@ -22,11 +22,15 @@ export class AssetsMarketplaceService {
     // Init workflow marketplace
     const data = BUILT_IN_WORKFLOW_MARKETPLACE_LIST;
     const allTags = data.map((x) => x.tags || []).flat();
+    const marketplaceTagBatch = await this.assetsCommonRepository.createMarketplaceTagBatch('workflow', allTags);
     for (const item of data) {
       item.workflowId = item.id;
-      await this.workflowAssetRepository.initBuiltInMarketPlace('knowledge-base', item);
+      await this.workflowAssetRepository.initBuiltInMarketPlace('workflow', item);
+      if (item.tags) {
+        const tagIds = item.tags.map((tagName) => marketplaceTagBatch.find((tag) => tag.name === tagName).id);
+        await this.assetsCommonRepository.updateAssetMarketplaceTags('workflow', item.id, tagIds);
+      }
     }
-    await this.assetsCommonRepository.createMarketplaceTagBatch('workflow', allTags);
   }
 
   public async initBuiltInLLMMarketplace() {
