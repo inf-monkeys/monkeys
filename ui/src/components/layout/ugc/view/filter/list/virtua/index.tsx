@@ -6,7 +6,7 @@ import { IUgcFilterRules } from '@/apis/ugc/typings.ts';
 import { VirtuaUgcFilterListItem } from '@/components/layout/ugc/view/filter/list/virtua/item.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 
-interface IVirtuaUgcFilterListProps {
+interface IVirtualUgcFilterListProps {
   data: Partial<IUgcFilterRules>[];
 
   height: number;
@@ -16,7 +16,7 @@ interface IVirtuaUgcFilterListProps {
   onItemDeleteClicked?: (ruleId: string) => void;
 }
 
-export const VirtuaUgcFilterList: React.FC<IVirtuaUgcFilterListProps> = ({
+export const VirtualUgcFilterList: React.FC<IVirtualUgcFilterListProps> = ({
   data,
   height,
   currentRuleId,
