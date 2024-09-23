@@ -8,6 +8,8 @@ import { Injectable } from '@nestjs/common';
 import { WorkflowMetadataEntity } from '../entities/workflow/workflow-metadata';
 import { WorkflowAssetRepositroy } from './assets-workflow.respository';
 import { WorkflowRepository } from './workflow.repository';
+import { uniq } from 'lodash';
+import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 
 @Injectable()
 export class AssetsMarketPlaceRepository {
@@ -46,11 +48,25 @@ export class AssetsMarketPlaceRepository {
       const originalMarketPlaceData = BUILT_IN_WORKFLOW_MARKETPLACE_LIST.find((x) => x.id === forkFromId);
       if (originalMarketPlaceData?.autoPinPage?.length) {
         const pages = await this.workflowRepository.listWorkflowPagesAndCreateIfNotExists(workflow.workflowId);
-        for (const pageType of originalMarketPlaceData.autoPinPage) {
-          const page = pages.find((x) => x.type === pageType);
-          if (page) {
-            await this.workflowRepository.updatePagePinStatus(teamId, page.id, true);
+
+        const groupMap: Record<string, WorkflowPageGroupEntity> = {};
+        const groups = uniq(originalMarketPlaceData.autoPinPage.flatMap((it) => Object.keys(it)));
+        const groupIds = await this.workflowRepository.getPageGroupsAndCreateIfNotExists(teamId, groups);
+        let groupIndex = 0;
+        for (const group of groupIds) {
+          groupMap[groups[groupIndex]] = group;
+          groupIndex++;
+        }
+
+        for (const mapper of originalMarketPlaceData.autoPinPage) {
+          for (const [groupName, pageTypes] of Object.entries(mapper)) {
+            const type2PageIds = pages.filter((it) => pageTypes.includes(it.type)).map((it) => it.id);
+            groupMap[groupName].pageIds = uniq([...(groupMap[groupName].pageIds ?? []), ...type2PageIds]);
           }
+        }
+
+        for (const group of Object.values(groupMap)) {
+          await this.workflowRepository.updatePageGroup(group.id, { pageIds: group.pageIds });
         }
       }
     }

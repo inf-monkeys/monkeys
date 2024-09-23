@@ -18,8 +18,8 @@ export class TeamsService {
   ) {}
 
   private async forkAssetsFromMarketPlace(teamId: string, userId: string) {
-    const clonedWorfklows = await this.marketPlaceRepository.forkBuiltInWorkflowAssetsFromMarketPlace(teamId, userId);
-    for (const workflow of clonedWorfklows) {
+    const clonedWorkflows = await this.marketPlaceRepository.forkBuiltInWorkflowAssetsFromMarketPlace(teamId, userId);
+    for (const workflow of clonedWorkflows) {
       try {
         await this.conductorService.saveWorkflowInConductor(workflow);
       } catch (e) {
@@ -39,7 +39,7 @@ export class TeamsService {
   public async createTeam(userId: string, teamName: string, description?: string, iconUrl?: string, isBuiltIn = false, workflowTaskNamePrefix?: string, createMethod: 'self' | 'import' = 'self') {
     const team = await this.teamRepository.createTeam(userId, teamName, description, iconUrl, isBuiltIn, createMethod);
     // Init assets from built-in marketplace
-    this.forkAssetsFromMarketPlace(team.id, userId);
+    await this.forkAssetsFromMarketPlace(team.id, userId);
   }
 
   public async updateTeam(
