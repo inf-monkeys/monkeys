@@ -18,7 +18,7 @@ export class AssetsMarketplaceService {
     private readonly assetsCommonRepository: AssetsCommonRepository,
   ) {}
 
-  public async initWorfklowMarketplace() {
+  public async initWorkflowMarketplace() {
     // Init workflow marketplace
     const data = BUILT_IN_WORKFLOW_MARKETPLACE_LIST;
     const allTags = data.map((x) => x.tags || []).flat();
@@ -34,14 +34,13 @@ export class AssetsMarketplaceService {
   }
 
   public async initBuiltInLLMMarketplace() {
-    const data = ONEAPI_CHANNELS;
-    for (const item of data) {
+    for (const item of ONEAPI_CHANNELS) {
       await this.llmChannelAssetRepository.initBuiltInMarketPlace('llm-channel', item);
     }
   }
 
   public async initBuiltInMarketplace() {
-    await this.initWorfklowMarketplace();
+    await this.initWorkflowMarketplace();
     if (config.oneapi.enabled) {
       await this.initBuiltInLLMMarketplace();
     }

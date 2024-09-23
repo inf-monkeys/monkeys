@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SystemConfigurationRepository } from '../../database/repositories/system-configuration.repository';
+import { SystemConfigurationRepository } from '@/database/repositories/system-configuration.repository';
 import { AssetsMarketplaceService } from '../assets/assets.marketplace.service';
 import { ToolsRegistryService } from '../tools/tools.registry.service';
 
@@ -13,7 +13,7 @@ export class BootstrapService {
 
   public async bootstrap() {
     // Register built in tools
-    this.toolsRegistryService.initBuiltInTools();
+    await this.toolsRegistryService.initBuiltInTools();
     await this.systemConfigurationRepository.initAesKey();
     await this.systemConfigurationRepository.initOneApiRootUserToken();
     await this.marketplaceService.initBuiltInMarketplace();
