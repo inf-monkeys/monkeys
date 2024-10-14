@@ -23,6 +23,7 @@ export const useCopy = ({ timeout = 2000 } = {}) => {
   });
 
   const copy = useMemoizedFn((valueToCopy: any) => {
+    console.log('[VinesCopy]:', valueToCopy);
     try {
       if ('clipboard' in navigator) {
         navigator.clipboard.writeText(valueToCopy).then(() => handleCopyResult(true));
