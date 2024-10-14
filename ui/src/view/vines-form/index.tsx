@@ -34,7 +34,7 @@ export const VinesForm: React.FC<IVinesFormProps> = () => {
   const containerHeight = usePageStore((s) => s.containerHeight);
 
   const isMiniFrame = mode === 'mini';
-  const height = containerHeight - (vinesIFrameVisible ? 0 : workbenchVisible ? (isMiniFrame ? 80 : 32) : 48);
+  const height = containerHeight - (vinesIFrameVisible ? 32 : workbenchVisible ? (isMiniFrame ? 80 : 32) : 48);
 
   return (
     <>
