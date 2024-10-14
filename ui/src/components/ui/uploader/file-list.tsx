@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { useDebounceEffect } from 'ahooks';
 import { CheckCircle2, FileCheck, FileClock, FileSearch, FileX2, Loader2, UploadCloud, XCircle } from 'lucide-react';
 import { FileWithPath } from 'react-dropzone';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +24,8 @@ interface IFilesProps extends React.ComponentPropsWithoutRef<'div'> {
   onFinished?: (urls: string[]) => void;
   limit?: number;
   basePath?: string;
+
+  autoUpload?: boolean;
 }
 
 export interface IFile {
@@ -47,12 +50,14 @@ export const FileList: React.FC<IFilesProps> = ({
   onFinished,
   saveToResource = true,
   basePath = 'user-files/other',
+
+  autoUpload,
 }) => {
   const { t } = useTranslation();
 
   const [list, setList] = useState<IFile[]>([]);
 
-  const { validList, hasFile, isWaitToUpload, handleOnClickUpload } = useVinesUploaderManage({
+  const { validList, hasFile, isWaitToUpload, hasFileNeedToUpload, handleOnClickUpload } = useVinesUploaderManage({
     files,
     list,
     setList,
@@ -62,6 +67,18 @@ export const FileList: React.FC<IFilesProps> = ({
     basePath,
     onFinished,
   });
+
+  useDebounceEffect(
+    () => {
+      if (autoUpload && isWaitToUpload && hasFileNeedToUpload) {
+        void handleOnClickUpload();
+      }
+    },
+    [autoUpload, isWaitToUpload, hasFileNeedToUpload],
+    {
+      wait: 100,
+    },
+  );
 
   const remaining = limit ? limit - files.length : 0;
 

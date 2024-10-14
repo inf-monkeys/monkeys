@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { useCreation } from 'ahooks';
+import { useCreation, useDebounceEffect } from 'ahooks';
 import { motion } from 'framer-motion';
 import { isString } from 'lodash';
 import { CheckCircle2, FileCheck, FileClock, FileSearch, FileX2, Loader2, Trash, UploadCloud } from 'lucide-react';
@@ -33,6 +33,8 @@ interface IEmbedFileListProps extends React.ComponentPropsWithoutRef<'div'> {
   basePath?: string;
 
   limit?: number;
+
+  autoUpload?: boolean;
 }
 
 export const EmbedFileList: React.FC<IEmbedFileListProps> = ({
@@ -47,12 +49,14 @@ export const EmbedFileList: React.FC<IEmbedFileListProps> = ({
   basePath = 'user-files/other',
 
   limit,
+
+  autoUpload,
 }) => {
   const { t } = useTranslation();
 
   const [list, setList] = useState<IFile[]>([]);
 
-  const { validList, hasFile, isWaitToUpload, handleOnClickUpload } = useVinesUploaderManage({
+  const { validList, hasFile, isWaitToUpload, hasFileNeedToUpload, handleOnClickUpload } = useVinesUploaderManage({
     files,
     list,
     setList,
@@ -62,6 +66,18 @@ export const EmbedFileList: React.FC<IEmbedFileListProps> = ({
     saveToResource,
     basePath,
   });
+
+  useDebounceEffect(
+    () => {
+      if (autoUpload && isWaitToUpload && hasFileNeedToUpload) {
+        void handleOnClickUpload();
+      }
+    },
+    [autoUpload, isWaitToUpload, hasFileNeedToUpload],
+    {
+      wait: 100,
+    },
+  );
 
   const preview = useCreation(
     () =>
@@ -86,7 +102,9 @@ export const EmbedFileList: React.FC<IEmbedFileListProps> = ({
   const remaining = limit ? limit - files.length : 0;
 
   const previewLength = preview.length;
-  const needUpdateList = validList.filter((it) => !/(https|http):\/\/[^\s/]+\.[^\s/]+\/\S+\.\w{2,5}/g.test(it.path));
+  const needUpdateList = validList.filter(
+    (it) => !/(https|http):\/\/[^\s/]+\.[^\s/]+\/\S+\.\w{2,5}/g.test(it.path) && it.status === 'wait-to-update',
+  );
 
   const needUpdateListLength = needUpdateList.length;
   const isAllSuccess = needUpdateList.every((it) => it.status === 'success');
