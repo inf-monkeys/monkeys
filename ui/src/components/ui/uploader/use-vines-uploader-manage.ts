@@ -208,11 +208,14 @@ export const useVinesUploaderManage = ({
   }, [uploadQueue]);
   // endregion
 
+  const hasFileNeedToUpload = validList.some((it) => it.status === 'wait-to-update');
+
   return {
     validList,
 
     hasFile,
     isWaitToUpload,
+    hasFileNeedToUpload,
 
     updateListById,
     handleOnClickUpload,
