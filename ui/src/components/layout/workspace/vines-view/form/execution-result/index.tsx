@@ -101,6 +101,8 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
       const images = outputValues.map((it) => extractImageUrls(it)).flat();
       const videos = outputValues.map((it) => extractVideoUrls(it)).flat();
 
+      const alt = (Object.entries(flattenOutput)?.find(([key]) => key.endsWith('__display_text'))?.[1] ?? '') as string;
+
       let isInserted = false;
 
       const outputValuesLength = outputValues.length;
@@ -115,7 +117,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
       for (const image of images) {
         insertData({
           ...execution,
-          render: { type: 'image', data: image },
+          render: { type: 'image', data: image, alt },
         });
         isInserted = true;
       }

@@ -12,6 +12,7 @@ export type IVinesExecutionResultItem = VinesWorkflowExecution & {
   render: {
     type: 'image' | 'video' | 'raw' | 'empty';
     data: JSONValue;
+    alt?: string;
   };
 };
 
@@ -31,14 +32,14 @@ export const VirtuaExecutionResultGridItem: React.FC<IVirtuaExecutionResultGridI
     >
       {row.map((it, i) => {
         const {
-          render: { type, data },
+          render: { type, data, alt },
         } = it;
 
         switch (type) {
           case 'image':
             return (
               <VirtuaExecutionResultGridWrapper data={it}>
-                <VirtuaExecutionResultGridImageItem key={i} src={data as string} />
+                <VirtuaExecutionResultGridImageItem key={i} src={data as string} alt={alt} />
               </VirtuaExecutionResultGridWrapper>
             );
           case 'video':
