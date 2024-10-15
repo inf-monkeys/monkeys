@@ -53,7 +53,6 @@ export const Uploader: React.FC<IUpdaterProps> = ({
   const [isInteracted, setIsInteracted] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [disabled, setDisabled] = useState(false);
-  const [autoUpload, setAutoUpload] = useState(false);
 
   useEffect(() => {
     if (isInteracted && isUploading) {
@@ -83,11 +82,9 @@ export const Uploader: React.FC<IUpdaterProps> = ({
   return (
     <div className="flex w-full flex-col gap-4">
       <Dropzone
-        onDrop={(_files, _, dropEvent) => {
+        onDrop={(_files) => {
           setFiles((prev) => [...prev, ..._files]);
           !isInteracted && setIsInteracted(true);
-
-          setAutoUpload(dropEvent?.type === 'drop');
         }}
         accept={
           hasExtensionAccept
@@ -209,8 +206,7 @@ export const Uploader: React.FC<IUpdaterProps> = ({
                       onFinished={onFinished}
                       saveToResource={saveToResource}
                       basePath={basePath}
-
-                      autoUpload={autoUpload}
+                      autoUpload
                     />
                   )}
                 </AnimatePresence>
@@ -231,7 +227,7 @@ export const Uploader: React.FC<IUpdaterProps> = ({
             onFinished={onFinished}
             saveToResource={saveToResource}
             basePath={basePath}
-            autoUpload={autoUpload}
+            autoUpload
           />
         </SmoothTransition>
       )}
