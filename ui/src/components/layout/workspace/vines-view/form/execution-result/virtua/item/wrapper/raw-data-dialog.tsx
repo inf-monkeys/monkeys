@@ -22,6 +22,8 @@ export const VirtuaExecutionResultRawDataDialog: React.FC<IVirtuaExecutionResult
 }) => {
   const { t } = useTranslation();
 
+  const alt = data.render?.alt;
+
   return (
     <Dialog>
       <Tooltip>
@@ -41,6 +43,7 @@ export const VirtuaExecutionResultRawDataDialog: React.FC<IVirtuaExecutionResult
           </TabsList>
           <TabsContent value="data">
             <VinesAbstractDataPreview className="h-96" data={data.render.data} />
+            {alt && <div className="rounded border p-2 text-sm">{alt}</div>}
           </TabsContent>
           <TabsContent value="logs">
             <CodeEditor className="h-96 w-full" readonly data={omit(data, 'render') as JSONValue} />
