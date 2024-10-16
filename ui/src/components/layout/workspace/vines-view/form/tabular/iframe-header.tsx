@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { I18nSelector } from '@/components/ui/i18n-selector';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator.tsx';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import useUrlState from '@/hooks/use-url-state.ts';
@@ -37,13 +38,20 @@ export const IframeHeader: React.FC<IIframeHeaderProps> = ({ historyVisible, set
 
   const workflow = page?.[teamId]?.workflow ?? data;
 
+  const displayName = getI18nContent(workflow?.displayName);
+
   return (
     <>
       <header className="flex items-center justify-between p-2">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <VinesIcon size="sm">{workflow?.iconUrl || 'emoji:🍀:#ceefc5'}</VinesIcon>
           <div className="flex flex-col gap-0.5">
-            <h1 className="text-sm font-bold leading-tight">{getI18nContent(workflow?.displayName)}</h1>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <h1 className="line-clamp-1 text-sm font-bold leading-tight">{displayName}</h1>
+              </TooltipTrigger>
+              <TooltipContent>{displayName}</TooltipContent>
+            </Tooltip>
             {workflow?.description && <span className="text-xxs">{getI18nContent(workflow?.description)}</span>}
           </div>
         </div>

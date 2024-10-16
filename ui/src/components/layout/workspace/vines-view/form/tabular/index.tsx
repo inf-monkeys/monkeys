@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 
 import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useVinesFlow } from '@/package/vines-flow';
@@ -87,27 +88,35 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
       <div ref={inputRef} className="flex gap-2">
         {isInputNotEmpty && (
           <div className="flex flex-col gap-1">
-            <Button
-              className="h-auto py-1 text-xs"
-              variant="outline"
-              onClick={() => tabular$.emit('restore-previous-param')}
-              icon={<Undo2 />}
-            >
-              {t('workspace.form-view.quick-toolbar.restore-previous-param.label')}
-            </Button>
-            <Button
-              className="h-auto py-1 text-xs"
-              variant="outline"
-              onClick={() => tabular$.emit('reset')}
-              icon={<RotateCcw />}
-            >
-              {t('workspace.form-view.quick-toolbar.reset')}
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="!h-6 py-1 text-xs"
+                  variant="outline"
+                  onClick={() => tabular$.emit('restore-previous-param')}
+                  icon={<Undo2 />}
+                  size="small"
+                />
+              </TooltipTrigger>
+              <TooltipContent>{t('workspace.form-view.quick-toolbar.restore-previous-param.label')}</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="!h-6 py-1 text-xs"
+                  variant="outline"
+                  onClick={() => tabular$.emit('reset')}
+                  icon={<RotateCcw />}
+                  size="small"
+                />
+              </TooltipTrigger>
+              <TooltipContent> {t('workspace.form-view.quick-toolbar.reset')}</TooltipContent>
+            </Tooltip>
           </div>
         )}
         <Button
           variant="solid"
-          className="size-full"
+          className="size-full text-base"
           onClick={() => submitButton.current?.click()}
           disabled={openAIInterfaceEnabled}
           icon={<Sparkles className="fill-white" />}
