@@ -59,7 +59,11 @@ export const VinesForm: React.FC<IVinesFormProps> = () => {
           height={height}
         />
 
-        <VinesExecutionResult event$={event$} height={height} />
+        <VinesExecutionResult
+          className={historyVisible ? '' : 'pointer-events-none z-0 opacity-0 [&_*]:pointer-events-none'}
+          event$={event$}
+          height={height}
+        />
       </div>
       {openAIInterfaceEnabled && (
         <div className="vines-center absolute inset-1 size-full flex-col gap-4 backdrop-blur">
