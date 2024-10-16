@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 
 import { useCreation, useDebounceEffect, useThrottleEffect } from 'ahooks';
 import { motion } from 'framer-motion';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useWorkspacePages } from '@/apis/pages';
@@ -107,10 +107,10 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
       <Tooltip>
         <TooltipTrigger asChild>
           <div
-            className="group absolute -right-3.5 top-5 z-10 flex h-6 w-3.5 cursor-pointer items-center justify-center rounded-r-sm border bg-border px-0.5"
+            className="group absolute -right-3.5 top-5 z-10 flex h-6 w-3.5 cursor-pointer items-center justify-center rounded-r-sm border border-input bg-border shadow"
             onClick={() => setSidebarVisible(!sidebarVisible)}
           >
-            <ChevronLeft className={cn(sidebarVisible && 'scale-x-[-1]')} />
+            <ChevronRight className={cn(sidebarVisible && 'scale-x-[-1]')} />
           </div>
         </TooltipTrigger>
         <TooltipContent side="right">
