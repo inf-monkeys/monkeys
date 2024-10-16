@@ -2,6 +2,7 @@ import React from 'react';
 
 import { Copy, Eye } from 'lucide-react';
 import Image from 'rc-image';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -17,6 +18,8 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   src,
   alt,
 }) => {
+  const { t } = useTranslation();
+
   const { copy } = useCopy();
 
   const [mode] = useLocalStorage<string>('vines-ui-dark-mode', 'auto', false);
@@ -41,11 +44,16 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
           <Tooltip>
             <TooltipTrigger asChild>
               <div
-                className="absolute bottom-2 flex w-[calc(100%-1rem)] items-center gap-1 rounded bg-white/80 p-1 backdrop-blur"
+                className="absolute bottom-2 flex w-[calc(100%-1rem)] items-center gap-1 rounded border border-input bg-slate-1/80 p-1 shadow backdrop-blur"
                 onClick={() => copy(alt)}
               >
                 <p className="truncate text-xs">{alt}</p>
-                <Button icon={<Copy />} variant="outline" size="small" className="-m-2 scale-[.5] p-1" />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button icon={<Copy />} variant="outline" size="small" className="-m-2 scale-[.5] p-1 opacity-80" />
+                  </TooltipTrigger>
+                  <TooltipContent>{t('common.utils.copy')}</TooltipContent>
+                </Tooltip>
               </div>
             </TooltipTrigger>
             <TooltipContent className="max-w-96">{alt}</TooltipContent>

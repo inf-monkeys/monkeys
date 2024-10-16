@@ -17,7 +17,7 @@ export const workflowInputSchema = z.object({
   displayName: z.string().min(1, 'Display name cannot be empty'),
   name: z
     .string()
-    .min(2, 'Field cannot be less than two characters')
+    .min(1, 'Field cannot be less than one characters')
     .max(20, 'Field cannot be more than twenty characters'),
   description: z.string().optional(),
   tips: z.string().optional(),
