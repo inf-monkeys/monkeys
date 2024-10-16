@@ -1,20 +1,26 @@
 import React, { useRef, useState } from 'react';
 
 import { useCreation, useDebounceEffect, useThrottleEffect } from 'ahooks';
+import { motion } from 'framer-motion';
+import { ChevronLeft } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
 import { VirtuaWorkbenchMiniViewList } from '@/components/layout/workbench/sidebar/mode/mini/virtua';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
-import { Separator } from '@/components/ui/separator.tsx';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VINES_IFRAME_PAGE_TYPE2ID_MAPPER } from '@/components/ui/vines-iframe/consts.ts';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
+import { cn } from '@/utils';
 
 interface IWorkbenchMiniModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> = () => {
+  const { t } = useTranslation();
+
   const { data } = useWorkspacePages();
 
   const [{ sidebarFilter: routeSidebarFilter, sidebarReserve: routeSidebarReserve }] = useUrlState<{
@@ -78,17 +84,39 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
     { wait: 64 },
   );
 
+  const [sidebarVisible, setSidebarVisible] = useState(false);
+
   return (
-    <div className="flex h-full w-20 py-2" ref={ref}>
+    <motion.div
+      className="absolute z-50 flex h-full w-20 border-r border-input bg-slate-1 py-2 shadow-md"
+      initial={{ marginLeft: -80 }}
+      animate={{ marginLeft: sidebarVisible ? 0 : -80 }}
+      ref={ref}
+    >
       <div className="-mt-2 flex w-full flex-col gap-4 px-2">
         <VirtuaWorkbenchMiniViewList
           data={originalPages}
           height={height}
           currentPageId={currentPage?.[teamId]?.id}
-          onItemClicked={(page) => setCurrentPage((prev) => ({ ...prev, [teamId]: page }))}
+          onItemClicked={(page) => {
+            setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
+            setSidebarVisible(false);
+          }}
         />
       </div>
-      <Separator orientation="vertical" />
-    </div>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div
+            className="group absolute -right-3.5 top-5 z-10 flex h-6 w-3.5 cursor-pointer items-center justify-center rounded-r-sm border bg-border px-0.5"
+            onClick={() => setSidebarVisible(!sidebarVisible)}
+          >
+            <ChevronLeft className={cn(sidebarVisible && 'scale-x-[-1]')} />
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="right">
+          {sidebarVisible ? t('common.sidebar.hide') : t('common.sidebar.show')}
+        </TooltipContent>
+      </Tooltip>
+    </motion.div>
   );
 };

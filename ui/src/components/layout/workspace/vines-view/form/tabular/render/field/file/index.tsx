@@ -10,8 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { VinesImageMaskPreview, VinesImageMaskPreviewDialog } from '@/components/ui/image-editor/mask/preview.tsx';
 import { getFileNameByOssUrl } from '@/components/ui/uploader/utils.ts';
+import useUrlState from '@/hooks/use-url-state.ts';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
+import { cn } from '@/utils';
 
 interface IFieldFileProps {
   input: VinesWorkflowVariable;
@@ -28,6 +30,8 @@ export const FieldFile: React.FC<IFieldFileProps> = ({
   miniMode = false,
 }) => {
   const { t } = useTranslation();
+
+  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
 
   const [files, setFiles] = useState<FileWithPath[]>([]);
 
@@ -116,7 +120,7 @@ export const FieldFile: React.FC<IFieldFileProps> = ({
         )}
       </>
     ) : (
-      <Card className="w-full overflow-hidden max-sm:max-w-[calc(100vw-3rem)]">
+      <Card className={cn('w-full overflow-hidden', mode !== 'mini' && 'max-sm:max-w-[calc(100vw-3rem)]')}>
         <CardContent className="relative p-2">
           {enableImageMask ? (
             <VinesImageMaskPreview src={value} onFinished={(val) => form.setValue(name, isMultiple ? [val] : val)} />
