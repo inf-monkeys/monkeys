@@ -41,6 +41,7 @@ const RootComponent: React.FC = () => {
   } = useVinesRoute();
 
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
+  const [{ zoom }] = useUrlState<{ zoom: number }>({ zoom: 1 });
 
   const namePath = SIDEBAR_MAP.flatMap((it) =>
     it.items
@@ -95,7 +96,7 @@ const RootComponent: React.FC = () => {
       <ScrollRestoration />
       <TooltipProvider delayDuration={100}>
         <VinesGlobalUpload />
-        <main className="vines-ui h-screen w-screen">
+        <main className="vines-ui grid size-full min-h-screen" style={{ zoom }}>
           <AnimatePresence mode="popLayout">
             {visible && (
               <motion.div
