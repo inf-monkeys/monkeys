@@ -1,8 +1,9 @@
 import { config } from '@/common/config';
 import { SuccessResponse } from '@/common/response';
 import { S3Helpers } from '@/common/s3';
-import { Body, Controller, Get, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
 
 @Controller('medias')
 export class MediaUploadController {
@@ -25,6 +26,14 @@ export class MediaUploadController {
     return new SuccessResponse({
       data,
     });
+  }
+
+  @Get('/s3/sign-proxy')
+  async getProxySignedUrl(@Query('key') key, @Res({ passthrough: true }) res: Response) {
+    const s3Helpers = new S3Helpers();
+    const data = await s3Helpers.getSignedUrl(key.replace(/^\/+/, ''));
+
+    res.redirect(data);
   }
 
   @Get('/s3/presign')
