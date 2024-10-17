@@ -5,7 +5,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
 import { useGetWorkflow } from '@/apis/workflow';
-import { Route } from '@/pages/login';
+import { Route } from '@/pages/login/index.lazy.tsx';
 import { cn, getI18nContent } from '@/utils';
 
 interface IWorkflowCellProps {

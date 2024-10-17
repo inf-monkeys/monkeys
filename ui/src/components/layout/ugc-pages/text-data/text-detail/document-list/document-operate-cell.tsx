@@ -20,7 +20,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog.tsx';
 import { Button } from '@/components/ui/button';
-import { Route } from '@/pages/$teamId/text-data/$textId';
+import { Route } from '@/pages/$teamId/text-data/$textId/index.lazy.tsx';
 
 interface IParagraphOperateCellProps extends CellContext<IKnowledgeBaseDocument, unknown> {}
 

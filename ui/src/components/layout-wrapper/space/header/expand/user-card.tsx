@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
-import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId';
+import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId/index.lazy.tsx';
 import VinesEvent from '@/utils/events.ts';
 
 interface IUserCardProps extends React.ComponentPropsWithoutRef<'div'> {}

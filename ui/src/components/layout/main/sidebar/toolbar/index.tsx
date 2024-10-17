@@ -9,7 +9,7 @@ import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { Button } from '@/components/ui/button';
 import { I18nSelector } from '@/components/ui/i18n-selector';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Route } from '@/pages/login';
+import { Route } from '@/pages/login/index.lazy.tsx';
 
 export const Toolbar: React.FC = () => {
   const { t } = useTranslation();

@@ -27,7 +27,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId';
+import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId/index.lazy.tsx';
 import { useFlowStore } from '@/store/useFlowStore';
 
 interface IMoreToolbarProps extends React.ComponentPropsWithoutRef<'div'> {}

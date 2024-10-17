@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { updateWorkspacePages, useWorkspacePagesWithWorkflowId } from '@/apis/pages';
 import { IPageType } from '@/apis/pages/typings.ts';
 import { useGetWorkflow } from '@/apis/workflow';
-import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId';
+import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId/index.lazy.tsx';
 import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cloneDeep } from '@/utils';

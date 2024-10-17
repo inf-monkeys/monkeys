@@ -3,7 +3,7 @@ import { ParsedLocation } from '@tanstack/react-router';
 import { IVinesTeam } from '@/apis/authz/team/typings.ts';
 import { authGuard } from '@/components/router/guard/auth.ts';
 import { readLocalStorageValue } from '@/hooks/use-local-storage';
-import { Route } from '@/pages/$teamId';
+import { Route } from '@/pages/$teamId/index.lazy.tsx';
 import VinesEvent from '@/utils/events.ts';
 
 export const teamIdGuard = async (props: {
