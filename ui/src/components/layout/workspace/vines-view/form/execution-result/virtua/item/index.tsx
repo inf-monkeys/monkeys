@@ -38,16 +38,14 @@ export const VirtuaExecutionResultGridItem: React.FC<IVirtuaExecutionResultGridI
         switch (type) {
           case 'image':
             return (
-              <VirtuaExecutionResultGridWrapper data={it}>
-                <VirtuaExecutionResultGridImageItem key={i} src={data as string} alt={alt} />
+              <VirtuaExecutionResultGridWrapper data={it} key={i}>
+                <VirtuaExecutionResultGridImageItem src={data as string} alt={alt} />
               </VirtuaExecutionResultGridWrapper>
             );
           case 'video':
             return (
-              <VirtuaExecutionResultGridWrapper data={it}>
-                <VinesAbstractVideo key={i} className="my-auto [&>video]:min-h-16">
-                  {data as string}
-                </VinesAbstractVideo>
+              <VirtuaExecutionResultGridWrapper data={it} key={i}>
+                <VinesAbstractVideo className="my-auto [&>video]:min-h-16">{data as string}</VinesAbstractVideo>
               </VirtuaExecutionResultGridWrapper>
             );
           default:
