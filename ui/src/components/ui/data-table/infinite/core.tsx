@@ -1,36 +1,16 @@
 import React from 'react';
 
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  TableState,
-  useReactTable,
-} from '@tanstack/react-table';
+import { flexRender, getCoreRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
 import { CircleSlash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { TableVirtuoso } from 'react-virtuoso';
 
+import { IInfiniteScrollingDataTableProps } from '@/components/ui/data-table/infinite/index.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import { TableCell, TableHead, TableRow } from '@/components/ui/table.tsx';
 import { cn } from '@/utils';
 
-interface IInfiniteScrollingDataTableProps<TData, TValue> {
-  className?: string;
-
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-  state?: Partial<TableState>;
-
-  increaseViewportBy?: number;
-  loadMore?: () => void;
-  loading?: boolean;
-
-  tfoot?: React.ReactNode;
-}
-
-export function InfiniteScrollingDataTable<TData, TValue>({
+function InfiniteScrollingDataTable<TData, TValue>({
   className,
 
   columns,
@@ -107,3 +87,5 @@ export function InfiniteScrollingDataTable<TData, TValue>({
     </div>
   );
 }
+
+export default InfiniteScrollingDataTable;

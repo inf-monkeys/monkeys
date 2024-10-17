@@ -29,10 +29,8 @@ export interface ICodeEditorProps {
 
 const CodeEditorCore = lazy(() => import('./core.tsx'));
 
-export const CodeEditor: React.FC<ICodeEditorProps> = (props) => {
-  return (
-    <Suspense fallback={<Skeleton className="size-full" />}>
-      <CodeEditorCore {...props} />
-    </Suspense>
-  );
-};
+export const CodeEditor: React.FC<ICodeEditorProps> = (props) => (
+  <Suspense fallback={<Skeleton className="size-full" />}>
+    <CodeEditorCore {...props} />
+  </Suspense>
+);

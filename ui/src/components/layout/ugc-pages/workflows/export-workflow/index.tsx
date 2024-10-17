@@ -188,7 +188,7 @@ export const ExportWorkflowDialog: React.FC<IExportWorkflowDialogProps> = ({ vis
     <Dialog open={visible} onOpenChange={setVisible}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{(context?.version ? '导出当前版本' : '导出全部版本') ?? '导出'}</DialogTitle>
+          <DialogTitle>{context?.version ? '导出当前版本' : '导出全部版本'}</DialogTitle>
         </DialogHeader>
         {loading ? (
           <div className="my-8 flex w-full select-none items-center justify-center gap-4 text-xs">

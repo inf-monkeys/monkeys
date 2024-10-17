@@ -1,34 +1,20 @@
 import React, { useState } from 'react';
 
 import {
-  ColumnDef,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  OnChangeFn,
-  PaginationState,
   SortingState,
   useReactTable,
 } from '@tanstack/react-table';
 import { useTranslation } from 'react-i18next';
 
+import { IRemoteDataTableProps } from '@/components/ui/data-table/remote/index.tsx';
 import { TablePagination } from '@/components/ui/pagination/table-pagination.tsx';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
 
-interface IRemoteDataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-  rowCount: number;
-  state: {
-    pagination: PaginationState;
-  };
-  onPaginationChange: OnChangeFn<PaginationState>;
-  preloadHover?: (pageIndex: number, e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void;
-  showPagination?: boolean;
-}
-
-export function RemoteDataTable<TData, TValue>({
+function RemoteDataTable<TData, TValue>({
   columns,
   data,
   state,
@@ -107,3 +93,5 @@ export function RemoteDataTable<TData, TValue>({
     </div>
   );
 }
+
+export default RemoteDataTable;
