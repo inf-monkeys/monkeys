@@ -84,12 +84,18 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
     { wait: 64 },
   );
 
-  const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [{ sidebar }] = useUrlState<{ sidebar: 'default' | 'embed' }>({ sidebar: 'default' });
+  const isUseFixedSidebar = sidebar === 'default';
+
+  const [sidebarVisible, setSidebarVisible] = useState(!isUseFixedSidebar);
 
   return (
     <motion.div
-      className="absolute z-50 flex h-full w-20 border-r border-input bg-slate-1 py-2 shadow-md"
-      initial={{ marginLeft: -80 }}
+      className={cn(
+        'flex h-full w-20 border-r border-input bg-slate-1 py-2',
+        isUseFixedSidebar && 'absolute z-50 shadow-md',
+      )}
+      initial={{ marginLeft: isUseFixedSidebar ? -80 : 0 }}
       animate={{ marginLeft: sidebarVisible ? 0 : -80 }}
       ref={ref}
     >
@@ -100,23 +106,25 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
           currentPageId={currentPage?.[teamId]?.id}
           onItemClicked={(page) => {
             setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
-            setSidebarVisible(false);
+            isUseFixedSidebar && setSidebarVisible(false);
           }}
         />
       </div>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div
-            className="group absolute -right-3.5 top-5 z-10 flex h-6 w-3.5 cursor-pointer items-center justify-center rounded-r-sm border border-input bg-border shadow"
-            onClick={() => setSidebarVisible(!sidebarVisible)}
-          >
-            <ChevronRight className={cn(sidebarVisible && 'scale-x-[-1]')} />
-          </div>
-        </TooltipTrigger>
-        <TooltipContent side="right">
-          {sidebarVisible ? t('common.sidebar.hide') : t('common.sidebar.show')}
-        </TooltipContent>
-      </Tooltip>
+      {isUseFixedSidebar && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div
+              className="group absolute -right-3.5 top-5 z-10 flex h-6 w-3.5 cursor-pointer items-center justify-center rounded-r-sm border border-input bg-border shadow"
+              onClick={() => setSidebarVisible(!sidebarVisible)}
+            >
+              <ChevronRight className={cn(sidebarVisible && 'scale-x-[-1]')} />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            {sidebarVisible ? t('common.sidebar.hide') : t('common.sidebar.show')}
+          </TooltipContent>
+        </Tooltip>
+      )}
     </motion.div>
   );
 };
