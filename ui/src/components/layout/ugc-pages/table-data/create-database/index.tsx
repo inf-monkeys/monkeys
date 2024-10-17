@@ -31,7 +31,7 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
       createType: 'builtIn',
       displayName: '',
       description: '',
-      iconUrl: 'emoji:🍀:#ceefc5',
+      iconUrl: 'emoji:🍀:#eeeef1',
     },
   });
 
@@ -210,7 +210,7 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
                       <FormControl>
                         <VinesIconEditor
                           value={field.value!}
-                          defaultValue="emoji:🍀:#ceefc5"
+                          defaultValue="emoji:🍀:#eeeef1"
                           onChange={field.onChange}
                         />
                       </FormControl>

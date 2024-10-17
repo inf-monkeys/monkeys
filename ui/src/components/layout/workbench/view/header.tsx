@@ -67,7 +67,9 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page,
     <header className="z-50 flex w-full flex-col justify-center pt-4">
       <div className="flex items-center justify-between px-4 pb-4">
         <div className="flex gap-2">
-          <VinesIcon size="sm">{info?.iconUrl}</VinesIcon>
+          <VinesIcon size="sm" disabledPreview>
+            {info?.iconUrl}
+          </VinesIcon>
           <div className="flex flex-col gap-0.5">
             <h1 className="text-sm font-bold leading-tight">
               {getI18nContent(info?.displayName) ?? t('common.utils.untitled')}
@@ -95,10 +97,12 @@ export const WorkbenchViewHeader: React.FC<IWorkbenchViewHeaderProps> = ({ page,
           </Tooltip>
           <Link
             to={isWorkflowPage ? '/$teamId/workspace/$workflowId/$pageId' : '/$teamId/agent/$agentId'}
-            params={{
-              teamId,
-              ...(isWorkflowPage ? { workflowId: page?.workflowId, pageId: page?.id } : { agentId: page?.agent?.id }),
-            }}
+            params={
+              {
+                teamId,
+                ...(isWorkflowPage ? { workflowId: page?.workflowId, pageId: page?.id } : { agentId: page?.agent?.id }),
+              } as any
+            }
             search={isWorkflowPage ? {} : { tab: page?.instance?.type }}
           >
             <Button variant="outline" size="small">

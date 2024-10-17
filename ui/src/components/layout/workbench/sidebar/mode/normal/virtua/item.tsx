@@ -59,7 +59,9 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(({ p
       )}
       onClick={() => onClick?.(page)}
     >
-      <VinesIcon size="sm">{info?.iconUrl}</VinesIcon>
+      <VinesIcon size="sm" disabledPreview>
+        {info?.iconUrl}
+      </VinesIcon>
       <div className="flex max-w-44 flex-col gap-0.5">
         <h1 className="text-sm font-bold leading-tight">
           {getI18nContent(info?.displayName) ?? t('common.utils.untitled')}

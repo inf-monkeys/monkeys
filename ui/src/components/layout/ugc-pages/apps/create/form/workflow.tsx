@@ -29,7 +29,7 @@ export const WorkflowCreateForm: React.FC<{
     defaultValues: {
       displayName: t('common.utils.untitled') + t('common.type.workflow'),
       description: '',
-      iconUrl: 'emoji:🍀:#ceefc5',
+      iconUrl: 'emoji:🍀:#eeeef1',
     },
   });
 

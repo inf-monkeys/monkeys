@@ -21,7 +21,7 @@ export const WorkflowInfoCard: React.FC<IWorkflowInfoCardProps> = () => {
       <WorkflowInfoEditor>
         <TooltipTrigger asChild>
           <div className="group flex cursor-pointer items-center gap-2.5">
-            <VinesIcon size="sm">{workflow?.iconUrl || 'emoji:🍀:#ceefc5'}</VinesIcon>
+            <VinesIcon size="sm">{workflow?.iconUrl || 'emoji:🍀:#eeeef1'}</VinesIcon>
             <div className="flex flex-col gap-0.5">
               <h1 className="font-bold leading-tight">{getI18nContent(workflow?.displayName)}</h1>
               {workflow?.description && <span className="text-xxs">{getI18nContent(workflow?.description)}</span>}

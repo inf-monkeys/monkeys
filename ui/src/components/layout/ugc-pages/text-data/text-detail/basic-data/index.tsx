@@ -50,9 +50,9 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
     );
   };
 
-  const [icon, setIcon] = useState(detail?.iconUrl || 'emoji:🍀:#ceefc5');
+  const [icon, setIcon] = useState(detail?.iconUrl || 'emoji:🍀:#eeeef1');
   useEffect(() => {
-    setIcon(detail?.iconUrl || 'emoji:🍀:#ceefc5');
+    setIcon(detail?.iconUrl || 'emoji:🍀:#eeeef1');
   }, [detail?.iconUrl]);
 
   const form = useForm<IRetrievalSettings>({

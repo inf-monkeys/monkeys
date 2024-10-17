@@ -74,7 +74,7 @@ export const useWorkflow = (workflow?: { workflowId?: string }) => {
       > = {
         displayName: info.displayName,
         description: info.description ?? '',
-        iconUrl: info.iconUrl ?? 'emoji:🍀:#ceefc5',
+        iconUrl: info.iconUrl ?? 'emoji:🍀:#eeeef1',
         tasks: workflowDef.tasks,
       };
 

@@ -71,7 +71,7 @@ export const ImportToolService: React.FC<IImportToolServiceProps> = ({ onFinishe
     defaultValues: {
       importType: ToolImportType.api,
       apiInfo: {
-        iconUrl: 'emoji:🍀:#ceefc5',
+        iconUrl: 'emoji:🍀:#eeeef1',
       },
     },
   });
@@ -144,7 +144,7 @@ export const ImportToolService: React.FC<IImportToolServiceProps> = ({ onFinishe
                     <FormControl>
                       <VinesIconEditor
                         value={field.value ?? ''}
-                        defaultValue="emoji:🍀:#ceefc5"
+                        defaultValue="emoji:🍀:#eeeef1"
                         onChange={field.onChange}
                         size="md"
                       />

@@ -61,7 +61,7 @@ export const ImageModelInfoEditor: React.FC<IImageModelInfoEditorProps> = ({
     if (!model) return;
     form.setValue('displayName', getI18nContent(model.displayName) || '');
     form.setValue('description', getI18nContent(model.description) || '');
-    form.setValue('iconUrl', model.iconUrl || 'emoji:🍀:#ceefc5');
+    form.setValue('iconUrl', model.iconUrl || 'emoji:🍀:#eeeef1');
   }, [model]);
 
   const handleSubmit = form.handleSubmit(async (data) => {
@@ -136,7 +136,7 @@ export const ImageModelInfoEditor: React.FC<IImageModelInfoEditorProps> = ({
                   <FormControl>
                     <div className="w-full">
                       <VinesImageEditor value={field.value} onChange={field.onChange} aspectRatio={1}>
-                        <VinesIcon size="md" src={field.value ?? 'emoji:🍀:#ceefc5'} disabledPreview />
+                        <VinesIcon size="md" src={field.value ?? 'emoji:🍀:#eeeef1'} disabledPreview />
                       </VinesImageEditor>
                     </div>
                   </FormControl>
