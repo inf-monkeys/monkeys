@@ -29,7 +29,7 @@ export const VinesIconEditor: React.FC<IVinesIconEditorProps> = ({
     <div className="flex">
       <VinesEmojiSelector emojiLink={value} onChange={onChange} onFinished={onFinished} onlyEmoji={onlyEmoji}>
         <div className="relative cursor-pointer">
-          <VinesIcon size={size} preClassName={onlyEmoji ? 'border border-input' : ''}>
+          <VinesIcon size={size} className={onlyEmoji ? 'border border-input' : ''}>
             {value}
           </VinesIcon>
           <Tooltip>

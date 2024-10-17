@@ -12,6 +12,8 @@ interface IVirtuaWorkbenchMiniViewListProps {
   height: number;
   currentPageId?: string;
   onItemClicked?: (page: IPinPage) => void;
+
+  mini?: boolean;
 }
 
 export const VirtuaWorkbenchMiniViewList: React.FC<IVirtuaWorkbenchMiniViewListProps> = ({
@@ -19,6 +21,7 @@ export const VirtuaWorkbenchMiniViewList: React.FC<IVirtuaWorkbenchMiniViewListP
   height,
   currentPageId,
   onItemClicked,
+  mini,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -26,7 +29,13 @@ export const VirtuaWorkbenchMiniViewList: React.FC<IVirtuaWorkbenchMiniViewListP
     <ScrollArea className="-mr-2 pr-2" ref={scrollRef} style={{ height }} disabledOverflowMask>
       <Virtualizer scrollRef={scrollRef}>
         {data.map((it, i) => (
-          <VirtuaWorkbenchMiniViewListItem key={i} data={it} currentPageId={currentPageId} onClick={onItemClicked} />
+          <VirtuaWorkbenchMiniViewListItem
+            key={i}
+            data={it}
+            currentPageId={currentPageId}
+            onClick={onItemClicked}
+            mini={mini}
+          />
         ))}
       </Virtualizer>
     </ScrollArea>

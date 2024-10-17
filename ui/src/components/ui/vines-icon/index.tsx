@@ -12,9 +12,8 @@ import { cn } from '@/utils';
 
 export type IVinesIconSize = 'auto' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'max' | 'gallery';
 
-interface IVinesIconProps extends React.ComponentPropsWithoutRef<'div'> {
+export interface IVinesIconProps extends React.ComponentPropsWithoutRef<'div'> {
   src?: string;
-  preClassName?: string;
   backgroundColor?: string;
   size?: IVinesIconSize;
   alt?: string;
@@ -25,7 +24,7 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
   src: propSrc,
   size = 'auto',
   style,
-  preClassName,
+  className,
   children,
   alt,
   disabledPreview,
@@ -56,7 +55,7 @@ export const VinesIcon: React.FC<IVinesIconProps> = ({
         size === '3xl' && 'h-20 w-20 text-2xl',
         size === 'gallery' && 'h-36 w-36 text-4xl',
         size === 'max' && 'h-48 w-48 !text-5xl',
-        preClassName,
+        className,
       )}
       style={style}
     >

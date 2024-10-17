@@ -11,7 +11,7 @@ export const VinesLucideIconWithBackground: React.FC<IVinesIconProps> = ({
   src: propSrc,
   size = 'auto',
   style,
-  preClassName,
+  className,
   children,
 }) => {
   const initialized = useAppStore((s) => s.iconInitialized);
@@ -41,7 +41,7 @@ export const VinesLucideIconWithBackground: React.FC<IVinesIconProps> = ({
         size === '3xl' && 'h-20 w-20 text-2xl',
         size === 'gallery' && 'h-36 w-36 text-4xl',
         size === 'max' && 'h-48 w-48 !text-5xl',
-        preClassName,
+        className,
       )}
       style={style}
     >
