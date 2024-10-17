@@ -92,11 +92,11 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
   return (
     <motion.div
       className={cn(
-        'flex h-full w-20 border-r border-input bg-slate-1 py-2',
-        isUseFixedSidebar && 'absolute z-50 shadow-md',
+        'relative flex h-full min-w-14 max-w-20 border-r border-input bg-slate-1 py-2',
+        isUseFixedSidebar && 'absolute z-50 min-w-20 shadow-md',
       )}
       initial={{ marginLeft: isUseFixedSidebar ? -80 : 0 }}
-      animate={{ marginLeft: sidebarVisible ? 0 : -80 }}
+      animate={{ marginLeft: sidebarVisible ? 0 : isUseFixedSidebar ? -80 : -55 }}
       ref={ref}
     >
       <div className="-mt-2 flex w-full flex-col gap-4 px-2">
@@ -106,25 +106,26 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
           currentPageId={currentPage?.[teamId]?.id}
           onItemClicked={(page) => {
             setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
-            isUseFixedSidebar && setSidebarVisible(false);
+            setSidebarVisible(false);
           }}
+          mini={!isUseFixedSidebar}
         />
       </div>
-      {isUseFixedSidebar && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div
-              className="group absolute -right-3.5 top-5 z-10 flex h-6 w-3.5 cursor-pointer items-center justify-center rounded-r-sm border border-input bg-border shadow"
-              onClick={() => setSidebarVisible(!sidebarVisible)}
-            >
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div
+            className="group absolute -right-32 top-5 z-10 h-6 cursor-pointer pl-32"
+            onClick={() => setSidebarVisible(!sidebarVisible)}
+          >
+            <div className="absolute left-0 flex h-6 w-3.5 items-center justify-center rounded-r-sm border border-input bg-border shadow">
               <ChevronRight className={cn(sidebarVisible && 'scale-x-[-1]')} />
             </div>
-          </TooltipTrigger>
-          <TooltipContent side="right">
-            {sidebarVisible ? t('common.sidebar.hide') : t('common.sidebar.show')}
-          </TooltipContent>
-        </Tooltip>
-      )}
+          </div>
+        </TooltipTrigger>
+        <TooltipContent className="cursor-pointer" sideOffset={10} onClick={() => setSidebarVisible(!sidebarVisible)}>
+          {sidebarVisible ? t('common.sidebar.hide') : t('common.sidebar.show')}
+        </TooltipContent>
+      </Tooltip>
     </motion.div>
   );
 };
