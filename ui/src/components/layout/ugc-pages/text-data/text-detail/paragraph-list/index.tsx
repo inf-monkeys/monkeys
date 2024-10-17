@@ -9,7 +9,7 @@ import { IFullTextSearchParams, IVectorRecord } from '@/apis/vector/typings.ts';
 import { MetadataFilter } from '@/components/layout/ugc-pages/text-data/text-detail/paragraph-list/metadata-filter.tsx';
 import { ParagraphOperateCell } from '@/components/layout/ugc-pages/text-data/text-detail/paragraph-list/paragraph-operate-cell.tsx';
 import { Button } from '@/components/ui/button';
-import { InfiniteScrollingDataTable } from '@/components/ui/data-table/infinite.tsx';
+import { InfiniteScrollingDataTable } from '@/components/ui/data-table/infinite';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { Separator } from '@/components/ui/separator.tsx';

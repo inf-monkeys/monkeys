@@ -27,7 +27,7 @@ export const UgcDetailWorkflows: React.FC<IUgcDetailWorkflowsProps> = ({ data })
       header: t('components.layout.ugc.detail.workflows.columns.displayName.label'),
       cell: ({ row, getValue }) => (
         <a
-          className="transition-colors hover:text-primary-500"
+          className="hover:text-primary-500 transition-colors"
           href={`/${row.original.teamId}/workspace/${row.original.workflowId}`}
           target="_blank"
           rel="noreferrer"

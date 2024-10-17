@@ -21,7 +21,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog.tsx';
 import { Button } from '@/components/ui/button';
-import { InfiniteScrollingDataTable } from '@/components/ui/data-table/infinite.tsx';
+import { InfiniteScrollingDataTable } from '@/components/ui/data-table/infinite';
 import { Input } from '@/components/ui/input';
 import { getI18nContent } from '@/utils';
 

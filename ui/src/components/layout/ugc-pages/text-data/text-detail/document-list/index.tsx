@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useKnowledgeBaseDocuments } from '@/apis/vector';
 import { IKnowledgeBaseDocument, KnowledgebaseTaskStatus } from '@/apis/vector/typings.ts';
 import { DocumentOperateCell } from '@/components/layout/ugc-pages/text-data/text-detail/document-list/document-operate-cell.tsx';
-import { InfiniteScrollingDataTable } from '@/components/ui/data-table/infinite.tsx';
+import { InfiniteScrollingDataTable } from '@/components/ui/data-table/infinite';
 import { VinesLoading } from '@/components/ui/loading';
 
 interface IParagraphListProps {

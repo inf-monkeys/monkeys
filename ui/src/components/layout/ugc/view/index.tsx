@@ -33,7 +33,7 @@ import { DEFAULT_SORT_CONDITION } from '@/components/layout/ugc/view/header/cons
 import { RenderTags } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
-import { RemoteDataTable } from '@/components/ui/data-table/remote.tsx';
+import { RemoteDataTable } from '@/components/ui/data-table/remote';
 import { VinesFullLoading } from '@/components/ui/loading';
 import { TablePagination } from '@/components/ui/pagination/table-pagination.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';

@@ -12,7 +12,7 @@ import { WorkflowCell } from '@/components/layout/settings/account/consumer-deta
 import { balanceFormat } from '@/components/layout/settings/account/utils.ts';
 import { Badge } from '@/components/ui/badge.tsx';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.tsx';
-import { RemoteDataTable } from '@/components/ui/data-table/remote.tsx';
+import { RemoteDataTable } from '@/components/ui/data-table/remote';
 import { VinesFullLoading } from '@/components/ui/loading';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
 
