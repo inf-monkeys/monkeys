@@ -29,19 +29,28 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
   }>();
 
   const originalPages = useCreation(() => {
-    const sidebarFilter = (routeSidebarFilter?.toString() ?? '')?.split(',')?.filter(Boolean);
+    const pageIdsForSort = Array.from(new Set(data?.groups.flatMap((it) => it.pageIds)));
 
+    const sidebarFilter = (routeSidebarFilter?.toString() ?? '')?.split(',')?.filter(Boolean);
     if (sidebarFilter.length > 0) {
       return (
         data?.pages.filter(({ type }) => sidebarFilter.includes(VINES_IFRAME_PAGE_TYPE2ID_MAPPER[type] || type)) ?? []
-      );
+      ).sort((a, b) => {
+        const aIndex = pageIdsForSort.indexOf(a.id);
+        const bIndex = pageIdsForSort.indexOf(b.id);
+        return aIndex - bIndex;
+      });
     }
 
     const sidebarReserve = (routeSidebarReserve?.toString() ?? '')?.split(',')?.filter(Boolean);
     if (sidebarReserve.length > 0) {
       return (
         data?.pages.filter(({ type }) => sidebarReserve.includes(VINES_IFRAME_PAGE_TYPE2ID_MAPPER[type] || type)) ?? []
-      );
+      ).sort((a, b) => {
+        const aIndex = pageIdsForSort.indexOf(a.id);
+        const bIndex = pageIdsForSort.indexOf(b.id);
+        return aIndex - bIndex;
+      });
     }
 
     return data?.pages ?? [];
