@@ -80,7 +80,7 @@ export const VinesFlow: React.FC<IVinesFlowProps> = () => {
         <AnimatePresence>
           {visible && (
             <motion.div
-              className="relative"
+              className="relative z-10"
               key="vines-canvas"
               style={{ width, height }}
               initial={{ opacity: 0 }}

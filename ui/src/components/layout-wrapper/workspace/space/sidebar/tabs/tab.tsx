@@ -10,7 +10,7 @@ import { IPageInstanceType } from '@/apis/pages/typings.ts';
 import { useGetWorkflow } from '@/apis/workflow';
 import { SpaceSidebarTabContent, spaceSidebarTabVariants } from '@/components/layout-wrapper/space/sidebar/tabs.tsx';
 import { TabMenu } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/menu';
-import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId';
+import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId/index.lazy.tsx';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 

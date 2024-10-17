@@ -60,7 +60,9 @@ export const VinesForm: React.FC<IVinesFormProps> = () => {
         />
 
         <VinesExecutionResult
-          className={historyVisible ? '' : 'pointer-events-none z-0 opacity-0 [&_*]:pointer-events-none'}
+          className={
+            isMiniFrame && !historyVisible ? 'pointer-events-none z-0 opacity-0 [&_*]:pointer-events-none' : ''
+          }
           event$={event$}
           height={height}
         />

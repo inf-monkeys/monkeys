@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form.tsx';
 import { VinesFullLoading } from '@/components/ui/loading';
 import { setLocalStorage } from '@/hooks/use-local-storage';
-import { Route } from '@/pages/login';
+import { Route } from '@/pages/login/index.lazy.tsx';
 import VinesEvent from '@/utils/events.ts';
 
 export type AuthEvent = 'trigger-login' | 'clear-sms-code-input';
