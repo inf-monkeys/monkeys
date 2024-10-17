@@ -61,6 +61,13 @@ export const AuthWithRouteSearch: React.FC = () => {
   };
 
   useEffect(() => {
+    const splitPath = location.pathname?.split('/') ?? [];
+    const teamIdWithPath = splitPath?.find((it) => isMongoId(it));
+    if (teamIdWithPath) {
+      localStorage.setItem('vines-team-id', teamIdWithPath);
+      window['vinesTeamId'] = teamIdWithPath;
+    }
+
     if (getVinesToken() && search?.auth_mode !== 'force') return;
 
     if (has(search, 'auth_user') && has(search, 'auth_pwd')) {
