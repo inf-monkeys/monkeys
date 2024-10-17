@@ -51,7 +51,7 @@ export const RelatedApplication: React.FC<IRelatedApplicationProps> = ({ textId 
         {data?.map(({ iconUrl, displayName, workflowId, description }, i) => (
           <TableRow key={i}>
             <TableCell>
-              <VinesIcon size="sm">{iconUrl || 'emoji:🍀:#ceefc5'}</VinesIcon>
+              <VinesIcon size="sm">{iconUrl || 'emoji:🍀:#eeeef1'}</VinesIcon>
             </TableCell>
             <TableCell className="font-medium">
               <a

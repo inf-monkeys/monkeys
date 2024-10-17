@@ -32,7 +32,7 @@ export const CreateDataset: React.FC<ICreateDatasetProps> = () => {
   const form = useForm<IDatasetInfo>({
     resolver: zodResolver(datasetInfoSchema),
     defaultValues: {
-      iconUrl: 'emoji:🍀:#ceefc5',
+      iconUrl: 'emoji:🍀:#eeeef1',
     },
   });
 
@@ -151,7 +151,7 @@ export const CreateDataset: React.FC<ICreateDatasetProps> = () => {
                 <FormItem>
                   <FormLabel>{t('ugc-page.text-data.ugc-view.subtitle.create-dataset.form.iconUrl.label')}</FormLabel>
                   <FormControl>
-                    <VinesIconEditor value={field.value} defaultValue="emoji:🍀:#ceefc5" onChange={field.onChange} />
+                    <VinesIconEditor value={field.value} defaultValue="emoji:🍀:#eeeef1" onChange={field.onChange} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

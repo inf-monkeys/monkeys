@@ -75,7 +75,7 @@ export const FieldImageModel: React.FC<IFieldImageModelProps> = ({ input: { type
                     <TooltipTrigger asChild>
                       <SelectItem value={serverRelation.apiPath}>
                         <div className="flex items-center gap-2">
-                          <VinesIcon src={iconUrl || 'emoji:🍀:#ceefc5'} size="xs" />
+                          <VinesIcon src={iconUrl || 'emoji:🍀:#eeeef1'} size="xs" />
                           <p className="text-sm font-bold">{displayName ?? 'unknown'}</p>
                           {serverRelation.type && serverRelation.type.length > 0 && (
                             <div className="flex gap-1">

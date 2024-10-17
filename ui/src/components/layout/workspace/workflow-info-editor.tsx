@@ -59,7 +59,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
       displayName:
         getI18nContent(workflow?.displayName) ?? t('workspace.wrapper.workflow-info-card.default-workflow-name'),
       description: getI18nContent(workflow?.description) ?? '',
-      iconUrl: workflow?.iconUrl ?? 'emoji:🍀:#ceefc5',
+      iconUrl: workflow?.iconUrl ?? 'emoji:🍀:#eeeef1',
     },
   });
 
@@ -70,7 +70,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
       getI18nContent(workflow.displayName) || t('workspace.wrapper.workflow-info-card.default-workflow-name'),
     );
     form.setValue('description', getI18nContent(workflow.description) || '');
-    form.setValue('iconUrl', workflow.iconUrl || 'emoji:🍀:#ceefc5');
+    form.setValue('iconUrl', workflow.iconUrl || 'emoji:🍀:#eeeef1');
   }, [workflow]);
 
   const handleSubmit = form.handleSubmit(async (data) => {

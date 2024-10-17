@@ -42,7 +42,7 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
   const form = useForm<IImportComfyUIWorkflow>({
     resolver: zodResolver(importComfyUIWorkflowSchema),
     defaultValues: {
-      iconUrl: 'emoji:🍀:#ceefc5',
+      iconUrl: 'emoji:🍀:#eeeef1',
       workflowType: 'json',
     },
   });
@@ -78,7 +78,7 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
                     <FormControl>
                       <VinesIconEditor
                         value={field.value ?? ''}
-                        defaultValue="emoji:🍀:#ceefc5"
+                        defaultValue="emoji:🍀:#eeeef1"
                         onChange={field.onChange}
                         size="md"
                       />

@@ -38,7 +38,7 @@ export const VinesIconEditor: React.FC<IVinesIconEditorProps> = ({
                 className="absolute bottom-0 right-0 cursor-pointer rounded-br-md rounded-tl-md bg-white bg-opacity-45 p-1 shadow hover:bg-opacity-60 [&_svg]:stroke-vines-500"
                 onClick={(e) => {
                   e.preventDefault();
-                  onChange?.(defaultValue || (onlyEmoji ? '🍀' : 'emoji:🍀:#ceefc5'));
+                  onChange?.(defaultValue || (onlyEmoji ? '🍀' : 'emoji:🍀:#eeeef1'));
                 }}
               >
                 <RotateCcw size={8} />

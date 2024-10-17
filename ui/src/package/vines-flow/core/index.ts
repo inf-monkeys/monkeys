@@ -41,7 +41,7 @@ import VinesEvent from '@/utils/events';
 export class VinesCore extends VinesTools(VinesBase) {
   public workflowId: string | undefined;
 
-  public workflowIcon = 'emoji:🍀:#ceefc5';
+  public workflowIcon = 'emoji:🍀:#eeeef1';
 
   public workflowName = '未命名';
 
