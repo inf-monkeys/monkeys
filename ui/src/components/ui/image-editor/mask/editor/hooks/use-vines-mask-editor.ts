@@ -12,6 +12,8 @@ export interface IVinesMaskEditorProps {
   maskColor?: string;
   brushType?: 'normal' | 'rectangle';
 
+  zoom?: number;
+
   onDrawEnd?: () => void;
 }
 
@@ -23,6 +25,7 @@ export const useVinesMaskEditor = ({
   pointerMode = 'brush',
   maskColor = 'rgb(0,0,0)',
   brushType = 'normal',
+  zoom = 1,
   onDrawEnd,
 }: IVinesMaskEditorProps) => {
   const isDrawingRef = useRef(false);
@@ -31,6 +34,8 @@ export const useVinesMaskEditor = ({
 
   const isErasingRef = useRef(false);
 
+  const calculateOffset = (value: number) => value / zoom;
+
   const onPointerMove = useMemoizedFn((e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!maskCanvasRef.current || !tempMaskCanvasRef.current) return;
 
@@ -38,8 +43,8 @@ export const useVinesMaskEditor = ({
 
     const cursorCanvas = cursorCanvasRef.current;
     if (cursorCanvas) {
-      const cursorX = e.nativeEvent.offsetX;
-      const cursorY = e.nativeEvent.offsetY;
+      const cursorX = calculateOffset(e.nativeEvent.offsetX);
+      const cursorY = calculateOffset(e.nativeEvent.offsetY);
       const cursorCanvasStyle = cursorCanvas.style;
       cursorCanvasStyle.width = brushSize * 2 + 'px';
       cursorCanvasStyle.height = brushSize * 2 + 'px';
@@ -51,8 +56,8 @@ export const useVinesMaskEditor = ({
     const leftButtonDown = (window.TouchEvent && e instanceof TouchEvent) || buttons == 1;
     const rightButtonDown = [2, 5, 32].includes(buttons);
 
-    const x = e.nativeEvent.offsetX;
-    const y = e.nativeEvent.offsetY;
+    const x = calculateOffset(e.nativeEvent.offsetX);
+    const y = calculateOffset(e.nativeEvent.offsetY);
 
     const isErasing = ((e.altKey || pointerMode == 'eraser') && leftButtonDown) || rightButtonDown;
     const shouldDraw = (!e.altKey && pointerMode == 'brush' && leftButtonDown) || isErasing;
@@ -124,8 +129,8 @@ export const useVinesMaskEditor = ({
 
       e.preventDefault();
 
-      const x = e.nativeEvent.offsetX;
-      const y = e.nativeEvent.offsetY;
+      const x = calculateOffset(e.nativeEvent.offsetX);
+      const y = calculateOffset(e.nativeEvent.offsetY);
 
       maskCanvasRef.current?.style.setProperty('opacity', '0.6');
 
@@ -165,8 +170,8 @@ export const useVinesMaskEditor = ({
           maskCtx.fillRect(
             startPositionRef.current.x,
             startPositionRef.current.y,
-            e.nativeEvent.offsetX - startPositionRef.current.x,
-            e.nativeEvent.offsetY - startPositionRef.current.y,
+            calculateOffset(e.nativeEvent.offsetX) - startPositionRef.current.x,
+            calculateOffset(e.nativeEvent.offsetY) - startPositionRef.current.y,
           );
         }
         maskCtx.drawImage(tempMaskCanvasRef.current, 0, 0);
