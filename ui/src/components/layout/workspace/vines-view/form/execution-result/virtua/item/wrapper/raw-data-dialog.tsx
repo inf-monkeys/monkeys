@@ -8,6 +8,7 @@ import { IVinesExecutionResultItem } from '@/components/layout/workspace/vines-v
 import { CodeEditor, JSONValue } from '@/components/ui/code-editor';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
+import { Textarea } from '@/components/ui/textarea.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface IVirtuaExecutionResultRawDataDialogProps {
@@ -43,7 +44,7 @@ export const VirtuaExecutionResultRawDataDialog: React.FC<IVirtuaExecutionResult
           </TabsList>
           <TabsContent value="data">
             <VinesAbstractDataPreview className="h-96" data={data.render.data} />
-            {alt && <div className="rounded border p-2 text-sm">{alt}</div>}
+            {alt && <Textarea className="rounded border p-2 text-sm" value={alt} readOnly />}
           </TabsContent>
           <TabsContent value="logs">
             <CodeEditor className="h-96 w-full" readonly data={omit(data, 'render') as JSONValue} />

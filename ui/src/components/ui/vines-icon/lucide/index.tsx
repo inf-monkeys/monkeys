@@ -74,7 +74,7 @@ export const VinesLucideIcon = forwardRef<HTMLDivElement, IVinesLucideIconProps>
           >
             <svg width={24} height={24} viewBox="0 0 24 24" />
             <div className="vines-center absolute left-0 top-0">
-              <VinesLoading size="sm" />
+              <VinesLoading size="sm" className="-m-1.5 scale-50" />
             </div>
           </motion.div>
         )}

@@ -34,10 +34,10 @@ export const VirtuaWorkbenchMiniViewListItem: React.FC<IVirtuaWorkbenchMiniViewL
       )}
       onClick={() => onClick?.(data)}
     >
-      <VinesIcon size="sm" className={cn(mini && 'scale-75')} disabledPreview>
+      <VinesIcon size="sm" className={cn('pointer-events-none select-none', mini && 'scale-75')} disabledPreview>
         {info?.iconUrl}
       </VinesIcon>
-      <span className="text-xxs text-center" style={mini ? { fontSize: 8 } : {}}>
+      <span className="text-xxs pointer-events-none select-none text-center" style={mini ? { fontSize: 8 } : {}}>
         {getI18nContent(info?.displayName) ?? t('common.utils.untitled')}
       </span>
     </div>

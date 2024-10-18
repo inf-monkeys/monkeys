@@ -44,7 +44,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
           <Tooltip>
             <TooltipTrigger asChild>
               <div
-                className="absolute bottom-2 flex w-[calc(100%-1rem)] items-center gap-1 rounded border border-input bg-slate-1/80 p-1 shadow backdrop-blur"
+                className="absolute bottom-2 flex w-[calc(100%-1rem)] items-center justify-between gap-1 rounded border border-input bg-slate-1/80 p-1 shadow backdrop-blur"
                 onClick={() => copy(alt)}
               >
                 <p className="truncate text-xs">{alt}</p>
@@ -56,7 +56,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
                 </Tooltip>
               </div>
             </TooltipTrigger>
-            <TooltipContent className="max-w-96">{alt}</TooltipContent>
+            <TooltipContent className="max-h-60 max-w-60 overflow-auto">{alt}</TooltipContent>
           </Tooltip>
         )}
       </div>
