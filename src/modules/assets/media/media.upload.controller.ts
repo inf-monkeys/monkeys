@@ -37,7 +37,7 @@ export class MediaUploadController {
       const data = await s3Helpers.getSignedUrl(key.replace(/^\/+/, ''));
       res.redirect(data);
     } else {
-      const file = await s3Helpers.getFile(key);
+      const file = await s3Helpers.getFile(key.replace(/^\/+/, ''));
 
       res.set('Content-Type', file.ContentType);
       res.set('Content-Length', file.ContentLength.toString());
