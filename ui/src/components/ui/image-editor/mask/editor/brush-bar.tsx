@@ -31,7 +31,7 @@ export const BrushBar: React.FC<IBrushBarProps> = ({
 
   const isUseNormalBrush = brushType === 'normal';
   return (
-    <div className="absolute bottom-1 left-1 z-20 flex items-center justify-center gap-2 rounded border border-input bg-background px-2 py-1 opacity-70 transition-opacity hover:opacity-100">
+    <div className="absolute bottom-1 left-1 z-20 -m-6 !-mb-2 flex scale-75 items-center justify-center gap-2 rounded border border-input bg-background px-2 py-1 opacity-70 transition-opacity hover:opacity-100">
       {pointerMode === 'brush' ? <Brush size={14} /> : <Eraser size={14} />}
       {isUseNormalBrush && (
         <Slider

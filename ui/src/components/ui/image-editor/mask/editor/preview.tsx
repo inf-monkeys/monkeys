@@ -15,7 +15,7 @@ export const MaskPreview: React.FC<IMaskPreviewProps> = ({ src, visible }) => {
     <AnimatePresence>
       {visible && (
         <motion.div
-          className="absolute bottom-1 right-1"
+          className="absolute bottom-1 right-1 -m-5 !-mb-3.5 scale-75"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

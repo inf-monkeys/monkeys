@@ -11,6 +11,7 @@ import {
   useVinesMaskEditor,
 } from '@/components/ui/image-editor/mask/editor/hooks/use-vines-mask-editor.ts';
 import { applyMaskToNewCanvas, canvasToBlob } from '@/components/ui/image-editor/mask/editor/utils.ts';
+import useUrlState from '@/hooks/use-url-state.ts';
 import { cn } from '@/utils';
 
 export type IMaskEditorEvent = 'clear-mask' | 'save';
@@ -108,6 +109,8 @@ export const MaskEditor: React.FC<IMaskEditorProps> = ({
     setPreviewImage?.(URL.createObjectURL(newBlob));
   });
 
+  const [{ zoom }] = useUrlState<{ zoom: number }>({ zoom: 1 });
+
   const { onPointerMove, onPointerDown, onPointerUp, onPointerLeave, handleCleanMask } = useVinesMaskEditor({
     maskCanvasRef: maskCanvas,
     cursorCanvasRef: cursorCanvas,
@@ -116,6 +119,7 @@ export const MaskEditor: React.FC<IMaskEditorProps> = ({
     pointerMode,
     brushSize,
     onDrawEnd: handleGenerateMaskImage,
+    zoom,
   });
 
   event$?.useSubscription((trigger) => {
