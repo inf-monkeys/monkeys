@@ -1,9 +1,10 @@
 import { config } from '@/common/config';
 import { SuccessResponse } from '@/common/response';
 import { S3Helpers } from '@/common/s3';
-import { Body, Controller, Get, Post, Query, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Res, StreamableFile, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
+import { Readable } from 'stream';
 
 @Controller('medias')
 export class MediaUploadController {
@@ -29,11 +30,23 @@ export class MediaUploadController {
   }
 
   @Get('/s3/sign-proxy')
-  async getProxySignedUrl(@Query('key') key, @Res({ passthrough: true }) res: Response) {
+  async getProxySignedUrl(@Query('key') key, @Query('u403') u403, @Res({ passthrough: true }) res: Response) {
     const s3Helpers = new S3Helpers();
-    const data = await s3Helpers.getSignedUrl(key.replace(/^\/+/, ''));
 
-    res.redirect(data);
+    if (u403) {
+      const data = await s3Helpers.getSignedUrl(key.replace(/^\/+/, ''));
+      res.redirect(data);
+    } else {
+      const file = await s3Helpers.getFile(key);
+
+      res.set('Content-Type', file.ContentType);
+      res.set('Content-Length', file.ContentLength.toString());
+      res.set('Last-Modified', file.LastModified.toUTCString());
+      res.set('ETag', file.ETag);
+
+      // return stream to client
+      return new StreamableFile(file.Body as Readable);
+    }
   }
 
   @Get('/s3/presign')

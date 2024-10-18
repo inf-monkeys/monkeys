@@ -32,8 +32,7 @@ export class S3Helpers {
       Bucket: config.s3.bucket,
       Key: fileKey,
     });
-    const res = await this.client.send(command);
-    return res;
+    return await this.client.send(command);
   }
 
   public async uploadFile(fileBuffer: string | Buffer | Readable | ReadableStream<any> | Blob | Uint8Array, fileKey: string) {
@@ -51,8 +50,7 @@ export class S3Helpers {
       Bucket: config.s3.bucket,
       Key: fileKey,
     });
-    const res = await this.client.send(command);
-    return res;
+    return await this.client.send(command);
   }
 
   public async getSignedUrl(fileKey: string) {
@@ -61,7 +59,7 @@ export class S3Helpers {
       Key: fileKey,
     });
 
-    const res = await getSignedUrl(this.client, command, { expiresIn: 3600 });
+    const res = await getSignedUrl(this.client, command, { expiresIn: 259200 });
     return res;
   }
 
@@ -71,7 +69,7 @@ export class S3Helpers {
       Key: fileKey,
       ContentType: '*/*',
     });
-    const res = await getSignedUrl(this.client, command, { expiresIn: 3600 });
+    const res = await getSignedUrl(this.client, command, { expiresIn: 259200 });
     return res;
   }
 
