@@ -44,13 +44,15 @@ export const IframeHeader: React.FC<IIframeHeaderProps> = ({ historyVisible, set
     <>
       <header className="flex items-center justify-between p-2">
         <div className="flex items-center gap-2">
-          <VinesIcon size="sm" disabledPreview>
+          <VinesIcon size="sm" className="pointer-events-none select-none" disabledPreview>
             {workflow?.iconUrl || 'emoji:🍀:#eeeef1'}
           </VinesIcon>
           <div className="flex flex-col gap-0.5">
             <Tooltip>
               <TooltipTrigger asChild>
-                <h1 className="line-clamp-1 text-sm font-bold leading-tight">{displayName}</h1>
+                <h1 className="pointer-events-none line-clamp-1 select-none text-sm font-bold leading-tight">
+                  {displayName}
+                </h1>
               </TooltipTrigger>
               <TooltipContent>{displayName}</TooltipContent>
             </Tooltip>

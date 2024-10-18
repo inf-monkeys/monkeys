@@ -31,11 +31,11 @@ export const VirtuaToolListItem: React.FC<IVirtuaToolListItemProps> = ({ tool, c
         onDoubleClick={() => onClick?.(tool)}
       >
         <div className="relative flex h-12 w-12 flex-shrink-0 items-end justify-end overflow-hidden rounded-lg border-input shadow-md">
-          <div className="absolute">
+          <div className="absolute size-full">
             <VinesIcon className="size-full" size="lg" src={tool.icon} disabledPreview />
           </div>
           {(category === 'sub-workflow' || tool.type === 'SUB_WORKFLOW') && (
-            <div className="z-20 translate-x-[0.5px] translate-y-[0.5px] scale-90 rounded-lg rounded-bl-none rounded-tr-none bg-white bg-opacity-45 p-1 opacity-80">
+            <div className="z-20 translate-x-[0.5px] translate-y-[0.5px] scale-90 rounded-lg rounded-bl-none rounded-tr-none bg-white bg-opacity-85 p-1 opacity-90 backdrop-blur">
               <Link2 size={12} className="text-vines-500" />
             </div>
           )}
