@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { isObject } from 'lodash';
+
 import { VinesAbstractVideo } from '@/components/layout/workspace/vines-view/_common/data-display/abstract/node/video.tsx';
 import { VirtuaExecutionResultGridImageItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/image.tsx';
 import { VirtuaExecutionResultGridRawItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/raw.tsx';
@@ -12,7 +14,7 @@ export type IVinesExecutionResultItem = VinesWorkflowExecution & {
   render: {
     type: 'image' | 'video' | 'raw' | 'empty';
     data: JSONValue;
-    alt?: string;
+    alt?: string | string[] | undefined;
   };
 };
 
@@ -39,7 +41,10 @@ export const VirtuaExecutionResultGridItem: React.FC<IVirtuaExecutionResultGridI
           case 'image':
             return (
               <VirtuaExecutionResultGridWrapper data={it} key={i}>
-                <VirtuaExecutionResultGridImageItem src={data as string} alt={alt} />
+                <VirtuaExecutionResultGridImageItem
+                  src={data as string}
+                  alt={isObject(alt) ? alt?.[data as string]?.toString() : alt}
+                />
               </VirtuaExecutionResultGridWrapper>
             );
           case 'video':
