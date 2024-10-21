@@ -95,13 +95,15 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
 
       const output: JSONValue = execution.output ?? {};
 
-      const flattenOutput = flattenKeys(output);
+      let alt: IVinesExecutionResultItem['render']['alt'];
+
+      const flattenOutput = flattenKeys(output, void 0, ['__display_text'], (_, data) => {
+        alt = data;
+      });
       const outputValues = Object.values(flattenOutput);
 
       const images = outputValues.map((it) => extractImageUrls(it)).flat();
       const videos = outputValues.map((it) => extractVideoUrls(it)).flat();
-
-      const alt = (Object.entries(flattenOutput)?.find(([key]) => key.endsWith('__display_text'))?.[1] ?? '') as string;
 
       let isInserted = false;
 
