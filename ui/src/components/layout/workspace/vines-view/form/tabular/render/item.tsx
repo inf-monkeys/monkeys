@@ -12,10 +12,10 @@ import { FieldBoolean } from '@/components/layout/workspace/vines-view/form/tabu
 import { FieldFile } from '@/components/layout/workspace/vines-view/form/tabular/render/field/file';
 import { FieldNumber } from '@/components/layout/workspace/vines-view/form/tabular/render/field/number.tsx';
 import { FieldOptions } from '@/components/layout/workspace/vines-view/form/tabular/render/field/options.tsx';
+import { FieldSelect } from '@/components/layout/workspace/vines-view/form/tabular/render/field/select.tsx';
 import { FieldTagInputAndTextarea } from '@/components/layout/workspace/vines-view/form/tabular/render/field/tag-input-and-textarea.tsx';
 import { Button } from '@/components/ui/button';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
@@ -105,25 +105,7 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
           <FormControl>
             <>
               {enableSelectList ? (
-                <Select
-                  onValueChange={(val) => {
-                    onChange(type === 'number' ? Number(val) : val);
-                  }}
-                  value={value?.toString() ?? ''}
-                >
-                  <SelectTrigger>
-                    <SelectValue
-                      placeholder={t('workspace.pre-view.actuator.execution-form.select', { displayName })}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {selectList.map((it, i) => (
-                      <SelectItem value={it.value?.toString()} key={i}>
-                        {it.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <FieldSelect input={it} onChange={onChange} form={form} value={value} field={field} />
               ) : (
                 <>
                   {assetType === 'comfyui-model' ? (

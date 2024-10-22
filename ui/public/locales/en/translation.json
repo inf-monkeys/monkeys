@@ -2461,7 +2461,17 @@
                   "label-placeholder": "Aliases",
                   "value-placeholder": "Value",
                   "remove-tips": "Delete",
-                  "add": "Add"
+                  "add": "Add",
+
+                  "linkage": {
+                    "tips": "Linked data",
+                    "desc": "When the user selects this option, other form configurations can be updated in a linked manner",
+
+                    "select-placeholder": "Select the linked field",
+                    "value-placeholder": "Please enter the value to be linked",
+
+                    "add": "Add a linked form"
+                  }
                 }
               },
               "file": {

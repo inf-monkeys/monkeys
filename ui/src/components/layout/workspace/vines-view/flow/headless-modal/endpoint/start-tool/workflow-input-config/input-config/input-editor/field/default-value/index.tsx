@@ -1,21 +1,18 @@
 import React, { useEffect } from 'react';
 
-import { isArray, isBoolean, isEmpty, toNumber } from 'lodash';
-import { Circle, CircleDot, Plus, Trash } from 'lucide-react';
+import { isArray, isBoolean, toNumber } from 'lodash';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { SelectListMode } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/default-value/select-list';
 import { BOOLEAN_VALUES } from '@/components/layout/workspace/vines-view/form/tabular/render';
-import { Button } from '@/components/ui/button';
 import { FieldGroup, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
-import { Input } from '@/components/ui/input';
 import { NumberField, NumberFieldInput } from '@/components/ui/input/number.tsx';
 import { TagInput } from '@/components/ui/input/tag';
 import { Label } from '@/components/ui/label.tsx';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea.tsx';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { IWorkflowInput } from '@/schema/workspace/workflow-input.ts';
 
@@ -47,45 +44,6 @@ export const FieldDefaultValue: React.FC<IFieldDefaultValueProps> = ({ form }) =
 
   const isNumber = type === 'number';
 
-  const handleAddSelectList = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    form.setValue('selectList', [...selectList, { value: '', label: '' }]);
-    forceUpdate();
-  };
-
-  const handleUpdateSelectList = (index: number, key: 'value' | 'label', value: string | number) => {
-    if (isNumber && key === 'value') {
-      value = Number(value);
-      if (isNaN(value)) {
-        return;
-      }
-    }
-
-    form.setValue(
-      'selectList',
-      selectList.map((it, i) => (i === index ? { ...it, [key]: value } : it)),
-    );
-    forceUpdate();
-  };
-
-  const handleRemoveSelectList = (e: React.MouseEvent<HTMLButtonElement>, index: number) => {
-    e.preventDefault();
-    e.stopPropagation();
-    form.setValue(
-      'selectList',
-      selectList.filter((_, i) => i !== index),
-    );
-    forceUpdate();
-  };
-
-  const handleSetDefault = (e: React.MouseEvent<HTMLButtonElement>, value: string | number) => {
-    e.preventDefault();
-    e.stopPropagation();
-    form.setValue('default', value);
-    forceUpdate();
-  };
-
   return (
     <FormField
       name="default"
@@ -114,57 +72,14 @@ export const FieldDefaultValue: React.FC<IFieldDefaultValueProps> = ({ form }) =
           <FormControl>
             <SmoothTransition>
               {enableSelectList && isEnableSelectList ? (
-                <div className="space-y-2">
-                  {selectList.map(({ label, value }, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="outline"
-                            icon={Default === value && !isEmpty(Default?.toString()) ? <CircleDot /> : <Circle />}
-                            className="size-10"
-                            onClick={(e) => handleSetDefault(e, value)}
-                          />
-                        </TooltipTrigger>
-                        <TooltipContent side="right">
-                          {t('workspace.flow-view.endpoint.start-tool.input.config-form.default.select.set-default')}
-                        </TooltipContent>
-                      </Tooltip>
-                      <Input
-                        className="flex-[40%]"
-                        placeholder={t(
-                          'workspace.flow-view.endpoint.start-tool.input.config-form.default.select.label-placeholder',
-                        )}
-                        value={label}
-                        onChange={(labelVal) => handleUpdateSelectList(i, 'label', labelVal)}
-                      />
-                      <Input
-                        placeholder={t(
-                          'workspace.flow-view.endpoint.start-tool.input.config-form.default.select.value-placeholder',
-                        )}
-                        value={value}
-                        type={type === 'number' ? 'number' : 'text'}
-                        onChange={(defVal) => handleUpdateSelectList(i, 'value', defVal)}
-                      />
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="outline"
-                            icon={<Trash />}
-                            className="size-10"
-                            onClick={(e) => handleRemoveSelectList(e, i)}
-                          />
-                        </TooltipTrigger>
-                        <TooltipContent side="left">
-                          {t('workspace.flow-view.endpoint.start-tool.input.config-form.default.select.remove-tips')}
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                  ))}
-                  <Button className="w-full" variant="outline" icon={<Plus />} onClick={handleAddSelectList}>
-                    {t('workspace.flow-view.endpoint.start-tool.input.config-form.default.select.add')}
-                  </Button>
-                </div>
+                <SelectListMode
+                  form={form}
+                  Default={Default}
+                  type={type}
+                  forceUpdate={forceUpdate}
+                  selectList={selectList}
+                  isNumber={isNumber}
+                />
               ) : multipleValues ? (
                 <TagInput
                   placeholder={t('workspace.flow-view.endpoint.start-tool.input.config-form.default.placeholder-list')}

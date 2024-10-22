@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useLatest } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { AnimatePresence, motion } from 'framer-motion';
-import { fromPairs, groupBy, isArray, isEmpty, omit } from 'lodash';
+import { fromPairs, groupBy, isArray, isEmpty, omit, set } from 'lodash';
 import { ChevronRightIcon, Workflow } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -76,33 +76,42 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
 
   useEffect(() => {
     if (!inputs) return;
+
+    const targetInputs = inputs.filter(({ default: v }) => typeof v !== 'undefined');
     const defaultValues = fromPairs(
-      inputs
-        .filter(({ default: v }) => typeof v !== 'undefined')
-        .map((it) => {
-          const defValue = it.default;
-          const type = it.type;
-          const isMultiple = it.typeOptions?.multipleValues ?? false;
+      targetInputs.map((it) => {
+        const defValue = it.default;
+        const type = it.type;
+        const isMultiple = it.typeOptions?.multipleValues ?? false;
 
-          if (type === 'number') {
-            return [
-              it.name,
-              isMultiple ? ((defValue as string[]) ?? []).map((it) => Number(it)) : Number(defValue ?? 0),
-            ];
-          }
+        if (type === 'number') {
+          return [it.name, isMultiple ? ((defValue as string[]) ?? []).map((it) => Number(it)) : Number(defValue ?? 0)];
+        }
 
-          if (type === 'boolean') {
-            return [
-              it.name,
-              isMultiple
-                ? ((defValue as string[]) ?? []).map((it) => BOOLEAN_VALUES.includes(it))
-                : BOOLEAN_VALUES.includes((defValue ?? '')?.toString()),
-            ];
-          }
+        if (type === 'boolean') {
+          return [
+            it.name,
+            isMultiple
+              ? ((defValue as string[]) ?? []).map((it) => BOOLEAN_VALUES.includes(it))
+              : BOOLEAN_VALUES.includes((defValue ?? '')?.toString()),
+          ];
+        }
 
-          return [it.name, defValue];
-        }),
+        return [it.name, defValue];
+      }),
     ) as IWorkflowInputForm;
+
+    for (const it of targetInputs) {
+      if (it.typeOptions?.enableSelectList) {
+        const selectList =
+          (it.typeOptions?.selectList ?? []).find((item: any) => item.value === it.default)?.linkage ?? [];
+        if (isArray(selectList) && selectList?.length) {
+          for (const { name, value } of selectList) {
+            set(defaultValues, name, value);
+          }
+        }
+      }
+    }
 
     setDefValues(defaultValues);
 

@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { FieldAccordion } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion';
 import { FieldImageModelServerSelector } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/comfyui-model/server-selector.tsx';
 import { FieldImageModelTypeSelector } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/comfyui-model/type-selector.tsx';
-import { FieldDefaultValue } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/default-value.tsx';
+import { FieldDefaultValue } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/default-value';
 import { FieldDisplayName } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/display-name.tsx';
 import { FieldFile } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/file.tsx';
 import { FieldNumber } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/number.tsx';
@@ -23,7 +23,7 @@ import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInput, workflowInputSchema } from '@/schema/workspace/workflow-input.ts';
 import { useFlowStore } from '@/store/useFlowStore';
-import { cn, getI18nContent, nanoIdLowerCase } from '@/utils';
+import { cloneDeep, cn, getI18nContent, nanoIdLowerCase } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IInputEditorProps {}
@@ -57,7 +57,14 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
     const handleOpen = (_wid: string, id?: string) => {
       if (workflowId !== _wid) return;
       if (!id) {
-        form.reset();
+        form.reset({
+          displayName: '',
+          name: nanoIdLowerCase(6),
+          type: 'string',
+          default: '',
+          multipleValues: false,
+          assetType: '',
+        });
         form.setValue('name', nanoIdLowerCase(6));
       }
       setTimeout(() => forceUpdate());
@@ -197,7 +204,28 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       }
     }
 
-    vines.update({ variable: finalVariable as VinesWorkflowVariable });
+    const prevVariableName = currentVariable?.name;
+    const nextVariableName = finalVariable?.name;
+    if (prevVariableName !== nextVariableName) {
+      vines.update({
+        variables: cloneDeep(vines.workflowInput).map((it) => {
+          for (const selectItem of it.typeOptions?.selectList ?? []) {
+            for (const linkageItem of selectItem?.linkage ?? []) {
+              if (linkageItem.name === prevVariableName) {
+                linkageItem.name = nextVariableName;
+              }
+            }
+          }
+
+          if (it.name === prevVariableName) {
+            return finalVariable;
+          }
+          return it;
+        }),
+      });
+    } else {
+      vines.update({ variable: finalVariable as VinesWorkflowVariable });
+    }
 
     setOpen(false);
   });
@@ -214,7 +242,6 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
           if (e.target instanceof Element && e.target.closest('[data-sonner-toast]')) {
             e.preventDefault();
           }
-          submitButtonRef.current?.click();
         }}
       >
         <DialogTitle>{t('workspace.flow-view.endpoint.start-tool.input.config-form.title')}</DialogTitle>

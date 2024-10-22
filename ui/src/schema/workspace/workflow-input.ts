@@ -13,6 +13,20 @@ export const inputType = z.enum(['string', 'number', 'boolean', 'file'], {
   },
 });
 
+export const workflowInputSelectListLinkageSchema = z.array(
+  z.object({
+    name: z.string(),
+    value: z.union([
+      z.string(),
+      z.number(),
+      z.boolean(),
+      z.array(z.string()),
+      z.array(z.number()),
+      z.array(z.boolean()),
+    ]),
+  }),
+);
+
 export const workflowInputSchema = z.object({
   displayName: z.string().min(1, 'Display name cannot be empty'),
   name: z
@@ -41,6 +55,7 @@ export const workflowInputSchema = z.object({
       z.object({
         value: z.union([z.string(), z.number()]),
         label: z.string(),
+        linkage: workflowInputSelectListLinkageSchema.optional(),
       }),
     )
     .optional(),
@@ -53,3 +68,4 @@ export const workflowInputSchema = z.object({
 });
 
 export type IWorkflowInput = z.infer<typeof workflowInputSchema>;
+export type IWorkflowInputSelectListLinkage = z.infer<typeof workflowInputSelectListLinkageSchema>;
