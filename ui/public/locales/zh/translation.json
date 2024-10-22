@@ -2460,7 +2460,17 @@
                   "label-placeholder": "别名",
                   "value-placeholder": "默认值",
                   "remove-tips": "删除",
-                  "add": "新增"
+                  "add": "新增",
+
+                  "linkage": {
+                    "tips": "联动数据",
+                    "desc": "当用户选择此选项时，可联动更新其他表单配置",
+
+                    "select-placeholder": "选择联动字段",
+                    "value-placeholder": "请输入联动更变的值",
+
+                    "add": "添加联动更变的表单"
+                  }
                 }
               },
               "file": {
