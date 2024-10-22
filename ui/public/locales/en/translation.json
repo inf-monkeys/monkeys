@@ -2490,6 +2490,9 @@
                   "label": "Fold to \"Advanced Configuration\"",
                   "description": "When fields are optional, they can be grouped under Advanced Configuration to organize configuration options more efficiently."
                 },
+                "set-required": {
+                  "label": "Set as Required"
+                },
                 "enable-reset": {
                   "label": "Enable the Reset button"
                 },
@@ -2649,6 +2652,7 @@
         "re-run": "Restart",
         "start": "Start",
         "workflow-input-empty": "Please enter the workflow input",
+        "workflow-input-is-required": "Please complete {{name}} first",
         "stop-and-edit": "Stop and Edit",
         "timer": {
           "workflow": "Workflow {{status}}",

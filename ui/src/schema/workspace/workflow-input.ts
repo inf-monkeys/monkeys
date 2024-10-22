@@ -25,6 +25,7 @@ export const workflowInputSchema = z.object({
   default: z
     .union([z.string(), z.number(), z.boolean(), z.array(z.string()), z.array(z.number()), z.array(z.boolean())])
     .optional(),
+  required: z.boolean().optional(),
   multipleValues: z.boolean().optional(),
   assetType: z.string().optional(),
 

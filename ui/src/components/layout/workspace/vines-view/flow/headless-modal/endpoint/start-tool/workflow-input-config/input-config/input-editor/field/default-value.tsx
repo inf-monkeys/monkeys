@@ -126,7 +126,7 @@ export const FieldDefaultValue: React.FC<IFieldDefaultValueProps> = ({ form }) =
                             onClick={(e) => handleSetDefault(e, value)}
                           />
                         </TooltipTrigger>
-                        <TooltipContent>
+                        <TooltipContent side="right">
                           {t('workspace.flow-view.endpoint.start-tool.input.config-form.default.select.set-default')}
                         </TooltipContent>
                       </Tooltip>
@@ -155,7 +155,7 @@ export const FieldDefaultValue: React.FC<IFieldDefaultValueProps> = ({ form }) =
                             onClick={(e) => handleRemoveSelectList(e, i)}
                           />
                         </TooltipTrigger>
-                        <TooltipContent>
+                        <TooltipContent side="left">
                           {t('workspace.flow-view.endpoint.start-tool.input.config-form.default.select.remove-tips')}
                         </TooltipContent>
                       </Tooltip>

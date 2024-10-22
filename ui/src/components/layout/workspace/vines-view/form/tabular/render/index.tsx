@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useLatest } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { AnimatePresence, motion } from 'framer-motion';
-import { fromPairs, groupBy, isArray, omit } from 'lodash';
+import { fromPairs, groupBy, isArray, isEmpty, omit } from 'lodash';
 import { ChevronRightIcon, Workflow } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -110,11 +110,17 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
   }, [inputs]);
 
   const handleSubmit = form.handleSubmit((data) => {
-    for (const [key, value] of Object.entries(data)) {
-      if (isArray(value)) {
-        if (inputs?.find((it) => it.name === key)?.type === 'boolean') {
-          data[key] = value.map((it: string | number | boolean) => BOOLEAN_VALUES.includes(it?.toString() ?? ''));
-        }
+    for (const inputDef of inputs) {
+      const { name, required, type, displayName } = inputDef;
+      const value = data[name];
+
+      if (required && isEmpty(value)) {
+        toast.warning(t('workspace.flow-view.execution.workflow-input-is-required', { name: displayName }));
+        return;
+      }
+
+      if (type === 'boolean' && isArray(value)) {
+        data[name] = value.map((it: string | number | boolean) => BOOLEAN_VALUES.includes(it?.toString() ?? ''));
       }
     }
     onSubmit?.(data);

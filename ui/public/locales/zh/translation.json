@@ -2489,6 +2489,9 @@
                   "label": "折叠到「高级配置」",
                   "description": "当字段为选填项时，可以将其归入「高级配置」，以便更有效地整理配置选项"
                 },
+                "set-required": {
+                  "label": "设置为必填项"
+                },
                 "enable-reset": {
                   "label": "显示「重置」按钮"
                 },
@@ -2648,6 +2651,7 @@
         "re-run": "重新运行",
         "start": "视图内运行",
         "workflow-input-empty": "请先完善工作流表单",
+        "workflow-input-is-required": "请先完善「{{name}}」",
         "stop-and-edit": "返回编辑模式",
         "timer": {
           "workflow": "工作流 {{status}}",
