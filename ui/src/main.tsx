@@ -21,7 +21,6 @@ import { ErrorComponent } from '@/components/router/catch-boundary';
 dayjs.extend(duration);
 dayjs.extend(utc);
 
-import { localStorageProvider } from '@/apis/providers.ts';
 import { Skeleton } from '@/components/ui/skeleton.tsx';
 
 import './polyfill';
@@ -41,7 +40,7 @@ declare module '@tanstack/react-router' {
 
 ReactDOM.createRoot(document.getElementById('vines-ui')!).render(
   <Suspense fallback={<Skeleton className="h-screen w-screen" />}>
-    <SWRConfig value={{ provider: localStorageProvider }}>
+    <SWRConfig>
       <AnimatePresence mode="wait">
         <RouterProvider router={router} />
       </AnimatePresence>

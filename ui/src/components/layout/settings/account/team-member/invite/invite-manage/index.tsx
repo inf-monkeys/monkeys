@@ -253,7 +253,7 @@ export const InviteManage: React.FC<IInviteManageProps> = ({ visible, setVisible
         {isLoading ? (
           <Spinner loading={isLoading} />
         ) : (
-          <DataTable<ITeamInviteWithUserProfile, unknown> columns={column} data={inviteList ?? []} />
+          <DataTable<ITeamInviteWithUserProfile, unknown> columns={column as any} data={inviteList ?? []} />
         )}
       </DialogContent>
     </Dialog>
