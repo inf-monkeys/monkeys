@@ -28,8 +28,15 @@ export const StartTool: React.FC<IStartToolProps> = () => {
   }, [workflowId]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen} modal={false}>
-      <DialogContent className="h-[38rem]">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent
+        className="h-[38rem]"
+        onPointerDownOutside={(e) => {
+          if (e.target instanceof Element && e.target.closest('[data-sonner-toast]')) {
+            e.preventDefault();
+          }
+        }}
+      >
         <DialogTitle>{t('workspace.flow-view.endpoint.start-tool.title')}</DialogTitle>
         <WorkflowInputConfig />
       </DialogContent>
