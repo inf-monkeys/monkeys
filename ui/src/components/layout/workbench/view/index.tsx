@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useThrottleEffect } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -24,7 +24,13 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ groupId, mode }) 
   const { t } = useTranslation();
 
   const { data } = useWorkspacePages();
-  const pages = data?.pages;
+  const [pages, setPages] = useState(data?.pages);
+
+  useEffect(() => {
+    if (typeof data !== 'undefined') {
+      setPages(data?.pages ?? []);
+    }
+  }, [data?.pages]);
 
   const { ref, width, height } = useElementSize();
 

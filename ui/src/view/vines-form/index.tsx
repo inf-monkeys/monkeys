@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-import { useEventEmitter } from 'ahooks';
+import { useEventEmitter, useInViewport } from 'ahooks';
 import { ShieldBan } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -11,6 +11,7 @@ import { useVinesOriginWorkflow } from '@/components/layout-wrapper/workspace/ut
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
+import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 
 interface IVinesFormProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -36,10 +37,22 @@ export const VinesForm: React.FC<IVinesFormProps> = () => {
   const isMiniFrame = mode === 'mini';
   const height = containerHeight - (vinesIFrameVisible ? 32 : workbenchVisible ? (isMiniFrame ? 80 : 32) : 48);
 
+  const ref = useRef<HTMLDivElement>(null);
+  const [inViewport] = useInViewport(ref);
+
+  const setVisible = useViewStore((s) => s.setVisible);
+
+  useEffect(() => {
+    if (isMiniFrame) {
+      setVisible(!!inViewport);
+    }
+  }, [inViewport, isMiniFrame]);
+
   return (
     <>
       {isMiniFrame && <IframeHeader historyVisible={historyVisible} setHistoryVisible={setHistoryVisible} />}
       <div
+        ref={ref}
         className={cn(
           'relative grid size-full grid-cols-2 p-6',
           workbenchVisible && 'p-4',
