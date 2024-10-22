@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 
 import { useCreation, useDebounceEffect, useThrottleEffect } from 'ahooks';
 import { motion } from 'framer-motion';
@@ -92,6 +92,12 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
     [wrapperHeight],
     { wait: 64 },
   );
+
+  useLayoutEffect(() => {
+    // 启用 SWR 缓存
+    if (localStorage.getItem('vines-swr-cache-enable')) return;
+    localStorage.setItem('vines-swr-cache-enable', '1');
+  }, []);
 
   const [{ sidebar }] = useUrlState<{ sidebar: 'default' | 'embed' }>({ sidebar: 'default' });
   const isUseFixedSidebar = sidebar === 'default';
