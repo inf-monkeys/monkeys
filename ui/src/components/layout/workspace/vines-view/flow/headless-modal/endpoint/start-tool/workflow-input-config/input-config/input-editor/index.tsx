@@ -12,6 +12,7 @@ import { FieldDefaultValue } from '@/components/layout/workspace/vines-view/flow
 import { FieldDisplayName } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/display-name.tsx';
 import { FieldFile } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/file.tsx';
 import { FieldNumber } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/number.tsx';
+import { FieldSetRequired } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/set-required.tsx';
 import { FieldType } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/type.tsx';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from '@/components/ui/dialog';
@@ -81,6 +82,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       tips: get(currentVariable, 'typeOptions.tips', ''),
       type: currentVariable.type as IWorkflowInput['type'],
       default: currentVariable.default as IWorkflowInput['default'],
+      required: get(currentVariable, 'required', false),
       multipleValues: get(currentVariable, 'typeOptions.multipleValues', false),
       assetType: get(currentVariable, 'typeOptions.assetType', ''),
       enableImageMask: get(currentVariable, 'typeOptions.enableImageMask', undefined),
@@ -236,6 +238,8 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
                   )}
 
                   <FieldDefaultValue form={form} />
+
+                  <FieldSetRequired form={form} />
 
                   <FieldAccordion form={form} />
                 </div>
