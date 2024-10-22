@@ -91,9 +91,14 @@ export const MultiFieldObjectInput: React.FC<IVinesInputPropertyProps> = ({
             </div>
             {!disabled && (
               <>
-                <Button icon={<TrashIcon />} onClick={() => handleDelete(index)} />
+                <Button icon={<TrashIcon />} onClick={() => handleDelete(index)} variant="outline" />
                 <Tooltip content={hasKey ? `$.${it.key}` : ''}>
-                  <Button icon={<ClipboardCopyIcon />} disabled={!hasKey} onClick={() => copy(`$.${it.key}`)} />
+                  <Button
+                    icon={<ClipboardCopyIcon />}
+                    disabled={!hasKey}
+                    onClick={() => copy(`$.${it.key}`)}
+                    variant="outline"
+                  />
                 </Tooltip>
               </>
             )}
@@ -102,7 +107,7 @@ export const MultiFieldObjectInput: React.FC<IVinesInputPropertyProps> = ({
       })}
       {!disabled && (
         <div className="flex w-full justify-center">
-          <Button icon={<PlusIcon />} size="small" onClick={handleAddInput}>
+          <Button icon={<PlusIcon />} size="small" onClick={handleAddInput} variant="outline">
             {t('workspace.flow-view.headless-modal.tool-editor.input.comps.multi-field-object.create-field')}
           </Button>
         </div>

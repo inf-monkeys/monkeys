@@ -200,11 +200,21 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
     setOpen(false);
   });
 
+  const submitButtonRef = React.useRef<HTMLButtonElement>(null);
+
   const { type, assetType } = form.getValues();
 
   return (
-    <Dialog open={open} onOpenChange={setOpen} modal={false}>
-      <DialogContent className="w-auto max-w-6xl">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent
+        className="w-auto max-w-6xl"
+        onPointerDownOutside={(e) => {
+          if (e.target instanceof Element && e.target.closest('[data-sonner-toast]')) {
+            e.preventDefault();
+          }
+          submitButtonRef.current?.click();
+        }}
+      >
         <DialogTitle>{t('workspace.flow-view.endpoint.start-tool.input.config-form.title')}</DialogTitle>
         <Form {...form}>
           <form
@@ -236,7 +246,12 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
             </div>
 
             <DialogFooter>
-              <Button type="submit" variant="outline" className={cn(!isLatestWorkflowVersion && 'hidden')}>
+              <Button
+                ref={submitButtonRef}
+                type="submit"
+                variant="outline"
+                className={cn(!isLatestWorkflowVersion && 'hidden')}
+              >
                 {t('workspace.flow-view.endpoint.start-tool.input.config-form.submit')}
               </Button>
             </DialogFooter>

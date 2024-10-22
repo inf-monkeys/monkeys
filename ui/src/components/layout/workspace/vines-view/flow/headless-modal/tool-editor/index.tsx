@@ -73,8 +73,16 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
   const disabled = !isLatestWorkflowVersion;
 
   return (
-    <Dialog modal={false} open={open} onOpenChange={(val) => !disableDialogClose && setOpen(val)}>
-      <DialogContent className="flex h-full max-h-[calc(100%-20%)] min-w-[55rem] max-w-[calc(100%-40%)] flex-col">
+    <Dialog open={open} onOpenChange={(val) => !disableDialogClose && setOpen(val)}>
+      <DialogContent
+        className="flex h-full max-h-[calc(100%-20%)] min-w-[55rem] max-w-[calc(100%-40%)] flex-col"
+        onPointerDownOutside={(e) => {
+          if (e.target instanceof Element && e.target.closest('[data-sonner-toast]')) {
+            e.preventDefault();
+          }
+          vines.emit('update', vines.getRaw());
+        }}
+      >
         <DialogTitle asChild>
           <Header node={node} />
         </DialogTitle>
