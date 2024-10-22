@@ -206,7 +206,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
 
     const prevVariableName = currentVariable?.name;
     const nextVariableName = finalVariable?.name;
-    if (prevVariableName !== nextVariableName) {
+    if (!isUndefined(prevVariableName) && prevVariableName !== nextVariableName) {
       vines.update({
         variables: cloneDeep(vines.workflowInput).map((it) => {
           for (const selectItem of it.typeOptions?.selectList ?? []) {
