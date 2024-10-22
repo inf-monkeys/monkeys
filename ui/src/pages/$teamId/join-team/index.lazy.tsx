@@ -16,9 +16,11 @@ const JoinTeamPage: React.FC = () => {
   const { teamId } = useVinesTeam();
   const { teamId: inviteId } = Route.useParams();
 
+  const finalInviteId = inviteId?.replace('i-', '') ?? '';
+
   const [loading, setLoading] = useState(false);
 
-  const { data, error } = useInviteTeam(inviteId);
+  const { data, error } = useInviteTeam(finalInviteId);
 
   if (error instanceof Error) {
     if (error.message.startsWith('您已加入该团队') || error.message.startsWith('邀请链接不存在')) {
@@ -29,7 +31,7 @@ const JoinTeamPage: React.FC = () => {
 
   const handleJoinTeam = () => {
     setLoading(true);
-    toast.promise(acceptTeamInvite(inviteId), {
+    toast.promise(acceptTeamInvite(finalInviteId), {
       loading: '正在加入团队...',
       success: () => {
         mutate('/api/teams').then(() => {
