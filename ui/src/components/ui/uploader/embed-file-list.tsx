@@ -12,6 +12,7 @@ import { AlertTitle } from '@/components/ui/alert.tsx';
 import { Button } from '@/components/ui/button';
 import { VinesImage, VinesImageGroup } from '@/components/ui/image';
 import { Label } from '@/components/ui/label.tsx';
+import { VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -132,48 +133,62 @@ export const EmbedFileList: React.FC<IEmbedFileListProps> = ({
               e.stopPropagation();
             }}
           >
-            {preview.map(({ id, src, path, size, name, status, progress }) => (
-              <Tooltip key={id}>
-                <TooltipTrigger asChild>
-                  <div className="group relative flex h-36 justify-center overflow-hidden rounded shadow hover:bg-gray-8">
-                    <VinesImage src={src} className="h-full" />
-                    <div className="absolute left-0 top-0 -ml-6 flex w-[calc(100%+3rem)] scale-75 items-center justify-between p-2 opacity-0 transition-opacity group-hover:opacity-100">
-                      <Label className="flex items-center gap-1 text-xs text-white [&>svg]:stroke-white">
-                        {status === 'wait' && <FileSearch size={16} />}
-                        {status === 'busy' ? `${progress}% ` : ''}
-                        {status === 'uploading' && <Loader2 size={16} className="animate-spin" />}
-                        {status === 'wait-to-update' && <FileClock size={16} />}
-                        {status === 'success' && <CheckCircle2 size={16} />}
-                        {status === 'error' && <FileX2 size={16} />}
-                        {t(`components.ui.updater.file-list.item-status.${status}`)}
-                      </Label>
-                      <Label className="text-xs text-white">{size}</Label>
+            {preview.map(({ id, src, path, size, name, status, progress }) => {
+              const itUploading = status === 'uploading';
+              const itBusy = status === 'busy';
+              return (
+                <Tooltip key={id}>
+                  <TooltipTrigger asChild>
+                    <div className="vines-alpha-bg vines-hidden-image-bg group relative flex h-36 min-w-48 justify-center overflow-hidden rounded shadow hover:bg-gray-8">
+                      <VinesImage src={src} className={cn('h-full', (itUploading || itBusy) && 'brightness-50')} />
+                      <div className="absolute left-0 top-0 -ml-6 flex w-[calc(100%+3rem)] scale-75 items-center justify-between p-2 opacity-0 transition-opacity group-hover:opacity-100">
+                        <Label className="flex items-center gap-1 text-xs text-white [&>svg]:stroke-white">
+                          {status === 'wait' && <FileSearch size={16} />}
+                          {itBusy ? `${progress}% ` : ''}
+                          {itUploading && <Loader2 size={16} className="animate-spin" />}
+                          {status === 'wait-to-update' && <FileClock size={16} />}
+                          {status === 'success' && <CheckCircle2 size={16} />}
+                          {status === 'error' && <FileX2 size={16} />}
+                          {t(`components.ui.updater.file-list.item-status.${status}`)}
+                        </Label>
+                        <Label className="text-xs text-white">{size}</Label>
+                      </div>
+                      {['busy', 'uploading'].includes(status) && (
+                        <VinesLoading
+                          className="vines-center absolute size-full"
+                          value={itBusy ? Number(progress) : void 0}
+                          immediately
+                        />
+                      )}
+                      <div
+                        className={cn(
+                          'absolute bottom-1 left-1/2 flex -translate-x-1/2 scale-75 transform flex-nowrap gap-1 rounded-md border bg-card p-1 opacity-0 shadow-sm transition-opacity group-hover:opacity-100',
+                          isUploading && 'hidden',
+                        )}
+                        onClick={(e) => e.preventDefault()}
+                      >
+                        <ToolButton
+                          icon={<Trash />}
+                          tip={t('components.ui.updater.remove')}
+                          side="top"
+                          onClick={() => {
+                            setFiles((prev) => prev.filter((it) => it.path !== path));
+                            setList((prev) => prev.filter((it) => it.id !== id));
+                          }}
+                        />
+                      </div>
                     </div>
-                    <div
-                      className="absolute bottom-1 left-1/2 flex -translate-x-1/2 scale-75 transform flex-nowrap gap-1 rounded-md border bg-card p-1 opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
-                      onClick={(e) => e.preventDefault()}
-                    >
-                      <ToolButton
-                        icon={<Trash />}
-                        tip={t('components.ui.updater.remove')}
-                        side="top"
-                        onClick={() => {
-                          setFiles((prev) => prev.filter((it) => it.path !== path));
-                          setList((prev) => prev.filter((it) => it.id !== id));
-                        }}
-                      />
-                    </div>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>{name}</TooltipContent>
-              </Tooltip>
-            ))}
+                  </TooltipTrigger>
+                  <TooltipContent>{name}</TooltipContent>
+                </Tooltip>
+              );
+            })}
           </motion.div>
         </VinesImageGroup>
       </ScrollArea>
       <motion.div
         key="vines-uploader-embed-toolbar"
-        className="w-full overflow-hidden"
+        className={cn('w-full overflow-hidden', autoUpload && 'hidden')}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1, transition: { delay: 0.2 } }}
         exit={{ opacity: 0 }}
