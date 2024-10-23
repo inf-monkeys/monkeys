@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { lazy, Suspense } from 'react';
 
-import { useVariableEditor, UseVariableEditorOptions } from '@/components/ui/vines-variable-editor/use-editor.tsx';
+import { Skeleton } from '@/components/ui/skeleton.tsx';
+import { UseVariableEditorOptions } from '@/components/ui/vines-variable-editor/use-editor.tsx';
 
 export type VariableEditorRefProps = {
   insertVariable: (pointer: string) => void;
@@ -12,15 +13,10 @@ export type VariableEditorProps = {
   editorRef?: React.MutableRefObject<VariableEditorRefProps>;
 } & UseVariableEditorOptions;
 
-export const VariableEditor: React.FC<VariableEditorProps> = ({ editorRef, ...rest }) => {
-  const { VariableEditor: Editor, insertVariable, onChange } = useVariableEditor(rest);
+const VariableEditorCore = lazy(() => import('./core.tsx'));
 
-  useEffect(() => {
-    if (editorRef?.current) {
-      editorRef.current.insertVariable = insertVariable;
-      editorRef.current.onChange = onChange;
-    }
-  }, [editorRef]);
-
-  return useMemo(() => <Editor placeholder={rest.placeholder} />, []);
-};
+export const VariableEditor: React.FC<VariableEditorProps> = (props) => (
+  <Suspense fallback={<Skeleton className="min-h-10 w-full" />}>
+    <VariableEditorCore {...props} />
+  </Suspense>
+);

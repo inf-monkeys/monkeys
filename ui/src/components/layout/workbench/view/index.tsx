@@ -9,6 +9,7 @@ import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
 import { WorkbenchViewHeader } from '@/components/layout/workbench/view/header.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
+import { VinesLoading } from '@/components/ui/loading';
 import { VinesIFrame } from '@/components/ui/vines-iframe';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
@@ -23,7 +24,7 @@ interface IWorkbenchViewProps extends React.ComponentPropsWithoutRef<'div'> {
 export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ groupId, mode }) => {
   const { t } = useTranslation();
 
-  const { data } = useWorkspacePages();
+  const { data, isLoading } = useWorkspacePages();
   const [pages, setPages] = useState(data?.pages);
 
   useEffect(() => {
@@ -85,6 +86,8 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ groupId, mode }) 
               <VinesIFrame pages={pages ?? []} page={teamPage} />
             </div>
           </motion.div>
+        ) : isLoading ? (
+          <VinesLoading className="vines-center size-full" />
         ) : (
           <motion.div
             key="vines-workbench-view-empty"
