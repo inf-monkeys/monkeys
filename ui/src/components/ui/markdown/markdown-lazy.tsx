@@ -21,7 +21,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useCopy } from '@/hooks/use-copy.ts';
 import { cn } from '@/utils';
 
-const MemoizedReactMarkdownCore = lazy(() => import('./memoized-core.tsx'));
+const MemoizedReactMarkdownCore = lazy(() => import('./memoized-lazy.tsx'));
 
 const MemoizedReactMarkdown: FC<Options> = (props) => {
   return (

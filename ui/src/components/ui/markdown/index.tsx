@@ -10,7 +10,7 @@ export interface IVinesMarkdownProps extends Options {
   allowHtml?: boolean;
 }
 
-const VinesMarkdownCore = lazy(() => import('./core.tsx'));
+const VinesMarkdownCore = lazy(() => import('./markdown-lazy.tsx'));
 
 export const VinesMarkdown: React.FC<IVinesMarkdownProps> = (props) => (
   <Suspense fallback={<Skeleton className="min-h-12 min-w-32" />}>
@@ -18,7 +18,7 @@ export const VinesMarkdown: React.FC<IVinesMarkdownProps> = (props) => (
   </Suspense>
 );
 
-const MemoizedReactMarkdownCore = lazy(() => import('./memoized-core.tsx'));
+const MemoizedReactMarkdownCore = lazy(() => import('./memoized-lazy.tsx'));
 
 export const MemoizedReactMarkdown: FC<Options> = (props) => {
   return (

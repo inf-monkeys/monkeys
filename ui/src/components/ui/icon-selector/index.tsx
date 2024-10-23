@@ -7,7 +7,7 @@ export interface IVinesIconSelectorProps extends Omit<React.ComponentPropsWithou
   onIconSelect?: (iconName: string) => void | Promise<void>;
 }
 
-const VinesIconSelectorCore = lazy(() => import('./core.tsx'));
+const VinesIconSelectorCore = lazy(() => import('./icon-selector-lazy.tsx'));
 
 export const VinesIconSelector: React.FC<IVinesEmojiSelectorProps> = (props) => (
   <Suspense fallback={<Skeleton className="h-96 w-[468px]" />}>

@@ -8,7 +8,7 @@ export interface IVinesHighlighterProps extends React.ComponentPropsWithoutRef<'
   language: (typeof languageMap)[number];
 }
 
-const VinesHighlighterCore = lazy(() => import('./core.tsx'));
+const VinesHighlighterCore = lazy(() => import('./highlighter-lazy.tsx'));
 
 export const VinesHighlighter: React.FC<IVinesHighlighterProps> = (props) => (
   <Suspense fallback={<Skeleton className="min-h-12 min-w-32" />}>
