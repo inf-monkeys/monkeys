@@ -2,8 +2,8 @@ import React from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { usePageStore } from '@/store/usePageStore';
 import { IntegrationCenter } from '@/components/layout/workspace/integration-center';
+import { usePageStore } from '@/store/usePageStore';
 
 interface IFullScreenDisplayProps {}
 

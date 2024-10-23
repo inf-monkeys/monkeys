@@ -1,19 +1,17 @@
-import React, { memo } from 'react';
+import React, { lazy, Suspense } from 'react';
 
-import { SyntaxHighlighter } from '@/components/ui/highlighter/SyntaxHighlighter.tsx';
 import { languageMap } from '@/components/ui/highlighter/useHighlight.ts';
+import { Skeleton } from '@/components/ui/skeleton.tsx';
 
-interface IVinesHighlighterProps extends React.ComponentPropsWithoutRef<'pre'> {
+export interface IVinesHighlighterProps extends React.ComponentPropsWithoutRef<'pre'> {
   children: string;
   language: (typeof languageMap)[number];
 }
 
-export const VinesHighlighter = memo<IVinesHighlighterProps>(({ children, language, ...rest }) => {
-  return (
-    <SyntaxHighlighter language={language?.toLowerCase()} {...rest}>
-      {children}
-    </SyntaxHighlighter>
-  );
-});
+const VinesHighlighterCore = lazy(() => import('./core.tsx'));
 
-VinesHighlighter.displayName = 'VinesHighlighter';
+export const VinesHighlighter: React.FC<IVinesHighlighterProps> = (props) => (
+  <Suspense fallback={<Skeleton className="min-h-12 min-w-32" />}>
+    <VinesHighlighterCore {...props} />
+  </Suspense>
+);
