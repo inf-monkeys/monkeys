@@ -1,3 +1,13 @@
 .vines-center {
   @apply flex items-center justify-center;
 }
+
+.vines-alpha-bg {
+  background-image: repeating-conic-gradient(#eee 0 25%, transparent 0 50%);
+  background-size: 16px 16px;
+}
+
+.vines-hidden-image-bg:hover {
+  background-image: none !important;
+  background-size: 0 0 !important;
+}
