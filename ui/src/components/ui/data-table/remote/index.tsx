@@ -17,7 +17,7 @@ export interface IRemoteDataTableProps<TData, TValue> {
   showPagination?: boolean;
 }
 
-const RemoteDataTableCore = lazy(() => import('./core.tsx'));
+const RemoteDataTableCore = lazy(() => import('./data-table-remote.tsx'));
 
 export function RemoteDataTable<TData, TValue>(props: IRemoteDataTableProps<TData, TValue>) {
   return (

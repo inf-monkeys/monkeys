@@ -11,7 +11,7 @@ export interface IVinesImageEditorProps {
   aspectRatio?: number;
 }
 
-const VinesImageEditorCore = lazy(() => import('./core.tsx'));
+const VinesImageEditorCore = lazy(() => import('./image-editor-lazy.tsx'));
 
 export const VinesImageEditor: React.FC<IVinesImageEditorProps> = (props) => (
   <Suspense fallback={<Skeleton />}>

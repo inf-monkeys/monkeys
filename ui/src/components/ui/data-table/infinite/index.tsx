@@ -19,7 +19,7 @@ export interface IInfiniteScrollingDataTableProps<TData, TValue> {
   tfoot?: React.ReactNode;
 }
 
-const InfiniteScrollingDataTableCore = lazy(() => import('./core.tsx'));
+const InfiniteScrollingDataTableCore = lazy(() => import('./data-table-infinite.tsx'));
 
 export function InfiniteScrollingDataTable<TData, TValue>(props: IInfiniteScrollingDataTableProps<TData, TValue>) {
   return (

@@ -13,7 +13,7 @@ export type VariableEditorProps = {
   editorRef?: React.MutableRefObject<VariableEditorRefProps>;
 } & UseVariableEditorOptions;
 
-const VariableEditorCore = lazy(() => import('./core.tsx'));
+const VariableEditorCore = lazy(() => import('./vines-variable-editor-lazy.tsx'));
 
 export const VariableEditor: React.FC<VariableEditorProps> = (props) => (
   <Suspense fallback={<Skeleton className="min-h-10 w-full" />}>

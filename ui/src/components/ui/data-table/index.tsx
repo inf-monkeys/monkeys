@@ -12,7 +12,7 @@ export interface IDataTableProps<TData, TValue> {
   defaultPageSize?: number;
 }
 
-const DataTableCore = lazy(() => import('./core.tsx'));
+const DataTableCore = lazy(() => import('./data-table-lazy.tsx'));
 
 export const DataTable = <TData, TValue>(props: IDataTableProps<TData, TValue>) => (
   <Suspense fallback={<Skeleton className="min-h-32 w-full" />}>
