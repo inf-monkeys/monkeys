@@ -92,14 +92,7 @@ export const FieldImageModel: React.FC<IFieldImageModelProps> = ({ input: { type
                         </div>
                       </SelectItem>
                     </TooltipTrigger>
-                    <TooltipContent side={i === 0 ? 'bottom' : 'top'}>
-                      <span className="text-sm font-bold">
-                        {t('workspace.pre-view.actuator.execution-form.image-model.tooltip.file-path') +
-                          serverRelation.path}
-                      </span>
-                      <br />
-                      {description}
-                    </TooltipContent>
+                    {description && <TooltipContent side={i === 0 ? 'bottom' : 'top'}>{description}</TooltipContent>}
                   </Tooltip>
                 ))}
               </SelectContent>

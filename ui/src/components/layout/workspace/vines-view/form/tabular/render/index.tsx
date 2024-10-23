@@ -16,6 +16,7 @@ import { VinesFormFieldItem } from '@/components/layout/workspace/vines-view/for
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx';
 import { Form } from '@/components/ui/form.tsx';
 import { Label } from '@/components/ui/label.tsx';
+import { VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
@@ -28,6 +29,7 @@ export type TTabularEvent = 'reset' | 'restore-previous-param' | 'submit';
 interface ITabularRenderProps {
   inputs: VinesWorkflowVariable[];
   height?: number;
+  isLoading?: boolean;
 
   children?: React.ReactNode;
   fieldChildren?: React.ReactNode;
@@ -49,6 +51,7 @@ interface ITabularRenderProps {
 export const TabularRender: React.FC<ITabularRenderProps> = ({
   inputs,
   height,
+  isLoading = false,
 
   children,
   fieldChildren,
@@ -194,7 +197,9 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
         onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
       >
         <AnimatePresence>
-          {isFormEmpty && (
+          {isLoading ? (
+            <VinesLoading className="vines-center absolute left-0 top-0 size-full" />
+          ) : isFormEmpty ? (
             <motion.div
               className="vines-center absolute left-0 top-0 size-full flex-col gap-2"
               initial={{ opacity: 0 }}
@@ -205,7 +210,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
               <Workflow size={64} />
               <Label className="text-sm">{t('workspace.chat-view.workflow-mode.empty-input.completed')}</Label>
             </motion.div>
-          )}
+          ) : null}
         </AnimatePresence>
         <ScrollArea className={scrollAreaClassName} style={{ height }} disabledOverflowMask>
           <div className={cn('grid grid-cols-2 items-start gap-4', formClassName)}>

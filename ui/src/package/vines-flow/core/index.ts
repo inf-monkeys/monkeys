@@ -70,6 +70,8 @@ export class VinesCore extends VinesTools(VinesBase) {
 
   public canvasSize = { width: 0, height: 0 };
 
+  public workflowLoaded = false;
+
   public executionWorkflowDisableRestore = false;
 
   // 当前执行的工作流实例
@@ -117,6 +119,8 @@ export class VinesCore extends VinesTools(VinesBase) {
       if (workflow?.exposeOpenaiCompatibleInterface) {
         this.enableOpenAIInterface = workflow.exposeOpenaiCompatibleInterface;
       }
+
+      this.workflowLoaded = true;
     }
     workflowId && (this.workflowId = workflowId);
     version && (this.version = version);

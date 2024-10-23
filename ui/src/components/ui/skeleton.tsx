@@ -9,7 +9,7 @@ function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>)
 
 function SkeletonWithFullscreenUseLoading({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('vines-center relative size-full animate-pulse rounded-md bg-muted', className)} {...props}>
+    <div className={cn('vines-center relative size-full', className)} {...props}>
       {children}
       <VinesLoading className="absolute" />
     </div>

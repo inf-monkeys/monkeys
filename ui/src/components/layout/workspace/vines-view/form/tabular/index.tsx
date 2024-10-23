@@ -58,6 +58,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
         <TabularRender
           formClassName={cn(mode === 'mini' && 'gap-0')}
           inputs={vines.workflowInput}
+          isLoading={!vines.workflowLoaded}
           height={height - inputHeight}
           onSubmit={(inputData) => {
             vines.start({ inputData, onlyStart: true }).then((status) => {
