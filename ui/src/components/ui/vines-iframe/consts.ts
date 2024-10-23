@@ -1,3 +1,4 @@
+import { AgentLogsView } from 'src/view/agent-logs';
 import { VinesChatView } from 'src/view/vines-chat';
 import { VinesLogView } from 'src/view/vines-log';
 
@@ -5,7 +6,6 @@ import { withProviders } from '@/components/ui/vines-iframe/utils.ts';
 import { CanvasInteractionStoreProvider, createCanvasInteractionStore } from '@/store/useCanvasStore/interaction.ts';
 import { AgentChatView } from '@/view/agent-chat';
 import { AgentConfigView } from '@/view/agent-config';
-import { AgentLogsView } from 'src/view/agent-logs';
 import { VinesFlow } from '@/view/vines-flow';
 import { VinesForm } from '@/view/vines-form';
 
