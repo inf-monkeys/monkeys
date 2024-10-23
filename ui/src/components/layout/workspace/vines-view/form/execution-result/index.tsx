@@ -155,7 +155,18 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
         </VinesImageGroup>
 
         <AnimatePresence>
-          {!totalCount && (
+          {isLoading ? (
+            <motion.div
+              key="vines-execution-result-loading"
+              className="vines-center absolute left-0 top-0 size-full"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { delay: 0.5 } }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <VinesLoading />
+            </motion.div>
+          ) : totalCount ? null : (
             <motion.div
               key="vines-execution-result-empty"
               className="vines-center absolute left-0 top-0 size-full flex-col gap-2"
@@ -166,18 +177,6 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
             >
               <History size={64} />
               <Label className="text-sm">{t('workspace.logs-view.log.list.empty')}</Label>
-            </motion.div>
-          )}
-          {isLoading && (
-            <motion.div
-              key="vines-execution-result-loading"
-              className="vines-center absolute left-0 top-0 size-full"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: { delay: 0.5 } }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <VinesLoading />
             </motion.div>
           )}
         </AnimatePresence>
