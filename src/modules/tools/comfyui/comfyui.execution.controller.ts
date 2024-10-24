@@ -1,11 +1,18 @@
-import { MonkeyToolCategories, MonkeyToolDisplayName, MonkeyToolIcon, MonkeyToolInput, MonkeyToolName, MonkeyToolOutput } from '@/common/decorators/monkey-block-api-extensions.decorator';
-import { IRequest } from '@/common/typings/request';
-import { ApiType, AuthType, ManifestJson, SchemaVersion } from '@/common/typings/tools';
-import { Body, Controller, Get, Post, Req } from '@nestjs/common';
-import { ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger';
-import { ComfyUIService } from './comfyui.service';
-import { COMFYUI_TOOL_OPENAPI_PATH } from './comfyui.swagger';
-import { RunComfyuiWorkflowDto } from './dto/req/execute-comfyui-workflow';
+import {
+  MonkeyToolCategories,
+  MonkeyToolDisplayName,
+  MonkeyToolIcon,
+  MonkeyToolInput,
+  MonkeyToolName,
+  MonkeyToolOutput
+} from "@/common/decorators/monkey-block-api-extensions.decorator";
+import { IRequest } from "@/common/typings/request";
+import { ApiType, AuthType, ManifestJson, SchemaVersion } from "@/common/typings/tools";
+import { Body, Controller, Get, Post, Req } from "@nestjs/common";
+import { ApiExcludeEndpoint, ApiTags } from "@nestjs/swagger";
+import { ComfyUIService } from "./comfyui.service";
+import { COMFYUI_TOOL_OPENAPI_PATH } from "./comfyui.swagger";
+import { RunComfyuiWorkflowDto } from "./dto/req/execute-comfyui-workflow";
 
 export const COMFYUI_NAMESPACE = 'comfyui';
 export const COMFYUI_TOOL = 'run_comfyui_workflow';
@@ -86,7 +93,6 @@ export class ComfyuiExecutionController {
   ])
   public async runComfyuiWorkflow(@Req() req: IRequest, @Body() body: RunComfyuiWorkflowDto) {
     const { workflow, server, ...rest } = body;
-    const data = await this.comfyuiService.runComfyuiWorkflow(server, workflow, rest);
-    return data;
+    return await this.comfyuiService.runComfyuiWorkflow(server, workflow, rest);
   }
 }

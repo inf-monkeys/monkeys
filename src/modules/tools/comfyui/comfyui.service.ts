@@ -1,14 +1,17 @@
 import { ListDto } from '@/common/dto/list.dto';
 import { logger } from '@/common/logger';
+import { config } from '@/common/config';
 import { ComfyuiNode, ComfyuiPrompt, ComfyuiWorkflow, ComfyuiWorkflowWithPrompt } from '@/common/typings/comfyui';
 import { readComfyuiWorkflowFromImage, readComfyuiWorkflowFromJsonFile, readComfyuiWorkflowPromptFromJsonFile } from '@/common/utils/comfyui';
 import { ComfyuiWorkflowSourceType } from '@/database/entities/comfyui/comfyui-workflow.entity';
 import { ComfyuiRepository } from '@/database/repositories/comfyui.repository';
 import { ToolProperty, ToolPropertyTypes } from '@inf-monkeys/monkeys';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import _ from 'lodash';
 import { CreateComfyuiServerDto } from './dto/req/create-comfyui-server';
+import { CACHE_TOKEN } from '@/common/common.module';
+import { CacheManager } from '@/common/cache';
 
 export interface ImportComfyuiWorkflowParams {
   displayName?: string;
@@ -33,7 +36,10 @@ export interface IComfyuiWorkflowDependencyUninstalledNode {
 
 @Injectable()
 export class ComfyUIService {
-  constructor(private readonly comfyuiWorkflowRepository: ComfyuiRepository) {}
+  constructor(
+    private readonly comfyuiWorkflowRepository: ComfyuiRepository,
+    @Inject(CACHE_TOKEN) private readonly cache: CacheManager,
+  ) {}
 
   public async listComfyuiWorkflows(teamId: string, dto: ListDto) {
     return await this.comfyuiWorkflowRepository.listComfyuiWorkflows(teamId, dto);
@@ -252,7 +258,7 @@ export class ComfyUIService {
     if (workflowType === 'image') {
       const { workflow, prompt } = await readComfyuiWorkflowFromImage(imageUrl);
       const toolInput = await this.generateToolInputByComfyuiWorkflow({ workflow, prompt });
-      const comfyuiWorkflow = await this.comfyuiWorkflowRepository.createComfyuiWorkflow(teamId, userId, {
+      return await this.comfyuiWorkflowRepository.createComfyuiWorkflow(teamId, userId, {
         workflowType,
         originalData: { imageUrl },
         workflow: workflow,
@@ -260,7 +266,6 @@ export class ComfyUIService {
         displayName,
         toolInput,
       });
-      return comfyuiWorkflow;
     } else if (workflowType === 'json') {
       const workflow = await readComfyuiWorkflowFromJsonFile(workflowJsonUrl);
       if (!workflow?.links || !workflow?.nodes) {
@@ -271,7 +276,7 @@ export class ComfyUIService {
         throw new Error('Invalid ComfyUI API JSON file');
       }
       const toolInput = await this.generateToolInputByComfyuiWorkflow({ workflow, prompt });
-      const comfyuiWorkflow = await this.comfyuiWorkflowRepository.createComfyuiWorkflow(teamId, userId, {
+      return await this.comfyuiWorkflowRepository.createComfyuiWorkflow(teamId, userId, {
         workflowType,
         originalData: { workflowJsonUrl, workflowApiJsonUrl },
         workflow,
@@ -279,7 +284,6 @@ export class ComfyUIService {
         displayName,
         toolInput,
       });
-      return comfyuiWorkflow;
     }
   }
 
@@ -316,6 +320,9 @@ export class ComfyUIService {
         url: '/comfyfile/healthz',
         baseURL: address,
         timeout: 5000,
+        headers: {
+          ...(config?.comfyui?.apiToken && { Authorization: `Bearer ${config.comfyui.apiToken}` }),
+        },
       });
       return {
         success: true,
@@ -353,7 +360,7 @@ export class ComfyUIService {
     const { data } = await axios({
       method: 'POST',
       url: '/comfyfile/run',
-      baseURL: serverAddress,
+      baseURL: await this.getBuiltInOrCustomServer(serverAddress),
       data: {
         workflow_api_json: comfyuiWorkflow.prompt,
         workflow_json: comfyuiWorkflow.workflow,
@@ -361,6 +368,9 @@ export class ComfyUIService {
         comfyfile_repo: comfyuiWorkflow.originalData?.comfyfileRepo,
         input_config: toolInput,
         output_config: toolOutput,
+      },
+      headers: {
+        ...(config?.comfyui?.apiToken && { Authorization: `Bearer ${config.comfyui.apiToken}` }),
       },
     });
     return data;
@@ -374,10 +384,13 @@ export class ComfyUIService {
     const { data } = await axios({
       method: 'POST',
       url: '/comfyfile/check-dependencies',
-      baseURL: serverAddress,
+      baseURL: await this.getBuiltInOrCustomServer(serverAddress),
       data: {
         workflow_json: workflow.workflow,
         workflow_api_json: workflow.prompt,
+      },
+      headers: {
+        ...(config?.comfyui?.apiToken && { Authorization: `Bearer ${config.comfyui.apiToken}` }),
       },
     });
     return data;
@@ -392,8 +405,11 @@ export class ComfyUIService {
         await axios({
           method: 'GET',
           url: '/comfyfile/healthz',
-          baseURL: serverAddress,
+          baseURL: await this.getBuiltInOrCustomServer(serverAddress),
           timeout: 5000,
+          headers: {
+            ...(config?.comfyui?.apiToken && { Authorization: `Bearer ${config.comfyui.apiToken}` }),
+          },
         });
         success = true;
         break;
@@ -408,6 +424,8 @@ export class ComfyUIService {
   }
 
   private async rebootComfyuiServer(serverAddress: string) {
+    serverAddress = await this.getBuiltInOrCustomServer(serverAddress);
+
     try {
       await axios({
         method: 'GET',
@@ -419,6 +437,8 @@ export class ComfyUIService {
   }
 
   public async installComfyuiDependencies(serverAddress: string, dependencies: { nodes: IComfyuiWorkflowDependencyUninstalledNode[] }) {
+    serverAddress = await this.getBuiltInOrCustomServer(serverAddress);
+
     const succeededNodes: IComfyuiWorkflowDependencyUninstalledNode[] = [];
     for (const node of dependencies.nodes || []) {
       logger.info(`Installing node: ${node.title}(${node.reference})`);
@@ -449,11 +469,119 @@ export class ComfyUIService {
     const { data } = await axios({
       method: 'POST',
       url: '/comfyfile/apps',
-      baseURL: serverAddress,
+      baseURL: await this.getBuiltInOrCustomServer(serverAddress),
       data: {
         comfyfile_repo: comfyuiWorkflow.originalData?.comfyfileRepo,
       },
+      headers: {
+        ...(config?.comfyui?.apiToken && { Authorization: `Bearer ${config.comfyui.apiToken}` }),
+      },
     });
     return data;
+  }
+
+  public async getBuiltInOrCustomServer(serverAddress: string): Promise<string> {
+    if (serverAddress.startsWith('system')) {
+      const defaultServer = config.comfyui.defaultServer;
+
+      let cacheServerLists: string[] = [];
+      try {
+        cacheServerLists = JSON.parse((await this.cache.get(`${config.server.appId}:comfyfile_builtin_servers`)) ?? '[]');
+      } catch {}
+
+      const builtInServers = cacheServerLists.length ? cacheServerLists : await this.getAutoDLComfyUIServersAddress();
+
+      const serverLength = builtInServers.length;
+      if (serverLength) {
+        // 负载均衡
+        if (serverLength > 1) {
+          return (await this.findApiWithSmallestQueue(builtInServers)) ?? defaultServer;
+        } else {
+          return builtInServers[0];
+        }
+      }
+
+      return defaultServer;
+    }
+
+    return serverAddress;
+  }
+
+  public async getAutoDLComfyUIServersAddress(): Promise<string[]> {
+    const autoDLToken = config.comfyui.autodl.token;
+    if (autoDLToken) {
+      const { data } = await axios({
+        method: 'POST',
+        url: 'https://www.autodl.com/api/v1/instance',
+        headers: {
+          Authorization: autoDLToken,
+        },
+        data: '{"page_index":1,"page_size":10}',
+      });
+
+      const machineIds = config?.comfyui?.autodl?.machineIds ?? [];
+      const enableFilterMachine = machineIds.length > 0;
+
+      const builtInServers: string[] = [];
+      for (const machine of data?.data?.list ?? []) {
+        if (enableFilterMachine && !machineIds.some((x) => ((machine?.uuid as string) ?? '').startsWith(x))) {
+          continue;
+        }
+
+        const domain = machine?.tensorboard_domain;
+        if (!domain) continue;
+        const finalAddress = `https://${domain}`;
+        const { success } = await this.testComfyuiServerConnection(finalAddress);
+        if (success) {
+          builtInServers.push(finalAddress);
+        }
+      }
+
+      void this.cache.set(`${config.server.appId}:comfyfile_builtin_servers`, JSON.stringify(builtInServers), 'EX', 60 * 30);
+
+      return builtInServers;
+    }
+    return [];
+  }
+
+  private async getQueueRemaining(apiAddress: string, maxRetries: number = 5): Promise<number | null> {
+    let attempts = 0;
+    while (attempts < maxRetries) {
+      try {
+        const { data } = await axios.get(`${apiAddress}/prompt`, {
+          headers: {
+            ...(config?.comfyui?.apiToken && { Authorization: `Bearer ${config.comfyui.apiToken}` }),
+          },
+        });
+
+        if (data && data.exec_info && typeof data.exec_info.queue_remaining === 'number') {
+          return data.exec_info.queue_remaining;
+        } else {
+          attempts++;
+        }
+      } catch {
+        attempts++;
+      }
+    }
+    return null;
+  }
+
+  private async findApiWithSmallestQueue(apiAddresses: string[]): Promise<string | null> {
+    const queuePromises = apiAddresses.map(async (apiAddress) => {
+      const queueRemaining = await this.getQueueRemaining(apiAddress);
+      return { apiAddress, queueRemaining };
+    });
+
+    const results = await Promise.all(queuePromises);
+
+    const validResults = results.filter((result) => result.queueRemaining !== null) as { apiAddress: string; queueRemaining: number }[];
+
+    if (validResults.length === 0) {
+      return null;
+    }
+
+    validResults.sort((a, b) => a.queueRemaining - b.queueRemaining);
+
+    return validResults[0].apiAddress;
   }
 }
