@@ -8,6 +8,7 @@ import { ComfyUIService } from '@/modules/tools/comfyui/comfyui.service';
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { basename } from 'path';
+import { config } from '@/common/config';
 
 @Injectable()
 export class ComfyuiModelService {
@@ -72,8 +73,11 @@ export class ComfyuiModelService {
     const { data } = await axios<{ path: string; sha256: string }[]>({
       method: 'GET',
       url: '/comfyfile/model-list',
-      baseURL: serverAddress,
+      baseURL: await this.comfyuiService.getBuiltInOrCustomServer(serverAddress),
       timeout: 5000,
+      headers: {
+        ...(config?.comfyui?.apiToken && { Authorization: `Bearer ${config.comfyui.apiToken}` }),
+      },
     });
     return data;
   }

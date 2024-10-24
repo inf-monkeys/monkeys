@@ -84,6 +84,11 @@ export interface ComfyUICofig {
   defaultServer: string;
   githubToken: string;
   refreshCron: string;
+  apiToken?: string;
+  autodl?: {
+    token: string;
+    machineIds: string[];
+  };
 }
 
 export enum AuthMethod {
@@ -284,6 +289,11 @@ export const config: Config = {
     githubToken: readConfig('comfyui.githubToken'),
     // Defaults to every 5 minutes
     refreshCron: readConfig('comfyui.refreshCron', '0 */5 * * * *'),
+    apiToken: readConfig('comfyui.apiToken'),
+    autodl: {
+      token: readConfig('comfyui.autodl.token'),
+      machineIds: readConfig('comfyui.autodl.machineIds', []),
+    },
   },
   auth: {
     enabled: readConfig('auth.enabled', [AuthMethod.password, AuthMethod.apikey]),
