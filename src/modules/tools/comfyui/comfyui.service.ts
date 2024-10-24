@@ -55,7 +55,7 @@ export class ComfyUIService {
     await this.comfyuiWorkflowRepository.updateComfyuiWorkflow(id, updates);
   }
 
-  private inferInput(node: ComfyuiNode, key: string, value: any): ToolProperty {
+  private inferInput(node: ComfyuiNode, key: string, value: any, isMixlabWorkflow: boolean = false): ToolProperty {
     if (node.type === 'LoadImage' && key === 'upload') {
       return;
     }
@@ -75,7 +75,7 @@ export class ComfyUIService {
           name: `${node.id}_${key}`,
           type: 'file',
           default: '',
-          required: true,
+          required: false,
           typeOptions: {
             multipleValues: false,
             accept: '.jpg,.jpeg,.png,.webp',
@@ -95,7 +95,7 @@ export class ComfyUIService {
           name: `${node.id}_${key}`,
           type: 'file',
           default: '',
-          required: true,
+          required: false,
           typeOptions: {
             // 是否支持多文件上传
             multipleValues: false,
@@ -115,7 +115,7 @@ export class ComfyUIService {
           name: `${node.id}_${key}`,
           type: 'string',
           default: value,
-          required: true,
+          required: false,
           typeOptions: {
             comfyOptions: {
               node: node.id,
@@ -123,13 +123,13 @@ export class ComfyUIService {
             },
           },
         };
-      } else {
+      } else if (!isMixlabWorkflow) {
         return {
           displayName: `${nodeName} - ${key}`,
           name: `${node.id}_${key}`,
           type: 'string',
           default: value,
-          required: true,
+          required: false,
           typeOptions: {
             comfyOptions: {
               node: node.id,
@@ -138,7 +138,7 @@ export class ComfyUIService {
           },
         };
       }
-    } else {
+    } else if (!isMixlabWorkflow) {
       const dataTypeMap: { [x: string]: ToolPropertyTypes } = {
         number: 'number',
         boolean: 'boolean',
@@ -149,7 +149,7 @@ export class ComfyUIService {
         name: `${node.id}_${key}`,
         type: dataTypeMap[dataType] || 'string',
         default: value,
-        required: true,
+        required: false,
         typeOptions: {
           comfyOptions: {
             node: node.id,
@@ -160,19 +160,68 @@ export class ComfyUIService {
     }
   }
 
+  private inferMixlabInput(node: ComfyuiNode, promptInputs: Record<string, any>): ToolProperty {
+    const nodeName = node.title || node.properties['Node name for S&R'] || 'Unkonwn Node';
+    switch (node.type) {
+      case 'IntNumber':
+      case 'FloatSlider':
+        return {
+          displayName: nodeName,
+          name: node.id.toString(),
+          type: 'number',
+          default: promptInputs['number'],
+          required: false,
+          typeOptions: {
+            maxValue: promptInputs['max_value'],
+            minValue: promptInputs['min_value'],
+            numberPrecision: promptInputs['step'],
+            comfyOptions: {
+              node: node.id,
+              key: 'number',
+            },
+          },
+        };
+
+      case 'TextInput_':
+        return {
+          displayName: nodeName,
+          name: node.id.toString(),
+          type: 'string',
+          default: promptInputs['text'],
+          required: false,
+          typeOptions: {
+            comfyOptions: {
+              node: node.id,
+              key: 'text',
+            },
+          },
+        };
+    }
+  }
+
   private async generateToolInputByComfyuiWorkflow(_workflow: ComfyuiWorkflowWithPrompt) {
     let inputs: ToolProperty[] = [];
     const newWorkflow = _.cloneDeep(_workflow);
     const prompt: ComfyuiPrompt = newWorkflow.prompt;
+    const isMixlabWorkflow = newWorkflow.workflow.nodes.findIndex((node) => ['IntNumber', 'FloatSlider', 'TextInput_'].includes(node.type)) != -1;
     for (const node of newWorkflow.workflow.nodes) {
       const promptInputs: { [x: string]: any } = prompt[node.id!]?.inputs;
       if (!promptInputs) {
         continue;
       }
-      for (const key in promptInputs) {
-        const input = this.inferInput(node, key, promptInputs[key]);
+
+      // mixlab
+      if (isMixlabWorkflow && ['IntNumber', 'FloatSlider', 'TextInput_'].includes(node.type)) {
+        const input = this.inferMixlabInput(node, promptInputs);
         if (input) {
           inputs.push(input);
+        }
+      } else {
+        for (const key in promptInputs) {
+          const input = this.inferInput(node, key, promptInputs[key], isMixlabWorkflow);
+          if (input) {
+            inputs.push(input);
+          }
         }
       }
     }

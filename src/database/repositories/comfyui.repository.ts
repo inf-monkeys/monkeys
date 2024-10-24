@@ -18,6 +18,7 @@ export interface CreateComfyuiWorkflowParams {
   prompt: ComfyuiPrompt;
   displayName: string;
   toolInput?: ToolProperty[];
+  toolOutput?: ToolProperty[];
 }
 
 @Injectable()
@@ -90,6 +91,7 @@ export class ComfyuiRepository {
     entity.prompt = comfyuiWorkflow.prompt;
     entity.displayName = comfyuiWorkflow.displayName;
     entity.toolInput = comfyuiWorkflow.toolInput || [];
+    entity.toolOutput = comfyuiWorkflow.toolOutput || [];
 
     await this.comfyuiWorkflowRepository.save(entity);
   }
