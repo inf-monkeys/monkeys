@@ -35,7 +35,10 @@ const JoinTeamPage: React.FC = () => {
       loading: '正在加入团队...',
       success: () => {
         mutate('/api/teams').then(() => {
-          void navigate({ to: '/$teamId', params: { teamId: data?.team?.id ?? teamId } });
+          const inviteTeamId = data?.team?.id ?? teamId;
+          localStorage.setItem('vines-team-id', inviteTeamId);
+          window['vinesTeamId'] = inviteTeamId;
+          void navigate({ to: '/$teamId', params: { teamId: inviteTeamId } });
         });
         return '成功加入团队';
       },
