@@ -84,7 +84,7 @@ export class ComfyuiExecutionController {
       },
     },
   ])
-  public async createComfyuiServer(@Req() req: IRequest, @Body() body: RunComfyuiWorkflowDto) {
+  public async runComfyuiWorkflow(@Req() req: IRequest, @Body() body: RunComfyuiWorkflowDto) {
     const { workflow, server, ...rest } = body;
     const data = await this.comfyuiService.runComfyuiWorkflow(server, workflow, rest);
     return data;
