@@ -431,6 +431,9 @@ export class ComfyUIService {
         method: 'GET',
         url: '/manager/reboot',
         baseURL: serverAddress,
+        headers: {
+          ...(config?.comfyui?.apiToken && { Authorization: `Bearer ${config.comfyui.apiToken}` }),
+        },
       });
     } catch (error) {}
     await this.waitForComfyuiServerStartup(serverAddress);
@@ -448,6 +451,9 @@ export class ComfyUIService {
           url: 'customnode/install',
           baseURL: serverAddress,
           data: node,
+          headers: {
+            ...(config?.comfyui?.apiToken && { Authorization: `Bearer ${config.comfyui.apiToken}` }),
+          },
         });
         succeededNodes.push(node);
       } catch (error) {
