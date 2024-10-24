@@ -3,7 +3,7 @@
 }
 
 .vines-alpha-bg {
-  background-image: repeating-conic-gradient(#eee 0 25%, transparent 0 50%);
+  background-image: repeating-conic-gradient(hsl(var(--secondary)) 0 25%, transparent 0 50%);
   background-size: 16px 16px;
 }
 
