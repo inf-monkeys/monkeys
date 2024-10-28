@@ -1,7 +1,6 @@
 import { config } from '@/common/config';
 import { ListDto } from '@/common/dto/list.dto';
 import { WorkflowStatusEnum } from '@/common/dto/status.enum';
-import { logger } from '@/common/logger';
 import { generateDbId } from '@/common/utils';
 import { getNextCronTimestamp } from '@/common/utils/cron';
 import { calcMd5 } from '@/common/utils/utils';
@@ -830,8 +829,6 @@ ORDER BY
       .andWhere('w.is_deleted = false')
       .andWhere('w.is_published = false')
       .groupBy('w.workflow_id');
-
-    logger.debug(latestVersionSubquery);
 
     if (filter) {
       // Apply any additional filters here using your `findAssetIdsByCommonFilter` logic.

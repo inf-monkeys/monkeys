@@ -1,4 +1,4 @@
-import { AssetPublishConfig } from '@/database/entities/assets/base-asset';
+import { AssetPublishConfig, BaseAssetEntity } from '@/database/entities/assets/base-asset';
 import { AssetType } from '@inf-monkeys/monkeys';
 import { Injectable } from '@nestjs/common';
 import { AssetsMapperService } from './assets.common.service';
@@ -15,5 +15,15 @@ export class AssetsPublishService {
   public async forkAsset(assetType: AssetType, teamId: string, assetId: string) {
     const repo = this.assetsMapperService.getRepositoryByAssetType(assetType);
     return await repo.forkAsset(teamId, assetId);
+  }
+
+  public async updatePublishedAsset(assetType: AssetType, teamId: string, assetId: string, newAssetData: BaseAssetEntity) {
+    const repo = this.assetsMapperService.getRepositoryByAssetType(assetType);
+    return await repo.updatePublishedAsset(teamId, assetId, newAssetData);
+  }
+
+  public async deletePublishedAsset(assetType: AssetType, teamId: string, assetId: string) {
+    const repo = this.assetsMapperService.getRepositoryByAssetType(assetType);
+    return await repo.deletePublishedAsset(teamId, assetId);
   }
 }

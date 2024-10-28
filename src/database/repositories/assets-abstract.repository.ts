@@ -1,6 +1,7 @@
 import { AssetFilter, ListDto } from '@/common/dto/list.dto';
 import { generateDbId } from '@/common/utils';
 import { AssetType } from '@inf-monkeys/monkeys';
+import _ from 'lodash';
 import { Between, FindManyOptions, FindOptionsOrder, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { AssetPublishConfig, BaseAssetEntity } from '../entities/assets/base-asset';
 import { AssetsCommonRepository, AssetsFillAdditionalInfoOptions } from './assets-common.repository';
@@ -261,6 +262,44 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     //   default:
     //     break;
     // }
+  }
+
+  public async updatePublishedAsset(teamId: string, assetId: string, newAssetData: BaseAssetEntity) {
+    const asset = await this.getAssetById(assetId);
+    if (!asset) {
+      throw new Error('资产不存在');
+    }
+    if (asset.teamId != teamId) {
+      throw new Error('无权限操作此资产');
+    }
+    const { isPublished } = asset;
+    if (!isPublished) {
+      throw new Error('此资产未发布');
+    }
+    const newAsset = {
+      ...asset,
+      ..._.omit(newAssetData, ['assetType', 'teamId', 'creatorUserId', 'isPreset', 'isPublished', 'id', 'createdTimestamp', 'updatedTimestamp', 'isDeleted']),
+      updatedTimestamp: Date.now(),
+    };
+    await this.repository.save(newAsset);
+    return newAsset;
+  }
+
+  public async deletePublishedAsset(teamId: string, assetId: string) {
+    const asset = await this.getAssetById(assetId);
+    if (!asset) {
+      throw new Error('资产不存在');
+    }
+    if (asset.teamId != teamId) {
+      throw new Error('无权限操作此资产');
+    }
+    const { isPublished } = asset;
+    if (!isPublished) {
+      throw new Error('此资产未发布');
+    }
+    asset.isDeleted = true;
+    await this.repository.save(asset);
+    return true;
   }
 
   public async initBuiltInMarketPlace(assetType: AssetType, data: Partial<E>) {
