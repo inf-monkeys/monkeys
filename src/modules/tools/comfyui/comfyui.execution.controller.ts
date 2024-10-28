@@ -62,7 +62,7 @@ export class ComfyuiExecutionController {
   ])
   @MonkeyToolOutput([
     {
-      name: 'file_output',
+      name: 'file_list',
       displayName: {
         'zh-CN': '文件输出列表',
         'en-US': 'File Output List',
