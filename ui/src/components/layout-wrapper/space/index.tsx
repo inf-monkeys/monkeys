@@ -25,14 +25,13 @@ export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar, clas
   const vinesIFrameVisible = usePageStore((s) => s.vinesIFrameVisible);
 
   return (
-    <div className="flex h-[calc(100%-3.5rem)] w-full">
+    <div ref={ref} className="flex h-[calc(100vh-5.75rem)] w-full">
       {!vinesIFrameVisible && sidebar}
       <div
-        ref={ref}
         className={cn(
-          'relative m-4 overflow-hidden rounded-md border border-input bg-slate-1 shadow-sm',
+          'relative mt-4 overflow-hidden rounded-xl bg-slate-1 shadow-sm',
           !vinesIFrameVisible && sidebar && 'ml-0',
-          sidebar ? 'w-[calc(100vw-15rem)]' : 'w-full p-4',
+          sidebar ? 'w-[calc(100vw-17rem)]' : 'w-full p-4',
           className,
         )}
       >

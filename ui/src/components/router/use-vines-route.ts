@@ -23,7 +23,7 @@ export const useVinesRoute = () => {
   const isUseWorkbench = !routeAppId;
   const isUseWorkSpace = routeAppId === 'workspace' && !isUseShareView && !isUseIFrame;
   const isUseAgent = routeAppId === 'agent';
-  const isUsePanel = (!routeAppId && !!routeIds) || routeAppId === 'store';
+  const isUsePanel = (!!routeIds || !isUseWorkbench) && !isUseWorkSpace && !isUseAgent;
 
   window['vinesRoute'] = [routeAppId || 'main', params?.['teamId'], params?.['workflowId']];
 

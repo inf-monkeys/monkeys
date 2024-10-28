@@ -12,13 +12,13 @@ import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import useUrlState from '@/hooks/use-url-state.ts';
+import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface ISpaceHeaderProps extends React.ComponentPropsWithoutRef<'header'> {
   tail?: React.ReactNode;
   tailWithAuth?: React.ReactNode;
   disableSeparator?: boolean;
-  redirect?: 'workbench' | 'panel';
 }
 
 export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
@@ -26,7 +26,6 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
   tail,
   disableSeparator = false,
   tailWithAuth,
-  redirect = 'workbench',
 }) => {
   const { t } = useTranslation();
 
@@ -37,15 +36,15 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
   const hasToken = !!getVinesToken();
 
   return (
-    <header className="flex h-14 w-full items-center justify-between bg-slate-1 px-6 shadow-sm">
+    <header className="flex w-full items-center justify-between rounded-xl bg-slate-1 p-3 shadow-sm">
       <div className="z-20 flex h-full items-center gap-5">
         <Link
-          to={redirect === 'workbench' ? '/$teamId/workbench' : '/$teamId'}
+          to="/$teamId"
           params={{ teamId }}
           disabled={!hasToken}
           onClick={() => Object.keys(mode).length && setMode({ mode: 'normal' })}
         >
-          <VinesLogo description="" height={32} className={hasToken ? 'cursor-pointer' : ''} />
+          <VinesLogo description="" height={32} className={cn('ml-2', hasToken && 'cursor-pointer')} />
         </Link>
 
         {children && (

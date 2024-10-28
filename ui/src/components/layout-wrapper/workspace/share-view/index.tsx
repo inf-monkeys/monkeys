@@ -48,7 +48,6 @@ export const WorkspaceShareView: React.FC<IWorkspaceShareViewProps> = () => {
   return (
     <ViewGuard className="bg-slate-3">
       <SpaceHeader
-        redirect="panel"
         tail={
           <div className="flex items-center gap-2">
             <VinesDarkMode />

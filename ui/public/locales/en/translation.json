@@ -341,15 +341,20 @@
       "main": {
         "sidebar": {
           "list": {
+            "workspace": {
+              "label": "Workspace"
+            },
             "workbench": {
-              "label": "Workbench",
-              "switch": "Switch to the dashboard management"
+              "label": "Workbench"
             },
-            "agent": {
-              "label": "Agents"
-            },
-            "workflow": {
-              "label": "Workflows"
+            "apps": {
+              "label": "Applications",
+              "workflows": {
+                "label": "Workflows"
+              },
+              "agents": {
+                "label": "Agents"
+              }
             },
             "tools": {
               "label": "Tools"

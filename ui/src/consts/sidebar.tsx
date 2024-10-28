@@ -2,7 +2,7 @@ import React from 'react';
 
 import { LinkOptions } from '@tanstack/react-router';
 
-import { Bot, Calculator, Database, Package, Rocket, Server, ShoppingCart } from 'lucide-react';
+import { Bot, Calculator, Database, Package } from 'lucide-react';
 
 export interface NavItemWithoutLabel {
   name: string;
@@ -14,22 +14,24 @@ export interface NavItemWithoutLabel {
 }
 
 export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
+  // {
+  //   path: '/$teamId/workbench',
+  //   name: 'workbench',
+  //   icon: <Rocket />,
+  // },
   {
-    path: '/$teamId/workbench',
-    name: 'workbench',
-    icon: <Rocket />,
-  },
-  {
-    name: 'agent',
+    name: 'apps',
     icon: <Bot />,
-    path: '/$teamId/agents',
-    super: true,
-    comingSoon: true,
-  },
-  {
-    name: 'workflow',
-    icon: <Server />,
-    path: '/$teamId/workflows',
+    items: [
+      {
+        name: 'agents',
+        path: '/$teamId/agents',
+      },
+      {
+        name: 'workflows',
+        path: '/$teamId/workflows',
+      },
+    ],
   },
   {
     name: 'tools',
@@ -68,26 +70,26 @@ export const SIDEBAR_MAP: NavItemWithoutLabel[] = [
       },
     ],
   },
-  {
-    name: 'store',
-    icon: <ShoppingCart />,
-    items: [
-      {
-        path: '/$teamId/application-store',
-        name: 'application-store',
-      },
-      // {
-      //   path: '/$teamId/text-model-store',
-      //   name: 'text-model-store',
-      // },
-      // {
-      //   path: '/$teamId/image-model-store',
-      //   name: 'image-model-store',
-      // },
-      {
-        path: '/$teamId/comfyui-store',
-        name: 'comfyui-store',
-      },
-    ],
-  },
+  // {
+  //   name: 'store',
+  //   icon: <ShoppingCart />,
+  //   items: [
+  //     {
+  //       path: '/$teamId/application-store',
+  //       name: 'application-store',
+  //     },
+  //     // {
+  //     //   path: '/$teamId/text-model-store',
+  //     //   name: 'text-model-store',
+  //     // },
+  //     // {
+  //     //   path: '/$teamId/image-model-store',
+  //     //   name: 'image-model-store',
+  //     // },
+  //     {
+  //       path: '/$teamId/comfyui-store',
+  //       name: 'comfyui-store',
+  //     },
+  //   ],
+  // },
 ];
