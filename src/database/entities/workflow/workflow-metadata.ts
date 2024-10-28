@@ -155,6 +155,13 @@ export class WorkflowMetadataEntity extends BaseAssetEntity {
   })
   notAuthorized?: boolean;
 
+  @Column({
+    nullable: true,
+    default: false,
+    type: 'varchar',
+  })
+  thumbnail?: string;
+
   public isRateLimitEnabled() {
     return this.rateLimiter?.enabled;
   }
