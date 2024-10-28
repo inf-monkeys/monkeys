@@ -1,6 +1,7 @@
 import { config } from '@/common/config';
 import { ListDto } from '@/common/dto/list.dto';
 import { WorkflowStatusEnum } from '@/common/dto/status.enum';
+import { logger } from '@/common/logger';
 import { generateDbId } from '@/common/utils';
 import { getNextCronTimestamp } from '@/common/utils/cron';
 import { calcMd5 } from '@/common/utils/utils';
@@ -827,7 +828,10 @@ ORDER BY
       .addSelect('MAX(w.version)', 'max_version')
       .where('w.team_id = :teamId', { teamId })
       .andWhere('w.is_deleted = false')
+      .andWhere('w.is_published = false')
       .groupBy('w.workflow_id');
+
+    logger.debug(latestVersionSubquery);
 
     if (filter) {
       // Apply any additional filters here using your `findAssetIdsByCommonFilter` logic.
@@ -840,7 +844,7 @@ ORDER BY
 
     const workflowsQueryBuilder = this.workflowMetadataRepository
       .createQueryBuilder('w')
-      .innerJoin(`(${latestVersionSubquery.getQuery()})`, 'latest', 'w.workflow_id = latest.workflow_id AND w.version = latest.max_version')
+      .innerJoin(`(${latestVersionSubquery.getQuery()})`, 'latest', 'w.workflow_id = latest.workflow_id AND w.version = latest.max_version AND w.is_published = false')
       .setParameters(latestVersionSubquery.getParameters());
 
     // Count total number of workflows

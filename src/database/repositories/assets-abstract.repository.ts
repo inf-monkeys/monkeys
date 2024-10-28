@@ -56,6 +56,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     const entity = await this.repository.findOne({
       where: {
         isDeleted: false,
+        isPublished: false,
         id: id,
         ...additionQuery,
       } as Partial<E> as FindOptionsWhere<E>,
@@ -93,12 +94,14 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
         {
           teamId,
           isDeleted: false,
+          isPublished: false,
           id: idsConstraints.length ? In(idsConstraints) : undefined,
           ...extraWhere,
         },
         {
           id: In(authorizedIds),
           isDeleted: false,
+          isPublished: false,
           ...extraWhere,
         },
       ] as FindOptionsWhere<E>[],
@@ -114,10 +117,12 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
         {
           teamId,
           isDeleted: false,
+          isPublished: false,
         },
         {
           id: In(authorizedIds),
           isDeleted: false,
+          isPublished: false,
         },
       ] as FindOptionsWhere<E>[],
       order: {
@@ -202,10 +207,22 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     if (isPreset) {
       throw new Error('无法发布预置资产');
     }
-    asset.isPublished = true;
-    asset.publishConfig = publishConfig;
-    await this.repository.save(asset);
-    return true;
+    const id = generateDbId();
+    const clonedAsset = this.repository.create({
+      ...asset,
+      workflowId: asset.assetType === 'workflow' ? id : undefined,
+      id,
+      teamId,
+      forkedFrom: assetId,
+      isDeleted: false,
+      isPreset: false,
+      isPublished: true,
+      createdTimestamp: Date.now(),
+      updatedTimestamp: Date.now(),
+      publishConfig,
+    });
+    await this.repository.save(clonedAsset);
+    return clonedAsset;
   }
 
   public async forkAsset(teamId: string, assetId: string) {
