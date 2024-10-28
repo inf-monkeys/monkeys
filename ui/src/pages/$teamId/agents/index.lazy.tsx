@@ -79,7 +79,7 @@ export const ConversationApps: React.FC = () => {
         assetKey="agent"
         assetType="conversation-app"
         assetIdKey="agent"
-        assetName={tHook('components.layout.main.sidebar.list.agent.label')}
+        assetName={tHook('components.layout.main.sidebar.list.apps.agents.label')}
         useUgcFetcher={useUgcAgents}
         preloadUgcFetcher={preloadUgcAgents}
         createColumns={createAgentsColumns}

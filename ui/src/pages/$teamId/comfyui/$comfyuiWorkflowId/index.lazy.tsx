@@ -47,7 +47,7 @@ export const IComfyUIWorkflowDetail: React.FC<IComfyUIWorkflowDetailProps> = () 
       </header>
       <Tabs
         defaultValue="info"
-        className="[&_[role='tabpanel']]:mt-4 [&_[role='tabpanel']]:h-[calc(100vh-11.5rem)] [&_[role='tabpanel']]:overflow-y-auto [&_[role='tabpanel']]:overflow-x-hidden"
+        className="[&_[role='tabpanel']]:mt-4 [&_[role='tabpanel']]:h-[calc(100vh-15.3rem)] [&_[role='tabpanel']]:overflow-y-auto [&_[role='tabpanel']]:overflow-x-hidden"
       >
         <TabsList>
           <TabsTrigger value="info" className="text-xs">

@@ -335,15 +335,20 @@
       "main": {
         "sidebar": {
           "list": {
+            "workspace": {
+              "label": "工作空间"
+            },
             "workbench": {
-              "label": "工作台",
-              "switch": "切换到管理台"
+              "label": "工作台"
             },
-            "agent": {
-              "label": "智能体"
-            },
-            "workflow": {
-              "label": "工作流"
+            "apps": {
+              "label": "应用",
+              "workflows": {
+                "label": "工作流"
+              },
+              "agents": {
+                "label": "智能体"
+              }
             },
             "tools": {
               "label": "工具"

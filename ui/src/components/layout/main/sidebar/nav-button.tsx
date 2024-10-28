@@ -15,7 +15,7 @@ interface INavButtonProps extends React.ComponentPropsWithoutRef<'div'> {
 
 export const NavButton: React.FC<INavButtonProps> = ({ to, children, icon, postfix, ...props }) => {
   const { onClick, onFocus, onMouseEnter, onMouseLeave, onTouchStart, ...link } = useLinkProps({
-    to,
+    to: to as any,
     activeOptions: { exact: true },
   });
 
@@ -30,7 +30,7 @@ export const NavButton: React.FC<INavButtonProps> = ({ to, children, icon, postf
   return (
     <div
       className={cn(
-        'flex w-full cursor-pointer select-none items-center gap-2 rounded-lg border border-transparent p-2 text-xs hover:bg-mauve-2 hover:bg-opacity-70',
+        'flex w-full cursor-pointer select-none items-center gap-2 rounded-lg border border-transparent p-2 text-xs hover:border-input/60 hover:bg-mauve-2/60 hover:bg-opacity-70',
         to && isActive ? 'border-input bg-mauve-2 font-bold' : '',
       )}
       {...(to &&

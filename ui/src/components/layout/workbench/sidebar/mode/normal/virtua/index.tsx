@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { useCreation } from 'ahooks';
 import { set } from 'lodash';
+import { useTranslation } from 'react-i18next';
 import { Virtualizer, VListHandle } from 'virtua';
 
 import { IPinPage } from '@/apis/pages/typings.ts';
@@ -34,6 +35,8 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
   currentGroupId,
   onChildClick,
 }) => {
+  const { t } = useTranslation();
+
   const [activeIndex, setActiveIndex] = useState(0);
 
   const [stickyIndexes, list] = useCreation(() => {
@@ -78,7 +81,9 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
               {list.map((it, i) =>
                 it.type === 'v-label' ? (
                   <div key={i} className="select-none bg-slate-1 py-2 pl-2">
-                    <Label className="text-sm leading-none text-muted-foreground">{it.displayName}</Label>
+                    <Label className="text-sm leading-none text-muted-foreground">
+                      {t([`workspace.wrapper.space.menu.group.name-${it.displayName}`, it.displayName])}
+                    </Label>
                   </div>
                 ) : (
                   <ViewItem key={i} page={it as IWorkbenchViewItemPage} onClick={onChildClick} />

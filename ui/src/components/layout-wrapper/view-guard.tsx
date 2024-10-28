@@ -57,7 +57,7 @@ export const ViewGuard = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
     const visible = loading || isUnAuth || (isTokenEmpty && !isWorkspace);
 
     return (
-      <main ref={ref} className={cn('size-full bg-slate-1', className)} {...props}>
+      <main ref={ref} className={cn('size-full bg-slate-1 p-4', className)} {...props}>
         {children}
         <AnimatePresence>
           {visible && (

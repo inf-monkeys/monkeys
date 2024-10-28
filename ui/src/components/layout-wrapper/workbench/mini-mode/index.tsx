@@ -15,7 +15,7 @@ export const WorkbenchMiniModeLayout: React.FC<IWorkbenchMiniModeWrapperProps> =
   }, []);
 
   return (
-    <ViewGuard className="bg-slate-1">
+    <ViewGuard className="bg-slate-1 p-0">
       <Outlet />
     </ViewGuard>
   );

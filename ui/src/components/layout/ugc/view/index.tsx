@@ -265,7 +265,8 @@ export const UgcView = <E extends object>({
             filter,
             onChange: setFilter,
           },
-          toolsData: assetType === 'tools' ? ((originData?.data ?? []) as IAssetItem<ICommonTool>[]) : undefined,
+          toolsData:
+            assetType === 'tools' ? ((originData?.data ?? []) as unknown as IAssetItem<ICommonTool>[]) : undefined,
         }}
       />
       <div className="relative w-full flex-1 overflow-x-clip">
@@ -285,10 +286,7 @@ export const UgcView = <E extends object>({
           </AnimatePresence>
           <div className="flex size-full flex-col">
             <ScrollArea
-              className={cn(
-                'relative w-full rounded-r-lg px-4 py-2',
-                showPagination ? 'h-[calc(100%-4.5rem)]' : 'h-[calc(100%-2.1rem)]',
-              )}
+              className={cn('relative w-full p-4', showPagination ? 'h-[calc(100%-4.9rem)]' : 'h-[calc(100%-1.7rem)]')}
               disabledOverflowMask
             >
               {rows.length === 0 ? (
@@ -326,7 +324,7 @@ export const UgcView = <E extends object>({
                   )}
                   {displayMode === 'table' && (
                     <RemoteDataTable
-                      columns={columns}
+                      columns={columns as any}
                       data={data}
                       onPaginationChange={table.setPagination}
                       rowCount={table.getRowCount()}

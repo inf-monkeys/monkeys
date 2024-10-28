@@ -15,32 +15,30 @@ export const ApplicationStore: React.FC = () => {
   const { t: tHook } = useTranslation();
 
   return (
-    <main className="size-full">
-      <UgcView
-        assetKey="application-store"
-        assetType="workflow"
-        assetName={tHook('components.layout.main.sidebar.list.store.application-store.label')}
-        isMarket
-        useUgcFetcher={useUgcApplicationStore}
-        preloadUgcFetcher={preloadUgcApplicationStore}
-        createColumns={() => createApplicationStoreColumns()}
-        renderOptions={{
-          subtitle: (item) => (
-            <span className="line-clamp-1">
-              {`${item.user?.name ?? tHook('common.utils.system')} ${tHook('common.utils.created-at', {
-                time: formatTimeDiffPrevious(item.createdTimestamp),
-              })}`}
-            </span>
-          ),
-          cover: (item) => {
-            return RenderIcon({ iconUrl: item.iconUrl, size: 'gallery' });
-          },
-        }}
-        operateArea={(item, trigger, tooltipTriggerContent) => (
-          <OperateArea item={item} trigger={trigger} tooltipTriggerContent={tooltipTriggerContent} />
-        )}
-      />
-    </main>
+    <UgcView
+      assetKey="application-store"
+      assetType="workflow"
+      assetName={tHook('components.layout.main.sidebar.list.store.application-store.label')}
+      isMarket
+      useUgcFetcher={useUgcApplicationStore}
+      preloadUgcFetcher={preloadUgcApplicationStore}
+      createColumns={() => createApplicationStoreColumns()}
+      renderOptions={{
+        subtitle: (item) => (
+          <span className="line-clamp-1">
+            {`${item.user?.name ?? tHook('common.utils.system')} ${tHook('common.utils.created-at', {
+              time: formatTimeDiffPrevious(item.createdTimestamp),
+            })}`}
+          </span>
+        ),
+        cover: (item) => {
+          return RenderIcon({ iconUrl: item.iconUrl, size: 'gallery' });
+        },
+      }}
+      operateArea={(item, trigger, tooltipTriggerContent) => (
+        <OperateArea item={item} trigger={trigger} tooltipTriggerContent={tooltipTriggerContent} />
+      )}
+    />
   );
 };
 

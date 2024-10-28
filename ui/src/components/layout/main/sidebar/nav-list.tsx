@@ -8,10 +8,11 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { SIDEBAR_MAP } from '@/consts/sidebar.tsx';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import { cn } from '@/utils';
 
 interface INavListProps extends React.ComponentPropsWithoutRef<'div'> {}
 
-export const NavList: React.FC<INavListProps> = () => {
+export const NavList: React.FC<INavListProps> = ({ className }) => {
   const { t } = useTranslation();
 
   const [activeIndex, setActiveIndex] = useLocalStorage<string[]>(
@@ -20,7 +21,7 @@ export const NavList: React.FC<INavListProps> = () => {
   );
 
   return (
-    <ScrollArea className="h-full flex-1 overflow-y-scroll" scrollBarDisabled>
+    <ScrollArea className={cn('h-full flex-1 overflow-y-scroll', className)} scrollBarDisabled>
       <Accordion
         type="multiple"
         className="flex w-full flex-col gap-1 text-xs text-slateA-8 text-opacity-70"

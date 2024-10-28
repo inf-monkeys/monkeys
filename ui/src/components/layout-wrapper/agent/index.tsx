@@ -13,7 +13,7 @@ import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 
 export const AgentLayout: React.FC = () => {
   return (
-    <main className="size-full bg-slate-3">
+    <main className="size-full bg-slate-3 p-4">
       <SpaceHeader>
         <AgentInfoCard />
       </SpaceHeader>

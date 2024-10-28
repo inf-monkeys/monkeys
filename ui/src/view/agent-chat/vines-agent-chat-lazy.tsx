@@ -31,7 +31,7 @@ const AgentChatView: React.FC = () => {
           multipleChat
           id={agentId}
           botPhoto={agentData?.iconUrl}
-          height={containerHeight - (workbenchVisible ? 32 : 48)}
+          height={containerHeight - (workbenchVisible ? 32 : 60)}
         />
       </div>
       <div className="group z-10 -mr-4 h-full w-4 after:absolute after:top-0 after:-ml-4 after:h-full after:w-4">

@@ -19,7 +19,7 @@ export const AppLogo: React.FC<ILogoProps> = memo(
     <motion.div key="vines-logo" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
       <Avatar className={cn('w-auto select-none rounded', className)} style={{ width, height }}>
         <AvatarImage className={cn('aspect-auto w-auto rounded', imageClassName)} src={url} alt={alt} />
-        <AvatarFallback className="rounded-none p-2 text-xs">{alt}</AvatarFallback>
+        <AvatarFallback className="min-w-32 rounded-none p-2 text-xs">{alt}</AvatarFallback>
       </Avatar>
 
       {description && (

@@ -17,7 +17,7 @@ export const spaceSidebarTabVariants = cva(
   {
     variants: {
       status: {
-        active: 'border-input bg-mauve-2 font-medium',
+        active: '!border-input bg-mauve-2 font-medium',
       },
     },
   },

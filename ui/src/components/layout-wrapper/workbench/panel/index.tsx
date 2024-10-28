@@ -2,7 +2,7 @@ import React, { useLayoutEffect } from 'react';
 
 import { Outlet } from '@tanstack/react-router';
 
-import { Bolt } from 'lucide-react';
+import { Layers2, Package, PackagePlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { TeamSelector } from '@/components/layout/main/sidebar/teams/team-selector';
@@ -10,12 +10,11 @@ import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { VinesSpace } from '@/components/layout-wrapper/space';
 import { SpaceHeader } from '@/components/layout-wrapper/space/header';
 import { ViewGuard } from '@/components/layout-wrapper/view-guard.tsx';
+import { VinesPanelSidebar } from '@/components/layout-wrapper/workbench/panel/sidebar.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
-import { Button } from '@/components/ui/button';
 import { I18nSelector } from '@/components/ui/i18n-selector';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
@@ -34,7 +33,9 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
     setWorkbenchVisible(true);
   }, []);
 
+  const isWorkbenchRoute = layoutId === 'vines-outlet-main-$teamId';
   const isStoreRoute = layoutId === 'vines-outlet-main-$teamId-store';
+  const isWorkspaceRoute = layoutId.startsWith('vines-outlet-main-$teamId-') && !isStoreRoute;
 
   return (
     <ViewGuard className="bg-slate-3">
@@ -50,7 +51,7 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
         disableSeparator
       >
         <Tabs
-          value={isStoreRoute ? 'store' : 'workbench'}
+          value={isWorkspaceRoute ? 'main' : isStoreRoute ? 'store' : 'workbench'}
           onValueChange={(val) => {
             switch (val) {
               case 'workbench':
@@ -59,38 +60,31 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
               case 'store':
                 VinesEvent.emit('vines-nav', '/$teamId/store/', { teamId });
                 break;
+              case 'main':
+                VinesEvent.emit('vines-nav', '/$teamId/agents/', { teamId });
             }
           }}
         >
           <TabsList className="!h-9">
-            <TabsTrigger className="py-1 [&[data-state=inactive]>div]:w-0" value="workbench">
+            <TabsTrigger className="gap-1 py-1" value="workbench">
+              <Layers2 size={14} />
               {t('components.layout.main.sidebar.list.workbench.label')}
-              <div className="-my-1 -mr-2 ml-1.5 overflow-hidden transition-all">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      className="border-transparent !p-1 shadow-none [&_svg]:size-3"
-                      size="small"
-                      variant="outline"
-                      icon={<Bolt />}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        VinesEvent.emit('vines-nav', '/$teamId/workbench/', { teamId });
-                      }}
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>{t('components.layout.main.sidebar.list.workbench.switch')}</TooltipContent>
-                </Tooltip>
-              </div>
             </TabsTrigger>
-            <TabsTrigger className="py-1" value="store">
+            <TabsTrigger className="gap-1 py-1" value="store">
+              <Package size={14} />
               {t('components.layout.main.sidebar.list.store.application-store.label')}
+            </TabsTrigger>
+            <TabsTrigger className="gap-1 py-1" value="main">
+              <PackagePlus size={14} />
+              {t('components.layout.main.sidebar.list.workspace.label')}
             </TabsTrigger>
           </TabsList>
         </Tabs>
       </SpaceHeader>
-      <VinesSpace className={cn(!isStoreRoute && 'p-0')}>
+      <VinesSpace
+        className={cn(isWorkbenchRoute && 'p-0', isWorkspaceRoute && 'w-full p-4')}
+        sidebar={isWorkspaceRoute && <VinesPanelSidebar />}
+      >
         <Outlet />
       </VinesSpace>
     </ViewGuard>

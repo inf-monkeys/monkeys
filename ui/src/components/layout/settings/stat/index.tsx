@@ -12,8 +12,8 @@ export const Stat: React.FC<IStatProps> = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-4 pb-6">
-      <Card>
+    <>
+      <Card className="mb-4">
         <CardHeader>
           <CardTitle>{t('settings.stat.workflow.label')}</CardTitle>
           <CardDescription>{t('settings.stat.workflow.desc')}</CardDescription>
@@ -31,6 +31,6 @@ export const Stat: React.FC<IStatProps> = () => {
           <AgentStat />
         </CardContent>
       </Card>
-    </div>
+    </>
   );
 };
