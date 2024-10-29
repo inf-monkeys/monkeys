@@ -196,8 +196,8 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     };
   }
 
-  public async publishAsset(teamId: string, assetId: string, publishConfig: AssetPublishConfig) {
-    const asset = await this.getAssetById(assetId);
+  public async publishAsset(teamId: string, assetId: string, publishConfig: AssetPublishConfig, metadata?: E) {
+    const asset = metadata || (await this.getAssetById(assetId));
     if (!asset) {
       throw new Error('资产不存在');
     }

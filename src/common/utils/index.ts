@@ -1,3 +1,5 @@
+import { SimpleTaskDef } from '@inf-monkeys/conductor-javascript';
+import { MonkeyWorkflowDef } from '@inf-monkeys/monkeys';
 import crypto from 'crypto';
 import shortid from 'shortid';
 
@@ -82,4 +84,21 @@ export function maskString(str: string) {
   } catch (error) {
     return str;
   }
+}
+
+export interface ComfyUIWorkflowDataInWorkflowTask {
+  index: number;
+  comfyuiWorkflowId?: string;
+}
+export function getComfyuiWorkflowDataListFromWorkflow(workflow: MonkeyWorkflowDef): ComfyUIWorkflowDataInWorkflowTask[] {
+  const result: ComfyUIWorkflowDataInWorkflowTask[] = [];
+  for (const [index, task] of workflow.tasks.entries()) {
+    if (task.name === 'comfyui:run_comfyui_workflow') {
+      result.push({
+        index,
+        comfyuiWorkflowId: (workflow.tasks[index] as SimpleTaskDef).inputParameters?.workflow as string | undefined,
+      });
+    }
+  }
+  return result;
 }

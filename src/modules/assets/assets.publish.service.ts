@@ -1,5 +1,7 @@
+import { getComfyuiWorkflowDataListFromWorkflow } from '@/common/utils';
 import { AssetPublishConfig, BaseAssetEntity } from '@/database/entities/assets/base-asset';
-import { AssetType } from '@inf-monkeys/monkeys';
+import { SimpleTaskDef } from '@inf-monkeys/conductor-javascript';
+import { AssetType, MonkeyWorkflowDef } from '@inf-monkeys/monkeys';
 import { Injectable } from '@nestjs/common';
 import { AssetsMapperService } from './assets.common.service';
 
@@ -9,6 +11,18 @@ export class AssetsPublishService {
 
   public async publishAsset(teamId: string, assetType: AssetType, assetId: string, publishConfig: AssetPublishConfig) {
     const repo = this.assetsMapperService.getRepositoryByAssetType(assetType);
+    const asset = await repo.getAssetById(assetId);
+    if (asset.assetType === 'workflow') {
+      const comfyuiDataList = getComfyuiWorkflowDataListFromWorkflow(asset as unknown as MonkeyWorkflowDef);
+      if (comfyuiDataList.length > 0) {
+        const comfyuiWorkflowRepo = this.assetsMapperService.getRepositoryByAssetType('comfyui-workflow');
+        for (const [, { index, comfyuiWorkflowId }] of comfyuiDataList.entries()) {
+          const { id } = await comfyuiWorkflowRepo.publishAsset(teamId, comfyuiWorkflowId, publishConfig);
+          ((asset as unknown as MonkeyWorkflowDef).tasks[index] as SimpleTaskDef).inputParameters.workflow = id;
+        }
+        return await repo.publishAsset(teamId, assetId, publishConfig, asset);
+      }
+    }
     return await repo.publishAsset(teamId, assetId, publishConfig);
   }
 
