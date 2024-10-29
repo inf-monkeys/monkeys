@@ -38,6 +38,19 @@ export class AssetsPublishService {
 
   public async deletePublishedAsset(assetType: AssetType, teamId: string, assetId: string) {
     const repo = this.assetsMapperService.getRepositoryByAssetType(assetType);
+    const asset = await repo.getAssetById(assetId, { isPublished: true });
+    if (asset.assetType === 'workflow') {
+      const comfyuiDataList = getComfyuiWorkflowDataListFromWorkflow(asset as unknown as MonkeyWorkflowDef);
+      if (comfyuiDataList.length > 0) {
+        const comfyuiWorkflowRepo = this.assetsMapperService.getRepositoryByAssetType('comfyui-workflow');
+        for (const [, { comfyuiWorkflowId }] of comfyuiDataList.entries()) {
+          try {
+            await comfyuiWorkflowRepo.deletePublishedAsset(teamId, comfyuiWorkflowId, true);
+          } catch (error) {}
+        }
+        return await repo.deletePublishedAsset(teamId, assetId, true);
+      }
+    }
     return await repo.deletePublishedAsset(teamId, assetId);
   }
 }
