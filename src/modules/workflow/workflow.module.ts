@@ -1,7 +1,9 @@
+import { ConversationAppEntity } from '@/database/entities/conversation-app/conversation-app.entity';
 import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
 import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AssetsModule } from '../assets/assets.module';
 import { ToolsModule } from '../tools/tools.module';
 import { ConductorModule } from './conductor/conductor.module';
 import { WorkflowAssetsController } from './workflow.assets.controller';
@@ -27,7 +29,6 @@ import { WorkflowValidateController } from './workflow.validate.controller';
 import { WorkflowValidateService } from './workflow.validate.service';
 import { WorkflowWebhookController } from './workflow.webhook.controller';
 import { WorkflowWebhookService } from './workflow.webhook.service';
-import { ConversationAppEntity } from '@/database/entities/conversation-app/conversation-app.entity';
 
 @Module({
   controllers: [
@@ -57,7 +58,7 @@ import { ConversationAppEntity } from '@/database/entities/conversation-app/conv
     WorkflowLogService,
     WorkflowStatisticsService,
   ],
-  imports: [ConductorModule, TypeOrmModule.forFeature([WorkflowPageEntity, WorkflowPageGroupEntity, ConversationAppEntity]), ToolsModule],
+  imports: [ConductorModule, AssetsModule, TypeOrmModule.forFeature([WorkflowPageEntity, WorkflowPageGroupEntity, ConversationAppEntity]), ToolsModule],
   exports: [WorkflowCrudService, WorkflowExecutionService],
 })
 export class WorkflowModule {}

@@ -10,6 +10,7 @@ export enum AssetPublishPolicy {
 
 export class AssetPublishConfig {
   policy: AssetPublishPolicy;
+  extraAssetData: BaseAssetEntity;
 }
 
 export class BaseAssetEntity extends BaseEntity {
