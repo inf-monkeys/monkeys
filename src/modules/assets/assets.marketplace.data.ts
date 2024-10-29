@@ -15,7 +15,7 @@ let rawBuiltInMarketList = [];
 if (process.env.MONKEYS_BUILT_IN_MARKET_FILE) {
   rawBuiltInMarketList = [path.resolve(process.env.MONKEYS_CONFIG_FILE)];
 } else {
-  rawBuiltInMarketList = [path.resolve('/etc/monkeys/builtInMarket.json'), path.resolve('./builtInMarket.json', path.resolve('./builtInMarket.example.json'))];
+  rawBuiltInMarketList = [path.resolve('/etc/monkeys/builtInMarket.json'), path.resolve('./builtInMarket.json'), path.resolve('./builtInMarket.example.json')];
 }
 
 rawBuiltInMarketList = rawBuiltInMarketList
