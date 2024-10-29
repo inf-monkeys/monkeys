@@ -12,7 +12,7 @@ import {
   VinesWorkflowExecutionStatData,
 } from '@/apis/workflow/execution/typings.ts';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
-import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
+import { VinesWorkflowExecution, VinesWorkflowExecutionOutputs } from '@/package/vines-flow/core/typings.ts';
 import { IVinesSearchWorkflowExecutionsParams } from '@/schema/workspace/workflow-execution.ts';
 import { IVinesSearchWorkflowExecutionStatParams } from '@/schema/workspace/workflow-execution-stat.ts';
 
@@ -78,6 +78,13 @@ export const useSearchWorkflowExecutions = (
       vinesFetcher<VinesWorkflowExecutionLists, IVinesSearchWorkflowExecutionsParams>({ method: 'POST', simple: true })(
         ...(args as [string, IVinesSearchWorkflowExecutionsParams]),
       ),
+    { refreshInterval },
+  );
+
+export const useWorkflowExecutionOutputs = (workflowId?: string | null, page = 1, limit = 100, refreshInterval = 500) =>
+  useSWR<VinesWorkflowExecutionOutputs[] | undefined>(
+    workflowId ? `/api/workflow/executions/${workflowId}/outputs?${qs.stringify({ page, limit })}` : null,
+    vinesFetcher({ method: 'GET' }),
     { refreshInterval },
   );
 

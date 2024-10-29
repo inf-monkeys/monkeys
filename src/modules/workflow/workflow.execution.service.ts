@@ -5,13 +5,14 @@ import { OrderBy } from '@/common/dto/order.enum';
 import { PaginationDto } from '@/common/dto/pagination.dto';
 import { WorkflowExecutionContext } from '@/common/dto/workflow-execution-context.dto';
 import { TooManyRequestsException } from '@/common/exceptions/too-many-requests';
+import { extractImageUrls, extractVideoUrls, flattenKeys } from '@/common/utils';
 import { RateLimiter } from '@/common/utils/rate-limiter';
 import { sleep } from '@/common/utils/utils';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
 import { Task, Workflow } from '@inf-monkeys/conductor-javascript';
 import { Inject, Injectable } from '@nestjs/common';
-import _ from 'lodash';
+import _, { pick } from 'lodash';
 import retry from 'retry-as-promised';
 import { FindWorkflowCondition, WorkflowRepository } from '../../database/repositories/workflow.repository';
 import { ConductorService } from './conductor/conductor.service';
@@ -217,6 +218,76 @@ export class WorkflowExecutionService {
     const data = await this.conductorService.getWorkflowExecutionStatus(teamId, workflowInstanceId);
     await this.populateMetadataByForExecutions([data]);
     return data;
+  }
+
+  public async getWorkflowExecutionOutputs(workflowId: string, page = 1, limit = 10) {
+    const start = (page - 1) * limit;
+
+    const data = await retry(
+      async () => {
+        const data = await conductorClient.workflowResource.searchV21(start, limit, 'startTime:DESC', '*', `workflowType IN (${workflowId})`);
+        return data;
+      },
+      {
+        max: 3,
+      },
+    );
+
+    return {
+      total: data?.totalHits ?? 0,
+      data: (data?.results ?? []).map((it) => {
+        const { workflowId, input, output, ...rest } = pick(it, ['status', 'startTime', 'createTime', 'updateTime', 'endTime', 'workflowId', 'output', 'input']);
+
+        let alt: string | string[] | undefined;
+
+        const flattenOutput = flattenKeys(output, void 0, ['__display_text'], (_, data) => {
+          alt = data;
+        });
+
+        const outputValues = Object.values(flattenOutput);
+
+        const images = outputValues.map((it) => extractImageUrls(it)).flat();
+        const videos = outputValues.map((it) => extractVideoUrls(it)).flat();
+
+        const finalOutput = [];
+        let isInserted = false;
+
+        const outputValuesLength = outputValues.length;
+        if (outputValuesLength === 1 && !images.length && !videos.length) {
+          const currentOutput = outputValues[0];
+          if (typeof currentOutput === 'string') {
+            finalOutput.push({ type: 'text', data: currentOutput });
+          } else {
+            finalOutput.push({ type: 'json', data: currentOutput });
+          }
+          isInserted = true;
+        }
+
+        for (const image of images) {
+          finalOutput.push({ type: 'image', data: image, alt });
+          isInserted = true;
+        }
+
+        for (const video of videos) {
+          finalOutput.push({ type: 'video', data: video });
+          isInserted = true;
+        }
+
+        if (!isInserted) {
+          finalOutput.push({ type: 'json', data: output });
+        }
+
+        const ctx = input?.['__context'];
+        return {
+          ...rest,
+          output: finalOutput,
+          rawOutput: output,
+          taskId: workflowId,
+          userId: ctx?.userId ?? '',
+          teamId: ctx?.teamId ?? '',
+        };
+      }),
+    };
   }
 
   public async startWorkflow(request: StartWorkflowRequest) {

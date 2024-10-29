@@ -1,8 +1,10 @@
+import { MonkeyTaskDefTypes } from '@inf-monkeys/monkeys';
+
 import { WorkflowTriggerType } from '@/apis/workflow/trigger/typings.ts';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { VinesNodeExecutionTask } from '@/package/vines-flow/core/nodes/typings.ts';
+import { JSONValue } from '@/package/vines-flow/core/tools/typings.ts';
 import type { Task, Workflow as WorkflowExecution } from '@/package/vines-flow/share/types.ts';
-import { MonkeyTaskDefTypes } from '@inf-monkeys/monkeys';
 
 export type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -53,4 +55,21 @@ export type VinesWorkflowExecution = Omit<WorkflowExecution, 'tasks' | 'status'>
   tasks: VinesNodeExecutionTask[];
   originTasks: Array<Task>;
   triggerType?: WorkflowTriggerType;
+};
+
+export type VinesWorkflowExecutionOutputs = {
+  status: VinesWorkflowExecutionType;
+  startTime: number;
+  createTime: number;
+  updateTime: number;
+  endTime: number;
+  output: {
+    type: 'image' | 'video' | 'text' | 'json';
+    data: JSONValue;
+    alt?: string | string[] | undefined;
+  }[];
+  rawOutput: Record<string, any>;
+  taskId: string;
+  userId: string;
+  teamId: string;
 };

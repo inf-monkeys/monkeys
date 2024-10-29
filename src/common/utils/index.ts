@@ -103,3 +103,37 @@ export function getComfyuiWorkflowDataListFromWorkflow(workflow: MonkeyWorkflowD
   }
   return result;
 }
+
+import { isObject, merge, reduce } from 'lodash';
+
+type FlattenedObject = Record<string, any>;
+
+export const flattenKeys = (obj: unknown, path: string[] = [], triggerKeys?: string[], triggerCallback?: (key: string, data: any) => void): FlattenedObject =>
+  isObject(obj)
+    ? reduce(
+        obj,
+        (cum: FlattenedObject, next: unknown, key: string) => {
+          if (triggerKeys) {
+            if (triggerKeys.includes(key)) {
+              triggerCallback?.(key, obj[key]);
+            }
+          }
+          return merge(cum, flattenKeys(next, [...path, key], triggerKeys, triggerCallback));
+        },
+        {},
+      )
+    : { [path.join('.')]: obj };
+
+export const extractImageUrls = (text: unknown): string[] => {
+  if (typeof text !== 'string') return [];
+
+  const regex = /https?:\/\/[^\s"]+?\.(jpg|jpeg|png|gif|bmp|webp|svg)/gi;
+  return text.match(regex) || [];
+};
+
+export const extractVideoUrls = (text: unknown): string[] => {
+  if (typeof text !== 'string') return [];
+
+  const regex = /https?:\/\/[^\s"]+?\.(mp4|avi|mov|mkv|flv|wmv|webm)/gi;
+  return text.match(regex) || [];
+};

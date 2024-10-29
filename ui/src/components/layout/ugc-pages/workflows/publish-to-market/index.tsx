@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { useMemoizedFn } from 'ahooks';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -16,7 +17,8 @@ interface IPublishToMarketProps {
 
 export const PublishToMarket: React.FC<IPublishToMarketProps> = ({ visible, setVisible, context }) => {
   const { t } = useTranslation();
-  const publishToMarket = () => {
+
+  const publishToMarket = useMemoizedFn(() => {
     if (!context?.id) {
       toast.warning(t('common.toast.loading'));
       return;
@@ -29,7 +31,8 @@ export const PublishToMarket: React.FC<IPublishToMarketProps> = ({ visible, setV
       },
       error: t('common.operate.error'),
     });
-  };
+  });
+
   return (
     <Dialog open={visible} onOpenChange={setVisible}>
       <DialogContent>
