@@ -482,6 +482,9 @@
           "title": "Publish to market",
           "name": {
             "placeholder": "Enter name"
+          },
+          "button": {
+            "publish": "Publish"
           }
         },
         "view": {

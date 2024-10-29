@@ -476,6 +476,9 @@
           "title": "发布到市场",
           "name": {
             "placeholder": "请输入名称"
+          },
+          "button": {
+            "publish": "发布"
           }
         },
         "view": {

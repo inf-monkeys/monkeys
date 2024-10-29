@@ -18,6 +18,7 @@ import { createWorkflowsColumns } from '@/components/layout/ugc-pages/workflows/
 import { ExportWorkflowDialog } from '@/components/layout/ugc-pages/workflows/export-workflow';
 import { IExportWorkflowWithAssetsContext } from '@/components/layout/ugc-pages/workflows/export-workflow/typings.ts';
 import { PublishToMarket } from '@/components/layout/ugc-pages/workflows/publish-to-market';
+import { IPublishToMarketWithAssetsContext } from '@/components/layout/ugc-pages/workflows/publish-to-market/typings.ts';
 import { WorkflowInfoEditor } from '@/components/layout/workspace/workflow-info-editor.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
@@ -64,6 +65,7 @@ export const Workflows: React.FC = () => {
   const [exportDialogVisible, setExportDialogVisible] = useState(false);
   const [exportAssetContext, setExportAssetContext] = useState<IExportWorkflowWithAssetsContext | undefined>();
   const [publishToMarketVisible, setPublishToMarketVisible] = useState(false);
+  const [publishToMarketContext, setPublishToMarketContext] = useState<IPublishToMarketWithAssetsContext | undefined>();
 
   const handleAfterUpdateWorkflow = () => {
     void mutateWorkflows();
@@ -205,7 +207,14 @@ export const Workflows: React.FC = () => {
                   </DropdownMenuPortal>
                 </DropdownMenuSub>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => setPublishToMarketVisible(true)}>
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setPublishToMarketContext({
+                      id: item.workflowId,
+                    });
+                    setPublishToMarketVisible(true);
+                  }}
+                >
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                     <Share size={15} />
                   </DropdownMenuShortcut>
@@ -306,7 +315,11 @@ export const Workflows: React.FC = () => {
         }}
         context={exportAssetContext}
       />
-      <PublishToMarket visible={publishToMarketVisible} setVisible={setPublishToMarketVisible} />
+      <PublishToMarket
+        visible={publishToMarketVisible}
+        setVisible={setPublishToMarketVisible}
+        context={publishToMarketContext}
+      />
     </main>
   );
 };
