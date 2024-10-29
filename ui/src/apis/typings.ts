@@ -19,3 +19,9 @@ export interface IPaginationListData<T> {
   limit?: number;
   total?: number;
 }
+
+export enum IAssetPublishPolicy {
+  authorize = 'authorize',
+  clone = 'clone',
+  createNew = 'createNew',
+}
