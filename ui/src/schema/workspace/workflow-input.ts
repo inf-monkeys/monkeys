@@ -34,6 +34,7 @@ export const workflowInputSchema = z.object({
     .min(1, 'Field cannot be less than one characters')
     .max(20, 'Field cannot be more than twenty characters'),
   description: z.string().optional(),
+  placeholder: z.string().optional(),
   tips: z.string().optional(),
   type: inputType,
   default: z
@@ -59,6 +60,8 @@ export const workflowInputSchema = z.object({
       }),
     )
     .optional(),
+
+  textareaMiniHeight: z.number().optional(),
 
   foldUp: z.boolean().optional(),
   enableReset: z.boolean().optional(),

@@ -137,3 +137,22 @@ export const extractVideoUrls = (text: unknown): string[] => {
   const regex = /https?:\/\/[^\s"]+?\.(mp4|avi|mov|mkv|flv|wmv|webm)/gi;
   return text.match(regex) || [];
 };
+
+export const maskUrl = (url: string) => {
+  const parts = url.split('//');
+  const domain = parts[1];
+  const domainParts = domain.split('.');
+
+  const hideDomain = domainParts
+    .map((part) => {
+      if (part.length <= 4) {
+        return part.slice(0, -2) + '**';
+      }
+      const mid = Math.floor(part.length / 2);
+      return part.slice(0, 2) + '*'.repeat(2) + part.slice(mid - 2, mid + 3) + '*'.repeat(2) + part.slice(-2);
+    })
+    .join('.');
+
+  const hiddenAddress = parts[0] + '//' + hideDomain;
+  return hiddenAddress;
+};

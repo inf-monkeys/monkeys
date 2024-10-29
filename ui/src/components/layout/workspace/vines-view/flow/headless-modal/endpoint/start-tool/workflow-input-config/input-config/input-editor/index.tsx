@@ -86,10 +86,12 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       displayName: getI18nContent(currentVariable.displayName) ?? t('common.utils.unknown'),
       name: currentVariable.name,
       description: getI18nContent(currentVariable.description) ?? '',
+      placeholder: get(currentVariable, 'typeOptions.placeholder', ''),
       tips: get(currentVariable, 'typeOptions.tips', ''),
       type: currentVariable.type as IWorkflowInput['type'],
       default: currentVariable.default as IWorkflowInput['default'],
       required: get(currentVariable, 'required', false),
+      textareaMiniHeight: get(currentVariable, 'typeOptions.textareaMiniHeight', 40),
       multipleValues: get(currentVariable, 'typeOptions.multipleValues', false),
       assetType: get(currentVariable, 'typeOptions.assetType', ''),
       enableImageMask: get(currentVariable, 'typeOptions.enableImageMask', undefined),
@@ -117,6 +119,8 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       maxValue,
       numberPrecision,
       default: Default,
+      textareaMiniHeight,
+      placeholder,
       tips,
       selectList,
       enableSelectList,
@@ -129,6 +133,8 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       'multipleValues',
       'assetType',
       'default',
+      'textareaMiniHeight',
+      'placeholder',
       'minValue',
       'maxValue',
       'numberPrecision',
@@ -147,6 +153,8 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
       'multipleValues',
       'assetType',
       'default',
+      'placeholder',
+      'textareaMiniHeight',
       'minValue',
       'maxValue',
       'numberPrecision',
@@ -181,6 +189,8 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
     setOption('singleColumn', singleColumn);
     setOption('comfyuiModelServerId', comfyuiModelServerId);
     setOption('comfyuiModelTypeName', comfyuiModelTypeName);
+    setOption('placeholder', placeholder);
+    setOption('textareaMiniHeight', textareaMiniHeight);
 
     if (Default) {
       set(finalVariable, 'default', Default);

@@ -8,7 +8,9 @@ import { FieldDesc } from '@/components/layout/workspace/vines-view/flow/headles
 import { FieldEnableReset } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion/enable-reset.tsx';
 import { FieldFoldUp } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion/fold-up.tsx';
 import { FieldName } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion/name.tsx';
+import { FieldPlaceholder } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion/placeholder.tsx';
 import { FieldSingleColumn } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion/single-column.tsx';
+import { FieldTextareaMinHeight } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion/textarea-min-height.tsx';
 import { FieldTips } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/accordion/tips.tsx';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx';
 import { IWorkflowInput } from '@/schema/workspace/workflow-input.ts';
@@ -29,11 +31,13 @@ export const FieldAccordion: React.FC<IFieldAccordionProps> = ({ form }) => {
         </AccordionTrigger>
         <AccordionContent className="pt-4">
           <FieldDesc form={form} />
+          <FieldPlaceholder form={form} />
           <FieldTips form={form} />
           <FieldName form={form} />
           <FieldFoldUp form={form} />
           <FieldEnableReset form={form} />
           <FieldSingleColumn form={form} />
+          <FieldTextareaMinHeight form={form} />
         </AccordionContent>
       </AccordionItem>
     </Accordion>
