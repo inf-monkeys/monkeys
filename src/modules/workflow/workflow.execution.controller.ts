@@ -3,7 +3,7 @@ import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SearchWorkflowExecutionsDto } from './dto/req/search-workflow-execution.dto';
 import { StartWorkflowSyncDto } from './dto/req/start-workflow-sync.dto';
@@ -42,6 +42,21 @@ export class WorkflowExecutionController {
     return new SuccessResponse({
       data: result,
     });
+  }
+
+  @Get('/executions/:workflowId/outputs')
+  @ApiOperation({
+    summary: '获取 workflow 的执行输出',
+    description: '获取 workflow 的执行输出',
+  })
+  public async getWorkflowExecutionOutputs(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Query() query: { page: number; limit: number }) {
+    const { page = 1, limit = 10 } = query;
+    const result = await this.service.getWorkflowExecutionOutputs(workflowId, page, limit);
+    return {
+      code: 200,
+      message: 'ok',
+      ...result,
+    };
   }
 
   @Post('/executions/:workflowId/start-sync')

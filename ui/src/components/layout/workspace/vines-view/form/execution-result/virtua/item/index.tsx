@@ -12,7 +12,7 @@ import { cn } from '@/utils';
 
 export type IVinesExecutionResultItem = VinesWorkflowExecution & {
   render: {
-    type: 'image' | 'video' | 'raw' | 'empty';
+    type: 'image' | 'video' | 'text' | 'json' | 'empty';
     data: JSONValue;
     alt?: string | string[] | undefined;
   };
