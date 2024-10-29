@@ -31,12 +31,10 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   const [previewSrc, setPreviewSrc] = useState<string>(src);
 
   useAsyncEffect(async () => {
-    const newLink = new URL(src);
-    const pathnameArr = newLink.pathname.split('/');
-    const pathnameArrLength = pathnameArr.length;
-    newLink.pathname = pathnameArr.map((it, i) => (i === pathnameArrLength - 2 ? `${it}_thumb` : it)).join('/');
+    const srcArr = src.split('/');
+    const srcArrLength = srcArr.length;
 
-    const finalSrc = newLink.href;
+    const finalSrc = srcArr.map((it, i) => (i === srcArrLength - 2 ? `${it}_thumb` : it)).join('/');
     if (await checkImageUrlAvailable(finalSrc)) {
       setPreviewSrc(finalSrc);
     }
