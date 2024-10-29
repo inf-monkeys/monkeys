@@ -47,7 +47,7 @@ const VinesChatView: React.FC = () => {
   const [sidebarVisible, setSidebarVisible] = useState(!workbenchVisible);
 
   const containerHeight = usePageStore((s) => s.containerHeight);
-  const height = containerHeight - (vinesIFrameVisible ? 70 : workbenchVisible ? 36 : 48);
+  const height = containerHeight - (vinesIFrameVisible ? 70 : workbenchVisible ? 36 : 64);
 
   return (
     <div className={cn('relative flex h-full max-h-full p-6', workbenchVisible && 'p-0 pl-4')}>

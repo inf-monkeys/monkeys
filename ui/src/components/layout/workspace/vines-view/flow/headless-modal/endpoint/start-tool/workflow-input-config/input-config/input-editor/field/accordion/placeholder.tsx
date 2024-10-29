@@ -7,31 +7,31 @@ import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessa
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { IWorkflowInput } from '@/schema/workspace/workflow-input.ts';
 
-interface IFieldTipsProps extends React.ComponentPropsWithoutRef<'div'> {
+interface IFieldPlaceholderProps extends React.ComponentPropsWithoutRef<'div'> {
   form: UseFormReturn<IWorkflowInput>;
 }
 
-export const FieldTips: React.FC<IFieldTipsProps> = ({ form }) => {
+export const FieldPlaceholder: React.FC<IFieldPlaceholderProps> = ({ form }) => {
   const { t } = useTranslation();
 
   return (
     <FormField
-      name="tips"
+      name="placeholder"
       control={form.control}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>{t('workspace.flow-view.endpoint.start-tool.input.config-form.tips.label')}</FormLabel>
+          <FormLabel>{t('workspace.flow-view.endpoint.start-tool.input.config-form.placeholder.label')}</FormLabel>
           <div className="px-1">
             <FormControl>
               <Textarea
-                placeholder={t('workspace.flow-view.endpoint.start-tool.input.config-form.tips.placeholder')}
+                placeholder={t('workspace.flow-view.endpoint.start-tool.input.config-form.placeholder.placeholder')}
                 {...field}
                 className="grow"
               />
             </FormControl>
           </div>
           <FormDescription>
-            {t('workspace.flow-view.endpoint.start-tool.input.config-form.tips.placeholder')}
+            {t('workspace.flow-view.endpoint.start-tool.input.config-form.placeholder.placeholder')}
           </FormDescription>
           <FormMessage />
         </FormItem>

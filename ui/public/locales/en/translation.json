@@ -2427,6 +2427,10 @@
                 "label": "Description",
                 "placeholder": "After filling in, the description of the configuration will be displayed below"
               },
+              "placeholder": {
+                "label": "Input placeholder",
+                "placeholder": "After filling in, a placeholder will be displayed in the form input box, such as \"Please enter...\""
+              },
               "tips": {
                 "label": "Tips",
                 "placeholder": "After filling in, a prompt icon will be displayed, and prompt information will be displayed when the mouse hovers"
@@ -2515,6 +2519,9 @@
                 "single-column": {
                   "label": "Single column display",
                   "desc": "When enabled, it will form a double column with the adjacent single column"
+                },
+                "textarea-mini-height": {
+                  "label": "Input box line height"
                 },
                 "fold": "Advanced Configuration",
                 "reset": "Reset"

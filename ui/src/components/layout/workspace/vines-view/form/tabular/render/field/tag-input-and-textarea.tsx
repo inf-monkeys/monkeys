@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 
-import { t } from 'i18next';
 import { isArray } from 'lodash';
 import { ControllerRenderProps, FieldValues, UseFormReturn } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 
 import { AutosizeTextarea } from '@/components/ui/autosize-textarea.tsx';
 import { TagInput } from '@/components/ui/input/tag';
@@ -28,12 +28,17 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
   field,
   miniMode = false,
 }) => {
+  const { t } = useTranslation();
+
   const isNumber = type === 'number';
   const isMultiple = typeOptions?.multipleValues ?? false;
 
   const visible = useMemo(() => type === 'string' || (miniMode && type === 'file'), [type, typeOptions, miniMode]);
 
   const displayName = getI18nContent(inputDisplayName);
+
+  const placeholder =
+    typeOptions?.placeholder ?? t('workspace.pre-view.actuator.execution-form.string', { displayName });
 
   return (
     visible &&
@@ -46,11 +51,11 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
             value.filter((it) => (isNumber ? !isNaN(Number(it)) : it)),
           )
         }
-        placeholder={t('workspace.pre-view.actuator.execution-form.string', { displayName })}
+        placeholder={placeholder}
       />
     ) : (
       <AutosizeTextarea
-        placeholder={t('workspace.pre-view.actuator.execution-form.string', { displayName })}
+        placeholder={placeholder}
         value={(value as string) ?? ''}
         onChange={(value) => {
           if (isNumber) {
@@ -60,7 +65,7 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
             onChange(value);
           }
         }}
-        minHeight={40}
+        minHeight={typeOptions?.textareaMiniHeight ?? 40}
         maxHeight={200}
         {...field}
       />

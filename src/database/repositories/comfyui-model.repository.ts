@@ -1,8 +1,8 @@
 import { ListDto } from '@/common/dto/list.dto';
-import { generateDbId } from '@/common/utils';
+import { generateDbId, maskUrl } from '@/common/utils';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import _ from 'lodash';
+import _, { set } from 'lodash';
 import { ILike, In, Repository } from 'typeorm';
 import { ComfyuiModelServerRelationEntity } from '../entities/assets/model/comfyui-model/comfyui-model-server-relation.entity';
 import { ComfyuiModelTypeEntity, CreateComfyuiModelTypeParams, UpdateComfyuiModelTypeParams } from '../entities/assets/model/comfyui-model/comfyui-model-type.entity';
@@ -190,6 +190,7 @@ export class ComfyuiModelRepository {
         ...model,
         serverRelations: serverRelations
           ? serverRelations.map((relation) => {
+              set(relation, 'server.address', maskUrl(relation.server.address));
               return {
                 ...relation,
                 type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
@@ -336,6 +337,7 @@ export class ComfyuiModelRepository {
         serverRelations: serverRelations
           ? serverRelations.map((relation) => {
               const pathArr = relation.path.split('/');
+              set(relation, 'server.address', maskUrl(relation.server.address));
               return {
                 ...relation,
                 apiPath: pathArr.length > 1 ? pathArr.slice(1).join('/') : relation.path,
@@ -389,6 +391,7 @@ export class ComfyuiModelRepository {
 
     if (rawModel.serverRelations) {
       rawModel.serverRelations = rawModel.serverRelations.map((relation) => {
+        set(relation, 'server.address', maskUrl(relation.server.address));
         return {
           ...relation,
           type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),

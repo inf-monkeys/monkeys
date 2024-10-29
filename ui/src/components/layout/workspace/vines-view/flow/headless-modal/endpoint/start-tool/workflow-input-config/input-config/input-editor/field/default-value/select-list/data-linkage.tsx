@@ -80,50 +80,60 @@ export const SelectDataLinkage: React.FC<ISelectDataLinkageProps> = ({
               {t('workspace.flow-view.endpoint.start-tool.input.config-form.default.select.linkage.desc')}
             </p>
           </div>
-          {list.map(({ name, value }, i) => (
-            <div className="flex items-start gap-2" key={i}>
-              <Select
-                value={name}
-                onValueChange={(val) => {
-                  if (value) {
-                    replace(i, { name: val, value });
-                  } else {
-                    const itDefault = workflowInput.find(({ name: itName }) => itName === val)?.default;
-                    replace(i, { name: val, value: itDefault?.toString() ?? '' });
-                  }
-                }}
-              >
-                <SelectTrigger className="w-32">
-                  <SelectValue
-                    placeholder={t(
-                      'workspace.flow-view.endpoint.start-tool.input.config-form.default.select.linkage.select-placeholder',
-                    )}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {workflowInput.map(({ name: itName, displayName }) => (
-                    <SelectItem
-                      key={itName}
-                      value={itName}
-                      disabled={list.some(({ name: itName2 }, j) => j !== i && itName2 === itName)}
-                    >
-                      {getI18nContent(displayName)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <AutosizeTextarea
-                minHeight={36}
-                disabled={!name}
-                value={value?.toString()}
-                onChange={(val) => replace(i, { name, value: val.target.value })}
-                placeholder={t(
-                  'workspace.flow-view.endpoint.start-tool.input.config-form.default.select.linkage.value-placeholder',
-                )}
-              />
-              <Button icon={<Trash2 />} size="small" variant="outline" onClick={() => remove(i)} />
-            </div>
-          ))}
+          {list.map(({ name, value }, i) => {
+            const input = workflowInput.find(({ name: itName }) => itName === name);
+
+            const selectList = input?.typeOptions?.selectList ?? [];
+
+            return (
+              <div className="flex items-start gap-2" key={i}>
+                <Select
+                  value={name}
+                  onValueChange={(val) => {
+                    if (value) {
+                      replace(i, { name: val, value });
+                    } else {
+                      replace(i, { name: val, value: input?.default?.toString() ?? '' });
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-32">
+                    <SelectValue
+                      placeholder={t(
+                        'workspace.flow-view.endpoint.start-tool.input.config-form.default.select.linkage.select-placeholder',
+                      )}
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {workflowInput.map(({ name: itName, displayName }) => (
+                      <SelectItem
+                        key={itName}
+                        value={itName}
+                        disabled={list.some(({ name: itName2 }, j) => j !== i && itName2 === itName)}
+                      >
+                        {getI18nContent(displayName)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <AutosizeTextarea
+                  minHeight={36}
+                  disabled={!name}
+                  value={value?.toString()}
+                  onChange={(val) => replace(i, { name, value: val.target.value })}
+                  placeholder={t(
+                    'workspace.flow-view.endpoint.start-tool.input.config-form.default.select.linkage.value-placeholder',
+                  )}
+                />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button icon={<Trash2 />} size="small" variant="outline" onClick={() => remove(i)} />
+                  </TooltipTrigger>
+                  <TooltipContent>{t('common.utils.delete')}</TooltipContent>
+                </Tooltip>
+              </div>
+            );
+          })}
           <Button
             variant="outline"
             size="small"

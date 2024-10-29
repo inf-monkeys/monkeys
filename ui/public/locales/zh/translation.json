@@ -2426,8 +2426,12 @@
                 "label": "描述",
                 "placeholder": "填写后，将在表单下方显示描述信息"
               },
+              "placeholder": {
+                "label": "输入框占位符",
+                "placeholder": "填写后，将在表单输入框中显示占位符，如「请输入...」"
+              },
               "tips": {
-                "label": "输入提示",
+                "label": "填写提示",
                 "placeholder": "填写后，将显示提示图标，鼠标悬浮时显示提示信息"
               },
               "type": {
@@ -2475,7 +2479,11 @@
                     "desc": "当用户选择此选项时，可联动更新其他表单配置",
                     "select-placeholder": "选择联动字段",
                     "value-placeholder": "请输入联动更变的值",
-                    "add": "添加联动更变的表单"
+                    "add": "添加联动更变的表单",
+                    "filter-select-list": {
+                      "label": "过滤选项",
+                      "desc": "联动此选项表单时，将根据此指定的值过滤选项"
+                    }
                   }
                 }
               },
@@ -2514,6 +2522,9 @@
                 "single-column": {
                   "label": "单栏显示",
                   "desc": "启用后，将会与相邻的单栏组成双栏"
+                },
+                "textarea-mini-height": {
+                  "label": "输入框行高"
                 },
                 "fold": "高级配置",
                 "reset": "重置"
