@@ -1,7 +1,7 @@
 import { config } from '@/common/config';
 import { ListDto } from '@/common/dto/list.dto';
 import { logger } from '@/common/logger';
-import { generateDbId } from '@/common/utils';
+import { generateDbId, getComfyuiWorkflowDataListFromWorkflow } from '@/common/utils';
 import { flatTasks } from '@/common/utils/conductor';
 import { getI18NValue } from '@/common/utils/i18n';
 import { extractAssetFromZip } from '@/common/utils/zip-asset';
@@ -9,13 +9,14 @@ import { ValidationIssueType, WorkflowMetadataEntity, WorkflowOutputValue, Workf
 import { WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
 import { AssetsCommonRepository } from '@/database/repositories/assets-common.repository';
 import { UpdatePermissionsDto } from '@/modules/workflow/dto/req/update-permissions.dto';
-import { WorkflowTask } from '@inf-monkeys/conductor-javascript';
+import { SimpleTaskDef, WorkflowTask } from '@inf-monkeys/conductor-javascript';
 import { AssetType, MonkeyTaskDefTypes, ToolProperty, ToolType } from '@inf-monkeys/monkeys';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import fs from 'fs';
 import _ from 'lodash';
 import { ToolsRepository } from '../../database/repositories/tools.repository';
 import { WorkflowRepository } from '../../database/repositories/workflow.repository';
+import { AssetsPublishService } from '../assets/assets.publish.service';
 import { ConductorService } from './conductor/conductor.service';
 import { CreateWorkflowData, CreateWorkflowOptions, WorkflowExportJson, WorkflowWithAssetsJson } from './interfaces';
 import { WorkflowValidateService } from './workflow.validate.service';
@@ -33,6 +34,7 @@ export class WorkflowCrudService {
     private readonly workflowRepository: WorkflowRepository,
     private readonly workflowValidateService: WorkflowValidateService,
     private readonly assetsCommonRepository: AssetsCommonRepository,
+    private readonly assetsPublishService: AssetsPublishService,
   ) {}
 
   public async getWorkflowDef(workflowId: string, version?: number): Promise<WorkflowMetadataEntity> {
@@ -392,6 +394,14 @@ export class WorkflowCrudService {
     const newWorkflowId = generateDbId();
     for (const { version } of versions) {
       const originalWorkflow = await this.workflowRepository.getWorkflowById(originalWorkflowId, version);
+      const comfyuiDataList = getComfyuiWorkflowDataListFromWorkflow(originalWorkflow);
+      if (comfyuiDataList.length > 0) {
+        for (const [, { index, comfyuiWorkflowId }] of comfyuiDataList.entries()) {
+          const { id } = await this.assetsPublishService.forkAsset('comfyui-workflow', teamId, comfyuiWorkflowId);
+          logger.debug(id);
+          (originalWorkflow.tasks[index] as SimpleTaskDef).inputParameters.workflow = id;
+        }
+      }
       await this.createWorkflowDef(
         teamId,
         userId,

@@ -1,3 +1,4 @@
+import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { SimpleTaskDef } from '@inf-monkeys/conductor-javascript';
 import { MonkeyWorkflowDef } from '@inf-monkeys/monkeys';
 import crypto from 'crypto';
@@ -90,7 +91,7 @@ export interface ComfyUIWorkflowDataInWorkflowTask {
   index: number;
   comfyuiWorkflowId?: string;
 }
-export function getComfyuiWorkflowDataListFromWorkflow(workflow: MonkeyWorkflowDef): ComfyUIWorkflowDataInWorkflowTask[] {
+export function getComfyuiWorkflowDataListFromWorkflow(workflow: MonkeyWorkflowDef | WorkflowMetadataEntity): ComfyUIWorkflowDataInWorkflowTask[] {
   const result: ComfyUIWorkflowDataInWorkflowTask[] = [];
   for (const [index, task] of workflow.tasks.entries()) {
     if (task.name === 'comfyui:run_comfyui_workflow') {

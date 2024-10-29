@@ -208,9 +208,11 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     if (isPreset) {
       throw new Error('无法发布预置资产');
     }
+    const extraAssetData = _.pick(publishConfig, 'extraAssetData');
     const id = generateDbId();
     const clonedAsset = this.repository.create({
       ...asset,
+      ...extraAssetData,
       workflowId: asset.assetType === 'workflow' ? id : undefined,
       id,
       teamId,
@@ -220,19 +222,22 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
       isPublished: true,
       createdTimestamp: Date.now(),
       updatedTimestamp: Date.now(),
-      publishConfig,
+      publishConfig: _.omit(publishConfig, 'extraAssetData'),
     });
     await this.repository.save(clonedAsset);
     return clonedAsset;
   }
 
-  public async forkAsset(teamId: string, assetId: string) {
-    const asset = await this.getAssetById(assetId);
+  public async forkAsset(teamId: string, assetId: string, metadata?: E) {
+    const asset =
+      metadata ||
+      (await this.getAssetById(assetId, {
+        isPublished: true,
+      }));
     if (!asset) {
       throw new Error('资产不存在');
     }
-    const { isPublished } = asset;
-    if (!isPublished) {
+    if (!asset.isPublished) {
       throw new Error('此资产未发布');
     }
     if (asset.teamId === teamId) {
