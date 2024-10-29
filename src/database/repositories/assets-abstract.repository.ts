@@ -270,7 +270,9 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
   }
 
   public async updatePublishedAsset(teamId: string, assetId: string, newAssetData: BaseAssetEntity) {
-    const asset = await this.getAssetById(assetId);
+    const asset = await this.getAssetById(assetId, {
+      isPublished: true,
+    });
     if (!asset) {
       throw new Error('资产不存在');
     }
@@ -290,20 +292,25 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     return newAsset;
   }
 
-  public async deletePublishedAsset(teamId: string, assetId: string) {
-    const asset = await this.getAssetById(assetId);
+  public async deletePublishedAsset(teamId: string, assetId: string, soft = true) {
+    const asset = await this.getAssetById(assetId, {
+      isPublished: true,
+    });
     if (!asset) {
       throw new Error('资产不存在');
     }
     if (asset.teamId != teamId) {
       throw new Error('无权限操作此资产');
     }
-    const { isPublished } = asset;
-    if (!isPublished) {
+    if (!asset.isPublished) {
       throw new Error('此资产未发布');
     }
-    asset.isDeleted = true;
-    await this.repository.save(asset);
+    if (soft) {
+      asset.isDeleted = true;
+      await this.repository.save(asset);
+    } else {
+      await this.repository.remove(asset);
+    }
     return true;
   }
 

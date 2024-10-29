@@ -14,3 +14,9 @@ export const publishApplication = (id: string, assetType: AssetType, publishConf
     method: 'POST',
     simple: true,
   })(`/api/assets/${assetType}/publish/${id}`, { publishConfig });
+
+export const deleteApplicationOnStore = (id: string, assetType: AssetType) =>
+  vinesFetcher({
+    method: 'DELETE',
+    simple: true,
+  })(`/api/assets/${assetType}/publish/${id}`);
