@@ -4,7 +4,7 @@ import { mutate } from 'swr';
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
-import { Copy, FileUp, FolderUp, Import, Link, Pencil, Trash } from 'lucide-react';
+import { Copy, Download, FileUp, FolderUp, Import, Link, Pencil, Share, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -17,6 +17,7 @@ import { CreateAppDialog } from '@/components/layout/ugc-pages/apps/create';
 import { createWorkflowsColumns } from '@/components/layout/ugc-pages/workflows/consts.tsx';
 import { ExportWorkflowDialog } from '@/components/layout/ugc-pages/workflows/export-workflow';
 import { IExportWorkflowWithAssetsContext } from '@/components/layout/ugc-pages/workflows/export-workflow/typings.ts';
+import { PublishToMarket } from '@/components/layout/ugc-pages/workflows/publish-to-market';
 import { WorkflowInfoEditor } from '@/components/layout/workspace/workflow-info-editor.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import {
@@ -36,8 +37,12 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuPortal,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
@@ -58,6 +63,7 @@ export const Workflows: React.FC = () => {
   const [deleteAlertDialogVisible, setDeleteAlertDialogVisible] = useState(false);
   const [exportDialogVisible, setExportDialogVisible] = useState(false);
   const [exportAssetContext, setExportAssetContext] = useState<IExportWorkflowWithAssetsContext | undefined>();
+  const [publishToMarketVisible, setPublishToMarketVisible] = useState(false);
 
   const handleAfterUpdateWorkflow = () => {
     void mutateWorkflows();
@@ -132,25 +138,6 @@ export const Workflows: React.FC = () => {
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem
-                  onSelect={() => copy(location.origin.concat(`/${item.teamId}/workspace/${item.workflowId}`))}
-                >
-                  <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
-                    <Link size={15} />
-                  </DropdownMenuShortcut>
-                  {t('ugc-page.workflow.ugc-view.operate-area.options.copy-link')}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onSelect={() => {
-                    void handleCloneWorkflow(item.workflowId);
-                  }}
-                >
-                  <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
-                    <Copy size={15} />
-                  </DropdownMenuShortcut>
-                  {t('ugc-page.workflow.ugc-view.operate-area.options.create-a-copy')}
-                </DropdownMenuItem>
-                <DropdownMenuItem
                   onSelect={() => {
                     setCurrentWorkflow(item);
                     setWorkflowEditorVisible(true);
@@ -162,33 +149,67 @@ export const Workflows: React.FC = () => {
                   {t('ugc-page.workflow.ugc-view.operate-area.options.edit-info')}
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onSelect={() => {
-                    setExportAssetContext({
-                      workflowId: item.workflowId,
-                      displayName: getI18nContent(item.displayName) ?? t('common.utils.untitled'),
-                      version: item.version,
-                    });
-                    setExportDialogVisible(true);
-                  }}
+                  onSelect={() => copy(location.origin.concat(`/${item.teamId}/workspace/${item.workflowId}`))}
                 >
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
-                    <FileUp size={15} />
+                    <Link size={15} />
                   </DropdownMenuShortcut>
-                  {t('ugc-page.workflow.ugc-view.operate-area.options.export-current-version')}
+                  {t('ugc-page.workflow.ugc-view.operate-area.options.copy-link')}
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onSelect={() => {
-                    setExportAssetContext({
-                      workflowId: item.workflowId,
-                      displayName: getI18nContent(item.displayName) ?? t('common.utils.untitled'),
-                    });
-                    setExportDialogVisible(true);
-                  }}
-                >
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => void handleCloneWorkflow(item.workflowId)}>
                   <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
-                    <FolderUp size={15} />
+                    <Copy size={15} />
                   </DropdownMenuShortcut>
-                  {t('ugc-page.workflow.ugc-view.operate-area.options.export-all-versions')}
+                  {t('ugc-page.workflow.ugc-view.operate-area.options.create-a-copy')}
+                </DropdownMenuItem>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                      <Download size={15} />
+                    </DropdownMenuShortcut>
+                    {t('settings.account.team.import-export.export.button')}
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuItem
+                        onSelect={() => {
+                          setExportAssetContext({
+                            workflowId: item.workflowId,
+                            displayName: getI18nContent(item.displayName) ?? t('common.utils.untitled'),
+                            version: item.version,
+                          });
+                          setExportDialogVisible(true);
+                        }}
+                      >
+                        <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                          <FileUp size={15} />
+                        </DropdownMenuShortcut>
+                        {t('ugc-page.workflow.ugc-view.operate-area.options.export-current-version')}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={() => {
+                          setExportAssetContext({
+                            workflowId: item.workflowId,
+                            displayName: getI18nContent(item.displayName) ?? t('common.utils.untitled'),
+                          });
+                          setExportDialogVisible(true);
+                        }}
+                      >
+                        <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                          <FolderUp size={15} />
+                        </DropdownMenuShortcut>
+                        {t('ugc-page.workflow.ugc-view.operate-area.options.export-all-versions')}
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => setPublishToMarketVisible(true)}>
+                  <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
+                    <Share size={15} />
+                  </DropdownMenuShortcut>
+                  {t('components.layout.ugc.publish-dialog.title')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -223,7 +244,7 @@ export const Workflows: React.FC = () => {
                 }}
               >
                 <DropdownMenuGroup>
-                  <DropdownMenuItem disabled onSelect={() => {}}>
+                  <DropdownMenuItem disabled>
                     {t('ugc-page.workflow.ugc-view.subtitle.import.options.local-import')}
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -285,6 +306,7 @@ export const Workflows: React.FC = () => {
         }}
         context={exportAssetContext}
       />
+      <PublishToMarket visible={publishToMarketVisible} setVisible={setPublishToMarketVisible} />
     </main>
   );
 };
