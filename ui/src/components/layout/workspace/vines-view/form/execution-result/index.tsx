@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useCreation } from 'ahooks';
 import { type EventEmitter } from 'ahooks/lib/useEventEmitter';
@@ -16,6 +16,7 @@ import { VinesLoading } from '@/components/ui/loading';
 import { useFlowStore } from '@/store/useFlowStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
+import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 const EMPTY_ITEM: IVinesExecutionResultItem = {
   tasks: [],
@@ -26,15 +27,22 @@ const EMPTY_ITEM: IVinesExecutionResultItem = {
 interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {
   event$: EventEmitter<void>;
   height: number;
+
+  enablePostMessage?: boolean;
 }
 
-export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ className, event$, height }) => {
+export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
+  className,
+  event$,
+  height,
+  enablePostMessage,
+}) => {
   const { t } = useTranslation();
 
   const visible = useViewStore((s) => s.visible);
   const workflowId = useFlowStore((s) => s.workflowId);
 
-  const { data: output, isLoading } = useWorkflowExecutionOutputs(workflowId && visible ? workflowId : null);
+  const { data: output, isLoading, mutate } = useWorkflowExecutionOutputs(workflowId && visible ? workflowId : null);
 
   const [refresh, setRefresh] = useState(0);
 
@@ -89,6 +97,29 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({ cla
 
     return result.filter((it) => it.length).map((it) => it.filter((it) => it.render.type !== 'empty'));
   }, [output, refresh]);
+
+  useEffect(() => {
+    if (enablePostMessage && output) {
+      window.parent.postMessage(
+        stringify(
+          output
+            .filter(({ status }) => ['COMPLETED', 'RUNNING'].includes(status))
+            .map(({ rawOutput: _, userId: _u, teamId: _t, ...rest }) => rest),
+        ),
+        '*',
+      );
+    }
+  }, [enablePostMessage, output]);
+
+  useEffect(() => {
+    window.addEventListener('message', (event) => {
+      switch (event.data) {
+        case 'vines-get-execution-outputs':
+          void mutate();
+          break;
+      }
+    });
+  }, []);
 
   event$.useSubscription(() => setRefresh((it) => it + 1));
 
