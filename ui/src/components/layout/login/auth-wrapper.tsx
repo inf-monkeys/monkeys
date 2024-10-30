@@ -34,8 +34,8 @@ interface IAuthWrapperProps {
 export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, children, method, event$ }) => {
   const { t } = useTranslation();
 
-  const navigate = useNavigate({ from: Route.fullPath });
-  const { redirect_id, redirect_params, redirect_search } = Route.useSearch();
+  const navigate = useNavigate();
+  const { redirect_id, redirect_params, redirect_search } = Route.useSearch<any>();
   const { mutate } = useSWRConfig();
 
   const { trigger: triggerPassword, data: passwordData } = useLoginByPassword();
@@ -79,9 +79,19 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
         mutate('/api/teams').then((it) => {
           setLoading(false);
           setLocalStorage('vines-teams', it);
-          if (redirect_id && redirect_params) {
+          if (
+            redirect_id &&
+            redirect_params &&
+            !!redirect_params?.teamId &&
+            it?.some((item: { id: string }) => item.id === redirect_params?.teamId)
+          ) {
             VinesEvent.emit('vines-nav', redirect_id, redirect_params, redirect_search);
           } else {
+            const currentTeamId = it?.[0]?.id;
+            if (currentTeamId) {
+              localStorage.setItem('vines-team-id', currentTeamId);
+              window['vinesTeamId'] = currentTeamId;
+            }
             void navigate({ to: '/' });
           }
         });

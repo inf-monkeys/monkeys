@@ -57,7 +57,11 @@ export const FieldType: React.FC<IFieldTypeProps> = ({ form, forceUpdate }) => {
                   </Button>
                 </FormControl>
               </PopoverTrigger>
-              <PopoverContent className="p-0">
+              <PopoverContent
+                className="p-0"
+                onWheel={(e) => e.stopPropagation()}
+                onTouchMove={(e) => e.stopPropagation()}
+              >
                 <Command>
                   <CommandInput
                     placeholder={t('workspace.flow-view.endpoint.start-tool.input.config-form.type.placeholder')}
@@ -65,7 +69,7 @@ export const FieldType: React.FC<IFieldTypeProps> = ({ form, forceUpdate }) => {
                   <CommandEmpty>
                     {t('workspace.flow-view.endpoint.start-tool.input.config-form.type.search-empty')}
                   </CommandEmpty>
-                  <ScrollArea className="h-56">
+                  <ScrollArea className="flex max-h-52 flex-col overflow-y-auto">
                     <CommandGroup>
                       {WORKFLOW_INPUT_TYPE_OPTION_LIST.map((it, i) => {
                         const labelVal = t(

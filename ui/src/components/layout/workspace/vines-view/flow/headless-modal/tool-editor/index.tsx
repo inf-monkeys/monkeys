@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import { useLatest } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -72,6 +73,8 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
 
   const disabled = !isLatestWorkflowVersion;
 
+  const openLatest = useLatest(open);
+
   return (
     <Dialog open={open} onOpenChange={(val) => !disableDialogClose && setOpen(val)}>
       <DialogContent
@@ -80,7 +83,13 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
           if (e.target instanceof Element && e.target.closest('[data-sonner-toast]')) {
             e.preventDefault();
           }
-          vines.emit('update', vines.getRaw());
+          if ((e.target as HTMLDivElement).getAttribute('data-vines-overlay')) {
+            setTimeout(() => {
+              if (!openLatest.current) {
+                vines.emit('update', vines.getRaw());
+              }
+            });
+          }
         }}
       >
         <DialogTitle asChild>

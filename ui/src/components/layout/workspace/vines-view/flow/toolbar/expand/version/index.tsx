@@ -52,7 +52,7 @@ export const VinesVersionToolbar: React.FC<IVinesVersionToolbarProps> = ({ versi
         <Command>
           <CommandInput placeholder={t('workspace.flow-view.version.search')} />
           <CommandEmpty>{t('workspace.flow-view.version.search-empty')}</CommandEmpty>
-          <ScrollArea className="h-36">
+          <ScrollArea className="flex max-h-40 flex-col overflow-y-auto">
             <CommandGroup>
               {workflowVersion.map((id) => {
                 const finalId = id.toString();

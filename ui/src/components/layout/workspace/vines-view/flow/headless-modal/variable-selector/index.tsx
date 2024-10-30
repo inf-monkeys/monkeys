@@ -16,6 +16,7 @@ import {
   CommandShortcut,
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VariableEditorRefProps } from '@/components/ui/vines-variable-editor';
 import { useVinesFlow } from '@/package/vines-flow';
 import { IVinesVariable } from '@/package/vines-flow/core/tools/typings.ts';
@@ -108,7 +109,7 @@ export const VinesVariableSelector: React.FC<IVinesVariableSelectorProps> = () =
           _
         </div>
       </PopoverTrigger>
-      <PopoverContent className="p-0">
+      <PopoverContent className="p-0" onWheel={(e) => e.stopPropagation()} onTouchMove={(e) => e.stopPropagation()}>
         <Command>
           <CommandList>
             <CommandInput placeholder={t('workspace.flow-view.headless-modal.variable-selector.search-placeholder')} />
@@ -116,28 +117,30 @@ export const VinesVariableSelector: React.FC<IVinesVariableSelectorProps> = () =
           </CommandList>
           <CommandSeparator />
           <CommandList>
-            {variables.map((it, index) => (
-              <CommandGroup key={index} heading={it[0].group.name}>
-                {it.map(({ label, originalName, id, jsonpath, targetId, children }, i) => (
-                  <CommandItem key={i} onSelect={() => handleOnSelected(id, jsonpath, targetId)}>
-                    {label}
-                    <CommandShortcut>
-                      {originalName.length > 20 ? `${originalName.slice(0, 20)}...` : originalName}
-                    </CommandShortcut>
-                    {children && children.length > 0 && (
-                      <VariableChildren
-                        name={label}
-                        onSelected={(childId, childJsonpath, childTargetId) =>
-                          handleOnSelected(childId, childJsonpath, childTargetId)
-                        }
-                      >
-                        {children}
-                      </VariableChildren>
-                    )}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            ))}
+            <ScrollArea className="flex max-h-64 flex-col overflow-y-auto">
+              {variables.map((it, index) => (
+                <CommandGroup key={index} heading={it[0].group.name}>
+                  {it.map(({ label, originalName, id, jsonpath, targetId, children }, i) => (
+                    <CommandItem key={i} onSelect={() => handleOnSelected(id, jsonpath, targetId)}>
+                      {label}
+                      <CommandShortcut>
+                        {originalName.length > 20 ? `${originalName.slice(0, 20)}...` : originalName}
+                      </CommandShortcut>
+                      {children && children.length > 0 && (
+                        <VariableChildren
+                          name={label}
+                          onSelected={(childId, childJsonpath, childTargetId) =>
+                            handleOnSelected(childId, childJsonpath, childTargetId)
+                          }
+                        >
+                          {children}
+                        </VariableChildren>
+                      )}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              ))}
+            </ScrollArea>
           </CommandList>
         </Command>
       </PopoverContent>
