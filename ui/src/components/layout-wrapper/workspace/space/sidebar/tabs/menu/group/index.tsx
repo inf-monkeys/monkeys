@@ -72,7 +72,7 @@ export const ViewGroup: React.FC<IViewGroupProps> = ({ pageId, pagesMutate }) =>
       <DropdownMenuPortal>
         <DropdownMenuSubContent>
           {isLoading && <DropdownMenuItem disabled>{t('common.load.loading')}</DropdownMenuItem>}
-          <VirtuaPinGroupList data={finalGroups} height={120} pageId={pageId} mutate={pageGroupMutate} />
+          <VirtuaPinGroupList data={finalGroups} pageId={pageId} mutate={pageGroupMutate} />
           <DropdownMenuSeparator />
           <SimpleInputDialog
             title={t('workspace.wrapper.space.menu.group.create')}

@@ -11,16 +11,15 @@ import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 interface IVirtuaPinGroupListProps {
   data: IPageGroup[];
 
-  height: number;
   pageId: string;
   mutate: KeyedMutator<IPageGroup[] | undefined>;
 }
 
-export const VirtuaPinGroupList: React.FC<IVirtuaPinGroupListProps> = ({ data, height, pageId, mutate }) => {
+export const VirtuaPinGroupList: React.FC<IVirtuaPinGroupListProps> = ({ data, pageId, mutate }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
-    <ScrollArea className="-mr-1 w-52 pr-1" ref={scrollRef} style={{ height }} disabledOverflowMask>
+    <ScrollArea className="-mr-1 flex max-h-44 w-52 flex-col overflow-y-auto pr-1" ref={scrollRef} disabledOverflowMask>
       <Virtualizer scrollRef={scrollRef}>
         {data.map((it, i) => (
           <GroupItem key={i} group={it} pageId={pageId} mutate={mutate} />

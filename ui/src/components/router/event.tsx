@@ -39,7 +39,7 @@ export const RouteEvent: React.FC = () => {
         });
       } else {
         return navigate({
-          to: to.endsWith('/') && !to.endsWith('$teamId/') ? to.slice(0, -1) : to,
+          to: to.endsWith('/') && !to.endsWith('$teamId/') ? to.slice(0, -1) : (to as any),
           params: {
             ...routeMetadata.current.params,
             ...params,
