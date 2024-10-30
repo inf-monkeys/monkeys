@@ -5312,6 +5312,11 @@ jsonwebtoken@^9.0.2:
     ms "^2.1.1"
     semver "^7.5.4"
 
+jssha@^3.3.1:
+  version "3.3.1"
+  resolved "https://registry.npmmirror.com/jssha/-/jssha-3.3.1.tgz#c5b7fc7fb9aa745461923b87df0e247dd59c7ea8"
+  integrity sha512-VCMZj12FCFMQYcFLPRm/0lOBbLi8uM2BhXPTqw3U4YAfs4AZfiApOoBLoN8cQE60Z50m1MYMTQVCfgF/KaCVhQ==
+
 jszip@^3.10.1:
   version "3.10.1"
   resolved "https://registry.yarnpkg.com/jszip/-/jszip-3.10.1.tgz#34aee70eb18ea1faec2f589208a157d1feb091c2"
@@ -7097,6 +7102,13 @@ toidentifier@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/toidentifier/-/toidentifier-1.0.1.tgz#3be34321a88a820ed1bd80dfaa33e479fbb8dd35"
   integrity sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA==
+
+totp-generator@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmmirror.com/totp-generator/-/totp-generator-1.0.0.tgz#00a3532dbece7a08950a6318c1317bff3b609510"
+  integrity sha512-Iu/1Lk60/MH8FE+5cDWPiGbwKK1hxzSq+KT9oSqhZ1BEczGIKGcN50bP0WMLiIZKRg7t29iWLxw6f81TICQdoA==
+  dependencies:
+    jssha "^3.3.1"
 
 tr46@~0.0.3:
   version "0.0.3"

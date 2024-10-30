@@ -1,5 +1,5 @@
 import { S3Helpers } from '@/common/s3';
-import { generateDbId } from '@/common/utils';
+import { generateDbId, isValidObjectId } from '@/common/utils';
 import { getMap } from '@/common/utils/map';
 import { CustomTheme, TeamEntity } from '@/database/entities/identity/team';
 import { TeamInviteLinkOutdateType, TeamInviteStatus, TeamInviteType, TeamInvitesRequestsEntity } from '@/database/entities/identity/team-invites';
@@ -107,13 +107,30 @@ export class TeamRepository {
     return !!team;
   }
 
-  async createTeam(userId: string, teamName: string, description?: string, iconUrl?: string, isBuiltIn = false, workflowTaskNamePrefix?: string) {
+  public async checkInitialTeamIdConflict(initialTeamId: string) {
+    const team = await this.teamRepository.findOne({
+      where: {
+        id: initialTeamId,
+      },
+    });
+    return !!team;
+  }
+
+  async createTeam(userId: string, teamName: string, description?: string, iconUrl?: string, isBuiltIn = false, workflowTaskNamePrefix?: string, initialTeamId?: string) {
     if (await this.checkNameConflict(userId, teamName)) {
       throw new Error('同名团队已经存在，请更换名称');
     }
+    if (initialTeamId) {
+      if (await this.checkInitialTeamIdConflict(initialTeamId)) {
+        throw new Error('该团队 ID 已存在');
+      }
+      if (!isValidObjectId(initialTeamId)) {
+        throw new Error('团队 ID 格式不正确');
+      }
+    }
     const now = Date.now();
     const newTeam: TeamEntity = {
-      id: generateDbId(),
+      id: initialTeamId || generateDbId(),
       name: teamName,
       description,
       iconUrl,

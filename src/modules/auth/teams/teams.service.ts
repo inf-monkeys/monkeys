@@ -36,8 +36,8 @@ export class TeamsService {
     return pick(await this.teamRepository.getTeamById(teamId), ['id', 'name', 'description', 'logoUrl']) as TeamEntity;
   }
 
-  public async createTeam(userId: string, teamName: string, description?: string, iconUrl?: string, isBuiltIn = false, workflowTaskNamePrefix?: string, createMethod: 'self' | 'import' = 'self') {
-    const team = await this.teamRepository.createTeam(userId, teamName, description, iconUrl, isBuiltIn, createMethod);
+  public async createTeam(userId: string, teamName: string, description?: string, iconUrl?: string, isBuiltIn = false, createMethod: 'self' | 'import' = 'self', initialTeamId?: string) {
+    const team = await this.teamRepository.createTeam(userId, teamName, description, iconUrl, isBuiltIn, createMethod, initialTeamId);
     // Init assets from built-in marketplace
     await this.forkAssetsFromMarketPlace(team.id, userId);
   }

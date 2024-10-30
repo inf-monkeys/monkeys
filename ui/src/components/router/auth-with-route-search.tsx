@@ -25,7 +25,8 @@ export const AuthWithRouteSearch: React.FC = () => {
 
   const { redirect_id, redirect_params, redirect_search } = search;
 
-  const { trigger, data } = useLoginByPassword();
+  const isRenewalAuthMode = search?.auth_mode === 'renewal';
+  const { trigger, data } = useLoginByPassword(!isRenewalAuthMode);
 
   const handelRedirect = () => {
     let needRedirect = false;
@@ -68,10 +69,14 @@ export const AuthWithRouteSearch: React.FC = () => {
       window['vinesTeamId'] = teamIdWithPath;
     }
 
-    if (getVinesToken() && search?.auth_mode !== 'force') return;
+    if (getVinesToken() && !['force', 'renewal'].includes(search?.auth_mode ?? '')) return;
 
     if (has(search, 'auth_user') && has(search, 'auth_pwd')) {
-      void trigger({ email: search?.auth_user ?? '', password: search?.auth_pwd ?? '' });
+      void trigger({
+        email: search?.auth_user ?? '',
+        password: search?.auth_pwd ?? '',
+        ...(isRenewalAuthMode && teamIdWithPath && { initialTeamId: teamIdWithPath }),
+      });
       return;
     } else if (has(search, 'auth_token')) {
       saveAuthToken(search?.auth_token).then((user) => {
@@ -93,7 +98,11 @@ export const AuthWithRouteSearch: React.FC = () => {
   useEffect(() => {
     if (!data) return;
 
+    // 必须放在外面，否则之前没有登录态的不会跳转
+    const hasToken = !!getVinesToken();
     saveAuthToken(data?.token ?? '').then((result) => {
+      if (hasToken && isRenewalAuthMode) return;
+
       if (result) {
         handelRedirect();
       }
