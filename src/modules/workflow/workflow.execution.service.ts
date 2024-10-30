@@ -412,4 +412,34 @@ export class WorkflowExecutionService {
       status: updates.status as 'IN_PROGRESS' | 'FAILED' | 'FAILED_WITH_TERMINAL_ERROR' | 'COMPLETED',
     });
   }
+
+  public async getWorkflowExecutionThumbnails(workflowId: string, limit = 5) {
+    const data = await retry(
+      async () => {
+        const data = await conductorClient.workflowResource.searchV21(0, 100, 'startTime:DESC', '*', `workflowType IN (${workflowId}) AND status IN (COMPLETED)`);
+        return data;
+      },
+      {
+        max: 3,
+      },
+    );
+
+    let count = 0;
+    let thumbnails: string[] = [];
+    for (const execution of data.results) {
+      const flattenOutput = flattenKeys(execution.output);
+      const outputValues = Object.values(flattenOutput);
+      const images = outputValues.map((it) => extractImageUrls(it)).flat();
+      const imagesLength = images.length;
+      if (imagesLength) {
+        thumbnails = thumbnails.concat(images);
+        count += imagesLength;
+      }
+
+      if (count >= limit) {
+        break;
+      }
+    }
+    return thumbnails.slice(0, limit);
+  }
 }

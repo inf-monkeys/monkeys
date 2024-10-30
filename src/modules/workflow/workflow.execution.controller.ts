@@ -59,6 +59,19 @@ export class WorkflowExecutionController {
     };
   }
 
+  @Get('/executions/:workflowId/thumbnails')
+  @ApiOperation({
+    summary: '获取 workflow 的缩略图列表',
+    description: '获取 workflow 的缩略图列表',
+  })
+  public async getWorkflowExecutionThumbnails(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Query() query: { limit: number }) {
+    const { limit = 5 } = query;
+    const result = await this.service.getWorkflowExecutionThumbnails(workflowId, limit);
+    return new SuccessResponse({
+      data: result,
+    });
+  }
+
   @Post('/executions/:workflowId/start-sync')
   @ApiOperation({
     summary: '运行 workflow',
