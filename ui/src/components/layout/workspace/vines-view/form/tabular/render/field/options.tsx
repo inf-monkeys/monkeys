@@ -17,14 +17,13 @@ interface IFieldOptionsProps {
 export const FieldOptions: React.FC<IFieldOptionsProps> = ({ input: { type, ...other }, value, onChange }) => {
   const { t } = useTranslation();
 
+  const options = (other as ToolProperty)?.options ?? [];
+
   return (
     type === 'options' && (
       <Select
         onValueChange={(val) =>
-          onChange(
-            ((other as ToolProperty)?.options?.find((it) => ('value' in it ? it.value.toString() : '' === val)) as any)
-              ?.value ?? '',
-          )
+          onChange((options.find((it) => ('value' in it ? it.value.toString() : '' === val)) as any)?.value ?? '')
         }
         defaultValue={value as string}
       >
@@ -34,7 +33,7 @@ export const FieldOptions: React.FC<IFieldOptionsProps> = ({ input: { type, ...o
           </SelectTrigger>
         </FormControl>
         <SelectContent>
-          {(other as ToolProperty)?.options?.map((it, i) => (
+          {options?.map((it, i) => (
             <SelectItem value={'value' in it ? it.value.toString() : ''} key={i}>
               {getI18nContent(it.name)}
             </SelectItem>

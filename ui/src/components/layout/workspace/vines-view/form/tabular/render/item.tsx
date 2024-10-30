@@ -12,13 +12,17 @@ import { FieldBoolean } from '@/components/layout/workspace/vines-view/form/tabu
 import { FieldFile } from '@/components/layout/workspace/vines-view/form/tabular/render/field/file';
 import { FieldNumber } from '@/components/layout/workspace/vines-view/form/tabular/render/field/number.tsx';
 import { FieldOptions } from '@/components/layout/workspace/vines-view/form/tabular/render/field/options.tsx';
-import { FieldSelect } from '@/components/layout/workspace/vines-view/form/tabular/render/field/select.tsx';
+import {
+  FieldSelect,
+  TSelectList,
+} from '@/components/layout/workspace/vines-view/form/tabular/render/field/select.tsx';
 import { FieldTagInputAndTextarea } from '@/components/layout/workspace/vines-view/form/tabular/render/field/tag-input-and-textarea.tsx';
 import { Button } from '@/components/ui/button';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
+import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
 import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
 import { cn, getI18nContent } from '@/utils';
 
@@ -29,6 +33,9 @@ interface IVinesFormFieldItemProps extends React.ComponentPropsWithoutRef<'div'>
   defValues: IWorkflowInputForm;
   miniMode?: boolean;
   extra?: Record<string, any>;
+
+  linkage?: IWorkflowInputSelectListLinkage;
+  setLinkage?: (k: string, v: IWorkflowInputSelectListLinkage) => void;
 }
 
 export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
@@ -38,6 +45,9 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
   itemClassName,
   miniMode = false,
   extra = {},
+
+  linkage = [],
+  setLinkage,
 }) => {
   const { t } = useTranslation();
 
@@ -54,7 +64,7 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
 
   const tips = typeOptions?.tips;
 
-  const selectList = (typeOptions?.selectList ?? []) as { value: string; label: string }[];
+  const selectList = (typeOptions?.selectList ?? []) as TSelectList;
   const enableSelectList = (typeOptions?.enableSelectList ?? false) && selectList.length > 0;
 
   const enableReset = (typeOptions?.enableReset ?? false) && !isUndefined(defValues?.[name]);
@@ -69,83 +79,100 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
       name={name}
       control={form.control}
       rules={{ required }}
-      render={({ field: { value, onChange, ...field } }) => (
-        <FormItem className={cn('col-span-2 px-3', singleColumn && 'col-span-1', itemClassName)}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <FormLabel className="font-bold">
-                {required && <span className="text-red-10">* </span>}
-                {getI18nContent(displayName)}
-              </FormLabel>
-              {tips && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <HelpCircle size={18} className="cursor-pointer fill-gray-7 stroke-slate-1" />
-                  </TooltipTrigger>
-                  <TooltipContent>{tips}</TooltipContent>
-                </Tooltip>
+      render={({ field: { value, onChange, ...field } }) => {
+        const targetLinkage = linkage.find((it) => it.name === field.name);
+        const filterList = targetLinkage?.selectFilter?.list;
+        const filterReserve = targetLinkage?.selectFilter?.reserve;
+        const enableFilter = (filterList?.length ?? 0) > 0;
+        return (
+          <FormItem className={cn('col-span-2 px-3', singleColumn && 'col-span-1', itemClassName)}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1">
+                <FormLabel className="font-bold">
+                  {required && <span className="text-red-10">* </span>}
+                  {getI18nContent(displayName)}
+                </FormLabel>
+                {tips && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle size={18} className="cursor-pointer fill-gray-7 stroke-slate-1" />
+                    </TooltipTrigger>
+                    <TooltipContent>{tips}</TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+              {enableReset && (
+                <Button
+                  className="h-6"
+                  variant="outline"
+                  size="small"
+                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onChange(defValues[name]);
+                    forceUpdate();
+                  }}
+                >
+                  {t('workspace.flow-view.endpoint.start-tool.input.config-form.type-options.reset')}
+                </Button>
               )}
             </div>
-            {enableReset && (
-              <Button
-                className="h-6"
-                variant="outline"
-                size="small"
-                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onChange(defValues[name]);
-                  forceUpdate();
-                }}
-              >
-                {t('workspace.flow-view.endpoint.start-tool.input.config-form.type-options.reset')}
-              </Button>
-            )}
-          </div>
-          <FormControl>
-            <>
-              {enableSelectList ? (
-                <FieldSelect input={it} onChange={onChange} form={form} value={value} field={field} />
-              ) : (
-                <>
-                  {assetType === 'comfyui-model' ? (
-                    <FieldImageModel input={it} form={form} value={value} onChange={onChange} field={field} />
-                  ) : assetType === 'oneapi-model' ? (
-                    <FieldOneApiModels
-                      input={it}
-                      form={form}
-                      value={value}
-                      onChange={onChange}
-                      field={field}
-                      extra={extra}
-                    />
-                  ) : (
-                    <FieldTagInputAndTextarea
-                      input={it}
-                      value={value}
-                      onChange={onChange}
-                      form={form}
-                      field={field}
-                      miniMode={miniMode}
-                    />
-                  )}
+            <FormControl>
+              <>
+                {enableSelectList ? (
+                  <FieldSelect
+                    input={it}
+                    onChange={onChange}
+                    form={form}
+                    value={value}
+                    field={field}
+                    setLinkage={setLinkage}
+                    filter={(m) => (enableFilter ? filterList?.includes(m.value) === filterReserve : true)}
+                  />
+                ) : (
+                  <>
+                    {assetType === 'comfyui-model' ? (
+                      <FieldImageModel
+                        input={it}
+                        value={value}
+                        onChange={onChange}
+                        filter={
+                          targetLinkage
+                            ? (m) =>
+                                enableFilter ? filterList?.includes(m.serverRelation.apiPath) === filterReserve : true
+                            : void 0
+                        }
+                      />
+                    ) : assetType === 'oneapi-model' ? (
+                      <FieldOneApiModels input={it} value={value} onChange={form.setValue} extra={extra} />
+                    ) : (
+                      <FieldTagInputAndTextarea
+                        input={it}
+                        value={value}
+                        onChange={onChange}
+                        form={form}
+                        field={field}
+                        miniMode={miniMode}
+                      />
+                    )}
 
-                  <FieldNumber input={it} value={value} onChange={onChange} field={field} />
+                    <FieldNumber input={it} value={value} onChange={onChange} field={field} />
 
-                  <FieldBoolean input={it} value={value} onChange={onChange} form={form} />
+                    <FieldBoolean input={it} value={value} onChange={onChange} form={form} />
 
-                  <FieldFile input={it} form={form} value={value} miniMode={miniMode} />
+                    <FieldFile input={it} form={form} value={value} miniMode={miniMode} />
 
-                  <FieldOptions input={it} value={value} onChange={onChange} />
-                </>
-              )}
-            </>
-          </FormControl>
-          <FormDescription className="font-bold">{getI18nContent(description)}</FormDescription>
+                    <FieldOptions input={it} value={value} onChange={onChange} />
+                  </>
+                )}
+              </>
+            </FormControl>
+            <FormDescription className="font-bold">{getI18nContent(description)}</FormDescription>
 
-          <FormMessage />
-        </FormItem>
-      )}
+            <FormMessage />
+          </FormItem>
+        );
+      }}
     />
   );
 };

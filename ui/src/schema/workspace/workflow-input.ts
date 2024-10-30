@@ -24,6 +24,12 @@ export const workflowInputSelectListLinkageSchema = z.array(
       z.array(z.number()),
       z.array(z.boolean()),
     ]),
+    selectFilter: z
+      .object({
+        list: z.array(z.string()),
+        reserve: z.boolean(),
+      })
+      .optional(),
   }),
 );
 

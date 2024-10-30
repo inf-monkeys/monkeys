@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { ControllerRenderProps, FieldValues, UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +8,13 @@ import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.t
 import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
 import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
 
+export type TSelect = {
+  value: string;
+  label: string;
+  linkage?: IWorkflowInputSelectListLinkage;
+};
+export type TSelectList = TSelect[];
+
 interface IFieldSelectProps extends React.ComponentPropsWithoutRef<'div'> {
   input: VinesWorkflowVariable;
   value: any;
@@ -15,34 +22,54 @@ interface IFieldSelectProps extends React.ComponentPropsWithoutRef<'div'> {
 
   form: UseFormReturn<IWorkflowInputForm>;
   field: Omit<ControllerRenderProps<FieldValues, string>, 'value' | 'onChange'>;
+
+  filter?: (it: TSelect) => boolean;
+
+  setLinkage?: (k: string, v: IWorkflowInputSelectListLinkage) => void;
 }
 
 export const FieldSelect: React.FC<IFieldSelectProps> = ({
-  input: { type, displayName, typeOptions },
+  input: { type, name, displayName, typeOptions },
   form,
   value,
   onChange,
+  filter,
+  setLinkage,
 }) => {
   const { t } = useTranslation();
 
-  const selectList = (typeOptions?.selectList ?? []) as {
-    value: string;
-    label: string;
-    linkage?: IWorkflowInputSelectListLinkage;
-  }[];
+  const selectList = (typeOptions?.selectList ?? []).filter(filter ?? (() => true)) as TSelectList;
+
+  const handleLinkage = (val: string) => {
+    const linkage = selectList.find((it) => it.value === val)?.linkage;
+    if (linkage?.length) {
+      for (const { name, value } of linkage) {
+        form.setValue(name, value);
+      }
+      setLinkage?.(name, linkage);
+    } else {
+      setLinkage?.(name, []);
+    }
+  };
+
+  const finalValue = value?.toString() ?? '';
+
+  const initialRef = useRef(false);
+  useEffect(() => {
+    if (initialRef.current) return;
+    if (finalValue) {
+      handleLinkage(finalValue);
+      initialRef.current = true;
+    }
+  }, [finalValue]);
 
   return (
     <Select
       onValueChange={(val) => {
         onChange(type === 'number' ? Number(val) : val);
-        const linkage = selectList.find((it) => it.value === val)?.linkage;
-        if (linkage) {
-          for (const { name, value } of linkage) {
-            form.setValue(name, value);
-          }
-        }
+        handleLinkage(val);
       }}
-      value={value?.toString() ?? ''}
+      value={finalValue}
     >
       <SelectTrigger>
         <SelectValue placeholder={t('workspace.pre-view.actuator.execution-form.select', { displayName })} />

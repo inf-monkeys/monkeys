@@ -6,11 +6,12 @@ import { Circle, CircleDot, Plus, Trash } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
-import { SelectDataLinkage } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/default-value/select-list/data-linkage.tsx';
+import { SelectDataLinkage } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/default-value/select-list/data-linkage';
+import { TSelectList } from '@/components/layout/workspace/vines-view/form/tabular/render/field/select.tsx';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { IWorkflowInput, IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
+import { IWorkflowInput } from '@/schema/workspace/workflow-input.ts';
 
 interface ISelectListModeProps extends React.ComponentPropsWithoutRef<'div'> {
   form: UseFormReturn<IWorkflowInput>;
@@ -21,7 +22,7 @@ interface ISelectListModeProps extends React.ComponentPropsWithoutRef<'div'> {
   type: IWorkflowInput['type'];
 
   forceUpdate: () => void;
-  selectList: { label: string; value: string | number; linkage?: IWorkflowInputSelectListLinkage }[];
+  selectList: TSelectList;
 }
 
 export const SelectListMode: React.FC<ISelectListModeProps> = ({ form, Default, type, forceUpdate, selectList }) => {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useLatest } from 'ahooks';
 import { get, isBoolean, isUndefined, omit, pick, set } from 'lodash';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -244,6 +245,7 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
 
   const { type, assetType } = form.getValues();
 
+  const openLatest = useLatest(open);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
@@ -251,6 +253,13 @@ export const InputEditor: React.FC<IInputEditorProps> = () => {
         onPointerDownOutside={(e) => {
           if (e.target instanceof Element && e.target.closest('[data-sonner-toast]')) {
             e.preventDefault();
+          }
+          if ((e.target as HTMLDivElement).getAttribute('data-vines-overlay')) {
+            setTimeout(() => {
+              if (!openLatest.current) {
+                submitButtonRef.current?.click();
+              }
+            });
           }
         }}
       >
