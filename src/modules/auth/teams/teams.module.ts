@@ -7,5 +7,6 @@ import { TeamsService } from './teams.service';
   controllers: [TeamsController],
   providers: [TeamsService],
   imports: [ConductorModule],
+  exports: [TeamsService],
 })
 export class TeamsModule {}

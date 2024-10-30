@@ -1,11 +1,30 @@
 import useSWRMutation from 'swr/mutation';
 
+import { toast } from 'sonner';
+
 import { vinesFetcher } from '@/apis/fetcher.ts';
 
-export const useLoginByPassword = () =>
-  useSWRMutation<{ token: string } | undefined, unknown, string, { email: string; password: string }>(
+export const useLoginByPassword = (useToast = true) =>
+  useSWRMutation<
+    { token: string } | undefined,
+    unknown,
+    string,
+    { email: string; password: string; initialTeamId?: string }
+  >(
     '/api/auth/password/login',
-    vinesFetcher({ method: 'POST', auth: false }),
+    vinesFetcher({
+      method: 'POST',
+      auth: false,
+      responseResolver: async (r) => {
+        const { code, data, message } = await r.json();
+
+        if (code === 200 && data?.token) {
+          return { token: data.token };
+        } else if (useToast) {
+          toast.warning(message);
+        }
+      },
+    }),
   );
 
 export const useLoginByPhone = () =>

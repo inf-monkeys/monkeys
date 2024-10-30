@@ -38,8 +38,6 @@ export const saveAuthToken = async (token: string): Promise<Partial<IVinesUser> 
     return;
   }
 
-  localStorage.removeItem('vines-team-id');
-  window['vinesTeamId'] = void 0;
   setLocalStorage('vines-token', token);
 
   const user = await getUser();

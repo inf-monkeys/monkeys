@@ -16,8 +16,8 @@ export class PasswordController {
     summary: '使用密码登录',
   })
   public async loginByPassword(@Req() req: IRequest, @Body() body: LoginByPasswordDto) {
-    const { email, password } = body;
-    const token = await this.service.loginByPassword(email, password);
+    const { email, password, initialTeamId } = body;
+    const token = await this.service.loginByPassword(email, password, initialTeamId);
     return new SuccessResponse({
       data: {
         token: token,
