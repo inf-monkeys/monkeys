@@ -5,6 +5,7 @@ import { PageInstanceType } from '@/database/entities/workflow/workflow-page';
 import fs from 'fs';
 import path from 'path';
 import { LLM_CHAT_COMPLETION_TOOL, LLM_COMPLETION_TOOL, LLM_NAMESPACE } from '../tools/llm/llm.controller';
+import { INTERNAL_BUILT_IN_MARKET } from './consts';
 
 export interface WorkflowMarketplaceData extends WorkflowMetadataEntity {
   tags: string[];
@@ -15,13 +16,17 @@ let rawBuiltInMarketList = [];
 if (process.env.MONKEYS_BUILT_IN_MARKET_FILE) {
   rawBuiltInMarketList = [path.resolve(process.env.MONKEYS_CONFIG_FILE)];
 } else {
-  rawBuiltInMarketList = [path.resolve('/etc/monkeys/builtInMarket.json'), path.resolve('./builtInMarket.json'), path.resolve('./builtInMarket.example.json')];
+  rawBuiltInMarketList = [path.resolve('/etc/monkeys/builtInMarket.json'), path.resolve('./builtInMarket.json')];
 }
 
 rawBuiltInMarketList = rawBuiltInMarketList
   .filter(Boolean)
   .filter(fs.existsSync)
-  .map((file) => fs.readFileSync(file, 'utf-8'))
+  .map((file) => fs.readFileSync(file, 'utf-8'));
+
+rawBuiltInMarketList.push(JSON.stringify(INTERNAL_BUILT_IN_MARKET));
+
+rawBuiltInMarketList = rawBuiltInMarketList
   .map((content) =>
     content
       .replace(/\{\{LLM_CHAT_COMPLETION_TOOL\}\}/g, LLM_CHAT_COMPLETION_TOOL)
