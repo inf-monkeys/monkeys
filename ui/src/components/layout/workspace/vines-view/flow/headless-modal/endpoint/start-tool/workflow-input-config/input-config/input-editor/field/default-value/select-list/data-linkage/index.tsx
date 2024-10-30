@@ -5,6 +5,7 @@ import { Link, Plus, Trash2 } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { SelectFilter } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/default-value/select-list/data-linkage/select-filter.tsx';
 import { AutosizeTextarea } from '@/components/ui/autosize-textarea.tsx';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -47,7 +48,11 @@ export const SelectDataLinkage: React.FC<ISelectDataLinkageProps> = ({
       onOpenChange={(val) => {
         setOpen(val);
         if (!val) {
-          handleUpdate?.(list.some(({ name, value }) => name && value) ? list : []);
+          handleUpdate?.(
+            list.some(({ name, value, selectFilter }) => name && (value || (selectFilter?.list?.length ?? 0) >= 1))
+              ? list
+              : [],
+          );
         }
       }}
     >
@@ -86,8 +91,9 @@ export const SelectDataLinkage: React.FC<ISelectDataLinkageProps> = ({
               !list.length && '-my-4',
             )}
           >
-            {list.map(({ name, value }, i) => {
+            {list.map(({ name, value, selectFilter }, i) => {
               const input = workflowInput.find(({ name: itName }) => itName === name);
+
               return (
                 <div className="flex items-start gap-2" key={i}>
                   <Select
@@ -136,6 +142,11 @@ export const SelectDataLinkage: React.FC<ISelectDataLinkageProps> = ({
                     </TooltipTrigger>
                     <TooltipContent side="left">{t('common.utils.delete')}</TooltipContent>
                   </Tooltip>
+                  <SelectFilter
+                    input={input}
+                    selectFilter={selectFilter}
+                    onChange={(v) => replace(i, { name, value, selectFilter: v })}
+                  />
                 </div>
               );
             })}

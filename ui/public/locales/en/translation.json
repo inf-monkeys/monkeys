@@ -2480,7 +2480,15 @@
                     "desc": "When the user selects this option, other form configurations can be updated in a linked manner",
                     "select-placeholder": "Select the linked field",
                     "value-placeholder": "Please enter the value to be linked",
-                    "add": "Add a linked form"
+                    "add": "Add a linked form",
+
+                    "filter-select-list": {
+                      "label": "Filter options",
+                      "desc": "When this option form is linked, the options will be filtered according to the specified value",
+                      "reserve": "Reverse selection",
+
+                      "add": "Add filter options"
+                    }
                   }
                 }
               },

@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useLatest } from 'ahooks';
+import { useLatest, useMap } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { AnimatePresence, motion } from 'framer-motion';
 import { fromPairs, groupBy, isArray, isEmpty, omit, set } from 'lodash';
@@ -19,6 +19,7 @@ import { Label } from '@/components/ui/label.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
+import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
 import { cn } from '@/utils';
 
@@ -186,6 +187,9 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
     [inputs],
   );
 
+  const [linkageMap, { set: setLinkage }] = useMap<string, IWorkflowInputSelectListLinkage>([]);
+  const linkage = Array.from(linkageMap ?? []).flatMap((it) => it[1]);
+
   const hasFoldInputs = foldInputs?.length > 0;
   const isFormEmpty = !defInputs?.length && !hasFoldInputs;
 
@@ -223,6 +227,8 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
                 defValues={defValues}
                 miniMode={miniMode}
                 extra={extra}
+                linkage={linkage}
+                setLinkage={setLinkage}
               />
             ))}
             {hasFoldInputs && (
@@ -242,6 +248,8 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
                         defValues={defValues}
                         miniMode={miniMode}
                         extra={extra}
+                        linkage={linkage}
+                        setLinkage={setLinkage}
                       />
                     ))}
                   </AccordionContent>
