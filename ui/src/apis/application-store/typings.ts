@@ -6,3 +6,5 @@ export interface IApplicationPublishConfig {
   policy?: IAssetPublishPolicy;
   extraAssetData?: Partial<MonkeyWorkflow>;
 }
+
+export type IAutoPinPage = Record<'default' | string, 'process' | 'log' | 'chat' | 'preview' | 'api'>[];

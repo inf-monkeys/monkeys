@@ -1,13 +1,13 @@
 import { AssetType, MonkeyWorkflow } from '@inf-monkeys/monkeys';
 
-import { IApplicationPublishConfig } from '@/apis/application-store/typings.ts';
+import { IApplicationPublishConfig, IAutoPinPage } from '@/apis/application-store/typings.ts';
 import { vinesFetcher } from '@/apis/fetcher.ts';
 
-export const forkApplicationFromTemplate = (id: string) =>
-  vinesFetcher<MonkeyWorkflow>({
+export const forkApplicationFromTemplate = (id: string, autoPinPage?: IAutoPinPage) =>
+  vinesFetcher<Pick<MonkeyWorkflow, 'workflowId'>>({
     method: 'POST',
     simple: true,
-  })(`/api/workflow/metadata/${id}/clone`);
+  })(`/api/workflow/metadata/${id}/clone`, autoPinPage ? { autoPinPage } : undefined);
 
 export const publishApplication = (id: string, assetType: AssetType, publishConfig: IApplicationPublishConfig) =>
   vinesFetcher<MonkeyWorkflow, { publishConfig: IApplicationPublishConfig }>({
