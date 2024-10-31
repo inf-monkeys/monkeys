@@ -4,6 +4,7 @@ import { JwtHelper } from '@/modules/auth/jwt-utils';
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { config } from '../config';
 import { IRequest } from '../typings/request';
+import { isValidObjectId } from '../utils';
 
 @Injectable()
 export class CompatibleAuthGuard implements CanActivate {
@@ -37,6 +38,33 @@ export class CompatibleAuthGuard implements CanActivate {
             teamId = validateApiKeyResult.teamId;
             apiKey = authorizationToken;
           }
+        }
+        // privileged token
+        else if (authorizationToken.startsWith('$') && authorizationToken === config.auth.privilegedToken) {
+          const headerUserId = request.headers['x-monkeys-userid'] as string;
+          const headerTeamId = request.headers['x-monkeys-teamid'] as string;
+
+          request.teamId = headerTeamId;
+
+          if (!headerTeamId || !isValidObjectId(headerTeamId)) {
+            return false;
+          }
+
+          if (headerUserId && isValidObjectId(headerUserId)) {
+            request.userId = headerUserId;
+          } else {
+            request.userId = (await this.teamRepository.getUserIdByTeamId(headerTeamId)) as string;
+            if (!request.userId) {
+              return false;
+            }
+          }
+
+          const isUserInTeam = await this.teamRepository.isUserInTeam(request.userId, request.teamId);
+          if (!isUserInTeam) {
+            return false;
+          }
+
+          return true;
         }
         // password or phone
         else {
