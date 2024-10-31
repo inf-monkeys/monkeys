@@ -18,6 +18,7 @@ export class AssetsPublishService {
         const comfyuiWorkflowRepo = this.assetsMapperService.getRepositoryByAssetType('comfyui-workflow');
         for (const [, { index, comfyuiWorkflowId }] of comfyuiDataList.entries()) {
           const { id } = await comfyuiWorkflowRepo.publishAsset(teamId, comfyuiWorkflowId, publishConfig);
+          ((asset as unknown as MonkeyWorkflowDef).tasks[index] as SimpleTaskDef).inputParameters.server = 'system';
           ((asset as unknown as MonkeyWorkflowDef).tasks[index] as SimpleTaskDef).inputParameters.workflow = id;
         }
         return await repo.publishAsset(teamId, assetId, publishConfig, asset);
