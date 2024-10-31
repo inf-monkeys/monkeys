@@ -143,6 +143,7 @@ export interface AuthConfig {
   jwt: JwtConfig;
   sms: SMSConfig;
   saltTotp: string;
+  privilegedToken: string;
 }
 
 export interface S3Config {
@@ -325,6 +326,7 @@ export const config: Config = {
       config: readConfig('auth.sms.config', {}),
     },
     saltTotp: readConfig('auth.saltTotp'),
+    privilegedToken: readConfig('auth.privilegedToken'),
   },
   s3: {
     proxy: readConfig('s3.proxy', true),
