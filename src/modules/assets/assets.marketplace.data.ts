@@ -7,9 +7,10 @@ import path from 'path';
 import { LLM_CHAT_COMPLETION_TOOL, LLM_COMPLETION_TOOL, LLM_NAMESPACE } from '../tools/llm/llm.controller';
 import { INTERNAL_BUILT_IN_MARKET } from './consts';
 
+export type WorkflowAutoPinPage = Record<'default' | string, PageInstanceType[]>[];
 export interface WorkflowMarketplaceData extends WorkflowMetadataEntity {
   tags: string[];
-  autoPinPage?: Record<'default' | string, PageInstanceType[]>[];
+  autoPinPage?: WorkflowAutoPinPage;
 }
 
 let rawBuiltInMarketList = [];

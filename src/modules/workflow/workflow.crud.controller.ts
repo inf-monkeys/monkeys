@@ -1,11 +1,14 @@
 import { ListDto } from '@/common/dto/list.dto';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
+import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { generateZip } from '@/common/utils/zip-asset';
+import { UpdatePermissionsDto } from '@/modules/workflow/dto/req/update-permissions.dto';
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
+import { WorkflowAutoPinPage } from '../assets/assets.marketplace.data';
 import { CreateWorkflowDefDto } from './dto/req/create-workflow-def.dto';
 import { GetWorkflowDto } from './dto/req/get-workflow.dto';
 import { ImportWorkflowDto } from './dto/req/import-workflow.dto';
@@ -13,8 +16,6 @@ import { UpdateWorkflowDefDto } from './dto/req/update-workflow-def.dto';
 import { WorkflowWithAssetsJson } from './interfaces';
 import { WorkflowCrudService } from './workflow.curd.service';
 import { WorkflowPageService } from './workflow.page.service';
-import { UpdatePermissionsDto } from '@/modules/workflow/dto/req/update-permissions.dto';
-import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 
 @Controller('/workflow/metadata')
 @ApiTags('Workflows/CRUD')
@@ -236,9 +237,9 @@ export class WorkflowCrudController {
     description: 'Clone workflow',
   })
   @UseGuards(CompatibleAuthGuard)
-  public async cloneWorkflow(@Req() req: IRequest, @Param('workflowId') workflowId: string) {
+  public async cloneWorkflow(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Body() body?: { autoPinPage: WorkflowAutoPinPage }) {
     const { teamId, userId } = req;
-    const newWorkflowId = await this.service.cloneWorkflow(teamId, userId, workflowId);
+    const newWorkflowId = await this.service.cloneWorkflow(teamId, userId, workflowId, body?.autoPinPage);
     return new SuccessResponse({
       data: {
         workflowId: newWorkflowId,

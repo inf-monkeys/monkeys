@@ -6,6 +6,7 @@ import { flatTasks } from '@/common/utils/conductor';
 import { getI18NValue } from '@/common/utils/i18n';
 import { extractAssetFromZip } from '@/common/utils/zip-asset';
 import { ValidationIssueType, WorkflowMetadataEntity, WorkflowOutputValue, WorkflowRateLimiter, WorkflowValidationIssue } from '@/database/entities/workflow/workflow-metadata';
+import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 import { WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
 import { AssetsCommonRepository } from '@/database/repositories/assets-common.repository';
 import { UpdatePermissionsDto } from '@/modules/workflow/dto/req/update-permissions.dto';
@@ -16,6 +17,7 @@ import fs from 'fs';
 import _ from 'lodash';
 import { ToolsRepository } from '../../database/repositories/tools.repository';
 import { WorkflowRepository } from '../../database/repositories/workflow.repository';
+import { WorkflowAutoPinPage } from '../assets/assets.marketplace.data';
 import { AssetsPublishService } from '../assets/assets.publish.service';
 import { ConductorService } from './conductor/conductor.service';
 import { CreateWorkflowData, CreateWorkflowOptions, WorkflowExportJson, WorkflowWithAssetsJson } from './interfaces';
@@ -389,7 +391,7 @@ export class WorkflowCrudService {
     return workflowId;
   }
 
-  public async cloneWorkflow(teamId: string, userId: string, originalWorkflowId: string) {
+  public async cloneWorkflow(teamId: string, userId: string, originalWorkflowId: string, autoPinPage?: WorkflowAutoPinPage) {
     const versions = await this.workflowRepository.getWorkflowVersions(originalWorkflowId);
     const newWorkflowId = generateDbId();
     for (const { version } of versions) {
@@ -424,6 +426,31 @@ export class WorkflowCrudService {
         },
       );
     }
+
+    if (autoPinPage) {
+      const pages = await this.workflowRepository.listWorkflowPagesAndCreateIfNotExists(newWorkflowId);
+
+      const groupMap: Record<string, WorkflowPageGroupEntity> = {};
+      const groups = _.uniq(autoPinPage.flatMap((it) => Object.keys(it)));
+      const groupIds = await this.workflowRepository.getPageGroupsAndCreateIfNotExists(teamId, groups);
+      let groupIndex = 0;
+      for (const group of groupIds) {
+        groupMap[groups[groupIndex]] = group;
+        groupIndex++;
+      }
+
+      for (const mapper of autoPinPage) {
+        for (const [groupName, pageTypes] of Object.entries(mapper)) {
+          const type2PageIds = pages.filter((it) => pageTypes.includes(it.type)).map((it) => it.id);
+          groupMap[groupName].pageIds = _.uniq([...(groupMap[groupName].pageIds ?? []), ...type2PageIds]);
+        }
+      }
+
+      for (const group of Object.values(groupMap)) {
+        await this.workflowRepository.updatePageGroup(group.id, { pageIds: group.pageIds });
+      }
+    }
+
     return newWorkflowId;
   }
 
