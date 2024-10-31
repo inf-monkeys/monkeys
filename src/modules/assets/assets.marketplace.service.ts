@@ -1,18 +1,20 @@
 import { config } from '@/common/config';
 import { ListDto } from '@/common/dto/list.dto';
 import { ONEAPI_CHANNELS } from '@/common/oneapi/consts';
+import { ComfyuiWorkflowAssetRepositroy } from '@/database/repositories/assets-comfyui-workflow.respository';
 import { AssetsCommonRepository } from '@/database/repositories/assets-common.repository';
 import { LlmChannelAssetRepositroy } from '@/database/repositories/assets-llm-channel.respository';
 import { WorkflowAssetRepositroy } from '@/database/repositories/assets-workflow.respository';
 import { AssetType } from '@inf-monkeys/monkeys';
 import { Injectable } from '@nestjs/common';
 import { AssetsMapperService } from './assets.common.service';
-import { BUILT_IN_WORKFLOW_MARKETPLACE_LIST } from './assets.marketplace.data';
+import { BUILT_IN_COMFYUI_WORKFLOW_MARKETPLACE_LIST, BUILT_IN_WORKFLOW_MARKETPLACE_LIST } from './assets.marketplace.data';
 
 @Injectable()
 export class AssetsMarketplaceService {
   constructor(
     private readonly workflowAssetRepository: WorkflowAssetRepositroy,
+    private readonly comfyuiWorkflowAssetRepository: ComfyuiWorkflowAssetRepositroy,
     private readonly llmChannelAssetRepository: LlmChannelAssetRepositroy,
     private readonly assetsMapperService: AssetsMapperService,
     private readonly assetsCommonRepository: AssetsCommonRepository,
@@ -33,6 +35,13 @@ export class AssetsMarketplaceService {
     }
   }
 
+  public async initComfyuiWorkflowMarketplace() {
+    const data = BUILT_IN_COMFYUI_WORKFLOW_MARKETPLACE_LIST;
+    for (const item of data) {
+      await this.comfyuiWorkflowAssetRepository.initBuiltInMarketPlace('comfyui-workflow', item);
+    }
+  }
+
   public async initBuiltInLLMMarketplace() {
     for (const item of ONEAPI_CHANNELS) {
       await this.llmChannelAssetRepository.initBuiltInMarketPlace('llm-channel', item);
@@ -44,6 +53,7 @@ export class AssetsMarketplaceService {
     if (config.oneapi.enabled) {
       await this.initBuiltInLLMMarketplace();
     }
+    await this.initComfyuiWorkflowMarketplace();
   }
 
   public async listMarketplaceAssets(assetType: AssetType, dto: ListDto) {

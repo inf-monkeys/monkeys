@@ -1,4 +1,5 @@
 import { logger } from '@/common/logger';
+import { ComfyuiWorkflowEntity } from '@/database/entities/comfyui/comfyui-workflow.entity';
 import { CustomTheme, TeamEntity } from '@/database/entities/identity/team';
 import { AssetsMarketPlaceRepository } from '@/database/repositories/assets-marketplace.repository';
 import { TeamRepository } from '@/database/repositories/team.repository';
@@ -18,7 +19,10 @@ export class TeamsService {
   ) {}
 
   private async forkAssetsFromMarketPlace(teamId: string, userId: string) {
-    const clonedWorkflows = await this.marketPlaceRepository.forkBuiltInWorkflowAssetsFromMarketPlace(teamId, userId);
+    const clonedComfyuiWorkflows = (await this.marketPlaceRepository.forkBuiltInComfyuiWorkflowAssetsFromMarketPlace(teamId, userId)) as (ComfyuiWorkflowEntity & { forkFromId: string })[];
+    const clonedWorkflows = await this.marketPlaceRepository.forkBuiltInWorkflowAssetsFromMarketPlace(teamId, userId, {
+      clonedComfyuiWorkflows,
+    });
     for (const workflow of clonedWorkflows) {
       try {
         await this.conductorService.saveWorkflowInConductor(workflow);

@@ -47,6 +47,7 @@ export const builtInMarketList = rawBuiltInMarketList.reduce((acc, current) => {
 }, {}) as BuiltInMarket;
 
 export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketplaceData>> = builtInMarketList.workflows;
+export const BUILT_IN_COMFYUI_WORKFLOW_MARKETPLACE_LIST: Array<Partial<ComfyuiWorkflowEntity>> = builtInMarketList['comfyui-workflows'];
 
 export interface ComfyUIWorkflowWorkflowMarketplaceData extends ComfyuiWorkflowEntity {
   tags: string[];

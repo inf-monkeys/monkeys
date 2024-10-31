@@ -354,7 +354,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
         updatedTimestamp: Date.now(),
       });
       await this.repository.save(clonedAsset);
-      clonedAssets.push(clonedAsset);
+      clonedAssets.push({ ...clonedAsset, forkFromId: id });
     }
     return clonedAssets;
   }
