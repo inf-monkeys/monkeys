@@ -208,7 +208,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     if (isPreset) {
       throw new Error('无法发布预置资产');
     }
-    const extraAssetData = _.pick(publishConfig, 'extraAssetData');
+    const extraAssetData = _.get(publishConfig, 'extraAssetData');
     const id = generateDbId();
     const clonedAsset = this.repository.create({
       ...asset,
