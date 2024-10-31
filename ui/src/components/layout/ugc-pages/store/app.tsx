@@ -60,20 +60,30 @@ export const StoreApp: React.FC<IStoreAppProps> = ({
   const handleUse = useMemoizedFn(async () => {
     setIsLoading(true);
 
-    toast.promise(forkApplicationFromTemplate(id), {
-      success: (flow) => {
-        if (flow) {
-          setTimeout(() => VinesEvent.emit('vines-nav', '/$teamId', { teamId }, { activePage: flow.workflowId }), 100);
-        }
-        setIsLoading(false);
-        return t('components.layout.ugc.import-dialog.use-template.success');
+    toast.promise(
+      forkApplicationFromTemplate(id, [
+        {
+          default: 'preview',
+        },
+      ]),
+      {
+        success: (flow) => {
+          if (flow) {
+            setTimeout(
+              () => VinesEvent.emit('vines-nav', '/$teamId', { teamId }, { activePage: flow.workflowId }),
+              100,
+            );
+          }
+          setIsLoading(false);
+          return t('components.layout.ugc.import-dialog.use-template.success');
+        },
+        error: () => {
+          setIsLoading(false);
+          return t('components.layout.ugc.import-dialog.use-template.error');
+        },
+        loading: t('components.layout.ugc.import-dialog.use-template.loading'),
       },
-      error: () => {
-        setIsLoading(false);
-        return t('components.layout.ugc.import-dialog.use-template.error');
-      },
-      loading: t('components.layout.ugc.import-dialog.use-template.loading'),
-    });
+    );
   });
 
   const isEmojiIcon = iconUrl.startsWith('emoji:');
