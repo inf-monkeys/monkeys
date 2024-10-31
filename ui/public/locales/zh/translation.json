@@ -464,19 +464,30 @@
             "success": "创建成功",
             "error": "创建失败，请检查网络后重试"
           },
-          "import-to-team": "导入该团队",
+          "import-to-team": "一键使用",
           "import-workflow": {
             "title": "导入此工作流",
             "loading": "创建中...",
             "success": "创建成功",
             "error": "创建失败，请检查网络后重试"
           },
-          "delete": "删除此工作流"
+          "delete": {
+            "label": "下架此应用",
+            "desc": "下架后，其他用户将无法再从市场中获取此应用"
+          }
         },
         "publish-dialog": {
           "title": "发布到市场",
           "name": {
-            "placeholder": "请输入名称"
+            "label": "应用名称",
+            "placeholder": "请输入应用名称"
+          },
+          "desc": {
+            "label": "应用描述（支持 Markdown）",
+            "placeholder": "请输入应用描述"
+          },
+          "thumbnail": {
+            "label": "应用缩略图"
           },
           "button": {
             "publish": "发布"

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { Link } from '@tanstack/react-router';
 
@@ -18,6 +18,7 @@ import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer';
+import useUrlState from '@/hooks/use-url-state.ts';
 import { cloneDeep, cn } from '@/utils';
 
 interface IWorkbenchNormalModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -53,6 +54,9 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     .filter((it) => it.pages?.length)
     .sort((a) => (a.isBuiltIn ? -1 : 1));
 
+  const [{ activePage }] = useUrlState<{ activePage: string }>({ activePage: '' });
+  const toggleToActivePageRef = useRef(activePage ? false : null);
+
   const [currentPage, setCurrentPage] = useLocalStorage<Partial<IWorkbenchViewItemPage>>('vines-ui-workbench-page', {});
 
   useDebounceEffect(
@@ -65,6 +69,17 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
       const currentTeamPage = currentPage?.[teamId] ?? {};
       const currentPageId = currentTeamPage?.id;
+
+      if (toggleToActivePageRef.current === false) {
+        const page = originalPages.find((it) => it.workflowId === activePage);
+        const groupWithPageId = originalGroups.find((it) => it.pageIds.includes(page?.id ?? ''));
+        if (page && groupWithPageId) {
+          setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
+          setGroupId(groupWithPageId.id);
+          toggleToActivePageRef.current = true;
+          return;
+        }
+      }
 
       const setEmptyOrFirstPage = () => {
         if (pagesLength && groupsLength) {
