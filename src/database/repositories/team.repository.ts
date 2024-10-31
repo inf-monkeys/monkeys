@@ -232,6 +232,16 @@ export class TeamRepository {
     return !!entity;
   }
 
+  public async getUserIdByTeamId(teamId: string) {
+    const entity = await this.teamRepository.findOne({
+      where: {
+        id: teamId,
+        isDeleted: false,
+      },
+    });
+    return entity?.ownerUserId;
+  }
+
   public async getTeamMembers(teamId: string) {
     const relationships = await this.teamMembersRepository.find({
       where: {
