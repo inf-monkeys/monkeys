@@ -470,19 +470,30 @@
             "success": "Create successful!",
             "error": "Create failed! Please try again later!"
           },
-          "import-to-team": "Import to team",
+          "import-to-team": "One-click use",
           "import-workflow": {
             "title": "Import workflow",
             "loading": "Creating...",
             "success": "Create successful!",
             "error": "Create failed! Please try again later!"
           },
-          "delete": "Delete the workflow"
+          "delete": {
+            "label": "Remove this app",
+            "desc": "After removal, other users will no longer be able to obtain this app from the market"
+          }
         },
         "publish-dialog": {
-          "title": "Publish to market",
+          "title": "Publish to the market",
           "name": {
-            "placeholder": "Enter name"
+            "label": "Application name",
+            "placeholder": "Please enter the application name"
+          },
+          "desc": {
+            "label": "Application description (supports Markdown)",
+            "placeholder": "Please enter the application description"
+          },
+          "thumbnail": {
+            "label": "Application thumbnail"
           },
           "button": {
             "publish": "Publish"

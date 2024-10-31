@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 
+import { mutate } from 'swr';
+
 import { FileDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 import { deleteApplicationOnStore } from '@/apis/application-store';
 import { IApplicationStoreItemDetail } from '@/apis/ugc/asset-typings.ts';
@@ -31,8 +34,6 @@ import {
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { getI18nContent } from '@/utils';
-import { toast } from 'sonner';
-import { mutate } from 'swr';
 
 interface IOperateAreaProps {
   item: IAssetItem<IApplicationStoreItemDetail>;
@@ -113,7 +114,7 @@ export const OperateArea: React.FC<IOperateAreaProps> = ({ item, trigger, toolti
                       <DropdownMenuShortcut className="ml-0 mr-2 mt-0.5">
                         <FileDown size={15} />
                       </DropdownMenuShortcut>
-                      {t('components.layout.ugc.import-dialog.delete')}
+                      {t('components.layout.ugc.import-dialog.delete.label')}
                     </DropdownMenuItem>
                   </AlertDialogTrigger>
                   <AlertDialogContent

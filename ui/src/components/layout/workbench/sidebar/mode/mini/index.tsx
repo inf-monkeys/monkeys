@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { useCreation, useDebounceEffect, useThrottleEffect } from 'ahooks';
 import { motion } from 'framer-motion';
@@ -57,12 +57,25 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
   }, [routeSidebarFilter, routeSidebarReserve, data?.pages]);
 
   const { teamId } = useVinesTeam();
+
+  const [{ activePage }] = useUrlState<{ activePage: string }>({ activePage: '' });
+  const toggleToActivePageRef = useRef(activePage ? false : null);
+
   const [currentPage, setCurrentPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
 
   const prevPageRef = useRef<string>();
   useDebounceEffect(
     () => {
       if (!teamId) return;
+
+      if (toggleToActivePageRef.current === false) {
+        const page = originalPages.find((it) => it.workflowId === activePage);
+        if (page) {
+          setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
+          toggleToActivePageRef.current = true;
+          return;
+        }
+      }
 
       const currentPageId = currentPage?.[teamId]?.id;
 

@@ -81,7 +81,12 @@ export const MaskEditorToolbar: React.FC<IMaskEditorToolbarProps> = ({
   return (
     <div ref={ref} className="relative flex w-full items-center">
       <div ref={toolbarRef} className="flex w-full overflow-hidden">
-        <div className={cn('flex w-full min-w-[26rem] items-center justify-between', scrollToolVisible && 'pr-16 min-w-[30rem]')}>
+        <div
+          className={cn(
+            'flex w-full min-w-[26rem] items-center justify-between',
+            scrollToolVisible && 'min-w-[30rem] pr-16',
+          )}
+        >
           <div className="flex items-center gap-2">
             <input ref={fileInputRef} className="hidden" type="file" accept="image/*" onChange={onFileInputChange} />
             {children}

@@ -184,3 +184,9 @@ export const useUpdateExecutionTask = (instanceId: string, taskId: string) =>
     instanceId && taskId ? `/api/workflow/executions/${instanceId}/tasks/${taskId}` : null,
     vinesFetcher({ method: 'POST' }),
   );
+
+export const useWorkflowExecutionThumbnails = (workflowId?: string | null) =>
+  useSWR<string[] | undefined, unknown, string | null>(
+    workflowId ? `/api/workflow/executions/${workflowId}/thumbnails` : null,
+    vinesFetcher({ method: 'GET' }),
+  );

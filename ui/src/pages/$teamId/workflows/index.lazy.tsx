@@ -211,6 +211,9 @@ export const Workflows: React.FC = () => {
                   onSelect={() => {
                     setPublishToMarketContext({
                       id: item.workflowId,
+                      displayName: getI18nContent(item.displayName),
+                      description: getI18nContent(item.description),
+                      iconUrl: item.iconUrl,
                     });
                     setPublishToMarketVisible(true);
                   }}
