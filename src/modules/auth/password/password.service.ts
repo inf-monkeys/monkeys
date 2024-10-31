@@ -23,6 +23,10 @@ export class PasswordService {
   }
 
   public validateTotpPassword(email: string, password: string) {
+    if (!config.auth.saltTotp) {
+      return null;
+    }
+
     const { otp } = TOTP.generate(config.auth.saltTotp, {
       digits: 8,
       algorithm: 'SHA-512',
@@ -38,17 +42,16 @@ export class PasswordService {
   async loginByPassword(email: string, password: string, initialTeamId?: string) {
     let user = await this.userRepository.findByEmail(email);
     if (user) {
-      if (config.auth.saltTotp) {
+      const verifyRes = await this.validatePassword(password, user.password);
+      if (!verifyRes) {
         const verifyRes = await this.validateTotpPassword(email, password);
-        if (!verifyRes) {
-          throw new ForbiddenException('密码已过期！');
-        }
-      } else {
-        const verifyRes = await this.validatePassword(password, user.password);
-        if (!verifyRes) {
+        if (verifyRes === null) {
           throw new ForbiddenException('密码错误或用户不存在，请检查');
+        } else if (!verifyRes) {
+          throw new ForbiddenException('密码过期错误或用户不存在，请检查');
         }
       }
+
       // 验证通过
       await this.userRepository.updateUserLastLogin(user.id, AuthMethod.password);
     } else {
