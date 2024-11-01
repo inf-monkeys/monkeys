@@ -7,7 +7,7 @@ import { ComfyUIService } from './comfyui.service';
 import { ComfyuiWorkflowController } from './comfyui.workflow.controller';
 
 @Module({
-  // imports: [ComfyuiModelModule],
+  // imports: [ConductorModule],
   providers: [ComfyUIService],
   controllers: [ComfyuiWorkflowController, ComfyuiServerController, ComfyuiExecutionController, ComfyuiDependencyController],
   exports: [ComfyUIService],
