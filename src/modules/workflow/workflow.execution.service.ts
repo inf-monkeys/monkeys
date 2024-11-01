@@ -331,13 +331,13 @@ export class WorkflowExecutionService {
           if (variables) {
             formattedInput = Object.keys(input).map((inputName) => {
               const value = input[inputName];
-              const { displayName, description, type } = variables.find((variable) => variable.name === inputName);
+              const variable = variables.find((variable) => variable.name === inputName);
               return {
                 id: inputName,
-                displayName,
-                description,
+                displayName: variable?.displayName || inputName,
+                description: variable?.description || '',
                 value,
-                type,
+                type: variable?.type || typeof value,
               };
             });
           }
