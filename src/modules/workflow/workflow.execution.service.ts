@@ -246,7 +246,7 @@ export class WorkflowExecutionService {
     // FIXME: not recommend for getting all executions
     for (const workflow of workflowList) {
       try {
-        const executions = (await this.getWorkflowExecutionOutputs(workflow.id, 1, 99999)).data;
+        const executions = (await this.getWorkflowExecutionOutputs(workflow.id, 1, 5000)).data;
         allExecutions = allExecutions.concat(executions);
       } catch (error) {}
     }
