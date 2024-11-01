@@ -329,17 +329,19 @@ export class WorkflowExecutionService {
         if (definitions.length > 0) {
           const { variables } = definitions[0];
           if (variables) {
-            formattedInput = Object.keys(input).map((inputName) => {
-              const value = input[inputName];
-              const variable = variables.find((variable) => variable.name === inputName);
-              return {
-                id: inputName,
-                displayName: variable?.displayName || inputName,
-                description: variable?.description || '',
-                value,
-                type: variable?.type || typeof value,
-              };
-            });
+            formattedInput = Object.keys(input)
+              .filter((inputName) => !inputName.startsWith('__'))
+              .map((inputName) => {
+                const value = input[inputName];
+                const variable = variables.find((variable) => variable.name === inputName);
+                return {
+                  id: inputName,
+                  displayName: variable?.displayName || inputName,
+                  description: variable?.description || '',
+                  value,
+                  type: variable?.type || typeof value,
+                };
+              });
           }
         }
 
