@@ -44,6 +44,35 @@ export class WorkflowExecutionController {
     });
   }
 
+  @Get('/executions/:workflowInstanceId/simple')
+  @ApiOperation({
+    summary: '获取某一次 workflow 执行实例的执行信息',
+    description: '获取某一次 workflow 执行实例的执行信息',
+  })
+  public async getWorkflowInstanceExecutionSimpleDetail(@Req() req: IRequest, @Param('workflowInstanceId') workflowInstanceId: string) {
+    const { teamId } = req;
+    const result = await this.service.getWorkflowExecutionSimpleDetail(teamId, workflowInstanceId);
+    return new SuccessResponse({
+      data: result,
+    });
+  }
+
+  @Get('/executions/outputs')
+  @ApiOperation({
+    summary: '获取所有 workflow 的执行输出',
+    description: '获取所有 workflow 的执行输出',
+  })
+  public async getAllWorkflowsExecutionOutputs(@Req() req: IRequest, @Query() query: { page: number; limit: number; orderBy: 'DESC' | 'ASC' }) {
+    const { teamId } = req;
+    const { page = 1, limit = 10, orderBy = 'DESC' } = query;
+    const result = await this.service.getAllWorkflowsExecutionOutputs(teamId, { page, limit, orderBy });
+    return {
+      code: 200,
+      message: 'ok',
+      ...result,
+    };
+  }
+
   @Get('/executions/:workflowId/outputs')
   @ApiOperation({
     summary: '获取 workflow 的执行输出',
