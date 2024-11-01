@@ -138,6 +138,16 @@ export const extractVideoUrls = (text: unknown): string[] => {
   return text.match(regex) || [];
 };
 
+export const getDataType = (data: any): 'json' | 'text' | 'image' | 'video' => {
+  if (typeof data === 'string') {
+    if (/https?:\/\/[^\s"]+?\.(jpg|jpeg|png|gif|bmp|webp|svg)/gi.test(data)) return 'image';
+    if (/https?:\/\/[^\s"]+?\.(mp4|avi|mov|mkv|flv|wmv|webm)/gi.test(data)) return 'video';
+    return 'text';
+  } else {
+    return 'json';
+  }
+};
+
 export const maskUrl = (url: string) => {
   const parts = url.split('//');
   const domain = parts[1];
