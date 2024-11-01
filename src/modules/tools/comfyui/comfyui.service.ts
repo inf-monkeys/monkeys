@@ -1,6 +1,8 @@
+import { CacheManager } from '@/common/cache';
+import { CACHE_TOKEN } from '@/common/common.module';
+import { config } from '@/common/config';
 import { ListDto } from '@/common/dto/list.dto';
 import { logger } from '@/common/logger';
-import { config } from '@/common/config';
 import { ComfyuiNode, ComfyuiPrompt, ComfyuiWorkflow, ComfyuiWorkflowWithPrompt } from '@/common/typings/comfyui';
 import { readComfyuiWorkflowFromImage, readComfyuiWorkflowFromJsonFile, readComfyuiWorkflowPromptFromJsonFile } from '@/common/utils/comfyui';
 import { ComfyuiWorkflowSourceType } from '@/database/entities/comfyui/comfyui-workflow.entity';
@@ -10,8 +12,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import _ from 'lodash';
 import { CreateComfyuiServerDto } from './dto/req/create-comfyui-server';
-import { CACHE_TOKEN } from '@/common/common.module';
-import { CacheManager } from '@/common/cache';
+import { RunComfyuiWorkflowExtraOptions } from './dto/req/execute-comfyui-workflow';
 
 export interface ImportComfyuiWorkflowParams {
   displayName?: string;
@@ -350,7 +351,7 @@ export class ComfyUIService {
     return await this.comfyuiWorkflowRepository.deleteComfyuiServer(teamId, address);
   }
 
-  public async runComfyuiWorkflow(serverAddress: string, worfklowId: string, inputData: { [x: string]: any }) {
+  public async runComfyuiWorkflow(serverAddress: string, worfklowId: string, inputData: { [x: string]: any }, extraOptions: RunComfyuiWorkflowExtraOptions) {
     const comfyuiWorkflow = await this.comfyuiWorkflowRepository.getComfyuiWorkflowById(worfklowId);
     if (!comfyuiWorkflow) {
       throw new Error(`Comfyui workflow not found: ${worfklowId}`);
@@ -368,6 +369,16 @@ export class ComfyUIService {
         comfyfile_repo: comfyuiWorkflow.originalData?.comfyfileRepo,
         input_config: toolInput,
         output_config: toolOutput,
+        extra_options: {
+          add_monkey_input: extraOptions.addMonkeyInput,
+          remove_prompt: extraOptions.removePrompt,
+          monkey_info: extraOptions.addMonkeyInput
+            ? {
+                team_id: extraOptions.teamId,
+                instance_id: extraOptions.instanceId,
+              }
+            : undefined,
+        },
       },
       headers: {
         ...(config?.comfyui?.apiToken && { Authorization: `Bearer ${config.comfyui.apiToken}` }),
