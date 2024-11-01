@@ -5,7 +5,7 @@ import { OrderBy } from '@/common/dto/order.enum';
 import { PaginationDto } from '@/common/dto/pagination.dto';
 import { WorkflowExecutionContext } from '@/common/dto/workflow-execution-context.dto';
 import { TooManyRequestsException } from '@/common/exceptions/too-many-requests';
-import { extractImageUrls, extractVideoUrls, flattenKeys } from '@/common/utils';
+import { extractImageUrls, extractVideoUrls, flattenKeys, getDataType } from '@/common/utils';
 import { RateLimiter } from '@/common/utils/rate-limiter';
 import { sleep } from '@/common/utils/utils';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
@@ -245,8 +245,10 @@ export class WorkflowExecutionService {
 
     // FIXME: not recommend for getting all executions
     for (const workflow of workflowList) {
-      const executions = (await this.getWorkflowExecutionOutputs(workflow.id, 1, 99999)).data;
-      allExecutions = allExecutions.concat(executions);
+      try {
+        const executions = (await this.getWorkflowExecutionOutputs(workflow.id, 1, 99999)).data;
+        allExecutions = allExecutions.concat(executions);
+      } catch (error) {}
     }
 
     allExecutions = allExecutions.sort((a, b) => (orderBy === 'DESC' ? b.startTime - a.startTime : a.startTime - b.startTime));
@@ -332,14 +334,14 @@ export class WorkflowExecutionService {
             formattedInput = Object.keys(input)
               .filter((inputName) => !inputName.startsWith('__'))
               .map((inputName) => {
-                const value = input[inputName];
+                const data = input[inputName];
                 const variable = variables.find((variable) => variable.name === inputName);
                 return {
                   id: inputName,
                   displayName: variable?.displayName || inputName,
                   description: variable?.description || '',
-                  value,
-                  type: variable?.type || typeof value,
+                  data,
+                  type: getDataType(data),
                 };
               });
           }
