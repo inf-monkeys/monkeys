@@ -224,10 +224,13 @@ export class WorkflowExecutionService {
     const data = await this.conductorService.getWorkflowExecutionStatus(teamId, workflowInstanceId);
     await this.populateMetadataByForExecutions([data]);
     return {
-      ..._.pick(data, ['createTime', 'startTime', 'endTime', 'input', 'output']),
+      ..._.pick(data, ['status', 'createTime', 'startTime', 'endTime', 'input', 'output']),
       workflowId: data.workflowName,
-      taskId: workflowInstanceId,
-      workflow: data.workflowDefinition,
+      instanceId: workflowInstanceId,
+      workflow: {
+        id: data.workflowDefinition.name,
+        displayName: data.workflowDefinition.description,
+      },
     };
   }
 
