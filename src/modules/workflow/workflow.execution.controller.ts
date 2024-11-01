@@ -57,6 +57,21 @@ export class WorkflowExecutionController {
     });
   }
 
+  @Get('/executions/:workflowId/outputs')
+  @ApiOperation({
+    summary: '获取 workflow 的执行输出',
+    description: '获取 workflow 的执行输出',
+  })
+  public async getWorkflowExecutionOutputs(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Query() query: { page: number; limit: number }) {
+    const { page = 1, limit = 10 } = query;
+    const result = await this.service.getWorkflowExecutionOutputs(workflowId, page, limit);
+    return {
+      code: 200,
+      message: 'ok',
+      ...result,
+    };
+  }
+
   @Get('/executions/outputs')
   @ApiOperation({
     summary: '获取所有 workflow 的执行输出',
@@ -66,21 +81,6 @@ export class WorkflowExecutionController {
     const { teamId } = req;
     const { page = 1, limit = 10, orderBy = 'DESC' } = query;
     const result = await this.service.getAllWorkflowsExecutionOutputs(teamId, { page, limit, orderBy });
-    return {
-      code: 200,
-      message: 'ok',
-      ...result,
-    };
-  }
-
-  @Get('/executions/:workflowId/outputs')
-  @ApiOperation({
-    summary: '获取 workflow 的执行输出',
-    description: '获取 workflow 的执行输出',
-  })
-  public async getWorkflowExecutionOutputs(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Query() query: { page: number; limit: number }) {
-    const { page = 1, limit = 10 } = query;
-    const result = await this.service.getWorkflowExecutionOutputs(workflowId, page, limit);
     return {
       code: 200,
       message: 'ok',
