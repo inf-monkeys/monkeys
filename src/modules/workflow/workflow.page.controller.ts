@@ -1,13 +1,13 @@
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
+import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { BUILT_IN_PAGE_INSTANCES } from '@/database/repositories/workflow.repository';
-import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreatePageDto } from './dto/req/create-page.dto';
 import { UpdatePageGroupDto, UpdatePagesDto } from './dto/req/update-pages.dto';
 import { WorkflowPageService } from './workflow.page.service';
-import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 
 @ApiTags('Workflows/Pages')
 @Controller('/workflow')
@@ -63,6 +63,17 @@ export class WorkflowPageController {
   async getPinnedPages(@Req() request: IRequest) {
     const { teamId } = request;
     const data = await this.pageService.getPinnedPages(teamId);
+    return new SuccessResponse({ data });
+  }
+
+  @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
+  @Get('/pages/pinned/simple')
+  async getSimplePinnedPages(@Req() request: IRequest, @Query('sidebarFilter') sidebarFilter?: string, @Query('sidebarReserve') sidebarReserve?: string) {
+    const { teamId } = request;
+    const data = await this.pageService.getSimplePinnedPages(teamId, {
+      routeSidebarFilter: sidebarFilter,
+      routeSidebarReserve: sidebarReserve,
+    });
     return new SuccessResponse({ data });
   }
 

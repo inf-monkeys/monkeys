@@ -18,7 +18,7 @@ import { FindWorkflowCondition, WorkflowRepository } from '../../database/reposi
 import { ConductorService } from './conductor/conductor.service';
 import { SearchWorkflowExecutionsDto, SearchWorkflowExecutionsOrderDto, WorkflowExecutionSearchableField } from './dto/req/search-workflow-execution.dto';
 import { UpdateTaskStatusDto } from './dto/req/update-task-status.dto';
-import { DebugWorkflowRequest, StartWorkflowRequest } from './interfaces';
+import { DebugWorkflowRequest, StartWorkflowRequest, WorkflowExecutionOutput } from './interfaces';
 
 export interface WorkflowWithMetadata extends Workflow {
   startBy: string;
@@ -220,18 +220,63 @@ export class WorkflowExecutionService {
     return data;
   }
 
-  public async getWorkflowExecutionOutputs(workflowId: string, page = 1, limit = 10) {
+  public async getWorkflowExecutionSimpleDetail(teamId: string, workflowInstanceId: string) {
+    const data = await this.conductorService.getWorkflowExecutionStatus(teamId, workflowInstanceId);
+    await this.populateMetadataByForExecutions([data]);
+    return {
+      ..._.pick(data, ['createTime', 'startTime', 'endTime', 'input', 'output']),
+      workflowId: data.workflowName,
+      taskId: workflowInstanceId,
+      workflow: data.workflowDefinition,
+    };
+  }
+
+  public async getAllWorkflowsExecutionOutputs(
+    teamId: string,
+    condition = {
+      page: 1,
+      limit: 10,
+      orderBy: 'DESC',
+    },
+  ) {
+    const { page, limit, orderBy } = condition;
+    const workflowList = await this.workflowRepository.getAllWorkflows(teamId);
+    let allExecutions: WorkflowExecutionOutput[] = [];
+
+    // FIXME: not recommend for getting all executions
+    for (const workflow of workflowList) {
+      const executions = (await this.getWorkflowExecutionOutputs(workflow.id, 1, 99999)).data;
+      allExecutions = allExecutions.concat(executions);
+    }
+
+    allExecutions = allExecutions.sort((a, b) => (orderBy === 'DESC' ? b.startTime - a.startTime : a.startTime - b.startTime));
+
+    const start = (page - 1) * limit;
+    const end = start + limit;
+
+    return {
+      total: allExecutions.length,
+      data: allExecutions.slice(start, end),
+      page,
+      limit,
+      workflows: workflowList.map((workflow) => _.pick(workflow, ['displayName', 'description', 'id', 'iconUrl'])),
+    };
+  }
+
+  public async getWorkflowExecutionOutputs(inputWorkflowId: string, page = 1, limit = 10) {
     const start = (page - 1) * limit;
 
     const data = await retry(
       async () => {
-        const data = await conductorClient.workflowResource.searchV21(start, limit, 'startTime:DESC', '*', `workflowType IN (${workflowId})`);
+        const data = await conductorClient.workflowResource.searchV21(start, limit, 'startTime:DESC', '*', `workflowType IN (${inputWorkflowId})`);
         return data;
       },
       {
         max: 3,
       },
     );
+
+    const definitions = await this.workflowRepository.findWorkflowByIds([inputWorkflowId]);
 
     return {
       total: data?.totalHits ?? 0,
@@ -278,15 +323,40 @@ export class WorkflowExecutionService {
         }
 
         const ctx = input?.['__context'];
+
+        let formattedInput = null;
+
+        if (definitions.length > 0) {
+          const { variables } = definitions[0];
+          if (variables) {
+            formattedInput = Object.keys(input).map((inputName) => {
+              const value = input[inputName];
+              const { displayName, description, type } = variables.find((variable) => variable.name === inputName);
+              return {
+                id: inputName,
+                displayName,
+                description,
+                value,
+                type,
+              };
+            });
+          }
+        }
+
         return {
           ...rest,
+          input: formattedInput,
+          rawInput: input,
           output: finalOutput,
           rawOutput: output,
+          workflowId: inputWorkflowId,
           taskId: workflowId,
           userId: ctx?.userId ?? '',
           teamId: ctx?.teamId ?? '',
-        };
+        } as WorkflowExecutionOutput;
       }),
+      page,
+      limit,
     };
   }
 

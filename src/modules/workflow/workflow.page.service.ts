@@ -1,5 +1,7 @@
 import { generateDbId } from '@/common/utils';
+import { ConversationAppEntity } from '@/database/entities/conversation-app/conversation-app.entity';
 import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
+import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 import { BUILT_IN_PAGE_INSTANCES, WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -8,8 +10,6 @@ import { In, Repository } from 'typeorm';
 import { CreatePageDto } from './dto/req/create-page.dto';
 import { UpdatePageGroupDto, UpdatePagesDto } from './dto/req/update-pages.dto';
 import { WorkflowPageJson } from './interfaces';
-import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
-import { ConversationAppEntity } from '@/database/entities/conversation-app/conversation-app.entity';
 
 @Injectable()
 export class WorkflowPageService {
@@ -232,6 +232,84 @@ export class WorkflowPageService {
         ...agentPages,
       ],
       groups: groups.map((it) => pick(it, ['id', 'displayName', 'pageIds', 'isBuiltIn'])),
+    };
+  }
+
+  public async getSimplePinnedPages(
+    teamId: string,
+    filter?: {
+      routeSidebarFilter?: string;
+      routeSidebarReserve?: string;
+    },
+  ) {
+    const rawData = await this.getPinnedPages(teamId);
+
+    const VINES_VIEW_ID_MAPPER: Record<string, string> = {
+      'view-flow': 'process',
+      'view-logs': 'log',
+      'view-form': 'preview',
+      'view-chat': 'chat',
+    };
+
+    const VINES_IFRAME_PAGE_TYPE2ID_MAPPER = Object.entries(VINES_VIEW_ID_MAPPER).reduce(
+      (acc, [key, value]) => {
+        acc[value] = key;
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
+
+    const newPages = rawData.pages.map((rawPage) => {
+      const page = rawPage as {
+        id: string;
+        type: string;
+        displayName: string;
+        workflow?: {
+          displayName: string;
+          description: string;
+          id: string;
+          iconUrl: string;
+        };
+      };
+      return {
+        id: page.id,
+        displayName: page.workflow ? page.workflow.displayName : page.displayName,
+        description: page.workflow ? page.workflow.description : '',
+        iconUrl: page.workflow ? page.workflow.iconUrl : '',
+        workflowId: page.workflow ? page.workflow.id : undefined,
+        type: page.type,
+      };
+    });
+
+    const pageIdsForSort = Array.from(new Set(rawData.groups.flatMap((it) => it.pageIds)));
+
+    const sidebarFilter = (filter?.routeSidebarFilter?.toString() ?? '')?.split(',')?.filter(Boolean);
+    if (sidebarFilter.length > 0) {
+      return {
+        groups: rawData.groups,
+        pages: (newPages.filter(({ type }) => sidebarFilter.includes(VINES_IFRAME_PAGE_TYPE2ID_MAPPER[type] || type)) ?? []).sort((a, b) => {
+          const aIndex = pageIdsForSort.indexOf(a.id);
+          const bIndex = pageIdsForSort.indexOf(b.id);
+          return aIndex - bIndex;
+        }),
+      };
+    }
+
+    const sidebarReserve = (filter?.routeSidebarReserve?.toString() ?? '')?.split(',')?.filter(Boolean);
+    if (sidebarReserve.length > 0) {
+      return {
+        groups: rawData.groups,
+        pages: (newPages.filter(({ type }) => sidebarReserve.includes(VINES_IFRAME_PAGE_TYPE2ID_MAPPER[type] || type)) ?? []).sort((a, b) => {
+          const aIndex = pageIdsForSort.indexOf(a.id);
+          const bIndex = pageIdsForSort.indexOf(b.id);
+          return aIndex - bIndex;
+        }),
+      };
+    }
+
+    return {
+      groups: rawData.groups,
+      pages: newPages,
     };
   }
 

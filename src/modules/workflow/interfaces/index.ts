@@ -1,6 +1,7 @@
 import { WorkflowMetadataEntity, WorkflowOutputValue, WorkflowRateLimiter } from '@/database/entities/workflow/workflow-metadata';
 import { PageInstanceType, PagePermission } from '@/database/entities/workflow/workflow-page';
 import { WebhookTriggerConfig, WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
+import { Workflow } from '@inf-monkeys/conductor-javascript';
 import { AssetType, I18nValue, MonkeyTaskDefTypes, ToolProperty, WorkflowValidationIssue } from '@inf-monkeys/monkeys';
 
 export interface BaseAsset {
@@ -226,3 +227,12 @@ export interface DebugWorkflowRequest {
 }
 
 export type DebugWorkflowDto = Omit<DebugWorkflowRequest, 'teamId' | 'userId' | 'workflowId'>;
+
+export type WorkflowExecutionOutput = Pick<Workflow, 'status' | 'startTime' | 'createTime' | 'updateTime' | 'endTime' | 'workflowId' | 'output' | 'input'> & {
+  output: any[];
+  rawOutput: Record<string, any>;
+  workflowId: string;
+  taskId: string;
+  userId: string;
+  teamId: string;
+};
