@@ -1,8 +1,12 @@
 import { logger } from '@/common/logger';
 import { IRequest } from '@/common/typings/request';
+import { generateDbId, getComfyuiWorkflowDataListFromWorkflow } from '@/common/utils';
+import { ComfyuiRepository } from '@/database/repositories/comfyui.repository';
+import { SimpleTaskDef } from '@inf-monkeys/conductor-javascript';
 import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
 import { WorkflowRepository } from '../../database/repositories/workflow.repository';
+import { INTERNAL_BUILT_IN_MARKET } from '../assets/consts';
 import { LlmModelJson, RichMediaJson, SdModelJson, TableCollectionsJson, TeamInfoJson, TextCollectionJson, WorkflowWithPagesJson } from '../workflow/interfaces';
 import { WorkflowCrudService } from '../workflow/workflow.curd.service';
 import { ExportTeamDto } from './dto/export-team.dto';
@@ -12,6 +16,7 @@ export class ExportService {
   constructor(
     private readonly workflowCrudService: WorkflowCrudService,
     private readonly workflowRepository: WorkflowRepository,
+    private readonly comfyuiWorkflowRepository: ComfyuiRepository,
   ) {}
 
   public async exportTeamData(req: IRequest, dto: ExportTeamDto) {
@@ -92,6 +97,47 @@ export class ExportService {
       vectorDatabases,
       sdModels,
       llmModels,
+    };
+  }
+
+  public async exportTeamDataAsBuiltInMarket(teamId: string) {
+    const comfyuiInWorkflowIdList: string[] = [];
+    const workflows = (await this.workflowRepository.getAllWorkflowsInTeam(teamId))
+      .filter((workflow) => !(workflow.forkFromId && INTERNAL_BUILT_IN_MARKET.workflows.map((internal) => internal.id).includes(workflow.forkFromId)))
+      .map((workflow) => {
+        const comfyuiDataList = getComfyuiWorkflowDataListFromWorkflow(workflow);
+        if (comfyuiDataList.length > 0) {
+          for (const [, { index }] of comfyuiDataList.entries()) {
+            (workflow.tasks[index] as SimpleTaskDef).inputParameters.server = 'system';
+            const comfyuiWorkflowId = (workflow.tasks[index] as SimpleTaskDef).inputParameters.workflow as string | undefined;
+            if (comfyuiWorkflowId && !comfyuiInWorkflowIdList.includes(comfyuiWorkflowId)) comfyuiInWorkflowIdList.push(comfyuiWorkflowId);
+          }
+        }
+        return {
+          ..._.pick(workflow, ['tags', 'autoPinPage', 'displayName', 'description', 'iconUrl', 'version', 'variables', 'tasks', 'exposeOpenaiCompatibleInterface', 'thumbnail']),
+          isPreset: true,
+          isPublished: true,
+          id: generateDbId(),
+        };
+      });
+    const comfyuiWorkflows = (
+      await this.comfyuiWorkflowRepository.listComfyuiWorkflows(teamId, {
+        page: 1,
+        limit: 99999,
+      })
+    ).list
+      .filter((comfyui) => comfyuiInWorkflowIdList.includes(comfyui.id))
+      .map((comfyuiWorkflow) => {
+        return {
+          ..._.pick(comfyuiWorkflow, ['id', 'displayName', 'description', 'iconUrl', 'workflow', 'workflowType', 'prompt', 'toolInput', 'toolOutput', 'additionalNodeList', 'additionalModelList']),
+          isPreset: true,
+          isPublished: true,
+          originalData: {},
+        };
+      });
+    return {
+      workflows,
+      'comfyui-workflows': comfyuiWorkflows,
     };
   }
 

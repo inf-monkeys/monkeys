@@ -159,7 +159,7 @@ export class WorkflowRepository {
     return await this.workflowMetadataRepository.find({
       where: {
         teamId,
-        isDeleted: true,
+        isDeleted: false,
       },
     });
   }

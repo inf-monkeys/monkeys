@@ -100,7 +100,7 @@ export const Team: React.FC<ITeamProps> = () => {
         {isOwner && (
           <>
             <ApplyManage teamId={team?.id} />
-            <ImportExportTeam />
+            <ImportExportTeam team={team} />
             <DeleteTeam teamId={team?.id} />
           </>
         )}

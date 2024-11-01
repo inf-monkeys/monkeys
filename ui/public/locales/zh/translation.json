@@ -685,6 +685,10 @@
           "export": {
             "button": "导出数据",
             "title": "导出团队数据"
+          },
+          "export-as-built-in-market": {
+            "button": "导出数据为预置格式",
+            "title": "导出团队数据为预置格式"
           }
         },
         "join-public-team": {
@@ -2495,7 +2499,6 @@
                       "label": "过滤选项",
                       "desc": "联动此选项表单时，将根据此指定的值过滤选项",
                       "reserve": "反选",
-
                       "add": "添加过滤选项"
                     }
                   }
