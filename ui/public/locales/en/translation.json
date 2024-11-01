@@ -691,6 +691,10 @@
           "export": {
             "button": "Export Data",
             "title": "Export team data"
+          },
+          "export-as-built-in-market": {
+            "button": "Export Data as Built-in Market Format",
+            "title": "Export team data as built-in market format"
           }
         },
         "join-public-team": {

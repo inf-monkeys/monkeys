@@ -88,4 +88,12 @@ export class ExportController {
       teamId,
     };
   }
+
+  @Post('/tenant-assets/:teamId/export-as-built-in-market')
+  async exportAsBuiltInMarket(@Req() req: IRequest, @Res() res: Response, @Param('teamId') teamId: string) {
+    const data = await this.service.exportTeamDataAsBuiltInMarket(teamId);
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="${teamId}.json"`);
+    res.send(JSON.stringify(data));
+  }
 }
