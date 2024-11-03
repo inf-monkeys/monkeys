@@ -51,7 +51,7 @@ const AgentConfigView: React.FC = () => {
         isObject(value)
           ? isArray(value)
             ? (value as string[])
-            : (getI18nContent(value as I18nValue) ?? '')
+            : getI18nContent(value as I18nValue) ?? ''
           : (value as string),
       );
     }
