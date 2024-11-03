@@ -20,10 +20,14 @@ export const VinesImage: React.FC<IVinesImageProps> = ({ src, disabled, preview 
 
   const isDarkMode = mode === 'dark';
 
-  const [previewSrc, setPreviewSrc] = useState<string>(src || '');
+  const [previewSrc, setPreviewSrc] = useState<string | undefined>(src);
 
   useAsyncEffect(async () => {
     if (!src) return;
+    if (src.startsWith('blob:')) {
+      setPreviewSrc(src);
+      return;
+    }
     const srcArr = src.split('/');
     const srcArrLength = srcArr.length;
 
