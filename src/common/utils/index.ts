@@ -138,13 +138,19 @@ export const extractVideoUrls = (text: unknown): string[] => {
   return text.match(regex) || [];
 };
 
-export const getDataType = (data: any): 'json' | 'text' | 'image' | 'video' => {
+export const getDataType = (data: any): 'json' | 'number' | 'boolean' | 'text' | 'image' | 'video' | 'unknown' => {
   if (typeof data === 'string') {
     if (/https?:\/\/[^\s"]+?\.(jpg|jpeg|png|gif|bmp|webp|svg)/gi.test(data)) return 'image';
     if (/https?:\/\/[^\s"]+?\.(mp4|avi|mov|mkv|flv|wmv|webm)/gi.test(data)) return 'video';
     return 'text';
-  } else {
+  } else if (typeof data === 'object') {
     return 'json';
+  } else if (typeof data === 'number') {
+    return 'number';
+  } else if (typeof data === 'boolean') {
+    return 'boolean';
+  } else {
+    return 'unknown';
   }
 };
 
