@@ -8,8 +8,20 @@ import { toast } from 'sonner';
 
 import { createMediaFile, getResourceByMd5 } from '@/apis/resources';
 import { VinesResourceImageParams, VinesResourceSource, VinesResourceType } from '@/apis/resources/typting.ts';
-import { IFile } from '@/components/ui/uploader/file-list.tsx';
 import { calculateMD5, generateUploadFilePrefix, getImageSize, uploadFile } from '@/components/ui/uploader/utils.ts';
+
+export interface IFile {
+  id: string;
+  file: FileWithPath;
+  path: string;
+  name: string;
+  type: string;
+  size: number;
+  md5?: string;
+  url?: string;
+  status: 'wait' | 'busy' | 'wait-to-update' | 'uploading' | 'error' | 'success';
+  progress: string;
+}
 
 interface IUseVinesUploaderManage {
   files: FileWithPath[];

@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMemoizedFn } from 'ahooks';
-import { isString, set } from 'lodash';
-import { FileWithPath } from 'react-dropzone';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -19,8 +17,7 @@ import { VinesImage } from '@/components/ui/image';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Textarea } from '@/components/ui/textarea.tsx';
-import { Uploader } from '@/components/ui/uploader';
-import { getFileNameByOssUrl } from '@/components/ui/uploader/utils.ts';
+import { VinesUploader } from '@/components/ui/vines-uploader';
 import { IWorkflowInfo, workflowInfoSchema } from '@/schema/workspace/workflow-info.ts';
 import { getI18nContent } from '@/utils';
 
@@ -137,26 +134,23 @@ export const PublishToMarket: React.FC<IPublishToMarketProps> = ({ visible, setV
               name="iconUrl"
               control={form.control}
               render={({ field: { value, onChange } }) => {
-                const files: FileWithPath[] = [];
-                if (isString(value) && /(https|http):\/\/[^\s/]+\.[^\s/]+\/\S+\.\w{2,5}/.test(value)) {
-                  const file = new File([value], getFileNameByOssUrl(value), {
-                    type: value.split('.').pop() ?? 'file',
-                  });
-                  set(file, 'path', value);
-                  files.push(file);
-                }
                 return (
                   <FormItem>
                     <FormLabel>{t('components.layout.ugc.publish-dialog.thumbnail.label')}</FormLabel>
                     <FormControl>
-                      <div className="space-y-2 rounded border border-input p-2">
-                        <Uploader
-                          files={files}
-                          limit={1}
-                          extensionAccept={['png', 'jpg', 'jpeg', 'webp']}
-                          onFinished={(urls) => onChange(urls[0])}
+                      <div
+                        className="space-y-2 rounded border border-input p-2"
+                        onChange={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                      >
+                        <VinesUploader
+                          files={[value]}
+                          max={1}
+                          accept={['png', 'jpg', 'jpeg', 'webp']}
+                          onChange={(urls) => onChange(urls[0])}
                           basePath="user-files/thumbnails"
-                          mode="embed"
                         />
                         {hasThumbnails && (
                           <ScrollArea orientation="horizontal" className="[&>div>div[style]]:!block">
