@@ -223,14 +223,83 @@ export class WorkflowExecutionService {
   public async getWorkflowExecutionSimpleDetail(teamId: string, workflowInstanceId: string) {
     const data = await this.conductorService.getWorkflowExecutionStatus(teamId, workflowInstanceId);
     await this.populateMetadataByForExecutions([data]);
+
+    const { input, output } = data;
+
+    let alt: string | string[] | undefined;
+
+    const flattenOutput = flattenKeys(output, void 0, ['__display_text'], (_, data) => {
+      alt = data;
+    });
+
+    const outputValues = Object.values(flattenOutput);
+
+    const images = outputValues.map((it) => extractImageUrls(it)).flat();
+    const videos = outputValues.map((it) => extractVideoUrls(it)).flat();
+
+    const finalOutput = [];
+    let isInserted = false;
+
+    const outputValuesLength = outputValues.length;
+    if (outputValuesLength === 1 && !images.length && !videos.length) {
+      const currentOutput = outputValues[0];
+      if (typeof currentOutput === 'string') {
+        finalOutput.push({ type: 'text', data: currentOutput });
+      } else {
+        finalOutput.push({ type: 'json', data: currentOutput });
+      }
+      isInserted = true;
+    }
+
+    for (const image of images) {
+      finalOutput.push({ type: 'image', data: image, alt });
+      isInserted = true;
+    }
+
+    for (const video of videos) {
+      finalOutput.push({ type: 'video', data: video });
+      isInserted = true;
+    }
+
+    if (!isInserted) {
+      finalOutput.push({ type: 'json', data: output });
+    }
+
+    const ctx = input?.['__context'];
+
+    let formattedInput = null;
+
+    const definitions = await this.workflowRepository.findWorkflowByIds([data.workflowName]);
+
+    if (definitions.length > 0) {
+      const { variables } = definitions[0];
+      if (variables) {
+        formattedInput = Object.keys(input)
+          .filter((inputName) => !inputName.startsWith('__'))
+          .map((inputName) => {
+            const data = input[inputName];
+            const variable = variables.find((variable) => variable.name === inputName);
+            return {
+              id: inputName,
+              displayName: variable?.displayName || inputName,
+              description: variable?.description || '',
+              data,
+              type: getDataType(data),
+            };
+          });
+      }
+    }
+
     return {
-      ..._.pick(data, ['status', 'createTime', 'startTime', 'endTime', 'input', 'output']),
+      ..._.pick(data, ['status', 'createTime', 'startTime', 'updateTime', 'endTime']),
+      input: formattedInput,
+      rawInput: input,
+      output: finalOutput,
+      rawOutput: output,
       workflowId: data.workflowName,
       instanceId: workflowInstanceId,
-      workflow: {
-        id: data.workflowDefinition.name,
-        displayName: data.workflowDefinition.description,
-      },
+      userId: ctx.userId,
+      teamId: ctx.teamId,
     };
   }
 
@@ -357,7 +426,7 @@ export class WorkflowExecutionService {
           output: finalOutput,
           rawOutput: output,
           workflowId: inputWorkflowId,
-          taskId: workflowId,
+          instanceId: workflowId,
           userId: ctx?.userId ?? '',
           teamId: ctx?.teamId ?? '',
         } as WorkflowExecutionOutput;

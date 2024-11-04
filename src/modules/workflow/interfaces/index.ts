@@ -232,7 +232,7 @@ export type WorkflowExecutionOutput = Pick<Workflow, 'status' | 'startTime' | 'c
   output: any[];
   rawOutput: Record<string, any>;
   workflowId: string;
-  taskId: string;
+  instanceId: string;
   userId: string;
   teamId: string;
 };
