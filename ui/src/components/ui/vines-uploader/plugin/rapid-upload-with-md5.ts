@@ -53,6 +53,7 @@ export default class RapidUpload<M extends Meta, B extends Body> extends BasePlu
             meta: {
               ...file.meta,
               remoteUrl,
+              isRapidUploaded: true,
             },
             progress: { ...file.progress, uploadComplete: true, percentage: 100 },
           });

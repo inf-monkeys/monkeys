@@ -24,16 +24,15 @@ export const VinesImage: React.FC<IVinesImageProps> = ({ src, disabled, preview 
 
   useAsyncEffect(async () => {
     if (!src) return;
-    if (src.startsWith('blob:')) {
-      setPreviewSrc(src);
-      return;
-    }
+
     const srcArr = src.split('/');
     const srcArrLength = srcArr.length;
 
     const finalSrc = srcArr.map((it, i) => (i === srcArrLength - 2 ? `${it}_thumb` : it)).join('/');
     if (await checkImageUrlAvailable(finalSrc)) {
       setPreviewSrc(finalSrc);
+    } else {
+      setPreviewSrc(src);
     }
   }, [src]);
 

@@ -1,8 +1,8 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import Uppy from '@uppy/core';
 import ThumbnailGenerator from '@uppy/thumbnail-generator';
-import { useClickAway, useCreation, useMemoizedFn, useUnmount } from 'ahooks';
+import { useClickAway, useCreation, useDrop, useLatest, useMemoizedFn, useUnmount } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { isEmpty } from 'lodash';
 import { ClipboardPaste, FileUp, Plus } from 'lucide-react';
@@ -15,9 +15,14 @@ import { useUppyEvent, useUppyState, useVinesDropzone } from '@/components/ui/vi
 import FileMd5 from '@/components/ui/vines-uploader/plugin/file-md5.ts';
 import RapidUpload from '@/components/ui/vines-uploader/plugin/rapid-upload-with-md5.ts';
 import RemoteUrlToFile from '@/components/ui/vines-uploader/plugin/remote-url-to-file.ts';
+import VinesUpload from '@/components/ui/vines-uploader/plugin/vines-upload.ts';
+import { checkIfCorrectURL, getFileNameByOssUrl } from '@/components/ui/vines-uploader/utils.ts';
 import { cn } from '@/utils';
 
 export interface IVinesUploaderProps {
+  files?: string[];
+  onChange?: (urls: string[]) => void;
+
   maxSize?: number;
 
   max?: number;
@@ -26,12 +31,13 @@ export interface IVinesUploaderProps {
   accept?: string[] | null;
 
   autoUpload?: boolean;
+  basePath?: string;
 }
 
 export const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
   const { t } = useTranslation();
 
-  const { maxSize = 30, autoUpload = true, min = 1, max, accept = null } = props;
+  const { maxSize = 30, autoUpload = true, min = 1, max, accept = null, onChange, basePath } = props;
 
   const maxFileSize = maxSize * 1024 ** 2;
 
@@ -55,16 +61,12 @@ export const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
           thumbnailHeight: 192,
         })
         .use(FileMd5)
-        .use(RapidUpload),
+        .use(RapidUpload)
+        .use(VinesUpload, { basePath }),
     [],
   );
 
   useUnmount(() => uppy.destroy());
-
-  useUppyEvent(uppy, 'complete', (result) => {
-    console.log('successful files:', result.successful);
-    console.log('failed files:', result.failed);
-  });
 
   const filesMapper = useUppyState(uppy, (state) => state.files);
 
@@ -94,17 +96,59 @@ export const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
   const isFilesEmpty = isEmpty(filesMapper);
   const files = Object.values(filesMapper);
 
+  const latestFiles = useLatest(files);
+  useUppyEvent(uppy, 'complete', () => {
+    onChange?.(latestFiles.current.map((it) => it.uploadURL || it.meta.remoteUrl) as string[]);
+  });
+  useUppyEvent(uppy, 'file-removed', (file) => {
+    onChange?.(
+      latestFiles.current.filter((it) => it.id !== file.id).map((it) => it.uploadURL || it.meta.remoteUrl) as string[],
+    );
+  });
+
+  useEffect(() => {
+    const propsFiles = props.files || [];
+    if (propsFiles.length > 0) {
+      const currentFileUrls = latestFiles.current.map((it) => it.uploadURL || it.meta.remoteUrl);
+      uppy.addFiles(
+        propsFiles
+          .filter((it) => !currentFileUrls.includes(it))
+          .map((url) => {
+            if (checkIfCorrectURL(url)) {
+              const file = new File([], getFileNameByOssUrl(url), { type: 'text/plain' }) as File & {
+                meta?: { remoteUrl: string };
+              };
+              file.meta = { remoteUrl: url };
+              return handleConvertFile(file);
+            }
+            return null;
+          })
+          .filter(Boolean) as any[],
+      );
+    }
+  }, [props.files]);
+
+  const [isHovering, setIsHovering] = useState(false);
+  useDrop(ref, {
+    onDragEnter: () => setIsHovering(true),
+    onDragLeave: () => setIsHovering(false),
+  });
+
   return (
     <Dropzone
-      onDrop={(f) => uppy.addFiles(f.map((file) => handleConvertFile(file)))}
+      onDrop={(f) => {
+        uppy.addFiles(f.map((file) => handleConvertFile(file)));
+        setIsHovering(false);
+      }}
       onDropRejected={onDropRejected}
       validator={validator}
       maxSize={maxFileSize}
       maxFiles={max}
       noClick
     >
-      {({ getRootProps, getInputProps, isDragAccept, isFocused, open }) => {
-        const isEmptyFilesOrDragAccept = isFilesEmpty || isDragAccept;
+      {({ getRootProps, getInputProps, isDragAccept, isDragActive, isFocused, open }) => {
+        const isDropzoneActive = isDragAccept || isDragActive || isHovering;
+        const isEmptyFilesOrDragAccept = isFilesEmpty || isDropzoneActive;
         return (
           <div
             className={cn('relative h-[15.8rem] rounded')}
@@ -130,15 +174,17 @@ export const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                 >
                   <div
                     className={cn(
-                      'vines-center h-full cursor-pointer gap-4 rounded border-2 border-dashed border-input/75 bg-muted/35',
-                      isDragAccept && 'border-input bg-muted/75',
+                      'vines-center h-full cursor-pointer gap-4 rounded border-2 border-dashed border-input bg-muted/75',
+                      isHovering && '!border-solid !bg-muted/75',
                     )}
                     onClick={open}
                   >
                     <FileUp size={50} className="stroke-muted-foreground" />
                     <div className="flex max-w-[70%] flex-col">
                       <h1 className="text-xl font-bold leading-tight text-muted-foreground">
-                        {t('components.ui.updater.click-or-drag-area')}
+                        {isHovering
+                          ? t('components.ui.updater.release-file')
+                          : t('components.ui.updater.click-or-drag-area')}
                       </h1>
                       <p className="text-sm text-muted-foreground text-opacity-85">
                         {accept
@@ -156,12 +202,12 @@ export const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
             </AnimatePresence>
             <div
               className={cn(
-                'vines-center absolute bottom-0 w-full overflow-hidden rounded-md p-2 backdrop-blur-xl',
+                'vines-center absolute bottom-0 z-20 w-full overflow-hidden rounded-md p-2 backdrop-blur-xl',
                 files.length <= 3 && 'pt-0',
               )}
             >
               <Button variant="outline" icon={<Plus />} onClick={open}>
-                添加本地文件
+                {t('components.ui.updater.add-local-file')}
               </Button>
               <span
                 className={cn(
@@ -170,7 +216,7 @@ export const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                 )}
               >
                 <ClipboardPaste className="stroke-muted-foreground/45" size={18} />
-                可在此处粘贴图片上传
+                {t('components.ui.updater.paste-hint')}
               </span>
             </div>
           </div>

@@ -1,3 +1,5 @@
+import { customAlphabet } from 'nanoid';
+
 export const addProtocolToURL = (url: string) => {
   const protocolRegex = /^[a-z0-9]+:\/\//;
   const defaultProtocol = 'http://';
@@ -28,3 +30,6 @@ export const getFileNameByOssUrl = (url?: string, DEFAULT_NAME = 'unknown.jpg') 
 
   return match || DEFAULT_NAME;
 };
+
+export const generateSSOFilePrefixId = (length = 6) =>
+  'R' + customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', length - 1)();
