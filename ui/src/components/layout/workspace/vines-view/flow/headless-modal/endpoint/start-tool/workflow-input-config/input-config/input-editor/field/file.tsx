@@ -2,7 +2,6 @@ import React from 'react';
 
 import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Uploader } from 'src/components/ui/uploader';
 
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
@@ -10,6 +9,7 @@ import { VinesImageMaskPreview } from '@/components/ui/image-editor/mask/preview
 import { Label } from '@/components/ui/label.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Switch } from '@/components/ui/switch';
+import { VinesUploader } from '@/components/ui/vines-uploader';
 import { IWorkflowInput } from '@/schema/workspace/workflow-input.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 
@@ -49,17 +49,24 @@ export const FieldFile: React.FC<IFieldFileProps> = ({ form }) => {
               />
             </div>
           ) : (
-            <div className="w-[38rem] space-y-2">
+            <div
+              className="w-[38rem] space-y-2"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+              }}
+            >
               <Label>
                 {t('workspace.flow-view.endpoint.start-tool.input.config-form.file.label', {
                   extra: multipleValues ? t('workspace.flow-view.endpoint.start-tool.input.config-form.file.list') : '',
                 })}
               </Label>
-              <Uploader
-                limit={multipleValues ? void 0 : 1}
-                onFinished={(urls) => form.setValue('default', multipleValues ? urls : urls[0])}
+              <VinesUploader
+                className="rounded border border-input"
+                files={(multipleValues ? form.getValues('default') : [form.getValues('default')]) as string[]}
+                max={multipleValues ? void 0 : 1}
+                onChange={(urls) => form.setValue('default', multipleValues ? urls : urls[0])}
                 basePath="user-files/workflow-input"
-                mode="embed"
               />
               <p className="text-xs text-muted-foreground">
                 {t('workspace.flow-view.endpoint.start-tool.input.config-form.file.desc')}

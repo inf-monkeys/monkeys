@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Uploader } from 'src/components/ui/uploader';
 
 import { useUploadDocumentToKnowledgeBase } from '@/apis/vector';
 import { IUploadDocument } from '@/apis/vector/typings.ts';
@@ -25,6 +24,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
+import { VinesUploader } from '@/components/ui/vines-uploader';
 import { IImportFile, importFileSchema, PRE_PROCESS_RULES } from '@/schema/text-dataset/import-file.ts';
 
 interface IImportFileProps {
@@ -75,25 +75,22 @@ export const ImportFile: React.FC<IImportFileProps> = ({ children, textId }) => 
             className="flex flex-col gap-2"
             onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
           >
-            <ScrollArea className="h-80 px-2 [&>div>div]:p-1">
+            <ScrollArea className="max-h-96 px-2 [&>div>div]:p-1" disabledOverflowMask>
               <FormField
                 name="fileURL"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Uploader
-                        extensionAccept={['txt', 'md', 'markdown', 'pdf', 'csv', 'json', 'jsonl', 'zip']}
+                      <VinesUploader
+                        accept={['txt', 'md', 'markdown', 'pdf', 'csv', 'json', 'zip']}
                         maxSize={400}
-                        limit={1}
-                        onFinished={(urls) => {
+                        max={1}
+                        onChange={(urls, files) => {
                           field.onChange(urls[0]);
-                        }}
-                        onFilesUpdate={(files) => {
                           setFilename(files[0]?.name ?? '');
                         }}
                         basePath="user-files/text-data-file"
-                        mode="embed"
                       />
                     </FormControl>
                     <FormDescription>{t('common.form.description.upload-file-auto-store')}</FormDescription>

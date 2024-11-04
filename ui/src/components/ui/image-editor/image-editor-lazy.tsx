@@ -2,7 +2,6 @@ import React, { createRef, useEffect, useState } from 'react';
 
 import { Cropper, ReactCropperElement } from 'react-cropper';
 import { useTranslation } from 'react-i18next';
-import { VinesUploader } from 'src/components/ui/uploader';
 
 import { getResourceByMd5 } from '@/apis/resources';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,7 @@ import { IVinesImageEditorProps } from '@/components/ui/image-editor/index.tsx';
 import { base64toFile } from '@/components/ui/image-editor/utils.ts';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { calculateMD5, uploadFile } from '@/components/ui/uploader/utils.ts';
+import { VinesUploader } from '@/components/ui/vines-uploader';
 import { nanoIdLowerCase } from '@/utils';
 
 const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
@@ -71,6 +71,8 @@ const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
     setLoading(false);
   };
 
+  const [uploaderVisible, setUploaderVisible] = useState(false);
+
   return (
     <Tooltip>
       <Dialog open={visible} onOpenChange={setVisible}>
@@ -111,19 +113,25 @@ const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
           />
 
           <DialogFooter>
-            <VinesUploader
-              accept={['image/png', 'image/jpeg']}
-              maxSize={10}
-              limit={1}
-              onFinished={(urls) => {
-                setTempImage(urls[0]);
-              }}
-              basePath="user-files/base"
-            >
-              <Button variant="outline" disabled={loading}>
-                {t('components.ui.image-editor.upload-others')}
-              </Button>
-            </VinesUploader>
+            <Dialog open={uploaderVisible} onOpenChange={setUploaderVisible}>
+              <DialogTrigger asChild>
+                <Button variant="outline" disabled={loading}>
+                  {t('components.ui.image-editor.upload-others')}
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <VinesUploader
+                  accept={['png', 'jpg', 'jpeg', 'webp', 'bmp']}
+                  maxSize={10}
+                  max={1}
+                  onChange={(urls) => {
+                    setTempImage(urls[0]);
+                    setUploaderVisible(false);
+                  }}
+                  basePath="user-files/base"
+                />
+              </DialogContent>
+            </Dialog>
             <Button variant="outline" onClick={handleSave} loading={loading}>
               {t('common.utils.save')}
             </Button>

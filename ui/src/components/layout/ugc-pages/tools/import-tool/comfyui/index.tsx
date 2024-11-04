@@ -8,7 +8,6 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { ComfyUIServerListModal } from 'src/components/layout/ugc-pages/comfyui/comfyui-server-list';
-import { Uploader } from 'src/components/ui/uploader';
 
 import { importComfyuiWorkflow } from '@/apis/comfyui';
 import { Button } from '@/components/ui/button';
@@ -25,8 +24,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Textarea } from '@/components/ui/textarea.tsx';
-import { MIME_TYPES } from '@/components/ui/uploader/mime-types.ts';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
+import { VinesUploader } from '@/components/ui/vines-uploader';
 import { IImportComfyUIWorkflow, importComfyUIWorkflowSchema } from '@/schema/workspace/import-comfyui-workflow.ts';
 
 interface IImportComfyUIWorkflowProps {
@@ -66,7 +65,7 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
   return (
     <Form {...form}>
       <form onSubmit={handleSubmit}>
-        <ScrollArea className="-ml-1 -mr-3.5 h-[calc(100vh-22rem)] pr-3 [&>[data-radix-scroll-area-viewport]>div]:px-1">
+        <ScrollArea className="-ml-1 -mr-3.5 flex max-h-96 flex-col pr-3 [&>[data-radix-scroll-area-viewport]>div]:px-1">
           <div className="w-full space-y-2">
             <FormLabel>{t('ugc-page.tools.import.import-comfyui-workflow.form.display-name.label')}</FormLabel>
             <div className="flex w-full items-center gap-2">
@@ -163,15 +162,12 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Uploader
-                        accept={[MIME_TYPES.png, MIME_TYPES.jpeg, MIME_TYPES.gif]}
+                      <VinesUploader
+                        accept={['png', 'jpg', 'gif', 'jpeg']}
                         maxSize={20}
-                        limit={1}
-                        onFinished={(urls) => {
-                          field.onChange(urls[0]);
-                        }}
+                        max={1}
+                        onChange={(urls) => field.onChange(urls[0])}
                         basePath="user-files/import-comfyui-image"
-                        mode="embed"
                       />
                     </FormControl>
                     <FormDescription>{t('common.form.description.upload-file-auto-store')}</FormDescription>
@@ -193,15 +189,13 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
                       {t('ugc-page.tools.import.import-comfyui-workflow.form.workflowJsonUrl.label')}
                     </FormLabel>
                     <FormControl>
-                      <Uploader
-                        accept={['application/json']}
+                      <VinesUploader
+                        className="rounded border border-input"
+                        accept={['json']}
                         maxSize={20}
-                        limit={1}
-                        onFinished={(urls) => {
-                          field.onChange(urls[0]);
-                        }}
+                        max={1}
+                        onChange={(urls) => field.onChange(urls[0])}
                         basePath="user-files/import-comfyui-json"
-                        mode="embed"
                       />
                     </FormControl>
                     <FormDescription>{t('common.form.description.upload-file-auto-store')}</FormDescription>
@@ -218,15 +212,13 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
                       {t('ugc-page.tools.import.import-comfyui-workflow.form.workflowApiJsonUrl.label')}
                     </FormLabel>
                     <FormControl>
-                      <Uploader
-                        accept={['application/json']}
+                      <VinesUploader
+                        className="rounded border border-input"
+                        accept={['json']}
                         maxSize={20}
-                        limit={1}
-                        onFinished={(urls) => {
-                          field.onChange(urls[0]);
-                        }}
+                        max={1}
+                        onChange={(urls) => field.onChange(urls[0])}
                         basePath="user-files/import-comfyui-json-url"
-                        mode="embed"
                       />
                     </FormControl>
                     <FormDescription>{t('common.form.description.upload-file-auto-store')}</FormDescription>
