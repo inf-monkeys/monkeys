@@ -85,7 +85,7 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({
 
   const { data: history, error, isLoading: isHistoryLoading } = useChatBotHistory(chatId);
 
-  const { isLoading, setMessages, messages, resend } = useChat({
+  const { isLoading, setMessages, messages, resend, input, setInput, handleEnterPress, stop, reload } = useChat({
     chatId,
     model: id,
     apiKey,
@@ -167,11 +167,18 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({
       </div>
       <div ref={inputRef} className="z-20">
         <VinesChatInput
-          chatId={chatId}
           id={id}
           multipleChat={multipleChat}
           autoCreateSession={isDefaultSession}
           setChatId={setChatId}
+          messages={messages}
+          setMessages={setMessages}
+          input={input}
+          setInput={setInput}
+          handleEnterPress={handleEnterPress}
+          isLoading={isLoading}
+          stop={stop}
+          reload={reload}
         />
       </div>
     </>

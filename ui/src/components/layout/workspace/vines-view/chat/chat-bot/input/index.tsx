@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 
 import { useCreateWorkflowChatSession, useWorkflowChatSessions } from '@/apis/workflow/chat';
 import { CleanMessages } from '@/components/layout/workspace/vines-view/chat/chat-bot/input/clean-messages.tsx';
-import { useChat } from '@/components/layout/workspace/vines-view/chat/chat-bot/use-chat.ts';
+import { IVinesMessage } from '@/components/layout/workspace/vines-view/chat/chat-bot/use-chat.ts';
 import { AutosizeTextarea } from '@/components/ui/autosize-textarea.tsx';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -16,25 +16,37 @@ import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useSubmitHandler } from '@/hooks/use-submit-handler.ts';
 
 interface IVinesChatInputProps {
-  chatId: string;
   id: string;
   multipleChat?: boolean;
   autoCreateSession?: boolean;
   setChatId?: (chatId: string) => void;
+
+  messages: IVinesMessage[];
+  setMessages: (messages: IVinesMessage[]) => void;
+  input: string;
+  setInput: React.Dispatch<React.SetStateAction<string>>;
+  handleEnterPress: () => void;
+  isLoading: boolean;
+  stop: () => void;
+  reload: () => Promise<null | undefined>;
 }
 
 export const VinesChatInput: React.FC<IVinesChatInputProps> = ({
-  chatId,
   id,
   multipleChat = true,
   autoCreateSession = false,
   setChatId,
+
+  messages,
+  setMessages,
+  input,
+  setInput,
+  handleEnterPress,
+  isLoading,
+  stop,
+  reload,
 }) => {
   const { t } = useTranslation();
-
-  const { messages, setMessages, input, setInput, handleEnterPress, isLoading, stop, reload } = useChat({
-    chatId,
-  });
 
   const { mutate } = useWorkflowChatSessions(id);
   const { trigger } = useCreateWorkflowChatSession();
