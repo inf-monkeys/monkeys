@@ -3,13 +3,14 @@ import React from 'react';
 import Uppy, { Meta, UppyFile } from '@uppy/core';
 import { useCreation } from 'ahooks';
 import { motion } from 'framer-motion';
-import { CircleCheck, Eye, Loader2, Trash2 } from 'lucide-react';
+import { CircleCheck, CircleX, Eye, Loader2, RotateCw, Trash2, Zap } from 'lucide-react';
 import Image from 'rc-image';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { useVinesImageManage } from '@/components/ui/image/use-vines-image-manage.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn } from '@/utils';
@@ -40,8 +41,6 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
 
   const listLen = list.length;
 
-  console.log(list);
-
   return (
     <motion.div
       className="z-10"
@@ -52,43 +51,95 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
     >
       <ScrollArea className="h-52" disabledOverflowMask>
         <div className={cn('flex size-full items-center justify-center gap-2 p-2', listLen > 3 && 'grid grid-cols-3')}>
-          {list.map(({ id, preview, src, progress: { uploadComplete, uploadStarted, percentage } }) => (
-            <div
-              key={id}
-              className="vines-center group relative h-48 min-w-40 overflow-hidden rounded border border-input/80 shadow [&_.rc-image-mask]:absolute [&_.rc-image-mask]:h-full [&_.rc-image]:static"
-            >
-              <Image
-                src={preview}
-                fallback={isDarkMode ? '/fallback_image_dark.webp' : '/fallback_image.webp'}
-                preview={{
-                  src,
-                  icons,
-                  closeIcon,
-                  mask: <Eye className="stroke-white" />,
-                }}
-              />
-              <div className="absolute left-2 top-2 flex items-center justify-center gap-1 rounded border border-input bg-slate-1 px-2 py-1.5 shadow">
-                {uploadComplete ? <CircleCheck size={13} /> : <Loader2 size={13} className="animate-spin" />}
-                <p className="text-xs leading-none">
-                  {uploadComplete ? '已上传' : uploadStarted ? `上传中（${percentage}%）` : '待上传'}
-                </p>
+          {list.map(
+            ({ id, preview, name, src, progress: { uploadComplete, uploadStarted, percentage }, error, meta }) => (
+              <div
+                key={id}
+                className="vines-center group relative h-48 min-w-28 overflow-hidden rounded border border-input/80 shadow [&_.rc-image-mask]:absolute [&_.rc-image-mask]:h-full [&_.rc-image]:static"
+              >
+                <Image
+                  src={preview}
+                  fallback={isDarkMode ? '/fallback_image_dark.webp' : '/fallback_image.webp'}
+                  preview={{
+                    src,
+                    icons,
+                    closeIcon,
+                    mask: <Eye className="stroke-white" />,
+                  }}
+                />
+                <div className="absolute left-2 top-2 flex items-center justify-center gap-1 rounded border border-input bg-slate-1 px-2 py-1.5 shadow">
+                  {error ? (
+                    <CircleX size={13} />
+                  ) : uploadComplete ? (
+                    <CircleCheck size={13} />
+                  ) : (
+                    <Loader2 size={13} className="animate-spin" />
+                  )}
+                  <p className="text-xs leading-none">
+                    {error
+                      ? t('components.ui.updater.status.upload-failed')
+                      : uploadComplete
+                        ? t('components.ui.updater.status.upload-success')
+                        : uploadStarted
+                          ? t('components.ui.updater.status.uploading', { percentage })
+                          : t('components.ui.updater.status.wait')}
+                  </p>
+                  {(meta.isRapidUploaded as boolean) && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex cursor-pointer items-center gap-1">
+                          <Separator className="mx-1 h-4" orientation="vertical" />
+                          <Zap size={13} className="fill-vines-500 stroke-vines-500" />
+                          <p className="text-xs leading-none text-vines-500">
+                            {t('components.ui.updater.rapid-upload')}
+                          </p>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent sideOffset={8}>{t('components.ui.updater.rapid-upload-tip')}</TooltipContent>
+                    </Tooltip>
+                  )}
+                  {error && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          className="absolute -right-8 -mt-0.5 !p-1"
+                          icon={<RotateCw size={12} />}
+                          variant="outline"
+                          size="small"
+                          onClick={() => uppy.retryUpload(id)}
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent>{t('common.utils.retry')}</TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
+                {!meta.isUploading && (
+                  <div className="pointer-events-none absolute bottom-2 flex w-full items-center justify-between gap-2 px-2 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p className="line-clamp-1 max-w-36 rounded border border-input bg-slate-1 p-1 text-sm leading-none shadow">
+                          {name}
+                        </p>
+                      </TooltipTrigger>
+                      <TooltipContent>{name}</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          className="!p-1.5"
+                          icon={<Trash2 size={12} />}
+                          variant="outline"
+                          size="small"
+                          onClick={() => uppy.removeFile(id)}
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent>{t('common.utils.delete')}</TooltipContent>
+                    </Tooltip>
+                  </div>
+                )}
               </div>
-              <div className="pointer-events-none absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      className="!p-1.5"
-                      icon={<Trash2 size={12} />}
-                      variant="outline"
-                      size="small"
-                      onClick={() => uppy.removeFile(id)}
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>{t('common.utils.delete')}</TooltipContent>
-                </Tooltip>
-              </div>
-            </div>
-          ))}
+            ),
+          )}
         </div>
       </ScrollArea>
     </motion.div>

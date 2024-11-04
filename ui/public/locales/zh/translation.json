@@ -56,7 +56,8 @@
       "click-to-copy": "点击复制",
       "coming-soon": "即将上线",
       "counter": "（{{count}}）",
-      "fill-required": "请填写必填项"
+      "fill-required": "请填写必填项",
+      "retry": "重试"
     },
     "type": {
       "workflow": "工作流",
@@ -264,7 +265,19 @@
           }
         },
         "remove": "移除",
-        "wait-to-upload": "共计 {{filesCount}} 份文件等待上传"
+        "wait-to-upload": "共计 {{filesCount}} 份文件等待上传",
+
+        "add-local-file": "添加本地文件",
+        "paste-hint": "可在此处粘贴图片上传",
+        "release-file": "立即上传",
+        "status": {
+            "uploading": "上传中（{{progress}}%）",
+            "upload-success": "已上传",
+            "upload-failed": "上传失败",
+            "wait": "正在预处理"
+        },
+        "rapid-upload": "秒传",
+        "rapid-upload-tip": "检测到服务器上存在该文件，无需重复上传"
       },
       "vines-variable-editor": {
         "cannot-parse-toast": "VinesVariableEditor 无法解析文本！"

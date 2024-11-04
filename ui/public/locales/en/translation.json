@@ -56,7 +56,8 @@
       "click-to-copy": "Click to copy",
       "coming-soon": "Coming soon",
       "counter": " ({{count}})",
-      "fill-required": "Please fill in the required fields"
+      "fill-required": "Please fill in the required fields",
+      "retry": "Retry"
     },
     "type": {
       "workflow": "workflow",
@@ -270,7 +271,19 @@
           }
         },
         "remove": "Remove",
-        "wait-to-upload": "A total of {{filesCount}} files are waiting to be uploaded"
+        "wait-to-upload": "A total of {{filesCount}} files are waiting to be uploaded",
+
+        "add-local-file": "Add local file",
+        "paste-hint": "You can paste the image here to upload",
+        "release-file": "Upload now",
+        "status": {
+          "uploading": "Uploading ({{progress}}%)",
+          "upload-success": "Uploaded",
+          "upload-failed": "Upload failed",
+          "wait": "Preprocessing"
+        },
+        "rapid-upload": "",
+        "rapid-upload-tip": "The file is detected on the server, no need to upload again"
       },
       "vines-variable-editor": {
         "cannot-parse-toast": "VinesVariableEditor can't parse text!"

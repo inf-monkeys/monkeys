@@ -20,6 +20,7 @@ export const simpleFilePut = (
     'Content-Type': 'application/x-www-form-urlencoded',
   },
   params: Record<string, string> = {},
+  controller?: AbortController,
 ): Promise<XMLHttpRequest> =>
   new Promise((resolve, reject) => {
     const req = new XMLHttpRequest();
@@ -44,6 +45,13 @@ export const simpleFilePut = (
     req.onerror = () => {
       reject(new Error('Request error'));
     };
+
+    if (controller) {
+      controller.signal.addEventListener('abort', () => {
+        req.abort();
+        reject(new Error('Request aborted'));
+      });
+    }
 
     if (method === 'POST') {
       const formData = new FormData();
