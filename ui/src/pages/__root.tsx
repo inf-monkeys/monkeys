@@ -19,7 +19,6 @@ import { TeamsGuard, useVinesTeam } from '@/components/router/guard/team.tsx';
 import { UserGuard } from '@/components/router/guard/user.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { VinesGlobalUpload } from '@/components/ui/uploader/vines-global-upload.tsx';
 import { IconGuard } from '@/components/ui/vines-icon/lucide/guard.tsx';
 import { SIDEBAR_MAP } from '@/consts/sidebar.tsx';
 import useUrlState from '@/hooks/use-url-state.ts';
@@ -95,7 +94,6 @@ const RootComponent: React.FC = () => {
     <>
       <ScrollRestoration />
       <TooltipProvider delayDuration={100}>
-        <VinesGlobalUpload />
         <main className="vines-ui grid size-full min-h-screen" style={{ zoom }}>
           <AnimatePresence mode="popLayout">
             {visible && (

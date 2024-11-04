@@ -57,7 +57,13 @@
       "coming-soon": "Coming soon",
       "counter": " ({{count}})",
       "fill-required": "Please fill in the required fields",
-      "retry": "Retry"
+      "retry": "Retry",
+      "download": {
+        "label": "Download",
+        "loading": "Downloading...",
+        "success": "Download successful",
+        "error": "Download failed"
+      }
     },
     "type": {
       "workflow": "workflow",

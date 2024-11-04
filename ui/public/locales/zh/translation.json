@@ -57,7 +57,13 @@
       "coming-soon": "即将上线",
       "counter": "（{{count}}）",
       "fill-required": "请填写必填项",
-      "retry": "重试"
+      "retry": "重试",
+      "download": {
+        "label": "下载",
+        "loading": "下载中...",
+        "success": "下载成功",
+        "error": "下载失败"
+      }
     },
     "type": {
       "workflow": "工作流",
