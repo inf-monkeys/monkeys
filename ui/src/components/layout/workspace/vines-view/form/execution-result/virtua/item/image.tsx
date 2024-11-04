@@ -42,7 +42,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
 
   return (
     <div className="box-border flex-none content-stretch p-1">
-      <div className="vines-center relative overflow-hidden rounded-lg">
+      <div className="vines-center relative overflow-hidden rounded-lg [&_.rc-image-mask]:absolute [&_.rc-image-mask]:h-full [&_.rc-image]:static">
         <Image
           src={previewSrc}
           alt="image"

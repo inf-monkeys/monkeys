@@ -40,7 +40,7 @@ export const VirtuaExecutionResultGridItem: React.FC<IVirtuaExecutionResultGridI
         switch (type) {
           case 'image':
             return (
-              <VirtuaExecutionResultGridWrapper data={it} key={i}>
+              <VirtuaExecutionResultGridWrapper data={it} key={i} src={data as string}>
                 <VirtuaExecutionResultGridImageItem
                   src={data as string}
                   alt={isObject(alt) ? alt?.[data as string]?.toString() : alt}
@@ -49,7 +49,7 @@ export const VirtuaExecutionResultGridItem: React.FC<IVirtuaExecutionResultGridI
             );
           case 'video':
             return (
-              <VirtuaExecutionResultGridWrapper data={it} key={i}>
+              <VirtuaExecutionResultGridWrapper data={it} key={i} src={data as string}>
                 <VinesAbstractVideo className="my-auto [&>video]:min-h-16">{data as string}</VinesAbstractVideo>
               </VirtuaExecutionResultGridWrapper>
             );

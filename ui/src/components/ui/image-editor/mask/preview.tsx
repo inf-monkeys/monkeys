@@ -12,7 +12,7 @@ export interface IVinesImageMaskPreviewProps {
 const VinesMaskEditorPreviewCore = lazy(() => import('./preview-lazy.tsx'));
 
 export const VinesImageMaskPreview: React.FC<IVinesImageMaskPreviewProps> = (props) => (
-  <Suspense fallback={<Skeleton />}>
+  <Suspense fallback={<Skeleton className="h-[15.8rem] w-full" />}>
     <VinesMaskEditorPreviewCore {...props} />
   </Suspense>
 );
