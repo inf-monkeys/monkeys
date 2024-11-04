@@ -277,7 +277,7 @@
         "paste-hint": "You can paste the image here to upload",
         "release-file": "Upload now",
         "status": {
-          "uploading": "Uploading ({{progress}}%)",
+          "uploading": "Uploading ({{percentage}}%)",
           "upload-success": "Uploaded",
           "upload-failed": "Upload failed",
           "wait": "Preprocessing"

@@ -38,7 +38,13 @@ export const FieldFile: React.FC<IFieldFileProps> = ({ form }) => {
                 control={form.control}
                 render={({ field: { value } }) => (
                   <Card className="w-full overflow-hidden">
-                    <CardContent className="relative p-2">
+                    <CardContent
+                      className="relative p-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                      }}
+                    >
                       <VinesImageMaskPreview
                         src={value?.toString() ?? ''}
                         onFinished={(val) => form.setValue('default', val)}

@@ -23,7 +23,19 @@ import { cn } from '@/utils';
 const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
   const { t } = useTranslation();
 
-  const { className, maxSize = 30, autoUpload = true, min = 1, max, accept = null, onChange, basePath } = props;
+  const {
+    className,
+    children,
+    uppy$,
+
+    maxSize = 30,
+    autoUpload = true,
+    min = 1,
+    max,
+    accept = null,
+    onChange,
+    basePath,
+  } = props;
 
   const maxFileSize = maxSize * 1024 ** 2;
 
@@ -109,6 +121,8 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
           .filter(Boolean) as any[],
       );
     }
+
+    uppy$?.emit(uppy);
   }, [props.files]);
 
   const [isHovering, setIsHovering] = useState(false);
@@ -196,13 +210,14 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
             </span>
             <div
               className={cn(
-                'vines-center absolute bottom-0 z-20 w-full overflow-hidden rounded-md p-2 backdrop-blur-xl',
+                'vines-center absolute bottom-0 z-20 w-full gap-2 overflow-hidden rounded-md p-2 backdrop-blur-xl',
                 filesLength <= 3 && 'pt-0',
               )}
             >
               <Button variant="outline" icon={<Plus />} onClick={open} disabled={filesLength >= (max ?? Infinity)}>
                 {t('components.ui.updater.add-local-file')}
               </Button>
+              {children}
             </div>
           </div>
         );

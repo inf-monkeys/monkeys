@@ -271,7 +271,7 @@
         "paste-hint": "可在此处粘贴图片上传",
         "release-file": "立即上传",
         "status": {
-            "uploading": "上传中（{{progress}}%）",
+            "uploading": "上传中（{{percentage}}%）",
             "upload-success": "已上传",
             "upload-failed": "上传失败",
             "wait": "正在预处理"
