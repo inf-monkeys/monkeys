@@ -3,15 +3,11 @@ import React, { createRef, useEffect, useState } from 'react';
 import { Cropper, ReactCropperElement } from 'react-cropper';
 import { useTranslation } from 'react-i18next';
 
-import { getResourceByMd5 } from '@/apis/resources';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { IVinesImageEditorProps } from '@/components/ui/image-editor/index.tsx';
-import { base64toFile } from '@/components/ui/image-editor/utils.ts';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { calculateMD5, uploadFile } from '@/components/ui/uploader/utils.ts';
 import { VinesUploader } from '@/components/ui/vines-uploader';
-import { nanoIdLowerCase } from '@/utils';
 
 const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
   width = 500,
@@ -44,28 +40,28 @@ const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
     }
     setLoading(true);
 
-    let ossUrl: string = tempImage ?? '';
-
-    const avatarB64 = cropperRef.current?.cropper.getCroppedCanvas()?.toDataURL();
-    if (avatarB64) {
-      const finalFileName = `${fileName ? fileName.split('.')[0] : nanoIdLowerCase(10)}.png`;
-      const file = base64toFile(avatarB64, finalFileName);
-      if (file) {
-        const cropperMd5 = await calculateMD5(file, () => {});
-        if (cropperMd5 !== tempImageMd5) {
-          const existingFileUrl = (await getResourceByMd5(cropperMd5 as string))?.data?.url;
-          if (existingFileUrl) {
-            ossUrl = existingFileUrl;
-          } else {
-            ossUrl = await uploadFile(file, `images/${finalFileName}`, () => {});
-          }
-        }
-      }
-    }
-
-    if (ossUrl !== value) {
-      onChange(ossUrl);
-    }
+    // let ossUrl: string = tempImage ?? '';
+    //
+    // const avatarB64 = cropperRef.current?.cropper.getCroppedCanvas()?.toDataURL();
+    // if (avatarB64) {
+    //   const finalFileName = `${fileName ? fileName.split('.')[0] : nanoIdLowerCase(10)}.png`;
+    //   const file = base64toFile(avatarB64, finalFileName);
+    //   if (file) {
+    //     const cropperMd5 = await calculateMD5(file, () => {});
+    //     if (cropperMd5 !== tempImageMd5) {
+    //       const existingFileUrl = (await getResourceByMd5(cropperMd5 as string))?.data?.url;
+    //       if (existingFileUrl) {
+    //         ossUrl = existingFileUrl;
+    //       } else {
+    //         ossUrl = await uploadFile(file, `images/${finalFileName}`, () => {});
+    //       }
+    //     }
+    //   }
+    // }
+    //
+    // if (ossUrl !== value) {
+    //   onChange(ossUrl);
+    // }
 
     setVisible(false);
     setLoading(false);
@@ -91,23 +87,23 @@ const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
             autoCropArea={1}
             viewMode={1}
             preview={void 0}
-            ready={() => {
-              setTimeout(() => {
-                try {
-                  const avatarB64 = cropperRef.current?.cropper.getCroppedCanvas()?.toDataURL();
-                  if (avatarB64) {
-                    const file = base64toFile(avatarB64, `temp.png`);
-                    if (file) {
-                      calculateMD5(file, () => {}).then((md5) => {
-                        setTempImageMd5(md5 as string);
-                      });
-                    }
-                  }
-                } catch {
-                  /* empty */
-                }
-              });
-            }}
+            // ready={() => {
+            //   setTimeout(() => {
+            //     try {
+            //       const avatarB64 = cropperRef.current?.cropper.getCroppedCanvas()?.toDataURL();
+            //       if (avatarB64) {
+            //         const file = base64toFile(avatarB64, `temp.png`);
+            //         if (file) {
+            //           calculateMD5(file, () => {}).then((md5) => {
+            //             setTempImageMd5(md5 as string);
+            //           });
+            //         }
+            //       }
+            //     } catch {
+            //       /* empty */
+            //     }
+            //   });
+            // }}
             checkCrossOrigin={false}
             crossOrigin="anonymous"
           />
