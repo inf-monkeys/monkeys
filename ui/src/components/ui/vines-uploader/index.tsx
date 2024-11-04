@@ -1,11 +1,15 @@
 import React, { lazy, Suspense } from 'react';
 
-import { Meta, UppyFile } from '@uppy/core';
+import { Meta, Uppy, UppyFile } from '@uppy/core';
+import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 
 import { Skeleton } from '@/components/ui/skeleton.tsx';
 
 export interface IVinesUploaderProps {
   className?: string;
+  children?: React.ReactNode;
+
+  uppy$?: EventEmitter<Uppy<Meta, Record<string, never>>>;
 
   files?: string[];
   onChange?: (urls: string[], files: UppyFile<Meta, Record<string, never>>[]) => void;

@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card.tsx';
-import { VinesImageMaskPreview, VinesImageMaskPreviewDialog } from '@/components/ui/image-editor/mask/preview.tsx';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { VinesImageMaskPreview } from '@/components/ui/image-editor/mask/preview.tsx';
 import { VinesUploader } from '@/components/ui/vines-uploader';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
@@ -44,14 +45,23 @@ export const FieldFile: React.FC<IFieldFileProps> = ({
             <span className="text-xs text-opacity-70">
               {t('workspace.pre-view.actuator.execution-form.file.label')}
             </span>
-            <VinesImageMaskPreviewDialog
-              src={value}
-              onFinished={(val) => form.setValue(name, isMultiple ? [val] : val)}
-            >
-              <Button variant="outline" size="small" className="-mr-1 scale-90">
-                {t('workspace.pre-view.actuator.execution-form.file.click-to-open-in-image-mask-editor-and-upload')}
-              </Button>
-            </VinesImageMaskPreviewDialog>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="small" className="-mr-1 scale-90">
+                  {t('workspace.pre-view.actuator.execution-form.file.click-to-open-in-image-mask-editor-and-upload')}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-[35rem]">
+                <DialogHeader>
+                  <DialogTitle>{t('components.ui.vines-image-mask-editor.preview.label')}</DialogTitle>
+                </DialogHeader>
+                <VinesImageMaskPreview
+                  className="h-96"
+                  src={value}
+                  onFinished={(val) => form.setValue(name, isMultiple ? [val] : val)}
+                />
+              </DialogContent>
+            </Dialog>
           </div>
         ) : (
           <div
@@ -75,7 +85,13 @@ export const FieldFile: React.FC<IFieldFileProps> = ({
       </>
     ) : (
       <Card className={cn('w-full overflow-hidden', mode !== 'mini' && 'max-sm:max-w-[calc(100vw-3rem)]')}>
-        <CardContent className={cn('relative p-0', enableImageMask && 'p-2')}>
+        <CardContent
+          className={cn('relative p-0', enableImageMask && 'p-2')}
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+        >
           {enableImageMask ? (
             <VinesImageMaskPreview src={value} onFinished={(val) => form.setValue(name, isMultiple ? [val] : val)} />
           ) : (

@@ -14,7 +14,7 @@ export interface IVinesImageEditorProps {
 const VinesImageEditorCore = lazy(() => import('./image-editor-lazy.tsx'));
 
 export const VinesImageEditor: React.FC<IVinesImageEditorProps> = (props) => (
-  <Suspense fallback={<Skeleton />}>
+  <Suspense fallback={<Skeleton className="h-[15.8rem] w-full" />}>
     <VinesImageEditorCore {...props} />
   </Suspense>
 );

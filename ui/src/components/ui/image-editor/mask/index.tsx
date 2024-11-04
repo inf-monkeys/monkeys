@@ -15,13 +15,12 @@ import { MaskEditorToolbar } from '@/components/ui/image-editor/mask/editor/tool
 import { mergeBlobToFile } from '@/components/ui/image-editor/mask/editor/utils.ts';
 import { VinesLoading } from '@/components/ui/loading';
 import { cn } from '@/utils';
-import VinesEvent from '@/utils/events.ts';
 
 export interface MaskEditorProps extends Omit<IMaskEditorProps, 'src'> {
   src: string | File;
 
   className?: string;
-  onFinished?: (url: string) => void;
+  onFinished?: (file: File) => void;
 
   children?: React.ReactNode;
 }
@@ -58,7 +57,6 @@ export const VinesImageMaskEditor: React.FC<MaskEditorProps> = ({ src, onFinishe
 
   const maskEditorEvent$ = useEventEmitter<IMaskEditorEvent>();
 
-  const [uploading, setUploading] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
   maskEditorEvent$.useSubscription((mode) => {
@@ -66,17 +64,7 @@ export const VinesImageMaskEditor: React.FC<MaskEditorProps> = ({ src, onFinishe
       setExporting(true);
 
       optimizeImage(new File([maskFileBlob], 'optimize-image', { type: 'image/png' }), setExportProgress)
-        .then((result) => {
-          setUploading(true);
-
-          const newFile = mergeBlobToFile(file, result as Blob);
-          VinesEvent.emit('vines-uploader', [newFile], (urls: string[]) => {
-            onFinished?.(urls[0]);
-            toast.success(t('components.ui.vines-image-mask-editor.finish'));
-
-            setUploading(false);
-          });
-        })
+        .then((result) => onFinished?.(mergeBlobToFile(file, result as Blob)))
         .finally(() => {
           setExporting(false);
           setExportProgress(0);
@@ -84,7 +72,7 @@ export const VinesImageMaskEditor: React.FC<MaskEditorProps> = ({ src, onFinishe
     }
   });
 
-  const isExport = exporting || uploading;
+  const isExport = exporting;
 
   return (
     <div
@@ -194,9 +182,7 @@ export const VinesImageMaskEditor: React.FC<MaskEditorProps> = ({ src, onFinishe
           >
             <VinesLoading immediately value={exportProgress} />
             <span className="text-sm">
-              {uploading
-                ? t('components.ui.vines-image-mask-editor.init.upload')
-                : t('components.ui.vines-image-mask-editor.init.export', { progress: exportProgress })}
+              {t('components.ui.vines-image-mask-editor.init.export', { progress: exportProgress })}
             </span>
           </motion.div>
         )}
