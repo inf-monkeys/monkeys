@@ -1,13 +1,19 @@
 import React, { createRef, useEffect, useState } from 'react';
 
+import { Meta, Uppy } from '@uppy/core';
+import { useEventEmitter, useMemoizedFn } from 'ahooks';
+import { PencilRuler } from 'lucide-react';
 import { Cropper, ReactCropperElement } from 'react-cropper';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { IVinesImageEditorProps } from '@/components/ui/image-editor/index.tsx';
+import { base64toFile } from '@/components/ui/image-editor/utils.ts';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesUploader } from '@/components/ui/vines-uploader';
+import { nanoIdLowerCase } from '@/utils';
 
 const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
   width = 500,
@@ -23,7 +29,6 @@ const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
 
   const [visible, setVisible] = useState(false);
 
-  const [tempImageMd5, setTempImageMd5] = useState('');
   const [tempImage, setTempImage] = useState(value);
 
   useEffect(() => {
@@ -32,42 +37,43 @@ const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
     }
   }, [value]);
 
-  const [loading, setLoading] = useState(false);
-  const handleSave = async () => {
-    if (!onChange) {
-      setVisible(false);
-      return;
+  const [uppy, setUppy] = React.useState<Uppy<Meta, Record<string, never>> | null>(null);
+  const uppy$ = useEventEmitter<Uppy<Meta, Record<string, never>>>();
+  uppy$.useSubscription((uppyObject) => {
+    if (!uppy) {
+      setUppy(uppyObject);
     }
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [imageEditorVisible, setImageEditorVisible] = useState(false);
+
+  const handleImageEditSave = async () => {
     setLoading(true);
 
-    // let ossUrl: string = tempImage ?? '';
-    //
-    // const avatarB64 = cropperRef.current?.cropper.getCroppedCanvas()?.toDataURL();
-    // if (avatarB64) {
-    //   const finalFileName = `${fileName ? fileName.split('.')[0] : nanoIdLowerCase(10)}.png`;
-    //   const file = base64toFile(avatarB64, finalFileName);
-    //   if (file) {
-    //     const cropperMd5 = await calculateMD5(file, () => {});
-    //     if (cropperMd5 !== tempImageMd5) {
-    //       const existingFileUrl = (await getResourceByMd5(cropperMd5 as string))?.data?.url;
-    //       if (existingFileUrl) {
-    //         ossUrl = existingFileUrl;
-    //       } else {
-    //         ossUrl = await uploadFile(file, `images/${finalFileName}`, () => {});
-    //       }
-    //     }
-    //   }
-    // }
-    //
-    // if (ossUrl !== value) {
-    //   onChange(ossUrl);
-    // }
+    const avatarB64 = cropperRef.current?.cropper.getCroppedCanvas()?.toDataURL();
+    if (avatarB64) {
+      const finalFileName = `${fileName ? fileName.split('.')[0] : nanoIdLowerCase(8)}.png`;
+      const file = base64toFile(avatarB64, finalFileName);
+      if (file && uppy) {
+        uppy.removeFiles(uppy.getFiles().map((it) => it.id));
+        setTimeout(() => uppy.addFile(file), 100);
+      }
+    }
 
-    setVisible(false);
+    setImageEditorVisible(false);
     setLoading(false);
   };
 
-  const [uploaderVisible, setUploaderVisible] = useState(false);
+  const handleSave = useMemoizedFn(() => {
+    if (tempImage && onChange) {
+      onChange(tempImage);
+      toast.success(t('components.ui.image-editor.success'));
+    } else {
+      toast.error(t('components.ui.image-editor.error'));
+    }
+    setVisible(false);
+  });
 
   return (
     <Tooltip>
@@ -75,63 +81,54 @@ const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
         <DialogTrigger asChild>
           <TooltipTrigger>{children}</TooltipTrigger>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent
+          onPointerDownOutside={(e) => {
+            if (e.target instanceof Element && e.target.closest('[data-sonner-toast]')) {
+              e.preventDefault();
+            }
+            handleSave();
+          }}
+        >
           <DialogTitle>{t('components.ui.image-editor.title')}</DialogTitle>
-          <Cropper
-            aspectRatio={aspectRatio}
-            width={width}
-            ref={cropperRef}
-            src={tempImage}
-            guides={true}
-            className="h-80 overflow-hidden rounded"
-            autoCropArea={1}
-            viewMode={1}
-            preview={void 0}
-            // ready={() => {
-            //   setTimeout(() => {
-            //     try {
-            //       const avatarB64 = cropperRef.current?.cropper.getCroppedCanvas()?.toDataURL();
-            //       if (avatarB64) {
-            //         const file = base64toFile(avatarB64, `temp.png`);
-            //         if (file) {
-            //           calculateMD5(file, () => {}).then((md5) => {
-            //             setTempImageMd5(md5 as string);
-            //           });
-            //         }
-            //       }
-            //     } catch {
-            //       /* empty */
-            //     }
-            //   });
-            // }}
-            checkCrossOrigin={false}
-            crossOrigin="anonymous"
-          />
-
-          <DialogFooter>
-            <Dialog open={uploaderVisible} onOpenChange={setUploaderVisible}>
+          <VinesUploader
+            accept={['png', 'jpg', 'jpeg', 'webp', 'bmp']}
+            maxSize={10}
+            max={1}
+            files={tempImage ? [tempImage] : []}
+            onChange={(urls) => setTempImage(urls[0])}
+            uppy$={uppy$}
+            basePath="user-files/base"
+          >
+            <Dialog open={imageEditorVisible} onOpenChange={setImageEditorVisible}>
               <DialogTrigger asChild>
-                <Button variant="outline" disabled={loading}>
-                  {t('components.ui.image-editor.upload-others')}
+                <Button variant="outline" icon={<PencilRuler />} disabled={loading}>
+                  {t('components.ui.image-editor.edit')}
                 </Button>
               </DialogTrigger>
               <DialogContent>
-                <VinesUploader
-                  accept={['png', 'jpg', 'jpeg', 'webp', 'bmp']}
-                  maxSize={10}
-                  max={1}
-                  onChange={(urls) => {
-                    setTempImage(urls[0]);
-                    setUploaderVisible(false);
-                  }}
-                  basePath="user-files/base"
+                <Cropper
+                  aspectRatio={aspectRatio}
+                  width={width}
+                  ref={cropperRef}
+                  src={tempImage}
+                  guides={true}
+                  className="h-80 overflow-hidden rounded"
+                  autoCropArea={1}
+                  viewMode={1}
+                  checkCrossOrigin={false}
+                  crossOrigin="anonymous"
                 />
+                <DialogFooter>
+                  <Button variant="outline" onClick={handleImageEditSave} loading={loading}>
+                    {t('common.utils.save')}
+                  </Button>
+                </DialogFooter>
               </DialogContent>
             </Dialog>
-            <Button variant="outline" onClick={handleSave} loading={loading}>
+            <Button variant="outline" loading={loading} onClick={handleSave}>
               {t('common.utils.save')}
             </Button>
-          </DialogFooter>
+          </VinesUploader>
         </DialogContent>
       </Dialog>
       <TooltipContent>{t('components.ui.image-editor.confirm-tooltip')}</TooltipContent>

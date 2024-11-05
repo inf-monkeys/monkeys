@@ -204,7 +204,9 @@
       "image-editor": {
         "title": "上传图像",
         "confirm-tooltip": "点击更新",
-        "upload-others": "上传其他图像"
+        "edit": "编辑图像",
+        "success": "图像已更新",
+        "error": "图像更新失败"
       },
       "updater": {
         "title": "上传文件",
