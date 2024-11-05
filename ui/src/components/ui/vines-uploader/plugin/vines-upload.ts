@@ -391,6 +391,10 @@ export default class VinesUpload<M extends Meta, B extends Body> extends BasePlu
     for (const file of filesFiltered) {
       if (!file.name || !file.size || !file.meta.md5) {
         this.uppy.log(`[VinesUpload] File ${file.id} is missing name, size or md5, can’t upload`, 'warning');
+        this.uppy.setFileState(file.id, {
+          ...file,
+          error: 'Missing name, size or md5',
+        });
         continue;
       }
 
