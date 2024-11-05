@@ -60,7 +60,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
         })
         .use(FileMd5)
         .use(RapidUpload)
-        .use(VinesUpload, { basePath }),
+        .use(VinesUpload, { ...(basePath && { basePath }) }),
     [],
   );
 

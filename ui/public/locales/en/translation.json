@@ -210,7 +210,9 @@
       "image-editor": {
         "title": "Upload image",
         "confirm-tooltip": "Click to update",
-        "upload-others": "Upload others"
+        "edit": "Edit",
+        "success": "Image updated",
+        "error": "Image update failed"
       },
       "updater": {
         "title": "Upload files",

@@ -43,17 +43,17 @@ export const Settings: React.FC = () => {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="account" asChild>
-          <ScrollArea className="-mr-3 pr-3">
+          <ScrollArea className="-mr-3 pr-3" disabledOverflowMask>
             <Account />
           </ScrollArea>
         </TabsContent>
         <TabsContent value="stat" asChild>
-          <ScrollArea className="-mr-3 pr-3">
+          <ScrollArea className="-mr-3 pr-3" disabledOverflowMask>
             <Stat />
           </ScrollArea>
         </TabsContent>
         <TabsContent value="apikey" asChild>
-          <ScrollArea className="-mr-3 pr-3">
+          <ScrollArea className="-mr-3 pr-3" disabledOverflowMask>
             <ApiKey />
           </ScrollArea>
         </TabsContent>

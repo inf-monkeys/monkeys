@@ -73,6 +73,7 @@ const VinesImageMaskPreview: React.FC<IVinesImageMaskPreviewProps> = ({ src, cla
           onChange={(files) => onFinished?.(files[0])}
           className="w-full"
           uppy$={uppy$}
+          basePath="workflow/image-mask"
         >
           <Button variant="outline" icon={<PencilRuler />} onClick={() => setVisible(true)} disabled={!src}>
             {t('components.ui.vines-image-mask-editor.preview.label')}
