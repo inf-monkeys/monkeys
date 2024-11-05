@@ -3064,6 +3064,7 @@
           "running": "In progress",
           "completed": "No input has been configured yet, you can execute it directly"
         },
+        "is-getting-input": "Getting parameters",
         "instance-id-tips": "Instance ID",
         "manually-trigger": "Manual or automatic execution trigger",
         "options": {

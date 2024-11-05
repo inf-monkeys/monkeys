@@ -190,3 +190,19 @@ export const useWorkflowExecutionThumbnails = (workflowId?: string | null) =>
     workflowId ? `/api/workflow/executions/${workflowId}/thumbnails` : null,
     vinesFetcher({ method: 'GET' }),
   );
+
+export type TWorkflowInstanceByImageUrl = {
+  instance: (Omit<VinesWorkflowExecutionOutputs, 'rawOutput' | 'taskId'> & { instanceId: string }) | null;
+  total: number;
+};
+
+export const useWorkflowInstanceByImageUrl = (workflowId?: string | null) =>
+  useSWRMutation<
+    TWorkflowInstanceByImageUrl | undefined,
+    unknown,
+    string | null,
+    { imageUrl: string; page?: number; limit?: number }
+  >(
+    workflowId ? `/api/workflow/executions/${workflowId}/get-instance-by-image-url` : null,
+    vinesFetcher({ method: 'POST' }),
+  );

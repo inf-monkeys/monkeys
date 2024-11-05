@@ -24,7 +24,11 @@ export type FlowEventType =
   | 'flow-trigger-webhook'
   | 'flow-trigger-custom';
 
-export type EventType = AppEventType | FlowCanvasEventType | FlowEventType;
+export type FromEventType = 'form-fill-data-by-image-url';
+
+export type ViewEventType = 'view-toggle-active-view-by-workflow-id';
+
+export type EventType = AppEventType | FlowCanvasEventType | FlowEventType | FromEventType | ViewEventType;
 
 const VinesEvent = new EventEmitter<EventType>();
 

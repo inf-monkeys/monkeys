@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useLatest, useMap } from 'ahooks';
+import { useDebounceFn, useLatest, useMap } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { AnimatePresence, motion } from 'framer-motion';
 import { fromPairs, groupBy, isArray, isEmpty, omit, set } from 'lodash';
@@ -11,17 +11,22 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { useMutationSearchWorkflowExecutions } from '@/apis/workflow/execution';
+import {
+  TWorkflowInstanceByImageUrl,
+  useMutationSearchWorkflowExecutions,
+  useWorkflowInstanceByImageUrl,
+} from '@/apis/workflow/execution';
 import { VinesFormFieldItem } from '@/components/layout/workspace/vines-view/form/tabular/render/item.tsx';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion.tsx';
 import { Form } from '@/components/ui/form.tsx';
 import { Label } from '@/components/ui/label.tsx';
-import { VinesLoading } from '@/components/ui/loading';
+import { VinesFullLoading, VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
 import { cn } from '@/utils';
+import VinesEvent from '@/utils/events.ts';
 
 export const BOOLEAN_VALUES = ['true', 'yes', '是', '1'];
 
@@ -178,6 +183,36 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
     }
   });
 
+  const [loadingDialog, setLoadingDialog] = useState<string | null>(null);
+
+  const { trigger: getWorkflowInstanceByImageUrl } = useWorkflowInstanceByImageUrl(workflowId);
+  const { run: handleFillDataByImageUrl } = useDebounceFn(
+    async (imageUrl: string, eventWorkflowId: string, autoProduce?: boolean) => {
+      if (workflowId === eventWorkflowId) {
+        setLoadingDialog(t('workspace.chat-view.workflow-mode.is-getting-input'));
+        const { instance } = (await getWorkflowInstanceByImageUrl({ imageUrl })) as TWorkflowInstanceByImageUrl;
+        if (instance) {
+          const values = (instance?.input ?? {}) as unknown as IWorkflowInputForm;
+          setDefValues(values);
+          form.reset(values);
+          if (autoProduce) {
+            setTimeout(() => handleSubmit(), 200);
+          }
+        }
+        setLoadingDialog(null);
+      }
+    },
+    {
+      wait: 200,
+    },
+  );
+  useEffect(() => {
+    VinesEvent.on('form-fill-data-by-image-url', handleFillDataByImageUrl);
+    return () => {
+      VinesEvent.off('form-fill-data-by-image-url', handleFillDataByImageUrl);
+    };
+  }, []);
+
   const { foldInputs, defInputs } = useMemo(
     () =>
       groupBy(inputs, (it) => (it?.typeOptions?.foldUp ? 'foldInputs' : 'defInputs')) as Record<
@@ -201,6 +236,14 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
         onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
       >
         <AnimatePresence>
+          {loadingDialog && (
+            <VinesFullLoading
+              motionKey="form-full-screen-tips"
+              key="form-full-screen-tips"
+              tips={loadingDialog}
+              className="backdrop-blur-sm"
+            />
+          )}
           {isLoading ? (
             <VinesLoading className="vines-center absolute left-0 top-0 size-full" />
           ) : isFormEmpty ? (

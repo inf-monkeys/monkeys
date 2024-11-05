@@ -3062,6 +3062,7 @@
           "running": "正在运行中",
           "completed": "暂未配置输入，可直接运行"
         },
+        "is-getting-input": "正在获取参数",
         "instance-id-tips": "运行实例 ID",
         "manually-trigger": "手动或自动执行触发",
         "options": {

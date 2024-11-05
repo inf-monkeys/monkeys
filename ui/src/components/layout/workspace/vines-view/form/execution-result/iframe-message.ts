@@ -6,6 +6,7 @@ import { useMemoizedFn } from 'ahooks';
 import { isString, omit } from 'lodash';
 
 import { VinesWorkflowExecutionOutput, VinesWorkflowExecutionOutputs } from '@/package/vines-flow/core/typings.ts';
+import VinesEvent from '@/utils/events.ts';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 interface IVinesIframeMessage {
@@ -43,13 +44,24 @@ export const useVinesIframeMessage = ({ output, mutate, enable = false }: IVines
     try {
       const data = JSON.parse(event.data);
       const eventName = data?.['v-event'];
+      const eventData = data?.['v-data'];
       if (eventName && isString(eventName)) {
         switch (eventName) {
           case 'vines-get-execution-outputs':
             void mutate();
             break;
           case 'vines-fill-parameters-with-image-url':
-            console.warn('[VinesIframeEmbed]: this v-event is not currently supported:', eventName);
+            if (eventData) {
+              VinesEvent.emit('view-toggle-active-view-by-workflow-id', data?.['v-workflow-id']);
+              VinesEvent.emit(
+                'form-fill-data-by-image-url',
+                eventData,
+                data?.['v-workflow-id'],
+                data?.['v-auto-produce'],
+              );
+            } else {
+              console.error('[VinesIframeEmbed]: received invalid iframe message v-data');
+            }
             break;
           default:
             console.error('[VinesIframeEmbed]: received unsupported iframe message v-event name:', eventName);
