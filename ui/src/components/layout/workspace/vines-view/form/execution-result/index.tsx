@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { useCreation } from 'ahooks';
 import { type EventEmitter } from 'ahooks/lib/useEventEmitter';
@@ -7,6 +7,7 @@ import { History } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useWorkflowExecutionOutputs } from '@/apis/workflow/execution';
+import { useVinesIframeMessage } from '@/components/layout/workspace/vines-view/form/execution-result/iframe-message.ts';
 import { VirtuaExecutionResultGrid } from '@/components/layout/workspace/vines-view/form/execution-result/virtua';
 import { IVinesExecutionResultItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item';
 import { Card, CardContent } from '@/components/ui/card.tsx';
@@ -16,7 +17,6 @@ import { VinesLoading } from '@/components/ui/loading';
 import { useFlowStore } from '@/store/useFlowStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
-import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 const EMPTY_ITEM: IVinesExecutionResultItem = {
   tasks: [],
@@ -98,24 +98,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
     return result.filter((it) => it.length).map((it) => it.filter((it) => it.render.type !== 'empty'));
   }, [output, refresh]);
 
-  useEffect(() => {
-    if (enablePostMessage && output) {
-      window.parent.postMessage(
-        stringify(output.filter(({ status }) => ['COMPLETED', 'RUNNING'].includes(status))),
-        '*',
-      );
-    }
-  }, [enablePostMessage, output]);
-
-  useEffect(() => {
-    window.addEventListener('message', (event) => {
-      switch (event.data) {
-        case 'vines-get-execution-outputs':
-          void mutate();
-          break;
-      }
-    });
-  }, []);
+  useVinesIframeMessage({ output, mutate, enable: enablePostMessage });
 
   event$.useSubscription(() => setRefresh((it) => it + 1));
 
