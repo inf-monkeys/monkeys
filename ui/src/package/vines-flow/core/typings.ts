@@ -1,4 +1,5 @@
 import { MonkeyTaskDefTypes } from '@inf-monkeys/monkeys';
+import { ToolPropertyTypes } from '@inf-monkeys/monkeys/src/types/tool.ts';
 
 import { WorkflowTriggerType } from '@/apis/workflow/trigger/typings.ts';
 import { VinesNode } from '@/package/vines-flow/core/nodes';
@@ -57,17 +58,28 @@ export type VinesWorkflowExecution = Omit<WorkflowExecution, 'tasks' | 'status'>
   triggerType?: WorkflowTriggerType;
 };
 
+export type VinesWorkflowExecutionOutput = {
+  type: 'image' | 'video' | 'text' | 'json';
+  data: JSONValue;
+  alt?: string | string[] | undefined;
+};
+
+export type VinesWorkflowExecutionInputs = {
+  id: string;
+  data: JSONValue;
+  type: ToolPropertyTypes;
+  displayName: string;
+  description: string;
+};
+
 export type VinesWorkflowExecutionOutputs = {
   status: VinesWorkflowExecutionType;
   startTime: number;
   createTime: number;
   updateTime: number;
   endTime: number;
-  output: {
-    type: 'image' | 'video' | 'text' | 'json';
-    data: JSONValue;
-    alt?: string | string[] | undefined;
-  }[];
+  input: VinesWorkflowExecutionInputs[];
+  output: VinesWorkflowExecutionOutput[];
   rawOutput: Record<string, any>;
   taskId: string;
   userId: string;

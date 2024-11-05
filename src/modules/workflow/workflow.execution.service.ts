@@ -505,17 +505,16 @@ export class WorkflowExecutionService {
       },
     };
 
-    const workflowInstanceId = await conductorClient.workflowResource.startWorkflow({
+    return conductorClient.workflowResource.startWorkflow({
       name: workflowId,
       version: -1,
       input: inputData,
     });
-    return workflowInstanceId;
   }
 
   public async waitForWorkflowResult(teamId: string, workflowInstanceId: string, interval: number = 200, maxWiat: number = 600 * 1000) {
     let finished = false;
-    let output;
+    let output: Record<string, any>;
     const start = +new Date();
     let status;
     let takes = 0;
@@ -535,15 +534,15 @@ export class WorkflowExecutionService {
   }
 
   public async pauseWorkflow(workflowInstanceId: string) {
-    return await conductorClient.workflowResource.pauseWorkflow(workflowInstanceId);
+    return conductorClient.workflowResource.pauseWorkflow(workflowInstanceId);
   }
 
   public async resumeWorkflow(workflowInstanceId: string) {
-    return await conductorClient.workflowResource.resumeWorkflow(workflowInstanceId);
+    return conductorClient.workflowResource.resumeWorkflow(workflowInstanceId);
   }
 
   public async terminateWorkflow(workflowInstanceId: string) {
-    return await conductorClient.workflowResource.terminate1(workflowInstanceId);
+    return conductorClient.workflowResource.terminate1(workflowInstanceId);
   }
 
   public async retryWorkflow(workflowInstanceId: string) {
@@ -551,7 +550,7 @@ export class WorkflowExecutionService {
   }
 
   public async updateTaskStatus(workflowInstanceId: string, taskId: string, updates: UpdateTaskStatusDto) {
-    return await conductorClient.taskResource.updateTask1({
+    return conductorClient.taskResource.updateTask1({
       workflowInstanceId,
       taskId,
       outputData: updates.outputData,
@@ -562,8 +561,7 @@ export class WorkflowExecutionService {
   public async getWorkflowExecutionThumbnails(workflowId: string, limit = 5) {
     const data = await retry(
       async () => {
-        const data = await conductorClient.workflowResource.searchV21(0, 100, 'startTime:DESC', '*', `workflowType IN (${workflowId}) AND status IN (COMPLETED)`);
-        return data;
+        return conductorClient.workflowResource.searchV21(0, 100, 'startTime:DESC', '*', `workflowType IN (${workflowId}) AND status IN (COMPLETED)`);
       },
       {
         max: 3,
