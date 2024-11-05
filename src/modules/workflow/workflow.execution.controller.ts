@@ -88,6 +88,20 @@ export class WorkflowExecutionController {
     });
   }
 
+  @Post('/executions/:workflowId/get-instance-by-image-url')
+  @ApiOperation({
+    summary: '根据图片 URL 获取 workflow 实例',
+    description: '根据图片 URL 获取 workflow 实例',
+  })
+  public async getWorkflowInstanceByImageUrl(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Body() body: { imageUrl: string; page?: number; limit: number }) {
+    const { teamId } = req;
+    const { imageUrl, page = 1, limit = 500 } = body;
+    const result = await this.service.getWorkflowInstanceByImageUrl(teamId, workflowId, imageUrl, Number(page) || 1, Number(limit) || 500);
+    return new SuccessResponse({
+      data: result,
+    });
+  }
+
   @Post('/executions/:workflowId/start-sync')
   @ApiOperation({
     summary: '运行 workflow',

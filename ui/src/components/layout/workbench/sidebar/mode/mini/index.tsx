@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-import { useCreation, useDebounceEffect, useThrottleEffect } from 'ahooks';
+import { useCreation, useDebounceEffect, useLatest, useMemoizedFn, useThrottleEffect } from 'ahooks';
 import { motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +15,7 @@ import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { cn } from '@/utils';
+import VinesEvent from '@/utils/events.ts';
 
 interface IWorkbenchMiniModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -106,11 +107,19 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
     { wait: 64 },
   );
 
-  // useLayoutEffect(() => {
-  //   // 启用 SWR 缓存
-  //   if (localStorage.getItem('vines-swr-cache-enable')) return;
-  //   localStorage.setItem('vines-swr-cache-enable', '1');
-  // }, []);
+  const latestOriginalPages = useLatest(originalPages);
+  const handleToggleActiveViewByWorkflowId = useMemoizedFn((workflowId: string) => {
+    const page = latestOriginalPages.current.find((it) => it.workflowId === workflowId);
+    if (page) {
+      setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
+    }
+  });
+  useEffect(() => {
+    VinesEvent.on('view-toggle-active-view-by-workflow-id', handleToggleActiveViewByWorkflowId);
+    return () => {
+      VinesEvent.off('view-toggle-active-view-by-workflow-id', handleToggleActiveViewByWorkflowId);
+    };
+  }, []);
 
   const [{ sidebar }] = useUrlState<{ sidebar: 'default' | 'embed' }>({ sidebar: 'default' });
   const isUseFixedSidebar = sidebar === 'default';

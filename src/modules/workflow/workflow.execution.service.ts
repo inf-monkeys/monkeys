@@ -586,4 +586,45 @@ export class WorkflowExecutionService {
     }
     return thumbnails.slice(0, limit);
   }
+
+  public async getWorkflowInstanceByImageUrl(teamId: string, workflowId: string, imageUrl: string, page = 1, limit = 500) {
+    const start = (page - 1) * limit;
+
+    const data = await retry(
+      async () => {
+        const data = await conductorClient.workflowResource.searchV21(start, limit, 'startTime:DESC', '*', `workflowType IN (${workflowId}) AND status IN (COMPLETED)`);
+        return data;
+      },
+      {
+        max: 3,
+      },
+    );
+
+    for (const execution of data.results) {
+      const flattenOutput = flattenKeys(execution.output);
+      const outputValues = Object.values(flattenOutput);
+      if (outputValues.some((it) => extractImageUrls(it).includes(imageUrl))) {
+        const {
+          workflowId,
+          input: { __context, ...input },
+          ...rest
+        } = pick(execution, ['status', 'startTime', 'createTime', 'updateTime', 'endTime', 'workflowId', 'output', 'input']);
+        return {
+          instance: {
+            ...rest,
+            input,
+            instanceId: workflowId,
+            userId: __context?.userId ?? null,
+            teamId: __context?.teamId ?? teamId,
+          },
+          total: data.totalHits,
+        };
+      }
+    }
+
+    return {
+      instance: null,
+      total: 0,
+    };
+  }
 }
