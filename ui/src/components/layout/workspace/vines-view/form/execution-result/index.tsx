@@ -101,11 +101,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   useEffect(() => {
     if (enablePostMessage && output) {
       window.parent.postMessage(
-        stringify(
-          output
-            .filter(({ status }) => ['COMPLETED', 'RUNNING'].includes(status))
-            .map(({ rawOutput: _, userId: _u, teamId: _t, ...rest }) => rest),
-        ),
+        stringify(output.filter(({ status }) => ['COMPLETED', 'RUNNING'].includes(status))),
         '*',
       );
     }
