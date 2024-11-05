@@ -62,10 +62,12 @@ export class WorkflowExecutionController {
     summary: '获取 workflow 的执行输出',
     description: '获取 workflow 的执行输出',
   })
-  public async getWorkflowExecutionOutputs(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Query() query: { page: number; limit: number; orderBy: 'DESC' | 'ASC' }) {
+  public async getWorkflowExecutionOutputs(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Query() query: { page: string; limit: string; orderBy: 'DESC' | 'ASC' }) {
     const { page = 1, limit = 10, orderBy = 'DESC' } = query;
     const result =
-      workflowId === 'all' ? await this.service.getAllWorkflowsExecutionOutputs(req.teamId, { page, limit, orderBy }) : await this.service.getWorkflowExecutionOutputs(workflowId, page, limit);
+      workflowId === 'all'
+        ? await this.service.getAllWorkflowsExecutionOutputs(req.teamId, { page: Number(page) || 1, limit: Number(limit) || 10, orderBy })
+        : await this.service.getWorkflowExecutionOutputs(workflowId, Number(page) || 1, Number(limit) || 10);
     return {
       code: 200,
       message: 'ok',
@@ -78,9 +80,9 @@ export class WorkflowExecutionController {
     summary: '获取 workflow 的缩略图列表',
     description: '获取 workflow 的缩略图列表',
   })
-  public async getWorkflowExecutionThumbnails(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Query() query: { limit: number }) {
+  public async getWorkflowExecutionThumbnails(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Query() query: { limit: string }) {
     const { limit = 5 } = query;
-    const result = await this.service.getWorkflowExecutionThumbnails(workflowId, limit);
+    const result = await this.service.getWorkflowExecutionThumbnails(workflowId, Number(limit) || 5);
     return new SuccessResponse({
       data: result,
     });
