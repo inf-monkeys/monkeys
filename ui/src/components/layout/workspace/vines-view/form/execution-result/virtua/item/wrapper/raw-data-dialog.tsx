@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { omit } from 'lodash';
+import { isString, omit } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
 import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
@@ -44,7 +44,13 @@ export const VirtuaExecutionResultRawDataDialog: React.FC<IVirtuaExecutionResult
           </TabsList>
           <TabsContent value="data">
             <VinesAbstractDataPreview className="h-96" data={data.render.data} />
-            {alt && <Textarea className="rounded border p-2 text-sm" value={alt} readOnly />}
+            {alt && (
+              <Textarea
+                className="rounded border p-2 text-sm"
+                value={isString(alt) ? alt : JSON.stringify(alt, null, 2)}
+                readOnly
+              />
+            )}
           </TabsContent>
           <TabsContent value="logs">
             <CodeEditor className="h-96 w-full" readonly data={omit(data, 'render') as JSONValue} />
