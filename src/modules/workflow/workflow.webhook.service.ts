@@ -15,7 +15,7 @@ export class WorkflowWebhookService {
     return await this.workflowRepository.findWebhookTrigger(webhookPath);
   }
 
-  public async triggerWorkflowByWebhook(webhookPath: string, req: IRequest, query: any, body: any) {
+  public async triggerWorkflowByWebhook(webhookPath: string, req: IRequest, query: any, body: any): Promise<[number, any]> {
     const trigger = await this.findWebhookTrigger(webhookPath);
 
     if (!trigger || trigger.isDeleted) {
