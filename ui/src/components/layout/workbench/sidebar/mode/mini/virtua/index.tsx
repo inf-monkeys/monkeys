@@ -7,7 +7,7 @@ import { VirtuaWorkbenchMiniViewListItem } from '@/components/layout/workbench/s
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 
 interface IVirtuaWorkbenchMiniViewListProps {
-  data: IPinPage[];
+  data: IPinPage[] | null;
 
   height: number;
   currentPageId?: string;
@@ -28,7 +28,7 @@ export const VirtuaWorkbenchMiniViewList: React.FC<IVirtuaWorkbenchMiniViewListP
   return (
     <ScrollArea className="-mr-2 pr-2" ref={scrollRef} style={{ height }} disabledOverflowMask>
       <Virtualizer scrollRef={scrollRef}>
-        {data.map((it, i) => (
+        {data?.map((it, i) => (
           <VirtuaWorkbenchMiniViewListItem
             key={i}
             data={it}

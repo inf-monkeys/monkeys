@@ -29,6 +29,7 @@ interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div
   height: number;
 
   enablePostMessage?: boolean;
+  isMiniFrame?: boolean;
 }
 
 export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
@@ -36,6 +37,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   event$,
   height,
   enablePostMessage,
+  isMiniFrame,
 }) => {
   const { t } = useTranslation();
 
@@ -50,36 +52,40 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
     const result: IVinesExecutionResultItem[][] = [[]];
 
     let rowIndex = 0;
-    const insertData = (data: IVinesExecutionResultItem) => {
-      if (result[rowIndex].length === 3) {
+    const insertData = (data: IVinesExecutionResultItem, col = 3) => {
+      const currentRow = result[rowIndex];
+      const isTextOrJson = data.render.type === 'json' || data.render.type === 'text';
+
+      // 如果当前行已满,创建新行
+      if (currentRow.length >= col) {
         result.push([]);
         rowIndex++;
       }
 
-      const currentRow = result[rowIndex];
+      // 文本类型数据处理
+      if (isTextOrJson) {
+        const emptyItems = new Array(col - 1).fill(EMPTY_ITEM);
 
-      if (data.render.type === 'json' || data.render.type === 'text') {
-        if (currentRow.length !== 0) {
-          for (let i = 0; i < 4 - currentRow.length; i++) {
-            currentRow.push(EMPTY_ITEM);
-          }
-          result.push([data, EMPTY_ITEM, EMPTY_ITEM]);
-          result.push([]);
-          rowIndex++;
+        if (currentRow.length) {
+          // 当前行非空,填充当前行并创建新行
+          currentRow.push(...new Array(col - currentRow.length).fill(EMPTY_ITEM));
+          result.push([data, ...emptyItems]);
         } else {
-          currentRow.push(data);
-          currentRow.push(EMPTY_ITEM);
-          currentRow.push(EMPTY_ITEM);
-          result.push([]);
-          rowIndex++;
+          // 当前行为空,直接使用
+          currentRow.push(data, ...emptyItems);
         }
+
+        result.push([]);
+        rowIndex++;
+        return;
+      }
+
+      // 非文本类型数据处理
+      const emptyIndex = currentRow.findIndex((it) => it.render.type === 'empty');
+      if (emptyIndex !== -1) {
+        currentRow[emptyIndex] = data;
       } else {
-        const emptyIndex = currentRow.findIndex((it) => it.render.type === 'empty');
-        if (emptyIndex !== -1) {
-          currentRow[emptyIndex] = data;
-        } else {
-          currentRow.push(data);
-        }
+        currentRow.push(data);
       }
     };
 
@@ -87,16 +93,19 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
       const { output: executionOutput, rawOutput, ...rest } = execution;
 
       for (const it of executionOutput) {
-        insertData({
-          ...rest,
-          output: rawOutput,
-          render: it,
-        } as unknown as IVinesExecutionResultItem);
+        insertData(
+          {
+            ...rest,
+            output: rawOutput,
+            render: it,
+          } as unknown as IVinesExecutionResultItem,
+          isMiniFrame ? 1 : 3,
+        );
       }
     }
 
     return result.filter((it) => it.length).map((it) => it.filter((it) => it.render.type !== 'empty'));
-  }, [output, refresh]);
+  }, [output, refresh, isMiniFrame]);
 
   useVinesIframeMessage({ output, mutate, enable: enablePostMessage });
 

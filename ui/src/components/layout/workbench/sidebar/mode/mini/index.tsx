@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { useCreation, useDebounceEffect, useLatest, useMemoizedFn, useThrottleEffect } from 'ahooks';
+import { useCreation, useDebounceEffect, useDebounceFn, useLatest, useThrottleEffect } from 'ahooks';
 import { motion } from 'framer-motion';
+import { isUndefined } from 'lodash';
 import { ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -30,6 +31,8 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
   }>();
 
   const originalPages = useCreation(() => {
+    if (isUndefined(data)) return null;
+
     const pageIdsForSort = Array.from(new Set(data?.groups.flatMap((it) => it.pageIds)));
 
     const sidebarFilter = (routeSidebarFilter?.toString() ?? '')?.split(',')?.filter(Boolean);
@@ -67,9 +70,9 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
   const prevPageRef = useRef<string>();
   useDebounceEffect(
     () => {
-      if (!teamId) return;
+      if (!teamId || originalPages === null) return;
 
-      if (toggleToActivePageRef.current === false) {
+      if (toggleToActivePageRef.current === false && activePage) {
         const page = originalPages.find((it) => it.workflowId === activePage);
         if (page) {
           setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
@@ -81,7 +84,7 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
       const currentPageId = currentPage?.[teamId]?.id;
 
       if (currentPageId) {
-        if (!originalPages?.find((page) => page.id === currentPageId)) {
+        if (!originalPages.find((page) => page.id === currentPageId)) {
           setCurrentPage((prev) => ({ ...prev, [teamId]: {} }));
         }
       } else {
@@ -107,13 +110,18 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
     { wait: 64 },
   );
 
-  const latestOriginalPages = useLatest(originalPages);
-  const handleToggleActiveViewByWorkflowId = useMemoizedFn((workflowId: string) => {
-    const page = latestOriginalPages.current.find((it) => it.workflowId === workflowId);
-    if (page) {
-      setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
-    }
-  });
+  const latestOriginalPages = useLatest(originalPages ?? []);
+  const { run: handleToggleActiveViewByWorkflowId } = useDebounceFn(
+    (workflowId: string) => {
+      const page = latestOriginalPages.current.find((it) => it.workflowId === workflowId);
+      if (page) {
+        setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
+      }
+    },
+    {
+      wait: 100,
+    },
+  );
   useEffect(() => {
     VinesEvent.on('view-toggle-active-view-by-workflow-id', handleToggleActiveViewByWorkflowId);
     return () => {
