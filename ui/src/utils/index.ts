@@ -45,8 +45,3 @@ export const I18nAllContent = (content: string | I18nValue | undefined): string 
  * @returns {string} A kebabized string
  */
 export const toKebabCase = (string: string): string => string.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
-
-export const checkImageUrlAvailable = (url: string) =>
-  fetch(url, { method: 'HEAD' })
-    .then((response) => response.ok)
-    .catch(() => false);

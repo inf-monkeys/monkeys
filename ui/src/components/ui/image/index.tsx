@@ -6,8 +6,8 @@ import Image, { ImagePreviewType } from 'rc-image';
 import { PreviewGroupPreview } from 'rc-image/lib/PreviewGroup';
 
 import { useVinesImageManage } from '@/components/ui/image/use-vines-image-manage.tsx';
+import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils.ts';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-import { checkImageUrlAvailable } from '@/utils';
 
 interface IVinesImageProps extends React.ComponentProps<typeof Image> {
   disabled?: boolean;
@@ -39,7 +39,6 @@ export const VinesImage: React.FC<IVinesImageProps> = ({ src, disabled, preview 
   return (
     <Image
       src={previewSrc}
-      loading="lazy"
       fallback={isDarkMode ? '/fallback_image_dark.webp' : '/fallback_image.webp'}
       onClick={onClick}
       preview={
