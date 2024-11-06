@@ -77,6 +77,7 @@ const VinesForm: React.FC = () => {
           event$={event$}
           height={height}
           enablePostMessage={isMiniFrame}
+          isMiniFrame={isMiniFrame}
         />
       </div>
       {openAIInterfaceEnabled && (

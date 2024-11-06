@@ -51,6 +51,7 @@ export const VirtuaExecutionResultGrid: React.FC<IVirtuaExecutionResultGridProps
             scrolling.current = false;
             enable(true);
           }}
+          overscan={2}
         >
           {data.map((it, i) => (
             <VirtuaExecutionResultGridItem data={it} key={i} />
