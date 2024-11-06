@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 
 import { useSWRConfig } from 'swr';
 
-import { useEventEmitter, useThrottleEffect } from 'ahooks';
+import { useEventEmitter, useMemoizedFn, useThrottleEffect } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { isArray } from 'lodash';
 import { RotateCcw, Sparkles, Undo2 } from 'lucide-react';
@@ -52,6 +52,34 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
     { wait: 64 },
   );
 
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = useMemoizedFn((inputData) => {
+    setLoading(true);
+    vines
+      .start({ inputData, onlyStart: true })
+      .then((status) => {
+        if (status) {
+          toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
+          setHistoryVisible(true);
+          setLoading(false);
+          void mutate(
+            (it) => isArray(it) && it?.[0] === `/api/workflow/executions/${vines.workflowId}/outputs`,
+            (data: any) => {
+              if (data?.data) {
+                data.data.unshift({
+                  status: 'RUNNING',
+                });
+              }
+              event$.emit?.();
+              return data;
+            },
+          );
+        }
+      })
+      .finally(() => setLoading(false));
+  });
+
   return (
     <div className={cn('flex flex-col pr-6', className)} style={style}>
       <div className="flex-1">
@@ -60,26 +88,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
           inputs={vines.workflowInput}
           isLoading={!vines.workflowLoaded}
           height={height - inputHeight}
-          onSubmit={(inputData) => {
-            vines.start({ inputData, onlyStart: true }).then((status) => {
-              if (status) {
-                toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
-                setHistoryVisible(true);
-                void mutate(
-                  (it) => isArray(it) && it?.[0] === '/api/workflow/executions/search',
-                  (data: any) => {
-                    if (data?.data) {
-                      data.data.unshift({
-                        status: 'RUNNING',
-                      });
-                    }
-                    event$.emit?.();
-                    return data;
-                  },
-                );
-              }
-            });
-          }}
+          onSubmit={handleSubmit}
           event$={tabular$}
           workflowId={vines.workflowId}
         >
@@ -121,6 +130,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
           onClick={() => submitButton.current?.click()}
           disabled={openAIInterfaceEnabled}
           icon={<Sparkles className="fill-white" />}
+          loading={loading}
         >
           {t(
             openAIInterfaceEnabled
