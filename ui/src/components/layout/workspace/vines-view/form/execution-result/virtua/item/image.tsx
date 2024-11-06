@@ -1,15 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-import { useAsyncEffect } from 'ahooks';
-import { Copy, Eye } from 'lucide-react';
-import Image from 'rc-image';
+import { Copy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { VinesImage } from '@/components/ui/vines-image';
 import { useCopy } from '@/hooks/use-copy.ts';
-import { useLocalStorage } from '@/hooks/use-local-storage';
-import { checkImageUrlAvailable } from '@/utils';
 
 interface IVirtuaExecutionResultGridImageItemProps {
   src: string;
@@ -24,35 +21,13 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
 
   const { copy } = useCopy();
 
-  const [mode] = useLocalStorage<string>('vines-ui-dark-mode', 'auto', false);
-
-  const isDarkMode = mode === 'dark';
-
-  const [previewSrc, setPreviewSrc] = useState<string>(src);
-
-  useAsyncEffect(async () => {
-    const srcArr = src.split('/');
-    const srcArrLength = srcArr.length;
-
-    const finalSrc = srcArr.map((it, i) => (i === srcArrLength - 2 ? `${it}_thumb` : it)).join('/');
-    if (await checkImageUrlAvailable(finalSrc)) {
-      setPreviewSrc(finalSrc);
-    }
-  }, [src]);
-
   return (
     <div className="box-border flex-none content-stretch p-1">
       <div className="vines-center relative overflow-hidden rounded-lg [&_.rc-image-mask]:absolute [&_.rc-image-mask]:h-full [&_.rc-image]:static">
-        <Image
-          src={previewSrc}
-          alt="image"
+        <VinesImage
           className="aspect-square size-full transform rounded-lg border border-input object-cover object-center shadow-sm"
-          loading="lazy"
-          fallback={isDarkMode ? '/fallback_image_dark.webp' : '/fallback_image.webp'}
-          preview={{
-            src,
-            mask: <Eye className="stroke-white" />,
-          }}
+          src={src}
+          alt="image"
         />
 
         {alt && (

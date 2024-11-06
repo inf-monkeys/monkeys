@@ -49,62 +49,48 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   const [refresh, setRefresh] = useState(0);
 
   const list = useCreation(() => {
-    const result: IVinesExecutionResultItem[][] = [[]];
-
-    let rowIndex = 0;
-    const insertData = (data: IVinesExecutionResultItem, col = 3) => {
-      const currentRow = result[rowIndex];
-      const isTextOrJson = data.render.type === 'json' || data.render.type === 'text';
-
-      // 如果当前行已满,创建新行
-      if (currentRow.length >= col) {
-        result.push([]);
-        rowIndex++;
-      }
-
-      // 文本类型数据处理
-      if (isTextOrJson) {
-        const emptyItems = new Array(col - 1).fill(EMPTY_ITEM);
-
-        if (currentRow.length) {
-          // 当前行非空,填充当前行并创建新行
-          currentRow.push(...new Array(col - currentRow.length).fill(EMPTY_ITEM));
-          result.push([data, ...emptyItems]);
-        } else {
-          // 当前行为空,直接使用
-          currentRow.push(data, ...emptyItems);
-        }
-
-        result.push([]);
-        rowIndex++;
-        return;
-      }
-
-      // 非文本类型数据处理
-      const emptyIndex = currentRow.findIndex((it) => it.render.type === 'empty');
-      if (emptyIndex !== -1) {
-        currentRow[emptyIndex] = data;
-      } else {
-        currentRow.push(data);
-      }
-    };
+    const result: IVinesExecutionResultItem[][] = [];
+    let currentRow: IVinesExecutionResultItem[] = [];
+    const col = isMiniFrame ? 2 : 3;
 
     for (const execution of output ?? []) {
       const { output: executionOutput, rawOutput, ...rest } = execution;
 
       for (const it of executionOutput) {
-        insertData(
-          {
-            ...rest,
-            output: rawOutput,
-            render: it,
-          } as unknown as IVinesExecutionResultItem,
-          isMiniFrame ? 1 : 3,
-        );
+        const data = {
+          ...rest,
+          output: rawOutput,
+          render: it,
+        } as unknown as IVinesExecutionResultItem;
+
+        const isTextOrJson = data.render.type === 'json' || data.render.type === 'text';
+
+        if (isTextOrJson) {
+          if (currentRow.length > 0) {
+            // 填充当前行并添加到结果中
+            currentRow = currentRow.concat(new Array(col - currentRow.length).fill(EMPTY_ITEM));
+            result.push(currentRow);
+            currentRow = [];
+          }
+          // 创建新行并填充空白项
+          const newRow = [data].concat(new Array(col - 1).fill(EMPTY_ITEM));
+          result.push(newRow);
+        } else {
+          if (currentRow.length >= col) {
+            result.push(currentRow);
+            currentRow = [];
+          }
+          currentRow.push(data);
+        }
       }
     }
 
-    return result.filter((it) => it.length).map((it) => it.filter((it) => it.render.type !== 'empty'));
+    // 添加剩余的当前行
+    if (currentRow.length > 0) {
+      result.push(currentRow);
+    }
+
+    return result.map((row) => row.filter((item) => item.render.type !== 'empty'));
   }, [output, refresh, isMiniFrame]);
 
   useVinesIframeMessage({ output, mutate, enable: enablePostMessage });
