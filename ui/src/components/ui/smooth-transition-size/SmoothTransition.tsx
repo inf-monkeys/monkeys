@@ -26,7 +26,6 @@ export const SmoothTransition: React.FC<ISmoothTransitionProps> = ({
         opacity: 1,
         transition: {
           delay: 0.08,
-          duration: 0.2,
         },
       }}
       onAnimationComplete={onAnimationComplete}

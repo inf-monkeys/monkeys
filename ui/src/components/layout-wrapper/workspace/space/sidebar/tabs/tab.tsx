@@ -10,7 +10,6 @@ import { IPageInstanceType } from '@/apis/pages/typings.ts';
 import { useGetWorkflow } from '@/apis/workflow';
 import { SpaceSidebarTabContent, spaceSidebarTabVariants } from '@/components/layout-wrapper/space/sidebar/tabs.tsx';
 import { TabMenu } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/menu';
-import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId/index.lazy.tsx';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
@@ -33,7 +32,7 @@ interface ISpaceTabProps extends React.ComponentPropsWithoutRef<'div'> {
 export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon, activeIndex, index, type }) => {
   const { t } = useTranslation();
 
-  const navigate = useNavigate({ from: Route.fullPath });
+  const navigate = useNavigate() as any;
 
   const setApiDocumentVisible = usePageStore((s) => s.setApiDocumentVisible);
 
@@ -92,7 +91,6 @@ export const SpaceTab: React.FC<ISpaceTabProps> = memo(({ id, displayName, icon,
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
               className="absolute right-2"
             >
               <TabMenu onOpenChange={(status) => setDisabled(status)} />

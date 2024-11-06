@@ -136,7 +136,7 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2, delay: 0.15 }}
+              transition={{ delay: 0.15 }}
             >
               <VirtuaChatBotMessages
                 data={messages ?? []}
@@ -153,7 +153,6 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({
                   className="vines-center absolute left-0 top-0 size-full flex-col"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1, transition: { delay: 0.4 } }}
-                  transition={{ duration: 0.2 }}
                 >
                   <MessageSquareDashed size={64} />
                   <div className="mt-2 flex flex-col text-center">

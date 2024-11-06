@@ -36,7 +36,6 @@ export const VinesLogo: React.FC<Omit<ILogoProps, 'url'> & { disableInitialHeigh
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { delay: 0.15 } }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
           >
             <AppLogo
               className={cn('w-auto', className)}
@@ -51,7 +50,6 @@ export const VinesLogo: React.FC<Omit<ILogoProps, 'url'> & { disableInitialHeigh
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { delay: 0.15 } }}
-            transition={{ duration: 0.2 }}
             className="absolute left-0 top-0"
           >
             <Skeleton className={cn('w-full', enabledCustomIcon && 'h-8')} style={{ height }} />

@@ -58,7 +58,6 @@ export const VinesLucideIcon = forwardRef<HTMLDivElement, IVinesLucideIconProps>
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
           >
             {isLucide ? <LucideIconRender src={finalSrc} className={className} style={style} {...attr} /> : finalSrc}
           </motion.div>
@@ -68,7 +67,6 @@ export const VinesLucideIcon = forwardRef<HTMLDivElement, IVinesLucideIconProps>
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
             className={cn('vines-center relative', className)}
             style={style}
           >

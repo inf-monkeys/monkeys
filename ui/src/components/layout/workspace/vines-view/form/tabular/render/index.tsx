@@ -252,7 +252,6 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { delay: 0.2 } }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
             >
               <Workflow size={64} />
               <Label className="text-sm">{t('workspace.chat-view.workflow-mode.empty-input.completed')}</Label>

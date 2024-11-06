@@ -101,7 +101,6 @@ export const VinesImageMaskEditor: React.FC<MaskEditorProps> = ({ src, onFinishe
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { delay: 0.2 } }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
           >
             <TransformWrapper minScale={0.05} initialScale={centerScale} centerOnInit panning={{ disabled: editable }}>
               {() => (
@@ -165,7 +164,6 @@ export const VinesImageMaskEditor: React.FC<MaskEditorProps> = ({ src, onFinishe
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
           >
             <VinesLoading immediately value={progress} />
             <span className="text-sm">{t('components.ui.vines-image-mask-editor.init.optimize', { progress })}</span>
@@ -178,7 +176,6 @@ export const VinesImageMaskEditor: React.FC<MaskEditorProps> = ({ src, onFinishe
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
           >
             <VinesLoading immediately value={exportProgress} />
             <span className="text-sm">

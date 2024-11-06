@@ -33,7 +33,6 @@ const VinesImageMaskPreview: React.FC<IVinesImageMaskPreviewProps> = ({ src, cla
         initial={{ opacity: 0 }}
         animate={{ opacity: visible ? 1 : 0 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
         className={cn('pointer-events-none absolute size-full', visible && 'pointer-events-auto z-20', className)}
       >
         <VinesImageMaskEditor
@@ -65,7 +64,6 @@ const VinesImageMaskPreview: React.FC<IVinesImageMaskPreviewProps> = ({ src, cla
         initial={{ opacity: 0 }}
         animate={{ opacity: visible ? 0 : 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
       >
         <VinesUploader
           max={1}

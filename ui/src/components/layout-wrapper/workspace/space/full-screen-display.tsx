@@ -17,7 +17,6 @@ export const FullScreenDisplay: React.FC<IFullScreenDisplayProps> = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
           className="absolute inset-1 left-0 top-0 z-[1000] bg-slate-1"
         >
           <IntegrationCenter />

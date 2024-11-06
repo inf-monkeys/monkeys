@@ -128,7 +128,6 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
             >
               <Button
                 icon={<Plus />}
@@ -151,7 +150,6 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
             >
               {output.map((it, index) => (
                 <div key={index} className="flex items-center gap-2">

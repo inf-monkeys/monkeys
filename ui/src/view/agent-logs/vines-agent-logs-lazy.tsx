@@ -104,7 +104,6 @@ const AgentLogsView: React.FC = () => {
         animate={{
           width: sidebarVisible ? 320 : 0,
           paddingRight: sidebarVisible ? 6 : 0,
-          transition: { duration: 0.2 },
         }}
       >
         <ScrollArea style={{ height: finalHeight }}>

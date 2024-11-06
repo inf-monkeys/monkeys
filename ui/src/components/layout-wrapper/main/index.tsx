@@ -29,7 +29,6 @@ export const MainWrapper: React.FC<IProps> = ({ layoutId }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
           >
             <Outlet />
           </motion.div>

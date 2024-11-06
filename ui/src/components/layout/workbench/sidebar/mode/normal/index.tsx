@@ -140,7 +140,6 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
         animate={{
           width: visible ? 280 : 0,
           paddingRight: visible ? 16 : 0,
-          transition: { duration: 0.2 },
         }}
       >
         <div className="grid p-4 pr-0">

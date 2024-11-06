@@ -30,64 +30,33 @@ export const ExecutionStatusIcon: React.FC<IExecutionStatusIconProps> = memo(
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
                   className="flex"
                   style={{ width: size, height: size }}
                 >
                   <VinesLoading size={loadingSize} />
                 </motion.div>
               ) : status === 'COMPLETED' ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <CheckCircle2 size={size} className="stroke-green-10" />
                 </motion.div>
               ) : ['CANCELED', 'TERMINATED'].includes(status) ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <CircleSlash size={size} className="stroke-gray-10" />
                 </motion.div>
               ) : ['SKIPPED', 'TIMED_OUT'].includes(status) ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <Circle size={size} />
                 </motion.div>
               ) : ['FAILED', 'FAILED_WITH_TERMINAL_ERROR'].includes(status) ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <AlertCircle size={size} className="stroke-red-10" />
                 </motion.div>
               ) : workflowStatus === 'PAUSED' ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <PauseCircle size={size} className="stroke-yellow-10" />
                 </motion.div>
               ) : workflowStatus !== 'SCHEDULED' ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <CircleDashed size={size} />
                 </motion.div>
               ) : null}

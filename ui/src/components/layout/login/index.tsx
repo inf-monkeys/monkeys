@@ -52,7 +52,7 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
       className="flex flex-col items-center gap-8"
       key="vines-login"
       initial={{ opacity: 0 }}
-      animate={{ opacity: 1, transition: { duration: 0.2 } }}
+      animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
       {areValuesUsed && (
@@ -74,7 +74,6 @@ export const AuthContainer: React.FC<IAuthContainerProps> = ({
               initial={{ x: 10, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -10, opacity: 0 }}
-              transition={{ duration: 0.2 }}
             >
               {enablePhone && activeTab === 'phone' && (
                 <TabsContent value="phone" className="w-full" forceMount>

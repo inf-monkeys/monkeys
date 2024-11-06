@@ -29,7 +29,6 @@ export const UgcSidebar: React.FC<IUgcSidebarProps> = ({ assetType, assetKey, is
         animate={{
           width: visible ? 256 : 0,
           paddingRight: visible ? 16 : 0,
-          transition: { duration: 0.2 },
         }}
       >
         <div className="flex items-center gap-2">

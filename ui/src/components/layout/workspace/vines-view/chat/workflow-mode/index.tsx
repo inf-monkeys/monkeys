@@ -123,7 +123,7 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ workflowId, heigh
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, delay: 0.2 }}
+            transition={{ delay: 0.2 }}
           >
             <VirtuaWorkflowChatMessages data={list} height={height} useSimple={useSimple} />
           </motion.div>
@@ -134,7 +134,6 @@ export const VinesChatList: React.FC<IVinesChatListProps> = ({ workflowId, heigh
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { delay: 0.3 } }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
           >
             <MessageSquareDashed size={64} />
             <div className="mt-4 flex flex-col text-center">

@@ -66,7 +66,6 @@ export const VinesLoading = forwardRef<Omit<HTMLDivElement, 'value'>, IVinesLoad
         initial={{ opacity: 0 }}
         animate={{ opacity: 1, transition: { delay: immediately ? 0 : 0.3 } }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
         aria-label={t('common.load.loading')}
       >
         <svg
@@ -127,7 +126,6 @@ export const VinesFullLoading: React.FC<ILoadingProps> = ({ motionKey, disableCa
       initial={{ opacity: 0 }}
       animate={{ opacity: 1, transition: { delay: immediately ? 0 : 0.3 } }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
     >
       {disableCard ? (
         <VinesLoading immediately />

@@ -79,7 +79,6 @@ export const VirtuaWorkflowChatMessages: React.FC<IVirtuaWorkflowChatMessagesPro
           opacity: atBottom ? 0 : 1,
           transition: { delay: atBottom ? 0 : 0.4 },
         }}
-        transition={{ duration: 0.2 }}
       >
         <Button
           icon={<ListEnd />}

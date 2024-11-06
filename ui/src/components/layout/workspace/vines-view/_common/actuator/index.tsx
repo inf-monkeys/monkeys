@@ -56,7 +56,6 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
       className="absolute left-0 top-0 flex size-full flex-col gap-4"
     >
       <ActuatorHeader
@@ -113,7 +112,6 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({
           animate={{
             width: sidebarVisible ? 352 : 0,
             paddingRight: sidebarVisible ? 6 : 0,
-            transition: { duration: 0.2 },
           }}
         >
           <ActuatorToolList

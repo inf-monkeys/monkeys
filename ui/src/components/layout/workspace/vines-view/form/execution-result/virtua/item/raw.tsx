@@ -28,7 +28,6 @@ export const VirtuaExecutionResultGridRawItem: React.FC<IVirtuaExecutionResultGr
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
               >
                 <VinesLoading />
               </motion.div>
@@ -38,7 +37,6 @@ export const VirtuaExecutionResultGridRawItem: React.FC<IVirtuaExecutionResultGr
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
               >
                 <VinesAbstractDataPreview data={renderData} className="h-full" />
               </motion.div>

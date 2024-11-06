@@ -58,7 +58,6 @@ export const ChatSidebar: React.FC<IChatSidebarProps> = ({
         ...(side === 'right' && {
           paddingLeft: sidebarVisible ? 16 : 0,
         }),
-        transition: { duration: 0.2 },
       }}
     >
       <div className="flex w-full items-center justify-between pr-4">
