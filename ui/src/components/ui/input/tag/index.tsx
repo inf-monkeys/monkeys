@@ -150,7 +150,6 @@ export const TagInput = forwardRef<HTMLInputElement, ITagInputProps>(
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
               onMouseLeave={() => setOnScrollbar(false)}
               onMouseEnter={() => setOnScrollbar(true)}
               onMouseUp={() => inputRef.current?.focus()}

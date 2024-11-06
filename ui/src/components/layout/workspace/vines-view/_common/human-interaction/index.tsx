@@ -89,7 +89,6 @@ export const VinesExecutionHumanInteraction: React.FC<IVinesExecutionHumanIntera
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
             >
               <VinesLoading />
             </motion.div>
@@ -100,7 +99,6 @@ export const VinesExecutionHumanInteraction: React.FC<IVinesExecutionHumanIntera
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
             >
               <div>
                 <h1 className="text-xl font-bold">{t('workspace.pre-view.actuator.detail.human-interaction.label')}</h1>

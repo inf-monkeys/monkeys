@@ -114,7 +114,6 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { delay: 0.5 } }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
             >
               <VinesLoading />
             </motion.div>
@@ -125,7 +124,6 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { delay: 0.3 } }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
             >
               <History size={64} />
               <Label className="text-sm">{t('workspace.logs-view.log.list.empty')}</Label>

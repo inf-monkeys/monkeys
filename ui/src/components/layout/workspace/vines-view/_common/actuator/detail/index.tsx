@@ -27,7 +27,6 @@ export const VinesActuatorDetail: React.FC<IVinesActuatorDetailProps> = memo(({ 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
         >
           <VinesActuatorDetailHeader
             ref={ref}
@@ -47,7 +46,6 @@ export const VinesActuatorDetail: React.FC<IVinesActuatorDetailProps> = memo(({ 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1, transition: { delay: 0.25 } }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
         >
           <Label className="text-sm">{t('workspace.pre-view.actuator.detail.empty')}</Label>
         </motion.div>

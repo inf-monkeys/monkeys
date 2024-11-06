@@ -111,7 +111,6 @@ export const VirtuaChatBotMessages: React.FC<IVirtuaChatBotMessagesProps> = ({
           opacity: atBottom ? 0 : 1,
           transition: { delay: atBottom ? 0 : 0.4 },
         }}
-        transition={{ duration: 0.2 }}
       >
         <Button
           icon={<ListEnd />}

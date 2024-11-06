@@ -84,8 +84,8 @@ const VinesFlow: React.FC<IVinesFlowProps> = () => {
               key="vines-canvas"
               style={{ width, height }}
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: { duration: 0.2 } }}
-              exit={{ opacity: 0, transition: { duration: 0.2 } }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
             >
               <VinesEdges />
               <VinesNodes />
@@ -98,8 +98,8 @@ const VinesFlow: React.FC<IVinesFlowProps> = () => {
           <motion.div
             key="vines-canvas-waiting"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { duration: 0.2 } }}
-            exit={{ opacity: 0, transition: { duration: 0.2 } }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ type: 'linear' }}
             className="vines-center absolute left-0 top-0 z-20 size-full"
           >

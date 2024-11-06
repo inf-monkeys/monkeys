@@ -39,7 +39,6 @@ const TextDataDetail: React.FC = () => {
           animate={{
             width: visible ? 256 : 0,
             paddingRight: visible ? 16 : 0,
-            transition: { duration: 0.2 },
           }}
         >
           <header className="flex items-center gap-2">
@@ -109,7 +108,6 @@ const TextDataDetail: React.FC = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
               >
                 <VinesLoading />
               </motion.div>
@@ -122,7 +120,6 @@ const TextDataDetail: React.FC = () => {
                   initial={{ y: 10, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   exit={{ y: -10, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
                 >
                   {activeTab === 'documents' && <DocumentsList knowledgeBaseId={textId} />}
                   {activeTab === 'segments' && <ParagraphList textId={textId} />}

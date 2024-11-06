@@ -7,8 +7,8 @@ import { toast } from 'sonner';
 
 import { JSONValue } from '@/components/ui/code-editor';
 import { VinesLoading } from '@/components/ui/loading';
-import { useAppStore } from '@/store/useAppStore';
 import useExternal from '@/hooks/use-external.ts';
+import { useAppStore } from '@/store/useAppStore';
 
 interface IVinesAbstractPDBProps {
   children: JSONValue;
@@ -79,7 +79,6 @@ export const VinesAbstractPDB: React.FC<IVinesAbstractPDBProps> = ({ children, h
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
           >
             <VinesLoading />
             <div className="space-y-1">
@@ -93,7 +92,6 @@ export const VinesAbstractPDB: React.FC<IVinesAbstractPDBProps> = ({ children, h
         key="vines-molstar"
         ref={node}
         animate={{ opacity: molstarInstance ? 1 : 0 }}
-        transition={{ duration: 0.2 }}
         onTap={() => molstarInstance?.visual?.toggleSpin(false)}
       />
     </div>

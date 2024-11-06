@@ -12,7 +12,7 @@ import * as Portal from '@radix-ui/react-portal';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import utc from 'dayjs/plugin/utc';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, MotionConfig } from 'framer-motion';
 import { Toaster } from 'sonner';
 
 import { LagRadar } from '@/components/devtools/lag-radar/dev';
@@ -41,9 +41,11 @@ declare module '@tanstack/react-router' {
 ReactDOM.createRoot(document.getElementById('vines-ui')!).render(
   <Suspense fallback={<Skeleton className="h-screen w-screen" />}>
     <SWRConfig>
-      <AnimatePresence mode="wait">
-        <RouterProvider router={router} />
-      </AnimatePresence>
+      <MotionConfig transition={{ duration: 0.2 }}>
+        <AnimatePresence mode="wait">
+          <RouterProvider router={router} />
+        </AnimatePresence>
+      </MotionConfig>
     </SWRConfig>
     <Suspense>
       <LagRadar />

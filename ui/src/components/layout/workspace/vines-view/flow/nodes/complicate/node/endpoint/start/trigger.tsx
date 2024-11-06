@@ -54,7 +54,6 @@ export const ComplicateTriggerNode: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
             >
               <TabularRender
                 inputs={vines.workflowInput}
@@ -81,7 +80,6 @@ export const ComplicateTriggerNode: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
             >
               <Tabs defaultValue="input">
                 <TabsList>

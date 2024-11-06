@@ -66,7 +66,6 @@ export const ViewGuard = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { delay: 0.42 } }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
             >
               {loading ? (
                 <VinesLoading />

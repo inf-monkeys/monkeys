@@ -58,13 +58,12 @@ export const WorkspaceIFramePage: React.FC = () => {
       ) : (
         <motion.div
           className="absolute left-0 top-0 z-[10000] size-full bg-slate-1"
-          exit={{ opacity: 0, transition: { duration: 0.2, delay: 0.2 } }}
+          exit={{ opacity: 0, transition: { delay: 0.2 } }}
         >
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { delay: 0.5 } }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
             className="vines-center relative size-full"
           >
             <VinesLoading />

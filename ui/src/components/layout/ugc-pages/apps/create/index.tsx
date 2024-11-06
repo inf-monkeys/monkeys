@@ -45,7 +45,6 @@ export const CreateAppDialog: React.FC<ICreateAppDialogProps> = ({ defaultSelect
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
             >
               {selectedType === 'workflow' && <WorkflowCreateForm setOpen={setOpen} />}
               {selectedType === 'agent' && <AgentCreateForm setOpen={setOpen} />}
