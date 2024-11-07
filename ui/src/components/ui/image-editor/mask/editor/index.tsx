@@ -131,7 +131,7 @@ export const MaskEditor: React.FC<IMaskEditorProps> = ({
 
   return (
     <div
-      className={cn('bg-transparent-grid relative rounded', disabled && 'pointer-events-none')}
+      className={cn('bg-transparent-grid vines-center relative rounded', disabled && 'pointer-events-none')}
       onMouseLeave={onPointerLeave}
       {...props}
     >
@@ -167,7 +167,7 @@ export const MaskEditor: React.FC<IMaskEditorProps> = ({
       />
       <canvas
         ref={tempMaskCanvas}
-        className="absolute left-0 top-0 z-30"
+        className="absolute z-30"
         style={{
           width: size.w,
           height: size.h,

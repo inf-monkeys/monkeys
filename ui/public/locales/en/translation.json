@@ -313,12 +313,16 @@
         },
         "toolbar": {
           "select-image": "Select image from local",
+          "zoom-in-editor": "Zoom in editor",
+          "fullscreen": "Full screen",
+          "exit-fullscreen": "Exit full screen",
           "zoom-in": "Zoom in",
           "fit-view": "Fit view",
           "zoom-out": "Zoom out",
           "editable": "Edit mode",
           "move": "View mode",
           "brush": "Brush",
+          "rectangle": "Rectangle selection",
           "eraser": "Eraser",
           "clear": "Clear canvas",
           "preview": {
@@ -329,7 +333,8 @@
           "save": "Save mask"
         },
         "brush-bar": {
-          "rectangle": "Rectangular brush"
+          "rectangle": "Toggle rectangle selection",
+          "brush": "Toggle brush"
         },
         "failed-to-gen-mask": "Failed to generate mask!",
         "finish": "Mask updated"

@@ -200,7 +200,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
             </AnimatePresence>
             <span
               className={cn(
-                'pointer-events-none absolute bottom-4 right-2.5 z-30 flex select-none items-center gap-1 text-sm text-muted-foreground/45 opacity-0 transition-opacity duration-100',
+                'pointer-events-none absolute -right-2 bottom-4 z-30 flex scale-75 select-none items-center gap-1 text-sm text-muted-foreground/45 opacity-0 transition-opacity duration-100',
                 isFocused && !isClickOutside && 'opacity-100',
               )}
             >
