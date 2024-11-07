@@ -37,7 +37,7 @@ export const useVinesIframeMessage = ({ output, mutate, enable = false }: IVines
 
       window.parent.postMessage(
         stringify({
-          'v-event': 'vines-get-execution-outputs',
+          'v-event': 'vines-execution-image-outputs',
           'v-data': msg.slice(0, 4),
         }),
         '*',
@@ -54,7 +54,14 @@ export const useVinesIframeMessage = ({ output, mutate, enable = false }: IVines
       if (eventName && isString(eventName)) {
         switch (eventName) {
           case 'vines-get-execution-outputs':
-            void mutate();
+            mutate().then((it) =>
+              window.parent.postMessage(
+                stringify({
+                  'v-event': 'vines-execution-outputs',
+                  'v-data': it,
+                }),
+              ),
+            );
             break;
           case 'vines-fill-parameters-with-image-url':
             if (eventData) {
