@@ -33,6 +33,8 @@ export const useVinesIframeMessage = ({ output, mutate, enable = false }: IVines
             instance: omit(it, 'output'),
           });
         }
+
+        break;
       }
 
       window.parent.postMessage(
