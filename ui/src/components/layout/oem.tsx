@@ -6,6 +6,7 @@ import { get } from 'lodash';
 import { useSystemConfig } from '@/apis/common';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import useUrlState from '@/hooks/use-url-state.ts';
 import { useAppStore } from '@/store/useAppStore';
 import { EDarkModeTrigger } from '@/store/useAppStore/dark-mode.slice.ts';
 import usePaletteStore from '@/store/usePaletteStore.ts';
@@ -30,7 +31,10 @@ export const OEM: React.FC = () => {
     setValue(teamThemeColor || siteThemeColor);
   }, [siteThemeColor, teamThemeColor]);
 
+  const [{ theme }] = useUrlState<{ theme: 'dark' | 'light' | null }>({ theme: null });
+
   useLayoutEffect(() => {
+    if (theme) return;
     const handleToggleTheme = (event: Pick<MediaQueryListEvent, 'matches'>) => toggleDarkMode(event.matches);
 
     const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -43,6 +47,15 @@ export const OEM: React.FC = () => {
 
   const initialRef = useRef(false);
   useEffect(() => {
+    if (theme) {
+      setDarkModeTrigger(EDarkModeTrigger.Manual);
+      const useDarkMode = theme === 'dark';
+      setDarkMode(useDarkMode);
+      toggleDarkMode(useDarkMode);
+      initialRef.current = true;
+      return;
+    }
+
     if (initialRef.current) {
       if (localDarkMode === 'auto') {
         setDarkModeTrigger(EDarkModeTrigger.Auto);
@@ -66,7 +79,7 @@ export const OEM: React.FC = () => {
       }
       initialRef.current = true;
     }
-  }, [localDarkMode]);
+  }, [localDarkMode, theme]);
 
   const [title, setTitle] = useState('');
 
