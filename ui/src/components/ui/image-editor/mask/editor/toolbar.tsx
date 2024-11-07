@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 
-import { useThrottleEffect } from 'ahooks';
+import { useMemoizedFn, useThrottleEffect } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -11,11 +11,11 @@ import {
   Eraser,
   Eye,
   EyeOff,
-  Fullscreen,
   Hand,
   ImageUp,
   PencilRuler,
   Save,
+  SquareIcon,
   ZoomInIcon,
   ZoomOutIcon,
 } from 'lucide-react';
@@ -45,6 +45,8 @@ interface IMaskEditorToolbarProps {
   event$: EventEmitter<IMaskEditorEvent>;
 
   children?: React.ReactNode;
+
+  mini?: boolean;
 }
 
 export const MaskEditorToolbar: React.FC<IMaskEditorToolbarProps> = ({
@@ -57,11 +59,10 @@ export const MaskEditorToolbar: React.FC<IMaskEditorToolbarProps> = ({
   onFileInputChange,
   event$,
   children,
+  mini,
 }) => {
   const { t } = useTranslation();
   const { zoomIn, zoomOut, resetTransform } = useControls();
-
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const { ref, width } = useElementSize();
 
@@ -76,6 +77,16 @@ export const MaskEditorToolbar: React.FC<IMaskEditorToolbarProps> = ({
     { wait: 100 },
   );
 
+  const handleSelectLocalImage = useMemoizedFn(() => {
+    const inputElement = document.createElement('input');
+    inputElement.type = 'file';
+    inputElement.accept = 'image/*';
+    inputElement.onchange = (e) => {
+      onFileInputChange(e as unknown as React.ChangeEvent<HTMLInputElement>);
+    };
+    inputElement.click();
+  });
+
   const toolbarRef = useRef<HTMLDivElement | null>(null);
 
   return (
@@ -84,11 +95,10 @@ export const MaskEditorToolbar: React.FC<IMaskEditorToolbarProps> = ({
         <div
           className={cn(
             'flex w-full min-w-[26rem] items-center justify-between',
-            scrollToolVisible && 'min-w-[30rem] pr-16',
+            scrollToolVisible && 'min-w-[34rem] pr-16',
           )}
         >
           <div className="flex items-center gap-2">
-            <input ref={fileInputRef} className="hidden" type="file" accept="image/*" onChange={onFileInputChange} />
             {children}
 
             <Tooltip>
@@ -98,13 +108,13 @@ export const MaskEditorToolbar: React.FC<IMaskEditorToolbarProps> = ({
                   variant="outline"
                   size="small"
                   icon={<ImageUp />}
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={handleSelectLocalImage}
                 />
               </TooltipTrigger>
               <TooltipContent>{t('components.ui.vines-image-mask-editor.toolbar.select-image')}</TooltipContent>
             </Tooltip>
           </div>
-          <div className="flex items-center gap-2">
+          <div className={cn('flex items-center gap-2', !mini && '-ml-32')}>
             <div className="space-x-1">
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -125,7 +135,7 @@ export const MaskEditorToolbar: React.FC<IMaskEditorToolbarProps> = ({
                     className="border-transparent !p-1 shadow-none"
                     variant="outline"
                     size="small"
-                    icon={<Fullscreen />}
+                    icon={<SquareIcon />}
                     onClick={() => resetTransform()}
                   />
                 </TooltipTrigger>

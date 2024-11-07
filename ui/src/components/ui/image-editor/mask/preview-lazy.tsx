@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 
 import { Meta, Uppy } from '@uppy/core';
-import { useEventEmitter } from 'ahooks';
+import { useEventEmitter, useMemoizedFn } from 'ahooks';
 import { motion } from 'framer-motion';
-import { PencilRuler, Undo2 } from 'lucide-react';
+import { Fullscreen, PencilRuler, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { VinesImageMaskEditor } from '@/components/ui/image-editor/mask/index.tsx';
 import { IVinesImageMaskPreviewProps } from '@/components/ui/image-editor/mask/preview.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesUploader } from '@/components/ui/vines-uploader';
+import useUrlState from '@/hooks/use-url-state.ts';
 import { cn } from '@/utils';
 
 const VinesImageMaskPreview: React.FC<IVinesImageMaskPreviewProps> = ({ src, className, onFinished }) => {
@@ -26,6 +29,20 @@ const VinesImageMaskPreview: React.FC<IVinesImageMaskPreviewProps> = ({ src, cla
     }
   });
 
+  const handleMaskEditFinished = useMemoizedFn((val: File) => {
+    if (uppy) {
+      uppy.removeFiles(uppy.getFiles().map((it) => it.id));
+      uppy.addFile(val);
+    }
+    setVisible(false);
+  });
+
+  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
+  const isMiniMode = mode === 'mini';
+
+  const [fullScreenDialog, setFullScreenDialog] = useState(false);
+  const [fullScreen, setFullScreen] = useState(false);
+
   return (
     <div className="vines-center relative size-full">
       <motion.div
@@ -35,19 +52,9 @@ const VinesImageMaskPreview: React.FC<IVinesImageMaskPreviewProps> = ({ src, cla
         exit={{ opacity: 0 }}
         className={cn('pointer-events-none absolute size-full', visible && 'pointer-events-auto z-20', className)}
       >
-        <VinesImageMaskEditor
-          className="h-[15.8rem]"
-          src={src}
-          onFinished={(val) => {
-            if (uppy) {
-              uppy.removeFiles(uppy.getFiles().map((it) => it.id));
-              uppy.addFile(val);
-            }
-            setVisible(false);
-          }}
-        >
+        <VinesImageMaskEditor className="h-[15.8rem]" src={src} onFinished={handleMaskEditFinished} mini={isMiniMode}>
           <Button
-            className="h-7 px-2 py-1"
+            className="h-7 border-transparent px-2 py-1 shadow-none"
             icon={<Undo2 />}
             variant="outline"
             size="small"
@@ -55,6 +62,61 @@ const VinesImageMaskPreview: React.FC<IVinesImageMaskPreviewProps> = ({ src, cla
           >
             {t('components.ui.vines-image-mask-editor.preview.back')}
           </Button>
+          <Dialog
+            open={fullScreenDialog}
+            onOpenChange={(val) => {
+              setFullScreenDialog(val);
+              !val && setFullScreen(val);
+            }}
+            modal={false}
+          >
+            <Tooltip>
+              <DialogTrigger asChild>
+                <TooltipTrigger asChild>
+                  <Button
+                    className="border-transparent !p-1 shadow-none"
+                    icon={<Fullscreen />}
+                    variant="outline"
+                    size="small"
+                    onClick={() => setVisible(false)}
+                  />
+                </TooltipTrigger>
+              </DialogTrigger>
+              <TooltipContent>{t('components.ui.vines-image-mask-editor.toolbar.zoom-in-editor')}</TooltipContent>
+            </Tooltip>
+            <DialogContent
+              className={cn(
+                'flex flex-col',
+                fullScreen ? 'h-screen max-w-[100vw] pt-10' : 'h-[60vh] max-w-[55vw]',
+                isMiniMode && 'max-w-[100vw]',
+              )}
+            >
+              {!fullScreen && (
+                <DialogTitle className="h-5">{t('components.ui.vines-image-mask-editor.preview.label')}</DialogTitle>
+              )}
+              <VinesImageMaskEditor
+                className="!size-full"
+                src={src}
+                onFinished={(val) => {
+                  handleMaskEditFinished(val);
+                  setFullScreenDialog(false);
+                }}
+                mini={isMiniMode}
+              >
+                <Button
+                  className="border-transparent !p-1 shadow-none"
+                  icon={<Fullscreen />}
+                  variant="outline"
+                  size="small"
+                  onClick={() => setFullScreen(!fullScreen)}
+                >
+                  {fullScreen
+                    ? t('components.ui.vines-image-mask-editor.toolbar.exit-fullscreen')
+                    : t('components.ui.vines-image-mask-editor.toolbar.fullscreen')}
+                </Button>
+              </VinesImageMaskEditor>
+            </DialogContent>
+          </Dialog>
           <Separator orientation="vertical" className="h-4" />
         </VinesImageMaskEditor>
       </motion.div>
