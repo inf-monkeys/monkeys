@@ -342,6 +342,7 @@ export class ToolsPollingService {
         'x-monkeys-teamid': __context?.teamId,
         'x-monkeys-workflow-instanceid': task.workflowInstanceId,
         'x-monkeys-workflow-taskid': task.taskId,
+        'x-monkeys-workflow-id': task.workflowType,
       };
       switch (authType) {
         case AuthType.none:

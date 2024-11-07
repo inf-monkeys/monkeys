@@ -119,6 +119,7 @@ export class ComfyuiExecutionController {
           instanceId: req.headers['x-monkeys-workflow-instanceid'] as string | undefined,
           teamId: req.headers['x-monkeys-teamid'] as string | undefined,
           addMonkeyInput: true,
+          workflowId: req.headers['x-monkeys-workflow-id'] as string | undefined,
         }
       : {};
     return await this.comfyuiService.runComfyuiWorkflow(server, workflow, rest, {
