@@ -372,12 +372,7 @@ export class ComfyUIService {
         extra_options: {
           add_monkey_input: extraOptions.addMonkeyInput,
           remove_prompt: extraOptions.removePrompt,
-          monkey_info: extraOptions.addMonkeyInput
-            ? {
-                team_id: extraOptions.teamId,
-                instance_id: extraOptions.instanceId,
-              }
-            : undefined,
+          monkey_info: extraOptions.addMonkeyInput ? extraOptions.monkeyInfo : undefined,
         },
       },
       headers: {

@@ -1,15 +1,8 @@
 export type RunComfyuiWorkflowExtraOptions = {
   removePrompt: boolean;
-} & (
-  | {
-      addMonkeyInput: true;
-      instanceId: string;
-      teamId: string;
-    }
-  | {
-      addMonkeyInput: false;
-    }
-);
+  addMonkeyInput: boolean;
+  monkeyInfo?: Record<string, any>;
+};
 
 export type RunComfyuiWorkflowDto = {
   server: string;

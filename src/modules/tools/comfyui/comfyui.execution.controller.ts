@@ -116,10 +116,13 @@ export class ComfyuiExecutionController {
     const { workflow, server, removePrompt, addMonkeyInput, ...rest } = body;
     const inputInfo = addMonkeyInput
       ? {
-          instanceId: req.headers['x-monkeys-workflow-instanceid'] as string | undefined,
-          teamId: req.headers['x-monkeys-teamid'] as string | undefined,
           addMonkeyInput: true,
-          workflowId: req.headers['x-monkeys-workflow-id'] as string | undefined,
+          monkeyInfo: {
+            'v-user-id': req.headers['x-monkeys-userid'] as string | undefined,
+            'v-team-id': req.headers['x-monkeys-teamid'] as string | undefined,
+            'v-workflow-id': req.headers['x-monkeys-workflow-id'] as string | undefined,
+            'v-instance-id': req.headers['x-monkeys-workflow-instanceid'] as string | undefined,
+          },
         }
       : {};
     return await this.comfyuiService.runComfyuiWorkflow(server, workflow, rest, {
