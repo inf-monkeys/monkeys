@@ -47,7 +47,18 @@ export const builtInMarketList = rawBuiltInMarketList.reduce((acc, current) => {
   return acc;
 }, {}) as BuiltInMarket;
 
-export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketplaceData>> = builtInMarketList.workflows;
+const overwriteWorkflowIds = builtInMarketList['overwrite-workflows'].map((ow) => ow.id);
+
+export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketplaceData>> = builtInMarketList.workflows.map((w) => {
+  if (overwriteWorkflowIds.includes(w.id)) {
+    const ow = builtInMarketList['overwrite-workflows'].find((ow) => ow.id === w.id);
+    return {
+      ...w,
+      ...ow,
+    };
+  }
+  return w;
+});
 export const BUILT_IN_COMFYUI_WORKFLOW_MARKETPLACE_LIST: Array<Partial<ComfyuiWorkflowEntity>> = builtInMarketList['comfyui-workflows'];
 
 export interface ComfyUIWorkflowWorkflowMarketplaceData extends ComfyuiWorkflowEntity {

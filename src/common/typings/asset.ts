@@ -28,7 +28,7 @@ export interface AuthorizedTarget {
   targetId: string;
 }
 
-export type BuiltInMarketType = 'workflows' | 'comfyui-workflows';
+export type BuiltInMarketType = 'workflows' | 'comfyui-workflows' | 'overwrite-workflows';
 
 type BuiltInWorkflowMarketItem = Partial<WorkflowMarketplaceData>;
 
