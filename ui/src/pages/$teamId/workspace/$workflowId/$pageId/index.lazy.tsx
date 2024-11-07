@@ -9,7 +9,7 @@ import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { VinesIFrame } from '@/components/ui/vines-iframe';
 import { VINES_IFRAME_PAGE_IDS, VINES_VIEW_ID_MAPPER } from '@/components/ui/vines-iframe/consts.ts';
 import { VinesView } from '@/components/ui/vines-iframe/view';
-import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider.tsx';
+import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
 import { usePageStore } from '@/store/usePageStore';
 import { createViewStore, ViewStoreProvider } from '@/store/useViewStore';
 import { getI18nContent } from '@/utils';

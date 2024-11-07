@@ -2,14 +2,10 @@ import React, { useMemo } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
+import { IVinesFlowProviderProps } from '@/components/ui/vines-iframe/view/vines-flow-provider/index.tsx';
 import { createVinesCore } from '@/package/vines-flow';
 
-interface IVinesFlowProviderProps {
-  workflowId: string;
-  children: React.ReactNode;
-}
-
-export const VinesFlowProvider: React.FC<IVinesFlowProviderProps> = ({ workflowId, children }) => {
+const VinesFlowProvider: React.FC<IVinesFlowProviderProps> = ({ workflowId, children }) => {
   const { i18n } = useTranslation();
 
   const Wrapper = useMemo(() => {
@@ -20,3 +16,5 @@ export const VinesFlowProvider: React.FC<IVinesFlowProviderProps> = ({ workflowI
 
   return Wrapper({ children });
 };
+
+export default VinesFlowProvider;

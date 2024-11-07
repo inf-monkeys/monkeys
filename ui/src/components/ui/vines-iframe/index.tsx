@@ -4,7 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import { groupBy, has, reduce } from 'lodash';
 
 import { VinesView } from '@/components/ui/vines-iframe/view';
-import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider.tsx';
+import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
 import { createViewStore, ViewStoreProvider } from '@/store/useViewStore';
 
 export interface IVinesIFramePropsRequired {
