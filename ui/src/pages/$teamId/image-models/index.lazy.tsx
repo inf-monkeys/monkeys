@@ -8,13 +8,12 @@ import { ComfyUIServerListModal } from 'src/components/layout/ugc-pages/comfyui/
 
 import { IComfyuiModelType } from '@/apis/comfyui-model/typings.ts';
 import { preloadUgcImageModels, useUgcImageModels } from '@/apis/ugc';
+import { UgcView } from '@/components/layout/ugc/view';
+import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { createImageModelsColumns } from '@/components/layout/ugc-pages/image-models/consts.tsx';
 import { ImageModelManageDropdown } from '@/components/layout/ugc-pages/image-models/model-manage-dropdown';
 import { ImageModelTypeModal } from '@/components/layout/ugc-pages/image-models/model-type-modal';
 import { OperateArea } from '@/components/layout/ugc-pages/image-models/operate-area';
-import { UgcView } from '@/components/layout/ugc/view';
-import { RenderIcon } from '@/components/layout/ugc/view/utils/renderer.tsx';
-import { teamIdGuard } from '@/components/router/guard/team-id.ts';
 import { Button } from '@/components/ui/button';
 import { Tag } from '@/components/ui/tag';
 import { useCopy } from '@/hooks/use-copy.ts';
@@ -111,5 +110,4 @@ export const ImageModels: React.FC = () => {
 
 export const Route = createFileRoute('/$teamId/image-models/')({
   component: ImageModels,
-  beforeLoad: teamIdGuard,
 });

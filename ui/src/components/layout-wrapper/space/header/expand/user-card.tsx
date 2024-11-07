@@ -17,7 +17,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
-import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId/index.lazy.tsx';
 import VinesEvent from '@/utils/events.ts';
 
 interface IUserCardProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -25,11 +24,11 @@ interface IUserCardProps extends React.ComponentPropsWithoutRef<'div'> {}
 export const UserCard: React.FC<IUserCardProps> = () => {
   const { t } = useTranslation();
 
-  const navigate = useNavigate({ from: Route.fullPath });
+  const navigate = useNavigate();
   const { userPhoto, userName } = useVinesUser();
   const { teamId, team } = useVinesTeam();
 
-  const teamName = team?.name ?? '默认团队';
+  const teamName = team?.name ?? t('components.layout.main.sidebar.teams.默认团队');
 
   return (
     <DropdownMenu>

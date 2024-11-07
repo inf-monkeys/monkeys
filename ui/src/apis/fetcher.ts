@@ -97,7 +97,7 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
                   localStorage.removeItem('vines-token');
                   localStorage.removeItem('vines-team-id');
                   window['vinesTeamId'] = void 0;
-                  VinesEvent.emit('vines-nav', '/login');
+                  VinesEvent.emit('vines-nav', '/login', void 0, void 0, false);
                 },
               },
             };

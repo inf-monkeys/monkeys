@@ -26,16 +26,23 @@ export const RouteEvent: React.FC = () => {
   }, [routeId, routeParams]);
 
   useLayoutEffect(() => {
-    const handleVinesNav = (to: string, params?: Record<string, any>, search?: Record<string, any>) => {
+    const handleVinesNav = (
+      to: string,
+      params?: Record<string, any>,
+      search?: Record<string, any>,
+      redirect = true,
+    ) => {
       if (to === '/login') {
         const metadata = routeMetadata.current;
         return navigate({
           to: '/login/',
-          search: {
-            redirect_id: metadata.id,
-            redirect_params: metadata.params,
-            redirect_search: metadata.search,
-          },
+          ...(redirect && {
+            search: {
+              redirect_id: metadata.id,
+              redirect_params: metadata.params,
+              redirect_search: metadata.search,
+            },
+          }),
         });
       } else {
         return navigate({
