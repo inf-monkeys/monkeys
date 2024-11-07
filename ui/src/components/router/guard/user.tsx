@@ -22,7 +22,10 @@ export const UserGuard: React.FC = () => {
     if (logout()?.lastAuthMethod === AuthMethod.oidc) {
       handleOidcLogout();
     } else {
-      VinesEvent.emit('vines-nav', '/login');
+      localStorage.removeItem('vines-token');
+      localStorage.removeItem('vines-team-id');
+      window['vinesTeamId'] = void 0;
+      VinesEvent.emit('vines-nav', '/login', void 0, void 0, false);
     }
   };
 

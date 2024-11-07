@@ -13,13 +13,6 @@ import VinesEvent from '@/utils/events.ts';
 
 const t = i18n.t;
 
-export interface IUserToken {
-  data: IVinesUser;
-  token: string;
-}
-
-export type IUserTokens = Record<string, IUserToken>;
-
 export const isAuthed = () => {
   const token = readLocalStorageValue('vines-token', '', false);
 
