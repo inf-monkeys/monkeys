@@ -35,7 +35,13 @@ export const useVinesIframeMessage = ({ output, mutate, enable = false }: IVines
         }
       }
 
-      window.parent.postMessage(stringify(msg.slice(0, 4)), '*');
+      window.parent.postMessage(
+        stringify({
+          'v-event': 'vines-get-execution-outputs',
+          'v-data': msg.slice(0, 4),
+        }),
+        '*',
+      );
     }
   }, [enable, output]);
 
