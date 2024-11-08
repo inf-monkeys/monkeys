@@ -43,17 +43,16 @@ export function applyMaskToNewCanvas(
 
   // 遍历像素并应用遮罩
   for (let i = 0; i < originalPixels.length; i += 4) {
+    // 直接复制原始图像的所有通道数据
     resultPixels[i] = originalPixels[i]; // Red
     resultPixels[i + 1] = originalPixels[i + 1]; // Green
     resultPixels[i + 2] = originalPixels[i + 2]; // Blue
+    resultPixels[i + 3] = originalPixels[i + 3]; // Alpha
 
+    // 如果遮罩像素不是完全透明的，则只将透明通道设为0
     const maskAlpha = maskPixels[i + 3];
     if (maskAlpha > 0) {
-      // 如果遮罩像素不是完全透明的，则将结果图像对应像素设为透明
       resultPixels[i + 3] = 0;
-    } else {
-      // 否则保留原始图像的 alpha 值
-      resultPixels[i + 3] = originalPixels[i + 3];
     }
   }
 
