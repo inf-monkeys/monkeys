@@ -1,6 +1,6 @@
 import React, { forwardRef, useState } from 'react';
 
-import { useEventEmitter } from 'ahooks';
+import { useEventEmitter, useLatest } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
@@ -12,7 +12,7 @@ import { useImageOptimize } from '@/components/ui/image-editor/mask/editor/hooks
 import { IVinesMaskEditorProps } from '@/components/ui/image-editor/mask/editor/hooks/use-vines-mask-editor.ts';
 import { MaskPreview } from '@/components/ui/image-editor/mask/editor/preview.tsx';
 import { MaskEditorToolbar } from '@/components/ui/image-editor/mask/editor/toolbar.tsx';
-import { mergeBlobToFile } from '@/components/ui/image-editor/mask/editor/utils.ts';
+import { applyMaskCanvasToOriginalImageFile, mergeBlobToFile } from '@/components/ui/image-editor/mask/editor/utils.ts';
 import { VinesLoading } from '@/components/ui/loading';
 import { cn } from '@/utils';
 
@@ -35,12 +35,13 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
 
     const [editable, setEditable] = useState(true);
     const [miniPreview, setMiniPreview] = useState(true);
+    const [maskContext, setMaskContext] = useState<CanvasRenderingContext2D | null>(null);
 
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [maskFileBlob, setMaskFileBlob] = useState<Blob | null>(null);
     const [progress, setProgress] = useState(0);
 
-    const { image, file, onFileInputChange, optimizeImage } = useImageOptimize({
+    const { file, optimizeImage, optimizeFile, onFileInputChange } = useImageOptimize({
       src,
       onProgress: setProgress,
       onFetchImageFailed: () => {
@@ -62,16 +63,17 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
 
     const [exporting, setExporting] = useState(false);
     const [exportProgress, setExportProgress] = useState(0);
-    maskEditorEvent$.useSubscription((mode) => {
-      if (mode === 'save' && maskFileBlob && file) {
+    const isEdited = useLatest(maskFileBlob && optimizeFile);
+    maskEditorEvent$.useSubscription(async (mode) => {
+      if (mode === 'save' && isEdited.current && file && maskContext && onFinished) {
         setExporting(true);
+        await new Promise((resolve) => setTimeout(resolve, 180));
 
-        optimizeImage(new File([maskFileBlob], 'optimize-image', { type: 'image/png' }), setExportProgress)
-          .then((result) => onFinished?.(mergeBlobToFile(file, result as Blob)))
-          .finally(() => {
-            setExporting(false);
-            setExportProgress(0);
-          });
+        const mergeBlob = await applyMaskCanvasToOriginalImageFile(file, maskContext, setExportProgress);
+        onFinished(mergeBlobToFile(file, mergeBlob as Blob));
+
+        setExporting(false);
+        setExportProgress(0);
       }
     });
 
@@ -98,7 +100,7 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
         }}
       >
         <AnimatePresence>
-          {image ? (
+          {optimizeImage ? (
             <motion.div
               key="vines-image-mask-editor-main"
               className={cn('size-full space-y-2 transition-opacity', isExport && 'pointer-events-none !opacity-0')}
@@ -124,6 +126,7 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
                       setPointerMode={setPointerMode}
                       onFileInputChange={onFileInputChange}
                       event$={maskEditorEvent$}
+                      disabledSave={!isEdited.current}
                     >
                       {children}
                     </MaskEditorToolbar>
@@ -138,7 +141,7 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
                         }}
                       >
                         <MaskEditor
-                          src={image}
+                          src={optimizeImage}
                           disabled={!editable}
                           setCenterScale={setCenterScale}
                           onMouseDown={(e) => {
@@ -148,6 +151,8 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
                           }}
                           setPreviewImage={setPreviewImage}
                           setMaskFileBlob={setMaskFileBlob}
+                          maskContext={maskContext}
+                          setMaskContext={setMaskContext}
                           pointerMode={pointerMode}
                           brushSize={brushSize}
                           brushType={brushType}
@@ -158,7 +163,7 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
                   </>
                 )}
               </TransformWrapper>
-              <MaskPreview src={previewImage ?? image} visible={miniPreview} mini={mini} />
+              <MaskPreview src={previewImage ?? optimizeImage} visible={miniPreview} mini={mini} />
               <BrushBar
                 pointerMode={pointerMode}
                 brushSize={brushSize}

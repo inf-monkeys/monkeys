@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { useMemoizedFn } from 'ahooks';
 import imageCompression, { Options } from 'browser-image-compression';
+import { fileTypeFromBlob, MimeType } from 'file-type';
+
+import { getFileNameByOssUrl } from '@/components/ui/vines-uploader/utils.ts';
 
 interface IImageOptimizeProps extends Omit<Options, 'useWebWorker'> {
   src: string | File;
@@ -22,7 +25,9 @@ export const useImageOptimize = ({
   onFinished,
   ...OptimizeOptions
 }: IImageOptimizeProps) => {
-  const [image, setImage] = useState<string | null>(null);
+  const [optimizeImage, setOptimizeImage] = useState<string | null>(null);
+  const [optimizeFile, setOptimizeFile] = useState<File | null>(null);
+
   const [file, setFile] = useState<File | null>(null);
 
   const fetchImageMap = useRef(new Map<string, File>());
@@ -36,16 +41,12 @@ export const useImageOptimize = ({
       const fetchResponse = await fetch(url, { method: 'GET', headers: { Accept: 'image/*' } });
       const newBlob = await fetchResponse.blob();
 
-      let fileType = newBlob.type;
-      if (fileType === 'application/octet-stream') {
-        fileType = `image/${url.match(/\.([a-zA-Z0-9]+)$/)?.[1] ?? 'png'}`;
+      let fileType = (await fileTypeFromBlob(newBlob))?.mime;
+      if (!fileType) {
+        fileType = `image/${url.match(/\.([a-zA-Z0-9]+)$/)?.[1] ?? 'png'}` as MimeType;
       }
 
-      const fileName =
-        url
-          .split('/')
-          .pop()
-          ?.replace(/^R([a-z0-9]{5})_/, '') ?? 'optimized-image.png';
+      const fileName = getFileNameByOssUrl(url, 'optimized-image.png');
 
       const newFile = new File([newBlob], fileName, { type: fileType });
 
@@ -70,7 +71,7 @@ export const useImageOptimize = ({
   });
 
   const optimizeImageCount = useRef(0);
-  const optimizeImage = useMemoizedFn(
+  const handleOptimizeImage = useMemoizedFn(
     async (file: File, updateProgress?: (val: number) => void): Promise<File | null> => {
       try {
         if (updateProgress) {
@@ -98,7 +99,7 @@ export const useImageOptimize = ({
         if (optimizeImageCount.current < retry) {
           optimizeImageCount.current += 1;
           return new Promise((resolve) => {
-            setTimeout(() => resolve(optimizeImage(file)), 2 ** optimizeImageCount.current * 1000);
+            setTimeout(() => resolve(handleOptimizeImage(file)), 2 ** optimizeImageCount.current * 1000);
           });
         } else {
           onOptimizeFailed?.(true);
@@ -110,40 +111,45 @@ export const useImageOptimize = ({
 
   const handleUpdateState = useMemoizedFn((newFile?: File | null) => {
     if (newFile) {
-      setImage(URL.createObjectURL(newFile));
-      setFile(newFile);
+      setOptimizeImage(URL.createObjectURL(newFile));
+      setOptimizeFile(newFile);
     }
   });
 
   useEffect(() => {
     if (!src) return;
+    setOptimizeFile(null);
+    setOptimizeImage(null);
     setFile(null);
-    setImage(null);
     if (src instanceof File) {
-      optimizeImage(src).then(handleUpdateState);
+      handleOptimizeImage(src).then(handleUpdateState);
     } else {
       fetchImage(src).then((newFile) => {
+        setFile(newFile);
         if (newFile) {
-          optimizeImage(newFile).then(handleUpdateState);
+          handleOptimizeImage(newFile).then(handleUpdateState);
         }
       });
     }
   }, [src]);
 
   const onFileInputChange = useMemoizedFn((event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    const inputFile = event.target.files?.[0];
+    if (!inputFile) return;
 
-    setFile(null);
-    setImage(null);
-    optimizeImage(file).then(handleUpdateState);
+    setOptimizeFile(null);
+    setOptimizeImage(null);
+    setFile(inputFile);
+    handleOptimizeImage(inputFile).then(handleUpdateState);
   });
 
   return {
-    image,
     file,
 
     optimizeImage,
+    optimizeFile,
+
+    handleOptimizeImage,
 
     onFileInputChange,
   };

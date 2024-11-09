@@ -30,6 +30,9 @@ export interface IMaskEditorProps extends Pick<React.ComponentPropsWithoutRef<'d
   setPreviewImage?: React.Dispatch<React.SetStateAction<string | null>>;
   setMaskFileBlob?: React.Dispatch<React.SetStateAction<Blob | null>>;
 
+  maskContext: CanvasRenderingContext2D | null;
+  setMaskContext: React.Dispatch<React.SetStateAction<CanvasRenderingContext2D | null>>;
+
   event$?: EventEmitter<IMaskEditorEvent>;
 }
 
@@ -40,6 +43,10 @@ export const MaskEditor: React.FC<IMaskEditorProps> = ({
   initialSize,
   setPreviewImage,
   setMaskFileBlob,
+
+  maskContext,
+  setMaskContext,
+
   pointerMode = 'brush',
   brushType = 'normal',
   brushSize,
@@ -57,7 +64,6 @@ export const MaskEditor: React.FC<IMaskEditorProps> = ({
   const cursorCanvas = useRef<HTMLCanvasElement | null>(null);
   const tempMaskCanvas = useRef<HTMLCanvasElement | null>(null);
   const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
-  const [maskContext, setMaskContext] = useState<CanvasRenderingContext2D | null>(null);
 
   useLayoutEffect(() => {
     if (canvas.current && !context) {
