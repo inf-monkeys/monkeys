@@ -43,6 +43,7 @@ interface IMaskEditorToolbarProps {
   onFileInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 
   event$: EventEmitter<IMaskEditorEvent>;
+  disabledSave?: boolean;
 
   children?: React.ReactNode;
 
@@ -58,6 +59,7 @@ export const MaskEditorToolbar: React.FC<IMaskEditorToolbarProps> = ({
   setPointerMode,
   onFileInputChange,
   event$,
+  disabledSave,
   children,
   mini,
 }) => {
@@ -241,6 +243,7 @@ export const MaskEditorToolbar: React.FC<IMaskEditorToolbarProps> = ({
                 variant="outline"
                 size="small"
                 icon={<Save />}
+                disabled={disabledSave}
                 onClick={() => event$.emit('save')}
               />
             </TooltipTrigger>
