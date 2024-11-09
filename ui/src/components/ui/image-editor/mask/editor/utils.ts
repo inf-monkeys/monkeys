@@ -126,41 +126,19 @@ export const applyMaskCanvasToOriginalImageFile = async (
   const originalImageBlob = await (await getCanvasBlob(originalCanvas))!.arrayBuffer();
   const maskImageBlob = await (await getCanvasBlob(scaledMaskCanvas))!.arrayBuffer();
 
-  // const originalPixels = originalImageData.data;
-  // const maskPixels = maskImageData.data;
-
-  // // 分批处理像素以避免卡顿
-  // const batchSize = 100000; // 每批处理的像素数
-  // const totalPixels = originalPixels.length;
-  // const batches = Math.ceil(totalPixels / (batchSize * 4));
-  //
-  // for (let b = 0; b < batches; b++) {
-  //   await new Promise<void>((resolve) => {
-  //     requestAnimationFrame(() => {
-  //       const start = b * batchSize * 4;
-  //       const end = Math.min(start + batchSize * 4, totalPixels);
-  //
-  //       for (let i = start; i < end; i += 4) {
-  //         // 反转遮罩 alpha 通道
-  //         if (maskPixels[i + 3]) {
-  //           originalPixels[i + 3] = 0;
-  //         }
-  //       }
-  //
-  //       onProgress?.(Math.round(((b + 1) / batches) * 1000) / 10);
-  //       resolve();
-  //     });
-  //   });
-  // }
-
   return new Promise((resolve) => {
     const worker = new ImageWorker();
 
     worker.onmessage = (event) => {
-      const { newPng } = event.data;
+      const { type, progress, image } = event.data;
+
+      if (type === 'progress') {
+        onProgress?.(progress);
+        return;
+      }
 
       // 创建 Blob 和 File 对象
-      const newBlob = new Blob([newPng], { type: 'image/png' });
+      const newBlob = new Blob([image], { type: 'image/png' });
 
       resolve(newBlob);
 
@@ -174,11 +152,6 @@ export const applyMaskCanvasToOriginalImageFile = async (
       maskArrayBuffer: maskImageBlob,
     });
   });
-  // // 将处理后的像素数据放回原始 canvas
-  // originalCtx.putImageData(originalImageData, 0, 0);
-  //
-  // // 将 canvas 转换为 blob
-  // return await canvasToBlob(originalCanvas, 'image/png');
 };
 
 export const mergeBlobToFile = (file: File, blob: Blob): File => {
