@@ -336,7 +336,9 @@
           "rectangle": "Select box",
           "brush": "Brush",
           "lasso": "Lasso",
-          "eraser": "Eraser"
+          "eraser": "Eraser",
+          "undo": "Undo",
+          "redo": "Redo"
         },
         "failed-to-gen-mask": "Failed to generate mask!",
         "finish": "Mask updated"

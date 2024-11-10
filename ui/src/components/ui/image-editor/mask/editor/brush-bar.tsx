@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
-import { Brush, CopyX, Eraser, Frame, Lasso } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Brush, CopyX, Eraser, Frame, Lasso, Redo2, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -22,7 +23,8 @@ interface IBrushBarProps {
   brushType: IVinesMaskEditorProps['brushType'];
   setBrushType: React.Dispatch<React.SetStateAction<IVinesMaskEditorProps['brushType']>>;
 
-  mini?: boolean;
+  canUndo: boolean;
+  canRedo: boolean;
 
   event$: EventEmitter<IMaskEditorEvent>;
 }
@@ -34,7 +36,8 @@ export const BrushBar: React.FC<IBrushBarProps> = ({
   setBrushSize,
   brushType,
   setBrushType,
-  mini,
+  canUndo,
+  canRedo,
   event$,
 }) => {
   const { t } = useTranslation();
@@ -44,6 +47,10 @@ export const BrushBar: React.FC<IBrushBarProps> = ({
   const isUseLassoBrush = brushType === 'lasso';
 
   const isUseBrush = pointerMode === 'brush';
+
+  const [auxiliaryBrushSizeVisible, setAuxiliaryBrushSizeVisible] = useState(false);
+
+  const displayBrushSize = brushSize * 2;
 
   return (
     <>
@@ -121,8 +128,45 @@ export const BrushBar: React.FC<IBrushBarProps> = ({
             {t('components.ui.vines-image-mask-editor.toolbar.clear')}
           </TooltipContent>
         </Tooltip>
+
+        <Separator className="w-[80%]" />
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              className="border-transparent !p-1 shadow-none"
+              variant="outline"
+              size="small"
+              icon={<Undo2 />}
+              disabled={!canUndo}
+              onClick={() => event$.emit('undo')}
+            />
+          </TooltipTrigger>
+          <TooltipContent side="right" sideOffset={8}>
+            {t('components.ui.vines-image-mask-editor.brush-bar.undo')}
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              className="border-transparent !p-1 shadow-none"
+              variant="outline"
+              size="small"
+              icon={<Redo2 />}
+              disabled={!canRedo}
+              onClick={() => event$.emit('redo')}
+            />
+          </TooltipTrigger>
+          <TooltipContent side="right" sideOffset={8}>
+            {t('components.ui.vines-image-mask-editor.brush-bar.redo')}
+          </TooltipContent>
+        </Tooltip>
       </div>
-      <div className="absolute bottom-1 left-1 flex items-center justify-center gap-2 rounded border border-input bg-background p-2 opacity-85 transition-opacity hover:opacity-100">
+      <div
+        className="absolute bottom-1 left-1 flex items-center justify-center gap-2 rounded border border-input bg-background p-2 opacity-85 transition-opacity hover:opacity-100"
+        onFocus={() => isUseNormalBrush && setAuxiliaryBrushSizeVisible(true)}
+        onBlur={() => setAuxiliaryBrushSizeVisible(false)}
+      >
         {isUseBrush ? (
           isUseNormalBrush ? (
             <Brush size={14} />
@@ -134,7 +178,7 @@ export const BrushBar: React.FC<IBrushBarProps> = ({
         ) : (
           <Eraser size={14} />
         )}
-        <span className="text-xs">
+        <span className="select-none text-xs">
           {isUseBrush
             ? isUseNormalBrush
               ? t('components.ui.vines-image-mask-editor.brush-bar.brush')
@@ -155,6 +199,22 @@ export const BrushBar: React.FC<IBrushBarProps> = ({
           />
         )}
       </div>
+      <AnimatePresence>
+        {auxiliaryBrushSizeVisible && (
+          <motion.div
+            className="vines-center absolute left-0 top-0 z-20 size-full"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setAuxiliaryBrushSizeVisible(false)}
+          >
+            <div
+              className="rounded-full bg-black outline outline-2 outline-offset-2 outline-vines-500"
+              style={{ width: displayBrushSize, height: displayBrushSize }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

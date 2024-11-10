@@ -14,7 +14,7 @@ import { applyMaskToNewCanvas, canvasToBlob } from '@/components/ui/image-editor
 import useUrlState from '@/hooks/use-url-state.ts';
 import { cn } from '@/utils';
 
-export type IMaskEditorEvent = 'clear-mask' | 'save';
+export type IMaskEditorEvent = 'clear-mask' | 'save' | 'undo' | 'redo';
 
 export interface IMaskEditorProps extends Pick<React.ComponentPropsWithoutRef<'div'>, 'onMouseDown' | 'onMouseUp'> {
   src: string;
@@ -23,6 +23,8 @@ export interface IMaskEditorProps extends Pick<React.ComponentPropsWithoutRef<'d
   pointerMode?: IVinesMaskEditorProps['pointerMode'];
   brushType?: IVinesMaskEditorProps['brushType'];
   brushSize?: IVinesMaskEditorProps['brushSize'];
+  setCanUndo?: React.Dispatch<React.SetStateAction<boolean>>;
+  setCanRedo?: React.Dispatch<React.SetStateAction<boolean>>;
 
   disabled?: boolean;
   setCenterScale?: React.Dispatch<React.SetStateAction<number>>;
@@ -50,6 +52,9 @@ export const MaskEditor: React.FC<IMaskEditorProps> = ({
   pointerMode = 'brush',
   brushType = 'normal',
   brushSize,
+  setCanUndo,
+  setCanRedo,
+
   event$,
   ...props
 }) => {
@@ -117,21 +122,34 @@ export const MaskEditor: React.FC<IMaskEditorProps> = ({
 
   const [{ zoom }] = useUrlState<{ zoom: number }>({ zoom: 1 });
 
-  const { onPointerMove, onPointerDown, onPointerUp, onPointerLeave, handleCleanMask } = useVinesMaskEditor({
-    maskCanvasRef: maskCanvas,
-    cursorCanvasRef: cursorCanvas,
-    tempMaskCanvasRef: tempMaskCanvas,
-    brushType,
-    pointerMode,
-    brushSize,
-    onDrawEnd: handleGenerateMaskImage,
-    zoom,
-  });
+  const { onPointerMove, onPointerDown, onPointerUp, onPointerLeave, handleCleanMask, undo, redo } = useVinesMaskEditor(
+    {
+      maskCanvasRef: maskCanvas,
+      cursorCanvasRef: cursorCanvas,
+      tempMaskCanvasRef: tempMaskCanvas,
+      brushType,
+      pointerMode,
+      brushSize,
+      onDrawEnd: handleGenerateMaskImage,
+      zoom,
+      onHistoryChange: (canUndo, canRedo) => {
+        setCanUndo?.(canUndo);
+        setCanRedo?.(canRedo);
+      },
+    },
+  );
 
   event$?.useSubscription((trigger) => {
     switch (trigger) {
       case 'clear-mask':
         handleCleanMask();
+        break;
+      case 'redo':
+        redo();
+        break;
+      case 'undo':
+        undo();
+        break;
     }
   });
 

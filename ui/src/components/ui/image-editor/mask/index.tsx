@@ -57,6 +57,8 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
     const [pointerMode, setPointerMode] = useState<IVinesMaskEditorProps['pointerMode']>('brush');
     const [brushSize, setBrushSize] = useState<IVinesMaskEditorProps['brushSize']>(12);
     const [brushType, setBrushType] = useState<IVinesMaskEditorProps['brushType']>('normal');
+    const [canUndo, setCanUndo] = useState(false);
+    const [canRedo, setCanRedo] = useState(false);
 
     const maskEditorEvent$ = useEventEmitter<IMaskEditorEvent>();
 
@@ -149,6 +151,8 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
                           pointerMode={pointerMode}
                           brushSize={brushSize}
                           brushType={brushType}
+                          setCanUndo={setCanUndo}
+                          setCanRedo={setCanRedo}
                           event$={maskEditorEvent$}
                         />
                       </div>
@@ -170,7 +174,8 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
                 setBrushSize={setBrushSize}
                 brushType={brushType}
                 setBrushType={setBrushType}
-                mini={mini}
+                canUndo={canUndo}
+                canRedo={canRedo}
                 event$={maskEditorEvent$}
               />
             </motion.div>

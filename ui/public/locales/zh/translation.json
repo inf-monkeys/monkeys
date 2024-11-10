@@ -330,7 +330,9 @@
           "rectangle": "框选",
           "brush": "画笔",
           "lasso": "套索",
-          "eraser": "橡皮擦"
+          "eraser": "橡皮擦",
+          "undo": "撤销",
+          "redo": "重做"
         },
         "failed-to-gen-mask": "生成遮罩失败！",
         "finish": "遮罩已更新"

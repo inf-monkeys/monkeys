@@ -2,6 +2,11 @@ import React, { useRef } from 'react';
 
 import { useMemoizedFn } from 'ahooks';
 
+interface DrawHistory {
+  imageData: ImageData;
+  timestamp: number;
+}
+
 export interface IVinesMaskEditorProps {
   maskCanvasRef: React.RefObject<HTMLCanvasElement>;
   cursorCanvasRef: React.RefObject<HTMLCanvasElement>;
@@ -15,6 +20,7 @@ export interface IVinesMaskEditorProps {
   zoom?: number;
 
   onDrawEnd?: () => void;
+  onHistoryChange?: (canUndo: boolean, canRedo: boolean) => void;
 }
 
 export const useVinesMaskEditor = ({
@@ -27,6 +33,7 @@ export const useVinesMaskEditor = ({
   brushType = 'normal',
   zoom = 1,
   onDrawEnd,
+  onHistoryChange,
 }: IVinesMaskEditorProps) => {
   const isDrawingRef = useRef(false);
   const lastPositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -148,6 +155,21 @@ export const useVinesMaskEditor = ({
     const ctx = tempMaskCanvasRef.current.getContext('2d')!;
 
     if ([0, 2, 5].includes(e.button)) {
+      if (historyRef.current.length === 0) {
+        const maskCtx = maskCanvasRef.current.getContext('2d')!;
+        const initialImageData = maskCtx.getImageData(
+          0,
+          0,
+          maskCanvasRef.current.width,
+          maskCanvasRef.current.height
+        );
+        historyRef.current.push({
+          imageData: initialImageData,
+          timestamp: Date.now(),
+        });
+        currentHistoryIndexRef.current = 0;
+      }
+
       isDrawingRef.current = true;
 
       e.preventDefault();
@@ -234,6 +256,8 @@ export const useVinesMaskEditor = ({
       }
 
       tempCtx.clearRect(0, 0, tempMaskCanvasRef.current.width, tempMaskCanvasRef.current.height);
+
+      saveToHistory();
       onDrawEnd?.();
     }
     isDrawingRef.current = false;
@@ -256,12 +280,75 @@ export const useVinesMaskEditor = ({
   const handleCleanMask = useMemoizedFn(() => {
     if (!maskCanvasRef.current || !tempMaskCanvasRef.current) return;
 
+    if (historyRef.current.length === 0) {
+      const ctx = maskCanvasRef.current.getContext('2d')!;
+      const initialImageData = ctx.getImageData(
+        0,
+        0,
+        maskCanvasRef.current.width,
+        maskCanvasRef.current.height
+      );
+      historyRef.current.push({
+        imageData: initialImageData,
+        timestamp: Date.now(),
+      });
+      currentHistoryIndexRef.current = 0;
+    }
+
     const tempCtx = tempMaskCanvasRef.current.getContext('2d')!;
     tempCtx.clearRect(0, 0, tempMaskCanvasRef.current.width, tempMaskCanvasRef.current.height);
 
     const ctx = maskCanvasRef.current.getContext('2d')!;
     ctx.clearRect(0, 0, maskCanvasRef.current.width, maskCanvasRef.current.height);
 
+    saveToHistory();
+    onDrawEnd?.();
+  });
+
+  const historyRef = useRef<DrawHistory[]>([]);
+  const currentHistoryIndexRef = useRef<number>(-1);
+
+  const saveToHistory = useMemoizedFn(() => {
+    if (!maskCanvasRef.current) return;
+
+    const ctx = maskCanvasRef.current.getContext('2d')!;
+    const imageData = ctx.getImageData(0, 0, maskCanvasRef.current.width, maskCanvasRef.current.height);
+
+    historyRef.current = historyRef.current.slice(0, currentHistoryIndexRef.current + 1);
+
+    historyRef.current.push({
+      imageData,
+      timestamp: Date.now(),
+    });
+
+    currentHistoryIndexRef.current++;
+
+    onHistoryChange?.(currentHistoryIndexRef.current > 0, false);
+  });
+
+  const undo = useMemoizedFn(() => {
+    if (!maskCanvasRef.current || currentHistoryIndexRef.current <= 0) return;
+
+    currentHistoryIndexRef.current--;
+    const previousState = historyRef.current[currentHistoryIndexRef.current];
+
+    const ctx = maskCanvasRef.current.getContext('2d')!;
+    ctx.putImageData(previousState.imageData, 0, 0);
+
+    onHistoryChange?.(currentHistoryIndexRef.current > 0, true);
+    onDrawEnd?.();
+  });
+
+  const redo = useMemoizedFn(() => {
+    if (!maskCanvasRef.current || currentHistoryIndexRef.current >= historyRef.current.length - 1) return;
+
+    currentHistoryIndexRef.current++;
+    const nextState = historyRef.current[currentHistoryIndexRef.current];
+
+    const ctx = maskCanvasRef.current.getContext('2d')!;
+    ctx.putImageData(nextState.imageData, 0, 0);
+
+    onHistoryChange?.(true, currentHistoryIndexRef.current < historyRef.current.length - 1);
     onDrawEnd?.();
   });
 
@@ -271,5 +358,7 @@ export const useVinesMaskEditor = ({
     onPointerUp,
     onPointerLeave,
     handleCleanMask,
+    undo,
+    redo,
   };
 };
