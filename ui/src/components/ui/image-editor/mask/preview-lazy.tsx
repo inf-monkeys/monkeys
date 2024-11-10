@@ -52,6 +52,7 @@ const VinesImageMaskPreview: React.FC<IVinesImageMaskPreviewProps> = ({ src, cla
         className={cn('pointer-events-none top-0 size-full', visible && 'pointer-events-auto z-20', className)}
       >
         <VinesImageMaskEditor
+          visible={visible}
           className="h-full min-h-[15.8rem]"
           src={src}
           onFinished={handleMaskEditFinished}

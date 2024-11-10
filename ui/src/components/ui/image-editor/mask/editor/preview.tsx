@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { useLongPress } from 'ahooks';
 import { motion } from 'framer-motion';
@@ -16,19 +16,27 @@ import { cn } from '@/utils';
 interface IMaskPreviewProps {
   src: string;
 
+  visible?: boolean;
+
   contrast: boolean;
   setContrast: React.Dispatch<React.SetStateAction<boolean>>;
 
   mini?: boolean;
 }
 
-export const MaskPreview: React.FC<IMaskPreviewProps> = ({ src, contrast, setContrast, mini }) => {
+export const MaskPreview: React.FC<IMaskPreviewProps> = ({ src, visible, contrast, setContrast, mini }) => {
   const { t } = useTranslation();
 
   const [miniPreview, setMiniPreview] = useState(true);
 
   const { icons, closeIcon } = useVinesImageManage();
   const { zoomIn, zoomOut, resetTransform } = useControls();
+
+  useEffect(() => {
+    if (visible) {
+      setTimeout(() => resetTransform(), 200);
+    }
+  }, [visible]);
 
   const contrastBtnRef = useRef<HTMLButtonElement>(null);
 

@@ -5,24 +5,28 @@ import { KeyedMutator } from 'swr/_internal';
 import { useMemoizedFn } from 'ahooks';
 import { isString, omit } from 'lodash';
 
-import { VinesWorkflowExecutionOutput, VinesWorkflowExecutionOutputs } from '@/package/vines-flow/core/typings.ts';
+import { IPaginationListData } from '@/apis/typings.ts';
+import {
+  VinesWorkflowExecutionOutput,
+  VinesWorkflowExecutionOutputListItem,
+} from '@/package/vines-flow/core/typings.ts';
 import VinesEvent from '@/utils/events.ts';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 interface IVinesIframeMessage {
-  output?: VinesWorkflowExecutionOutputs[];
-  mutate: KeyedMutator<VinesWorkflowExecutionOutputs[] | undefined>;
+  outputs?: VinesWorkflowExecutionOutputListItem[];
+  mutate: KeyedMutator<IPaginationListData<VinesWorkflowExecutionOutputListItem> | undefined>;
 
   enable?: boolean;
 }
 
-export const useVinesIframeMessage = ({ output, mutate, enable = false }: IVinesIframeMessage) => {
+export const useVinesIframeMessage = ({ outputs, mutate, enable = false }: IVinesIframeMessage) => {
   useEffect(() => {
-    if (enable && output) {
+    if (enable && outputs) {
       const msg: (VinesWorkflowExecutionOutput & {
-        instance: Omit<VinesWorkflowExecutionOutputs, 'output'>;
+        instance: Omit<VinesWorkflowExecutionOutputListItem, 'output'>;
       })[] = [];
-      for (const it of output) {
+      for (const it of outputs) {
         if (msg.length > 4) break;
         if (it.status !== 'COMPLETED') continue;
 
@@ -45,7 +49,7 @@ export const useVinesIframeMessage = ({ output, mutate, enable = false }: IVines
         '*',
       );
     }
-  }, [enable, output]);
+  }, [enable, outputs]);
 
   const messageListened = useRef(false);
   const messageEvent = useMemoizedFn((event: MessageEvent<any>) => {

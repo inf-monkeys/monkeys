@@ -5,14 +5,16 @@ import FileSaver from 'file-saver';
 import qs from 'qs';
 
 import { vinesFetcher } from '@/apis/fetcher.ts';
+import { IPaginationListData } from '@/apis/typings.ts';
 import {
   IUpdateExecutionTaskParams,
   IVinesSearchWorkflowExecutionStatExportParams,
   VinesWorkflowExecutionLists,
   VinesWorkflowExecutionStatData,
 } from '@/apis/workflow/execution/typings.ts';
+import { paginationWrapper } from '@/apis/wrapper.ts';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
-import { VinesWorkflowExecution, VinesWorkflowExecutionOutputs } from '@/package/vines-flow/core/typings.ts';
+import { VinesWorkflowExecution, VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings.ts';
 import { IVinesSearchWorkflowExecutionsParams } from '@/schema/workspace/workflow-execution.ts';
 import { IVinesSearchWorkflowExecutionStatParams } from '@/schema/workspace/workflow-execution-stat.ts';
 
@@ -82,9 +84,9 @@ export const useSearchWorkflowExecutions = (
   );
 
 export const useWorkflowExecutionOutputs = (workflowId?: string | null, page = 1, limit = 100, refreshInterval = 500) =>
-  useSWR<VinesWorkflowExecutionOutputs[] | undefined>(
+  useSWR<IPaginationListData<VinesWorkflowExecutionOutputListItem> | undefined>(
     workflowId ? `/api/workflow/executions/${workflowId}/outputs?${qs.stringify({ page, limit })}` : null,
-    vinesFetcher({ method: 'GET' }),
+    vinesFetcher({ method: 'GET', wrapper: paginationWrapper }),
     { refreshInterval },
   );
 
@@ -192,7 +194,7 @@ export const useWorkflowExecutionThumbnails = (workflowId?: string | null) =>
   );
 
 export type TWorkflowInstanceByImageUrl = {
-  instance: (Omit<VinesWorkflowExecutionOutputs, 'rawOutput' | 'taskId'> & { instanceId: string }) | null;
+  instance: (Omit<VinesWorkflowExecutionOutputListItem, 'rawOutput' | 'taskId'> & { instanceId: string }) | null;
   total: number;
 };
 

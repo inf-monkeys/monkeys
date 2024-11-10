@@ -25,10 +25,11 @@ export interface MaskEditorProps extends Omit<IMaskEditorProps, 'src' | 'setMask
   children?: React.ReactNode;
 
   mini?: boolean;
+  visible?: boolean;
 }
 
 export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
-  ({ src, onFinished, className, children, mini }, ref) => {
+  ({ src, onFinished, className, children, visible, mini }, ref) => {
     const { t } = useTranslation();
 
     const [centerScale, setCenterScale] = useState(1);
@@ -162,6 +163,7 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
 
                     <MaskPreview
                       src={previewImage ?? optimizeImage}
+                      visible={visible}
                       contrast={contrast}
                       setContrast={setContrast}
                       mini={mini}

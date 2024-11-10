@@ -72,7 +72,7 @@ export type VinesWorkflowExecutionInputs = {
   description: string;
 };
 
-export type VinesWorkflowExecutionOutputs = {
+export type VinesWorkflowExecutionOutputListItem = {
   status: VinesWorkflowExecutionType;
   startTime: number;
   createTime: number;
