@@ -34,6 +34,7 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
     const [centerScale, setCenterScale] = useState(1);
 
     const [editable, setEditable] = useState(true);
+    const [contrast, setContrast] = useState(false);
     const [maskContext, setMaskContext] = useState<CanvasRenderingContext2D | null>(null);
 
     const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -138,6 +139,7 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
                         <MaskEditor
                           src={optimizeImage}
                           disabled={!editable}
+                          contrast={contrast}
                           setCenterScale={setCenterScale}
                           onMouseDown={(e) => {
                             if (e.button === 1) {
@@ -160,8 +162,8 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
 
                     <MaskPreview
                       src={previewImage ?? optimizeImage}
-                      editable={editable}
-                      setEditable={setEditable}
+                      contrast={contrast}
+                      setContrast={setContrast}
                       mini={mini}
                     />
                   </>

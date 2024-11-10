@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
+import { useLongPress } from 'ahooks';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, Hand, PencilRuler, ScanSearch, ZoomInIcon, ZoomOutIcon } from 'lucide-react';
+import { Contrast, Eye, EyeOff, ScanSearch, ZoomInIcon, ZoomOutIcon } from 'lucide-react';
 import Image from 'rc-image';
 import { useTranslation } from 'react-i18next';
 import { useControls } from 'react-zoom-pan-pinch';
@@ -15,19 +16,26 @@ import { cn } from '@/utils';
 interface IMaskPreviewProps {
   src: string;
 
-  editable: boolean;
-  setEditable: React.Dispatch<React.SetStateAction<boolean>>;
+  contrast: boolean;
+  setContrast: React.Dispatch<React.SetStateAction<boolean>>;
 
   mini?: boolean;
 }
 
-export const MaskPreview: React.FC<IMaskPreviewProps> = ({ src, editable, setEditable, mini }) => {
+export const MaskPreview: React.FC<IMaskPreviewProps> = ({ src, contrast, setContrast, mini }) => {
   const { t } = useTranslation();
 
   const [miniPreview, setMiniPreview] = useState(true);
 
   const { icons, closeIcon } = useVinesImageManage();
   const { zoomIn, zoomOut, resetTransform } = useControls();
+
+  const contrastBtnRef = useRef<HTMLButtonElement>(null);
+
+  useLongPress(() => setContrast(true), contrastBtnRef, {
+    onLongPressEnd: () => setContrast(false),
+    delay: 0,
+  });
 
   return (
     <div
@@ -58,15 +66,11 @@ export const MaskPreview: React.FC<IMaskPreviewProps> = ({ src, editable, setEdi
               className="border-transparent !p-1 shadow-none"
               variant="outline"
               size="small"
-              icon={editable ? <PencilRuler /> : <Hand />}
-              onClick={() => setEditable(!editable)}
+              icon={<Contrast className={cn(contrast && '-scale-x-100')} />}
+              ref={contrastBtnRef}
             />
           </TooltipTrigger>
-          <TooltipContent>
-            {editable
-              ? t('components.ui.vines-image-mask-editor.toolbar.editable')
-              : t('components.ui.vines-image-mask-editor.toolbar.move')}
-          </TooltipContent>
+          <TooltipContent>{t('components.ui.vines-image-mask-editor.toolbar.contrast')}</TooltipContent>
         </Tooltip>
         <Separator className="h-4" orientation="vertical" />
         <Tooltip>
