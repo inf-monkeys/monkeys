@@ -20,6 +20,7 @@ import { UserGuard } from '@/components/router/guard/user.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { IconGuard } from '@/components/ui/vines-icon/lucide/guard.tsx';
+import { VinesImageOptimizeManage } from '@/components/ui/vines-image';
 import { SIDEBAR_MAP } from '@/consts/sidebar.tsx';
 import useUrlState from '@/hooks/use-url-state.ts';
 import VinesEvent from '@/utils/events.ts';
@@ -122,6 +123,7 @@ const RootComponent: React.FC = () => {
       <IconGuard />
       <RouteEvent />
       <AuthWithRouteSearch />
+      <VinesImageOptimizeManage />
     </>
   );
 };

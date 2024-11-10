@@ -16,3 +16,11 @@ export const VinesImage: React.FC<IVinesImageProps> = (props) => (
     <VinesImageCore {...props} />
   </Suspense>
 );
+
+// IMAGE OPTIMIZATION MANAGE
+const VinesImageOptimizeManageCore = lazy(() => import('./optimize-manage/index.tsx'));
+export const VinesImageOptimizeManage = () => (
+  <Suspense fallback={null}>
+    <VinesImageOptimizeManageCore />
+  </Suspense>
+);

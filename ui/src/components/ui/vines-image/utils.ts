@@ -1,9 +1,13 @@
-export const checkImageUrlAvailable = (url: string) =>
-  url.startsWith('blob:')
-    ? Promise.resolve(true)
-    : fetch(url, { method: 'HEAD' })
-        .then((response) => response.ok)
-        .catch(() => false);
+export const checkImageUrlAvailable = async (url: string) => {
+  if (url.startsWith('blob:')) {
+    return true;
+  }
+  try {
+    return (await fetch(url, { method: 'HEAD' })).ok;
+  } catch {
+    return false;
+  }
+};
 
 // ref: https://github.com/transloadit/uppy/blob/ca0a7864c9e78e23c69450df8dc2bab338a1a288/packages/%40uppy/thumbnail-generator/src/index.ts
 import dataURItoBlob from '@/utils/data-url-to-blob.ts';

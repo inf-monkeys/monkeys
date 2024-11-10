@@ -1,12 +1,14 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
+
+import useSWR from 'swr';
 
 import { motion } from 'framer-motion';
 import { Eye } from 'lucide-react';
 import Image from 'rc-image';
 
 import { VinesLoading } from '@/components/ui/loading';
-import { useVinesOptimization } from '@/components/ui/vines-image/use-vines-optimization.ts';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import VinesEvent from '@/utils/events.ts';
 
 interface ILazyImageProps {
   src: string;
@@ -22,14 +24,18 @@ export const LazyImage: React.FC<ILazyImageProps> = memo(({ src, alt, width, hei
   const [themeMode] = useLocalStorage<string>('vines-ui-dark-mode', 'auto', false);
   const isDark = themeMode === 'dark';
 
-  const { originalUrl } = useVinesOptimization({
-    src,
-    width,
-    height,
-    onCompleted: (url) => {
-      setImage(url);
-    },
+  const { data: cacheImageUrls } = useSWR<Record<string, string>>('vines-image-urls', null, {
+    fallbackData: {},
   });
+
+  useEffect(() => {
+    VinesEvent.emit('vines-optimize-image', {
+      src,
+      width,
+      height,
+      callback: setImage,
+    });
+  }, []);
 
   return image ? (
     <Image
@@ -37,7 +43,7 @@ export const LazyImage: React.FC<ILazyImageProps> = memo(({ src, alt, width, hei
       alt={alt}
       fallback={isDark ? '/fallback_image_dark.webp' : '/fallback_image.webp'}
       preview={{
-        src: originalUrl,
+        src: cacheImageUrls?.[src] || src,
         mask: <Eye className="stroke-white" />,
       }}
     />
