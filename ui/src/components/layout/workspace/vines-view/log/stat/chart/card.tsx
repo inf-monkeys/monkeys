@@ -60,12 +60,16 @@ export const VinesLogViewStatChartCard: React.FC<IVinesLogViewStatChartCardProps
                 );
               })}
             </defs>
-            {Object.keys(chartConfig).map((key) => {
-              const { color } = chartConfig[key];
-              return (
-                <Area type="monotone" dataKey={key} stroke={color} fillOpacity={1} fill={`url(#${key})`} key={key} />
-              );
-            })}
+            {Object.keys(chartConfig).map((key) => (
+              <Area
+                type="monotone"
+                dataKey={key}
+                stroke={chartConfig[key].color}
+                fillOpacity={1}
+                fill={`url(#${key})`}
+                key={key}
+              />
+            ))}
             <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
             <XAxis dataKey="date" />
             <ChartTooltip content={<ChartTooltipContent />} />

@@ -97,11 +97,7 @@ export const ConversationApps: React.FC = () => {
           cover: (item) => RenderIcon({ iconUrl: item.iconUrl, size: 'gallery' }),
         }}
         onItemClick={(item) => open(`/${item.teamId}/agent/${item.id}`, '_blank')}
-        subtitle={
-          <>
-            <CreateAppDialog defaultSelect="agent" />
-          </>
-        }
+        subtitle={<CreateAppDialog defaultSelect="agent" />}
         operateArea={(item, trigger, tooltipTriggerContent) => (
           <DropdownMenu>
             {tooltipTriggerContent ? (

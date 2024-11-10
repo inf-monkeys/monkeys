@@ -30,9 +30,7 @@ interface ISpaceSidebarTabProps extends React.ComponentPropsWithoutRef<'div'> {
 export const SpaceSidebarTabContent: React.FC<ISpaceSidebarTabProps> = ({ children, icon, displayName, ...attr }) => {
   return (
     <div className="flex h-full select-none items-center" {...attr}>
-      <p className="mr-2">
-        <VinesLucideIcon className="size-[15px]" size={15} src={EMOJI2LUCIDE_MAPPER[icon] ?? icon} />
-      </p>
+      <VinesLucideIcon className="mr-2 size-[15px]" size={15} src={EMOJI2LUCIDE_MAPPER[icon] ?? icon} />
       <h1 className="whitespace-nowrap text-sm">{displayName}</h1>
       {children}
     </div>

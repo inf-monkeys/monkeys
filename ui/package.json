@@ -102,7 +102,7 @@
     "react-resizable-panels": "^2.0.16",
     "react-virtuoso": "^4.10.1",
     "react-zoom-pan-pinch": "^3.4.4",
-    "recharts": "^2.12.7",
+    "recharts": "^2.13.0-alpha.5",
     "rehype-katex": "^7.0.0",
     "rehype-raw": "^7.0.0",
     "remark-breaks": "^4.0.0",
