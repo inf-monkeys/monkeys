@@ -19,7 +19,7 @@ export interface IconsSlice {
   ) => void;
 }
 
-export const createIconsSlice: ImmerStateCreator<IconsSlice> = (set, get) => ({
+export const createIconsSlice: ImmerStateCreator<IconsSlice> = (set) => ({
   iconSVG: {},
   iconMetadata: {},
 
