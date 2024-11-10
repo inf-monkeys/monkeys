@@ -144,7 +144,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
         const isEmptyFilesOrDragAccept = isFilesEmpty || isDropzoneActive;
         return (
           <div
-            className={cn('relative h-[15.8rem] rounded', className)}
+            className={cn('relative h-[15.5rem] rounded', className)}
             {...getRootProps({
               onPaste: onPaste as any,
               onDrag: onDrag as any,
@@ -159,7 +159,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
               {isEmptyFilesOrDragAccept && (
                 <motion.div
                   key="vines-uploader-hint"
-                  className="absolute left-0 top-0 z-20 size-full p-2 pb-[3.25rem]"
+                  className="absolute left-0 top-0 z-20 size-full p-2 pb-[3rem]"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -207,7 +207,13 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                 filesLength <= 3 && 'pt-0',
               )}
             >
-              <Button variant="outline" icon={<Plus />} onClick={open} disabled={filesLength >= (max ?? Infinity)}>
+              <Button
+                variant="outline"
+                size="small"
+                icon={<Plus />}
+                onClick={open}
+                disabled={filesLength >= (max ?? Infinity)}
+              >
                 {t('components.ui.updater.add-local-file')}
               </Button>
               {children}
