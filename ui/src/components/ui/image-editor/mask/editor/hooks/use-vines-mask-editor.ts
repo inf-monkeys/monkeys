@@ -126,11 +126,13 @@ export const useVinesMaskEditor = ({
             }
             ctx.lineTo(x, y);
 
-            ctx.closePath();
-            ctx.fill();
             if (isErasing) {
-              ctx.stroke();
+              ctx.strokeStyle = 'rgb(255, 0, 0)';
+            } else {
+              ctx.strokeStyle = maskColor;
             }
+            ctx.lineWidth = 2;
+            ctx.stroke();
           }
           lassoPointsRef.current.push({ x, y });
         }
@@ -183,6 +185,27 @@ export const useVinesMaskEditor = ({
     if (maskCanvasRef.current && tempMaskCanvasRef.current) {
       const maskCtx = maskCanvasRef.current.getContext('2d')!;
       const tempCtx = tempMaskCanvasRef.current.getContext('2d')!;
+
+      if (brushType === 'lasso' && lassoPointsRef.current.length > 2) {
+        tempCtx.clearRect(0, 0, tempMaskCanvasRef.current.width, tempMaskCanvasRef.current.height);
+        tempCtx.beginPath();
+        tempCtx.moveTo(lassoPointsRef.current[0].x, lassoPointsRef.current[0].y);
+
+        for (let i = 1; i < lassoPointsRef.current.length; i++) {
+          tempCtx.lineTo(lassoPointsRef.current[i].x, lassoPointsRef.current[i].y);
+        }
+
+        tempCtx.closePath();
+        if (pointerMode === 'brush' && !isErasingRef.current) {
+          tempCtx.fillStyle = maskColor;
+          tempCtx.fill();
+        } else {
+          tempCtx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+          tempCtx.fill();
+          tempCtx.strokeStyle = 'rgb(255, 0, 0)';
+          tempCtx.stroke();
+        }
+      }
 
       if (pointerMode === 'brush' && e.button !== 2 && !isErasingRef.current) {
         maskCtx.drawImage(tempMaskCanvasRef.current, 0, 0);
