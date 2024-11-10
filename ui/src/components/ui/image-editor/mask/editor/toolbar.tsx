@@ -3,43 +3,15 @@ import React, { useRef, useState } from 'react';
 import { useMemoizedFn, useThrottleEffect } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-  Brush,
-  ChevronLeft,
-  ChevronRight,
-  CopyX,
-  Eraser,
-  Eye,
-  EyeOff,
-  Hand,
-  ImageUp,
-  PencilRuler,
-  Save,
-  SquareIcon,
-  ZoomInIcon,
-  ZoomOutIcon,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, ImageUp, Save } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useControls } from 'react-zoom-pan-pinch';
 
 import { Button } from '@/components/ui/button';
-import { IVinesMaskEditorProps } from '@/components/ui/image-editor/mask/editor/hooks/use-vines-mask-editor.ts';
 import { IMaskEditorEvent } from '@/components/ui/image-editor/mask/editor/index.tsx';
-import { Separator } from '@/components/ui/separator.tsx';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { cn } from '@/utils';
 
 interface IMaskEditorToolbarProps {
-  miniPreview: boolean;
-  setMiniPreview: React.Dispatch<React.SetStateAction<boolean>>;
-
-  editable: boolean;
-  setEditable: React.Dispatch<React.SetStateAction<boolean>>;
-
-  pointerMode: IVinesMaskEditorProps['pointerMode'];
-  setPointerMode: React.Dispatch<React.SetStateAction<IVinesMaskEditorProps['pointerMode']>>;
-
   onFileInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 
   event$: EventEmitter<IMaskEditorEvent>;
@@ -51,20 +23,12 @@ interface IMaskEditorToolbarProps {
 }
 
 export const MaskEditorToolbar: React.FC<IMaskEditorToolbarProps> = ({
-  miniPreview,
-  setMiniPreview,
-  editable,
-  setEditable,
-  pointerMode,
-  setPointerMode,
   onFileInputChange,
   event$,
   disabledSave,
   children,
-  mini,
 }) => {
   const { t } = useTranslation();
-  const { zoomIn, zoomOut, resetTransform } = useControls();
 
   const { ref, width } = useElementSize();
 
@@ -102,153 +66,26 @@ export const MaskEditorToolbar: React.FC<IMaskEditorToolbarProps> = ({
         >
           <div className="flex items-center gap-2">
             {children}
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  className="border-transparent !p-1 shadow-none"
-                  variant="outline"
-                  size="small"
-                  icon={<ImageUp />}
-                  onClick={handleSelectLocalImage}
-                />
-              </TooltipTrigger>
-              <TooltipContent>{t('components.ui.vines-image-mask-editor.toolbar.select-image')}</TooltipContent>
-            </Tooltip>
+            <Button
+              className="border-transparent !p-1 shadow-none"
+              variant="outline"
+              size="small"
+              icon={<ImageUp />}
+              onClick={handleSelectLocalImage}
+            >
+              {t('components.ui.vines-image-mask-editor.toolbar.select-image')}
+            </Button>
           </div>
-          <div className={cn('flex items-center gap-2', !mini && '-ml-32')}>
-            <div className="space-x-1">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    className="border-transparent !p-1 shadow-none"
-                    variant="outline"
-                    size="small"
-                    icon={<ZoomInIcon />}
-                    onClick={() => zoomIn()}
-                  />
-                </TooltipTrigger>
-                <TooltipContent>{t('components.ui.vines-image-mask-editor.toolbar.zoom-in')}</TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    className="border-transparent !p-1 shadow-none"
-                    variant="outline"
-                    size="small"
-                    icon={<SquareIcon />}
-                    onClick={() => resetTransform()}
-                  />
-                </TooltipTrigger>
-                <TooltipContent>{t('components.ui.vines-image-mask-editor.toolbar.fit-view')}</TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    className="border-transparent !p-1 shadow-none"
-                    variant="outline"
-                    size="small"
-                    icon={<ZoomOutIcon />}
-                    onClick={() => zoomOut()}
-                  />
-                </TooltipTrigger>
-                <TooltipContent>{t('components.ui.vines-image-mask-editor.toolbar.zoom-out')}</TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    className="border-transparent !p-1 shadow-none"
-                    variant="outline"
-                    size="small"
-                    icon={editable ? <PencilRuler /> : <Hand />}
-                    onClick={() => setEditable(!editable)}
-                  />
-                </TooltipTrigger>
-                <TooltipContent>
-                  {editable
-                    ? t('components.ui.vines-image-mask-editor.toolbar.editable')
-                    : t('components.ui.vines-image-mask-editor.toolbar.move')}
-                </TooltipContent>
-              </Tooltip>
-            </div>
-            <Separator className="h-4" orientation="vertical" />
-            <div className="space-x-1">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    className={cn('!p-1', pointerMode !== 'brush' && 'border-transparent shadow-none')}
-                    variant="outline"
-                    size="small"
-                    icon={<Brush />}
-                    onClick={() => setPointerMode('brush')}
-                  />
-                </TooltipTrigger>
-                <TooltipContent>{t('components.ui.vines-image-mask-editor.toolbar.brush')}</TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    className={cn('!p-1', pointerMode !== 'eraser' && 'border-transparent shadow-none')}
-                    variant="outline"
-                    size="small"
-                    icon={<Eraser />}
-                    onClick={() => setPointerMode('eraser')}
-                  />
-                </TooltipTrigger>
-                <TooltipContent>{t('components.ui.vines-image-mask-editor.toolbar.eraser')}</TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    className="border-transparent !p-1 shadow-none"
-                    variant="outline"
-                    size="small"
-                    icon={<CopyX />}
-                    onClick={() => event$.emit('clear-mask')}
-                  />
-                </TooltipTrigger>
-                <TooltipContent>{t('components.ui.vines-image-mask-editor.toolbar.clear')}</TooltipContent>
-              </Tooltip>
-            </div>
-            <Separator className="h-4" orientation="vertical" />
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  className="border-transparent !p-1 shadow-none"
-                  variant="outline"
-                  size="small"
-                  icon={miniPreview ? <Eye /> : <EyeOff />}
-                  onClick={() => setMiniPreview(!miniPreview)}
-                />
-              </TooltipTrigger>
-              <TooltipContent>
-                {t('components.ui.vines-image-mask-editor.toolbar.preview.label', {
-                  status: miniPreview
-                    ? t('components.ui.vines-image-mask-editor.toolbar.preview.open')
-                    : t('components.ui.vines-image-mask-editor.toolbar.preview.close'),
-                })}
-              </TooltipContent>
-            </Tooltip>
-          </div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                className="border-transparent !p-1 shadow-none"
-                variant="outline"
-                size="small"
-                icon={<Save />}
-                disabled={disabledSave}
-                onClick={() => event$.emit('save')}
-              />
-            </TooltipTrigger>
-            <TooltipContent>{t('components.ui.vines-image-mask-editor.toolbar.save')}</TooltipContent>
-          </Tooltip>
+          <Button
+            className="border-transparent !p-1 shadow-none"
+            variant="outline"
+            size="small"
+            icon={<Save />}
+            disabled={disabledSave}
+            onClick={() => event$.emit('save')}
+          >
+            {t('components.ui.vines-image-mask-editor.toolbar.save')}
+          </Button>
         </div>
       </div>
       <AnimatePresence>

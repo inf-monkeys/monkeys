@@ -16,7 +16,7 @@ import { applyMaskCanvasToOriginalImageFile, mergeBlobToFile } from '@/component
 import { VinesLoading } from '@/components/ui/loading';
 import { cn } from '@/utils';
 
-export interface MaskEditorProps extends Omit<IMaskEditorProps, 'src'> {
+export interface MaskEditorProps extends Omit<IMaskEditorProps, 'src' | 'setMaskContext' | 'maskContext'> {
   src: string | File;
 
   className?: string;
@@ -34,7 +34,6 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
     const [centerScale, setCenterScale] = useState(1);
 
     const [editable, setEditable] = useState(true);
-    const [miniPreview, setMiniPreview] = useState(true);
     const [maskContext, setMaskContext] = useState<CanvasRenderingContext2D | null>(null);
 
     const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -118,12 +117,6 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
                   <>
                     <MaskEditorToolbar
                       mini={mini}
-                      miniPreview={miniPreview}
-                      setMiniPreview={setMiniPreview}
-                      editable={editable}
-                      setEditable={setEditable}
-                      pointerMode={pointerMode}
-                      setPointerMode={setPointerMode}
                       onFileInputChange={onFileInputChange}
                       event$={maskEditorEvent$}
                       disabledSave={!isEdited.current}
@@ -160,17 +153,25 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
                         />
                       </div>
                     </TransformComponent>
+
+                    <MaskPreview
+                      src={previewImage ?? optimizeImage}
+                      editable={editable}
+                      setEditable={setEditable}
+                      mini={mini}
+                    />
                   </>
                 )}
               </TransformWrapper>
-              <MaskPreview src={previewImage ?? optimizeImage} visible={miniPreview} mini={mini} />
               <BrushBar
                 pointerMode={pointerMode}
+                setPointerMode={setPointerMode}
                 brushSize={brushSize}
                 setBrushSize={setBrushSize}
                 brushType={brushType}
                 setBrushType={setBrushType}
                 mini={mini}
+                event$={maskEditorEvent$}
               />
             </motion.div>
           ) : (

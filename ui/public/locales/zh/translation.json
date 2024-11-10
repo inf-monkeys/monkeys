@@ -307,7 +307,10 @@
         },
         "toolbar": {
           "select-image": "从本地选择图片",
-          "zoom-in-editor": "放大编辑器",
+          "zoom-in-editor": {
+            "label": "放大",
+            "tip": "放大编辑器"
+          },
           "fullscreen": "全屏",
           "exit-fullscreen": "退出全屏",
           "zoom-in": "放大",
@@ -315,9 +318,6 @@
           "zoom-out": "缩小",
           "editable": "编辑模式",
           "move": "查看模式",
-          "brush": "画笔",
-          "rectangle": "框选",
-          "eraser": "橡皮擦",
           "clear": "清空画布",
           "preview": {
             "label": "预览窗口：{{status}}",
@@ -327,8 +327,10 @@
           "save": "保存遮罩"
         },
         "brush-bar": {
-          "rectangle": "切换框选",
-          "brush": "切换画笔"
+          "rectangle": "框选",
+          "brush": "画笔",
+          "lasso": "套索",
+          "eraser": "橡皮擦"
         },
         "failed-to-gen-mask": "生成遮罩失败！",
         "finish": "遮罩已更新"
