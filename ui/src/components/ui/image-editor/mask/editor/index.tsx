@@ -27,6 +27,7 @@ export interface IMaskEditorProps extends Pick<React.ComponentPropsWithoutRef<'d
   setCanRedo?: React.Dispatch<React.SetStateAction<boolean>>;
 
   disabled?: boolean;
+  contrast?: boolean;
   setCenterScale?: React.Dispatch<React.SetStateAction<number>>;
 
   setPreviewImage?: React.Dispatch<React.SetStateAction<string | null>>;
@@ -41,6 +42,7 @@ export interface IMaskEditorProps extends Pick<React.ComponentPropsWithoutRef<'d
 export const MaskEditor: React.FC<IMaskEditorProps> = ({
   src,
   disabled,
+  contrast,
   setCenterScale,
   initialSize,
   setPreviewImage,
@@ -180,7 +182,7 @@ export const MaskEditor: React.FC<IMaskEditorProps> = ({
         height={size.h}
       />
       <canvas
-        className="absolute left-0 top-0 z-20"
+        className={cn('absolute left-0 top-0 z-20 transition-opacity', contrast && '!opacity-0')}
         ref={maskCanvas}
         style={{
           width: size.w,

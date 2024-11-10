@@ -316,8 +316,7 @@
           "zoom-in": "放大",
           "fit-view": "适应视图",
           "zoom-out": "缩小",
-          "editable": "编辑模式",
-          "move": "查看模式",
+          "contrast": "对比",
           "clear": "清空画布",
           "preview": {
             "label": "预览窗口：{{status}}",
