@@ -56,7 +56,6 @@ export const FieldFile: React.FC<IFieldFileProps> = ({
                   <DialogTitle>{t('components.ui.vines-image-mask-editor.preview.label')}</DialogTitle>
                 </DialogHeader>
                 <VinesImageMaskPreview
-                  className="h-96"
                   src={value}
                   onFinished={(val) => form.setValue(name, isMultiple ? [val] : val)}
                 />

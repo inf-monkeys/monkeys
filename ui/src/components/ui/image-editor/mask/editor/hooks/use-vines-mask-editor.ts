@@ -10,7 +10,7 @@ export interface IVinesMaskEditorProps {
   brushSize?: number;
   pointerMode?: 'brush' | 'eraser';
   maskColor?: string;
-  brushType?: 'normal' | 'rectangle';
+  brushType?: 'normal' | 'rectangle' | 'lasso';
 
   zoom?: number;
 
@@ -31,6 +31,7 @@ export const useVinesMaskEditor = ({
   const isDrawingRef = useRef(false);
   const lastPositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const startPositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const lassoPointsRef = useRef<{ x: number; y: number }[]>([]);
 
   const isErasingRef = useRef(false);
 
@@ -112,6 +113,26 @@ export const useVinesMaskEditor = ({
           if (isErasing) {
             ctx.strokeRect(startX, startY, width, height);
           }
+        } else if (brushType === 'lasso') {
+          maskCanvasRef.current?.style.setProperty('opacity', '0.6');
+          ctx.clearRect(0, 0, tempMaskCanvasRef.current!.width, tempMaskCanvasRef.current!.height);
+
+          if (lassoPointsRef.current.length > 0) {
+            ctx.beginPath();
+            ctx.moveTo(lassoPointsRef.current[0].x, lassoPointsRef.current[0].y);
+
+            for (let i = 1; i < lassoPointsRef.current.length; i++) {
+              ctx.lineTo(lassoPointsRef.current[i].x, lassoPointsRef.current[i].y);
+            }
+            ctx.lineTo(x, y);
+
+            ctx.closePath();
+            ctx.fill();
+            if (isErasing) {
+              ctx.stroke();
+            }
+          }
+          lassoPointsRef.current.push({ x, y });
         }
       };
 
@@ -148,6 +169,8 @@ export const useVinesMaskEditor = ({
         ctx.fill();
       } else if (brushType === 'rectangle') {
         startPositionRef.current = { x, y };
+      } else if (brushType === 'lasso') {
+        lassoPointsRef.current = [{ x, y }];
       }
 
       lastPositionRef.current = { x, y };
@@ -173,6 +196,15 @@ export const useVinesMaskEditor = ({
             calculateOffset(e.nativeEvent.offsetX) - startPositionRef.current.x,
             calculateOffset(e.nativeEvent.offsetY) - startPositionRef.current.y,
           );
+        } else if (brushType === 'lasso') {
+          maskCtx.fillStyle = 'rgba(0, 0, 0, 1)';
+          maskCtx.beginPath();
+          maskCtx.moveTo(lassoPointsRef.current[0].x, lassoPointsRef.current[0].y);
+          for (let i = 1; i < lassoPointsRef.current.length; i++) {
+            maskCtx.lineTo(lassoPointsRef.current[i].x, lassoPointsRef.current[i].y);
+          }
+          maskCtx.closePath();
+          maskCtx.fill();
         }
         maskCtx.drawImage(tempMaskCanvasRef.current, 0, 0);
         maskCtx.globalCompositeOperation = 'source-over';
@@ -183,6 +215,7 @@ export const useVinesMaskEditor = ({
     }
     isDrawingRef.current = false;
     isErasingRef.current = false;
+    lassoPointsRef.current = [];
   });
 
   const onPointerLeave = useMemoizedFn(() => {
@@ -194,6 +227,7 @@ export const useVinesMaskEditor = ({
     }
     isDrawingRef.current = false;
     isErasingRef.current = false;
+    lassoPointsRef.current = [];
   });
 
   const handleCleanMask = useMemoizedFn(() => {

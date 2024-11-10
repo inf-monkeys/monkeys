@@ -11,7 +11,6 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/
 import { VinesImageMaskEditor } from '@/components/ui/image-editor/mask/index.tsx';
 import { IVinesImageMaskPreviewProps } from '@/components/ui/image-editor/mask/preview.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesUploader } from '@/components/ui/vines-uploader';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { cn } from '@/utils';
@@ -19,7 +18,7 @@ import { cn } from '@/utils';
 const VinesImageMaskPreview: React.FC<IVinesImageMaskPreviewProps> = ({ src, className, onFinished }) => {
   const { t } = useTranslation();
 
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
 
   const [uppy, setUppy] = React.useState<Uppy<Meta, Record<string, never>> | null>(null);
   const uppy$ = useEventEmitter<Uppy<Meta, Record<string, never>>>();
@@ -48,11 +47,16 @@ const VinesImageMaskPreview: React.FC<IVinesImageMaskPreviewProps> = ({ src, cla
       <motion.div
         key="field-image-mask-editor"
         initial={{ opacity: 0 }}
-        animate={{ opacity: visible ? 1 : 0 }}
+        animate={{ opacity: visible ? 1 : 0, height: visible ? 500 : 253 }}
         exit={{ opacity: 0 }}
-        className={cn('pointer-events-none absolute size-full', visible && 'pointer-events-auto z-20', className)}
+        className={cn('pointer-events-none top-0 size-full', visible && 'pointer-events-auto z-20', className)}
       >
-        <VinesImageMaskEditor className="h-[15.8rem]" src={src} onFinished={handleMaskEditFinished} mini={isMiniMode}>
+        <VinesImageMaskEditor
+          className="h-full min-h-[15.8rem]"
+          src={src}
+          onFinished={handleMaskEditFinished}
+          mini={isMiniMode}
+        >
           <Button
             className="h-7 border-transparent px-2 py-1 shadow-none"
             icon={<Undo2 />}
@@ -70,20 +74,17 @@ const VinesImageMaskPreview: React.FC<IVinesImageMaskPreviewProps> = ({ src, cla
             }}
             modal={false}
           >
-            <Tooltip>
-              <DialogTrigger asChild>
-                <TooltipTrigger asChild>
-                  <Button
-                    className="border-transparent !p-1 shadow-none"
-                    icon={<Fullscreen />}
-                    variant="outline"
-                    size="small"
-                    onClick={() => setVisible(false)}
-                  />
-                </TooltipTrigger>
-              </DialogTrigger>
-              <TooltipContent>{t('components.ui.vines-image-mask-editor.toolbar.zoom-in-editor')}</TooltipContent>
-            </Tooltip>
+            <DialogTrigger asChild>
+              <Button
+                className="border-transparent !p-1 shadow-none"
+                icon={<Fullscreen />}
+                variant="outline"
+                size="small"
+                onClick={() => setVisible(false)}
+              >
+                {t('components.ui.vines-image-mask-editor.toolbar.zoom-in-editor.label')}
+              </Button>
+            </DialogTrigger>
             <DialogContent
               className={cn(
                 'flex flex-col',
@@ -122,7 +123,7 @@ const VinesImageMaskPreview: React.FC<IVinesImageMaskPreviewProps> = ({ src, cla
       </motion.div>
       <motion.div
         key="field-image-mask-editor-preview"
-        className={cn('vines-center group relative size-full', visible && 'pointer-events-none z-0')}
+        className={cn('vines-center group absolute size-full', visible && 'pointer-events-none z-0')}
         initial={{ opacity: 0 }}
         animate={{ opacity: visible ? 0 : 1 }}
         exit={{ opacity: 0 }}
