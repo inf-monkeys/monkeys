@@ -45,12 +45,6 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
         id: 'vines-uppy',
         autoProceed: autoUpload,
         restrictions: { maxFileSize, maxNumberOfFiles: max, minNumberOfFiles: min },
-        debug: true,
-        logger: {
-          debug: console.debug,
-          warn: console.warn,
-          error: console.error,
-        },
       })
         .use(RemoteUrlToFile)
         .use(ThumbnailGenerator, {

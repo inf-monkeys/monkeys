@@ -61,7 +61,7 @@ export const User: React.FC<IUserProps> = () => {
           <Tooltip>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <Button icon={<LogOut className="!stroke-red-10" strokeWidth={1.5} size={16} />} variant="outline" />
                 </TooltipTrigger>
               </AlertDialogTrigger>

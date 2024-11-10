@@ -45,28 +45,26 @@ export const VinesLogViewStatChart: React.FC<IVinesLogViewStatChartProps> = ({ s
     },
   };
   return (
-    <>
-      {searchWorkflowExecutionStatData && (
-        <div className="grid grid-cols-[1fr_1fr] gap-4">
-          <VinesLogViewStatChartCard
-            chartConfig={{ totalCount: statChartConfig['totalCount'] }}
-            searchWorkflowExecutionStatData={searchWorkflowExecutionStatData}
-          />
-          <VinesLogViewStatChartCard
-            chartConfig={{ averageTime: statChartConfig['averageTime'] }}
-            countCalcType="avg"
-            searchWorkflowExecutionStatData={searchWorkflowExecutionStatData}
-          />
-          <VinesLogViewStatChartCard
-            chartConfig={{ successCount: statChartConfig['successCount'] }}
-            searchWorkflowExecutionStatData={searchWorkflowExecutionStatData}
-          />
-          <VinesLogViewStatChartCard
-            chartConfig={{ failedCount: statChartConfig['failedCount'] }}
-            searchWorkflowExecutionStatData={searchWorkflowExecutionStatData}
-          />
-        </div>
-      )}
-    </>
+    searchWorkflowExecutionStatData && (
+      <div className="grid grid-cols-[1fr_1fr] gap-4">
+        <VinesLogViewStatChartCard
+          chartConfig={{ totalCount: statChartConfig['totalCount'] }}
+          searchWorkflowExecutionStatData={searchWorkflowExecutionStatData}
+        />
+        <VinesLogViewStatChartCard
+          chartConfig={{ averageTime: statChartConfig['averageTime'] }}
+          countCalcType="avg"
+          searchWorkflowExecutionStatData={searchWorkflowExecutionStatData}
+        />
+        <VinesLogViewStatChartCard
+          chartConfig={{ successCount: statChartConfig['successCount'] }}
+          searchWorkflowExecutionStatData={searchWorkflowExecutionStatData}
+        />
+        <VinesLogViewStatChartCard
+          chartConfig={{ failedCount: statChartConfig['failedCount'] }}
+          searchWorkflowExecutionStatData={searchWorkflowExecutionStatData}
+        />
+      </div>
+    )
   );
 };

@@ -24,7 +24,7 @@ export const CreateAppDialog: React.FC<ICreateAppDialogProps> = ({ defaultSelect
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <Button variant="outline" size="small" icon={<Plus />}>
           {t('common.utils.create')}
         </Button>
