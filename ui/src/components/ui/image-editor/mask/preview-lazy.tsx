@@ -18,7 +18,7 @@ import { cn } from '@/utils';
 const VinesImageMaskPreview: React.FC<IVinesImageMaskPreviewProps> = ({ src, className, onFinished }) => {
   const { t } = useTranslation();
 
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
 
   const [uppy, setUppy] = React.useState<Uppy<Meta, Record<string, never>> | null>(null);
   const uppy$ = useEventEmitter<Uppy<Meta, Record<string, never>>>();
