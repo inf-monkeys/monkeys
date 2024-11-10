@@ -85,14 +85,18 @@ export const FieldFile: React.FC<IFieldFileProps> = ({
     ) : (
       <Card className={cn('w-full overflow-hidden', mode !== 'mini' && 'max-sm:max-w-[calc(100vw-3rem)]')}>
         <CardContent
-          className={cn('relative p-0', enableImageMask && 'p-2')}
+          className="relative p-0"
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();
           }}
         >
           {enableImageMask ? (
-            <VinesImageMaskPreview src={value} onFinished={(val) => form.setValue(name, isMultiple ? [val] : val)} />
+            <VinesImageMaskPreview
+              className="p-2"
+              src={value}
+              onFinished={(val) => form.setValue(name, isMultiple ? [val] : val)}
+            />
           ) : (
             <div
               onClick={(e) => {
