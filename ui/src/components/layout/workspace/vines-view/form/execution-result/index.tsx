@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-import { useCreation } from 'ahooks';
 import { type EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { AnimatePresence, motion } from 'framer-motion';
 import { History } from 'lucide-react';
@@ -8,21 +7,16 @@ import { useTranslation } from 'react-i18next';
 
 import { useWorkflowExecutionOutputs } from '@/apis/workflow/execution';
 import { useVinesIframeMessage } from '@/components/layout/workspace/vines-view/form/execution-result/iframe-message.ts';
+import { useVinesExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result/use-vines-execution-result.ts';
 import { VirtuaExecutionResultGrid } from '@/components/layout/workspace/vines-view/form/execution-result/virtua';
-import { IVinesExecutionResultItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item';
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { VinesImageGroup } from '@/components/ui/image';
 import { Label } from '@/components/ui/label.tsx';
 import { VinesLoading } from '@/components/ui/loading';
+import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
-
-const EMPTY_ITEM: IVinesExecutionResultItem = {
-  tasks: [],
-  originTasks: [],
-  render: { type: 'empty', data: '' },
-};
 
 interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {
   event$: EventEmitter<void>;
@@ -31,6 +25,8 @@ interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div
   enablePostMessage?: boolean;
   isMiniFrame?: boolean;
 }
+
+export const LOAD_LIMIT = 22;
 
 export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   className,
@@ -42,68 +38,32 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   const { t } = useTranslation();
 
   const visible = useViewStore((s) => s.visible);
-  const workflowId = useFlowStore((s) => s.workflowId);
+  const storeWorkflowId = useFlowStore((s) => s.workflowId);
+  const workflowId = storeWorkflowId && visible ? storeWorkflowId : null;
 
-  const { data: output, isLoading, mutate } = useWorkflowExecutionOutputs(workflowId && visible ? workflowId : null);
+  const { data, isLoading, mutate } = useWorkflowExecutionOutputs(workflowId, 1, LOAD_LIMIT);
 
-  const [refresh, setRefresh] = useState(0);
+  const outputs = data?.data ?? [];
+  const totalCount = outputs.length;
 
-  const list = useCreation(() => {
-    const result: IVinesExecutionResultItem[][] = [];
-    let currentRow: IVinesExecutionResultItem[] = [];
-    const col = isMiniFrame ? 2 : 3;
+  const { conversionOutputs } = useVinesExecutionResult();
 
-    for (const execution of output ?? []) {
-      const { output: executionOutput, rawOutput, ...rest } = execution;
+  useVinesIframeMessage({ outputs, mutate, enable: enablePostMessage });
 
-      for (const it of executionOutput) {
-        const data = {
-          ...rest,
-          output: rawOutput,
-          render: it,
-        } as unknown as IVinesExecutionResultItem;
-
-        const isTextOrJson = data.render.type === 'json' || data.render.type === 'text';
-
-        if (isTextOrJson) {
-          if (currentRow.length > 0) {
-            // 填充当前行并添加到结果中
-            currentRow = currentRow.concat(new Array(col - currentRow.length).fill(EMPTY_ITEM));
-            result.push(currentRow);
-            currentRow = [];
-          }
-          // 创建新行并填充空白项
-          const newRow = [data].concat(new Array(col - 1).fill(EMPTY_ITEM));
-          result.push(newRow);
-        } else {
-          if (currentRow.length >= col) {
-            result.push(currentRow);
-            currentRow = [];
-          }
-          currentRow.push(data);
-        }
-      }
-    }
-
-    // 添加剩余的当前行
-    if (currentRow.length > 0) {
-      result.push(currentRow);
-    }
-
-    return result.map((row) => row.filter((item) => item.render.type !== 'empty'));
-  }, [output, refresh, isMiniFrame]);
-
-  useVinesIframeMessage({ output, mutate, enable: enablePostMessage });
-
-  event$.useSubscription(() => setRefresh((it) => it + 1));
-
-  const totalCount = list.length;
+  const forceUpdate = useForceUpdate();
+  event$.useSubscription(() => forceUpdate());
 
   return (
     <Card className={cn('relative', className)}>
       <CardContent className="p-0">
         <VinesImageGroup>
-          <VirtuaExecutionResultGrid data={list} height={height} />
+          <VirtuaExecutionResultGrid
+            data={conversionOutputs(outputs, isMiniFrame ? 2 : 3)}
+            isMiniFrame={isMiniFrame}
+            total={data?.total ?? 0}
+            workflowId={workflowId}
+            height={height}
+          />
         </VinesImageGroup>
 
         <AnimatePresence>
