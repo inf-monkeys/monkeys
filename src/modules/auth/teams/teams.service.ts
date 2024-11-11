@@ -18,7 +18,7 @@ export class TeamsService {
     private readonly conductorService: ConductorService,
   ) {}
 
-  private async forkAssetsFromMarketPlace(teamId: string, userId: string) {
+  public async forkAssetsFromMarketPlace(teamId: string, userId: string) {
     const clonedComfyuiWorkflows = (await this.marketPlaceRepository.forkBuiltInComfyuiWorkflowAssetsFromMarketPlace(teamId, userId)) as (ComfyuiWorkflowEntity & { forkFromId: string })[];
     const clonedWorkflows = await this.marketPlaceRepository.forkBuiltInWorkflowAssetsFromMarketPlace(teamId, userId, {
       clonedComfyuiWorkflows,
