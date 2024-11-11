@@ -1,12 +1,12 @@
 import { LlmModelEndpointType } from '@/common/config';
-import { generateDbId } from '@/common/utils';
+import { generateDbId, getComfyuiWorkflowDataListFromWorkflow } from '@/common/utils';
 import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 import { BUILT_IN_WORKFLOW_MARKETPLACE_LIST } from '@/modules/assets/assets.marketplace.data';
 import { LLM_CHAT_COMPLETION_TOOL, LLM_COMPLETION_TOOL, LLM_GENERATE_TEXT_TOOL, LLM_NAMESPACE } from '@/modules/tools/llm/llm.controller';
 import { getDefaultModel } from '@/modules/tools/llm/llm.service';
 import { SimpleTaskDef } from '@inf-monkeys/conductor-javascript';
 import { Injectable } from '@nestjs/common';
-import { uniq } from 'lodash';
+import _, { uniq } from 'lodash';
 import { ComfyuiWorkflowEntity } from '../entities/comfyui/comfyui-workflow.entity';
 import { WorkflowMetadataEntity } from '../entities/workflow/workflow-metadata';
 import { ComfyuiWorkflowAssetRepositroy } from './assets-comfyui-workflow.respository';
@@ -30,6 +30,11 @@ export class AssetsMarketPlaceRepository {
   ) {
     const clonedWorkflows = await this.workflowAssetsRepository.forkBuiltInWorkflowAssetsFromMarketPlace(teamId, creatorUserId, (workflowMetadata: WorkflowMetadataEntity) => {
       const { tasks = [] } = workflowMetadata;
+      const comfyuiDataList = getComfyuiWorkflowDataListFromWorkflow(tasks);
+      const comfyuiWorkflowIdMapper = extraOptions.clonedComfyuiWorkflows.reduce((mapper, cw) => {
+        mapper[cw.forkFromId] = cw.id;
+        return mapper;
+      }, {});
       for (const task of tasks) {
         if (task.name === `${LLM_NAMESPACE}:${LLM_CHAT_COMPLETION_TOOL}`) {
           const defaultModel = getDefaultModel(LlmModelEndpointType.CHAT_COMPLETIONS);
@@ -46,11 +51,11 @@ export class AssetsMarketPlaceRepository {
           if (defaultModel) {
             (task as SimpleTaskDef).inputParameters.model = defaultModel;
           }
-        } else if (task.name === 'comfyui:run_comfyui_workflow') {
-          //TODO: comfyui namespace
-          const newId = extraOptions?.clonedComfyuiWorkflows.find((w) => w.forkFromId === (task as SimpleTaskDef).inputParameters.workflow)?.id;
-          if (newId) (task as SimpleTaskDef).inputParameters.workflow = newId;
         }
+      }
+      for (const { path, comfyuiWorkflowId } of comfyuiDataList) {
+        _.set(tasks, `${path}.workflow`, comfyuiWorkflowIdMapper[comfyuiWorkflowId]);
+        _.set(tasks, `${path}.server`, 'system');
       }
       return {
         workflowId: generateDbId(),
