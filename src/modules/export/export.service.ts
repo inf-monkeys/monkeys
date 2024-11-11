@@ -1,6 +1,6 @@
 import { logger } from '@/common/logger';
 import { IRequest } from '@/common/typings/request';
-import { generateDbId, getComfyuiWorkflowDataListFromWorkflow } from '@/common/utils';
+import { getComfyuiWorkflowDataListFromWorkflow } from '@/common/utils';
 import { ComfyuiRepository } from '@/database/repositories/comfyui.repository';
 import { SimpleTaskDef } from '@inf-monkeys/conductor-javascript';
 import { Injectable } from '@nestjs/common';
@@ -114,10 +114,9 @@ export class ExportService {
           }
         }
         return {
-          ..._.pick(workflow, ['tags', 'autoPinPage', 'displayName', 'description', 'iconUrl', 'version', 'variables', 'tasks', 'exposeOpenaiCompatibleInterface', 'thumbnail']),
+          ..._.pick(workflow, ['id', 'tags', 'autoPinPage', 'displayName', 'description', 'iconUrl', 'version', 'variables', 'tasks', 'exposeOpenaiCompatibleInterface', 'thumbnail']),
           isPreset: true,
           isPublished: true,
-          id: generateDbId(),
         };
       });
     const comfyuiWorkflows = (

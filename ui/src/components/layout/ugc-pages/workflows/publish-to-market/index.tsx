@@ -176,7 +176,15 @@ export const PublishToMarket: React.FC<IPublishToMarketProps> = ({ visible, setV
 
             <DialogFooter>
               <DialogFooter>
-                <Button onClick={() => setVisible(false)}>{t('common.utils.cancel')}</Button>
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setVisible(false);
+                  }}
+                >
+                  {t('common.utils.cancel')}
+                </Button>
                 <Button variant="solid" type="submit" loading={isLoading}>
                   {t('components.layout.ugc.publish-dialog.button.publish')}
                 </Button>
