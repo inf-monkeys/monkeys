@@ -1,6 +1,5 @@
-import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
-import { SimpleTaskDef } from '@inf-monkeys/conductor-javascript';
-import { MonkeyWorkflowDef } from '@inf-monkeys/monkeys';
+import { DoWhileTaskDef, ForkJoinTaskDef, SimpleTaskDef, SubWorkflowTaskDef } from '@inf-monkeys/conductor-javascript';
+import { MonkeyTaskDefTypes } from '@inf-monkeys/monkeys';
 import crypto from 'crypto';
 import shortid from 'shortid';
 
@@ -88,17 +87,48 @@ export function maskString(str: string) {
 }
 
 export interface ComfyUIWorkflowDataInWorkflowTask {
-  index: number;
+  path: string;
   comfyuiWorkflowId?: string;
 }
-export function getComfyuiWorkflowDataListFromWorkflow(workflow: MonkeyWorkflowDef | WorkflowMetadataEntity): ComfyUIWorkflowDataInWorkflowTask[] {
+export function getComfyuiWorkflowDataListFromWorkflow(tasks: MonkeyTaskDefTypes[]): ComfyUIWorkflowDataInWorkflowTask[] {
   const result: ComfyUIWorkflowDataInWorkflowTask[] = [];
-  for (const [index, task] of workflow.tasks.entries()) {
-    if (task.name === 'comfyui:run_comfyui_workflow') {
-      result.push({
-        index,
-        comfyuiWorkflowId: (workflow.tasks[index] as SimpleTaskDef).inputParameters?.workflow as string | undefined,
-      });
+  for (const [index, task] of tasks.entries()) {
+    if (task.type === 'SIMPLE') {
+      if (task.name === 'comfyui:run_comfyui_workflow') {
+        result.push({
+          path: `[${index}].inputParameters`,
+          comfyuiWorkflowId: (task as SimpleTaskDef).inputParameters?.workflow as string | undefined,
+        });
+      }
+    } else if (task.type === 'FORK_JOIN') {
+      for (const [forkIndex, forkTask] of (task as ForkJoinTaskDef).forkTasks.entries()) {
+        result.push(
+          ...getComfyuiWorkflowDataListFromWorkflow(forkTask).map((c) => {
+            return {
+              path: `[${index}].forkTasks[${forkIndex}]${c.path}`,
+              comfyuiWorkflowId: c.comfyuiWorkflowId,
+            };
+          }),
+        );
+      }
+    } else if (task.type === 'DO_WHILE') {
+      result.push(
+        ...getComfyuiWorkflowDataListFromWorkflow((task as DoWhileTaskDef).loopOver).map((c) => {
+          return {
+            path: `[${index}].loopOver${c.path}`,
+            comfyuiWorkflowId: c.comfyuiWorkflowId,
+          };
+        }),
+      );
+    } else if (task.type === 'SUB_WORKFLOW') {
+      result.push(
+        ...getComfyuiWorkflowDataListFromWorkflow((task as SubWorkflowTaskDef).subWorkflowParam['workflowDefinition'].tasks).map((c) => {
+          return {
+            path: `[${index}].subWorkflowParam.workflowDefinition.tasks${c.path}`,
+            comfyuiWorkflowId: c.comfyuiWorkflowId,
+          };
+        }),
+      );
     }
   }
   return result;

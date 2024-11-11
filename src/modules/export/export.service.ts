@@ -2,7 +2,6 @@ import { logger } from '@/common/logger';
 import { IRequest } from '@/common/typings/request';
 import { getComfyuiWorkflowDataListFromWorkflow } from '@/common/utils';
 import { ComfyuiRepository } from '@/database/repositories/comfyui.repository';
-import { SimpleTaskDef } from '@inf-monkeys/conductor-javascript';
 import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
 import { WorkflowRepository } from '../../database/repositories/workflow.repository';
@@ -105,12 +104,11 @@ export class ExportService {
     const workflows = (await this.workflowRepository.getAllWorkflowsInTeam(teamId))
       .filter((workflow) => !(workflow.forkFromId && INTERNAL_BUILT_IN_MARKET.workflows.map((internal) => internal.id).includes(workflow.forkFromId)))
       .map((workflow) => {
-        const comfyuiDataList = getComfyuiWorkflowDataListFromWorkflow(workflow);
+        const comfyuiDataList = getComfyuiWorkflowDataListFromWorkflow(workflow.tasks);
         if (comfyuiDataList.length > 0) {
-          for (const [, { index }] of comfyuiDataList.entries()) {
-            (workflow.tasks[index] as SimpleTaskDef).inputParameters.server = 'system';
-            const comfyuiWorkflowId = (workflow.tasks[index] as SimpleTaskDef).inputParameters.workflow as string | undefined;
-            if (comfyuiWorkflowId && !comfyuiInWorkflowIdList.includes(comfyuiWorkflowId)) comfyuiInWorkflowIdList.push(comfyuiWorkflowId);
+          comfyuiInWorkflowIdList.push(...Array.from(new Set(comfyuiDataList.map((c) => c.comfyuiWorkflowId))));
+          for (const { path } of comfyuiDataList) {
+            _.set(workflow, `${path}.server`, 'system');
           }
         }
         return {

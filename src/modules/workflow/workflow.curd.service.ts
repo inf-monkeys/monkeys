@@ -10,7 +10,7 @@ import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-p
 import { WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
 import { AssetsCommonRepository } from '@/database/repositories/assets-common.repository';
 import { UpdatePermissionsDto } from '@/modules/workflow/dto/req/update-permissions.dto';
-import { SimpleTaskDef, WorkflowTask } from '@inf-monkeys/conductor-javascript';
+import { WorkflowTask } from '@inf-monkeys/conductor-javascript';
 import { AssetType, MonkeyTaskDefTypes, ToolProperty, ToolType } from '@inf-monkeys/monkeys';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import fs from 'fs';
@@ -396,12 +396,20 @@ export class WorkflowCrudService {
     const newWorkflowId = generateDbId();
     for (const { version } of versions) {
       const originalWorkflow = await this.workflowRepository.getWorkflowById(originalWorkflowId, version);
-      const comfyuiDataList = getComfyuiWorkflowDataListFromWorkflow(originalWorkflow);
+      const comfyuiDataList = getComfyuiWorkflowDataListFromWorkflow(originalWorkflow.tasks);
+      const comfyuiWorkflowIds = Array.from(new Set(comfyuiDataList.map((c) => c.comfyuiWorkflowId)));
+      const comfyuiWorkflowIdMapper = comfyuiWorkflowIds.reduce((mapper, comfyuiWorkflowId) => {
+        mapper[comfyuiWorkflowId] = null;
+        return mapper;
+      }, {});
+      for (const comfyuiWorkflowId of comfyuiWorkflowIds) {
+        const { id } = await this.assetsPublishService.forkAsset('comfyui-workflow', teamId, comfyuiWorkflowId);
+        comfyuiWorkflowIdMapper[comfyuiWorkflowId] = id;
+      }
       if (comfyuiDataList.length > 0) {
-        for (const [, { index, comfyuiWorkflowId }] of comfyuiDataList.entries()) {
-          const { id } = await this.assetsPublishService.forkAsset('comfyui-workflow', teamId, comfyuiWorkflowId);
-          logger.debug(id);
-          (originalWorkflow.tasks[index] as SimpleTaskDef).inputParameters.workflow = id;
+        for (const { path, comfyuiWorkflowId } of comfyuiDataList) {
+          logger.debug(`${path}.workflow`);
+          _.set(originalWorkflow.tasks, `${path}.workflow`, comfyuiWorkflowIdMapper[comfyuiWorkflowId]);
         }
       }
       await this.createWorkflowDef(
