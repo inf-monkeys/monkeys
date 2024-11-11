@@ -197,7 +197,7 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
   }
 
   public async publishAsset(teamId: string, assetId: string, publishConfig: AssetPublishConfig, metadata?: E) {
-    const asset = metadata || (await this.getAssetById(assetId));
+    let asset = metadata || (await this.getAssetById(assetId));
     if (!asset) {
       throw new Error('资产不存在');
     }
@@ -208,15 +208,30 @@ export class AbstractAssetRepository<E extends BaseAssetEntity> {
     if (isPreset) {
       throw new Error('无法发布预置资产');
     }
+
     const extraAssetData = _.get(publishConfig, 'extraAssetData');
-    const id = generateDbId();
+    let id = generateDbId();
+    if (asset.assetType === 'workflow') {
+      const publishedAsset = await this.repository.findOne({
+        where: {
+          forkFromId: assetId,
+          isDeleted: false,
+          isPublished: true,
+          teamId,
+        } as unknown as FindOptionsWhere<E>,
+      });
+      if (publishedAsset) {
+        asset = publishedAsset;
+        id = publishedAsset.id;
+      }
+    }
     const clonedAsset = this.repository.create({
       ...asset,
       ...extraAssetData,
       workflowId: asset.assetType === 'workflow' ? id : undefined,
       id,
       teamId,
-      forkedFrom: assetId,
+      forkFromId: assetId,
       isDeleted: false,
       isPreset: false,
       isPublished: true,
