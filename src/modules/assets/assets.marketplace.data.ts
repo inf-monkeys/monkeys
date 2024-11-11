@@ -1,3 +1,4 @@
+import { config } from '@/common/config';
 import { BuiltInMarket } from '@/common/typings/asset';
 import { ComfyuiWorkflowEntity } from '@/database/entities/comfyui/comfyui-workflow.entity';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
@@ -15,9 +16,10 @@ export interface WorkflowMarketplaceData extends WorkflowMetadataEntity {
 
 let rawBuiltInMarketList = [];
 if (process.env.MONKEYS_BUILT_IN_MARKET_FILE) {
-  rawBuiltInMarketList = [path.resolve(process.env.MONKEYS_CONFIG_FILE)];
+  rawBuiltInMarketList = [path.resolve(process.env.MONKEYS_BUILT_IN_MARKET_FILE)];
 } else {
-  rawBuiltInMarketList = [path.resolve('/etc/monkeys/builtInMarket.json'), path.resolve('./builtInMarket.json')];
+  const appBuiltInMarketFileList = [path.resolve(`/etc/monkeys/builtInMarket.${config.server.appId}.json`), path.resolve(`./builtInMarket.${config.server.appId}.json`)];
+  rawBuiltInMarketList = appBuiltInMarketFileList.some(fs.existsSync) ? appBuiltInMarketFileList : [path.resolve('/etc/monkeys/builtInMarket.json'), path.resolve('./builtInMarket.json')];
 }
 
 rawBuiltInMarketList = rawBuiltInMarketList
