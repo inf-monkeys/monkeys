@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import Uppy from '@uppy/core';
+import Uppy, { Meta, UppyFile } from '@uppy/core';
 import ThumbnailGenerator from '@uppy/thumbnail-generator';
 import { useClickAway, useCreation, useDrop, useLatest, useMemoizedFn } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -95,25 +95,33 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
     onChange?.(finalFiles.map((it) => it.uploadURL || it.meta.remoteUrl) as string[], finalFiles);
   });
 
+  const lastPropFiles = useRef<UppyFile<Meta, Record<string, never>>[]>([]);
   useEffect(() => {
-    const propsFiles = props.files || [];
+    const currentFileUrls = latestFiles.current.map((it) => it.uploadURL || it.meta.remoteUrl);
+    const propsFiles = (props.files || []).filter((it) => !currentFileUrls.includes(it));
     if (propsFiles.length > 0) {
-      const currentFileUrls = latestFiles.current.map((it) => it.uploadURL || it.meta.remoteUrl);
-      uppy.addFiles(
-        propsFiles
-          .filter((it) => !currentFileUrls.includes(it))
-          .map((url) => {
-            if (checkIfCorrectURL(url)) {
-              const file = new File([], getFileNameByOssUrl(url), { type: 'text/plain' }) as File & {
-                meta?: { remoteUrl: string };
-              };
-              file.meta = { remoteUrl: url };
-              return handleConvertFile(file);
-            }
-            return null;
-          })
-          .filter(Boolean) as any[],
+      const convertFiles = propsFiles
+        .map((url) => {
+          if (checkIfCorrectURL(url)) {
+            const file = new File([], getFileNameByOssUrl(url), { type: 'text/plain' }) as File & {
+              meta?: { remoteUrl: string };
+            };
+            file.meta = { remoteUrl: url };
+            return handleConvertFile(file);
+          }
+          return null;
+        })
+        .filter(Boolean) as any[];
+
+      const needToRemoveFiles = lastPropFiles.current.filter(
+        (it) => !propsFiles.some((url) => url === it.meta?.remoteUrl),
       );
+      for (const file of needToRemoveFiles) {
+        uppy.removeFile(file.id);
+      }
+
+      uppy.addFiles(convertFiles);
+      lastPropFiles.current = uppy.getFiles();
     }
 
     uppy$?.emit(uppy);
