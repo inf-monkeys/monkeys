@@ -9,6 +9,7 @@ import { NoticeInput } from '@/components/layout/workspace/vines-view/flow/headl
 import { FieldImageModel } from '@/components/layout/workspace/vines-view/form/tabular/render/field/assets/image-model.tsx';
 import { FieldOneApiModels } from '@/components/layout/workspace/vines-view/form/tabular/render/field/assets/oneapi-models.tsx';
 import { FieldBoolean } from '@/components/layout/workspace/vines-view/form/tabular/render/field/boolean.tsx';
+import { CanvasAssistedInteraction } from '@/components/layout/workspace/vines-view/form/tabular/render/field/canvas-assisted-interaction';
 import { FieldFile } from '@/components/layout/workspace/vines-view/form/tabular/render/field/file';
 import { FieldNumber } from '@/components/layout/workspace/vines-view/form/tabular/render/field/number.tsx';
 import { FieldOptions } from '@/components/layout/workspace/vines-view/form/tabular/render/field/options.tsx';
@@ -163,6 +164,8 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
                     <FieldFile input={it} form={form} value={value} miniMode={miniMode} />
 
                     <FieldOptions input={it} value={value} onChange={onChange} />
+
+                    {type === 'canvas-assist' && <CanvasAssistedInteraction input={it} id={it.name} form={form} />}
                   </>
                 )}
               </>
