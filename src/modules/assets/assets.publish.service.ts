@@ -12,6 +12,7 @@ export class AssetsPublishService {
   public async publishAsset(teamId: string, assetType: AssetType, assetId: string, publishConfig: AssetPublishConfig) {
     const repo = this.assetsMapperService.getRepositoryByAssetType(assetType);
     const asset = await repo.getAssetById(assetId);
+    if (!asset) throw new Error('资产未找到');
     if (asset.assetType === 'workflow') {
       const comfyuiDataList = getComfyuiWorkflowDataListFromWorkflow((asset as unknown as MonkeyWorkflowDef).tasks).map((c) => {
         return {

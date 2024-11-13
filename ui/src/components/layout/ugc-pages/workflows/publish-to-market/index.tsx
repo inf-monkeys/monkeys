@@ -56,7 +56,7 @@ export const PublishToMarket: React.FC<IPublishToMarketProps> = ({ visible, setV
       displayName:
         getI18nContent(context?.displayName) ?? t('workspace.wrapper.workflow-info-card.default-workflow-name'),
       description: getI18nContent(context?.description) ?? '',
-      iconUrl: '',
+      thumbnail: '',
     },
   });
 
@@ -65,23 +65,24 @@ export const PublishToMarket: React.FC<IPublishToMarketProps> = ({ visible, setV
       displayName:
         getI18nContent(context?.displayName) ?? t('workspace.wrapper.workflow-info-card.default-workflow-name'),
       description: getI18nContent(context?.description) ?? '',
-      iconUrl: '',
+      thumbnail: '',
     });
   }, [context]);
 
   const handleSubmit = form.handleSubmit(async (data) => {
+    console.log(data);
     setIsLoading(true);
     publishToMarket({
       extraAssetData: {
         displayName: data.displayName,
         description: data.description,
-        iconUrl: data.iconUrl,
+        thumbnail: data.thumbnail,
       },
     });
   });
 
-  const { iconUrl } = form.watch();
-  const thumbnails = outputThumbnails?.filter((it) => it !== iconUrl && /(png|jpg|jpeg|webp)/.test(it)) ?? [];
+  const { thumbnail } = form.watch();
+  const thumbnails = outputThumbnails?.filter((it) => it !== thumbnail && /(png|jpg|jpeg|webp)/.test(it)) ?? [];
   const hasThumbnails = (thumbnails?.length ?? 0) > 0;
 
   return (
@@ -131,7 +132,7 @@ export const PublishToMarket: React.FC<IPublishToMarketProps> = ({ visible, setV
             />
 
             <FormField
-              name="iconUrl"
+              name="thumbnail"
               control={form.control}
               render={({ field: { value, onChange } }) => {
                 return (
@@ -146,7 +147,7 @@ export const PublishToMarket: React.FC<IPublishToMarketProps> = ({ visible, setV
                         }}
                       >
                         <VinesUploader
-                          files={[value]}
+                          files={value ? [value] : []}
                           max={1}
                           accept={['png', 'jpg', 'jpeg', 'webp']}
                           onChange={(urls) => onChange(urls[0])}
