@@ -35,6 +35,7 @@ interface IStoreAppProps extends IApplicationStoreItemDetail {
 export const StoreApp: React.FC<IStoreAppProps> = ({
   id,
   iconUrl,
+  thumbnail,
   displayName,
   description,
   teamId: itTeamId,
@@ -87,13 +88,16 @@ export const StoreApp: React.FC<IStoreAppProps> = ({
   });
 
   const isEmojiIcon = iconUrl.startsWith('emoji:');
+  const isThumbnailValid = thumbnail?.startsWith('http');
   const title = getI18nContent(displayName);
   const desc = getI18nContent(description);
 
   return (
     <div key={id} className="relative m-2 h-80 w-[calc(100%-1rem)] rounded-md border border-input shadow-sm">
       <div className="m-3 mb-0 h-1/2 overflow-hidden rounded-t-md">
-        {isEmojiIcon ? (
+        {isThumbnailValid && thumbnail ? (
+          <VinesImage src={thumbnail} alt={title} className="w-full object-cover" disabled />
+        ) : isEmojiIcon ? (
           <VinesIcon src={iconUrl} className="[&_img]:!size-12" />
         ) : (
           <VinesImage src={iconUrl} alt={title} className="w-full object-cover" disabled />

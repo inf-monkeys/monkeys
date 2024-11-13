@@ -141,6 +141,7 @@ export interface IApplicationStoreItem {
   displayName: string | I18nValue;
   description: string | I18nValue;
   iconUrl: string;
+  thumbnail?: string | null;
   teamId: string;
   workflowId: string;
   creatorUserId: string;

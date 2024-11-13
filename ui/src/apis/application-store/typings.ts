@@ -4,7 +4,7 @@ import { IAssetPublishPolicy } from '@/apis/typings.ts';
 
 export interface IApplicationPublishConfig {
   policy?: IAssetPublishPolicy;
-  extraAssetData?: Partial<MonkeyWorkflow>;
+  extraAssetData?: Partial<MonkeyWorkflow & { thumbnail?: string }>;
 }
 
 export type IAutoPinPage = Record<'default' | string, 'process' | 'log' | 'chat' | 'preview' | 'api'>[];
