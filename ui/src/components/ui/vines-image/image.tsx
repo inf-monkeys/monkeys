@@ -14,11 +14,13 @@ interface ILazyImageProps {
   src: string;
   alt?: string;
 
+  disabledPreview?: boolean;
+
   width?: number;
   height?: number;
 }
 
-export const LazyImage: React.FC<ILazyImageProps> = memo(({ src, alt, width, height }) => {
+export const LazyImage: React.FC<ILazyImageProps> = memo(({ src, alt, width, height, disabledPreview = false }) => {
   const [image, setImage] = useState<string>('');
 
   const [themeMode] = useLocalStorage<string>('vines-ui-dark-mode', 'auto', false);
@@ -42,10 +44,14 @@ export const LazyImage: React.FC<ILazyImageProps> = memo(({ src, alt, width, hei
       src={image}
       alt={alt}
       fallback={isDark ? '/fallback_image_dark.webp' : '/fallback_image.webp'}
-      preview={{
-        src: cacheImageUrls?.[src] || src,
-        mask: <Eye className="stroke-white" />,
-      }}
+      preview={
+        disabledPreview
+          ? false
+          : {
+              src: cacheImageUrls?.[src] || src,
+              mask: <Eye className="stroke-white" />,
+            }
+      }
     />
   ) : (
     <>

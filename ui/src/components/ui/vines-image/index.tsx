@@ -6,6 +6,8 @@ export interface IVinesImageProps {
   src: string;
   alt?: string;
 
+  disabledPreview?: boolean;
+
   className?: string;
 }
 

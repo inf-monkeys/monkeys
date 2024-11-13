@@ -30,7 +30,7 @@ export const TeamSelector: React.FC = () => {
   const { t } = useTranslation();
 
   const { routeId } = useVinesRoute();
-  const navigate = useNavigate({ from: location.pathname });
+  const navigate = useNavigate() as any;
 
   const [open, setOpen] = useState(false);
 
@@ -40,7 +40,7 @@ export const TeamSelector: React.FC = () => {
   const handleSwapTeam = useMemoizedFn(async (id: string) => {
     setTeamId(id);
 
-    const navRouteId = routeId?.replace(/.$/, '');
+    const navRouteId = routeId?.replace(/.$/, '') ?? '';
     const splitRouteId = navRouteId.split('/').filter(Boolean);
     if (NEED_FORCE_REFRESH.includes(splitRouteId?.[1])) {
       await navigate({

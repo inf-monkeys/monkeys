@@ -4,7 +4,15 @@ import * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, VariantProps } from 'class-variance-authority';
 import { composeRenderProps, Group as AriaGroup, GroupProps as AriaGroupProps } from 'react-aria-components';
-import { Controller, ControllerProps, FieldPath, FieldValues, FormProvider, useFormContext } from 'react-hook-form';
+import {
+  Controller,
+  ControllerProps,
+  FieldPath,
+  FieldValues,
+  FormProvider,
+  useFormContext,
+  useWatch,
+} from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { Label } from '@/components/ui/label';
@@ -161,5 +169,25 @@ function FieldGroup({ className, variant, ...props }: GroupProps) {
   );
 }
 
+const useFormValues = () => {
+  const { getValues } = useFormContext();
+
+  return {
+    ...useWatch(),
+    ...getValues(),
+  };
+};
+
 // eslint-disable-next-line react-refresh/only-export-components
-export { FieldGroup, Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, useFormField };
+export {
+  FieldGroup,
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  useFormField,
+  useFormValues,
+};

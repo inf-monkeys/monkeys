@@ -11,6 +11,7 @@ export const addProtocolToURL = (url: string) => {
 };
 
 export const checkIfCorrectURL = (url?: string) => {
+  if (!url?.startsWith && !url?.endsWith) return false;
   return url?.startsWith('http://') || url?.startsWith('https://');
 };
 

@@ -1,3 +1,4 @@
+import { ToolPropertyTypes } from '@inf-monkeys/monkeys/src/types/tool.ts';
 import { get } from 'lodash';
 
 interface IWorkflowInputTypeOption {
@@ -75,6 +76,8 @@ export const WORKFLOW_INPUT_TYPE_OPTION_LIST: IWorkflowInputTypeOption[] = [
     assetType: 'comfyui-model',
   },
 ];
+
+export const VINES_WORKFLOW_INPUT_SPECIAL_TYPES = ['canvas-assist', 'notice'] as ToolPropertyTypes[];
 
 export const VINES_WORKFLOW_INPUT_TYPE_DISPLAY_MAPPER = WORKFLOW_INPUT_TYPE_OPTION_LIST.reduce(
   (acc: Record<string, string>, obj) => {

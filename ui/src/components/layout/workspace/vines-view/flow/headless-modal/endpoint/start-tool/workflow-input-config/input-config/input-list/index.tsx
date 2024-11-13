@@ -1,9 +1,13 @@
 import React from 'react';
 
+import { ToolPropertyTypes } from '@inf-monkeys/monkeys/src/types/tool.ts';
 import { get, isArray, isBoolean } from 'lodash';
 import { useTranslation } from 'react-i18next';
 
-import { VINES_WORKFLOW_INPUT_TYPE_DISPLAY_MAPPER } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/consts.ts';
+import {
+  VINES_WORKFLOW_INPUT_SPECIAL_TYPES,
+  VINES_WORKFLOW_INPUT_TYPE_DISPLAY_MAPPER,
+} from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/consts.ts';
 import { Card } from '@/components/ui/card.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -16,7 +20,7 @@ import { stringify } from '@/utils/fast-stable-stringify.ts';
 
 interface IWorkflowInputListProps {
   inputs: VinesWorkflowVariable[];
-  children?: (variableId: string) => React.ReactNode;
+  children?: (variableId: string, specialType?: ToolPropertyTypes) => React.ReactNode;
   className?: string;
   cardClassName?: string;
   contentWidth?: number;
@@ -45,7 +49,10 @@ export const WorkflowInputList: React.FC<IWorkflowInputListProps> = ({
         const defaultValueType = typeof defaultData;
         const assetType = get(typeOptions, 'assetType', null);
         const multipleValues = get(typeOptions, 'multipleValues', false);
-        const child = children?.(variableId);
+
+        const isSpecialType = VINES_WORKFLOW_INPUT_SPECIAL_TYPES.includes(type);
+
+        const child = children?.(variableId, isSpecialType ? type : void 0);
         return (
           <Card
             className={cn(
@@ -58,12 +65,12 @@ export const WorkflowInputList: React.FC<IWorkflowInputListProps> = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {disabledTypeTag ? null : (
-                  <Tag className="text-xxs bg-muted py-1 shadow-sm">
-                    {
-                      VINES_WORKFLOW_INPUT_TYPE_DISPLAY_MAPPER[
-                        type + (assetType ? `:${assetType}` : '') + (multipleValues ? '-list' : '')
-                      ]
-                    }
+                  <Tag className={cn('text-xxs bg-muted py-1 shadow-sm', isSpecialType && 'bg-muted-foreground/35')}>
+                    {isSpecialType
+                      ? type
+                      : VINES_WORKFLOW_INPUT_TYPE_DISPLAY_MAPPER[
+                          type + (assetType ? `:${assetType}` : '') + (multipleValues ? '-list' : '')
+                        ]}
                   </Tag>
                 )}
 

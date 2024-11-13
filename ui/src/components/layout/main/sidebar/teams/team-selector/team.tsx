@@ -31,7 +31,9 @@ export const Team: React.FC<ITeamProps> = ({ className, name, logo, description 
             <TooltipTrigger asChild>
               <span className="text-xxs line-clamp-1 text-muted-foreground">{description}</span>
             </TooltipTrigger>
-            <TooltipContent side="bottom">{description}</TooltipContent>
+            <TooltipContent side="left" sideOffset={48}>
+              {description}
+            </TooltipContent>
           </Tooltip>
         </div>
       )}

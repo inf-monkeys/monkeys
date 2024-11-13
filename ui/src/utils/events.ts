@@ -24,6 +24,7 @@ export type FlowEventType =
   | 'flow-raw-data-editor'
   | 'flow-variable-selector'
   | 'flow-input-editor'
+  | 'flow-input-widgets'
   | 'flow-trigger-selector'
   | 'flow-trigger-schedule'
   | 'flow-trigger-webhook'
