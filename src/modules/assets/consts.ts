@@ -263,7 +263,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['效率提升'],
       autoPinPage: [
         {
-          效率提升: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6480ed9e2e4999ef0',
@@ -337,7 +337,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['效率提升'],
       autoPinPage: [
         {
-          效率提升: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6bee1ed58fe23ea3d',
@@ -410,7 +410,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['效率提升'],
       autoPinPage: [
         {
-          效率提升: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6a15ef950b20f3e0d',
@@ -483,7 +483,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['效率提升'],
       autoPinPage: [
         {
-          效率提升: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee61d4f6d54f3746d16',
@@ -556,7 +556,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['效率提升'],
       autoPinPage: [
         {
-          效率提升: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee675d6716210bda905',
@@ -629,7 +629,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['人力资源'],
       autoPinPage: [
         {
-          人力资源: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee684163d972e05a92e',
@@ -702,7 +702,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['人力资源'],
       autoPinPage: [
         {
-          人力资源: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee69aca5420e6d524a1',
@@ -775,7 +775,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['人力资源'],
       autoPinPage: [
         {
-          人力资源: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee623dcd505ef621063',
@@ -848,7 +848,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['效率提升'],
       autoPinPage: [
         {
-          效率提升: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee64acf0df5bac31fb2',
@@ -921,7 +921,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['效率提升'],
       autoPinPage: [
         {
-          效率提升: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee60d1196e612a3e16a',
@@ -994,7 +994,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['效率提升'],
       autoPinPage: [
         {
-          效率提升: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee654ae41d344264a26',
@@ -1067,7 +1067,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['效率提升'],
       autoPinPage: [
         {
-          效率提升: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee669a327496f4863ec',
@@ -1140,7 +1140,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['效率提升'],
       autoPinPage: [
         {
-          效率提升: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6269595890b32a18a',
@@ -1213,7 +1213,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['效率提升'],
       autoPinPage: [
         {
-          效率提升: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6a708208b3e68b0fb',
@@ -1286,7 +1286,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['效率提升'],
       autoPinPage: [
         {
-          效率提升: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee636c9b0a7b638d287',
@@ -1359,7 +1359,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['效率提升'],
       autoPinPage: [
         {
-          效率提升: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee64a28439a2526aee4',
@@ -1431,7 +1431,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['内容营销'],
       autoPinPage: [
         {
-          内容营销: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6ef2105aa0ffd4579',
@@ -1504,7 +1504,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['内容营销'],
       autoPinPage: [
         {
-          内容营销: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6144dbfa69b10f02f',
@@ -1577,7 +1577,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['效率提升'],
       autoPinPage: [
         {
-          效率提升: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee69baf25f4d2f3c47f',
@@ -1650,7 +1650,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['内容编译'],
       autoPinPage: [
         {
-          内容编译: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee604f72ddcc3e9b428',
@@ -1723,7 +1723,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['内容编译'],
       autoPinPage: [
         {
-          内容编译: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee64ff03a9ade4832b4',
@@ -1796,7 +1796,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['内容营销'],
       autoPinPage: [
         {
-          内容营销: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6d96ef9b98204a77c',
@@ -1869,7 +1869,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['内容营销'],
       autoPinPage: [
         {
-          内容营销: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6ab287d0112e36195',
@@ -1942,7 +1942,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['内容营销'],
       autoPinPage: [
         {
-          内容营销: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee65029ed4c91c25d60',
@@ -2015,7 +2015,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['内容编译'],
       autoPinPage: [
         {
-          内容编译: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee61bffae9beb0adb44',
@@ -2088,7 +2088,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['内容编译'],
       autoPinPage: [
         {
-          内容编译: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee64e9326dab341a33b',
@@ -2161,7 +2161,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['内容营销'],
       autoPinPage: [
         {
-          内容营销: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee67d773ab9dd4789e4',
@@ -2234,7 +2234,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['内容营销'],
       autoPinPage: [
         {
-          内容营销: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6d66034fb571ec830',
@@ -2307,7 +2307,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['内容营销'],
       autoPinPage: [
         {
-          内容营销: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee69664833c0fb89f09',
@@ -2379,7 +2379,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['内容营销'],
       autoPinPage: [
         {
-          内容营销: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6677226bbda4e5a6d',
@@ -2452,7 +2452,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['内容营销'],
       autoPinPage: [
         {
-          内容营销: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee66640e4890bc63a1f',
@@ -2525,7 +2525,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['内容营销'],
       autoPinPage: [
         {
-          内容营销: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6eb349f2c3df9f65f',
@@ -2598,7 +2598,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['内容营销'],
       autoPinPage: [
         {
-          内容营销: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee64ab6a0cc56fd4210',
@@ -2671,7 +2671,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['内容编译'],
       autoPinPage: [
         {
-          内容编译: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6bd4f49b132232dc5',
@@ -2744,7 +2744,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee68a00c13980c8ad34',
@@ -2818,7 +2818,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6b2997d2babfb8770',
@@ -2891,7 +2891,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6ba35822fb87e27c5',
@@ -2964,7 +2964,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6bb36dc74fee5305c',
@@ -3037,7 +3037,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6ee92525dcff24e6d',
@@ -3110,7 +3110,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6d1eb578899d75359',
@@ -3183,7 +3183,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6f313fe727fff6e86',
@@ -3256,7 +3256,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6c2c3c5411b6d3049',
@@ -3329,7 +3329,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6571ea63bdc333ae2',
@@ -3402,7 +3402,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee62f203febd6660814',
@@ -3475,7 +3475,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee61d9bfe1cf2985efc',
@@ -3548,7 +3548,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6a13b309d4e09d58f',
@@ -3621,7 +3621,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6304badfd7d623447',
@@ -3694,7 +3694,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6ffc5078048e5290c',
@@ -3767,7 +3767,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee68de50134c7a0c05a',
@@ -3841,7 +3841,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6e18b11f5ab501723',
@@ -3913,7 +3913,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee615fb4bf0d36afdaa',
@@ -3986,7 +3986,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6fe02e340005ef0b1',
@@ -4059,7 +4059,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6b959dfff3c1b8825',
@@ -4132,7 +4132,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6814fd48aeea2ff51',
@@ -4205,7 +4205,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6a806ad870609b279',
@@ -4278,7 +4278,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6dad556584cbafb3b',
@@ -4351,7 +4351,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6cba9dcb62c08cd95',
@@ -4424,7 +4424,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6d2e86bb9432e98a7',
@@ -4496,7 +4496,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6322db7c37eb02490',
@@ -4568,7 +4568,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6f3736ad03d2eb3bc',
@@ -4641,7 +4641,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee68f305c4735f384e5',
@@ -4713,7 +4713,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6b796eed66d30d2d0',
@@ -4786,7 +4786,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6bdd348752a0f7901',
@@ -4859,7 +4859,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6a3742cac9756a9a9',
@@ -4932,7 +4932,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6fc21fcbc1743ac21',
@@ -5005,7 +5005,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee61aeda186eae37af6',
@@ -5078,7 +5078,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6424cdc51d349c8e3',
@@ -5151,7 +5151,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee693195047f2bedfe6',
@@ -5224,7 +5224,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6c8a713f77dd1501c',
@@ -5297,7 +5297,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6d25391a5eec25cf3',
@@ -5369,7 +5369,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6269e578cf3610472',
@@ -5442,7 +5442,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6722af69955420fd1',
@@ -5515,7 +5515,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6bffcc14f382e0e06',
@@ -5588,7 +5588,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee645a0372b508346d7',
@@ -5661,7 +5661,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee68b223594821cb994',
@@ -5734,7 +5734,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6ba2d6d7d5cb16bc5',
@@ -5807,7 +5807,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee60b53144112238ccc',
@@ -5880,7 +5880,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6a3aec834eecd2bb7',
@@ -5953,7 +5953,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6e980b27bfd6620d1',
@@ -6025,7 +6025,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6961906304607e379',
@@ -6098,7 +6098,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee617b0bb40795449bf',
@@ -6170,7 +6170,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6d514a037191743a8',
@@ -6243,7 +6243,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee69a856a3c641f092f',
@@ -6316,7 +6316,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee626ab16ed1c43bb8c',
@@ -6389,7 +6389,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6369569da44c10cde',
@@ -6460,7 +6460,11 @@ export const INTERNAL_BUILT_IN_MARKET = {
     },
     {
       tags: [],
-      autoPinPage: [],
+      autoPinPage: [
+        {
+          default: ['chat'],
+        },
+      ],
       id: '66f12ee6389be887489fbe3b',
       displayName: '代码毒舌大师',
       description: '擅长尖刻批评代码，讽刺性地指出低效和可读性问题',
@@ -6531,7 +6535,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee61b4e790a8935b670',
@@ -6604,7 +6608,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6dd998367fb21466c',
@@ -6677,7 +6681,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee6ba6800bf15c08e62',
@@ -6750,7 +6754,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
       tags: ['软件开发'],
       autoPinPage: [
         {
-          软件开发: ['chat'],
+          default: ['chat'],
         },
       ],
       id: '66f12ee66f2c4529d24efadf',
