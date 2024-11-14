@@ -1,7 +1,7 @@
 import { CSSProperties } from 'react';
 
 import { useCreation } from 'ahooks';
-import { isEmpty } from 'lodash';
+import { isEmpty, isUndefined } from 'lodash';
 
 import { TCalculateRelativePositionParams } from '@/components/layout/workspace/vines-view/form/tabular/render/field/canvas-assisted-interaction/utils.ts';
 
@@ -140,7 +140,30 @@ export const useLayer = ({ layer, style, values, maxWidth, maxHeight }: IUseLaye
     if (!layerMapper) {
       return {};
     }
-    return createObjectWithLayerMapper(values, layerMapper, ['image', 'icon', 'translateX', 'translateY']);
+
+    // return createObjectWithLayerMapper(values, layerMapper, ['image', 'icon', 'translateX', 'translateY']);
+    const finalValues = {};
+    for (const [key, layerOptions] of layerMapper) {
+      const val = values[key];
+      if (!isUndefined(val)) {
+        for (const option of layerOptions) {
+          finalValues[option] = {
+            value: val,
+            targets: finalValues[option]?.targets ? [...finalValues[option].targets, key] : [key],
+          };
+        }
+      }
+    }
+
+    return finalValues as Partial<
+      Record<
+        PropertyKey & LayerMapperValue,
+        {
+          value: string | number | boolean | string[] | number[] | boolean[];
+          targets: string[];
+        }
+      >
+    >;
   }, [layerMapper, values]);
 
   return {

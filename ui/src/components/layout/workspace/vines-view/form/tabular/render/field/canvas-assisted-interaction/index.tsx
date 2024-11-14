@@ -2,6 +2,7 @@ import React from 'react';
 
 import { DndContext } from '@dnd-kit/core';
 import { restrictToParentElement } from '@dnd-kit/modifiers';
+import { useEventEmitter, useEventListener } from 'ahooks';
 import { UseFormReturn } from 'react-hook-form';
 
 import { CaiLayer } from '@/components/layout/workspace/vines-view/form/tabular/render/field/canvas-assisted-interaction/layer';
@@ -32,6 +33,9 @@ export const CanvasAssistedInteraction: React.FC<ICanvasAssistedInteractionProps
   const containerWidth = (width ?? 0) - padding * 2;
   const containerHeight = (height ?? 0) - padding * 2;
 
+  const wheelEvent$ = useEventEmitter<WheelEvent>();
+  useEventListener('wheel', (e: WheelEvent) => wheelEvent$.emit(e), { target: ref });
+
   const { ref: canvasRef, width: canvasWidth, height: canvasHeight } = useElementSize();
 
   const layers = layer?.layers ?? [];
@@ -51,7 +55,7 @@ export const CanvasAssistedInteraction: React.FC<ICanvasAssistedInteractionProps
             return (
               <Layer
                 key={i}
-                id={`cai-interaction-${id}-${i}`}
+                id={`cai-layer-${id}-${i}`}
                 index={i}
                 className={cn('border border-transparent', i === 0 && layer.type === 'layer' ? 'relative' : 'absolute')}
                 style={{
@@ -69,6 +73,7 @@ export const CanvasAssistedInteraction: React.FC<ICanvasAssistedInteractionProps
                 canvasWidth={canvasWidth}
                 canvasHeight={canvasHeight}
                 form={form}
+                wheelEvent$={wheelEvent$}
               />
             );
           })}
