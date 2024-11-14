@@ -1,8 +1,9 @@
 import React, { CSSProperties, useEffect, useRef } from 'react';
 
 import { DragEndEvent, DragMoveEvent, useDndMonitor, useDraggable } from '@dnd-kit/core';
-import { useCreation, useSetState } from 'ahooks';
-import { isUndefined, omit } from 'lodash';
+import { useCreation, useEventListener, useMemoizedFn, useSetState } from 'ahooks';
+import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
+import { isUndefined } from 'lodash';
 import { UseFormReturn } from 'react-hook-form';
 
 import {
@@ -21,6 +22,8 @@ interface ICaiInteractionProps extends React.ComponentPropsWithoutRef<'div'>, Om
 
   canvasWidth: number;
   canvasHeight: number;
+
+  wheelEvent$?: EventEmitter<WheelEvent>;
 }
 
 export const CaiInteraction: React.FC<ICaiInteractionProps> = ({
@@ -34,9 +37,10 @@ export const CaiInteraction: React.FC<ICaiInteractionProps> = ({
   canvasWidth,
   canvasHeight,
   form,
+  wheelEvent$,
   ...props
 }) => {
-  const { layerStyle, layerValues, layerMapper } = useLayer({
+  const { layerStyle, layerValues } = useLayer({
     layer,
     values,
     maxWidth,
@@ -102,18 +106,15 @@ export const CaiInteraction: React.FC<ICaiInteractionProps> = ({
     if (isMovingRef.current) return;
     const translateX = layerValues?.translateX;
     const translateY = layerValues?.translateY;
-    if (translateX || translateY) {
-      const translateXKeys = layerMapper?.find(([, value]) => value.includes('translateX'))?.[0];
-      const translateYKeys = layerMapper?.find(([, value]) => value.includes('translateY'))?.[0];
-
-      const xParams = layer.valueTypeOptions?.[translateXKeys ?? '']?.number;
-      const yParams = layer.valueTypeOptions?.[translateYKeys ?? '']?.number;
+    if (typeof translateX !== 'undefined' && typeof translateY !== 'undefined') {
+      const xParams = layer.valueTypeOptions?.[translateX.targets?.[0] ?? '']?.number;
+      const yParams = layer.valueTypeOptions?.[translateY.targets?.[0] ?? '']?.number;
 
       const { canvasX, canvasY } = calculatePosition({
         canvasWidth,
         canvasHeight,
-        valueX: translateX,
-        valueY: translateY,
+        valueX: translateX.value as number,
+        valueY: translateY.value as number,
         xParams,
         yParams,
       });
@@ -138,16 +139,52 @@ export const CaiInteraction: React.FC<ICaiInteractionProps> = ({
     left: x,
   } as CSSProperties;
 
+  const handelWheel = useMemoizedFn((e: WheelEvent, mouseWheel = true) => {
+    const scaleValue = layerValues.scale;
+    const updateTargetKeys = scaleValue?.targets ?? [];
+    if (typeof scaleValue !== 'undefined' && updateTargetKeys.length) {
+      //=> 处理手势缩放 | 操作时会自动把 ctrlKey 设置为 true
+      if (e.ctrlKey) {
+        e.stopPropagation();
+        e.preventDefault();
+
+        let finalScale = (scaleValue.value as number) ?? 1;
+        finalScale += -e.deltaY * 0.015;
+        finalScale = parseFloat(finalScale.toFixed(3));
+
+        for (const targetKey of updateTargetKeys) {
+          form.setValue(targetKey, finalScale);
+        }
+        return;
+      }
+      if (mouseWheel) {
+        e.stopPropagation();
+        e.preventDefault();
+        // 处理鼠标滚轮缩放
+        let finalScale = (scaleValue.value as number) * Math.pow(1.1, -e.deltaY);
+        finalScale = parseFloat(finalScale.toFixed(3));
+        for (const targetKey of updateTargetKeys) {
+          form.setValue(targetKey, finalScale);
+        }
+      }
+    }
+  });
+
+  const ref = useRef<HTMLDivElement>(null);
+  useEventListener('wheel', handelWheel, { target: ref });
+  wheelEvent$?.useSubscription((e) => handelWheel(e, false));
+
   return (
-    <div ref={setNodeRef} className="vines-center absolute" style={dragStyle} {...omit(props, ['form'])}>
+    <div ref={setNodeRef} className="vines-center absolute" style={dragStyle} {...props}>
       <div
+        ref={ref}
         className={cn('vines-center absolute cursor-grab', className)}
         style={layerStyle}
         {...listeners}
         {...attributes}
       >
-        {layerValues.icon && <VinesLucideIcon src={layerValues.icon} />}
-        {layerValues.image && <VinesImage src={layerValues.image} disabledPreview />}
+        {layerValues.icon && <VinesLucideIcon src={layerValues.icon.value as string} />}
+        {layerValues.image && <VinesImage src={layerValues.image.value as string} disabledPreview />}
       </div>
     </div>
   );
