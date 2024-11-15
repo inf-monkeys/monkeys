@@ -6,6 +6,7 @@ import type { Body, Meta } from '@uppy/utils/lib/UppyFile';
 import { fileTypeFromBlob } from 'file-type';
 import { set } from 'lodash';
 
+import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils.ts';
 import FileMd5 from '@/components/ui/vines-uploader/plugin/file-md5.ts';
 import RapidUpload from '@/components/ui/vines-uploader/plugin/rapid-upload-with-md5.ts';
 
@@ -41,8 +42,7 @@ export default class RemoteUrlToFile<M extends Meta, B extends Body> extends Bas
     this.prepareUpload = this.prepareUpload.bind(this);
   }
 
-  async requestGetRemoteFile(file: UppyFile<M, B>): Promise<Blob> {
-    const remoteUrl = file.meta.remoteUrl as string;
+  async requestGetRemoteFile(remoteUrl?: string): Promise<Blob> {
     if (!remoteUrl) {
       return Promise.reject(new Error('remoteUrl is not defined'));
     }
@@ -59,7 +59,15 @@ export default class RemoteUrlToFile<M extends Meta, B extends Body> extends Bas
 
         let blob: Blob | undefined;
         try {
-          blob = await this.requestGetRemoteFile(file);
+          // 构造缩略图地址
+          const srcPath = remoteUrl.split('/');
+          const srcPathLength = srcPath.length;
+          const thumbUrl = srcPath.map((it, i) => (i === srcPathLength - 2 ? `${it}_thumb` : it)).join('/');
+
+          // 检查 OSS 缩略图可用性
+          const isThumbAvailable = await checkImageUrlAvailable(thumbUrl);
+
+          blob = await this.requestGetRemoteFile(isThumbAvailable ? thumbUrl : remoteUrl);
         } catch {
           if (this.opts.removeFileWhenGettingFails) {
             this.uppy.log(`[RemoteUrlToFile] Removing file ${file.id} due to fetch failure`, 'warning');
