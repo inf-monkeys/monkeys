@@ -1,100 +1,44 @@
 import React, { useState } from 'react';
 
-import { useMemoizedFn } from 'ahooks';
-import { Trash2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 
-import { deleteApplicationOnStore, forkApplicationFromTemplate } from '@/apis/application-store';
 import { IApplicationStoreItemDetail } from '@/apis/ugc/asset-typings.ts';
+import { DeleteApp } from '@/components/layout/ugc-pages/store/delete.tsx';
+import { OneClickToUseApp } from '@/components/layout/ugc-pages/store/one-click-to-use-app.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog.tsx';
 import { Button } from '@/components/ui/button';
 import { VinesImage } from '@/components/ui/image';
-import { VinesMarkdown } from '@/components/ui/markdown';
+import VinesMarkdown from '@/components/ui/markdown/markdown-lazy.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { getI18nContent } from '@/utils';
-import VinesEvent from '@/utils/events.ts';
 
 interface IStoreAppProps extends IApplicationStoreItemDetail {
   mutate: () => void;
 }
 
-export const StoreApp: React.FC<IStoreAppProps> = ({
-  id,
-  iconUrl,
-  thumbnail,
-  displayName,
-  description,
-  teamId: itTeamId,
-  mutate,
-}) => {
+export const StoreApp: React.FC<IStoreAppProps> = (props) => {
+  const { id, iconUrl, thumbnail, displayName, description, teamId: itTeamId, mutate, assetTags } = props;
   const { t } = useTranslation();
 
   const { teamId } = useVinesTeam();
-
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleDeleteApplicationOnStore = useMemoizedFn((id: string) => {
-    return toast.promise(deleteApplicationOnStore(id, 'workflow'), {
-      loading: t('common.delete.loading'),
-      success: () => {
-        void mutate();
-        return t('common.delete.success');
-      },
-      error: t('common.delete.error'),
-    });
-  });
-
-  const handleUse = useMemoizedFn(async () => {
-    setIsLoading(true);
-
-    toast.promise(
-      forkApplicationFromTemplate(id, [
-        {
-          default: 'preview',
-        },
-      ]),
-      {
-        success: (flow) => {
-          if (flow) {
-            setTimeout(
-              () => VinesEvent.emit('vines-nav', '/$teamId', { teamId }, { activePage: flow.workflowId }),
-              100,
-            );
-          }
-          setIsLoading(false);
-          return t('components.layout.ugc.import-dialog.use-template.success');
-        },
-        error: () => {
-          setIsLoading(false);
-          return t('components.layout.ugc.import-dialog.use-template.error');
-        },
-        loading: t('components.layout.ugc.import-dialog.use-template.loading'),
-      },
-    );
-  });
 
   const isEmojiIcon = iconUrl.startsWith('emoji:');
   const isThumbnailValid = thumbnail?.startsWith('http');
   const title = getI18nContent(displayName);
   const desc = getI18nContent(description);
 
+  const [hover, setHover] = useState(false);
+
   return (
-    <div key={id} className="relative m-2 h-80 w-[calc(100%-1rem)] rounded-md border border-input shadow-sm">
-      <div className="m-3 mb-0 h-1/2 overflow-hidden rounded-t-md">
+    <motion.div
+      key={id}
+      className="relative m-2 h-48 w-[calc(100%-1rem)] overflow-hidden rounded-md border border-input shadow-sm"
+      onHoverStart={() => setHover(true)}
+      onHoverEnd={() => setHover(false)}
+    >
+      <div className="m-3 mb-0 h-3/4 overflow-hidden rounded-t-md">
         {isThumbnailValid && thumbnail ? (
           <VinesImage src={thumbnail} alt={title} className="w-full object-cover" disabled />
         ) : isEmojiIcon ? (
@@ -103,43 +47,40 @@ export const StoreApp: React.FC<IStoreAppProps> = ({
           <VinesImage src={iconUrl} alt={title} className="w-full object-cover" disabled />
         )}
       </div>
-      <div className="absolute bottom-0 flex h-1/2 w-full flex-col justify-between gap-1 overflow-hidden rounded-b-md bg-slate-1/35 p-4 backdrop-blur-md">
-        <h1 className="text-base font-bold">{title}</h1>
-        <ScrollArea disabledOverflowMask>
-          <VinesMarkdown className="min-h-[55px] flex-1 text-sm">{desc}</VinesMarkdown>
-        </ScrollArea>
-        <div className="flex h-10 w-full items-center gap-2">
-          <Button className="w-full" variant="outline" onClick={handleUse} loading={isLoading}>
-            {t('components.layout.ugc.import-dialog.import-to-team')}
-          </Button>
-          {teamId === itTeamId && (
-            <AlertDialog>
-              <Tooltip>
-                <AlertDialogTrigger asChild>
-                  <TooltipTrigger asChild>
-                    <Button size="small" className="[&>div>svg]:stroke-red-10" icon={<Trash2 />} variant="outline" />
-                  </TooltipTrigger>
-                </AlertDialogTrigger>
-                <TooltipContent>{t('components.layout.ugc.import-dialog.delete.label')}</TooltipContent>
-              </Tooltip>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>{t('components.layout.ugc.import-dialog.delete.label')}</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {t('components.layout.ugc.import-dialog.delete.desc')}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>{t('common.utils.cancel')}</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => handleDeleteApplicationOnStore(id)}>
-                    {t('common.utils.confirm')}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
+      <motion.div
+        className="absolute bottom-0 w-full overflow-hidden"
+        variants={{
+          visible: { marginBottom: 0 },
+          hidden: { marginBottom: desc ? -92 : -55 },
+        }}
+        initial="hidden"
+        animate={hover ? 'visible' : 'hidden'}
+      >
+        <div className="flex w-full items-center gap-1 px-2 pb-1">
+          {assetTags.map((it, i) => (
+            <div className="rounded bg-slate-1/45 px-2 py-1 text-sm backdrop-blur-md" key={i}>
+              {it.name}
+            </div>
+          ))}
         </div>
-      </div>
-    </div>
+        <div className="flex flex-col justify-between gap-4 rounded-b-md bg-slate-1/35 p-4 backdrop-blur-md">
+          <h1 className="text-base font-bold">{title}</h1>
+          {desc && (
+            <ScrollArea disabledOverflowMask className="-my-2 h-8">
+              <VinesMarkdown className="min-h-[55px] flex-1 text-sm">{desc}</VinesMarkdown>
+            </ScrollArea>
+          )}
+          <div className="flex h-10 w-full items-center gap-2">
+            <OneClickToUseApp {...props}>
+              <Button className="w-full" variant="outline">
+                {t('components.layout.ugc.import-dialog.import-to-team.label')}
+              </Button>
+            </OneClickToUseApp>
+
+            {teamId === itTeamId && <DeleteApp id={id} mutate={mutate} />}
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 };

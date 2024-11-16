@@ -19,6 +19,9 @@ export const useGetWorkflow = (workflowId: string, version?: number) =>
 export const useWorkflowList = (query: WorkflowListQuery = {}) =>
   useSWR<MonkeyWorkflow[] | undefined>(`/api/workflow/metadata?${qs.stringify(query)}`, vinesFetcher());
 
+export const getWorkflowList = (query: WorkflowListQuery = {}) =>
+  vinesFetcher<MonkeyWorkflow[]>({ simple: true })(`/api/workflow/metadata?${qs.stringify(query)}`);
+
 export const createWorkflow = (workflowParams: Partial<MonkeyWorkflow>) =>
   vinesFetcher<{ workflowId: string }>({ method: 'POST', simple: true })('/api/workflow/metadata', workflowParams);
 

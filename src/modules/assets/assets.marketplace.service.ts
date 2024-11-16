@@ -24,7 +24,7 @@ export class AssetsMarketplaceService {
     // Init workflow marketplace
     const data = BUILT_IN_WORKFLOW_MARKETPLACE_LIST;
     const allTags = data.map((x) => x.tags || []).flat();
-    const marketplaceTagBatch = await this.assetsCommonRepository.createMarketplaceTagBatch('workflow', allTags);
+    const marketplaceTagBatch = (await this.assetsCommonRepository.createMarketplaceTagBatch('workflow', allTags))?.filter((item, index, self) => self.findIndex((t) => t.id === item.id) === index);
     for (const item of data) {
       item.workflowId = item.id;
       await this.workflowAssetRepository.initBuiltInMarketPlace('workflow', item);
@@ -62,6 +62,8 @@ export class AssetsMarketplaceService {
       withTags: true,
       withTeam: true,
       withUser: true,
+
+      isMarketplace: true,
     });
   }
 
