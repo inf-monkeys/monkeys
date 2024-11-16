@@ -120,7 +120,7 @@ export const OneClickToUseApp: React.FC<IOneClickToUseAppProps> = ({ id, childre
                       })}
                     </p>
                     <p>
-                      {t('components.layout.ugc.import-dialog.import-to-team.views.pinned', {
+                      {t('components.layout.ugc.import-dialog.import-to-team.views.unpinned', {
                         count: unpinnedViews.length,
                         items: unpinnedViews.join(en ? ',' : '、'),
                       })}

@@ -34,11 +34,11 @@ export const StoreApp: React.FC<IStoreAppProps> = (props) => {
   return (
     <motion.div
       key={id}
-      className="relative m-2 h-48 w-[calc(100%-1rem)] overflow-hidden rounded-md border border-input shadow-sm"
+      className="relative m-2 h-52 w-[calc(100%-1rem)] overflow-hidden rounded-md border border-input shadow-sm"
       onHoverStart={() => setHover(true)}
       onHoverEnd={() => setHover(false)}
     >
-      <div className="m-3 mb-0 h-3/4 overflow-hidden rounded-t-md">
+      <div className="m-3 mb-0 h-3/4 overflow-hidden rounded-md">
         {isThumbnailValid && thumbnail ? (
           <VinesImage src={thumbnail} alt={title} className="w-full object-cover" disabled />
         ) : isEmojiIcon ? (
