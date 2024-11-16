@@ -9,6 +9,7 @@ import { set } from 'lodash';
 import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils.ts';
 import FileMd5 from '@/components/ui/vines-uploader/plugin/file-md5.ts';
 import RapidUpload from '@/components/ui/vines-uploader/plugin/rapid-upload-with-md5.ts';
+import VinesEvent from '@/utils/events.ts';
 
 declare module '@uppy/core' {
   export interface UppyEventMap<M extends Meta, B extends Body> {
@@ -47,7 +48,19 @@ export default class RemoteUrlToFile<M extends Meta, B extends Body> extends Bas
       return Promise.reject(new Error('remoteUrl is not defined'));
     }
 
-    return fetch(remoteUrl).then((response) => response.blob());
+    const optimizedImage = await Promise.race([
+      new Promise<string | null>((resolve) => {
+        VinesEvent.emit('vines-optimize-image', {
+          src: remoteUrl,
+          callback: resolve,
+        });
+      }),
+      new Promise<string | null>((resolve) => {
+        setTimeout(() => resolve(null), 30000);
+      }),
+    ]);
+
+    return fetch(optimizedImage || remoteUrl).then((response) => response.blob());
   }
 
   async prepareUpload(fileIDs: string[]): Promise<void> {
