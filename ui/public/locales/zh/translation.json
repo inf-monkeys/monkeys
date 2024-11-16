@@ -493,7 +493,20 @@
             "success": "创建成功",
             "error": "创建失败，请检查网络后重试"
           },
-          "import-to-team": "一键使用",
+          "import-to-team": {
+            "label": "一键使用",
+
+            "views": {
+              "label": "视图",
+              "pinned": "{{count}} 个固定在工作台的视图：{{items}}",
+              "unpinned": "{{count}} 个标准视图：{{items}}"
+            },
+            "tools": {
+              "label": "工具",
+              "added": "{{count}} 个已添加的工具：{{items}}",
+              "pending": "{{count}} 个待添加的工具：{{items}}"
+            }
+          },
           "import-workflow": {
             "title": "导入此工作流",
             "loading": "创建中...",

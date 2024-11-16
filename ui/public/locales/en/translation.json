@@ -499,7 +499,20 @@
             "success": "Create successful!",
             "error": "Create failed! Please try again later!"
           },
-          "import-to-team": "One-click use",
+          "import-to-team": {
+            "label": "One-click use",
+
+            "views": {
+              "label": "Views",
+              "pinned": "{{count}} views pinned to the workbench: {{items}}",
+              "unpinned": "{{count}} standard views: {{items}}"
+            },
+            "tools": {
+              "label": "Tools",
+              "added": "{{count}} added tools: {{items}}",
+              "pending": "{{count}} tools to be added: {{items}}"
+            }
+          },
           "import-workflow": {
             "title": "Import workflow",
             "loading": "Creating...",

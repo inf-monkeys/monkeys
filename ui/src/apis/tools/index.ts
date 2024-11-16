@@ -11,6 +11,8 @@ export const useToolLists = () =>
     revalidateOnFocus: false,
   });
 
+export const getToolList = () => vinesFetcher<VinesToolDef[]>({ method: 'GET', simple: true })('/api/tools');
+
 export const useTool = (name?: string) =>
   useSWR<VinesToolDef | undefined>(name ? `/api/tools/${name}` : null, vinesFetcher(), {
     refreshInterval: 600000,

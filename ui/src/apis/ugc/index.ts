@@ -58,6 +58,7 @@ export const preloadUgcAgents = (dto: IListUgcDto) => preloadUgcItems<IAgent>(dt
 export const useUgcActionTools = (dto: IListUgcDto) => useUgcItems<IWorkflowTool>(dto, '/api/tools');
 export const useUgcComfyuiWorkflows = (dto: IListUgcDto) =>
   useUgcItems<IComfyuiWorkflow>(dto, '/api/comfyui/workflows');
+
 export const useUgcTools = (dto: IListUgcDto) => {
   const { page, limit } = dto;
 

@@ -2,6 +2,7 @@ import { AssetType, I18nValue, MonkeyWorkflow } from '@inf-monkeys/monkeys';
 
 import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { SdModelType, SdWorkProcessStatus, XYZTestResult } from '@/apis/sd/typings.ts';
+import { IAssetTag } from '@/apis/ugc/typings.ts';
 
 export interface IBaseAsset {
   originalSite: string;
@@ -154,7 +155,8 @@ export interface IApplicationStoreItem {
   assetsPolicy: { [x: string]: any };
 }
 
-export type IApplicationStoreItemDetail = IApplicationStoreItem & {
-  workflow: MonkeyWorkflow;
-  user: Partial<IVinesUser>;
-};
+export type IApplicationStoreItemDetail = IApplicationStoreItem &
+  MonkeyWorkflow & {
+    assetTags: IAssetTag[];
+    user: Partial<IVinesUser>;
+  };

@@ -102,15 +102,15 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
       if (currentPageId) {
         const page = originalPages.find((it) => it.id === currentPageId);
-        if (!page) {
-          setEmptyOrFirstPage();
-        } else {
+        if (page) {
           const groupIdWithPage = originalGroups.find((it) => it.id === (currentTeamPage?.groupId || currentPageId));
           if (groupIdWithPage) {
             setGroupId(groupIdWithPage.id);
           } else {
             setEmptyOrFirstPage();
           }
+        } else {
+          setEmptyOrFirstPage();
         }
       } else {
         setEmptyOrFirstPage();

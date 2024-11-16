@@ -1,6 +1,7 @@
 import useSWR from 'swr';
 
 import { ToolProperty } from '@inf-monkeys/monkeys';
+import qs from 'qs';
 
 import {
   IComfyuiModelLegacy,
@@ -10,6 +11,7 @@ import {
   IComfyuiWorkflowDependencyNode,
 } from '@/apis/comfyui/typings.ts';
 import { vinesFetcher } from '@/apis/fetcher.ts';
+import { IListUgcDto } from '@/apis/ugc/typings.ts';
 
 export interface ImportComfyuiWorkflowParams {
   workflowType: string;
@@ -82,3 +84,9 @@ export const deleteComfyuiServer = (address: string) =>
   vinesFetcher({ method: 'DELETE', simple: true })(`/api/comfyui/servers`, {
     address,
   });
+
+export const getComfyUIWorkflowList = (query: IListUgcDto) =>
+  vinesFetcher<IComfyuiWorkflow[]>({ simple: true })(`/api/comfyui/workflows?${qs.stringify(query)}`);
+
+export const getComfyUIStoreList = (query: IListUgcDto) =>
+  vinesFetcher<IComfyuiWorkflow[]>({ simple: true })(`/api/assets/comfyui-workflow/marketplace?${qs.stringify(query)}`);

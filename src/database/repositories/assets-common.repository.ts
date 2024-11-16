@@ -23,6 +23,8 @@ export interface AssetsFillAdditionalInfoOptions {
   withUser?: boolean;
   withTeam?: boolean;
   withTags?: boolean;
+
+  isMarketplace?: boolean;
 }
 
 @Injectable()
@@ -388,33 +390,34 @@ export class AssetsCommonRepository {
   }
 
   public async fillAdditionalInfoList<E extends BaseAssetEntity>(list: E[], options?: AssetsFillAdditionalInfoOptions): Promise<AssetWithAdditionalInfo<E>[]> {
-    const { withTeam = false, withUser = false, withTags = false } = options || {};
+    const { withTeam = false, withUser = false, withTags = false, isMarketplace = false } = options || {};
 
     const teamIds = uniq((list as E[]).map((l) => l.teamId).filter((l) => l));
     const userIds = uniq((list as E[]).map((l) => l.creatorUserId).filter((l) => l));
     const assetIds = uniq(list.map((l) => l.getAssetId()).flat());
 
-    const assetIdToTags: { [x: string]: AssetsTagEntity[] } = {};
+    const assetIdToTags: { [x: string]: (AssetsTagEntity | AssetsMarketPlaceTagEntity)[] } = {};
 
     if (withTags) {
+      const tagsWheres = list.map((x) => ({
+        assetType: x.assetType,
+        assetId: x.getAssetId(),
+        isDeleted: false,
+      }));
       const allTagRels =
         withTags && assetIds.length
-          ? await this.assetsTagRelationsRepo.find({
-              where: list.map((x) => ({
-                assetType: x.assetType,
-                assetId: x.getAssetId(),
-                isDeleted: false,
-              })),
-            })
+          ? (await this?.[isMarketplace ? 'assetsMarketPlaceTagRelationsRepo' : 'assetsTagRelationsRepo'].find({
+              where: tagsWheres,
+            })) || []
           : [];
       const allTagIds = uniq(allTagRels.map((x) => x.tagId));
       const allTagDefs =
         withTags && allTagIds.length
-          ? await this.assetTagRepo.find({
+          ? (await this?.[isMarketplace ? 'assetMarketPlaceTagRepo' : 'assetTagRepo'].find({
               where: {
                 id: In(allTagIds),
               },
-            })
+            })) || []
           : [];
       for (const item of list) {
         const itemTagIds = allTagRels.filter((x) => x.assetId === item.getAssetId()).map((x) => x.tagId);
