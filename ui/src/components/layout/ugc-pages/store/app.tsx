@@ -8,10 +8,10 @@ import { DeleteApp } from '@/components/layout/ugc-pages/store/delete.tsx';
 import { OneClickToUseApp } from '@/components/layout/ugc-pages/store/one-click-to-use-app.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
-import { VinesImage } from '@/components/ui/image';
 import VinesMarkdown from '@/components/ui/markdown/markdown-lazy.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { VinesImage } from '@/components/ui/vines-image';
 import { getI18nContent } from '@/utils';
 
 interface IStoreAppProps extends IApplicationStoreItemDetail {
@@ -40,11 +40,11 @@ export const StoreApp: React.FC<IStoreAppProps> = (props) => {
     >
       <div className="m-3 mb-0 h-3/4 overflow-hidden rounded-md">
         {isThumbnailValid && thumbnail ? (
-          <VinesImage src={thumbnail} alt={title} className="w-full object-cover" disabled />
+          <VinesImage src={thumbnail} alt={title} className="w-full object-cover" disabledPreview />
         ) : isEmojiIcon ? (
           <VinesIcon src={iconUrl} className="[&_img]:!size-12" />
         ) : (
-          <VinesImage src={iconUrl} alt={title} className="w-full object-cover" disabled />
+          <VinesImage src={iconUrl} alt={title} className="w-full object-cover" disabledPreview />
         )}
       </div>
       <motion.div
