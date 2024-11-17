@@ -1,5 +1,7 @@
 import { mutate } from 'swr';
 
+import { fileTypeFromBlob } from 'file-type';
+
 import IndexedDBStore from './indexed-db-store.ts';
 
 export default class GoldenRetriever {
@@ -7,8 +9,6 @@ export default class GoldenRetriever {
 
   constructor() {
     this.IndexedDBStore = new IndexedDBStore();
-
-    this.restoreBlobs();
   }
 
   restoreBlobs = (): void => {
@@ -39,6 +39,26 @@ export default class GoldenRetriever {
         return {};
       });
   }
+
+  getFile = async (fileId: string): Promise<string | null> => {
+    try {
+      const { data } = await this.IndexedDBStore.get(fileId);
+      if (data) {
+        // 校验图片
+        const fileType = await fileTypeFromBlob(data);
+        if (fileType?.mime?.startsWith('image')) {
+          this.renewFile(fileId);
+          return URL.createObjectURL(data);
+        }
+        // 校验失败
+        console.error(`[Vines-GoldenRetriever] File ${fileId} is not an image`);
+        await this.IndexedDBStore.delete(fileId);
+      }
+    } catch {
+      return null;
+    }
+    return null;
+  };
 
   addFile = (fileId: string, blob: Blob): void => {
     void this.IndexedDBStore.put(fileId, blob);

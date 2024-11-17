@@ -127,7 +127,14 @@ const OptimizeManage: React.FC = () => {
 
       if (latestCachePreviewImageUrls.current && latestCachePreviewImageUrls.current[src]) {
         callback(latestCachePreviewImageUrls.current[src]);
-        void goldenRetriever.renewFile(src);
+        return;
+      }
+
+      // use cache if available
+      const getGoldenRetrieverFileUrl = await goldenRetriever.getFile(src);
+      if (getGoldenRetrieverFileUrl) {
+        await setCachePreviewImageUrl((prev) => ({ ...prev, [src]: getGoldenRetrieverFileUrl }));
+        callback(getGoldenRetrieverFileUrl);
         return;
       }
 
