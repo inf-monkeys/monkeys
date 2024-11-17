@@ -138,8 +138,13 @@ class IndexedDBStore {
     return Promise.resolve(this.#ready);
   }
 
+  #keyCache = new Map<string, string>();
   key(fileID: string): string {
-    return `${this.name}!${MD5(fileID).toString()}`;
+    const cached = this.#keyCache.get(fileID);
+    if (cached) return cached;
+    const key = `${this.name}!${MD5(fileID).toString()}`;
+    this.#keyCache.set(fileID, key);
+    return key;
   }
 
   /**
@@ -161,9 +166,7 @@ class IndexedDBStore {
     const db = await this.#ready;
     const transaction = db.transaction([STORE_NAME], 'readonly');
     const request = transaction.objectStore(STORE_NAME).get(this.key(fileID));
-    const { data } = await waitForRequest<{
-      data: { data: Blob; fileID: string };
-    }>(request);
+    const data = await waitForRequest<{ data: Blob; fileID: string }>(request);
     return {
       id: data.fileID,
       data: data.data,
