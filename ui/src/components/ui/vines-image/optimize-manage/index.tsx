@@ -2,10 +2,11 @@ import React, { useEffect, useRef } from 'react';
 
 import useSWR from 'swr';
 
-import { useLatest, useMemoizedFn } from 'ahooks';
+import { useCreation, useLatest, useMemoizedFn } from 'ahooks';
 import { rotation } from 'exifr';
 import { isUndefined } from 'lodash';
 
+import GoldenRetriever from '@/components/ui/vines-image/optimize-manage/golden-retriever';
 import {
   canvasToBlob,
   checkImageUrlAvailable,
@@ -32,6 +33,8 @@ interface QueueItem {
 }
 
 const OptimizeManage: React.FC = () => {
+  const goldenRetriever = useCreation(() => new GoldenRetriever(), []);
+
   const { data: thumbImageUrlMapper, mutate: setThumbImageUrlToMapper } = useSWR<Record<string, string>>(
     'vines-thumb-image-url-mapper',
     null,
@@ -76,14 +79,12 @@ const OptimizeManage: React.FC = () => {
 
       const orientationPromise = rotation(url).catch(() => 1) as Promise<Rotation>;
 
-      return Promise.all([onload, orientationPromise])
-        .then(([image, orientation]) => {
-          const dimensions = getProportionalDimensions(image, targetWidth, targetHeight, orientation.deg);
-          const rotatedImage = rotateImage(image, orientation);
-          const resizedImage = resizeImage(rotatedImage, dimensions.width, dimensions.height);
-          return canvasToBlob(resizedImage, thumbnailType, 80);
-        })
-        .then((blob) => URL.createObjectURL(blob));
+      return Promise.all([onload, orientationPromise]).then(([image, orientation]) => {
+        const dimensions = getProportionalDimensions(image, targetWidth, targetHeight, orientation.deg);
+        const rotatedImage = rotateImage(image, orientation);
+        const resizedImage = resizeImage(rotatedImage, dimensions.width, dimensions.height);
+        return canvasToBlob(resizedImage, thumbnailType, 80);
+      });
     },
   );
 
@@ -97,12 +98,16 @@ const OptimizeManage: React.FC = () => {
 
       const src = current.src;
       // 生成缩略图
-      const thumbBlobUrl = await convertThumbnails({
+      const thumbBlob = await convertThumbnails({
         url: current.url,
         targetWidth: current.width || 300,
         targetHeight: current.height || 300,
         thumbnailType: 'image/png',
       });
+      const thumbBlobUrl = URL.createObjectURL(thumbBlob);
+
+      // GoldenRetriever
+      goldenRetriever.addFile(src, thumbBlob);
 
       current.callback(thumbBlobUrl);
 
@@ -122,6 +127,7 @@ const OptimizeManage: React.FC = () => {
 
       if (latestCachePreviewImageUrls.current && latestCachePreviewImageUrls.current[src]) {
         callback(latestCachePreviewImageUrls.current[src]);
+        void goldenRetriever.renewFile(src);
         return;
       }
 
@@ -135,6 +141,7 @@ const OptimizeManage: React.FC = () => {
 
       try {
         let url = latestThumbImageUrlMapper.current[src] || latestCacheImageUrls.current[src];
+
         if (!url) {
           let targetSrc = src;
 
@@ -145,7 +152,9 @@ const OptimizeManage: React.FC = () => {
           }
 
           // 获取图片文件
-          const fetchImageUrl = URL.createObjectURL(await (await fetch(targetSrc)).blob());
+          const imageBlob = await fetch(targetSrc).then((res) => res.blob());
+
+          const fetchImageUrl = URL.createObjectURL(imageBlob);
           url = fetchImageUrl;
 
           void setCacheImageUrl((prev) => ({ ...prev, [targetSrc]: fetchImageUrl }));

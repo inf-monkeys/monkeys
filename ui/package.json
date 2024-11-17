@@ -60,6 +60,7 @@
     "clsx": "^2.1.0",
     "cmdk": "^0.2.1",
     "cropperjs": "^1.6.1",
+    "crypto-es": "^2.1.0",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.10",
     "emoji-mart": "^5.5.2",
