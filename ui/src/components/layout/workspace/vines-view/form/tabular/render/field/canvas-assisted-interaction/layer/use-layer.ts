@@ -1,4 +1,4 @@
-import { CSSProperties, useState } from 'react';
+import React, { CSSProperties, useContext, useState } from 'react';
 
 import useSWR from 'swr';
 
@@ -6,6 +6,7 @@ import { useCreation, useLatest, useMemoizedFn, useThrottleEffect } from 'ahooks
 import { imageDimensionsFromStream } from 'image-dimensions';
 import { isEmpty, isString, isUndefined } from 'lodash';
 
+import { LayerScaleContext } from '@/components/layout/workspace/vines-view/form/tabular/render/field/canvas-assisted-interaction';
 import { TCalculateRelativePositionParams } from '@/components/layout/workspace/vines-view/form/tabular/render/field/canvas-assisted-interaction/utils.ts';
 
 export type TLayerValueTypeOption = {
@@ -63,6 +64,7 @@ export interface IUseLayerOptions {
   layer: ILayer;
   values: Record<string, string | number | boolean | string[] | number[] | boolean[] | undefined>;
   style?: CSSProperties;
+  setLayerScale?: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const createObjectWithLayerMapper = (
@@ -95,7 +97,7 @@ const createObjectWithLayerMapper = (
   };
 };
 
-export const useLayer = ({ layer, style, values, maxWidth, maxHeight }: IUseLayerOptions) => {
+export const useLayer = ({ layer, style, values, maxWidth, maxHeight, setLayerScale }: IUseLayerOptions) => {
   const layerMapper = useCreation(() => (layer.mapper ? Object.entries(layer.mapper) : null), [layer.mapper]);
 
   const layerStyle = useCreation(() => {
@@ -103,6 +105,10 @@ export const useLayer = ({ layer, style, values, maxWidth, maxHeight }: IUseLaye
       const resultStyle: CSSProperties = {
         ...createObjectWithLayerMapper(values, layerMapper, ['width', 'height'], {}, ({ width, height }) => {
           const scale = Math.min(width ? maxWidth / width : 1, height ? maxHeight / height : 1);
+
+          if (scale !== 1) {
+            setLayerScale?.(scale);
+          }
 
           return {
             width: width ? width * scale : maxWidth,
@@ -169,6 +175,8 @@ export const useLayer = ({ layer, style, values, maxWidth, maxHeight }: IUseLaye
     >;
   }, [layerMapper, values]);
 
+  const layerScale = useContext(LayerScaleContext);
+
   const [autoStyle, setAutoStyle] = useState<CSSProperties>({});
 
   const { data: cache, mutate: setCache } = useSWR<Record<string, any>>('vines-use-layer-cache', null, {
@@ -190,8 +198,8 @@ export const useLayer = ({ layer, style, values, maxWidth, maxHeight }: IUseLaye
         if (size) {
           resultStyle = {
             ...resultStyle,
-            ...(layerWidth === null ? { width: size.width } : {}),
-            ...(layerHeight === null ? { height: size.height } : {}),
+            ...(layerWidth === null ? { width: size.width * layerScale } : {}),
+            ...(layerHeight === null ? { height: size.height * layerScale } : {}),
           };
         }
       } else {
@@ -216,8 +224,8 @@ export const useLayer = ({ layer, style, values, maxWidth, maxHeight }: IUseLaye
           if (size) {
             resultStyle = {
               ...resultStyle,
-              ...(layerWidth === null ? { width: size.width } : {}),
-              ...(layerHeight === null ? { height: size.height } : {}),
+              ...(layerWidth === null ? { width: size.width * layerScale } : {}),
+              ...(layerHeight === null ? { height: size.height * layerScale } : {}),
             };
             await setCache((prev) => ({
               ...prev,
@@ -238,7 +246,7 @@ export const useLayer = ({ layer, style, values, maxWidth, maxHeight }: IUseLaye
     () => {
       void handleCalculateAutoStyle();
     },
-    [layer, layerValues],
+    [layer, layerScale, layerValues],
     { wait: 500 },
   );
 

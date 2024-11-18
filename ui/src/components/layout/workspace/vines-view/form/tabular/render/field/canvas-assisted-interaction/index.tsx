@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { createContext, useState } from 'react';
 
 import { DndContext } from '@dnd-kit/core';
 import { restrictToParentElement } from '@dnd-kit/modifiers';
@@ -23,6 +23,8 @@ interface ICanvasAssistedInteractionProps {
   form: UseFormReturn<IWorkflowInputForm>;
 }
 
+export const LayerScaleContext = createContext<number>(1);
+
 export const CanvasAssistedInteraction: React.FC<ICanvasAssistedInteractionProps> = ({ id, input, form }) => {
   const values = useFormValues();
 
@@ -41,44 +43,52 @@ export const CanvasAssistedInteraction: React.FC<ICanvasAssistedInteractionProps
   const layers = layer?.layers ?? [];
   const firstIsLayer = layers?.[0]?.type === 'layer';
 
+  const [layerScale, setLayerScale] = useState<number>(1);
+
   return (
-    <div
-      ref={ref}
-      className="vines-center h-72 w-full overflow-hidden rounded-lg border border-input shadow-sm"
-      style={{ padding, background: layer?.background, height: layer?.height }}
-    >
-      <DndContext modifiers={[restrictToParentElement]}>
-        <div ref={canvasRef} className={cn('relative flex', !firstIsLayer && 'size-full')}>
-          {layers.map((layer, i) => {
-            const Layer = layer.type === 'interaction' ? CaiInteraction : CaiLayer;
-            const background = layer.background;
-            return (
-              <Layer
-                key={i}
-                id={`cai-layer-${id}-${i}`}
-                index={i}
-                className={cn('border border-transparent', i === 0 && layer.type === 'layer' ? 'relative' : 'absolute')}
-                style={{
-                  height: layer?.height ?? void 0,
-                  width: layer?.width ?? void 0,
-                  borderColor: layer.borderColor ?? ELayerDefault.borderColor,
-                  background: background?.startsWith('http') ? `url(${background})` : background,
-                  padding: layer.padding,
-                  opacity: layer.opacity,
-                }}
-                maxWidth={containerWidth}
-                maxHeight={containerHeight}
-                layer={layer}
-                values={values}
-                canvasWidth={canvasWidth}
-                canvasHeight={canvasHeight}
-                form={form}
-                wheelEvent$={wheelEvent$}
-              />
-            );
-          })}
-        </div>
-      </DndContext>
-    </div>
+    <LayerScaleContext.Provider value={layerScale}>
+      <div
+        ref={ref}
+        className="vines-center h-72 w-full overflow-hidden rounded-lg border border-input shadow-sm"
+        style={{ padding, background: layer?.background, height: layer?.height }}
+      >
+        <DndContext modifiers={[restrictToParentElement]}>
+          <div ref={canvasRef} className={cn('relative flex', !firstIsLayer && 'size-full')}>
+            {layers.map((layer, i) => {
+              const Layer = layer.type === 'interaction' ? CaiInteraction : CaiLayer;
+              const background = layer.background;
+              return (
+                <Layer
+                  key={i}
+                  id={`cai-layer-${id}-${i}`}
+                  index={i}
+                  className={cn(
+                    'border border-transparent',
+                    i === 0 && layer.type === 'layer' ? 'relative' : 'absolute',
+                  )}
+                  style={{
+                    height: layer?.height ?? void 0,
+                    width: layer?.width ?? void 0,
+                    borderColor: layer.borderColor ?? ELayerDefault.borderColor,
+                    background: background?.startsWith('http') ? `url(${background})` : background,
+                    padding: layer.padding,
+                    opacity: layer.opacity,
+                  }}
+                  maxWidth={containerWidth}
+                  maxHeight={containerHeight}
+                  layer={layer}
+                  values={values}
+                  canvasWidth={canvasWidth}
+                  canvasHeight={canvasHeight}
+                  setLayerScale={setLayerScale}
+                  form={form}
+                  wheelEvent$={wheelEvent$}
+                />
+              );
+            })}
+          </div>
+        </DndContext>
+      </div>
+    </LayerScaleContext.Provider>
   );
 };

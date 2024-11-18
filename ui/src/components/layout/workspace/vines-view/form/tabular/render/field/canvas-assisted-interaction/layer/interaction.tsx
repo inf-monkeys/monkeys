@@ -3,7 +3,7 @@ import React, { CSSProperties, useEffect, useRef } from 'react';
 import { DragEndEvent, DragMoveEvent, useDndMonitor, useDraggable } from '@dnd-kit/core';
 import { useCreation, useEventListener, useMemoizedFn, useSetState } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
-import { isUndefined, pick } from 'lodash';
+import { isUndefined, omit, pick } from 'lodash';
 import { UseFormReturn } from 'react-hook-form';
 
 import {
@@ -69,8 +69,8 @@ export const CaiInteraction: React.FC<ICaiInteractionProps> = ({
     },
     onDragMove({ delta }: DragMoveEvent) {
       if (layerInsertMapper) {
-        const translateXKeys = layerInsertMapper.find(([value]) => value.includes('translateX'))?.[1];
-        const translateYKeys = layerInsertMapper.find(([value]) => value.includes('translateY'))?.[1];
+        const translateXKeys = layerValues?.translateX?.targets;
+        const translateYKeys = layerValues?.translateY?.targets;
 
         if (isUndefined(translateXKeys) || isUndefined(translateYKeys)) {
           return;
@@ -139,43 +139,41 @@ export const CaiInteraction: React.FC<ICaiInteractionProps> = ({
     left: x,
   } as CSSProperties;
 
-  const handelWheel = useMemoizedFn((e: WheelEvent, mouseWheel = true) => {
+  const handelWheel = useMemoizedFn((e: WheelEvent, disabledWheel = false) => {
+    if (disabledWheel && !e.ctrlKey) return;
+
     const scaleValue = layerValues.scale;
     const updateTargetKeys = scaleValue?.targets ?? [];
     if (typeof scaleValue !== 'undefined' && updateTargetKeys.length) {
+      const scaleParams = layer.valueTypeOptions?.[scaleValue.targets?.[0] ?? '']?.number;
+      // scaleParams: {max: 2, min: 0, step: 0.001}
+      const minScale = scaleParams?.min ?? -Infinity;
+      const maxScale = scaleParams?.max ?? Infinity;
+      const stepScale = scaleParams?.step ?? 0.015;
+
       //=> 处理手势缩放 | 操作时会自动把 ctrlKey 设置为 true
-      if (e.ctrlKey) {
-        e.stopPropagation();
-        e.preventDefault();
+      e.stopPropagation();
+      e.preventDefault();
 
-        let finalScale = (scaleValue.value as number) ?? 1;
-        finalScale += -e.deltaY * 0.015;
-        finalScale = parseFloat(finalScale.toFixed(3));
+      let finalScale = (scaleValue.value as number) ?? 1;
+      finalScale += -e.deltaY * stepScale;
+      finalScale = parseFloat(finalScale.toFixed(3));
 
-        for (const targetKey of updateTargetKeys) {
-          form.setValue(targetKey, finalScale);
-        }
-        return;
-      }
-      if (mouseWheel) {
-        e.stopPropagation();
-        e.preventDefault();
-        // 处理鼠标滚轮缩放
-        let finalScale = (scaleValue.value as number) * Math.pow(1.1, -e.deltaY);
-        finalScale = parseFloat(finalScale.toFixed(3));
+      if (finalScale >= minScale && finalScale <= maxScale) {
         for (const targetKey of updateTargetKeys) {
           form.setValue(targetKey, finalScale);
         }
       }
+      return;
     }
   });
 
   const ref = useRef<HTMLDivElement>(null);
   useEventListener('wheel', handelWheel, { target: ref });
-  wheelEvent$?.useSubscription((e) => handelWheel(e, false));
+  wheelEvent$?.useSubscription((e) => handelWheel(e, true));
 
   return (
-    <div ref={setNodeRef} className="vines-center absolute" style={dragStyle} {...props}>
+    <div ref={setNodeRef} className="vines-center absolute" style={dragStyle} {...omit(props, ['setLayerScale'])}>
       <div
         ref={ref}
         className={cn('vines-center absolute cursor-grab', className)}
