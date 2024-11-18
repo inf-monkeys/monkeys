@@ -63,14 +63,14 @@ export const WorkflowRawDataEditor: React.FC<IWorkflowRawDataEditorProps> = () =
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-5xl">
         <DialogTitle>{t('workspace.flow-view.tooltip.raw-data.button')}</DialogTitle>
         <DialogDescription>{t('workspace.flow-view.tooltip.raw-data.desc')}</DialogDescription>
 
         <CodeEditor
           data={draft}
           onUpdate={handleUpdate}
-          className="h-96 w-full"
+          className="h-[60vh] w-full"
           lineNumbers={3}
           readonly={!isLatestWorkflowVersion}
         />
@@ -80,7 +80,7 @@ export const WorkflowRawDataEditor: React.FC<IWorkflowRawDataEditorProps> = () =
           <Button variant="outline" onClick={() => setDraft((workflow ?? {}) as JSONValue)}>
             {t('workspace.flow-view.tooltip.raw-data.reset')}
           </Button>
-          <Button variant="outline" onClick={handleSave} disabled={!!error}>
+          <Button variant="solid" onClick={handleSave} disabled={!!error}>
             {t('workspace.flow-view.tooltip.raw-data.save')}
           </Button>
         </DialogFooter>
