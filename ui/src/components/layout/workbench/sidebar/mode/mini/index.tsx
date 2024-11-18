@@ -67,13 +67,14 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
 
   const [currentPage, setCurrentPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
 
+  const latestOriginalPages = useLatest(originalPages ?? []);
   const prevPageRef = useRef<string>();
   useDebounceEffect(
     () => {
-      if (!teamId || originalPages === null) return;
+      if (!teamId || latestOriginalPages.current === null) return;
 
       if (toggleToActivePageRef.current === false && activePage) {
-        const page = originalPages.find((it) => it.workflowId === activePage);
+        const page = latestOriginalPages.current.find((it) => it.workflowId === activePage);
         if (page) {
           setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
           toggleToActivePageRef.current = true;
@@ -84,11 +85,11 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
       const currentPageId = currentPage?.[teamId]?.id;
 
       if (currentPageId) {
-        if (!originalPages.find((page) => page.id === currentPageId)) {
+        if (!latestOriginalPages.current.find((page) => page.id === currentPageId)) {
           setCurrentPage((prev) => ({ ...prev, [teamId]: {} }));
         }
       } else {
-        const page = originalPages.find((it) => it.id !== currentPageId);
+        const page = latestOriginalPages.current.find((it) => it.id !== currentPageId);
         if (page && prevPageRef.current !== page.id) {
           setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
           prevPageRef.current = page.id;
@@ -110,7 +111,6 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
     { wait: 64 },
   );
 
-  const latestOriginalPages = useLatest(originalPages ?? []);
   const { run: handleToggleActiveViewByWorkflowId } = useDebounceFn(
     (workflowId: string) => {
       const page = latestOriginalPages.current.find((it) => it.workflowId === workflowId);

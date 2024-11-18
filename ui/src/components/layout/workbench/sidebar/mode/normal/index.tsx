@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 
 import { Link } from '@tanstack/react-router';
 
-import { useCreation, useDebounceEffect, useThrottleEffect } from 'ahooks';
+import { useCreation, useDebounceEffect, useLatest, useThrottleEffect } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import { keyBy, map } from 'lodash';
 import { ChevronRight, Plus } from 'lucide-react';
@@ -59,20 +59,22 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   const [currentPage, setCurrentPage] = useLocalStorage<Partial<IWorkbenchViewItemPage>>('vines-ui-workbench-page', {});
 
+  const latestOriginalPages = useLatest(originalPages);
+  const latestOriginalGroups = useLatest(originalGroups);
   useDebounceEffect(
     () => {
       if (!teamId) return;
 
-      const pagesLength = originalPages.length;
-      const groupsLength = originalGroups.length;
+      const pagesLength = latestOriginalPages.current.length;
+      const groupsLength = latestOriginalGroups.current.length;
       if (!pagesLength) return;
 
       const currentTeamPage = currentPage?.[teamId] ?? {};
       const currentPageId = currentTeamPage?.id;
 
       if (toggleToActivePageRef.current === false) {
-        const page = originalPages.find((it) => it.workflowId === activePage);
-        const groupWithPageId = originalGroups.find((it) => it.pageIds.includes(page?.id ?? ''));
+        const page = latestOriginalPages.current.find((it) => it.workflowId === activePage);
+        const groupWithPageId = latestOriginalGroups.current.find((it) => it.pageIds.includes(page?.id ?? ''));
         if (page && groupWithPageId) {
           setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
           setGroupId(groupWithPageId.id);
@@ -83,10 +85,10 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
       const setEmptyOrFirstPage = () => {
         if (pagesLength && groupsLength) {
-          const sortedGroups = cloneDeep(originalGroups).sort((a) => (a.isBuiltIn ? 1 : -1));
+          const sortedGroups = cloneDeep(latestOriginalGroups.current).sort((a) => (a.isBuiltIn ? 1 : -1));
           sortedGroups.forEach(({ id, pageIds }) => {
             if (pageIds.length) {
-              const firstPage = originalPages.find((it) => it.id === pageIds[0]);
+              const firstPage = latestOriginalPages.current.find((it) => it.id === pageIds[0]);
               if (firstPage) {
                 setCurrentPage((prev) => ({ ...prev, [teamId]: firstPage }));
                 setGroupId(id);
@@ -101,9 +103,11 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
       };
 
       if (currentPageId) {
-        const page = originalPages.find((it) => it.id === currentPageId);
+        const page = latestOriginalPages.current.find((it) => it.id === currentPageId);
         if (page) {
-          const groupIdWithPage = originalGroups.find((it) => it.id === (currentTeamPage?.groupId || currentPageId));
+          const groupIdWithPage = latestOriginalGroups.current.find(
+            (it) => it.id === (currentTeamPage?.groupId || currentPageId),
+          );
           if (groupIdWithPage) {
             setGroupId(groupIdWithPage.id);
           } else {
@@ -117,7 +121,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
       }
     },
     [currentPage?.[teamId], data, teamId],
-    { wait: 180 },
+    { wait: 210 },
   );
 
   const { ref, height: wrapperHeight } = useElementSize();

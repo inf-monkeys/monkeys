@@ -19,7 +19,18 @@ export const FieldNumber: React.FC<IFieldNumberProps> = ({ input: { type, typeOp
   return (
     type === 'number' &&
     (isUndefined(typeOptions?.minValue) || isUndefined(typeOptions?.maxValue) || typeOptions?.numberPrecision === 0 ? (
-      <NumberField value={toNumber(value)} onChange={onChange} aria-label="number input" {...field}>
+      <NumberField
+        value={toNumber(value)}
+        onChange={onChange}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.code === 'Enter' || e.keyCode === 13) {
+            e.continuePropagation();
+            e.preventDefault();
+          }
+        }}
+        aria-label="number input"
+        {...field}
+      >
         <FieldGroup>
           <NumberFieldInput />
         </FieldGroup>
