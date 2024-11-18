@@ -63,7 +63,7 @@ export const WorkflowRawDataEditor: React.FC<IWorkflowRawDataEditorProps> = () =
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-5xl">
+      <DialogContent className="max-w-6xl">
         <DialogTitle>{t('workspace.flow-view.tooltip.raw-data.button')}</DialogTitle>
         <DialogDescription>{t('workspace.flow-view.tooltip.raw-data.desc')}</DialogDescription>
 
