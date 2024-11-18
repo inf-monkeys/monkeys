@@ -19,6 +19,7 @@ export const CaiLayer: React.FC<ICaiLayerProps> = ({
   maxHeight,
   className,
   style,
+  setLayerScale,
   ...props
 }) => {
   const { layerStyle, layerValues } = useLayer({
@@ -26,6 +27,7 @@ export const CaiLayer: React.FC<ICaiLayerProps> = ({
     values,
     maxWidth,
     maxHeight,
+    setLayerScale,
     style,
   });
 
