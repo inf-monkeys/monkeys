@@ -1,6 +1,8 @@
 import { CSSProperties, useState } from 'react';
 
-import { useCreation, useDebounceEffect, useMemoizedFn } from 'ahooks';
+import useSWR from 'swr';
+
+import { useCreation, useLatest, useMemoizedFn, useThrottleEffect } from 'ahooks';
 import { imageDimensionsFromStream } from 'image-dimensions';
 import { isEmpty, isString, isUndefined } from 'lodash';
 
@@ -168,6 +170,11 @@ export const useLayer = ({ layer, style, values, maxWidth, maxHeight }: IUseLaye
   }, [layerMapper, values]);
 
   const [autoStyle, setAutoStyle] = useState<CSSProperties>({});
+
+  const { data: cache, mutate: setCache } = useSWR<Record<string, any>>('vines-use-layer-cache', null, {
+    fallbackData: {},
+  });
+  const latestCache = useLatest(cache);
   const handleCalculateAutoStyle = useMemoizedFn(async () => {
     let resultStyle: CSSProperties = {};
 
@@ -176,9 +183,10 @@ export const useLayer = ({ layer, style, values, maxWidth, maxHeight }: IUseLaye
     const layerHeight = layer.height;
     const layerImageValue = layerValues?.image?.value;
     if ((layerWidth === null || layerHeight === null) && isString(layerImageValue)) {
-      const { body } = await fetch(layerImageValue);
-      if (body) {
-        const size = await imageDimensionsFromStream(body);
+      const cacheId = `auto-calc-size-${layerImageValue}`;
+      if (latestCache.current?.[cacheId]) {
+        // 使用缓存
+        const size = latestCache.current[cacheId];
         if (size) {
           resultStyle = {
             ...resultStyle,
@@ -186,6 +194,38 @@ export const useLayer = ({ layer, style, values, maxWidth, maxHeight }: IUseLaye
             ...(layerHeight === null ? { height: size.height } : {}),
           };
         }
+      } else {
+        // region 自动计算图片尺寸
+        const { body } = await fetch(layerImageValue);
+        if (body) {
+          let size: { width: number; height: number } | undefined;
+          try {
+            size = await imageDimensionsFromStream(body);
+          } catch {
+            await new Promise((resolve) => {
+              const img = new Image();
+              img.src = layerImageValue;
+              const isTimeout = setTimeout(() => resolve(null), 30000);
+              img.onload = () => {
+                clearTimeout(isTimeout);
+                size = { width: img.width, height: img.height };
+                resolve(null);
+              };
+            });
+          }
+          if (size) {
+            resultStyle = {
+              ...resultStyle,
+              ...(layerWidth === null ? { width: size.width } : {}),
+              ...(layerHeight === null ? { height: size.height } : {}),
+            };
+            await setCache((prev) => ({
+              ...prev,
+              [cacheId]: size,
+            }));
+          }
+        }
+        // endregion
       }
     }
 
@@ -194,12 +234,12 @@ export const useLayer = ({ layer, style, values, maxWidth, maxHeight }: IUseLaye
       ...resultStyle,
     }));
   });
-  useDebounceEffect(
+  useThrottleEffect(
     () => {
       void handleCalculateAutoStyle();
     },
     [layer, layerValues],
-    { wait: 100 },
+    { wait: 500 },
   );
 
   return {
