@@ -9,6 +9,9 @@ export interface IVinesImageProps {
   disabledPreview?: boolean;
 
   className?: string;
+
+  style?: React.CSSProperties;
+  imageStyle?: React.CSSProperties;
 }
 
 const VinesImageCore = lazy(() => import('./vines-image-lazy.tsx'));

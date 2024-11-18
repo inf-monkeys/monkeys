@@ -1,7 +1,8 @@
-import { CSSProperties } from 'react';
+import { CSSProperties, useState } from 'react';
 
-import { useCreation } from 'ahooks';
-import { isEmpty, isUndefined } from 'lodash';
+import { useCreation, useDebounceEffect, useMemoizedFn } from 'ahooks';
+import { imageDimensionsFromStream } from 'image-dimensions';
+import { isEmpty, isString, isUndefined } from 'lodash';
 
 import { TCalculateRelativePositionParams } from '@/components/layout/workspace/vines-view/form/tabular/render/field/canvas-assisted-interaction/utils.ts';
 
@@ -166,9 +167,47 @@ export const useLayer = ({ layer, style, values, maxWidth, maxHeight }: IUseLaye
     >;
   }, [layerMapper, values]);
 
+  const [autoStyle, setAutoStyle] = useState<CSSProperties>({});
+  const handleCalculateAutoStyle = useMemoizedFn(async () => {
+    let resultStyle: CSSProperties = {};
+
+    // 自动计算图片尺寸
+    const layerWidth = layer.width;
+    const layerHeight = layer.height;
+    const layerImageValue = layerValues?.image?.value;
+    if ((layerWidth === null || layerHeight === null) && isString(layerImageValue)) {
+      const { body } = await fetch(layerImageValue);
+      if (body) {
+        const size = await imageDimensionsFromStream(body);
+        if (size) {
+          resultStyle = {
+            ...resultStyle,
+            ...(layerWidth === null ? { width: size.width } : {}),
+            ...(layerHeight === null ? { height: size.height } : {}),
+          };
+        }
+      }
+    }
+
+    setAutoStyle((prev) => ({
+      ...prev,
+      ...resultStyle,
+    }));
+  });
+  useDebounceEffect(
+    () => {
+      void handleCalculateAutoStyle();
+    },
+    [layer, layerValues],
+    { wait: 100 },
+  );
+
   return {
     layerMapper,
-    layerStyle,
+    layerStyle: {
+      ...layerStyle,
+      ...autoStyle,
+    },
     layerValues,
   };
 };

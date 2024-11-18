@@ -74,6 +74,7 @@
     "i18next": "^23.11.3",
     "i18next-browser-languagedetector": "^7.2.1",
     "i18next-http-backend": "^2.5.1",
+    "image-dimensions": "^2.3.0",
     "image-js": "^0.35.6",
     "immer": "^10.0.4",
     "input-otp": "^1.2.4",

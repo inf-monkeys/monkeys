@@ -3,7 +3,7 @@ import React, { CSSProperties, useEffect, useRef } from 'react';
 import { DragEndEvent, DragMoveEvent, useDndMonitor, useDraggable } from '@dnd-kit/core';
 import { useCreation, useEventListener, useMemoizedFn, useSetState } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
-import { isUndefined } from 'lodash';
+import { isUndefined, pick } from 'lodash';
 import { UseFormReturn } from 'react-hook-form';
 
 import {
@@ -184,7 +184,13 @@ export const CaiInteraction: React.FC<ICaiInteractionProps> = ({
         {...attributes}
       >
         {layerValues.icon && <VinesLucideIcon src={layerValues.icon.value as string} />}
-        {layerValues.image && <VinesImage src={layerValues.image.value as string} disabledPreview />}
+        {layerValues.image && (
+          <VinesImage
+            src={layerValues.image.value as string}
+            imageStyle={pick(layerStyle, ['width', 'height', 'transform'])}
+            disabledPreview
+          />
+        )}
       </div>
     </div>
   );
