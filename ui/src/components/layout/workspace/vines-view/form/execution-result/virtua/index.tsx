@@ -12,6 +12,7 @@ import {
   VirtuaExecutionResultGridItem,
 } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { cn } from '@/utils';
 import { mergeRefs } from '@/utils/merge-refs.ts';
 
 const RefContext = createContext<React.RefCallback<Element>>(null!);
@@ -68,7 +69,10 @@ export const VirtuaExecutionResultGrid: React.FC<IVirtuaExecutionResultGridProps
   return (
     <RefContext.Provider value={animationParent}>
       <ScrollArea
-        className="-pr-0.5 mr-0.5 [&>[data-radix-scroll-area-viewport]]:p-2"
+        className={cn(
+          '-pr-0.5 z-20 mr-0.5 bg-background [&>[data-radix-scroll-area-viewport]]:p-2',
+          !total && 'hidden',
+        )}
         ref={scrollRef}
         style={{ height }}
         disabledOverflowMask
