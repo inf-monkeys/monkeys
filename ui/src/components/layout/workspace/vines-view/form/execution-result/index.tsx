@@ -66,11 +66,11 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
           />
         </VinesImageGroup>
 
-        <AnimatePresence>
+        <AnimatePresence mode="popLayout">
           {isLoading ? (
             <motion.div
               key="vines-execution-result-loading"
-              className="vines-center absolute left-0 top-0 size-full"
+              className="vines-center pointer-events-none absolute left-0 top-0 z-0 size-full"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { delay: 0.5 } }}
               exit={{ opacity: 0 }}
@@ -80,7 +80,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
           ) : totalCount ? null : (
             <motion.div
               key="vines-execution-result-empty"
-              className="vines-center absolute left-0 top-0 size-full flex-col gap-2"
+              className="vines-center pointer-events-none absolute left-0 top-0 z-0 size-full flex-col gap-2"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { delay: 0.3 } }}
               exit={{ opacity: 0 }}
