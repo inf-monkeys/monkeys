@@ -29,7 +29,7 @@ export const OAuthWeWorkProvider: React.FC<IOAuthWeWorkProviderProps> = ({ child
               agentid: it.agentid,
               redirect_uri: it.redirect_uri,
               redirect_type: WWLoginRedirectType.top,
-              lang: i18n.language === 'cn' ? WWLoginLangType.zh : WWLoginLangType.en,
+              lang: i18n.language === 'zh' ? WWLoginLangType.zh : WWLoginLangType.en,
             },
             onLoginFail({ errMsg }) {
               toast.error(errMsg);

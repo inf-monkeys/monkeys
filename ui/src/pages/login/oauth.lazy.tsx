@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 
+import { useSWRConfig } from 'swr';
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { useMemoizedFn } from 'ahooks';
@@ -15,12 +16,15 @@ import { VinesUserLogin } from '@/components/layout/login';
 import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { I18nSelector } from '@/components/ui/i18n-selector';
 import { AppLogo } from '@/components/ui/logo';
+import { setLocalStorage } from '@/hooks/use-local-storage';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useAppStore } from '@/store/useAppStore';
 import VinesEvent from '@/utils/events.ts';
 
 const OAuthPage: React.FC = () => {
   const { t } = useTranslation();
+
+  const { mutate } = useSWRConfig();
 
   const darkMode = useAppStore((s) => s.darkMode);
   const { data: oem, error } = useSystemConfig();
@@ -45,7 +49,15 @@ const OAuthPage: React.FC = () => {
     toast.promise(trigger({ code: bind_code }), {
       loading: t('auth.oauth.loading'),
       success: () => {
-        void navigate({ to: '/' });
+        mutate('/api/teams').then((it) => {
+          setLocalStorage('vines-teams', it);
+          const currentTeamId = it?.[0]?.id;
+          if (currentTeamId) {
+            localStorage.setItem('vines-team-id', currentTeamId);
+            window['vinesTeamId'] = currentTeamId;
+          }
+          void navigate({ to: '/' });
+        });
         return t('auth.oauth.success');
       },
       error: t('auth.oauth.error'),
