@@ -42,11 +42,12 @@ export class ToolsCredentialsService {
       throw new Error(`Namespace ${toolNamespace} Not found`);
     }
     const rasPublicKey = namespace.rasPublicKey;
-    if (!rasPublicKey) {
-      throw new Error(`RSA public key for configured for namespace ${toolNamespace}`);
+    if (rasPublicKey) {
+      const encryptedData = encryptWithPublicKey(JSON.stringify(data), rasPublicKey);
+      return await this.credentialsRepository.updateCredential(teamId, id, displayName, encryptedData);
+    } else {
+      return await this.credentialsRepository.updateCredential(teamId, id, displayName, JSON.stringify(data));
     }
-    const encryptedData = encryptWithPublicKey(JSON.stringify(data), rasPublicKey);
-    return await this.credentialsRepository.updateCredential(teamId, id, displayName, encryptedData);
   }
 
   public async deleteCredential(teamId: string, id: string) {
@@ -61,8 +62,12 @@ export class ToolsCredentialsService {
       throw new Error(`Namespace ${toolNamespace} Not found`);
     }
     const rasPublicKey = namespace.rasPublicKey;
-    if (!rasPublicKey) {
-      throw new Error(`RSA public key for configured for namespace ${toolNamespace}`);
+
+    let encryptedData: string;
+    if (rasPublicKey) {
+      encryptedData = encryptWithPublicKey(JSON.stringify(data), rasPublicKey);
+    } else {
+      encryptedData = JSON.stringify(data);
     }
     const credentialId = generateDbId();
 
@@ -73,7 +78,7 @@ export class ToolsCredentialsService {
       id: credentialId,
       type,
       isDeleted: false,
-      encryptedData: encryptWithPublicKey(JSON.stringify(data), rasPublicKey),
+      encryptedData: encryptedData,
     };
     return await this.credentialsRepository.createCredentail(entity);
   }
