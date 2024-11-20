@@ -96,6 +96,7 @@ export enum AuthMethod {
   phone = 'phone',
   oidc = 'oidc',
   apikey = 'apikey',
+  oauth = 'oauth',
 }
 
 export interface OIDCIdpConfig {
@@ -135,6 +136,13 @@ export interface JwtConfig {
   expires_in: number | string;
 }
 
+export interface WeWorkConfig {
+  corpId: string;
+  agentId: string;
+  secret: string;
+  passwdSalt: string;
+}
+
 export interface AuthConfig {
   enabled: AuthMethod[];
   sessionSecret?: string;
@@ -142,8 +150,9 @@ export interface AuthConfig {
   password?: PasswordConfig;
   jwt: JwtConfig;
   sms: SMSConfig;
-  saltTotp: string;
-  privilegedToken: string;
+  saltTotp?: string;
+  privilegedToken?: string;
+  wework?: WeWorkConfig;
 }
 
 export interface S3Config {
@@ -324,6 +333,12 @@ export const config: Config = {
     sms: {
       provider: 'dysms',
       config: readConfig('auth.sms.config', {}),
+    },
+    wework: {
+      corpId: readConfig('auth.wework.corpId'),
+      agentId: readConfig('auth.wework.agentId'),
+      secret: readConfig('auth.wework.secret'),
+      passwdSalt: readConfig('auth.wework.passwdSalt', '***monkeys-oauth*{{id}}*'),
     },
     saltTotp: readConfig('auth.saltTotp'),
     privilegedToken: readConfig('auth.privilegedToken'),

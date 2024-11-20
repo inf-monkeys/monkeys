@@ -7,6 +7,7 @@ export interface CacheManager {
   get(key: string): Promise<string | null>;
   set(key: string, value: string | Buffer | number, secondsToken?: 'EX', seconds?: number | string): Promise<'OK'>;
   lpush(key: string, value: string | Buffer | number): Promise<number>;
+  del(key: string): Promise<number>;
 }
 
 export class InMemoryCache implements CacheManager {
@@ -17,12 +18,12 @@ export class InMemoryCache implements CacheManager {
   }
 
   public async get(key: string): Promise<string | null> {
-    return this.storage[key];
+    return new Promise((resolve) => resolve(this.storage[key]));
   }
 
   public async set(key: string, value: string | number | Buffer): Promise<'OK'> {
     this.storage[key] = value;
-    return 'OK';
+    return new Promise((resolve) => resolve('OK'));
   }
 
   public async lpush(key: string, value: string | Buffer | number): Promise<number> {
@@ -30,7 +31,12 @@ export class InMemoryCache implements CacheManager {
       this.storage[key] = [];
     }
     this.storage[key].push(value);
-    return this.storage[key].length;
+    return new Promise((resolve) => resolve(this.storage[key].length));
+  }
+
+  public async del(key: string): Promise<number> {
+    delete this.storage[key];
+    return new Promise((resolve) => resolve(1));
   }
 }
 
@@ -54,5 +60,9 @@ export class RedisCache implements CacheManager {
 
   public async lpush(key: string, value: string | Buffer | number) {
     return await this.redis.lpush(key, value);
+  }
+
+  public async del(key: string) {
+    return await this.redis.del(key);
   }
 }
