@@ -90,6 +90,15 @@ export class UserRepository {
     });
   }
 
+  public async findByExternalId(externalId: string) {
+    return await this.userRepository.findOne({
+      where: {
+        externalId,
+        isDeleted: false,
+      },
+    });
+  }
+
   public async updateUserLastLogin(userId: string, authMethod: AuthMethod) {
     const user = await this.findById(userId);
     if (user) {
@@ -102,7 +111,7 @@ export class UserRepository {
 
   public async registerUser(data: RegisterUserParams) {
     const { phone, email, name, password, photo, externalId } = data;
-    const user = await this.userRepository.save({
+    return await this.userRepository.save({
       id: generateDbId(),
       name: name || phone || email,
       phone,
@@ -116,7 +125,6 @@ export class UserRepository {
       isBlocked: false,
       externalId,
     });
-    return user;
   }
 
   async registryOrGetUser(data: RegisterOrUpdateUserParams) {
@@ -188,6 +196,15 @@ export class UserRepository {
     return {
       success: true,
     };
+  }
+
+  async updateUser(userId: string, data: Partial<UserEntity>) {
+    await this.userRepository.update(
+      {
+        id: userId,
+      },
+      data,
+    );
   }
 
   public async getUsersByIdsAsMap(ids: string[]) {

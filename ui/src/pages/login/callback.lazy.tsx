@@ -22,11 +22,17 @@ const LoginCallback: React.FC = () => {
 
   const navigate = useNavigate();
   const { mutate } = useSWRConfig();
-  const { access_token } = Route.useSearch() as { access_token: string };
+  const { access_token, error } = Route.useSearch() as { access_token: string; error?: string };
 
   const { data: oem } = useSystemConfig();
 
   useEffect(() => {
+    if (error) {
+      toast.warning(error);
+      VinesEvent.emit('vines-nav', '/login');
+      return;
+    }
+
     if (!access_token) {
       toast.warning(t('auth.oidc.auth-failed'));
       VinesEvent.emit('vines-nav', '/login');
@@ -47,7 +53,7 @@ const LoginCallback: React.FC = () => {
       void navigate({ to: '/' });
       toast.success(t('auth.login.success'));
     });
-  }, [access_token]);
+  }, [access_token, error]);
 
   const oidcText = oem?.auth?.oidc?.buttonText;
 

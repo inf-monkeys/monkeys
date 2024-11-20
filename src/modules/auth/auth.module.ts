@@ -6,6 +6,7 @@ import { PasswordModule } from './password/password.module';
 import { PhoneModule } from './phone/phone.module';
 import { TeamsModule } from './teams/teams.module';
 import { UsersModule } from './users/users.module';
+import { OAuthModule } from '@/modules/auth/oauth/oauth.module';
 
 const imports: Array<any> = [TeamsModule, UsersModule, ApikeyModule];
 if (config.auth.enabled.includes(AuthMethod.oidc)) {
@@ -16,6 +17,10 @@ if (config.auth.enabled.includes(AuthMethod.password)) {
 }
 if (config.auth.enabled.includes(AuthMethod.phone)) {
   imports.push(PhoneModule);
+}
+
+if (config.auth.enabled.includes(AuthMethod.oauth)) {
+  imports.push(OAuthModule);
 }
 
 @Module({

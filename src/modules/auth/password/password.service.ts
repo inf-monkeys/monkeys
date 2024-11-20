@@ -42,9 +42,9 @@ export class PasswordService {
   async loginByPassword(email: string, password: string, initialTeamId?: string) {
     let user = await this.userRepository.findByEmail(email);
     if (user) {
-      const verifyRes = await this.validatePassword(password, user.password);
+      const verifyRes = this.validatePassword(password, user.password);
       if (!verifyRes) {
-        const verifyRes = await this.validateTotpPassword(email, password);
+        const verifyRes = this.validateTotpPassword(email, password);
         if (verifyRes === null) {
           throw new ForbiddenException('密码错误或用户不存在，请检查');
         } else if (!verifyRes) {
