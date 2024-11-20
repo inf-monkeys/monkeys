@@ -43,11 +43,12 @@ export class OAuthService {
         throw new Error(`获取用户信息失败: ${result.errmsg}`);
       }
 
-      if (!result.UserId) {
+      const weworkUserId = result.UserId;
+      if (!weworkUserId) {
         throw new Error('获取用户信息失败: 用户 ID 为空');
       }
 
-      const saltUserId = crypto.MD5(result.UserId).toString();
+      const saltUserId = crypto.MD5(weworkUserId).toString();
 
       const user = await this.userRepository.findByExternalId(saltUserId);
 
@@ -59,22 +60,26 @@ export class OAuthService {
         };
       } else {
         // 获取用户详情
-        const accessToken = await this.wechatWorkBaseService.getAccessToken(AgentType.Custom);
-        const userDetail =
-          (
-            await lastValueFrom(
-              this.httpService.post(`https://qyapi.weixin.qq.com/cgi-bin/auth/getuserdetail?access_token=${accessToken}`, {
-                user_ticket: result.user_ticket,
-              }),
-            )
-          )?.data ?? {};
+        let userDetail: Record<string, any>;
+        const userTicket = result.user_ticket;
+        if (userTicket) {
+          const accessToken = await this.wechatWorkBaseService.getAccessToken(AgentType.Custom);
+          userDetail =
+            (
+              await lastValueFrom(
+                this.httpService.post(`https://qyapi.weixin.qq.com/cgi-bin/auth/getuserdetail?access_token=${accessToken}`, {
+                  user_ticket: userTicket,
+                }),
+              )
+            )?.data ?? {};
+        }
 
         // 自动注册为新账号
         if (state === 'create') {
           const newUser = await this.userRepository.registerUser({
             password: this.idToPassword(saltUserId),
-            name: userDetail?.userid,
-            email: userDetail?.biz_mail,
+            name: userDetail?.userid ?? weworkUserId,
+            email: userDetail?.biz_mail ?? `${weworkUserId}@wework.tencent`,
             phone: userDetail?.mobile,
             photo: userDetail?.avatar,
             externalId: saltUserId,
@@ -91,6 +96,7 @@ export class OAuthService {
           `${config.server.appId}:oauth-${bindCode}`,
           JSON.stringify({
             id: saltUserId,
+            weworkUserId,
             data: userDetail,
           }),
           'EX',
@@ -138,5 +144,18 @@ export class OAuthService {
     } catch {
       throw new Error('绑定失败，用户信息失效');
     }
+  }
+
+  public async unbindWework(userId: string) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new Error('用户不存在');
+    }
+
+    await this.userRepository.updateUser(user.id, {
+      externalId: null,
+    });
+
+    return '解绑成功';
   }
 }

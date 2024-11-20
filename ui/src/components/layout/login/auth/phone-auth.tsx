@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 
 import { sendSmsVerifyCode } from '@/apis/authz';
 import { AuthMethod } from '@/apis/common/typings.ts';
-import { AuthEvent, AuthWrapper } from '@/components/layout/login/auth-wrapper.tsx';
+import { AuthEvent, AuthWrapper, IAuthWrapperOptions } from '@/components/layout/login/auth/auth-wrapper.tsx';
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input';
@@ -16,11 +16,12 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
 import { PHONE_REGEX } from '@/consts/authz';
 import { ILoginViaSms, loginViaSmsSchema } from '@/schema/authz';
 
-interface IPhoneAuthProps extends React.ComponentPropsWithoutRef<'div'> {
-  onFinished?: () => void;
-}
-
-export const PhoneAuth: React.FC<IPhoneAuthProps> = ({ onFinished }) => {
+export const PhoneAuth: React.FC<IAuthWrapperOptions> = ({
+  onFinished,
+  buttonContent,
+  buttonIcon,
+  onLoginFinished,
+}) => {
   const { t } = useTranslation();
 
   const form = useForm<ILoginViaSms>({
@@ -81,6 +82,9 @@ export const PhoneAuth: React.FC<IPhoneAuthProps> = ({ onFinished }) => {
       onFinished={onFinished}
       method={AuthMethod.phone}
       event$={event$}
+      buttonContent={buttonContent}
+      buttonIcon={buttonIcon}
+      onLoginFinished={onLoginFinished}
     >
       <FormField
         name="phoneNumber"

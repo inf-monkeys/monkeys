@@ -16,26 +16,45 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form.tsx';
 import { VinesFullLoading } from '@/components/ui/loading';
 import { setLocalStorage } from '@/hooks/use-local-storage';
-import { Route } from '@/pages/login/index.lazy.tsx';
+import useUrlState from '@/hooks/use-url-state.ts';
 import VinesEvent from '@/utils/events.ts';
 
 export type AuthEvent = 'trigger-login' | 'clear-sms-code-input';
 
-interface IAuthWrapperProps {
+export interface IAuthWrapperOptions {
+  buttonContent?: React.ReactNode;
+  buttonIcon?: React.ReactNode;
+  onFinished?: () => void;
+  onLoginFinished?: () => void;
+}
+
+interface IAuthWrapperProps extends IAuthWrapperOptions {
   children?: React.ReactNode;
 
   form: UseFormReturn<never>;
-  onFinished?: () => void;
   method: AuthMethod;
 
   event$?: EventEmitter<AuthEvent>;
 }
 
-export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, children, method, event$ }) => {
+export const AuthWrapper: React.FC<IAuthWrapperProps> = ({
+  form,
+  onFinished,
+  children,
+  method,
+  event$,
+  buttonContent,
+  buttonIcon,
+  onLoginFinished,
+}) => {
   const { t } = useTranslation();
 
   const navigate = useNavigate();
-  const { redirect_id, redirect_params, redirect_search } = Route.useSearch<any>();
+  const [{ redirect_id, redirect_params, redirect_search }] = useUrlState<{
+    redirect_id?: number;
+    redirect_params?: string;
+    redirect_search?: string;
+  }>({});
   const { mutate } = useSWRConfig();
 
   const { trigger: triggerPassword, data: passwordData } = useLoginByPassword();
@@ -74,30 +93,34 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
     const finalToken = passwordData?.token ?? phoneData?.token ?? '';
 
     saveAuthToken(finalToken).then((result) => {
+      toast.success(t('auth.login.success'));
       if (result) {
-        setLoading(true);
-        mutate('/api/teams').then((it) => {
-          setLoading(false);
-          setLocalStorage('vines-teams', it);
-          if (
-            redirect_id &&
-            redirect_params &&
-            !!redirect_params?.teamId &&
-            it?.some((item: { id: string }) => item.id === redirect_params?.teamId)
-          ) {
-            VinesEvent.emit('vines-nav', redirect_id, redirect_params, redirect_search);
-          } else {
-            const currentTeamId = it?.[0]?.id;
-            if (currentTeamId) {
-              localStorage.setItem('vines-team-id', currentTeamId);
-              window['vinesTeamId'] = currentTeamId;
+        if (onLoginFinished) {
+          onLoginFinished();
+        } else {
+          setLoading(true);
+          mutate('/api/teams').then((it) => {
+            setLoading(false);
+            setLocalStorage('vines-teams', it);
+            if (
+              redirect_id &&
+              redirect_params &&
+              !!redirect_params?.teamId &&
+              it?.some((item: { id: string }) => item.id === redirect_params?.teamId)
+            ) {
+              VinesEvent.emit('vines-nav', redirect_id, redirect_params, redirect_search);
+            } else {
+              const currentTeamId = it?.[0]?.id;
+              if (currentTeamId) {
+                localStorage.setItem('vines-team-id', currentTeamId);
+                window['vinesTeamId'] = currentTeamId;
+              }
+              void navigate({ to: '/' });
             }
-            void navigate({ to: '/' });
-          }
-        });
+          });
+        }
       }
       onFinished?.();
-      toast.success(t('auth.login.success'));
     });
   }, [passwordData, phoneData]);
 
@@ -120,8 +143,8 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({ form, onFinished, chi
           </span>
         </div>
 
-        <Button ref={submitButtonRef} type="submit" loading={isLoggingIn} variant="solid">
-          {t('auth.login.login')}
+        <Button ref={submitButtonRef} type="submit" loading={isLoggingIn} variant="solid" icon={buttonIcon}>
+          {buttonContent ? buttonContent : t('auth.login.login')}
         </Button>
       </form>
       {loading && <VinesFullLoading className="top-0 z-50 backdrop-blur-sm" tips={t('auth.login.fetch-teams')} />}

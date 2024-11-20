@@ -19,6 +19,7 @@ import { Route as rootRoute } from './pages/__root'
 const IndexLazyImport = createFileRoute('/')()
 const LoginIndexLazyImport = createFileRoute('/login/')()
 const TeamIdIndexLazyImport = createFileRoute('/$teamId/')()
+const LoginOauthLazyImport = createFileRoute('/login/oauth')()
 const LoginCallbackLazyImport = createFileRoute('/login/callback')()
 const TeamIdWorkspaceIndexLazyImport = createFileRoute('/$teamId/workspace/')()
 const TeamIdWorkflowsIndexLazyImport = createFileRoute('/$teamId/workflows/')()
@@ -107,6 +108,11 @@ const TeamIdIndexLazyRoute = TeamIdIndexLazyImport.update({
   path: '/$teamId/',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./pages/$teamId/index.lazy').then((d) => d.Route))
+
+const LoginOauthLazyRoute = LoginOauthLazyImport.update({
+  path: '/login/oauth',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./pages/login/oauth.lazy').then((d) => d.Route))
 
 const LoginCallbackLazyRoute = LoginCallbackLazyImport.update({
   path: '/login/callback',
@@ -386,6 +392,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginCallbackLazyImport
       parentRoute: typeof rootRoute
     }
+    '/login/oauth': {
+      preLoaderRoute: typeof LoginOauthLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/': {
       preLoaderRoute: typeof TeamIdIndexLazyImport
       parentRoute: typeof rootRoute
@@ -530,6 +540,7 @@ declare module '@tanstack/react-router' {
 export const routeTree = rootRoute.addChildren([
   IndexLazyRoute,
   LoginCallbackLazyRoute,
+  LoginOauthLazyRoute,
   TeamIdIndexLazyRoute,
   LoginIndexLazyRoute,
   TeamIdActionToolsIndexLazyRoute,

@@ -5,16 +5,17 @@ import { useForm, UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { AuthMethod } from '@/apis/common/typings.ts';
-import { AuthWrapper } from '@/components/layout/login/auth-wrapper.tsx';
+import { AuthWrapper, IAuthWrapperOptions } from '@/components/layout/login/auth/auth-wrapper.tsx';
 import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form.tsx';
 import { Input } from '@/components/ui/input';
 import { ILoginViaMail, loginViaMailSchema } from '@/schema/authz';
 
-interface IEmailAuthProps extends React.ComponentPropsWithoutRef<'div'> {
-  onFinished?: () => void;
-}
-
-export const EmailAuth: React.FC<IEmailAuthProps> = ({ onFinished }) => {
+export const EmailAuth: React.FC<IAuthWrapperOptions> = ({
+  onFinished,
+  buttonContent,
+  buttonIcon,
+  onLoginFinished,
+}) => {
   const { t } = useTranslation();
 
   const form = useForm<ILoginViaMail>({
@@ -26,7 +27,14 @@ export const EmailAuth: React.FC<IEmailAuthProps> = ({ onFinished }) => {
   });
 
   return (
-    <AuthWrapper form={form as unknown as UseFormReturn<never>} onFinished={onFinished} method={AuthMethod.password}>
+    <AuthWrapper
+      form={form as unknown as UseFormReturn<never>}
+      onFinished={onFinished}
+      method={AuthMethod.password}
+      buttonContent={buttonContent}
+      buttonIcon={buttonIcon}
+      onLoginFinished={onLoginFinished}
+    >
       <FormField
         name="email"
         control={form.control}

@@ -630,6 +630,17 @@
       "logout-user": "已登出成功登出「{{name}}」",
       "title": "确定要退出登录吗？"
     },
+    "oauth": {
+      "wework": {
+        "label": "企业微信",
+        "get-info-failed": "获取企业微信登录信息失败"
+      },
+
+      "button": "绑定{{name}}快捷登录",
+      "loading": "绑定中...",
+      "success": "绑定成功",
+      "error": "绑定失败！请稍后再试"
+    },
     "loading": "正在载入中",
     "wait-to-long": {
       "title": "检测到在此页面等待时间过长",

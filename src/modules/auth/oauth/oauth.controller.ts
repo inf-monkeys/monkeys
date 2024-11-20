@@ -1,11 +1,11 @@
 import { config } from '@/common/config';
-import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
+import { SuccessResponse } from '@/common/response';
+import { IRequest } from '@/common/typings/request';
+import { Body, Controller, Delete, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { AuthResultType, OAuthService } from './oauth.service';
-import { SuccessResponse } from '@/common/response';
-import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
-import { IRequest } from '@/common/typings/request';
 
 @Controller('/auth/oauth')
 @ApiTags('Auth/OAuth')
@@ -23,7 +23,6 @@ export class OAuthController {
 
     if (code) {
       const { type, ...rest } = await this.oauthService.handleWeworkCallback(code, state);
-      console.log('type', type, 'rest', rest);
 
       if (type === AuthResultType.ERROR) {
         return res.redirect(`${baseUrl}/login/callback?error=${encodeURIComponent(rest.message)}`);
@@ -37,6 +36,21 @@ export class OAuthController {
     }
 
     res.redirect(`${baseUrl}/login`);
+  }
+
+  @Get('wework/info')
+  @ApiOperation({
+    description: '获取企业微信 OAuth 信息',
+    summary: '获取企业微信用户 OAuth 信息',
+  })
+  public async getWeworkInfo() {
+    return new SuccessResponse({
+      data: {
+        corpId: config.auth.wework.corpId,
+        agentid: config.auth.wework.agentId,
+        redirect_uri: `${config.server.appUrl}/api/auth/oauth/wework/callback`,
+      },
+    });
   }
 
   @Post('wework/bind')
@@ -56,7 +70,30 @@ export class OAuthController {
     } catch (e) {
       return new SuccessResponse({
         code: 400,
-        data: e.message,
+        data: null,
+        message: e.message,
+      });
+    }
+  }
+
+  @Delete('wework/bind')
+  @ApiOperation({
+    description: '解绑企业微信',
+    summary: '解绑企业微信',
+  })
+  @UseGuards(CompatibleAuthGuard)
+  public async unbindWework(@Req() req: IRequest) {
+    const { userId } = req;
+    try {
+      const result = await this.oauthService.unbindWework(userId);
+      return new SuccessResponse({
+        data: result,
+      });
+    } catch (e) {
+      return new SuccessResponse({
+        code: 400,
+        data: null,
+        message: e.message,
       });
     }
   }

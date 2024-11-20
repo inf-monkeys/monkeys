@@ -4,6 +4,7 @@ export enum AuthMethod {
   password = 'password',
   phone = 'phone',
   oidc = 'oidc',
+  oauth = 'oauth',
 }
 
 export interface ISystemConfig {

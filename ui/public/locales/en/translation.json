@@ -636,6 +636,17 @@
       "logout-user": "Logged out Successfully logged out \"{{name}}\"",
       "title": "Are you sure you want to log out?"
     },
+    "oauth": {
+      "wework": {
+        "label": "Enterprise WeChat",
+        "get-info-failed": "Failed to obtain enterprise WeChat login information"
+      },
+
+      "button": "Bind {{name}}",
+      "loading": "Bind...",
+      "success": "Bind successfully",
+      "error": "Bind failed! Please try again later"
+    },
     "loading": "Loading...",
     "wait-to-long": {
       "title": "Detected that the waiting time on this page is too long.",
