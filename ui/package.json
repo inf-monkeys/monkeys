@@ -53,6 +53,7 @@
     "@uppy/core": "^4.2.3",
     "@uppy/thumbnail-generator": "^4.0.1",
     "@vitejs/plugin-legacy": "^5.4.0",
+    "@wecom/jssdk": "^2.2.3",
     "ahooks": "^3.8.0",
     "browser-image-compression": "^2.0.2",
     "chroma-js": "^2.4.2",

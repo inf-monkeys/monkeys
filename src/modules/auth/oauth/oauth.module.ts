@@ -5,8 +5,6 @@ import { AuthType, WechatWorkModule } from 'nestjs-wechat-work';
 import { config } from '@/common/config';
 import { HttpModule } from '@nestjs/axios';
 
-console.log(config.auth.wework.corpId);
-
 @Module({
   imports: [
     WechatWorkModule.register({

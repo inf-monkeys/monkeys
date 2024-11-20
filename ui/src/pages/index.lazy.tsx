@@ -24,10 +24,13 @@ const TeamsIdPage: React.FC = () => {
 
   useEffect(() => {
     if (!teams?.length) return;
+    const finalTeamId = teamId ? teamId : teams[0].id;
+    localStorage.setItem('vines-team-id', finalTeamId);
+    window['vinesTeamId'] = finalTeamId;
     void navigate({
       to: '/$teamId/',
       params: {
-        teamId: teamId ? teamId : teams[0].id,
+        teamId: finalTeamId,
       },
     });
   }, [teamId, teams]);
