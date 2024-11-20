@@ -84,11 +84,11 @@ export class ToolsRegistryService {
     if (data.triggers?.length) {
       this.validateTriggerEndpoints(data.triggerEndpoints);
     }
-    if (data.credentials?.length) {
-      if (!data.rsaPublicKey) {
-        throw new Error('Error import tool: rsaPublicKey is missing when credentials is not empty');
-      }
-    }
+    // if (data.credentials?.length) {
+    //   if (!data.rsaPublicKey) {
+    //     throw new Error('Error import tool: rsaPublicKey is missing when credentials is not empty');
+    //   }
+    // }
     if (data.logEndpoint) {
       if (!data.logEndpoint.includes('{taskId}')) {
         throw new Error('Error import tool: logEndpoint must include {taskId}');
