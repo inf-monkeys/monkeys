@@ -185,7 +185,7 @@ export const CaiInteraction: React.FC<ICaiInteractionProps> = ({
         {layerValues.image && (
           <VinesImage
             src={layerValues.image.value as string}
-            imageStyle={pick(layerStyle, ['width', 'height', 'transform'])}
+            imageStyle={pick(layerStyle, ['width', 'height'])}
             disabledPreview
           />
         )}
