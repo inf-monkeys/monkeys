@@ -50,7 +50,7 @@ export class OAuthService {
 
       const saltUserId = crypto.MD5(weworkUserId).toString();
 
-      const user = await this.userRepository.findByExternalId(saltUserId);
+      const user = await this.userRepository.findByExternalId(`wework:${saltUserId}`);
 
       if (user) {
         await this.userRepository.updateUserLastLogin(user.id, AuthMethod.oauth);
@@ -82,7 +82,7 @@ export class OAuthService {
             email: userDetail?.biz_mail ?? `${weworkUserId}@wework.tencent`,
             phone: userDetail?.mobile,
             photo: userDetail?.avatar,
-            externalId: saltUserId,
+            externalId: `wework:${saltUserId}`,
           });
           return {
             type: AuthResultType.JWT,
@@ -135,7 +135,7 @@ export class OAuthService {
         ...(!user?.email && data?.biz_mail ? { email: data?.biz_mail } : {}),
         ...(!user?.phone && data?.mobile ? { phone: data?.mobile } : {}),
         ...(!user?.photo && data?.avatar ? { photo: data?.avatar } : {}),
-        externalId: id,
+        externalId: `wework:${id}`,
       });
 
       await this.cache.del(cacheKey);
@@ -150,6 +150,10 @@ export class OAuthService {
     const user = await this.userRepository.findById(userId);
     if (!user) {
       throw new Error('用户不存在');
+    }
+
+    if (!user.externalId?.startsWith('wework:')) {
+      throw new Error('用户未绑定企业微信');
     }
 
     await this.userRepository.updateUser(user.id, {
