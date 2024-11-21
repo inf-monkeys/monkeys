@@ -15,7 +15,7 @@ import { ToolsRegistryService } from './modules/tools/tools.registry.service';
 @Injectable()
 export class AppService implements OnApplicationBootstrap {
   constructor(
-    private readonly workerRegistryService: ToolsRegistryService,
+    private readonly toolsRegistryService: ToolsRegistryService,
     private readonly toolsRepository: ToolsRepository,
     private readonly comfyuiRepository: ComfyuiRepository,
   ) {}
@@ -55,7 +55,7 @@ export class AppService implements OnApplicationBootstrap {
     await this.waitServerHttpServiceAvailable();
     if (config.server.loadExample) {
       logger.info(`Loading example tools of ${EXAMPLE_TOOL_OPENAPI_MENIFEST_URL}`);
-      this.workerRegistryService.registerToolsServer(
+      this.toolsRegistryService.registerToolsServer(
         {
           importType: ToolImportType.manifest,
           manifestUrl: EXAMPLE_TOOL_OPENAPI_MENIFEST_URL,
@@ -67,7 +67,7 @@ export class AppService implements OnApplicationBootstrap {
     }
 
     logger.info(`Loading chat tool of ${CHAT_TOOL_OPENAPI_MENIFEST_URL}`);
-    this.workerRegistryService.registerToolsServer(
+    this.toolsRegistryService.registerToolsServer(
       {
         importType: ToolImportType.manifest,
         manifestUrl: CHAT_TOOL_OPENAPI_MENIFEST_URL,
@@ -78,7 +78,7 @@ export class AppService implements OnApplicationBootstrap {
     );
 
     logger.info(`Loading comfyui tool of ${COMFYUI_TOOL_OPENAPI_MENIFEST_URL}`);
-    this.workerRegistryService.registerToolsServer(
+    this.toolsRegistryService.registerToolsServer(
       {
         importType: ToolImportType.manifest,
         manifestUrl: COMFYUI_TOOL_OPENAPI_MENIFEST_URL,
@@ -90,7 +90,7 @@ export class AppService implements OnApplicationBootstrap {
 
     for (const { name, manifestUrl } of config.tools) {
       logger.info(`Loading ${name} tools of ${manifestUrl}`);
-      this.workerRegistryService
+      this.toolsRegistryService
         .registerToolsServer(
           {
             importType: ToolImportType.manifest,

@@ -28,6 +28,7 @@ export class ToolsRegistryCronService {
       // 成功获取到锁，执行需要加锁的代码
 
       try {
+        // 注册
         const registries = await this.toolsRepository.listServers();
         for (const registry of registries) {
           try {
@@ -37,6 +38,22 @@ export class ToolsRegistryCronService {
             });
           } catch (error) {
             logger.info(`Refresh tools ${registry.namespace} failed`, error.message);
+          }
+        }
+
+        for (const { name, manifestUrl } of config.tools) {
+          try {
+            await this.toolsRegistryService.registerToolsServer(
+              {
+                importType: ToolImportType.manifest,
+                manifestUrl: manifestUrl,
+              },
+              {
+                isPublic: true,
+              },
+            );
+          } catch (error) {
+            logger.warn(`Load tool ${name}(${manifestUrl}) failed: ${error.message}`);
           }
         }
       } finally {
