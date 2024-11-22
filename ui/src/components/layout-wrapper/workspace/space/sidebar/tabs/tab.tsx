@@ -13,6 +13,7 @@ import { TabMenu } from '@/components/layout-wrapper/workspace/space/sidebar/tab
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const EMOJI2LUCIDE_MAPPER = {
   '🚀': 'square-function',
   '📃': 'square-kanban',

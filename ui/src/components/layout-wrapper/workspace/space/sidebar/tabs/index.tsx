@@ -33,7 +33,7 @@ export const SpaceTabs: React.FC<ITabsProps> = () => {
 
   const apiDocumentVisible = usePageStore((s) => s.apiDocumentVisible);
 
-  const { pages, setPages, page, pageId } = useVinesPage();
+  const { pages, setPages, pageId } = useVinesPage();
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
