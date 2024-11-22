@@ -81,7 +81,7 @@ const VinesForm: React.FC = () => {
         />
       </div>
       {openAIInterfaceEnabled && (
-        <div className="vines-center absolute inset-1 size-full flex-col gap-4 backdrop-blur">
+        <div className="vines-center absolute inset-1 size-full flex-col gap-4 backdrop-blur z-50">
           <ShieldBan size={64} />
           <span className="text-sm font-medium">{t('workspace.form-view.not-support')}</span>
         </div>
