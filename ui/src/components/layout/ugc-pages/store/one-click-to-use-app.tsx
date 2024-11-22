@@ -24,7 +24,7 @@ interface IOneClickToUseAppProps extends IApplicationStoreItemDetail {
 }
 
 export const OneClickToUseApp: React.FC<IOneClickToUseAppProps> = ({ id, children, ...workflow }) => {
-  const { thumbnail, iconUrl, displayName, description } = workflow;
+  const { thumbnail, iconUrl, displayName, description, exposeOpenaiCompatibleInterface } = workflow;
 
   const { t, i18n } = useTranslation();
 
@@ -39,7 +39,7 @@ export const OneClickToUseApp: React.FC<IOneClickToUseAppProps> = ({ id, childre
     toast.promise(
       forkApplicationFromTemplate(id, [
         {
-          default: 'preview',
+          default: exposeOpenaiCompatibleInterface ? 'chat' : 'preview',
         },
       ]),
       {
