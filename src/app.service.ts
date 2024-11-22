@@ -11,6 +11,7 @@ import { COMFYUI_TOOL_OPENAPI_MENIFEST_URL } from './modules/tools/comfyui/comfy
 import { EXAMPLE_TOOL_OPENAPI_MENIFEST_URL } from './modules/tools/example/example.swagger';
 import { CHAT_TOOL_OPENAPI_MENIFEST_URL } from './modules/tools/llm/llm.swagger';
 import { ToolsRegistryService } from './modules/tools/tools.registry.service';
+import { TRANSLATE_TOOL_OPENAPI_MANIFEST_URL } from '@/modules/tools/translate/translate.swagger';
 
 @Injectable()
 export class AppService implements OnApplicationBootstrap {
@@ -55,7 +56,7 @@ export class AppService implements OnApplicationBootstrap {
     await this.waitServerHttpServiceAvailable();
     if (config.server.loadExample) {
       logger.info(`Loading example tools of ${EXAMPLE_TOOL_OPENAPI_MENIFEST_URL}`);
-      this.toolsRegistryService.registerToolsServer(
+      await this.toolsRegistryService.registerToolsServer(
         {
           importType: ToolImportType.manifest,
           manifestUrl: EXAMPLE_TOOL_OPENAPI_MENIFEST_URL,
@@ -67,7 +68,7 @@ export class AppService implements OnApplicationBootstrap {
     }
 
     logger.info(`Loading chat tool of ${CHAT_TOOL_OPENAPI_MENIFEST_URL}`);
-    this.toolsRegistryService.registerToolsServer(
+    await this.toolsRegistryService.registerToolsServer(
       {
         importType: ToolImportType.manifest,
         manifestUrl: CHAT_TOOL_OPENAPI_MENIFEST_URL,
@@ -78,7 +79,7 @@ export class AppService implements OnApplicationBootstrap {
     );
 
     logger.info(`Loading comfyui tool of ${COMFYUI_TOOL_OPENAPI_MENIFEST_URL}`);
-    this.toolsRegistryService.registerToolsServer(
+    await this.toolsRegistryService.registerToolsServer(
       {
         importType: ToolImportType.manifest,
         manifestUrl: COMFYUI_TOOL_OPENAPI_MENIFEST_URL,
@@ -87,6 +88,19 @@ export class AppService implements OnApplicationBootstrap {
         isPublic: true,
       },
     );
+
+    if (config?.aws?.translate) {
+      logger.info(`Loading translate tool of ${TRANSLATE_TOOL_OPENAPI_MANIFEST_URL}`);
+      await this.toolsRegistryService.registerToolsServer(
+        {
+          importType: ToolImportType.manifest,
+          manifestUrl: TRANSLATE_TOOL_OPENAPI_MANIFEST_URL,
+        },
+        {
+          isPublic: true,
+        },
+      );
+    }
 
     for (const { name, manifestUrl } of config.tools) {
       logger.info(`Loading ${name} tools of ${manifestUrl}`);

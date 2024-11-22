@@ -20,6 +20,7 @@ import { ToolsModule } from './modules/tools/tools.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { OpenapiModule } from './openapi.module';
 import { PrometheusModule } from './prometheus/prometheus.module';
+import { TranslateToolsModule } from '@/modules/tools/translate/translate.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { PrometheusModule } from './prometheus/prometheus.module';
     AuthModule,
     AssetsModule,
     LLMToolsModule,
+    TranslateToolsModule,
     ChatModule,
     PaymentModule,
     PrometheusModule.register({

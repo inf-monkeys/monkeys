@@ -18,6 +18,7 @@ import { setupExampleToolSwagger } from './modules/tools/example/example.swagger
 import { setupLlmToolSwagger } from './modules/tools/llm/llm.swagger';
 import { ToolsPollingService } from './modules/tools/tools.polling.service';
 import { setupSwagger } from './setupSwagger';
+import { setupTranslateToolSwagger } from '@/modules/tools/translate/translate.swagger';
 
 process.on('unhandledRejection', (err: Error) => {
   logger.error('unhandledRejection: ', err);
@@ -95,11 +96,12 @@ async function bootstrap() {
   setupExampleToolSwagger(app);
   setupLlmToolSwagger(app);
   setupComfyuiToolSwagger(app);
+  setupTranslateToolSwagger(app);
   setupSwagger(app);
 
   // String polling for tasks
   const toolsPollingService = await app.resolve<ToolsPollingService>(ToolsPollingService);
-  toolsPollingService.startPolling();
+  void toolsPollingService.startPolling();
 
   // System bootstrap
   const bootstrapService = await app.resolve<BootstrapService>(BootstrapService);

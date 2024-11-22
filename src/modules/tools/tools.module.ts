@@ -9,11 +9,12 @@ import { ToolsCredentialsService } from './tools.credential.service';
 import { ToolsForwardService } from './tools.forward.service';
 import { ToolsPollingService } from './tools.polling.service';
 import { ToolsRegistryService } from './tools.registry.service';
+import { TranslateToolsModule } from '@/modules/tools/translate/translate.module';
 
 @Module({
   controllers: [ToolsController, ToolsCredentialsController],
   providers: [ToolsPollingService, ToolsRegistryService, ToolsForwardService, ToolsCredentialsService],
-  imports: [ExampleToolsModule, HttpModule, ComfyUIModule, OneAPIModule],
+  imports: [ExampleToolsModule, HttpModule, ComfyUIModule, OneAPIModule, TranslateToolsModule],
   exports: [ToolsRegistryService, ToolsForwardService],
 })
 export class ToolsModule {}

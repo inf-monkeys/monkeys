@@ -217,6 +217,14 @@ export interface OneApiConfig {
   rootPassword?: string;
 }
 
+export interface AwsConfig {
+  translate: {
+    region: string;
+    accessKey: string;
+    secretKey: string;
+  };
+}
+
 export interface Config {
   server: ServerConfig;
   conductor: ConductorConfig;
@@ -232,6 +240,7 @@ export interface Config {
   llm: LLmConfig;
   paymentServer: PaymentServerConfig;
   oneapi: OneApiConfig;
+  aws: AwsConfig;
 }
 
 const port = readConfig('server.port', 3000);
@@ -406,6 +415,9 @@ When answer to user:
     rootToken: readConfig('oneapi.rootToken'),
     rootPassword: readConfig('oneapi.rootPassword'),
     rootUsername: readConfig('oneapi.rootUsername'),
+  },
+  aws: {
+    translate: readConfig('aws.translate', {}),
   },
 };
 
