@@ -5,9 +5,11 @@ export const SQL_KNOWLEDGE_BASE_QUERY_TABLE = 'query_table_sql';
 export const SQL_KNOWLEDGE_BASE_QUERY_TABLE_TOOL = `${KNOWLEDGE_BASE_NAMESPACE}:${SQL_KNOWLEDGE_BASE_QUERY_TABLE}`;
 
 const defaultModelWithConfig = config.models[0];
-const INITIAL_CHAT_WORKFLOW_TASK_INPUT = {
-  model: Array.isArray(defaultModelWithConfig.model) ? defaultModelWithConfig.model[0] : defaultModelWithConfig.model,
-};
+const INITIAL_CHAT_WORKFLOW_TASK_INPUT = defaultModelWithConfig
+  ? {
+      model: Array.isArray(defaultModelWithConfig.model) ? defaultModelWithConfig.model[0] : defaultModelWithConfig.model,
+    }
+  : {};
 
 export const INTERNAL_BUILT_IN_MARKET = {
   workflows: [
