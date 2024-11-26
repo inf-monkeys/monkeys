@@ -15,8 +15,8 @@ import { AssetType, MonkeyTaskDefTypes, ToolProperty, ToolType } from '@inf-monk
 import { Injectable, NotFoundException } from '@nestjs/common';
 import fs from 'fs';
 import _ from 'lodash';
-import { ToolsRepository } from '../../database/repositories/tools.repository';
-import { WorkflowRepository } from '../../database/repositories/workflow.repository';
+import { ToolsRepository } from '@/database/repositories/tools.repository';
+import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { WorkflowAutoPinPage } from '../assets/assets.marketplace.data';
 import { AssetsPublishService } from '../assets/assets.publish.service';
 import { ConductorService } from './conductor/conductor.service';
@@ -43,13 +43,11 @@ export class WorkflowCrudService {
     if (!version) {
       version = await this.workflowRepository.getMaxVersion(workflowId);
     }
-    const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
-    return workflow;
+    return await this.workflowRepository.getWorkflowById(workflowId, version);
   }
 
   public async getWorkflowVersions(workflowId: string) {
-    const versions = await this.workflowRepository.getWorkflowVersions(workflowId);
-    return versions;
+    return await this.workflowRepository.getWorkflowVersions(workflowId);
   }
 
   public async listWorkflows(teamId: string, dto: ListDto) {
@@ -85,7 +83,7 @@ export class WorkflowCrudService {
               if (!policyConfig) {
                 continue;
               }
-              // 老版本，调过
+              // 老版本，跳过
               if (typeof policyConfig === 'string') {
                 continue;
               }
@@ -271,7 +269,7 @@ export class WorkflowCrudService {
       throw new Error('不合法的 zip 文件, zip 文件中必须有且只有一条工作流');
     }
 
-    let newWorkflowId;
+    let newWorkflowId: string;
     try {
       // 导入表格数据
       const replaceSqlDatabaseMap = {};
@@ -374,13 +372,12 @@ export class WorkflowCrudService {
    * 删除 workflow（conductor 里面的 workflow 定义不要删，保留一下备份，不然日志那些都查不到了）
    */
   public async deleteWorkflowDef(teamId: string, workflowId: string) {
-    const result = await this.workflowRepository.deleteWorkflow(teamId, workflowId);
-    return result;
+    return await this.workflowRepository.deleteWorkflow(teamId, workflowId);
   }
 
   public async cloneWorkflowOfVersion(teamId: string, userId: string, originalWorkflowId: string, originalWorkflowVersion: number) {
     const originalWorkflow = await this.workflowRepository.getWorkflowById(originalWorkflowId, originalWorkflowVersion);
-    const workflowId = await this.createWorkflowDef(teamId, userId, {
+    return await this.createWorkflowDef(teamId, userId, {
       displayName: {
         'zh-CN': getI18NValue(originalWorkflow.displayName, 'zh-CN') + ' - 副本',
         'en-US': getI18NValue(originalWorkflow.displayName, 'en-US') + ' - Copy',
@@ -388,7 +385,6 @@ export class WorkflowCrudService {
       version: originalWorkflowVersion,
       tasks: originalWorkflow.tasks,
     });
-    return workflowId;
   }
 
   public async cloneWorkflow(teamId: string, userId: string, originalWorkflowId: string, autoPinPage?: WorkflowAutoPinPage) {
@@ -463,7 +459,7 @@ export class WorkflowCrudService {
   }
 
   private convertWorkflowToJson(workflow: WorkflowMetadataEntity, triggers?: WorkflowTriggersEntity[]): WorkflowExportJson {
-    const json: WorkflowExportJson = {
+    return {
       displayName: workflow.displayName,
       iconUrl: workflow.iconUrl,
       description: workflow.description,
@@ -481,7 +477,6 @@ export class WorkflowCrudService {
       originalSite: config.server.appId,
       assetType: 'workflow',
     };
-    return json;
   }
 
   public async exportWorkflowOfVersion(workflowId: string, version: number) {

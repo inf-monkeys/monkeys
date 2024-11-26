@@ -8,7 +8,7 @@ import { WorkflowChatSessionEntity } from '@/database/entities/workflow/workflow
 import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { WorkflowMetadataEntity, WorkflowOutputValue, WorkflowRateLimiter, WorkflowValidationIssue } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
-import { WorkflowTriggerType, WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
+import { WorkflowTriggersEntity, WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
 import { I18nValue, MonkeyTaskDefTypes, ToolProperty } from '@inf-monkeys/monkeys';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -230,8 +230,7 @@ export class WorkflowRepository {
         isDeleted: false,
       },
     });
-    const md5 = this.calcWorkflowMd5(workflow);
-    workflow.md5 = md5;
+    workflow.md5 = this.calcWorkflowMd5(workflow);
     await this.workflowMetadataRepository.save(workflow);
     return workflow;
   }
@@ -317,13 +316,12 @@ export class WorkflowRepository {
   }
 
   public async getWorkflowVersions(workflowId: string) {
-    const versions = await this.workflowMetadataRepository.find({
+    return await this.workflowMetadataRepository.find({
       where: {
         workflowId,
         isDeleted: false,
       },
     });
-    return versions;
   }
 
   public async getMaxVersion(workflowId: string) {
@@ -335,8 +333,7 @@ export class WorkflowRepository {
     if (versions?.length === 0) {
       return 1;
     }
-    const maxVersion = Math.max(...versions.map((x) => x.version));
-    return maxVersion;
+    return Math.max(...versions.map((x) => x.version));
   }
 
   public async findWebhookTrigger(webhookPath: string) {
@@ -495,10 +492,10 @@ ORDER BY
       averageTime: number;
     }> = [];
     for (const date of dateList) {
-      const callsPerDay = callsPerDayResult.find((x) => x.date === date);
-      const successPerDay = successPerDayResult.find((x) => x.date === date);
-      const failedPerDay = failedPerDayResult.find((x) => x.date === date);
-      const averageTakesPerDay = averageTakesPerDayResult.find((x) => x.date === date);
+      const callsPerDay = callsPerDayResult.find((x: { date: any }) => x.date === date);
+      const successPerDay = successPerDayResult.find((x: { date: any }) => x.date === date);
+      const failedPerDay = failedPerDayResult.find((x: { date: any }) => x.date === date);
+      const averageTakesPerDay = averageTakesPerDayResult.find((x: { date: any }) => x.date === date);
       result.push({
         date,
         totalCount: parseInt(callsPerDay?.total_calls) || 0,
@@ -618,10 +615,10 @@ ORDER BY
       averageTime: number;
     }> = [];
     for (const date of dateList) {
-      const callsPerDay = callsPerDayResult.find((x) => x.date === date);
-      const successPerDay = successPerDayResult.find((x) => x.date === date);
-      const failedPerDay = failedPerDayResult.find((x) => x.date === date);
-      const averageTakesPerDay = averageTakesPerDayResult.find((x) => x.date === date);
+      const callsPerDay = callsPerDayResult.find((x: { date: any }) => x.date === date);
+      const successPerDay = successPerDayResult.find((x: { date: any }) => x.date === date);
+      const failedPerDay = failedPerDayResult.find((x: { date: any }) => x.date === date);
+      const averageTakesPerDay = averageTakesPerDayResult.find((x: { date: any }) => x.date === date);
       result.push({
         date,
         totalCount: parseInt(callsPerDay?.total_calls) || 0,
@@ -666,13 +663,12 @@ ORDER BY
   }
 
   public async getWorkflowTrigger(triggerId: string) {
-    const trigger = await this.workflowTriggerRepository.findOne({
+    return await this.workflowTriggerRepository.findOne({
       where: {
         id: triggerId,
         isDeleted: false,
       },
     });
-    return trigger;
   }
 
   public async saveWorkflowTrigger(entity: WorkflowTriggersEntity) {
@@ -698,8 +694,7 @@ ORDER BY
       .andWhere('workflow_trigger.type = :type', { type: WorkflowTriggerType.SCHEDULER })
       .andWhere('(workflow_trigger.next_trigger_time IS NULL OR workflow_trigger.next_trigger_time < :currentTimestamp)', { currentTimestamp })
       .andWhere('workflow_trigger.is_deleted = :isDeleted', { isDeleted: false });
-    const triggersToRun = await query.getMany();
-    return triggersToRun;
+    return await query.getMany();
   }
 
   public async updateNextTriggerTime(currentTimestamp: number, triggers: WorkflowTriggersEntity[]) {
@@ -869,7 +864,7 @@ ORDER BY
 
   async listWorkflowPagesAndCreateIfNotExists(workflowId: string) {
     const workflow = await this.getWorkflowByIdWithoutVersion(workflowId);
-    let pages: WorkflowPageEntity[] = [];
+    let pages: WorkflowPageEntity[];
     const existsPages = await this.pageRepository.find({
       where: {
         workflowId,
