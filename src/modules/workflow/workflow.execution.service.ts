@@ -14,7 +14,7 @@ import { Task, Workflow } from '@inf-monkeys/conductor-javascript';
 import { Inject, Injectable } from '@nestjs/common';
 import _, { pick } from 'lodash';
 import retry from 'retry-as-promised';
-import { FindWorkflowCondition, WorkflowRepository } from '../../database/repositories/workflow.repository';
+import { FindWorkflowCondition, WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { ConductorService } from './conductor/conductor.service';
 import { SearchWorkflowExecutionsDto, SearchWorkflowExecutionsOrderDto, WorkflowExecutionSearchableField } from './dto/req/search-workflow-execution.dto';
 import { UpdateTaskStatusDto } from './dto/req/update-task-status.dto';
@@ -178,15 +178,9 @@ export class WorkflowExecutionService {
     const { field = WorkflowExecutionSearchableField.startTime, order = OrderBy.DESC } = orderBy as SearchWorkflowExecutionsOrderDto;
     const sortText = `${field}:${order}`;
 
-    const data = await retry(
-      async () => {
-        const data = await conductorClient.workflowResource.searchV21(start, limit, sortText, freeText, query.join('AND'));
-        return data;
-      },
-      {
-        max: 3,
-      },
-    );
+    const data = await retry(() => conductorClient.workflowResource.searchV21(start, limit, sortText, freeText, query.join('AND')), {
+      max: 3,
+    });
 
     let definitions: WorkflowMetadataEntity[] = [];
     if (workflowId) {
@@ -340,15 +334,9 @@ export class WorkflowExecutionService {
   public async getWorkflowExecutionOutputs(inputWorkflowId: string, page = 1, limit = 10) {
     const start = (page - 1) * limit;
 
-    const data = await retry(
-      async () => {
-        const data = await conductorClient.workflowResource.searchV21(start, limit, 'startTime:DESC', '*', `workflowType IN (${inputWorkflowId})`);
-        return data;
-      },
-      {
-        max: 3,
-      },
-    );
+    const data = await retry(() => conductorClient.workflowResource.searchV21(start, limit, 'startTime:DESC', '*', `workflowType IN (${inputWorkflowId})`), {
+      max: 3,
+    });
 
     const definitions = await this.workflowRepository.findWorkflowByIds([inputWorkflowId]);
 
@@ -590,15 +578,9 @@ export class WorkflowExecutionService {
   public async getWorkflowInstanceByImageUrl(teamId: string, workflowId: string, imageUrl: string, page = 1, limit = 500) {
     const start = (page - 1) * limit;
 
-    const data = await retry(
-      async () => {
-        const data = await conductorClient.workflowResource.searchV21(start, limit, 'startTime:DESC', '*', `workflowType IN (${workflowId}) AND status IN (COMPLETED)`);
-        return data;
-      },
-      {
-        max: 3,
-      },
-    );
+    const data = await retry(() => conductorClient.workflowResource.searchV21(start, limit, 'startTime:DESC', '*', `workflowType IN (${workflowId}) AND status IN (COMPLETED)`), {
+      max: 3,
+    });
 
     for (const execution of data.results) {
       const flattenOutput = flattenKeys(execution.output);
