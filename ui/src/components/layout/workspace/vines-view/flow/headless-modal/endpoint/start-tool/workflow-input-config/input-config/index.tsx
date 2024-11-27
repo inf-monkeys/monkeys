@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/alert-dialog.tsx';
 import { Button } from '@/components/ui/button';
 import { useVinesFlow } from '@/package/vines-flow';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { cloneDeep, cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
@@ -33,6 +34,7 @@ export const InputConfig: React.FC<IInputConfigProps> = ({ className, contentWid
   const { t } = useTranslation();
 
   const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
+  const isWorkflowReadOnly = useCanvasStore((s) => s.isWorkflowReadOnly);
 
   const { vines } = useVinesFlow();
   const workflowId = vines.workflowId;
@@ -50,6 +52,8 @@ export const InputConfig: React.FC<IInputConfigProps> = ({ className, contentWid
     vines.update({ variables: newInputs });
   };
 
+  const disabled = !isLatestWorkflowVersion || isWorkflowReadOnly;
+
   return (
     <div className={cn('relative flex h-[30rem] w-full flex-col gap-4 py-2', className)}>
       <WorkflowInputList
@@ -60,20 +64,23 @@ export const InputConfig: React.FC<IInputConfigProps> = ({ className, contentWid
       >
         {(variableId, specialType) => (
           <div className="flex items-center gap-1">
-            <Button
-              icon={<Edit />}
-              variant="outline"
-              className="scale-80"
-              onClick={() =>
-                VinesEvent.emit(specialType ? 'flow-input-widgets' : 'flow-input-editor', workflowId, variableId)
-              }
-            />
+            {!disabled && (
+              <Button
+                icon={<Edit />}
+                variant="outline"
+                className="scale-80"
+                disabled={disabled}
+                onClick={() =>
+                  VinesEvent.emit(specialType ? 'flow-input-widgets' : 'flow-input-editor', workflowId, variableId)
+                }
+              />
+            )}
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
                   icon={<Trash2 />}
                   variant="outline"
-                  className={cn('scale-80 [&_svg]:stroke-red-10', !isLatestWorkflowVersion && 'hidden')}
+                  className={cn('scale-80 [&_svg]:stroke-red-10', disabled && 'hidden')}
                 />
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -96,7 +103,7 @@ export const InputConfig: React.FC<IInputConfigProps> = ({ className, contentWid
           </div>
         )}
       </WorkflowInputList>
-      <div className={cn('grid grid-cols-3 gap-2', !isLatestWorkflowVersion && 'hidden')}>
+      <div className={cn('grid grid-cols-3 gap-2', disabled && 'hidden')}>
         <Button
           className="col-span-2"
           variant="outline"

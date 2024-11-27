@@ -17,8 +17,6 @@ import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VINES_STATUS } from '@/package/vines-flow/core/typings.ts';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { useCanvasInteractionStore } from '@/store/useCanvasStore/interaction.ts';
-import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
-import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IComplicateNodeProps {
@@ -37,7 +35,6 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
 
   const { vines } = useVinesFlow();
 
-  const canvasMode = useCanvasStore((s) => s.canvasMode);
   const isWorkflowRUNNING = useCanvasStore((s) => s.isWorkflowRUNNING);
 
   const isUserInteraction = useCanvasInteractionStore((s) => s.isUserInteraction);
@@ -88,11 +85,7 @@ export const ComplicateNode: React.FC<IComplicateNodeProps> = ({ node, index }) 
   const nodeExecutionStatus = executionTask?.originStatus ?? executionTask?.status ?? 'DEFAULT';
 
   return (
-    <div
-      ref={ref}
-      className={cn('relative', canvasMode === CanvasStatus.READONLY && 'pointer-events-none')}
-      style={{ zIndex: 500 - (index + 1) }}
-    >
+    <div ref={ref} className="relative" style={{ zIndex: 500 - (index + 1) }}>
       <Card
         id={'complicate-' + nodeId}
         className="absolute"

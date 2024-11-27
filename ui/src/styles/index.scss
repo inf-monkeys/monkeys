@@ -60,6 +60,11 @@ body {
   @apply text-adjust leading-none;
 }
 
+.text-ss {
+  font-size: 0.5rem;
+  @apply text-adjust leading-none;
+}
+
 .vines-result-streaming>:not(ol):not(ul):not(pre):last-child:after, .result-streaming>ol:last-child li:last-child:after, .result-streaming>pre:last-child code:after, .result-streaming>ul:last-child li:last-child:after {
   @apply content-['▋'] -ml-1 align-baseline opacity-0;
   animation: pulse 0.6s infinite;

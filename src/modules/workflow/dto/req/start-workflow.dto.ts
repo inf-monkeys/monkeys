@@ -25,6 +25,13 @@ export class StartWorkflowDto {
   chatSessionId?: string;
 
   @ApiProperty({
+    description: '执行记录分组',
+    required: false,
+    type: String,
+  })
+  group?: string;
+
+  @ApiProperty({
     description: '是否等待工作流执行完成之后再返回',
     required: false,
     default: false,

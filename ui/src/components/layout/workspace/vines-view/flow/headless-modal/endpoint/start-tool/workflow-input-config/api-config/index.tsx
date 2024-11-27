@@ -17,6 +17,7 @@ import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Switch } from '@/components/ui/switch';
 import { useVinesFlow } from '@/package/vines-flow';
 import { IWorkflowApiConfigInfo, workflowApiConfigInfoSchema } from '@/schema/workspace/workflow-api-config';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
 
@@ -26,6 +27,8 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
   const { t } = useTranslation();
 
   const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
+  const isWorkflowReadOnly = useCanvasStore((s) => s.isWorkflowReadOnly);
+
   const workflowId = useFlowStore((s) => s.workflowId);
 
   const { vines } = useVinesFlow();
@@ -74,6 +77,8 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
     );
   });
 
+  const disabled = !isLatestWorkflowVersion || isWorkflowReadOnly;
+
   const { exposeOpenaiCompatibleInterface: F_exposeOpenaiCompatibleInterface, rateLimiter: F_rateLimiter } =
     form.getValues();
 
@@ -85,6 +90,7 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
             <FormField
               name="exposeOpenaiCompatibleInterface"
               control={form.control}
+              disabled={disabled}
               render={({ field }) => (
                 <FormItem className="hidden flex-col gap-2">
                   <FormLabel>
@@ -93,7 +99,7 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
                     )}
                   </FormLabel>
                   <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    <Switch checked={field.value} onCheckedChange={field.onChange} disabled={disabled} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -104,6 +110,7 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
               <FormField
                 name="openaiModelName"
                 control={form.control}
+                disabled={disabled}
                 render={({ field }) => (
                   <FormItem className="hidden">
                     <FormLabel>
@@ -117,6 +124,7 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
                         placeholder={t(
                           'workspace.flow-view.endpoint.start-tool.api-config.form.openai-model-name.placeholder',
                         )}
+                        disabled={disabled}
                         {...field}
                       />
                     </FormControl>
@@ -129,13 +137,14 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
             <FormField
               name="rateLimiter.enabled"
               control={form.control}
+              disabled={disabled}
               render={({ field }) => (
                 <FormItem className="flex flex-col gap-2">
                   <FormLabel>
                     {t('workspace.flow-view.endpoint.start-tool.api-config.form.rate-limiter.label')}
                   </FormLabel>
                   <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    <Switch checked={field.value} onCheckedChange={field.onChange} disabled={disabled} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -147,6 +156,7 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
                 <FormField
                   name="rateLimiter.windowMs"
                   control={form.control}
+                  disabled={disabled}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
@@ -158,6 +168,7 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
                             'workspace.flow-view.endpoint.start-tool.api-config.form.rate-limiter.window-ms.placeholder',
                           )}
                           {...field}
+                          disabled={disabled}
                           onChange={(v) => {
                             const val = parseInt(v);
                             field.onChange(isNaN(val) ? 0 : val);
@@ -172,6 +183,7 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
                 <FormField
                   name="rateLimiter.max"
                   control={form.control}
+                  disabled={disabled}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
@@ -180,6 +192,7 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
                       <FormControl>
                         <Input
                           {...field}
+                          disabled={disabled}
                           onChange={(v) => {
                             const val = parseInt(v);
                             field.onChange(isNaN(val) ? 0 : val);
@@ -196,7 +209,7 @@ export const WorkflowApiConfig: React.FC<IWorkflowApiConfigProps> = () => {
 
           <Button
             loading={isLoading}
-            className={cn(!isLatestWorkflowVersion && 'hidden')}
+            className={cn(disabled && 'hidden')}
             variant="outline"
             icon={<Save />}
             type="submit"

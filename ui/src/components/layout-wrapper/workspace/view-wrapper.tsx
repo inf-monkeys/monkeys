@@ -8,6 +8,7 @@ import { useGetWorkflow } from '@/apis/workflow';
 import { useVinesFlow } from '@/package/vines-flow';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
+import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { usePageStore } from '@/store/usePageStore';
 
 interface IVinesViewWrapperProps {
@@ -19,6 +20,7 @@ export const VinesViewWrapper: React.FC<IVinesViewWrapperProps> = memo(({ workfl
   const page = usePageStore((s) => s.page);
   const setWorkflowId = useFlowStore((s) => s.setWorkflowId);
   const setVisible = useCanvasStore((s) => s.setVisible);
+  const setCanvasMode = useCanvasStore((s) => s.setCanvasMode);
 
   const { workflowId: pageWorkflowId } = useParams({ from: '/$teamId/workspace/$workflowId/$pageId/' });
 
@@ -64,6 +66,9 @@ export const VinesViewWrapper: React.FC<IVinesViewWrapperProps> = memo(({ workfl
     } else {
       vines.executionWorkflowDisableRestore = false;
     }
+
+    // 快捷方式时只读
+    setCanvasMode(workflow?.shortcutsFlow ? CanvasStatus.READONLY : CanvasStatus.EDIT);
 
     if (!workflow?.tasks?.length && workflow !== void 0) {
       setVisible(false);

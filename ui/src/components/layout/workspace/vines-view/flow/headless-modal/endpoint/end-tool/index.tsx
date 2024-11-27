@@ -24,6 +24,7 @@ export const EndTool: React.FC<IEndToolProps> = () => {
   const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
   const workflowId = useFlowStore((s) => s.workflowId);
   const disableDialogClose = useCanvasStore((s) => s.disableDialogClose);
+  const isWorkflowReadOnly = useCanvasStore((s) => s.isWorkflowReadOnly);
 
   const [open, setOpen] = useState(false);
 
@@ -57,7 +58,7 @@ export const EndTool: React.FC<IEndToolProps> = () => {
       <DialogContent>
         <DialogTitle>{t('workspace.flow-view.endpoint.end-tool.title')}</DialogTitle>
         <WorkflowOutputConfig output={output} setOutput={setOutput} />
-        <DialogFooter className={cn(!isLatestWorkflowVersion && 'hidden')}>
+        <DialogFooter className={cn((!isLatestWorkflowVersion || isWorkflowReadOnly) && 'hidden')}>
           <Button variant="outline" onClick={handleUpdate}>
             {t('workspace.flow-view.endpoint.end-tool.save.button')}
           </Button>

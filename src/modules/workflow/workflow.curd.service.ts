@@ -14,7 +14,7 @@ import { WorkflowTask } from '@inf-monkeys/conductor-javascript';
 import { AssetType, MonkeyTaskDefTypes, ToolProperty, ToolType } from '@inf-monkeys/monkeys';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import fs from 'fs';
-import _ from 'lodash';
+import _, { isEmpty } from 'lodash';
 import { ToolsRepository } from '@/database/repositories/tools.repository';
 import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { WorkflowAutoPinPage } from '../assets/assets.marketplace.data';
@@ -39,11 +39,23 @@ export class WorkflowCrudService {
     private readonly assetsPublishService: AssetsPublishService,
   ) {}
 
-  public async getWorkflowDef(workflowId: string, version?: number): Promise<WorkflowMetadataEntity> {
+  public async getWorkflowDef(workflowId: string, version?: number, simple = true): Promise<WorkflowMetadataEntity> {
     if (!version) {
       version = await this.workflowRepository.getMaxVersion(workflowId);
     }
-    return await this.workflowRepository.getWorkflowById(workflowId, version);
+    let workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
+
+    if (!simple) {
+      // 处理快捷方式
+      const convertedWorkflow = await this.workflowRepository.convertWorkflowWhitShortcutsFlowId(workflow, version);
+      if (convertedWorkflow) {
+        workflow = convertedWorkflow;
+      } else {
+        workflow.shortcutsFlow = null;
+      }
+    }
+
+    return workflow;
   }
 
   public async getWorkflowVersions(workflowId: string) {
@@ -64,7 +76,7 @@ export class WorkflowCrudService {
 
   public async createWorkflowDef(teamId: string, userId: string, data: CreateWorkflowData, options?: CreateWorkflowOptions) {
     const { assetsPolicy, isTheSameTeam = false, replaceSqlDatabaseMap, replaceVectorDatabaseMap, replaceLlmModelMap, replaceSdModelMap } = options || {};
-    const { displayName, iconUrl, description, tasks, variables, triggers, output, version = 1, exposeOpenaiCompatibleInterface = false, rateLimiter } = data;
+    const { displayName, iconUrl, description, tasks, variables, triggers, output, version = 1, exposeOpenaiCompatibleInterface = false, shortcutsFlow = null, rateLimiter } = data;
     const workflowId = options?.useExistId || generateDbId();
 
     // 从应用市场 clone 的时候，资产的授权策略
@@ -237,6 +249,7 @@ export class WorkflowCrudService {
         rateLimiter,
         validationIssues,
         validated,
+        shortcutsFlow,
       },
       options?.useNewId ?? false,
     );
@@ -424,6 +437,7 @@ export class WorkflowCrudService {
           output: originalWorkflow.output,
           exposeOpenaiCompatibleInterface: originalWorkflow.exposeOpenaiCompatibleInterface,
           rateLimiter: originalWorkflow.rateLimiter,
+          shortcutsFlow: originalWorkflow.shortcutsFlow,
         },
         {
           useExistId: newWorkflowId,
@@ -521,12 +535,21 @@ export class WorkflowCrudService {
       exposeOpenaiCompatibleInterface?: boolean;
       rateLimiter?: WorkflowRateLimiter;
       openaiModelName?: string;
+      shortcutsFlow?: string;
     },
   ) {
     const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
     if (!workflow) {
       throw new NotFoundException(`工作流 (${workflowId}) 不存在！`);
     }
+
+    // 当为快捷方式时，只允许更新 shortcutsFlow 字段
+    if (!isEmpty(workflow?.shortcutsFlow ?? null)) {
+      updates = {
+        shortcutsFlow: updates.shortcutsFlow,
+      };
+    }
+
     const workflowEntity = await this.workflowRepository.updateWorkflowDef(teamId, workflowId, version, updates);
     let validated = workflow.validated;
     let validationIssues: WorkflowValidationIssue[] = [];
@@ -559,5 +582,26 @@ export class WorkflowCrudService {
     return {
       notAuthorized: (await this.workflowRepository.hasWorkflowUnauthorized(workflowId))?.notAuthorized || false,
     };
+  }
+
+  public async workflowCanUse(workflowId: string, version?: number) {
+    if (!version) {
+      version = await this.workflowRepository.getMaxVersion(workflowId);
+    }
+
+    try {
+      const workflow = await this.workflowRepository.getWorkflowById(workflowId, version);
+      if (!workflow) {
+        return false;
+      }
+
+      if (!isEmpty(workflow?.shortcutsFlow ?? null)) {
+        return false;
+      }
+    } catch {
+      return false;
+    }
+
+    return true;
   }
 }

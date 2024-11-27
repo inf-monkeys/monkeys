@@ -63,6 +63,9 @@ export const exportWorkflow = async (workflowId: string, name: string, version?:
     method: 'GET',
     simple: true,
     responseResolver: async (r) => {
+      if (r.status !== 200) {
+        throw new Error('导出失败');
+      }
       FileSaver.saveAs(await r.blob(), version ? `${name}(版本${version}).zip` : `${name}(全部版本).zip`);
     },
   })(

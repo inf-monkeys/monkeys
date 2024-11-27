@@ -27,7 +27,7 @@ import { formatTimeDiffPrevious, formatTimeGap } from '@/utils/time.ts';
 
 interface IVinesLogItemProps {
   workflowExecution: VinesWorkflowExecution;
-  workflowDefinition: MonkeyWorkflow;
+  workflowDefinition?: MonkeyWorkflow;
   disabled?: boolean;
 
   handleSubmit?: (loadNextPage?: boolean, useToast?: boolean) => Promise<VinesWorkflowExecutionLists | undefined>;
@@ -104,11 +104,11 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({
               >
                 <div className="flex flex-1 items-center gap-4">
                   <div className="flex-shrink-0">
-                    <VinesIcon src={workflowDefinition.iconUrl} size="sm" />
+                    <VinesIcon src={workflowDefinition?.iconUrl} size="sm" />
                   </div>
                   <div>
                     <div className="line-clamp-1 flex items-center gap-2 font-bold">
-                      {getI18nContent(workflowDefinition.displayName)}
+                      {getI18nContent(workflowDefinition?.displayName)}
                       <WorkflowVersionTag version={workflowExecution.workflowDefinition?.version ?? 1} />
                       <Tag size="xs" color="tertiary">
                         {getDescOfTriggerType(workflowExecution?.triggerType ?? WorkflowTriggerType.MANUAL)}

@@ -84,4 +84,11 @@ export class UpdateWorkflowDefDto {
     type: String,
   })
   openaiModelName: string;
+
+  @ApiProperty({
+    description: '指定为某工作流的快捷方式',
+    required: false,
+    type: String,
+  })
+  shortcutsFlow: string;
 }

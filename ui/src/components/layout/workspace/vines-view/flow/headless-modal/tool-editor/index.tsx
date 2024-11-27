@@ -28,6 +28,7 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
   const workflowId = useFlowStore((s) => s.workflowId);
 
   const disableDialogClose = useCanvasStore((s) => s.disableDialogClose);
+  const isWorkflowReadOnly = useCanvasStore((s) => s.isWorkflowReadOnly);
 
   const { vines } = useVinesFlow();
 
@@ -70,7 +71,7 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
   const nodeTask = node?.getRaw();
   const task = (nodeTask || {}) as JSONValue;
 
-  const disabled = !isLatestWorkflowVersion;
+  const disabled = !isLatestWorkflowVersion || isWorkflowReadOnly;
 
   return (
     <Dialog open={open} onOpenChange={(val) => !disableDialogClose && setOpen(val)}>
@@ -133,6 +134,7 @@ export const ToolEditor: React.FC<IToolEditorProps> = () => {
           <Button
             className={cn(disabled && 'hidden')}
             variant="outline"
+            disabled={disabled}
             onClick={() => vines.emit('update', vines.getRaw())}
           >
             {t('workspace.flow-view.headless-modal.tool-editor.save')}

@@ -186,6 +186,7 @@ export interface CreateWorkflowData {
   output?: WorkflowOutputValue[];
   exposeOpenaiCompatibleInterface?: boolean;
   rateLimiter?: WorkflowRateLimiter;
+  shortcutsFlow?: string;
 }
 
 export interface GenerateSubWorkflowsToSaveAtImportResult {
@@ -215,6 +216,7 @@ export interface StartWorkflowRequest {
   inputData: { [x: string]: any };
   triggerType: WorkflowTriggerType;
   chatSessionId?: string;
+  group?: string;
 }
 
 export interface DebugWorkflowRequest {
