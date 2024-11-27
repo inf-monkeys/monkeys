@@ -119,8 +119,7 @@ export class WorkflowExecutionController {
       triggerType: WorkflowTriggerType.MANUALLY,
       apiKey: apikey,
     });
-    const result = await this.service.waitForWorkflowResult(teamId, workflowInstanceId);
-    return result;
+    return await this.service.waitForWorkflowResult(teamId, workflowInstanceId);
   }
 
   @Post('/executions/:workflowId/start')
@@ -130,7 +129,7 @@ export class WorkflowExecutionController {
   })
   public async startWorkflow(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Body() body: StartWorkflowDto) {
     const { teamId, userId } = req;
-    const { inputData, version, chatSessionId, waitForWorkflowFinished = false } = body;
+    const { inputData, version, chatSessionId, waitForWorkflowFinished = false, group } = body;
     const workflowInstanceId = await this.service.startWorkflow({
       teamId,
       userId,
@@ -139,6 +138,7 @@ export class WorkflowExecutionController {
       version,
       triggerType: WorkflowTriggerType.MANUALLY,
       chatSessionId,
+      group,
     });
 
     if (waitForWorkflowFinished) {

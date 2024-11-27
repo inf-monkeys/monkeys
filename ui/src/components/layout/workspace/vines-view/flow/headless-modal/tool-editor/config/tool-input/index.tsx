@@ -16,6 +16,7 @@ import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { IVinesVariableMap, VinesToolDef, VinesToolDefProperties } from '@/package/vines-flow/core/tools/typings.ts';
 import { VARIABLE_REGEXP } from '@/package/vines-flow/core/utils.ts';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { cloneDeep, cn } from '@/utils';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 
@@ -31,6 +32,8 @@ interface IToolInputProps {
 export const ToolInput: React.FC<IToolInputProps> = memo(
   ({ nodeId, task, tool, updateRaw, variableMapper, className }) => {
     const { t } = useTranslation();
+
+    const isWorkflowReadOnly = useCanvasStore((s) => s.isWorkflowReadOnly);
 
     const input = tool?.input;
 
@@ -130,6 +133,7 @@ export const ToolInput: React.FC<IToolInputProps> = memo(
               value={getPropertyValueFromTask(def, task, !isSpecialNode)}
               onChange={(value: unknown) => handleUpdate(value, def.name)}
               variableMapper={variableMapper}
+              disabled={isWorkflowReadOnly}
             />
           ))}
       </div>

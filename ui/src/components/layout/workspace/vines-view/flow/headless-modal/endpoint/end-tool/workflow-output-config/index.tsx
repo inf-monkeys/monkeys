@@ -14,7 +14,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.t
 import { useVinesFlow } from '@/package/vines-flow';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
-import { CanvasStatus } from '@/store/useFlowStore/typings.ts';
 import { cn } from '@/utils';
 
 export interface IVinesOutputData {
@@ -38,7 +37,7 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({
 
   const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
   const workflowId = useFlowStore((s) => s.workflowId);
-  const canvasMode = useCanvasStore((s) => s.canvasMode);
+  const isWorkflowReadOnly = useCanvasStore((s) => s.isWorkflowReadOnly);
 
   const { vines } = useVinesFlow();
   const { data: workflow } = useGetWorkflow(workflowId, vines.version);
@@ -111,8 +110,6 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({
     [setOutput, outputRef.current],
   );
 
-  const disabled = canvasMode !== CanvasStatus.EDIT;
-
   return (
     <Tabs defaultValue="output" className={className}>
       <TabsList>
@@ -129,17 +126,18 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <Button
-                icon={<Plus />}
-                onClick={() => {
-                  outputRef.current = [{ key: 'output1', value: 'simple data' }];
-                  setOutput(outputRef.current);
-                }}
-                disabled={disabled || !isLatestWorkflowVersion}
-                variant="outline"
-              >
-                {t('workspace.flow-view.endpoint.end-tool.create')}
-              </Button>
+              {!isWorkflowReadOnly && isLatestWorkflowVersion && (
+                <Button
+                  icon={<Plus />}
+                  onClick={() => {
+                    outputRef.current = [{ key: 'output1', value: 'simple data' }];
+                    setOutput(outputRef.current);
+                  }}
+                  variant="outline"
+                >
+                  {t('workspace.flow-view.endpoint.end-tool.create')}
+                </Button>
+              )}
               <h1 className="text-xl font-bold">{t('workspace.flow-view.endpoint.end-tool.tip1')}</h1>
               <span className="text-xs text-gray-10">{t('workspace.flow-view.endpoint.end-tool.tip2')}</span>
             </motion.div>
@@ -158,34 +156,34 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({
                     value={it.key}
                     onChange={(val) => handleValueChange(index, val, 'key')}
                     placeholder="参数名"
-                    disabled={disabled}
+                    disabled={isWorkflowReadOnly}
                   />
                   <div
                     key={it.key}
                     className={cn(
                       'relative flex h-full flex-[70%] items-center justify-end',
-                      'pointer-events-none' && disabled,
+                      'pointer-events-none' && isWorkflowReadOnly,
                     )}
                   >
                     <WorkflowOutputVariableEditor
                       value={it.value?.toString() || ''}
                       onChange={(val) => handleValueChange(index, val, 'value')}
-                      disabled={disabled}
+                      disabled={isWorkflowReadOnly}
                       variableMapper={variableMapper}
                       workflowId={workflowId}
                     />
                   </div>
-                  {!disabled && (
+                  {!isWorkflowReadOnly && (
                     <Button
                       icon={<TrashIcon />}
                       onClick={() => handleDelete(index)}
-                      disabled={disabled}
+                      disabled={isWorkflowReadOnly}
                       variant="outline"
                     />
                   )}
                 </div>
               ))}
-              {!disabled && (
+              {!isWorkflowReadOnly && (
                 <div className="w-full text-center">
                   <Button
                     icon={<Plus />}
@@ -193,7 +191,7 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({
                       outputRef.current = [...outputRef.current, { key: `output${outputLength + 1}`, value: '' }];
                       setOutput(outputRef.current);
                     }}
-                    disabled={disabled}
+                    disabled={isWorkflowReadOnly}
                     variant="outline"
                   >
                     {t('workspace.flow-view.endpoint.end-tool.create')}
@@ -211,7 +209,7 @@ export const WorkflowOutputConfig: React.FC<IWorkflowOutputConfigProps> = ({
           onUpdate={handleUpdateRaw}
           lineNumbers={3}
           minimap={false}
-          readonly={disabled || !isLatestWorkflowVersion}
+          readonly={isWorkflowReadOnly || !isLatestWorkflowVersion}
         />
         {editorError && (
           <p className="text-danger pointer-events-none absolute bottom-7 left-8 flex items-center gap-2 text-xs opacity-80">

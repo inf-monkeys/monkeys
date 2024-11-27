@@ -2817,7 +2817,8 @@
       },
       "error": {
         "tips": "定位到工具"
-      }
+      },
+      "shortcuts-flow": "快捷方式"
     },
     "logs-view": {
       "title": "日志视图",

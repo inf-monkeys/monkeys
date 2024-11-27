@@ -14,8 +14,18 @@ export class WorkflowStatisticsService {
     if (isNaN(createdTimestamp) || isNaN(endTimestamp)) {
       throw new Error('startTimestamp and endTimestamp must be a number');
     }
-    const data = await this.workflowRepository.getWorkflowExecutionStatisticsByWorkflowId(workflowId, createdTimestamp, endTimestamp);
-    return data;
+
+    const workflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(workflowId);
+    if (!workflow) {
+      throw new Error('workflow not found');
+    }
+
+    const shortcutsFlowId = workflow?.shortcutsFlow?.toString()?.split(':')?.[0];
+    if (shortcutsFlowId) {
+      return await this.workflowRepository.getWorkflowExecutionStatisticsByWorkflowId(shortcutsFlowId, createdTimestamp, endTimestamp, true);
+    }
+
+    return await this.workflowRepository.getWorkflowExecutionStatisticsByWorkflowId(workflowId, createdTimestamp, endTimestamp);
   }
 
   public async getTeamWorkflowStatistics(teamId: string, createdTimestampStr: string, endTimestampStr: string) {
@@ -27,7 +37,6 @@ export class WorkflowStatisticsService {
     if (isNaN(createdTimestamp) || isNaN(endTimestamp)) {
       throw new Error('startTimestamp and endTimestamp must be a number');
     }
-    const data = await this.workflowRepository.getWorkflowExecutionStatisticsByTeamId(teamId, createdTimestamp, endTimestamp);
-    return data;
+    return await this.workflowRepository.getWorkflowExecutionStatisticsByTeamId(teamId, createdTimestamp, endTimestamp);
   }
 }

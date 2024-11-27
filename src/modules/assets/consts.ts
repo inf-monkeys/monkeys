@@ -90,6 +90,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['模型调用（AutoInfer）'],
@@ -158,6 +159,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['模型调用（AutoInfer）'],
@@ -346,6 +348,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['效率提升'],
@@ -420,6 +423,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['效率提升'],
@@ -494,6 +498,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['效率提升'],
@@ -568,6 +573,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['效率提升'],
@@ -642,6 +648,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['人力资源'],
@@ -716,6 +723,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['人力资源'],
@@ -790,6 +798,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['人力资源'],
@@ -864,6 +873,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['效率提升'],
@@ -938,6 +948,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['效率提升'],
@@ -1012,6 +1023,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['效率提升'],
@@ -1086,6 +1098,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['效率提升'],
@@ -1160,6 +1173,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['效率提升'],
@@ -1234,6 +1248,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['效率提升'],
@@ -1308,6 +1323,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['效率提升'],
@@ -1382,6 +1398,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['效率提升'],
@@ -1455,6 +1472,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['内容营销'],
@@ -1529,6 +1547,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['内容营销'],
@@ -1603,6 +1622,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['效率提升'],
@@ -1677,6 +1697,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['内容编译'],
@@ -1751,6 +1772,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['内容编译'],
@@ -1825,6 +1847,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['内容营销'],
@@ -1899,6 +1922,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['内容营销'],
@@ -1973,6 +1997,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['内容营销'],
@@ -2047,6 +2072,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['内容编译'],
@@ -2121,6 +2147,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['内容编译'],
@@ -2195,6 +2222,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['内容营销'],
@@ -2269,6 +2297,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['内容营销'],
@@ -2343,6 +2372,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['内容营销'],
@@ -2416,6 +2446,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['内容营销'],
@@ -2490,6 +2521,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['内容营销'],
@@ -2564,6 +2596,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['内容营销'],
@@ -2638,6 +2671,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['内容营销'],
@@ -2712,6 +2746,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['内容编译'],
@@ -2786,6 +2821,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -2861,6 +2897,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -2935,6 +2972,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -3009,6 +3047,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -3083,6 +3122,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -3157,6 +3197,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -3231,6 +3272,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -3305,6 +3347,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -3379,6 +3422,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -3453,6 +3497,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -3527,6 +3572,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -3601,6 +3647,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -3675,6 +3722,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -3749,6 +3797,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -3823,6 +3872,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -3898,6 +3948,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -3971,6 +4022,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -4045,6 +4097,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -4119,6 +4172,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -4193,6 +4247,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -4267,6 +4322,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -4341,6 +4397,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -4415,6 +4472,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -4489,6 +4547,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -4562,6 +4621,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -4635,6 +4695,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -4709,6 +4770,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -4782,6 +4844,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -4856,6 +4919,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -4930,6 +4994,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -5004,6 +5069,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -5078,6 +5144,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -5152,6 +5219,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -5226,6 +5294,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -5300,6 +5369,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -5374,6 +5444,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -5447,6 +5518,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -5521,6 +5593,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -5595,6 +5668,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -5669,6 +5743,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -5743,6 +5818,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -5817,6 +5893,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -5891,6 +5968,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -5965,6 +6043,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -6039,6 +6118,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -6112,6 +6192,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -6186,6 +6267,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -6259,6 +6341,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -6333,6 +6416,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -6407,6 +6491,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -6481,6 +6566,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -6555,6 +6641,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: [],
@@ -6629,6 +6716,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -6703,6 +6791,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -6777,6 +6866,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -6851,6 +6941,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
     {
       tags: ['软件开发'],
@@ -6925,6 +7016,7 @@ export const INTERNAL_BUILT_IN_MARKET = {
         },
       ],
       exposeOpenaiCompatibleInterface: true,
+      shortcutsFlow: null,
     },
   ],
   'comfyui-workflows': [],

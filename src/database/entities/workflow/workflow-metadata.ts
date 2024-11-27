@@ -156,6 +156,13 @@ export class WorkflowMetadataEntity extends BaseAssetEntity {
   notAuthorized?: boolean;
 
   @Column({
+    type: 'text',
+    name: 'shortcuts_flow',
+    nullable: true,
+  })
+  shortcutsFlow?: string;
+
+  @Column({
     nullable: true,
     default: false,
     type: 'varchar',

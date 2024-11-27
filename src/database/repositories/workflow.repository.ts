@@ -12,7 +12,7 @@ import { WorkflowTriggersEntity, WorkflowTriggerType } from '@/database/entities
 import { I18nValue, MonkeyTaskDefTypes, ToolProperty } from '@inf-monkeys/monkeys';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import _, { keyBy } from 'lodash';
+import _, { isEmpty, isString, keyBy, omit, pick } from 'lodash';
 import { ChatCompletionMessageParam } from 'openai/resources';
 import { In, IsNull, Repository } from 'typeorm';
 import { PageInstance, WorkflowPageEntity } from '../entities/workflow/workflow-page';
@@ -94,10 +94,11 @@ export class WorkflowRepository {
       rateLimiter?: WorkflowRateLimiter;
       validationIssues?: WorkflowValidationIssue[];
       validated?: boolean;
+      shortcutsFlow?: string;
     },
     useNewId = false,
   ) {
-    const { displayName, description, iconUrl, tasks, variables, output, exposeOpenaiCompatibleInterface, rateLimiter, validationIssues = [], validated = true } = data;
+    const { displayName, description, iconUrl, tasks, variables, output, exposeOpenaiCompatibleInterface, shortcutsFlow, rateLimiter, validationIssues = [], validated = true } = data;
 
     const id = useNewId ? generateDbId() : workflowId;
 
@@ -120,6 +121,7 @@ export class WorkflowRepository {
       rateLimiter,
       validationIssues,
       validated,
+      shortcutsFlow,
     });
     return await this.getWorkflowById(workflowId, version);
   }
@@ -187,13 +189,29 @@ export class WorkflowRepository {
       rateLimiter?: WorkflowRateLimiter;
       exposeOpenaiCompatibleInterface?: boolean;
       openaiModelName?: string;
+      shortcutsFlow?: string;
     },
   ) {
-    const { displayName, description, iconUrl, tasks, variables, activated, validationIssues, validated, output, tagIds, rateLimiter, exposeOpenaiCompatibleInterface, openaiModelName } = updates;
+    const {
+      displayName,
+      description,
+      iconUrl,
+      tasks,
+      variables,
+      activated,
+      validationIssues,
+      validated,
+      output,
+      tagIds,
+      rateLimiter,
+      exposeOpenaiCompatibleInterface,
+      openaiModelName,
+      shortcutsFlow,
+    } = updates;
 
     // 字段都为空，则跳过更新
     if (
-      [displayName, description, iconUrl, tasks, variables, activated, validated, validationIssues, output, tagIds, rateLimiter, exposeOpenaiCompatibleInterface, openaiModelName].every(
+      [displayName, description, iconUrl, tasks, variables, activated, validated, validationIssues, output, tagIds, rateLimiter, exposeOpenaiCompatibleInterface, openaiModelName, shortcutsFlow].every(
         (item) => typeof item === 'undefined',
       )
     )
@@ -203,6 +221,18 @@ export class WorkflowRepository {
     }
     if (output && !Array.isArray(output)) {
       throw new Error('output 字段必须为数组');
+    }
+
+    // 检查 shortcutsFlow 对应的工作流是否存在
+    if (isString(shortcutsFlow)) {
+      const [shortcutsFlowId, shortcutsFlowVersionString] = shortcutsFlow.split(':');
+      if (!(await this.checkWorkflowExists(shortcutsFlowId, parseInt(shortcutsFlowVersionString)))) {
+        throw new Error('shortcutsFlow 对应的工作流不存在');
+      }
+      if (shortcutsFlowId === workflowId) {
+        throw new Error('shortcutsFlow 不能指向自身');
+      }
+      // 此处应有授权逻辑
     }
 
     // Check if openaiModelName is unique
@@ -216,7 +246,7 @@ export class WorkflowRepository {
     await this.workflowMetadataRepository.findOneOrFail({ where: { workflowId: workflowId, version, teamId, isDeleted: false } });
     const updateFields = {
       ..._.pickBy(
-        { displayName, iconUrl, description, tasks, variables, activated, validationIssues, validated, output, tagIds, rateLimiter, exposeOpenaiCompatibleInterface, openaiModelName },
+        { displayName, iconUrl, description, tasks, variables, activated, validationIssues, validated, output, tagIds, rateLimiter, exposeOpenaiCompatibleInterface, openaiModelName, shortcutsFlow },
         (v) => typeof v !== 'undefined',
       ),
       updatedTimestamp: Date.now(),
@@ -261,6 +291,25 @@ export class WorkflowRepository {
     return await this.workflowExecutionRepository.find({
       where: {
         chatSessionId: In(chatSessionIds),
+      },
+    });
+  }
+
+  public async findExecutionsByGroup(group: string) {
+    return await this.workflowExecutionRepository.find({
+      where: {
+        group,
+      },
+    });
+  }
+
+  public async findExecutionsByGroups(groups: string[]) {
+    if (!groups?.length) {
+      return [];
+    }
+    return await this.workflowExecutionRepository.find({
+      where: {
+        group: In(groups),
       },
     });
   }
@@ -345,7 +394,25 @@ export class WorkflowRepository {
     });
   }
 
-  public async saveWorkflowExecution(workflowId: string, version: number, workflowInstanceId: string, userId: string, triggerType: WorkflowTriggerType, chatSessionId: string, apiKey: string) {
+  public async saveWorkflowExecution({
+    workflowId,
+    version,
+    workflowInstanceId,
+    userId,
+    triggerType,
+    chatSessionId,
+    apiKey,
+    group,
+  }: {
+    workflowId: string;
+    version: number;
+    workflowInstanceId: string;
+    userId: string;
+    triggerType: WorkflowTriggerType;
+    chatSessionId?: string;
+    apiKey: string;
+    group?: string;
+  }) {
     await this.workflowExecutionRepository.save({
       id: generateDbId(),
       createdTimestamp: Date.now(),
@@ -358,6 +425,7 @@ export class WorkflowRepository {
       triggerType,
       chatSessionId,
       apikey: apiKey,
+      group,
     });
   }
 
@@ -409,8 +477,10 @@ export class WorkflowRepository {
     return dateList;
   }
 
-  public async getWorkflowExecutionStatisticsByWorkflowId(workflowId: string, startTimestamp: number, endTimestamp: number) {
+  public async getWorkflowExecutionStatisticsByWorkflowId(workflowId: string, startTimestamp: number, endTimestamp: number, onlyGroup?: boolean) {
     const appId = config.server.appId;
+    const groupCondition = onlyGroup ? `"group" LIKE 'shortcut-%'` : `("group" IS NULL OR "group" NOT LIKE 'shortcut-%')`;
+
     const callsPerDateSql = `
 SELECT
     workflow_id,
@@ -419,6 +489,7 @@ SELECT
 FROM
     ${appId}_workflow_execution
 WHERE workflow_id = '${workflowId}' AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+  AND ${groupCondition}
 GROUP BY
     workflow_id,
     TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
@@ -435,6 +506,7 @@ SELECT
 FROM
     ${appId}_workflow_execution
 WHERE workflow_id = '${workflowId}' AND status = 'COMPLETED' AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+  AND ${groupCondition}
 GROUP BY
     workflow_id,
     TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
@@ -451,6 +523,7 @@ SELECT
 FROM
     ${appId}_workflow_execution
 WHERE workflow_id = '${workflowId}' AND status in ('FAILED','TERMINATED','PAUSED') AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+  AND ${groupCondition}
 GROUP BY
     workflow_id,
     TO_CHAR(TO_TIMESTAMP(created_timestamp/1000), 'YYYY-MM-DD')
@@ -468,6 +541,7 @@ FROM
   ${appId}_workflow_execution
 WHERE
   status = 'COMPLETED' AND workflow_id = '${workflowId}' AND created_timestamp >= ${startTimestamp} AND created_timestamp <= ${endTimestamp}
+  AND ${groupCondition}
 GROUP BY
   workflow_id,
   date
@@ -1029,5 +1103,71 @@ ORDER BY
         notAuthorized,
       },
     );
+  }
+
+  public async checkWorkflowExists(workflowId: string, version?: number) {
+    return (
+      (await this.workflowMetadataRepository.findOne({
+        where: {
+          workflowId,
+          isDeleted: false,
+          ...(version && { version }),
+        },
+      })) !== null
+    );
+  }
+
+  public async convertWorkflowWhitShortcutsFlowId(workflowOrWorkflowId: WorkflowMetadataEntity | string, version?: number, targetWorkflow = false) {
+    let workflow: WorkflowMetadataEntity | null;
+
+    if (typeof workflowOrWorkflowId === 'string') {
+      if (!version) {
+        version = await this.getMaxVersion(workflowOrWorkflowId);
+      }
+      workflow = await this.getWorkflowById(workflowOrWorkflowId, version);
+    } else {
+      workflow = workflowOrWorkflowId;
+    }
+
+    const shortcutsFlow = workflow?.shortcutsFlow;
+    if (shortcutsFlow) {
+      const [workflowId, versionString] = shortcutsFlow.split(':');
+      if (!isEmpty(workflowId)) {
+        let shortcutsFlowVersion = parseInt(versionString);
+        if (!shortcutsFlowVersion) {
+          shortcutsFlowVersion = await this.getMaxVersion(workflowId);
+        }
+
+        const targetFlow = await this.getWorkflowById(workflowId, shortcutsFlowVersion, false);
+        if (targetFlow) {
+          if (isEmpty(targetFlow?.shortcutsFlow ?? null)) {
+            if (targetWorkflow) {
+              return targetFlow;
+            }
+
+            const targetKeys = [
+              'tasks',
+              'version',
+              'updatedTimestamp',
+              'iconUrl',
+              'displayName',
+              'description',
+              'variables',
+              'output',
+              'md5',
+              'exposeOpenaiCompatibleInterface',
+              'openaiModelName',
+            ] as (keyof WorkflowMetadataEntity)[];
+
+            return {
+              ...omit(workflow, targetKeys),
+              ...pick(targetFlow, targetKeys),
+            } as WorkflowMetadataEntity;
+          }
+        }
+      }
+    }
+
+    return null;
   }
 }

@@ -55,6 +55,8 @@ export class VinesCore extends VinesTools(VinesBase) {
 
   public enableOpenAIInterface = false;
 
+  public shortcutsFlowId: string | null = null;
+
   public workflowInput: VinesWorkflowVariable[] = [];
 
   public workflowOutput: MonkeyWorkflow['output'] = [];
@@ -111,6 +113,7 @@ export class VinesCore extends VinesTools(VinesBase) {
       workflow?.description && (this.workflowDesc = getI18nContent(workflow.description) ?? '');
       workflow?.iconUrl && (this.workflowIcon = workflow.iconUrl);
       workflow?.output && (this.workflowOutput = workflow.output);
+      workflow?.shortcutsFlow && (this.shortcutsFlowId = workflow.shortcutsFlow);
 
       if (isArray(workflow?.variables) && workflow?.variables?.length) {
         this.workflowInput = workflow.variables;

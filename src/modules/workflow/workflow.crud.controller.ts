@@ -50,7 +50,7 @@ export class WorkflowCrudController {
     if (versionStr) {
       version = parseInt(versionStr.toString());
     }
-    const result = await this.service.getWorkflowDef(workflowId, version);
+    const result = await this.service.getWorkflowDef(workflowId, version, false);
     return new SuccessResponse({
       data: result,
     });
@@ -77,6 +77,16 @@ export class WorkflowCrudController {
   @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
   public async createWorkflowVersion(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Body() body: CreateWorkflowDefDto) {
     const { teamId, userId } = req;
+
+    // 检查工作流是否可用
+    if (!(await this.service.workflowCanUse(workflowId))) {
+      return new SuccessResponse({
+        code: 400,
+        data: null,
+        message: '当前工作流不可创建版本（快捷方式）',
+      });
+    }
+
     const result = await this.service.createWorkflowDef(teamId, userId, body, {
       useExistId: workflowId,
       useNewId: true,
@@ -88,11 +98,11 @@ export class WorkflowCrudController {
 
   @Get('/:workflowId/validation-issues')
   @ApiOperation({
-    summary: '获取工作流的所有版本',
-    description: '获取工作流的所有版本',
+    summary: '获取工作流的所有校验结果',
+    description: '获取工作流的校验结果',
   })
   @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
-  public async getWorkflowValicationIssues(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Query('version') versionStr: string) {
+  public async getWorkflowValidationIssues(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Query('version') versionStr: string) {
     let version = undefined;
     if (versionStr) {
       version = parseInt(versionStr.toString());
@@ -157,12 +167,17 @@ export class WorkflowCrudController {
   })
   @UseGuards(WorkflowAuthGuard, CompatibleAuthGuard)
   public async exportWorkflow(
-    @Req() req: IRequest,
     @Res() res: Response,
     @Param('workflowId') workflowId: string,
     @Query('version') versionStr: string,
     // @Query('exportAssets') exportAssetsStr: string,
   ) {
+    // 检查工作流是否可用
+    if (!(await this.service.workflowCanUse(workflowId))) {
+      res.status(400).send('工作流不可用');
+      return;
+    }
+
     let version = undefined;
     // const exportAssets = exportAssetsStr === '1' || exportAssetsStr === 'true';
     let json: WorkflowWithAssetsJson = {
@@ -239,6 +254,16 @@ export class WorkflowCrudController {
   @UseGuards(CompatibleAuthGuard)
   public async cloneWorkflow(@Req() req: IRequest, @Param('workflowId') workflowId: string, @Body() body?: { autoPinPage: WorkflowAutoPinPage }) {
     const { teamId, userId } = req;
+
+    // 检查工作流是否可用
+    if (!(await this.service.workflowCanUse(workflowId))) {
+      return new SuccessResponse({
+        code: 400,
+        data: null,
+        message: '当前工作流不可复制（快捷方式）',
+      });
+    }
+
     const newWorkflowId = await this.service.cloneWorkflow(teamId, userId, workflowId, body?.autoPinPage);
     return new SuccessResponse({
       data: {

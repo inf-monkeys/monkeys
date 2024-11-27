@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
@@ -23,6 +23,7 @@ interface IWorkflowInfoEditorProps {
   visible?: boolean;
   setVisible?: (v: boolean) => void;
   afterUpdate?: () => void;
+  disabled?: boolean;
 }
 
 export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
@@ -31,6 +32,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
   visible,
   setVisible,
   afterUpdate,
+  disabled,
 }) => {
   const { t } = useTranslation();
 
@@ -39,11 +41,11 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
   const [open, setOpen] = useState(visible ?? false);
   const [isLoading, setIsLoading] = useState(false);
 
-  useMemo(() => {
+  useEffect(() => {
     typeof visible != 'undefined' && setOpen(visible);
   }, [visible]);
 
-  useMemo(() => {
+  useEffect(() => {
     if (typeof setVisible != 'undefined') {
       setTimeout(() => {
         setVisible(open);
@@ -74,6 +76,8 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
   }, [workflow]);
 
   const handleSubmit = form.handleSubmit(async (data) => {
+    if (disabled) return;
+
     setIsLoading(true);
     if (!workflow?.workflowId) {
       setIsLoading(false);
@@ -92,7 +96,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
   });
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={disabled ? void 0 : setOpen}>
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent>
         <DialogHeader>

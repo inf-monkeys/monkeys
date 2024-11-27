@@ -7,7 +7,7 @@ import { WorkflowInfoEditor } from '@/components/layout/workspace/workflow-info-
 import { useVinesOriginWorkflow } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
-import { getI18nContent } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 
 interface IWorkflowInfoCardProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -16,24 +16,37 @@ export const WorkflowInfoCard: React.FC<IWorkflowInfoCardProps> = () => {
 
   const { workflow } = useVinesOriginWorkflow();
 
+  const enabled = !workflow?.shortcutsFlow;
+
   return (
     <Tooltip>
-      <WorkflowInfoEditor>
+      <WorkflowInfoEditor disabled={!enabled}>
         <TooltipTrigger asChild>
-          <div className="group flex cursor-pointer items-center gap-2.5">
+          <div className={cn('group flex cursor-default items-center gap-2.5', enabled && 'cursor-pointer')}>
             <VinesIcon size="sm">{workflow?.iconUrl || 'emoji:🍀:#eeeef1'}</VinesIcon>
             <div className="flex flex-col gap-0.5">
               <h1 className="font-bold leading-tight">{getI18nContent(workflow?.displayName)}</h1>
-              {workflow?.description && <span className="text-xxs">{getI18nContent(workflow?.description)}</span>}
+              <div className="flex items-center gap-1">
+                {!enabled && (
+                  <div className="vines-center gap-2">
+                    <p className="text-ss model-tag rounded-sm border border-input bg-muted px-1 py-0.5">
+                      {t('workspace.flow-view.shortcuts-flow')}
+                    </p>
+                  </div>
+                )}
+                {workflow?.description && <span className="text-xxs">{getI18nContent(workflow.description)}</span>}
+              </div>
             </div>
 
-            <div className="mt-0.5 opacity-0 transition-opacity group-hover:opacity-70">
-              <Pencil size={12} />
-            </div>
+            {enabled && (
+              <div className="mt-0.5 opacity-0 transition-opacity group-hover:opacity-70">
+                <Pencil size={12} />
+              </div>
+            )}
           </div>
         </TooltipTrigger>
       </WorkflowInfoEditor>
-      <TooltipContent>{t('workspace.wrapper.workflow-info-card.tip')}</TooltipContent>
+      {enabled && <TooltipContent>{t('workspace.wrapper.workflow-info-card.tip')}</TooltipContent>}
     </Tooltip>
   );
 };

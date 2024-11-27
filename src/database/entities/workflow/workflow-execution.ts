@@ -38,6 +38,12 @@ export class WorkflowExecutionEntity extends BaseEntity {
   chatSessionId?: string;
 
   @Column({
+    name: 'group',
+    nullable: true,
+  })
+  group?: string;
+
+  @Column({
     name: 'status',
     nullable: true,
     type: 'varchar',

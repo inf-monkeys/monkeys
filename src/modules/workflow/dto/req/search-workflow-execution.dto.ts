@@ -155,4 +155,12 @@ export class SearchWorkflowExecutionsDto {
     isArray: true,
   })
   chatSessionIds?: string[];
+
+  @ApiProperty({
+    description: '分组列表',
+    type: String,
+    required: false,
+    isArray: true,
+  })
+  groups?: string[];
 }

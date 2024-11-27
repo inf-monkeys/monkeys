@@ -55,6 +55,7 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
 
   const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
   const isWorkflowRUNNING = useCanvasStore((s) => s.isWorkflowRUNNING);
+  const isWorkflowReadOnly = useCanvasStore((s) => s.isWorkflowReadOnly);
 
   const [activeTab, setActiveTab] = useState('config');
 
@@ -63,7 +64,7 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
     isUnSupport && setActiveTab('dev');
   }, [isUnSupport]);
 
-  const disabled = !isLatestWorkflowVersion;
+  const disabled = !isLatestWorkflowVersion || isWorkflowReadOnly;
 
   return (
     <>
@@ -84,7 +85,7 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                className={cn(isWorkflowRUNNING && 'hidden')}
+                className={cn(disabled && 'hidden')}
                 icon={<CircleEllipsisIcon />}
                 size="small"
                 variant="outline"
@@ -109,9 +110,11 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
               <TabsTrigger value="more-config">
                 {t('workspace.flow-view.headless-modal.tool-editor.tabs.more-config')}
               </TabsTrigger>
-              <TabsTrigger value="custom-config">
-                {t('workspace.flow-view.headless-modal.tool-editor.tabs.custom-config')}
-              </TabsTrigger>
+              {!disabled && (
+                <TabsTrigger value="custom-config">
+                  {t('workspace.flow-view.headless-modal.tool-editor.tabs.custom-config')}
+                </TabsTrigger>
+              )}
             </>
           )}
         </TabsList>
@@ -164,6 +167,7 @@ export const ComplicateSimpleNode: React.FC<IComplicateSimpleNodeProps> = ({
                   defaultDesc={getI18nContent(tool?.description) ?? ''}
                   task={task}
                   updateRaw={(newTask) => vinesUpdateRaw?.(nodeId, newTask, true)}
+                  disabled={disabled}
                 />
               </TabsContent>
             )}

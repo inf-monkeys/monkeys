@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { useLatest, useMemoizedFn } from 'ahooks';
 import {
   BetweenHorizontalStart,
   BetweenVerticalStart,
@@ -57,6 +58,7 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
     {},
   );
 
+  const enableShortcutsFlowLatest = useLatest(!!vines.shortcutsFlowId);
   const isEditMode = canvasMode === CanvasStatus.EDIT;
   const isHorizontal = vines.renderDirection === 'horizontal';
   const isRenderMini = vines.renderOptions.type === IVinesFlowRenderType.MINI;
@@ -72,8 +74,13 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
     setCanvasMoving(!isCanvasMoving);
     setCanvasDisabled(!canvasDisabled);
   };
-  const handleToggleMode = () =>
+  const handleToggleMode = useMemoizedFn(() => {
+    if (enableShortcutsFlowLatest.current) {
+      setCanvasMode(CanvasStatus.READONLY);
+      return;
+    }
     setCanvasMode(canvasMode === CanvasStatus.EDIT ? CanvasStatus.READONLY : CanvasStatus.EDIT);
+  });
   const handleDirectionChange = () => {
     setVisible(false);
     void updatePageData('customOptions.render.useHorizontal', !isHorizontal);
@@ -127,16 +134,18 @@ export const VinesToolbar: React.FC<IVinesToolbarProps> = () => {
         keys={['space']}
         onClick={handleCanvasMove}
       />
-      <ToolButton
-        className={cn(
-          !isEditMode && '[&_svg]:stroke-red-10',
-          (isNotLatestWorkflowVersion || isWorkflowRUNNING) && 'hidden',
-        )}
-        icon={<Lock />}
-        tip={isEditMode ? t('workspace.flow-view.tooltip.only-read') : t('workspace.flow-view.tooltip.edit')}
-        keys={['ctrl', 'L']}
-        onClick={handleToggleMode}
-      />
+      {!enableShortcutsFlowLatest.current && (
+        <ToolButton
+          className={cn(
+            !isEditMode && '[&_svg]:stroke-red-10',
+            (isNotLatestWorkflowVersion || isWorkflowRUNNING) && 'hidden',
+          )}
+          icon={<Lock />}
+          tip={isEditMode ? t('workspace.flow-view.tooltip.only-read') : t('workspace.flow-view.tooltip.edit')}
+          keys={['ctrl', 'L']}
+          onClick={handleToggleMode}
+        />
+      )}
       <ToolButton
         className={cn(isWorkflowRUNNING && 'hidden')}
         icon={isHorizontal ? <BetweenHorizontalStart /> : <BetweenVerticalStart />}

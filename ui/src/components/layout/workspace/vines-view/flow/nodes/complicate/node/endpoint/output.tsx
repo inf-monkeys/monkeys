@@ -23,6 +23,7 @@ export const ComplicateEndNode: React.FC = () => {
   const { t } = useTranslation();
 
   const isWorkflowRUNNING = useCanvasStore((s) => s.isWorkflowRUNNING);
+  const isWorkflowReadOnly = useCanvasStore((s) => s.isWorkflowReadOnly);
   const workflowId = useFlowStore((s) => s.workflowId);
 
   const { vines } = useVinesFlow();
@@ -38,7 +39,7 @@ export const ComplicateEndNode: React.FC = () => {
     });
   };
 
-  const executionOutput = vines.executionWorkflowExecution?.output ?? {};
+  const executionOutput = vines.getWorkflowExecution()?.output ?? {};
   const hasExecutionOutput = Object.keys(executionOutput).length > 0;
 
   return (
@@ -53,7 +54,7 @@ export const ComplicateEndNode: React.FC = () => {
         }}
       >
         <Button
-          className={cn(isWorkflowRUNNING && 'hidden')}
+          className={cn((isWorkflowRUNNING || isWorkflowReadOnly) && 'hidden')}
           variant="outline"
           size="small"
           icon={<Save />}

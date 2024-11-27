@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
@@ -19,6 +20,7 @@ export const QuickOptions: React.FC<IQuickOptionsProps> = ({ nodeId }) => {
   const { t } = useTranslation();
 
   const isLatestWorkflowVersion = useFlowStore((s) => s.isLatestWorkflowVersion);
+  const isWorkflowReadOnly = useCanvasStore((s) => s.isWorkflowReadOnly);
 
   const { vines } = useVinesFlow();
 
@@ -75,19 +77,21 @@ export const QuickOptions: React.FC<IQuickOptionsProps> = ({ nodeId }) => {
           {t('workspace.flow-view.headless-modal.tool-editor.header.quick-options.toggle-next-tool')}
         </TooltipContent>
       </Tooltip>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            className={cn('[&_svg]:stroke-red-10', !isLatestWorkflowVersion && 'hidden')}
-            icon={<Trash2 />}
-            variant="borderless"
-            onClick={handleDelete}
-          />
-        </TooltipTrigger>
-        <TooltipContent>
-          {t('workspace.flow-view.headless-modal.tool-editor.header.quick-options.del.button-tips')}
-        </TooltipContent>
-      </Tooltip>
+      {!isWorkflowReadOnly && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              className={cn('[&_svg]:stroke-red-10', !isLatestWorkflowVersion && 'hidden')}
+              icon={<Trash2 />}
+              variant="borderless"
+              onClick={handleDelete}
+            />
+          </TooltipTrigger>
+          <TooltipContent>
+            {t('workspace.flow-view.headless-modal.tool-editor.header.quick-options.del.button-tips')}
+          </TooltipContent>
+        </Tooltip>
+      )}
     </div>
   );
 };

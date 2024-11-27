@@ -4,7 +4,7 @@ import { getComfyuiWorkflowDataListFromWorkflow } from '@/common/utils';
 import { ComfyuiRepository } from '@/database/repositories/comfyui.repository';
 import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
-import { WorkflowRepository } from '../../database/repositories/workflow.repository';
+import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { INTERNAL_BUILT_IN_MARKET } from '../assets/consts';
 import { LlmModelJson, RichMediaJson, SdModelJson, TableCollectionsJson, TeamInfoJson, TextCollectionJson, WorkflowWithPagesJson } from '../workflow/interfaces';
 import { WorkflowCrudService } from '../workflow/workflow.curd.service';
@@ -49,13 +49,13 @@ export class ExportService {
     }
 
     // 导出 sql 数据库
-    let sqlDatabases: TableCollectionsJson[] = [];
+    const sqlDatabases: TableCollectionsJson[] = [];
     if (exportSqlTables) {
       // sqlDatabases = await this.tableCollectionService.exportAllDatabase(teamId);
     }
 
     // 导出富媒体数据
-    let richMedias: RichMediaJson[] = [];
+    const richMedias: RichMediaJson[] = [];
     if (exportRichMedias) {
       // const rawResources = await this.resourceService.exportResources(teamId);
       // richMedias = rawResources.map((resource) => ({
@@ -71,19 +71,19 @@ export class ExportService {
     }
 
     // 导出向量数据库数据
-    let vectorDatabases: TextCollectionJson[] = [];
+    const vectorDatabases: TextCollectionJson[] = [];
     if (exportVectorDatabases) {
       // vectorDatabases = await this.vectorService.exportAllCollections(teamId);
     }
 
     // 导出 sd 模型
-    let sdModels: SdModelJson[] = [];
+    const sdModels: SdModelJson[] = [];
     if (exportSdModel) {
       // sdModels = await this.sdModelService.exportSdModels(req);
     }
 
     // 导出 llm 模型
-    let llmModels: LlmModelJson[] = [];
+    const llmModels: LlmModelJson[] = [];
     if (exportLlmModel) {
       // llmModels = await this.llmModelService.exportLlmModels(req);
     }
@@ -112,7 +112,7 @@ export class ExportService {
           }
         }
         return {
-          ..._.pick(workflow, ['id', 'tags', 'autoPinPage', 'displayName', 'description', 'iconUrl', 'version', 'variables', 'tasks', 'exposeOpenaiCompatibleInterface', 'thumbnail']),
+          ..._.pick(workflow, ['id', 'tags', 'autoPinPage', 'displayName', 'description', 'iconUrl', 'version', 'variables', 'tasks', 'exposeOpenaiCompatibleInterface', 'thumbnail', 'shortcutsFlow']),
           isPreset: true,
           isPublished: true,
         };
@@ -150,55 +150,55 @@ export class ExportService {
       llmModels: LlmModelJson[];
     },
   ) {
-    const { workflows, tableCollections, richMedias, textCollections, sdModels, llmModels } = data;
+    const { workflows, tableCollections, textCollections, sdModels, llmModels } = data;
     // 导入表格数据
     const replaceSqlDatabaseMap = {};
     logger.log('开始导入表格数据集：', tableCollections.length);
-    for (const infoJson of tableCollections) {
-      // const sqlDatabaseId = await this.tableCollectionService.importDatabase(teamId, userId, infoJson);
-      // replaceSqlDatabaseMap[infoJson.originalId] = sqlDatabaseId;
-    }
+    // for (const infoJson of tableCollections) {
+    //   // const sqlDatabaseId = await this.tableCollectionService.importDatabase(teamId, userId, infoJson);
+    //   // replaceSqlDatabaseMap[infoJson.originalId] = sqlDatabaseId;
+    // }
 
     // 导入向量数据库
     logger.log('开始导入文本数据集：', textCollections.length);
     const replaceVectorDatabaseMap = {};
-    if (textCollections.length) {
-      for (const infoJson of textCollections) {
-        // const collectionName = await this.vectorService.importCollection(teamId, userId, infoJson);
-        // replaceVectorDatabaseMap[infoJson.originalId] = collectionName;
-      }
-    }
+    // if (textCollections.length) {
+    //   for (const infoJson of textCollections) {
+    //     // const collectionName = await this.vectorService.importCollection(teamId, userId, infoJson);
+    //     // replaceVectorDatabaseMap[infoJson.originalId] = collectionName;
+    //   }
+    // }
 
     // 导入 llm model
     const replaceLlmModelMap = {};
     logger.log('开始导入文本模型：', llmModels.length);
-    const llmModelsChunks = _.chunk(llmModels, 10);
-    for (const chunk of llmModelsChunks) {
-      await Promise.all(
-        chunk.map(async (c) => {
-          // const originalModelId = c.originalId;
-          // const newLlmModel = await this.llmModelAssetSvc.createAsset('llm-model', c, {
-          //   teamId,
-          //   userId,
-          // });
-          // replaceLlmModelMap[originalModelId] = newLlmModel._id.toHexString();
-        }),
-      );
-    }
+    // const llmModelsChunks = _.chunk(llmModels, 10);
+    // for (const chunk of llmModelsChunks) {
+    //   await Promise.all(
+    //     chunk.map(async (c) => {
+    //       // const originalModelId = c.originalId;
+    //       // const newLlmModel = await this.llmModelAssetSvc.createAsset('llm-model', c, {
+    //       //   teamId,
+    //       //   userId,
+    //       // });
+    //       // replaceLlmModelMap[originalModelId] = newLlmModel._id.toHexString();
+    //     }),
+    //   );
+    // }
 
     // 导入 sd model
     logger.log('开始导入图像模型：', sdModels.length);
     const replaceSdModelMap = {};
-    const sdModelsChunks = _.chunk(sdModels, 10);
-    for (const chunk of sdModelsChunks) {
-      await Promise.all(
-        chunk.map(async (c) => {
-          // const originalModelId = c.originalId;
-          // const newSdModel = await this.sdModelAssetSvc.createAsset('sd-model', c, { teamId, userId });
-          // replaceSdModelMap[originalModelId] = newSdModel._id.toHexString();
-        }),
-      );
-    }
+    // const sdModelsChunks = _.chunk(sdModels, 10);
+    // for (const chunk of sdModelsChunks) {
+    //   await Promise.all(
+    //     chunk.map(async (c) => {
+    //       // const originalModelId = c.originalId;
+    //       // const newSdModel = await this.sdModelAssetSvc.createAsset('sd-model', c, { teamId, userId });
+    //       // replaceSdModelMap[originalModelId] = newSdModel._id.toHexString();
+    //     }),
+    //   );
+    // }
 
     // 导入工作流
     const workflowChunks = _.chunk(workflows, 5);
@@ -216,9 +216,9 @@ export class ExportService {
     }
 
     // 导入富媒体资源
-    const richMediaChunks = _.chunk(richMedias, 20);
-    for (const chunk of richMediaChunks) {
-      // await this.resourceService.importResourcesBatch(teamId, userId, chunk);
-    }
+    // const richMediaChunks = _.chunk(richMedias, 20);
+    // for (const chunk of richMediaChunks) {
+    //   // await this.resourceService.importResourcesBatch(teamId, userId, chunk);
+    // }
   }
 }

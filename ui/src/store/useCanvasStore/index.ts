@@ -13,6 +13,7 @@ export interface CanvasStore {
 
   canvasMode: CanvasStatus;
   isWorkflowRUNNING: boolean;
+  isWorkflowReadOnly: boolean;
   setCanvasMode: (mode: CanvasStatus) => void;
 
   activeDraggableNodeId: string;
@@ -35,9 +36,11 @@ const createCanvasStore = () =>
 
       canvasMode: CanvasStatus.EDIT,
       isWorkflowRUNNING: false,
+      isWorkflowReadOnly: false,
       setCanvasMode: (canvasMode) =>
         set({
           canvasMode,
+          isWorkflowReadOnly: canvasMode === CanvasStatus.READONLY,
           isWorkflowRUNNING: [CanvasStatus.RUNNING, CanvasStatus.WAIT_TO_RUNNING].includes(canvasMode),
         }),
 

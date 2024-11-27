@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
-import { cloneDeep } from '@/utils';
+import { cloneDeep, cn } from '@/utils';
 
 interface IToolCustomDataEditorProps {
   task?: VinesTask;
@@ -20,6 +20,7 @@ interface IToolCustomDataEditorProps {
   desc?: string;
   defaultDesc?: string;
   updateRaw: (task: VinesTask) => void;
+  disabled?: boolean;
 }
 
 export const ToolCustomDataEditor: React.FC<IToolCustomDataEditorProps> = ({
@@ -31,6 +32,7 @@ export const ToolCustomDataEditor: React.FC<IToolCustomDataEditorProps> = ({
   desc,
   defaultDesc,
   updateRaw,
+  disabled,
 }) => {
   const { t } = useTranslation();
 
@@ -91,24 +93,38 @@ export const ToolCustomDataEditor: React.FC<IToolCustomDataEditorProps> = ({
           <Label htmlFor="width">
             {t('workspace.flow-view.headless-modal.tool-editor.header.info.editor.form.name')}
           </Label>
-          <Input id="width" value={customDisplayName} onChange={setCustomDisplayName} className="col-span-2 h-8" />
+          <Input
+            id="width"
+            value={customDisplayName}
+            onChange={setCustomDisplayName}
+            className="col-span-2 h-8"
+            disabled={disabled}
+          />
         </div>
         <div className="grid grid-cols-3 items-center gap-4">
           <Label htmlFor="width">
             {t('workspace.flow-view.headless-modal.tool-editor.header.info.editor.form.desc')}
           </Label>
-          <Input id="width" value={customDescription} onChange={setCustomDescription} className="col-span-2 h-8" />
+          <Input
+            id="width"
+            value={customDescription}
+            onChange={setCustomDescription}
+            className="col-span-2 h-8"
+            disabled={disabled}
+          />
         </div>
-        <div className="grid grid-cols-3 items-center gap-4">
+        <div className={cn('grid grid-cols-3 items-center gap-4', disabled && 'hidden')}>
           <Label htmlFor="width">
             {t('workspace.flow-view.headless-modal.tool-editor.header.info.editor.form.icon')}
           </Label>
           <VinesIconEditor value={customIcon} defaultValue={defaultIcon} onChange={setCustomIcon} />
         </div>
       </div>
-      <Button onClick={handleUpdate} variant="outline">
-        {t('workspace.flow-view.headless-modal.tool-editor.header.info.editor.form.submit')}
-      </Button>
+      {!disabled && (
+        <Button onClick={handleUpdate} variant="outline">
+          {t('workspace.flow-view.headless-modal.tool-editor.header.info.editor.form.submit')}
+        </Button>
+      )}
     </div>
   );
 };

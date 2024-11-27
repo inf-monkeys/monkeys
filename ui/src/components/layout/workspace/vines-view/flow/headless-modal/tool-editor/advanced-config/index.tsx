@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { useVinesFlow } from '@/package/vines-flow/use.ts';
+import { useCanvasStore } from '@/store/useCanvasStore';
 import { cloneDeep } from '@/utils';
 
 interface INodeConfigProps {
@@ -20,6 +21,8 @@ export const ToolAdvancedConfig: React.FC<INodeConfigProps> = ({ nodeId, task })
   const { t } = useTranslation();
 
   const { vines } = useVinesFlow();
+
+  const isWorkflowReadOnly = useCanvasStore((s) => s.isWorkflowReadOnly);
 
   const taskRef = useRef<VinesTask | null>(null);
 
@@ -70,6 +73,7 @@ export const ToolAdvancedConfig: React.FC<INodeConfigProps> = ({ nodeId, task })
           setTimeoutInput(val);
           handleUpdate('timeout', number);
         }}
+        disabled={isWorkflowReadOnly}
       />
       <Label>{t('workspace.flow-view.headless-modal.tool-editor.advanced-config.output.label')}</Label>
       <Select
@@ -79,6 +83,7 @@ export const ToolAdvancedConfig: React.FC<INodeConfigProps> = ({ nodeId, task })
           handleUpdate('outputAs', val);
         }}
         defaultValue="json"
+        disabled={isWorkflowReadOnly}
       >
         <SelectTrigger>
           <SelectValue
