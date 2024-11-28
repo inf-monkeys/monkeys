@@ -493,6 +493,12 @@
             "success": "创建成功",
             "error": "创建失败，请检查网络后重试"
           },
+          "only-import": {
+            "label": "仅导入",
+            "loading": "导入中...",
+            "success": "导入成功",
+            "error": "导入失败，请检查网络后重试"
+          },
           "import-to-team": {
             "label": "一键使用",
 

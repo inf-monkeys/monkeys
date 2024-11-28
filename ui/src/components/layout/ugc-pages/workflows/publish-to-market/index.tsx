@@ -56,6 +56,7 @@ export const PublishToMarket: React.FC<IPublishToMarketProps> = ({ visible, setV
       displayName:
         getI18nContent(context?.displayName) ?? t('workspace.wrapper.workflow-info-card.default-workflow-name'),
       description: getI18nContent(context?.description) ?? '',
+      iconUrl: context?.iconUrl ?? 'emoji:🍀:#eeeef1',
       thumbnail: '',
     },
   });
@@ -70,7 +71,6 @@ export const PublishToMarket: React.FC<IPublishToMarketProps> = ({ visible, setV
   }, [context]);
 
   const handleSubmit = form.handleSubmit(async (data) => {
-    console.log(data);
     setIsLoading(true);
     publishToMarket({
       extraAssetData: {

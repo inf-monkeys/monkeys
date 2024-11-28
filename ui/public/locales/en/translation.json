@@ -499,6 +499,12 @@
             "success": "Create successful!",
             "error": "Create failed! Please try again later!"
           },
+          "only-import": {
+            "label": "Import only",
+            "loading": "Importing...",
+            "success": "Import successful",
+            "error": "Import failed, please check the network and try again"
+          },
           "import-to-team": {
             "label": "One-click use",
 

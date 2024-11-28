@@ -272,6 +272,23 @@ export class WorkflowCrudController {
     });
   }
 
+  @Post('/:workflowId/create-shortcut')
+  @ApiOperation({
+    summary: '创建工作流快捷方式',
+    description: 'Create shortcut',
+  })
+  @UseGuards(CompatibleAuthGuard)
+  public async createShortcut(@Req() req: IRequest, @Param('workflowId') workflowId: string) {
+    const { teamId, userId } = req;
+
+    const newWorkflowId = await this.service.createShortcut(workflowId, teamId, userId);
+    return new SuccessResponse({
+      data: {
+        workflowId: newWorkflowId,
+      },
+    });
+  }
+
   @Delete('/:workflowId')
   @ApiOperation({
     summary: '删除 workflow 定义',
