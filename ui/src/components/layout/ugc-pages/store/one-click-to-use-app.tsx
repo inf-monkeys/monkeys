@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { forkApplicationFromTemplate } from '@/apis/application-store';
+import { createShortcutsFlowWithWorkflowId, forkApplicationFromTemplate } from '@/apis/application-store';
 import { IApplicationStoreItemDetail } from '@/apis/ugc/asset-typings.ts';
 import { useAppChecklist } from '@/components/layout/ugc-pages/store/use-app-checklist.ts';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
@@ -24,17 +24,17 @@ interface IOneClickToUseAppProps extends IApplicationStoreItemDetail {
 }
 
 export const OneClickToUseApp: React.FC<IOneClickToUseAppProps> = ({ id, children, ...workflow }) => {
-  const { thumbnail, iconUrl, displayName, description, exposeOpenaiCompatibleInterface } = workflow;
+  const { forkFromId, thumbnail, iconUrl, displayName, description, exposeOpenaiCompatibleInterface } = workflow;
 
   const { t, i18n } = useTranslation();
 
   const { teamId } = useVinesTeam();
 
   const [open, setOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isOnlyImportLoading, setIsOnlyImportLoading] = useState(false);
 
-  const handleUse = useMemoizedFn(async () => {
-    setIsLoading(true);
+  const handleOnlyImport = useMemoizedFn(async () => {
+    setIsOnlyImportLoading(true);
 
     toast.promise(
       forkApplicationFromTemplate(id, [
@@ -50,17 +50,41 @@ export const OneClickToUseApp: React.FC<IOneClickToUseAppProps> = ({ id, childre
               100,
             );
           }
-          setIsLoading(false);
+          setIsOnlyImportLoading(false);
           setOpen(false);
           return t('components.layout.ugc.import-dialog.use-template.success');
         },
         error: () => {
-          setIsLoading(false);
+          setIsOnlyImportLoading(false);
           return t('components.layout.ugc.import-dialog.use-template.error');
         },
         loading: t('components.layout.ugc.import-dialog.use-template.loading'),
       },
     );
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const handleUse = useMemoizedFn(async () => {
+    if (!forkFromId) {
+      toast.error(t('components.layout.ugc.import-dialog.only-import.error'));
+      return;
+    }
+    setIsLoading(true);
+    toast.promise(createShortcutsFlowWithWorkflowId(forkFromId), {
+      success: (flow) => {
+        if (flow) {
+          setTimeout(() => VinesEvent.emit('vines-nav', '/$teamId', { teamId }, { activePage: flow.workflowId }), 100);
+        }
+        setIsLoading(false);
+        setOpen(false);
+        return t('components.layout.ugc.import-dialog.only-import.success');
+      },
+      error: () => {
+        setIsLoading(false);
+        return t('components.layout.ugc.import-dialog.only-import.error');
+      },
+      loading: t('components.layout.ugc.import-dialog.only-import.loading'),
+    });
   });
 
   const {
@@ -156,7 +180,9 @@ export const OneClickToUseApp: React.FC<IOneClickToUseAppProps> = ({ id, childre
           <Button onClick={() => setOpen(false)} variant="outline">
             {t('common.utils.cancel')}
           </Button>
-          {/*<Button variant="outline">仅导入</Button>*/}
+          <Button variant="outline" onClick={handleOnlyImport} loading={isOnlyImportLoading}>
+            {t('components.layout.ugc.import-dialog.only-import.label')}
+          </Button>
           <Button variant="solid" onClick={handleUse} loading={isLoading}>
             {t('components.layout.ugc.import-dialog.import-to-team.label')}
           </Button>

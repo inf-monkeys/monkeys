@@ -446,30 +446,34 @@ export class WorkflowCrudService {
     }
 
     if (autoPinPage) {
-      const pages = await this.workflowRepository.listWorkflowPagesAndCreateIfNotExists(newWorkflowId);
-
-      const groupMap: Record<string, WorkflowPageGroupEntity> = {};
-      const groups = _.uniq(autoPinPage.flatMap((it) => Object.keys(it)));
-      const groupIds = await this.workflowRepository.getPageGroupsAndCreateIfNotExists(teamId, groups);
-      let groupIndex = 0;
-      for (const group of groupIds) {
-        groupMap[groups[groupIndex]] = group;
-        groupIndex++;
-      }
-
-      for (const mapper of autoPinPage) {
-        for (const [groupName, pageTypes] of Object.entries(mapper)) {
-          const type2PageIds = pages.filter((it) => pageTypes.includes(it.type)).map((it) => it.id);
-          groupMap[groupName].pageIds = _.uniq([...(groupMap[groupName].pageIds ?? []), ...type2PageIds]);
-        }
-      }
-
-      for (const group of Object.values(groupMap)) {
-        await this.workflowRepository.updatePageGroup(group.id, { pageIds: group.pageIds });
-      }
+      await this.autoPinnedPageWithWorkflowId(teamId, newWorkflowId, autoPinPage);
     }
 
     return newWorkflowId;
+  }
+
+  private async autoPinnedPageWithWorkflowId(teamId: string, workflowId: string, autoPinPage: WorkflowAutoPinPage) {
+    const pages = await this.workflowRepository.listWorkflowPagesAndCreateIfNotExists(workflowId);
+
+    const groupMap: Record<string, WorkflowPageGroupEntity> = {};
+    const groups = _.uniq(autoPinPage.flatMap((it) => Object.keys(it)));
+    const groupIds = await this.workflowRepository.getPageGroupsAndCreateIfNotExists(teamId, groups);
+    let groupIndex = 0;
+    for (const group of groupIds) {
+      groupMap[groups[groupIndex]] = group;
+      groupIndex++;
+    }
+
+    for (const mapper of autoPinPage) {
+      for (const [groupName, pageTypes] of Object.entries(mapper)) {
+        const type2PageIds = pages.filter((it) => pageTypes.includes(it.type)).map((it) => it.id);
+        groupMap[groupName].pageIds = _.uniq([...(groupMap[groupName].pageIds ?? []), ...type2PageIds]);
+      }
+    }
+
+    for (const group of Object.values(groupMap)) {
+      await this.workflowRepository.updatePageGroup(group.id, { pageIds: group.pageIds });
+    }
   }
 
   private convertWorkflowToJson(workflow: WorkflowMetadataEntity, triggers?: WorkflowTriggersEntity[]): WorkflowExportJson {
@@ -603,5 +607,39 @@ export class WorkflowCrudService {
     }
 
     return true;
+  }
+
+  public async createShortcut(workflowId: string, teamId: string, userId: string) {
+    const targetWorkflowVersion = await this.workflowRepository.getMaxVersion(workflowId);
+    const targetWorkflow = await this.workflowRepository.getWorkflowById(workflowId, targetWorkflowVersion, false);
+
+    if (!isEmpty(targetWorkflow?.shortcutsFlow ?? null)) {
+      throw new NotFoundException(`工作流 (${workflowId}) 已经是快捷方式！`);
+    }
+
+    if (targetWorkflow) {
+      const exposeOpenaiCompatibleInterface = targetWorkflow.exposeOpenaiCompatibleInterface;
+      const newWorkflowId = await this.createWorkflowDef(teamId, userId, {
+        displayName: targetWorkflow.displayName,
+        description: targetWorkflow.description,
+        iconUrl: targetWorkflow.iconUrl,
+        tasks: targetWorkflow.tasks,
+        variables: targetWorkflow.variables,
+        output: targetWorkflow.output,
+        exposeOpenaiCompatibleInterface: exposeOpenaiCompatibleInterface,
+        shortcutsFlow: `${workflowId}:${targetWorkflowVersion}`,
+      });
+
+      // 处理工作空间页面
+      await this.autoPinnedPageWithWorkflowId(teamId, newWorkflowId, [
+        {
+          default: [exposeOpenaiCompatibleInterface ? 'chat' : 'preview'],
+        },
+      ]);
+
+      return targetWorkflow;
+    } else {
+      throw new NotFoundException(`工作流 (${workflowId}) 不存在！无法创建快捷方式`);
+    }
   }
 }

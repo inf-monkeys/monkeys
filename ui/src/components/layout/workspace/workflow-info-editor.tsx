@@ -148,7 +148,11 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
                 <FormItem>
                   <FormLabel>{t('workspace.wrapper.workflow-info-card.form.workflow-icon')}</FormLabel>
                   <FormControl>
-                    <VinesIconEditor value={field.value} defaultValue={workflow?.iconUrl} onChange={field.onChange} />
+                    <VinesIconEditor
+                      value={field.value ?? 'emoji:🍀:#eeeef1'}
+                      defaultValue={workflow?.iconUrl}
+                      onChange={field.onChange}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -159,4 +159,5 @@ export type IApplicationStoreItemDetail = IApplicationStoreItem &
   MonkeyWorkflow & {
     assetTags: IAssetTag[];
     user: Partial<IVinesUser>;
+    forkFromId?: string;
   };

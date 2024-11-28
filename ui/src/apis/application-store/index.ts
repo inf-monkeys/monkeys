@@ -9,6 +9,12 @@ export const forkApplicationFromTemplate = (id: string, autoPinPage?: IAutoPinPa
     simple: true,
   })(`/api/workflow/metadata/${id}/clone`, autoPinPage ? { autoPinPage } : undefined);
 
+export const createShortcutsFlowWithWorkflowId = (workflowId: string) =>
+  vinesFetcher<Pick<MonkeyWorkflow, 'workflowId'>>({
+    method: 'POST',
+    simple: true,
+  })(`/api/workflow/metadata/${workflowId}/create-shortcut`);
+
 export const publishApplication = (id: string, assetType: AssetType, publishConfig: IApplicationPublishConfig) =>
   vinesFetcher<MonkeyWorkflow, { publishConfig: IApplicationPublishConfig }>({
     method: 'POST',
