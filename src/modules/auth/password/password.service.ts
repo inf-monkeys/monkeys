@@ -30,7 +30,7 @@ export class PasswordService {
     const { otp } = TOTP.generate(config.auth.saltTotp, {
       digits: 8,
       algorithm: 'SHA-512',
-      period: 30,
+      period: 120,
       timestamp: Date.now(),
     });
 
