@@ -21,6 +21,11 @@ COPY ./multi-tenancy .
 RUN yarn
 
 ENV MONKEYS_DIST_FOLDER=/usr/src/server/dist
+# 设置时区和字符集
+ENV TZ Asia/Shanghai
+ENV LC_ALL=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US.UTF-8
 
 EXPOSE 3000
 CMD ["node", "main.js"]
