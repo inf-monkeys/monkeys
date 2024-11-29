@@ -180,7 +180,13 @@ export const OneClickToUseApp: React.FC<IOneClickToUseAppProps> = ({ id, childre
           <Button onClick={() => setOpen(false)} variant="outline">
             {t('common.utils.cancel')}
           </Button>
-          <Button variant="outline" onClick={handleOnlyImport} loading={isOnlyImportLoading}>
+          <Button
+            className="hidden"
+            disabled
+            variant="outline"
+            onClick={handleOnlyImport}
+            loading={isOnlyImportLoading}
+          >
             {t('components.layout.ugc.import-dialog.only-import.label')}
           </Button>
           <Button variant="solid" onClick={handleUse} loading={isLoading}>
