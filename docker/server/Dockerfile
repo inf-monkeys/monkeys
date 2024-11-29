@@ -26,5 +26,12 @@ ENV LC_ALL=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
 
+# 安装 tzdata 包
+RUN apt-get update && apt-get install -y tzdata
+
+# 设置时区
+RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && echo "Asia/Shanghai" > /etc/timezone
+
 # Start the server using the production build
 CMD yarn migration:run; yarn start:prod
