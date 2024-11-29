@@ -20,6 +20,11 @@ RUN yarn build
 EXPOSE 3000
 
 ENV NODE_OPTIONS=--max_old_space_size=4096
+# 设置时区和字符集
+ENV TZ Asia/Shanghai
+ENV LC_ALL=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US.UTF-8
 
 # Start the server using the production build
 CMD yarn migration:run; yarn start:prod
