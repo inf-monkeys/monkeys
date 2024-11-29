@@ -161,7 +161,7 @@
     "eslint-plugin-unused-imports": "^3.1.0",
     "postcss": "^8.4.38",
     "prettier": "^3.2.5",
-    "prettier-plugin-tailwindcss": "^0.5.13",
+    "prettier-plugin-tailwindcss": "^0.6.9",
     "sass": "^1.74.1",
     "shiki": "^1.2.4",
     "tailwindcss": "^3.4.3",

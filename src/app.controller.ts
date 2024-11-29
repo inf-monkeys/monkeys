@@ -120,6 +120,9 @@ export class AppController {
         colors: {
           primaryColor: config.server.customization.colors.primary,
         },
+        toast: {
+          position: config.server.customization.toast.position,
+        },
       },
       auth: {
         enabled: config.auth.enabled,

@@ -15,6 +15,9 @@ export interface ISystemConfig {
     colors: {
       primaryColor: string;
     };
+    toast: {
+      position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
+    };
   };
   auth: {
     enabled: AuthMethod[];
