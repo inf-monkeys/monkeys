@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 
 import { SWRConfig } from 'swr';
@@ -13,7 +13,6 @@ import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import utc from 'dayjs/plugin/utc';
 import { AnimatePresence, MotionConfig } from 'framer-motion';
-import { Toaster } from 'sonner';
 
 import { LagRadar } from '@/components/devtools/lag-radar/dev';
 import { ErrorComponent } from '@/components/router/catch-boundary';
@@ -22,6 +21,7 @@ dayjs.extend(duration);
 dayjs.extend(utc);
 
 import { Skeleton } from '@/components/ui/skeleton.tsx';
+import { Toaster } from '@/components/ui/toaster';
 
 import './polyfill';
 import './i18n';
@@ -51,7 +51,7 @@ ReactDOM.createRoot(document.getElementById('vines-ui')!).render(
       <LagRadar />
     </Suspense>
     <Portal.Root>
-      <Toaster richColors closeButton visibleToasts={10} className="pointer-events-auto" />
+      <Toaster />
     </Portal.Root>
   </Suspense>,
 );

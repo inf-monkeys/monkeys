@@ -72,6 +72,7 @@
     "passport": "^0.7.0",
     "pg": "^8.11.3",
     "pinyin-pro": "^3.19.6",
+    "prettier-plugin-tailwindcss": "^0.6.9",
     "prom-client": "^15.1.3",
     "reflect-metadata": "^0.1.13",
     "retry-as-promised": "^7.0.4",
