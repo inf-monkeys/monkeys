@@ -29,7 +29,7 @@ interface IVinesLogItemProps {
   workflowExecution: VinesWorkflowExecution;
   workflowDefinition?: MonkeyWorkflow;
   disabled?: boolean;
-
+  mutate: () => Promise<void>;
   handleSubmit?: (loadNextPage?: boolean, useToast?: boolean) => Promise<VinesWorkflowExecutionLists | undefined>;
   setActiveTab?: React.Dispatch<React.SetStateAction<string>>;
 }
@@ -40,6 +40,7 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({
   disabled,
   handleSubmit,
   setActiveTab,
+  mutate,
 }) => {
   const { t } = useTranslation();
   const { copy } = useCopy({ timeout: 500 });
@@ -165,7 +166,7 @@ export const VinesLogItem: React.FC<IVinesLogItemProps> = ({
         <AccordionContent className="space-y-1 p-4 pt-0">
           <Separator className="mb-4" />
           <div className="relative h-[32rem] w-full">
-            <VinesActuator height={512} instanceId={instanceId} onRestart={onRestart} />
+            <VinesActuator height={512} instanceId={instanceId} onRestart={onRestart} mutate={mutate} />
           </div>
         </AccordionContent>
       </Card>

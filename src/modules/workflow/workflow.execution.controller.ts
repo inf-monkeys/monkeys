@@ -3,7 +3,7 @@ import { WorkflowAuthGuard } from '@/common/guards/workflow-auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
-import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SearchWorkflowExecutionsDto } from './dto/req/search-workflow-execution.dto';
 import { StartWorkflowSyncDto } from './dto/req/start-workflow-sync.dto';
@@ -41,6 +41,19 @@ export class WorkflowExecutionController {
     const result = await this.service.getWorkflowExecutionDetail(teamId, workflowInstanceId);
     return new SuccessResponse({
       data: result,
+    });
+  }
+
+  @Delete('/executions/:workflowInstanceId/')
+  @ApiOperation({
+    summary: '删除某一次 workflow 执行实例',
+    description: '删除某一次 workflow 执行实例',
+  })
+  public async deleteWorkflowInstanceExecution(@Req() req: IRequest, @Param('workflowInstanceId') workflowInstanceId: string) {
+    const { teamId } = req;
+    await this.service.deleteWorkflowExecution(teamId, workflowInstanceId);
+    return new SuccessResponse({
+      data: true,
     });
   }
 

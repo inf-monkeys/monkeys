@@ -18,6 +18,7 @@ interface IVinesLogViewLogListProps {
   setActiveTab: React.Dispatch<React.SetStateAction<string>>;
 
   height: number;
+  mutate: () => Promise<void>;
 }
 
 export const VinesLogViewLogList: React.FC<IVinesLogViewLogListProps> = ({
@@ -26,6 +27,7 @@ export const VinesLogViewLogList: React.FC<IVinesLogViewLogListProps> = ({
   activeTab,
   setActiveTab,
   height,
+  mutate,
 }) => {
   const { t } = useTranslation();
 
@@ -51,14 +53,15 @@ export const VinesLogViewLogList: React.FC<IVinesLogViewLogListProps> = ({
         >
           {workflowExecutions && workflowDefinitions
             ? workflowExecutions.map((workflowExecution, index) => (
-                <VinesLogItem
-                  key={index}
-                  workflowExecution={workflowExecution}
-                  workflowDefinition={workflowDefinitionIdMapper[workflowExecution.workflowName!]}
-                  handleSubmit={handleSubmit}
-                  setActiveTab={setActiveTab}
-                />
-              ))
+              <VinesLogItem
+                key={index}
+                workflowExecution={workflowExecution}
+                workflowDefinition={workflowDefinitionIdMapper[workflowExecution.workflowName!]}
+                handleSubmit={handleSubmit}
+                setActiveTab={setActiveTab}
+                mutate={mutate}
+              />
+            ))
             : null}
         </Accordion>
         {workflowExecutions && workflowDefinitions && workflowTotal ? (

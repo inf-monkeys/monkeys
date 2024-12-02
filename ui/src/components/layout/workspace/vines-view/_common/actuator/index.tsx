@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
 import { motion } from 'framer-motion';
-import { t } from 'i18next';
-import { ChevronRight, RotateCcw, StopCircle } from 'lucide-react';
+import { ChevronRight, RotateCcw, StopCircle, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { VinesActuatorDetail } from '@/components/layout/workspace/vines-view/_common/actuator/detail';
@@ -22,6 +22,7 @@ interface IVinesActuatorProps {
   instanceId?: string;
   onRestart?: () => void;
   onManualRestart?: () => void;
+  mutate: () => Promise<void>;
 }
 
 export const VinesActuator: React.FC<IVinesActuatorProps> = ({
@@ -30,7 +31,9 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({
   children,
   onRestart,
   onManualRestart,
+  mutate,
 }) => {
+  const { t } = useTranslation();
   const [activeTool, setActiveTool] = useState<VinesNode>();
 
   const [sidebarVisible, setSidebarVisible] = useState(document.body.clientWidth > 520);
@@ -64,6 +67,27 @@ export const VinesActuator: React.FC<IVinesActuatorProps> = ({
       >
         <div className="flex gap-2">
           {children}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                icon={<Trash2 size={16} />}
+                onClick={async () => {
+                  if (instanceId) {
+                    toast.promise(vines.deleteWorkflowExecution(instanceId), {
+                      success: t('common.delete.success'),
+                      error: t('common.delete.error'),
+                      loading: t('common.delete.loading'),
+                      finally: () => {
+                        mutate();
+                      },
+                    });
+                  }
+                }}
+              />
+            </TooltipTrigger>
+            <TooltipContent>{t('common.utils.delete')}</TooltipContent>
+          </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
