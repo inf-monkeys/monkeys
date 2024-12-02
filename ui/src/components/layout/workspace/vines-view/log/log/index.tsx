@@ -50,6 +50,8 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
 
   const workflowPageRef = useRef(1);
 
+  let formParams: IVinesSearchWorkflowExecutionsParams;
+
   const handleSubmit = async (
     loadNextPage?: boolean,
     useToast = true,
@@ -68,6 +70,7 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
 
       const result = new Promise((resolve) => {
         form.handleSubmit((params) => {
+          formParams = params;
           if (useToast) {
             toast.promise(trigger(params), {
               loading: t('workspace.logs-view.loading'),
@@ -88,6 +91,10 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
 
     toast.warning(t('workspace.logs-view.workflow-id-error'));
     return;
+  };
+
+  const handleMutate = async () => {
+    await trigger(formParams);
   };
 
   useEffect(() => {
@@ -133,6 +140,7 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           height={containerHeight}
+          mutate={handleMutate}
         />
       </div>
     </div>

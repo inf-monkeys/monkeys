@@ -278,4 +278,8 @@ export class ConductorService {
     this.convertConductorTasksToVinesTasks(teamId, (data.tasks || []) as Task[], data.workflowDefinition);
     return data;
   }
+
+  public async deleteWorkflowExecution(workflowInstanceId: string) {
+    return await conductorClient.workflowResource.delete(workflowInstanceId, false);
+  }
 }

@@ -4,6 +4,7 @@ import { isArray, omit } from 'lodash';
 import { toast } from 'sonner';
 
 import {
+  deleteWorkflowExecution,
   executionWorkflow,
   executionWorkflowPause,
   executionWorkflowResume,
@@ -791,6 +792,14 @@ export class VinesCore extends VinesTools(VinesBase) {
 
   public getWorkflowExecution(instanceId = this.executionInstanceId) {
     return this.executions.get(instanceId);
+  }
+
+  public async deleteWorkflowExecution(instanceId = this.executionInstanceId) {
+    await deleteWorkflowExecution(instanceId);
+    this.executions.delete(instanceId);
+    this.executionInstanceId = '';
+    this.sendEvent('refresh');
+    return;
   }
 
   public fillUpSubWorkflowChildren(render = true) {

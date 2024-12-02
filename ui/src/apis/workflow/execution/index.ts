@@ -15,8 +15,8 @@ import {
 import { paginationWrapper } from '@/apis/wrapper.ts';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesWorkflowExecution, VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings.ts';
-import { IVinesSearchWorkflowExecutionsParams } from '@/schema/workspace/workflow-execution.ts';
 import { IVinesSearchWorkflowExecutionStatParams } from '@/schema/workspace/workflow-execution-stat.ts';
+import { IVinesSearchWorkflowExecutionsParams } from '@/schema/workspace/workflow-execution.ts';
 
 export const executionWorkflow = (
   workflowId: string,
@@ -55,6 +55,9 @@ export const useWorkflowExecution = (instanceId: string) =>
 
 export const getWorkflowExecution = (instanceId: string) =>
   vinesFetcher<VinesWorkflowExecution>({ simple: true })(`/api/workflow/executions/${instanceId}`);
+
+export const deleteWorkflowExecution = (instanceId: string) =>
+  vinesFetcher({ method: 'DELETE' })(`/api/workflow/executions/${instanceId}`);
 
 export const executionWorkflowTerminate = (instanceId: string) =>
   vinesFetcher({ method: 'POST' })(`/api/workflow/executions/${instanceId}/terminate`);

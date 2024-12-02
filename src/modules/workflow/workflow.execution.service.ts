@@ -519,6 +519,11 @@ export class WorkflowExecutionService {
     };
   }
 
+  public async deleteWorkflowExecution(teamId: string, workflowInstanceId: string) {
+    await this.conductorService.getWorkflowExecutionStatus(teamId, workflowInstanceId);
+    return await this.conductorService.deleteWorkflowExecution(workflowInstanceId);
+  }
+
   public async startWorkflow(request: StartWorkflowRequest) {
     const { teamId, userId, triggerType, chatSessionId, apiKey, group } = request;
     const workflowContext: WorkflowExecutionContext = {
