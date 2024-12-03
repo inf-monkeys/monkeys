@@ -4,8 +4,19 @@ import { IVinesExecutionResultItem } from '@/components/layout/workspace/vines-v
 import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings.ts';
 
 const EMPTY_ITEM: IVinesExecutionResultItem = {
-  tasks: [],
-  originTasks: [],
+  createTime: 0,
+  endTime: 0,
+  input: [],
+  instanceId: '',
+  output: [],
+  rawOutput: {},
+  startTime: 0,
+  status: 'SCHEDULED',
+  taskId: '',
+  teamId: '',
+  updateTime: 0,
+  userId: '',
+  workflowId: '',
   render: { type: 'empty', data: '' },
 };
 
@@ -15,7 +26,7 @@ export const useVinesExecutionResult = () => {
     let currentRow: IVinesExecutionResultItem[] = [];
 
     for (const execution of outputs ?? []) {
-      const { output: executionOutput, rawOutput, ...rest } = execution;
+      const { output: executionOutput = [], rawOutput = {}, ...rest } = execution;
 
       for (const it of executionOutput) {
         const data = {

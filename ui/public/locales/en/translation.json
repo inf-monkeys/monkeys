@@ -25,6 +25,7 @@
       "update": "Update",
       "create": "Create",
       "delete": "Delete",
+      "close": "Close",
       "edit": "Edit",
       "operate": "Operations",
       "reset": "Reset",
