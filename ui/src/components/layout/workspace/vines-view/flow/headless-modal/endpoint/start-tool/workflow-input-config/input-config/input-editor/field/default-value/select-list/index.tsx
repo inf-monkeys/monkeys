@@ -23,9 +23,18 @@ interface ISelectListModeProps extends React.ComponentPropsWithoutRef<'div'> {
 
   forceUpdate: () => void;
   selectList: TSelectList;
+
+  multipleValues: boolean;
 }
 
-export const SelectListMode: React.FC<ISelectListModeProps> = ({ form, Default, type, forceUpdate, selectList }) => {
+export const SelectListMode: React.FC<ISelectListModeProps> = ({
+  form,
+  Default,
+  type,
+  forceUpdate,
+  selectList,
+  multipleValues,
+}) => {
   const { t } = useTranslation();
 
   const handleAddSelectList = useMemoizedFn((e: React.MouseEvent<HTMLButtonElement>) => {
@@ -63,9 +72,31 @@ export const SelectListMode: React.FC<ISelectListModeProps> = ({ form, Default, 
   const handleSetDefault = useMemoizedFn((e: React.MouseEvent<HTMLButtonElement>, value: string | number) => {
     e.preventDefault();
     e.stopPropagation();
-    form.setValue('default', value);
+    if (multipleValues) {
+      const rawDefault = form.getValues('default') ?? [];
+      if (Array.isArray(rawDefault)) {
+        if ((rawDefault as (string | number)[]).includes(value)) {
+          form.setValue(
+            'default',
+            (rawDefault as (string | number)[]).filter((it) => (it === value ? undefined : it)) as string[] | number[],
+          );
+        } else {
+          form.setValue('default', [...(rawDefault as string[] | number[]), value] as string[] | number[]);
+        }
+      } else {
+        form.setValue('default', [value as string]);
+      }
+    } else {
+      form.setValue('default', value);
+    }
     forceUpdate();
   });
+
+  const isDefault = (value: string | number) => {
+    return multipleValues
+      ? ((form.getValues('default') ?? []) as unknown as (string | number)[]).includes(value)
+      : Default === value && !isEmpty(Default?.toString());
+  };
 
   return (
     <div className="space-y-2">
@@ -75,7 +106,7 @@ export const SelectListMode: React.FC<ISelectListModeProps> = ({ form, Default, 
             <TooltipTrigger asChild>
               <Button
                 variant="outline"
-                icon={Default === value && !isEmpty(Default?.toString()) ? <CircleDot /> : <Circle />}
+                icon={isDefault(value) ? <CircleDot /> : <Circle />}
                 className="size-10"
                 onClick={(e) => handleSetDefault(e, value)}
               />
@@ -113,11 +144,13 @@ export const SelectListMode: React.FC<ISelectListModeProps> = ({ form, Default, 
               {t('workspace.flow-view.endpoint.start-tool.input.config-form.default.select.remove-tips')}
             </TooltipContent>
           </Tooltip>
-          <SelectDataLinkage
-            form={form}
-            value={linkage}
-            handleUpdate={(value) => handleUpdateSelectList(i, 'linkage', value)}
-          />
+          {!multipleValues && (
+            <SelectDataLinkage
+              form={form}
+              value={linkage}
+              handleUpdate={(value) => handleUpdateSelectList(i, 'linkage', value)}
+            />
+          )}
         </div>
       ))}
       <Button className="w-full" variant="outline" icon={<Plus />} onClick={handleAddSelectList}>

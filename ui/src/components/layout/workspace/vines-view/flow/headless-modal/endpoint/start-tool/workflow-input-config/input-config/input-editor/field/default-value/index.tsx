@@ -52,7 +52,7 @@ export const FieldDefaultValue: React.FC<IFieldDefaultValueProps> = ({ form }) =
         <FormItem>
           <div className="flex items-center justify-between">
             <FormLabel>{t('workspace.flow-view.endpoint.start-tool.input.config-form.default.label')}</FormLabel>
-            {!multipleValues && isEnableSelectList && (
+            {isEnableSelectList && (
               <div className="flex items-center space-x-2">
                 <Switch
                   size="small"
@@ -79,6 +79,7 @@ export const FieldDefaultValue: React.FC<IFieldDefaultValueProps> = ({ form }) =
                   forceUpdate={forceUpdate}
                   selectList={selectList}
                   isNumber={isNumber}
+                  multipleValues={multipleValues ?? false}
                 />
               ) : multipleValues ? (
                 <TagInput
