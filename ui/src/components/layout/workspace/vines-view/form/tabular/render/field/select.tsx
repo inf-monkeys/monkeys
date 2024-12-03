@@ -3,10 +3,11 @@ import React, { useEffect, useRef } from 'react';
 import { ControllerRenderProps, FieldValues, UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { MultiSelect } from '@/components/ui/multi-select';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
-import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
 import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
+import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
 
 export type TSelect = {
   value: string;
@@ -41,18 +42,20 @@ export const FieldSelect: React.FC<IFieldSelectProps> = ({
   const selectList = (typeOptions?.selectList ?? []).filter(filter ?? (() => true)) as TSelectList;
 
   const handleLinkage = (val: string) => {
-    const linkage = selectList.find((it) => it.value === val)?.linkage;
-    if (linkage?.length) {
-      for (const { name, value } of linkage) {
-        form.setValue(name, value);
+    if (!typeOptions?.multipleValues) {
+      const linkage = selectList.find((it) => it.value === val)?.linkage;
+      if (linkage?.length) {
+        for (const { name, value } of linkage) {
+          form.setValue(name, value);
+        }
+        setLinkage?.(name, linkage);
+      } else {
+        setLinkage?.(name, []);
       }
-      setLinkage?.(name, linkage);
-    } else {
-      setLinkage?.(name, []);
     }
   };
 
-  const finalValue = value?.toString() ?? '';
+  const finalValue = typeOptions?.multipleValues ? value || [] : value?.toString() ?? '';
 
   const initialRef = useRef(false);
   useEffect(() => {
@@ -63,7 +66,16 @@ export const FieldSelect: React.FC<IFieldSelectProps> = ({
     }
   }, [finalValue]);
 
-  return (
+  return typeOptions?.multipleValues ? (
+    <MultiSelect
+      onValueChange={(val) => {
+        onChange(type === 'number' ? val.map(Number) : val);
+      }}
+      value={finalValue || []}
+      options={selectList}
+      placeholder={t('workspace.pre-view.actuator.execution-form.select', { displayName })}
+    />
+  ) : (
     <Select
       onValueChange={(val) => {
         onChange(type === 'number' ? Number(val) : val);
