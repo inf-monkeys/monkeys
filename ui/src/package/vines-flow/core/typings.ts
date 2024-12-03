@@ -78,6 +78,8 @@ export type VinesWorkflowExecutionOutputListItem = {
   createTime: number;
   updateTime: number;
   endTime: number;
+  instanceId: string;
+  workflowId: string;
   input: VinesWorkflowExecutionInputs[];
   output: VinesWorkflowExecutionOutput[];
   rawOutput: Record<string, any>;

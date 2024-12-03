@@ -1,12 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-import { isString, omit } from 'lodash';
+import { useSWRConfig } from 'swr';
+
+import { useMemoizedFn } from 'ahooks';
+import { isArray, isString, omit } from 'lodash';
+import { Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
+import { deleteWorkflowExecution } from '@/apis/workflow/execution';
 import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
 import { IVinesExecutionResultItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog.tsx';
+import { Button } from '@/components/ui/button';
 import { CodeEditor, JSONValue } from '@/components/ui/code-editor';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -23,10 +41,34 @@ export const VirtuaExecutionResultRawDataDialog: React.FC<IVirtuaExecutionResult
 }) => {
   const { t } = useTranslation();
 
+  const { mutate } = useSWRConfig();
+
   const alt = data.render?.alt;
 
+  const [open, setOpen] = useState(false);
+
+  const handleDelete = useMemoizedFn(() => {
+    const targetInstanceId = data?.instanceId;
+    if (targetInstanceId) {
+      toast.promise(deleteWorkflowExecution(targetInstanceId), {
+        success: () => {
+          setOpen(false);
+          void mutate(
+            (it) => isString(it) && it.startsWith(`/api/workflow/executions/${data.workflowId}/outputs`),
+            (data: any) => {
+              return isArray(data) ? data.filter((it) => it?.instanceId !== targetInstanceId) : data;
+            },
+          );
+          return t('common.delete.success');
+        },
+        error: t('common.delete.error'),
+        loading: t('common.delete.loading'),
+      });
+    }
+  });
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <Tooltip>
         <TooltipTrigger asChild>
           <DialogTrigger asChild>{children}</DialogTrigger>
@@ -56,6 +98,33 @@ export const VirtuaExecutionResultRawDataDialog: React.FC<IVirtuaExecutionResult
             <CodeEditor className="h-96 w-full" readonly data={omit(data, 'render') as JSONValue} />
           </TabsContent>
         </Tabs>
+        <DialogFooter>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button className="text-red-10 [&>div>svg]:stroke-red-10" variant="outline" icon={<Trash2 size={16} />}>
+                {t('common.utils.delete')}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t('common.dialog.delete-confirm.title', { type: '' })}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t('common.dialog.delete-confirm.content', {
+                    type: '',
+                    name: t('workspace.pre-view.actuator.detail.form-render.title'),
+                  })}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t('common.utils.cancel')}</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete}>{t('common.utils.confirm')}</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            {t('common.utils.close')}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

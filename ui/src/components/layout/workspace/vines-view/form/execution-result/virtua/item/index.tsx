@@ -7,10 +7,10 @@ import { VirtuaExecutionResultGridImageItem } from '@/components/layout/workspac
 import { VirtuaExecutionResultGridRawItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/raw.tsx';
 import { VirtuaExecutionResultGridWrapper } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/wrapper';
 import { JSONValue } from '@/components/ui/code-editor';
-import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
+import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings.ts';
 import { cn } from '@/utils';
 
-export type IVinesExecutionResultItem = VinesWorkflowExecution & {
+export type IVinesExecutionResultItem = VinesWorkflowExecutionOutputListItem & {
   render: {
     type: 'image' | 'video' | 'text' | 'json' | 'empty';
     data: JSONValue;

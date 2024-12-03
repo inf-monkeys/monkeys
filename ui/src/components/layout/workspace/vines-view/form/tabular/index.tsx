@@ -4,7 +4,7 @@ import { useSWRConfig } from 'swr';
 
 import { useEventEmitter, useMemoizedFn, useThrottleEffect } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
-import { isArray } from 'lodash';
+import { isString } from 'lodash';
 import { RotateCcw, Sparkles, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -64,11 +64,12 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
           setHistoryVisible(true);
           setLoading(false);
           void mutate(
-            (it) => isArray(it) && it?.[0] === `/api/workflow/executions/${vines.workflowId}/outputs`,
+            (it) => isString(it) && it.startsWith(`/api/workflow/executions/${vines.workflowId}/outputs`),
             (data: any) => {
               if (data?.data) {
                 data.data.unshift({
                   status: 'RUNNING',
+                  output: [{ type: 'text', data: '' }],
                 });
               }
               event$.emit?.();
