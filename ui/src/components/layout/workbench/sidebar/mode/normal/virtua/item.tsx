@@ -1,7 +1,6 @@
 import React, { createContext, forwardRef, useContext } from 'react';
 
 import { useTranslation } from 'react-i18next';
-import { CustomItemComponentProps } from 'virtua';
 
 import { IPageInstanceType, IPinPage } from '@/apis/pages/typings.ts';
 import { ViewItemMenu } from '@/components/layout/workbench/sidebar/mode/normal/virtua/menu.tsx';
@@ -9,27 +8,6 @@ import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { cn, getI18nContent } from '@/utils';
-
-export const WorkbenchViewListStickyIndexContext = createContext(-1);
-export const WorkbenchViewListStickyIndexesContext = createContext(new Set([-1]));
-
-export const WorkbenchViewListStickyItem = forwardRef<HTMLDivElement, CustomItemComponentProps>(
-  ({ children, style, index }, ref) => {
-    const activeIndex = useContext(WorkbenchViewListStickyIndexContext);
-    const stickyIndexes = useContext(WorkbenchViewListStickyIndexesContext);
-
-    return (
-      <div
-        ref={ref}
-        className={cn(stickyIndexes.has(index) && '!z-20', activeIndex === index && '!sticky !top-0')}
-        style={style}
-      >
-        {children}
-      </div>
-    );
-  },
-);
-WorkbenchViewListStickyItem.displayName = 'VirtuaWorkbenchViewListStickyItem';
 
 export const WorkbenchViewItemCurrentData = createContext<{ pageId?: string; groupId?: string }>({});
 
@@ -54,7 +32,7 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(({ p
       key={pageId}
       className={cn(
         'relative z-10 mb-1 flex cursor-pointer items-center space-x-2 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
-        currentPageId === pageId && page.groupId === currentGroupId
+        currentPageId === pageId
           ? 'group border border-input bg-background p-2 text-accent-foreground'
           : 'p-[calc(0.5rem+1px)]',
       )}

@@ -5,15 +5,18 @@ import { Link } from '@tanstack/react-router';
 import { useCreation, useDebounceEffect, useLatest, useThrottleEffect } from 'ahooks';
 import { AnimatePresence } from 'framer-motion';
 import { keyBy, map } from 'lodash';
-import { Plus } from 'lucide-react';
+import { CircleSlash, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useWorkspacePages } from '@/apis/pages';
+import { IPinPage } from '@/apis/pages/typings.ts';
+import { VirtuaWorkbenchViewGroupList } from '@/components/layout/workbench/sidebar/mode/normal/group-virua';
 import { VirtuaWorkbenchViewList } from '@/components/layout/workbench/sidebar/mode/normal/virtua';
 import { IWorkbenchViewItemPage } from '@/components/layout/workbench/sidebar/mode/normal/virtua/item.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { VinesFullLoading } from '@/components/ui/loading';
+import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer';
@@ -129,18 +132,35 @@ export const WorkbenchNormalModeSidebar: React.FC = () => {
     { wait: 64 },
   );
 
+  const hasGroups = lists.length && !isLoading;
+
   return (
-    <div className="relative mr-4 flex h-full w-72 rounded-xl border border-input bg-slate-1 shadow-sm" ref={ref}>
+    <div
+      className="relative mr-4 flex h-full w-96 items-center justify-center rounded-xl border border-input bg-slate-1 shadow-sm"
+      ref={ref}
+    >
       <AnimatePresence>{isLoading && <VinesFullLoading disableCard />}</AnimatePresence>
+      {hasGroups ? (
+        <>
+          <VirtuaWorkbenchViewGroupList data={lists} groupId={groupId} setGroupId={setGroupId} />
+          <Separator orientation="vertical" />
+        </>
+      ) : (
+        <div className="vines-center absolute flex-col gap-4">
+          <CircleSlash size={64} />
+          <div className="flex flex-col text-center">
+            <h2 className="font-bold">{t('workbench.view.no-starred-view')}</h2>
+          </div>
+        </div>
+      )}
       <div className="grid w-full overflow-hidden p-4 [&_h1]:line-clamp-1 [&_span]:line-clamp-1">
         <VirtuaWorkbenchViewList
           height={height}
-          data={lists}
+          data={(lists?.find((it) => it.id === groupId)?.pages ?? []) as IPinPage[]}
           currentPageId={currentPage?.[teamId]?.id}
           currentGroupId={groupId}
           onChildClick={(page) => {
-            setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
-            setGroupId(page.groupId);
+            setCurrentPage((prev) => ({ ...prev, [teamId]: { ...page, groupId } }));
           }}
         />
         <Tooltip>
