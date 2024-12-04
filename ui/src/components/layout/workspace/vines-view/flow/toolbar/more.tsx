@@ -27,7 +27,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Route } from '@/pages/$teamId/workspace/$workflowId/$pageId/index.lazy.tsx';
 import { useFlowStore } from '@/store/useFlowStore';
 
 interface IMoreToolbarProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -38,7 +37,7 @@ export const MoreToolbar: React.FC<IMoreToolbarProps> = () => {
   const workflowId = useFlowStore((s) => s.workflowId);
 
   const { teamId } = useVinesTeam();
-  const navigate = useNavigate({ from: Route.fullPath });
+  const navigate = useNavigate();
 
   const handleDeleteWorkflow = () => {
     toast.promise(deleteWorkflow(workflowId), {

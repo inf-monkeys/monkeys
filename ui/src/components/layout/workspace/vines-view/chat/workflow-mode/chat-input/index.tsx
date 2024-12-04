@@ -54,14 +54,13 @@ export const VinesChatWorkflowModeInput: React.FC<IVinesChatWorkflowModeInputPro
   const workflowInput = vines.workflowInput;
   const workflowInputLength = workflowInput.length;
   const isUseTabular = useCreation(() => {
-    setDirection?.(workflowInputLength > 1 ? 'horizontal' : 'vertical');
-
     return workflowInputLength > 1;
   }, [workflowInputLength]);
 
   const { ref: inputRef, height: wrapperHeight } = useElementSize();
   useThrottleEffect(
     () => {
+      setDirection?.(workflowInputLength > 1 ? 'horizontal' : 'vertical');
       if (!wrapperHeight || isUseTabular) {
         setInputHeight(0);
         return;

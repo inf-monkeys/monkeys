@@ -89,7 +89,7 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
                   <ViewItem key={i} page={it as IWorkbenchViewItemPage} onClick={onChildClick} />
                 ),
               )}
-              <div></div>
+              <div />
             </Virtualizer>
           </ScrollArea>
         </WorkbenchViewItemCurrentData.Provider>

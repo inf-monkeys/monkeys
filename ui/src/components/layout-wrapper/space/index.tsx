@@ -16,6 +16,7 @@ export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar, clas
   const setContainerWidth = usePageStore((s) => s.setContainerWidth);
   const setContainerHeight = usePageStore((s) => s.setContainerHeight);
   const setWorkbenchVisible = usePageStore((s) => s.setWorkbenchVisible);
+
   useEffect(() => {
     setContainerWidth(width);
     setContainerHeight(height);
