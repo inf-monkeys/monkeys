@@ -82,7 +82,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
   });
 
   return (
-    <div className={cn('flex flex-col pr-6', className)} style={style}>
+    <div className={cn('flex flex-col pr-4', className)} style={style}>
       <div className="flex-1">
         <TabularRender
           formClassName={cn(mode === 'mini' && 'gap-0')}
@@ -98,11 +98,11 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
       </div>
       <div ref={inputRef} className="flex gap-2">
         {isInputNotEmpty && (
-          <div className="flex flex-col gap-1">
+          <>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  className="!h-6 py-1 text-xs"
+                  className="!px-2.5"
                   variant="outline"
                   onClick={() => tabular$.emit('restore-previous-param')}
                   icon={<Undo2 />}
@@ -114,7 +114,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  className="!h-6 py-1 text-xs"
+                  className="!px-2.5"
                   variant="outline"
                   onClick={() => tabular$.emit('reset')}
                   icon={<RotateCcw />}
@@ -123,7 +123,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
               </TooltipTrigger>
               <TooltipContent> {t('workspace.form-view.quick-toolbar.reset')}</TooltipContent>
             </Tooltip>
-          </div>
+          </>
         )}
         <Button
           variant="solid"

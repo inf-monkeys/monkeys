@@ -52,7 +52,7 @@ const VinesForm: React.FC = () => {
       <div
         ref={ref}
         className={cn(
-          'relative grid size-full grid-cols-2 p-6',
+          'relative grid size-full grid-cols-3 p-6',
           workbenchVisible && 'p-4',
           isMiniFrame && 'h-[calc(100%-3rem)] grid-cols-1 p-2',
           vinesIFrameVisible && 'p-4',
@@ -71,9 +71,10 @@ const VinesForm: React.FC = () => {
         />
 
         <VinesExecutionResult
-          className={
-            isMiniFrame && !historyVisible ? 'pointer-events-none z-0 opacity-0 [&_*]:pointer-events-none' : ''
-          }
+          className={cn(
+            'col-span-2',
+            isMiniFrame && !historyVisible ? 'pointer-events-none z-0 opacity-0 [&_*]:pointer-events-none' : '',
+          )}
           event$={event$}
           height={height}
           enablePostMessage={isMiniFrame}
@@ -81,7 +82,7 @@ const VinesForm: React.FC = () => {
         />
       </div>
       {openAIInterfaceEnabled && (
-        <div className="vines-center absolute inset-1 size-full flex-col gap-4 backdrop-blur z-50">
+        <div className="vines-center absolute inset-1 z-50 size-full flex-col gap-4 backdrop-blur">
           <ShieldBan size={64} />
           <span className="text-sm font-medium">{t('workspace.form-view.not-support')}</span>
         </div>
