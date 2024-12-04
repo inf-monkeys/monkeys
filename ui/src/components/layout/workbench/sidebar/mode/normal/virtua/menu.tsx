@@ -17,6 +17,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -82,11 +83,6 @@ export const ViewItemMenu: React.FC<IViewItemMenuProps> = ({ page, groupId }) =>
         <TooltipContent side="right">{t('workspace.flow-view.tooltip.more.tip')}</TooltipContent>
       </Tooltip>
       <DropdownMenuContent side="right" align="start" sideOffset={12}>
-        <DropdownMenuItem className="flex items-center gap-2" onClick={handleUnPin}>
-          <PinOff strokeWidth={1.5} size={16} />
-          <p>{t('workbench.view.header.delete')}</p>
-        </DropdownMenuItem>
-
         <Link
           to={isWorkflowPage ? '/$teamId/workspace/$workflowId/$pageId' : '/$teamId/agent/$agentId'}
           params={
@@ -102,6 +98,11 @@ export const ViewItemMenu: React.FC<IViewItemMenuProps> = ({ page, groupId }) =>
             <p>{t('workbench.view.header.enter')}</p>
           </DropdownMenuItem>
         </Link>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem className="flex items-center gap-2 text-red-10" onClick={handleUnPin}>
+          <PinOff strokeWidth={1.5} size={16} />
+          <p>{t('workbench.view.header.delete')}</p>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
