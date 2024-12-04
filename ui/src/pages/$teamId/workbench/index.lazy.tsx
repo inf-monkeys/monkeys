@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import { createLazyFileRoute } from '@tanstack/react-router';
 
@@ -16,12 +16,10 @@ export const Workbench: React.FC = () => {
     setTimeout(() => setWorkbenchVisible(true), 80);
   }, []);
 
-  const [groupId, setGroupId] = useState<string>('default');
-
   return (
     <main className="flex size-full">
-      <WorkbenchSidebar groupId={groupId} setGroupId={setGroupId} mode={mode} />
-      <WorkbenchView groupId={groupId} mode={mode} />
+      <WorkbenchSidebar mode={mode} />
+      <WorkbenchView mode={mode} />
     </main>
   );
 };

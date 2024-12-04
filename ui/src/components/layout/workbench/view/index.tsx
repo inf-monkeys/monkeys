@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 
 import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
-import { WorkbenchViewHeader } from '@/components/layout/workbench/view/header.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import { VinesIFrame } from '@/components/ui/vines-iframe';
@@ -17,11 +16,10 @@ import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
 interface IWorkbenchViewProps extends React.ComponentPropsWithoutRef<'div'> {
-  groupId: string;
   mode?: 'normal' | 'fast' | 'mini';
 }
 
-export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ groupId, mode }) => {
+export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
   const { t } = useTranslation();
 
   const { data, isLoading } = useWorkspacePages();
@@ -50,7 +48,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ groupId, mode }) 
     () => {
       setContainerWidth(width);
       if (height) {
-        setContainerHeight(height - (mode === 'mini' ? 16 : 64));
+        setContainerHeight(height - (mode === 'mini' ? 16 : 0));
       }
     },
     [width, height, mode],
@@ -65,7 +63,10 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ groupId, mode }) 
   }, [teamPage]);
 
   return (
-    <div ref={ref} className="relative w-full flex-1 overflow-hidden">
+    <div
+      ref={ref}
+      className="relative w-full flex-1 overflow-hidden rounded-xl border border-input bg-slate-1 shadow-sm"
+    >
       <AnimatePresence>
         {hasPages && hasPage ? (
           <motion.div
@@ -76,13 +77,8 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ groupId, mode }) 
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
           >
-            {mode !== 'mini' && <WorkbenchViewHeader page={teamPage} groupId={groupId} />}
-            <div
-              className={cn(
-                'relative size-full overflow-hidden',
-                mode === 'mini' ? 'm-2 size-[calc(100%-1rem)]' : 'max-h-[calc(100%-4rem)]',
-              )}
-            >
+            {/*{mode !== 'mini' && <WorkbenchViewHeader page={teamPage} groupId={groupId} />}*/}
+            <div className={cn('relative size-full overflow-hidden', mode === 'mini' && 'm-2 size-[calc(100%-1rem)]')}>
               <VinesIFrame pages={pages ?? []} page={teamPage} />
             </div>
           </motion.div>

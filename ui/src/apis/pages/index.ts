@@ -57,8 +57,8 @@ export interface IUpdatePageGroupParams {
   mode?: 'add' | 'remove';
 }
 
-export const useUpdateGroupPages = (groupId: string) =>
-  useSWRMutation<IPageGroup[] | undefined, unknown, string, IUpdatePageGroupParams>(
-    `/api/workflow/page-groups/${groupId}`,
+export const useUpdateGroupPages = (groupId?: string) =>
+  useSWRMutation<IPageGroup[] | undefined, unknown, string | null, IUpdatePageGroupParams>(
+    groupId ? `/api/workflow/page-groups/${groupId}` : null,
     vinesFetcher({ method: 'PUT' }),
   );

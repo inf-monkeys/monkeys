@@ -82,7 +82,10 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
         </Tabs>
       </SpaceHeader>
       <VinesSpace
-        className={cn(isWorkbenchRoute && 'p-0', isWorkspaceRoute && 'w-full p-4')}
+        className={cn(
+          isWorkbenchRoute && 'overflow-auto bg-transparent p-0 shadow-none transition-colors',
+          isWorkspaceRoute && 'w-full p-4',
+        )}
         sidebar={isWorkspaceRoute && <VinesPanelSidebar />}
       >
         <Outlet />

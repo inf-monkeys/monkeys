@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { CustomItemComponentProps } from 'virtua';
 
 import { IPageInstanceType, IPinPage } from '@/apis/pages/typings.ts';
+import { ViewItemMenu } from '@/components/layout/workbench/sidebar/mode/normal/virtua/menu.tsx';
 import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab.tsx';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
@@ -52,9 +53,9 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(({ p
     <div
       key={pageId}
       className={cn(
-        'z-10 mb-1 flex cursor-pointer items-start space-x-2 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
+        'relative z-10 mb-1 flex cursor-pointer items-center space-x-2 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
         currentPageId === pageId && page.groupId === currentGroupId
-          ? 'border border-input bg-background p-2 text-accent-foreground'
+          ? 'group border border-input bg-background p-2 text-accent-foreground'
           : 'p-[calc(0.5rem+1px)]',
       )}
       onClick={() => onClick?.(page)}
@@ -73,6 +74,7 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(({ p
           </span>
         </div>
       </div>
+      <ViewItemMenu page={page} groupId={currentGroupId} />
     </div>
   );
 });

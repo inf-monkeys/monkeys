@@ -1,0 +1,108 @@
+import React from 'react';
+
+import { useSWRConfig } from 'swr';
+import { Link } from '@tanstack/react-router';
+
+import { useMemoizedFn } from 'ahooks';
+import { EllipsisIcon, LogIn, PinOff } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+
+import { useUpdateGroupPages } from '@/apis/pages';
+import { IPinPage } from '@/apis/pages/typings.ts';
+import { IWorkbenchViewItemPage } from '@/components/layout/workbench/sidebar/mode/normal/virtua/item.tsx';
+import { useVinesTeam } from '@/components/router/guard/team.tsx';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu.tsx';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+
+interface IViewItemMenuProps extends React.ComponentPropsWithoutRef<'div'> {
+  page: IWorkbenchViewItemPage;
+  groupId?: string;
+}
+
+export const ViewItemMenu: React.FC<IViewItemMenuProps> = ({ page, groupId }) => {
+  const { t } = useTranslation();
+
+  const { teamId } = useVinesTeam();
+
+  const { mutate } = useSWRConfig();
+
+  const { trigger } = useUpdateGroupPages(groupId);
+
+  const [, setCurrentPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
+
+  const handleClickMoreMenu = useMemoizedFn((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
+    e.preventDefault();
+  });
+
+  const handleUnPin = () => {
+    if (!page?.id) return;
+    toast.promise(
+      trigger({
+        pageId: page.id,
+        mode: 'remove',
+      }),
+      {
+        loading: t('workspace.wrapper.space.menu.group.update.loading'),
+        success: () => {
+          void mutate('/api/workflow/pages/pinned').then((it) => {
+            setCurrentPage((prev) => ({ ...prev, [teamId]: it?.pages?.[0] ?? {} }));
+          });
+
+          return t('workspace.wrapper.space.menu.group.update.success');
+        },
+        error: t('workspace.wrapper.space.menu.group.update.error'),
+      },
+    );
+  };
+
+  const isWorkflowPage = !!page?.workflowId;
+
+  return (
+    <DropdownMenu>
+      <Tooltip>
+        <DropdownMenuTrigger asChild>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              icon={<EllipsisIcon />}
+              className="pointer-events-none absolute right-2 !p-1.5 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 [&>div>svg]:size-3"
+              onClick={handleClickMoreMenu}
+            />
+          </TooltipTrigger>
+        </DropdownMenuTrigger>
+        <TooltipContent side="right">{t('workspace.flow-view.tooltip.more.tip')}</TooltipContent>
+      </Tooltip>
+      <DropdownMenuContent side="right" align="start" sideOffset={12}>
+        <DropdownMenuItem className="flex items-center gap-2" onClick={handleUnPin}>
+          <PinOff strokeWidth={1.5} size={16} />
+          <p>{t('workbench.view.header.delete')}</p>
+        </DropdownMenuItem>
+
+        <Link
+          to={isWorkflowPage ? '/$teamId/workspace/$workflowId/$pageId' : '/$teamId/agent/$agentId'}
+          params={
+            {
+              teamId,
+              ...(isWorkflowPage ? { workflowId: page?.workflowId, pageId: page?.id } : { agentId: page?.agent?.id }),
+            } as any
+          }
+          search={isWorkflowPage ? {} : { tab: page?.instance?.type }}
+        >
+          <DropdownMenuItem className="flex items-center gap-2">
+            <LogIn strokeWidth={1.5} size={16} />
+            <p>{t('workbench.view.header.enter')}</p>
+          </DropdownMenuItem>
+        </Link>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
