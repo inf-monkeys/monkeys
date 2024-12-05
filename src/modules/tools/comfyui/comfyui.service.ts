@@ -40,7 +40,7 @@ export class ComfyUIService {
   constructor(
     private readonly comfyuiWorkflowRepository: ComfyuiRepository,
     @Inject(CACHE_TOKEN) private readonly cache: CacheManager,
-  ) {}
+  ) { }
 
   public async listComfyuiWorkflows(teamId: string, dto: ListDto) {
     return await this.comfyuiWorkflowRepository.listComfyuiWorkflows(teamId, dto);
@@ -206,6 +206,26 @@ export class ComfyUIService {
     }
   }
 
+  private inferSeedInput(node: ComfyuiNode, promptInputs: Record<string, any>): ToolProperty {
+    const nodeName = node.title || node.properties['Node name for S&R'] || 'Unkonwn Node';
+    if (['Seed (rgthree)', 'Seed_'].includes(node.type)) {
+      return {
+        displayName: nodeName,
+        name: node.id.toString(),
+        type: 'number',
+        default: promptInputs['seed'],
+        typeOptions: {
+          comfyOptions: {
+            node: node.id,
+            key: 'seed',
+          },
+        },
+      };
+    } else {
+      return;
+    }
+  }
+
   private async generateToolInputByComfyuiWorkflow(_workflow: ComfyuiWorkflowWithPrompt) {
     let inputs: ToolProperty[] = [];
     const newWorkflow = _.cloneDeep(_workflow);
@@ -231,7 +251,16 @@ export class ComfyUIService {
           }
         }
       }
+
+      // seed
+      for (const key in promptInputs) {
+        const input = this.inferSeedInput(node, promptInputs[key]);
+        if (input) {
+          inputs.push(input);
+        }
+      }
     }
+
     const getScore = (input: ToolProperty) => {
       if (input.type === 'file') {
         return 2;
@@ -441,7 +470,7 @@ export class ComfyUIService {
           ...(config?.comfyui?.apiToken && { Authorization: `Bearer ${config.comfyui.apiToken}` }),
         },
       });
-    } catch (error) {}
+    } catch (error) { }
     await this.waitForComfyuiServerStartup(serverAddress);
   }
 
@@ -499,7 +528,7 @@ export class ComfyUIService {
       let cacheServerLists: string[] = [];
       try {
         cacheServerLists = JSON.parse((await this.cache.get(`${config.server.appId}:comfyfile_builtin_servers`)) ?? '[]');
-      } catch {}
+      } catch { }
 
       const builtInServers = cacheServerLists.length ? cacheServerLists : await this.getAutoDLComfyUIServersAddress();
 
