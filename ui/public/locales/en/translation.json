@@ -137,12 +137,13 @@
       "show": "Show"
     },
     "language-selector": {
-      "tooltip": "Switch language",
+      "tooltip": "Language",
       "switching": "Switching language...",
       "switched": "Language switched",
       "switch-failed": "Failed to switch language!"
     },
     "dark-mode-selector": {
+      "label": "Appearance",
       "auto": "Auto",
       "dark": "Dark",
       "light": "Light"

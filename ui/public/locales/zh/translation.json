@@ -131,12 +131,13 @@
       "show": "展开"
     },
     "language-selector": {
-      "tooltip": "切换语言",
+      "tooltip": "语言",
       "switching": "切换中...",
       "switched": "已切换为「简体中文」",
       "switch-failed": "语言切换失败！"
     },
     "dark-mode-selector": {
+      "label": "外观",
       "auto": "跟随系统",
       "dark": "深色模式",
       "light": "浅色模式"
