@@ -6,14 +6,11 @@ import { Layers2, Package, PackagePlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { TeamSelector } from '@/components/layout/main/sidebar/teams/team-selector';
-import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { VinesSpace } from '@/components/layout-wrapper/space';
 import { SpaceHeader } from '@/components/layout-wrapper/space/header';
 import { ViewGuard } from '@/components/layout-wrapper/view-guard.tsx';
 import { VinesPanelSidebar } from '@/components/layout-wrapper/workbench/panel/sidebar.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
-import { I18nSelector } from '@/components/ui/i18n-selector';
-import { Separator } from '@/components/ui/separator.tsx';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
@@ -39,17 +36,7 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
 
   return (
     <ViewGuard className="bg-slate-3">
-      <SpaceHeader
-        tail={
-          <div className="flex items-center gap-2">
-            <VinesDarkMode />
-            <I18nSelector />
-            <Separator orientation="vertical" className="mx-2 h-6" />
-            <TeamSelector />
-          </div>
-        }
-        disableSeparator
-      >
+      <SpaceHeader tail={<TeamSelector />} disableSeparator>
         <Tabs
           value={isWorkspaceRoute ? 'main' : isStoreRoute ? 'store' : 'workbench'}
           onValueChange={(val) => {
