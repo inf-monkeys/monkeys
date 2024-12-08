@@ -98,16 +98,21 @@ const OptimizeManage: React.FC = () => {
 
       const src = current.src;
       // 生成缩略图
-      const thumbBlob = await convertThumbnails({
-        url: current.url,
-        targetWidth: current.width || 300,
-        targetHeight: current.height || 300,
-        thumbnailType: 'image/png',
-      });
-      const thumbBlobUrl = URL.createObjectURL(thumbBlob);
+      let thumbBlobUrl = src;
+      try {
+        const thumbBlob = await convertThumbnails({
+          url: current.url,
+          targetWidth: current.width || 300,
+          targetHeight: current.height || 300,
+          thumbnailType: 'image/png',
+        });
+        thumbBlobUrl = URL.createObjectURL(thumbBlob);
 
-      // GoldenRetriever
-      goldenRetriever.addFile(src, thumbBlob);
+        // GoldenRetriever
+        goldenRetriever.addFile(src, thumbBlob);
+      } catch (e) {
+        console.error('[VinesImage] 生成缩略图失败！', e);
+      }
 
       current.callback(thumbBlobUrl);
 

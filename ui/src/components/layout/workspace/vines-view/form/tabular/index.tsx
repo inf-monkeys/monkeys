@@ -71,6 +71,9 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
                   status: 'RUNNING',
                   output: [{ type: 'text', data: '' }],
                 });
+                if (typeof data?.total === 'number') {
+                  data.total += 1;
+                }
               }
               event$.emit?.();
               return data;

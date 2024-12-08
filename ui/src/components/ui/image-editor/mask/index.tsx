@@ -102,11 +102,14 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
           }
         }}
       >
-        <AnimatePresence>
+        <AnimatePresence mode="popLayout">
           {optimizeImage ? (
             <motion.div
               key="vines-image-mask-editor-main"
-              className={cn('size-full space-y-2 transition-opacity', isExport && 'pointer-events-none !opacity-0')}
+              className={cn(
+                'z-20 size-full space-y-2 transition-opacity',
+                isExport && 'pointer-events-none !opacity-0',
+              )}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { delay: 0.2 } }}
               exit={{ opacity: 0 }}
@@ -186,7 +189,7 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
           ) : (
             <motion.div
               key="vines-image-mask-editor-loading"
-              className="vines-center absolute left-0 top-0 size-full flex-col gap-2"
+              className="vines-center pointer-events-none absolute left-0 top-0 z-0 size-full flex-col gap-2"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}

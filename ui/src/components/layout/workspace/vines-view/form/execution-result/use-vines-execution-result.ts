@@ -35,25 +35,25 @@ export const useVinesExecutionResult = () => {
           render: it,
         } as unknown as IVinesExecutionResultItem;
 
-        const isTextOrJson = data.render.type === 'json' || data.render.type === 'text';
-
-        if (isTextOrJson) {
-          if (currentRow.length > 0) {
-            // 填充当前行并添加到结果中
-            currentRow = currentRow.concat(new Array(col - currentRow.length).fill(EMPTY_ITEM));
-            result.push(currentRow);
-            currentRow = [];
-          }
-          // 创建新行并填充空白项
-          const newRow = [data].concat(new Array(col - 1).fill(EMPTY_ITEM));
-          result.push(newRow);
-        } else {
-          if (currentRow.length >= col) {
-            result.push(currentRow);
-            currentRow = [];
-          }
-          currentRow.push(data);
+        // const isTextOrJson = data.render.type === 'json' || data.render.type === 'text';
+        //
+        // if (isTextOrJson) {
+        //   if (currentRow.length > 0) {
+        //     // 填充当前行并添加到结果中
+        //     currentRow = currentRow.concat(new Array(col - currentRow.length).fill(EMPTY_ITEM));
+        //     result.push(currentRow);
+        //     currentRow = [];
+        //   }
+        //   // 创建新行并填充空白项
+        //   const newRow = [data].concat(new Array(col - 1).fill(EMPTY_ITEM));
+        //   result.push(newRow);
+        // } else {
+        if (currentRow.length >= col) {
+          result.push(currentRow);
+          currentRow = [];
         }
+        currentRow.push(data);
+        // }
       }
     }
 

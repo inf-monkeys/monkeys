@@ -27,7 +27,10 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
           {data.map(({ displayName, id }, i) => (
             <Button
               key={i}
-              className={cn('mb-2 w-full hover:bg-accent', groupId === id && 'border border-input bg-background')}
+              className={cn(
+                'mb-2 w-full justify-start px-2 hover:bg-accent',
+                groupId === id && 'border border-input bg-background',
+              )}
               variant="ghost"
               onClick={() => setGroupId(id)}
             >
