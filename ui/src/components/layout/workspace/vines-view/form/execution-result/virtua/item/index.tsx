@@ -23,13 +23,13 @@ interface IVirtuaExecutionResultGridItemProps {
 }
 
 export const VirtuaExecutionResultGridItem: React.FC<IVirtuaExecutionResultGridItemProps> = ({ data: row }) => {
-  const rowLength = row.length;
+  // const rowLength = row.length;
 
   return (
     <div
       className={cn(
-        'grid w-full items-center',
-        rowLength > 2 ? 'grid-cols-3' : rowLength === 2 ? 'grid-cols-2' : 'grid-cols-1',
+        'grid size-full grid-cols-3',
+        // rowLength > 2 ? 'grid-cols-3' : rowLength === 2 ? 'grid-cols-2' : 'grid-cols-1',
       )}
     >
       {row.map((it, i) => {

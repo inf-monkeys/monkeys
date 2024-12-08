@@ -55,7 +55,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
   });
 
   return (
-    <div className="group/vgi relative">
+    <div className="group/vgi relative min-h-64 min-w-64 p-1">
       {children}
       <div className="absolute right-4 top-4 flex gap-1 opacity-0 transition-opacity group-hover/vgi:opacity-100 ">
         {src && (

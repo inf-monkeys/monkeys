@@ -6,7 +6,6 @@ import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-vi
 import { IVinesExecutionResultItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/index.tsx';
 import { VirtuaExecutionResultRawDataDialog } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/wrapper/raw-data-dialog.tsx';
 import { VinesLoading } from '@/components/ui/loading';
-import { cn } from '@/utils';
 
 interface IVirtuaExecutionResultGridRawItemProps {
   data: IVinesExecutionResultItem;
@@ -19,12 +18,12 @@ export const VirtuaExecutionResultGridRawItem: React.FC<IVirtuaExecutionResultGr
 
   return (
     <VirtuaExecutionResultRawDataDialog data={data}>
-      <div className={cn('box-border flex max-h-96 flex-none content-stretch p-1', isRUNNING && 'min-h-48')}>
-        <div className="relative w-full cursor-pointer overflow-hidden rounded-lg border border-input bg-background p-2 shadow-sm">
+      <div className="box-border flex flex-none content-stretch p-1">
+        <div className="relative max-h-96 min-h-64 w-full min-w-64 cursor-pointer overflow-hidden rounded-lg border border-input bg-background p-2 shadow-sm">
           <AnimatePresence>
             {isRUNNING ? (
               <motion.div
-                className="vines-center absolute left-0 top-0 size-full"
+                className="vines-center left-0 top-0 size-full"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

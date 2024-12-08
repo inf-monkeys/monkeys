@@ -49,7 +49,12 @@ export const WorkbenchNormalModeSidebar: React.FC = () => {
     pages: map(pageIds, (pageId) => pagesMap[pageId]).filter(Boolean),
   }))
     .filter((it) => it.pages?.length)
-    .sort((a) => (a.isBuiltIn ? -1 : 1));
+    .sort((a, b) => {
+      if (a.isBuiltIn !== b.isBuiltIn) {
+        return a.isBuiltIn ? -1 : 1;
+      }
+      return a.displayName.localeCompare(b.displayName, undefined, { numeric: true });
+    });
 
   const [{ activePage }] = useUrlState<{ activePage: string }>({ activePage: '' });
   const toggleToActivePageRef = useRef(activePage ? false : null);
