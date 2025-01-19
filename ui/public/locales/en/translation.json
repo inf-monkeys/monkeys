@@ -282,7 +282,6 @@
         },
         "remove": "Remove",
         "wait-to-upload": "A total of {{filesCount}} files are waiting to be uploaded",
-
         "add-local-file": "Add local file",
         "paste-hint": "You can paste the image here to upload",
         "release-file": "Upload now",
@@ -509,7 +508,6 @@
           },
           "import-to-team": {
             "label": "One-click use",
-
             "views": {
               "label": "Views",
               "pinned": "{{count}} views pinned to the workbench: {{items}}",
@@ -649,7 +647,10 @@
         "label": "Enterprise WeChat",
         "get-info-failed": "Failed to obtain enterprise WeChat login information"
       },
-
+      "feishu": {
+        "label": "Feishu",
+        "get-info-failed": "Failed to obtain Feishu login information"
+      },
       "button": "Bind {{name}}",
       "loading": "Bind...",
       "success": "Bind successfully",
@@ -2557,12 +2558,10 @@
                     "select-placeholder": "Select the linked field",
                     "value-placeholder": "Please enter the value to be linked",
                     "add": "Add a linked form",
-
                     "filter-select-list": {
                       "label": "Filter options",
                       "desc": "When this option form is linked, the options will be filtered according to the specified value",
                       "reserve": "Reverse selection",
-
                       "add": "Add filter options"
                     }
                   }

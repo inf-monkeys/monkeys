@@ -10,12 +10,12 @@ import { handleOidcLogin } from '@/apis/authz/oidc';
 import { IAuthWrapperOptions } from '@/components/layout/login/auth/auth-wrapper.tsx';
 import { EmailAuth } from '@/components/layout/login/auth/email-auth.tsx';
 import { PhoneAuth } from '@/components/layout/login/auth/phone-auth.tsx';
-import { OAuthProvider } from 'src/components/layout/login/auth/oauth/typing.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn } from '@/utils';
+import { OAuthProvider } from 'src/components/layout/login/auth/oauth/typing.tsx';
 
 interface IAuthContainerProps extends React.ComponentPropsWithoutRef<'div'>, IAuthWrapperOptions {
   enableOidc: boolean;
