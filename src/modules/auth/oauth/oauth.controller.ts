@@ -10,7 +10,7 @@ import { AuthResultType, OAuthService } from './oauth.service';
 @Controller('/auth/oauth')
 @ApiTags('Auth/OAuth')
 export class OAuthController {
-  constructor(private readonly oauthService: OAuthService) {}
+  constructor(private readonly oauthService: OAuthService) { }
 
   // 企业微信回调
   @Get('wework/callback')
@@ -96,5 +96,32 @@ export class OAuthController {
         message: e.message,
       });
     }
+  }
+
+  @Get('feishu/info')
+  @ApiOperation({
+    description: '获取飞书 OAuth 信息',
+    summary: '获取飞书 OAuth 信息',
+  })
+  public async getFeishuInfo() {
+    return new SuccessResponse({
+      data: {
+        appId: config.auth.feishu.appId,
+        feishuApiUrl: config.auth.feishu.feishuApiUrl,
+        redirectUri: `${config.server.appUrl}/api/auth/oauth/feishu/callback`,
+      },
+    });
+  }
+
+  // 飞书回调
+  @Get('feishu/callback')
+  @ApiOperation({
+    description: '使用飞书登录',
+    summary: '使用飞书登录',
+  })
+  public async loginByFeishuOauth(@Query('code') code: string, @Query('state') state: string, @Res() res: Response) {
+    const redirect_to = state.replace('redirect_to=', '');
+    const accessToken = await this.oauthService.handleFeishuCallback(code, state);
+    res.redirect(`${redirect_to}?access_token=${accessToken}`);
   }
 }

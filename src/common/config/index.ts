@@ -146,6 +146,12 @@ export interface WeWorkConfig {
   passwdSalt: string;
 }
 
+export interface FeishuConfig {
+  feishuApiUrl: string;
+  appId: string;
+  appSecret: string;
+}
+
 export interface AuthConfig {
   enabled: AuthMethod[];
   sessionSecret?: string;
@@ -156,6 +162,7 @@ export interface AuthConfig {
   saltTotp?: string;
   privilegedToken?: string;
   wework?: WeWorkConfig;
+  feishu?: FeishuConfig;
 }
 
 export interface S3Config {
@@ -354,6 +361,11 @@ export const config: Config = {
       agentId: readConfig('auth.wework.agentId'),
       secret: readConfig('auth.wework.secret'),
       passwdSalt: readConfig('auth.wework.passwdSalt', '***monkeys-oauth*{{id}}*'),
+    },
+    feishu: {
+      feishuApiUrl: readConfig('auth.feishu.feishuApiUrl', 'https://open.feishu.cn'),
+      appId: readConfig('auth.feishu.appId'),
+      appSecret: readConfig('auth.feishu.appSecret'),
     },
     saltTotp: readConfig('auth.saltTotp'),
     privilegedToken: readConfig('auth.privilegedToken'),

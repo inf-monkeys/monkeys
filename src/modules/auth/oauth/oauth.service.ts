@@ -5,6 +5,7 @@ import { UserRepository } from '@/database/repositories/user.repository';
 import { JwtHelper } from '@/modules/auth/jwt-utils';
 import { HttpService } from '@nestjs/axios';
 import { Inject, Injectable } from '@nestjs/common';
+import axios from 'axios';
 import crypto from 'crypto-js';
 import { omit } from 'lodash';
 import { AgentType, WechatWorkBaseService } from 'nestjs-wechat-work';
@@ -23,7 +24,7 @@ export class OAuthService {
     private readonly userRepository: UserRepository,
     private readonly httpService: HttpService,
     @Inject(CACHE_TOKEN) private readonly cache: CacheManager,
-  ) {}
+  ) { }
 
   private idToPassword(id: string) {
     return crypto.MD5(config.auth.wework.passwdSalt.replaceAll('{{id}}', id) + id).toString();
@@ -161,5 +162,42 @@ export class OAuthService {
     });
 
     return '解绑成功';
+  }
+
+  public async handleFeishuCallback(code: string, state: string) {
+    const tokenApi = `${config.auth.feishu.feishuApiUrl}/open-apis/authen/v2/oauth/token`;
+    const { data: tokenData } = await axios.post(tokenApi, {
+      grant_type: 'authorization_code',
+      client_id: config.auth.feishu.appId,
+      client_secret: config.auth.feishu.appSecret,
+      code,
+      redirect_uri: `${config.server.appUrl}/api/auth/oauth/feishu/callback`,
+    });
+    const { access_token } = tokenData;
+    const userInfoApi = `${config.auth.feishu.feishuApiUrl}/open-apis/authen/v1/user_info`;
+    const { data: userInfoData } = await axios.get(userInfoApi, {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    });
+    if (userInfoData.code !== 0) {
+      throw new Error(userInfoData.msg);
+    }
+    console.log(userInfoData.data)
+    let { avatar_url, email, mobile, enterprise_email, name, user_id } = userInfoData.data;
+    email = enterprise_email || email;
+    if (mobile) {
+      mobile = mobile.replace(/^(\+86|86)/, '');
+    }
+    const user = await this.userRepository.registryOrGetUser({
+      email,
+      phone: mobile,
+      photo: avatar_url,
+      name,
+      externalId: `feishu:${user_id}`,
+    });
+    await this.userRepository.updateUserLastLogin(user.id, AuthMethod.oauth);
+    const jwtToken = JwtHelper.signToken(user);
+    return jwtToken
   }
 }
