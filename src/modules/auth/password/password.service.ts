@@ -40,10 +40,10 @@ export class PasswordService {
     if (user) {
       if (config.auth.saltTotp) {
         const verifyRes = this.validatePassword(password, user.password) || this.validateTotpPassword(email, password);
-        if (!verifyRes) throw new ForbiddenException('密码过期错误或用户不存在，请检查');
+        if (!verifyRes) throw new ForbiddenException('密码过期错误或用户不存在，请检查。');
       } else {
         const verifyRes = this.validatePassword(password, user.password);
-        if (!verifyRes) throw new ForbiddenException('密码错误或用户不存在，请检查');
+        if (!verifyRes) throw new ForbiddenException('密码错误或用户不存在，请检查。');
       }
       // 验证通过
       await this.userRepository.updateUserLastLogin(user.id, AuthMethod.password);
