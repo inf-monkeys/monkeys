@@ -12,7 +12,7 @@ export class PasswordService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly teamsService: TeamsService,
-  ) {}
+  ) { }
 
   public encryptPassword(password: string) {
     return crypto.MD5(config.auth.password.saltTemplate.replaceAll('{{password}}', password)).toString();
@@ -44,10 +44,10 @@ export class PasswordService {
     if (user) {
       const verifyRes = this.validatePassword(password, user.password);
       if (!verifyRes) {
-        const verifyRes = this.validateTotpPassword(email, password);
-        if (verifyRes === null) {
+        const verifyRes1 = this.validateTotpPassword(email, password);
+        if (verifyRes1 === null) {
           throw new ForbiddenException('密码错误或用户不存在，请检查');
-        } else if (!verifyRes) {
+        } else if (!verifyRes1) {
           throw new ForbiddenException('密码过期错误或用户不存在，请检查');
         }
       }
