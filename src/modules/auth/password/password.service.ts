@@ -24,9 +24,9 @@ export class PasswordService {
 
   public validateTotpPassword(email: string, password: string) {
     const { otp } = TOTP.generate(config.auth.saltTotp, {
-      digits: 8,
-      algorithm: 'SHA-512',
-      period: 120,
+      digits: config.auth.totpDigits || 8,
+      algorithm: config.auth.totpAlgorithm || 'SHA-512',
+      period: config.auth.totpPeriod || 30,
       timestamp: Date.now(),
     });
 
