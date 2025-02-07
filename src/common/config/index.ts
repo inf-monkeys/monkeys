@@ -160,6 +160,9 @@ export interface AuthConfig {
   jwt: JwtConfig;
   sms: SMSConfig;
   saltTotp?: string;
+  totpPeriod?: number;
+  totpDigits?: number;
+  totpAlgorithm?: 'SHA-512' | 'SHA-1' | 'SHA-224' | 'SHA-256' | 'SHA-384' | 'SHA3-224' | 'SHA3-256' | 'SHA3-384' | 'SHA3-512';
   privilegedToken?: string;
   wework?: WeWorkConfig;
   feishu?: FeishuConfig;
