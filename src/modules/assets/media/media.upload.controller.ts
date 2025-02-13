@@ -32,19 +32,20 @@ export class MediaUploadController {
   @Get('/s3/sign-proxy')
   async getProxySignedUrl(@Query('key') key, @Query('u403') u403, @Res({ passthrough: true }) res: Response) {
     const s3Helpers = new S3Helpers();
+    const cleanKey = key.replace(/^\/+/, '').replace(/\?.*$/, '');
 
     if (u403) {
-      const data = await s3Helpers.getSignedUrl(key.replace(/^\/+/, ''));
+      const data = await s3Helpers.getSignedUrl(cleanKey);
       res.redirect(data);
     } else {
-      const file = await s3Helpers.getFile(key.replace(/^\/+/, ''));
+      const file = await s3Helpers.getFile(cleanKey);
 
       res.set('Content-Type', file.ContentType);
       res.set('Content-Length', file.ContentLength.toString());
       res.set('Last-Modified', file.LastModified.toUTCString());
       res.set('ETag', file.ETag);
+      res.set('Content-Disposition', `attachment; filename="${cleanKey.split('/').pop()}"`);
 
-      // return stream to client
       return new StreamableFile(file.Body as Readable);
     }
   }
