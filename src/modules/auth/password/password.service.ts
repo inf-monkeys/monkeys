@@ -24,15 +24,17 @@ export class PasswordService {
 
   public validateTotpPassword(email: string, password: string) {
     const { otp } = TOTP.generate(config.auth.saltTotp, {
-      digits: config.auth.totpDigits || 8,
-      algorithm: config.auth.totpAlgorithm || 'SHA-512',
-      period: config.auth.totpPeriod || 30,
+      digits: config.auth.totpDigits,
+      algorithm: config.auth.totpAlgorithm,
+      period: config.auth.totpPeriod,
       timestamp: Date.now(),
     });
 
     const emailPrefix = email.split('@')[0];
 
-    return crypto.MD5(emailPrefix + otp).toString() === password;
+    const encryptedPassword = crypto.MD5(emailPrefix + otp).toString();
+
+    return encryptedPassword === password;
   }
 
   async loginByPassword(email: string, password: string, initialTeamId?: string) {
