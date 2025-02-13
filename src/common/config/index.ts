@@ -371,6 +371,9 @@ export const config: Config = {
       appSecret: readConfig('auth.feishu.appSecret'),
     },
     saltTotp: readConfig('auth.saltTotp'),
+    totpDigits: readConfig('auth.totpDigits', 8),
+    totpAlgorithm: readConfig('auth.totpAlgorithm', 'SHA-512'),
+    totpPeriod: readConfig('auth.totpPeriod', 120),
     privilegedToken: readConfig('auth.privilegedToken'),
   },
   s3: {
