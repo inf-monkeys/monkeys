@@ -3,6 +3,7 @@ import { ComfyuiWorkflowEntity } from '@/database/entities/comfyui/comfyui-workf
 import { CustomTheme, TeamEntity } from '@/database/entities/identity/team';
 import { AssetsMarketPlaceRepository } from '@/database/repositories/assets-marketplace.repository';
 import { TeamRepository } from '@/database/repositories/team.repository';
+import { ComfyuiModelService } from '@/modules/assets/comfyui-model/comfyui-model.service';
 import { ConductorService } from '@/modules/workflow/conductor/conductor.service';
 import { Injectable } from '@nestjs/common';
 import { pick } from 'lodash';
@@ -16,7 +17,8 @@ export class TeamsService {
     private readonly teamRepository: TeamRepository,
     private readonly marketPlaceRepository: AssetsMarketPlaceRepository,
     private readonly conductorService: ConductorService,
-  ) {}
+    private readonly comfyuiModelService: ComfyuiModelService,
+  ) { }
 
   public async forkAssetsFromMarketPlace(teamId: string, userId: string) {
     const clonedComfyuiWorkflows = (await this.marketPlaceRepository.forkBuiltInComfyuiWorkflowAssetsFromMarketPlace(teamId, userId)) as (ComfyuiWorkflowEntity & { forkFromId: string })[];
@@ -44,6 +46,10 @@ export class TeamsService {
     const team = await this.teamRepository.createTeam(userId, teamName, description, iconUrl, isBuiltIn, createMethod, initialTeamId);
     // Init assets from built-in marketplace
     await this.forkAssetsFromMarketPlace(team.id, userId);
+    // 初始化内置图像模型类型
+    await this.comfyuiModelService.updateTypesFromInternals(team.id);
+    // 自动更新内置图像模型列表
+    await this.comfyuiModelService.updateModelsByTeamIdAndServerId(team.id, 'default');
   }
 
   public async updateTeam(
