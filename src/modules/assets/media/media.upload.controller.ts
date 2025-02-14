@@ -2,7 +2,7 @@ import { config } from '@/common/config';
 import { SuccessResponse } from '@/common/response';
 import { S3Helpers } from '@/common/s3';
 import { getMimeType } from '@/common/utils/file';
-import { BadRequestException, Body, Controller, Get, Post, Query, Res, StreamableFile, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Res, StreamableFile, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { Readable } from 'stream';
@@ -35,7 +35,7 @@ export class MediaUploadController {
     const s3Helpers = new S3Helpers();
 
     if (!key) {
-      throw new BadRequestException('Key is required');
+      throw new Error('Key is required');
     }
 
     const cleanKey = key.replace(/^\/+/, '').replace(/\?.*$/, '');
@@ -44,17 +44,21 @@ export class MediaUploadController {
       const data = await s3Helpers.getSignedUrl(cleanKey);
       res.redirect(data);
     } else {
-      const file = await s3Helpers.getFile(cleanKey);
-      const fileName = cleanKey.split('/').pop();
-      const mimeType = getMimeType(fileName) || file.ContentType;
+      try {
+        const file = await s3Helpers.getFile(cleanKey);
+        const fileName = cleanKey.split('/').pop();
+        const mimeType = getMimeType(fileName) || file.ContentType;
 
-      res.set('Content-Type', mimeType);
-      res.set('Content-Length', file.ContentLength.toString());
-      res.set('Last-Modified', file.LastModified.toUTCString());
-      res.set('ETag', file.ETag);
-      res.set('Content-Disposition', `attachment; filename="${fileName}"`);
+        res.set('Content-Type', mimeType);
+        res.set('Content-Length', file.ContentLength.toString());
+        res.set('Last-Modified', file.LastModified.toUTCString());
+        res.set('ETag', file.ETag);
+        res.set('Content-Disposition', `attachment; filename="${fileName}"`);
 
-      return new StreamableFile(file.Body as Readable);
+        return new StreamableFile(file.Body as Readable);
+      } catch (error) {
+        throw new Error('File not found.');
+      }
     }
   }
 
