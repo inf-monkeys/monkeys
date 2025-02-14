@@ -30,3 +30,21 @@ export function findFilesInDir(startPath: string, filter: string) {
 
   return results;
 }
+
+export function getMimeType(fileName: string): string {
+  const ext = fileName.split('.').pop()?.toLowerCase();
+  const mimeTypes = {
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    png: 'image/png',
+    gif: 'image/gif',
+    pdf: 'application/pdf',
+    doc: 'application/msword',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    xls: 'application/vnd.ms-excel',
+    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    txt: 'text/plain',
+    json: 'application/json',
+  };
+  return mimeTypes[ext] || 'binary/octet-stream';
+}

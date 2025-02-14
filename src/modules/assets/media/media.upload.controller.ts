@@ -1,6 +1,7 @@
 import { config } from '@/common/config';
 import { SuccessResponse } from '@/common/response';
 import { S3Helpers } from '@/common/s3';
+import { getMimeType } from '@/common/utils/file';
 import { Body, Controller, Get, Post, Query, Res, StreamableFile, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
@@ -39,12 +40,14 @@ export class MediaUploadController {
       res.redirect(data);
     } else {
       const file = await s3Helpers.getFile(cleanKey);
+      const fileName = cleanKey.split('/').pop();
+      const mimeType = getMimeType(fileName) || file.ContentType;
 
-      res.set('Content-Type', file.ContentType);
+      res.set('Content-Type', mimeType);
       res.set('Content-Length', file.ContentLength.toString());
       res.set('Last-Modified', file.LastModified.toUTCString());
       res.set('ETag', file.ETag);
-      res.set('Content-Disposition', `attachment; filename="${cleanKey.split('/').pop()}"`);
+      res.set('Content-Disposition', `attachment; filename="${fileName}"`);
 
       return new StreamableFile(file.Body as Readable);
     }
