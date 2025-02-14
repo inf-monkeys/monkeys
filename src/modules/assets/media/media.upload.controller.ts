@@ -2,7 +2,7 @@ import { config } from '@/common/config';
 import { SuccessResponse } from '@/common/response';
 import { S3Helpers } from '@/common/s3';
 import { getMimeType } from '@/common/utils/file';
-import { Body, Controller, Get, Post, Query, Res, StreamableFile, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Post, Query, Res, StreamableFile, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { Readable } from 'stream';
@@ -33,6 +33,11 @@ export class MediaUploadController {
   @Get('/s3/sign-proxy')
   async getProxySignedUrl(@Query('key') key, @Query('u403') u403, @Res({ passthrough: true }) res: Response) {
     const s3Helpers = new S3Helpers();
+
+    if (!key) {
+      throw new BadRequestException('Key is required');
+    }
+
     const cleanKey = key.replace(/^\/+/, '').replace(/\?.*$/, '');
 
     if (u403) {
