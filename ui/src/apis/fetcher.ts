@@ -87,31 +87,37 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
             window['vinesRoute403_COUNT'] = 0;
             window['vinesRoute403_TOAST_ID'] = void 0;
           }, 3000);
-
-          if (window['vinesRoute403_COUNT']) {
-            window['vinesRoute403_COUNT']++;
-            const toastData = {
-              action: {
-                label: t('auth.re-login'),
-                onClick: () => {
-                  localStorage.removeItem('vines-token');
-                  localStorage.removeItem('vines-team-id');
-                  window['vinesTeamId'] = void 0;
-                  VinesEvent.emit('vines-nav', '/login', void 0, void 0, false);
+          if (window['sideBarMode'] != 'mini') {
+            if (window['vinesRoute403_COUNT']) {
+              window['vinesRoute403_COUNT']++;
+              const toastData = {
+                action: {
+                  label: t('auth.re-login'),
+                  onClick: () => {
+                    localStorage.removeItem('vines-token');
+                    localStorage.removeItem('vines-team-id');
+                    window['vinesTeamId'] = void 0;
+                    VinesEvent.emit('vines-nav', '/login', void 0, void 0, false);
+                  },
                 },
-              },
-            };
-            if (window['vinesRoute403_TOAST_ID']) {
-              toast(t('auth.login-required', { count: window['vinesRoute403_COUNT'] }), {
-                ...toastData,
-                id: window['vinesRoute403_TOAST_ID'],
-              });
+              };
+
+              if (window['vinesRoute403_TOAST_ID']) {
+                toast(t('auth.login-required', { count: window['vinesRoute403_COUNT'] }), {
+                  ...toastData,
+                  id: window['vinesRoute403_TOAST_ID'],
+                });
+              } else {
+                window['vinesRoute403_TOAST_ID'] = toast(t('auth.api-403'), toastData);
+              }
+
             } else {
-              window['vinesRoute403_TOAST_ID'] = toast(t('auth.api-403'), toastData);
+              window['vinesRoute403_COUNT'] = 1;
+              toast.warning(t('auth.login-expired'));
             }
-          } else {
-            window['vinesRoute403_COUNT'] = 1;
-            toast.warning(t('auth.login-expired'));
+          }
+          if (window['sideBarMode'] == 'mini') {
+            window.location.reload();
           }
           throw new Error('Login Required');
         } else {
