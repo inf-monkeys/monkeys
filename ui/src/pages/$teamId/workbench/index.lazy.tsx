@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { createLazyFileRoute } from '@tanstack/react-router';
 
@@ -15,6 +15,10 @@ export const Workbench: React.FC = () => {
   useEffect(() => {
     setTimeout(() => setWorkbenchVisible(true), 80);
   }, []);
+
+  useMemo(() => {
+    window['sideBarMode'] = mode;
+  }, [mode]);
 
   return (
     <main className="flex size-full">
