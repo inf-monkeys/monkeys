@@ -12,7 +12,7 @@ import { DEFAULT_TEAM_DESCRIPTION, DEFAULT_TEAM_PHOTO, TeamsService } from './te
 @ApiTags('Auth/Teams')
 @UseGuards(CompatibleAuthGuard)
 export class TeamsController {
-  constructor(private readonly service: TeamsService) {}
+  constructor(private readonly service: TeamsService) { }
 
   @Get()
   @ApiOperation({
@@ -74,6 +74,17 @@ export class TeamsController {
   public async deleteTeam(@Req() req: IRequest, @Param('id') teamId: string) {
     const { userId } = req;
     const data = await this.service.deleteTeam(teamId, userId);
+    return new SuccessResponse({ data });
+  }
+
+  @Post('/:id/init')
+  @ApiOperation({
+    description: '初始化团队',
+    summary: '初始化团队',
+  })
+  public async initTeam(@Req() req: IRequest, @Param('id') teamId: string) {
+    const { userId } = req;
+    const data = await this.service.initTeam(teamId, userId);
     return new SuccessResponse({ data });
   }
 

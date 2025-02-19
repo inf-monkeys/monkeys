@@ -42,14 +42,20 @@ export class TeamsService {
     return pick(await this.teamRepository.getTeamById(teamId), ['id', 'name', 'description', 'logoUrl']) as TeamEntity;
   }
 
+  public async initTeam(teamId: string, userId: string) {
+    // Init assets from built-in marketplace
+    await this.forkAssetsFromMarketPlace(teamId, userId);
+    // 初始化内置图像模型类型
+    await this.comfyuiModelService.updateTypesFromInternals(teamId);
+    // 自动更新内置图像模型列表
+    await this.comfyuiModelService.updateModelsByTeamIdAndServerId(teamId, 'default');
+    return;
+  }
+
   public async createTeam(userId: string, teamName: string, description?: string, iconUrl?: string, isBuiltIn = false, createMethod: 'self' | 'import' = 'self', initialTeamId?: string) {
     const team = await this.teamRepository.createTeam(userId, teamName, description, iconUrl, isBuiltIn, createMethod, initialTeamId);
-    // Init assets from built-in marketplace
-    await this.forkAssetsFromMarketPlace(team.id, userId);
-    // 初始化内置图像模型类型
-    await this.comfyuiModelService.updateTypesFromInternals(team.id);
-    // 自动更新内置图像模型列表
-    await this.comfyuiModelService.updateModelsByTeamIdAndServerId(team.id, 'default');
+    await this.initTeam(team.id, userId);
+    return team;
   }
 
   public async updateTeam(
