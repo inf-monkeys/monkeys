@@ -21,7 +21,7 @@ export class ComfyuiModelRepository {
     private readonly modelTypeAssetRepository: ComfyuiModelTypeAssetRepositroy,
     @InjectRepository(ComfyuiModelServerRelationEntity)
     private readonly relationRepository: Repository<ComfyuiModelServerRelationEntity>,
-  ) {}
+  ) { }
 
   public async listAssetTypes(teamId: string, dto: ListDto) {
     return await this.modelTypeAssetRepository.listAssets('comfyui-model-type', teamId, dto, {
@@ -190,12 +190,12 @@ export class ComfyuiModelRepository {
         ...model,
         serverRelations: serverRelations
           ? serverRelations.map((relation) => {
-              set(relation, 'server.address', maskUrl(relation.server.address));
-              return {
-                ...relation,
-                type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
-              };
-            })
+            set(relation, 'server.address', maskUrl(relation.server.address));
+            return {
+              ...relation,
+              type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
+            };
+          })
           : undefined,
       };
     });
@@ -220,15 +220,21 @@ export class ComfyuiModelRepository {
 
   public async getModelsByTeamId(teamId: string) {
     const rawModels = await this.modelRepository.find({
-      where: {
-        teamId,
-        isDeleted: false,
-        serverRelations: {
-          server: {
+      where:
+        teamId === 'internals'
+          ? {
+            teamId,
             isDeleted: false,
+          }
+          : {
+            teamId,
+            isDeleted: false,
+            serverRelations: {
+              server: {
+                isDeleted: false,
+              },
+            },
           },
-        },
-      },
       relations: {
         serverRelations: {
           server: true,
@@ -248,11 +254,11 @@ export class ComfyuiModelRepository {
         ...model,
         serverRelations: serverRelations
           ? serverRelations.map((relation) => {
-              return {
-                ...relation,
-                type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
-              };
-            })
+            return {
+              ...relation,
+              type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
+            };
+          })
           : undefined,
       };
     });
@@ -290,11 +296,11 @@ export class ComfyuiModelRepository {
         ...model,
         serverRelations: serverRelations
           ? serverRelations.map((relation) => {
-              return {
-                ...relation,
-                type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
-              };
-            })
+            return {
+              ...relation,
+              type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
+            };
+          })
           : undefined,
       };
     });
@@ -336,14 +342,14 @@ export class ComfyuiModelRepository {
         ...model,
         serverRelations: serverRelations
           ? serverRelations.map((relation) => {
-              const pathArr = relation.path.split('/');
-              set(relation, 'server.address', maskUrl(relation.server.address));
-              return {
-                ...relation,
-                apiPath: pathArr.length > 1 ? pathArr.slice(1).join('/') : relation.path,
-                type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
-              };
-            })
+            const pathArr = relation.path.split('/');
+            set(relation, 'server.address', maskUrl(relation.server.address));
+            return {
+              ...relation,
+              apiPath: pathArr.length > 1 ? pathArr.slice(1).join('/') : relation.path,
+              type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
+            };
+          })
           : undefined,
       };
     });
@@ -453,34 +459,38 @@ export class ComfyuiModelRepository {
   }
 
   public async updateModelsFromTeamIdToTeamId(originTeamId: string, targetTeamId: string) {
-    const originModels = await this.getModelsByTeamId(originTeamId);
-    const targetModels = await this.getModelsByTeamId(targetTeamId);
+    // 并行获取源数据和目标数据
+    const [originModels, targetModels] = await Promise.all([this.getModelsByTeamId(originTeamId), this.getModelsByTeamId(targetTeamId)]);
 
-    const originModelSha256List = originModels.map((m) => m.sha256);
-    const targetModelSha256List = targetModels.map((m) => m.sha256);
+    // 使用 Set 提高查找效率
+    const originSha256Set = new Set(originModels.map((m) => m.sha256));
+    const targetSha256Set = new Set(targetModels.map((m) => m.sha256));
 
-    // update
+    console.log(originTeamId, originModels.length, targetTeamId, targetModels.length);
+
+    // 需要更新的目标模型（SHA256 匹配的）
     const toUpdate = targetModels
-      .filter((m) => originModelSha256List.includes(m.sha256))
-      .map((m) => {
-        const newParams = _.pick(originModels.find((om) => om.sha256 === m.sha256) ?? {}, ['displayName', 'description', 'iconUrl']);
-        return {
-          ...m,
-          ...newParams,
-        };
-      });
-    toUpdate.forEach(async (m) => {
-      await this.updateModel(targetTeamId, m.id, m);
-    });
+      .filter((m) => originSha256Set.has(m.sha256))
+      .map((m) => ({
+        id: m.id,
+        ..._.pick(originModels.find((om) => om.sha256 === m.sha256)!, ['displayName', 'description', 'iconUrl']),
+      }));
 
-    // create
-    const toCreate = originModels.filter((m) => !targetModelSha256List.includes(m.sha256));
-    toCreate.forEach(async (m) => {
-      await this.createModel(targetTeamId, _.pick(m, ['iconUrl', 'description', 'displayName', 'sha256']));
-    });
+    // 需要创建的新模型（存在于源但不在目标中的）
+    const toCreate = originTeamId === 'internals' ? [] : originModels.filter((m) => !targetSha256Set.has(m.sha256));
+
+    // 执行更新操作
+    for (const model of toUpdate) {
+      await this.updateModel(targetTeamId, model.id, model);
+    }
+
+    // 执行创建操作
+    for (const model of toCreate) {
+      await this.createModel(targetTeamId, _.pick(model, ['iconUrl', 'description', 'displayName', 'sha256']));
+    }
 
     return {
-      remove: 0,
+      remove: 0, // 根据要求不执行删除操作
       update: toUpdate.length,
       create: toCreate.length,
     };
