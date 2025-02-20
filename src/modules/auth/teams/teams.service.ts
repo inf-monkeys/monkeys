@@ -49,6 +49,8 @@ export class TeamsService {
     await this.comfyuiModelService.updateTypesFromInternals(teamId);
     // 自动更新内置图像模型列表
     await this.comfyuiModelService.updateModelsByTeamIdAndServerId(teamId, 'default');
+    // 自动更新图像模型列表类型
+    await this.comfyuiModelService.updateModelsFromInternals(teamId);
     return;
   }
 
