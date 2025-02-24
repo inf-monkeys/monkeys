@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
+import useUrlState from '@/hooks/use-url-state';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
@@ -25,8 +26,10 @@ export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar, clas
 
   const vinesIFrameVisible = usePageStore((s) => s.vinesIFrameVisible);
 
+  const [{ hideSpaceHeader }] = useUrlState<{ hideSpaceHeader: boolean }>({ hideSpaceHeader: false });
+
   return (
-    <div ref={ref} className="flex h-[calc(100vh-5.75rem)] w-full">
+    <div ref={ref} className={cn('flex w-full', hideSpaceHeader ? 'h-[calc(100vh-3rem)]' : 'h-[calc(100vh-5.75rem)]')}>
       {!vinesIFrameVisible && sidebar}
       <div
         className={cn(
