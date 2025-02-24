@@ -23,7 +23,11 @@ import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { cloneDeep } from '@/utils';
 
-export const WorkbenchNormalModeSidebar: React.FC = () => {
+interface IWorkbenchNormalModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
+  showGroup?: boolean;
+}
+
+export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarProps> = ({ showGroup = true }) => {
   const { t } = useTranslation();
 
   const { teamId } = useVinesTeam();
@@ -146,10 +150,14 @@ export const WorkbenchNormalModeSidebar: React.FC = () => {
     >
       <AnimatePresence>{isLoading && <VinesFullLoading disableCard />}</AnimatePresence>
       {hasGroups ? (
-        <>
-          <VirtuaWorkbenchViewGroupList data={lists} groupId={groupId} setGroupId={setGroupId} />
-          <Separator orientation="vertical" />
-        </>
+        showGroup ? (
+          <>
+            <VirtuaWorkbenchViewGroupList data={lists} groupId={groupId} setGroupId={setGroupId} />
+            <Separator orientation="vertical" />
+          </>
+        ) : (
+          <></>
+        )
       ) : (
         <div className="vines-center absolute flex-col gap-4">
           <CircleSlash size={64} />

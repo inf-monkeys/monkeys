@@ -10,7 +10,10 @@ import { usePageStore } from '@/store/usePageStore';
 export const Workbench: React.FC = () => {
   const setWorkbenchVisible = usePageStore((s) => s.setWorkbenchVisible);
 
-  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
+  const [{ mode, showGroup }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini'; showGroup: boolean }>({
+    mode: 'normal',
+    showGroup: true,
+  });
 
   useEffect(() => {
     setTimeout(() => setWorkbenchVisible(true), 80);
@@ -18,11 +21,12 @@ export const Workbench: React.FC = () => {
 
   useMemo(() => {
     window['sideBarMode'] = mode;
-  }, [mode]);
+    window['sideBarShowGroup'] = showGroup;
+  }, [mode, showGroup]);
 
   return (
     <main className="flex size-full">
-      <WorkbenchSidebar mode={mode} />
+      <WorkbenchSidebar mode={mode} showGroup={showGroup} />
       <WorkbenchView mode={mode} />
     </main>
   );
