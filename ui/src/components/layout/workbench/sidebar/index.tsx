@@ -5,8 +5,9 @@ import { WorkbenchNormalModeSidebar } from '@/components/layout/workbench/sideba
 
 interface IWorkbenchSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
   mode?: 'normal' | 'fast' | 'mini';
+  showGroup?: boolean;
 }
 
-export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ mode = 'normal' }) => {
-  return mode === 'mini' ? <WorkbenchMiniModeSidebar /> : <WorkbenchNormalModeSidebar />;
+export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ mode = 'normal', showGroup = true }) => {
+  return mode === 'mini' ? <WorkbenchMiniModeSidebar /> : <WorkbenchNormalModeSidebar showGroup={showGroup} />;
 };
