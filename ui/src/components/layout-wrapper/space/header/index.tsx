@@ -6,8 +6,8 @@ import { LogIn } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { getVinesToken } from '@/apis/utils.ts';
-import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
 import { UserCard } from '@/components/layout-wrapper/space/header/expand/user-card.tsx';
+import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -33,9 +33,13 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
 
   const [mode, setMode] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>();
 
+  const [{ hideSpaceHeader }] = useUrlState<{ hideSpaceHeader: boolean }>({ hideSpaceHeader: false });
+
   const hasToken = !!getVinesToken();
 
-  return (
+  return hideSpaceHeader ? (
+    <></>
+  ) : (
     <header className="flex w-full items-center justify-between rounded-xl bg-slate-1 p-3 shadow-sm">
       <div className="z-20 flex h-full items-center gap-5">
         <Link
