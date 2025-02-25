@@ -21,7 +21,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
-import { cloneDeep } from '@/utils';
+import { cloneDeep, cn } from '@/utils';
 
 interface IWorkbenchNormalModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
   showGroup?: boolean;
@@ -145,7 +145,10 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   return (
     <div
-      className="relative mr-4 flex h-full w-96 items-center justify-center rounded-xl border border-input bg-slate-1 shadow-sm"
+      className={cn(
+        'relative mr-4 flex h-full items-center justify-center rounded-xl border border-input bg-slate-1 shadow-sm',
+        showGroup ? 'w-96' : 'w-64',
+      )}
       ref={ref}
     >
       <AnimatePresence>{isLoading && <VinesFullLoading disableCard />}</AnimatePresence>
