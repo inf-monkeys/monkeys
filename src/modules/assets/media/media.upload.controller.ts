@@ -39,7 +39,7 @@ export class MediaUploadController {
     }
 
     const decodedKey = decodeURIComponent(key);
-    const cleanKey = decodedKey.replace(/(^\?+|\?.*$)/g, '');
+    const cleanKey = decodedKey.replace(/^\/+|\?.*$/g, '');
 
     if (u403) {
       const data = await s3Helpers.getSignedUrl(cleanKey);
@@ -54,10 +54,11 @@ export class MediaUploadController {
         res.set('Content-Length', file.ContentLength.toString());
         res.set('Last-Modified', file.LastModified.toUTCString());
         res.set('ETag', file.ETag);
-        res.set('Content-Disposition', `attachment; filename="${fileName}"`);
+        res.set('Content-Disposition', `attachment; filename="${encodeURIComponent(fileName)}"`);
 
         return new StreamableFile(file.Body as Readable);
       } catch (error) {
+        console.error(error);
         throw new Error('File not found.');
       }
     }
