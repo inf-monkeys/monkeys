@@ -87,7 +87,7 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
             window['vinesRoute403_COUNT'] = 0;
             window['vinesRoute403_TOAST_ID'] = void 0;
           }, 3000);
-          if (window['sideBarMode'] != 'mini') {
+          if (window['sideBarMode'] != 'mini' && window['hideAuthToast'] !== true) {
             if (window['vinesRoute403_COUNT']) {
               window['vinesRoute403_COUNT']++;
               const toastData = {
@@ -110,13 +110,12 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
               } else {
                 window['vinesRoute403_TOAST_ID'] = toast(t('auth.api-403'), toastData);
               }
-
             } else {
               window['vinesRoute403_COUNT'] = 1;
               toast.warning(t('auth.login-expired'));
             }
           }
-          if (window['sideBarMode'] == 'mini') {
+          if (window['sideBarMode'] == 'mini' || (window['hideAuthToast'] === true && window['autoReload'] === true)) {
             window.location.reload();
           }
           throw new Error('Login Required');

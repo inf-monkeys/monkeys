@@ -31,6 +31,8 @@ export interface ISystemConfig {
       buttonText?: string;
       autoSignin?: boolean;
     };
+    hideAuthToast?: boolean;
+    autoReload?: boolean;
   };
   pages: {
     allowPageKeys: string[] | '*';

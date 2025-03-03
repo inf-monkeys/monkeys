@@ -166,6 +166,8 @@ export interface AuthConfig {
   privilegedToken?: string;
   wework?: WeWorkConfig;
   feishu?: FeishuConfig;
+  hideAuthToast?: boolean;
+  autoReload?: boolean;
 }
 
 export interface S3Config {
@@ -375,6 +377,8 @@ export const config: Config = {
     totpAlgorithm: readConfig('auth.totpAlgorithm', 'SHA-512'),
     totpPeriod: readConfig('auth.totpPeriod', 120),
     privilegedToken: readConfig('auth.privilegedToken'),
+    hideAuthToast: readConfig('auth.hideAuthToast', false),
+    autoReload: readConfig('auth.autoReload', false),
   },
   s3: {
     proxy: readConfig('s3.proxy', true),

@@ -45,6 +45,11 @@ export const OEM: React.FC = () => {
     };
   }, []);
 
+  const hideAuthToast = get(oem, 'auth.hideAuthToast', false);
+  const autoReload = get(oem, 'auth.autoReload', false);
+  window['hideAuthToast'] = hideAuthToast;
+  window['autoReload'] = autoReload;
+
   const initialRef = useRef(false);
   useEffect(() => {
     if (theme) {
