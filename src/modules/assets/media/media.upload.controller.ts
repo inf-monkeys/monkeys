@@ -38,7 +38,8 @@ export class MediaUploadController {
       throw new Error('Key is required');
     }
 
-    const cleanKey = key.replace(/^\/+/, '').replace(/\?.*$/, '');
+    const decodedKey = decodeURIComponent(key);
+    const cleanKey = decodedKey.replace(/(^\?+|\?.*$)/g, '');
 
     if (u403) {
       const data = await s3Helpers.getSignedUrl(cleanKey);
@@ -46,7 +47,7 @@ export class MediaUploadController {
     } else {
       try {
         const file = await s3Helpers.getFile(cleanKey);
-        const fileName = cleanKey.split('/').pop();
+        const fileName = cleanKey.split('/').pop()?.split('?')[0] || 'file';
         const mimeType = getMimeType(fileName) || file.ContentType;
 
         res.set('Content-Type', mimeType);
