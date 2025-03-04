@@ -115,7 +115,7 @@ export const vinesFetcher = <U, T = {}, P extends boolean = false>({
               toast.warning(t('auth.login-expired'));
             }
           }
-          if (window['sideBarMode'] == 'mini' || (window['hideAuthToast'] === true && window['autoReload'] === true)) {
+          if (window['sideBarMode'] == 'mini') {
             window.location.reload();
           }
           throw new Error('Login Required');

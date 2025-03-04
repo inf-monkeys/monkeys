@@ -18,13 +18,24 @@ const Login: React.FC = () => {
   const logoUrl = get(oem, `theme.logo.${darkMode ? 'dark' : 'light'}`, '');
   const appName = get(oem, 'theme.name', 'AI');
 
+  const hideLogin = get(oem, 'auth.hideAuthToast', false);
+
   const isServerError = error instanceof Error;
 
   return (
     <>
       <div className="flex flex-col items-center gap-8">
-        {!isServerError && <AppLogo url={logoUrl} alt={appName} height={36} />}
-        <VinesUserLogin />
+        {hideLogin ? (
+          <div className="flex flex-col items-center gap-8">
+            <img src="/Iframe404.webp" alt="遇到网络错误，请刷新整个页面重试" />
+            <span>遇到网络错误，请刷新整个页面重试</span>
+          </div>
+        ) : (
+          <>
+            {!isServerError && <AppLogo url={logoUrl} alt={appName} height={36} />}
+            <VinesUserLogin />
+          </>
+        )}
       </div>
       <div className="absolute bottom-6 left-6 flex items-center gap-2">
         <VinesDarkMode />
