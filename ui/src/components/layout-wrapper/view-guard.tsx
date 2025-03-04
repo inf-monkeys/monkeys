@@ -5,11 +5,12 @@ import { useParams } from '@tanstack/react-router';
 
 import { useDebounceEffect } from 'ahooks';
 import { AnimatePresence, motion } from 'framer-motion';
-import { isEmpty } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { LogIn } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { useSystemConfig } from '@/apis/common';
 import { workflowPermission } from '@/apis/workflow';
 import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { Button } from '@/components/ui/button';
@@ -56,6 +57,10 @@ export const ViewGuard = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
 
     const visible = loading || isUnAuth || (isTokenEmpty && !isWorkspace);
 
+    const { data: oem } = useSystemConfig();
+
+    const hideLogin = get(oem, 'auth.hideAuthToast', false);
+
     return (
       <main ref={ref} className={cn('size-full bg-slate-1 p-4', className)} {...props}>
         {children}
@@ -69,6 +74,12 @@ export const ViewGuard = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
             >
               {loading ? (
                 <VinesLoading />
+              ) : hideLogin ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>请刷新页面，稍候再试</CardTitle>
+                  </CardHeader>
+                </Card>
               ) : (
                 <Card>
                   <CardHeader>
