@@ -151,43 +151,50 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
       )}
       ref={ref}
     >
-      <AnimatePresence>{isLoading && <VinesFullLoading disableCard />}</AnimatePresence>
-      {hasGroups ? (
-        showGroup ? (
-          <>
-            <VirtuaWorkbenchViewGroupList data={lists} groupId={groupId} setGroupId={setGroupId} />
-            <Separator orientation="vertical" />
-          </>
-        ) : (
-          <></>
-        )
+      {isLoading ? (
+        <AnimatePresence>
+          <VinesFullLoading disableCard />
+        </AnimatePresence>
       ) : (
-        <div className="vines-center absolute flex-col gap-4">
-          <CircleSlash size={64} />
-          <div className="flex flex-col text-center">
-            <h2 className="font-bold">{t('workbench.view.no-starred-view')}</h2>
+        <>
+          {hasGroups ? (
+            showGroup ? (
+              <>
+                <VirtuaWorkbenchViewGroupList data={lists} groupId={groupId} setGroupId={setGroupId} />
+                <Separator orientation="vertical" />
+              </>
+            ) : (
+              <></>
+            )
+          ) : (
+            <div className="vines-center absolute flex-col gap-4">
+              <CircleSlash size={64} />
+              <div className="flex flex-col text-center">
+                <h2 className="font-bold">{t('workbench.view.no-starred-view')}</h2>
+              </div>
+            </div>
+          )}
+          <div className="grid w-full overflow-hidden p-4 [&_h1]:line-clamp-1 [&_span]:line-clamp-1">
+            <VirtuaWorkbenchViewList
+              height={height}
+              data={(lists?.find((it) => it.id === groupId)?.pages ?? []) as IPinPage[]}
+              currentPageId={currentPage?.[teamId]?.id}
+              currentGroupId={groupId}
+              onChildClick={(page) => {
+                setCurrentPage((prev) => ({ ...prev, [teamId]: { ...page, groupId } }));
+              }}
+            />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link to="/$teamId/workflows/" params={{ teamId }}>
+                  <Button icon={<Plus />} className="mt-2 w-full" variant="outline" />
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>{t('workbench.sidebar.add')}</TooltipContent>
+            </Tooltip>
           </div>
-        </div>
+        </>
       )}
-      <div className="grid w-full overflow-hidden p-4 [&_h1]:line-clamp-1 [&_span]:line-clamp-1">
-        <VirtuaWorkbenchViewList
-          height={height}
-          data={(lists?.find((it) => it.id === groupId)?.pages ?? []) as IPinPage[]}
-          currentPageId={currentPage?.[teamId]?.id}
-          currentGroupId={groupId}
-          onChildClick={(page) => {
-            setCurrentPage((prev) => ({ ...prev, [teamId]: { ...page, groupId } }));
-          }}
-        />
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link to="/$teamId/workflows/" params={{ teamId }}>
-              <Button icon={<Plus />} className="mt-2 w-full" variant="outline" />
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent>{t('workbench.sidebar.add')}</TooltipContent>
-        </Tooltip>
-      </div>
     </div>
   );
 };
