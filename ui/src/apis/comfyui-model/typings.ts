@@ -41,6 +41,6 @@ export interface IComfyuiModelWithApiPath extends IComfyuiModel {
   serverRelations: IComfyuiServerRelationWithApiPath[];
 }
 
-export type IComfyuiModelWithOneServerWithApiPath = Omit<IComfyuiModel, 'serverRelations'> & {
-  serverRelation: IComfyuiServerRelationWithApiPath;
-};
+// export type IComfyuiModelWithOneServerWithApiPath = Omit<IComfyuiModel, 'serverRelations'> & {
+//   serverRelation: IComfyuiServerRelationWithApiPath;
+// };
