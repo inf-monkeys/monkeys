@@ -69,7 +69,7 @@ export const FieldImageModel: React.FC<IFieldImageModelProps> = ({
                 <SelectValue placeholder={t('workspace.pre-view.actuator.execution-form.image-model.placeholder')} />
               </SelectTrigger>
               <SelectContent style={enableMaxWidth ? { maxWidth: width + 25 } : {}}>
-                <SelectItem value=" ">未选择</SelectItem>
+                <SelectItem value=" ">不使用模型</SelectItem>
                 {models.flatMap(({ id, displayName, iconUrl, serverRelations, description }) => {
                   const validRelations = serverRelations.filter(
                     (r) => r.server.id === typeOptions?.comfyuiModelServerId,
