@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
 import { useComfyuiModelListByTypeNameAndServerId } from '@/apis/comfyui-model';
-import { IComfyuiModelWithOneServerWithApiPath } from '@/apis/comfyui-model/typings.ts';
+import { IComfyuiModel } from '@/apis/comfyui-model/typings.ts';
 import { FormControl, FormMessage } from '@/components/ui/form.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
@@ -18,7 +18,7 @@ interface IFieldImageModelProps {
   value: any;
   onChange: (value: any) => void;
 
-  filter?: (model: IComfyuiModelWithOneServerWithApiPath) => boolean;
+  filter?: (model: IComfyuiModel) => boolean;
 }
 
 export const FieldImageModel: React.FC<IFieldImageModelProps> = ({
@@ -34,17 +34,9 @@ export const FieldImageModel: React.FC<IFieldImageModelProps> = ({
     typeOptions?.comfyuiModelServerId,
   );
 
-  const models = (
-    (rawModels ?? [])
-      .map(({ serverRelations, ...raw }) => {
-        const serverRelation = serverRelations.find((r) => r.server.id === typeOptions?.comfyuiModelServerId);
-        return {
-          ...raw,
-          serverRelation,
-        };
-      })
-      .filter((m) => m.serverRelation) as IComfyuiModelWithOneServerWithApiPath[]
-  ).filter(filter ?? (() => true));
+  const models = (rawModels ?? [])
+    .filter((m) => m.serverRelations.some((r) => r.server.id === typeOptions?.comfyuiModelServerId))
+    .filter(filter ?? (() => true));
 
   const { ref, width } = useElementSize();
   const enableMaxWidth = width > 200;
@@ -77,31 +69,43 @@ export const FieldImageModel: React.FC<IFieldImageModelProps> = ({
                 <SelectValue placeholder={t('workspace.pre-view.actuator.execution-form.image-model.placeholder')} />
               </SelectTrigger>
               <SelectContent style={enableMaxWidth ? { maxWidth: width + 25 } : {}}>
-                {models.map(({ id, displayName, iconUrl, serverRelation, description }, i) => (
-                  <Tooltip key={id}>
-                    <TooltipTrigger asChild>
-                      <SelectItem value={serverRelation.apiPath}>
-                        <div className="flex w-full items-center gap-2">
-                          <VinesIcon src={iconUrl || 'emoji:🍀:#eeeef1'} size="xs" />
-                          <p className="flex-1 break-all text-sm font-bold leading-4">{displayName ?? 'unknown'}</p>
-                          {serverRelation.type && serverRelation.type.length > 0 && (
-                            <div className="flex gap-1">
-                              {serverRelation.type.map((type) => (
-                                <p
-                                  key={type.id}
-                                  className="text-xxs model-tag rounded border border-input bg-muted p-1"
-                                >
-                                  {type?.displayName ?? type?.name}
-                                </p>
-                              ))}
+                <SelectItem value=" ">未选择</SelectItem>
+                {models.flatMap(({ id, displayName, iconUrl, serverRelations, description }) => {
+                  const validRelations = serverRelations.filter(
+                    (r) => r.server.id === typeOptions?.comfyuiModelServerId,
+                  );
+
+                  return validRelations.map((relation) => {
+                    const apiPath = relation.apiPath;
+                    return (
+                      <Tooltip key={`${id}-${apiPath}`}>
+                        <TooltipTrigger asChild>
+                          <SelectItem value={apiPath}>
+                            <div className="flex w-full items-center gap-2">
+                              <VinesIcon src={iconUrl || 'emoji:🍀:#eeeef1'} size="xs" />
+                              <div className="flex-1">
+                                <p className="break-all text-sm font-bold leading-4">{displayName ?? 'unknown'}</p>
+                              </div>
+                              {relation.type && relation.type.length > 0 && (
+                                <div className="flex gap-1">
+                                  {relation.type.map((type) => (
+                                    <p
+                                      key={type.id}
+                                      className="text-xxs model-tag rounded border border-input bg-muted p-1"
+                                    >
+                                      {type?.displayName ?? type?.name}
+                                    </p>
+                                  ))}
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-                      </SelectItem>
-                    </TooltipTrigger>
-                    {description && <TooltipContent side={i === 0 ? 'bottom' : 'top'}>{description}</TooltipContent>}
-                  </Tooltip>
-                ))}
+                          </SelectItem>
+                        </TooltipTrigger>
+                        {description && <TooltipContent>{description}</TooltipContent>}
+                      </Tooltip>
+                    );
+                  });
+                })}
               </SelectContent>
             </Select>
           </FormControl>
