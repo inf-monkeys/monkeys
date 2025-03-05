@@ -26,12 +26,12 @@ export const VirtuaExecutionResultGridItem: React.FC<IVirtuaExecutionResultGridI
   // const rowLength = row.length;
 
   return (
-    <div
-      className={cn(
-        'grid size-full grid-cols-3',
-        // rowLength > 2 ? 'grid-cols-3' : rowLength === 2 ? 'grid-cols-2' : 'grid-cols-1',
-      )}
-    >
+    <div className={cn(
+      'grid size-full gap-2',
+      'grid-auto-rows:1fr',
+      'grid-cols-[repeat(auto-fit,minmax(min(200px,100%),1fr))]',
+      'overflow-auto',
+    )}>
       {row.map((it, i) => {
         const {
           render: { type, data, alt },

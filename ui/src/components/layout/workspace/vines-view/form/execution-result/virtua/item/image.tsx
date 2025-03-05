@@ -24,7 +24,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   return (
     <div className="vines-center relative overflow-hidden rounded-lg [&_.rc-image-mask]:absolute [&_.rc-image-mask]:h-full [&_.rc-image]:static">
       <VinesImage
-        className="aspect-square size-full transform rounded-lg border border-input object-cover object-center shadow-sm"
+        className="size-full rounded-lg border border-input object-cover object-center shadow-sm"
         src={src}
         alt="image"
       />
