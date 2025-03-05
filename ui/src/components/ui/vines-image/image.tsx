@@ -52,9 +52,11 @@ export const LazyImage: React.FC<ILazyImageProps> = memo(
           disabledPreview
             ? false
             : {
-                src: cacheImageUrls?.[src] || src,
-                mask: <Eye className="stroke-white" />,
-              }
+              src: cacheImageUrls?.[src] || src,
+              mask: <Eye className="stroke-white" />,
+              forceRender: false,
+              destroyOnClose: true,
+            }
         }
       />
     ) : (

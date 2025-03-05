@@ -103,7 +103,10 @@ export const VirtuaExecutionResultGrid: React.FC<IVirtuaExecutionResultGridProps
           overscan={2}
         >
           {data.concat(list).map((it, i) => (
-            <VirtuaExecutionResultGridItem data={it} key={i} />
+            <VirtuaExecutionResultGridItem
+              data={it}
+              key={it.map((i) => `${i.instanceId}-${i.render.index}`).join('-')}
+            />
           ))}
         </Virtualizer>
       </ScrollArea>
