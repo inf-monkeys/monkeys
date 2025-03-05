@@ -15,6 +15,7 @@ export type IVinesExecutionResultItem = VinesWorkflowExecutionOutputListItem & {
     type: 'image' | 'video' | 'text' | 'json' | 'empty';
     data: JSONValue;
     alt?: string | string[] | undefined;
+    index: number;
   };
 };
 
@@ -24,6 +25,8 @@ interface IVirtuaExecutionResultGridItemProps {
 
 export const VirtuaExecutionResultGridItem: React.FC<IVirtuaExecutionResultGridItemProps> = ({ data: row }) => {
   // const rowLength = row.length;
+
+  console.log(row);
 
   return (
     <div className={cn(

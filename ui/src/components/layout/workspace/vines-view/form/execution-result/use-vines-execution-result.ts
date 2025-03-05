@@ -17,7 +17,7 @@ const EMPTY_ITEM: IVinesExecutionResultItem = {
   updateTime: 0,
   userId: '',
   workflowId: '',
-  render: { type: 'empty', data: '' },
+  render: { type: 'empty', data: '', index: 0 },
 };
 
 export const useVinesExecutionResult = () => {
@@ -28,11 +28,14 @@ export const useVinesExecutionResult = () => {
     for (const execution of outputs ?? []) {
       const { output: executionOutput = [], rawOutput = {}, ...rest } = execution;
 
-      for (const it of executionOutput) {
+      for (const [index, it] of executionOutput.entries()) {
         const data = {
           ...rest,
           output: rawOutput,
-          render: it,
+          render: {
+            ...it,
+            index,
+          },
         } as unknown as IVinesExecutionResultItem;
 
         // const isTextOrJson = data.render.type === 'json' || data.render.type === 'text';

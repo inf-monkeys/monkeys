@@ -19,7 +19,7 @@ export const VirtuaExecutionResultGridRawItem: React.FC<IVirtuaExecutionResultGr
   return (
     <VirtuaExecutionResultRawDataDialog data={data}>
       <div className="box-border flex flex-none content-stretch p-1">
-        <div className="relative max-h-96 min-h-64 w-full min-w-64 cursor-pointer overflow-hidden rounded-lg border border-input bg-background p-2 shadow-sm">
+        <div className="relative max-h-96 min-h-32 w-full min-w-64 cursor-pointer overflow-hidden rounded-lg border border-input bg-background p-2 shadow-sm">
           <AnimatePresence>
             {isRUNNING ? (
               <motion.div
