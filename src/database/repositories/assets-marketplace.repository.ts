@@ -1,7 +1,7 @@
 import { LlmModelEndpointType } from '@/common/config';
 import { generateDbId, getComfyuiWorkflowDataListFromWorkflow } from '@/common/utils';
 import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
-import { BUILT_IN_WORKFLOW_MARKETPLACE_LIST } from '@/modules/assets/assets.marketplace.data';
+import { BUILT_IN_WORKFLOW_MARKETPLACE_LIST, PAGE_GROUP_SORT_LIST } from '@/modules/assets/assets.marketplace.data';
 import { LLM_CHAT_COMPLETION_TOOL, LLM_COMPLETION_TOOL, LLM_GENERATE_TEXT_TOOL, LLM_NAMESPACE } from '@/modules/tools/llm/llm.controller';
 import { getDefaultModel } from '@/modules/tools/llm/llm.service';
 import { SimpleTaskDef } from '@inf-monkeys/conductor-javascript';
@@ -61,6 +61,9 @@ export class AssetsMarketPlaceRepository {
         workflowId: generateDbId(),
       };
     });
+
+    const pageIdOrderMap = new Map<string, number>();
+
     for (const workflow of clonedWorkflows) {
       const { forkFromId } = workflow;
       const originalMarketPlaceData = BUILT_IN_WORKFLOW_MARKETPLACE_LIST.find((x) => x.id === forkFromId);
@@ -79,7 +82,12 @@ export class AssetsMarketPlaceRepository {
         for (const mapper of originalMarketPlaceData.autoPinPage) {
           for (const [groupName, pageTypes] of Object.entries(mapper)) {
             const type2PageIds = pages.filter((it) => pageTypes.includes(it.type)).map((it) => it.id);
-            groupMap[groupName].pageIds = uniq([...(groupMap[groupName].pageIds ?? []), ...type2PageIds]);
+            type2PageIds.forEach((pageId) => {
+              pageIdOrderMap.set(pageId, PAGE_GROUP_SORT_LIST.indexOf(forkFromId) || 100000);
+            });
+            groupMap[groupName].pageIds = uniq([...(groupMap[groupName].pageIds ?? []), ...type2PageIds]).sort((a, b) => {
+              return pageIdOrderMap.get(a) - pageIdOrderMap.get(b);
+            });
           }
         }
 

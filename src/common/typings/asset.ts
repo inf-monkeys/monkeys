@@ -30,8 +30,10 @@ export interface AuthorizedTarget {
 
 export type BuiltInMarketType = 'workflows' | 'comfyui-workflows' | 'overwrite-workflows';
 
+type BuiltInMarketPageGroupSort = Record<'page-group-sorts', string[]>;
+
 type BuiltInWorkflowMarketItem = Partial<WorkflowMarketplaceData>;
 
 type BuiltInMarketItem = BuiltInWorkflowMarketItem;
 
-export type BuiltInMarket = Record<BuiltInMarketType, BuiltInMarketItem[]>;
+export type BuiltInMarket = Record<BuiltInMarketType, BuiltInMarketItem[]> & BuiltInMarketPageGroupSort;
