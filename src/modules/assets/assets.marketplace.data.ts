@@ -51,17 +51,19 @@ export const builtInMarketList = rawBuiltInMarketList.reduce((acc, current) => {
 
 const overwriteWorkflowIds = builtInMarketList['overwrite-workflows']?.map((ow) => ow.id);
 
+export const PAGE_GROUP_SORT_LIST = builtInMarketList['page-group-sorts'] ?? [];
+
 export const BUILT_IN_WORKFLOW_MARKETPLACE_LIST: Array<Partial<WorkflowMarketplaceData>> = overwriteWorkflowIds
   ? builtInMarketList.workflows.map((w) => {
-      if (overwriteWorkflowIds.includes(w.id)) {
-        const ow = builtInMarketList['overwrite-workflows'].find((ow) => ow.id === w.id);
-        return {
-          ...w,
-          ...ow,
-        };
-      }
-      return w;
-    })
+    if (overwriteWorkflowIds.includes(w.id)) {
+      const ow = builtInMarketList['overwrite-workflows'].find((ow) => ow.id === w.id);
+      return {
+        ...w,
+        ...ow,
+      };
+    }
+    return w;
+  })
   : builtInMarketList.workflows;
 export const BUILT_IN_COMFYUI_WORKFLOW_MARKETPLACE_LIST: Array<Partial<ComfyuiWorkflowEntity>> = builtInMarketList['comfyui-workflows'];
 
