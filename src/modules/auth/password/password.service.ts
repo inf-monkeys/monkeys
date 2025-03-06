@@ -66,7 +66,6 @@ export class PasswordService {
 
       if (initialTeamId) {
         await this.teamsService.createTeam(user.id, '默认团队', DEFAULT_TEAM_DESCRIPTION, DEFAULT_TEAM_PHOTO, true, 'self', initialTeamId);
-        await this.teamsService.forkAssetsFromMarketPlace(initialTeamId, user.id);
       }
     }
     user = omit(user, ['password']);
