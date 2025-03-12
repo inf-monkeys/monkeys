@@ -7,10 +7,16 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesImage } from '@/components/ui/vines-image';
 import { useCopy } from '@/hooks/use-copy.ts';
+import { isObject } from 'lodash';
+
+export type IVinesExecutionResultImageAlt = string | {
+  label: string;
+  value: string;
+};
 
 interface IVirtuaExecutionResultGridImageItemProps {
   src: string;
-  alt?: string;
+  alt: IVinesExecutionResultImageAlt;
 }
 
 export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResultGridImageItemProps> = ({
@@ -20,6 +26,9 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   const { t } = useTranslation();
 
   const { copy } = useCopy();
+
+  const altLabel = isObject(alt) ? alt.label : alt;
+  const altContent = isObject(alt) ? alt.value : alt;
 
   return (
     <div className="vines-center relative overflow-hidden rounded-lg [&_.rc-image-mask]:absolute [&_.rc-image-mask]:h-full [&_.rc-image]:static">
@@ -34,9 +43,9 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
           <TooltipTrigger asChild>
             <div
               className="absolute bottom-2 flex w-[calc(100%-1rem)] items-center justify-between gap-1 rounded border border-input bg-slate-1/80 p-1 shadow backdrop-blur"
-              onClick={() => copy(alt)}
+              onClick={() => copy(altContent)}
             >
-              <p className="truncate text-xs">{alt}</p>
+              <p className="truncate text-xs">{altLabel}</p>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button icon={<Copy />} variant="outline" size="small" className="-m-2 scale-[.5] p-1 opacity-80" />
@@ -45,7 +54,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
               </Tooltip>
             </div>
           </TooltipTrigger>
-          <TooltipContent className="max-h-60 max-w-60 overflow-auto">{alt}</TooltipContent>
+          <TooltipContent className="max-h-60 max-w-60 overflow-auto">{altLabel}</TooltipContent>
         </Tooltip>
       )}
     </div>
