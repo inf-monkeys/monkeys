@@ -117,6 +117,8 @@
       "vector-database-not-found": "知识库不存在",
       "copy-success": "复制成功",
       "copy-failed": "复制失败",
+      "paste-success": "粘贴成功",
+      "paste-failed": "粘贴失败",
       "Forbidden resource": "权限不足，请重新登录！"
     },
     "dialog": {
@@ -276,15 +278,14 @@
         },
         "remove": "移除",
         "wait-to-upload": "共计 {{filesCount}} 份文件等待上传",
-
         "add-local-file": "添加本地文件",
         "paste-hint": "可在此处粘贴图片上传",
         "release-file": "立即上传",
         "status": {
-            "uploading": "上传中（{{percentage}}%）",
-            "upload-success": "已上传",
-            "upload-failed": "上传失败",
-            "wait": "正在预处理"
+          "uploading": "上传中（{{percentage}}%）",
+          "upload-success": "已上传",
+          "upload-failed": "上传失败",
+          "wait": "正在预处理"
         },
         "rapid-upload": "秒传",
         "rapid-upload-tip": "检测到服务器上存在该文件，无需重复上传"
@@ -503,7 +504,6 @@
           },
           "import-to-team": {
             "label": "一键使用",
-
             "views": {
               "label": "视图",
               "pinned": "{{count}} 个固定在工作台的视图：{{items}}",
@@ -643,7 +643,6 @@
         "label": "企业微信",
         "get-info-failed": "获取企业微信登录信息失败"
       },
-
       "button": "绑定{{name}}快捷登录",
       "loading": "绑定中...",
       "success": "绑定成功",
@@ -3014,6 +3013,9 @@
             "tabs": {
               "data": "数据",
               "logs": "原始数据"
+            },
+            "actions": {
+              "copy-input": "复制输入参数"
             }
           },
           "empty": "请先选择一个工具"
@@ -3122,6 +3124,10 @@
       "quick-toolbar": {
         "more": "更多操作",
         "reset": "恢复默认参数",
+        "paste-param": {
+          "label": "粘贴输入参数",
+          "bad-content": "数据有误，请重新复制"
+        },
         "restore-previous-param": {
           "label": "恢复上次生成参数",
           "loading": "正在恢复上次生成参数...",

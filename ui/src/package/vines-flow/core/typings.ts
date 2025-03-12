@@ -64,7 +64,7 @@ export type VinesWorkflowExecutionOutput = {
   alt?: string | string[] | undefined;
 };
 
-export type VinesWorkflowExecutionInputs = {
+export type VinesWorkflowExecutionInput = {
   id: string;
   data: JSONValue;
   type: ToolPropertyTypes;
@@ -80,7 +80,7 @@ export type VinesWorkflowExecutionOutputListItem = {
   endTime: number;
   instanceId: string;
   workflowId: string;
-  input: VinesWorkflowExecutionInputs[];
+  input: VinesWorkflowExecutionInput[];
   output: VinesWorkflowExecutionOutput[];
   rawOutput: Record<string, any>;
   taskId: string;

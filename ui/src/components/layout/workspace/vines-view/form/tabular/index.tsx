@@ -5,13 +5,14 @@ import { useSWRConfig } from 'swr';
 import { useEventEmitter, useMemoizedFn, useThrottleEffect } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { isString } from 'lodash';
-import { RotateCcw, Sparkles, Undo2 } from 'lucide-react';
+import { Clipboard, RotateCcw, Sparkles, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useClipboard } from '@/hooks/use-clipboard';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useVinesFlow } from '@/package/vines-flow';
@@ -84,6 +85,24 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
       .finally(() => setLoading(false));
   });
 
+  const { read } = useClipboard({ showSuccess: false });
+
+  const handlePasteInput = useMemoizedFn(async () => {
+    const text = await read();
+    if (text) {
+      try {
+        const inputData = JSON.parse(text);
+        if (inputData.type === 'input-parameters') {
+          tabular$.emit({ type: 'paste-param', data: inputData.data });
+        } else {
+          toast.error(t('workspace.form-view.quick-toolbar.paste-param.bad-content'));
+        }
+      } catch (error) {
+        toast.error(t('workspace.form-view.quick-toolbar.paste-param.bad-content'));
+      }
+    }
+  });
+
   return (
     <div className={cn('flex flex-col pr-4', className)} style={style}>
       <div className="flex-1">
@@ -124,10 +143,22 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
                   size="small"
                 />
               </TooltipTrigger>
-              <TooltipContent> {t('workspace.form-view.quick-toolbar.reset')}</TooltipContent>
+              <TooltipContent>{t('workspace.form-view.quick-toolbar.reset')}</TooltipContent>
             </Tooltip>
           </>
         )}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              className="!px-2.5"
+              variant="outline"
+              onClick={handlePasteInput}
+              icon={<Clipboard />}
+              size="small"
+            />
+          </TooltipTrigger>
+          <TooltipContent>{t('workspace.form-view.quick-toolbar.paste-param.label')}</TooltipContent>
+        </Tooltip>
         <Button
           variant="solid"
           className="size-full text-base"

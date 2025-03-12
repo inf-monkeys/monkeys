@@ -4,7 +4,7 @@ import { useSWRConfig } from 'swr';
 
 import { useMemoizedFn } from 'ahooks';
 import { isArray, isString, omit } from 'lodash';
-import { Trash2 } from 'lucide-react';
+import { Copy, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -28,6 +28,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useCopy } from '@/hooks/use-copy';
 
 interface IVirtuaExecutionResultRawDataDialogProps {
   children: React.ReactNode;
@@ -66,6 +67,8 @@ export const VirtuaExecutionResultRawDataDialog: React.FC<IVirtuaExecutionResult
       });
     }
   });
+
+  const { copy } = useCopy();
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -121,6 +124,20 @@ export const VirtuaExecutionResultRawDataDialog: React.FC<IVirtuaExecutionResult
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+          <Button
+            variant="outline"
+            onClick={() => {
+              copy(
+                JSON.stringify({
+                  type: 'input-parameters',
+                  data: data.input ?? [],
+                }),
+              );
+            }}
+            icon={<Copy size={16} />}
+          >
+            {t('workspace.pre-view.actuator.detail.form-render.actions.copy-input')}
+          </Button>
           <Button variant="outline" onClick={() => setOpen(false)}>
             {t('common.utils.close')}
           </Button>

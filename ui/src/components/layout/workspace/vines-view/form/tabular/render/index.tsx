@@ -23,14 +23,15 @@ import { Label } from '@/components/ui/label.tsx';
 import { VinesFullLoading, VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
-import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
+import { VinesWorkflowExecutionInput } from '@/package/vines-flow/core/typings';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
+import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 export const BOOLEAN_VALUES = ['true', 'yes', '是', '1'];
 
-export type TTabularEvent = 'reset' | 'restore-previous-param' | 'submit';
+export type TTabularEvent = 'reset' | 'restore-previous-param' | 'submit' | { type: 'paste-param'; data: VinesWorkflowExecutionInput[] };
 
 interface ITabularRenderProps {
   inputs: VinesWorkflowVariable[];
@@ -147,39 +148,50 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
   const { trigger: triggerGetExecutions } = useMutationSearchWorkflowExecutions();
   const latestValues = useLatest(defValues);
   event$?.useSubscription((event) => {
-    switch (event) {
-      case 'reset':
-        form.reset(latestValues.current);
-        break;
-      case 'restore-previous-param':
-        if (workflowId) {
-          toast.promise(
-            triggerGetExecutions({
-              pagination: { page: 1, limit: 10 },
-              orderBy: { filed: 'startTime', order: 'DESC' },
-              workflowId,
-            }),
-            {
-              loading: t('workspace.form-view.quick-toolbar.restore-previous-param.loading'),
-              success: (data) => {
-                if (data) {
-                  form.reset(omit(data?.data?.[0]?.input, '__context'));
-                  return t('workspace.form-view.quick-toolbar.restore-previous-param.success');
-                }
-                return t('workspace.form-view.quick-toolbar.restore-previous-param.prev-param-empty');
+    if (typeof event === 'string') {
+      switch (event) {
+        case 'reset':
+          form.reset(latestValues.current);
+          break;
+        case 'restore-previous-param':
+          if (workflowId) {
+            toast.promise(
+              triggerGetExecutions({
+                pagination: { page: 1, limit: 10 },
+                orderBy: { filed: 'startTime', order: 'DESC' },
+                workflowId,
+              }),
+              {
+                loading: t('workspace.form-view.quick-toolbar.restore-previous-param.loading'),
+                success: (data) => {
+                  if (data) {
+                    form.reset(omit(data?.data?.[0]?.input, '__context'));
+                    return t('workspace.form-view.quick-toolbar.restore-previous-param.success');
+                  }
+                  return t('workspace.form-view.quick-toolbar.restore-previous-param.prev-param-empty');
+                },
+                error: t('workspace.form-view.quick-toolbar.restore-previous-param.error'),
               },
-              error: t('workspace.form-view.quick-toolbar.restore-previous-param.error'),
-            },
-          );
-        } else {
-          toast.error(t('workspace.wrapper.workflow-info-card.workflow-id-empty'));
+            );
+          } else {
+            toast.error(t('workspace.wrapper.workflow-info-card.workflow-id-empty'));
+          }
+          break;
+        case 'submit':
+          void handleSubmit();
+          break;
+        default:
+          break;
+      }
+    } else if (typeof event === 'object') {
+      if (event.type === 'paste-param') {
+        console.log(event.data);
+        for (const inputDef of event.data) {
+          const { id, data } = inputDef;
+          form.setValue(id, data as unknown as any);
         }
-        break;
-      case 'submit':
-        void handleSubmit();
-        break;
-      default:
-        break;
+        toast.success(t('common.toast.paste-success'));
+      }
     }
   });
 

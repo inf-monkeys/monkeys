@@ -123,6 +123,8 @@
       "vector-database-not-found": "The vector database doesn't exist.",
       "copy-success": "Copy success.",
       "copy-failed": "Copy failed.",
+      "paste-success": "Paste success.",
+      "paste-failed": "Paste failed.",
       "Forbidden resource": "Insufficient privileges, login required."
     },
     "dialog": {
@@ -3015,6 +3017,9 @@
             "tabs": {
               "data": "Data",
               "logs": "Raw Data"
+            },
+            "actions": {
+              "copy-input": "Copy Input Parameters"
             }
           },
           "empty": "Please select a tool first"
@@ -3123,6 +3128,10 @@
       "quick-toolbar": {
         "more": "More operations",
         "reset": "Restore default parameters",
+        "paste-param": {
+          "label": "Paste input parameters",
+          "bad-content": "Data is incorrect, please re-copy"
+        },
         "restore-previous-param": {
           "label": "Restore last generated parameters",
           "loading": "Restoring last generated parameters...",
