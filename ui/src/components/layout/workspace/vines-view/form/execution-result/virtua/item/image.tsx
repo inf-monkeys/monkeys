@@ -38,7 +38,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
         alt="image"
       />
 
-      {alt && (
+      {altLabel.trim() !== '' && (
         <Tooltip>
           <TooltipTrigger asChild>
             <div
