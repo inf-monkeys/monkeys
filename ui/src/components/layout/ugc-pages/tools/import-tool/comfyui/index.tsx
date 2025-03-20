@@ -189,14 +189,20 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
                       {t('ugc-page.tools.import.import-comfyui-workflow.form.workflowJsonUrl.label')}
                     </FormLabel>
                     <FormControl>
-                      <VinesUploader
-                        className="rounded border border-input"
-                        accept={['json']}
-                        maxSize={20}
-                        max={1}
-                        onChange={(urls) => field.onChange(urls[0])}
-                        basePath="user-files/import-comfyui-json"
-                      />
+                      <>
+                        <Input
+                          {...field}
+                          className="grow"
+                        />
+                        <VinesUploader
+                          className="rounded border border-input"
+                          accept={['json']}
+                          maxSize={20}
+                          max={1}
+                          onChange={(urls) => field.onChange(urls[0])}
+                          basePath="user-files/import-comfyui-json"
+                        />
+                      </>
                     </FormControl>
                     <FormDescription>{t('common.form.description.upload-file-auto-store')}</FormDescription>
                     <FormMessage />
@@ -212,14 +218,20 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
                       {t('ugc-page.tools.import.import-comfyui-workflow.form.workflowApiJsonUrl.label')}
                     </FormLabel>
                     <FormControl>
-                      <VinesUploader
-                        className="rounded border border-input"
-                        accept={['json']}
-                        maxSize={20}
-                        max={1}
-                        onChange={(urls) => field.onChange(urls[0])}
-                        basePath="user-files/import-comfyui-json-url"
-                      />
+                      <>
+                        <Input
+                          {...field}
+                          className="grow"
+                        />
+                        <VinesUploader
+                          className="rounded border border-input"
+                          accept={['json']}
+                          maxSize={20}
+                          max={1}
+                          onChange={(urls) => field.onChange(urls[0])}
+                          basePath="user-files/import-comfyui-json-url"
+                        />
+                      </>
                     </FormControl>
                     <FormDescription>{t('common.form.description.upload-file-auto-store')}</FormDescription>
                     <FormMessage />
