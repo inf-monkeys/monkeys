@@ -292,8 +292,8 @@ export const config: Config = {
         position: readConfig('server.customization.toast.position', 'bottom-right'),
       },
       hideSpaceHeader: readConfig('server.customization.hideSpaceHeader', false),
+      showSidebarPageGroup: readConfig('server.customization.showSidebarPageGroup', true),
       showSidebarTeamSelector: readConfig('server.customization.showSidebarTeamSelector', false),
-      showSidebarPageGroup: readConfig('server.customization.showSidebarPageGroup', false),
     },
   },
   conductor: {
