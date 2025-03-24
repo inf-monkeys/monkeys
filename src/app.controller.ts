@@ -123,6 +123,9 @@ export class AppController {
         toast: {
           position: config.server.customization.toast.position,
         },
+        hideSpaceHeader: config.server.customization.hideSpaceHeader,
+        showSidebarTeamSelector: config.server.customization.showSidebarTeamSelector,
+        showSidebarPageGroup: config.server.customization.showSidebarPageGroup,
       },
       auth: {
         enabled: config.auth.enabled,

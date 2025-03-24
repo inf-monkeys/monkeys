@@ -26,7 +26,11 @@ import { cn } from '@/utils';
 
 const NEED_FORCE_REFRESH = ['text-data', 'table-data', 'image-models'];
 
-export const TeamSelector: React.FC = () => {
+interface ITeamSelectorProps extends React.ComponentPropsWithoutRef<'div'> {
+  size?: 'normal' | 'large';
+}
+
+export const TeamSelector: React.FC<ITeamSelectorProps> = ({ size = 'normal' }) => {
   const { t } = useTranslation();
 
   const { routeId } = useVinesRoute();
@@ -65,7 +69,10 @@ export const TeamSelector: React.FC = () => {
         <Button
           variant="outline"
           role="combobox"
-          className="justify-between gap-1 px-3"
+          className={cn(
+            'justify-between gap-1',
+            size === 'large' ? 'px-4 py-6' : 'px-3',
+          )}
           aria-expanded={open}
           aria-label="Select a team"
         >

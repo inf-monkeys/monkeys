@@ -24,6 +24,9 @@ export interface ISystemConfig {
     toast: {
       position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
     };
+    hideSpaceHeader: boolean;
+    showSidebarTeamSelector: boolean;
+    showSidebarPageGroup: boolean;
   };
   auth: {
     enabled: AuthMethod[];

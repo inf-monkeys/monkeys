@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 
 import { createLazyFileRoute } from '@tanstack/react-router';
 
+import { useSystemConfig } from '@/apis/common';
 import { WorkbenchSidebar } from '@/components/layout/workbench/sidebar';
 import { WorkbenchView } from '@/components/layout/workbench/view';
 import useUrlState from '@/hooks/use-url-state.ts';
@@ -10,10 +11,14 @@ import { usePageStore } from '@/store/usePageStore';
 export const Workbench: React.FC = () => {
   const setWorkbenchVisible = usePageStore((s) => s.setWorkbenchVisible);
 
-  const [{ mode, showGroup }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini'; showGroup: boolean }>({
+  const { data: oem } = useSystemConfig();
+
+  const [{ mode, showGroup: urlShowGroup }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini'; showGroup: boolean }>({
     mode: 'normal',
     showGroup: true,
   });
+
+  const showGroup = oem?.theme.showSidebarPageGroup ?? urlShowGroup;
 
   useEffect(() => {
     setTimeout(() => setWorkbenchVisible(true), 80);
