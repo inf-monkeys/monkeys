@@ -5,6 +5,7 @@ import { Link } from '@tanstack/react-router';
 import { LogIn } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { useSystemConfig } from '@/apis/common';
 import { getVinesToken } from '@/apis/utils.ts';
 import { UserCard } from '@/components/layout-wrapper/space/header/expand/user-card.tsx';
 import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
@@ -14,7 +15,6 @@ import { Separator } from '@/components/ui/separator.tsx';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
-
 interface ISpaceHeaderProps extends React.ComponentPropsWithoutRef<'header'> {
   tail?: React.ReactNode;
   tailWithAuth?: React.ReactNode;
@@ -29,11 +29,16 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
 }) => {
   const { t } = useTranslation();
 
+  const { data: oem } = useSystemConfig();
+
   const { teamId } = useVinesTeam();
 
   const [mode, setMode] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>();
 
-  const [{ hideSpaceHeader }] = useUrlState<{ hideSpaceHeader: boolean }>({ hideSpaceHeader: false });
+  const [{ hideSpaceHeader: urlHideSpaceHeader }] = useUrlState<{ hideSpaceHeader: boolean }>({ hideSpaceHeader: false });
+
+
+  const hideSpaceHeader = oem?.theme.hideSpaceHeader ?? urlHideSpaceHeader;
 
   const hasToken = !!getVinesToken();
 
