@@ -525,22 +525,22 @@ export class ComfyUIService {
     if (serverAddress.startsWith('system')) {
       const defaultServer = config.comfyui.defaultServer;
 
-      let cacheServerLists: string[] = [];
-      try {
-        cacheServerLists = JSON.parse((await this.cache.get(`${config.server.appId}:comfyfile_builtin_servers`)) ?? '[]');
-      } catch { }
+      // let cacheServerLists: string[] = [];
+      // try {
+      //   cacheServerLists = JSON.parse((await this.cache.get(`${config.server.appId}:comfyfile_builtin_servers`)) ?? '[]');
+      // } catch { }
 
-      const builtInServers = cacheServerLists.length ? cacheServerLists : await this.getAutoDLComfyUIServersAddress();
+      // const builtInServers = cacheServerLists.length ? cacheServerLists : await this.getAutoDLComfyUIServersAddress();
 
-      const serverLength = builtInServers.length;
-      if (serverLength) {
-        // 负载均衡
-        if (serverLength > 1) {
-          return (await this.findApiWithSmallestQueue(builtInServers)) ?? defaultServer;
-        } else {
-          return builtInServers[0];
-        }
-      }
+      // const serverLength = builtInServers.length;
+      // if (serverLength) {
+      //   // 负载均衡
+      //   if (serverLength > 1) {
+      //     return (await this.findApiWithSmallestQueue(builtInServers)) ?? defaultServer;
+      //   } else {
+      //     return builtInServers[0];
+      //   }
+      // }
 
       return defaultServer;
     }
