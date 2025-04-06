@@ -15,7 +15,7 @@ export const Workbench: React.FC = () => {
 
   const [{ mode, showGroup: urlShowGroup }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini'; showGroup: boolean }>({
     mode: 'normal',
-    showGroup: true,
+    showGroup: false,
   });
 
   const showGroup = oem?.theme.showSidebarPageGroup ?? urlShowGroup;
