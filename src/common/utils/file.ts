@@ -79,17 +79,18 @@ export function getFileExtensionFromMimeType(mimeType: string): string {
 }
 
 export async function downloadImageAsBase64(imageUrl: string): Promise<string> {
-  const response = await fetch(imageUrl);
-  const blob = await response.blob();
+  try {
+    const axios = require('axios');
+    const response = await axios.get(imageUrl, {
+      responseType: 'arraybuffer'
+    });
 
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      resolve(reader.result as string);
-    };
-    reader.onerror = () => {
-      reject(new Error('Failed to read image'));
-    };
-    reader.readAsDataURL(blob);
-  });
+    const contentType = response.headers['content-type'];
+    const base64 = Buffer.from(response.data, 'binary').toString('base64');
+
+    return `data:${contentType};base64,${base64}`;
+  } catch (error) {
+    logger.error('Image download failed:', error);
+    throw new Error('Image download failed');
+  }
 }
