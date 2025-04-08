@@ -10,6 +10,7 @@ import {
 } from '@/common/decorators/monkey-block-api-extensions.decorator';
 import { IRequest, IToolsRequest } from '@/common/typings/request';
 import { ApiType, AuthType, ManifestJson, SchemaVersion } from '@/common/typings/tools';
+import { downloadImageAsBase64 } from '@/common/utils/file';
 import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
@@ -35,7 +36,6 @@ import {
 } from './llm.consts';
 import { LlmService, getModels } from './llm.service';
 import { CHAT_TOOL_OPENAPI_PATH } from './llm.swagger';
-
 const ErrorMessage: { [key: string]: string } = {
   400: 'Bad Request',
   401: 'API KEY ERROR',
@@ -344,6 +344,12 @@ export class LlmController {
       return res.status(400).send('userMessage is required');
     }
     const teamId = req.headers['x-monkeys-teamid'] as string;
+
+    if (body.userImageMessage && body.userImageMessage.length > 0) {
+      body.userImageMessage = await Promise.all(body.userImageMessage.map(async (image) => (
+        await downloadImageAsBase64(image)
+      )));
+    }
     await this.service.createChatCompelitions(
       res,
       teamId,

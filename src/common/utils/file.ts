@@ -77,3 +77,19 @@ export function getMimeType(fileName: string): string {
 export function getFileExtensionFromMimeType(mimeType: string): string {
   return Object.keys(mimeTypes).find(key => mimeTypes[key] === mimeType);
 }
+
+export async function downloadImageAsBase64(imageUrl: string): Promise<string> {
+  const response = await fetch(imageUrl);
+  const blob = await response.blob();
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      resolve(reader.result as string);
+    };
+    reader.onerror = () => {
+      reject(new Error('Failed to read image'));
+    };
+    reader.readAsDataURL(blob);
+  });
+}
