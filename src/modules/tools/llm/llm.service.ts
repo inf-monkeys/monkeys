@@ -138,7 +138,7 @@ export class LlmService {
     private readonly sqlKnowledgeBaseService: SqlKnowledgeBaseService,
     private readonly llmModelRepository: LlmModelRepository,
     private readonly oneApiRepository: OneApiRepository,
-  ) {}
+  ) { }
 
   private getModelNameByModelMappings(modelMappings: { [x: string]: string }, modelName: string): string {
     for (const key in modelMappings) {
@@ -643,8 +643,8 @@ ${userQuestion}
       response_format:
         response_format === ResponseFormat.jsonObject
           ? {
-              type: response_format,
-            }
+            type: response_format,
+          }
           : undefined,
       ...defaultParams,
     };
@@ -813,9 +813,9 @@ ${userQuestion}
             apiResponseType === 'full'
               ? result
               : {
-                  messages: result.choices[0].message?.content,
-                  usage: result.usage,
-                },
+                messages: result.choices[0].message?.content,
+                usage: result.usage,
+              },
           );
         } else {
           if (showLogs) {
@@ -826,9 +826,9 @@ ${userQuestion}
             apiResponseType === 'full'
               ? response
               : {
-                  message: (response as ChatCompletion).choices[0].message?.content,
-                  usage: (response as ChatCompletion).usage,
-                },
+                message: (response as ChatCompletion).choices[0].message?.content,
+                usage: (response as ChatCompletion).usage,
+              },
           );
         }
       }
