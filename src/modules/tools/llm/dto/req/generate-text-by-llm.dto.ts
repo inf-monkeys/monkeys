@@ -14,19 +14,19 @@ export class GenerateTextByLlmDto {
   systemPrompt: string;
 
   @ApiProperty({
+    description: '用户消息',
+    type: String,
+    isArray: true,
+  })
+  userMessage: string;
+
+  @ApiProperty({
     description: '用户图片消息',
     type: String,
     isArray: true,
     required: false,
   })
   userImageMessage?: string[];
-
-  @ApiProperty({
-    description: '用户消息',
-    type: String,
-    isArray: true,
-  })
-  userMessage: string;
 
   @ApiProperty({
     description: '生成的最大令牌数',
