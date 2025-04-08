@@ -33,7 +33,6 @@ export const USER_IMAGE_MESSAGE_PROPERTY: ToolProperty = {
   required: false,
   typeOptions: {
     multipleValues: true,
-    accept: 'image/*',
   },
 };
 
