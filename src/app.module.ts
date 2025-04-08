@@ -1,3 +1,4 @@
+import { TranslateToolsModule } from '@/modules/tools/translate/translate.module';
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ServeStaticModule } from '@nestjs/serve-static';
@@ -16,11 +17,11 @@ import { ChatModule } from './modules/chat/chat.module';
 import { ExportModule } from './modules/export/export.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { LLMToolsModule } from './modules/tools/llm/llm.module';
+import { MediaToolsModule } from './modules/tools/media/media.module';
 import { ToolsModule } from './modules/tools/tools.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { OpenapiModule } from './openapi.module';
 import { PrometheusModule } from './prometheus/prometheus.module';
-import { TranslateToolsModule } from '@/modules/tools/translate/translate.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { TranslateToolsModule } from '@/modules/tools/translate/translate.module
     AssetsModule,
     LLMToolsModule,
     TranslateToolsModule,
+    MediaToolsModule,
     ChatModule,
     PaymentModule,
     PrometheusModule.register({
