@@ -3,6 +3,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Readable } from 'stream';
 import { config } from '../config';
 import { logger } from '../logger';
+import { getMimeType } from '../utils/file';
 
 export class S3Helpers {
   client: S3Client;
@@ -35,11 +36,16 @@ export class S3Helpers {
     return await this.client.send(command);
   }
 
-  public async uploadFile(fileBuffer: string | Buffer | Readable | ReadableStream<any> | Blob | Uint8Array, fileKey: string) {
+  public async uploadFile(
+    fileBuffer: string | Buffer | Readable | ReadableStream<any> | Blob | Uint8Array,
+    fileKey: string,
+    contentType?: string
+  ) {
     const command = new PutObjectCommand({
       Bucket: config.s3.bucket,
       Key: fileKey,
       Body: fileBuffer,
+      ContentType: contentType || getMimeType(fileKey),
     });
     await this.client.send(command);
     return config.s3.publicAccessUrl + '/' + fileKey;
