@@ -9,6 +9,7 @@ import {
 } from '@/common/decorators/monkey-block-api-extensions.decorator';
 import { S3Helpers } from '@/common/s3';
 import { ApiType, AuthType, ManifestJson, SchemaVersion } from '@/common/typings/tools';
+import { getFileExtensionFromMimeType } from '@/common/utils/file';
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { nanoid } from 'nanoid';
@@ -94,15 +95,23 @@ export class MediaToolsController {
   public async uploadBase64Media(@Body() body: UploadBase64MediaDto) {
     let { base64, fileExtension } = body;
 
+    const matches = base64.match(/^data:(.*?);base64,(.*)$/);
+    if (!matches) {
+      throw new Error("Invalid base64 data URL");
+    }
+    const contentType = matches[1];
+    const base64Data = matches[2];
+    const buffer = Buffer.from(base64Data, "base64");
+
     if (fileExtension.trim() === '') {
-      fileExtension = base64.split(';')[0].split('/')[1];
+      fileExtension = getFileExtensionFromMimeType(contentType);
     }
 
     const fileName = `${nanoid()}${fileExtension ? '.'.concat(fileExtension) : ''}`;
 
     const s3Helpers = new S3Helpers();
 
-    const url = await s3Helpers.uploadFile(base64, `media-tools/uploaded/${fileName}`);
+    const url = await s3Helpers.uploadFile(buffer, `media-tools/uploaded/${fileName}`);
     return {
       url,
     };
