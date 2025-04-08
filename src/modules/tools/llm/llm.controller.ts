@@ -10,7 +10,6 @@ import {
 } from '@/common/decorators/monkey-block-api-extensions.decorator';
 import { IRequest, IToolsRequest } from '@/common/typings/request';
 import { ApiType, AuthType, ManifestJson, SchemaVersion } from '@/common/typings/tools';
-import { downloadImageAsBase64 } from '@/common/utils/file';
 import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
@@ -345,11 +344,6 @@ export class LlmController {
     }
     const teamId = req.headers['x-monkeys-teamid'] as string;
 
-    if (body.userImageMessage && body.userImageMessage.length > 0) {
-      body.userImageMessage = await Promise.all(body.userImageMessage.map(async (image) => (
-        await downloadImageAsBase64(image)
-      )));
-    }
     await this.service.createChatCompelitions(
       res,
       teamId,
