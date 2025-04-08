@@ -1,3 +1,4 @@
+import { setupTranslateToolSwagger } from '@/modules/tools/translate/translate.swagger';
 import { RequestMethod } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import bodyParser from 'body-parser';
@@ -16,9 +17,9 @@ import { BootstrapService } from './modules/bootstrap/bootstrap.service';
 import { setupComfyuiToolSwagger } from './modules/tools/comfyui/comfyui.swagger';
 import { setupExampleToolSwagger } from './modules/tools/example/example.swagger';
 import { setupLlmToolSwagger } from './modules/tools/llm/llm.swagger';
+import { setupMediaToolSwagger } from './modules/tools/media/media.swagger';
 import { ToolsPollingService } from './modules/tools/tools.polling.service';
 import { setupSwagger } from './setupSwagger';
-import { setupTranslateToolSwagger } from '@/modules/tools/translate/translate.swagger';
 
 process.on('unhandledRejection', (err: Error) => {
   logger.error('unhandledRejection: ', err);
@@ -76,9 +77,9 @@ async function bootstrap() {
     session({
       store: isRedisConfigured()
         ? new RedisStore({
-            client: initRedisClient(config.redis),
-            prefix: config.redis.prefix || config.server.appId,
-          })
+          client: initRedisClient(config.redis),
+          prefix: config.redis.prefix || config.server.appId,
+        })
         : new MemoryStore(),
       secret: config.auth.sessionSecret, // to sign session id
       resave: false, // will default to false in near future: https://github.com/expressjs/session#resave
@@ -97,6 +98,7 @@ async function bootstrap() {
   setupLlmToolSwagger(app);
   setupComfyuiToolSwagger(app);
   setupTranslateToolSwagger(app);
+  setupMediaToolSwagger(app);
   setupSwagger(app);
 
   // String polling for tasks

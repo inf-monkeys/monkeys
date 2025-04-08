@@ -1,3 +1,4 @@
+import { TRANSLATE_TOOL_OPENAPI_MANIFEST_URL } from '@/modules/tools/translate/translate.swagger';
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { OpenAPIObject } from '@nestjs/swagger';
 import axios from 'axios';
@@ -10,8 +11,8 @@ import { ToolsRepository } from './database/repositories/tools.repository';
 import { COMFYUI_TOOL_OPENAPI_MENIFEST_URL } from './modules/tools/comfyui/comfyui.swagger';
 import { EXAMPLE_TOOL_OPENAPI_MENIFEST_URL } from './modules/tools/example/example.swagger';
 import { CHAT_TOOL_OPENAPI_MENIFEST_URL } from './modules/tools/llm/llm.swagger';
+import { MEDIA_TOOL_OPENAPI_MANIFEST_URL } from './modules/tools/media/media.swagger';
 import { ToolsRegistryService } from './modules/tools/tools.registry.service';
-import { TRANSLATE_TOOL_OPENAPI_MANIFEST_URL } from '@/modules/tools/translate/translate.swagger';
 
 @Injectable()
 export class AppService implements OnApplicationBootstrap {
@@ -19,7 +20,7 @@ export class AppService implements OnApplicationBootstrap {
     private readonly toolsRegistryService: ToolsRegistryService,
     private readonly toolsRepository: ToolsRepository,
     private readonly comfyuiRepository: ComfyuiRepository,
-  ) {}
+  ) { }
 
   public async getCombinedToolsSwagger() {
     const servers = await this.toolsRepository.listServers();
@@ -33,7 +34,7 @@ export class AppService implements OnApplicationBootstrap {
             displayName: server.displayName,
             spec: specData,
           };
-        } catch (error) {}
+        } catch (error) { }
       }),
     );
     return result.filter(Boolean);
@@ -101,6 +102,17 @@ export class AppService implements OnApplicationBootstrap {
         },
       );
     }
+
+    logger.info(`Loading media tool of ${MEDIA_TOOL_OPENAPI_MANIFEST_URL}`);
+    await this.toolsRegistryService.registerToolsServer(
+      {
+        importType: ToolImportType.manifest,
+        manifestUrl: MEDIA_TOOL_OPENAPI_MANIFEST_URL,
+      },
+      {
+        isPublic: true,
+      },
+    );
 
     for (const { name, manifestUrl } of config.tools) {
       logger.info(`Loading ${name} tools of ${manifestUrl}`);
