@@ -23,6 +23,20 @@ export const USER_MESSAGE_PROPERTY: ToolProperty = {
   required: false,
 };
 
+export const USER_IMAGE_MESSAGE_PROPERTY: ToolProperty = {
+  displayName: {
+    'zh-CN': '用户图片消息',
+    'en-US': 'User Image Message',
+  },
+  name: 'userImageMessage',
+  type: 'file',
+  required: false,
+  typeOptions: {
+    multipleValues: true,
+    accept: 'image/*',
+  },
+};
+
 export const PROMPT_PROPERTY: ToolProperty = {
   displayName: {
     'zh-CN': '用户消息',
