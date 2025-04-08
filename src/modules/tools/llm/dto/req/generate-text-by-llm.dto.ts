@@ -14,6 +14,14 @@ export class GenerateTextByLlmDto {
   systemPrompt: string;
 
   @ApiProperty({
+    description: '用户图片消息',
+    type: String,
+    isArray: true,
+    required: false,
+  })
+  userImageMessage?: string[];
+
+  @ApiProperty({
     description: '用户消息',
     type: String,
     isArray: true,

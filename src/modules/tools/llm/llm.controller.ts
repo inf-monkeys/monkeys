@@ -13,6 +13,7 @@ import { ApiType, AuthType, ManifestJson, SchemaVersion } from '@/common/typings
 import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
 import { ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
+import { ChatCompletionContentPartImage } from 'openai/resources';
 import { CreateChatCompletionsDto } from './dto/req/create-chat-compltion.dto';
 import { CreateCompletionsDto } from './dto/req/create-compltions.dto';
 import { GenerateTextByLlmDto } from './dto/req/generate-text-by-llm.dto';
@@ -53,7 +54,7 @@ export const LLM_GENERATE_TEXT_TOOL = 'generate_text';
 @Controller('/llm-tool')
 @ApiTags('大语言模型')
 export class LlmController {
-  constructor(private readonly service: LlmService) {}
+  constructor(private readonly service: LlmService) { }
 
   @Get('/manifest.json')
   @ApiExcludeEndpoint()
@@ -348,7 +349,18 @@ export class LlmController {
         messages: [
           {
             role: 'user',
-            content: body.userMessage,
+            content: body.userImageMessage && body.userImageMessage.length > 0 ? [
+              ...body.userImageMessage.map((image) => ({
+                type: 'image_url',
+                image_url: {
+                  url: image,
+                },
+              })) as ChatCompletionContentPartImage[],
+              {
+                type: 'text',
+                text: body.userMessage,
+              },
+            ] : body.userMessage,
           },
         ],
         model: body.model,
