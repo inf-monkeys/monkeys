@@ -344,6 +344,8 @@ export class LlmController {
     }
     const teamId = req.headers['x-monkeys-teamid'] as string;
 
+    body.userImageMessage = !body.userImageMessage ? [] : typeof body.userImageMessage === 'string' ? [body.userImageMessage] : body.userImageMessage;
+
     await this.service.createChatCompelitions(
       res,
       teamId,
@@ -351,7 +353,7 @@ export class LlmController {
         messages: [
           {
             role: 'user',
-            content: body.userImageMessage && body.userImageMessage.length > 0 ? [
+            content: body.userImageMessage.length > 0 ? [
               ...body.userImageMessage.map((image) => ({
                 type: 'image_url',
                 image_url: {
