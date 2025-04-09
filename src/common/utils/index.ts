@@ -1,4 +1,4 @@
-import { DoWhileTaskDef, ForkJoinTaskDef, SimpleTaskDef, SubWorkflowTaskDef } from '@inf-monkeys/conductor-javascript';
+import { DoWhileTaskDef, ForkJoinTaskDef, SimpleTaskDef, SubWorkflowTaskDef, SwitchTaskDef } from '@inf-monkeys/conductor-javascript';
 import { MonkeyTaskDefTypes } from '@inf-monkeys/monkeys';
 import crypto from 'crypto';
 import shortid from 'shortid';
@@ -124,6 +124,18 @@ export function getComfyuiWorkflowDataListFromWorkflow(tasks: MonkeyTaskDefTypes
           };
         }),
       );
+    } else if (task.type === 'SWITCH') {
+      Object.keys((task as SwitchTaskDef).decisionCases).forEach((key) => {
+        const value = (task as SwitchTaskDef).decisionCases[key];
+        result.push(
+          ...getComfyuiWorkflowDataListFromWorkflow(value).map((c) => {
+            return {
+              path: `[${index}].decisionCases["${key}"]${c.path}`,
+              comfyuiWorkflowId: c.comfyuiWorkflowId,
+            };
+          }),
+        );
+      });
     }
   }
   return result;
