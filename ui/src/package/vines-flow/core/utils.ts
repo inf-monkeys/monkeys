@@ -47,6 +47,9 @@ export function createSubWorkflowDef(tasks: VinesTask[]) {
     type: TaskType.SUB_WORKFLOW,
     inputParameters: {
       version: 1,
+      __context: {
+        teamId: localStorage.getItem('vines-team-id'),
+      },
     },
     subWorkflowParam: {
       name: nodeId,

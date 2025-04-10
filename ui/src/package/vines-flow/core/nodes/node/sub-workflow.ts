@@ -77,6 +77,10 @@ export class SubWorkflowNode extends ControlFlowVinesNode<VinesSubWorkflowTaskDe
       set(this._task, 'subWorkflowParam.workflowDefinition.name', finalName);
     }
 
+    const teamId = localStorage.getItem('vines-team-id');
+
+    set(this._task, 'inputParameters.__context.teamId', teamId);
+
     return super.check();
   }
 
