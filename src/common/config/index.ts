@@ -436,8 +436,8 @@ When answer to user:
       ),
     },
     maxRetries: readConfig('llm.maxRetries', 0),
-    // Defaults to 3 minutes
-    timeout: readConfig('llm.timeout', 1000 * 60 * 3),
+    // Defaults to 30 minutes
+    timeout: readConfig('llm.timeout', 1000 * 60 * 30),
   },
   paymentServer: {
     enabled: readConfig('paymentServer.enabled', false),
