@@ -138,7 +138,7 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
       )}
       ref={ref}
     >
-      <div className="-mt-2 flex w-full flex-col gap-4 px-2">
+      <div className="-mt-2 flex w-full flex-col gap-4 px-2 py-2">
         <VirtuaWorkbenchMiniViewList
           data={originalPages}
           height={height}
