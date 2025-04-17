@@ -41,7 +41,7 @@ export const VirtuaExecutionResultGrid: React.FC<IVirtuaExecutionResultGridProps
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const [animationParent, enable] = useAutoAnimate();
+  const [animationParent, enableAutoAnimate] = useAutoAnimate();
   const scrolling = useRef(false);
 
   const [page, setPage] = useState(1);
@@ -52,6 +52,7 @@ export const VirtuaExecutionResultGrid: React.FC<IVirtuaExecutionResultGridProps
   const loadedPageItemsLengthRef = useRef<number>(LOAD_LIMIT);
   const [list, setList] = useState<IVinesExecutionResultItem[][]>([]);
 
+  // 使数据适配三列Grid
   const { conversionOutputs } = useVinesExecutionResult();
   useEffect(() => {
     if (isUndefined(remoteData) || loadedPagesRef.current.includes(page)) return;
@@ -85,7 +86,7 @@ export const VirtuaExecutionResultGrid: React.FC<IVirtuaExecutionResultGridProps
             const prevScrolling = scrolling.current;
             scrolling.current = true;
             if (prevScrolling !== scrolling.current) {
-              enable(false);
+              enableAutoAnimate(false);
             }
             if (!ref.current) return;
 
@@ -98,7 +99,7 @@ export const VirtuaExecutionResultGrid: React.FC<IVirtuaExecutionResultGridProps
           }}
           onScrollEnd={() => {
             scrolling.current = false;
-            enable(true);
+            enableAutoAnimate(true);
           }}
           overscan={2}
         >
