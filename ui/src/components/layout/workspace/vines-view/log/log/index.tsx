@@ -94,7 +94,26 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
   };
 
   const handleMutate = async () => {
-    await trigger(formParams);
+    if (!vines.workflowId) {
+      toast.warning(t('workspace.logs-view.workflow-id-error'));
+      return;
+    }
+    
+    // 设置与handleSubmit相同的参数处理逻辑
+    form.setValue('workflowId', vines.workflowId);
+    form.setValue('pagination', {
+      page: 1,
+      limit: workflowPageRef.current * 10,
+    });
+    
+    // 使用form.handleSubmit确保获取完整的表单数据
+    await new Promise<void>((resolve) => {
+      form.handleSubmit(async (params) => {
+        formParams = params; // 更新全局变量
+        await trigger(params);
+        resolve();
+      })();
+    });
   };
 
   useEffect(() => {
