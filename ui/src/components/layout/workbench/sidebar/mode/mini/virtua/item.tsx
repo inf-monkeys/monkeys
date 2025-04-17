@@ -3,8 +3,9 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { IPinPage } from '@/apis/pages/typings.ts';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
-import { cn, getI18nContent } from '@/utils';
+import { cn } from '@/utils';
 
 interface IVirtuaWorkbenchMiniViewListItemProps {
   data: IPinPage;
@@ -34,12 +35,18 @@ export const VirtuaWorkbenchMiniViewListItem: React.FC<IVirtuaWorkbenchMiniViewL
       )}
       onClick={() => onClick?.(data)}
     >
-      <VinesIcon size="sm" className={cn('pointer-events-none select-none', mini && 'scale-75')} disabledPreview>
-        {info?.iconUrl}
-      </VinesIcon>
-      <span className="text-xxs pointer-events-none select-none text-center" style={mini ? { fontSize: 8 } : {}}>
-        {getI18nContent(info?.displayName) ?? t('common.utils.untitled')}
-      </span>
+      <Tooltip>
+        <TooltipTrigger >
+          <VinesIcon size="xs" className={cn('pointer-events-none select-none', mini && 'scale-75')} disabledPreview>
+            {info?.iconUrl}
+          </VinesIcon>
+        </TooltipTrigger>
+        <TooltipContent side="right" align="start" alignOffset={-9} sideOffset={9}>
+          <VinesIcon size="md" className={cn('pointer-events-none select-none', mini && 'scale-75')} disabledPreview>
+            {info?.iconUrl}
+          </VinesIcon>
+        </TooltipContent>
+      </Tooltip>
     </div>
   );
 };
