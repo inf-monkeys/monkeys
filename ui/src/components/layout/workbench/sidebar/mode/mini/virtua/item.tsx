@@ -29,22 +29,22 @@ export const VirtuaWorkbenchMiniViewListItem: React.FC<IVirtuaWorkbenchMiniViewL
     <div
       key={pageId}
       className={cn(
-        'mt-2 flex cursor-pointer flex-col items-center justify-center gap-1 rounded-md border border-transparent py-2 transition-colors hover:bg-accent hover:text-accent-foreground',
+        'flex cursor-pointer flex-col items-center justify-center gap-1 rounded-md border border-transparent py-2 transition-colors hover:bg-accent hover:text-accent-foreground',
         currentPageId === pageId && 'border-input bg-background text-accent-foreground',
         mini && 'gap-0 pb-1 pt-0',
       )}
       onClick={() => onClick?.(data)}
     >
       <Tooltip>
-        <TooltipTrigger >
+        <TooltipTrigger>
           <VinesIcon size="xs" className={cn('pointer-events-none select-none', mini && 'scale-75')} disabledPreview>
             {info?.iconUrl}
           </VinesIcon>
         </TooltipTrigger>
-        <TooltipContent side="right" align="start" alignOffset={-9} sideOffset={9}>
-          <VinesIcon size="md" className={cn('pointer-events-none select-none', mini && 'scale-75')} disabledPreview>
+        <TooltipContent side="right" align="start" alignOffset={-9} sideOffset={8}>
+          <span><VinesIcon size="md" className={cn('pointer-events-none select-none', mini && 'scale-75')} disabledPreview>
             {info?.iconUrl}
-          </VinesIcon>
+          </VinesIcon></span>
         </TooltipContent>
       </Tooltip>
     </div>
