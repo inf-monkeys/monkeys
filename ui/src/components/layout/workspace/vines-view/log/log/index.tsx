@@ -50,8 +50,6 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
 
   const workflowPageRef = useRef(1);
 
-  let formParams: IVinesSearchWorkflowExecutionsParams;
-
   const handleSubmit = async (
     loadNextPage?: boolean,
     useToast = true,
@@ -70,7 +68,6 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
 
       const result = new Promise((resolve) => {
         form.handleSubmit((params) => {
-          formParams = params;
           if (useToast) {
             toast.promise(trigger(params), {
               loading: t('workspace.logs-view.loading'),
@@ -98,22 +95,16 @@ export const VinesLogViewLogTab: React.FC<IVinesLogViewLogTabProps> = ({
       toast.warning(t('workspace.logs-view.workflow-id-error'));
       return;
     }
-    
+
     // 设置与handleSubmit相同的参数处理逻辑
     form.setValue('workflowId', vines.workflowId);
     form.setValue('pagination', {
       page: 1,
       limit: workflowPageRef.current * 10,
     });
-    
+
     // 使用form.handleSubmit确保获取完整的表单数据
-    await new Promise<void>((resolve) => {
-      form.handleSubmit(async (params) => {
-        formParams = params; // 更新全局变量
-        await trigger(params);
-        resolve();
-      })();
-    });
+    await form.handleSubmit((params) => trigger(params))();
   };
 
   useEffect(() => {
