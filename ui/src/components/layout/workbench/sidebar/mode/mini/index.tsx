@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useCreation, useDebounceEffect, useDebounceFn, useLatest, useThrottleEffect } from 'ahooks';
 import { motion } from 'framer-motion';
 import { isUndefined } from 'lodash';
-import { useTranslation } from 'react-i18next';
 
 import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
@@ -19,7 +18,6 @@ import VinesEvent from '@/utils/events.ts';
 interface IWorkbenchMiniModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> { }
 
 export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> = () => {
-  const { t } = useTranslation();
 
   const { data } = useWorkspacePages();
 
@@ -130,11 +128,10 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
   const [{ sidebar }] = useUrlState<{ sidebar: 'default' | 'embed' }>({ sidebar: 'default' });
   const isUseFixedSidebar = sidebar === 'default';
 
-
   return (
     <motion.div
       className={cn(
-        'relative flex h-full min-w-14 max-w-20 rounded-tl-xl rounded-bl-xl border border-input bg-slate-1 py-2',
+        'relative flex h-full min-w-14 max-w-20 rounded-bl-xl rounded-tl-xl border border-input bg-slate-1 py-2',
       )}
       ref={ref}
     >

@@ -3,9 +3,10 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { IPinPage } from '@/apis/pages/typings.ts';
+import { useWorkflowExecutionThumbnails } from '@/apis/workflow/execution';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
-import { cn } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 
 interface IVirtuaWorkbenchMiniViewListItemProps {
   data: IPinPage;
@@ -25,6 +26,10 @@ export const VirtuaWorkbenchMiniViewListItem: React.FC<IVirtuaWorkbenchMiniViewL
   const info = data?.workflow || data?.agent;
   const pageId = data?.id ?? '';
 
+  const { data: workflowThumbs } = useWorkflowExecutionThumbnails(data.agent ? null : data.workflowId);
+
+  const thumbs = workflowThumbs?.filter((it) => /(png|jpg|jpeg|webp)/.test(it)) ?? [];
+
   return (
     <div
       key={pageId}
@@ -42,9 +47,18 @@ export const VirtuaWorkbenchMiniViewListItem: React.FC<IVirtuaWorkbenchMiniViewL
           </VinesIcon>
         </TooltipTrigger>
         <TooltipContent side="right" align="start" alignOffset={-9} sideOffset={8}>
-          <span><VinesIcon size="md" className={cn('pointer-events-none select-none', mini && 'scale-75')} disabledPreview>
-            {info?.iconUrl}
-          </VinesIcon></span>
+          <div className="flex flex-col items-center gap-2">
+            <span>
+              <VinesIcon
+                size="3xl"
+                className={cn('pointer-events-none select-none', mini && 'scale-75')}
+                disabledPreview
+              >
+                {thumbs.length ? thumbs[0] : info?.iconUrl}
+              </VinesIcon>
+            </span>
+            <span>{getI18nContent(info.displayName)}</span>
+          </div>
         </TooltipContent>
       </Tooltip>
     </div>
