@@ -10,6 +10,7 @@ import { Card } from '@/components/ui/card.tsx';
 import { VinesMarkdown } from '@/components/ui/markdown';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { cn } from '@/utils';
+import _ from 'lodash';
 
 interface IVinesChatMessageProps {
   data: IVinesMessage;
@@ -38,7 +39,16 @@ export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
 }) => {
   const isUser = data.role === 'user';
   const content = data.content ?? '';
-  const isEmptyMessage = isEmpty(content.trim());
+  const isTextContent = _.isString(content);
+  const isEmptyMessage = isEmpty(isTextContent ? content.trim() : content.length);
+  const textContent = isTextContent ? content : content.map((item) => {
+    switch (item.type) {
+      case 'text':
+        return item.text;
+      case 'image_url':
+        return `![${item.image_url.url}](${item.image_url.url})`;
+    }
+  }).join('\n');
 
   const extra = data.extra;
 
@@ -55,11 +65,11 @@ export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
               className="-mr-3 ml-0"
               setMessageByIndex={setMessageByIndex}
               resend={resend}
-              content={content}
+              content={textContent}
               messageIndex={index}
             />
             <Card className="p-4 text-sm">
-              <VinesMarkdown className="max-w-full">{content}</VinesMarkdown>
+              <VinesMarkdown className="max-w-full">{textContent}</VinesMarkdown>
             </Card>
           </div>
         </div>
@@ -78,7 +88,7 @@ export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
             <MessageToolbar
               setMessageByIndex={setMessageByIndex}
               resend={resend}
-              content={content}
+              content={textContent}
               messageIndex={index}
             />
           </div>

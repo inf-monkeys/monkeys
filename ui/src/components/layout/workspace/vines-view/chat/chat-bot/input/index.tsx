@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { isEmpty } from 'lodash';
+import _, { isEmpty } from 'lodash';
 import { Repeat2, Send, StopCircle, Trash2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -9,13 +9,12 @@ import { toast } from 'sonner';
 import { useCreateWorkflowChatSession, useWorkflowChatSessions } from '@/apis/workflow/chat';
 import { CleanMessages } from '@/components/layout/workspace/vines-view/chat/chat-bot/input/clean-messages.tsx';
 import { ImageUploadButton } from '@/components/layout/workspace/vines-view/chat/chat-bot/input/image-upload-button';
-import { IVinesMessage } from '@/components/layout/workspace/vines-view/chat/chat-bot/use-chat.ts';
+import { IVinesMessage, IVinesMessageContent, IVinesMessageContentItem } from '@/components/layout/workspace/vines-view/chat/chat-bot/use-chat.ts';
 import { AutosizeTextarea } from '@/components/ui/autosize-textarea.tsx';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useSubmitHandler } from '@/hooks/use-submit-handler.ts';
-import { ContentPartDto } from '@/modules/chat/dto/req/create-chat-compltion.dto';
 
 interface IVinesChatInputProps {
   id: string;
@@ -25,8 +24,8 @@ interface IVinesChatInputProps {
 
   messages: IVinesMessage[];
   setMessages: (messages: IVinesMessage[]) => void;
-  input: string;
-  setInput: React.Dispatch<React.SetStateAction<string>>;
+  input: IVinesMessageContent;
+  setInput: React.Dispatch<React.SetStateAction<IVinesMessageContent>>;
   handleEnterPress: () => void;
   isLoading: boolean;
   stop: () => void;
@@ -55,6 +54,8 @@ export const VinesChatInput: React.FC<IVinesChatInputProps> = ({
   const { trigger } = useCreateWorkflowChatSession();
   const [chatSessions, setChatSessions] = useLocalStorage<Record<string, string>>('vines-ui-chat-session', {});
 
+  const [textInput, setTextInput] = useState<string>('');
+
   const handleSend = () => {
     if (autoCreateSession) {
       toast.promise(trigger({ displayName: t('workspace.chat-view.sidebar.create.def-label'), workflowId: id }), {
@@ -71,11 +72,7 @@ export const VinesChatInput: React.FC<IVinesChatInputProps> = ({
           }
 
           setTimeout(() => {
-            if (attachedImages.length > 0) {
-              handleSendWithImages();
-            } else {
-              handleEnterPress();
-            }
+            handleEnterPress();
           }, 80);
 
           return t('workspace.chat-view.sidebar.create.success');
@@ -84,50 +81,27 @@ export const VinesChatInput: React.FC<IVinesChatInputProps> = ({
         finally: () => void mutate(),
       });
     } else {
-      if (attachedImages.length > 0) {
-        handleSendWithImages();
-      } else {
-        handleEnterPress();
-      }
+      handleEnterPress();
     }
+    setTextInput('');
+    setAttachedImages([]);
   };
 
-  const handleSendWithImages = () => {
-    // 构建多模态消息内容
-    const contentParts: ContentPartDto[] = [];
 
-    // 如果有文本，添加文本部分
-    if (!isEmpty(input.trim())) {
-      contentParts.push({
+  useMemo(() => {
+    setInput(attachedImages.length > 0 ? [
+      {
         type: 'text',
-        text: input.trim()
-      });
-    }
-
-    // 添加所有图片
-    attachedImages.forEach(imageUrl => {
-      contentParts.push({
+        text: textInput,
+      },
+      ...attachedImages.map(imageUrl => ({
         type: 'image_url',
         image_url: {
           url: imageUrl,
-          detail: 'auto'
-        }
-      });
-    });
-
-    // 创建一个自定义消息事件，包含文本和图片
-    const customEvent = new CustomEvent('custom_message', {
-      detail: {
-        role: 'user',
-        content: contentParts
-      }
-    });
-    document.dispatchEvent(customEvent);
-
-    // 清空输入框和图片
-    setInput('');
-    setAttachedImages([]);
-  };
+        },
+      }) as IVinesMessageContentItem),
+    ] : textInput);
+  }, [textInput, attachedImages]);
 
   const handleImagesSelected = (imageUrls: string[]) => {
     setAttachedImages(prev => [...prev, ...imageUrls]);
@@ -139,7 +113,7 @@ export const VinesChatInput: React.FC<IVinesChatInputProps> = ({
 
   const { submitKey } = useSubmitHandler();
 
-  const isInputEmpty = isEmpty(input.trim()) && attachedImages.length === 0;
+  const isInputEmpty = (_.isArray(input) && input.length === 0) || (_.isString(input) && isEmpty(input.trim())) || attachedImages.length === 0;
   const hasMessages = messages?.length > 0;
 
   return (
@@ -190,8 +164,8 @@ export const VinesChatInput: React.FC<IVinesChatInputProps> = ({
           placeholder={t('workspace.chat-view.chat-bot.chat.placeholder')}
           maxHeight={150}
           minHeight={80}
-          value={input}
-          onChange={(val) => setInput(val.target.value)}
+          value={textInput}
+          onChange={(val) => setTextInput(val.target.value)}
         />
         <div className="absolute bottom-2 right-2 flex items-center gap-2">
           {/* 图片上传按钮 */}

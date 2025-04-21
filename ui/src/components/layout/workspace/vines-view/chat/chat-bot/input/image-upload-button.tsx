@@ -40,6 +40,7 @@ export const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({ onImagesSe
     <>
       <Button
         variant="ghost"
+        theme="tertiary"
         size="icon"
         className="h-8 w-8 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
         onClick={() => setIsOpen(true)}
@@ -50,7 +51,7 @@ export const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({ onImagesSe
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('图片上传')}</DialogTitle>
+            <DialogTitle>{t('common.utils.upload')}</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
@@ -65,10 +66,10 @@ export const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({ onImagesSe
 
           <div className="flex justify-end space-x-2">
             <Button variant="outline" onClick={handleCancel}>
-              {t('取消')}
+              {t('common.utils.cancel')}
             </Button>
-            <Button onClick={handleConfirm}>
-              {t('确定')}
+            <Button variant="solid" onClick={handleConfirm}>
+              {t('common.utils.confirm')}
             </Button>
           </div>
         </DialogContent>
