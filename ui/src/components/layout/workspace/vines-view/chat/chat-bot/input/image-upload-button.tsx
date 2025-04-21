@@ -56,7 +56,7 @@ export const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({ onImagesSe
           <div className="space-y-4 py-4">
             <VinesUploader
               max={1}
-              accept={['image/jpeg', 'image/png', 'image/gif', 'image/webp']}
+              accept={['jpg', 'jpeg', 'png', 'gif', 'webp']}
               files={uploadedFiles}
               onChange={handleUpload}
               autoUpload
