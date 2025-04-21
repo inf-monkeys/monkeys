@@ -1,5 +1,55 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ChatCompletionMessageParam } from 'openai/resources';
+
+// 为图片URL添加DTO
+export class ImageUrlDto {
+  @ApiProperty({
+    description: '图片URL或Base64编码的图片数据',
+    example: 'https://example.com/image.jpg',
+  })
+  url: string;
+
+  @ApiProperty({
+    description: '图片详细度',
+    required: false,
+    enum: ['auto', 'low', 'high'],
+    default: 'auto',
+  })
+  detail?: 'auto' | 'low' | 'high';
+}
+
+// 为图片内容部分添加DTO
+export class ImageContentPartDto {
+  @ApiProperty({
+    description: '内容类型',
+    enum: ['image_url'],
+    default: 'image_url',
+  })
+  type: 'image_url';
+
+  @ApiProperty({
+    description: '图片URL信息',
+    type: ImageUrlDto,
+  })
+  image_url: ImageUrlDto;
+}
+
+// 为文本内容部分添加DTO
+export class TextContentPartDto {
+  @ApiProperty({
+    description: '内容类型',
+    enum: ['text'],
+    default: 'text',
+  })
+  type: 'text';
+
+  @ApiProperty({
+    description: '文本内容',
+  })
+  text: string;
+}
+
+// 内容部分可以是文本或图片
+export type ContentPartDto = TextContentPartDto | ImageContentPartDto;
 
 export class CreateChatCompletionsDto {
   @ApiProperty({
@@ -16,8 +66,13 @@ export class CreateChatCompletionsDto {
   @ApiProperty({
     description: 'Messages',
     isArray: true,
+    type: 'array',
   })
-  messages: Array<ChatCompletionMessageParam>;
+  messages: Array<{
+    role: string;
+    content: string | Array<ContentPartDto>;
+    name?: string;
+  }>;
 
   @ApiProperty({
     description: '生成的最大令牌数',
