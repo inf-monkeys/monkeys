@@ -565,11 +565,32 @@ export class LlmController {
   public async createChatCompletions(@Res() res: Response, @Req() req: IToolsRequest, @Body() body: CreateChatCompletionsDto) {
     const teamId = req.headers['x-monkeys-teamid'] as string;
     const { stream = false, show_logs = false } = body;
+
+    // 将OpenAI消息格式转换为内部所需格式
+    const messages = body.messages.map(msg => {
+      // 基本消息格式
+      const message: {
+        role: string;
+        content: string;
+        name?: string;
+      } = {
+        role: msg.role,
+        content: typeof msg.content === 'string' ? msg.content : "",
+      };
+
+      // 仅当有name属性时添加
+      if ('name' in msg && msg.name) {
+        message.name = msg.name;
+      }
+
+      return message;
+    });
+
     await this.service.createChatCompelitions(
       res,
       teamId,
       {
-        messages: body.messages,
+        messages,
         model: body.model,
         temperature: body.temperature,
         frequency_penalty: body.frequency_penalty,
