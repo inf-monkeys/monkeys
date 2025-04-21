@@ -21,8 +21,15 @@ import { KnowledgeBaseService } from '../../assets/knowledge-base/knowledge-base
 import { ToolsForwardService } from '../tools.forward.service';
 import { ResponseFormat } from './dto/req/create-chat-compltion.dto';
 
+// 导入图片内容相关类型
+import { ContentPartDto } from '@/modules/chat/dto/req/create-chat-compltion.dto';
+
 export interface CreateChatCompelitionsParams {
-  messages: Array<ChatCompletionMessageParam>;
+  messages: Array<{
+    role: string;
+    content: string | Array<ContentPartDto>;
+    name?: string;
+  }>;
   model: string;
   temperature?: number;
   frequency_penalty?: number;
@@ -218,9 +225,63 @@ export class LlmService {
     return [...systemMessages, ...historyMessages];
   }
 
-  private sanitizeMessages(messages: Array<ChatCompletionMessageParam>) {
-    const messageHistory: Array<ChatCompletionMessageParam> = messages.filter(({ content }) => !!content);
+  private sanitizeMessages(messages: Array<{
+    role: string;
+    content: string | Array<ContentPartDto>;
+    name?: string;
+  }>) {
+    const messageHistory = messages.filter(({ content }) => !!content);
     return messageHistory;
+  }
+
+  private convertToOpenAIMessages(messages: Array<{
+    role: string;
+    content: string | Array<ContentPartDto>;
+    name?: string;
+  }>): Array<ChatCompletionMessageParam> {
+    return messages.map(message => {
+      // 如果content是字符串，直接使用标准格式
+      if (typeof message.content === 'string') {
+        return {
+          role: message.role as any,
+          content: message.content,
+          name: message.name
+        } as ChatCompletionMessageParam;
+      }
+      // 如果content是数组，转换为OpenAI要求的格式
+      else if (Array.isArray(message.content)) {
+        const formattedContent = message.content.map(item => {
+          if (item.type === 'text') {
+            return {
+              type: 'text',
+              text: item.text
+            };
+          } else if (item.type === 'image_url') {
+            return {
+              type: 'image_url',
+              image_url: {
+                url: item.image_url.url,
+                detail: item.image_url.detail || 'auto'
+              }
+            };
+          }
+          return item;
+        });
+
+        return {
+          role: message.role as any,
+          content: formattedContent as any,
+          name: message.name
+        } as ChatCompletionMessageParam;
+      }
+
+      // 兜底，避免类型错误
+      return {
+        role: message.role as any,
+        content: "",
+        name: message.name
+      } as ChatCompletionMessageParam;
+    });
   }
 
   public async createCompelitions(teamId: string, params: CreateCompelitionsParams) {
@@ -440,7 +501,7 @@ ${userQuestion}
   private async generateSystemMessages(
     openai: OpenAI,
     model: string,
-    messages: Array<ChatCompletionMessageParam>,
+    messages: Array<any>, // 使用更通用的类型
     presetPrompt: string,
     knowledgeBase: string,
   ): Promise<{
@@ -618,12 +679,18 @@ ${userQuestion}
       });
     }
 
+    // 转换消息格式并进行类型转换
+    const openAIHistoryMessages = this.convertToOpenAIMessages(historyMessages);
+
     // Cap messages
-    messages = await this.capMessages(systemMessages, historyMessages);
+    const cappedMessages = await this.capMessages(systemMessages, openAIHistoryMessages);
+
+    // 使用转换后的消息
+    let openAIMessages = cappedMessages;
 
     // Merge consecutive messages
     if (autoMergeConsecutiveMessages) {
-      messages = this.mergeConsecutiveMessages(messages);
+      openAIMessages = this.mergeConsecutiveMessages(openAIMessages);
     }
 
     const tools: Array<ChatCompletionTool> = await this.resolveTools(params.tools || [], sqlKnowledgeBase);
@@ -636,7 +703,7 @@ ${userQuestion}
       frequency_penalty: params.frequency_penalty ?? undefined,
       presence_penalty: params.presence_penalty ?? undefined,
       max_tokens: params.max_tokens ?? undefined,
-      messages,
+      messages: openAIMessages, // 使用转换后的消息格式
       tools: tools?.length ? tools : undefined,
       tool_choice: tools?.length ? 'auto' : undefined,
       // Only pass response_format if it's json_object, in case some llm not spport this feature results in error
@@ -714,7 +781,7 @@ ${userQuestion}
                 }
               }
               return openai.chat.completions.create({
-                messages: [...messages, ...toolMessages] as any,
+                messages: [...openAIMessages, ...toolMessages] as Array<ChatCompletionMessageParam>,
                 model,
                 stream: true,
                 tools,
@@ -798,7 +865,7 @@ ${userQuestion}
             }
           }
           const result = await openai.chat.completions.create({
-            messages: [...messages, ...toolMessages] as any,
+            messages: [...openAIMessages, ...toolMessages] as Array<ChatCompletionMessageParam>,
             model,
             stream: false,
             tools,
