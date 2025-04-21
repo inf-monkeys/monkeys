@@ -11,9 +11,24 @@ import { nanoIdLowerCase } from '@/utils';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
 import { parseOpenAIStream } from '@/utils/openai.ts';
 
+export type IVinesMessageTextContentItem = {
+  type: 'text';
+  text: string;
+};
+
+export type IVinesMessageImageContentItem = {
+  type: 'image_url';
+  image_url: {
+    url: string;
+  };
+};
+
+export type IVinesMessageContentItem = IVinesMessageImageContentItem | IVinesMessageTextContentItem;
+
+export type IVinesMessageContent = IVinesMessageContentItem[] | string;
 export interface IVinesMessage {
   id?: string;
-  content: string;
+  content: IVinesMessageContent;
   role: 'user' | 'assistant';
   extra?: ChatCompletionLog[];
   createdAt?: Date;
@@ -327,7 +342,7 @@ export const useChat = ({
     [append, setMessages],
   );
 
-  const [input, setInput] = useState(initialInput);
+  const [input, setInput] = useState<IVinesMessageContent>(initialInput);
 
   const handleEnterPress = useCallback(() => {
     if (!input) return;
