@@ -145,7 +145,7 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({
                 botPhoto={botPhoto}
                 isLoading={isLoading}
                 resend={resend}
-                height={height - inputHeight}
+                height={isEmptyMessages ? 0 : height - inputHeight}
               />
               {isEmptyMessages && (
                 <motion.div
