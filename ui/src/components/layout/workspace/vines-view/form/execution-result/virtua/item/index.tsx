@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { isArray, isObject } from 'lodash';
 
@@ -49,48 +49,42 @@ export const VirtuaExecutionResultGridItem: React.FC<IVirtuaExecutionResultGridI
   hasMore = false,
   itemsPerPage = 90
 }) => {
-  // 使用useState管理当前显示的项目数量
-  const [visibleItems, setVisibleItems] = useState(itemsPerPage);
-  // 用于监听滚动容器的引用
-  const containerRef = useRef<HTMLDivElement>(null);
-  // 用于标记加载状态，防止多次触发加载
-  const [isLoading, setIsLoading] = useState(false);
+  // 使用ref来追踪上次渲染的时间，防止频繁触发loadMore
+  const lastRenderTimeRef = useRef<number>(Date.now());
+  const loadMoreTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 监听滚动事件的处理函数
-  const handleScroll = useCallback(() => {
-    if (!containerRef.current || isLoading) return;
-
-    const container = containerRef.current;
-    // 当滚动到距离底部100px时触发加载更多
-    const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
-
-    if (isNearBottom && loadMore && hasMore) {
-      setIsLoading(true);
-      loadMore();
-      setIsLoading(false);
-    } else if (isNearBottom && visibleItems < row.length) {
-      // 如果没有提供loadMore函数但有更多本地数据，增加显示数量
-      setVisibleItems(prev => Math.min(prev + itemsPerPage, row.length));
-    }
-  }, [loadMore, hasMore, isLoading, visibleItems, row.length, itemsPerPage]);
-
-  // 设置滚动监听
+  // 在组件挂载和数据变化时尝试触发loadMore
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    // 防止频繁调用：只在有必要时才触发loadMore
+    if (loadMore && hasMore) {
+      const now = Date.now();
+      // 确保距离上次加载至少有1秒间隔
+      if (now - lastRenderTimeRef.current > 1000) {
+        lastRenderTimeRef.current = now;
 
-    container.addEventListener('scroll', handleScroll);
+        // 清除现有的timeout
+        if (loadMoreTimeoutRef.current) {
+          clearTimeout(loadMoreTimeoutRef.current);
+        }
+
+        // 设置一个短暂的延迟，避免在组件初始渲染时过早加载
+        loadMoreTimeoutRef.current = setTimeout(() => {
+          loadMore();
+          loadMoreTimeoutRef.current = null;
+        }, 100);
+      }
+    }
+
+    // 组件卸载时清理timeout
     return () => {
-      container.removeEventListener('scroll', handleScroll);
+      if (loadMoreTimeoutRef.current) {
+        clearTimeout(loadMoreTimeoutRef.current);
+      }
     };
-  }, [handleScroll]);
-
-  // 获取当前需要渲染的数据
-  const visibleData = row.slice(0, visibleItems);
+  }, [loadMore, hasMore, row.length]);
 
   return (
     <div
-      ref={containerRef}
       className={cn(
         'grid size-full gap-2',
         'grid-auto-rows:1fr',
@@ -98,7 +92,7 @@ export const VirtuaExecutionResultGridItem: React.FC<IVirtuaExecutionResultGridI
         'overflow-auto',
       )}
     >
-      {visibleData.map((it, i) => {
+      {row.map((it, i) => {
         const {
           render: { type, data, alt },
         } = it;
@@ -140,7 +134,7 @@ export const VirtuaExecutionResultGridItem: React.FC<IVirtuaExecutionResultGridI
       })}
 
       {/* 添加底部加载指示器 */}
-      {(hasMore || visibleItems < row.length) && (
+      {hasMore && (
         <div className="col-span-full flex items-center justify-center p-4">
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
         </div>
