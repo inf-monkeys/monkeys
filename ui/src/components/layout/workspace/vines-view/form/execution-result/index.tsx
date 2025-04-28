@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 
 import { type EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -17,6 +17,8 @@ import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
+import { useSize } from 'ahooks';
+import { MasonryExecutionResultGrid } from '@/components/layout/workspace/vines-view/form/execution-result/execution-result.tsx';
 
 interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {
   event$: EventEmitter<void>;
@@ -52,20 +54,28 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
 
   const forceUpdate = useForceUpdate();
   event$.useSubscription(() => forceUpdate());
-
+  const masornyContainer = useRef();
+  const masornyContainerSize = useSize(masornyContainer);
   return (
     <Card className={cn('relative', className)}>
       <CardContent className="p-0">
-        <VinesImageGroup>
-          <VirtuaExecutionResultGrid
-            data={conversionOutputs(outputs, isMiniFrame ? 2 : 3)}
-            isMiniFrame={isMiniFrame}
-            total={data?.total ?? 0}
-            workflowId={workflowId}
-            height={height}
-          />
-        </VinesImageGroup>
-
+        {/*<VinesImageGroup>*/}
+        {/*  <VirtuaExecutionResultGrid*/}
+        {/*    data={conversionOutputs(outputs, isMiniFrame ? 2 : 3)}*/}
+        {/*    isMiniFrame={isMiniFrame}*/}
+        {/*    total={data?.total ?? 0}*/}
+        {/*    workflowId={workflowId}*/}
+        {/*    height={height}*/}
+        {/*  />*/}
+        {/*</VinesImageGroup>*/}
+        <MasonryExecutionResultGrid
+          data={conversionOutputs(outputs, isMiniFrame ? 2 : 3)}
+          isMiniFrame={isMiniFrame}
+          total={data?.total ?? 0}
+          workflowId={workflowId}
+          height={height}
+          width={masornyContainerSize?.width ?? 300}
+        />
         <AnimatePresence mode="popLayout">
           {isLoading ? (
             <motion.div
