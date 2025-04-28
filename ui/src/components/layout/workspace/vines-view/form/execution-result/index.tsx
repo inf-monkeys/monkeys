@@ -74,7 +74,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
           total={data?.total ?? 0}
           workflowId={workflowId}
           height={height}
-          width={masornyContainerSize?.width ?? 300}
+          width={masornyContainerSize?.width ?? 900}
         />
         <AnimatePresence mode="popLayout">
           {isLoading ? (

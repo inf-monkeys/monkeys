@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { isArray, isObject, isUndefined } from 'lodash';
-import { Masonry } from 'masonic';
+import { Masonry, useInfiniteLoader } from 'masonic';
 import { VListHandle } from 'virtua';
 
 import { useWorkflowExecutionOutputs } from '@/apis/workflow/execution';
@@ -20,6 +20,8 @@ import { VirtuaExecutionResultGridWrapper } from '@/components/layout/workspace/
 import { VinesAbstractVideo } from '@/components/layout/workspace/vines-view/_common/data-display/abstract/node/video.tsx';
 import { VirtuaExecutionResultGridRawItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/raw.tsx';
 import { VirtuaExecutionResultGridImageItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/image.tsx';
+import { useDebounce, useDebounceFn } from 'ahooks';
+import Image from 'rc-image';
 
 interface IMasonryExecutionResultGridProps {
   data: IVinesExecutionResultItem[][];
@@ -43,10 +45,18 @@ export const MasonryExecutionResultGrid: React.FC<IMasonryExecutionResultGridPro
   const scrolling = useRef(false);
 
   const [page, setPage] = useState(1);
+  const { run: debouncedChangePage } = useDebounceFn(
+    () => {
+      setPage((prev) => prev + 1);
+    },
+    {
+      wait: 300,
+    },
+  );
   const { data, isLoading } = useWorkflowExecutionOutputs(workflowId, page, LOAD_LIMIT, 0);
   const outputs = data?.data ?? [];
 
-  const loadedPagesRef = useRef<number[]>([1]);
+  const loadedPagesRef = useRef<number[]>([]);
   const loadedPageItemsLengthRef = useRef<number>(LOAD_LIMIT);
   const [list, setList] = useState<IVinesExecutionResultItem[]>([]);
 
@@ -62,19 +72,46 @@ export const MasonryExecutionResultGrid: React.FC<IMasonryExecutionResultGridPro
     }
   }, [isMiniFrame, outputs, page]);
 
+  const loader = () => {
+    console.log('inf loader called');
+    if (isLoading) {
+      console.log('loaded pages', loadedPagesRef.current);
+      console.log('list size', list.length);
+      return;
+    }
+    console.log('try to load next page');
+    console.log('loaded pages', loadedPagesRef.current);
+    console.log('list size', list.length);
+    console.log('total images', total);
+    debouncedChangePage();
+  };
+
+  const infiniteLoader = useInfiniteLoader(loader, {
+    totalItems: total,
+    isItemLoaded: (index, items) => list.length <= total,
+    threshold: 0,
+  });
   const ref = useRef<VListHandle>(null);
   return (
     <ScrollArea
-      className={cn('-pr-0.5 z-20 mr-0.5 bg-background [&>[data-radix-scroll-area-viewport]]:p-2', !total && 'hidden')}
+      className={cn(
+        '-pr-0.5 z-20 mr-0.5 w-full bg-background [&>[data-radix-scroll-area-viewport]]:p-2',
+        !total && 'hidden',
+      )}
       ref={scrollRef}
-      style={{ height }}
+      style={{ height: height }}
       disabledOverflowMask
     >
       <Masonry
         items={list}
+        columnWidth={220}
+        columnGutter={8}
+        rowGutter={8}
+        overscanBy={3}
         render={({ data }) => {
           return <MasnoryItem {...data} />;
         }}
+        onRender={infiniteLoader}
       ></Masonry>
     </ScrollArea>
   );
@@ -117,7 +154,7 @@ const MasnoryItem: React.FC<IMasonryExecutionResultItem> = ({ render, ...it }) =
 
   switch (type) {
     case 'image':
-      return <img src={data as string} />;
+      return <Image src={data as string} />;
     /*      return (
             <VirtuaExecutionResultGridWrapper data={it} key={i} src={data as string}>
               <VirtuaExecutionResultGridImageItem
