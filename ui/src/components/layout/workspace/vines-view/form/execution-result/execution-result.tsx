@@ -68,24 +68,24 @@ export const MasonryExecutionResultGrid: React.FC<IMasonryExecutionResultGridPro
     }
   }, [isMiniFrame, outputs, page]);
 
+  // 无限滚动加载器，当用户滚动到底部时触发
   const loader = () => {
-    console.log('inf loader called');
-    if (isLoading) {
-      console.log('loaded pages', loadedPagesRef.current);
-      console.log('list size', list.length);
+    // 如果正在加载或已加载全部内容，则不触发
+    if (isLoading || loadedPageItemsLengthRef.current >= total) {
       return;
     }
-    console.log('try to load next page');
-    console.log('loaded pages', loadedPagesRef.current);
-    console.log('list size', list.length);
-    console.log('total images', total);
-    debouncedChangePage();
+
+    // 只有当当前页面的数据都已经加载完毕时才加载下一页
+    if (outputs.length === LOAD_LIMIT) {
+      debouncedChangePage();
+    }
   };
 
+  // 使用useInfiniteLoader钩子来优化无限滚动
   const infiniteLoader = useInfiniteLoader(loader, {
-    totalItems: total,
-    isItemLoaded: (index, items) => list.length <= total,
-    threshold: 0,
+    totalItems: total,  // 总项目数
+    isItemLoaded: (index) => index < list.length, // 检查项目是否已加载
+    threshold: 3,  // 提前加载的阈值，较高的值可以提前触发加载
   });
   const ref = useRef<VListHandle>(null);
   return (
@@ -103,12 +103,12 @@ export const MasonryExecutionResultGrid: React.FC<IMasonryExecutionResultGridPro
         columnWidth={220}
         columnGutter={8}
         rowGutter={8}
-        overscanBy={3}
+        overscanBy={5}  // 增加预渲染的项目数，提高滚动性能
         render={({ data }) => {
           return <MasnoryItem {...data} />;
         }}
         onRender={infiniteLoader}
-      ></Masonry>
+      />
     </ScrollArea>
   );
 };
@@ -133,6 +133,7 @@ type IMasonryExecutionResultItem = VinesWorkflowExecutionOutputListItem & {
   };
 };
 
+// 瀑布流项目组件
 const MasnoryItem: React.FC<IMasonryExecutionResultItem> = ({ render, ...it }) => {
   const { type, data, alt } = render;
 
@@ -150,26 +151,44 @@ const MasnoryItem: React.FC<IMasonryExecutionResultItem> = ({ render, ...it }) =
 
   switch (type) {
     case 'image':
-      return <Image src={data as string} />;
-    /*      return (
-            <VirtuaExecutionResultGridWrapper data={it} key={i} src={data as string}>
-              <VirtuaExecutionResultGridImageItem
-                src={data as string}
-                alt={{
-                  label: altLabel,
-                  value: altContent
-                }}
-              />
-            </VirtuaExecutionResultGridWrapper>
-          );*/
-    // case 'video':
-    //   return (
-    //     <VirtuaExecutionResultGridWrapper data={it} key={i} src={data as string}>
-    //       <VinesAbstractVideo className="my-auto [&>video]:min-h-16">{data as string}</VinesAbstractVideo>
-    //     </VirtuaExecutionResultGridWrapper>
-    //   );
+      // 使用img标签而不是Image组件可以提高性能
+      return (
+        <div className="relative overflow-hidden rounded-lg border border-input shadow-sm">
+          <Image
+            src={data as string}
+            alt={altLabel || "image"}
+            className="w-full object-cover"
+            preview={{ mask: null }} // 优化预览性能
+            loading="lazy" // 懒加载图片
+          />
+          {altLabel.trim() !== '' && (
+            <div className="absolute bottom-1 left-1 right-1 truncate rounded bg-slate-1/80 px-2 py-1 text-xs backdrop-blur">
+              {altLabel}
+            </div>
+          )}
+        </div>
+      );
+    case 'video':
+      return (
+        <div className="relative overflow-hidden rounded-lg border border-input shadow-sm">
+          <video
+            src={data as string}
+            controls
+            className="h-auto w-full"
+            preload="metadata"
+          />
+        </div>
+      );
+    case 'text':
+    case 'json':
+      return (
+        <div className="overflow-hidden rounded-lg border border-input p-2 shadow-sm">
+          <pre className="max-h-48 overflow-auto text-xs">
+            {typeof data === 'object' ? JSON.stringify(data, null, 2) : String(data)}
+          </pre>
+        </div>
+      );
     default:
-      // return <div>un handle yet</div>;
-      return;
+      return null;
   }
 };
