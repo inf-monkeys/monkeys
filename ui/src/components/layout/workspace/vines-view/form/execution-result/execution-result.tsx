@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { isArray, isObject, isUndefined } from 'lodash';
@@ -16,11 +16,7 @@ import {
   VinesWorkflowExecutionOutputListItem,
 } from '@/package/vines-flow/core/typings.ts';
 import { cn } from '@/utils';
-import { VirtuaExecutionResultGridWrapper } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/wrapper';
-import { VinesAbstractVideo } from '@/components/layout/workspace/vines-view/_common/data-display/abstract/node/video.tsx';
-import { VirtuaExecutionResultGridRawItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/raw.tsx';
-import { VirtuaExecutionResultGridImageItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/image.tsx';
-import { useDebounce, useDebounceFn } from 'ahooks';
+import { useDebounceFn } from 'ahooks';
 import Image from 'rc-image';
 
 interface IMasonryExecutionResultGridProps {
@@ -122,17 +118,17 @@ type IMasonryExecutionResultItem = VinesWorkflowExecutionOutputListItem & {
     type: 'image' | 'video' | 'text' | 'json' | 'empty';
     data: JSONValue;
     alt?:
-      | string
-      | string[]
-      | { [imgUrl: string]: string }
-      | {
-          [imgUrl: string]: {
-            type: 'copy-param';
-            label: string;
-            data: VinesWorkflowExecutionInput[];
-          };
-        }
-      | undefined;
+    | string
+    | string[]
+    | { [imgUrl: string]: string }
+    | {
+      [imgUrl: string]: {
+        type: 'copy-param';
+        label: string;
+        data: VinesWorkflowExecutionInput[];
+      };
+    }
+    | undefined;
     index: number;
   };
 };
@@ -146,11 +142,11 @@ const MasnoryItem: React.FC<IMasonryExecutionResultItem> = ({ render, ...it }) =
   const altContent = isArray(alt)
     ? altLabel
     : (isObject(alt?.[data as string]) && alt?.[data as string].type === 'copy-param'
-        ? JSON.stringify({
-            type: 'input-parameters',
-            data: [...it.input, ...alt?.[data as string].data],
-          })
-        : alt?.[data as string]) ?? '';
+      ? JSON.stringify({
+        type: 'input-parameters',
+        data: [...it.input, ...alt?.[data as string].data],
+      })
+      : alt?.[data as string]) ?? '';
 
   switch (type) {
     case 'image':
@@ -173,6 +169,7 @@ const MasnoryItem: React.FC<IMasonryExecutionResultItem> = ({ render, ...it }) =
     //     </VirtuaExecutionResultGridWrapper>
     //   );
     default:
-      return <div>un handle yet</div>;
+      // return <div>un handle yet</div>;
+      return;
   }
 };
