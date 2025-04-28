@@ -9,10 +9,12 @@ import { VinesImage } from '@/components/ui/vines-image';
 import { useCopy } from '@/hooks/use-copy.ts';
 import { isObject } from 'lodash';
 
-export type IVinesExecutionResultImageAlt = string | {
-  label: string;
-  value: string;
-};
+export type IVinesExecutionResultImageAlt =
+  | string
+  | {
+      label: string;
+      value: string;
+    };
 
 interface IVirtuaExecutionResultGridImageItemProps {
   src: string;
