@@ -47,7 +47,7 @@ export const VirtuaExecutionResultGridItem: React.FC<IVirtuaExecutionResultGridI
   data: row,
   loadMore,
   hasMore = false,
-  itemsPerPage = 40
+  itemsPerPage = 90
 }) => {
   // 使用useState管理当前显示的项目数量
   const [visibleItems, setVisibleItems] = useState(itemsPerPage);
