@@ -2909,7 +2909,61 @@
       "loading": "查询中...",
       "success": "查询成功",
       "error": "查询失败，请检查网络是否通畅",
-      "workflow-id-error": "请等待页面加载完毕"
+      "workflow-id-error": "请等待页面加载完毕",
+      "observability": {
+        "title": "可观测性",
+        "create": "创建可观测性",
+        "delete": "删除可观测性",
+        "delete-confirm": "确定要删除此可观测性吗？",
+        "table": {
+          "columns": {
+            "id": "ID",
+            "name": "名称",
+            "platform": "平台"
+          }
+        },
+        "operate": {
+          "dropdown-label": "操作",
+          "options": {
+            "delete": "删除可观测性"
+          }
+        },
+        "workflow-create-modal": {
+          "create-label": "创建可观测性",
+          "table": {
+            "columns": {
+              "name": {
+                "label": "名称",
+                "placeholder": "请输入可观测性名称"
+              },
+              "platform": {
+                "label": "平台",
+                "placeholder": "请选择平台",
+                "options": {
+                  "langfuse": "Langfuse"
+                }
+              },
+              "platform-config": {
+                "label": "平台配置",
+                "langfuse": {
+                  "secret-key": {
+                    "label": "Secret Key",
+                    "placeholder": "请输入 secret key"
+                  },
+                  "public-key": {
+                    "label": "Public Key",
+                    "placeholder": "请输入 public key"
+                  },
+                  "base-url": {
+                    "label": "Base URL",
+                    "placeholder": "请输入 base url"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "pre-view": {
       "title": "预览工作流",
