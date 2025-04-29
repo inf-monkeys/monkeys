@@ -107,6 +107,13 @@ export const VirtuaExecutionResultGrid: React.FC<IVirtuaExecutionResultGridProps
             <VirtuaExecutionResultGridItem
               data={it}
               key={it.map((i) => `${i.instanceId}-${i.render.index}`).join('-')}
+              loadMore={() => {
+                if (total > loadedPageItemsLengthRef.current && outputs.length === LOAD_LIMIT && !isLoading) {
+                  setPage((prev) => prev + 1);
+                }
+              }}
+              hasMore={total > loadedPageItemsLengthRef.current && outputs.length === LOAD_LIMIT}
+              itemsPerPage={20}
             />
           ))}
         </Virtualizer>

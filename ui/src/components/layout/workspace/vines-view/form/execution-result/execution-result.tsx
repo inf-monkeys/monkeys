@@ -1,0 +1,197 @@
+import React, { useEffect, useRef, useState } from 'react';
+
+import { useAutoAnimate } from '@formkit/auto-animate/react';
+import { isArray, isObject, isUndefined } from 'lodash';
+import { Masonry, useInfiniteLoader } from 'masonic';
+
+import { useWorkflowExecutionOutputs } from '@/apis/workflow/execution';
+import { useVinesSimplifiedExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result/convertOutput.ts';
+import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result/index.tsx';
+import { IVinesExecutionResultItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item';
+import { JSONValue } from '@/components/ui/code-editor';
+import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { useForceUpdate } from '@/hooks/use-force-update';
+import {
+  VinesWorkflowExecutionInput,
+  VinesWorkflowExecutionOutputListItem,
+} from '@/package/vines-flow/core/typings.ts';
+import { cn } from '@/utils';
+import { useDebounceFn, useEventEmitter, useMount } from 'ahooks';
+import Image from 'rc-image';
+
+interface IMasonryExecutionResultGridProps {
+  data: IVinesExecutionResultItem[][];
+
+  isMiniFrame?: boolean;
+  workflowId?: string | null;
+  total: number;
+  width: number;
+  height: number;
+}
+
+export const MasonryExecutionResultGrid: React.FC<IMasonryExecutionResultGridProps> = ({
+  total,
+  isMiniFrame,
+  workflowId,
+  height,
+}) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const [animationParent, enableAutoAnimate] = useAutoAnimate();
+  const scrolling = useRef(false);
+
+  const [page, setPage] = useState(1);
+  const { run: debouncedChangePage } = useDebounceFn(
+    () => {
+      setPage((prev) => prev + 1);
+    },
+    {
+      wait: 300,
+    },
+  );
+  const { data, isLoading } = useWorkflowExecutionOutputs(workflowId, page, LOAD_LIMIT, 0);
+  const outputs = data?.data ?? [];
+
+  const loadedPagesRef = useRef<number[]>([]);
+  const loadedPageItemsLengthRef = useRef<number>(LOAD_LIMIT);
+  const [list, setList] = useState<IVinesExecutionResultItem[]>([]);
+
+  const { conversionOutputs } = useVinesSimplifiedExecutionResult();
+  useEffect(() => {
+    if (isUndefined(data) || loadedPagesRef.current.includes(page)) return;
+
+    const resultList = conversionOutputs(outputs);
+    if (resultList.length) {
+      setList((prev) => [...prev, ...resultList]);
+      loadedPagesRef.current.push(page);
+      loadedPageItemsLengthRef.current += outputs.length;
+    }
+  }, [isMiniFrame, outputs, page]);
+
+  // 无限滚动加载器，当用户滚动到底部时触发
+  const loader = () => {
+    // 如果正在加载或已加载全部内容，则不触发
+    if (isLoading || loadedPageItemsLengthRef.current >= total) {
+      return;
+    }
+
+    // 只有当当前页面的数据都已经加载完毕时才加载下一页
+    if (outputs.length === LOAD_LIMIT) {
+      debouncedChangePage();
+    }
+  };
+
+  // 使用useInfiniteLoader钩子来优化无限滚动
+  const infiniteLoader = useInfiniteLoader(loader, {
+    totalItems: total, // 总项目数
+    isItemLoaded: (index) => index < list.length, // 检查项目是否已加载
+    threshold: 3, // 提前加载的阈值，较高的值可以提前触发加载
+  });
+  const [shouldShowMasonry, setShowMasonry] = useState(false);
+  // const forceUpdate = useForceUpdate();
+  // const event$ = useEventEmitter();
+  // event$.useSubscription(() => {
+  //   forceUpdate();
+  // });
+  useMount(() => {
+    setTimeout(() => setShowMasonry(true), 350);
+  });
+
+  return (
+    <ScrollArea
+      className={cn('-pr-0.5 z-20 mr-0.5 bg-background [&>[data-radix-scroll-area-viewport]]:p-2', !total && 'hidden')}
+      ref={scrollRef}
+      style={{ height: height }}
+      disabledOverflowMask
+    >
+      {shouldShowMasonry && (
+        <Masonry
+          items={list}
+          columnWidth={220}
+          columnGutter={8}
+          rowGutter={8}
+          overscanBy={5} // 增加预渲染的项目数，提高滚动性能
+          render={({ data }) => {
+            return <MasnoryItem {...data} />;
+          }}
+          onRender={infiniteLoader}
+        />
+      )}
+    </ScrollArea>
+  );
+};
+
+type IMasonryExecutionResultItem = VinesWorkflowExecutionOutputListItem & {
+  render: {
+    type: 'image' | 'video' | 'text' | 'json' | 'empty';
+    data: JSONValue;
+    alt?:
+      | string
+      | string[]
+      | { [imgUrl: string]: string }
+      | {
+          [imgUrl: string]: {
+            type: 'copy-param';
+            label: string;
+            data: VinesWorkflowExecutionInput[];
+          };
+        }
+      | undefined;
+    index: number;
+  };
+};
+
+// 瀑布流项目组件
+const MasnoryItem: React.FC<IMasonryExecutionResultItem> = ({ render, ...it }) => {
+  const { type, data, alt } = render;
+
+  const altLabel = isArray(alt)
+    ? alt[0]
+    : (isObject(alt?.[data as string]) ? alt?.[data as string].label : alt?.[data as string]) || alt || '';
+  const altContent = isArray(alt)
+    ? altLabel
+    : (isObject(alt?.[data as string]) && alt?.[data as string].type === 'copy-param'
+        ? JSON.stringify({
+            type: 'input-parameters',
+            data: [...it.input, ...alt?.[data as string].data],
+          })
+        : alt?.[data as string]) ?? '';
+
+  switch (type) {
+    case 'image':
+      // 使用img标签而不是Image组件可以提高性能
+      return (
+        <div className="relative overflow-hidden rounded-lg border border-input shadow-sm">
+          <Image
+            src={data as string}
+            alt={altLabel || 'image'}
+            className="w-full object-cover"
+            preview={{ mask: null }} // 优化预览性能
+            loading="lazy" // 懒加载图片
+          />
+          {altLabel.trim() !== '' && (
+            <div className="absolute bottom-1 left-1 right-1 truncate rounded bg-slate-1/80 px-2 py-1 text-xs backdrop-blur">
+              {altLabel}
+            </div>
+          )}
+        </div>
+      );
+    case 'video':
+      return (
+        <div className="relative overflow-hidden rounded-lg border border-input shadow-sm">
+          <video src={data as string} controls className="h-auto w-full" preload="metadata" />
+        </div>
+      );
+    case 'text':
+    case 'json':
+      return (
+        <div className="overflow-hidden rounded-lg border border-input p-2 shadow-sm">
+          <pre className="max-h-48 overflow-auto text-xs">
+            {typeof data === 'object' ? JSON.stringify(data, null, 2) : String(data)}
+          </pre>
+        </div>
+      );
+    default:
+      return null;
+  }
+};

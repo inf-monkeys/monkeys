@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 
 import { type EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -6,17 +6,17 @@ import { History } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useWorkflowExecutionOutputs } from '@/apis/workflow/execution';
+import { MasonryExecutionResultGrid } from '@/components/layout/workspace/vines-view/form/execution-result/execution-result.tsx';
 import { useVinesIframeMessage } from '@/components/layout/workspace/vines-view/form/execution-result/iframe-message.ts';
 import { useVinesExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result/use-vines-execution-result.ts';
-import { VirtuaExecutionResultGrid } from '@/components/layout/workspace/vines-view/form/execution-result/virtua';
 import { Card, CardContent } from '@/components/ui/card.tsx';
-import { VinesImageGroup } from '@/components/ui/image';
 import { Label } from '@/components/ui/label.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
+import { useSize } from 'ahooks';
 
 interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {
   event$: EventEmitter<void>;
@@ -52,20 +52,19 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
 
   const forceUpdate = useForceUpdate();
   event$.useSubscription(() => forceUpdate());
-
+  const masornyContainer = useRef();
+  const masornyContainerSize = useSize(masornyContainer);
   return (
     <Card className={cn('relative', className)}>
       <CardContent className="p-0">
-        <VinesImageGroup>
-          <VirtuaExecutionResultGrid
-            data={conversionOutputs(outputs, isMiniFrame ? 2 : 3)}
-            isMiniFrame={isMiniFrame}
-            total={data?.total ?? 0}
-            workflowId={workflowId}
-            height={height}
-          />
-        </VinesImageGroup>
-
+        <MasonryExecutionResultGrid
+          data={conversionOutputs(outputs, isMiniFrame ? 2 : 3)}
+          isMiniFrame={isMiniFrame}
+          total={data?.total ?? 0}
+          workflowId={workflowId}
+          height={height}
+          width={masornyContainerSize?.width ?? 900}
+        />
         <AnimatePresence mode="popLayout">
           {isLoading ? (
             <motion.div
