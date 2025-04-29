@@ -2914,7 +2914,61 @@
       "loading": "Searching...",
       "success": "Search successful",
       "error": "Query failed, please check whether the network is unobstructed",
-      "workflow-id-error": "Please wait for the page to load"
+      "workflow-id-error": "Please wait for the page to load",
+      "observability": {
+        "title": "Observability",
+        "create": "Create Observability",
+        "delete": "Delete Observability",
+        "delete-confirm": "Are you sure you want to delete the observability?",
+        "table": {
+          "columns": {
+            "id": "ID",
+            "name": "Name",
+            "platform": "Platform"
+          }
+        },
+        "operate": {
+          "dropdown-label": "Operate",
+          "options": {
+            "delete": "Delete Observability"
+          }
+        },
+        "workflow-create-modal": {
+          "create-label": "Create Observability",
+          "table": {
+            "columns": {
+              "name": {
+                "label": "Name",
+                "placeholder": "Enter observability name"
+              },
+              "platform": {
+                "label": "Platform",
+                "placeholder": "Select platform",
+                "options": {
+                  "langfuse": "Langfuse"
+                }
+              },
+              "platform-config": {
+                "label": "Platform Config",
+                "langfuse": {
+                  "secret-key": {
+                    "label": "Secret Key",
+                    "placeholder": "Enter secret key"
+                  },
+                  "public-key": {
+                    "label": "Public Key",
+                    "placeholder": "Enter public key"
+                  },
+                  "base-url": {
+                    "label": "Base URL",
+                    "placeholder": "Enter base url"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "pre-view": {
       "title": "Workflow Preview",

@@ -1,9 +1,12 @@
 import React from 'react';
 
+import { Telescope } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { VinesLogViewLogTab } from '@/components/layout/workspace/vines-view/log/log';
+import { VinesLogViewLogObservabilityModal } from '@/components/layout/workspace/vines-view/log/log/observability';
 import { VinesLogViewStatTab } from '@/components/layout/workspace/vines-view/log/stat';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { usePageStore } from '@/store/usePageStore';
@@ -30,14 +33,21 @@ const VinesLogView: React.FC = () => {
         onValueChange={(val) => setTab({ tab: val })}
         className="h-full w-full [&>[role='tabpanel']]:mt-4 [&>[role='tabpanel']]:overflow-hidden"
       >
-        <TabsList>
-          <TabsTrigger value="log" className="text-xs">
-            {t('workspace.logs-view.log.title')}
-          </TabsTrigger>
-          <TabsTrigger value="stat" className="text-xs">
-            {t('workspace.logs-view.stat.title')}
-          </TabsTrigger>
-        </TabsList>
+        <div className="flex items-center justify-between">
+          <TabsList>
+            <TabsTrigger value="log" className="text-xs">
+              {t('workspace.logs-view.log.title')}
+            </TabsTrigger>
+            <TabsTrigger value="stat" className="text-xs">
+              {t('workspace.logs-view.stat.title')}
+            </TabsTrigger>
+          </TabsList>
+          <VinesLogViewLogObservabilityModal>
+            <Button variant="outline" icon={<Telescope />}>
+              {t('workspace.logs-view.observability.title')}
+            </Button>
+          </VinesLogViewLogObservabilityModal>
+        </div>
         <TabsContent value="log">
           <VinesLogViewLogTab visible={visible} containerHeight={height} workbenchVisible={workbenchVisible} />
         </TabsContent>

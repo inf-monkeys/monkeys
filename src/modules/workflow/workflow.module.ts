@@ -1,3 +1,4 @@
+import { CommonModule } from '@/common/common.module';
 import { ConversationAppEntity } from '@/database/entities/conversation-app/conversation-app.entity';
 import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
 import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
@@ -19,10 +20,13 @@ import { WorkflowExecutionController } from './workflow.execution.controller';
 import { WorkflowExecutionService } from './workflow.execution.service';
 import { WorkflowLogsController } from './workflow.log.controller';
 import { WorkflowLogService } from './workflow.log.service';
+import { WorkflowObservabilityController } from './workflow.observability.controller';
+import { WorkflowObservabilityService } from './workflow.observability.service';
 import { WorkflowPageController } from './workflow.page.controller';
 import { WorkflowPageService } from './workflow.page.service';
 import { WorkflowStatisticsController } from './workflow.statistics.controller';
 import { WorkflowStatisticsService } from './workflow.statstics.service';
+import { WorkflowTrackerService } from './workflow.tracker.service';
 import { WorkflowTriggerController } from './workflow.trigger.controller';
 import { WorkflowTriggerService } from './workflow.trigger.service';
 import { WorkflowValidateController } from './workflow.validate.controller';
@@ -43,6 +47,7 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     WorkflowCustomTriggerInvokeController,
     WorkflowLogsController,
     WorkflowStatisticsController,
+    WorkflowObservabilityController,
   ],
   providers: [
     WorkflowCrudService,
@@ -57,8 +62,10 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     WorkflowCustomTriggerInvokeService,
     WorkflowLogService,
     WorkflowStatisticsService,
+    WorkflowTrackerService,
+    WorkflowObservabilityService,
   ],
-  imports: [ConductorModule, AssetsModule, TypeOrmModule.forFeature([WorkflowPageEntity, WorkflowPageGroupEntity, ConversationAppEntity]), ToolsModule],
-  exports: [WorkflowCrudService, WorkflowExecutionService],
+  imports: [ConductorModule, AssetsModule, TypeOrmModule.forFeature([WorkflowPageEntity, WorkflowPageGroupEntity, ConversationAppEntity]), ToolsModule, CommonModule],
+  exports: [WorkflowCrudService, WorkflowExecutionService, WorkflowTrackerService],
 })
-export class WorkflowModule {}
+export class WorkflowModule { }

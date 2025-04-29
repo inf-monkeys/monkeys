@@ -39,6 +39,7 @@ import { TeamEntity } from './entities/identity/team';
 import { TeamJoinRequestsEntity } from './entities/identity/team-join-request';
 import { UserEntity } from './entities/identity/user';
 import { TeamMembersEntity } from './entities/identity/user-team-relationship';
+import { WorkflowObservabilityEntity } from './entities/observability/workflow-observability';
 import { OneApiUsersEntity } from './entities/oneapi/oneapi-user.entity';
 import { ToolsTriggerTypesEntity } from './entities/tools/tools-trigger-types';
 import { WorkflowPageEntity } from './entities/workflow/workflow-page';
@@ -85,6 +86,7 @@ export const entities: EntityClassOrSchema[] = [
   OneApiUsersEntity,
   ConversationAppEntity,
   ConversationExecutionEntity,
+  WorkflowObservabilityEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({
