@@ -36,4 +36,10 @@ export class ObservabilityRepository {
       },
     });
   }
+
+  public async deleteWorkflowObservability(observabilityId: string) {
+    await this.workflowObservabilityRepository.delete({
+      id: observabilityId,
+    });
+  }
 }
