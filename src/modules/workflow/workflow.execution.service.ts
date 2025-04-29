@@ -14,12 +14,15 @@ import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigg
 import { FindWorkflowCondition, WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Task, Workflow } from '@inf-monkeys/conductor-javascript';
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import _, { pick } from 'lodash';
 import retry from 'retry-as-promised';
 import { ConductorService } from './conductor/conductor.service';
 import { SearchWorkflowExecutionsDto, SearchWorkflowExecutionsOrderDto, WorkflowExecutionSearchableField } from './dto/req/search-workflow-execution.dto';
 import { UpdateTaskStatusDto } from './dto/req/update-task-status.dto';
 import { DebugWorkflowRequest, StartWorkflowRequest, WorkflowExecutionOutput } from './interfaces';
+import { WorkflowObservabilityService } from './workflow.observability.service';
+import { WorkflowTrackerService } from './workflow.tracker.service';
 
 export interface WorkflowWithMetadata extends Workflow {
   startBy: string;
@@ -32,7 +35,10 @@ export class WorkflowExecutionService {
     private readonly workflowRepository: WorkflowRepository,
     private readonly conductorService: ConductorService,
     @Inject(RATE_LIMITER_TOKEN) private readonly rateLimiter: RateLimiter,
-  ) {}
+    private readonly eventEmitter: EventEmitter2,
+    private readonly workflowTrackerService: WorkflowTrackerService,
+    private readonly workflowObservabilityService: WorkflowObservabilityService,
+  ) { }
 
   private async populateMetadataByForExecutions(executions: Workflow[]): Promise<WorkflowWithMetadata[]> {
     const workflowInstanceIds = executions.map((x) => x.workflowId);
@@ -397,7 +403,7 @@ export class WorkflowExecutionService {
       try {
         const executions = (await this.getWorkflowExecutionOutputs(workflow.id, 1, 5000)).data;
         allExecutions = allExecutions.concat(executions);
-      } catch (error) {}
+      } catch (error) { }
     }
 
     allExecutions = allExecutions.sort((a, b) => (orderBy === 'DESC' ? b.startTime - a.startTime : a.startTime - b.startTime));
@@ -583,6 +589,20 @@ export class WorkflowExecutionService {
       version: version,
       input: inputData,
     });
+
+    // 注册回调
+    await this.workflowTrackerService.registerWorkflowTracking({
+      workflowInstanceId,
+      workflowId,
+      teamId,
+    });
+    this.eventEmitter.on(`workflow.completed.${workflowInstanceId}`, async (result: { workflowInstanceId: string; result: Workflow; timestamp: number }) => {
+      const observabilityFactories = await this.workflowObservabilityService.getWorkflowObservabilityInstanceList(teamId, workflowId);
+      for (const factory of observabilityFactories) {
+        await factory(result.result);
+      }
+    });
+
     await this.workflowRepository.saveWorkflowExecution({
       workflowId,
       version,
