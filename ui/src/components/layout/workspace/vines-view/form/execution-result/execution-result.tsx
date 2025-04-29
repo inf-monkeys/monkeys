@@ -8,16 +8,16 @@ import { useWorkflowExecutionOutputs } from '@/apis/workflow/execution';
 import { useVinesSimplifiedExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result/convertOutput.ts';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result/index.tsx';
 import { IVinesExecutionResultItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item';
+import { VirtuaExecutionResultGridImageItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/image.tsx';
+import { VirtuaExecutionResultGridWrapper } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/wrapper/index.tsx';
 import { JSONValue } from '@/components/ui/code-editor';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { useForceUpdate } from '@/hooks/use-force-update';
 import {
   VinesWorkflowExecutionInput,
   VinesWorkflowExecutionOutputListItem,
 } from '@/package/vines-flow/core/typings.ts';
 import { cn } from '@/utils';
-import { useDebounceFn, useEventEmitter, useMount } from 'ahooks';
-import Image from 'rc-image';
+import { useDebounceFn, useMount } from 'ahooks';
 
 interface IMasonryExecutionResultGridProps {
   data: IVinesExecutionResultItem[][];
@@ -107,9 +107,9 @@ export const MasonryExecutionResultGrid: React.FC<IMasonryExecutionResultGridPro
       {shouldShowMasonry && (
         <Masonry
           items={list}
-          columnWidth={220}
-          columnGutter={8}
-          rowGutter={8}
+          columnWidth={200} // 调整列宽，确保在容器内能完整显示
+          columnGutter={12} // 稍微增加列间距以提高可读性
+          rowGutter={12}
           overscanBy={5} // 增加预渲染的项目数，提高滚动性能
           render={({ data }) => {
             return <MasnoryItem {...data} />;
@@ -126,17 +126,17 @@ type IMasonryExecutionResultItem = VinesWorkflowExecutionOutputListItem & {
     type: 'image' | 'video' | 'text' | 'json' | 'empty';
     data: JSONValue;
     alt?:
-      | string
-      | string[]
-      | { [imgUrl: string]: string }
-      | {
-          [imgUrl: string]: {
-            type: 'copy-param';
-            label: string;
-            data: VinesWorkflowExecutionInput[];
-          };
-        }
-      | undefined;
+    | string
+    | string[]
+    | { [imgUrl: string]: string }
+    | {
+      [imgUrl: string]: {
+        type: 'copy-param';
+        label: string;
+        data: VinesWorkflowExecutionInput[];
+      };
+    }
+    | undefined;
     index: number;
   };
 };
@@ -151,29 +151,29 @@ const MasnoryItem: React.FC<IMasonryExecutionResultItem> = ({ render, ...it }) =
   const altContent = isArray(alt)
     ? altLabel
     : (isObject(alt?.[data as string]) && alt?.[data as string].type === 'copy-param'
-        ? JSON.stringify({
-            type: 'input-parameters',
-            data: [...it.input, ...alt?.[data as string].data],
-          })
-        : alt?.[data as string]) ?? '';
+      ? JSON.stringify({
+        type: 'input-parameters',
+        data: [...it.input, ...alt?.[data as string].data],
+      })
+      : alt?.[data as string]) ?? '';
 
   switch (type) {
     case 'image':
-      // 使用img标签而不是Image组件可以提高性能
+      // 使用包装组件来支持下载和删除功能
       return (
         <div className="relative overflow-hidden rounded-lg border border-input shadow-sm">
-          <Image
-            src={data as string}
-            alt={altLabel || 'image'}
-            className="w-full object-cover"
-            preview={{ mask: null }} // 优化预览性能
-            loading="lazy" // 懒加载图片
-          />
-          {altLabel.trim() !== '' && (
-            <div className="absolute bottom-1 left-1 right-1 truncate rounded bg-slate-1/80 px-2 py-1 text-xs backdrop-blur">
-              {altLabel}
+          {/* 使用指定结构确保事件正确传递 */}
+          <VirtuaExecutionResultGridWrapper data={{ ...it, render }} src={data as string}>
+            <div className="w-full h-full" onClick={e => e.stopPropagation()}>
+              <VirtuaExecutionResultGridImageItem
+                src={data as string}
+                alt={{
+                  label: altLabel,
+                  value: altContent,
+                }}
+              />
             </div>
-          )}
+          </VirtuaExecutionResultGridWrapper>
         </div>
       );
     case 'video':
