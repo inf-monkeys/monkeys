@@ -5,6 +5,7 @@ import { OrderBy } from '@/common/dto/order.enum';
 import { PaginationDto } from '@/common/dto/pagination.dto';
 import { WorkflowExecutionContext } from '@/common/dto/workflow-execution-context.dto';
 import { TooManyRequestsException } from '@/common/exceptions/too-many-requests';
+import { logger } from '@/common/logger';
 import { extractImageUrls, extractVideoUrls, flattenKeys, getDataType } from '@/common/utils';
 import { RateLimiter } from '@/common/utils/rate-limiter';
 import { sleep } from '@/common/utils/utils';
@@ -598,8 +599,11 @@ export class WorkflowExecutionService {
     });
     this.eventEmitter.on(`workflow.completed.${workflowInstanceId}`, async (result: { workflowInstanceId: string; result: Workflow; timestamp: number }) => {
       const observabilityFactories = await this.workflowObservabilityService.getWorkflowObservabilityInstanceList(teamId, workflowId);
-      for (const factory of observabilityFactories) {
-        await factory(result.result);
+      if (observabilityFactories.length) {
+        logger.info(`${workflowInstanceId} completed, start to notify observability factories`);
+        for (const factory of observabilityFactories) {
+          await factory(result.result);
+        }
       }
     });
 
