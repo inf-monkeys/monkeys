@@ -31,7 +31,6 @@ const VinesForm: React.FC = () => {
   const openAIInterfaceEnabled = workflow?.exposeOpenaiCompatibleInterface ?? false;
 
   const containerHeight = usePageStore((s) => s.containerHeight);
-
   const isMiniFrame = mode === 'mini';
   const height = containerHeight - (vinesIFrameVisible ? 32 : workbenchVisible ? (isMiniFrame ? 80 : 32) : 48);
 
@@ -70,7 +69,6 @@ const VinesForm: React.FC = () => {
           event$={event$}
           height={height}
         />
-
         <VinesExecutionResult
           className={cn(
             'col-span-3',
