@@ -1,4 +1,7 @@
-export type LangfusePlatform = 'langfuse';
+export enum ObservabilityPlatform {
+  LANGFUSE = 'langfuse',
+}
+
 export type LangfusePlatformConfig = {
   secretKey: string;
   publicKey: string;
@@ -6,10 +9,9 @@ export type LangfusePlatformConfig = {
 };
 
 export type LangfuseObservabilityConfig = {
-  platform: LangfusePlatform;
+  platform: ObservabilityPlatform.LANGFUSE;
   platformConfig: LangfusePlatformConfig;
 };
 
-export type ObservabilityPlatform = LangfusePlatform;
 export type ObservabilityPlatformConfig = LangfusePlatformConfig;
 export type ObservabilityConfig = LangfuseObservabilityConfig;

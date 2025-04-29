@@ -1,5 +1,6 @@
 import { CacheManager } from '@/common/cache';
 import { CACHE_TOKEN } from '@/common/common.module';
+import { Workflow } from '@inf-monkeys/conductor-javascript';
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import axios from 'axios';
@@ -17,7 +18,7 @@ interface WorkflowTrackInfo {
 @Injectable()
 export class WorkflowTrackerService {
   private readonly TRACKING_PREFIX = 'workflow_tracking:';
-  private readonly POLLING_INTERVAL = 30000; // 30秒
+  private readonly POLLING_INTERVAL = 10 * 1000; // 10秒
   private readonly MAX_EXECUTION_TIME = 24 * 60 * 60; // 24小时（单位：秒）
 
   constructor(
@@ -72,15 +73,8 @@ export class WorkflowTrackerService {
             const finished = status === 'COMPLETED' || status === 'FAILED' || status === 'TERMINATED' || status === 'TIMED_OUT';
 
             if (finished) {
-              // 更新状态
-              trackInfo.status = status;
-              await this.cacheManager.set(
-                key,
-                JSON.stringify(trackInfo),
-                'EX',
-                60, // 完成后保留1分钟
-              );
-
+              // 完成后删除
+              await this.cacheManager.del(key);
               // 执行回调
               if (trackInfo.callbackUrl) {
                 this.executeCallback(trackInfo.callbackUrl, {
@@ -94,6 +88,10 @@ export class WorkflowTrackerService {
               await this.sendNotification(workflowInstanceId, executionDetail);
             }
           } catch (error) {
+            if ((error as unknown as { status: number }).status === 404) {
+              await this.cacheManager.del(key);
+              continue;
+            }
             console.error(`Error checking workflow status: ${workflowInstanceId}`, error);
           }
         }
@@ -126,8 +124,7 @@ export class WorkflowTrackerService {
     }
   }
 
-  private async sendNotification(workflowInstanceId: string, result: any) {
-    // 使用 EventEmitter2 发送事件
+  private async sendNotification(workflowInstanceId: string, result: Workflow) {
     this.eventEmitter.emit(`workflow.completed.${workflowInstanceId}`, {
       workflowInstanceId,
       result,
