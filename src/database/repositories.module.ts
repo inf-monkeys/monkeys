@@ -24,6 +24,7 @@ import { SqlKnowledgeBaseRepository } from './repositories/knowledge-base-sql.re
 import { KnowledgeBaseRepository } from './repositories/knowledge-base.repository';
 import { LlmModelRepository } from './repositories/llm-model.repository';
 import { MediaFileRepository } from './repositories/media.repository';
+import { ObservabilityRepository } from './repositories/observability.repository';
 import { OneApiRepository } from './repositories/oneapi.respository';
 import { SdModelRepository } from './repositories/sd-model.repository';
 import { SystemConfigurationRepository } from './repositories/system-configuration.repository';
@@ -67,6 +68,7 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     OneApiRepository,
     ConversationAppRepository,
     ConversationAppAssetRepositroy,
+    ObservabilityRepository,
   ],
   exports: [
     ToolsRepository,
@@ -100,7 +102,8 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     OneApiRepository,
     ConversationAppRepository,
     ConversationAppAssetRepositroy,
+    ObservabilityRepository,
   ],
   imports: [TypeOrmModule.forFeature(entities)],
 })
-export class RepositoryMoule {}
+export class RepositoryMoule { }

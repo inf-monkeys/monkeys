@@ -20,6 +20,8 @@ import { WorkflowExecutionController } from './workflow.execution.controller';
 import { WorkflowExecutionService } from './workflow.execution.service';
 import { WorkflowLogsController } from './workflow.log.controller';
 import { WorkflowLogService } from './workflow.log.service';
+import { WorkflowObservabilityController } from './workflow.observability.controller';
+import { WorkflowObservabilityService } from './workflow.observability.service';
 import { WorkflowPageController } from './workflow.page.controller';
 import { WorkflowPageService } from './workflow.page.service';
 import { WorkflowStatisticsController } from './workflow.statistics.controller';
@@ -45,6 +47,7 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     WorkflowCustomTriggerInvokeController,
     WorkflowLogsController,
     WorkflowStatisticsController,
+    WorkflowObservabilityController,
   ],
   providers: [
     WorkflowCrudService,
@@ -60,6 +63,7 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     WorkflowLogService,
     WorkflowStatisticsService,
     WorkflowTrackerService,
+    WorkflowObservabilityService,
   ],
   imports: [ConductorModule, AssetsModule, TypeOrmModule.forFeature([WorkflowPageEntity, WorkflowPageGroupEntity, ConversationAppEntity]), ToolsModule, CommonModule],
   exports: [WorkflowCrudService, WorkflowExecutionService, WorkflowTrackerService],
