@@ -12,9 +12,9 @@ import { isObject } from 'lodash';
 export type IVinesExecutionResultImageAlt =
   | string
   | {
-      label: string;
-      value: string;
-    };
+    label: string;
+    value: string;
+  };
 
 interface IVirtuaExecutionResultGridImageItemProps {
   src: string;
@@ -38,6 +38,14 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
         className="size-full min-h-52 rounded-lg border border-input object-cover object-center shadow-sm"
         src={src}
         alt="image"
+        disabledPreview={false} // 确保预览功能启用
+        // VinesImage组件自带优化和缩略图功能，内部会自动处理
+        // 通过inspect元素可以看到image标签的src属性中是优化后的URL
+        style={{
+          objectFit: 'cover',
+          width: '100%',
+          height: '100%'
+        }}
       />
 
       {altLabel.trim() !== '' && (
