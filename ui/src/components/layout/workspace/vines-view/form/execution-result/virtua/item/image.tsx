@@ -1,6 +1,8 @@
 import React from 'react';
 
 import { Copy } from 'lucide-react';
+import Image from 'rc-image';
+import 'rc-image/assets/index.css';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -32,8 +34,8 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   const altContent = isObject(alt) ? alt.value : alt;
 
   return (
-    <div className="vines-center relative overflow-hidden rounded-lg [&_.rc-image-mask]:absolute [&_.rc-image-mask]:h-full [&_.rc-image]:static">
-      <img
+    <div className="vines-center relative overflow-hidden rounded-lg">
+      <Image
         className="size-full min-h-52 rounded-lg border border-input object-cover object-center shadow-sm"
         src={src}
         alt="image"
@@ -41,6 +43,10 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
           objectFit: 'cover',
           width: '100%',
           height: '100%'
+        }}
+        preview={{
+          mask: null, // 移除图片上的预览遮罩
+          rootClassName: 'no-flicker-preview'
         }}
       />
 
