@@ -21,6 +21,7 @@ import { ConductorService } from './conductor/conductor.service';
 import { SearchWorkflowExecutionsDto, SearchWorkflowExecutionsOrderDto, WorkflowExecutionSearchableField } from './dto/req/search-workflow-execution.dto';
 import { UpdateTaskStatusDto } from './dto/req/update-task-status.dto';
 import { DebugWorkflowRequest, StartWorkflowRequest, WorkflowExecutionOutput } from './interfaces';
+import { WorkflowObservabilityService } from './workflow.observability.service';
 import { WorkflowTrackerService } from './workflow.tracker.service';
 
 export interface WorkflowWithMetadata extends Workflow {
@@ -36,6 +37,7 @@ export class WorkflowExecutionService {
     @Inject(RATE_LIMITER_TOKEN) private readonly rateLimiter: RateLimiter,
     private readonly eventEmitter: EventEmitter2,
     private readonly workflowTrackerService: WorkflowTrackerService,
+    private readonly workflowObservabilityService: WorkflowObservabilityService,
   ) { }
 
   private async populateMetadataByForExecutions(executions: Workflow[]): Promise<WorkflowWithMetadata[]> {
@@ -594,8 +596,11 @@ export class WorkflowExecutionService {
       workflowId,
       teamId,
     });
-    this.eventEmitter.on(`workflow.completed.${workflowInstanceId}`, async (result) => {
-      // TODO: 执行完成回调
+    this.eventEmitter.on(`workflow.completed.${workflowInstanceId}`, async (result: { workflowInstanceId: string; result: Workflow; timestamp: number }) => {
+      const observabilityFactories = await this.workflowObservabilityService.getWorkflowObservabilityInstanceList(teamId, workflowId);
+      for (const factory of observabilityFactories) {
+        await factory(result.result);
+      }
     });
 
     await this.workflowRepository.saveWorkflowExecution({
