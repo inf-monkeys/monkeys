@@ -38,7 +38,7 @@ export class MigartionAddWorkflowObservability1745922805471 implements Migration
                     },
                     {
                         name: 'platform_config',
-                        type: 'simple-json',
+                        type: 'text',
                     },
                 ],
             }),
