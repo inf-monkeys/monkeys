@@ -1,7 +1,7 @@
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateWorkflowObservabilityDto } from './dto/req/create-workflow-observability.dto';
 import { WorkflowObservabilityService } from './workflow.observability.service';
@@ -39,5 +39,15 @@ export class WorkflowObservabilityController {
     return new SuccessResponse({
       data: workflowObservability,
     });
+  }
+
+  @Delete('/:workflowId/observability/:observabilityId')
+  @ApiOperation({
+    summary: '删除 workflow 可观测性',
+    description: '删除 workflow 可观测性',
+  })
+  public async deleteWorkflowObservability(@Param('observabilityId') observabilityId: string) {
+    await this.service.deleteWorkflowObservability(observabilityId);
+    return new SuccessResponse();
   }
 }

@@ -20,6 +20,10 @@ export class WorkflowObservabilityService {
     return workflowObservability;
   }
 
+  public async deleteWorkflowObservability(observabilityId: string) {
+    await this.observabilityRepository.deleteWorkflowObservability(observabilityId);
+  }
+
   convertWorkflowExecutionToLangfuseFactory(langfuse: Langfuse) {
     return async (rawWorkflowExecution: Workflow) => {
       const workflowId = rawWorkflowExecution.workflowDefinition.name;
