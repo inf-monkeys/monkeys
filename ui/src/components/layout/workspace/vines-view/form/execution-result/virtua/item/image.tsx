@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { VinesImage } from '@/components/ui/vines-image';
 import { useCopy } from '@/hooks/use-copy.ts';
 import { isObject } from 'lodash';
 
@@ -34,13 +33,10 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
 
   return (
     <div className="vines-center relative overflow-hidden rounded-lg [&_.rc-image-mask]:absolute [&_.rc-image-mask]:h-full [&_.rc-image]:static">
-      <VinesImage
+      <img
         className="size-full min-h-52 rounded-lg border border-input object-cover object-center shadow-sm"
         src={src}
         alt="image"
-        disabledPreview={false} // 确保预览功能启用
-        // VinesImage组件自带优化和缩略图功能，内部会自动处理
-        // 通过inspect元素可以看到image标签的src属性中是优化后的URL
         style={{
           objectFit: 'cover',
           width: '100%',
