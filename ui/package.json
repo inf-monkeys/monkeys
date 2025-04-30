@@ -4,10 +4,11 @@
   "version": "1.0.3",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "yarn fix:deps && vite",
+    "build": "yarn fix:deps && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "fix:deps": "npx patch-package"
   },
   "dependencies": {
     "@cyco130/vite-plugin-mdx": "^1.0.4",
@@ -160,6 +161,7 @@
     "eslint-plugin-react-refresh": "^0.4.6",
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "eslint-plugin-unused-imports": "^3.1.0",
+    "patch-package": "^8.0.0",
     "postcss": "^8.4.38",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.6.9",

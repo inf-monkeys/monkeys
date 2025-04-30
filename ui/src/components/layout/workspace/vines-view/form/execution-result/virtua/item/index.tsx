@@ -32,7 +32,8 @@ export type IVinesExecutionResultItem = VinesWorkflowExecutionOutputListItem & {
           [imgUrl: string]: IVinesExecutionResultImageAltCopy;
         }
       | undefined;
-    index: number;
+    // index: number;
+    key: string;
     status: VinesWorkflowExecutionType;
   };
 };

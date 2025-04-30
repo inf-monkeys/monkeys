@@ -1,37 +1,40 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { useDebounceFn, useMount } from 'ahooks';
-import { isArray, isObject, isUndefined } from 'lodash';
-import { CirclePause } from 'lucide-react';
+import { useDebounceFn } from 'ahooks';
+import { AnimatePresence, motion } from 'framer-motion';
+import { isArray, isObject } from 'lodash';
+import { CirclePause, History } from 'lucide-react';
 import { Masonry, useInfiniteLoader } from 'masonic';
+import { useTranslation } from 'react-i18next';
 
 import { useWorkflowExecutionOutputs } from '@/apis/workflow/execution';
 import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
-import { useVinesSimplifiedExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result/convert-output.ts';
+import { useVinesIframeMessage } from '@/components/layout/workspace/vines-view/form/execution-result/iframe-message.ts';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result/index.tsx';
+import { useVinesExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result/use-vines-execution-result.ts';
 import { IVinesExecutionResultItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item';
 import { VirtuaExecutionResultGridImageItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/image.tsx';
 import { VirtuaExecutionResultGridWrapper } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/wrapper/index.tsx';
+import { Label } from '@/components/ui/label.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
 interface IMasonryExecutionResultGridProps {
-  data: IVinesExecutionResultItem[][];
-
-  isMiniFrame?: boolean;
-  workflowId?: string | null;
-  total: number;
-  width: number;
+  workflowId: string | null;
   height: number;
+
+  enablePostMessage?: boolean;
 }
 
 export const MasonryExecutionResultGrid: React.FC<IMasonryExecutionResultGridProps> = ({
-  total,
-  isMiniFrame,
   workflowId,
   height,
+  enablePostMessage,
 }) => {
+  const { t } = useTranslation();
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const [page, setPage] = useState(1);
@@ -43,90 +46,124 @@ export const MasonryExecutionResultGrid: React.FC<IMasonryExecutionResultGridPro
       wait: 300,
     },
   );
-  const { data, isLoading } = useWorkflowExecutionOutputs(workflowId, page, LOAD_LIMIT, 1000);
-  const outputs = data?.data ?? [];
+
+  const { data, isLoading, mutate } = useWorkflowExecutionOutputs(workflowId, page, LOAD_LIMIT);
+
+  const { conversionOutputs } = useVinesExecutionResult();
+
+  const currentPageExecutionsCount = useMemo(() => data?.data.length ?? 0, [data?.data]);
+
+  const currentPageExecutionResultItems = useMemo(() => conversionOutputs(data?.data ?? []), [data?.data]);
+
+  const currentPageExecutionsResultItemsCount = currentPageExecutionResultItems.length;
+
+  const totalExecutionCount = data?.total ?? 0;
+
+  useVinesIframeMessage({ outputs: currentPageExecutionResultItems, mutate, enable: enablePostMessage });
 
   const loadedPagesRef = useRef<number[]>([]);
-  const loadedPageItemsLengthRef = useRef<number>(LOAD_LIMIT);
+  const loadedPageExecutionsLengthRef = useRef<number>(LOAD_LIMIT);
+  // const loadedPageExecutionsResultItemsLengthRef = useRef<number>(LOAD_LIMIT);
   const [list, setList] = useState<IVinesExecutionResultItem[]>([]);
 
-  const { conversionOutputs } = useVinesSimplifiedExecutionResult();
   useEffect(() => {
-    if (isUndefined(data)) return;
-
-    const resultList = conversionOutputs(outputs);
-    if (resultList.length) {
-      if (!loadedPagesRef.current.includes(page)) {
-        setList((prev) => [...prev, ...resultList]);
-        loadedPagesRef.current.push(page);
-        loadedPageItemsLengthRef.current += outputs.length;
-      } else {
-        setList((prev) => {
-          const startIndex = loadedPagesRef.current.indexOf(page) * LOAD_LIMIT;
-          const newList = [...prev];
-          for (let i = 0; i < resultList.length; i++) {
-            if (startIndex + i < newList.length) {
-              newList[startIndex + i] = resultList[i];
-            } else {
-              newList.push(resultList[i]);
-            }
+    if (!loadedPagesRef.current.includes(page)) {
+      setList((prev) => [...prev, ...currentPageExecutionResultItems]);
+      loadedPagesRef.current.push(page);
+      loadedPageExecutionsLengthRef.current += currentPageExecutionsCount;
+    } else {
+      setList((prev) => {
+        const startIndex = loadedPagesRef.current.indexOf(page) * LOAD_LIMIT;
+        const newList = [...prev];
+        for (let i = 0; i < currentPageExecutionsResultItemsCount; i++) {
+          if (startIndex + i < newList.length) {
+            newList[startIndex + i] = currentPageExecutionResultItems[i];
+          } else {
+            newList.push(currentPageExecutionResultItems[i]);
           }
-          return newList;
-        });
-      }
+        }
+        return newList;
+        // return [...prev, ...currentPageExecutionResultItems];
+      });
     }
-  }, [isMiniFrame, outputs, page, conversionOutputs, data]);
+  }, [page, currentPageExecutionResultItems, totalExecutionCount]);
 
-  // 无限滚动加载器，当用户滚动到底部时触发
-  const loader = () => {
-    // 如果正在加载或已加载全部内容，则不触发
-    if (isLoading || loadedPageItemsLengthRef.current >= total) {
-      return;
-    }
-
-    // 只有当当前页面的数据都已经加载完毕时才加载下一页
-    if (outputs.length === LOAD_LIMIT) {
-      debouncedChangePage();
-    }
-  };
+  useEffect(() => {
+    console.log(list, currentPageExecutionResultItems, totalExecutionCount);
+  }, [list, currentPageExecutionResultItems]);
 
   // 使用useInfiniteLoader钩子来优化无限滚动
-  const infiniteLoader = useInfiniteLoader(loader, {
-    totalItems: total, // 总项目数
-    isItemLoaded: (index) => index < list.length, // 检查项目是否已加载
-    threshold: 3, // 提前加载的阈值，较高的值可以提前触发加载
-  });
-  const [shouldShowMasonry, setShowMasonry] = useState(false);
-  // const forceUpdate = useForceUpdate();
-  // const event$ = useEventEmitter();
-  // event$.useSubscription(() => {
-  //   forceUpdate();
-  // });
-  useMount(() => {
-    setTimeout(() => setShowMasonry(true), 350);
-  });
+  const infiniteLoader = useInfiniteLoader(
+    () => {
+      console.log('load more');
+      // 如果正在加载或已加载全部内容，则不触发
+      if (isLoading || loadedPageExecutionsLengthRef.current >= totalExecutionCount) {
+        return;
+      }
+
+      console.log(currentPageExecutionsCount);
+
+      // 只有当当前页面的数据都已经加载完毕时才加载下一页
+      if (currentPageExecutionsCount == LOAD_LIMIT) {
+        debouncedChangePage();
+      }
+    },
+    {
+      // isItemLoaded: (index, items) => !!items[index], // 检查项目是否已加载
+      // threshold: 3, // 提前加载的阈值，较高的值可以提前触发加载
+    },
+  );
+
+  const containerWidth = usePageStore((s) => s.containerWidth);
 
   return (
-    <ScrollArea
-      className={cn('-pr-0.5 z-20 mr-0.5 bg-background [&>[data-radix-scroll-area-viewport]]:p-2', !total && 'hidden')}
-      ref={scrollRef}
-      style={{ height: height }}
-      disabledOverflowMask
-    >
-      {shouldShowMasonry && (
+    <>
+      <ScrollArea
+        className={cn(
+          '-pr-0.5 z-20 mr-0.5 bg-background [&>[data-radix-scroll-area-viewport]]:p-2',
+          !totalExecutionCount && 'hidden',
+        )}
+        ref={scrollRef}
+        style={{ height }}
+        disabledOverflowMask
+      >
         <Masonry
           items={list}
+          ssrWidth={(containerWidth - 48) * 0.6 - 16}
           columnWidth={200} // 调整列宽，确保在容器内能完整显示
           columnGutter={12} // 稍微增加列间距以提高可读性
           rowGutter={12}
-          overscanBy={5} // 增加预渲染的项目数，提高滚动性能
           render={({ data }) => {
             return <MasnoryItem {...data} />;
           }}
           onRender={infiniteLoader}
         />
-      )}
-    </ScrollArea>
+      </ScrollArea>
+      <AnimatePresence mode="popLayout">
+        {isLoading ? (
+          <motion.div
+            key="vines-execution-result-loading"
+            className="vines-center pointer-events-none absolute left-0 top-0 z-0 size-full"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { delay: 0.5 } }}
+            exit={{ opacity: 0 }}
+          >
+            <VinesLoading />
+          </motion.div>
+        ) : currentPageExecutionsResultItemsCount ? null : (
+          <motion.div
+            key="vines-execution-result-empty"
+            className="vines-center pointer-events-none absolute left-0 top-0 z-0 size-full flex-col gap-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { delay: 0.3 } }}
+            exit={{ opacity: 0 }}
+          >
+            <History size={64} />
+            <Label className="text-sm">{t('workspace.logs-view.log.list.empty')}</Label>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 
@@ -150,13 +187,19 @@ const MasnoryItem: React.FC<IVinesExecutionResultItem> = ({ render, ...it }) => 
     case 'SCHEDULED':
     case 'RUNNING':
       return (
-        <div className="flex h-40 items-center justify-center rounded-lg border border-input shadow-sm">
+        <div
+          key={render.key}
+          className="flex h-40 items-center justify-center rounded-lg border border-input shadow-sm"
+        >
           <VinesLoading />
         </div>
       );
     case 'PAUSED':
       return (
-        <div className="flex h-40 items-center justify-center rounded-lg border border-input shadow-sm">
+        <div
+          key={render.key}
+          className="flex h-40 items-center justify-center rounded-lg border border-input shadow-sm"
+        >
           <CirclePause className="stroke-yellow-12" size={48} />
         </div>
       );

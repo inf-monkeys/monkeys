@@ -25,7 +25,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
 }) => {
   const { t } = useTranslation();
   const workflowId = useFlowStore((s) => s.workflowId);
-  const { mutate } = useWorkflowExecutionOutputs(workflowId);
+  // const { mutate } = useWorkflowExecutionOutputs(workflowId);
 
   // 使用直接打开链接方式下载，避免CORS问题
   const handleDownload = useMemoizedFn(() => {
@@ -52,13 +52,13 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
       toast.promise(deleteWorkflowExecution(targetInstanceId), {
         success: () => {
           // 直接移除本地 outputs 数据
-          void mutate((currentData) => {
-            if (!currentData) return currentData;
-            return {
-              ...currentData,
-              data: currentData.data.filter((it) => it?.instanceId !== targetInstanceId),
-            };
-          }, false); // 只更新本地缓存
+          // void mutate((currentData) => {
+          //   if (!currentData) return currentData;
+          //   return {
+          //     ...currentData,
+          //     data: currentData.data.filter((it) => it?.instanceId !== targetInstanceId),
+          //   };
+          // }, false); // 只更新本地缓存
           return t('common.delete.success');
         },
         error: t('common.delete.error'),

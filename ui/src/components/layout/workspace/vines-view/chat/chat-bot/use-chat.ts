@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import useSWR from 'swr';
 
-import { isEmpty, omit } from 'lodash';
+import { isEmpty, isObject, omit } from 'lodash';
 import { toast } from 'sonner';
 
 import { ChatCompletionLog } from '@/components/layout/workspace/vines-view/chat/chat-bot/virtua-messages/chat-message/tool-display';
@@ -26,6 +26,7 @@ export type IVinesMessageImageContentItem = {
 export type IVinesMessageContentItem = IVinesMessageImageContentItem | IVinesMessageTextContentItem;
 
 export type IVinesMessageContent = IVinesMessageContentItem[] | string;
+
 export interface IVinesMessage {
   id?: string;
   content: IVinesMessageContent;
@@ -223,7 +224,7 @@ export const useChat = ({
         void mutateLoading(false);
 
         const botMessage = messagesRef.current.at(-1);
-        if (isEmpty(botMessage?.content?.trim() ?? '')) {
+        if (isObject(botMessage?.content) ? !botMessage?.content.length : isEmpty(botMessage?.content?.trim() ?? '')) {
           toast.warning('No response to the conversation!');
         }
       }
