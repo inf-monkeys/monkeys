@@ -1,6 +1,7 @@
 import { useMemoizedFn } from 'ahooks';
-import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings.ts';
+
 import { IVinesExecutionResultItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item';
+import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings.ts';
 
 export const useVinesSimplifiedExecutionResult = () => {
   const conversionOutputs = useMemoizedFn((outputs: VinesWorkflowExecutionOutputListItem[], col = 3) => {
@@ -16,6 +17,7 @@ export const useVinesSimplifiedExecutionResult = () => {
           render: {
             ...it,
             index,
+            status: rest.status,
           },
         } as unknown as IVinesExecutionResultItem;
 

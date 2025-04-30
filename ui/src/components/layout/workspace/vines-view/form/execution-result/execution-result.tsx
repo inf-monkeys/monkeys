@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { useAutoAnimate } from '@formkit/auto-animate/react';
+import { useDebounceFn, useMount } from 'ahooks';
 import { isArray, isObject, isUndefined } from 'lodash';
+import { CirclePause } from 'lucide-react';
 import { Masonry, useInfiniteLoader } from 'masonic';
 
 import { useWorkflowExecutionOutputs } from '@/apis/workflow/execution';
@@ -10,14 +11,9 @@ import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execut
 import { IVinesExecutionResultItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item';
 import { VirtuaExecutionResultGridImageItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/image.tsx';
 import { VirtuaExecutionResultGridWrapper } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/wrapper/index.tsx';
-import { JSONValue } from '@/components/ui/code-editor';
+import { VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import {
-  VinesWorkflowExecutionInput,
-  VinesWorkflowExecutionOutputListItem,
-} from '@/package/vines-flow/core/typings.ts';
 import { cn } from '@/utils';
-import { useDebounceFn, useMount } from 'ahooks';
 
 interface IMasonryExecutionResultGridProps {
   data: IVinesExecutionResultItem[][];
@@ -37,9 +33,6 @@ export const MasonryExecutionResultGrid: React.FC<IMasonryExecutionResultGridPro
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const [animationParent, enableAutoAnimate] = useAutoAnimate();
-  const scrolling = useRef(false);
-
   const [page, setPage] = useState(1);
   const { run: debouncedChangePage } = useDebounceFn(
     () => {
@@ -49,7 +42,7 @@ export const MasonryExecutionResultGrid: React.FC<IMasonryExecutionResultGridPro
       wait: 300,
     },
   );
-  const { data, isLoading } = useWorkflowExecutionOutputs(workflowId, page, LOAD_LIMIT, 0);
+  const { data, isLoading } = useWorkflowExecutionOutputs(workflowId, page, LOAD_LIMIT, 1000);
   const outputs = data?.data ?? [];
 
   const loadedPagesRef = useRef<number[]>([]);
@@ -58,15 +51,30 @@ export const MasonryExecutionResultGrid: React.FC<IMasonryExecutionResultGridPro
 
   const { conversionOutputs } = useVinesSimplifiedExecutionResult();
   useEffect(() => {
-    if (isUndefined(data) || loadedPagesRef.current.includes(page)) return;
+    if (isUndefined(data)) return;
 
     const resultList = conversionOutputs(outputs);
     if (resultList.length) {
-      setList((prev) => [...prev, ...resultList]);
-      loadedPagesRef.current.push(page);
-      loadedPageItemsLengthRef.current += outputs.length;
+      if (!loadedPagesRef.current.includes(page)) {
+        setList((prev) => [...prev, ...resultList]);
+        loadedPagesRef.current.push(page);
+        loadedPageItemsLengthRef.current += outputs.length;
+      } else {
+        setList((prev) => {
+          const startIndex = loadedPagesRef.current.indexOf(page) * LOAD_LIMIT;
+          const newList = [...prev];
+          for (let i = 0; i < resultList.length; i++) {
+            if (startIndex + i < newList.length) {
+              newList[startIndex + i] = resultList[i];
+            } else {
+              newList.push(resultList[i]);
+            }
+          }
+          return newList;
+        });
+      }
     }
-  }, [isMiniFrame, outputs, page]);
+  }, [isMiniFrame, outputs, page, conversionOutputs, data]);
 
   // 无限滚动加载器，当用户滚动到底部时触发
   const loader = () => {
@@ -121,29 +129,9 @@ export const MasonryExecutionResultGrid: React.FC<IMasonryExecutionResultGridPro
   );
 };
 
-type IMasonryExecutionResultItem = VinesWorkflowExecutionOutputListItem & {
-  render: {
-    type: 'image' | 'video' | 'text' | 'json' | 'empty';
-    data: JSONValue;
-    alt?:
-    | string
-    | string[]
-    | { [imgUrl: string]: string }
-    | {
-      [imgUrl: string]: {
-        type: 'copy-param';
-        label: string;
-        data: VinesWorkflowExecutionInput[];
-      };
-    }
-    | undefined;
-    index: number;
-  };
-};
-
 // 瀑布流项目组件
-const MasnoryItem: React.FC<IMasonryExecutionResultItem> = ({ render, ...it }) => {
-  const { type, data, alt } = render;
+const MasnoryItem: React.FC<IVinesExecutionResultItem> = ({ render, ...it }) => {
+  const { type, data, alt, status } = render;
 
   const altLabel = isArray(alt)
     ? alt[0]
@@ -151,11 +139,27 @@ const MasnoryItem: React.FC<IMasonryExecutionResultItem> = ({ render, ...it }) =
   const altContent = isArray(alt)
     ? altLabel
     : (isObject(alt?.[data as string]) && alt?.[data as string].type === 'copy-param'
-      ? JSON.stringify({
-        type: 'input-parameters',
-        data: [...it.input, ...alt?.[data as string].data],
-      })
-      : alt?.[data as string]) ?? '';
+        ? JSON.stringify({
+            type: 'input-parameters',
+            data: [...it.input, ...(alt?.[data as string]?.data ?? [])],
+          })
+        : alt?.[data as string]) ?? '';
+
+  switch (status) {
+    case 'SCHEDULED':
+    case 'RUNNING':
+      return (
+        <div className="flex h-40 items-center justify-center rounded-lg border border-input shadow-sm">
+          <VinesLoading />
+        </div>
+      );
+    case 'PAUSED':
+      return (
+        <div className="flex h-40 items-center justify-center rounded-lg border border-input shadow-sm">
+          <CirclePause className="stroke-yellow-12" size={48} />
+        </div>
+      );
+  }
 
   switch (type) {
     case 'image':
@@ -164,7 +168,7 @@ const MasnoryItem: React.FC<IMasonryExecutionResultItem> = ({ render, ...it }) =
         <div className="relative overflow-hidden rounded-lg border border-input shadow-sm">
           {/* 使用指定结构确保事件正确传递 */}
           <VirtuaExecutionResultGridWrapper data={{ ...it, render }} src={data as string}>
-            <div className="w-full h-full" onClick={e => e.stopPropagation()}>
+            <div className="h-full w-full" onClick={(e) => e.stopPropagation()}>
               <VirtuaExecutionResultGridImageItem
                 src={data as string}
                 alt={{

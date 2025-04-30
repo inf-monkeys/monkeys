@@ -10,6 +10,7 @@ import { JSONValue } from '@/components/ui/code-editor';
 import {
   VinesWorkflowExecutionInput,
   VinesWorkflowExecutionOutputListItem,
+  VinesWorkflowExecutionType,
 } from '@/package/vines-flow/core/typings.ts';
 import { cn } from '@/utils';
 
@@ -24,14 +25,15 @@ export type IVinesExecutionResultItem = VinesWorkflowExecutionOutputListItem & {
     type: 'image' | 'video' | 'text' | 'json' | 'empty';
     data: JSONValue;
     alt?:
-    | string
-    | string[]
-    | { [imgUrl: string]: string }
-    | {
-      [imgUrl: string]: IVinesExecutionResultImageAltCopy;
-    }
-    | undefined;
+      | string
+      | string[]
+      | { [imgUrl: string]: string }
+      | {
+          [imgUrl: string]: IVinesExecutionResultImageAltCopy;
+        }
+      | undefined;
     index: number;
+    status: VinesWorkflowExecutionType;
   };
 };
 
@@ -47,7 +49,7 @@ export const VirtuaExecutionResultGridItem: React.FC<IVirtuaExecutionResultGridI
   data: row,
   loadMore,
   hasMore = false,
-  itemsPerPage = 90
+  itemsPerPage = 90,
 }) => {
   // 使用ref来追踪上次渲染的时间，防止频繁触发loadMore
   const lastRenderTimeRef = useRef<number>(Date.now());
@@ -103,11 +105,11 @@ export const VirtuaExecutionResultGridItem: React.FC<IVirtuaExecutionResultGridI
         const altContent = isArray(alt)
           ? altLabel
           : (isObject(alt?.[data as string]) && alt?.[data as string].type === 'copy-param'
-            ? JSON.stringify({
-              type: 'input-parameters',
-              data: [...it.input, ...alt?.[data as string].data],
-            })
-            : alt?.[data as string]) ?? '';
+              ? JSON.stringify({
+                  type: 'input-parameters',
+                  data: [...it.input, ...alt?.[data as string].data],
+                })
+              : alt?.[data as string]) ?? '';
 
         switch (type) {
           case 'image':

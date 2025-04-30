@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useDeleteMediaData } from '@/apis/media-data/index.ts';
-
 import { IVinesExecutionResultItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item';
 import { VirtuaExecutionResultRawDataDialog } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/wrapper/raw-data-dialog.tsx';
 import { Button } from '@/components/ui/button';
@@ -85,7 +84,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
           window.dispatchEvent(event);
           return true;
         })
-        .catch(error => {
+        .catch((error) => {
           console.error('删除API错误:', error);
           throw error;
         }),
@@ -112,7 +111,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
   return (
     <div className="group/vgi relative flex h-full min-w-[200px] flex-1 flex-col p-1">
       {/* 图片内容区域，保持点击可以触发预览 */}
-      <div className="flex-1 z-10">{children}</div>
+      <div className="z-10 flex-1">{children}</div>
 
       {/* 操作按钮区域 - 提高z-index确保在最上层可点击 */}
       <div className="absolute right-4 top-4 z-30 flex gap-1 opacity-0 transition-opacity group-hover/vgi:opacity-100">
@@ -120,7 +119,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                className="rounded !p-1 [&_svg]:!size-3 bg-white/80 hover:bg-white shadow-sm"
+                className="rounded bg-white/80 !p-1 shadow-sm hover:bg-white [&_svg]:!size-3"
                 icon={<Download />}
                 variant="outline"
                 size="small"
@@ -138,7 +137,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                className="rounded !p-1 [&_svg]:!size-3 bg-white/80 hover:bg-white shadow-sm"
+                className="rounded bg-white/80 !p-1 shadow-sm hover:bg-white [&_svg]:!size-3"
                 icon={<Trash />}
                 variant="outline"
                 size="small"
@@ -154,7 +153,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
 
         <VirtuaExecutionResultRawDataDialog data={data}>
           <Button
-            className="rounded !p-1 [&_svg]:!size-3 bg-white/80 hover:bg-white shadow-sm"
+            className="rounded bg-white/80 !p-1 shadow-sm hover:bg-white [&_svg]:!size-3"
             icon={<Ellipsis />}
             variant="outline"
             size="small"
@@ -164,9 +163,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
       </div>
 
       {/* hover遮罩 - 半透明，只在hover时显示，z-index设置为20，低于按钮但高于其他元素 */}
-      <div
-        className="absolute inset-0 z-20 bg-black/20 opacity-0 transition-opacity group-hover/vgi:opacity-100 rounded-lg pointer-events-none"
-      ></div>
+      <div className="pointer-events-none absolute inset-0 z-20 rounded-lg bg-black/20 opacity-0 transition-opacity group-hover/vgi:opacity-100"></div>
     </div>
   );
 };
