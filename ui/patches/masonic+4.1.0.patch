@@ -1,0 +1,13 @@
+diff --git a/node_modules/masonic/dist/module/masonry.js b/node_modules/masonic/dist/module/masonry.js
+index 099c812..6195c20 100644
+--- a/node_modules/masonic/dist/module/masonry.js
++++ b/node_modules/masonic/dist/module/masonry.js
+@@ -24,7 +24,7 @@ export function Masonry(props) {
+   const containerPos = useContainerPosition(containerRef, windowSize);
+   const nextProps = Object.assign({
+     offset: containerPos.offset,
+-    width: containerPos.width || windowSize[0],
++    width: containerPos.width || props.ssrWidth || windowSize[0],
+     height: windowSize[1],
+     containerRef
+   }, props);

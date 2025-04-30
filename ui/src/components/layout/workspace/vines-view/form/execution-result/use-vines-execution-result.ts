@@ -4,9 +4,8 @@ import { IVinesExecutionResultItem } from '@/components/layout/workspace/vines-v
 import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings.ts';
 
 export const useVinesExecutionResult = () => {
-  const conversionOutputs = useMemoizedFn((outputs: VinesWorkflowExecutionOutputListItem[], col = 3) => {
-    const result: IVinesExecutionResultItem[][] = [];
-    let currentRow: IVinesExecutionResultItem[] = [];
+  const conversionOutputs = useMemoizedFn((outputs: VinesWorkflowExecutionOutputListItem[]) => {
+    const result: IVinesExecutionResultItem[] = [];
 
     for (const execution of outputs ?? []) {
       const { output: executionOutput = [], rawOutput = {}, ...rest } = execution;
@@ -17,7 +16,8 @@ export const useVinesExecutionResult = () => {
           output: rawOutput,
           render: {
             ...it,
-            index,
+            key: execution.instanceId + '-' + index,
+            status: rest.status,
           },
         } as unknown as IVinesExecutionResultItem;
 
@@ -34,21 +34,15 @@ export const useVinesExecutionResult = () => {
         //   const newRow = [data].concat(new Array(col - 1).fill(EMPTY_ITEM));
         //   result.push(newRow);
         // } else {
-        if (currentRow.length >= col) {
-          result.push(currentRow);
-          currentRow = [];
-        }
-        currentRow.push(data);
+
+        result.push(data);
         // }
       }
     }
 
     // 添加剩余的当前行
-    if (currentRow.length > 0) {
-      result.push(currentRow);
-    }
 
-    return result.map((row) => row.filter((item) => item.render.type !== 'empty'));
+    return result.filter((item) => item.render.type !== 'empty');
   });
 
   return {
