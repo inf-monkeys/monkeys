@@ -6,6 +6,7 @@ import { CirclePause } from 'lucide-react';
 import { Masonry, useInfiniteLoader } from 'masonic';
 
 import { useWorkflowExecutionOutputs } from '@/apis/workflow/execution';
+import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
 import { useVinesSimplifiedExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result/convert-output.ts';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result/index.tsx';
 import { IVinesExecutionResultItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item';
@@ -166,7 +167,6 @@ const MasnoryItem: React.FC<IVinesExecutionResultItem> = ({ render, ...it }) => 
       // 使用包装组件来支持下载和删除功能
       return (
         <div className="relative overflow-hidden rounded-lg border border-input shadow-sm">
-          {/* 使用指定结构确保事件正确传递 */}
           <VirtuaExecutionResultGridWrapper data={{ ...it, render }} src={data as string}>
             <div className="h-full w-full" onClick={(e) => e.stopPropagation()}>
               <VirtuaExecutionResultGridImageItem
@@ -180,22 +180,13 @@ const MasnoryItem: React.FC<IVinesExecutionResultItem> = ({ render, ...it }) => 
           </VirtuaExecutionResultGridWrapper>
         </div>
       );
-    case 'video':
-      return (
-        <div className="relative overflow-hidden rounded-lg border border-input shadow-sm">
-          <video src={data as string} controls className="h-auto w-full" preload="metadata" />
-        </div>
-      );
-    case 'text':
-    case 'json':
-      return (
-        <div className="overflow-hidden rounded-lg border border-input p-2 shadow-sm">
-          <pre className="max-h-48 overflow-auto text-xs">
-            {typeof data === 'object' ? JSON.stringify(data, null, 2) : String(data)}
-          </pre>
-        </div>
-      );
     default:
-      return null;
+      return (
+        <VirtuaExecutionResultGridWrapper data={{ ...it, render }}>
+          <div className="overflow-hidden rounded-lg border border-input p-2 shadow-sm">
+            <VinesAbstractDataPreview data={data} className="h-full" />
+          </div>
+        </VirtuaExecutionResultGridWrapper>
+      );
   }
 };
