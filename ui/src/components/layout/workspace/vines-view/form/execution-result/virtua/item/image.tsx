@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { Copy } from 'lucide-react';
-import Image from 'rc-image';
 import 'rc-image/assets/index.css';
 import { useTranslation } from 'react-i18next';
 
@@ -9,13 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCopy } from '@/hooks/use-copy.ts';
 import { isObject } from 'lodash';
+import { useMount } from 'ahooks';
+import { AnimatePresence, motion } from 'framer-motion';
+import { VinesLoading } from '@/components/ui/loading';
 
 export type IVinesExecutionResultImageAlt =
   | string
   | {
-    label: string;
-    value: string;
-  };
+      label: string;
+      value: string;
+    };
 
 interface IVirtuaExecutionResultGridImageItemProps {
   src: string;
@@ -33,22 +35,38 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   const altLabel = isObject(alt) ? alt.label : alt;
   const altContent = isObject(alt) ? alt.value : alt;
 
+  const [loadding, setLoading] = useState(true);
+
+  useMount(() => {
+    setLoading(false);
+  });
   return (
     <div className="vines-center relative overflow-hidden rounded-lg">
-      <Image
-        className="size-full min-h-52 rounded-lg border border-input object-cover object-center shadow-sm"
-        src={src}
-        alt="image"
-        style={{
-          objectFit: 'cover',
-          width: '100%',
-          height: '100%'
-        }}
-        preview={{
-          mask: null, // 移除图片上的预览遮罩
-          rootClassName: 'no-flicker-preview'
-        }}
-      />
+      <AnimatePresence>
+        {true ? (
+          <img
+            className="size-full min-h-52 rounded-lg border border-input object-cover object-center shadow-sm"
+            src={src}
+            alt="image"
+            style={{
+              objectFit: 'cover',
+              width: '100%',
+              height: '100%',
+            }}
+          />
+        ) : (
+          <>
+            <motion.div
+              key="vines-image-loading-skeleton"
+              className="size-full animate-pulse rounded-md bg-muted"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            />
+            <VinesLoading key="vines-image-loading" className="absolute" />
+          </>
+        )}
+      </AnimatePresence>
 
       {altLabel.trim() !== '' && (
         <Tooltip>

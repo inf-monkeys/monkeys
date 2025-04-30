@@ -21,7 +21,7 @@ export const WorkspaceIframe: React.FC<IWorkspaceIframeProps> = () => {
   const setPage = usePageStore((s) => s.setPage);
   const setVinesIFrameVisible = usePageStore((s) => s.setVinesIFrameVisible);
   useEffect(() => {
-    setContainerWidth(width);
+    // setContainerWidth(width);
     setContainerHeight(height);
     setWorkbenchVisible(false);
     setVinesIFrameVisible(true);

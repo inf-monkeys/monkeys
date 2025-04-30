@@ -2,14 +2,22 @@ import React, { useEffect, useRef } from 'react';
 
 import { isArray, isObject } from 'lodash';
 
-import { VinesAbstractVideo } from '@/components/layout/workspace/vines-view/_common/data-display/abstract/node/video.tsx';
-import { VirtuaExecutionResultGridImageItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/image.tsx';
-import { VirtuaExecutionResultGridRawItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/raw.tsx';
-import { VirtuaExecutionResultGridWrapper } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/wrapper';
+import {
+  VinesAbstractVideo
+} from '@/components/layout/workspace/vines-view/_common/data-display/abstract/node/video.tsx';
+import {
+  VirtuaExecutionResultGridImageItem
+} from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/image.tsx';
+import {
+  VirtuaExecutionResultGridRawItem
+} from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/raw.tsx';
+import {
+  VirtuaExecutionResultGridWrapper
+} from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/wrapper';
 import { JSONValue } from '@/components/ui/code-editor';
 import {
   VinesWorkflowExecutionInput,
-  VinesWorkflowExecutionOutputListItem,
+  VinesWorkflowExecutionOutputListItem
 } from '@/package/vines-flow/core/typings.ts';
 import { cn } from '@/utils';
 
@@ -24,13 +32,13 @@ export type IVinesExecutionResultItem = VinesWorkflowExecutionOutputListItem & {
     type: 'image' | 'video' | 'text' | 'json' | 'empty';
     data: JSONValue;
     alt?:
-    | string
-    | string[]
-    | { [imgUrl: string]: string }
-    | {
-      [imgUrl: string]: IVinesExecutionResultImageAltCopy;
-    }
-    | undefined;
+      | string
+      | string[]
+      | { [imgUrl: string]: string }
+      | {
+          [imgUrl: string]: IVinesExecutionResultImageAltCopy;
+        }
+      | undefined;
     index: number;
   };
 };
@@ -47,7 +55,7 @@ export const VirtuaExecutionResultGridItem: React.FC<IVirtuaExecutionResultGridI
   data: row,
   loadMore,
   hasMore = false,
-  itemsPerPage = 90
+  itemsPerPge = 90,
 }) => {
   // 使用ref来追踪上次渲染的时间，防止频繁触发loadMore
   const lastRenderTimeRef = useRef<number>(Date.now());
@@ -103,13 +111,13 @@ export const VirtuaExecutionResultGridItem: React.FC<IVirtuaExecutionResultGridI
         const altContent = isArray(alt)
           ? altLabel
           : (isObject(alt?.[data as string]) && alt?.[data as string].type === 'copy-param'
-            ? JSON.stringify({
-              type: 'input-parameters',
-              data: [...it.input, ...alt?.[data as string].data],
-            })
-            : alt?.[data as string]) ?? '';
+              ? JSON.stringify({
+                  type: 'input-parameters',
+                  data: [...it.input, ...alt?.[data as string].data],
+                })
+              : alt?.[data as string]) ?? '';
 
-        switch (type) {
+        sitch (type) {
           case 'image':
             return (
               <VirtuaExecutionResultGridWrapper data={it} key={i} src={data as string}>

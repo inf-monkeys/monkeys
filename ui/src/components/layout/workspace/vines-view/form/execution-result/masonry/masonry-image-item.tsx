@@ -2,8 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { isArray, isObject, isUndefined } from 'lodash';
-import { useInfiniteLoader } from 'masonic';
-import { Masonry } from './masonry';
+import { Masonry, useInfiniteLoader } from 'masonic';
 
 import { useWorkflowExecutionOutputs } from '@/apis/workflow/execution';
 import { useVinesSimplifiedExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result/convertOutput.ts';
@@ -113,18 +112,17 @@ export const MasonryExecutionResultGrid: React.FC<IMasonryExecutionResultGridPro
       {shouldShowMasonry && (
         <>
           <Masonry
-            containerRef={scrollRef}
             items={list}
             columnWidth={200} // 调整列宽，确保在容器内能完整显示
             columnGutter={12} // 稍微增加列间距以提高可读性
             rowGutter={12}
             overscanBy={5} // 增加预渲染的项目数，提高滚动性能
             render={({ data, width }) => {
-              return <MasonryItem {...data} key={data.createTime} />;
+              return <MasnoryItem {...data} key={data.createTime} />;
             }}
             onRender={infiniteLoader}
           />
-          <RerenderCounter setShowMasonry={setShowMasonry} />
+          <RerenderCounter />
         </>
       )}
     </ScrollArea>
@@ -153,7 +151,7 @@ type IMasonryExecutionResultItem = VinesWorkflowExecutionOutputListItem & {
 };
 
 // 瀑布流项目组件
-const MasonryItem: React.FC<IMasonryExecutionResultItem> = ({ render, ...it }) => {
+const MasnoryItem: React.FC<IMasonryExecutionResultItem> = ({ render, ...it }) => {
   const { type, data, alt } = render;
 
   const altLabel = isArray(alt)
@@ -207,14 +205,10 @@ const MasonryItem: React.FC<IMasonryExecutionResultItem> = ({ render, ...it }) =
   }
 };
 
-function RerenderCounter(props: any) {
+function RerenderCounter() {
   const ref = useRef(0);
   useEffect(() => {
     console.log(ref.current++);
-    if (ref.current >= 20) {
-      console.log('terminating');
-      // props.setShowMasonry(false);
-    }
   });
   return null;
 }

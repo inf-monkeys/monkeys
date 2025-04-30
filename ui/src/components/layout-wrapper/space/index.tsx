@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 
 import { useSystemConfig } from '@/apis/common';
 
-
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import useUrlState from '@/hooks/use-url-state';
 import { usePageStore } from '@/store/usePageStore';
@@ -24,7 +23,7 @@ export const VinesSpace: React.FC<IVinesSpaceProps> = ({ children, sidebar, clas
   const setWorkbenchVisible = usePageStore((s) => s.setWorkbenchVisible);
 
   useEffect(() => {
-    setContainerWidth(width);
+    // setContainerWidth(width);
     setContainerHeight(height);
     setWorkbenchVisible(false);
   }, [width, height]);

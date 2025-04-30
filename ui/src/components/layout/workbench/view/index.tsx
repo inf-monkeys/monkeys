@@ -46,7 +46,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
 
   useThrottleEffect(
     () => {
-      setContainerWidth(width);
+      // setContainerWidth(width);
       if (height) {
         setContainerHeight(height - (mode === 'mini' ? 16 : 0));
       }
