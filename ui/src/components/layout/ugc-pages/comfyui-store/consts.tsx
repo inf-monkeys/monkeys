@@ -18,8 +18,10 @@ export const createComfyuiStoreColumns = () => [
   columnHelper.accessor('displayName', {
     id: 'title',
     header: '名称',
-    cell: ({ row, getValue }) => (
-      <span className="transition-colors hover:text-primary-500">{getI18nContent(getValue() as string | I18nValue)}</span>
+    cell: ({ getValue }) => (
+      <span className="hover:text-primary-500 transition-colors">
+        {getI18nContent(getValue() as string | I18nValue)}
+      </span>
     ),
   }),
   columnHelper.accessor('description', {

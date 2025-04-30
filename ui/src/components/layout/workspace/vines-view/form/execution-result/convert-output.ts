@@ -4,7 +4,7 @@ import { IVinesExecutionResultItem } from '@/components/layout/workspace/vines-v
 import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings.ts';
 
 export const useVinesSimplifiedExecutionResult = () => {
-  const conversionOutputs = useMemoizedFn((outputs: VinesWorkflowExecutionOutputListItem[], col = 3) => {
+  const conversionOutputs = useMemoizedFn((outputs: VinesWorkflowExecutionOutputListItem[]) => {
     const result: IVinesExecutionResultItem[] = [];
 
     for (const execution of outputs ?? []) {

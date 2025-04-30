@@ -1,7 +1,6 @@
 import React, { KeyboardEventHandler, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import _ from 'lodash';
-import { useTranslation } from 'react-i18next';
 import { createEditor, Editor, Element, Text, Transforms } from 'slate';
 import { HistoryEditor, withHistory } from 'slate-history';
 import { Editable, ReactEditor, RenderElementProps, Slate, useFocused, useSelected, withReact } from 'slate-react';
@@ -64,7 +63,6 @@ const withVariable = (editor: ReactEditor) => {
  */
 // eslint-disable-next-line react-refresh/only-export-components
 export const useVariableEditor = (opt: UseVariableEditorOptions) => {
-  const { t } = useTranslation();
   const { initialValue, initialPointMapper = {}, onChange, width, onBlur, onFocus } = opt;
   const [editor] = useState(() => withVariable(withHistory(withReact(createEditor()))));
   const [pointerMapper, setPointerMapper] = useState(initialPointMapper);

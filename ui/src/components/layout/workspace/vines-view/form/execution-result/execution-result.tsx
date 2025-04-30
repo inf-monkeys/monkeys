@@ -6,7 +6,7 @@ import { CirclePause } from 'lucide-react';
 import { Masonry, useInfiniteLoader } from 'masonic';
 
 import { useWorkflowExecutionOutputs } from '@/apis/workflow/execution';
-import { useVinesSimplifiedExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result/convertOutput.ts';
+import { useVinesSimplifiedExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result/convert-output.ts';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result/index.tsx';
 import { IVinesExecutionResultItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item';
 import { VirtuaExecutionResultGridImageItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/image.tsx';

@@ -11,14 +11,20 @@ interface IWorkbenchSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ mode = 'normal', showGroup = true }) => {
-
   const { data: oem } = useSystemConfig();
 
   const showSidebarTeamSelector = oem?.theme.showSidebarTeamSelector ?? true;
 
-  return mode === 'mini' ? <WorkbenchMiniModeSidebar /> :
-    <div className='flex flex-col gap-2'>
-      {showSidebarTeamSelector && <div className='mr-4 flex flex-col'><TeamSelector size='large' /></div>}
+  return mode === 'mini' ? (
+    <WorkbenchMiniModeSidebar />
+  ) : (
+    <div className="flex flex-col gap-2">
+      {showSidebarTeamSelector && (
+        <div className="mr-4 flex flex-col">
+          <TeamSelector size="large" />
+        </div>
+      )}
       <WorkbenchNormalModeSidebar showGroup={showGroup} />
-    </div>;
+    </div>
+  );
 };

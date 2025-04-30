@@ -14,7 +14,6 @@ export const getWeWorkOAuthInfo = () =>
   );
 
 export const getFeishuOAuthInfo = () =>
-  vinesFetcher<{ appId: string; feishuApiUrl: string, redirectUri: string }>({ method: 'GET', auth: false })(
+  vinesFetcher<{ appId: string; feishuApiUrl: string; redirectUri: string }>({ method: 'GET', auth: false })(
     '/api/auth/oauth/feishu/info',
   );
-

@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { CodeEditor } from '@/components/ui/code-editor';
 import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
-import { ICreateTable, createTableSchema } from '@/schema/table-database/create-table.ts';
+import { createTableSchema, ICreateTable } from '@/schema/table-database/create-table.ts';
 
 interface ICreateTableProps {
   databaseId: string;

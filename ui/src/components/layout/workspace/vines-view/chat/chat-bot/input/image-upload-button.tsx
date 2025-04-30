@@ -1,12 +1,12 @@
-import { Camera } from 'lucide-react';
 import React, { useState } from 'react';
+
+import { Camera } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { VinesUploader } from '@/components/ui/vines-uploader';
-import { Meta, UppyFile } from '@uppy/core';
 
 interface ImageUploadButtonProps {
   onImagesSelected: (imageUrls: string[]) => void;
@@ -17,7 +17,7 @@ export const ImageUploadButton: React.FC<ImageUploadButtonProps> = ({ onImagesSe
   const [isOpen, setIsOpen] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
 
-  const handleUpload = (urls: string[], files: UppyFile<Meta, Record<string, never>>[]) => {
+  const handleUpload = (urls: string[]) => {
     setUploadedFiles(urls);
   };
 

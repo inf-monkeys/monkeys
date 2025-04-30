@@ -2,7 +2,7 @@ import React from 'react';
 
 import Image from 'rc-image';
 
-export const FeishuIcon: React.FC<React.ComponentPropsWithoutRef<'img'>> = ({ className, ...props }) => {
+export const FeishuIcon: React.FC<React.ComponentPropsWithoutRef<'img'>> = () => {
   return (
     <Image
       src={

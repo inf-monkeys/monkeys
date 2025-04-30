@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 import { updateComfyuiWorkflow } from '@/apis/comfyui';
 import { IComfyuiWorkflow } from '@/apis/comfyui/typings';
 import { Button } from '@/components/ui/button';
 import { CodeEditor } from '@/components/ui/code-editor';
-import { toast } from 'sonner';
 
 interface IComfyuiWofrkflowProps {
   data: IComfyuiWorkflow;

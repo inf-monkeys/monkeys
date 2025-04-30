@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import * as React from 'react';
 
 import * as LabelPrimitive from '@radix-ui/react-label';
@@ -178,7 +179,6 @@ const useFormValues = () => {
   };
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export {
   FieldGroup,
   Form,

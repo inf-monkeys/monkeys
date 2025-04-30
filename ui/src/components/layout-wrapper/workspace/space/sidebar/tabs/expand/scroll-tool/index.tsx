@@ -2,8 +2,8 @@ import React from 'react';
 
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
 import { CreateSpaceTab } from 'src/components/layout-wrapper/workspace/space/tabs/expand/create-tab';
+
 import { Button } from '@/components/ui/button';
 
 interface IScrollToolProps extends React.ComponentPropsWithoutRef<'div'> {

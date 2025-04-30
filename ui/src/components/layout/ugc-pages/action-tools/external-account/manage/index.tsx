@@ -30,8 +30,6 @@ export const ExternalAccountManage: React.FC<IExternalAccountManageProps> = ({ d
 
   const { data: credentials, mutate } = useCredentials(detail?.name);
 
-  const rows = detail?.properties?.filter((p) => p.type !== 'notice');
-
   const handleDelete = (id: string) => {
     toast.promise(deleteCredential(id), {
       loading: t('common.delete.loading'),

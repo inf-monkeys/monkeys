@@ -1,12 +1,12 @@
 import React from 'react';
 
+import { I18nValue } from '@inf-monkeys/monkeys';
 import { createColumnHelper } from '@tanstack/react-table';
 
 import { ISDModel } from '@/apis/sd/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { RenderDescription, RenderIcon, RenderTime } from '@/components/layout/ugc/view/utils/renderer.tsx';
 import { getI18nContent } from '@/utils';
-import { I18nValue } from '@inf-monkeys/monkeys';
 
 const columnHelper = createColumnHelper<IAssetItem<ISDModel>>();
 
@@ -21,7 +21,7 @@ export const createImageModelStoreColumns = () => [
     id: 'title',
     header: '名称',
     cell: ({ getValue }) => (
-      <a className="transition-colors hover:text-primary-500" target="_blank" rel="noreferrer">
+      <a className="hover:text-primary-500 transition-colors" target="_blank" rel="noreferrer">
         {getI18nContent(getValue() as string | I18nValue)}
       </a>
     ),

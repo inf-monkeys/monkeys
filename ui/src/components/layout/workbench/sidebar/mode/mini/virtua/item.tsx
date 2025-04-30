@@ -1,7 +1,5 @@
 import React from 'react';
 
-import { useTranslation } from 'react-i18next';
-
 import { IPinPage } from '@/apis/pages/typings.ts';
 import { useWorkflowExecutionThumbnails } from '@/apis/workflow/execution';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -21,8 +19,6 @@ export const VirtuaWorkbenchMiniViewListItem: React.FC<IVirtuaWorkbenchMiniViewL
   onClick,
   mini,
 }) => {
-  const { t } = useTranslation();
-
   const info = data?.workflow || data?.agent;
   const pageId = data?.id ?? '';
 

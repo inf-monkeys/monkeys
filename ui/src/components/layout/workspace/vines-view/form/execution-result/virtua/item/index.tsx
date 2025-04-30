@@ -49,7 +49,6 @@ export const VirtuaExecutionResultGridItem: React.FC<IVirtuaExecutionResultGridI
   data: row,
   loadMore,
   hasMore = false,
-  itemsPerPage = 90,
 }) => {
   // 使用ref来追踪上次渲染的时间，防止频繁触发loadMore
   const lastRenderTimeRef = useRef<number>(Date.now());
@@ -107,7 +106,7 @@ export const VirtuaExecutionResultGridItem: React.FC<IVirtuaExecutionResultGridI
           : (isObject(alt?.[data as string]) && alt?.[data as string].type === 'copy-param'
               ? JSON.stringify({
                   type: 'input-parameters',
-                  data: [...it.input, ...alt?.[data as string].data],
+                  data: [...it.input, ...(alt?.[data as string]?.data ?? [])],
                 })
               : alt?.[data as string]) ?? '';
 

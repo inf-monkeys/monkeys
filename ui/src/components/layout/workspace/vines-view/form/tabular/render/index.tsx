@@ -24,14 +24,18 @@ import { VinesFullLoading, VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { VinesWorkflowExecutionInput } from '@/package/vines-flow/core/typings';
-import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
 import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
+import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 export const BOOLEAN_VALUES = ['true', 'yes', '是', '1'];
 
-export type TTabularEvent = 'reset' | 'restore-previous-param' | 'submit' | { type: 'paste-param'; data: VinesWorkflowExecutionInput[] };
+export type TTabularEvent =
+  | 'reset'
+  | 'restore-previous-param'
+  | 'submit'
+  | { type: 'paste-param'; data: VinesWorkflowExecutionInput[] };
 
 interface ITabularRenderProps {
   inputs: VinesWorkflowVariable[];

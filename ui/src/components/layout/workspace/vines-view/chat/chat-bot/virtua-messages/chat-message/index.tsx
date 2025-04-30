@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { isEmpty } from 'lodash';
+import _ from 'lodash';
 
 import { IVinesMessage } from '@/components/layout/workspace/vines-view/chat/chat-bot/use-chat.ts';
 import { ToolDisplay } from '@/components/layout/workspace/vines-view/chat/chat-bot/virtua-messages/chat-message/tool-display.tsx';
@@ -10,7 +11,6 @@ import { Card } from '@/components/ui/card.tsx';
 import { VinesMarkdown } from '@/components/ui/markdown';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { cn } from '@/utils';
-import _ from 'lodash';
 
 interface IVinesChatMessageProps {
   data: IVinesMessage;
@@ -41,14 +41,18 @@ export const VinesChatMessage: React.FC<IVinesChatMessageProps> = ({
   const content = data.content ?? '';
   const isTextContent = _.isString(content);
   const isEmptyMessage = isEmpty(isTextContent ? content.trim() : content.length);
-  const textContent = isTextContent ? content : content.map((item) => {
-    switch (item.type) {
-      case 'text':
-        return item.text;
-      case 'image_url':
-        return `![${item.image_url.url}](${item.image_url.url})`;
-    }
-  }).join('\n');
+  const textContent = isTextContent
+    ? content
+    : content
+        .map((item) => {
+          switch (item.type) {
+            case 'text':
+              return item.text;
+            case 'image_url':
+              return `![${item.image_url.url}](${item.image_url.url})`;
+          }
+        })
+        .join('\n');
 
   const extra = data.extra;
 

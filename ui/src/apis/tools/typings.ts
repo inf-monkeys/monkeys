@@ -1,8 +1,8 @@
 import { MonkeyWorkflow, ToolCategory, ToolDef, ToolProperty } from '@inf-monkeys/monkeys';
 
 import { IComfyuiWorkflow } from '@/apis/comfyui/typings.ts';
-import { VinesNode } from '@/package/vines-flow/core/nodes';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
+import { VinesNode } from '@/package/vines-flow/core/nodes';
 
 export interface ToolPropertyExtended extends ToolProperty {
   id: number;

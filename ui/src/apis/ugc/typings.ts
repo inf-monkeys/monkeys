@@ -71,4 +71,4 @@ export type IManuallyFetcher<T> = {
 export type IListUgcItemsFnType<T> = (
   dto: IListUgcDto,
 ) => SWRResponse<IPaginationListData<IAssetItem<T>> | undefined, any> | IManuallyFetcher<T>;
-export type IPreloadUgcItemsFnType<T> = (dto: IListUgcDto) => Promise<any>;
+export type IPreloadUgcItemsFnType = (dto: IListUgcDto) => Promise<any>;

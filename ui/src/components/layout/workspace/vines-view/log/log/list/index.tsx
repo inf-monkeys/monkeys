@@ -53,15 +53,15 @@ export const VinesLogViewLogList: React.FC<IVinesLogViewLogListProps> = ({
         >
           {workflowExecutions && workflowDefinitions
             ? workflowExecutions.map((workflowExecution, index) => (
-              <VinesLogItem
-                key={index}
-                workflowExecution={workflowExecution}
-                workflowDefinition={workflowDefinitionIdMapper[workflowExecution.workflowName!]}
-                handleSubmit={handleSubmit}
-                setActiveTab={setActiveTab}
-                mutate={mutate}
-              />
-            ))
+                <VinesLogItem
+                  key={index}
+                  workflowExecution={workflowExecution}
+                  workflowDefinition={workflowDefinitionIdMapper[workflowExecution.workflowName!]}
+                  handleSubmit={handleSubmit}
+                  setActiveTab={setActiveTab}
+                  mutate={mutate}
+                />
+              ))
             : null}
         </Accordion>
         {workflowExecutions && workflowDefinitions && workflowTotal ? (

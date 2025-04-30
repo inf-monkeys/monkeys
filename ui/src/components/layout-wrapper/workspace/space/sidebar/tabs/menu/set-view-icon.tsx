@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import { set } from 'lodash';
 import { RotateCcw, SmilePlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -8,8 +9,8 @@ import { IPageType } from '@/apis/pages/typings.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu.tsx';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIconSelector } from '@/components/ui/icon-selector';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ISetViewIconProps extends React.ComponentPropsWithoutRef<'div'> {
   pageId: string;

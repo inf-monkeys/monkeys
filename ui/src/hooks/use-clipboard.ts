@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 import i18n from '@/i18n.ts';
 
-export const useClipboard = ({ timeout = 2000, showSuccess = true } = {}) => {
+export const useClipboard = ({ showSuccess = true } = {}) => {
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<string | null>(null);

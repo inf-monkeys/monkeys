@@ -9,7 +9,11 @@ import { toast } from 'sonner';
 import { useCreateWorkflowChatSession, useWorkflowChatSessions } from '@/apis/workflow/chat';
 import { CleanMessages } from '@/components/layout/workspace/vines-view/chat/chat-bot/input/clean-messages.tsx';
 import { ImageUploadButton } from '@/components/layout/workspace/vines-view/chat/chat-bot/input/image-upload-button';
-import { IVinesMessage, IVinesMessageContent, IVinesMessageContentItem } from '@/components/layout/workspace/vines-view/chat/chat-bot/use-chat.ts';
+import {
+  IVinesMessage,
+  IVinesMessageContent,
+  IVinesMessageContentItem,
+} from '@/components/layout/workspace/vines-view/chat/chat-bot/use-chat.ts';
 import { AutosizeTextarea } from '@/components/ui/autosize-textarea.tsx';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -87,33 +91,42 @@ export const VinesChatInput: React.FC<IVinesChatInputProps> = ({
     setAttachedImages([]);
   };
 
-
   useMemo(() => {
-    setInput(attachedImages.length > 0 ? [
-      {
-        type: 'text',
-        text: textInput,
-      },
-      ...attachedImages.map(imageUrl => ({
-        type: 'image_url',
-        image_url: {
-          url: imageUrl,
-        },
-      }) as IVinesMessageContentItem),
-    ] : textInput);
+    setInput(
+      attachedImages.length > 0
+        ? [
+            {
+              type: 'text',
+              text: textInput,
+            },
+            ...attachedImages.map(
+              (imageUrl) =>
+                ({
+                  type: 'image_url',
+                  image_url: {
+                    url: imageUrl,
+                  },
+                }) as IVinesMessageContentItem,
+            ),
+          ]
+        : textInput,
+    );
   }, [textInput, attachedImages]);
 
   const handleImagesSelected = (imageUrls: string[]) => {
-    setAttachedImages(prev => [...prev, ...imageUrls]);
+    setAttachedImages((prev) => [...prev, ...imageUrls]);
   };
 
   const removeImage = (index: number) => {
-    setAttachedImages(prev => prev.filter((_, i) => i !== index));
+    setAttachedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const { submitKey } = useSubmitHandler();
 
-  const isInputEmpty = (_.isArray(input) && input.length === 0) || (_.isString(input) && isEmpty(input.trim())) || attachedImages.length === 0;
+  const isInputEmpty =
+    (_.isArray(input) && input.length === 0) ||
+    (_.isString(input) && isEmpty(input.trim())) ||
+    attachedImages.length === 0;
   const hasMessages = messages?.length > 0;
 
   return (
