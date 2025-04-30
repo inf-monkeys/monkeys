@@ -59,7 +59,7 @@ export interface MultiSelectOption {
  */
 export interface MultiSelectProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-  VariantProps<typeof multiSelectVariants> {
+    VariantProps<typeof multiSelectVariants> {
   /**
    * An array of option objects to be displayed in the multi-select component.
    * Each option object has a label, value, and an optional icon.
@@ -127,7 +127,6 @@ export const MultiSelect = React.forwardRef<HTMLButtonElement, MultiSelectProps>
       animation = 0,
       maxCount = 3,
       modalPopover = false,
-      asChild = false,
       className,
       ...props
     },

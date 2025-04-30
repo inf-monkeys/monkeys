@@ -129,7 +129,6 @@ export function VinesTools<TBase extends Constructor<VinesBase>>(Base: TBase) {
       }
 
       this.vinesComfyUITools = comfyUIWorkflows.map(({ id, displayName, description, iconUrl }) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { input = [], ...attr } = cloneDeep(wrapperTool as VinesToolDef);
 
         const workflowIdInput = input.find((it) => it.name === 'workflow') ?? {

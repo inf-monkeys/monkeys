@@ -44,7 +44,7 @@ export const AppTypeItem: React.FC<{
           <ul className="list-disc space-y-1 pl-5">
             {(t(`ugc-page.app.create.dialog.type.${type}.descriptions`, { returnObjects: true }) as string[]).map(
               (desc, index) => (
-                <li className="text-xs opacity-65 " key={index}>
+                <li className="text-xs opacity-65" key={index}>
                   {desc}
                 </li>
               ),

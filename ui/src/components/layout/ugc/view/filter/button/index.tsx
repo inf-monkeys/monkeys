@@ -150,7 +150,7 @@ export const UgcViewFilterButton: React.FC<IUgcViewFilterButtonProps> = ({
             </PopoverContent>
           </Popover>
         </div>
-        <div className="mb-2 flex flex-col gap-3 ">
+        <div className="mb-2 flex flex-col gap-3">
           <Label>{t('components.layout.ugc.view.filter.button.updated-time.label')}</Label>
           <Popover>
             <PopoverTrigger asChild>

@@ -8,7 +8,6 @@ import { toast } from 'sonner';
 
 import { IUpdatePageGroupParams, useDeletePageGroup, useUpdateGroupPages } from '@/apis/pages';
 import { IPageGroup } from '@/apis/pages/typings.ts';
-import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +21,7 @@ import {
 } from '@/components/ui/alert-dialog.tsx';
 import { Button } from '@/components/ui/button';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu.tsx';
+import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface IGroupItemProps extends React.ComponentPropsWithoutRef<'div'> {

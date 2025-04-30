@@ -6,10 +6,10 @@ import { toast } from 'sonner';
 
 import { getFeishuOAuthInfo } from '@/apis/authz/oauth';
 
-interface IOAuthFeishuProps extends React.ComponentPropsWithoutRef<'div'> { }
+interface IOAuthFeishuProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const OAuthFeishuProvider: React.FC<IOAuthFeishuProps> = ({ children }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const handleLogin = useMemoizedFn(() => {
     getFeishuOAuthInfo().then((it) => {
       if (it?.appId && it?.redirectUri && it?.feishuApiUrl) {
@@ -20,5 +20,5 @@ export const OAuthFeishuProvider: React.FC<IOAuthFeishuProps> = ({ children }) =
       }
     });
   });
-  return <div onClick={handleLogin}>{children}</div>
+  return <div onClick={handleLogin}>{children}</div>;
 };

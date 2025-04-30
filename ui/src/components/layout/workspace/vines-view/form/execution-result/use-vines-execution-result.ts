@@ -3,23 +3,6 @@ import { useMemoizedFn } from 'ahooks';
 import { IVinesExecutionResultItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item';
 import { VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings.ts';
 
-const EMPTY_ITEM: IVinesExecutionResultItem = {
-  createTime: 0,
-  endTime: 0,
-  input: [],
-  instanceId: '',
-  output: [],
-  rawOutput: {},
-  startTime: 0,
-  status: 'SCHEDULED',
-  taskId: '',
-  teamId: '',
-  updateTime: 0,
-  userId: '',
-  workflowId: '',
-  render: { type: 'empty', data: '', index: 0 },
-};
-
 export const useVinesExecutionResult = () => {
   const conversionOutputs = useMemoizedFn((outputs: VinesWorkflowExecutionOutputListItem[], col = 3) => {
     const result: IVinesExecutionResultItem[][] = [];

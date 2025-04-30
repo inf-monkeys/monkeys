@@ -13,7 +13,6 @@ import { cn } from '@/utils';
 export const UgcViewGalleryItem = <E extends object>({
   row,
   columns,
-  index,
   renderOptions,
   operateArea,
   onItemClick,

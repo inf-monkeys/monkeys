@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 
+import { useSize } from 'ahooks';
 import { type EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { AnimatePresence, motion } from 'framer-motion';
 import { History } from 'lucide-react';
@@ -16,7 +17,6 @@ import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
-import { useSize } from 'ahooks';
 
 interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {
   event$: EventEmitter<void>;

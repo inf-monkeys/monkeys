@@ -190,10 +190,7 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
                     </FormLabel>
                     <FormControl>
                       <>
-                        <Input
-                          {...field}
-                          className="grow"
-                        />
+                        <Input {...field} className="grow" />
                         <VinesUploader
                           className="rounded border border-input"
                           accept={['json']}
@@ -219,10 +216,7 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
                     </FormLabel>
                     <FormControl>
                       <>
-                        <Input
-                          {...field}
-                          className="grow"
-                        />
+                        <Input {...field} className="grow" />
                         <VinesUploader
                           className="rounded border border-input"
                           accept={['json']}

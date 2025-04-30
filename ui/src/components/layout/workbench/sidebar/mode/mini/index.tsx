@@ -15,10 +15,9 @@ import useUrlState from '@/hooks/use-url-state.ts';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
-interface IWorkbenchMiniModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> { }
+interface IWorkbenchMiniModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> = () => {
-
   const { data } = useWorkspacePages();
 
   const [{ sidebarFilter: routeSidebarFilter, sidebarReserve: routeSidebarReserve }] = useUrlState<{

@@ -65,7 +65,7 @@ export const IFrameEmbed: React.FC<IIFrameEmbedProps> = ({ viewUrls }) => {
                 <Label>{t('workspace.wrapper.settings.common.iframe.other')}</Label>
 
                 <div className="-my-4 flex h-8 gap-1">
-                  {viewUrls?.map(({ icon, displayName, viewUrl, iframeUrl }, i) => (
+                  {viewUrls?.map(({ icon, displayName, iframeUrl }, i) => (
                     <Tooltip key={i}>
                       <TooltipTrigger asChild>
                         <Button

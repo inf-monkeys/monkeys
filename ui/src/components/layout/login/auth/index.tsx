@@ -5,6 +5,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { AnimatePresence, motion } from 'framer-motion';
 import { DoorOpen, Group, ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { OAuthProvider } from 'src/components/layout/login/auth/oauth/typing.tsx';
 
 import { handleOidcLogin } from '@/apis/authz/oidc';
 import { IAuthWrapperOptions } from '@/components/layout/login/auth/auth-wrapper.tsx';
@@ -15,7 +16,6 @@ import { Separator } from '@/components/ui/separator.tsx';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.tsx';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn } from '@/utils';
-import { OAuthProvider } from 'src/components/layout/login/auth/oauth/typing.tsx';
 
 interface IAuthContainerProps extends React.ComponentPropsWithoutRef<'div'>, IAuthWrapperOptions {
   enableOidc: boolean;

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 import { checkComfyuiDependencies, installComfyfile, useComfyuiServers } from '@/apis/comfyui';
 import {
@@ -12,7 +13,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { toast } from 'sonner';
 
 interface IComfyuiWofrkflowDependencyProps {
   comfyuiWorkflow: IComfyuiWorkflow;
@@ -163,7 +163,7 @@ export const ComfyuiWorkflowDependency: React.FC<IComfyuiWofrkflowDependencyProp
                   <TableCell>{description}</TableCell>
                   <TableCell>
                     <a
-                      className="transition-colors hover:text-primary-500"
+                      className="hover:text-primary-500 transition-colors"
                       href={reference}
                       target="_blank"
                       rel="noreferrer"

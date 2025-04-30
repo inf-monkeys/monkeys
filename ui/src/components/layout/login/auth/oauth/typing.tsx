@@ -3,6 +3,7 @@ import React from 'react';
 import { FeishuIcon } from '@/assets/icons/feishu';
 import { WeWorkIcon } from '@/assets/icons/wework.tsx';
 import { OAuthWeWorkProvider } from '@/components/layout/login/auth/oauth/wework.tsx';
+
 import { OAuthFeishuProvider } from './feishu';
 
 export const OAuthProvider: {

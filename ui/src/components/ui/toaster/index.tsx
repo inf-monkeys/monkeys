@@ -1,5 +1,6 @@
-import { useSystemConfig } from '@/apis/common';
 import { Toaster as SonnerToaster } from 'sonner';
+
+import { useSystemConfig } from '@/apis/common';
 
 export const Toaster = () => {
   const { data: oem } = useSystemConfig();

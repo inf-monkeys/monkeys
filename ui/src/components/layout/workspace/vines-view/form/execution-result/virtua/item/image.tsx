@@ -1,21 +1,22 @@
 import React from 'react';
 
+import { isObject } from 'lodash';
 import { Copy } from 'lucide-react';
 import Image from 'rc-image';
-import 'rc-image/assets/index.css';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCopy } from '@/hooks/use-copy.ts';
-import { isObject } from 'lodash';
+
+import 'rc-image/assets/index.css';
 
 export type IVinesExecutionResultImageAlt =
   | string
   | {
-    label: string;
-    value: string;
-  };
+      label: string;
+      value: string;
+    };
 
 interface IVirtuaExecutionResultGridImageItemProps {
   src: string;
@@ -42,11 +43,11 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
         style={{
           objectFit: 'cover',
           width: '100%',
-          height: '100%'
+          height: '100%',
         }}
         preview={{
           mask: null, // 移除图片上的预览遮罩
-          rootClassName: 'no-flicker-preview'
+          rootClassName: 'no-flicker-preview',
         }}
       />
 

@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import React, { forwardRef, useState } from 'react';
 
 import { useParams } from '@tanstack/react-router';

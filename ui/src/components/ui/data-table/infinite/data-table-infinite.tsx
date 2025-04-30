@@ -43,7 +43,7 @@ function InfiniteScrollingDataTable<TData, TValue>({
           data={rows}
           components={{
             Table: ({ children, ...props }) => (
-              <table className="w-full caption-bottom text-sm [&>thead]:bg-slate-1 " {...props}>
+              <table className="w-full caption-bottom text-sm [&>thead]:bg-slate-1" {...props}>
                 {children}
                 {tfoot}
               </table>

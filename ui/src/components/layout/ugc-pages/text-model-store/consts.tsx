@@ -19,7 +19,7 @@ export const createTextModelStoreColumns = () => [
     id: 'title',
     header: '名称',
     cell: ({ getValue }) => (
-      <a className="transition-colors hover:text-primary-500" target="_blank" rel="noreferrer">
+      <a className="hover:text-primary-500 transition-colors" target="_blank" rel="noreferrer">
         {getI18nContent(getValue() as string | I18nValue)}
       </a>
     ),

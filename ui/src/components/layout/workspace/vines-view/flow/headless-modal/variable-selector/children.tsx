@@ -12,7 +12,7 @@ interface IVariableChildrenProps {
   onSelected?: (childId: string, childJsonpath: string, childTargetId: string) => void;
 }
 
-export const VariableChildren: React.FC<IVariableChildrenProps> = ({ name, children, onSelected }) => {
+export const VariableChildren: React.FC<IVariableChildrenProps> = () => {
   return (
     <HoverCard openDelay={100}>
       <HoverCardTrigger asChild>
