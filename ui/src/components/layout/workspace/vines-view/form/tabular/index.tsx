@@ -57,6 +57,24 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
 
   const handleSubmit = useMemoizedFn((inputData) => {
     setLoading(true);
+    void mutate(
+      (key) => isString(key) && key.startsWith(`/api/workflow/executions/${vines.workflowId}/outputs`),
+      (data: any) => {
+        if (data?.data) {
+          data.data.unshift({
+            status: 'RUNNING',
+            output: [{ type: 'image', data: '' }],
+            render: { type: 'image', data: '', status: 'RUNNING' },
+          });
+          if (typeof data?.total === 'number') {
+            data.total += 1;
+          }
+        }
+        event$.emit?.();
+        return data;
+      },
+      false
+    );
     vines
       .start({ inputData, onlyStart: true })
       .then((status) => {
@@ -64,22 +82,6 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
           toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
           setHistoryVisible(true);
           setLoading(false);
-          void mutate(
-            (it) => isString(it) && it.startsWith(`/api/workflow/executions/${vines.workflowId}/outputs`),
-            (data: any) => {
-              if (data?.data) {
-                data.data.unshift({
-                  status: 'RUNNING',
-                  output: [{ type: 'text', data: '' }],
-                });
-                if (typeof data?.total === 'number') {
-                  data.total += 1;
-                }
-              }
-              event$.emit?.();
-              return data;
-            },
-          );
         }
       })
       .finally(() => setLoading(false));
