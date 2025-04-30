@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 
 import { useMemoizedFn } from 'ahooks';
+import { isString } from 'lodash';
 import { Download, Ellipsis, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -45,12 +46,16 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
 
   // 获取媒体文件ID - 优化提取逻辑
   const getMediaIdFromUrl = (url: string) => {
-    if (!url) return '';
+    if (!url || !isString(url)) return '';
 
     // 直接从URL路径中提取文件名作为ID
     // 例如：从https://inf-monkeys.oss-cn-beijing.aliyuncs.com/artworks/comfyui/7c1abb8...png
     // 提取7c1abb8...png作为ID
-    const parts = url.split('/');
+    const parts = url?.split('/');
+
+    const partsLength = parts?.length ?? 0;
+    if (!partsLength) return '';
+
     const filename = parts[parts.length - 1];
 
     // 去除可能的查询参数
