@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { useAsyncEffect } from 'ahooks';
 import { isObject } from 'lodash';
 import { Copy } from 'lucide-react';
 import Image from 'rc-image';
@@ -7,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
 import { useCopy } from '@/hooks/use-copy.ts';
 
 import 'rc-image/assets/index.css';
@@ -23,6 +25,12 @@ interface IVirtuaExecutionResultGridImageItemProps {
   alt: IVinesExecutionResultImageAlt;
 }
 
+function caculateThumbUrl(url: string) {
+  const urlPath = url.split('/');
+  const urlPathLength = urlPath.length;
+  return urlPath.map((it, i) => (i === urlPathLength - 2 ? `${it}_thumb` : it)).join('/');
+}
+
 export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResultGridImageItemProps> = ({
   src,
   alt,
@@ -33,21 +41,27 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
 
   const altLabel = isObject(alt) ? alt.label : alt;
   const altContent = isObject(alt) ? alt.value : alt;
+  const [previewSrc, setPreviewSrc] = React.useState(src);
+  useAsyncEffect(async () => {
+    if (!src) return;
+    const thumbnailSrc = caculateThumbUrl(src);
+    if (await checkImageUrlAvailable(thumbnailSrc)) {
+      setPreviewSrc(thumbnailSrc);
+    } else {
+      setPreviewSrc(src);
+    }
+  }, [src]);
 
   return (
     <div className="vines-center relative overflow-hidden rounded-lg">
       <Image
         className="size-full min-h-52 rounded-lg border border-input object-cover object-center shadow-sm"
-        src={src}
+        src={previewSrc}
         alt="image"
         style={{
           objectFit: 'cover',
           width: '100%',
           height: '100%',
-        }}
-        preview={{
-          mask: null, // 移除图片上的预览遮罩
-          rootClassName: 'no-flicker-preview',
         }}
       />
 
