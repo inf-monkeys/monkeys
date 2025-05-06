@@ -3,8 +3,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useDebounceFn, useMount } from 'ahooks';
 import { isArray, isObject, isUndefined } from 'lodash';
 import { CirclePause } from 'lucide-react';
-import { Masonry, useInfiniteLoader } from 'masonic';
-
+import { useInfiniteLoader } from 'masonic';
+import { Masonry } from './masonry.tsx';
 import { useWorkflowExecutionOutputs } from '@/apis/workflow/execution';
 import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
 import { useVinesSimplifiedExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result/convert-output.ts';
@@ -103,7 +103,7 @@ export const MasonryExecutionResultGrid: React.FC<IMasonryExecutionResultGridPro
   //   forceUpdate();
   // });
   useMount(() => {
-    setTimeout(() => setShowMasonry(true), 350);
+    setTimeout(() => setShowMasonry(true), 10);
   });
 
   return (
@@ -115,13 +115,14 @@ export const MasonryExecutionResultGrid: React.FC<IMasonryExecutionResultGridPro
     >
       {shouldShowMasonry && (
         <Masonry
+          containerRef={scrollRef}
           items={list}
           columnWidth={200} // 调整列宽，确保在容器内能完整显示
           columnGutter={12} // 稍微增加列间距以提高可读性
           rowGutter={12}
           overscanBy={5} // 增加预渲染的项目数，提高滚动性能
           render={({ data }) => {
-            return <MasnoryItem {...data} />;
+            return <MasonryItem {...data} key={`${data.workflowId}-${data.instanceId}`} />;
           }}
           onRender={infiniteLoader}
         />
@@ -131,7 +132,7 @@ export const MasonryExecutionResultGrid: React.FC<IMasonryExecutionResultGridPro
 };
 
 // 瀑布流项目组件
-const MasnoryItem: React.FC<IVinesExecutionResultItem> = ({ render, ...it }) => {
+const MasonryItem: React.FC<IVinesExecutionResultItem> = ({ render, ...it }) => {
   const { type, data, alt, status } = render;
 
   const altLabel = isArray(alt)
