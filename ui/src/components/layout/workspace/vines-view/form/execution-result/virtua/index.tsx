@@ -4,13 +4,10 @@ import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { isUndefined } from 'lodash';
 import { CustomContainerComponentProps, Virtualizer, VListHandle } from 'virtua';
 
-import { useWorkflowExecutionOutputs } from '@/apis/workflow/execution';
+import { useWorkflowExecutionList } from '@/apis/workflow/execution';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result';
 import { useVinesExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result/use-vines-execution-result.ts';
-import {
-  IVinesExecutionResultItem,
-  VirtuaExecutionResultGridItem,
-} from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item';
+import { IVinesExecutionResultItem, VirtuaExecutionResultGridItem } from '@/utils/execution.ts';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { cn } from '@/utils';
 import { mergeRefs } from '@/utils/merge-refs.ts';
@@ -45,7 +42,7 @@ export const VirtuaExecutionResultGrid: React.FC<IVirtuaExecutionResultGridProps
   const scrolling = useRef(false);
 
   const [page, setPage] = useState(1);
-  const { data: remoteData, isLoading } = useWorkflowExecutionOutputs(workflowId, page, LOAD_LIMIT, 0);
+  const { data: remoteData, isLoading } = useWorkflowExecutionList(workflowId, page, LOAD_LIMIT, 0);
   const outputs = remoteData?.data ?? [];
 
   const loadedPagesRef = useRef<number[]>([1]);

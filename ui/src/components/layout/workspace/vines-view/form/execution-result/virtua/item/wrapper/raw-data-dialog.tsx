@@ -10,7 +10,6 @@ import { toast } from 'sonner';
 
 import { deleteWorkflowExecution } from '@/apis/workflow/execution';
 import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
-import { IVinesExecutionResultItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,6 +28,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.t
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCopy } from '@/hooks/use-copy';
+import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
 interface IVirtuaExecutionResultRawDataDialogProps {
   children: React.ReactNode;
