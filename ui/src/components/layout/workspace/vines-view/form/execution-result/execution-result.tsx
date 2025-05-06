@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { MutableRefObject, useEffect, useRef, useState } from 'react';
 
 import { useDebounceFn, useMount } from 'ahooks';
 import { isArray, isObject, isUndefined } from 'lodash';
 import { CirclePause } from 'lucide-react';
 import { useInfiniteLoader } from 'masonic';
-import { Masonry } from './masonry.tsx';
+
 import { useWorkflowExecutionOutputs } from '@/apis/workflow/execution';
 import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
 import { useVinesSimplifiedExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result/convert-output.ts';
@@ -15,6 +15,8 @@ import { VirtuaExecutionResultGridWrapper } from '@/components/layout/workspace/
 import { VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { cn } from '@/utils';
+
+import { Masonry } from './masonry.tsx';
 
 interface IMasonryExecutionResultGridProps {
   data: IVinesExecutionResultItem[][];
@@ -94,7 +96,8 @@ export const MasonryExecutionResultGrid: React.FC<IMasonryExecutionResultGridPro
   const infiniteLoader = useInfiniteLoader(loader, {
     totalItems: total, // 总项目数
     isItemLoaded: (index) => index < list.length, // 检查项目是否已加载
-    threshold: 3, // 提前加载的阈值，较高的值可以提前触发加载
+    threshold: 2, // 提前加载的阈值，较高的值可以提前触发加载
+    minimumBatchSize: 10,
   });
   const [shouldShowMasonry, setShowMasonry] = useState(false);
   // const forceUpdate = useForceUpdate();
@@ -105,7 +108,7 @@ export const MasonryExecutionResultGrid: React.FC<IMasonryExecutionResultGridPro
   useMount(() => {
     setTimeout(() => setShowMasonry(true), 10);
   });
-
+  const debugSetRef = useRef(null);
   return (
     <ScrollArea
       className={cn('-pr-0.5 z-20 mr-0.5 bg-background [&>[data-radix-scroll-area-viewport]]:p-2', !total && 'hidden')}
@@ -114,18 +117,27 @@ export const MasonryExecutionResultGrid: React.FC<IMasonryExecutionResultGridPro
       disabledOverflowMask
     >
       {shouldShowMasonry && (
-        <Masonry
-          containerRef={scrollRef}
-          items={list}
-          columnWidth={200} // 调整列宽，确保在容器内能完整显示
-          columnGutter={12} // 稍微增加列间距以提高可读性
-          rowGutter={12}
-          overscanBy={5} // 增加预渲染的项目数，提高滚动性能
-          render={({ data }) => {
-            return <MasonryItem {...data} key={`${data.workflowId}-${data.instanceId}`} />;
-          }}
-          onRender={infiniteLoader}
-        />
+        <>
+          <Masonry
+            key={'execution-history-masonry'}
+            containerRef={scrollRef}
+            items={list}
+            columnWidth={200} // 调整列宽，确保在容器内能完整显示
+            columnGutter={12} // 稍微增加列间距以提高可读性
+            rowGutter={12}
+            overscanBy={5} // 增加预渲染的项目数，提高滚动性能
+            render={({ data }) => {
+              return (
+                <>
+                  <MasonryItem {...data} key={`${data.workflowId}-${data.instanceId}-${data.render.data}`} />
+                  <RenderCount setRef={debugSetRef} message={`masonry item, ${data.instanceId}`} />
+                </>
+              );
+            }}
+            onRender={infiniteLoader}
+          />
+          <RenderCount />
+        </>
       )}
     </ScrollArea>
   );
@@ -191,3 +203,31 @@ const MasonryItem: React.FC<IVinesExecutionResultItem> = ({ render, ...it }) => 
       );
   }
 };
+
+function RenderCount({ message, setRef }: { message?: string; setRef?: MutableRefObject<any> }) {
+  const renderTimes = useRef(0);
+  useEffect(() => {
+    if (setRef !== undefined) {
+      if (setRef.current === null) {
+        setRef.current = {
+          set: new Set(),
+          duplicateTimes: 0,
+        };
+        setRef.current.add(message);
+      }
+      if (setRef.current) {
+        const curr = setRef.current;
+        const set = setRef.current.set;
+        if (set.has(message)) {
+          curr.duplicateTimes += 1;
+          console.log(`duplicateTimes`, curr.duplicateTimes);
+        } else {
+          set.add(message);
+        }
+      }
+    }
+    renderTimes.current += 1;
+    console.log(message, 'rerender count (including strict mode)', renderTimes.current);
+  }, []);
+  return null;
+}
