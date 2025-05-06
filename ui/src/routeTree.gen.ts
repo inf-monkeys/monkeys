@@ -85,6 +85,9 @@ const TeamIdAgentAgentIdIndexLazyImport = createFileRoute(
 const TeamIdActionToolsActionToolNameIndexLazyImport = createFileRoute(
   '/$teamId/action-tools/$actionToolName/',
 )()
+const TeamIdWorkspaceWorkflowIdImageDetailIndexLazyImport = createFileRoute(
+  '/$teamId/workspace/$workflowId/image-detail/',
+)()
 const TeamIdWorkspaceWorkflowIdPageIdIndexLazyImport = createFileRoute(
   '/$teamId/workspace/$workflowId/$pageId/',
 )()
@@ -360,6 +363,16 @@ const TeamIdActionToolsActionToolNameIndexLazyRoute =
     ),
   )
 
+const TeamIdWorkspaceWorkflowIdImageDetailIndexLazyRoute =
+  TeamIdWorkspaceWorkflowIdImageDetailIndexLazyImport.update({
+    path: '/$teamId/workspace/$workflowId/image-detail/',
+    getParentRoute: () => rootRoute,
+  } as any).lazy(() =>
+    import(
+      './pages/$teamId/workspace/$workflowId/image-detail/index.lazy'
+    ).then((d) => d.Route),
+  )
+
 const TeamIdWorkspaceWorkflowIdPageIdIndexLazyRoute =
   TeamIdWorkspaceWorkflowIdPageIdIndexLazyImport.update({
     path: '/$teamId/workspace/$workflowId/$pageId/',
@@ -532,6 +545,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdPageIdIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/workspace/$workflowId/image-detail/': {
+      preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdImageDetailIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -575,6 +592,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdWorkspaceWorkflowIdIndexLazyRoute,
   TeamIdWorkspaceWorkflowIdPageIdViewIframeLazyRoute,
   TeamIdWorkspaceWorkflowIdPageIdIndexLazyRoute,
+  TeamIdWorkspaceWorkflowIdImageDetailIndexLazyRoute,
 ])
 
 /* prettier-ignore-end */

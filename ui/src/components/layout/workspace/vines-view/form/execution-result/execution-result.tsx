@@ -140,11 +140,11 @@ const MasnoryItem: React.FC<IVinesExecutionResultItem> = ({ render, ...it }) => 
   const altContent = isArray(alt)
     ? altLabel
     : (isObject(alt?.[data as string]) && alt?.[data as string].type === 'copy-param'
-        ? JSON.stringify({
-            type: 'input-parameters',
-            data: [...it.input, ...(alt?.[data as string]?.data ?? [])],
-          })
-        : alt?.[data as string]) ?? '';
+      ? JSON.stringify({
+        type: 'input-parameters',
+        data: [...it.input, ...(alt?.[data as string]?.data ?? [])],
+      })
+      : alt?.[data as string]) ?? '';
 
   switch (status) {
     case 'SCHEDULED':
@@ -175,6 +175,8 @@ const MasnoryItem: React.FC<IVinesExecutionResultItem> = ({ render, ...it }) => 
                   label: altLabel,
                   value: altContent,
                 }}
+                instanceId={it.instanceId}
+                outputIndex={render.index}
               />
             </div>
           </VirtuaExecutionResultGridWrapper>

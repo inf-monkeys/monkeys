@@ -7,12 +7,12 @@ import { useTranslation } from 'react-i18next';
 import { WorkspaceIframe } from 'src/components/layout-wrapper/space/iframe';
 import { WorkbenchPanelLayout } from 'src/components/layout-wrapper/workbench/panel';
 
-import { OEM } from '@/components/layout/oem';
 import { AgentLayout } from '@/components/layout-wrapper/agent';
 import { MainWrapper } from '@/components/layout-wrapper/main';
 import { WorkbenchMiniModeLayout } from '@/components/layout-wrapper/workbench/mini-mode';
 import { WorkspaceLayout } from '@/components/layout-wrapper/workspace';
 import { WorkspaceShareView } from '@/components/layout-wrapper/workspace/share-view';
+import { OEM } from '@/components/layout/oem';
 import { AuthWithRouteSearch } from '@/components/router/auth-with-route-search.tsx';
 import { RouteEvent } from '@/components/router/event.tsx';
 import { TeamsGuard, useVinesTeam } from '@/components/router/guard/team.tsx';
