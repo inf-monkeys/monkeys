@@ -5,6 +5,8 @@ import rfdc from 'rfdc';
 import { twMerge } from 'tailwind-merge';
 
 import i18n from '@/i18n';
+import { isArray, isObject } from 'lodash';
+import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
 export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 
@@ -45,3 +47,22 @@ export const I18nAllContent = (content: string | I18nValue | undefined): string 
  * @returns {string} A kebabized string
  */
 export const toKebabCase = (string: string): string => string.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+
+export const getAlt = (result: IVinesExecutionResultItem) => {
+  const { alt, data } = result.render;
+  const label = isArray(alt)
+    ? alt[0]
+    : (isObject(alt?.[data as string]) ? alt?.[data as string].label : alt?.[data as string]) || alt || '';
+  const value = isArray(alt)
+    ? label
+    : (isObject(alt?.[data as string]) && alt?.[data as string].type === 'copy-param'
+        ? JSON.stringify({
+            type: 'input-parameters',
+            data: [...result.input, ...(alt?.[data as string]?.data ?? [])],
+          })
+        : alt?.[data as string]) ?? '';
+  return {
+    label,
+    value,
+  };
+};

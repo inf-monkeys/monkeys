@@ -86,7 +86,7 @@ export const useSearchWorkflowExecutions = (
     { refreshInterval },
   );
 
-export const useWorkflowExecutionOutputs = (workflowId?: string | null, page = 1, limit = 20, refreshInterval = 500) =>
+export const useWorkflowExecutionList = (workflowId?: string | null, page = 1, limit = 20, refreshInterval = 500) =>
   useSWR<IPaginationListData<VinesWorkflowExecutionOutputListItem> | undefined>(
     workflowId ? `/api/workflow/executions/${workflowId}/outputs?${qs.stringify({ page, limit })}` : null,
     vinesFetcher({ method: 'GET', wrapper: paginationWrapper }),
