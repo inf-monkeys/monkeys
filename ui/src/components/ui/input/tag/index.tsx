@@ -67,11 +67,12 @@ export const TagInput = forwardRef<HTMLInputElement, ITagInputProps>(
         onChange(Array.from(new Set([...value, ...options.map((option) => option.value)])));
       }
     });
+
     useThrottleEffect(
       () => {
         setIsAllSelected(options.every((option) => value.includes(option.value)));
       },
-      [options, value],
+      [value],
       { wait: 100 },
     );
 
