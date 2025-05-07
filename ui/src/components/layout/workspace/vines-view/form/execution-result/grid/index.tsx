@@ -163,7 +163,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
         overscanBy: 3,
         render: useCallback(({ data: item }) => <ExecutionResultItem {...item} />, [isScrolling]),
         itemKey: (item) => item.render.key,
-        onRender: loadMoe,
+        onRender: loadMore,
       })}
     </ScrollArea>
   );
