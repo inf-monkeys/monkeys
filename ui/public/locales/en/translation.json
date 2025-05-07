@@ -2124,7 +2124,7 @@
         "workflow-update-failed": "Workflow information update failure"
       },
       "integration-center": {
-        "title": "API Documentation",
+        "title": "API Docs",
         "desc": "You can integrate with other apps through APIs for more functionality",
         "content": {
           "new-chat-session": "New session",
