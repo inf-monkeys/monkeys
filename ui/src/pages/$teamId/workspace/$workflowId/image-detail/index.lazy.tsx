@@ -58,12 +58,13 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
           {/* 主要内容区域 */}
           <div className="flex flex-1 overflow-hidden">
             {/* 左侧图片展示区 */}
-            <div className="flex w-[800px] items-center justify-center bg-slate-50 p-6">
+            <div className="flex w-[800px] items-center justify-center bg-white p-6">
               {imageUrl ? (
                 <div className="relative max-h-full max-w-full overflow-hidden rounded-md shadow-md">
                   <VinesImage
                     src={imageUrl}
                     alt="详情图片"
+                    disabledPreview={true}
                     className="max-h-[calc(100vh-120px)] max-w-full object-contain"
                   />
                 </div>
