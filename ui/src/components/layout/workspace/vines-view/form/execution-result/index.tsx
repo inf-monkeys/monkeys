@@ -102,6 +102,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
     <Card className={cn('relative', className)}>
       <CardContent className="p-0">
         <ExecutionResultGrid
+          event$={event$}
           workflowId={workflowId}
           height={height}
           page={currentPage}
