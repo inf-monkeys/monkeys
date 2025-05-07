@@ -3,13 +3,14 @@ import React from 'react';
 import { CirclePause } from 'lucide-react';
 
 import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
-import { VirtuaExecutionResultGridImageItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/image.tsx';
-import { VirtuaExecutionResultGridWrapper } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/wrapper';
 import { VinesLoading } from '@/components/ui/loading';
 import { getAlt } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
-export const ExecutionResultItem: React.FC<IVinesExecutionResultItem & { index: number }> = ({ index, ...result }) => {
+import { VirtuaExecutionResultGridImageItem } from '../virtua/item/image';
+import { VirtuaExecutionResultGridWrapper } from '../virtua/item/wrapper';
+
+export const ExecutionResultItem: React.FC<IVinesExecutionResultItem> = (result) => {
   const { render } = result;
   const { type, data, status } = render;
 
@@ -42,7 +43,6 @@ export const ExecutionResultItem: React.FC<IVinesExecutionResultItem & { index: 
       // 使用包装组件来支持下载和删除功能
       return (
         <div className="relative overflow-hidden rounded-lg border border-input shadow-sm">
-          <span>{index}</span>
           <VirtuaExecutionResultGridWrapper data={result} src={data as string}>
             <div className="h-full w-full" onClick={(e) => e.stopPropagation()}>
               <VirtuaExecutionResultGridImageItem src={data as string} alt={alt} />
@@ -52,11 +52,13 @@ export const ExecutionResultItem: React.FC<IVinesExecutionResultItem & { index: 
       );
     default:
       return (
-        <VirtuaExecutionResultGridWrapper data={result}>
-          <div className="min-h-40 overflow-hidden rounded-lg border border-input p-2 shadow-sm">
-            <VinesAbstractDataPreview data={data} className="h-full" />
-          </div>
-        </VirtuaExecutionResultGridWrapper>
+        <div className="relative overflow-hidden rounded-lg border border-input shadow-sm">
+          <VirtuaExecutionResultGridWrapper data={result}>
+            <div className="min-h-40 p-2">
+              <VinesAbstractDataPreview data={data} className="h-full" />
+            </div>
+          </VirtuaExecutionResultGridWrapper>
+        </div>
       );
   }
 };

@@ -1,13 +1,10 @@
-import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import React, { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
 
-import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
-import { Masonry, useInfiniteLoader } from 'masonic';
+import { useInfiniteLoader, useMasonry, usePositioner } from 'masonic';
 
 import { useWorkflowExecutionList } from '@/apis/workflow/execution';
-import { ExecutionResultItem } from '@/components/layout/workspace/vines-view/form/execution-result/grid/item.tsx';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result/index.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 import {
@@ -16,9 +13,9 @@ import {
   IVinesExecutionResultItem,
 } from '@/utils/execution.ts';
 
-interface IExecutionResultGridProps extends React.ComponentPropsWithoutRef<'div'> {
-  event$: EventEmitter<void>;
+import { ExecutionResultItem } from './item';
 
+interface IExecutionResultGridProps extends React.ComponentPropsWithoutRef<'div'> {
   workflowId?: string | null;
   height: number;
 
@@ -30,7 +27,6 @@ interface IExecutionResultGridProps extends React.ComponentPropsWithoutRef<'div'
 }
 
 export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
-  event$,
   workflowId,
   height,
   page,
@@ -39,29 +35,22 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   setData,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const forceUpdate = useForceUpdate();
-  const [renderKey, setRenderKey] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-  const containerWidth = usePageStore((s) => s.containerWidth);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  event$.useSubscription(() => {
-    forceUpdate();
-    setRenderKey((prev) => prev + 1);
-  });
+  const [hasMore, setHasMore] = useState(true);
+  const formContainerWidth = usePageStore((s) => s.containerWidth);
 
   const { data: currentPageExecutionListData, isLoading } = useWorkflowExecutionList(workflowId, page, LOAD_LIMIT, 0);
 
-  const maybeLoadMore = useInfiniteLoader(
+  const loadMore = useInfiniteLoader(
     async () => {
       if (isLoading || !hasMore) return;
 
-      console.log('触发加载更多，当前页：', page, '当前数据量：', data.length);
       setPage((prev) => prev + 1);
     },
     {
-      isItemLoaded: (index) => index < data.length,
-      threshold: 3,
-      // minimumBatchSize: LOAD_LIMIT / 2,
+      threshold: LOAD_LIMIT * 2,
+      minimumBatchSize: LOAD_LIMIT,
     },
   );
 
@@ -76,9 +65,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
       setHasMore(false);
     }
 
-    if (page === 1) {
-      return;
-    }
+    if (page === 1) return;
 
     const nonExist = currentPageResultList.filter(
       (item) => !data.some((existingItem) => existingItem.instanceId === item.instanceId),
@@ -87,9 +74,77 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     if (nonExist.length === 0) return;
 
     setData((prevData) => [...prevData, ...nonExist]);
-    setRenderKey((prev) => prev + 1);
-    event$.emit();
   }, [currentPageExecutionListData, page]);
+
+  const containerWidth = (formContainerWidth - 48) * 0.6 - 16;
+
+  const positioner = usePositioner({
+    width: containerWidth,
+    columnGutter: 12,
+    columnWidth: 200,
+    rowGutter: 12,
+  });
+
+  const [scrollTop, setScrollTop] = useState(0);
+  const [isScrolling, setIsScrolling] = useState(false);
+
+  const lastUpdateTimeRef = useRef(0);
+  const currentScrollTopRef = useRef(0);
+  const frameRef = useRef<number | null>(null);
+  const scrollTimeoutRef = useRef<any>(null);
+  const fps = 1;
+
+  const throttledUpdate = useCallback(() => {
+    if (frameRef.current) return;
+
+    frameRef.current = requestAnimationFrame(() => {
+      const now = Date.now();
+      if (now - lastUpdateTimeRef.current >= 1000 / fps) {
+        setScrollTop(currentScrollTopRef.current);
+        lastUpdateTimeRef.current = now;
+      }
+      frameRef.current = null;
+    });
+  }, [fps]);
+
+  useEffect(() => {
+    const scrollElement = scrollRef.current;
+    if (!scrollElement) return;
+
+    const handleScroll = () => {
+      currentScrollTopRef.current = scrollElement.scrollTop;
+
+      setIsScrolling(true);
+
+      throttledUpdate();
+
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
+      scrollTimeoutRef.current = setTimeout(
+        () => {
+          setIsScrolling(false);
+          setScrollTop(currentScrollTopRef.current);
+        },
+        100 + 1000 / fps,
+      );
+    };
+
+    scrollElement.addEventListener('scroll', handleScroll);
+
+    return () => {
+      scrollElement.removeEventListener('scroll', handleScroll);
+      if (frameRef.current) {
+        cancelAnimationFrame(frameRef.current);
+        frameRef.current = null;
+      }
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+        scrollTimeoutRef.current = null;
+      }
+    };
+  }, [throttledUpdate]);
 
   return (
     <ScrollArea
@@ -98,19 +153,18 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
       style={{ height }}
       disabledOverflowMask
     >
-      <Masonry
-        key={`${renderKey}-${data.length}`}
-        items={data ?? []}
-        ssrWidth={(containerWidth - 48) * 0.6 - 16}
-        columnWidth={200}
-        columnGutter={12}
-        rowGutter={12}
-        render={({ data: item, index }) => (
-          <ExecutionResultItem index={index} key={`${item.render.key}-${index}`} {...item} />
-        )}
-        itemHeightEstimate={1}
-        onRender={maybeLoadMore}
-      />
+      {useMasonry<IVinesExecutionResultItem>({
+        positioner,
+        scrollTop,
+        isScrolling,
+        height,
+        containerRef,
+        items: data ?? [],
+        overscanBy: 3,
+        render: useCallback(({ data: item }) => <ExecutionResultItem {...item} />, [isScrolling]),
+        itemKey: (item) => item.render.key,
+        onRender: loadMoe,
+      })}
     </ScrollArea>
   );
 };

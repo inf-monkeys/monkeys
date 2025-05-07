@@ -3,9 +3,9 @@ import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
-import { IVinesExecutionResultItem } from '@/utils/execution.ts/index.tsx';
-import { VirtuaExecutionResultRawDataDialog } from '@/utils/execution.ts/wrapper/raw-data-dialog.tsx';
+import { VirtuaExecutionResultRawDataDialog } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/wrapper/raw-data-dialog.tsx';
 import { VinesLoading } from '@/components/ui/loading';
+import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
 interface IVirtuaExecutionResultGridRawItemProps {
   data: IVinesExecutionResultItem;
