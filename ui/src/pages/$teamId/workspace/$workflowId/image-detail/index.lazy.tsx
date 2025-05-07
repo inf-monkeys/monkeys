@@ -7,12 +7,37 @@ import { ArrowLeft, DeleteIcon, DownloadIcon, Share2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import ImageDetailLayout from '@/components/layout/image-detail-layout';
-import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
+import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
 import { VinesImage } from '@/components/ui/vines-image';
+import { useVinesFlow } from '@/package/vines-flow';
 
 interface IImageDetailProps {}
+
+interface TabularRenderWrapperProps {
+  height: number;
+}
+
+// TabularRender包装组件，用于获取工作流输入参数
+const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height }) => {
+  const { vines } = useVinesFlow();
+  const tabular$ = useEventEmitter<TTabularEvent>();
+
+  // 从vines中获取工作流输入参数
+  const inputs = vines.workflowInput;
+  const workflowId = vines.workflowId;
+
+  return (
+    <TabularRender
+      inputs={inputs}
+      height={height}
+      event$={tabular$}
+      workflowId={workflowId}
+      scrollAreaClassName="pr-4"
+    />
+  );
+};
 
 export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const { t } = useTranslation();
@@ -24,8 +49,6 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const imageUrl = searchParams.get('imageUrl') || '';
 
   const { workflowId } = useParams({ from: '/$teamId/workspace/$workflowId/image-detail/' });
-
-  const event$ = useEventEmitter<void>();
 
   return (
     <VinesFlowProvider workflowId={workflowId}>
@@ -53,15 +76,16 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 
             {/* 中间区域，渲染表单 */}
             <div className="flex-1 overflow-auto p-6">
-              <VinesTabular setHistoryVisible={() => {}} event$={event$} height={600} />
+              <TabularRenderWrapper height={600} />
             </div>
 
             {/* 右侧操作按钮区 */}
             <div className="flex w-28 shrink-0 flex-col items-center justify-center gap-4 border-l border-input bg-white">
-              <Button icon={<ArrowLeft />} variant="ghost" size="icon" onClick={() => history.back()} />
-              <Button icon={<DownloadIcon />} variant="ghost" size="icon" />
-              <Button icon={<DeleteIcon />} variant="ghost" size="icon" />
-              <Button icon={<Share2 />} variant="ghost" size="icon" />
+              <Button icon={<ArrowLeft />} variant="outline" size="small" onClick={() => history.back()} />
+              <Button icon={<DownloadIcon />} variant="outline" size="small" />
+              <Button icon={<DeleteIcon />} variant="outline" size="small" />
+              <Button icon={<Share2 />} variant="outline" size="small" />
+              {/* <Button icon={displayModeIcon} variant="outline" size="small" /> */}
             </div>
           </div>
         </main>
