@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import _, { isEmpty } from 'lodash';
+import { isEmpty, isString } from 'lodash';
 import { Repeat2, Send, StopCircle, Trash2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -91,7 +91,7 @@ export const VinesChatInput: React.FC<IVinesChatInputProps> = ({
     setAttachedImages([]);
   };
 
-  useMemo(() => {
+  useEffect(() => {
     setInput(
       attachedImages.length > 0
         ? [
@@ -123,12 +123,12 @@ export const VinesChatInput: React.FC<IVinesChatInputProps> = ({
 
   const { submitKey } = useSubmitHandler();
 
-  const isInputEmpty =
-    (_.isArray(input) && input.length === 0) ||
-    (_.isString(input) && isEmpty(input.trim())) ||
-    attachedImages.length === 0;
+  const [shouldDisableButton, setShouldDisableButton] = useState(true);
   const hasMessages = messages?.length > 0;
-
+  useEffect(() => {
+    // 数组为空或者字符串trim后为空时禁用按钮
+    setShouldDisableButton(isEmpty(input) || (isString(input) && isEmpty(input.trim())));
+  }, [input]);
   return (
     <div className="space-y-1.5 pb-1 pt-2">
       <div className="flex items-center gap-2">
@@ -217,7 +217,7 @@ export const VinesChatInput: React.FC<IVinesChatInputProps> = ({
                   size="small"
                   icon={<Send />}
                   loading={isLoading}
-                  disabled={isInputEmpty}
+                  disabled={shouldDisableButton}
                   onClick={handleSend}
                 >
                   {t('workspace.chat-view.chat-bot.chat.send')}
