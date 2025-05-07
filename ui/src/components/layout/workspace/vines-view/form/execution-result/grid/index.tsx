@@ -1,6 +1,6 @@
 import React, { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
 
-import { useInfiniteLoader, useMasonry, usePositioner, useResizeObserver } from 'masonic';
+import { useInfiniteLoader, useMasonry, useResizeObserver } from 'masonic';
 
 import { useWorkflowExecutionList } from '@/apis/workflow/execution';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result/index.tsx';
@@ -14,6 +14,7 @@ import {
 } from '@/utils/execution.ts';
 
 import { ExecutionResultItem } from './item';
+import { usePositioner } from './utils';
 
 interface IExecutionResultGridProps extends React.ComponentPropsWithoutRef<'div'> {
   workflowId?: string | null;
