@@ -1,6 +1,8 @@
 import React from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
+
+import { useAsyncEffect } from 'ahooks';
 import { isObject } from 'lodash';
 import { Copy } from 'lucide-react';
 import Image from 'rc-image';
@@ -8,18 +10,18 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
 import { useCopy } from '@/hooks/use-copy.ts';
 import { useFlowStore } from '@/store/useFlowStore';
-import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
 
 import 'rc-image/assets/index.css';
 
 export type IVinesExecutionResultImageAlt =
   | string
   | {
-    label: string;
-    value: string;
-  };
+      label: string;
+      value: string;
+    };
 
 interface IVirtuaExecutionResultGridImageItemProps {
   src: string;
@@ -72,7 +74,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
           imageUrl: src,
           instanceId: instanceId || '',
           outputIndex,
-        }
+        },
       });
     }
   };
