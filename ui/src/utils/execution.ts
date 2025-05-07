@@ -1,9 +1,9 @@
+import { JSONValue } from '@/components/ui/code-editor';
 import {
   VinesWorkflowExecutionInput,
   VinesWorkflowExecutionOutputListItem,
   VinesWorkflowExecutionType,
 } from '@/package/vines-flow/core/typings.ts';
-import { JSONValue } from '@/components/ui/code-editor';
 
 type IVinesExecutionResultImageAltCopy = {
   type: 'copy-param';

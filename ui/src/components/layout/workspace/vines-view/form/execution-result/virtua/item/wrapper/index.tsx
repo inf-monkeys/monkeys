@@ -6,11 +6,11 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { deleteWorkflowExecution } from '@/apis/workflow/execution';
-import { IVinesExecutionResultItem } from '@/utils/execution.ts';
+import { VirtuaExecutionResultRawDataDialog } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/wrapper/raw-data-dialog.tsx';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useFlowStore } from '@/store/useFlowStore';
-import { VirtuaExecutionResultRawDataDialog } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/wrapper/raw-data-dialog.tsx';
+// import { useFlowStore } from '@/store/useFlowStore';
+import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
 interface IVirtuaExecutionResultGridWrapperProps {
   data: IVinesExecutionResultItem;
@@ -24,7 +24,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
   src,
 }) => {
   const { t } = useTranslation();
-  const workflowId = useFlowStore((s) => s.workflowId);
+  // const workflowId = useFlowStore((s) => s.workflowId);
   // const { mutate } = useWorkflowExecutionOutputs(workflowId);
 
   // 使用直接打开链接方式下载，避免CORS问题

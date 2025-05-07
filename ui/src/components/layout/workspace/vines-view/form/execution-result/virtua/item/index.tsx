@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 
 import { VinesAbstractVideo } from '@/components/layout/workspace/vines-view/_common/data-display/abstract/node/video.tsx';
-import { VirtuaExecutionResultGridImageItem } from '@/utils/execution.ts/image.tsx';
-import { VirtuaExecutionResultGridRawItem } from '@/utils/execution.ts/raw.tsx';
-import { VirtuaExecutionResultGridWrapper } from '@/utils/execution.ts/wrapper';
+import { VirtuaExecutionResultGridImageItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/image.tsx';
+import { VirtuaExecutionResultGridRawItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/raw.tsx';
+import { VirtuaExecutionResultGridWrapper } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/wrapper';
 import { cn, getAlt } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 

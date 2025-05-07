@@ -25,7 +25,7 @@ interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div
   isMiniFrame?: boolean;
 }
 
-export const LOAD_LIMIT = 22;
+export const LOAD_LIMIT = 50;
 
 export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   className,
@@ -56,19 +56,15 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
 
   // 第一页任务及状态变化
   useEffect(() => {
-    console.log('effect');
-
     // 筛选状态变更的替换原 result
     const changed = firstPageExecutionList.filter(
       (r) => resultList.findIndex((pr) => r.instanceId === pr.instanceId && r.status != pr.status) != -1,
     );
-    console.log('changed', changed);
 
     // 筛选不存在的拼接到头部
     const nonExist = firstPageExecutionList.filter(
       (r) => !resultList.map(({ instanceId }) => instanceId).includes(r.instanceId),
     );
-    console.log('non exist', nonExist);
 
     // 没有变化返回
     if (changed.length == 0 && nonExist.length == 0) return;
@@ -94,15 +90,10 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
     enable: enablePostMessage,
   });
 
-  useEffect(() => {
-    console.log('result list', resultList);
-  }, [resultList]);
-
   return (
     <Card className={cn('relative', className)}>
       <CardContent className="p-0">
         <ExecutionResultGrid
-          event$={event$}
           workflowId={workflowId}
           height={height}
           page={currentPage}

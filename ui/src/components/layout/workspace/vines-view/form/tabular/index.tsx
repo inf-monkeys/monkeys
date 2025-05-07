@@ -73,7 +73,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
         event$.emit?.();
         return data;
       },
-      false
+      false,
     );
     vines
       .start({ inputData, onlyStart: true })
