@@ -1,6 +1,6 @@
 import React, { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
 
-import { useInfiniteLoader, useMasonry, usePositioner } from 'masonic';
+import { useInfiniteLoader, useMasonry, usePositioner, useResizeObserver } from 'masonic';
 
 import { useWorkflowExecutionList } from '@/apis/workflow/execution';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result/index.tsx';
@@ -45,7 +45,6 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   const loadMore = useInfiniteLoader(
     async () => {
       if (isLoading || !hasMore) return;
-
       setPage((prev) => prev + 1);
     },
     {
@@ -85,6 +84,38 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     rowGutter: 12,
   });
 
+  const resizeObserver = useResizeObserver(positioner);
+
+  const { scrollTop, isScrolling } = useScroller(scrollRef);
+
+  const masonryGrid = useMasonry<IVinesExecutionResultItem>({
+    positioner,
+    scrollTop,
+    isScrolling,
+    height,
+    containerRef,
+    items: data ?? [],
+    overscanBy: 3,
+    render: useCallback(({ data: item }) => <ExecutionResultItem {...item} />, []),
+    itemKey: (item) => item.render.key,
+    onRender: loadMore,
+    itemHeightEstimate: 400,
+    resizeObserver,
+  });
+
+  return (
+    <ScrollArea
+      className={cn('-pr-0.5 z-20 mr-0.5 bg-background [&>[data-radix-scroll-area-viewport]]:p-2')}
+      ref={scrollRef}
+      style={{ height }}
+      disabledOverflowMask
+    >
+      {masonryGrid}
+    </ScrollArea>
+  );
+};
+
+const useScroller = (scrollRef: React.RefObject<HTMLElement>) => {
   const [scrollTop, setScrollTop] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
 
@@ -92,7 +123,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   const currentScrollTopRef = useRef(0);
   const frameRef = useRef<number | null>(null);
   const scrollTimeoutRef = useRef<any>(null);
-  const fps = 1;
+  const fps = 12; // 提高帧率以获得更流畅的滚动体验
 
   const throttledUpdate = useCallback(() => {
     if (frameRef.current) return;
@@ -113,9 +144,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
 
     const handleScroll = () => {
       currentScrollTopRef.current = scrollElement.scrollTop;
-
       setIsScrolling(true);
-
       throttledUpdate();
 
       if (scrollTimeoutRef.current) {
@@ -144,27 +173,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
         scrollTimeoutRef.current = null;
       }
     };
-  }, [throttledUpdate]);
+  }, [scrollRef, throttledUpdate]);
 
-  return (
-    <ScrollArea
-      className={cn('-pr-0.5 z-20 mr-0.5 bg-background [&>[data-radix-scroll-area-viewport]]:p-2')}
-      ref={scrollRef}
-      style={{ height }}
-      disabledOverflowMask
-    >
-      {useMasonry<IVinesExecutionResultItem>({
-        positioner,
-        scrollTop,
-        isScrolling,
-        height,
-        containerRef,
-        items: data ?? [],
-        overscanBy: 3,
-        render: useCallback(({ data: item }) => <ExecutionResultItem {...item} />, [isScrolling]),
-        itemKey: (item) => item.render.key,
-        onRender: loadMore,
-      })}
-    </ScrollArea>
-  );
+  return { scrollTop, isScrolling };
 };
