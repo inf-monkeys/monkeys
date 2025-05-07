@@ -9,7 +9,7 @@ import { VinesLoading } from '@/components/ui/loading';
 import { getAlt } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
-export const ExecutionResultItem: React.FC<IVinesExecutionResultItem> = (result) => {
+export const ExecutionResultItem: React.FC<IVinesExecutionResultItem & { index: number }> = ({ index, ...result }) => {
   const { render } = result;
   const { type, data, status } = render;
 
@@ -42,6 +42,7 @@ export const ExecutionResultItem: React.FC<IVinesExecutionResultItem> = (result)
       // 使用包装组件来支持下载和删除功能
       return (
         <div className="relative overflow-hidden rounded-lg border border-input shadow-sm">
+          <span>{index}</span>
           <VirtuaExecutionResultGridWrapper data={result} src={data as string}>
             <div className="h-full w-full" onClick={(e) => e.stopPropagation()}>
               <VirtuaExecutionResultGridImageItem src={data as string} alt={alt} />
