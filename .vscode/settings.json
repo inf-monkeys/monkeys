@@ -8,21 +8,12 @@
   // "editor.codeActionsOnSave": {
   //   "source.fixAll": true
   // },
-  "eslint.validate": [
-    "javascript",
-    "typescript"
-  ],
+  "eslint.validate": ["javascript", "typescript"],
   "[typescript]": {
     "editor.defaultFormatter": "vscode.typescript-language-features"
   },
-  "cSpell.words": [
-    "varchar"
-  ],
-  "i18n-ally.localesPaths": [
-    "src/locales",
-    "src/modules/i18n",
-    "src/modules/messages"
-  ],
+  "cSpell.words": ["varchar"],
+  "i18n-ally.localesPaths": ["src/locales", "src/modules/i18n", "src/modules/messages"],
   "[json]": {
     "editor.defaultFormatter": "vscode.json-language-features"
   },
@@ -32,6 +23,6 @@
     "source.organizeImports": "explicit"
   },
   "[typescriptreact]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useAsyncEffect } from 'ahooks';
+import { useNavigate } from '@tanstack/react-router';
 import { isObject } from 'lodash';
 import { Copy } from 'lucide-react';
 import Image from 'rc-image';
@@ -8,21 +8,24 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
 import { useCopy } from '@/hooks/use-copy.ts';
+import { useFlowStore } from '@/store/useFlowStore';
+import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
 
 import 'rc-image/assets/index.css';
 
 export type IVinesExecutionResultImageAlt =
   | string
   | {
-      label: string;
-      value: string;
-    };
+    label: string;
+    value: string;
+  };
 
 interface IVirtuaExecutionResultGridImageItemProps {
   src: string;
   alt: IVinesExecutionResultImageAlt;
+  instanceId?: string;
+  outputIndex?: number;
 }
 
 function caculateThumbUrl(url: string) {
@@ -34,10 +37,13 @@ function caculateThumbUrl(url: string) {
 export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResultGridImageItemProps> = ({
   src,
   alt,
+  instanceId,
+  outputIndex = 0,
 }) => {
   const { t } = useTranslation();
-
+  const navigate = useNavigate();
   const { copy } = useCopy();
+  const workflowId = useFlowStore((s) => s.workflowId);
 
   const altLabel = isObject(alt) ? alt.label : alt;
   const altContent = isObject(alt) ? alt.value : alt;
@@ -52,6 +58,25 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
     }
   }, [src]);
 
+  // 处理图片点击，跳转到详情页面
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (workflowId && src) {
+      navigate({
+        to: '/$teamId/workspace/$workflowId/image-detail/',
+        params: {
+          teamId: window['vinesTeamId'],
+          workflowId,
+        },
+        search: {
+          imageUrl: src,
+          instanceId: instanceId || '',
+          outputIndex,
+        }
+      });
+    }
+  };
+
   return (
     <div className="vines-center relative overflow-hidden rounded-lg">
       <Image
@@ -63,6 +88,8 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
           width: '100%',
           height: '100%',
         }}
+        preview={false}
+        onClick={handleImageClick}
       />
 
       {altLabel.trim() !== '' && (
