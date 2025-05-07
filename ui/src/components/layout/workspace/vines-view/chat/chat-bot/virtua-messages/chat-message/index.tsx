@@ -1,7 +1,6 @@
 import React from 'react';
 
-import { isEmpty } from 'lodash';
-import _ from 'lodash';
+import _, { isEmpty } from 'lodash';
 
 import { IVinesMessage } from '@/components/layout/workspace/vines-view/chat/chat-bot/use-chat.ts';
 import { ToolDisplay } from '@/components/layout/workspace/vines-view/chat/chat-bot/virtua-messages/chat-message/tool-display.tsx';
