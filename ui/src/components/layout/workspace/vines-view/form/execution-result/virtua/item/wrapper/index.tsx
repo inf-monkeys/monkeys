@@ -5,12 +5,12 @@ import { Download, Ellipsis, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { deleteWorkflowExecution, useWorkflowExecutionOutputs } from '@/apis/workflow/execution';
-import { IVinesExecutionResultItem } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item';
+import { deleteWorkflowExecution } from '@/apis/workflow/execution';
 import { VirtuaExecutionResultRawDataDialog } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/wrapper/raw-data-dialog.tsx';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useFlowStore } from '@/store/useFlowStore';
+// import { useFlowStore } from '@/store/useFlowStore';
+import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
 interface IVirtuaExecutionResultGridWrapperProps {
   data: IVinesExecutionResultItem;
@@ -24,8 +24,8 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
   src,
 }) => {
   const { t } = useTranslation();
-  const workflowId = useFlowStore((s) => s.workflowId);
-  const { mutate } = useWorkflowExecutionOutputs(workflowId);
+  // const workflowId = useFlowStore((s) => s.workflowId);
+  // const { mutate } = useWorkflowExecutionOutputs(workflowId);
 
   // 使用直接打开链接方式下载，避免CORS问题
   const handleDownload = useMemoizedFn(() => {
@@ -52,13 +52,13 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
       toast.promise(deleteWorkflowExecution(targetInstanceId), {
         success: () => {
           // 直接移除本地 outputs 数据
-          void mutate((currentData) => {
-            if (!currentData) return currentData;
-            return {
-              ...currentData,
-              data: currentData.data.filter((it) => it?.instanceId !== targetInstanceId),
-            };
-          }, false); // 只更新本地缓存
+          // void mutate((currentData) => {
+          //   if (!currentData) return currentData;
+          //   return {
+          //     ...currentData,
+          //     data: currentData.data.filter((it) => it?.instanceId !== targetInstanceId),
+          //   };
+          // }, false); // 只更新本地缓存
           return t('common.delete.success');
         },
         error: t('common.delete.error'),
