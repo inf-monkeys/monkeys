@@ -24,6 +24,7 @@ export const SettingsNavList: React.FC<INavListProps> = ({ className }) => {
 
   const currentTabVariant = useSearch({
     strict: false,
+    // @ts-expect-error
     select: (search) => search.tab,
   });
 
@@ -47,7 +48,7 @@ export const SettingsNavList: React.FC<INavListProps> = ({ className }) => {
 
           return (
             <AccordionItem key={i} value={name}>
-              <SettingsNavButton key={i} isActive={isActive()} icon={icon} to={to}>
+              <SettingsNavButton key={i} isActive={isActive()} icon={icon} to={to as any}>
                 {t(name)}
               </SettingsNavButton>
             </AccordionItem>

@@ -2,12 +2,13 @@ import React from 'react';
 
 import { Link } from '@tanstack/react-router';
 
-import { LogIn } from 'lucide-react';
+import { LogIn, StarIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useSystemConfig } from '@/apis/common';
 import { getVinesToken } from '@/apis/utils.ts';
 import { VinesLogo } from '@/components/layout/main/vines-logo.tsx';
+import { HeaderInvite } from '@/components/layout/settings/header-invite';
 import { UserCard } from '@/components/layout-wrapper/space/header/expand/user-card.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
@@ -65,6 +66,8 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
         )}
       </div>
       <div className="z-20 flex items-center gap-4">
+        <CreditButton />
+        <HeaderInvite />
         {tail}
         {hasToken ? (
           <>
@@ -85,3 +88,11 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
     </header>
   );
 };
+
+function CreditButton() {
+  return (
+    <Button icon={<StarIcon />} variant="outline" size="small" className="flex items-center gap-1">
+      1000
+    </Button>
+  );
+}

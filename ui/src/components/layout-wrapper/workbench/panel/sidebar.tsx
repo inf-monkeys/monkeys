@@ -34,7 +34,7 @@ export const VinesPanelSidebar: React.FC<IVinesPanelSidebarProps> = () => {
           <NavList />
           {hasPayment && <Balance />}
 
-          <NavButton icon={<UserCog />} to="/$teamId/settings?tab=account">
+          <NavButton icon={<UserCog />} to={'/$teamId/settings?tab=account' as any}>
             {t('components.layout.main.sidebar.toolbar.settings-tooltip')}
           </NavButton>
         </>
