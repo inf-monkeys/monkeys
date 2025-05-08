@@ -32,7 +32,7 @@ export const Settings: React.FC = () => {
         defaultValue="account"
         value={tab}
         onValueChange={(value) => setSettingsTab({ tab: value })}
-        className="[&_[role='tabpanel']]:h-[calc(100vh-15.3rem)] [&_[role='tabpanel']]:overflow-y-auto [&_[role='tabpanel']]:overflow-x-hidden"
+        className="[&_[role='tabpanel']]:h-[calc(100vh-8.3rem)] [&_[role='tabpanel']]:overflow-y-auto [&_[role='tabpanel']]:overflow-x-hidden"
       >
         {/* <TabsList>
           <TabsTrigger value="account" className="text-xs">
