@@ -21,11 +21,13 @@ $background-color: #f3f3f3;
 .rc-image {
   display: inline-flex;
   position: relative;
+  border: none !important;
 
 &-img {
   width: 100%;
   height: auto;
   @apply cursor-pointer;
+  border: none !important;
   &-placeholder {
     background-color: $background-color;
     background-repeat: no-repeat;

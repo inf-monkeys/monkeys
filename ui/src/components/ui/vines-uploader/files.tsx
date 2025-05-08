@@ -67,11 +67,13 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
               return (
                 <div
                   key={id}
-                  className="vines-center group relative h-48 min-w-28 overflow-hidden rounded border border-input/80 shadow [&_.rc-image-mask]:absolute [&_.rc-image-mask]:h-full [&_.rc-image]:static"
+                  className="vines-center group relative h-48 min-w-28 overflow-hidden [&_.rc-image-mask]:absolute [&_.rc-image-mask]:h-full [&_.rc-image]:static"
                 >
                   <Image
                     src={preview}
                     fallback={isDarkMode ? '/fallback_image_dark.webp' : '/fallback_image.webp'}
+                    className="border-0"
+                    style={{ border: 'none' }}
                     preview={{
                       src,
                       icons,

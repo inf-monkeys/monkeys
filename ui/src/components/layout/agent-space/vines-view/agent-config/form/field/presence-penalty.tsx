@@ -18,7 +18,7 @@ export const AgentConfigFormFieldPresencePenalty: React.FC<IAgentConfigFormField
       name="presence_penalty"
       control={form.control}
       render={({ field: { value, ...field } }) => (
-        <FormItem className="flex-1">
+        <FormItem className="flex-1" card>
           <FormLabel>{t('agent.view-config.form.presence-penalty.label')}</FormLabel>
           <FormControl>
             <Slider
