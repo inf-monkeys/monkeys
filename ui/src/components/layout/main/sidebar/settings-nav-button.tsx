@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { LinkOptions, useLinkProps, useRouterState } from '@tanstack/react-router';
+import { LinkOptions, useLinkProps } from '@tanstack/react-router';
 
 import { cn } from '@/utils';
 
@@ -9,20 +9,16 @@ interface INavButtonProps extends React.ComponentPropsWithoutRef<'div'> {
   postfix?: React.ReactNode;
   to?: LinkOptions['to'];
   children: React.ReactNode;
+  isActive: boolean;
 }
 
-export const SettingsNavButton: React.FC<INavButtonProps> = ({ to, children, icon, postfix, ...props }) => {
+export const SettingsNavButton: React.FC<INavButtonProps> = ({ to, children, icon, postfix, isActive, ...props }) => {
   const { onClick, onFocus, onMouseEnter, onMouseLeave, onTouchStart } = useLinkProps({
     to: to as any,
     activeOptions: { exact: true },
   });
-  const searchParams = useRouterState({
-    select: (state) => {
-      return state.location.search;
-    },
-  });
+
   // TODO: add active style based on tab search param
-  const isActive = false;
 
   return (
     <div
