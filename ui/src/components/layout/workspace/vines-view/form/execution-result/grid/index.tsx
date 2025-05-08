@@ -4,6 +4,7 @@ import { useInfiniteLoader, useMasonry, useResizeObserver } from 'masonic';
 
 import { useWorkflowExecutionList } from '@/apis/workflow/execution';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result/index.tsx';
+import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
@@ -40,6 +41,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
 
   const [hasMore, setHasMore] = useState(true);
   const formContainerWidth = usePageStore((s) => s.containerWidth);
+  const { isUseWorkSpace } = useVinesRoute();
 
   const { data: currentPageExecutionListData, isLoading } = useWorkflowExecutionList(workflowId, page, LOAD_LIMIT, 0);
 
@@ -76,7 +78,9 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     setData((prevData) => [...prevData, ...nonExist]);
   }, [currentPageExecutionListData, page]);
 
-  const containerWidth = (formContainerWidth - 48) * 0.6 - 16;
+  const containerWidth = (formContainerWidth - 48) * 0.6 - 16 - (isUseWorkSpace ? 140 : 0);
+
+  console.log(formContainerWidth);
 
   const positioner = usePositioner({
     width: containerWidth,
