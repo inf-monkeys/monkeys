@@ -23,8 +23,8 @@ import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessa
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
-import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
 import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
+import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
 import { cn, getI18nContent } from '@/utils';
 
 interface IVinesFormFieldItemProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -86,7 +86,7 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
         const filterReserve = targetLinkage?.selectFilter?.reserve;
         const enableFilter = (filterList?.length ?? 0) > 0;
         return (
-          <FormItem className={cn('col-span-2 px-3', singleColumn && 'col-span-1', itemClassName)}>
+          <FormItem className={cn('col-span-2 px-3', singleColumn && 'col-span-1', itemClassName)} card>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1">
                 <FormLabel className="font-bold">

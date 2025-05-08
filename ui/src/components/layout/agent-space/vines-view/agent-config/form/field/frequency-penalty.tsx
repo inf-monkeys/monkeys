@@ -20,7 +20,7 @@ export const AgentConfigFormFieldFrequencyPenalty: React.FC<IAgentConfigFormFiel
       name="frequency_penalty"
       control={form.control}
       render={({ field: { value, ...field } }) => (
-        <FormItem className="flex-1">
+        <FormItem className="flex-1" card>
           <FormLabel>{t('agent.view-config.form.frequency-penalty.label')}</FormLabel>
           <FormControl>
             <Slider
