@@ -4,6 +4,7 @@ import { useInfiniteLoader, useMasonry, useResizeObserver } from 'masonic';
 
 import { useWorkflowExecutionList } from '@/apis/workflow/execution';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result/index.tsx';
+import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
@@ -15,7 +16,6 @@ import {
 
 import { ExecutionResultItem } from './item';
 import { usePositioner } from './utils';
-import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 
 interface IExecutionResultGridProps extends React.ComponentPropsWithoutRef<'div'> {
   workflowId?: string | null;
