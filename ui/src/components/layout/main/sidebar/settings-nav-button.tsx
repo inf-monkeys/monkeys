@@ -18,8 +18,6 @@ export const SettingsNavButton: React.FC<INavButtonProps> = ({ to, children, ico
     activeOptions: { exact: true },
   });
 
-  // TODO: add active style based on tab search param
-
   return (
     <div
       className={cn(
