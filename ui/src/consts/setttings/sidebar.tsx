@@ -9,7 +9,7 @@ export const SETTINGS_SIDEBAR_MAP: SettingsTabNavItem[] = [
   {
     name: 'settings.individual-configurations.title',
     icon: <BotIcon />,
-    to: '/$teamId/settings?tab=individual-configurations',
+    to: '/$teamId/settings?tab=account',
   },
   {
     name: 'settings.team-configurations.title',

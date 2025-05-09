@@ -29,7 +29,7 @@ export const Settings: React.FC = () => {
     <div className="flex flex-col gap-4">
       {/* <h1 className="text-2xl font-bold">{t('settings.title')}</h1> */}
       <Tabs
-        defaultValue="individual-configurations"
+        defaultValue="account"
         value={tab}
         onValueChange={(value) => setSettingsTab({ tab: value })}
         className="[&_[role='tabpanel']]:h-[calc(100vh-8.3rem)] [&_[role='tabpanel']]:overflow-y-auto [&_[role='tabpanel']]:overflow-x-hidden"
@@ -45,7 +45,7 @@ export const Settings: React.FC = () => {
             {t('settings.api-key.title')}
           </TabsTrigger>
         </TabsList> */}
-        <TabsContent value="individual-configurations" asChild>
+        <TabsContent value="account" asChild>
           <ScrollArea className="-mr-3 pr-3" disabledOverflowMask>
             <Account />
           </ScrollArea>
