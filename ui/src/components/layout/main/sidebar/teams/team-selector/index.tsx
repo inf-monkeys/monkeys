@@ -22,6 +22,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn } from '@/utils';
 
 const NEED_FORCE_REFRESH = ['text-data', 'table-data', 'image-models'];
@@ -62,6 +63,10 @@ export const TeamSelector: React.FC<ITeamSelectorProps> = ({ size = 'normal' }) 
       });
     }
   });
+  //TODO 当主题模式为自动 切换系统主题时响应不及时
+  const [mode] = useLocalStorage<string>('vines-ui-dark-mode', 'auto', false);
+  const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  const isDarkMode = mode === 'dark' || (mode === 'auto' && darkModeMediaQuery.matches);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -73,7 +78,11 @@ export const TeamSelector: React.FC<ITeamSelectorProps> = ({ size = 'normal' }) 
           aria-expanded={open}
           aria-label="Select a team"
         >
-          <Team className="w-32" logo={currentTeam?.iconUrl} name={currentTeam?.name} />
+          <Team
+            className="w-32"
+            logo={isDarkMode ? currentTeam?.darkmodeIconUrl : currentTeam?.iconUrl}
+            name={currentTeam?.name}
+          />
           <ChevronsUpDown className="h-4 w-4 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -87,7 +96,7 @@ export const TeamSelector: React.FC<ITeamSelectorProps> = ({ size = 'normal' }) 
           <CommandList>
             <CommandGroup>
               <ScrollArea className="flex max-h-60 flex-col overflow-y-auto" disabledOverflowMask>
-                {teams?.map(({ id, iconUrl, name, description }) => {
+                {teams?.map(({ id, iconUrl, name, description, darkmodeIconUrl }) => {
                   const teamName = t([`components.layout.main.sidebar.teams.${name ?? ''}`, name ?? '']);
 
                   return (
@@ -102,7 +111,11 @@ export const TeamSelector: React.FC<ITeamSelectorProps> = ({ size = 'normal' }) 
                       >
                         <TooltipTrigger asChild>
                           <div className="group flex w-full cursor-pointer select-none items-center px-2 py-1.5 text-sm">
-                            <Team logo={iconUrl} name={teamName} description={description} />
+                            <Team
+                              logo={isDarkMode ? darkmodeIconUrl : iconUrl}
+                              name={teamName}
+                              description={description}
+                            />
                             <CheckIcon
                               className={cn('ml-auto', teamId === id ? 'opacity-100' : 'opacity-0')}
                               size={18}
