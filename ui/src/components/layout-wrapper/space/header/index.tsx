@@ -17,7 +17,7 @@ import useUrlState from '@/hooks/use-url-state.ts';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
-import { CreditButton } from './expand/credit-button';
+import { QuotaButton } from './expand/quota-button';
 interface ISpaceHeaderProps extends React.ComponentPropsWithoutRef<'header'> {
   tail?: React.ReactNode;
   tailWithAuth?: React.ReactNode;
@@ -67,7 +67,7 @@ export const SpaceHeader: React.FC<ISpaceHeaderProps> = ({
         )}
       </div>
       <div className="z-20 flex items-center gap-4">
-        <CreditButton />
+        <QuotaButton />
         <HeaderInvite />
         {tail}
         {hasToken ? (
