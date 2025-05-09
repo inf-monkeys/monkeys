@@ -51,6 +51,7 @@ export const Team: React.FC<ITeamProps> = () => {
   const teamName = team?.name || '团队';
   const teamDescription = team?.description || '暂无描述';
   const teamLogo = team?.iconUrl;
+  const teamDarkmodeLogo = team?.darkmodeIconUrl;
 
   return (
     <Card>
@@ -66,6 +67,12 @@ export const Team: React.FC<ITeamProps> = () => {
         <VinesImageEditor value={teamLogo} onChange={(val) => handleUpdateTeam('iconUrl', val)}>
           <Avatar className="size-10 cursor-pointer">
             <AvatarImage className="aspect-auto" src={teamLogo} alt={teamName} />
+            <AvatarFallback className="rounded-none p-2 text-xs">{teamName.substring(0, 2)}</AvatarFallback>
+          </Avatar>
+        </VinesImageEditor>
+        <VinesImageEditor value={teamLogo} onChange={(val) => handleUpdateTeam('darkmodeIconUrl', val)}>
+          <Avatar className="size-10 cursor-pointer">
+            <AvatarImage className="aspect-auto" src={teamDarkmodeLogo} alt={teamName} />
             <AvatarFallback className="rounded-none p-2 text-xs">{teamName.substring(0, 2)}</AvatarFallback>
           </Avatar>
         </VinesImageEditor>

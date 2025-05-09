@@ -67,6 +67,7 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
   };
 
   const teamLogo = team?.iconUrl;
+  const teamDarkmodeLogo = team?.darkmodeIconUrl;
 
   return (
     <Card>
@@ -75,12 +76,20 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
         <CardDescription>{t('settings.theme.team-logo.description')}</CardDescription>
       </CardHeader>
       <CardContent className="flex items-center justify-between">
-        <VinesImageEditor value={teamLogo} onChange={handleUpdateTeamLogo}>
-          <Avatar className="h-10 w-auto max-w-36 rounded-md">
-            <AvatarImage className="aspect-auto" src={team?.iconUrl} alt={teamName} />
-            <AvatarFallback className="rounded-none p-2 text-xs">{teamName?.substring(0, 2)}</AvatarFallback>
-          </Avatar>
-        </VinesImageEditor>
+        <div className="flex items-center gap-4">
+          <VinesImageEditor value={teamLogo} onChange={handleUpdateTeamLogo}>
+            <Avatar className="size-10 w-auto max-w-36 rounded-md">
+              <AvatarImage className="aspect-auto" src={team?.iconUrl} alt={teamName} />
+              <AvatarFallback className="rounded-none p-2 text-xs">{teamName?.substring(0, 2)}</AvatarFallback>
+            </Avatar>
+          </VinesImageEditor>
+          <VinesImageEditor value={teamDarkmodeLogo} onChange={handleUpdateTeamLogo}>
+            <Avatar className="size-10 w-auto max-w-36 rounded-md">
+              <AvatarImage className="aspect-auto" src={team?.darkmodeIconUrl} alt={teamName} />
+              <AvatarFallback className="rounded-none p-2 text-xs">{teamName?.substring(0, 2)}</AvatarFallback>
+            </Avatar>
+          </VinesImageEditor>
+        </div>
         <Tabs value={selected} onValueChange={handleUpdate}>
           <TabsList>
             <TabsTrigger value="team">{t('settings.theme.team-logo.options.team')}</TabsTrigger>
