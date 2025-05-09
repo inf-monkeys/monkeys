@@ -70,7 +70,7 @@ export const Team: React.FC<ITeamProps> = () => {
             <AvatarFallback className="rounded-none p-2 text-xs">{teamName.substring(0, 2)}</AvatarFallback>
           </Avatar>
         </VinesImageEditor>
-        <VinesImageEditor value={teamLogo} onChange={(val) => handleUpdateTeam('darkmodeIconUrl', val)}>
+        <VinesImageEditor value={teamDarkmodeLogo} onChange={(val) => handleUpdateTeam('darkmodeIconUrl', val)}>
           <Avatar className="size-10 cursor-pointer">
             <AvatarImage className="aspect-auto" src={teamDarkmodeLogo} alt={teamName} />
             <AvatarFallback className="rounded-none p-2 text-xs">{teamName.substring(0, 2)}</AvatarFallback>
