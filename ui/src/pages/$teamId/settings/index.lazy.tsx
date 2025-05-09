@@ -29,11 +29,7 @@ export const Settings: React.FC = () => {
     <div className="flex flex-col gap-4">
       {/* <h1 className="text-2xl font-bold">{t('settings.title')}</h1> */}
       <Tabs
-<<<<<<< HEAD
-        // defaultValue="account"
-=======
-        defaultValue="individual-configurations"
->>>>>>> 80df4a1742e0882266e613dfdef2922f57e706b3
+        defaultValue="account"
         value={tab}
         onValueChange={(value) => setSettingsTab({ tab: value })}
         className="[&_[role='tabpanel']]:h-[calc(100vh-8.3rem)] [&_[role='tabpanel']]:overflow-y-auto [&_[role='tabpanel']]:overflow-x-hidden"
