@@ -380,6 +380,9 @@
               },
               "agents": {
                 "label": "智能体"
+              },
+              "designs": {
+                "label": "设计"
               }
             },
             "tools": {

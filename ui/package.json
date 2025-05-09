@@ -123,6 +123,7 @@
     "swr": "^2.2.5",
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",
+    "tldraw": "^3.12.1",
     "unfetch": "^5.0.0",
     "use-sync-external-store": "^1.2.2",
     "validator": "^13.11.0",
