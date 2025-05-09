@@ -43,13 +43,13 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
 
   return (
     <motion.div
-      className="z-10"
+      className="z-10 dark:bg-[#242529]"
       key="vines-uploader-files"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      <ScrollArea className="h-52" disabledOverflowMask>
+      <ScrollArea className="h-52 dark:bg-[#242529]" disabledOverflowMask>
         <div className={cn('flex size-full items-center justify-center gap-2 p-2', listLen > 3 && 'grid grid-cols-3')}>
           {list.map(
             ({
@@ -67,7 +67,7 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
               return (
                 <div
                   key={id}
-                  className="vines-center group relative h-48 min-w-28 overflow-hidden [&_.rc-image-mask]:absolute [&_.rc-image-mask]:h-full [&_.rc-image]:static"
+                  className="vines-center group relative h-48 min-w-28 overflow-hidden dark:bg-[#242529] [&_.rc-image-mask]:absolute [&_.rc-image-mask]:h-full [&_.rc-image]:static"
                 >
                   <Image
                     src={preview}
@@ -81,7 +81,7 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
                       mask: <Eye className="stroke-white" />,
                     }}
                   />
-                  <div className="absolute left-2 top-2 flex items-center justify-center gap-1 rounded border border-input bg-slate-1 px-2 py-1.5 shadow">
+                  <div className="absolute left-2 top-2 flex items-center justify-center gap-1 rounded border border-input bg-slate-1 px-2 py-1.5 shadow dark:bg-[#242529]">
                     {isError ? (
                       <CircleX size={13} />
                     ) : isUploadComplete ? (
@@ -131,7 +131,7 @@ export const VinesFiles: React.FC<IVinesFilesProps> = ({ uppy, files }) => {
                     <div className="pointer-events-none absolute bottom-2 flex w-full items-center justify-between gap-2 px-2 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <p className="line-clamp-1 max-w-36 rounded border border-input bg-slate-1 p-1 text-sm leading-none shadow">
+                          <p className="line-clamp-1 max-w-36 rounded border border-input bg-slate-1 p-1 text-sm leading-none shadow dark:bg-[#242529]">
                             {name}
                           </p>
                         </TooltipTrigger>
