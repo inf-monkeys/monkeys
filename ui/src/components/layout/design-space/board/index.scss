@@ -1,0 +1,9 @@
+.tl-theme__light * {
+  color: revert;
+  --color-selected: rgb(var(--vines-500));
+}
+
+.tl-theme__dark {
+  color: revert;
+  --color-selected: rgb(var(--vines-500));
+}

@@ -386,6 +386,9 @@
               },
               "agents": {
                 "label": "Agents"
+              },
+              "designs": {
+                "label": "Designs"
               }
             },
             "tools": {

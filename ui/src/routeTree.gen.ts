@@ -49,6 +49,7 @@ const TeamIdImageModelsIndexLazyImport = createFileRoute(
 const TeamIdImageModelStoreIndexLazyImport = createFileRoute(
   '/$teamId/image-model-store/',
 )()
+const TeamIdDesignsIndexLazyImport = createFileRoute('/$teamId/designs/')()
 const TeamIdComfyuiIndexLazyImport = createFileRoute('/$teamId/comfyui/')()
 const TeamIdComfyuiStoreIndexLazyImport = createFileRoute(
   '/$teamId/comfyui-store/',
@@ -240,6 +241,13 @@ const TeamIdImageModelStoreIndexLazyRoute =
   } as any).lazy(() =>
     import('./pages/$teamId/image-model-store/index.lazy').then((d) => d.Route),
   )
+
+const TeamIdDesignsIndexLazyRoute = TeamIdDesignsIndexLazyImport.update({
+  path: '/$teamId/designs/',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() =>
+  import('./pages/$teamId/designs/index.lazy').then((d) => d.Route),
+)
 
 const TeamIdComfyuiIndexLazyRoute = TeamIdComfyuiIndexLazyImport.update({
   path: '/$teamId/comfyui/',
@@ -441,6 +449,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdComfyuiIndexLazyImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/designs/': {
+      preLoaderRoute: typeof TeamIdDesignsIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/image-model-store/': {
       preLoaderRoute: typeof TeamIdImageModelStoreIndexLazyImport
       parentRoute: typeof rootRoute
@@ -566,6 +578,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdApplicationStoreIndexLazyRoute,
   TeamIdComfyuiStoreIndexLazyRoute,
   TeamIdComfyuiIndexLazyRoute,
+  TeamIdDesignsIndexLazyRoute,
   TeamIdImageModelStoreIndexLazyRoute,
   TeamIdImageModelsIndexLazyRoute,
   TeamIdJoinTeamIndexLazyRoute,
