@@ -176,11 +176,22 @@ export class TeamsController {
 
     const teams = await this.service.getUserTeams(userId);
     if (teams.some((t) => t.id === invite.teamId)) {
-      throw new Error('您已加入该团队，无需重复加入：' + invite.teamId);
+      const team = await this.service.getTeamBriefById(invite.teamId);
+
+      return new SuccessResponse({
+        code: 200,
+        message: '您已加入该团队，无需重复加入',
+        data: {
+          alreadyJoined: true,
+          teamId: invite.teamId,
+          team: team,
+        },
+      });
     }
 
     const team = await this.service.getTeamBriefById(invite.teamId);
     return new SuccessResponse({
+      code: 200,
       data: {
         invite: omit(invite, ['remark']),
         team,
