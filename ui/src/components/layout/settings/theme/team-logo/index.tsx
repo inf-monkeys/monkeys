@@ -65,6 +65,23 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
       },
     );
   };
+  const handleUpdateTeamDarkmodeLogo = (val: string) => {
+    toast.promise(
+      new Promise((resolve) => {
+        updateTeam({
+          darkmodeIconUrl: val,
+        } as unknown as ITeamUpdate).then(async () => {
+          await mutate('/api/teams');
+          resolve('');
+        });
+      }),
+      {
+        loading: t('common.update.loading'),
+        success: t('common.update.success'),
+        error: t('common.update.error'),
+      },
+    );
+  };
 
   const teamLogo = team?.iconUrl;
   const teamDarkmodeLogo = team?.darkmodeIconUrl;
@@ -78,13 +95,13 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
       <CardContent className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <VinesImageEditor value={teamLogo} onChange={handleUpdateTeamLogo}>
-            <Avatar className="size-10 w-auto max-w-36 rounded-md">
+            <Avatar className="size-10 rounded-md">
               <AvatarImage className="aspect-auto" src={team?.iconUrl} alt={teamName} />
               <AvatarFallback className="rounded-none p-2 text-xs">{teamName?.substring(0, 2)}</AvatarFallback>
             </Avatar>
           </VinesImageEditor>
-          <VinesImageEditor value={teamDarkmodeLogo} onChange={handleUpdateTeamLogo}>
-            <Avatar className="size-10 w-auto max-w-36 rounded-md">
+          <VinesImageEditor value={teamDarkmodeLogo} onChange={handleUpdateTeamDarkmodeLogo}>
+            <Avatar className="size-10 rounded-md">
               <AvatarImage className="aspect-auto" src={team?.darkmodeIconUrl} alt={teamName} />
               <AvatarFallback className="rounded-none p-2 text-xs">{teamName?.substring(0, 2)}</AvatarFallback>
             </Avatar>
