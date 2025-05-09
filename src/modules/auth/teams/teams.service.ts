@@ -18,7 +18,7 @@ export class TeamsService {
     private readonly marketPlaceRepository: AssetsMarketPlaceRepository,
     private readonly conductorService: ConductorService,
     private readonly comfyuiModelService: ComfyuiModelService,
-  ) { }
+  ) {}
 
   public async forkAssetsFromMarketPlace(teamId: string, userId: string) {
     const clonedComfyuiWorkflows = (await this.marketPlaceRepository.forkBuiltInComfyuiWorkflowAssetsFromMarketPlace(teamId, userId)) as (ComfyuiWorkflowEntity & { forkFromId: string })[];
@@ -54,8 +54,17 @@ export class TeamsService {
     return;
   }
 
-  public async createTeam(userId: string, teamName: string, description?: string, iconUrl?: string, isBuiltIn = false, createMethod: 'self' | 'import' = 'self', initialTeamId?: string) {
-    const team = await this.teamRepository.createTeam(userId, teamName, description, iconUrl, isBuiltIn, createMethod, initialTeamId);
+  public async createTeam(
+    userId: string,
+    teamName: string,
+    description?: string,
+    iconUrl?: string,
+    isBuiltIn = false,
+    createMethod: 'self' | 'import' = 'self',
+    initialTeamId?: string,
+    darkmodeIconUrl?: string,
+  ) {
+    const team = await this.teamRepository.createTeam(userId, teamName, description, iconUrl, isBuiltIn, createMethod, initialTeamId, darkmodeIconUrl);
     await this.initTeam(team.id, userId);
     return team;
   }
@@ -67,6 +76,7 @@ export class TeamsService {
       description?: string;
       iconUrl?: string;
       customTheme?: CustomTheme;
+      darkmodeIconUrl?: string;
     },
   ) {
     return await this.teamRepository.updateTeam(teamId, updates);

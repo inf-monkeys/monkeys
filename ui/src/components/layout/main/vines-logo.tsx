@@ -8,6 +8,7 @@ import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { AppLogo, ILogoProps } from '@/components/ui/logo';
 import { Skeleton } from '@/components/ui/skeleton.tsx';
 import { SmoothTransition } from '@/components/ui/smooth-transition-size/SmoothTransition.tsx';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useAppStore } from '@/store/useAppStore';
 import { cn } from '@/utils';
 
@@ -24,8 +25,11 @@ export const VinesLogo: React.FC<Omit<ILogoProps, 'url'> & { disableInitialHeigh
   const darkMode = useAppStore((s) => s.darkMode);
 
   const enabledCustomIcon = get(team, 'customTheme.enableTeamLogo', false);
-
   const logoUrl = get(oem, `theme.logo.${darkMode ? 'dark' : 'light'}`, '');
+  //TODO 没有响应系统主题的变化
+  const [mode] = useLocalStorage<string>('vines-ui-dark-mode', 'auto', false);
+  const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  const isDarkMode = mode === 'dark' || (mode === 'auto' && darkModeMediaQuery.matches);
 
   return (
     <SmoothTransition className="relative" initialHeight={height} onClick={onClick}>
@@ -39,7 +43,7 @@ export const VinesLogo: React.FC<Omit<ILogoProps, 'url'> & { disableInitialHeigh
           >
             <AppLogo
               className={cn('w-auto', className)}
-              url={enabledCustomIcon ? team?.iconUrl : logoUrl}
+              url={enabledCustomIcon ? (isDarkMode ? team?.darkmodeIconUrl : team?.iconUrl) : logoUrl}
               height={disableInitialHeight ? void 0 : height}
               {...props}
             />

@@ -4,6 +4,7 @@ export interface IVinesTeam {
   id: string;
   name: string;
   iconUrl?: string;
+  darkmodeIconUrl?: string;
   description?: string;
   ownerUserId?: string;
   customTheme?: {
@@ -14,14 +15,16 @@ export interface IVinesTeam {
   };
 }
 
-export type ITeamUpdate = Partial<Pick<IVinesTeam, 'name' | 'description' | 'iconUrl' | 'customTheme'>>;
+export type ITeamUpdate = Partial<
+  Pick<IVinesTeam, 'name' | 'description' | 'iconUrl' | 'customTheme' | 'darkmodeIconUrl'>
+>;
 
 export type ITeamMember = {
   list: Array<IVinesUser>;
   listTotal: number;
 };
 
-export type ITeamCreate = Pick<IVinesTeam, 'name' | 'description' | 'iconUrl'>;
+export type ITeamCreate = Pick<IVinesTeam, 'name' | 'description' | 'iconUrl' | 'darkmodeIconUrl'>;
 
 export interface ITeamApplyListData {
   id: string;
