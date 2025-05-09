@@ -83,7 +83,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 
   // 右侧边栏组件
   const RightSidebar = (
-    <div className="ml-4 mt-4 flex h-[calc(100vh-5.75rem-1rem)] w-28 flex-col items-center justify-between gap-4 rounded-bl-xl rounded-br-xl rounded-tl-xl rounded-tr-xl border border-input bg-background px-2 py-6 shadow-sm">
+    <div className="ml-4 flex h-[calc(100vh-5.75rem-1rem)] w-28 flex-col items-center justify-between gap-4 rounded-bl-xl rounded-br-xl rounded-tl-xl rounded-tr-xl border border-input bg-background px-2 py-6 shadow-sm">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button icon={<X />} variant="outline" size="small" onClick={() => history.back()} />
@@ -107,12 +107,14 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
         </Tooltip>
       </div>
 
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button icon={<Trash />} variant="outline" size="small" />
-        </TooltipTrigger>
-        <TooltipContent>{t('workspace.image-detail.delete', '删除')}</TooltipContent>
-      </Tooltip>
+      <div className="mb-6">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button icon={<Trash />} variant="outline" size="small" />
+          </TooltipTrigger>
+          <TooltipContent>{t('workspace.image-detail.delete', '删除')}</TooltipContent>
+        </Tooltip>
+      </div>
     </div>
   );
 
@@ -120,9 +122,9 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
     <VinesFlowProvider workflowId={workflowId}>
       <ImageDetailLayout rightSidebar={RightSidebar}>
         {/* 主内容区域 */}
-        <main className="mt-4 flex size-full flex-1 overflow-hidden rounded-xl border border-input bg-background shadow-sm">
-          {/* 左侧图片展示区，添加rounded-l-xl和rounded-br-xl类 */}
-          <div className="flex w-[70%] flex-col items-center justify-start overflow-hidden rounded-bl-xl rounded-br-xl rounded-tl-xl p-6">
+        <main className="flex size-full flex-1 flex-col overflow-hidden rounded-xl border border-input bg-background shadow-sm md:flex-row">
+          {/* 左侧图片展示区 */}
+          <div className="flex w-full flex-col items-center justify-start overflow-hidden rounded-bl-xl rounded-br-xl rounded-tl-xl p-6 sm:w-full md:w-[70%]">
             {imageUrl ? (
               <>
                 <div
@@ -202,7 +204,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                   />
                 </div>
                 {/* 图片操作按钮 */}
-                <div className="mt-4 flex items-center justify-center gap-2">
+                <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-1 md:gap-2">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
@@ -378,11 +380,8 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
             )}
           </div>
 
-          {/* 分隔线 */}
-          <div className="border-l border-input"></div>
-
           {/* 中间区域，渲染表单 */}
-          <div className="flex h-full flex-1 flex-col overflow-auto rounded-r-xl rounded-tr-xl p-6">
+          <div className="flex h-full flex-1 flex-col overflow-auto rounded-r-xl rounded-tr-xl p-6 md:border-l md:border-input">
             <div className="h-full flex-1">
               <TabularRenderWrapper height={window.innerHeight - 150} />
             </div>
