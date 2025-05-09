@@ -54,7 +54,7 @@ export const ExecutionResultItem: React.FC<IVinesExecutionResultItem> = (result)
       return (
         <div className="relative overflow-hidden rounded-lg border border-input shadow-sm">
           <VirtuaExecutionResultGridWrapper data={result}>
-            <div className="min-h-40 p-2">
+            <div className="max-h-96 min-h-40 overflow-auto p-2">
               <VinesAbstractDataPreview data={data} className="h-full" />
             </div>
           </VirtuaExecutionResultGridWrapper>

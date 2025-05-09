@@ -96,5 +96,7 @@ export interface IExportTeamOptions {
 }
 
 export interface IInviteTeamData {
-  team: IVinesTeam;
+  team?: IVinesTeam;
+  alreadyJoined?: boolean;
+  teamId?: string;
 }
