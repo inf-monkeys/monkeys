@@ -1,6 +1,6 @@
 import React, { useLayoutEffect } from 'react';
 
-import { Outlet } from '@tanstack/react-router';
+import { Outlet, useRouterState } from '@tanstack/react-router';
 
 import { Layers2, Package, PackagePlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -33,7 +33,12 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
   const isWorkbenchRoute = layoutId === 'vines-outlet-main-$teamId';
   const isStoreRoute = layoutId === 'vines-outlet-main-$teamId-store';
   const isWorkspaceRoute = layoutId.startsWith('vines-outlet-main-$teamId-') && !isStoreRoute;
-
+  const pathName = useRouterState({
+    select: (state) => {
+      return state.location.pathname;
+    },
+  });
+  const isSettingRoute = pathName.split('/').at(-1) === 'settings';
   return (
     <ViewGuard className="bg-slate-3">
       <SpaceHeader tail={<TeamSelector />} disableSeparator>
@@ -71,7 +76,8 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
       <VinesSpace
         className={cn(
           isWorkbenchRoute && 'overflow-auto bg-transparent p-0 shadow-none transition-colors',
-          isWorkspaceRoute && 'w-full p-4',
+          isWorkspaceRoute && !isSettingRoute && 'w-full p-4',
+          isSettingRoute && 'w-full px-4 py-1',
         )}
         sidebar={isWorkspaceRoute && <VinesPanelSidebar />}
       >

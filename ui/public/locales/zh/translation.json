@@ -824,6 +824,15 @@
         }
       }
     },
+    "team-quota": {
+      "title": "团队配额"
+    },
+    "individual-configurations": {
+      "title": "个人配置"
+    },
+    "team-configurations": {
+      "title": "团队配置"
+    },
     "api-key": {
       "title": "API 密钥",
       "desc": "在此配置用于访问所有 API 的密钥。您可以创建多个密钥，以便在不同的场景下使用。",
