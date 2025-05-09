@@ -61,7 +61,7 @@ export class TeamsController {
   ) {
     const { userId } = req;
     const { name, description, iconUrl, darkmodeIconUrl } = body;
-    const team = await this.service.createTeam(userId, name, description, iconUrl, darkmodeIconUrl);
+    const team = await this.service.createTeam(userId, name, description, iconUrl, false, 'self', undefined, darkmodeIconUrl);
     return new SuccessResponse({
       data: team,
     });
@@ -102,6 +102,7 @@ export class TeamsController {
       description?: string;
       iconUrl?: string;
       customTheme: CustomTheme;
+      darkmodeIconUrl?: string;
     },
   ) {
     const { teamId } = req;
