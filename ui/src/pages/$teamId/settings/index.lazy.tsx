@@ -8,7 +8,7 @@ import { Account } from '@/components/layout/settings/account';
 import { ApiKey } from '@/components/layout/settings/api-key';
 import { Stat } from '@/components/layout/settings/stat';
 import { TeamSettings } from '@/components/layout/settings/team';
-import { TeamCredit } from '@/components/layout/settings/team-credit';
+import { TeamCredit } from '@/components/layout/settings/team-quota';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Tabs, TabsContent } from '@/components/ui/tabs.tsx';
 import useUrlState from '@/hooks/use-url-state.ts';
@@ -45,17 +45,17 @@ export const Settings: React.FC = () => {
             {t('settings.api-key.title')}
           </TabsTrigger>
         </TabsList> */}
-        <TabsContent value="account" asChild>
+        <TabsContent value="individual-configurations" asChild>
           <ScrollArea className="-mr-3 pr-3" disabledOverflowMask>
             <Account />
           </ScrollArea>
         </TabsContent>
-        <TabsContent value="team" asChild>
+        <TabsContent value="team-configurations" asChild>
           <ScrollArea className="-mr-3 pr-3" disabledOverflowMask>
             <TeamSettings />
           </ScrollArea>
         </TabsContent>
-        <TabsContent value="team-credit" asChild>
+        <TabsContent value="team-quota" asChild>
           <ScrollArea className="-mr-3 pr-3" disabledOverflowMask>
             <TeamCredit />
           </ScrollArea>

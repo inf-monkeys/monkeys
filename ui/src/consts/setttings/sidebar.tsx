@@ -7,19 +7,19 @@ export interface SettingsTabNavItem {
 
 export const SETTINGS_SIDEBAR_MAP: SettingsTabNavItem[] = [
   {
-    name: 'settings.account.title',
+    name: 'settings.individual-configurations.title',
     icon: <BotIcon />,
-    to: '/$teamId/settings?tab=account',
+    to: '/$teamId/settings?tab=individual-configurations',
   },
   {
-    name: 'settings.account.team.title',
+    name: 'settings.team-configurations.title',
     icon: <BotIcon />,
-    to: '/$teamId/settings?tab=team',
+    to: '/$teamId/settings?tab=team-configurations',
   },
   {
-    name: 'settings.payment.property.title',
+    name: 'settings.team-quota.title',
     icon: <BotIcon />,
-    to: '/$teamId/settings?tab=team-credit',
+    to: '/$teamId/settings?tab=team-quota',
   },
   {
     name: 'settings.stat.title',
