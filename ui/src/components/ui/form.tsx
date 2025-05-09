@@ -4,7 +4,7 @@ import * as React from 'react';
 import * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, VariantProps } from 'class-variance-authority';
-import { composeRenderProps, Group as AriaGroup, GroupProps as AriaGroupProps } from 'react-aria-components';
+import { Group as AriaGroup, GroupProps as AriaGroupProps, composeRenderProps } from 'react-aria-components';
 import {
   Controller,
   ControllerProps,
@@ -73,13 +73,17 @@ type FormItemContextValue = {
 
 const FormItemContext = React.createContext<FormItemContextValue>({} as FormItemContextValue);
 
-const FormItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => {
+const FormItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { card?: boolean }>(
+  ({ className, card = false, ...props }, ref) => {
     const id = React.useId();
 
     return (
       <FormItemContext.Provider value={{ id }}>
-        <div ref={ref} className={cn('space-y-2', className)} {...props} />
+        <div
+          ref={ref}
+          className={cn('space-y-2', card && 'rounded-lg bg-[#F2F2F2] p-4 text-[#3F3E39] dark:bg-gray-800', className)}
+          {...props}
+        />
       </FormItemContext.Provider>
     );
   },
@@ -92,7 +96,14 @@ const FormLabel = React.forwardRef<
 >(({ className, ...props }, ref) => {
   const { error, formItemId } = useFormField();
 
-  return <Label ref={ref} className={cn(error && 'text-destructive', className)} htmlFor={formItemId} {...props} />;
+  return (
+    <Label
+      ref={ref}
+      className={cn('font-medium text-[#3F3E39]', error && 'text-destructive', className)}
+      htmlFor={formItemId}
+      {...props}
+    />
+  );
 });
 FormLabel.displayName = 'FormLabel';
 
@@ -117,7 +128,7 @@ const FormDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttribu
   ({ className, ...props }, ref) => {
     const { formDescriptionId } = useFormField();
 
-    return <p ref={ref} id={formDescriptionId} className={cn('text-xs text-muted-foreground', className)} {...props} />;
+    return <p ref={ref} id={formDescriptionId} className={cn('text-xs text-[#3F3E39]/70', className)} {...props} />;
   },
 );
 FormDescription.displayName = 'FormDescription';

@@ -12,25 +12,24 @@ export interface SliderProps extends Omit<React.ComponentPropsWithoutRef<typeof 
 }
 
 const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, SliderProps>(
-  ({ className, label, value, disabledLabel = false, ...props }, ref) => (
-    <div className="flex flex-col items-end gap-2">
-      {!disabledLabel && (
-        <div className={cn('flex w-full justify-between', { 'justify-end': !label })}>
-          {label && <span className="text-sm">{label}</span>}
-          <span className="text-sm">{isUndefined(value?.[0]) ? 'NaN' : value[0]}</span>
-        </div>
-      )}
-      <SliderPrimitive.Root
-        ref={ref}
-        className={cn('relative flex w-full touch-none select-none items-center', className)}
-        value={value}
-        {...props}
-      >
-        <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary">
-          <SliderPrimitive.Range className="absolute h-full bg-vines-300" />
-        </SliderPrimitive.Track>
-        <SliderPrimitive.Thumb className="block size-4 cursor-grab rounded-full border-2 border-vines-400 bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vines-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" />
-      </SliderPrimitive.Root>
+  ({ className, value, ...props }, ref) => (
+    <div className="flex items-center gap-2">
+      <div className="flex-1">
+        <SliderPrimitive.Root
+          ref={ref}
+          className={cn('relative flex w-full touch-none select-none items-center', className)}
+          value={value}
+          {...props}
+        >
+          <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-md bg-[#E0E0E0] dark:bg-gray-700">
+            <SliderPrimitive.Range className="absolute h-full bg-[#6C6C6C] dark:bg-gray-400" />
+          </SliderPrimitive.Track>
+          <SliderPrimitive.Thumb className="block h-5 w-2 cursor-grab rounded-sm border-0 bg-[#6C6C6C] ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-800 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-300" />
+        </SliderPrimitive.Root>
+      </div>
+      <span className="min-w-10 text-right text-sm font-medium text-[#3F3E39]">
+        {isUndefined(value?.[0]) ? 'NaN' : value[0]}
+      </span>
     </div>
   ),
 );
