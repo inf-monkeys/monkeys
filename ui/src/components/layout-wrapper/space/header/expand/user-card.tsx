@@ -152,7 +152,15 @@ export const UserCard: React.FC<IUserCardProps> = () => {
           </DropdownMenuSub>
           <DropdownMenuItem
             className="flex gap-2"
-            onClick={() => navigate({ to: '/$teamId/settings', params: { teamId } })}
+            onClick={() =>
+              navigate({
+                to: '/$teamId/settings',
+                params: { teamId },
+                search: {
+                  tab: 'account',
+                },
+              } as any)
+            }
           >
             <UserCog strokeWidth={1.5} size={16} />
             <span>{t('components.layout.main.sidebar.toolbar.settings-tooltip')}</span>

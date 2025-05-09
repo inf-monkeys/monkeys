@@ -41,6 +41,16 @@ export class TeamRepository {
           }
         } catch (e) {}
       }
+      if (team.darkmodeIconUrl) {
+        try {
+          const s3Helpers = new S3Helpers();
+          const { refreshed, refreshedUrl } = await s3Helpers.refreshSignedUrl(team.darkmodeIconUrl);
+          if (refreshed) {
+            team.darkmodeIconUrl = refreshedUrl;
+            await this.teamRepository.save(team);
+          }
+        } catch (e) {}
+      }
     });
     await Promise.all(promises);
   }
@@ -116,7 +126,7 @@ export class TeamRepository {
     return !!team;
   }
 
-  async createTeam(userId: string, teamName: string, description?: string, iconUrl?: string, isBuiltIn = false, workflowTaskNamePrefix?: string, initialTeamId?: string) {
+  async createTeam(userId: string, teamName: string, description?: string, iconUrl?: string, isBuiltIn = false, workflowTaskNamePrefix?: string, initialTeamId?: string, darkmodeIconUrl?: string) {
     if (await this.checkNameConflict(userId, teamName)) {
       throw new Error('同名团队已经存在，请更换名称');
     }
@@ -134,6 +144,7 @@ export class TeamRepository {
       name: teamName,
       description,
       iconUrl,
+      darkmodeIconUrl,
       isBuiltIn,
       createdTimestamp: now,
       updatedTimestamp: now,
@@ -175,6 +186,7 @@ export class TeamRepository {
       name?: string;
       description?: string;
       iconUrl?: string;
+      darkmodeIconUrl?: string;
       customTheme?: CustomTheme;
       oneAPIToken?: string;
       oneAPIPassword?: string;
@@ -184,7 +196,7 @@ export class TeamRepository {
     if (!updates || !Object.keys(updates).length) {
       return;
     }
-    const { name, description, iconUrl, customTheme, oneAPIPassword, oneAPIToken, oneAPIUsername } = updates || {};
+    const { name, description, iconUrl, customTheme, oneAPIPassword, oneAPIToken, oneAPIUsername, darkmodeIconUrl } = updates || {};
     const team = await this.teamRepository.findOne({
       where: {
         id: teamId,
@@ -210,6 +222,7 @@ export class TeamRepository {
           name,
           description,
           iconUrl,
+          darkmodeIconUrl,
           customTheme,
           updatedTimestamp: now,
           oneAPIToken,
