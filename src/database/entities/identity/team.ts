@@ -23,6 +23,12 @@ export class TeamEntity extends BaseEntity {
   iconUrl?: string;
 
   @Column({
+    name: 'darkmode_icon_url',
+    nullable: true,
+  })
+  darkmodeIconUrl?: string;
+
+  @Column({
     name: 'owner_user_id',
   })
   ownerUserId: string;

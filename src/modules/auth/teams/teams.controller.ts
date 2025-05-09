@@ -12,7 +12,7 @@ import { DEFAULT_TEAM_DESCRIPTION, DEFAULT_TEAM_PHOTO, TeamsService } from './te
 @ApiTags('Auth/Teams')
 @UseGuards(CompatibleAuthGuard)
 export class TeamsController {
-  constructor(private readonly service: TeamsService) { }
+  constructor(private readonly service: TeamsService) {}
 
   @Get()
   @ApiOperation({
@@ -56,11 +56,12 @@ export class TeamsController {
       name: string;
       description?: string;
       iconUrl?: string;
+      darkmodeIconUrl?: string;
     },
   ) {
     const { userId } = req;
-    const { name, description, iconUrl } = body;
-    const team = await this.service.createTeam(userId, name, description, iconUrl);
+    const { name, description, iconUrl, darkmodeIconUrl } = body;
+    const team = await this.service.createTeam(userId, name, description, iconUrl, darkmodeIconUrl);
     return new SuccessResponse({
       data: team,
     });
