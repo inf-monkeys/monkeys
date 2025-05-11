@@ -6,13 +6,13 @@ import { Slot } from '@radix-ui/react-slot';
 import { cva, VariantProps } from 'class-variance-authority';
 import { Group as AriaGroup, GroupProps as AriaGroupProps, composeRenderProps } from 'react-aria-components';
 import {
-  Controller,
-  ControllerProps,
-  FieldPath,
-  FieldValues,
-  FormProvider,
-  useFormContext,
-  useWatch,
+    Controller,
+    ControllerProps,
+    FieldPath,
+    FieldValues,
+    FormProvider,
+    useFormContext,
+    useWatch,
 } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -81,7 +81,11 @@ const FormItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEl
       <FormItemContext.Provider value={{ id }}>
         <div
           ref={ref}
-          className={cn('space-y-2', card && 'rounded-lg bg-[#F2F2F2] p-4 text-[#3F3E39] dark:bg-gray-800', className)}
+          className={cn(
+            'space-y-2',
+            card && 'rounded-lg bg-[#F2F2F2] p-4 text-[#3F3E39] dark:bg-[#111113] dark:text-[#EDEDED]',
+            className,
+          )}
           {...props}
         />
       </FormItemContext.Provider>
@@ -99,7 +103,7 @@ const FormLabel = React.forwardRef<
   return (
     <Label
       ref={ref}
-      className={cn('font-medium text-[#3F3E39]', error && 'text-destructive', className)}
+      className={cn('font-medium text-[#3F3E39] dark:text-[#EDEDED]', error && 'text-destructive', className)}
       htmlFor={formItemId}
       {...props}
     />
@@ -128,7 +132,7 @@ const FormDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttribu
   ({ className, ...props }, ref) => {
     const { formDescriptionId } = useFormField();
 
-    return <p ref={ref} id={formDescriptionId} className={cn('text-xs text-[#3F3E39]/70', className)} {...props} />;
+    return <p ref={ref} id={formDescriptionId} className={cn('text-xs text-[#3F3E39]/70 dark:text-[#EDEDED]/70', className)} {...props} />;
   },
 );
 FormDescription.displayName = 'FormDescription';
@@ -191,14 +195,15 @@ const useFormValues = () => {
 };
 
 export {
-  FieldGroup,
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  useFormField,
-  useFormValues,
+    FieldGroup,
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+    useFormField,
+    useFormValues
 };
+
