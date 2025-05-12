@@ -4,7 +4,7 @@ import * as React from 'react';
 import * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, VariantProps } from 'class-variance-authority';
-import { Group as AriaGroup, GroupProps as AriaGroupProps, composeRenderProps } from 'react-aria-components';
+import { composeRenderProps, Group as AriaGroup, GroupProps as AriaGroupProps } from 'react-aria-components';
 import {
   Controller,
   ControllerProps,
@@ -81,7 +81,11 @@ const FormItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEl
       <FormItemContext.Provider value={{ id }}>
         <div
           ref={ref}
-          className={cn('space-y-2', card && 'rounded-lg bg-[#F2F2F2] p-4 text-[#3F3E39] dark:bg-gray-800', className)}
+          className={cn(
+            'space-y-4',
+            card && 'rounded-lg bg-[#F2F2F2] px-4 pb-0 pt-4 text-[#3F3E39] dark:bg-[#242529] dark:text-[#EDEDED]',
+            className,
+          )}
           {...props}
         />
       </FormItemContext.Provider>
@@ -99,7 +103,7 @@ const FormLabel = React.forwardRef<
   return (
     <Label
       ref={ref}
-      className={cn('font-medium text-[#3F3E39]', error && 'text-destructive', className)}
+      className={cn('font-medium text-[#3F3E39] dark:text-[#EDEDED]', error && 'text-destructive', className)}
       htmlFor={formItemId}
       {...props}
     />
@@ -128,7 +132,14 @@ const FormDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttribu
   ({ className, ...props }, ref) => {
     const { formDescriptionId } = useFormField();
 
-    return <p ref={ref} id={formDescriptionId} className={cn('text-xs text-[#3F3E39]/70', className)} {...props} />;
+    return (
+      <p
+        ref={ref}
+        id={formDescriptionId}
+        className={cn('text-xs text-[#3F3E39]/70 dark:text-[#EDEDED]/70', className)}
+        {...props}
+      />
+    );
   },
 );
 FormDescription.displayName = 'FormDescription';
@@ -156,7 +167,7 @@ const fieldGroupVariants = cva('', {
   variants: {
     variant: {
       default: [
-        'relative flex h-10 w-full items-center overflow-hidden rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background',
+        'relative flex h-10 w-full items-center overflow-hidden rounded-md border border-input bg-[#FFFFFF] dark:bg-[#111113] px-3 py-2 text-sm ring-offset-background',
         /* Focus Within */
         'data-[focus-within]:outline-none data-[focus-within]:ring-2 data-[focus-within]:ring-vines-500 data-[focus-within]:ring-offset-2',
         /* Disabled */

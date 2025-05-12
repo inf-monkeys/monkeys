@@ -12,7 +12,7 @@ const ImageDetailLayout: React.FC<IImageDetailLayoutProps> = ({ children, rightS
         {/* 主内容区域 */}
         <div className="flex flex-1">{children}</div>
 
-        {/* 右侧边栏，如果提供了 */}
+        {/* 右侧边栏 */}
         {rightSidebar && rightSidebar}
       </div>
     </div>
