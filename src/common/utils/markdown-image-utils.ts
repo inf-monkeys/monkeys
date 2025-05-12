@@ -1,3 +1,5 @@
+import * as crypto from 'crypto'; // Import the crypto module
+
 // markdown-image-utils.ts
 
 /**
@@ -135,3 +137,26 @@ console.log(updatedMarkdown);
 // This one should not change: ![Unchanged](http://example.com/keep_this.jpeg "Keep Me")
 // A link that is not an image: [click here](http://example.com/page)
 */
+
+export async function calculateMd5FromArrayBuffer(arrayBuffer: ArrayBuffer): Promise<string | null> {
+  try {
+    // 2. Convert the ArrayBuffer to a Node.js Buffer
+    // The crypto module works easily with Buffers
+    const buffer = Buffer.from(arrayBuffer);
+
+    // 3. Create an MD5 hash object
+    const hash = crypto.createHash('md5');
+
+    // 4. Update the hash with the buffer data
+    hash.update(buffer);
+
+    // 5. Get the final hash as a hexadecimal string
+    const md5Hash = hash.digest('hex');
+
+    console.log(`MD5 hash for ${arrayBuffer}: ${md5Hash}`);
+    return md5Hash;
+  } catch (error) {
+    console.error(`Error calculating MD5 for ${arrayBuffer}:`, error.message);
+    return null;
+  }
+}
