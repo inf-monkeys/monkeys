@@ -18,6 +18,7 @@ import {
   TSelectList,
 } from '@/components/layout/workspace/vines-view/form/tabular/render/field/select.tsx';
 import { FieldTagInputAndTextarea } from '@/components/layout/workspace/vines-view/form/tabular/render/field/tag-input-and-textarea.tsx';
+import { FieldTextInputWithButtons } from '@/components/layout/workspace/vines-view/form/tabular/render/field/text-input-with-buttons.tsx';
 import { Button } from '@/components/ui/button';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -86,21 +87,19 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
         const filterReserve = targetLinkage?.selectFilter?.reserve;
         const enableFilter = (filterList?.length ?? 0) > 0;
         return (
-          <FormItem className={cn('col-span-2 px-3', singleColumn && 'col-span-1', itemClassName)} card>
+          <FormItem className={cn('col-span-2', singleColumn && 'col-span-1', itemClassName)} card>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1">
                 <FormLabel className="font-bold">
                   {required && <span className="text-red-10">* </span>}
                   {getI18nContent(displayName)}
                 </FormLabel>
-                {tips && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <HelpCircle size={18} className="cursor-pointer fill-gray-7 stroke-slate-1" />
-                    </TooltipTrigger>
-                    <TooltipContent>{tips}</TooltipContent>
-                  </Tooltip>
-                )}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle size={18} className="cursor-pointer text-gray-400 dark:text-gray-500" />
+                  </TooltipTrigger>
+                  <TooltipContent>{tips || t('common.utils.no-tips')}</TooltipContent>
+                </Tooltip>
               </div>
               {enableReset && (
                 <Button
@@ -140,12 +139,23 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
                         filter={
                           targetLinkage
                             ? (m) =>
-                                enableFilter ? filterList?.includes(m.serverRelation.apiPath) === filterReserve : true
+                                enableFilter
+                                  ? filterList?.includes(m.serverRelations?.[0]?.apiPath) === filterReserve
+                                  : true
                             : void 0
                         }
                       />
                     ) : assetType === 'oneapi-model' ? (
                       <FieldOneApiModels input={it} value={value} onChange={form.setValue} extra={extra} />
+                    ) : type === 'string' && !typeOptions?.multipleValues ? (
+                      <FieldTextInputWithButtons
+                        input={it}
+                        value={value}
+                        onChange={onChange}
+                        form={form}
+                        field={field}
+                        miniMode={miniMode}
+                      />
                     ) : (
                       <FieldTagInputAndTextarea
                         input={it}

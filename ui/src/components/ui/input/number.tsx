@@ -2,10 +2,10 @@ import React from 'react';
 
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import {
-  composeRenderProps,
   Input as AriaInput,
   InputProps as AriaInputProps,
   NumberField as AriaNumberField,
+  composeRenderProps,
 } from 'react-aria-components';
 
 import { Button, ButtonProps } from '@/components/ui/button';
@@ -18,7 +18,7 @@ function NumberFieldInput({ className, ...props }: AriaInputProps) {
     <AriaInput
       className={composeRenderProps(className, (className) =>
         cn(
-          'w-fit min-w-0 flex-1 border-r border-transparent bg-background pr-2 outline outline-0 placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden',
+          'w-fit min-w-0 flex-1 border-r border-transparent bg-[#FFFFFF] pr-2 outline outline-0 placeholder:text-muted-foreground dark:bg-[#111113] [&::-webkit-search-cancel-button]:hidden',
           className,
         ),
       )}
