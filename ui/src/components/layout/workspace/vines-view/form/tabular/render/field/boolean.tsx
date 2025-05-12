@@ -6,9 +6,9 @@ import { useTranslation } from 'react-i18next';
 
 import { BOOLEAN_VALUES } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { TagInput } from '@/components/ui/input/tag';
-import { Switch } from '@/components/ui/switch';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { IWorkflowInputForm } from '@/schema/workspace/workflow-input-form.ts';
+import { cn } from '@/utils';
 
 interface IFieldBooleanProps {
   input: VinesWorkflowVariable;
@@ -26,6 +26,7 @@ export const FieldBoolean: React.FC<IFieldBooleanProps> = ({
   const { t } = useTranslation();
 
   const isMultiple = typeOptions?.multipleValues ?? false;
+  const isChecked = isBoolean(value) ? value : BOOLEAN_VALUES.includes((value as string)?.toString());
 
   return (
     type === 'boolean' && (
@@ -42,10 +43,32 @@ export const FieldBoolean: React.FC<IFieldBooleanProps> = ({
             placeholder={t('workspace.pre-view.actuator.execution-form.string', { displayName })}
           />
         ) : (
-          <Switch
-            checked={isBoolean(value) ? value : BOOLEAN_VALUES.includes((value as string)?.toString())}
-            onCheckedChange={onChange}
-          />
+          <div className="flex w-full gap-2">
+            <button
+              type="button"
+              onClick={() => onChange(false)}
+              className={cn(
+                'flex-1 rounded-md border py-2 text-center',
+                !isChecked
+                  ? 'border-transparent bg-white text-[#363531] dark:bg-black dark:text-white'
+                  : 'border-[#E5E5EA] bg-[#F9F9F9] text-[#D7D6D4] dark:border-[#3A3A3C] dark:bg-[#2C2C2E] dark:text-[#86868B]',
+              )}
+            >
+              否
+            </button>
+            <button
+              type="button"
+              onClick={() => onChange(true)}
+              className={cn(
+                'flex-1 rounded-md border py-2 text-center',
+                isChecked
+                  ? 'border-transparent bg-white text-[#363531] dark:bg-black dark:text-white'
+                  : 'border-[#E5E5EA] bg-[#F9F9F9] text-[#D7D6D4] dark:border-[#3A3A3C] dark:bg-[#2C2C2E] dark:text-[#86868B]',
+              )}
+            >
+              是
+            </button>
+          </div>
         )}
       </div>
     )

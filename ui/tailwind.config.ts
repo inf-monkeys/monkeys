@@ -1,7 +1,7 @@
 import type { Config } from 'tailwindcss';
 
-import tailwindcss_animate from 'tailwindcss-animate';
 import tailwindcss_typography from '@tailwindcss/typography';
+import tailwindcss_animate from 'tailwindcss-animate';
 import createPlugin from 'windy-radix-palette';
 
 const config = {
@@ -70,6 +70,8 @@ const config = {
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
+          dark: 'var(--card-dark)',
+          light: 'var(--card-light)',
         },
       },
       borderRadius: {

@@ -152,7 +152,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
         const isEmptyFilesOrDragAccept = isFilesEmpty || isDropzoneActive;
         return (
           <div
-            className={cn('relative h-[15.5rem] rounded dark:bg-[#242529]', className)}
+            className={cn('dark:bg-card-dark relative h-[15.5rem] rounded', className)}
             {...getRootProps({
               onPaste: onPaste as any,
               onDrag: onDrag as any,
@@ -167,7 +167,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
               {isEmptyFilesOrDragAccept && (
                 <motion.div
                   key="vines-uploader-hint"
-                  className="absolute left-0 top-0 z-20 size-full p-2 pb-[3rem] dark:bg-[#242529]"
+                  className="dark:bg-card-dark absolute left-0 top-0 z-20 size-full p-2 pb-[3rem]"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
