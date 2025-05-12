@@ -110,7 +110,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
 
   return (
     <ScrollArea
-      className={cn('-pr-0.5 z-20 mr-0.5 bg-[#F1F5F9] dark:bg-[#1D1D1F] [&>[data-radix-scroll-area-viewport]]:p-2')}
+      className={cn('-pr-0.5 dark:bg-card-dark bg-card-light z-20 mr-0.5 [&>[data-radix-scroll-area-viewport]]:p-2')}
       ref={scrollRef}
       style={{ height }}
       disabledOverflowMask

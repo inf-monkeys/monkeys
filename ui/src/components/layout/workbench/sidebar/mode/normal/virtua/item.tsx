@@ -33,7 +33,7 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(({ p
       className={cn(
         'relative z-10 mb-1 flex cursor-pointer items-center space-x-2 rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
         currentPageId === pageId
-          ? 'group border border-input bg-[#F1F5F9] p-2 text-accent-foreground dark:bg-[#1D1D1F]'
+          ? 'dark:bg-card-dark bg-card-light group border border-input p-2 text-accent-foreground'
           : 'p-[calc(0.5rem+1px)]',
       )}
       onClick={() => onClick?.(page)}
