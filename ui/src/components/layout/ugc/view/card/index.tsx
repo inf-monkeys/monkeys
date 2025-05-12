@@ -36,7 +36,7 @@ export const UgcViewCard = <E extends object>({
   return (
     <Card
       className={cn('h-44', {
-        'cursor-pointer transition-colors hover:bg-[#F1F5F9] active:bg-[#F1F5F9] dark:hover:bg-[#1D1D1F] active:dark:bg-[#1D1D1F]':
+        'dark:hover:bg-card-dark active:dark:bg-card-dark hover:bg-card-light active:bg-card-light cursor-pointer transition-colors':
           !!onItemClick,
         'cursor-default': !onItemClick,
       })}

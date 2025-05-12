@@ -83,7 +83,7 @@ const FormItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEl
           ref={ref}
           className={cn(
             'space-y-4',
-            card && 'rounded-lg bg-[#F1F5F9] px-4 pb-0 pt-4 text-[#3F3E39] dark:bg-[#1D1D1F] dark:text-[#EDEDED]',
+            card && 'dark:bg-card-dark bg-card-light rounded-lg px-4 pb-0 pt-4 text-[#3F3E39] dark:text-[#EDEDED]',
             className,
           )}
           {...props}
