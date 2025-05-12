@@ -2,8 +2,10 @@ import { MQ_TOKEN } from '@/common/common.module';
 import { ConversationStatusEnum } from '@/common/dto/status.enum';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { Mq } from '@/common/mq';
+import { S3Helpers } from '@/common/s3';
 import { IRequest } from '@/common/typings/request';
 import { isValidObjectId } from '@/common/utils';
+import { extractMarkdownImageUrls, replaceMarkdownImageUrls } from '@/common/utils/markdown-image-utils';
 import { ConversationAppEntity } from '@/database/entities/conversation-app/conversation-app.entity';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
@@ -12,6 +14,7 @@ import { TeamRepository } from '@/database/repositories/team.repository';
 import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Body, Controller, Get, HttpCode, Inject, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import axios from 'axios';
 import { Response } from 'express';
 import { ChatCompletionMessageParam } from 'openai/resources';
 import { LlmService } from '../tools/llm/llm.service';
@@ -31,7 +34,7 @@ export class WorkflowOpenAICompatibleController {
     private readonly teamRepository: TeamRepository,
     @Inject(MQ_TOKEN) private readonly mq: Mq,
     private readonly llmService: LlmService,
-  ) { }
+  ) {}
 
   @Get('/models')
   @ApiOperation({
@@ -84,33 +87,34 @@ export class WorkflowOpenAICompatibleController {
     }
   }
 
-  private convertToOpenAIMessages(messages: Array<{
-    role: string;
-    content: string | Array<ContentPartDto>;
-    name?: string;
-  }>): Array<ChatCompletionMessageParam> {
-    return messages.map(message => {
+  private convertToOpenAIMessages(
+    messages: Array<{
+      role: string;
+      content: string | Array<ContentPartDto>;
+      name?: string;
+    }>,
+  ): Array<ChatCompletionMessageParam> {
+    return messages.map((message) => {
       if (typeof message.content === 'string') {
         return {
           role: message.role as any,
           content: message.content,
-          name: message.name
+          name: message.name,
         } as ChatCompletionMessageParam;
-      }
-      else if (Array.isArray(message.content)) {
-        const formattedContent = message.content.map(item => {
+      } else if (Array.isArray(message.content)) {
+        const formattedContent = message.content.map((item) => {
           if (item.type === 'text') {
             return {
               type: 'text',
-              text: item.text
+              text: item.text,
             };
           } else if (item.type === 'image_url') {
             return {
               type: 'image_url',
               image_url: {
                 url: item.image_url.url,
-                detail: item.image_url.detail || 'auto'
-              }
+                detail: item.image_url.detail || 'auto',
+              },
             };
           }
           return item;
@@ -119,14 +123,14 @@ export class WorkflowOpenAICompatibleController {
         return {
           role: message.role as any,
           content: formattedContent as any,
-          name: message.name
+          name: message.name,
         } as ChatCompletionMessageParam;
       }
 
       return {
         role: message.role as any,
-        content: "",
-        name: message.name
+        content: '',
+        name: message.name,
       } as ChatCompletionMessageParam;
     });
   }
@@ -160,6 +164,21 @@ export class WorkflowOpenAICompatibleController {
     });
     if (stream === false) {
       const result = await this.workflowExecutionService.waitForWorkflowResult(teamId, workflowInstanceId);
+      const markdown = result.output;
+      const imageLinks = extractMarkdownImageUrls(markdown);
+      const replaceMap = new Map<string, string>();
+      if (imageLinks.length > 0) {
+        const s3Helpers = new S3Helpers();
+        const promises = imageLinks.map(async (url) => {
+          try {
+            const image = await axios.get(url, { responseType: 'arraybuffer' });
+            const s3url = await s3Helpers.uploadFile(image.data, url);
+            replaceMap.set(url, s3url);
+          } catch (e) {}
+        });
+        await Promise.all(promises);
+        result.output = replaceMarkdownImageUrls(markdown, replaceMap);
+      }
       return res.status(200).json(result);
     } else {
       res.setHeader('content-type', 'text/event-stream');
@@ -206,8 +225,24 @@ export class WorkflowOpenAICompatibleController {
       if (stream === false) {
         const result = await this.workflowExecutionService.waitForWorkflowResult(teamId, workflowInstanceId);
         const aiResponse = (result?.choices || [])[0]?.message?.content;
+        let finalResponse = aiResponse;
         if (aiResponse) {
-          const newMessages = body.messages.concat({ role: 'assistant', content: aiResponse });
+          const markdown = aiResponse;
+          const imageLinks = extractMarkdownImageUrls(markdown);
+          const replaceMap = new Map<string, string>();
+          if (imageLinks.length > 0) {
+            const s3Helpers = new S3Helpers();
+            const promises = imageLinks.map(async (url) => {
+              try {
+                const image = await axios.get(url, { responseType: 'arraybuffer' });
+                const s3url = await s3Helpers.uploadFile(image.data, url);
+                replaceMap.set(url, s3url);
+              } catch (e) {}
+            });
+            await Promise.all(promises);
+            finalResponse = replaceMarkdownImageUrls(markdown, replaceMap);
+          }
+          const newMessages = body.messages.concat({ role: 'assistant', content: finalResponse });
           if (conversationId) {
             const openAIMessages = this.convertToOpenAIMessages(newMessages);
             await this.workflowRepository.updateChatSessionMessages(teamId, conversationId, openAIMessages);
@@ -238,7 +273,7 @@ export class WorkflowOpenAICompatibleController {
               if (content) {
                 aiResponse += content;
               }
-            } catch (error) { }
+            } catch (error) {}
           }
         });
       }
