@@ -2,10 +2,10 @@ import { MQ_TOKEN } from '@/common/common.module';
 import { ConversationStatusEnum } from '@/common/dto/status.enum';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { Mq } from '@/common/mq';
-import { S3Helpers } from '@/common/s3';
 import { IRequest } from '@/common/typings/request';
 import { isValidObjectId } from '@/common/utils';
-import { extractMarkdownImageUrls, replaceMarkdownImageUrls } from '@/common/utils/markdown-image-utils';
+import { calculateMd5FromArrayBuffer, extractMarkdownImageUrls, replaceMarkdownImageUrls } from '@/common/utils/markdown-image-utils';
+import { MediaFileEntity } from '@/database/entities/assets/media/media-file';
 import { ConversationAppEntity } from '@/database/entities/conversation-app/conversation-app.entity';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
@@ -17,6 +17,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import axios from 'axios';
 import { Response } from 'express';
 import { ChatCompletionMessageParam } from 'openai/resources';
+import { MediaFileService } from '../assets/media/media.service';
 import { LlmService } from '../tools/llm/llm.service';
 import { TOOL_STREAM_RESPONSE_TOPIC } from '../tools/tools.polling.service';
 import { WorkflowExecutionService } from '../workflow/workflow.execution.service';
@@ -34,6 +35,7 @@ export class WorkflowOpenAICompatibleController {
     private readonly teamRepository: TeamRepository,
     @Inject(MQ_TOKEN) private readonly mq: Mq,
     private readonly llmService: LlmService,
+    private readonly mediaFileService: MediaFileService,
   ) {}
 
   @Get('/models')
@@ -168,12 +170,27 @@ export class WorkflowOpenAICompatibleController {
       const imageLinks = extractMarkdownImageUrls(markdown);
       const replaceMap = new Map<string, string>();
       if (imageLinks.length > 0) {
-        const s3Helpers = new S3Helpers();
         const promises = imageLinks.map(async (url) => {
           try {
             const image = await axios.get(url, { responseType: 'arraybuffer' });
-            const s3url = await s3Helpers.uploadFile(image.data, url);
-            replaceMap.set(url, s3url);
+            const md5 = await calculateMd5FromArrayBuffer(image.data);
+            const data = await this.mediaFileService.getMediaByMd5(teamId, md5);
+            if (!data) {
+              try {
+                const createdData = await this.mediaFileService.createMedia(teamId, userId, {
+                  type: 'image',
+                  displayName: url,
+                  url: url,
+                  source: 1,
+                  params: {
+                    url: url,
+                  },
+                  size: image.data.byteLength,
+                });
+
+                replaceMap.set(url, (createdData as MediaFileEntity).url);
+              } catch (error) {}
+            }
           } catch (e) {}
         });
         await Promise.all(promises);
@@ -226,22 +243,35 @@ export class WorkflowOpenAICompatibleController {
         const result = await this.workflowExecutionService.waitForWorkflowResult(teamId, workflowInstanceId);
         const aiResponse = (result?.choices || [])[0]?.message?.content;
         let finalResponse = aiResponse;
-        if (aiResponse) {
-          const markdown = aiResponse;
-          const imageLinks = extractMarkdownImageUrls(markdown);
-          const replaceMap = new Map<string, string>();
-          if (imageLinks.length > 0) {
-            const s3Helpers = new S3Helpers();
-            const promises = imageLinks.map(async (url) => {
-              try {
-                const image = await axios.get(url, { responseType: 'arraybuffer' });
-                const s3url = await s3Helpers.uploadFile(image.data, url);
-                replaceMap.set(url, s3url);
-              } catch (e) {}
-            });
-            await Promise.all(promises);
-            finalResponse = replaceMarkdownImageUrls(markdown, replaceMap);
-          }
+        const markdown = aiResponse;
+        const imageLinks = extractMarkdownImageUrls(markdown);
+        const replaceMap = new Map<string, string>();
+        if (imageLinks.length > 0) {
+          const promises = imageLinks.map(async (url) => {
+            try {
+              const image = await axios.get(url, { responseType: 'arraybuffer' });
+              const md5 = await calculateMd5FromArrayBuffer(image.data);
+              const data = await this.mediaFileService.getMediaByMd5(teamId, md5);
+              if (!data) {
+                try {
+                  const createdData = await this.mediaFileService.createMedia(teamId, userId, {
+                    type: 'image',
+                    displayName: url,
+                    url: url,
+                    source: 1,
+                    params: {
+                      url: url,
+                    },
+                    size: image.data.byteLength,
+                  });
+
+                  replaceMap.set(url, (createdData as MediaFileEntity).url);
+                } catch (error) {}
+              }
+            } catch (e) {}
+          });
+          await Promise.all(promises);
+          finalResponse = replaceMarkdownImageUrls(markdown, replaceMap);
           const newMessages = body.messages.concat({ role: 'assistant', content: finalResponse });
           if (conversationId) {
             const openAIMessages = this.convertToOpenAIMessages(newMessages);
@@ -283,7 +313,38 @@ export class WorkflowOpenAICompatibleController {
       const onSuccess = async (text: string) => {
         if (conversationId) {
           const end = +new Date();
-          const newMessages = body.messages.concat({ role: 'assistant', content: text });
+          let result = text;
+          const markdown = text;
+          const imageLinks = extractMarkdownImageUrls(markdown);
+          const replaceMap = new Map<string, string>();
+          if (imageLinks.length > 0) {
+            const promises = imageLinks.map(async (url) => {
+              try {
+                const image = await axios.get(url, { responseType: 'arraybuffer' });
+                const md5 = await calculateMd5FromArrayBuffer(image.data);
+                const data = await this.mediaFileService.getMediaByMd5(teamId, md5);
+                if (!data) {
+                  try {
+                    const createdData = await this.mediaFileService.createMedia(teamId, userId, {
+                      type: 'image',
+                      displayName: url,
+                      url: url,
+                      source: 1,
+                      params: {
+                        url: url,
+                      },
+                      size: image.data.byteLength,
+                    });
+
+                    replaceMap.set(url, (createdData as MediaFileEntity).url);
+                  } catch (error) {}
+                }
+              } catch (e) {}
+            });
+            await Promise.all(promises);
+            result = replaceMarkdownImageUrls(markdown, replaceMap);
+          }
+          const newMessages = body.messages.concat({ role: 'assistant', content: result });
           const openAIMessages = this.convertToOpenAIMessages(newMessages);
           await this.workflowRepository.updateChatSessionMessages(teamId, conversationId, openAIMessages);
           await this.conversationAppRepository.createConversationExecution(userId, conversationApp.id, ConversationStatusEnum.SUCCEED, end - start);
