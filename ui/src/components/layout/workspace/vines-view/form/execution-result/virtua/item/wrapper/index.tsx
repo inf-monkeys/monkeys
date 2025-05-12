@@ -26,7 +26,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
   const { t } = useTranslation();
   // const workflowId = useFlowStore((s) => s.workflowId);
   // const { mutate } = useWorkflowExecutionOutputs(workflowId);
-
+  // 瀑布流
   // 使用直接打开链接方式下载，避免CORS问题
   const handleDownload = useMemoizedFn(() => {
     if (!src) return;
@@ -68,7 +68,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
   });
 
   return (
-    <div className="group/vgi relative flex h-full min-w-[200px] flex-1 flex-col p-1">
+    <div className="group/vgi relative flex h-full flex-1 flex-col">
       {/* 图片内容区域，保持点击可以触发预览 */}
       <div className="z-10 flex-1">{children}</div>
 
