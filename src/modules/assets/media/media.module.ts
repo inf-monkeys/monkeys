@@ -6,5 +6,6 @@ import { MediaUploadController } from './media.upload.controller';
 @Module({
   controllers: [MediaUploadController, MediaFileCrudController],
   providers: [MediaFileService],
+  exports: [MediaFileService],
 })
 export class MediaModule {}
