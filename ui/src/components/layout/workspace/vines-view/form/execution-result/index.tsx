@@ -91,7 +91,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   });
 
   return (
-    <Card className={cn('relative', className)}>
+    <Card className={cn('relative bg-[#F1F5F9] dark:bg-[#1D1D1F]', className)}>
       <CardContent className="p-0">
         <ExecutionResultGrid
           workflowId={workflowId}

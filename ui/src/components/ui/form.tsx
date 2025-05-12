@@ -4,7 +4,7 @@ import * as React from 'react';
 import * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, VariantProps } from 'class-variance-authority';
-import { composeRenderProps, Group as AriaGroup, GroupProps as AriaGroupProps } from 'react-aria-components';
+import { Group as AriaGroup, GroupProps as AriaGroupProps, composeRenderProps } from 'react-aria-components';
 import {
   Controller,
   ControllerProps,
@@ -83,7 +83,7 @@ const FormItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEl
           ref={ref}
           className={cn(
             'space-y-4',
-            card && 'rounded-lg bg-[#F2F2F2] px-4 pb-0 pt-4 text-[#3F3E39] dark:bg-[#242529] dark:text-[#EDEDED]',
+            card && 'rounded-lg bg-[#F1F5F9] px-4 pb-0 pt-4 text-[#3F3E39] dark:bg-[#1D1D1F] dark:text-[#EDEDED]',
             className,
           )}
           {...props}

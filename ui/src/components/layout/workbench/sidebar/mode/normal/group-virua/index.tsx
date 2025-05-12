@@ -29,7 +29,7 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
               key={i}
               className={cn(
                 'mb-2 w-full justify-start px-2 hover:bg-accent',
-                groupId === id && 'border border-input bg-background',
+                groupId === id && 'border border-input bg-[#F1F5F9] dark:bg-[#1D1D1F]',
               )}
               variant="ghost"
               onClick={() => setGroupId(id)}

@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { MoreHorizontal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -38,7 +36,8 @@ export const UgcViewCard = <E extends object>({
   return (
     <Card
       className={cn('h-44', {
-        'cursor-pointer transition-colors hover:bg-[--bg-hover-color]': !!onItemClick,
+        'cursor-pointer transition-colors hover:bg-[#F1F5F9] active:bg-[#F1F5F9] dark:hover:bg-[#1D1D1F] active:dark:bg-[#1D1D1F]':
+          !!onItemClick,
         'cursor-default': !onItemClick,
       })}
       onClick={
