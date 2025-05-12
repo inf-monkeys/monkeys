@@ -76,7 +76,7 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height }) =
       height={dynamicHeight}
       event$={tabular$}
       workflowId={workflowId}
-      scrollAreaClassName="pr-4"
+      scrollAreaClassName=""
     />
   );
 };
@@ -166,7 +166,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   // 处理删除图片
   const handleDeleteImage = () => {
     // 这里应该是删除图片的API调用
-    // 为了演示，我们只是从列表中移除
+    // 为了演示，我只是从列表中移除
     if (imageList.length > 0) {
       const newImageList = [...imageList];
       newImageList.splice(imageIndex, 1);
@@ -193,7 +193,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 
   // 右侧边栏组件
   const RightSidebar = (
-    <div className="ml-4 flex h-[calc(100vh-5.75rem-1rem)] w-28 flex-col items-center justify-between gap-4 rounded-bl-xl rounded-br-xl rounded-tl-xl rounded-tr-xl border border-input bg-background px-2 py-6 shadow-sm">
+    <div className="ml-4 flex h-[calc(100vh-5.75rem-1rem)] w-14 flex-col items-center justify-between gap-4 rounded-bl-xl rounded-br-xl rounded-tl-xl rounded-tr-xl border border-input bg-background px-2 py-6 shadow-sm dark:bg-[#111113]">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button icon={<X />} variant="outline" size="small" onClick={() => history.back()} />
@@ -265,24 +265,27 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
     <VinesFlowProvider workflowId={workflowId}>
       <ImageDetailLayout rightSidebar={RightSidebar}>
         {/* 主内容区域 */}
-        <main className="flex size-full flex-1 flex-col overflow-hidden rounded-xl border border-input bg-background shadow-sm md:flex-row">
+        <main className="flex size-full flex-1 flex-col overflow-hidden rounded-xl border border-input bg-background shadow-sm dark:bg-[#111113] md:flex-row">
           {/* 左侧图片展示区 */}
-          <div className="flex w-full flex-col items-center justify-start overflow-hidden rounded-bl-xl rounded-br-xl rounded-tl-xl p-6 sm:w-full md:w-[70%]">
+          <div className="flex w-full flex-col items-center justify-start overflow-hidden rounded-bl-xl rounded-br-xl rounded-tl-xl bg-background px-6 dark:bg-[#111113] sm:w-full md:w-[70%]">
             {imageUrl ? (
               <>
                 <div
-                  className="flex items-center justify-center overflow-hidden"
-                  style={{ height: '80%', width: '100%', marginTop: '20px' }}
+                  className="flex w-full items-center justify-center"
+                  style={{ maxHeight: '80vh', width: '100%', marginTop: '20px', overflow: 'auto' }}
                 >
                   <Image
                     src={imageUrl}
                     alt="详情图片"
-                    className="rounded-lg object-contain"
+                    className="rounded-lg"
                     style={{
-                      maxWidth: '450px',
-                      maxHeight: '400px',
+                      display: 'block',
+                      margin: 'auto',
+                      maxWidth: '100%',
+                      maxHeight: '80vh',
                       width: 'auto',
                       height: 'auto',
+                      objectFit: 'contain',
                       transform: `
                         rotate(${imageRotation}deg)
                         scaleX(${imageFlipX ? -1 : 1})
@@ -291,70 +294,42 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                       `,
                       transition: 'transform 0.3s ease',
                     }}
-                    preview={{
-                      icons: {
-                        rotateLeft: (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button icon={<RotateCcw />} variant="outline" size="small" />
-                            </TooltipTrigger>
-                            <TooltipContent>{t('components.ui.image-preview.rotateLeft', '向左旋转')}</TooltipContent>
-                          </Tooltip>
-                        ),
-                        rotateRight: (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button icon={<RotateCw />} variant="outline" size="small" />
-                            </TooltipTrigger>
-                            <TooltipContent>{t('components.ui.image-preview.rotateRight', '向右旋转')}</TooltipContent>
-                          </Tooltip>
-                        ),
-                        zoomIn: (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button icon={<ZoomIn />} variant="outline" size="small" />
-                            </TooltipTrigger>
-                            <TooltipContent>{t('components.ui.image-preview.zoomIn', '放大')}</TooltipContent>
-                          </Tooltip>
-                        ),
-                        zoomOut: (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button icon={<ZoomOut />} variant="outline" size="small" />
-                            </TooltipTrigger>
-                            <TooltipContent>{t('components.ui.image-preview.zoomOut', '缩小')}</TooltipContent>
-                          </Tooltip>
-                        ),
-                        flipX: (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button icon={<FlipHorizontal />} variant="outline" size="small" />
-                            </TooltipTrigger>
-                            <TooltipContent>{t('components.ui.image-preview.flipX', '水平翻转')}</TooltipContent>
-                          </Tooltip>
-                        ),
-                        flipY: (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button icon={<FlipVertical />} variant="outline" size="small" />
-                            </TooltipTrigger>
-                            <TooltipContent>{t('components.ui.image-preview.flipY', '垂直翻转')}</TooltipContent>
-                          </Tooltip>
-                        ),
-                      },
-                      closeIcon: (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button icon={<X />} variant="outline" size="small" />
-                          </TooltipTrigger>
-                          <TooltipContent>{t('components.ui.image-preview.close', '关闭')}</TooltipContent>
-                        </Tooltip>
-                      ),
-                    }}
+                    preview={false}
                   />
                 </div>
                 {/* 图片操作按钮 */}
                 <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-1 md:gap-2">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        icon={<FlipVertical />}
+                        variant="outline"
+                        size="small"
+                        onClick={() => {
+                          // 直接应用垂直翻转效果
+                          setImageFlipY((prev) => !prev);
+                          toast.success(t('components.ui.image-preview.flipY-success', '已垂直翻转'));
+                        }}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>{t('components.ui.image-preview.flipY', '垂直翻转')}</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        icon={<FlipHorizontal />}
+                        variant="outline"
+                        size="small"
+                        onClick={() => {
+                          // 直接应用水平翻转效果
+                          setImageFlipX((prev) => !prev);
+                          toast.success(t('components.ui.image-preview.flipX-success', '已水平翻转'));
+                        }}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>{t('components.ui.image-preview.flipX', '水平翻转')}</TooltipContent>
+                  </Tooltip>
+
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
@@ -385,36 +360,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                     </TooltipTrigger>
                     <TooltipContent>{t('components.ui.image-preview.rotateRight', '向右旋转')}</TooltipContent>
                   </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        icon={<FlipHorizontal />}
-                        variant="outline"
-                        size="small"
-                        onClick={() => {
-                          // 直接应用水平翻转效果
-                          setImageFlipX((prev) => !prev);
-                          toast.success(t('components.ui.image-preview.flipX-success', '已水平翻转'));
-                        }}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>{t('components.ui.image-preview.flipX', '水平翻转')}</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        icon={<FlipVertical />}
-                        variant="outline"
-                        size="small"
-                        onClick={() => {
-                          // 直接应用垂直翻转效果
-                          setImageFlipY((prev) => !prev);
-                          toast.success(t('components.ui.image-preview.flipY-success', '已垂直翻转'));
-                        }}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>{t('components.ui.image-preview.flipY', '垂直翻转')}</TooltipContent>
-                  </Tooltip>
+
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
@@ -478,7 +424,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
           </div>
 
           {/* 中间区域，渲染表单 */}
-          <div className="flex h-full flex-1 flex-col overflow-auto rounded-r-xl rounded-tr-xl p-6 md:border-l md:border-input">
+          <div className="flex h-full flex-1 flex-col overflow-auto rounded-r-xl rounded-tr-xl bg-background px-6 pt-6 dark:bg-[#111113] md:border-l md:border-input">
             <div className="h-full flex-1">
               <TabularRenderWrapper height={window.innerHeight - 150} />
             </div>

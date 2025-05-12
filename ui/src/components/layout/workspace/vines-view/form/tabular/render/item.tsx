@@ -86,7 +86,7 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
         const filterReserve = targetLinkage?.selectFilter?.reserve;
         const enableFilter = (filterList?.length ?? 0) > 0;
         return (
-          <FormItem className={cn('col-span-2 px-3', singleColumn && 'col-span-1', itemClassName)} card>
+          <FormItem className={cn('col-span-2', singleColumn && 'col-span-1', itemClassName)} card>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1">
                 <FormLabel className="font-bold">
@@ -140,7 +140,9 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
                         filter={
                           targetLinkage
                             ? (m) =>
-                                enableFilter ? filterList?.includes(m.serverRelation.apiPath) === filterReserve : true
+                                enableFilter
+                                  ? filterList?.includes(m.serverRelations?.[0]?.apiPath) === filterReserve
+                                  : true
                             : void 0
                         }
                       />
