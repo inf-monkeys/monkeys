@@ -190,6 +190,8 @@ export class WorkflowOpenAICompatibleController {
 
                 replaceMap.set(url, (createdData as MediaFileEntity).url);
               } catch (error) {}
+            } else {
+              replaceMap.set(url, data.url);
             }
           } catch (e) {}
         });
@@ -267,6 +269,8 @@ export class WorkflowOpenAICompatibleController {
 
                   replaceMap.set(url, (createdData as MediaFileEntity).url);
                 } catch (error) {}
+              } else {
+                replaceMap.set(url, data.url);
               }
             } catch (e) {}
           });
@@ -338,6 +342,8 @@ export class WorkflowOpenAICompatibleController {
 
                     replaceMap.set(url, (createdData as MediaFileEntity).url);
                   } catch (error) {}
+                } else {
+                  replaceMap.set(url, data.url);
                 }
               } catch (e) {}
             });
