@@ -24,8 +24,8 @@ import { VinesFullLoading, VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { VinesWorkflowExecutionInput } from '@/package/vines-flow/core/typings';
-import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
 import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
+import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
@@ -247,7 +247,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
   return (
     <Form {...form}>
       <form
-        className={cn('relative -mx-3 flex flex-col gap-4', formClassName)}
+        className={cn('relative flex flex-col gap-3', formClassName)}
         onSubmit={handleSubmit}
         onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
       >
@@ -292,11 +292,11 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
             {hasFoldInputs && (
               <Accordion className="col-span-2" type="single" collapsible>
                 <AccordionItem value="more">
-                  <AccordionTrigger className="justify-start gap-2 px-3 text-sm [&[data-state=open]_.chevron]:rotate-90">
+                  <AccordionTrigger className="justify-start gap-2 px-4 text-sm [&[data-state=open]_.chevron]:rotate-90">
                     {t('workspace.flow-view.endpoint.start-tool.input.config-form.type-options.fold')}
                     <ChevronRightIcon className="chevron size-4 shrink-0 text-muted-foreground transition-transform duration-200" />
                   </AccordionTrigger>
-                  <AccordionContent className="grid grid-cols-2 gap-4 pt-6">
+                  <AccordionContent className="grid grid-cols-2 gap-4">
                     {foldInputs?.map((it, i) => (
                       <VinesFormFieldItem
                         it={it}
