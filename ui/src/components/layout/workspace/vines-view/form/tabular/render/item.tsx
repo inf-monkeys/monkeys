@@ -18,6 +18,7 @@ import {
   TSelectList,
 } from '@/components/layout/workspace/vines-view/form/tabular/render/field/select.tsx';
 import { FieldTagInputAndTextarea } from '@/components/layout/workspace/vines-view/form/tabular/render/field/tag-input-and-textarea.tsx';
+import { FieldTextInputWithButtons } from '@/components/layout/workspace/vines-view/form/tabular/render/field/text-input-with-buttons.tsx';
 import { Button } from '@/components/ui/button';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -93,14 +94,12 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
                   {required && <span className="text-red-10">* </span>}
                   {getI18nContent(displayName)}
                 </FormLabel>
-                {tips && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <HelpCircle size={18} className="cursor-pointer fill-gray-7 stroke-slate-1" />
-                    </TooltipTrigger>
-                    <TooltipContent>{tips}</TooltipContent>
-                  </Tooltip>
-                )}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle size={18} className="cursor-pointer text-gray-400 dark:text-gray-500" />
+                  </TooltipTrigger>
+                  <TooltipContent>{tips || t('common.utils.no-tips')}</TooltipContent>
+                </Tooltip>
               </div>
               {enableReset && (
                 <Button
@@ -148,6 +147,15 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
                       />
                     ) : assetType === 'oneapi-model' ? (
                       <FieldOneApiModels input={it} value={value} onChange={form.setValue} extra={extra} />
+                    ) : type === 'string' && !typeOptions?.multipleValues ? (
+                      <FieldTextInputWithButtons
+                        input={it}
+                        value={value}
+                        onChange={onChange}
+                        form={form}
+                        field={field}
+                        miniMode={miniMode}
+                      />
                     ) : (
                       <FieldTagInputAndTextarea
                         input={it}
