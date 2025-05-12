@@ -132,7 +132,14 @@ const FormDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttribu
   ({ className, ...props }, ref) => {
     const { formDescriptionId } = useFormField();
 
-    return <p ref={ref} id={formDescriptionId} className={cn('text-xs text-[#3F3E39]/70 dark:text-[#EDEDED]/70', className)} {...props} />;
+    return (
+      <p
+        ref={ref}
+        id={formDescriptionId}
+        className={cn('text-xs text-[#3F3E39]/70 dark:text-[#EDEDED]/70', className)}
+        {...props}
+      />
+    );
   },
 );
 FormDescription.displayName = 'FormDescription';
@@ -160,7 +167,7 @@ const fieldGroupVariants = cva('', {
   variants: {
     variant: {
       default: [
-        'relative flex h-10 w-full items-center overflow-hidden rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background',
+        'relative flex h-10 w-full items-center overflow-hidden rounded-md border border-input bg-[#FFFFFF] dark:bg-[#111113] px-3 py-2 text-sm ring-offset-background',
         /* Focus Within */
         'data-[focus-within]:outline-none data-[focus-within]:ring-2 data-[focus-within]:ring-vines-500 data-[focus-within]:ring-offset-2',
         /* Disabled */
@@ -204,6 +211,5 @@ export {
   FormLabel,
   FormMessage,
   useFormField,
-  useFormValues
+  useFormValues,
 };
-
