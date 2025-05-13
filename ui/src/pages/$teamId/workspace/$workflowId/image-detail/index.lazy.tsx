@@ -103,7 +103,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   useEffect(() => {
     if (imageUrl) {
       // 这里应该是从API获取图片列表的逻辑
-      // 为了演示，我们模拟一个图片列表
+      // 为了演示，我模拟一个图片列表
       setImageList([imageUrl, '/fallback_image.webp', '/fallback_image_dark.webp']);
 
       // 找到当前图片在列表中的索引
@@ -193,7 +193,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 
   // 右侧边栏组件
   const RightSidebar = (
-    <div className="ml-4 flex h-[calc(100vh-5.75rem-1rem)] w-14 flex-col items-center justify-between gap-4 rounded-bl-xl rounded-br-xl rounded-tl-xl rounded-tr-xl border border-input bg-background px-2 py-6 shadow-sm dark:bg-[#111113]">
+    <div className="ml-4 flex h-full w-14 flex-col items-center justify-between gap-4 rounded-bl-xl rounded-br-xl rounded-tl-xl rounded-tr-xl border border-input bg-background px-2 py-6 shadow-sm dark:bg-[#111113]">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button icon={<X />} variant="outline" size="small" onClick={() => history.back()} />
