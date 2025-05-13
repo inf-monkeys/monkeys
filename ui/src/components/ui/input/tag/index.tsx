@@ -85,7 +85,7 @@ export const TagInput = forwardRef<HTMLInputElement, ITagInputProps>(
     return (
       <div
         ref={ref}
-        className="relative flex min-h-10 w-full flex-wrap items-center gap-1.5 rounded-md border border-input px-3 py-2 text-sm has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-vines-500 has-[:focus-visible]:ring-offset-2"
+        className="relative flex min-h-10 w-full flex-wrap items-center gap-1.5 rounded-md border border-input bg-[#FFFFFF] px-3 py-2 text-sm has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-vines-500 has-[:focus-visible]:ring-offset-2 dark:bg-[#111113]"
         onClick={() => inputRef.current?.focus()}
       >
         {value?.map((tag, i) => (

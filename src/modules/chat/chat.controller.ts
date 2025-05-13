@@ -4,6 +4,8 @@ import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { Mq } from '@/common/mq';
 import { IRequest } from '@/common/typings/request';
 import { isValidObjectId } from '@/common/utils';
+import { calculateMd5FromArrayBuffer, extractMarkdownImageUrls, isMarkdown, replaceMarkdownImageUrls } from '@/common/utils/markdown-image-utils';
+import { MediaFileEntity } from '@/database/entities/assets/media/media-file';
 import { ConversationAppEntity } from '@/database/entities/conversation-app/conversation-app.entity';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
@@ -12,13 +14,16 @@ import { TeamRepository } from '@/database/repositories/team.repository';
 import { WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Body, Controller, Get, HttpCode, Inject, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import axios from 'axios';
 import { Response } from 'express';
 import { ChatCompletionMessageParam } from 'openai/resources';
+import { MediaFileService } from '../assets/media/media.service';
 import { LlmService } from '../tools/llm/llm.service';
 import { TOOL_STREAM_RESPONSE_TOPIC } from '../tools/tools.polling.service';
 import { WorkflowExecutionService } from '../workflow/workflow.execution.service';
 import { ContentPartDto, CreateChatCompletionsDto } from './dto/req/create-chat-compltion.dto';
 import { CreateCompletionsDto } from './dto/req/create-compltion.dto';
+
 
 @Controller('/v1')
 @ApiTags('Chat')
@@ -31,7 +36,8 @@ export class WorkflowOpenAICompatibleController {
     private readonly teamRepository: TeamRepository,
     @Inject(MQ_TOKEN) private readonly mq: Mq,
     private readonly llmService: LlmService,
-  ) {}
+    private readonly mediaFileService: MediaFileService,
+  ) { }
 
   @Get('/models')
   @ApiOperation({
@@ -161,6 +167,10 @@ export class WorkflowOpenAICompatibleController {
     });
     if (stream === false) {
       const result = await this.workflowExecutionService.waitForWorkflowResult(teamId, workflowInstanceId);
+      let content = result.output;
+      if (isMarkdown(content))
+        content = await this.llmService.replaceMarkdownImageUrls(content, teamId, userId);
+      result.output = content;
       return res.status(200).json(result);
     } else {
       res.setHeader('content-type', 'text/event-stream');
@@ -207,8 +217,39 @@ export class WorkflowOpenAICompatibleController {
       if (stream === false) {
         const result = await this.workflowExecutionService.waitForWorkflowResult(teamId, workflowInstanceId);
         const aiResponse = (result?.choices || [])[0]?.message?.content;
-        if (aiResponse) {
-          const newMessages = body.messages.concat({ role: 'assistant', content: aiResponse });
+        let finalResponse = aiResponse;
+        const markdown = aiResponse;
+        const imageLinks = extractMarkdownImageUrls(markdown);
+        const replaceMap = new Map<string, string>();
+        if (imageLinks.length > 0) {
+          const promises = imageLinks.map(async (url) => {
+            try {
+              const image = await axios.get(url, { responseType: 'arraybuffer' });
+              const md5 = await calculateMd5FromArrayBuffer(image.data);
+              const data = await this.mediaFileService.getMediaByMd5(teamId, md5);
+              if (!data) {
+                try {
+                  const createdData = await this.mediaFileService.createMedia(teamId, userId, {
+                    type: 'image',
+                    displayName: url,
+                    url: url,
+                    source: 1,
+                    params: {
+                      url: url,
+                    },
+                    size: image.data.byteLength,
+                  });
+
+                  replaceMap.set(url, (createdData as MediaFileEntity).url);
+                } catch (error) { }
+              } else {
+                replaceMap.set(url, data.url);
+              }
+            } catch (e) { }
+          });
+          await Promise.all(promises);
+          finalResponse = replaceMarkdownImageUrls(markdown, replaceMap);
+          const newMessages = body.messages.concat({ role: 'assistant', content: finalResponse });
           if (conversationId) {
             const openAIMessages = this.convertToOpenAIMessages(newMessages);
             await this.workflowRepository.updateChatSessionMessages(teamId, conversationId, openAIMessages);
@@ -239,7 +280,7 @@ export class WorkflowOpenAICompatibleController {
               if (content) {
                 aiResponse += content;
               }
-            } catch (error) {}
+            } catch (error) { }
           }
         });
       }
@@ -249,7 +290,40 @@ export class WorkflowOpenAICompatibleController {
       const onSuccess = async (text: string) => {
         if (conversationId) {
           const end = +new Date();
-          const newMessages = body.messages.concat({ role: 'assistant', content: text });
+          let result = text;
+          const markdown = text;
+          const imageLinks = extractMarkdownImageUrls(markdown);
+          const replaceMap = new Map<string, string>();
+          if (imageLinks.length > 0) {
+            const promises = imageLinks.map(async (url) => {
+              try {
+                const image = await axios.get(url, { responseType: 'arraybuffer' });
+                const md5 = await calculateMd5FromArrayBuffer(image.data);
+                const data = await this.mediaFileService.getMediaByMd5(teamId, md5);
+                if (!data) {
+                  try {
+                    const createdData = await this.mediaFileService.createMedia(teamId, userId, {
+                      type: 'image',
+                      displayName: url,
+                      url: url,
+                      source: 1,
+                      params: {
+                        url: url,
+                      },
+                      size: image.data.byteLength,
+                    });
+
+                    replaceMap.set(url, (createdData as MediaFileEntity).url);
+                  } catch (error) { }
+                } else {
+                  replaceMap.set(url, data.url);
+                }
+              } catch (e) { }
+            });
+            await Promise.all(promises);
+            result = replaceMarkdownImageUrls(markdown, replaceMap);
+          }
+          const newMessages = body.messages.concat({ role: 'assistant', content: result });
           const openAIMessages = this.convertToOpenAIMessages(newMessages);
           await this.workflowRepository.updateChatSessionMessages(teamId, conversationId, openAIMessages);
           await this.conversationAppRepository.createConversationExecution(userId, conversationApp.id, ConversationStatusEnum.SUCCEED, end - start);
@@ -278,6 +352,7 @@ export class WorkflowOpenAICompatibleController {
         {
           onSuccess,
           onFailed,
+          userId,
         },
       );
     }

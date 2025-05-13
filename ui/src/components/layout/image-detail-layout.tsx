@@ -2,17 +2,19 @@ import React from 'react';
 
 interface IImageDetailLayoutProps {
   children: React.ReactNode;
+  rightSidebar?: React.ReactNode;
 }
 
-const ImageDetailLayout: React.FC<IImageDetailLayoutProps> = ({ children }) => {
+const ImageDetailLayout: React.FC<IImageDetailLayoutProps> = ({ children, rightSidebar }) => {
   return (
-    <div className="flex h-full min-h-screen w-full flex-col bg-background">
-      {/* 顶部 header，只包含 WorkflowInfoCard */}
-      {/* <SpaceHeader> */}
-      {/* <WorkflowInfoCard /> */}
-      {/* </SpaceHeader> */}
-      {/* 主体内容区域 */}
-      <div className="flex flex-1 flex-col">{children}</div>
+    <div className="flex h-full w-full flex-col bg-slate-3">
+      <div className="flex flex-1">
+        {/* 主内容区域 */}
+        <div className="flex flex-1">{children}</div>
+
+        {/* 右侧边栏 */}
+        {rightSidebar && rightSidebar}
+      </div>
     </div>
   );
 };

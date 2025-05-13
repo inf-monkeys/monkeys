@@ -19,7 +19,7 @@ export const AgentConfigFormFieldTemperature: React.FC<IAgentConfigFormFieldTemp
       name="temperature"
       control={form.control}
       render={({ field: { value, ...field } }) => (
-        <FormItem className="flex-1">
+        <FormItem className="flex-1" card>
           <FormLabel>{t('agent.view-config.form.temperature.label')}</FormLabel>
           <FormControl>
             <Slider

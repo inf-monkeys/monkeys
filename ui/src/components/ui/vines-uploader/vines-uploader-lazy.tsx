@@ -152,7 +152,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
         const isEmptyFilesOrDragAccept = isFilesEmpty || isDropzoneActive;
         return (
           <div
-            className={cn('relative h-[15.5rem] rounded', className)}
+            className={cn('dark:bg-card-dark relative h-[15.5rem] rounded', className)}
             {...getRootProps({
               onPaste: onPaste as any,
               onDrag: onDrag as any,
@@ -167,15 +167,15 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
               {isEmptyFilesOrDragAccept && (
                 <motion.div
                   key="vines-uploader-hint"
-                  className="absolute left-0 top-0 z-20 size-full p-2 pb-[3rem]"
+                  className="dark:bg-card-dark absolute left-0 top-0 z-20 size-full p-2 pb-[3rem]"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
                   <div
                     className={cn(
-                      'vines-center h-full cursor-pointer gap-4 rounded border-2 border-dashed border-input bg-muted/75',
-                      isHovering && '!border-solid !bg-muted/75',
+                      'vines-center h-full cursor-pointer gap-4 rounded border-2 border-dashed border-input bg-muted/75 dark:bg-[#111113]',
+                      isHovering && '!border-solid !bg-muted/75 dark:!bg-[#111113]',
                     )}
                     onClick={open}
                   >
@@ -211,7 +211,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
             </span>
             <div
               className={cn(
-                'vines-center absolute bottom-0 z-20 w-full gap-2 overflow-hidden rounded-md p-2 backdrop-blur-xl',
+                'vines-center absolute bottom-0 z-20 w-full gap-2 overflow-hidden rounded-md p-2 backdrop-blur-xl dark:bg-[#111113]/80',
                 filesLength <= 3 && 'pt-0',
               )}
             >

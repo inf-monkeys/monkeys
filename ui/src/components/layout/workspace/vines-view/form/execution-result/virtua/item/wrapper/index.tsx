@@ -26,7 +26,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
   const { t } = useTranslation();
   // const workflowId = useFlowStore((s) => s.workflowId);
   // const { mutate } = useWorkflowExecutionOutputs(workflowId);
-
+  // 瀑布流
   // 使用直接打开链接方式下载，避免CORS问题
   const handleDownload = useMemoizedFn(() => {
     if (!src) return;
@@ -51,14 +51,6 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
     if (targetInstanceId) {
       toast.promise(deleteWorkflowExecution(targetInstanceId), {
         success: () => {
-          // 直接移除本地 outputs 数据
-          // void mutate((currentData) => {
-          //   if (!currentData) return currentData;
-          //   return {
-          //     ...currentData,
-          //     data: currentData.data.filter((it) => it?.instanceId !== targetInstanceId),
-          //   };
-          // }, false); // 只更新本地缓存
           return t('common.delete.success');
         },
         error: t('common.delete.error'),
@@ -68,7 +60,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
   });
 
   return (
-    <div className="group/vgi relative flex h-full min-w-[200px] flex-1 flex-col p-1">
+    <div className="group/vgi relative flex h-full flex-1 flex-col">
       {/* 图片内容区域，保持点击可以触发预览 */}
       <div className="z-10 flex-1">{children}</div>
 
@@ -78,7 +70,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                className="rounded bg-white/80 !p-1 shadow-sm hover:bg-white [&_svg]:!size-3"
+                className="dark:hover:bg-[--card-dark]/90 rounded bg-white/80 !p-1 shadow-sm hover:bg-white dark:bg-[--card-dark] [&_svg]:!size-3"
                 icon={<Download />}
                 variant="outline"
                 size="small"
@@ -96,7 +88,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                className="rounded bg-white/80 !p-1 shadow-sm hover:bg-white [&_svg]:!size-3"
+                className="dark:hover:bg-[--card-dark]/90 rounded bg-white/80 !p-1 shadow-sm hover:bg-white dark:bg-[--card-dark] [&_svg]:!size-3"
                 icon={<Trash />}
                 variant="outline"
                 size="small"
@@ -112,7 +104,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
 
         <VirtuaExecutionResultRawDataDialog data={data}>
           <Button
-            className="rounded bg-white/80 !p-1 shadow-sm hover:bg-white [&_svg]:!size-3"
+            className="dark:hover:bg-[--card-dark]/90 rounded bg-white/80 !p-1 shadow-sm hover:bg-white dark:bg-[--card-dark] [&_svg]:!size-3"
             icon={<Ellipsis />}
             variant="outline"
             size="small"
