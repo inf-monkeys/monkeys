@@ -1,6 +1,8 @@
 import { LlmModelEndpointType, config } from '@/common/config';
 import { LogLevel, logger } from '@/common/logger';
+import { S3Helpers } from '@/common/s3';
 import { maskString, replacerNoEscape } from '@/common/utils';
+import { getFileExtensionFromUrl } from '@/common/utils/file';
 import { getI18NValue } from '@/common/utils/i18n';
 import { LlmModelRepository } from '@/database/repositories/llm-model.repository';
 import { OneApiRepository } from '@/database/repositories/oneapi.respository';
@@ -21,7 +23,11 @@ import { KnowledgeBaseService } from '../../assets/knowledge-base/knowledge-base
 import { ToolsForwardService } from '../tools.forward.service';
 import { ResponseFormat } from './dto/req/create-chat-compltion.dto';
 
+
 // 导入图片内容相关类型
+import { calculateMd5FromArrayBuffer, extractMarkdownImageUrls, isMarkdown, replaceMarkdownImageUrls } from '@/common/utils/markdown-image-utils';
+import { MediaFileEntity } from '@/database/entities/assets/media/media-file';
+import { MediaFileService } from '@/modules/assets/media/media.service';
 import { ContentPartDto } from '@/modules/chat/dto/req/create-chat-compltion.dto';
 
 export interface CreateChatCompelitionsParams {
@@ -58,6 +64,7 @@ export interface CreateChatCompelitionsResponseOptions {
   showLogs?: boolean;
   onSuccess?: (text: string) => void;
   onFailed?: (error: string) => void;
+  userId?: string;
 }
 
 const getNameByModelName = (name?: string | string[], modelName?: string, defaultValue?: string) => {
@@ -145,6 +152,7 @@ export class LlmService {
     private readonly sqlKnowledgeBaseService: SqlKnowledgeBaseService,
     private readonly llmModelRepository: LlmModelRepository,
     private readonly oneApiRepository: OneApiRepository,
+    private readonly mediaFileService: MediaFileService,
   ) { }
 
   private getModelNameByModelMappings(modelMappings: { [x: string]: string }, modelName: string): string {
@@ -225,44 +233,48 @@ export class LlmService {
     return [...systemMessages, ...historyMessages];
   }
 
-  private sanitizeMessages(messages: Array<{
-    role: string;
-    content: string | Array<ContentPartDto>;
-    name?: string;
-  }>) {
+  private sanitizeMessages(
+    messages: Array<{
+      role: string;
+      content: string | Array<ContentPartDto>;
+      name?: string;
+    }>,
+  ) {
     const messageHistory = messages.filter(({ content }) => !!content);
     return messageHistory;
   }
 
-  private convertToOpenAIMessages(messages: Array<{
-    role: string;
-    content: string | Array<ContentPartDto>;
-    name?: string;
-  }>): Array<ChatCompletionMessageParam> {
-    return messages.map(message => {
+  private convertToOpenAIMessages(
+    messages: Array<{
+      role: string;
+      content: string | Array<ContentPartDto>;
+      name?: string;
+    }>,
+  ): Array<ChatCompletionMessageParam> {
+    return messages.map((message) => {
       // 如果content是字符串，直接使用标准格式
       if (typeof message.content === 'string') {
         return {
           role: message.role as any,
           content: message.content,
-          name: message.name
+          name: message.name,
         } as ChatCompletionMessageParam;
       }
       // 如果content是数组，转换为OpenAI要求的格式
       else if (Array.isArray(message.content)) {
-        const formattedContent = message.content.map(item => {
+        const formattedContent = message.content.map((item) => {
           if (item.type === 'text') {
             return {
               type: 'text',
-              text: item.text
+              text: item.text,
             };
           } else if (item.type === 'image_url') {
             return {
               type: 'image_url',
               image_url: {
                 url: item.image_url.url,
-                detail: item.image_url.detail || 'auto'
-              }
+                detail: item.image_url.detail || 'auto',
+              },
             };
           }
           return item;
@@ -271,15 +283,15 @@ export class LlmService {
         return {
           role: message.role as any,
           content: formattedContent as any,
-          name: message.name
+          name: message.name,
         } as ChatCompletionMessageParam;
       }
 
       // 兜底，避免类型错误
       return {
         role: message.role as any,
-        content: "",
-        name: message.name
+        content: '',
+        name: message.name,
       } as ChatCompletionMessageParam;
     });
   }
@@ -631,6 +643,49 @@ ${userQuestion}
     }
   }
 
+  public async replaceMarkdownImageUrls(content: string, teamId: string, userId: string) {
+    const imageLinks = extractMarkdownImageUrls(content);
+    const replaceMap = new Map<string, string>();
+    if (imageLinks.length > 0) {
+      const promises = imageLinks.map(async (url) => {
+        try {
+          const image = await axios.get(url, { responseType: 'arraybuffer' });
+          const md5 = await calculateMd5FromArrayBuffer(image.data);
+          const data = await this.mediaFileService.getMediaByMd5(teamId, md5);
+          if (!data) {
+            try {
+              const s3Helpers = new S3Helpers();
+              const s3UploadedUrl = await s3Helpers.uploadFile(image.data, `llm-generated-images/${md5}.${getFileExtensionFromUrl(url)}`);
+              const s3Url = config.s3.isPrivate ? await s3Helpers.getSignedUrl(md5) : s3UploadedUrl;
+              const createdData = await this.mediaFileService.createMedia(teamId, userId, {
+                type: 'image',
+                displayName: s3Url,
+                url: s3Url,
+                source: 1,
+                params: {
+                  url: s3Url,
+                },
+                size: image.data.byteLength,
+                md5,
+              });
+
+              replaceMap.set(url, (createdData as MediaFileEntity).url);
+            } catch (error) {
+              logger.error(`Failed to create media file: ${url}`, error);
+            }
+          } else {
+            replaceMap.set(url, data.url);
+          }
+        } catch (e) {
+          logger.error(`Failed to get image: ${url}`, e);
+        }
+      });
+      await Promise.all(promises);
+      content = replaceMarkdownImageUrls(content, replaceMap);
+    }
+    return content;
+  }
+
   public async createChatCompelitions(res: Response, teamId: string, params: CreateChatCompelitionsParams, options?: CreateChatCompelitionsResponseOptions) {
     const { apiResponseType = 'full', showLogs = false, onSuccess, onFailed } = options || {};
     if (apiResponseType === 'simple' && params.stream) {
@@ -875,12 +930,16 @@ ${userQuestion}
           if (showLogs) {
             (result as any).logs = logs;
           }
-          onSuccess?.(result.choices[0].message?.content);
+
+          let content = result.choices[0].message?.content ?? '';
+          if (!stream && isMarkdown(content) && options?.userId)
+            content = await this.replaceMarkdownImageUrls(content, teamId, options.userId);
+          onSuccess?.(content);
           return res.status(200).send(
             apiResponseType === 'full'
               ? result
               : {
-                messages: result.choices[0].message?.content,
+                messages: content,
                 usage: result.usage,
               },
           );
@@ -888,12 +947,15 @@ ${userQuestion}
           if (showLogs) {
             (response as any).logs = logs;
           }
-          onSuccess?.((response as ChatCompletion).choices[0].message?.content);
+          let content = (response as ChatCompletion).choices[0].message?.content;
+          if (!stream && isMarkdown(content) && options?.userId)
+            content = await this.replaceMarkdownImageUrls(content, teamId, options.userId);
+          onSuccess?.(content);
           return res.status(200).send(
             apiResponseType === 'full'
               ? response
               : {
-                message: (response as ChatCompletion).choices[0].message?.content,
+                message: content,
                 usage: (response as ChatCompletion).usage,
               },
           );

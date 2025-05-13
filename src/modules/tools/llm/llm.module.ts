@@ -1,3 +1,4 @@
+import { MediaFileService } from '@/modules/assets/media/media.service';
 import { SqlKnowledgeBaseModule } from '@/modules/assets/sql-knowledge-base/sql-knowledge-base.module';
 import { Module } from '@nestjs/common';
 import { KnowledgeBaseModule } from '../../assets/knowledge-base/knowledge-base.module';
@@ -7,8 +8,8 @@ import { LlmService } from './llm.service';
 
 @Module({
   controllers: [LlmController],
-  providers: [LlmService],
+  providers: [LlmService, MediaFileService],
   imports: [ToolsModule, KnowledgeBaseModule, SqlKnowledgeBaseModule],
   exports: [LlmService],
 })
-export class LLMToolsModule {}
+export class LLMToolsModule { }

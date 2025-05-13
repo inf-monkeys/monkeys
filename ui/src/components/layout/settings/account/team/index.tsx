@@ -64,13 +64,21 @@ export const Team: React.FC<ITeamProps> = () => {
         </div>
       </CardHeader>
       <CardContent className={cn('flex gap-4', !isOwner && 'pointer-events-none')}>
-        <VinesImageEditor value={teamLogo} onChange={(val) => handleUpdateTeam('iconUrl', val)}>
+        <VinesImageEditor
+          value={teamLogo}
+          onChange={(val) => handleUpdateTeam('iconUrl', val)}
+          tooltipI18nKey="settings.theme.team-logo.lightmode"
+        >
           <Avatar className="size-10 cursor-pointer">
             <AvatarImage className="aspect-auto" src={teamLogo} alt={teamName} />
             <AvatarFallback className="rounded-none p-2 text-xs">{teamName.substring(0, 2)}</AvatarFallback>
           </Avatar>
         </VinesImageEditor>
-        <VinesImageEditor value={teamDarkmodeLogo} onChange={(val) => handleUpdateTeam('darkmodeIconUrl', val)}>
+        <VinesImageEditor
+          value={teamDarkmodeLogo}
+          onChange={(val) => handleUpdateTeam('darkmodeIconUrl', val)}
+          tooltipI18nKey="settings.theme.team-logo.darkmode"
+        >
           <Avatar className="size-10 cursor-pointer">
             <AvatarImage className="aspect-auto" src={teamDarkmodeLogo} alt={teamName} />
             <AvatarFallback className="rounded-none p-2 text-xs">{teamName.substring(0, 2)}</AvatarFallback>

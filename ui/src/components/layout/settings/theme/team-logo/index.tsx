@@ -94,13 +94,21 @@ export const TeamLogo: React.FC<ITeamLogoProps> = () => {
       </CardHeader>
       <CardContent className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <VinesImageEditor value={teamLogo} onChange={handleUpdateTeamLogo}>
+          <VinesImageEditor
+            value={teamLogo}
+            onChange={handleUpdateTeamLogo}
+            tooltipI18nKey="settings.theme.team-logo.lightmode"
+          >
             <Avatar className="size-10 rounded-md">
               <AvatarImage className="aspect-auto" src={team?.iconUrl} alt={teamName} />
               <AvatarFallback className="rounded-none p-2 text-xs">{teamName?.substring(0, 2)}</AvatarFallback>
             </Avatar>
           </VinesImageEditor>
-          <VinesImageEditor value={teamDarkmodeLogo} onChange={handleUpdateTeamDarkmodeLogo}>
+          <VinesImageEditor
+            value={teamDarkmodeLogo}
+            onChange={handleUpdateTeamDarkmodeLogo}
+            tooltipI18nKey="settings.theme.team-logo.darkmode"
+          >
             <Avatar className="size-10 rounded-md">
               <AvatarImage className="aspect-auto" src={team?.darkmodeIconUrl} alt={teamName} />
               <AvatarFallback className="rounded-none p-2 text-xs">{teamName?.substring(0, 2)}</AvatarFallback>

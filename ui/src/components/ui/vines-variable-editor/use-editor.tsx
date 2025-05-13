@@ -190,14 +190,14 @@ export const useVariableEditor = (opt: UseVariableEditorOptions) => {
     return (
       <span
         className={cn(
-          'm-0.5 line-clamp-1 inline-block w-fit translate-y-0.5 cursor-pointer rounded-sm border border-solid border-input bg-gray-3 pr-1 align-sub shadow-sm transition-all',
+          'm-0.5 line-clamp-1 inline-block w-fit translate-y-0.5 cursor-pointer rounded-sm border border-solid border-input bg-gray-3 pr-1 align-sub shadow-sm transition-all dark:bg-[#111113]',
           selected && focused && '!border-vines-500 font-bold !opacity-100',
         )}
         {...attributes}
         contentEditable={false}
       >
         <VariableSchemaTypeMark schema={element._type} />
-        <span className="align-middle text-xs">
+        <span className="align-middle text-xs dark:text-[#E4E3E4]">
           {element.name}
           {props?.children}
         </span>
@@ -212,7 +212,7 @@ export const useVariableEditor = (opt: UseVariableEditorOptions) => {
         return <VariableElement {...props} />;
       default:
         return (
-          <p className="align-middle leading-tight" {...attributes}>
+          <p className="align-middle leading-tight dark:text-[#E4E3E4]" {...attributes}>
             {props?.children}
           </p>
         );
@@ -221,7 +221,7 @@ export const useVariableEditor = (opt: UseVariableEditorOptions) => {
 
   const renderLeaf = useCallback(
     (props: RenderLeafProps) => (
-      <span className="inline-block pt-0.5 align-middle [&_span]:mt-1" {...props.attributes}>
+      <span className="inline-block pt-0.5 align-middle dark:text-[#E4E3E4] [&_span]:mt-1" {...props.attributes}>
         {props?.children}
       </span>
     ),
@@ -295,7 +295,7 @@ export const useVariableEditor = (opt: UseVariableEditorOptions) => {
     return (
       <div
         className={cn(
-          'relative min-h-10 rounded-md border border-input text-sm has-[:focus-visible]:!ring-2 has-[:focus-visible]:!ring-vines-500 has-[:focus-visible]:!ring-offset-2 [&>div]:mt-1',
+          'relative min-h-10 rounded-md border border-input text-sm has-[:focus-visible]:!ring-2 has-[:focus-visible]:!ring-vines-500 has-[:focus-visible]:!ring-offset-2 dark:bg-[#111113] [&>div]:mt-1',
           opt.className,
         )}
       >
@@ -315,7 +315,7 @@ export const useVariableEditor = (opt: UseVariableEditorOptions) => {
             onKeyDown={handleKeyDown}
             onBlur={onBlur}
             onFocus={onFocus}
-            className="flex-initial overflow-hidden whitespace-pre-wrap break-words px-2 py-1 outline-none transition-all"
+            className="flex-initial overflow-hidden whitespace-pre-wrap break-words px-2 py-1 outline-none transition-all dark:bg-[#111113] dark:text-[#E4E3E4]"
             style={{ width }}
           />
         </Slate>
