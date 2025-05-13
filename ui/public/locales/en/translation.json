@@ -778,7 +778,8 @@
         },
         "delete-member": "Delete member",
         "invite": {
-          "button-tooltip": "Invite user",
+          "header-button-tooltip": "Invite Team Members",
+          "button-tooltip": "Invite User",
           "dropdown-label": "Invite User",
           "outdated-options": {
             "7-day": "valid for 7 days",
@@ -914,7 +915,9 @@
         "options": {
           "team": "Team Logo",
           "system": "System Preset"
-        }
+        },
+        "lightmode": "Click to change light mode logo",
+        "darkmode": "Click to change dark mode logo"
       },
       "market": {
         "title": "Theme Market",

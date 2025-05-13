@@ -27,10 +27,10 @@ export const HeaderInvite: React.FC = () => {
   return (
     <>
       <DropdownMenu>
-        <Tooltip content={t('settings.account.team-member.invite.button-tooltip')}>
+        <Tooltip content={t('settings.account.team-member.invite.header-button-tooltip')}>
           <DropdownMenuTrigger asChild>
             <Button icon={<UsersIcon />} size="small" variant="outline">
-              {t('settings.account.team-member.invite.button-tooltip')}
+              {t('settings.account.team-member.invite.header-button-tooltip')}
             </Button>
           </DropdownMenuTrigger>
         </Tooltip>
