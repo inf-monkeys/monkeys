@@ -13,7 +13,7 @@
     "typescript"
   ],
   "[typescript]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
   "cSpell.words": [
     "varchar"
@@ -32,6 +32,6 @@
     "source.organizeImports": "explicit"
   },
   "[typescriptreact]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   }
 }
