@@ -31,7 +31,7 @@ export class WorkflowOpenAICompatibleController {
     private readonly teamRepository: TeamRepository,
     @Inject(MQ_TOKEN) private readonly mq: Mq,
     private readonly llmService: LlmService,
-  ) { }
+  ) {}
 
   @Get('/models')
   @ApiOperation({
@@ -84,33 +84,34 @@ export class WorkflowOpenAICompatibleController {
     }
   }
 
-  private convertToOpenAIMessages(messages: Array<{
-    role: string;
-    content: string | Array<ContentPartDto>;
-    name?: string;
-  }>): Array<ChatCompletionMessageParam> {
-    return messages.map(message => {
+  private convertToOpenAIMessages(
+    messages: Array<{
+      role: string;
+      content: string | Array<ContentPartDto>;
+      name?: string;
+    }>,
+  ): Array<ChatCompletionMessageParam> {
+    return messages.map((message) => {
       if (typeof message.content === 'string') {
         return {
           role: message.role as any,
           content: message.content,
-          name: message.name
+          name: message.name,
         } as ChatCompletionMessageParam;
-      }
-      else if (Array.isArray(message.content)) {
-        const formattedContent = message.content.map(item => {
+      } else if (Array.isArray(message.content)) {
+        const formattedContent = message.content.map((item) => {
           if (item.type === 'text') {
             return {
               type: 'text',
-              text: item.text
+              text: item.text,
             };
           } else if (item.type === 'image_url') {
             return {
               type: 'image_url',
               image_url: {
                 url: item.image_url.url,
-                detail: item.image_url.detail || 'auto'
-              }
+                detail: item.image_url.detail || 'auto',
+              },
             };
           }
           return item;
@@ -119,14 +120,14 @@ export class WorkflowOpenAICompatibleController {
         return {
           role: message.role as any,
           content: formattedContent as any,
-          name: message.name
+          name: message.name,
         } as ChatCompletionMessageParam;
       }
 
       return {
         role: message.role as any,
-        content: "",
-        name: message.name
+        content: '',
+        name: message.name,
       } as ChatCompletionMessageParam;
     });
   }
@@ -238,7 +239,7 @@ export class WorkflowOpenAICompatibleController {
               if (content) {
                 aiResponse += content;
               }
-            } catch (error) { }
+            } catch (error) {}
           }
         });
       }

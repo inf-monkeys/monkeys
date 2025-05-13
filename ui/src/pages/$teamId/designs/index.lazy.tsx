@@ -14,11 +14,15 @@ const FontCard: React.FC<{
   onClick: () => void;
 }> = ({ label, family, onClick }) => {
   return (
-    <div className="flex justify-center items-center p-4 bg-gray-100 rounded-md hover:bg-gray-200 cursor-pointer" onClick={onClick} style={{ fontFamily: `tldraw_${family}` }}>
+    <div
+      className="flex cursor-pointer items-center justify-center rounded-md bg-gray-100 p-4 hover:bg-gray-200"
+      onClick={onClick}
+      style={{ fontFamily: `tldraw_${family}` }}
+    >
       <span>{label}</span>
     </div>
-  )
-}
+  );
+};
 
 export const Designs: React.FC = () => {
   const { t } = useTranslation();
@@ -49,7 +53,6 @@ export const Designs: React.FC = () => {
     y += 32;
   };
 
-
   return (
     <main className="size-full">
       <EditorContext.Provider value={{ editor }}>
@@ -77,3 +80,18 @@ export const Designs: React.FC = () => {
 export const Route = createLazyFileRoute('/$teamId/designs/')({
   component: Designs,
 });
+
+// const useSaveSnapShot = () => {
+//   const { teamId } = useParams<{ teamId: string }>();
+//   const { saveSnapshot } = useBoardStore();
+//   const { mutateAsync: saveDesign } = useMutation({
+//     mutationFn: (snapshot: Record<string, any>) =>
+//       saveDesignMutation({
+//         teamId,
+//         snapshot,
+//       }),
+//   });
+//   return { saveSnapshot, saveDesign };
+// };
+
+// const loadSnapShot = () => {};
