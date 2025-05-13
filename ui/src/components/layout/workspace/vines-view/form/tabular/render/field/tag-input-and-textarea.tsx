@@ -71,9 +71,7 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
         <textarea
           placeholder={placeholder}
           // 目前是写的
-          value={
-            (value as string) ?? '卡萨帝风格，空调，深灰色，高光泽，反射，光线，深邃，纯净，智能触摸屏，金属装饰条'
-          }
+          value={(value as string) ?? ''}
           onChange={(e) => {
             const newValue = e.target.value;
             if (isNumber) {
@@ -91,7 +89,7 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
           <div className="absolute bottom-4 left-4 flex gap-2">
             <Button
               variant="outline"
-              size="sm"
+              size="small"
               className="vines-button flex select-none items-center justify-center gap-1 whitespace-nowrap rounded-md border border-input bg-white px-3 py-1 text-sm font-medium text-gray-800 shadow-sm ring-offset-background transition hover:bg-gray-100 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vines-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:bg-[#1E1E1E] dark:text-white dark:hover:bg-[#2D2D2D] dark:hover:text-white"
               onClick={handleSmartOptimize}
             >
@@ -100,7 +98,7 @@ export const FieldTagInputAndTextarea: React.FC<IFieldTagInputAndTextareaProps> 
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              size="small"
               className="vines-button flex select-none items-center justify-center gap-1 whitespace-nowrap rounded-md border border-input bg-white px-3 py-1 text-sm font-medium text-gray-800 shadow-sm ring-offset-background transition hover:bg-gray-100 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vines-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:bg-[#1E1E1E] dark:text-white dark:hover:bg-[#2D2D2D] dark:hover:text-white"
               onClick={handleShowDictionary}
             >

@@ -51,14 +51,6 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
     if (targetInstanceId) {
       toast.promise(deleteWorkflowExecution(targetInstanceId), {
         success: () => {
-          // 直接移除本地 outputs 数据
-          // void mutate((currentData) => {
-          //   if (!currentData) return currentData;
-          //   return {
-          //     ...currentData,
-          //     data: currentData.data.filter((it) => it?.instanceId !== targetInstanceId),
-          //   };
-          // }, false); // 只更新本地缓存
           return t('common.delete.success');
         },
         error: t('common.delete.error'),
@@ -78,7 +70,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                className="rounded bg-white/80 !p-1 shadow-sm hover:bg-white [&_svg]:!size-3"
+                className="dark:hover:bg-[--card-dark]/90 rounded bg-white/80 !p-1 shadow-sm hover:bg-white dark:bg-[--card-dark] [&_svg]:!size-3"
                 icon={<Download />}
                 variant="outline"
                 size="small"
@@ -96,7 +88,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                className="rounded bg-white/80 !p-1 shadow-sm hover:bg-white [&_svg]:!size-3"
+                className="dark:hover:bg-[--card-dark]/90 rounded bg-white/80 !p-1 shadow-sm hover:bg-white dark:bg-[--card-dark] [&_svg]:!size-3"
                 icon={<Trash />}
                 variant="outline"
                 size="small"
@@ -112,7 +104,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
 
         <VirtuaExecutionResultRawDataDialog data={data}>
           <Button
-            className="rounded bg-white/80 !p-1 shadow-sm hover:bg-white [&_svg]:!size-3"
+            className="dark:hover:bg-[--card-dark]/90 rounded bg-white/80 !p-1 shadow-sm hover:bg-white dark:bg-[--card-dark] [&_svg]:!size-3"
             icon={<Ellipsis />}
             variant="outline"
             size="small"
