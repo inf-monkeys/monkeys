@@ -7,12 +7,13 @@ import { useTranslation } from 'react-i18next';
 import { WorkspaceIframe } from 'src/components/layout-wrapper/space/iframe';
 import { WorkbenchPanelLayout } from 'src/components/layout-wrapper/workbench/panel';
 
-import { OEM } from '@/components/layout/oem';
 import { AgentLayout } from '@/components/layout-wrapper/agent';
+import { DesignLayout } from '@/components/layout-wrapper/design';
 import { MainWrapper } from '@/components/layout-wrapper/main';
 import { WorkbenchMiniModeLayout } from '@/components/layout-wrapper/workbench/mini-mode';
 import { WorkspaceLayout } from '@/components/layout-wrapper/workspace';
 import { WorkspaceShareView } from '@/components/layout-wrapper/workspace/share-view';
+import { OEM } from '@/components/layout/oem';
 import { AuthWithRouteSearch } from '@/components/router/auth-with-route-search.tsx';
 import { RouteEvent } from '@/components/router/event.tsx';
 import { TeamsGuard, useVinesTeam } from '@/components/router/guard/team.tsx';
@@ -36,6 +37,7 @@ const RootComponent: React.FC = () => {
     isUseShareView,
     isUseIFrame,
     isUseAgent,
+    isUseDesign,
     isUseWorkbench,
     isUsePanel,
   } = useVinesRoute();
@@ -46,15 +48,15 @@ const RootComponent: React.FC = () => {
   const namePath = SIDEBAR_MAP.flatMap((it) =>
     it.items
       ? it.items.map((sub) => {
-          return {
-            ...sub,
-            namePath: it.name + '.' + sub.name,
-          };
-        })
+        return {
+          ...sub,
+          namePath: it.name + '.' + sub.name,
+        };
+      })
       : {
-          ...it,
-          namePath: it.name,
-        },
+        ...it,
+        namePath: it.name,
+      },
   ).find((it) => it.name === routeAppId)?.namePath;
 
   const routeSiteName = namePath
@@ -73,6 +75,7 @@ const RootComponent: React.FC = () => {
     !isUseShareView &&
     !isUseIFrame &&
     !isUseAgent &&
+    !isUseDesign &&
     !isUsePanel &&
     (mode !== 'mini' || !isUseWorkbench);
 
@@ -109,6 +112,7 @@ const RootComponent: React.FC = () => {
                 {isUseOutside && <Outlet />}
                 {isUseWorkSpace && <WorkspaceLayout />}
                 {isUseAgent && <AgentLayout />}
+                {isUseDesign && <DesignLayout />}
                 {isUsePanel && mode !== 'mini' && <WorkbenchPanelLayout layoutId={layoutId} />}
                 {isUseWorkbench && mode === 'mini' && <WorkbenchMiniModeLayout />}
                 {isUseDefault && <MainWrapper layoutId={layoutId} />}
