@@ -4,17 +4,17 @@ import { createLazyFileRoute, useParams, useRouter } from '@tanstack/react-route
 
 import { useEventEmitter } from 'ahooks';
 import {
-    ChevronDown,
-    ChevronUp,
-    Download,
-    FlipHorizontal,
-    FlipVertical,
-    RotateCcw,
-    RotateCw,
-    Trash,
-    X,
-    ZoomIn,
-    ZoomOut,
+  ChevronDown,
+  ChevronUp,
+  Download,
+  FlipHorizontal,
+  FlipVertical,
+  RotateCcw,
+  RotateCw,
+  Trash,
+  X,
+  ZoomIn,
+  ZoomOut,
 } from 'lucide-react';
 import Image from 'rc-image';
 import { useTranslation } from 'react-i18next';
@@ -23,14 +23,14 @@ import { toast } from 'sonner';
 import ImageDetailLayout from '@/components/layout/image-detail-layout';
 import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -103,7 +103,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   useEffect(() => {
     if (imageUrl) {
       // 这里应该是从API获取图片列表的逻辑
-      // 为了演示，我们模拟一个图片列表
+      // 为了演示，我模拟一个图片列表
       setImageList([imageUrl, '/fallback_image.webp', '/fallback_image_dark.webp']);
 
       // 找到当前图片在列表中的索引
