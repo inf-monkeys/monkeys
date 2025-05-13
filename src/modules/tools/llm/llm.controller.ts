@@ -343,6 +343,7 @@ export class LlmController {
       return res.status(400).send('userMessage is required');
     }
     const teamId = req.headers['x-monkeys-teamid'] as string;
+    const userId = req.headers['x-monkeys-userid'] as string;
 
     body.userImageMessage = !body.userImageMessage ? [] : typeof body.userImageMessage === 'string' ? [body.userImageMessage] : body.userImageMessage;
 
@@ -353,18 +354,21 @@ export class LlmController {
         messages: [
           {
             role: 'user',
-            content: body.userImageMessage.length > 0 ? [
-              ...body.userImageMessage.map((image) => ({
-                type: 'image_url',
-                image_url: {
-                  url: image,
-                },
-              })) as ChatCompletionContentPartImage[],
-              {
-                type: 'text',
-                text: body.userMessage,
-              },
-            ] : body.userMessage,
+            content:
+              body.userImageMessage.length > 0
+                ? [
+                  ...(body.userImageMessage.map((image) => ({
+                    type: 'image_url',
+                    image_url: {
+                      url: image,
+                    },
+                  })) as ChatCompletionContentPartImage[]),
+                  {
+                    type: 'text',
+                    text: body.userMessage,
+                  },
+                ]
+                : body.userMessage,
           },
         ],
         model: body.model,
@@ -379,6 +383,7 @@ export class LlmController {
       },
       {
         apiResponseType: 'simple',
+        userId,
       },
     );
   }
@@ -564,10 +569,11 @@ export class LlmController {
    */
   public async createChatCompletions(@Res() res: Response, @Req() req: IToolsRequest, @Body() body: CreateChatCompletionsDto) {
     const teamId = req.headers['x-monkeys-teamid'] as string;
+    const userId = req.headers['x-monkeys-userid'] as string;
     const { stream = false, show_logs = false } = body;
 
     // 将OpenAI消息格式转换为内部所需格式
-    const messages = body.messages.map(msg => {
+    const messages = body.messages.map((msg) => {
       // 基本消息格式
       const message: {
         role: string;
@@ -575,7 +581,7 @@ export class LlmController {
         name?: string;
       } = {
         role: msg.role,
-        content: typeof msg.content === 'string' ? msg.content : "",
+        content: typeof msg.content === 'string' ? msg.content : '',
       };
 
       // 仅当有name属性时添加
@@ -605,6 +611,7 @@ export class LlmController {
       {
         apiResponseType: 'full',
         showLogs: show_logs,
+        userId,
       },
     );
   }
