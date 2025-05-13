@@ -9,6 +9,7 @@ export interface IVinesImageEditorProps {
   onChange?: (value: string) => void;
   children?: React.ReactNode;
   aspectRatio?: number;
+  tooltipI18nKey?: string;
 }
 
 const VinesImageEditorCore = lazy(() => import('./image-editor-lazy.tsx'));

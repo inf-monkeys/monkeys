@@ -768,6 +768,7 @@
         },
         "delete-member": "删除用户",
         "invite": {
+          "header-button-tooltip": "邀请团队成员",
           "button-tooltip": "邀请用户",
           "dropdown-label": "邀请用户",
           "outdated-options": {
@@ -904,7 +905,9 @@
         "options": {
           "team": "团队图标",
           "system": "系统预置"
-        }
+        },
+        "lightmode": "点击更换浅色图标",
+        "darkmode": "点击更换深色图标"
       },
       "market": {
         "title": "主题市场",
