@@ -2,36 +2,27 @@ import React, { useEffect, useState } from 'react';
 
 import { createLazyFileRoute, useParams, useRouter } from '@tanstack/react-router';
 
-import { useEventEmitter } from 'ahooks';
+import { useEventEmitter, useMemoizedFn } from 'ahooks';
 import {
-  ChevronDown,
-  ChevronUp,
-  Download,
-  FlipHorizontal,
-  FlipVertical,
-  RotateCcw,
-  RotateCw,
-  Trash,
-  X,
-  ZoomIn,
-  ZoomOut,
+    ChevronDown,
+    ChevronUp,
+    Download,
+    FlipHorizontal,
+    FlipVertical,
+    RotateCcw,
+    RotateCw,
+    Trash,
+    X,
+    ZoomIn,
+    ZoomOut,
 } from 'lucide-react';
 import Image from 'rc-image';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { deleteWorkflowExecution } from '@/apis/workflow/execution';
 import ImageDetailLayout from '@/components/layout/image-detail-layout';
 import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
@@ -85,9 +76,6 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const { t } = useTranslation();
   const router = useRouter();
   const { history } = router;
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [imageIndex, setImageIndex] = useState(0);
-  const [imageList, setImageList] = useState<string[]>([]);
   const [imageRotation, setImageRotation] = useState(0);
   const [imageFlipX, setImageFlipX] = useState(false);
   const [imageFlipY, setImageFlipY] = useState(false);
@@ -96,23 +84,11 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   // 从路由搜索参数中获取图片信息
   const searchParams = new URLSearchParams(window.location.search);
   const imageUrl = searchParams.get('imageUrl') || '';
+  const instanceId = searchParams.get('instanceId') || '';
 
   const { workflowId } = useParams({ from: '/$teamId/workspace/$workflowId/image-detail/' });
 
-  // 获取当前工作流的所有图片
-  useEffect(() => {
-    if (imageUrl) {
-      // 这里应该是从API获取图片列表的逻辑
-      // 为了演示，我模拟一个图片列表
-      setImageList([imageUrl, '/fallback_image.webp', '/fallback_image_dark.webp']);
-
-      // 找到当前图片在列表中的索引
-      const index = imageList.findIndex((url) => url === imageUrl);
-      if (index !== -1) {
-        setImageIndex(index);
-      }
-    }
-  }, [imageUrl]);
+  // 上一张/下一张图片功能已禁用，不再需要获取图片列表
 
   // 监听图片状态变化，更新图片样式
   useEffect(() => {
@@ -130,66 +106,27 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
     }
   }, [imageRotation, imageFlipX, imageFlipY, imageScale]);
 
-  // 处理上一张/下一张图片
-  const handlePrevImage = () => {
-    if (imageList.length > 1 && imageIndex > 0) {
-      const newIndex = imageIndex - 1;
-      setImageIndex(newIndex);
-      // 更新URL参数，保持状态同步
-      const newSearchParams = new URLSearchParams(window.location.search);
-      newSearchParams.set('imageUrl', imageList[newIndex]);
-      router.navigate({
-        search: newSearchParams.toString(),
-      });
-      toast.success(t('workspace.image-detail.prev-image-success', '已切换到上一张图片'));
-    } else {
-      toast.info(t('workspace.image-detail.no-prev-image', '已经是第一张图片'));
-    }
-  };
-
-  const handleNextImage = () => {
-    if (imageList.length > 1 && imageIndex < imageList.length - 1) {
-      const newIndex = imageIndex + 1;
-      setImageIndex(newIndex);
-      // 更新URL参数，保持状态同步
-      const newSearchParams = new URLSearchParams(window.location.search);
-      newSearchParams.set('imageUrl', imageList[newIndex]);
-      router.navigate({
-        search: newSearchParams.toString(),
-      });
-      toast.success(t('workspace.image-detail.next-image-success', '已切换到下一张图片'));
-    } else {
-      toast.info(t('workspace.image-detail.no-next-image', '已经是最后一张图片'));
-    }
-  };
+  // 上一张/下一张图片功能已禁用
 
   // 处理删除图片
-  const handleDeleteImage = () => {
-    // 这里应该是删除图片的API调用
-    // 为了演示，我只是从列表中移除
-    if (imageList.length > 0) {
-      const newImageList = [...imageList];
-      newImageList.splice(imageIndex, 1);
-      setImageList(newImageList);
-
-      if (newImageList.length > 0) {
-        // 如果还有图片，显示下一张或上一张
-        const newIndex = imageIndex >= newImageList.length ? newImageList.length - 1 : imageIndex;
-        setImageIndex(newIndex);
-        // 更新URL参数
-        const newSearchParams = new URLSearchParams(window.location.search);
-        newSearchParams.set('imageUrl', newImageList[newIndex]);
-        router.navigate({
-          search: newSearchParams.toString(),
-        });
-      } else {
-        // 如果没有图片了，返回上一页
-        history.back();
-      }
-      toast.success(t('workspace.image-detail.delete-success', '图片已删除'));
+  const handleDeleteImage = useMemoizedFn(() => {
+    // 如果有instanceId，则调用API删除
+    if (instanceId) {
+      toast.promise(deleteWorkflowExecution(instanceId), {
+        success: () => {
+          // 删除成功后返回上一页
+          history.back();
+          return t('common.delete.success');
+        },
+        error: t('common.delete.error'),
+        loading: t('common.delete.loading'),
+      });
+    } else {
+      // 如果没有instanceId，直接返回上一页
+      history.back();
+      toast.success(t('common.delete.success'));
     }
-    setShowDeleteDialog(false);
-  };
+  });
 
   // 右侧边栏组件
   const RightSidebar = (
@@ -204,26 +141,14 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
       <div className="flex flex-col items-center gap-4">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              icon={<ChevronUp />}
-              variant="outline"
-              size="small"
-              onClick={handlePrevImage}
-              disabled={imageList.length <= 1 || imageIndex <= 0}
-            />
+            <Button icon={<ChevronUp />} variant="outline" size="small" disabled={true} />
           </TooltipTrigger>
           <TooltipContent>{t('workspace.image-detail.prev-image', '上一张')}</TooltipContent>
         </Tooltip>
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              icon={<ChevronDown />}
-              variant="outline"
-              size="small"
-              onClick={handleNextImage}
-              disabled={imageList.length <= 1 || imageIndex >= imageList.length - 1}
-            />
+            <Button icon={<ChevronDown />} variant="outline" size="small" disabled={true} />
           </TooltipTrigger>
           <TooltipContent>{t('workspace.image-detail.next-image', '下一张')}</TooltipContent>
         </Tooltip>
@@ -236,27 +161,11 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
               icon={<Trash />}
               variant="outline"
               size="small"
-              disabled={!imageUrl}
-              onClick={() => setShowDeleteDialog(true)}
+              onClick={handleDeleteImage}
             />
           </TooltipTrigger>
           <TooltipContent>{t('workspace.image-detail.delete', '删除')}</TooltipContent>
         </Tooltip>
-
-        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t('workspace.image-detail.delete-confirm-title', '确认删除')}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {t('workspace.image-detail.delete-confirm-desc', '确定要删除这张图片吗？此操作无法撤销。')}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>{t('common.utils.cancel', '取消')}</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDeleteImage}>{t('common.utils.confirm', '确认')}</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
     </div>
   );
