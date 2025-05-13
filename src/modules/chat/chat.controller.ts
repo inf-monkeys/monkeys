@@ -4,7 +4,7 @@ import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { Mq } from '@/common/mq';
 import { IRequest } from '@/common/typings/request';
 import { isValidObjectId } from '@/common/utils';
-import { calculateMd5FromArrayBuffer, extractMarkdownImageUrls, replaceMarkdownImageUrls } from '@/common/utils/markdown-image-utils';
+import { calculateMd5FromArrayBuffer, extractMarkdownImageUrls, isMarkdown, replaceMarkdownImageUrls } from '@/common/utils/markdown-image-utils';
 import { MediaFileEntity } from '@/database/entities/assets/media/media-file';
 import { ConversationAppEntity } from '@/database/entities/conversation-app/conversation-app.entity';
 import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-metadata';
@@ -24,6 +24,7 @@ import { WorkflowExecutionService } from '../workflow/workflow.execution.service
 import { ContentPartDto, CreateChatCompletionsDto } from './dto/req/create-chat-compltion.dto';
 import { CreateCompletionsDto } from './dto/req/create-compltion.dto';
 
+
 @Controller('/v1')
 @ApiTags('Chat')
 @UseGuards(CompatibleAuthGuard)
@@ -36,7 +37,7 @@ export class WorkflowOpenAICompatibleController {
     @Inject(MQ_TOKEN) private readonly mq: Mq,
     private readonly llmService: LlmService,
     private readonly mediaFileService: MediaFileService,
-  ) {}
+  ) { }
 
   @Get('/models')
   @ApiOperation({
@@ -166,38 +167,10 @@ export class WorkflowOpenAICompatibleController {
     });
     if (stream === false) {
       const result = await this.workflowExecutionService.waitForWorkflowResult(teamId, workflowInstanceId);
-      const markdown = result.output;
-      const imageLinks = extractMarkdownImageUrls(markdown);
-      const replaceMap = new Map<string, string>();
-      if (imageLinks.length > 0) {
-        const promises = imageLinks.map(async (url) => {
-          try {
-            const image = await axios.get(url, { responseType: 'arraybuffer' });
-            const md5 = await calculateMd5FromArrayBuffer(image.data);
-            const data = await this.mediaFileService.getMediaByMd5(teamId, md5);
-            if (!data) {
-              try {
-                const createdData = await this.mediaFileService.createMedia(teamId, userId, {
-                  type: 'image',
-                  displayName: url,
-                  url: url,
-                  source: 1,
-                  params: {
-                    url: url,
-                  },
-                  size: image.data.byteLength,
-                });
-
-                replaceMap.set(url, (createdData as MediaFileEntity).url);
-              } catch (error) {}
-            } else {
-              replaceMap.set(url, data.url);
-            }
-          } catch (e) {}
-        });
-        await Promise.all(promises);
-        result.output = replaceMarkdownImageUrls(markdown, replaceMap);
-      }
+      let content = result.output;
+      if (isMarkdown(content))
+        content = await this.llmService.replaceMarkdownImageUrls(content, teamId, userId);
+      result.output = content;
       return res.status(200).json(result);
     } else {
       res.setHeader('content-type', 'text/event-stream');
@@ -268,11 +241,11 @@ export class WorkflowOpenAICompatibleController {
                   });
 
                   replaceMap.set(url, (createdData as MediaFileEntity).url);
-                } catch (error) {}
+                } catch (error) { }
               } else {
                 replaceMap.set(url, data.url);
               }
-            } catch (e) {}
+            } catch (e) { }
           });
           await Promise.all(promises);
           finalResponse = replaceMarkdownImageUrls(markdown, replaceMap);
@@ -307,7 +280,7 @@ export class WorkflowOpenAICompatibleController {
               if (content) {
                 aiResponse += content;
               }
-            } catch (error) {}
+            } catch (error) { }
           }
         });
       }
@@ -341,11 +314,11 @@ export class WorkflowOpenAICompatibleController {
                     });
 
                     replaceMap.set(url, (createdData as MediaFileEntity).url);
-                  } catch (error) {}
+                  } catch (error) { }
                 } else {
                   replaceMap.set(url, data.url);
                 }
-              } catch (e) {}
+              } catch (e) { }
             });
             await Promise.all(promises);
             result = replaceMarkdownImageUrls(markdown, replaceMap);
@@ -379,6 +352,7 @@ export class WorkflowOpenAICompatibleController {
         {
           onSuccess,
           onFailed,
+          userId,
         },
       );
     }
