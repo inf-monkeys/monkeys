@@ -24,12 +24,15 @@ export const useVinesRoute = () => {
   const isUseShareView = VINES_IFRAME_PAGE_IDS.includes(params?.['pageId']);
   const isUseIFrame = routeIds?.[4] === 'view-iframe';
   const isUseWorkbench = !routeAppId;
-  // 图片详情页面也应该使用WorkspaceLayout
+  // 图片详情页面应该使用WorkspaceLayout，但不显示侧边栏
   const isUseWorkSpace = (routeAppId === 'workspace' && !isUseShareView && !isUseIFrame) || isImageDetailPage;
   const isUseAgent = routeAppId === 'agent';
   const isUsePanel = (!!routeIds || !isUseWorkbench) && !isUseWorkSpace && !isUseAgent;
 
-  window['vinesRoute'] = [routeAppId || 'main', params?.['teamId'], params?.['workflowId']];
+  // 对于图片详情页面，确保路由信息中包含workbench，以便高亮工作台选项
+  window['vinesRoute'] = isImageDetailPage
+    ? ['workbench', params?.['teamId'], params?.['workflowId']]
+    : [routeAppId || 'main', params?.['teamId'], params?.['workflowId']];
 
   return {
     matches,
