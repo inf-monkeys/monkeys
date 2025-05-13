@@ -98,7 +98,7 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
                   <TooltipTrigger asChild>
                     <HelpCircle size={18} className="cursor-pointer text-gray-400 dark:text-gray-500" />
                   </TooltipTrigger>
-                  <TooltipContent>{tips || t('common.utils.no-tips')}</TooltipContent>
+                  <TooltipContent>{tips || t('这是提示')}</TooltipContent>
                 </Tooltip>
               </div>
               {enableReset && (
