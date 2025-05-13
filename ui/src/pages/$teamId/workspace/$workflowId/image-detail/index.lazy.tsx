@@ -4,17 +4,17 @@ import { createLazyFileRoute, useParams, useRouter } from '@tanstack/react-route
 
 import { useEventEmitter } from 'ahooks';
 import {
-  ChevronDown,
-  ChevronUp,
-  Download,
-  FlipHorizontal,
-  FlipVertical,
-  RotateCcw,
-  RotateCw,
-  Trash,
-  X,
-  ZoomIn,
-  ZoomOut,
+    ChevronDown,
+    ChevronUp,
+    Download,
+    FlipHorizontal,
+    FlipVertical,
+    RotateCcw,
+    RotateCw,
+    Trash,
+    X,
+    ZoomIn,
+    ZoomOut,
 } from 'lucide-react';
 import Image from 'rc-image';
 import { useTranslation } from 'react-i18next';
@@ -23,14 +23,14 @@ import { toast } from 'sonner';
 import ImageDetailLayout from '@/components/layout/image-detail-layout';
 import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -193,7 +193,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 
   // 右侧边栏组件
   const RightSidebar = (
-    <div className="ml-4 flex h-[calc(100vh-5.75rem-1rem)] w-14 flex-col items-center justify-between gap-4 rounded-bl-xl rounded-br-xl rounded-tl-xl rounded-tr-xl border border-input bg-background px-2 py-6 shadow-sm dark:bg-[#111113]">
+    <div className="ml-4 flex h-full w-14 flex-col items-center justify-between gap-4 rounded-bl-xl rounded-br-xl rounded-tl-xl rounded-tr-xl border border-input bg-background px-2 py-6 shadow-sm dark:bg-[#111113]">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button icon={<X />} variant="outline" size="small" onClick={() => history.back()} />
