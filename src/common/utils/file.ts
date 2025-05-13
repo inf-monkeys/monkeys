@@ -78,6 +78,13 @@ export function getFileExtensionFromMimeType(mimeType: string): string {
   return Object.keys(mimeTypes).find(key => mimeTypes[key] === mimeType);
 }
 
+export function getFileExtensionFromUrl(url: string): string {
+  const urlObj = new URL(url);
+  const pathname = urlObj.pathname;
+  const ext = pathname.split('.').pop()?.toLowerCase();
+  return ext || '';
+}
+
 export async function downloadImageAsBase64(imageUrl: string): Promise<string> {
   try {
     const axios = require('axios');
