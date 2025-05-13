@@ -1,6 +1,31 @@
 import * as crypto from 'crypto'; // Import the crypto module
+import { logger } from '../logger';
 
 // markdown-image-utils.ts
+
+// 检测文本是否为markdown格式
+export function isMarkdown(text: string): boolean {
+  if (!text || typeof text !== 'string') {
+    return false;
+  }
+
+  // 检查常见的Markdown特征
+  const markdownPatterns = [
+    /^#\s+.+$/m, // 标题
+    /\*\*.+\*\*/, // 粗体
+    /\*.+\*/, // 斜体
+    /!\[.+\]\(.+\)/, // 图片
+    /\[.+\]\(.+\)/, // 链接
+    /^\s*[-*+]\s+.+$/m, // 无序列表
+    /^\s*\d+\.\s+.+$/m, // 有序列表
+    /^>\s+.+$/m, // 引用
+    /`{1,3}[\s\S]*?`{1,3}/, // 代码块或行内代码
+    /^\s*---+\s*$/m, // 分隔线
+    /\|\s*[-:]+\s*\|/, // 表格
+  ];
+
+  return markdownPatterns.some((pattern) => pattern.test(text));
+}
 
 /**
  * Parses the destination string of a markdown link/image (the content within parentheses).
@@ -152,11 +177,9 @@ export async function calculateMd5FromArrayBuffer(arrayBuffer: ArrayBuffer): Pro
 
     // 5. Get the final hash as a hexadecimal string
     const md5Hash = hash.digest('hex');
-
-    console.log(`MD5 hash for ${arrayBuffer}: ${md5Hash}`);
     return md5Hash;
   } catch (error) {
-    console.error(`Error calculating MD5 for ${arrayBuffer}:`, error.message);
+    logger.error(`Error calculating MD5:`, error.message);
     return null;
   }
 }
