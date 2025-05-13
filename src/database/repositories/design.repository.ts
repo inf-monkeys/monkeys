@@ -1,3 +1,4 @@
+import { generateDbId } from '@/common/utils';
 import { CreateDesignDto } from '@/modules/design/dto/create-design.dto';
 import { UpdateDesignDto } from '@/modules/design/dto/update-design.dto';
 import { Injectable } from '@nestjs/common';
@@ -21,7 +22,14 @@ export class DesignRepository {
     return data;
   }
   public async createDesign(createDesignDto: CreateDesignDto) {
-    return this.designRepository.save(createDesignDto);
+    const id = generateDbId();
+    return this.designRepository.save({
+      ...createDesignDto,
+      id,
+      createdTimestamp: Date.now(),
+      updatedTimestamp: Date.now(),
+      isDeleted: false,
+    });
   }
   public async findById(designId: string) {
     const data = await this.designRepository.findOne({
