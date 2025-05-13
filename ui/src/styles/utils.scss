@@ -11,3 +11,11 @@
   background-image: none !important;
   background-size: 0 0 !important;
 }
+
+.bg-workspace-light {
+  background-color: #FCFCFD;
+}
+
+.dark .bg-workspace-light {
+  background-color: #111113;
+}
