@@ -57,17 +57,26 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
             }
           }}
         >
-          <TabsList className="!h-9">
-            <TabsTrigger className="gap-1 py-1" value="workbench">
-              <Layers2 size={14} />
+          <TabsList className="!h-9 p-0">
+            <TabsTrigger
+              className="!h-9 gap-1 text-muted-foreground *:data-[state=active]:stroke-foreground"
+              value="workbench"
+            >
+              <Layers2 size={14} className="stroke-muted-foreground" />
               {t('components.layout.main.sidebar.list.workbench.label')}
             </TabsTrigger>
-            <TabsTrigger className="gap-1 py-1" value="store">
-              <Package size={14} />
+            <TabsTrigger
+              className="!h-9 gap-1 text-muted-foreground *:data-[state=active]:stroke-foreground"
+              value="store"
+            >
+              <Package size={14} className="stroke-muted-foreground" />
               {t('components.layout.main.sidebar.list.store.application-store.label')}
             </TabsTrigger>
-            <TabsTrigger className="gap-1 py-1" value="main">
-              <PackagePlus size={14} />
+            <TabsTrigger
+              className="!h-9 gap-1 text-muted-foreground *:data-[state=active]:stroke-foreground"
+              value="main"
+            >
+              <PackagePlus size={14} className="stroke-muted-foreground" />
               {t('components.layout.main.sidebar.list.workspace.label')}
             </TabsTrigger>
           </TabsList>

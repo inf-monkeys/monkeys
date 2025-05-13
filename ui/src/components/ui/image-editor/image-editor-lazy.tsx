@@ -22,6 +22,7 @@ const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
   onChange,
   children,
   aspectRatio,
+  tooltipI18nKey,
 }) => {
   const { t } = useTranslation();
 
@@ -131,7 +132,7 @@ const VinesImageEditor: React.FC<IVinesImageEditorProps> = ({
           </VinesUploader>
         </DialogContent>
       </Dialog>
-      <TooltipContent>{t('components.ui.image-editor.confirm-tooltip')}</TooltipContent>
+      <TooltipContent>{t(tooltipI18nKey || 'components.ui.image-editor.confirm-tooltip')}</TooltipContent>
     </Tooltip>
   );
 };
