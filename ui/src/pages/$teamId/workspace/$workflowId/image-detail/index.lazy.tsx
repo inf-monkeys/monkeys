@@ -265,15 +265,12 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
     <VinesFlowProvider workflowId={workflowId}>
       <ImageDetailLayout rightSidebar={RightSidebar}>
         {/* 主内容区域 */}
-        <main className="flex size-full flex-1 flex-col overflow-hidden rounded-xl border border-input bg-background shadow-sm dark:bg-[#111113] md:flex-row">
+        <main className="flex size-full flex-1 flex-col overflow-hidden rounded-xl border border-input bg-background pb-6 shadow-sm dark:bg-[#111113] md:flex-row">
           {/* 左侧图片展示区 */}
-          <div className="flex w-full flex-col items-center justify-start overflow-hidden rounded-bl-xl rounded-br-xl rounded-tl-xl bg-background px-6 dark:bg-[#111113] sm:w-full md:w-[70%]">
+          <div className="flex h-full w-full flex-col items-center overflow-hidden rounded-bl-xl rounded-br-xl rounded-tl-xl bg-background dark:bg-[#111113] sm:w-full md:w-[70%]">
             {imageUrl ? (
               <>
-                <div
-                  className="flex w-full items-center justify-center"
-                  style={{ maxHeight: '80vh', width: '100%', marginTop: '20px', overflow: 'auto' }}
-                >
+                <div className="flex w-full flex-1 items-center justify-center overflow-auto p-4">
                   <Image
                     src={imageUrl}
                     alt="详情图片"
@@ -282,7 +279,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                       display: 'block',
                       margin: 'auto',
                       maxWidth: '100%',
-                      maxHeight: '80vh',
+                      maxHeight: 'calc(100vh - 200px)',
                       width: 'auto',
                       height: 'auto',
                       objectFit: 'contain',
@@ -297,8 +294,8 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                     preview={false}
                   />
                 </div>
-                {/* 图片操作按钮 */}
-                <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-1 md:gap-2">
+                {/* 图片操作按钮 - 底部 */}
+                <div className="flex w-full items-center justify-center gap-2 bg-background py-3 dark:bg-[#111113] sm:gap-1 md:gap-2">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
