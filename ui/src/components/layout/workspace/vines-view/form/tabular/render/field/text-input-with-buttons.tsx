@@ -50,7 +50,7 @@ export const FieldTextInputWithButtons: React.FC<IFieldTextInputWithButtonsProps
     visible && (
       <TextWithButtons
         placeholder={placeholder}
-        value={(value as string) ?? '卡萨帝风格，空调，深灰色，高光泽，反射，光线，深邃，纯净，智能触摸屏，金属装饰条'}
+        value={(value as string) ?? ''}
         onChange={(value) => {
           onChange(value);
         }}
