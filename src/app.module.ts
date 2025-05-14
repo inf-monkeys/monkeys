@@ -16,6 +16,7 @@ import { BootstrapModule } from './modules/bootstrap/bootstrap.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { ExportModule } from './modules/export/export.module';
 import { PaymentModule } from './modules/payment/payment.module';
+import { TenantModule } from './modules/tenant/tenant.module';
 import { LLMToolsModule } from './modules/tools/llm/llm.module';
 import { MediaToolsModule } from './modules/tools/media/media.module';
 import { ToolsModule } from './modules/tools/tools.module';
@@ -51,6 +52,7 @@ import { PrometheusModule } from './prometheus/prometheus.module';
         app: 'Monkeys Server',
       },
     }),
+    TenantModule,
   ],
   controllers: [AppController],
   providers: [AppService],
