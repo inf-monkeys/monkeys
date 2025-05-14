@@ -1,10 +1,9 @@
 import { TenantStaticsAuthGuard } from '@/common/guards/tenant-statics.guard';
-import { Controller, Get, HttpCode, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpCode, Query, UseGuards } from '@nestjs/common';
 import axios from 'axios';
-import { Response } from 'express';
 import { TenantService } from './tenant.service';
 
-const BATCH_SIZE = 5000;
+const BATCH_SIZE = 1000;
 
 @Controller('tenant')
 @UseGuards(TenantStaticsAuthGuard)
@@ -23,12 +22,10 @@ export class TenantController {
 
   @Get('es')
   @HttpCode(200)
-  async findAllEs(@Res() res: Response) {
-    res.setHeader('content-type', 'text/event-stream');
-    res.status(200);
+  async findAllEs(@Query() from: number, @Query() size?: number) {
     const searchQuery = {
-      size: BATCH_SIZE, // Limit to 10 results
-      from: 0, // Start from the beginning (skip 0 results)
+      size: size || BATCH_SIZE, // Limit to 10 results
+      from: from || 0, // Start from the beginning (skip 0 results)
       query: {
         match_all: {}, // Example query: fetch all documents
       },
@@ -36,32 +33,32 @@ export class TenantController {
         { startTime: 'asc' }, // Sort by start time descending for consistent pagination
       ],
     };
-    while (true) {
-      try {
-        const result = await axios.post('http://elasticsearch-master:9200/conductor_workflow/_search?pretty', searchQuery, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
+    try {
+      const result = await axios.post('http://elasticsearch-master:9200/conductor_workflow/_search?pretty', searchQuery, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (result.status === 200) {
+        const data = result.data;
+        const hits: Record<string, any> = data.hits.hits!;
+        const finalResult = [];
+        hits.forEach((e) => {
+          try {
+            const output = JSON.parse(e.output);
+            if (output.success) {
+              finalResult.push(output);
+            }
+          } catch (e) {}
         });
-        // Check for successful response
-        if (result.status === 200) {
-          res.write(result.data);
-          if (result.data.length < BATCH_SIZE) {
-            searchQuery.from += BATCH_SIZE;
-            break;
-          }
-        } else {
-          // Handle non-200 status codes
-          res.write({ error: 'Unexpected response status', status: result.status });
-          res.end();
-          return;
-        }
-      } catch (error) {
-        // Handle any network or other errors
-        res.write(error);
-        res.end();
+        return finalResult;
+      } else {
+        // Handle non-200 status codes
+        return { error: 'Unexpected response status', status: result.status };
       }
+    } catch (error) {
+      // Handle any network or other errors
+      return error;
     }
-    res.end();
   }
 }
