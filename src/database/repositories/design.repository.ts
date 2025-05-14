@@ -10,7 +10,7 @@ import { DesignEntity } from '../entities/design/design';
 export class DesignRepository {
   constructor(
     @InjectRepository(DesignEntity)
-    public readonly designRepository: Repository<DesignEntity>,
+    private readonly designRepository: Repository<DesignEntity>,
   ) {}
 
   public async listAllDesignsByTeamId(teamId: string) {
