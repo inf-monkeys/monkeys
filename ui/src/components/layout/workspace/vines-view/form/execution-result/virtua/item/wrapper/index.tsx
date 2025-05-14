@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useMemoizedFn } from 'ahooks';
-import { Download, Ellipsis, Trash } from 'lucide-react';
+import { Download, Ellipsis, RotateCcw, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -11,18 +11,28 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 // import { useFlowStore } from '@/store/useFlowStore';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
+import { isString } from 'lodash';
+import { useSWRConfig } from 'swr';
+import { useVinesFlow } from '@/package/vines-flow';
+import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 
 interface IVirtuaExecutionResultGridWrapperProps {
   data: IVinesExecutionResultItem;
   children: React.ReactNode;
   src?: string;
+  event$: EventEmitter<void>;
 }
 
 export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGridWrapperProps> = ({
   data,
   children,
   src,
+  event$,
 }) => {
+  const { mutate } = useSWRConfig();
+
+  const { vines } = useVinesFlow();
+
   const { t } = useTranslation();
   // const workflowId = useFlowStore((s) => s.workflowId);
   // const { mutate } = useWorkflowExecutionOutputs(workflowId);
@@ -51,12 +61,49 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
     if (targetInstanceId) {
       toast.promise(deleteWorkflowExecution(targetInstanceId), {
         success: () => {
+          void mutate(
+            (key) => isString(key) && key.startsWith(`/api/workflow/executions/${vines.workflowId}/outputs`),
+          ).then(() => {
+            event$.emit?.();
+          });
           return t('common.delete.success');
         },
         error: t('common.delete.error'),
         loading: t('common.delete.loading'),
       });
     }
+  });
+
+  const handleRetry = useMemoizedFn(() => {
+    console.log(data.input);
+    const inputData = {};
+    for (const { id, data: value } of data.input) {
+      inputData[id] = value;
+    }
+    void mutate(
+      (key) => isString(key) && key.startsWith(`/api/workflow/executions/${vines.workflowId}/outputs`),
+      (data: any) => {
+        if (data?.data) {
+          data.data.unshift({
+            status: 'RUNNING',
+            output: [{ type: 'image', data: '' }],
+            render: { type: 'image', data: '', status: 'RUNNING' },
+          });
+          if (typeof data?.total === 'number') {
+            data.total += 1;
+          }
+        }
+        return data;
+      },
+      false,
+    );
+    vines.start({ inputData, onlyStart: true }).then((status) => {
+      if (status) {
+        toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
+        handleDelete();
+        event$.emit?.();
+      }
+    });
   });
 
   return (
@@ -66,6 +113,24 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
 
       {/* 操作按钮区域 - 提高z-index确保在最上层可点击 */}
       <div className="absolute right-4 top-4 z-30 flex gap-1 opacity-0 transition-opacity group-hover/vgi:opacity-100">
+        {data.status === 'FAILED' && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                className="dark:hover:bg-[--card-dark]/90 rounded bg-white/80 !p-1 shadow-sm hover:bg-white dark:bg-[--card-dark] [&_svg]:!size-3"
+                icon={<RotateCcw />}
+                variant="outline"
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation(); // 阻止事件冒泡，防止触发预览
+                  handleRetry();
+                }}
+              />
+            </TooltipTrigger>
+            <TooltipContent>{t('common.utils.retry')}</TooltipContent>
+          </Tooltip>
+        )}
+
         {src && (
           <Tooltip>
             <TooltipTrigger asChild>
