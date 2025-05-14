@@ -11,7 +11,7 @@ export class TenantService {
   }
   async findAllEs() {
     try {
-      const res = await axios.get('http://localhost:9200/conductor_workflow/_search?pretty&size=100000');
+      const res = await axios.get('http://localhost:9200/conductor_workflow/_search?pretty&size=10000');
 
       // Check for successful response
       if (res.status === 200) {
