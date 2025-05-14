@@ -1,5 +1,5 @@
 import { IRequest } from '@/common/typings/request';
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Head, Param, Patch, Post, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DesignService } from './design.service';
 import { CreateDesignDto } from './dto/create-design.dto';
@@ -56,5 +56,10 @@ export class DesignController {
   })
   async remove(@Param('id') id: string) {
     return await this.designService.remove(id);
+  }
+
+  @Head()
+  async hi() {
+    return 'Hi there';
   }
 }
