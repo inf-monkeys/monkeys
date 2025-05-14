@@ -8,37 +8,27 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { isBoolean } from 'lodash';
 import { Repository } from 'typeorm';
 
-const searchQuery = {
-  size: 10000, // Limit to 10 results
-  from: 0, // Start from the beginning (skip 0 results)
-  query: {
-    match_all: {}, // Example query: fetch all documents
-  },
-  sort: [
-    { startTime: 'asc' }, // Sort by start time descending for consistent pagination
-  ],
-};
-
 @Injectable()
 export class TenantService {
   constructor(
-
     @InjectRepository(WorkflowExecutionEntity)
     private readonly workflowExecutionRepository: Repository<WorkflowExecutionEntity>,
-  ) {
-  }
+  ) {}
   async findAll() {
     const totalExecutions = await this.workflowExecutionRepository.find();
 
-    const { results: rawCurrentExecutions } = await conductorClient.workflowResource.searchV21()
+    const { results: rawCurrentExecutions } = await conductorClient.workflowResource.searchV21();
 
-    const currentExecutions = rawCurrentExecutions.filter((e) => e.input?.__context?.appId === config.server.appId)
+    const currentExecutions = rawCurrentExecutions.filter((e) => e.input?.__context?.appId === config.server.appId);
 
-    const imageSuffix = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg']
+    const imageSuffix = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
 
     const output = {
-      image: currentExecutions.map((e) => Object.values(flattenObject(e.output))).flat().filter((value: string | number | null) => typeof value === 'string' && imageSuffix.some(suffix => value.endsWith(suffix))).length
-    }
+      image: currentExecutions
+        .map((e) => Object.values(flattenObject(e.output)))
+        .flat()
+        .filter((value: string | number | null) => typeof value === 'string' && imageSuffix.some((suffix) => value.endsWith(suffix))).length,
+    };
 
     return {
       workflow: {
@@ -55,17 +45,10 @@ export class TenantService {
             success: currentExecutions.filter((e) => e.status === WorkflowStatusEnum.COMPLETED).length,
             resultSuccess: currentExecutions.filter((e) => e.output && (isBoolean(e.output.success) ? e.output.success : true)).length,
             failed: currentExecutions.filter((e) => e.status === WorkflowStatusEnum.FAILED).length,
-            output
+            output,
           },
-        }
-      }
-    }
-  }
-  async findAllEs() {
-    // const result = await this.client.search()
-
-    const result = await conductorClient.workflowResource.searchV21()
-
-    return result
+        },
+      },
+    };
   }
 }
