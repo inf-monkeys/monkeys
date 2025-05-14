@@ -84,8 +84,6 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
 
   const containerWidth = (formContainerWidth - 48) * 0.6 - 16 - (isUseWorkSpace ? 140 : 0);
 
-  console.log(formContainerWidth);
-
   const positioner = usePositioner({
     width: containerWidth,
     columnGutter: 12,
@@ -105,7 +103,12 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     containerRef,
     items: data ?? [],
     overscanBy: 3,
-    render: useCallback(({ data: item }) => <ExecutionResultItem result={item} event$={event$} />, []),
+    render: useCallback(
+      ({ data: item, index }) => (
+        <ExecutionResultItem key={`${index}-${item.render.key}`} result={item} event$={event$} />
+      ),
+      [data],
+    ),
     itemKey: (item) => item.render.key,
     onRender: loadMore,
     itemHeightEstimate: 400,
