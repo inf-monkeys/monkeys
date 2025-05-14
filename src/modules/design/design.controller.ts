@@ -1,5 +1,6 @@
+import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { IRequest } from '@/common/typings/request';
-import { Body, Controller, Delete, Get, Head, Param, Patch, Post, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Head, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DesignService } from './design.service';
 import { CreateDesignDto } from './dto/create-design.dto';
@@ -7,7 +8,7 @@ import { UpdateDesignDto } from './dto/update-design.dto';
 
 @Controller('design')
 @ApiTags('DesignCRUD')
-// @UseGuards(CompatibleAuthGuard)
+@UseGuards(CompatibleAuthGuard)
 export class DesignController {
   constructor(private readonly designService: DesignService) {}
   @Post()
@@ -18,8 +19,8 @@ export class DesignController {
   async create(@Req() req: IRequest, @Body() createDesignDto: CreateDesignDto) {
     const { teamId } = req;
     return await this.designService.create({
-      teamId,
       ...createDesignDto,
+      teamId,
     });
   }
 
@@ -30,6 +31,7 @@ export class DesignController {
   })
   async findAll(@Req() req: IRequest) {
     const { teamId } = req;
+    console.log(teamId);
     return await this.designService.findAllbyTeamId(teamId);
   }
 
