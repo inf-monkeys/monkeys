@@ -1,5 +1,6 @@
 import React from 'react';
 
+import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { CirclePause } from 'lucide-react';
 
 import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
@@ -10,7 +11,12 @@ import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 import { VirtuaExecutionResultGridImageItem } from '../virtua/item/image';
 import { VirtuaExecutionResultGridWrapper } from '../virtua/item/wrapper';
 
-export const ExecutionResultItem: React.FC<IVinesExecutionResultItem> = (result) => {
+interface IExecutionResultItemProps {
+  result: IVinesExecutionResultItem;
+  event$: EventEmitter<void>;
+}
+
+export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({ result, event$ }) => {
   const { render } = result;
   const { type, data, status } = render;
 
@@ -43,7 +49,7 @@ export const ExecutionResultItem: React.FC<IVinesExecutionResultItem> = (result)
       // 使用包装组件来支持下载和删除功能
       return (
         <div className="relative overflow-hidden rounded-lg border border-input shadow-sm">
-          <VirtuaExecutionResultGridWrapper data={result} src={data as string}>
+          <VirtuaExecutionResultGridWrapper data={result} src={data as string} event$={event$}>
             <div className="h-full w-full" onClick={(e) => e.stopPropagation()}>
               <VirtuaExecutionResultGridImageItem src={data as string} alt={alt} />
             </div>
@@ -53,7 +59,7 @@ export const ExecutionResultItem: React.FC<IVinesExecutionResultItem> = (result)
     default:
       return (
         <div className="relative overflow-hidden rounded-lg border border-input shadow-sm">
-          <VirtuaExecutionResultGridWrapper data={result}>
+          <VirtuaExecutionResultGridWrapper data={result} event$={event$}>
             <div className="max-h-96 min-h-40 overflow-auto p-2">
               <VinesAbstractDataPreview data={data} className="h-full" />
             </div>
