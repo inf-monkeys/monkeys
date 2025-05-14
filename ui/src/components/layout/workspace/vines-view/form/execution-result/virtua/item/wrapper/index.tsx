@@ -1,6 +1,10 @@
 import React from 'react';
 
+import { useSWRConfig } from 'swr';
+
 import { useMemoizedFn } from 'ahooks';
+import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
+import { isString } from 'lodash';
 import { Download, Ellipsis, RotateCcw, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -9,12 +13,9 @@ import { deleteWorkflowExecution } from '@/apis/workflow/execution';
 import { VirtuaExecutionResultRawDataDialog } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/wrapper/raw-data-dialog.tsx';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useVinesFlow } from '@/package/vines-flow';
 // import { useFlowStore } from '@/store/useFlowStore';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
-import { isString } from 'lodash';
-import { useSWRConfig } from 'swr';
-import { useVinesFlow } from '@/package/vines-flow';
-import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 
 interface IVirtuaExecutionResultGridWrapperProps {
   data: IVinesExecutionResultItem;
