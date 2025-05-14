@@ -1,43 +1,54 @@
 import { conductorClient } from '@/common/conductor';
+import { config } from '@/common/config';
+import { WorkflowStatusEnum } from '@/common/dto/status.enum';
+import { flattenObject } from '@/common/utils';
+import { WorkflowExecutionEntity } from '@/database/entities/workflow/workflow-execution';
 import { Injectable } from '@nestjs/common';
-import axios from 'axios';
-
-const searchQuery = {
-  size: 10000, // Limit to 10 results
-  from: 0, // Start from the beginning (skip 0 results)
-  query: {
-    match_all: {}, // Example query: fetch all documents
-  },
-  sort: [
-    { startTime: 'asc' }, // Sort by start time descending for consistent pagination
-  ],
-};
+import { InjectRepository } from '@nestjs/typeorm';
+import { isBoolean } from 'lodash';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TenantService {
+  constructor(
+    @InjectRepository(WorkflowExecutionEntity)
+    private readonly workflowExecutionRepository: Repository<WorkflowExecutionEntity>,
+  ) {}
   async findAll() {
-    // const allData = await axios.get('http://localhost:9200/conductor/_count?pretty');
-    const data = await conductorClient.workflowResource.searchV21();
-    return data;
-  }
-  async findAllEs() {
-    try {
-      const res = await axios.post('http://elasticsearch-master:9200/conductor_workflow/_search?pretty', searchQuery, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+    const totalExecutions = await this.workflowExecutionRepository.find();
 
-      // Check for successful response
-      if (res.status === 200) {
-        return res.data;
-      } else {
-        // Handle non-200 status codes
-        return { error: 'Unexpected response status', status: res.status };
-      }
-    } catch (error) {
-      // Handle any network or other errors
-      return { error: 'Request failed', details: error.message };
-    }
+    const { results: rawCurrentExecutions } = await conductorClient.workflowResource.searchV21();
+
+    const currentExecutions = rawCurrentExecutions.filter((e) => e.input?.__context?.appId === config.server.appId);
+
+    const imageSuffix = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+
+    const output = {
+      image: currentExecutions
+        .map((e) => Object.values(flattenObject(e.output)))
+        .flat()
+        .filter((value: string | number | null) => typeof value === 'string' && imageSuffix.some((suffix) => value.endsWith(suffix))).length,
+    };
+
+    return {
+      workflow: {
+        execution: {
+          // 从数据库拿到的是所有的统计
+          total: {
+            count: totalExecutions.length,
+            success: totalExecutions.filter((e) => e.status === WorkflowStatusEnum.COMPLETED).length,
+            failed: totalExecutions.filter((e) => e.status === WorkflowStatusEnum.FAILED).length,
+          },
+          // 用户没有删除的（只有没有删除的可以查到输入输出内容）
+          current: {
+            count: currentExecutions.length,
+            success: currentExecutions.filter((e) => e.status === WorkflowStatusEnum.COMPLETED).length,
+            resultSuccess: currentExecutions.filter((e) => e.output && (isBoolean(e.output.success) ? e.output.success : true)).length,
+            failed: currentExecutions.filter((e) => e.status === WorkflowStatusEnum.FAILED).length,
+            output,
+          },
+        },
+      },
+    };
   }
 }
