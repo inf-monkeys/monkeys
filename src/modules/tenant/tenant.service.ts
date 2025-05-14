@@ -2,6 +2,17 @@ import { conductorClient } from '@/common/conductor';
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 
+const searchQuery = {
+  size: 10000, // Limit to 10 results
+  from: 0, // Start from the beginning (skip 0 results)
+  query: {
+    match_all: {}, // Example query: fetch all documents
+  },
+  sort: [
+    { startTime: 'asc' }, // Sort by start time descending for consistent pagination
+  ],
+};
+
 @Injectable()
 export class TenantService {
   async findAll() {
@@ -11,7 +22,11 @@ export class TenantService {
   }
   async findAllEs() {
     try {
-      const res = await axios.get('http://localhost:9200/conductor_workflow/_search?pretty&size=10000');
+      const res = await axios.post('http://elasticsearch-master:9200/conductor_workflow/_search?pretty', searchQuery, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
       // Check for successful response
       if (res.status === 200) {
