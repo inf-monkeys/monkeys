@@ -1,11 +1,11 @@
 import { TenantStaticsAuthGuard } from '@/common/guards/tenant-statics.guard';
-import { Controller, Get, Head, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { TenantService } from './tenant.service';
 
 @Controller('tenant')
 @UseGuards(TenantStaticsAuthGuard)
 export class TenantController {
-  constructor(private readonly tenantService: TenantService) {}
+  constructor(private readonly tenantService: TenantService) { }
 
   // @Post()
   // async create(@Body() createTenantDto: CreateTenantDto) {
@@ -17,9 +17,9 @@ export class TenantController {
     return await this.tenantService.findAll();
   }
 
-  @Head()
-  async isUp() {
-    return 'Tenant Controller is up';
+  @Get('es')
+  async findAllEs() {
+    return await this.tenantService.findAllEs();
   }
 
   // @Get(':id')
