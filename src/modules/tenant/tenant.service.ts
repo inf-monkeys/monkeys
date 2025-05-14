@@ -13,7 +13,8 @@ export class TenantService {
   constructor(
     @InjectRepository(WorkflowExecutionEntity)
     private readonly workflowExecutionRepository: Repository<WorkflowExecutionEntity>,
-  ) {}
+  ) { }
+
   async findAll() {
     const totalExecutions = await this.workflowExecutionRepository.find();
 
