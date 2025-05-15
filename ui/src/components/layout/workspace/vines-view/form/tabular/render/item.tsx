@@ -94,12 +94,14 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
                   {required && <span className="text-red-10">* </span>}
                   {getI18nContent(displayName)}
                 </FormLabel>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <HelpCircle size={18} className="cursor-pointer text-gray-400 dark:text-gray-500" />
-                  </TooltipTrigger>
-                  <TooltipContent>{tips || t('这是提示')}</TooltipContent>
-                </Tooltip>
+                {tips && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle size={18} className="cursor-pointer text-gray-400 dark:text-gray-500" />
+                    </TooltipTrigger>
+                    <TooltipContent>{tips}</TooltipContent>
+                  </Tooltip>
+                )}
               </div>
               {enableReset && (
                 <Button
