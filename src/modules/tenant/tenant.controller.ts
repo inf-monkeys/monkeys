@@ -23,9 +23,4 @@ export class TenantController {
       data: result,
     });
   }
-
-  // @Get()
-  // async getConfig() {
-  //   throw new Error(config.tenant.bearer || 'bearer not exist');
-  // }
 }
