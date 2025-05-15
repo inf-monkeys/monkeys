@@ -12,6 +12,7 @@ export interface IVinesUploaderProps {
   uppy$?: EventEmitter<Uppy<Meta, Record<string, never>>>;
 
   files?: string[];
+  originalFiles?: string[]; // 添加原始输入图片属性
   onChange?: (urls: string[], files: UppyFile<Meta, Record<string, never>>[]) => void;
 
   maxSize?: number;

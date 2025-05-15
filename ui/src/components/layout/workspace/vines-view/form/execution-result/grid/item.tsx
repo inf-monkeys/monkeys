@@ -51,7 +51,7 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({ resul
         <div className="relative overflow-hidden rounded-lg border border-input shadow-sm">
           <VirtuaExecutionResultGridWrapper data={result} src={data as string} event$={event$}>
             <div className="h-full w-full" onClick={(e) => e.stopPropagation()}>
-              <VirtuaExecutionResultGridImageItem src={data as string} alt={alt} />
+              <VirtuaExecutionResultGridImageItem src={data as string} alt={alt} instanceId={result.instanceId} />
             </div>
           </VirtuaExecutionResultGridWrapper>
         </div>
