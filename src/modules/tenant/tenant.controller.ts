@@ -27,6 +27,6 @@ export class TenantController {
 
   @Get()
   async getConfig() {
-    return config.tenant.bearer;
+    throw new Error(config.tenant.bearer);
   }
 }
