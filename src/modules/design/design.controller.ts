@@ -1,12 +1,12 @@
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
 import { IRequest } from '@/common/typings/request';
-import { Body, Controller, Delete, Get, Head, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DesignService } from './design.service';
 import { CreateDesignDto } from './dto/create-design.dto';
 import { UpdateDesignDto } from './dto/update-design.dto';
 
-@Controller('design')
+@Controller('designs')
 @ApiTags('DesignCRUD')
 @UseGuards(CompatibleAuthGuard)
 export class DesignController {
@@ -58,10 +58,5 @@ export class DesignController {
   })
   async remove(@Param('id') id: string) {
     return await this.designService.remove(id);
-  }
-
-  @Head()
-  async hi() {
-    return 'Hi there';
   }
 }
