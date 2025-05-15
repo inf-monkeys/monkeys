@@ -16,7 +16,7 @@ export class TenantController {
     });
   }
 
-  @Get()
+  @Get('range')
   async findBetween(@Query() startTime: number, @Query() endTime: number) {
     const result = await this.tenantService.findBetween(startTime, endTime);
     return new SuccessResponse({
