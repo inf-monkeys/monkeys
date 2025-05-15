@@ -4,29 +4,31 @@ import { createLazyFileRoute, useParams, useRouter } from '@tanstack/react-route
 
 import { useEventEmitter, useMemoizedFn } from 'ahooks';
 import {
-    ChevronDown,
-    ChevronUp,
-    Download,
-    FlipHorizontal,
-    FlipVertical,
-    RotateCcw,
-    RotateCw,
-    Trash,
-    X,
-    ZoomIn,
-    ZoomOut,
+  ChevronDown,
+  ChevronUp,
+  Download,
+  FlipHorizontal,
+  FlipVertical,
+  RotateCcw,
+  RotateCw,
+  Trash,
+  X,
+  ZoomIn,
+  ZoomOut,
 } from 'lucide-react';
 import Image from 'rc-image';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { deleteWorkflowExecution } from '@/apis/workflow/execution';
+import { deleteWorkflowExecution, getWorkflowExecution } from '@/apis/workflow/execution';
 import ImageDetailLayout from '@/components/layout/image-detail-layout';
 import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
+import useUrlState from '@/hooks/use-url-state.ts';
 import { useVinesFlow } from '@/package/vines-flow';
+import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
 
 import 'rc-image/assets/index.css';
 
@@ -34,13 +36,15 @@ interface IImageDetailProps {}
 
 interface TabularRenderWrapperProps {
   height?: number;
+  execution?: VinesWorkflowExecution;
 }
 
 // TabularRender包装组件，用于获取工作流输入参数
-const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height }) => {
+const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, execution }) => {
   const { vines } = useVinesFlow();
   const tabular$ = useEventEmitter<TTabularEvent>();
   const [windowHeight, setWindowHeight] = React.useState(window.innerHeight);
+  const [processedInputs, setProcessedInputs] = React.useState<any[]>([]);
 
   // 监听窗口大小变化
   React.useEffect(() => {
@@ -61,9 +65,35 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height }) =
   // 计算动态高度，确保表单能够适应窗口高度
   const dynamicHeight = height || Math.max(1000, windowHeight - 150);
 
+  // 处理输入字段和原始图片
+  React.useEffect(() => {
+    if (!inputs || inputs.length === 0) {
+      console.log('TabularRenderWrapper: 没有输入字段可用');
+      setProcessedInputs([]);
+      return;
+    }
+
+    // 深拷贝inputs
+    const newInputs = execution
+      ? inputs.map((input) => {
+          return {
+            ...input,
+            default: execution.input?.[input.name] ?? input.default,
+          };
+        })
+      : [];
+    console.log('TabularRenderWrapper: 表单输入字段:', newInputs);
+    setProcessedInputs(newInputs);
+  }, [inputs, execution]);
+
+  // 如果没有处理好的输入字段，显示加载状态
+  if (processedInputs.length === 0 && inputs && inputs.length > 0) {
+    return <div className="flex h-full w-full items-center justify-center">处理表单数据中...</div>;
+  }
+
   return (
     <TabularRender
-      inputs={inputs}
+      inputs={processedInputs}
       height={dynamicHeight}
       event$={tabular$}
       workflowId={workflowId}
@@ -81,14 +111,36 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const [imageFlipY, setImageFlipY] = useState(false);
   const [imageScale, setImageScale] = useState(1);
 
-  // 从路由搜索参数中获取图片信息
-  const searchParams = new URLSearchParams(window.location.search);
-  const imageUrl = searchParams.get('imageUrl') || '';
-  const instanceId = searchParams.get('instanceId') || '';
+  const [urlState] = useUrlState({
+    imageUrl: '',
+    instanceId: '',
+  });
+
+  const { imageUrl, instanceId } = urlState;
+
+  const [execution, setExecution] = useState<VinesWorkflowExecution | undefined>();
+
+  // // 从路由搜索参数中获取图片信息
+  // const searchParams = new URLSearchParams(window.location.search);
+  // const imageUrl = searchParams.get('imageUrl') || '';
+  // const instanceId = searchParams.get('instanceId') || '';
+
+  // // 调试信息
+  // console.log('图片详情页面 - 初始化参数:', {
+  //   imageUrl,
+  //   instanceId,
+  //   search: window.location.search,
+  //   pathname: window.location.pathname,
+  // });
 
   const { workflowId } = useParams({ from: '/$teamId/workspace/$workflowId/image-detail/' });
 
-  // 上一张/下一张图片功能已禁用，不再需要获取图片列表
+  useEffect(() => {
+    getWorkflowExecution(instanceId).then((executionResult) => {
+      if (!executionResult) return;
+      setExecution(executionResult);
+    });
+  }, [urlState]);
 
   // 监听图片状态变化，更新图片样式
   useEffect(() => {
@@ -157,12 +209,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
       <div className="mb-6">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              icon={<Trash />}
-              variant="outline"
-              size="small"
-              onClick={handleDeleteImage}
-            />
+            <Button icon={<Trash />} variant="outline" size="small" onClick={handleDeleteImage} />
           </TooltipTrigger>
           <TooltipContent>{t('workspace.image-detail.delete', '删除')}</TooltipContent>
         </Tooltip>
@@ -332,7 +379,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
           {/* 中间区域，渲染表单 */}
           <div className="flex h-full flex-1 flex-col overflow-auto rounded-r-xl rounded-tr-xl bg-background px-6 pt-6 dark:bg-[#111113] md:border-l md:border-input">
             <div className="h-full flex-1">
-              <TabularRenderWrapper height={window.innerHeight - 150} />
+              <TabularRenderWrapper height={window.innerHeight - 150} execution={execution} />
             </div>
           </div>
         </main>

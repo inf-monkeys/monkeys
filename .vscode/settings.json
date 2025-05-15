@@ -13,7 +13,7 @@
   
   // 保存时使用ESLint修复问题
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true,
+    "source.fixAll.eslint": "explicit",
     "source.organizeImports": "explicit"
   },
   
@@ -25,7 +25,7 @@
     "editor.defaultFormatter": "dbaeumer.vscode-eslint"
   },
   "[typescriptreact]": {
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    "editor.defaultFormatter": "vscode.typescript-language-features"
   },
   
   // 保留其他非格式化相关设置

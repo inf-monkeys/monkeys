@@ -57,6 +57,7 @@ interface ITabularRenderProps {
   workflowId?: string;
 
   extra?: Record<string, any>;
+  originalInputImages?: string[]; // 添加原始输入图片属性
 }
 
 export const TabularRender: React.FC<ITabularRenderProps> = ({
@@ -79,6 +80,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
   workflowId,
 
   extra = {},
+  originalInputImages = [],
 }) => {
   const { t } = useTranslation();
 
@@ -285,6 +287,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
                 defValues={defValues}
                 miniMode={miniMode}
                 extra={extra}
+                originalInputImages={originalInputImages}
                 linkage={linkage}
                 setLinkage={setLinkage}
               />
@@ -306,6 +309,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
                         defValues={defValues}
                         miniMode={miniMode}
                         extra={extra}
+                        originalInputImages={originalInputImages}
                         linkage={linkage}
                         setLinkage={setLinkage}
                       />
