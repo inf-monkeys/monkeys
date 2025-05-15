@@ -54,7 +54,7 @@ export const BrushBar: React.FC<IBrushBarProps> = ({
 
   return (
     <>
-      <div className="absolute bottom-10 left-1 flex flex-col items-center gap-1 rounded border border-input bg-background p-1 opacity-85 transition-opacity hover:opacity-100">
+      <div className="absolute bottom-10 left-1 flex flex-col items-center gap-1 rounded border border-input bg-dialog p-1 opacity-85 transition-opacity hover:opacity-100">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -163,7 +163,7 @@ export const BrushBar: React.FC<IBrushBarProps> = ({
         </Tooltip>
       </div>
       <div
-        className="absolute bottom-1 left-1 flex items-center justify-center gap-2 rounded border border-input bg-background p-2 opacity-85 transition-opacity hover:opacity-100"
+        className="absolute bottom-1 left-1 flex items-center justify-center gap-2 rounded border border-input bg-dialog p-2 opacity-85 transition-opacity hover:opacity-100"
         onFocus={() => isUseNormalBrush && setAuxiliaryBrushSizeVisible(true)}
         onBlur={() => setAuxiliaryBrushSizeVisible(false)}
       >

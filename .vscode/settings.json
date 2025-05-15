@@ -4,14 +4,31 @@
   "prettier.printWidth": 120,
   "editor.snippetSuggestions": "top",
   "emmet.showSuggestionsAsSnippets": true,
-  "editor.defaultFormatter": "vscode.typescript-language-features",
-  // "editor.codeActionsOnSave": {
-  //   "source.fixAll": true
-  // },
-  "eslint.validate": ["javascript", "typescript"],
-  "[typescript]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
+  
+  // 禁用默认格式化器，使用ESLint替代
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  
+  // 启用ESLint验证的文件类型
+  "eslint.validate": ["javascript", "typescript", "typescriptreact"],
+  
+  // 保存时使用ESLint修复问题
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+    "source.organizeImports": "explicit"
   },
+  
+  // 为不同文件类型指定ESLint为格式化器
+  "[javascript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  
+  // 保留其他非格式化相关设置
   "cSpell.words": ["varchar"],
   "i18n-ally.localesPaths": ["src/locales", "src/modules/i18n", "src/modules/messages"],
   "[json]": {
@@ -19,10 +36,7 @@
   },
   "editor.bracketPairColorization.enabled": true,
   "editor.guides.bracketPairs": "active",
-  "editor.codeActionsOnSave": {
-    "source.organizeImports": "explicit"
-  },
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  
+  // 禁用Prettier（如果已安装）
+  "prettier.enable": false
 }
