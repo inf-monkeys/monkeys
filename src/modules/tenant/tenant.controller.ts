@@ -27,6 +27,6 @@ export class TenantController {
 
   @Get()
   async getConfig() {
-    throw new Error(config.tenant.bearer);
+    throw new Error(config.tenant.bearer || 'bearer not exist');
   }
 }
