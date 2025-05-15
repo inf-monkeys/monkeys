@@ -5,11 +5,10 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 export class TenantStatisticsAuthGuard implements CanActivate {
   constructor() {}
   async canActivate(context: ExecutionContext) {
-    // Skip if config.tenantStatistics.bearerToken is not configured in config.yaml
+    // Skip if config.tenant.bearer is not configured in config.yaml
     const configToken = config.tenant.bearer;
     if (!configToken) {
       throw new Error('Tenant Bearer Token Not Configured');
-      return false;
     }
 
     // Get Bearer Token from request
