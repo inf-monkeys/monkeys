@@ -97,6 +97,117 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
 
   const lastPropFiles = useRef<UppyFile<Meta, Record<string, never>>[]>([]);
   useEffect(() => {
+    // 如果有原始输入图片，优先使用它们
+    const originalFiles = props.originalFiles || [];
+    console.log('VinesUploader-useEffect: props.originalFiles =', originalFiles);
+    console.log('VinesUploader-useEffect: props =', props);
+
+    // 如果没有原始输入图片，但有常规文件，也尝试使用它们
+    const filesToUse = originalFiles.length > 0 ? originalFiles : props.files || [];
+
+    if (filesToUse.length > 0) {
+      console.log('VinesUploader: 使用图片:', filesToUse, '是原始输入图片:', originalFiles.length > 0);
+
+      try {
+        // 清除现有文件
+        console.log('VinesUploader: 清除现有文件, 当前文件数:', uppy.getFiles().length);
+        uppy.getFiles().forEach(file => {
+          console.log('VinesUploader: 移除文件:', file.id);
+          uppy.removeFile(file.id);
+        });
+
+        // 预处理URL，确保它们是有效的
+        const validUrls = filesToUse.filter(url => {
+          // 简化URL验证，只要是字符串就接受
+          if (typeof url !== 'string') {
+            console.warn('VinesUploader: 跳过非字符串URL:', url);
+            return false;
+          }
+
+          // 尝试使用更宽松的验证
+          const isValid = url.startsWith('http') || url.startsWith('/') ||
+            url.includes('.jpg') || url.includes('.png') ||
+            url.includes('/monkeys/');
+
+          if (!isValid) {
+            console.warn('VinesUploader: URL格式可能不正确:', url);
+          }
+
+          return true; // 即使格式可能不正确，也尝试使用
+        });
+
+        if (validUrls.length === 0) {
+          console.warn('VinesUploader: 没有有效的图片URL');
+          // 如果没有有效URL，尝试使用第一个URL，即使它不符合我们的检查标准
+          if (filesToUse.length > 0 && typeof filesToUse[0] === 'string') {
+            validUrls.push(filesToUse[0]);
+            console.log('VinesUploader: 强制使用第一个URL:', filesToUse[0]);
+          }
+        }
+
+        const convertFiles = validUrls
+          .map((url, index) => {
+            console.log(`VinesUploader: 处理URL[${index}]:`, url);
+            try {
+              // 确保URL格式正确
+              let processedUrl = url;
+              if (!url.startsWith('http') && !url.startsWith('/')) {
+                processedUrl = 'https://' + url;
+                console.log('VinesUploader: 修正URL格式:', processedUrl);
+              }
+
+              const fileName = getFileNameByOssUrl(processedUrl) || `image_${index}.jpg`;
+              console.log('VinesUploader: 文件名:', fileName);
+
+              // 创建一个空文件，但带有元数据
+              const file = new File([], fileName, { type: 'text/plain' }) as File & {
+                meta?: { remoteUrl: string; isOriginal?: boolean };
+              };
+              file.meta = {
+                remoteUrl: processedUrl,
+                isOriginal: true // 始终标记为原始输入图片，确保优先使用remoteUrl
+              };
+
+              const convertedFile = handleConvertFile(file);
+              console.log('VinesUploader: 转换后的文件:', convertedFile);
+              return convertedFile;
+            } catch (error) {
+              console.error('VinesUploader: 处理URL时出错:', url, error);
+              return null;
+            }
+          })
+          .filter(Boolean) as any[];
+
+        console.log('VinesUploader: 转换后的文件数组:', convertFiles);
+
+        // 添加图片
+        if (convertFiles.length > 0) {
+          console.log('VinesUploader: 添加文件到uppy');
+          uppy.addFiles(convertFiles);
+          lastPropFiles.current = uppy.getFiles();
+          console.log('VinesUploader: 添加后的文件数:', uppy.getFiles().length);
+
+          // 触发onChange回调，确保表单值更新
+          if (onChange) {
+            console.log('VinesUploader: 触发onChange回调');
+            // 使用原始URL而不是可能被修改的URL
+            onChange(
+              validUrls,
+              uppy.getFiles()
+            );
+          }
+        } else {
+          console.log('VinesUploader: 没有有效的文件可添加');
+        }
+
+        uppy$?.emit(uppy);
+      } catch (error) {
+        console.error('VinesUploader: 处理图片时出错:', error);
+      }
+      return;
+    }
+
+    // 原有的文件处理逻辑
     const currentFileUrls = latestFiles.current.map((it) => it.uploadURL || it.meta.remoteUrl);
     const propsFiles = (props.files || []).filter((it) => !currentFileUrls.includes(it));
     if (propsFiles.length > 0) {
@@ -125,7 +236,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
     }
 
     uppy$?.emit(uppy);
-  }, [props.files]);
+  }, [props.files, props.originalFiles]);
 
   const [isHovering, setIsHovering] = useState(false);
   useDrop(ref, {
@@ -189,9 +300,9 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                       <p className="text-sm text-muted-foreground text-opacity-85">
                         {accept
                           ? t('components.ui.updater.hint.accept.custom', {
-                              acceptString: accept.map((it) => `.${it}`).join('、'),
-                              count: max,
-                            })
+                            acceptString: accept.map((it) => `.${it}`).join('、'),
+                            count: max,
+                          })
                           : t('components.ui.updater.hint.accept.any')}
                         {t('components.ui.updater.hint.max-size', { maxSize })}
                       </p>
