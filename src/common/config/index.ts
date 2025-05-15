@@ -243,7 +243,7 @@ export interface AwsConfig {
   };
 }
 
-export interface TenantStaticsConfig {
+export interface TenantStatsConfig {
   bearerToken: string;
 }
 
@@ -263,7 +263,7 @@ export interface Config {
   paymentServer: PaymentServerConfig;
   oneapi: OneApiConfig;
   aws: AwsConfig;
-  tenantStatics: TenantStaticsConfig;
+  tenantStats: TenantStatsConfig;
 }
 
 const port = readConfig('server.port', 3000);
@@ -458,8 +458,8 @@ When answer to user:
   aws: {
     translate: readConfig('aws.translate', {}),
   },
-  tenantStatics: {
-    bearerToken: readConfig('tenantStatics.bearerToken', ''),
+  tenantStats: {
+    bearerToken: readConfig('tenantStats.bearerToken', ''),
   },
 };
 

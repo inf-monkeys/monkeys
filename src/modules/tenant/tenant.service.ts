@@ -52,4 +52,31 @@ export class TenantService {
       },
     };
   }
+
+  async findBetween(startTime: number, endTime: number) {
+    const { results: rawCurrentExecutions } = await conductorClient.workflowResource.searchV21(500, undefined, undefined, undefined, undefined);
+    const currentExecutions = rawCurrentExecutions.filter((e) => e.input?.__context?.appId === config.server.appId);
+
+    const imageSuffix = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+    const output = {
+      image: currentExecutions
+        .map((e) => Object.values(flattenObject(e.output)))
+        .flat()
+        .filter((value: string | number | null) => typeof value === 'string' && imageSuffix.some((suffix) => value.endsWith(suffix))).length,
+    };
+    return {
+      workflow: {
+        execution: {
+          // 用户没有删除的（只有没有删除的可以查到输入输出内容）
+          current: {
+            count: currentExecutions.length,
+            success: currentExecutions.filter((e) => e.status === WorkflowStatusEnum.COMPLETED).length,
+            resultSuccess: currentExecutions.filter((e) => e.output && (isBoolean(e.output.success) ? e.output.success : true)).length,
+            failed: currentExecutions.filter((e) => e.status === WorkflowStatusEnum.FAILED).length,
+            output,
+          },
+        },
+      },
+    };
+  }
 }
