@@ -55,9 +55,9 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
 
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = useMemoizedFn((inputData) => {
+  const handleSubmit = useMemoizedFn(async (inputData) => {
     setLoading(true);
-    void mutate(
+    void (await mutate(
       (key) => isString(key) && key.startsWith(`/api/workflow/executions/${vines.workflowId}/outputs`),
       (data: any) => {
         if (data?.data) {
@@ -70,11 +70,11 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
             data.total += 1;
           }
         }
-        event$.emit?.();
         return data;
       },
       false,
-    );
+    ));
+    event$.emit?.();
     vines
       .start({ inputData, onlyStart: true })
       .then((status) => {
@@ -82,6 +82,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
           toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
           setHistoryVisible(true);
           setLoading(false);
+          event$.emit?.();
         }
       })
       .finally(() => setLoading(false));

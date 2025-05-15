@@ -1,5 +1,6 @@
 import React, { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
 
+import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { useInfiniteLoader, useMasonry, useResizeObserver } from 'masonic';
 
 import { useWorkflowExecutionList } from '@/apis/workflow/execution';
@@ -26,6 +27,8 @@ interface IExecutionResultGridProps extends React.ComponentPropsWithoutRef<'div'
 
   data: IVinesExecutionResultItem[];
   setData: Dispatch<SetStateAction<IVinesExecutionResultItem[]>>;
+
+  event$: EventEmitter<void>;
 }
 
 export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
@@ -35,6 +38,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   setPage,
   data,
   setData,
+  event$,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -80,8 +84,6 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
 
   const containerWidth = (formContainerWidth - 48) * 0.6 - 16 - (isUseWorkSpace ? 140 : 0);
 
-  console.log(formContainerWidth);
-
   const positioner = usePositioner({
     width: containerWidth,
     columnGutter: 12,
@@ -101,7 +103,12 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     containerRef,
     items: data ?? [],
     overscanBy: 3,
-    render: useCallback(({ data: item }) => <ExecutionResultItem {...item} />, []),
+    render: useCallback(
+      ({ data: item, index }) => (
+        <ExecutionResultItem key={`${index}-${item.render.key}`} result={item} event$={event$} />
+      ),
+      [data],
+    ),
     itemKey: (item) => item.render.key,
     onRender: loadMore,
     itemHeightEstimate: 400,
@@ -110,7 +117,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
 
   return (
     <ScrollArea
-      className={cn('-pr-0.5 dark:bg-card-dark bg-card-light z-20 mr-0.5 [&>[data-radix-scroll-area-viewport]]:p-2')}
+      className={cn('-pr-0.5 z-20 mr-0.5 bg-card-light dark:bg-card-dark [&>[data-radix-scroll-area-viewport]]:p-2')}
       ref={scrollRef}
       style={{ height }}
       disabledOverflowMask

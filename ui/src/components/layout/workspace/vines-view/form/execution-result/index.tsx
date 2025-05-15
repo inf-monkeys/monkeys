@@ -91,7 +91,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   });
 
   return (
-    <Card className={cn('dark:bg-card-dark bg-card-light relative', className)}>
+    <Card className={cn('relative bg-card-light dark:bg-card-dark', className)}>
       <CardContent className="p-0">
         <ExecutionResultGrid
           workflowId={workflowId}
@@ -100,6 +100,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
           setPage={setCurrentPage}
           data={resultList}
           setData={setResultList}
+          event$={event$}
         />
         <AnimatePresence mode="popLayout">
           {firstPageExecutionListIsLoading ? (
