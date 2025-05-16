@@ -6,17 +6,20 @@ import { useEventEmitter, useMemoizedFn } from 'ahooks';
 import {
   ChevronDown,
   ChevronUp,
+  Copy,
   Download,
   FlipHorizontal,
   FlipVertical,
   RotateCcw,
   RotateCw,
+  Sparkles,
   Trash,
   X,
   ZoomIn,
   ZoomOut,
 } from 'lucide-react';
 import Image from 'rc-image';
+import { useFormContext } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -26,18 +29,22 @@ import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vine
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
+import { useCopy } from '@/hooks/use-copy';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
 
 import 'rc-image/assets/index.css';
 
-interface IImageDetailProps {}
+interface IImageDetailProps { }
 
 interface TabularRenderWrapperProps {
   height?: number;
   execution?: VinesWorkflowExecution;
 }
+
+// 扩展 TTabularEvent 类型
+type ExtendedTabularEvent = TTabularEvent | { type: 'form-change'; data: any };
 
 // TabularRender包装组件，用于获取工作流输入参数
 const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, execution }) => {
@@ -45,6 +52,8 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
   const tabular$ = useEventEmitter<TTabularEvent>();
   const [windowHeight, setWindowHeight] = React.useState(window.innerHeight);
   const [processedInputs, setProcessedInputs] = React.useState<any[]>([]);
+  const [showInputDiffBanner, setShowInputDiffBanner] = React.useState(false);
+  const [originalInputValues, setOriginalInputValues] = React.useState<Record<string, any>>({});
 
   // 监听窗口大小变化
   React.useEffect(() => {
@@ -73,18 +82,44 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
       return;
     }
 
-    // 深拷贝inputs
     const newInputs = execution
       ? inputs.map((input) => {
-          return {
-            ...input,
-            default: execution.input?.[input.name] ?? input.default,
-          };
-        })
+        return {
+          ...input,
+          default: execution.input?.[input.name] ?? input.default,
+        };
+      })
       : [];
     console.log('TabularRenderWrapper: 表单输入字段:', newInputs);
     setProcessedInputs(newInputs);
+
+    // 保存原始输入值
+    if (execution?.input) {
+      setOriginalInputValues(execution.input);
+    }
   }, [inputs, execution]);
+
+  // 监听表单值变化
+  useEffect(() => {
+    if (!execution?.input || !processedInputs.length) return;
+
+    const currentValues = processedInputs.reduce(
+      (acc, input) => {
+        acc[input.name] = input.default;
+        return acc;
+      },
+      {} as Record<string, any>,
+    );
+
+    // 比较当前值与原始值
+    const hasDiff = Object.keys(currentValues).some((key) => {
+      const originalValue = originalInputValues[key];
+      const currentValue = currentValues[key];
+      return JSON.stringify(originalValue) !== JSON.stringify(currentValue);
+    });
+
+    setShowInputDiffBanner(hasDiff);
+  }, [processedInputs, originalInputValues]);
 
   // 如果没有处理好的输入字段，显示加载状态
   if (processedInputs.length === 0 && inputs && inputs.length > 0) {
@@ -92,13 +127,96 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
   }
 
   return (
-    <TabularRender
-      inputs={processedInputs}
-      height={dynamicHeight}
-      event$={tabular$}
-      workflowId={workflowId}
-      scrollAreaClassName=""
-    />
+    <div style={{ position: 'relative', height: '100%' }}>
+      {showInputDiffBanner && (
+        <div className="absolute left-0 right-0 top-0 z-10 border-b border-yellow-200 bg-yellow-100 p-3 dark:border-yellow-800 dark:bg-yellow-900/30">
+          <p className="text-sm text-yellow-800 dark:text-yellow-200">
+            新的输入与原有输入不一致，可能会导致结果相差较大
+          </p>
+        </div>
+      )}
+      <TabularRender
+        inputs={processedInputs}
+        height={dynamicHeight}
+        event$={tabular$}
+        workflowId={workflowId}
+        scrollAreaClassName=""
+      >
+        <div
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 20,
+            background: 'var(--background)',
+            padding: '10px 0',
+          }}
+        >
+          <TabularFooterButtons processedInputs={processedInputs} />
+        </div>
+      </TabularRender>
+    </div>
+  );
+};
+
+interface TabularFooterButtonsProps {
+  processedInputs: any[];
+}
+
+const TabularFooterButtons: React.FC<TabularFooterButtonsProps> = ({ processedInputs }) => {
+  const { t } = useTranslation();
+  const { copy } = useCopy();
+  const { vines } = useVinesFlow();
+  const [loading, setLoading] = useState(false);
+  const form = useFormContext();
+
+  // 生成按钮通过事件触发提交
+  const handleGenerate = () => {
+    form.handleSubmit(async (values) => {
+      setLoading(true);
+      try {
+        await vines.start({ inputData: values, onlyStart: true });
+        toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
+      } catch (error) {
+        console.error('生成失败:', error);
+        toast.error(t('workspace.pre-view.actuator.execution.error'));
+      } finally {
+        setLoading(false);
+      }
+    })();
+  };
+
+  // 复制当前表单参数
+  const handleCopy = () => {
+    const values = form.getValues();
+    const data = processedInputs.map((input) => ({
+      id: input.name,
+      displayName: input.displayName,
+      description: input.description,
+      data: values[input.name],
+      type: input.type,
+    }));
+    copy(JSON.stringify({ type: 'input-parameters', data }));
+    toast.success(t('workspace.pre-view.actuator.detail.form-render.actions.copy-input-success'));
+  };
+
+  return (
+    <div className="z-10 flex w-full items-center justify-center gap-2 bg-background py-3 dark:bg-[#111113] sm:gap-1 md:gap-2">
+      <Button icon={<Copy />} variant="outline" size="small" onClick={handleCopy}>
+        {t('workspace.pre-view.actuator.detail.form-render.actions.copy-input', '复制输入')}
+      </Button>
+      <Button
+        icon={<Sparkles className="fill-white" />}
+        variant="solid"
+        size="small"
+        className="text-base"
+        onClick={handleGenerate}
+        loading={loading}
+      >
+        {t('workspace.pre-view.actuator.execution.label', '生成')}
+      </Button>
+    </div>
   );
 };
 
@@ -120,27 +238,15 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 
   const [execution, setExecution] = useState<VinesWorkflowExecution | undefined>();
 
-  // // 从路由搜索参数中获取图片信息
-  // const searchParams = new URLSearchParams(window.location.search);
-  // const imageUrl = searchParams.get('imageUrl') || '';
-  // const instanceId = searchParams.get('instanceId') || '';
-
-  // // 调试信息
-  // console.log('图片详情页面 - 初始化参数:', {
-  //   imageUrl,
-  //   instanceId,
-  //   search: window.location.search,
-  //   pathname: window.location.pathname,
-  // });
-
   const { workflowId } = useParams({ from: '/$teamId/workspace/$workflowId/image-detail/' });
 
   useEffect(() => {
+    if (!instanceId) return;
     getWorkflowExecution(instanceId).then((executionResult) => {
       if (!executionResult) return;
       setExecution(executionResult);
     });
-  }, [urlState]);
+  }, [instanceId]);
 
   // 监听图片状态变化，更新图片样式
   useEffect(() => {
@@ -162,7 +268,6 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 
   // 处理删除图片
   const handleDeleteImage = useMemoizedFn(() => {
-    // 如果有instanceId，则调用API删除
     if (instanceId) {
       toast.promise(deleteWorkflowExecution(instanceId), {
         success: () => {
@@ -251,7 +356,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                   />
                 </div>
                 {/* 图片操作按钮 - 底部 */}
-                <div className="flex w-full items-center justify-center gap-2 bg-background py-3 dark:bg-[#111113] sm:gap-1 md:gap-2">
+                <div className="flex w-full items-center justify-center gap-2 bg-background py-5 dark:bg-[#111113] sm:gap-1 md:gap-2">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
@@ -377,10 +482,13 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
           </div>
 
           {/* 中间区域，渲染表单 */}
-          <div className="flex h-full flex-1 flex-col overflow-auto rounded-r-xl rounded-tr-xl bg-background px-6 pt-6 dark:bg-[#111113] md:border-l md:border-input">
-            <div className="h-full flex-1">
-              <TabularRenderWrapper height={window.innerHeight - 150} execution={execution} />
+          <div className="relative flex h-full flex-1 flex-col rounded-r-xl rounded-tr-xl bg-background px-6 pt-6 dark:bg-[#111113] md:border-l md:border-input">
+            {/* 内容区，底部预留按钮高度 */}
+            <div className="flex-1 overflow-auto">
+              <TabularRenderWrapper height={window.innerHeight - 120} execution={execution} />
             </div>
+            {/* 按钮条 */}
+            <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 20, background: 'var(--background)' }} className="dark:bg-[#111113]"></div>
           </div>
         </main>
       </ImageDetailLayout>
