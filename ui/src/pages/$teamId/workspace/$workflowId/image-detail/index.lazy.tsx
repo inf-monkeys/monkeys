@@ -356,7 +356,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                   />
                 </div>
                 {/* 图片操作按钮 - 底部 */}
-                <div className="flex w-full items-center justify-center gap-2 bg-background py-3 dark:bg-[#111113] sm:gap-1 md:gap-2">
+                <div className="flex w-full items-center justify-center gap-2 bg-background py-5 dark:bg-[#111113] sm:gap-1 md:gap-2">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
