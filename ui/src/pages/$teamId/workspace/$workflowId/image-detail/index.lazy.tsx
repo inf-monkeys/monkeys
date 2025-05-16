@@ -141,7 +141,11 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
         event$={tabular$}
         workflowId={workflowId}
         scrollAreaClassName=""
-      />
+      >
+        <div className="absolute bottom-0 left-0 right-0 z-20 bg-background dark:bg-[#111113]" style={{ padding: '10px 0' }}>
+          <TabularFooterButtons />
+        </div>
+      </TabularRender>
     </div>
   );
 };
@@ -472,15 +476,6 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
             {/* 内容区，底部预留按钮高度 */}
             <div className="flex-1 overflow-auto" style={{ paddingBottom: 70 }}>
               <TabularRenderWrapper height={window.innerHeight - 220} execution={execution} />
-            </div>
-            {/* 固定底部按钮条 */}
-            <div
-              className="absolute bottom-0 left-0 right-0 z-20 bg-background dark:bg-[#111113]"
-              style={{
-                padding: '10px 0',
-              }}
-            >
-              <TabularFooterButtons />
             </div>
           </div>
         </main>
