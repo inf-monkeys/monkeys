@@ -485,10 +485,10 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
           <div className="relative flex h-full flex-1 flex-col rounded-r-xl rounded-tr-xl bg-background px-6 pt-6 dark:bg-[#111113] md:border-l md:border-input">
             {/* 内容区，底部预留按钮高度 */}
             <div className="flex-1 overflow-auto">
-              <TabularRenderWrapper height={window.innerHeight - 220} execution={execution} />
+              <TabularRenderWrapper height={window.innerHeight - 120} execution={execution} />
             </div>
             {/* 按钮条 */}
-            <div className="sticky bottom-0 left-0 right-0 z-20 bg-background dark:bg-[#111113]"></div>
+            <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 20, background: 'var(--background)' }} className="dark:bg-[#111113]"></div>
           </div>
         </main>
       </ImageDetailLayout>
