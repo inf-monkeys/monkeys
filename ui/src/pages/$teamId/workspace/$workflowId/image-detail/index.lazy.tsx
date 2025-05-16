@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import { cn } from '@/utils';
 import { createLazyFileRoute, useParams, useRouter } from '@tanstack/react-router';
-
 import { useEventEmitter, useMemoizedFn } from 'ahooks';
 import {
   ChevronDown,
@@ -32,12 +32,15 @@ import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
 
 import 'rc-image/assets/index.css';
 
-interface IImageDetailProps {}
+interface IImageDetailProps { }
 
 interface TabularRenderWrapperProps {
   height?: number;
   execution?: VinesWorkflowExecution;
 }
+
+// 扩展 TTabularEvent 类型
+type ExtendedTabularEvent = TTabularEvent | { type: 'form-change'; data: any };
 
 // TabularRender包装组件，用于获取工作流输入参数
 const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, execution }) => {
@@ -45,6 +48,8 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
   const tabular$ = useEventEmitter<TTabularEvent>();
   const [windowHeight, setWindowHeight] = React.useState(window.innerHeight);
   const [processedInputs, setProcessedInputs] = React.useState<any[]>([]);
+  const [showInputDiffBanner, setShowInputDiffBanner] = React.useState(false);
+  const [originalInputValues, setOriginalInputValues] = React.useState<Record<string, any>>({});
 
   // 监听窗口大小变化
   React.useEffect(() => {
@@ -76,15 +81,39 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
     // 深拷贝inputs
     const newInputs = execution
       ? inputs.map((input) => {
-          return {
-            ...input,
-            default: execution.input?.[input.name] ?? input.default,
-          };
-        })
+        return {
+          ...input,
+          default: execution.input?.[input.name] ?? input.default,
+        };
+      })
       : [];
     console.log('TabularRenderWrapper: 表单输入字段:', newInputs);
     setProcessedInputs(newInputs);
+
+    // 保存原始输入值
+    if (execution?.input) {
+      setOriginalInputValues(execution.input);
+    }
   }, [inputs, execution]);
+
+  // 监听表单值变化
+  useEffect(() => {
+    if (!execution?.input || !processedInputs.length) return;
+
+    const currentValues = processedInputs.reduce((acc, input) => {
+      acc[input.name] = input.default;
+      return acc;
+    }, {} as Record<string, any>);
+
+    // 比较当前值与原始值
+    const hasDiff = Object.keys(currentValues).some(key => {
+      const originalValue = originalInputValues[key];
+      const currentValue = currentValues[key];
+      return JSON.stringify(originalValue) !== JSON.stringify(currentValue);
+    });
+
+    setShowInputDiffBanner(hasDiff);
+  }, [processedInputs, originalInputValues]);
 
   // 如果没有处理好的输入字段，显示加载状态
   if (processedInputs.length === 0 && inputs && inputs.length > 0) {
@@ -92,13 +121,24 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
   }
 
   return (
-    <TabularRender
-      inputs={processedInputs}
-      height={dynamicHeight}
-      event$={tabular$}
-      workflowId={workflowId}
-      scrollAreaClassName=""
-    />
+    <div className="flex flex-col h-full relative">
+      {showInputDiffBanner && (
+        <div className="absolute top-0 left-0 right-0 z-10 p-3 bg-yellow-100 dark:bg-yellow-900/30 border-b border-yellow-200 dark:border-yellow-800">
+          <p className="text-sm text-yellow-800 dark:text-yellow-200">
+            新的输入与原有输入不一致，可能会导致结果相差较大
+          </p>
+        </div>
+      )}
+      <div className={cn("flex-1", showInputDiffBanner ? "pt-12" : "")}>
+        <TabularRender
+          inputs={processedInputs}
+          height={dynamicHeight}
+          event$={tabular$}
+          workflowId={workflowId}
+          scrollAreaClassName=""
+        />
+      </div>
+    </div>
   );
 };
 
@@ -120,18 +160,6 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 
   const [execution, setExecution] = useState<VinesWorkflowExecution | undefined>();
 
-  // // 从路由搜索参数中获取图片信息
-  // const searchParams = new URLSearchParams(window.location.search);
-  // const imageUrl = searchParams.get('imageUrl') || '';
-  // const instanceId = searchParams.get('instanceId') || '';
-
-  // // 调试信息
-  // console.log('图片详情页面 - 初始化参数:', {
-  //   imageUrl,
-  //   instanceId,
-  //   search: window.location.search,
-  //   pathname: window.location.pathname,
-  // });
 
   const { workflowId } = useParams({ from: '/$teamId/workspace/$workflowId/image-detail/' });
 
@@ -162,7 +190,6 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 
   // 处理删除图片
   const handleDeleteImage = useMemoizedFn(() => {
-    // 如果有instanceId，则调用API删除
     if (instanceId) {
       toast.promise(deleteWorkflowExecution(instanceId), {
         success: () => {
