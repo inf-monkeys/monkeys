@@ -1,22 +1,25 @@
 import React, { useEffect, useState } from 'react';
 
-import { cn } from '@/utils';
 import { createLazyFileRoute, useParams, useRouter } from '@tanstack/react-router';
+
 import { useEventEmitter, useMemoizedFn } from 'ahooks';
 import {
   ChevronDown,
   ChevronUp,
+  Copy,
   Download,
   FlipHorizontal,
   FlipVertical,
   RotateCcw,
   RotateCw,
+  Sparkles,
   Trash,
   X,
   ZoomIn,
   ZoomOut,
 } from 'lucide-react';
 import Image from 'rc-image';
+import { useFormContext } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -26,6 +29,7 @@ import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vine
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
+import { useCopy } from '@/hooks/use-copy';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
@@ -78,7 +82,6 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
       return;
     }
 
-    // 深拷贝inputs
     const newInputs = execution
       ? inputs.map((input) => {
         return {
@@ -100,13 +103,16 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
   useEffect(() => {
     if (!execution?.input || !processedInputs.length) return;
 
-    const currentValues = processedInputs.reduce((acc, input) => {
-      acc[input.name] = input.default;
-      return acc;
-    }, {} as Record<string, any>);
+    const currentValues = processedInputs.reduce(
+      (acc, input) => {
+        acc[input.name] = input.default;
+        return acc;
+      },
+      {} as Record<string, any>,
+    );
 
     // 比较当前值与原始值
-    const hasDiff = Object.keys(currentValues).some(key => {
+    const hasDiff = Object.keys(currentValues).some((key) => {
       const originalValue = originalInputValues[key];
       const currentValue = currentValues[key];
       return JSON.stringify(originalValue) !== JSON.stringify(currentValue);
@@ -121,23 +127,58 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
   }
 
   return (
-    <div className="flex flex-col h-full relative">
+    <div style={{ position: 'relative', height: '100%' }}>
       {showInputDiffBanner && (
-        <div className="absolute top-0 left-0 right-0 z-10 p-3 bg-yellow-100 dark:bg-yellow-900/30 border-b border-yellow-200 dark:border-yellow-800">
+        <div className="absolute left-0 right-0 top-0 z-10 border-b border-yellow-200 bg-yellow-100 p-3 dark:border-yellow-800 dark:bg-yellow-900/30">
           <p className="text-sm text-yellow-800 dark:text-yellow-200">
             新的输入与原有输入不一致，可能会导致结果相差较大
           </p>
         </div>
       )}
-      <div className={cn("flex-1", showInputDiffBanner ? "pt-12" : "")}>
-        <TabularRender
-          inputs={processedInputs}
-          height={dynamicHeight}
-          event$={tabular$}
-          workflowId={workflowId}
-          scrollAreaClassName=""
-        />
-      </div>
+      <TabularRender
+        inputs={processedInputs}
+        height={dynamicHeight}
+        event$={tabular$}
+        workflowId={workflowId}
+        scrollAreaClassName=""
+      />
+    </div>
+  );
+};
+
+// 表单底部按钮条，和图片区一致
+const TabularFooterButtons: React.FC = () => {
+  const { t } = useTranslation();
+  const { copy } = useCopy();
+  const form = useFormContext();
+  // 生成按钮通过事件触发提交
+  const handleGenerate = () => {
+    form.handleSubmit(() => { })(null as any); // 触发校验和提交
+  };
+  // 复制当前表单参数
+  const handleCopy = () => {
+    const values = form.getValues();
+    copy(
+      JSON.stringify({
+        type: 'input-parameters',
+        data: values,
+      }),
+    );
+  };
+  return (
+    <div className="z-10 flex w-full items-center justify-center gap-2 bg-background py-3 dark:bg-[#111113] sm:gap-1 md:gap-2">
+      <Button icon={<Copy />} variant="outline" size="small" onClick={handleCopy}>
+        {t('workspace.pre-view.actuator.detail.form-render.actions.copy-input', '复制输入')}
+      </Button>
+      <Button
+        icon={<Sparkles className="fill-white" />}
+        variant="solid"
+        size="small"
+        className="text-base"
+        onClick={handleGenerate}
+      >
+        {t('workspace.pre-view.actuator.execution.label', '生成')}
+      </Button>
     </div>
   );
 };
@@ -160,15 +201,15 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 
   const [execution, setExecution] = useState<VinesWorkflowExecution | undefined>();
 
-
   const { workflowId } = useParams({ from: '/$teamId/workspace/$workflowId/image-detail/' });
 
   useEffect(() => {
+    if (!instanceId) return;
     getWorkflowExecution(instanceId).then((executionResult) => {
       if (!executionResult) return;
       setExecution(executionResult);
     });
-  }, [urlState]);
+  }, [instanceId]);
 
   // 监听图片状态变化，更新图片样式
   useEffect(() => {
@@ -404,9 +445,19 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
           </div>
 
           {/* 中间区域，渲染表单 */}
-          <div className="flex h-full flex-1 flex-col overflow-auto rounded-r-xl rounded-tr-xl bg-background px-6 pt-6 dark:bg-[#111113] md:border-l md:border-input">
-            <div className="h-full flex-1">
-              <TabularRenderWrapper height={window.innerHeight - 150} execution={execution} />
+          <div className="relative flex h-full flex-1 flex-col rounded-r-xl rounded-tr-xl bg-background px-6 pt-6 dark:bg-[#111113] md:border-l md:border-input">
+            {/* 内容区，底部预留按钮高度 */}
+            <div className="flex-1 overflow-auto" style={{ paddingBottom: 70 }}>
+              <TabularRenderWrapper height={window.innerHeight - 220} execution={execution} />
+            </div>
+            {/* 固定底部按钮条 */}
+            <div
+              className="absolute bottom-0 left-0 right-0 z-20 bg-background dark:bg-[#111113]"
+              style={{
+                padding: '10px 0',
+              }}
+            >
+              <TabularFooterButtons />
             </div>
           </div>
         </main>
