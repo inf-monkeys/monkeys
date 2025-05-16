@@ -142,16 +142,29 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
         workflowId={workflowId}
         scrollAreaClassName=""
       >
-        <div className="absolute bottom-0 left-0 right-0 z-20 bg-background dark:bg-[#111113]" style={{ padding: '10px 0' }}>
-          <TabularFooterButtons />
+        <div
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 20,
+            background: 'var(--background)',
+            padding: '10px 0',
+          }}
+        >
+          <TabularFooterButtons processedInputs={processedInputs} />
         </div>
       </TabularRender>
     </div>
   );
 };
 
-// 表单底部按钮条，和图片区一致
-const TabularFooterButtons: React.FC = () => {
+interface TabularFooterButtonsProps {
+  processedInputs: any[];
+}
+
+const TabularFooterButtons: React.FC<TabularFooterButtonsProps> = ({ processedInputs }) => {
   const { t } = useTranslation();
   const { copy } = useCopy();
   const { vines } = useVinesFlow();
@@ -176,19 +189,16 @@ const TabularFooterButtons: React.FC = () => {
 
   // 复制当前表单参数
   const handleCopy = () => {
-    try {
-      const values = form.getValues();
-      copy(
-        JSON.stringify({
-          type: 'input-parameters',
-          data: values,
-        }),
-      );
-      toast.success(t('workspace.pre-view.actuator.detail.form-render.actions.copy-input-success'));
-    } catch (error) {
-      console.error('复制失败:', error);
-      toast.error(t('workspace.pre-view.actuator.detail.form-render.actions.copy-input-error'));
-    }
+    const values = form.getValues();
+    const data = processedInputs.map((input) => ({
+      id: input.name,
+      displayName: input.displayName,
+      description: input.description,
+      data: values[input.name],
+      type: input.type,
+    }));
+    copy(JSON.stringify({ type: 'input-parameters', data }));
+    toast.success(t('workspace.pre-view.actuator.detail.form-render.actions.copy-input-success'));
   };
 
   return (
@@ -474,9 +484,11 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
           {/* 中间区域，渲染表单 */}
           <div className="relative flex h-full flex-1 flex-col rounded-r-xl rounded-tr-xl bg-background px-6 pt-6 dark:bg-[#111113] md:border-l md:border-input">
             {/* 内容区，底部预留按钮高度 */}
-            <div className="flex-1 overflow-auto" style={{ paddingBottom: 70 }}>
+            <div className="flex-1 overflow-auto">
               <TabularRenderWrapper height={window.innerHeight - 220} execution={execution} />
             </div>
+            {/* 按钮条 */}
+            <div className="sticky bottom-0 left-0 right-0 z-20 bg-background dark:bg-[#111113]"></div>
           </div>
         </main>
       </ImageDetailLayout>
