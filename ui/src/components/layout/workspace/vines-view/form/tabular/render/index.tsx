@@ -46,6 +46,7 @@ interface ITabularRenderProps {
   fieldChildren?: React.ReactNode;
 
   onSubmit?: (data: IWorkflowInputForm) => void;
+  onFormChange?: () => void;
 
   formClassName?: string;
   scrollAreaClassName?: string;
@@ -69,6 +70,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
   fieldChildren,
 
   onSubmit,
+  onFormChange,
 
   formClassName,
   scrollAreaClassName,
@@ -133,6 +135,14 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
 
     form.reset(defaultValues);
   }, [inputs]);
+
+  // 监听表单值变化
+  useEffect(() => {
+    const subscription = form.watch(() => {
+      onFormChange?.();
+    });
+    return () => subscription.unsubscribe();
+  }, [form, onFormChange]);
 
   const handleSubmit = form.handleSubmit((data) => {
     for (const inputDef of inputs) {
