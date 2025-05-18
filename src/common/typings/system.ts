@@ -14,6 +14,7 @@ export interface ISystemConfig {
     };
     colors: {
       primaryColor: string;
+      neocardColor: string;
     };
     toast: {
       position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
