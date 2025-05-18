@@ -36,7 +36,7 @@ import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
 
 import 'rc-image/assets/index.css';
 
-interface IImageDetailProps { }
+interface IImageDetailProps {}
 
 interface TabularRenderWrapperProps {
   height?: number;
@@ -84,11 +84,11 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
 
     const newInputs = execution
       ? inputs.map((input) => {
-        return {
-          ...input,
-          default: execution.input?.[input.name] ?? input.default,
-        };
-      })
+          return {
+            ...input,
+            default: execution.input?.[input.name] ?? input.default,
+          };
+        })
       : [];
     console.log('TabularRenderWrapper: 表单输入字段:', newInputs);
     setProcessedInputs(newInputs);
@@ -366,7 +366,6 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         onClick={() => {
                           // 直接应用垂直翻转效果
                           setImageFlipY((prev) => !prev);
-                          toast.success(t('components.ui.image-preview.flipY-success', '已垂直翻转'));
                         }}
                       />
                     </TooltipTrigger>
@@ -381,7 +380,6 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         onClick={() => {
                           // 直接应用水平翻转效果
                           setImageFlipX((prev) => !prev);
-                          toast.success(t('components.ui.image-preview.flipX-success', '已水平翻转'));
                         }}
                       />
                     </TooltipTrigger>
@@ -397,7 +395,6 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         onClick={() => {
                           // 直接应用左旋转效果
                           setImageRotation((prev) => prev - 90);
-                          toast.success(t('components.ui.image-preview.rotateLeft-success', '已向左旋转'));
                         }}
                       />
                     </TooltipTrigger>
@@ -412,7 +409,6 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         onClick={() => {
                           // 直接应用右旋转效果
                           setImageRotation((prev) => prev + 90);
-                          toast.success(t('components.ui.image-preview.rotateRight-success', '已向右旋转'));
                         }}
                       />
                     </TooltipTrigger>
@@ -428,7 +424,6 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         onClick={() => {
                           // 直接应用放大效果
                           setImageScale((prev) => prev + 0.1);
-                          toast.success(t('components.ui.image-preview.zoomIn-success', '已放大'));
                         }}
                       />
                     </TooltipTrigger>
@@ -443,7 +438,6 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         onClick={() => {
                           // 直接应用缩小效果
                           setImageScale((prev) => Math.max(0.1, prev - 0.1));
-                          toast.success(t('components.ui.image-preview.zoomOut-success', '已缩小'));
                         }}
                       />
                     </TooltipTrigger>
@@ -463,9 +457,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                               link.setAttribute('download', '');
                               link.setAttribute('target', '_self');
                               link.click();
-                            } catch (error) {
-                              console.error('下载异常:', error);
-                            }
+                            } catch (error) {}
                           }
                         }}
                       />
@@ -488,7 +480,17 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
               <TabularRenderWrapper height={window.innerHeight - 120} execution={execution} />
             </div>
             {/* 按钮条 */}
-            <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 20, background: 'var(--background)' }} className="dark:bg-[#111113]"></div>
+            <div
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 20,
+                background: 'var(--background)',
+              }}
+              className="dark:bg-[#111113]"
+            ></div>
           </div>
         </main>
       </ImageDetailLayout>
