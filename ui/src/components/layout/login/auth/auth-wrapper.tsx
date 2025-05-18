@@ -18,6 +18,8 @@ import { VinesFullLoading } from '@/components/ui/loading';
 import { setLocalStorage } from '@/hooks/use-local-storage';
 import useUrlState from '@/hooks/use-url-state.ts';
 import VinesEvent from '@/utils/events.ts';
+import { IVinesTeam } from '@/apis/authz/team/typings.ts';
+import { useGetDefaultLoginTeam } from '@/hooks/use-get-default-login-team.ts';
 
 export type AuthEvent = 'trigger-login' | 'clear-sms-code-input';
 
@@ -56,6 +58,8 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({
     redirect_search?: string;
   }>({});
   const { mutate } = useSWRConfig();
+
+  const getDefaultTeam = useGetDefaultLoginTeam();
 
   const { trigger: triggerPassword, data: passwordData } = useLoginByPassword();
   const { trigger: triggerPhone, data: phoneData } = useLoginByPhone();
@@ -99,7 +103,7 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({
           onLoginFinished();
         } else {
           setLoading(true);
-          mutate('/api/teams').then((it) => {
+          mutate('/api/teams').then((it: IVinesTeam[] | undefined) => {
             setLoading(false);
             setLocalStorage('vines-teams', it);
             if (
@@ -110,7 +114,7 @@ export const AuthWrapper: React.FC<IAuthWrapperProps> = ({
             ) {
               VinesEvent.emit('vines-nav', redirect_id, redirect_params, redirect_search);
             } else {
-              const currentTeamId = it?.[0]?.id;
+              const currentTeamId = getDefaultTeam(it);
               if (currentTeamId) {
                 localStorage.setItem('vines-team-id', currentTeamId);
                 window['vinesTeamId'] = currentTeamId;
