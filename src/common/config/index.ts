@@ -41,6 +41,7 @@ export interface ServerConfig {
     };
     colors: {
       primary: string;
+      neocard: string;
     };
     toast: {
       position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
@@ -292,6 +293,7 @@ export const config: Config = {
       favicon: typeof faviconConfig === 'string' ? { light: faviconConfig, dark: faviconConfig } : faviconConfig,
       colors: {
         primary: readConfig('server.customization.colors.primary', '#52ad1f'),
+        neocard: readConfig('server.customization.colors.neocard', '#F1F5F9'),
       },
       toast: {
         position: readConfig('server.customization.toast.position', 'bottom-right'),

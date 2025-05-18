@@ -15,7 +15,7 @@ export class AppController {
     private readonly service: AppService,
     @Inject(CACHE_TOKEN) private readonly cache: CacheManager,
     @Inject(MQ_TOKEN) private readonly mq: Mq,
-  ) { }
+  ) {}
 
   @Get('/healthz')
   public async healthz() {
@@ -66,26 +66,26 @@ export class AppController {
         description?: string;
         'x-displayName'?: string;
       }> = [
-          {
-            name: '开发准备/介绍',
-            'x-displayName': '介绍',
-          },
-          {
-            name: '开发准备/鉴权机制',
-            'x-displayName': '鉴权机制',
-            description: config.auth.enabled.includes(AuthMethod.apikey) ? APIKEY_AUTH_DOC : NONE_AUTH_DOC,
-          },
-        ];
+        {
+          name: '开发准备/介绍',
+          'x-displayName': '介绍',
+        },
+        {
+          name: '开发准备/鉴权机制',
+          'x-displayName': '鉴权机制',
+          description: config.auth.enabled.includes(AuthMethod.apikey) ? APIKEY_AUTH_DOC : NONE_AUTH_DOC,
+        },
+      ];
       const tagGroups: Array<{
         name: string;
         tags: string[];
         description?: string;
       }> = [
-          {
-            name: '开发准备',
-            tags: ['开发准备/介绍', '开发准备/鉴权机制'],
-          },
-        ];
+        {
+          name: '开发准备',
+          tags: ['开发准备/介绍', '开发准备/鉴权机制'],
+        },
+      ];
       for (const server of data) {
         const itemTags = server.spec.tags?.map((x) => ({
           name: `${server.displayName}/${x.name}`,
@@ -119,6 +119,7 @@ export class AppController {
         favicon: config.server.customization.favicon,
         colors: {
           primaryColor: config.server.customization.colors.primary,
+          neocardColor: config.server.customization.colors.neocard,
         },
         toast: {
           position: config.server.customization.toast.position,
