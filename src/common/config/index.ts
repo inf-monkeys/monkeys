@@ -172,6 +172,7 @@ export interface AuthConfig {
   feishu?: FeishuConfig;
   hideAuthToast?: boolean;
   autoReload?: boolean;
+  defaultOtherTeam?: boolean;
 }
 
 export interface S3Config {
@@ -392,6 +393,7 @@ export const config: Config = {
     privilegedToken: readConfig('auth.privilegedToken'),
     hideAuthToast: readConfig('auth.hideAuthToast', false),
     autoReload: readConfig('auth.autoReload', false),
+    defaultOtherTeam: readConfig('auth.defaultOtherTeam', false),
   },
   s3: {
     proxy: readConfig('s3.proxy', true),

@@ -16,6 +16,7 @@ import { VinesUserLogin } from '@/components/layout/login';
 import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { I18nSelector } from '@/components/ui/i18n-selector';
 import { AppLogo } from '@/components/ui/logo';
+import { useGetDefaultLoginTeam } from '@/hooks/use-get-default-login-team.ts';
 import { setLocalStorage } from '@/hooks/use-local-storage';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useAppStore } from '@/store/useAppStore';
@@ -25,6 +26,8 @@ const OAuthPage: React.FC = () => {
   const { t } = useTranslation();
 
   const { mutate } = useSWRConfig();
+
+  const getDefaultTeam = useGetDefaultLoginTeam();
 
   const darkMode = useAppStore((s) => s.darkMode);
   const { data: oem, error } = useSystemConfig();
@@ -51,7 +54,7 @@ const OAuthPage: React.FC = () => {
       success: () => {
         mutate('/api/teams').then((it) => {
           setLocalStorage('vines-teams', it);
-          const currentTeamId = it?.[0]?.id;
+          const currentTeamId = getDefaultTeam(it);
           if (currentTeamId) {
             localStorage.setItem('vines-team-id', currentTeamId);
             window['vinesTeamId'] = currentTeamId;

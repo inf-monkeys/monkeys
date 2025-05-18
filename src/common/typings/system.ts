@@ -31,6 +31,7 @@ export interface ISystemConfig {
     };
     hideAuthToast: boolean;
     autoReload: boolean;
+    defaultOtherTeam: boolean;
   };
   pages: {
     allowPageKeys: string[] | '*';
