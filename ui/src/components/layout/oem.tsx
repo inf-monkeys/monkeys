@@ -26,6 +26,8 @@ export const OEM: React.FC = () => {
   const setValue = usePaletteStore((s) => s.setValue);
 
   const siteThemeColor = get(oem, 'theme.colors.primaryColor', '');
+  // TODO use it
+  const siteNeocardColor = get(oem, 'theme.colors.neocardColor', '');
   const teamThemeColor = get(team, 'customTheme.primaryColor', '');
   useEffect(() => {
     setValue(teamThemeColor || siteThemeColor);
