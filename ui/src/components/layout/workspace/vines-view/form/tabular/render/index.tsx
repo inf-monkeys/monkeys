@@ -259,7 +259,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
   return (
     <Form {...form}>
       <form
-        className={cn('relative flex flex-col gap-3', formClassName)}
+        className={cn('relative flex flex-col gap-4', formClassName)}
         onSubmit={handleSubmit}
         onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
       >

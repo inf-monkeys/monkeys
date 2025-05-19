@@ -82,7 +82,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     setData((prevData) => [...prevData, ...nonExist]);
   }, [currentPageExecutionListData, page]);
 
-  const containerWidth = formContainerWidth * 0.6 - 16 - 24 - 8 - (isUseWorkSpace ? 140 : 0);
+  const containerWidth = formContainerWidth * 0.6 - 16 - 16 - 4 - (isUseWorkSpace ? 140 : 0);
 
   const positioner = usePositioner({
     width: containerWidth,
