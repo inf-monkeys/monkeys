@@ -5,9 +5,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { History } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useWorkflowExecutionList } from '@/apis/workflow/execution';
+import { useWorkflowExecutionListInfinite } from '@/apis/workflow/execution';
 import { ExecutionResultGrid } from '@/components/layout/workspace/vines-view/form/execution-result/grid';
-import { useVinesIframeMessage } from '@/components/layout/workspace/vines-view/form/execution-result/iframe-message.ts';
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { Label } from '@/components/ui/label.tsx';
 import { VinesLoading } from '@/components/ui/loading';
@@ -15,7 +14,11 @@ import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
-import { convertExecutionResultToItemList, IVinesExecutionResultItem } from '@/utils/execution.ts';
+import {
+  concatResultListReducer,
+  convertExecutionResultToItemList,
+  IVinesExecutionResultItem,
+} from '@/utils/execution.ts';
 
 interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {
   event$: EventEmitter<void>;
@@ -42,53 +45,36 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   const storeWorkflowId = useFlowStore((s) => s.workflowId);
   const workflowId = storeWorkflowId && visible ? storeWorkflowId : null;
 
+  const [executionResultList, setExecutionResultList] = useState<IVinesExecutionResultItem[]>([]);
+
   const {
-    data: firstPageExecutionListData,
-    isLoading: firstPageExecutionListIsLoading,
-    mutate: firstPageExecutionListMutate,
-  } = useWorkflowExecutionList(workflowId, 1, LOAD_LIMIT);
+    data: executionListData,
+    mutate: executionListMutate,
+    size: currentPage,
+    setSize: setCurrentPage,
+    isLoading,
+  } = useWorkflowExecutionListInfinite(workflowId, LOAD_LIMIT);
 
-  const firstPageExecutionList = firstPageExecutionListData?.data ?? [];
-  const totalCount = firstPageExecutionListData?.total ?? 0;
+  const hasMore =
+    executionListData?.length != 0 &&
+    executionListData?.[currentPage - 1]?.total != 0 &&
+    executionListData?.[currentPage - 1]?.data.length == LOAD_LIMIT;
 
-  const [resultList, setResultList] = useState<IVinesExecutionResultItem[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const totalCount = executionListData?.[0]?.total ?? 0;
 
-  // 第一页任务及状态变化
   useEffect(() => {
-    // 筛选状态变更的替换原 result
-    const changed = firstPageExecutionList.filter(
-      (r) => resultList.findIndex((pr) => r.instanceId === pr.instanceId && r.status != pr.status) != -1,
-    );
+    setExecutionResultList([]);
+    console.log(workflowId);
+  }, [workflowId]);
 
-    // 筛选不存在的拼接到头部
-    const nonExist = firstPageExecutionList.filter(
-      (r) => !resultList.map(({ instanceId }) => instanceId).includes(r.instanceId),
-    );
-
-    // 没有变化返回
-    if (changed.length == 0 && nonExist.length == 0) return;
-
-    setResultList((prevList) => {
-      for (const changedExecution of changed) {
-        const index = prevList.findIndex((pr) => changedExecution.instanceId === pr.instanceId);
-        prevList = prevList.filter((pr) => changedExecution.instanceId != pr.instanceId);
-        prevList.splice(index, 0, ...convertExecutionResultToItemList(changedExecution));
-      }
-      for (const nonExistExecution of nonExist.reverse()) {
-        prevList.unshift(...convertExecutionResultToItemList(nonExistExecution));
-      }
-      return prevList;
-    });
-
-    event$.emit();
-  }, [firstPageExecutionList]);
-
-  useVinesIframeMessage({
-    outputs: firstPageExecutionList,
-    mutate: firstPageExecutionListMutate,
-    enable: enablePostMessage,
-  });
+  useEffect(() => {
+    const list: IVinesExecutionResultItem[] = [];
+    for (const execution of executionListData ?? []) {
+      if (execution && execution.data)
+        list.push(...execution.data.map(convertExecutionResultToItemList).reduce(concatResultListReducer, []));
+    }
+    setExecutionResultList(list);
+  }, [executionListData]);
 
   return (
     <Card className={cn('relative bg-card-light dark:bg-card-dark', className)}>
@@ -98,12 +84,12 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
           height={height}
           page={currentPage}
           setPage={setCurrentPage}
-          data={resultList}
-          setData={setResultList}
+          data={executionResultList}
+          hasMore={hasMore}
           event$={event$}
         />
         <AnimatePresence mode="popLayout">
-          {firstPageExecutionListIsLoading ? (
+          {isLoading ? (
             <motion.div
               key="vines-execution-result-loading"
               className="vines-center pointer-events-none absolute left-0 top-0 z-0 size-full"

@@ -26,7 +26,9 @@ interface IExecutionResultGridProps extends React.ComponentPropsWithoutRef<'div'
   setPage: Dispatch<SetStateAction<number>>;
 
   data: IVinesExecutionResultItem[];
-  setData: Dispatch<SetStateAction<IVinesExecutionResultItem[]>>;
+  // setData: Dispatch<SetStateAction<IVinesExecutionResultItem[]>>;
+
+  hasMore: boolean;
 
   event$: EventEmitter<void>;
 }
@@ -37,21 +39,22 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   page,
   setPage,
   data,
-  setData,
+  // setData,
+  hasMore,
   event$,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [hasMore, setHasMore] = useState(true);
+  // const [hasMore, setHasMore] = useState(true);
   const formContainerWidth = usePageStore((s) => s.containerWidth);
   const { isUseWorkSpace } = useVinesRoute();
 
-  const { data: currentPageExecutionListData, isLoading } = useWorkflowExecutionList(workflowId, page, LOAD_LIMIT, 0);
+  // const { data: currentPageExecutionListData, isLoading } = useWorkflowExecutionList(workflowId, page, LOAD_LIMIT, 0);
 
   const loadMore = useInfiniteLoader(
     async () => {
-      if (isLoading || !hasMore) return;
+      if (!hasMore) return;
       setPage((prev) => prev + 1);
     },
     {
@@ -60,27 +63,27 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     },
   );
 
-  useEffect(() => {
-    if (!currentPageExecutionListData) return;
+  // useEffect(() => {
+  // if (!currentPageExecutionListData) return;
 
-    const currentPageResultList = currentPageExecutionListData.data
-      .map(convertExecutionResultToItemList)
-      .reduce(concatResultListReducer, []);
+  // const currentPageResultList = currentPageExecutionListData.data
+  //   .map(convertExecutionResultToItemList)
+  //   .reduce(concatResultListReducer, []);
 
-    if (currentPageResultList && currentPageResultList.length < LOAD_LIMIT) {
-      setHasMore(false);
-    }
+  // if (currentPageResultList && currentPageResultList.length < LOAD_LIMIT) {
+  //   setHasMore(false);
+  // }
 
-    if (page === 1) return;
+  // if (page === 1) return;
 
-    const nonExist = currentPageResultList.filter(
-      (item) => !data.some((existingItem) => existingItem.instanceId === item.instanceId),
-    );
+  // const nonExist = currentPageResultList.filter(
+  //   (item) => !data.some((existingItem) => existingItem.instanceId === item.instanceId),
+  // );
+  //
+  // if (nonExist.length === 0) return;
 
-    if (nonExist.length === 0) return;
-
-    setData((prevData) => [...prevData, ...nonExist]);
-  }, [currentPageExecutionListData, page]);
+  // setData((prevData) => [...prevData, ...nonExist]);
+  // }, [page]);
 
   const containerWidth = formContainerWidth * 0.6 - 16 - 16 - 4 - (isUseWorkSpace ? 140 : 0);
 
