@@ -73,7 +73,13 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
 
   const { onDropRejected, validator, onDrag, onPaste } = useVinesDropzone({
     ...props,
-    onPasteOrDropCallback: (file) => uppy.addFile(handleConvertFile(file)),
+    onPasteOrDropCallback: (file) => {
+      if (max === 1 && !isEmpty(filesMapper)) {
+        const existingFiles = uppy.getFiles();
+        existingFiles.forEach(file => uppy.removeFile(file.id));
+      }
+      uppy.addFile(handleConvertFile(file));
+    },
   });
 
   const ref = useRef<HTMLDivElement>(null);
@@ -125,7 +131,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
     }
 
     uppy$?.emit(uppy);
-  }, [props.files]);
+  }, [props.files, props.originalFiles]);
 
   const [isHovering, setIsHovering] = useState(false);
   useDrop(ref, {
@@ -138,6 +144,10 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
   return (
     <Dropzone
       onDrop={(f) => {
+        if (max === 1 && !isEmpty(filesMapper)) {
+          const existingFiles = uppy.getFiles();
+          existingFiles.forEach(file => uppy.removeFile(file.id));
+        }
         uppy.addFiles(f.map((file) => handleConvertFile(file)));
         setIsHovering(false);
       }}
@@ -189,9 +199,9 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
                       <p className="text-sm text-muted-foreground text-opacity-85">
                         {accept
                           ? t('components.ui.updater.hint.accept.custom', {
-                              acceptString: accept.map((it) => `.${it}`).join('、'),
-                              count: max,
-                            })
+                            acceptString: accept.map((it) => `.${it}`).join('、'),
+                            count: max,
+                          })
                           : t('components.ui.updater.hint.accept.any')}
                         {t('components.ui.updater.hint.max-size', { maxSize })}
                       </p>

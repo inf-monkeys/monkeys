@@ -82,13 +82,13 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     setData((prevData) => [...prevData, ...nonExist]);
   }, [currentPageExecutionListData, page]);
 
-  const containerWidth = (formContainerWidth - 48) * 0.6 - 16 - (isUseWorkSpace ? 140 : 0);
+  const containerWidth = formContainerWidth * 0.6 - 16 - 24 - 8 - (isUseWorkSpace ? 140 : 0);
 
   const positioner = usePositioner({
     width: containerWidth,
-    columnGutter: 12,
+    columnGutter: 8,
     columnWidth: 200,
-    rowGutter: 12,
+    rowGutter: 8,
   });
 
   const resizeObserver = useResizeObserver(positioner);
@@ -117,7 +117,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
 
   return (
     <ScrollArea
-      className={cn('-pr-0.5 z-20 mr-0.5 bg-card-light dark:bg-card-dark [&>[data-radix-scroll-area-viewport]]:p-2')}
+      className={cn('z-20 mr-0.5 bg-card-light dark:bg-card-dark [&>[data-radix-scroll-area-viewport]]:p-2')}
       ref={scrollRef}
       style={{ height }}
       disabledOverflowMask

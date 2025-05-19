@@ -41,6 +41,7 @@ export interface ServerConfig {
     };
     colors: {
       primary: string;
+      neocard: string;
     };
     toast: {
       position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
@@ -171,6 +172,7 @@ export interface AuthConfig {
   feishu?: FeishuConfig;
   hideAuthToast?: boolean;
   autoReload?: boolean;
+  defaultOtherTeam?: boolean;
 }
 
 export interface S3Config {
@@ -292,6 +294,7 @@ export const config: Config = {
       favicon: typeof faviconConfig === 'string' ? { light: faviconConfig, dark: faviconConfig } : faviconConfig,
       colors: {
         primary: readConfig('server.customization.colors.primary', '#52ad1f'),
+        neocard: readConfig('server.customization.colors.neocard', '#F1F5F9'),
       },
       toast: {
         position: readConfig('server.customization.toast.position', 'bottom-right'),
@@ -390,6 +393,7 @@ export const config: Config = {
     privilegedToken: readConfig('auth.privilegedToken'),
     hideAuthToast: readConfig('auth.hideAuthToast', false),
     autoReload: readConfig('auth.autoReload', false),
+    defaultOtherTeam: readConfig('auth.defaultOtherTeam', false),
   },
   s3: {
     proxy: readConfig('s3.proxy', true),
