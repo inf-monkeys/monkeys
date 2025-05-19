@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { History } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useWorkflowExecutionListInfinite } from '@/apis/workflow/execution';
+import { useWorkflowExecutionList, useWorkflowExecutionListInfinite } from '@/apis/workflow/execution';
 import { ExecutionResultGrid } from '@/components/layout/workspace/vines-view/form/execution-result/grid';
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { Label } from '@/components/ui/label.tsx';
@@ -19,6 +19,8 @@ import {
   convertExecutionResultToItemList,
   IVinesExecutionResultItem,
 } from '@/utils/execution.ts';
+
+import { useVinesIframeMessage } from './iframe-message';
 
 interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {
   event$: EventEmitter<void>;
@@ -49,11 +51,14 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
 
   const {
     data: executionListData,
-    mutate: executionListMutate,
+    mutate: mutateExecutionList,
     size: currentPage,
     setSize: setCurrentPage,
     isLoading,
   } = useWorkflowExecutionListInfinite(workflowId, LOAD_LIMIT);
+
+  const { data: firstPageExecutionListData } = useWorkflowExecutionList(workflowId, 1, LOAD_LIMIT);
+  const firstPageExecutionList = firstPageExecutionListData?.data ?? [];
 
   const hasMore =
     executionListData?.length != 0 &&
@@ -63,11 +68,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   const totalCount = executionListData?.[0]?.total ?? 0;
 
   useEffect(() => {
-    setExecutionResultList([]);
-    console.log(workflowId);
-  }, [workflowId]);
-
-  useEffect(() => {
+    if (!executionListData || executionListData.length == 0 || executionListData[0]?.total == 0) return;
     const list: IVinesExecutionResultItem[] = [];
     for (const execution of executionListData ?? []) {
       if (execution && execution.data)
@@ -76,18 +77,62 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
     setExecutionResultList(list);
   }, [executionListData]);
 
+  // 第一页任务及状态变化
+  useEffect(() => {
+    // 筛选状态变更的替换原 result
+    const changed = firstPageExecutionList.filter(
+      (r) =>
+        executionResultList.findIndex(
+          (pr) => r.instanceId === pr.instanceId && r.status != pr.status && !pr.render.isDeleted,
+        ) != -1,
+    );
+
+    // 筛选不存在的拼接到头部
+    const nonExist = firstPageExecutionList.filter(
+      (r) => !executionResultList.map(({ instanceId }) => instanceId).includes(r.instanceId),
+    );
+
+    // 没有变化返回
+    if (changed.length == 0 && nonExist.length == 0) return;
+
+    setExecutionResultList((prevList) => {
+      for (const changedExecution of changed) {
+        const index = prevList.findIndex((pr) => changedExecution.instanceId === pr.instanceId);
+        // prevList[index].render = {
+        //   ...prevList[index].render,
+        //   isDeleted: true,
+        // };
+        prevList = prevList.filter((_, i) => i != index);
+        prevList.splice(index, 0, ...convertExecutionResultToItemList(changedExecution));
+      }
+      for (const nonExistExecution of nonExist.reverse()) {
+        prevList.unshift(...convertExecutionResultToItemList(nonExistExecution));
+      }
+      return prevList;
+    });
+    event$.emit();
+  }, [firstPageExecutionList]);
+
+  useVinesIframeMessage({
+    outputs: executionResultList,
+    mutate: mutateExecutionList,
+    enable: enablePostMessage,
+  });
+
   return (
     <Card className={cn('relative bg-card-light dark:bg-card-dark', className)}>
       <CardContent className="p-0">
-        <ExecutionResultGrid
-          workflowId={workflowId}
-          height={height}
-          page={currentPage}
-          setPage={setCurrentPage}
-          data={executionResultList}
-          hasMore={hasMore}
-          event$={event$}
-        />
+        {executionResultList && executionResultList.length && !isLoading ? (
+          <ExecutionResultGrid
+            workflowId={workflowId}
+            height={height}
+            setPage={setCurrentPage}
+            data={executionResultList}
+            hasMore={hasMore}
+            event$={event$}
+            mutate={mutateExecutionList}
+          />
+        ) : null}
         <AnimatePresence mode="popLayout">
           {isLoading ? (
             <motion.div

@@ -1,10 +1,8 @@
 import React from 'react';
 
-import { useSWRConfig } from 'swr';
-
 import { useMemoizedFn } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
-import { isBoolean, isString } from 'lodash';
+import { isBoolean } from 'lodash';
 import { Download, Ellipsis, RotateCcw, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -15,14 +13,17 @@ import { VirtuaExecutionResultRawDataDialog } from '@/components/layout/workspac
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useVinesFlow } from '@/package/vines-flow';
-// import { useFlowStore } from '@/store/useFlowStore';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
+import { IAddDeletedInstanceId } from '@/components/layout/workspace/vines-view/form/execution-result/grid';
+import { SWRInfiniteResponse } from 'swr/infinite';
 
 interface IVirtuaExecutionResultGridWrapperProps {
   data: IVinesExecutionResultItem;
   children: React.ReactNode;
   src?: string;
   event$: EventEmitter<void>;
+  addDeletedInstanceId?: IAddDeletedInstanceId;
+  mutate?: SWRInfiniteResponse['mutate'];
 }
 
 export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGridWrapperProps> = ({
@@ -30,18 +31,16 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
   children,
   src,
   event$,
+  addDeletedInstanceId,
+  mutate,
 }) => {
-  const { mutate } = useSWRConfig();
+  // const { mutate } = useSWRConfig();
 
   const { data: oem } = useSystemConfig();
 
   const { vines } = useVinesFlow();
 
   const { t } = useTranslation();
-  // const workflowId = useFlowStore((s) => s.workflowId);
-  // const { mutate } = useWorkflowExecutionOutputs(workflowId);
-  // 瀑布流
-  // 使用直接打开链接方式下载，避免CORS问题
   const handleDownload = useMemoizedFn(() => {
     if (!src) return;
 
@@ -65,11 +64,8 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
       if (!isBoolean(oem?.theme?.views?.form?.toast?.afterDelete) || oem?.theme?.views?.form?.toast?.afterDelete) {
         toast.promise(deleteWorkflowExecution(targetInstanceId), {
           success: () => {
-            void mutate(
-              (key) => isString(key) && key.startsWith(`/api/workflow/executions/${vines.workflowId}/outputs`),
-            ).then(() => {
-              event$.emit?.();
-            });
+            // addDeletedInstanceId?.(targetInstanceId);
+            void mutate?.();
             return t('common.delete.success');
           },
           error: t('common.delete.error'),
@@ -78,11 +74,8 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
       } else {
         try {
           deleteWorkflowExecution(targetInstanceId).then(() => {
-            void mutate(
-              (key) => isString(key) && key.startsWith(`/api/workflow/executions/${vines.workflowId}/outputs`),
-            ).then(() => {
-              event$.emit?.();
-            });
+            // addDeletedInstanceId?.(targetInstanceId);
+            void mutate?.();
           });
         } catch (error) {
           toast.error(t('common.delete.error'));
@@ -92,28 +85,11 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
   });
 
   const handleRetry = useMemoizedFn(() => {
-    console.log(data.input);
     const inputData = {};
     for (const { id, data: value } of data.input) {
       inputData[id] = value;
     }
-    void mutate(
-      (key) => isString(key) && key.startsWith(`/api/workflow/executions/${vines.workflowId}/outputs`),
-      (data: any) => {
-        if (data?.data) {
-          data.data.unshift({
-            status: 'RUNNING',
-            output: [{ type: 'image', data: '' }],
-            render: { type: 'image', data: '', status: 'RUNNING' },
-          });
-          if (typeof data?.total === 'number') {
-            data.total += 1;
-          }
-        }
-        return data;
-      },
-      false,
-    );
+    // addDeletedInstanceId?.(data?.instanceId);
     vines.start({ inputData, onlyStart: true }).then((status) => {
       if (status) {
         if (
@@ -170,23 +146,21 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
           </Tooltip>
         )}
 
-        {src && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                className="dark:hover:bg-[--card-dark]/90 rounded bg-white/80 !p-1 shadow-sm hover:bg-white dark:bg-[--card-dark] [&_svg]:!size-3"
-                icon={<Trash />}
-                variant="outline"
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation(); // 阻止事件冒泡，防止触发预览
-                  handleDelete();
-                }}
-              />
-            </TooltipTrigger>
-            <TooltipContent>{t('common.utils.delete')}</TooltipContent>
-          </Tooltip>
-        )}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              className="dark:hover:bg-[--card-dark]/90 rounded bg-white/80 !p-1 shadow-sm hover:bg-white dark:bg-[--card-dark] [&_svg]:!size-3"
+              icon={<Trash />}
+              variant="outline"
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation(); // 阻止事件冒泡，防止触发预览
+                handleDelete();
+              }}
+            />
+          </TooltipTrigger>
+          <TooltipContent>{t('common.utils.delete')}</TooltipContent>
+        </Tooltip>
 
         <VirtuaExecutionResultRawDataDialog data={data}>
           <Button
