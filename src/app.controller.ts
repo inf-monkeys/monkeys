@@ -136,6 +136,7 @@ export class AppController {
         },
         hideAuthToast: config.auth.hideAuthToast,
         autoReload: config.auth.autoReload,
+        defaultOtherTeam: config.auth.defaultOtherTeam,
       },
       pages: {
         allowPageKeys: '*',
