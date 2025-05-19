@@ -157,10 +157,11 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   const { scrollTop, isScrolling } = useScroller(scrollRef);
   const { setImages } = useExecutionImageResultStore();
   // filter all images data from data
+
   useEffect(() => {
     const images = data.filter((item) => item.render.type === 'image');
     setImages(images as ImagesResult[]);
-  }, [data]);
+  }, [data, setImages]);
 
   const masonryGrid = useMasonry<IVinesExecutionResultItem>({
     positioner,
