@@ -43,50 +43,51 @@ export const FieldFile: React.FC<IFieldFileProps> = ({
 
     // 添加从props传入的原始图片
     if (originalInputImages && originalInputImages.length > 0) {
-      originalInputImages.forEach(img => images.add(img));
-      console.log(`FieldFile(${name}): 从props获取原始图片:`, originalInputImages);
+      originalInputImages.forEach((img) => images.add(img));
+      // console.log(`FieldFile(${name}): 从props获取原始图片:`, originalInputImages);
     }
 
     // 添加从typeOptions传入的原始图片
     if (typeOptionsOriginalFiles && typeOptionsOriginalFiles.length > 0) {
-      typeOptionsOriginalFiles.forEach(img => images.add(img));
-      console.log(`FieldFile(${name}): 从typeOptions获取原始图片:`, typeOptionsOriginalFiles);
+      typeOptionsOriginalFiles.forEach((img) => images.add(img));
+      // console.log(`FieldFile(${name}): 从typeOptions获取原始图片:`, typeOptionsOriginalFiles);
     }
 
     // 如果value是字符串且看起来像URL，也添加它
-    if (typeof value === 'string' && (
-      value.startsWith('http') ||
-      value.startsWith('/') ||
-      value.includes('.jpg') ||
-      value.includes('.png') ||
-      value.includes('/monkeys/')
-    )) {
+    if (
+      typeof value === 'string' &&
+      (value.startsWith('http') ||
+        value.startsWith('/') ||
+        value.includes('.jpg') ||
+        value.includes('.png') ||
+        value.includes('/monkeys/'))
+    ) {
       images.add(value);
-      console.log(`FieldFile(${name}): 从value获取原始图片:`, value);
     }
 
     // 如果value是数组，添加所有看起来像URL的字符串
     if (Array.isArray(value)) {
       const urlsFromValue: string[] = [];
-      value.forEach(item => {
-        if (typeof item === 'string' && (
-          item.startsWith('http') ||
-          item.startsWith('/') ||
-          item.includes('.jpg') ||
-          item.includes('.png') ||
-          item.includes('/monkeys/')
-        )) {
+      value.forEach((item) => {
+        if (
+          typeof item === 'string' &&
+          (item.startsWith('http') ||
+            item.startsWith('/') ||
+            item.includes('.jpg') ||
+            item.includes('.png') ||
+            item.includes('/monkeys/'))
+        ) {
           images.add(item);
           urlsFromValue.push(item);
         }
       });
-      if (urlsFromValue.length > 0) {
-        console.log(`FieldFile(${name}): 从value数组获取原始图片:`, urlsFromValue);
-      }
+      // if (urlsFromValue.length > 0) {
+      //   console.log(`FieldFile(${name}): 从value数组获取原始图片:`, urlsFromValue);
+      // }
     }
 
     const result = Array.from(images);
-    console.log(`FieldFile(${name}): 合并后的原始图片:`, result);
+    // console.log(`FieldFile(${name}): 合并后的原始图片:`, result);
     return result;
   }, [name, originalInputImages, typeOptionsOriginalFiles, value]);
 
@@ -95,9 +96,9 @@ export const FieldFile: React.FC<IFieldFileProps> = ({
   const enableImageMask = typeOptions?.enableImageMask ?? false;
 
   // 调试信息
-  React.useEffect(() => {
-    console.log(`FieldFile(${name}): 合并后的原始图片:`, allOriginalImages);
-  }, [name, allOriginalImages]);
+  // React.useEffect(() => {
+  //   console.log(`FieldFile(${name}): 合并后的原始图片:`, allOriginalImages);
+  // }, [name, allOriginalImages]);
 
   return (
     type === 'file' &&

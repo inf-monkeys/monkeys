@@ -13,12 +13,8 @@ export const addProtocolToURL = (url: string) => {
 export const checkIfCorrectURL = (url?: string) => {
   if (!url || typeof url !== 'string') return false;
 
-  // 记录原始URL
-  console.log('checkIfCorrectURL: 检查URL:', url);
-
   // 检查是否为有效的URL字符串
   if (!url.startsWith && !url.endsWith) {
-    console.log('checkIfCorrectURL: URL不是有效的字符串');
     return false;
   }
 
@@ -32,9 +28,10 @@ export const checkIfCorrectURL = (url?: string) => {
   const hasImageExtension = /\.(jpg|jpeg|png|gif|webp|bmp)($|\?)/i.test(url);
 
   // 检查是否包含特定的路径模式（如workflow路径）
-  const hasWorkflowPath = url.includes('/monkeys/workflow/') ||
-                          url.includes('/user-files/workflow-input/') ||
-                          url.includes('/monkeyminio01.daocloud.cn/');
+  const hasWorkflowPath =
+    url.includes('/monkeys/workflow/') ||
+    url.includes('/user-files/workflow-input/') ||
+    url.includes('/monkeyminio01.daocloud.cn/');
 
   // 对于HTTP URL，我们认为它是有效的，如果它包含图片扩展名或特定路径
   const isValidHttpUrl = isHttpUrl && (hasImageExtension || hasWorkflowPath || url.includes('/monkeys/'));
@@ -43,14 +40,6 @@ export const checkIfCorrectURL = (url?: string) => {
   const isValidRelativeUrl = isRelativeUrl && (hasImageExtension || hasWorkflowPath);
 
   const result = isValidHttpUrl || isValidRelativeUrl;
-  console.log('checkIfCorrectURL: 检查结果:', result, {
-    isHttpUrl,
-    isRelativeUrl,
-    hasImageExtension,
-    hasWorkflowPath,
-    isValidHttpUrl,
-    isValidRelativeUrl
-  });
 
   return result;
 };
@@ -58,11 +47,8 @@ export const checkIfCorrectURL = (url?: string) => {
 export const getFileNameByOssUrl = (url?: string, DEFAULT_NAME = 'unknown.jpg') => {
   if (!url) return DEFAULT_NAME;
 
-  console.log('getFileNameByOssUrl: 提取文件名, URL:', url);
-
   try {
     const decodedUrl = decodeURIComponent(url);
-    console.log('getFileNameByOssUrl: 解码后的URL:', decodedUrl);
 
     const regexPatterns = {
       ossWithPrefix: /^https?:\/\/\S+\/(?:\S+\/)*(R[^_]+)_(.+)$/,
@@ -78,7 +64,6 @@ export const getFileNameByOssUrl = (url?: string, DEFAULT_NAME = 'unknown.jpg') 
     const ossMatch = regexPatterns.ossWithPrefix.exec(decodedUrl);
     if (ossMatch && ossMatch[2]) {
       match = ossMatch[2];
-      console.log('getFileNameByOssUrl: 匹配ossWithPrefix模式:', match);
     }
 
     // 尝试general模式
@@ -86,7 +71,6 @@ export const getFileNameByOssUrl = (url?: string, DEFAULT_NAME = 'unknown.jpg') 
       const generalMatch = regexPatterns.general.exec(decodedUrl);
       if (generalMatch && generalMatch[1]) {
         match = generalMatch[1];
-        console.log('getFileNameByOssUrl: 匹配general模式:', match);
       }
     }
 
@@ -95,7 +79,6 @@ export const getFileNameByOssUrl = (url?: string, DEFAULT_NAME = 'unknown.jpg') 
       const workflowMatch = regexPatterns.workflowPath.exec(decodedUrl);
       if (workflowMatch && workflowMatch[1]) {
         match = workflowMatch[1];
-        console.log('getFileNameByOssUrl: 匹配workflowPath模式:', match);
       }
     }
 
@@ -104,7 +87,6 @@ export const getFileNameByOssUrl = (url?: string, DEFAULT_NAME = 'unknown.jpg') 
       const relativeMatch = regexPatterns.relativePath.exec(decodedUrl);
       if (relativeMatch && relativeMatch[1]) {
         match = relativeMatch[1];
-        console.log('getFileNameByOssUrl: 匹配relativePath模式:', match);
       }
     }
 
@@ -114,19 +96,15 @@ export const getFileNameByOssUrl = (url?: string, DEFAULT_NAME = 'unknown.jpg') 
       const lastPart = parts[parts.length - 1].split('?')[0];
       if (lastPart) {
         match = lastPart;
-        console.log('getFileNameByOssUrl: 使用URL最后一部分:', match);
       }
     }
 
     if (!match) {
-      console.log('getFileNameByOssUrl: 无法提取文件名，使用默认名称:', DEFAULT_NAME);
       return DEFAULT_NAME;
     }
 
-    console.log('getFileNameByOssUrl: 最终文件名:', match);
     return match;
   } catch (error) {
-    console.error('getFileNameByOssUrl: 提取文件名时出错:', error);
     return DEFAULT_NAME;
   }
 };
