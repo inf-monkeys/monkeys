@@ -291,7 +291,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
     } else {
       // 如果没有instanceId，直接返回上一页
       history.back();
-      // clearImages();
+      clearImages();
       toast.success(t('common.delete.success'));
     }
   });
