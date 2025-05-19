@@ -46,6 +46,7 @@ interface ITabularRenderProps {
   fieldChildren?: React.ReactNode;
 
   onSubmit?: (data: IWorkflowInputForm) => void;
+  onFormChange?: () => void;
 
   formClassName?: string;
   scrollAreaClassName?: string;
@@ -57,6 +58,7 @@ interface ITabularRenderProps {
   workflowId?: string;
 
   extra?: Record<string, any>;
+  originalInputImages?: string[]; // 添加原始输入图片属性
 }
 
 export const TabularRender: React.FC<ITabularRenderProps> = ({
@@ -68,6 +70,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
   fieldChildren,
 
   onSubmit,
+  onFormChange,
 
   formClassName,
   scrollAreaClassName,
@@ -79,6 +82,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
   workflowId,
 
   extra = {},
+  originalInputImages = [],
 }) => {
   const { t } = useTranslation();
 
@@ -131,6 +135,14 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
 
     form.reset(defaultValues);
   }, [inputs]);
+
+  // 监听表单值变化
+  useEffect(() => {
+    const subscription = form.watch(() => {
+      onFormChange?.();
+    });
+    return () => subscription.unsubscribe();
+  }, [form, onFormChange]);
 
   const handleSubmit = form.handleSubmit((data) => {
     for (const inputDef of inputs) {
@@ -285,6 +297,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
                 defValues={defValues}
                 miniMode={miniMode}
                 extra={extra}
+                originalInputImages={originalInputImages}
                 linkage={linkage}
                 setLinkage={setLinkage}
               />
@@ -306,6 +319,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
                         defValues={defValues}
                         miniMode={miniMode}
                         extra={extra}
+                        originalInputImages={originalInputImages}
                         linkage={linkage}
                         setLinkage={setLinkage}
                       />

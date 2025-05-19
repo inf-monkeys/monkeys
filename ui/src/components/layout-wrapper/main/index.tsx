@@ -4,8 +4,8 @@ import { Outlet } from '@tanstack/react-router';
 
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { ViewGuard } from '@/components/layout-wrapper/view-guard.tsx';
 import { Sidebar } from '@/components/layout/main/sidebar';
+import { ViewGuard } from '@/components/layout-wrapper/view-guard.tsx';
 import { cn } from '@/utils';
 
 interface IProps {

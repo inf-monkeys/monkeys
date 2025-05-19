@@ -1,6 +1,6 @@
 import { TenantStatisticsAuthGuard } from '@/common/guards/tenant-statistics.guard';
 import { SuccessResponse } from '@/common/response';
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { TenantService } from './tenant.service';
 
 @Controller('tenant')
@@ -16,9 +16,10 @@ export class TenantController {
     });
   }
 
-  @Get('range')
-  async findBetween(@Query() startTime: number, @Query() endTime: number) {
-    const result = await this.tenantService.findBetween(startTime, endTime);
+  @Post()
+  @HttpCode(200)
+  async findBetween(@Body() body: { startTime: number; endTime: number }) {
+    const result = await this.tenantService.findBetween(body.startTime, body.endTime);
     return new SuccessResponse({
       data: result,
     });

@@ -129,7 +129,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
                 <Button
                   className="!px-2.5"
                   variant="outline"
-                  onClick={() => tabular$.emit('restore-previous-param')}
+                  onClick={() => tabular$.emit('restore-previous-param')} // 恢复上一个参数
                   icon={<Undo2 />}
                   size="small"
                 />
@@ -141,7 +141,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
                 <Button
                   className="!px-2.5"
                   variant="outline"
-                  onClick={() => tabular$.emit('reset')}
+                  onClick={() => tabular$.emit('reset')} // 重置
                   icon={<RotateCcw />}
                   size="small"
                 />
@@ -155,7 +155,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
             <Button
               className="!px-2.5"
               variant="outline"
-              onClick={handlePasteInput}
+              onClick={handlePasteInput} // 粘贴参数
               icon={<Clipboard />}
               size="small"
             />
@@ -165,7 +165,8 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
         <Button
           variant="solid"
           className="size-full text-base"
-          onClick={() => submitButton.current?.click()}
+          onClick={() => submitButton.current?.click()} // 生成
+          size="small"
           disabled={openAIInterfaceEnabled}
           icon={<Sparkles className="fill-white" />}
           loading={loading}
