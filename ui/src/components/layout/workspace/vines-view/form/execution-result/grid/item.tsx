@@ -2,6 +2,7 @@ import React from 'react';
 
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { CirclePause } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
 import { VinesLoading } from '@/components/ui/loading';
@@ -19,6 +20,7 @@ interface IExecutionResultItemProps {
 export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({ result, event$ }) => {
   const { render } = result;
   const { type, data, status } = render;
+  const { t } = useTranslation();
 
   const alt = getAlt(result);
 
@@ -37,9 +39,10 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({ resul
       return (
         <div
           key={render.key}
-          className="flex h-40 items-center justify-center rounded-lg border border-input shadow-sm"
+          className="flex h-40 w-full flex-col items-center justify-center gap-2 rounded-lg border border-input shadow-sm"
         >
-          <CirclePause className="stroke-yellow-12" size={48} />
+          <CirclePause className="stroke-yellow-10" size={36} />
+          <h1 className="text-sm font-bold">{t('common.workflow.status.PAUSED')}</h1>
         </div>
       );
   }
