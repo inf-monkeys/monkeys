@@ -33,7 +33,7 @@ export class TenantService {
   }
 
   async findBetween(startTime: number, endTime: number) {
-    const { results: rawCurrentExecutions } = await conductorClient.workflowResource.searchV21();
+    const { results: rawCurrentExecutions } = await conductorClient.workflowResource.searchV21(undefined, undefined, undefined, undefined, `startTime > ${startTime} AND startTime < ${endTime}`);
     const currentExecutions = rawCurrentExecutions.filter((e) => e.input?.__context?.appId === config.server.appId && e.startTime >= startTime && e.endTime <= endTime);
 
     const imageSuffix = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
