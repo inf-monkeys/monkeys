@@ -27,6 +27,14 @@ export interface ISystemConfig {
     icons?: {
       error?: string;
     };
+    views: {
+      form: {
+        toast: {
+          afterCreate: boolean;
+          afterDelete: boolean;
+        };
+      };
+    };
     hideSpaceHeader: boolean;
     showSidebarTeamSelector: boolean;
     showSidebarPageGroup: boolean;

@@ -4,11 +4,12 @@ import { useSWRConfig } from 'swr';
 
 import { useMemoizedFn } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
-import { isString } from 'lodash';
+import { isBoolean, isString } from 'lodash';
 import { Download, Ellipsis, RotateCcw, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { useSystemConfig } from '@/apis/common';
 import { deleteWorkflowExecution } from '@/apis/workflow/execution';
 import { VirtuaExecutionResultRawDataDialog } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/wrapper/raw-data-dialog.tsx';
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,8 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
 }) => {
   const { mutate } = useSWRConfig();
 
+  const { data: oem } = useSystemConfig();
+
   const { vines } = useVinesFlow();
 
   const { t } = useTranslation();
@@ -52,7 +55,6 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
 
       toast.success(t('common.utils.download.success'));
     } catch (error) {
-      console.error('下载异常:', error);
       toast.error(t('common.utils.download.error'));
     }
   });
@@ -60,18 +62,32 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
   const handleDelete = useMemoizedFn(() => {
     const targetInstanceId = data?.instanceId;
     if (targetInstanceId) {
-      toast.promise(deleteWorkflowExecution(targetInstanceId), {
-        success: () => {
-          void mutate(
-            (key) => isString(key) && key.startsWith(`/api/workflow/executions/${vines.workflowId}/outputs`),
-          ).then(() => {
-            event$.emit?.();
+      if (!isBoolean(oem?.theme?.views?.form?.toast?.afterDelete) || oem?.theme?.views?.form?.toast?.afterDelete) {
+        toast.promise(deleteWorkflowExecution(targetInstanceId), {
+          success: () => {
+            void mutate(
+              (key) => isString(key) && key.startsWith(`/api/workflow/executions/${vines.workflowId}/outputs`),
+            ).then(() => {
+              event$.emit?.();
+            });
+            return t('common.delete.success');
+          },
+          error: t('common.delete.error'),
+          loading: t('common.delete.loading'),
+        });
+      } else {
+        try {
+          deleteWorkflowExecution(targetInstanceId).then(() => {
+            void mutate(
+              (key) => isString(key) && key.startsWith(`/api/workflow/executions/${vines.workflowId}/outputs`),
+            ).then(() => {
+              event$.emit?.();
+            });
           });
-          return t('common.delete.success');
-        },
-        error: t('common.delete.error'),
-        loading: t('common.delete.loading'),
-      });
+        } catch (error) {
+          toast.error(t('common.delete.error'));
+        }
+      }
     }
   });
 
@@ -100,7 +116,11 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
     );
     vines.start({ inputData, onlyStart: true }).then((status) => {
       if (status) {
-        toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
+        if (
+          !isBoolean(oem?.theme?.views?.form?.toast?.afterCreate) ||
+          oem?.theme?.views?.form?.toast?.afterCreate != false
+        )
+          toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
         handleDelete();
         event$.emit?.();
       }

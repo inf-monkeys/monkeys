@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { createLazyFileRoute, useParams, useRouter } from '@tanstack/react-router';
 
 import { useEventEmitter, useMemoizedFn } from 'ahooks';
+import { isBoolean } from 'lodash';
 import {
   ChevronDown,
   ChevronUp,
@@ -23,6 +24,7 @@ import { useFormContext } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { useSystemConfig } from '@/apis/common';
 import { deleteWorkflowExecution, getWorkflowExecution } from '@/apis/workflow/execution';
 import ImageDetailLayout from '@/components/layout/image-detail-layout';
 import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
@@ -42,9 +44,6 @@ interface TabularRenderWrapperProps {
   height?: number;
   execution?: VinesWorkflowExecution;
 }
-
-// 扩展 TTabularEvent 类型
-type ExtendedTabularEvent = TTabularEvent | { type: 'form-change'; data: any };
 
 // TabularRender包装组件，用于获取工作流输入参数
 const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, execution }) => {
@@ -168,6 +167,7 @@ const TabularFooterButtons: React.FC<TabularFooterButtonsProps> = ({ processedIn
   const { t } = useTranslation();
   const { copy } = useCopy();
   const { vines } = useVinesFlow();
+  const { data: oem } = useSystemConfig();
   const [loading, setLoading] = useState(false);
   const form = useFormContext();
 
@@ -177,7 +177,11 @@ const TabularFooterButtons: React.FC<TabularFooterButtonsProps> = ({ processedIn
       setLoading(true);
       try {
         await vines.start({ inputData: values, onlyStart: true });
-        toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
+        if (
+          !isBoolean(oem?.theme?.views?.form?.toast?.afterCreate) ||
+          oem?.theme?.views?.form?.toast?.afterCreate != false
+        )
+          toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
       } catch (error) {
         console.error('生成失败:', error);
         toast.error(t('workspace.pre-view.actuator.execution.error'));
