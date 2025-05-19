@@ -30,7 +30,7 @@ interface IVirtuaExecutionResultGridImageItemProps {
   outputIndex?: number;
 }
 
-function caculateThumbUrl(url: string) {
+function calculateThumbUrl(url: string) {
   const urlPath = url.split('/');
   const urlPathLength = urlPath.length;
   return urlPath.map((it, i) => (i === urlPathLength - 2 ? `${it}_thumb` : it)).join('/');
@@ -52,7 +52,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   const [previewSrc, setPreviewSrc] = React.useState(src);
   useAsyncEffect(async () => {
     if (!src) return;
-    const thumbnailSrc = caculateThumbUrl(src);
+    const thumbnailSrc = calculateThumbUrl(src);
     if (await checkImageUrlAvailable(thumbnailSrc)) {
       setPreviewSrc(thumbnailSrc);
     } else {
@@ -64,7 +64,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   const handleImageClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (workflowId && src) {
-      navigate({
+      void navigate({
         to: '/$teamId/workspace/$workflowId/image-detail/',
         params: {
           teamId: window['vinesTeamId'],

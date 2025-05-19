@@ -49,6 +49,14 @@ export interface ServerConfig {
     icons: {
       error?: string;
     };
+    views: {
+      form: {
+        toast: {
+          afterCreate: boolean;
+          afterDelete: boolean;
+        };
+      };
+    };
     hideSpaceHeader?: boolean;
     showSidebarTeamSelector?: boolean;
     showSidebarPageGroup?: boolean;
@@ -304,6 +312,14 @@ export const config: Config = {
       },
       icons: {
         error: readConfig('server.customization.icons.error', undefined),
+      },
+      views: {
+        form: {
+          toast: {
+            afterCreate: readConfig('server.customization.views.form.toast.afterCreate', true),
+            afterDelete: readConfig('server.customization.views.form.toast.afterDelete', true),
+          },
+        },
       },
       hideSpaceHeader: readConfig('server.customization.hideSpaceHeader', false),
       showSidebarPageGroup: readConfig('server.customization.showSidebarPageGroup', true),
