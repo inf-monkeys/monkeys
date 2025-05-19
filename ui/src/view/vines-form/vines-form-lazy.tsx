@@ -4,10 +4,10 @@ import { useEventEmitter, useInViewport } from 'ahooks';
 import { ShieldBan } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { useVinesOriginWorkflow } from '@/components/layout-wrapper/workspace/utils.ts';
 import { VinesExecutionResult } from '@/components/layout/workspace/vines-view/form/execution-result';
 import { VinesTabular } from '@/components/layout/workspace/vines-view/form/tabular';
 import { IframeHeader } from '@/components/layout/workspace/vines-view/form/tabular/iframe-header.tsx';
-import { useVinesOriginWorkflow } from '@/components/layout-wrapper/workspace/utils.ts';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 import { usePageStore } from '@/store/usePageStore';
@@ -51,7 +51,7 @@ const VinesForm: React.FC = () => {
       <div
         ref={ref}
         className={cn(
-          'relative grid size-full grid-cols-5 p-6',
+          'relative grid size-full grid-cols-5 p-4',
           workbenchVisible && 'p-4',
           isMiniFrame && 'h-[calc(100%-3rem)] grid-cols-1 p-2',
           vinesIFrameVisible && 'p-4',
@@ -59,7 +59,7 @@ const VinesForm: React.FC = () => {
       >
         <VinesTabular
           className={cn(
-            'col-span-2 -ml-1',
+            'col-span-2',
             isMiniFrame && 'absolute z-20 size-full bg-slate-1 p-4 transition-opacity',
             isMiniFrame && historyVisible && 'pointer-events-none opacity-0',
             vinesIFrameVisible && !isMiniFrame && 'pr-4',
