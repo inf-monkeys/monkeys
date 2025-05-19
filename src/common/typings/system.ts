@@ -19,6 +19,9 @@ export interface ISystemConfig {
     toast: {
       position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
     };
+    icons: {
+      error?: string;
+    };
     hideSpaceHeader: boolean;
     showSidebarPageGroup: boolean;
     showSidebarTeamSelector: boolean;

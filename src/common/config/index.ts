@@ -46,6 +46,9 @@ export interface ServerConfig {
     toast: {
       position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
     };
+    icons: {
+      error?: string;
+    };
     hideSpaceHeader?: boolean;
     showSidebarTeamSelector?: boolean;
     showSidebarPageGroup?: boolean;
@@ -298,6 +301,9 @@ export const config: Config = {
       },
       toast: {
         position: readConfig('server.customization.toast.position', 'bottom-right'),
+      },
+      icons: {
+        error: readConfig('server.customization.icons.error', undefined),
       },
       hideSpaceHeader: readConfig('server.customization.hideSpaceHeader', false),
       showSidebarPageGroup: readConfig('server.customization.showSidebarPageGroup', true),
