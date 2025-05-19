@@ -25,11 +25,6 @@ import { toast } from 'sonner';
 
 import { deleteWorkflowExecution, getWorkflowExecution } from '@/apis/workflow/execution';
 import ImageDetailLayout from '@/components/layout/image-detail-layout';
-import {
-  useExecutionImageResultStore,
-  useHasNextImage,
-  useHasPrevImage,
-} from '@/components/layout/workspace/vines-view/form/execution-result/grid';
 import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -37,10 +32,11 @@ import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-
 import { useCopy } from '@/hooks/use-copy';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
+import { useExecutionImageResultStore, useHasNextImage, useHasPrevImage } from '@/store/useExecutionImageResultStore';
 
 import 'rc-image/assets/index.css';
 
-interface IImageDetailProps { }
+interface IImageDetailProps {}
 
 interface TabularRenderWrapperProps {
   height?: number;
@@ -48,7 +44,7 @@ interface TabularRenderWrapperProps {
 }
 
 // 扩展 TTabularEvent 类型
-type ExtendedTabularEvent = TTabularEvent | { type: 'form-change'; data: any };
+// type ExtendedTabularEvent = TTabularEvent | { type: 'form-change'; data: any };
 
 // TabularRender包装组件，用于获取工作流输入参数
 const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, execution }) => {
@@ -81,20 +77,20 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
   // 处理输入字段和原始图片
   React.useEffect(() => {
     if (!inputs || inputs.length === 0) {
-      console.log('TabularRenderWrapper: 没有输入字段可用');
+      // console.log('TabularRenderWrapper: 没有输入字段可用');
       setProcessedInputs([]);
       return;
     }
 
     const newInputs = execution
       ? inputs.map((input) => {
-        return {
-          ...input,
-          default: execution.input?.[input.name] ?? input.default,
-        };
-      })
+          return {
+            ...input,
+            default: execution.input?.[input.name] ?? input.default,
+          };
+        })
       : [];
-    console.log('TabularRenderWrapper: 表单输入字段:', newInputs);
+    // console.log('TabularRenderWrapper: 表单输入字段:', newInputs);
     setProcessedInputs(newInputs);
 
     // 保存原始输入值
@@ -183,7 +179,7 @@ const TabularFooterButtons: React.FC<TabularFooterButtonsProps> = ({ processedIn
         await vines.start({ inputData: values, onlyStart: true });
         toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
       } catch (error) {
-        console.error('生成失败:', error);
+        // console.error('生成失败:', error);
         toast.error(t('workspace.pre-view.actuator.execution.error'));
       } finally {
         setLoading(false);
@@ -233,18 +229,33 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const [imageFlipY, setImageFlipY] = useState(false);
   const [imageScale, setImageScale] = useState(1);
 
-  // const [urlState] = useUrlState({
-  //   imageUrl: '',
-  //   instanceId: '',
-  // });
   const { images, position, nextImage, prevImage, clearImages } = useExecutionImageResultStore();
+
+  useEffect(() => {
+    const controller = new AbortController();
+    document.body.addEventListener(
+      'keydown',
+      (e) => {
+        if (e.key === 'ArrowUp') {
+          prevImage();
+        } else if (e.key === 'ArrowDown') {
+          nextImage();
+        }
+      },
+      {
+        signal: controller.signal,
+      },
+    );
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
   const currentImage = images[position];
   const imageUrl = currentImage?.render?.data as string;
   const instanceId = currentImage?.instanceId;
   const hasPrev = useHasPrevImage();
   const hasNext = useHasNextImage();
-
-  // const { imageUrl, instanceId } = urlState;
 
   const [execution, setExecution] = useState<VinesWorkflowExecution | undefined>();
 
@@ -273,8 +284,6 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
       imgElement.style.transition = 'transform 0.3s ease';
     }
   }, [imageRotation, imageFlipX, imageFlipY, imageScale]);
-
-  // 上一张/下一张图片功能已禁用
 
   // 处理删除图片
   const handleDeleteImage = useMemoizedFn(() => {
@@ -466,9 +475,11 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                               const link = document.createElement('a');
                               link.href = imageUrl;
                               link.setAttribute('download', '');
-                              link.setAttribute('target', '_self');
+                              link.setAttribute('rel', 'noreferrer');
                               link.click();
-                            } catch (error) { }
+                            } catch (error) {
+                              // do nothing
+                            }
                           }
                         }}
                       />

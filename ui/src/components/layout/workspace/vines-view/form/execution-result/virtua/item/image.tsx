@@ -12,18 +12,17 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
 import { useCopy } from '@/hooks/use-copy.ts';
+import { useExecutionImageResultStore } from '@/store/useExecutionImageResultStore';
 import { useFlowStore } from '@/store/useFlowStore';
-
-import { useExecutionImageResultStore } from '../../grid';
 
 import 'rc-image/assets/index.css';
 
 export type IVinesExecutionResultImageAlt =
   | string
   | {
-    label: string;
-    value: string;
-  };
+      label: string;
+      value: string;
+    };
 
 interface IVirtuaExecutionResultGridImageItemProps {
   src: string;
