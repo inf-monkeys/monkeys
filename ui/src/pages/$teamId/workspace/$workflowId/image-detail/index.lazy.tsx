@@ -25,18 +25,22 @@ import { toast } from 'sonner';
 
 import { deleteWorkflowExecution, getWorkflowExecution } from '@/apis/workflow/execution';
 import ImageDetailLayout from '@/components/layout/image-detail-layout';
+import {
+  useExecutionImageResultStore,
+  useHasNextImage,
+  useHasPrevImage,
+} from '@/components/layout/workspace/vines-view/form/execution-result/grid';
 import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
 import { useCopy } from '@/hooks/use-copy';
-import useUrlState from '@/hooks/use-url-state.ts';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
 
 import 'rc-image/assets/index.css';
 
-interface IImageDetailProps {}
+interface IImageDetailProps { }
 
 interface TabularRenderWrapperProps {
   height?: number;
@@ -84,11 +88,11 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
 
     const newInputs = execution
       ? inputs.map((input) => {
-          return {
-            ...input,
-            default: execution.input?.[input.name] ?? input.default,
-          };
-        })
+        return {
+          ...input,
+          default: execution.input?.[input.name] ?? input.default,
+        };
+      })
       : [];
     console.log('TabularRenderWrapper: 表单输入字段:', newInputs);
     setProcessedInputs(newInputs);
@@ -229,12 +233,18 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const [imageFlipY, setImageFlipY] = useState(false);
   const [imageScale, setImageScale] = useState(1);
 
-  const [urlState] = useUrlState({
-    imageUrl: '',
-    instanceId: '',
-  });
+  // const [urlState] = useUrlState({
+  //   imageUrl: '',
+  //   instanceId: '',
+  // });
+  const { images, position, nextImage, prevImage, clearImages } = useExecutionImageResultStore();
+  const currentImage = images[position];
+  const imageUrl = currentImage?.render?.data as string;
+  const instanceId = currentImage?.instanceId;
+  const hasPrev = useHasPrevImage();
+  const hasNext = useHasNextImage();
 
-  const { imageUrl, instanceId } = urlState;
+  // const { imageUrl, instanceId } = urlState;
 
   const [execution, setExecution] = useState<VinesWorkflowExecution | undefined>();
 
@@ -281,6 +291,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
     } else {
       // 如果没有instanceId，直接返回上一页
       history.back();
+      // clearImages();
       toast.success(t('common.delete.success'));
     }
   });
@@ -298,14 +309,14 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
       <div className="flex flex-col items-center gap-4">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button icon={<ChevronUp />} variant="outline" size="small" disabled={true} />
+            <Button icon={<ChevronUp />} variant="outline" size="small" disabled={!hasPrev} onClick={prevImage} />
           </TooltipTrigger>
           <TooltipContent>{t('workspace.image-detail.prev-image', '上一张')}</TooltipContent>
         </Tooltip>
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button icon={<ChevronDown />} variant="outline" size="small" disabled={true} />
+            <Button icon={<ChevronDown />} variant="outline" size="small" disabled={!hasNext} onClick={nextImage} />
           </TooltipTrigger>
           <TooltipContent>{t('workspace.image-detail.next-image', '下一张')}</TooltipContent>
         </Tooltip>
@@ -457,7 +468,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                               link.setAttribute('download', '');
                               link.setAttribute('target', '_self');
                               link.click();
-                            } catch (error) {}
+                            } catch (error) { }
                           }
                         }}
                       />

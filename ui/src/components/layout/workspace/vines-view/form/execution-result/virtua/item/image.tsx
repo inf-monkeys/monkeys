@@ -14,14 +14,16 @@ import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
 import { useCopy } from '@/hooks/use-copy.ts';
 import { useFlowStore } from '@/store/useFlowStore';
 
+import { useExecutionImageResultStore } from '../../grid';
+
 import 'rc-image/assets/index.css';
 
 export type IVinesExecutionResultImageAlt =
   | string
   | {
-      label: string;
-      value: string;
-    };
+    label: string;
+    value: string;
+  };
 
 interface IVirtuaExecutionResultGridImageItemProps {
   src: string;
@@ -46,6 +48,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   const navigate = useNavigate();
   const { copy } = useCopy();
   const workflowId = useFlowStore((s) => s.workflowId);
+  const { images, setPosition } = useExecutionImageResultStore();
 
   const altLabel = isObject(alt) ? alt.label : alt;
   const altContent = isObject(alt) ? alt.value : alt;
@@ -64,6 +67,8 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   const handleImageClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (workflowId && src) {
+      const position = images?.findIndex((image) => (image.render.data as string) === src);
+      setPosition(position);
       navigate({
         to: '/$teamId/workspace/$workflowId/image-detail/',
         params: {

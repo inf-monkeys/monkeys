@@ -2,6 +2,7 @@ import React, { Dispatch, SetStateAction, useCallback, useEffect, useRef, useSta
 
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { useInfiniteLoader, useMasonry, useResizeObserver } from 'masonic';
+import { create } from 'zustand';
 
 import { useWorkflowExecutionList } from '@/apis/workflow/execution';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result/index.tsx';
@@ -30,6 +31,66 @@ interface IExecutionResultGridProps extends React.ComponentPropsWithoutRef<'div'
 
   event$: EventEmitter<void>;
 }
+
+type ImagesResult = IVinesExecutionResultItem & {
+  render: {
+    type: 'image';
+  };
+};
+
+interface IExecutionImageResultStore {
+  position: number;
+  images: ImagesResult[];
+  setPosition: (newPosition: number) => void;
+  setImages: (images: ImagesResult[]) => void;
+  clearImages: () => void;
+  nextImage: () => void;
+  prevImage: () => void;
+}
+
+export const useExecutionImageResultStore = create<IExecutionImageResultStore>()((set) => ({
+  position: 0,
+  images: [],
+  setPosition: (newPosition) => {
+    set({
+      position: newPosition,
+    });
+  },
+  clearImages: () =>
+    set({
+      images: [],
+    }),
+  setImages: (images) =>
+    set({
+      images,
+    }),
+  nextImage: () =>
+    set((state) => {
+      const length = state.images.length;
+      if (state.position < length - 1) {
+        return {
+          position: state.position + 1,
+        };
+      } else {
+        return state;
+      }
+    }),
+  prevImage: () => {
+    set((state) => {
+      if (state.position > 0) {
+        return {
+          position: state.position - 1,
+        };
+      } else {
+        return state;
+      }
+    });
+  },
+}));
+export const useHasNextImage = () =>
+  useExecutionImageResultStore((store) => store.images?.length && store.position < store.images.length - 1);
+export const useHasPrevImage = () =>
+  useExecutionImageResultStore((store) => store.images?.length && store.position > 0);
 
 export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   workflowId,
@@ -94,6 +155,12 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   const resizeObserver = useResizeObserver(positioner);
 
   const { scrollTop, isScrolling } = useScroller(scrollRef);
+  const { setImages } = useExecutionImageResultStore();
+  // filter all images data from data
+  useEffect(() => {
+    const images = data.filter((item) => item.render.type === 'image');
+    setImages(images as ImagesResult[]);
+  }, [data]);
 
   const masonryGrid = useMasonry<IVinesExecutionResultItem>({
     positioner,
