@@ -4,11 +4,12 @@ import { useSWRConfig } from 'swr';
 
 import { useEventEmitter, useMemoizedFn, useThrottleEffect } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
-import { isString } from 'lodash';
+import { isBoolean, isString } from 'lodash';
 import { Clipboard, RotateCcw, Sparkles, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { useSystemConfig } from '@/apis/common';
 import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -28,6 +29,8 @@ interface IVinesTabularProps extends React.ComponentPropsWithoutRef<'div'> {
 export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, setHistoryVisible, event$, height }) => {
   const { mutate } = useSWRConfig();
   const { t } = useTranslation();
+
+  const { data: oem } = useSystemConfig();
 
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
 
@@ -79,7 +82,11 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
       .start({ inputData, onlyStart: true })
       .then((status) => {
         if (status) {
-          toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
+          if (
+            !isBoolean(oem?.theme?.views?.form?.toast?.afterCreate) ||
+            oem?.theme?.views?.form?.toast?.afterCreate != false
+          )
+            toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
           setHistoryVisible(true);
           setLoading(false);
           event$.emit?.();
