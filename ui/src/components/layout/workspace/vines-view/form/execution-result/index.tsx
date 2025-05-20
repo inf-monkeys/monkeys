@@ -5,9 +5,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { History } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useWorkflowExecutionList } from '@/apis/workflow/execution';
+import { useWorkflowExecutionList, useWorkflowExecutionListInfinite } from '@/apis/workflow/execution';
 import { ExecutionResultGrid } from '@/components/layout/workspace/vines-view/form/execution-result/grid';
-import { useVinesIframeMessage } from '@/components/layout/workspace/vines-view/form/execution-result/iframe-message.ts';
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { Label } from '@/components/ui/label.tsx';
 import { VinesLoading } from '@/components/ui/loading';
@@ -16,7 +15,13 @@ import { ImagesResult, useExecutionImageResultStore } from '@/store/useExecution
 import { useFlowStore } from '@/store/useFlowStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
-import { convertExecutionResultToItemList, IVinesExecutionResultItem } from '@/utils/execution.ts';
+import {
+  concatResultListReducer,
+  convertExecutionResultToItemList,
+  IVinesExecutionResultItem,
+} from '@/utils/execution.ts';
+
+import { useVinesIframeMessage } from './iframe-message';
 
 interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {
   event$: EventEmitter<void>;
@@ -43,37 +48,62 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   const storeWorkflowId = useFlowStore((s) => s.workflowId);
   const workflowId = storeWorkflowId && visible ? storeWorkflowId : null;
 
+  const [executionResultList, setExecutionResultList] = useState<IVinesExecutionResultItem[]>([]);
+
   const {
-    data: firstPageExecutionListData,
-    isLoading: firstPageExecutionListIsLoading,
-    mutate: firstPageExecutionListMutate,
-  } = useWorkflowExecutionList(workflowId, 1, LOAD_LIMIT);
+    data: executionListData,
+    mutate: mutateExecutionList,
+    size: currentPage,
+    setSize: setCurrentPage,
+    isLoading,
+  } = useWorkflowExecutionListInfinite(workflowId, LOAD_LIMIT);
 
+  const { data: firstPageExecutionListData } = useWorkflowExecutionList(workflowId, 1, LOAD_LIMIT);
   const firstPageExecutionList = firstPageExecutionListData?.data ?? [];
-  const totalCount = firstPageExecutionListData?.total ?? 0;
 
-  const [resultList, setResultList] = useState<IVinesExecutionResultItem[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const hasMore =
+    executionListData?.length != 0 &&
+    executionListData?.[currentPage - 1]?.total != 0 &&
+    executionListData?.[currentPage - 1]?.data.length == LOAD_LIMIT;
+
+  const totalCount = executionListData?.[0]?.total ?? 0;
+
+  useEffect(() => {
+    if (!executionListData || executionListData.length == 0 || executionListData[0]?.total == 0) return;
+    const list: IVinesExecutionResultItem[] = [];
+    for (const execution of executionListData ?? []) {
+      if (execution && execution.data)
+        list.push(...execution.data.map(convertExecutionResultToItemList).reduce(concatResultListReducer, []));
+    }
+    setExecutionResultList(list);
+  }, [executionListData]);
 
   // 第一页任务及状态变化
   useEffect(() => {
     // 筛选状态变更的替换原 result
     const changed = firstPageExecutionList.filter(
-      (r) => resultList.findIndex((pr) => r.instanceId === pr.instanceId && r.status != pr.status) != -1,
+      (r) =>
+        executionResultList.findIndex(
+          (pr) => r.instanceId === pr.instanceId && r.status != pr.status && !pr.render.isDeleted,
+        ) != -1,
     );
 
     // 筛选不存在的拼接到头部
     const nonExist = firstPageExecutionList.filter(
-      (r) => !resultList.map(({ instanceId }) => instanceId).includes(r.instanceId),
+      (r) => !executionResultList.map(({ instanceId }) => instanceId).includes(r.instanceId),
     );
 
     // 没有变化返回
     if (changed.length == 0 && nonExist.length == 0) return;
 
-    setResultList((prevList) => {
+    setExecutionResultList((prevList) => {
       for (const changedExecution of changed) {
         const index = prevList.findIndex((pr) => changedExecution.instanceId === pr.instanceId);
-        prevList = prevList.filter((pr) => changedExecution.instanceId != pr.instanceId);
+        // prevList[index].render = {
+        //   ...prevList[index].render,
+        //   isDeleted: true,
+        // };
+        prevList = prevList.filter((_, i) => i != index);
         prevList.splice(index, 0, ...convertExecutionResultToItemList(changedExecution));
       }
       for (const nonExistExecution of nonExist.reverse()) {
@@ -86,30 +116,32 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   const { setImages } = useExecutionImageResultStore();
   // filter results for image detail route
   useEffect(() => {
-    const images = resultList.filter((item) => item.render.type.toLowerCase() === 'image');
+    const images = executionResultList.filter((item) => item.render.type.toLowerCase() === 'image');
     setImages(images as ImagesResult[]);
-  }, [resultList, setImages]);
+  }, [executionResultList, setImages]);
 
   useVinesIframeMessage({
-    outputs: firstPageExecutionList,
-    mutate: firstPageExecutionListMutate,
+    outputs: executionResultList,
+    mutate: mutateExecutionList,
     enable: enablePostMessage,
   });
 
   return (
     <Card className={cn('relative bg-card-light dark:bg-card-dark', className)}>
       <CardContent className="p-0">
-        <ExecutionResultGrid
-          workflowId={workflowId}
-          height={height}
-          page={currentPage}
-          setPage={setCurrentPage}
-          data={resultList}
-          setData={setResultList}
-          event$={event$}
-        />
+        {executionResultList && executionResultList.length && !isLoading ? (
+          <ExecutionResultGrid
+            workflowId={workflowId}
+            height={height}
+            setPage={setCurrentPage}
+            data={executionResultList}
+            hasMore={hasMore}
+            event$={event$}
+            mutate={mutateExecutionList}
+          />
+        ) : null}
         <AnimatePresence mode="popLayout">
-          {firstPageExecutionListIsLoading ? (
+          {isLoading ? (
             <motion.div
               key="vines-execution-result-loading"
               className="vines-center pointer-events-none absolute left-0 top-0 z-0 size-full"

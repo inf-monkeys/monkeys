@@ -1,57 +1,50 @@
 import React, { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
 
+import { SWRInfiniteResponse } from 'swr/infinite';
+
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { useInfiniteLoader, useMasonry, useResizeObserver } from 'masonic';
 
-import { useWorkflowExecutionList } from '@/apis/workflow/execution';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result/index.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
-import {
-  concatResultListReducer,
-  convertExecutionResultToItemList,
-  IVinesExecutionResultItem,
-} from '@/utils/execution.ts';
+import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
 import { ExecutionResultItem } from './item';
 import { usePositioner } from './utils';
 
 interface IExecutionResultGridProps extends React.ComponentPropsWithoutRef<'div'> {
-  workflowId?: string | null;
+  workflowId: string | null;
   height: number;
-
-  page: number;
   setPage: Dispatch<SetStateAction<number>>;
-
   data: IVinesExecutionResultItem[];
-  setData: Dispatch<SetStateAction<IVinesExecutionResultItem[]>>;
-
+  hasMore: boolean;
   event$: EventEmitter<void>;
+  mutate?: SWRInfiniteResponse['mutate'];
 }
+
+export type IAddDeletedInstanceId = (instanceId: string) => void;
 
 export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   workflowId,
   height,
-  page,
   setPage,
   data,
-  setData,
+  hasMore,
   event$,
+  mutate,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [hasMore, setHasMore] = useState(true);
   const formContainerWidth = usePageStore((s) => s.containerWidth);
   const { isUseWorkSpace } = useVinesRoute();
 
-  const { data: currentPageExecutionListData, isLoading } = useWorkflowExecutionList(workflowId, page, LOAD_LIMIT, 0);
-
   const loadMore = useInfiniteLoader(
     async () => {
-      if (isLoading || !hasMore) return;
+      if (!hasMore) return;
       setPage((prev) => prev + 1);
     },
     {
@@ -60,40 +53,28 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     },
   );
 
-  useEffect(() => {
-    if (!currentPageExecutionListData) return;
-
-    const currentPageResultList = currentPageExecutionListData.data
-      .map(convertExecutionResultToItemList)
-      .reduce(concatResultListReducer, []);
-
-    if (currentPageResultList && currentPageResultList.length < LOAD_LIMIT) {
-      setHasMore(false);
-    }
-
-    if (page === 1) return;
-
-    const nonExist = currentPageResultList.filter(
-      (item) => !data.some((existingItem) => existingItem.instanceId === item.instanceId),
-    );
-
-    if (nonExist.length === 0) return;
-
-    setData((prevData) => [...prevData, ...nonExist]);
-  }, [currentPageExecutionListData, page]);
+  const [deletedInstanceIdList, setDeletedInstanceIdList] = useState<string[]>([]);
 
   const containerWidth = formContainerWidth * 0.6 - 16 - 16 - 4 - (isUseWorkSpace ? 140 : 0);
 
-  const positioner = usePositioner({
-    width: containerWidth,
-    columnGutter: 8,
-    columnWidth: 200,
-    rowGutter: 8,
-  });
+  const positioner = usePositioner(
+    {
+      width: containerWidth,
+      columnGutter: 8,
+      columnWidth: 200,
+      rowGutter: 8,
+    },
+    [data.length, workflowId],
+  );
 
   const resizeObserver = useResizeObserver(positioner);
 
   const { scrollTop, isScrolling } = useScroller(scrollRef);
+
+  const addDeletedInstanceId = (instanceId: string) => {
+    if (!deletedInstanceIdList.includes(instanceId))
+      setDeletedInstanceIdList((prevState) => [...prevState, instanceId]);
+  };
 
   const masonryGrid = useMasonry<IVinesExecutionResultItem>({
     positioner,
@@ -104,12 +85,18 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     items: data ?? [],
     overscanBy: 3,
     render: useCallback(
-      ({ data: item, index }) => (
-        <ExecutionResultItem key={`${index}-${item.render.key}`} result={item} event$={event$} />
+      ({ data: item }) => (
+        <ExecutionResultItem
+          result={item}
+          event$={event$}
+          isDeleted={item.render.isDeleted || deletedInstanceIdList.includes(item.instanceId)}
+          addDeletedInstanceId={addDeletedInstanceId}
+          mutate={mutate}
+        />
       ),
-      [data],
+      [data, deletedInstanceIdList],
     ),
-    itemKey: (item) => item.render.key,
+    itemKey: (item, index) => `${index}-${item.render.key}`,
     onRender: loadMore,
     itemHeightEstimate: 400,
     resizeObserver,

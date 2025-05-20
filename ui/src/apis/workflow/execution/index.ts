@@ -1,4 +1,5 @@
 import useSWR from 'swr';
+import useSWRInfinite from 'swr/infinite';
 import useSWRMutation from 'swr/mutation';
 
 import FileSaver from 'file-saver';
@@ -15,8 +16,8 @@ import {
 import { paginationWrapper } from '@/apis/wrapper.ts';
 import { VinesTask } from '@/package/vines-flow/core/nodes/typings.ts';
 import { VinesWorkflowExecution, VinesWorkflowExecutionOutputListItem } from '@/package/vines-flow/core/typings.ts';
-import { IVinesSearchWorkflowExecutionsParams } from '@/schema/workspace/workflow-execution.ts';
 import { IVinesSearchWorkflowExecutionStatParams } from '@/schema/workspace/workflow-execution-stat.ts';
+import { IVinesSearchWorkflowExecutionsParams } from '@/schema/workspace/workflow-execution.ts';
 
 export const executionWorkflow = (
   workflowId: string,
@@ -91,6 +92,25 @@ export const useWorkflowExecutionList = (workflowId?: string | null, page = 1, l
     workflowId ? `/api/workflow/executions/${workflowId}/outputs?${qs.stringify({ page, limit })}` : null,
     vinesFetcher({ method: 'GET', wrapper: paginationWrapper }),
     { refreshInterval },
+  );
+
+export const useWorkflowExecutionListInfinite = (workflowId?: string | null, limit = 20) =>
+  useSWRInfinite<IPaginationListData<VinesWorkflowExecutionOutputListItem> | undefined>(
+    (index, previousPageData) => {
+      // 如果已经到达最后一页，返回 null 停止请求
+      if (previousPageData && !previousPageData.data.length) {
+        return null;
+      }
+
+      // 构建分页参数
+      const page = index + 1;
+      return workflowId ? `/api/workflow/executions/${workflowId}/outputs?${qs.stringify({ page, limit })}` : null;
+    },
+    vinesFetcher({ method: 'GET', wrapper: paginationWrapper }),
+    {
+      revalidateFirstPage: false,
+      revalidateOnFocus: false,
+    },
   );
 
 export const useMutationSearchWorkflowExecutionStats = ({
