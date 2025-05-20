@@ -32,9 +32,9 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
 import { useCopy } from '@/hooks/use-copy';
-import useUrlState from '@/hooks/use-url-state.ts';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
+import { useExecutionImageResultStore, useHasNextImage, useHasPrevImage } from '@/store/useExecutionImageResultStore';
 
 import 'rc-image/assets/index.css';
 
@@ -76,7 +76,7 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
   // 处理输入字段和原始图片
   React.useEffect(() => {
     if (!inputs || inputs.length === 0) {
-      console.log('TabularRenderWrapper: 没有输入字段可用');
+      // console.log('TabularRenderWrapper: 没有输入字段可用');
       setProcessedInputs([]);
       return;
     }
@@ -89,7 +89,7 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
           };
         })
       : [];
-    console.log('TabularRenderWrapper: 表单输入字段:', newInputs);
+    // console.log('TabularRenderWrapper: 表单输入字段:', newInputs);
     setProcessedInputs(newInputs);
 
     // 保存原始输入值
@@ -122,7 +122,7 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
 
   // 如果没有处理好的输入字段，显示加载状态
   if (processedInputs.length === 0 && inputs && inputs.length > 0) {
-    return <div className="flex h-full w-full items-center justify-center">处理表单数据中...</div>;
+    return <div className="vines-center size-full text-center text-3xl text-muted-foreground">未找到表单数据</div>;
   }
 
   return (
@@ -183,7 +183,7 @@ const TabularFooterButtons: React.FC<TabularFooterButtonsProps> = ({ processedIn
         )
           toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
       } catch (error) {
-        console.error('生成失败:', error);
+        // console.error('生成失败:', error);
         toast.error(t('workspace.pre-view.actuator.execution.error'));
       } finally {
         setLoading(false);
@@ -233,12 +233,36 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const [imageFlipY, setImageFlipY] = useState(false);
   const [imageScale, setImageScale] = useState(1);
 
-  const [urlState] = useUrlState({
-    imageUrl: '',
-    instanceId: '',
-  });
+  const { images, position, nextImage, prevImage, clearImages } = useExecutionImageResultStore();
 
-  const { imageUrl, instanceId } = urlState;
+  useEffect(() => {
+    const controller = new AbortController();
+    document.body.addEventListener(
+      'keydown',
+      (e) => {
+        if (e.key === 'ArrowUp') {
+          prevImage();
+        } else if (e.key === 'ArrowDown') {
+          nextImage();
+        } else if (e.key === 'Escape') {
+          clearImages();
+          history.back();
+        }
+      },
+      {
+        signal: controller.signal,
+      },
+    );
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
+  const currentImage = images[position];
+  const imageUrl = currentImage?.render?.data as string;
+  const instanceId = currentImage?.instanceId;
+  const hasPrev = useHasPrevImage();
+  const hasNext = useHasNextImage();
 
   const [execution, setExecution] = useState<VinesWorkflowExecution | undefined>();
 
@@ -268,8 +292,6 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
     }
   }, [imageRotation, imageFlipX, imageFlipY, imageScale]);
 
-  // 上一张/下一张图片功能已禁用
-
   // 处理删除图片
   const handleDeleteImage = useMemoizedFn(() => {
     if (instanceId) {
@@ -285,6 +307,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
     } else {
       // 如果没有instanceId，直接返回上一页
       history.back();
+      clearImages();
       toast.success(t('common.delete.success'));
     }
   });
@@ -302,14 +325,14 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
       <div className="flex flex-col items-center gap-4">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button icon={<ChevronUp />} variant="outline" size="small" disabled={true} />
+            <Button icon={<ChevronUp />} variant="outline" size="small" disabled={!hasPrev} onClick={prevImage} />
           </TooltipTrigger>
           <TooltipContent>{t('workspace.image-detail.prev-image', '上一张')}</TooltipContent>
         </Tooltip>
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button icon={<ChevronDown />} variant="outline" size="small" disabled={true} />
+            <Button icon={<ChevronDown />} variant="outline" size="small" disabled={!hasNext} onClick={nextImage} />
           </TooltipTrigger>
           <TooltipContent>{t('workspace.image-detail.next-image', '下一张')}</TooltipContent>
         </Tooltip>
@@ -459,9 +482,11 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                               const link = document.createElement('a');
                               link.href = imageUrl;
                               link.setAttribute('download', '');
-                              link.setAttribute('target', '_self');
+                              link.setAttribute('rel', 'noreferrer');
                               link.click();
-                            } catch (error) {}
+                            } catch (error) {
+                              // do nothing
+                            }
                           }
                         }}
                       />
@@ -471,7 +496,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                 </div>
               </>
             ) : (
-              <div className="text-center text-muted-foreground">
+              <div className="vines-center size-full text-center text-3xl text-muted-foreground">
                 {t('workspace.image-detail.no-image', '无图片数据')}
               </div>
             )}

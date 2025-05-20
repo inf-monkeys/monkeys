@@ -11,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card.tsx';
 import { Label } from '@/components/ui/label.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
+import { ImagesResult, useExecutionImageResultStore } from '@/store/useExecutionImageResultStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
@@ -108,10 +109,16 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
       for (const nonExistExecution of nonExist.reverse()) {
         prevList.unshift(...convertExecutionResultToItemList(nonExistExecution));
       }
-      return prevList;
+      return [...prevList];
     });
-    event$.emit();
   }, [firstPageExecutionList]);
+
+  const { setImages } = useExecutionImageResultStore();
+  // filter results for image detail route
+  useEffect(() => {
+    const images = executionResultList.filter((item) => item.render.type.toLowerCase() === 'image');
+    setImages(images as ImagesResult[]);
+  }, [executionResultList, setImages]);
 
   useVinesIframeMessage({
     outputs: executionResultList,
