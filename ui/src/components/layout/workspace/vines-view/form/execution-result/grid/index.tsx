@@ -7,7 +7,6 @@ import { useWorkflowExecutionList } from '@/apis/workflow/execution';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result/index.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { ImagesResult, useExecutionImageResultStore } from '@/store/useExecutionImageResultStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 import {
@@ -95,22 +94,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   const resizeObserver = useResizeObserver(positioner);
 
   const { scrollTop, isScrolling } = useScroller(scrollRef);
-  const { setImages, images: storeImages } = useExecutionImageResultStore();
-  // filter all images data from data
 
-  useEffect(() => {
-    console.log('data', data);
-    const images = data.filter((item) => {
-      console.log('item', item);
-      return item.render.type.toLowerCase() === 'image';
-    });
-    console.log('images', images);
-    setImages(images as ImagesResult[]);
-  }, [data, setImages]);
-
-  useEffect(() => {
-    console.log('store images', storeImages);
-  }, [storeImages]);
   const masonryGrid = useMasonry<IVinesExecutionResultItem>({
     positioner,
     scrollTop,

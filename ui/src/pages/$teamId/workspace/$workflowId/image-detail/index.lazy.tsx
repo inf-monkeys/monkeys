@@ -123,7 +123,7 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
 
   // 如果没有处理好的输入字段，显示加载状态
   if (processedInputs.length === 0 && inputs && inputs.length > 0) {
-    return <div className="flex h-full w-full items-center justify-center">处理表单数据中...</div>;
+    return <div className="vines-center size-full text-center text-3xl text-muted-foreground">未找到表单数据</div>;
   }
 
   return (
@@ -240,6 +240,9 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
           prevImage();
         } else if (e.key === 'ArrowDown') {
           nextImage();
+        } else if (e.key === 'Escape') {
+          clearImages();
+          history.back();
         }
       },
       {
@@ -489,7 +492,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                 </div>
               </>
             ) : (
-              <div className="text-center text-muted-foreground">
+              <div className="vines-center size-full text-center text-3xl text-muted-foreground">
                 {t('workspace.image-detail.no-image', '无图片数据')}
               </div>
             )}
