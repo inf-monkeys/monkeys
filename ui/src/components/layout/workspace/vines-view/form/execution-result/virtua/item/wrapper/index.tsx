@@ -49,7 +49,7 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
       const link = document.createElement('a');
       link.href = src;
       link.setAttribute('download', '');
-      link.setAttribute('target', '_self');
+      link.setAttribute('rel', 'noreferrer');
       link.click();
 
       toast.success(t('common.utils.download.success'));

@@ -27,7 +27,8 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }
   useEffect(() => {
     if (!page) return;
     if (renderer.findIndex(({ id }) => id === page.id) === -1) {
-      setRenderer((prev) => [...prev, page]);
+      // 为了image detail route 取消神奇优化，
+      setRenderer((prev) => [page]);
     }
   }, [page]);
 
