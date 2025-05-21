@@ -2878,6 +2878,14 @@
         },
         "list": {
           "empty": "暂无执行记录",
+          "error-filter": {
+            "title": "过滤错误",
+            "options": {
+              "yes": "是",
+              "no": "否"
+            }
+          },
+          "filtered-empty": "执行记录筛选后无数据",
           "bottom": "到底了",
           "more": "剩余 {{data}} 项，点击加载",
           "preview-page-not-found": "打开详情失败！找不到表单视图",
