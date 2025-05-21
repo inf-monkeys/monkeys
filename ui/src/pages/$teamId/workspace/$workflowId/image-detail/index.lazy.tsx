@@ -244,6 +244,10 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
           prevImage();
         } else if (e.key === 'ArrowDown') {
           nextImage();
+        } else if (e.key === 'ArrowLeft') {
+          prevImage();
+        } else if (e.key === 'ArrowRight') {
+          nextImage();
         } else if (e.key === 'Escape') {
           clearImages();
           history.back();
