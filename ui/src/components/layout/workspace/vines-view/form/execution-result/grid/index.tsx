@@ -84,7 +84,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     isScrolling,
     height,
     containerRef,
-    items: data ?? [],
+    items: data,
     overscanBy: 3,
     render: useCallback(
       ({ data: item }) => (

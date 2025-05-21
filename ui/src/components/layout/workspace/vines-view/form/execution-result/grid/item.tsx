@@ -64,7 +64,6 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
           <h1 className="text-sm font-bold">{t('common.workflow.status.PAUSED')}</h1>
         </div>
       );
-    case 'FAILED':
   }
 
   switch (type) {
