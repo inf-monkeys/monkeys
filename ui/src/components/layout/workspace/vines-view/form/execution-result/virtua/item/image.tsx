@@ -20,9 +20,9 @@ import 'rc-image/assets/index.css';
 export type IVinesExecutionResultImageAlt =
   | string
   | {
-      label: string;
-      value: string;
-    };
+    label: string;
+    value: string;
+  };
 
 interface IVirtuaExecutionResultGridImageItemProps {
   src: string;
@@ -31,7 +31,7 @@ interface IVirtuaExecutionResultGridImageItemProps {
   outputIndex?: number;
 }
 
-function calculateThumbUrl(url: string) {
+function getThumbUrl(url: string) {
   const urlPath = url.split('/');
   const urlPathLength = urlPath.length;
   return urlPath.map((it, i) => (i === urlPathLength - 2 ? `${it}_thumb` : it)).join('/');
@@ -54,7 +54,7 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   const [previewSrc, setPreviewSrc] = React.useState(src);
   useAsyncEffect(async () => {
     if (!src) return;
-    const thumbnailSrc = calculateThumbUrl(src);
+    const thumbnailSrc = getThumbUrl(src);
     if (await checkImageUrlAvailable(thumbnailSrc)) {
       setPreviewSrc(thumbnailSrc);
     } else {
