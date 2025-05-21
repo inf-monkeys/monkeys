@@ -33,7 +33,6 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
   const { render } = result;
   const { type, data, status } = render;
   const { t } = useTranslation();
-
   const alt = getAlt(result);
 
   if (isDeleted)

@@ -10,9 +10,11 @@ import { ExecutionResultGrid } from '@/components/layout/workspace/vines-view/fo
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { Label } from '@/components/ui/label.tsx';
 import { VinesLoading } from '@/components/ui/loading';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { ImagesResult, useExecutionImageResultStore } from '@/store/useExecutionImageResultStore';
 import { useFlowStore } from '@/store/useFlowStore';
+import { useShouldFilterError } from '@/store/useShouldErrorFilterStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
 import {
@@ -21,6 +23,7 @@ import {
   IVinesExecutionResultItem,
 } from '@/utils/execution.ts';
 
+import { ErrorFilter } from './grid/error-filter';
 import { useVinesIframeMessage } from './iframe-message';
 
 interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -75,7 +78,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
       if (execution && execution.data)
         list.push(...execution.data.map(convertExecutionResultToItemList).reduce(concatResultListReducer, []));
     }
-    setExecutionResultList(list);
+    setExecutionResultList([...list]);
   }, [executionListData]);
 
   // 第一页任务及状态变化
@@ -125,21 +128,64 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
     mutate: mutateExecutionList,
     enable: enablePostMessage,
   });
-
+  const shouldFilterError = useShouldFilterError();
+  const [filteredData, setFilteredData] = useState<IVinesExecutionResultItem[]>([]);
+  useEffect(() => {
+    if (shouldFilterError) {
+      const data = executionResultList;
+      const filtered = data.filter((item) => {
+        if (item.render.type === 'json') {
+          const data = item.render.data;
+          if (data && (data as { message?: string }).message?.includes('失败')) {
+            return false;
+          }
+          if (
+            data &&
+            (data as { success?: boolean }).success !== undefined &&
+            (data as { success?: boolean }).success === false
+          ) {
+            return false;
+          }
+        }
+        return !['FAILED', 'PAUSED'].includes(item.render.status);
+      });
+      setFilteredData(filtered);
+    } else {
+      setFilteredData(executionResultList);
+    }
+  }, [executionResultList, shouldFilterError]);
   return (
     <Card className={cn('relative bg-card-light dark:bg-card-dark', className)}>
       <CardContent className="p-0">
-        {executionResultList && executionResultList.length && !isLoading ? (
+        {executionResultList && executionResultList.length > 0 && filteredData.length > 0 && !isLoading ? (
           <ExecutionResultGrid
             workflowId={workflowId}
             height={height}
             setPage={setCurrentPage}
-            data={executionResultList}
+            data={filteredData}
             hasMore={hasMore}
             event$={event$}
             mutate={mutateExecutionList}
           />
-        ) : null}
+        ) : (
+          <ScrollArea
+            style={{ height }}
+            className="z-20 mr-0.5 bg-card-light dark:bg-card-dark [&>[data-radix-scroll-area-viewport]]:p-2"
+          >
+            <ErrorFilter />
+            <div className="vines-center pointer-events-none absolute left-0 top-0 z-0 size-full flex-col gap-2">
+              <History size={64} />
+              {/* // Execution records filtered to empty */}
+              <Label className="text-sm">
+                {t(
+                  executionResultList.length === filteredData.length
+                    ? 'workspace.logs-view.log.list.empty'
+                    : 'workspace.logs-view.log.list.filtered-empty',
+                )}
+              </Label>
+            </div>
+          </ScrollArea>
+        )}
         <AnimatePresence mode="popLayout">
           {isLoading ? (
             <motion.div

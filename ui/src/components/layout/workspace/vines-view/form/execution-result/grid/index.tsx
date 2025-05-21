@@ -9,9 +9,11 @@ import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execut
 import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { usePageStore } from '@/store/usePageStore';
+import { useShouldFilterError } from '@/store/useShouldErrorFilterStore.ts';
 import { cn } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
+import { ErrorFilter } from './error-filter';
 import { ExecutionResultItem } from './item';
 import { usePositioner } from './utils';
 
@@ -56,7 +58,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   const [deletedInstanceIdList, setDeletedInstanceIdList] = useState<string[]>([]);
 
   const containerWidth = formContainerWidth * 0.6 - 16 - 16 - 4 - (isUseWorkSpace ? 140 : 0);
-
+  const shouldFilterError = useShouldFilterError();
   const positioner = usePositioner(
     {
       width: containerWidth,
@@ -64,7 +66,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
       columnWidth: 200,
       rowGutter: 8,
     },
-    [data.length, workflowId],
+    [data.length, workflowId, shouldFilterError],
   );
 
   const resizeObserver = useResizeObserver(positioner);
@@ -82,7 +84,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     isScrolling,
     height,
     containerRef,
-    items: data ?? [],
+    items: data,
     overscanBy: 3,
     render: useCallback(
       ({ data: item }) => (
@@ -109,6 +111,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
       style={{ height }}
       disabledOverflowMask
     >
+      <ErrorFilter />
       {masonryGrid}
     </ScrollArea>
   );
