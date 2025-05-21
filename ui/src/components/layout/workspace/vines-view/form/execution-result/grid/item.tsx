@@ -9,7 +9,6 @@ import { useTranslation } from 'react-i18next';
 import { VinesAbstractDataPreview } from '@/components/layout/workspace/vines-view/_common/data-display/abstract';
 import { IAddDeletedInstanceId } from '@/components/layout/workspace/vines-view/form/execution-result/grid/index.tsx';
 import { VinesLoading } from '@/components/ui/loading';
-import { useShouldFilterError } from '@/store/useShouldErrorFilterStore';
 import { getAlt } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
@@ -34,7 +33,6 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
   const { render } = result;
   const { type, data, status } = render;
   const { t } = useTranslation();
-  const shouldFilterError = useShouldFilterError();
   const alt = getAlt(result);
 
   if (isDeleted)
@@ -57,7 +55,6 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
         </div>
       );
     case 'PAUSED':
-      if (shouldFilterError) return null;
       return (
         <div
           key={render.key}
@@ -68,16 +65,6 @@ export const ExecutionResultItem: React.FC<IExecutionResultItemProps> = ({
         </div>
       );
     case 'FAILED':
-      if (shouldFilterError) return null;
-    // return (
-    //   <div
-    //     key={render.key}
-    //     className="flex h-40 w-full flex-col items-center justify-center gap-2 rounded-lg border border-input shadow-sm"
-    //   >
-    //     <CirclePause className="stroke-" size={36} />
-    //     <h1 className="text-sm font-bold">{t('common.workflow.status.FAILED')}</h1>
-    //   </div>
-    // );
   }
 
   switch (type) {

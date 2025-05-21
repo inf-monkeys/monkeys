@@ -1,12 +1,14 @@
 import { create } from 'zustand';
 
-export const useShouldErrorFilterStore = create<{
+interface IShouldFilterErrorStore {
   filter: boolean;
   setFilterOn: () => void;
   setFilterOff: () => void;
-}>((set) => ({
+}
+
+export const useShouldFilterErrorStore = create<IShouldFilterErrorStore>((set) => ({
   filter: true,
   setFilterOn: () => set({ filter: true }),
   setFilterOff: () => set({ filter: false }),
 }));
-export const useShouldFilterError = () => useShouldErrorFilterStore((s) => s.filter);
+export const useShouldFilterError = () => useShouldFilterErrorStore((s) => s.filter);

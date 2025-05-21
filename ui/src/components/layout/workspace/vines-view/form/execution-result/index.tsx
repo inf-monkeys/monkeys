@@ -75,7 +75,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
       if (execution && execution.data)
         list.push(...execution.data.map(convertExecutionResultToItemList).reduce(concatResultListReducer, []));
     }
-    setExecutionResultList(list);
+    setExecutionResultList([...list]);
   }, [executionListData]);
 
   // 第一页任务及状态变化
