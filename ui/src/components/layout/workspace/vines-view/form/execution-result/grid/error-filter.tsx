@@ -7,9 +7,9 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useShouldErrorFilterStore } from '@/store/useShouldErrorFilterStore';
+import { useShouldFilterErrorStore } from '@/store/useShouldErrorFilterStore';
 export const ErrorFilter = () => {
-  const { filter, setFilterOn, setFilterOff } = useShouldErrorFilterStore();
+  const { filter, setFilterOn, setFilterOff } = useShouldFilterErrorStore();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
