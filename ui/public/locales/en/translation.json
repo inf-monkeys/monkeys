@@ -2883,6 +2883,14 @@
         },
         "list": {
           "empty": "Execution record is empty",
+          "filtered-empty": "Execution records filtered to empty",
+          "error-filter": {
+            "title": "Filter Error",
+            "options": {
+              "yes": "Yes",
+              "no": "No"
+            }
+          },
           "bottom": "No more data",
           "more": "Remaining {{data}} items, click to load more",
           "preview-page-not-found": "Failed to open details! Preview view not found",
