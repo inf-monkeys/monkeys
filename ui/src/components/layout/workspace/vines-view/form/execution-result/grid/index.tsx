@@ -12,6 +12,7 @@ import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
+import { ErrorFilter } from './error-filter';
 import { ExecutionResultItem } from './item';
 import { usePositioner } from './utils';
 
@@ -109,6 +110,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
       style={{ height }}
       disabledOverflowMask
     >
+      <ErrorFilter />
       {masonryGrid}
     </ScrollArea>
   );
