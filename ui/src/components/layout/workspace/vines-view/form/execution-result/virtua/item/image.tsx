@@ -20,9 +20,9 @@ import 'rc-image/assets/index.css';
 export type IVinesExecutionResultImageAlt =
   | string
   | {
-    label: string;
-    value: string;
-  };
+      label: string;
+      value: string;
+    };
 
 interface IVirtuaExecutionResultGridImageItemProps {
   src: string;
