@@ -16,15 +16,15 @@ export const ErrorFilter = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="borderless" className="mb-2 hover:bg-slate-1 active:bg-slate-1" icon={<FilterIcon />}>
-          {t('workspace.logs-view.log.list.error-filter.title')}
+          {t('workspace.image-detail.error-filter.title')}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" side="bottom">
         <DropdownMenuCheckboxItem checked={filter} onCheckedChange={setFilterOn}>
-          {t('workspace.logs-view.log.list.error-filter.options.yes')}
+          {t('workspace.image-detail.error-filter.options.on')}
         </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem checked={!filter} onCheckedChange={setFilterOff}>
-          {t('workspace.logs-view.log.list.error-filter.options.no')}
+          {t('workspace.image-detail.error-filter.options.off')}
         </DropdownMenuCheckboxItem>
       </DropdownMenuContent>
     </DropdownMenu>
