@@ -1,5 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+
+import { useRouterState } from '@tanstack/react-router';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDebounceFn, useLatest, useMap } from 'ahooks';
@@ -24,8 +26,9 @@ import { VinesFullLoading, VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { VinesWorkflowExecutionInput } from '@/package/vines-flow/core/typings';
-import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
 import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
+import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
+import { useSetWorkbenchCacheVal, useWorkbenchCacheVal } from '@/store/workbenchFormInputsCacheStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
@@ -92,9 +95,42 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
 
   const [defValues, setDefValues] = useState<IWorkflowInputForm>({});
 
+  const { watch } = form;
+  const setWorkbenchCacheVal = useSetWorkbenchCacheVal();
+  const workbenchCacheVal = useWorkbenchCacheVal(workflowId ?? '');
+  const useFormResetRef = useRef<boolean>(false);
+
+  const [hasRestoreValues, setHasRestoreValues] = useState(false);
+
+  const pathName = useRouterState({
+    select: (state) => state.location.pathname,
+  });
+  const inImageDetailRoute = pathName.includes('/image-detail');
+  useEffect(() => {
+    if (workbenchCacheVal && !hasRestoreValues && !inImageDetailRoute) {
+      useFormResetRef.current = true;
+      setDefValues(workbenchCacheVal);
+      form.reset(workbenchCacheVal);
+      setHasRestoreValues(true);
+      useFormResetRef.current = false;
+    }
+  }, [workbenchCacheVal, hasRestoreValues, inImageDetailRoute]);
+  useEffect(() => {
+    if (!workflowId) return;
+    if (inImageDetailRoute) return;
+    const { unsubscribe } = watch((data) => {
+      if (workflowId && !useFormResetRef.current) {
+        setWorkbenchCacheVal(workflowId, data);
+      }
+    });
+    return () => unsubscribe();
+  }, [watch, workflowId, setWorkbenchCacheVal]);
+
   useEffect(() => {
     if (!inputs) return;
-
+    if (!inImageDetailRoute) {
+      if (workbenchCacheVal) return;
+    }
     const targetInputs = inputs.filter(({ default: v }) => typeof v !== 'undefined');
     const defaultValues = fromPairs(
       targetInputs.map((it) => {
