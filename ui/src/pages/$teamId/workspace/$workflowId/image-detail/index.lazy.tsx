@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { startTransition, useCallback, useEffect, useState } from 'react';
 
 import { createLazyFileRoute, useParams, useRouter } from '@tanstack/react-router';
 
@@ -49,6 +49,7 @@ interface TabularRenderWrapperProps {
 const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, execution }) => {
   const { vines } = useVinesFlow();
   const tabular$ = useEventEmitter<TTabularEvent>();
+  const { t } = useTranslation();
   const [windowHeight, setWindowHeight] = React.useState(window.innerHeight);
   const [processedInputs, setProcessedInputs] = React.useState<any[]>([]);
   const [showInputDiffBanner, setShowInputDiffBanner] = React.useState(false);
@@ -122,16 +123,18 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
 
   // 如果没有处理好的输入字段，显示加载状态
   if (processedInputs.length === 0 && inputs && inputs.length > 0) {
-    return <div className="vines-center size-full text-center text-3xl text-muted-foreground">未找到表单数据</div>;
+    return (
+      <div className="vines-center size-full text-center text-3xl text-muted-foreground">
+        {t('workspace.image-detail.form-inputs-not-found')}
+      </div>
+    );
   }
 
   return (
     <div style={{ position: 'relative', height: '100%' }}>
       {showInputDiffBanner && (
-        <div className="absolute left-0 right-0 top-0 z-10 border-b border-yellow-200 bg-yellow-100 p-3 dark:border-yellow-800 dark:bg-yellow-900/30">
-          <p className="text-sm text-yellow-800 dark:text-yellow-200">
-            新的输入与原有输入不一致，可能会导致结果相差较大
-          </p>
+        <div className="z-10 mb-4 rounded-xl border-b border-yellow-200 bg-yellow-100 p-4 shadow-sm dark:border-yellow-800 dark:bg-yellow-900/30">
+          <p className="text-sm text-yellow-800 dark:text-yellow-200">{t('workspace.image-detail.input-diff.desc')}</p>
         </div>
       )}
       <TabularRender
@@ -234,20 +237,29 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const [imageScale, setImageScale] = useState(1);
 
   const { images, position, nextImage, prevImage, clearImages } = useExecutionImageResultStore();
-
+  const nonUrgentNextImage = useCallback(() => {
+    startTransition(() => {
+      nextImage();
+    });
+  }, [nextImage]);
+  const nonUrgentPrevImage = useCallback(() => {
+    startTransition(() => {
+      prevImage();
+    });
+  }, [prevImage]);
   useEffect(() => {
     const controller = new AbortController();
     document.body.addEventListener(
       'keydown',
       (e) => {
         if (e.key === 'ArrowUp') {
-          prevImage();
+          nonUrgentPrevImage();
         } else if (e.key === 'ArrowDown') {
-          nextImage();
+          nonUrgentNextImage();
         } else if (e.key === 'ArrowLeft') {
-          prevImage();
+          nonUrgentPrevImage();
         } else if (e.key === 'ArrowRight') {
-          nextImage();
+          nonUrgentNextImage();
         } else if (e.key === 'Escape') {
           clearImages();
           history.back();
@@ -329,14 +341,26 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
       <div className="flex flex-col items-center gap-4">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button icon={<ChevronUp />} variant="outline" size="small" disabled={!hasPrev} onClick={prevImage} />
+            <Button
+              icon={<ChevronUp />}
+              variant="outline"
+              size="small"
+              disabled={!hasPrev}
+              onClick={nonUrgentPrevImage}
+            />
           </TooltipTrigger>
           <TooltipContent>{t('workspace.image-detail.prev-image', '上一张')}</TooltipContent>
         </Tooltip>
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button icon={<ChevronDown />} variant="outline" size="small" disabled={!hasNext} onClick={nextImage} />
+            <Button
+              icon={<ChevronDown />}
+              variant="outline"
+              size="small"
+              disabled={!hasNext}
+              onClick={nonUrgentNextImage}
+            />
           </TooltipTrigger>
           <TooltipContent>{t('workspace.image-detail.next-image', '下一张')}</TooltipContent>
         </Tooltip>
@@ -400,7 +424,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         }}
                       />
                     </TooltipTrigger>
-                    <TooltipContent>{t('components.ui.image-preview.flipY', '垂直翻转')}</TooltipContent>
+                    <TooltipContent>{t('workspace.image-detail.flipY', '垂直翻转')}</TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -414,7 +438,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         }}
                       />
                     </TooltipTrigger>
-                    <TooltipContent>{t('components.ui.image-preview.flipX', '水平翻转')}</TooltipContent>
+                    <TooltipContent>{t('workspace.image-detail.flipX', '水平翻转')}</TooltipContent>
                   </Tooltip>
 
                   <Tooltip>
@@ -429,7 +453,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         }}
                       />
                     </TooltipTrigger>
-                    <TooltipContent>{t('components.ui.image-preview.rotateLeft', '向左旋转')}</TooltipContent>
+                    <TooltipContent>{t('workspace.image-detail.rotateLeft', '向左旋转')}</TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -443,7 +467,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         }}
                       />
                     </TooltipTrigger>
-                    <TooltipContent>{t('components.ui.image-preview.rotateRight', '向右旋转')}</TooltipContent>
+                    <TooltipContent>{t('workspace.image-detail.rotateRight', '向右旋转')}</TooltipContent>
                   </Tooltip>
 
                   <Tooltip>
@@ -458,7 +482,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         }}
                       />
                     </TooltipTrigger>
-                    <TooltipContent>{t('components.ui.image-preview.zoomIn', '放大')}</TooltipContent>
+                    <TooltipContent>{t('workspace.image-detail.zoomIn', '放大')}</TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -472,7 +496,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         }}
                       />
                     </TooltipTrigger>
-                    <TooltipContent>{t('components.ui.image-preview.zoomOut', '缩小')}</TooltipContent>
+                    <TooltipContent>{t('workspace.image-detail.zoomOut', '缩小')}</TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -495,7 +519,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         }}
                       />
                     </TooltipTrigger>
-                    <TooltipContent>{t('common.utils.download.label', '下载')}</TooltipContent>
+                    <TooltipContent>{t('workspace.image-detail.download', '下载')}</TooltipContent>
                   </Tooltip>
                 </div>
               </>
