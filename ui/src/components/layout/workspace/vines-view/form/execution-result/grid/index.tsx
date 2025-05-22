@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
+import React, { Dispatch, SetStateAction, startTransition, useCallback, useEffect, useRef, useState } from 'react';
 
 import { SWRInfiniteResponse } from 'swr/infinite';
 
@@ -9,6 +9,7 @@ import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execut
 import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { usePageStore } from '@/store/usePageStore';
+import { useLastScrollTop, useSetScrollTop } from '@/store/useScrollPositionStore';
 import { useShouldFilterError } from '@/store/useShouldErrorFilterStore.ts';
 import { cn } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
@@ -71,13 +72,48 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
 
   const resizeObserver = useResizeObserver(positioner);
 
-  const { scrollTop, isScrolling } = useScroller(scrollRef);
+  const { scrollTop, isScrolling, setScrollTop, currentScrollTopRef, lastUpdateTimeRef, setIsScrolling } = useScroller(
+    scrollRef,
+    workflowId ?? '',
+  );
 
+  const lastScrollTop = useLastScrollTop(workflowId ?? '');
+  useEffect(() => {});
   const addDeletedInstanceId = (instanceId: string) => {
     if (!deletedInstanceIdList.includes(instanceId))
       setDeletedInstanceIdList((prevState) => [...prevState, instanceId]);
   };
-
+  const hasUsedCacheScrollTop = useRef(false);
+  useEffect(() => {
+    console.log('scrollTop', scrollTop);
+  }, [scrollTop]);
+  useEffect(() => {
+    console.log('last scrollTop', lastScrollTop);
+  }, [lastScrollTop]);
+  useEffect(() => {
+    let timeout: NodeJS.Timeout | null = null;
+    startTransition(() => {
+      setIsScrolling(true);
+      if (lastScrollTop !== null && !hasUsedCacheScrollTop.current) {
+        timeout = setTimeout(() => {
+          console.log('timeout fired');
+          setScrollTop(lastScrollTop);
+          currentScrollTopRef.current = lastScrollTop;
+          lastUpdateTimeRef.current = Date.now();
+          console.log('scroll top set');
+          scrollRef.current!.scrollTop = lastScrollTop;
+          setIsScrolling(false);
+        }, 50);
+        hasUsedCacheScrollTop.current = true;
+        setIsScrolling(false);
+      }
+    });
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    };
+  }, [lastScrollTop]);
   const masonryGrid = useMasonry<IVinesExecutionResultItem>({
     positioner,
     scrollTop,
@@ -117,15 +153,16 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   );
 };
 
-const useScroller = (scrollRef: React.RefObject<HTMLElement>) => {
-  const [scrollTop, setScrollTop] = useState(0);
+const useScroller = (scrollRef: React.RefObject<HTMLElement>, workflowId: string) => {
   const [isScrolling, setIsScrolling] = useState(false);
-
+  const setStoreScrollTop = useSetScrollTop();
+  const lastScrollTop = useLastScrollTop(workflowId);
+  const [scrollTop, setScrollTop] = useState(lastScrollTop ?? 0);
   const lastUpdateTimeRef = useRef(0);
-  const currentScrollTopRef = useRef(0);
+  const currentScrollTopRef = useRef(lastScrollTop ?? 0);
   const frameRef = useRef<number | null>(null);
   const scrollTimeoutRef = useRef<any>(null);
-  const fps = 12; // 提高帧率以获得更流畅的滚动体验
+  const fps = 120; // 提高帧率以获得更流畅的滚动体验
 
   const throttledUpdate = useCallback(() => {
     if (frameRef.current) return;
@@ -134,6 +171,7 @@ const useScroller = (scrollRef: React.RefObject<HTMLElement>) => {
       const now = Date.now();
       if (now - lastUpdateTimeRef.current >= 1000 / fps) {
         setScrollTop(currentScrollTopRef.current);
+        setStoreScrollTop(workflowId, currentScrollTopRef.current);
         lastUpdateTimeRef.current = now;
       }
       frameRef.current = null;
@@ -175,7 +213,7 @@ const useScroller = (scrollRef: React.RefObject<HTMLElement>) => {
         scrollTimeoutRef.current = null;
       }
     };
-  }, [scrollRef, throttledUpdate]);
+  }, [workflowId, throttledUpdate]);
 
-  return { scrollTop, isScrolling };
+  return { scrollTop, isScrolling, setScrollTop, currentScrollTopRef, lastUpdateTimeRef, setIsScrolling };
 };
