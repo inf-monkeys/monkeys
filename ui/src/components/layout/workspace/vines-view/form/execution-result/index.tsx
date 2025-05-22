@@ -132,8 +132,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   const [filteredData, setFilteredData] = useState<IVinesExecutionResultItem[]>([]);
   useEffect(() => {
     if (shouldFilterError) {
-      const data = executionResultList;
-      const filtered = data.filter((item) => {
+      const filtered = executionResultList.filter((item) => {
         if (item.render.type === 'json') {
           const data = item.render.data;
           if (data && (data as { message?: string }).message?.includes('失败')) {
