@@ -84,28 +84,25 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
       setDeletedInstanceIdList((prevState) => [...prevState, instanceId]);
   };
   const hasUsedCacheScrollTop = useRef(false);
+  // useEffect(() => {
+  //   console.log('scrollTop', scrollTop);
+  // }, [scrollTop]);
+  // useEffect(() => {
+  //   console.log('last scrollTop', lastScrollTop);
+  // }, [lastScrollTop]);
   useEffect(() => {
-    console.log('scrollTop', scrollTop);
-  }, [scrollTop]);
-  useEffect(() => {
-    console.log('last scrollTop', lastScrollTop);
-  }, [lastScrollTop]);
-  useEffect(() => {
-    let timeout: NodeJS.Timeout | null = null;
+    const timeout: NodeJS.Timeout | null = null;
     startTransition(() => {
-      setIsScrolling(true);
-      if (lastScrollTop !== null && !hasUsedCacheScrollTop.current) {
-        timeout = setTimeout(() => {
-          console.log('timeout fired');
-          setScrollTop(lastScrollTop);
-          currentScrollTopRef.current = lastScrollTop;
-          lastUpdateTimeRef.current = Date.now();
-          console.log('scroll top set');
-          scrollRef.current!.scrollTop = lastScrollTop;
-          setIsScrolling(false);
-        }, 50);
+      // setIsScrolling(true);
+      if (lastScrollTop && !hasUsedCacheScrollTop.current) {
+        // console.log('timeout fired');
+        setScrollTop(lastScrollTop);
+        currentScrollTopRef.current = lastScrollTop;
+        lastUpdateTimeRef.current = Date.now();
+        // console.log('scroll top set');
+        scrollRef.current!.scrollTop = lastScrollTop;
+        // setIsScrolling(false);
         hasUsedCacheScrollTop.current = true;
-        setIsScrolling(false);
       }
     });
     return () => {
@@ -162,7 +159,7 @@ const useScroller = (scrollRef: React.RefObject<HTMLElement>, workflowId: string
   const currentScrollTopRef = useRef(lastScrollTop ?? 0);
   const frameRef = useRef<number | null>(null);
   const scrollTimeoutRef = useRef<any>(null);
-  const fps = 120; // 提高帧率以获得更流畅的滚动体验
+  const fps = 12; // 提高帧率以获得更流畅的滚动体验
 
   const throttledUpdate = useCallback(() => {
     if (frameRef.current) return;
