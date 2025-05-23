@@ -72,7 +72,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
 
   const resizeObserver = useResizeObserver(positioner);
 
-  const { scrollTop, isScrolling, setScrollTop, currentScrollTopRef, lastUpdateTimeRef, setIsScrolling } = useScroller(
+  const { scrollTop, isScrolling, setScrollTop, currentScrollTopRef, lastUpdateTimeRef } = useScroller(
     scrollRef,
     workflowId ?? '',
   );
@@ -84,12 +84,13 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
       setDeletedInstanceIdList((prevState) => [...prevState, instanceId]);
   };
   const hasUsedCacheScrollTop = useRef(false);
-  // useEffect(() => {
-  //   console.log('scrollTop', scrollTop);
-  // }, [scrollTop]);
-  // useEffect(() => {
-  //   console.log('last scrollTop', lastScrollTop);
-  // }, [lastScrollTop]);
+  useEffect(() => {
+    console.log('scrollTop', scrollTop);
+    console.log('container scrollTop', containerRef.current?.scrollTop);
+  }, [scrollTop]);
+  useEffect(() => {
+    console.log('last scrollTop', lastScrollTop);
+  }, [lastScrollTop]);
   useEffect(() => {
     const timeout: NodeJS.Timeout | null = null;
     startTransition(() => {
