@@ -24,6 +24,7 @@ import {
 } from '@/utils/execution.ts';
 
 import { ErrorFilter } from './grid/error-filter';
+import { ExtraButtonFilter } from './grid/extra-button-filter';
 import { useVinesIframeMessage } from './iframe-message';
 
 interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -172,6 +173,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
             className="z-20 mr-0.5 bg-card-light dark:bg-card-dark [&>[data-radix-scroll-area-viewport]]:p-2"
           >
             <ErrorFilter />
+            <ExtraButtonFilter />
             <div className="vines-center pointer-events-none absolute left-0 top-0 z-0 size-full flex-col gap-2">
               <History size={64} />
               {/* // Execution records filtered to empty */}
