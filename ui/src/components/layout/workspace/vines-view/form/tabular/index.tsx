@@ -4,11 +4,12 @@ import { useSWRConfig } from 'swr';
 
 import { useEventEmitter, useMemoizedFn, useThrottleEffect } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
-import { isString } from 'lodash';
+import { isBoolean, isString } from 'lodash';
 import { Clipboard, RotateCcw, Sparkles, Undo2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { useSystemConfig } from '@/apis/common';
 import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -28,6 +29,8 @@ interface IVinesTabularProps extends React.ComponentPropsWithoutRef<'div'> {
 export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, setHistoryVisible, event$, height }) => {
   const { mutate } = useSWRConfig();
   const { t } = useTranslation();
+
+  const { data: oem } = useSystemConfig();
 
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
 
@@ -55,9 +58,9 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
 
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = useMemoizedFn((inputData) => {
+  const handleSubmit = useMemoizedFn(async (inputData) => {
     setLoading(true);
-    void mutate(
+    void (await mutate(
       (key) => isString(key) && key.startsWith(`/api/workflow/executions/${vines.workflowId}/outputs`),
       (data: any) => {
         if (data?.data) {
@@ -70,18 +73,23 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
             data.total += 1;
           }
         }
-        event$.emit?.();
         return data;
       },
       false,
-    );
+    ));
+    event$.emit?.();
     vines
       .start({ inputData, onlyStart: true })
       .then((status) => {
         if (status) {
-          toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
+          if (
+            !isBoolean(oem?.theme?.views?.form?.toast?.afterCreate) ||
+            oem?.theme?.views?.form?.toast?.afterCreate != false
+          )
+            toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
           setHistoryVisible(true);
           setLoading(false);
+          event$.emit?.();
         }
       })
       .finally(() => setLoading(false));
@@ -128,7 +136,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
                 <Button
                   className="!px-2.5"
                   variant="outline"
-                  onClick={() => tabular$.emit('restore-previous-param')}
+                  onClick={() => tabular$.emit('restore-previous-param')} // 恢复上一个参数
                   icon={<Undo2 />}
                   size="small"
                 />
@@ -140,7 +148,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
                 <Button
                   className="!px-2.5"
                   variant="outline"
-                  onClick={() => tabular$.emit('reset')}
+                  onClick={() => tabular$.emit('reset')} // 重置
                   icon={<RotateCcw />}
                   size="small"
                 />
@@ -154,7 +162,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
             <Button
               className="!px-2.5"
               variant="outline"
-              onClick={handlePasteInput}
+              onClick={handlePasteInput} // 粘贴参数
               icon={<Clipboard />}
               size="small"
             />
@@ -164,7 +172,8 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
         <Button
           variant="solid"
           className="size-full text-base"
-          onClick={() => submitButton.current?.click()}
+          onClick={() => submitButton.current?.click()} // 生成
+          size="small"
           disabled={openAIInterfaceEnabled}
           icon={<Sparkles className="fill-white" />}
           loading={loading}

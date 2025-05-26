@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
 import { useCopy } from '@/hooks/use-copy.ts';
+import { useExecutionImageResultStore } from '@/store/useExecutionImageResultStore';
 import { useFlowStore } from '@/store/useFlowStore';
 
 import 'rc-image/assets/index.css';
@@ -30,7 +31,7 @@ interface IVirtuaExecutionResultGridImageItemProps {
   outputIndex?: number;
 }
 
-function caculateThumbUrl(url: string) {
+function getThumbUrl(url: string) {
   const urlPath = url.split('/');
   const urlPathLength = urlPath.length;
   return urlPath.map((it, i) => (i === urlPathLength - 2 ? `${it}_thumb` : it)).join('/');
@@ -46,13 +47,14 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   const navigate = useNavigate();
   const { copy } = useCopy();
   const workflowId = useFlowStore((s) => s.workflowId);
+  const { images, setPosition } = useExecutionImageResultStore();
 
   const altLabel = isObject(alt) ? alt.label : alt;
   const altContent = isObject(alt) ? alt.value : alt;
   const [previewSrc, setPreviewSrc] = React.useState(src);
   useAsyncEffect(async () => {
     if (!src) return;
-    const thumbnailSrc = caculateThumbUrl(src);
+    const thumbnailSrc = getThumbUrl(src);
     if (await checkImageUrlAvailable(thumbnailSrc)) {
       setPreviewSrc(thumbnailSrc);
     } else {
@@ -64,6 +66,8 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   const handleImageClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (workflowId && src) {
+      const position = images?.findIndex((image) => (image.render.data as string) === src);
+      setPosition(position);
       navigate({
         to: '/$teamId/workspace/$workflowId/image-detail/',
         params: {

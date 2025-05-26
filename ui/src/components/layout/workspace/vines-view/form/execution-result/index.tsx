@@ -5,17 +5,26 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { History } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { useWorkflowExecutionList } from '@/apis/workflow/execution';
+import { useWorkflowExecutionList, useWorkflowExecutionListInfinite } from '@/apis/workflow/execution';
 import { ExecutionResultGrid } from '@/components/layout/workspace/vines-view/form/execution-result/grid';
-import { useVinesIframeMessage } from '@/components/layout/workspace/vines-view/form/execution-result/iframe-message.ts';
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { Label } from '@/components/ui/label.tsx';
 import { VinesLoading } from '@/components/ui/loading';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
+import { ImagesResult, useExecutionImageResultStore } from '@/store/useExecutionImageResultStore';
 import { useFlowStore } from '@/store/useFlowStore';
+import { useShouldFilterError } from '@/store/useShouldErrorFilterStore';
 import { useViewStore } from '@/store/useViewStore';
 import { cn } from '@/utils';
-import { convertExecutionResultToItemList, IVinesExecutionResultItem } from '@/utils/execution.ts';
+import {
+  concatResultListReducer,
+  convertExecutionResultToItemList,
+  IVinesExecutionResultItem,
+} from '@/utils/execution.ts';
+
+import { ErrorFilter } from './grid/error-filter';
+import { useVinesIframeMessage } from './iframe-message';
 
 interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {
   event$: EventEmitter<void>;
@@ -42,67 +51,142 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   const storeWorkflowId = useFlowStore((s) => s.workflowId);
   const workflowId = storeWorkflowId && visible ? storeWorkflowId : null;
 
+  const [executionResultList, setExecutionResultList] = useState<IVinesExecutionResultItem[]>([]);
+
   const {
-    data: firstPageExecutionListData,
-    isLoading: firstPageExecutionListIsLoading,
-    mutate: firstPageExecutionListMutate,
-  } = useWorkflowExecutionList(workflowId, 1, LOAD_LIMIT);
+    data: executionListData,
+    mutate: mutateExecutionList,
+    size: currentPage,
+    setSize: setCurrentPage,
+    isLoading,
+  } = useWorkflowExecutionListInfinite(workflowId, LOAD_LIMIT);
 
+  const { data: firstPageExecutionListData } = useWorkflowExecutionList(workflowId, 1, LOAD_LIMIT);
   const firstPageExecutionList = firstPageExecutionListData?.data ?? [];
-  const totalCount = firstPageExecutionListData?.total ?? 0;
 
-  const [resultList, setResultList] = useState<IVinesExecutionResultItem[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const hasMore =
+    executionListData?.length != 0 &&
+    executionListData?.[currentPage - 1]?.total != 0 &&
+    executionListData?.[currentPage - 1]?.data.length == LOAD_LIMIT;
+
+  const totalCount = executionListData?.[0]?.total ?? 0;
+
+  useEffect(() => {
+    if (!executionListData || executionListData.length == 0 || executionListData[0]?.total == 0) return;
+    const list: IVinesExecutionResultItem[] = [];
+    for (const execution of executionListData ?? []) {
+      if (execution && execution.data)
+        list.push(...execution.data.map(convertExecutionResultToItemList).reduce(concatResultListReducer, []));
+    }
+    setExecutionResultList([...list]);
+  }, [executionListData]);
 
   // 第一页任务及状态变化
   useEffect(() => {
     // 筛选状态变更的替换原 result
     const changed = firstPageExecutionList.filter(
-      (r) => resultList.findIndex((pr) => r.instanceId === pr.instanceId && r.status != pr.status) != -1,
+      (r) =>
+        executionResultList.findIndex(
+          (pr) => r.instanceId === pr.instanceId && r.status != pr.status && !pr.render.isDeleted,
+        ) != -1,
     );
 
     // 筛选不存在的拼接到头部
     const nonExist = firstPageExecutionList.filter(
-      (r) => !resultList.map(({ instanceId }) => instanceId).includes(r.instanceId),
+      (r) => !executionResultList.map(({ instanceId }) => instanceId).includes(r.instanceId),
     );
 
     // 没有变化返回
     if (changed.length == 0 && nonExist.length == 0) return;
 
-    setResultList((prevList) => {
+    setExecutionResultList((prevList) => {
       for (const changedExecution of changed) {
         const index = prevList.findIndex((pr) => changedExecution.instanceId === pr.instanceId);
-        prevList = prevList.filter((pr) => changedExecution.instanceId != pr.instanceId);
+        // prevList[index].render = {
+        //   ...prevList[index].render,
+        //   isDeleted: true,
+        // };
+        prevList = prevList.filter((_, i) => i != index);
         prevList.splice(index, 0, ...convertExecutionResultToItemList(changedExecution));
       }
       for (const nonExistExecution of nonExist.reverse()) {
         prevList.unshift(...convertExecutionResultToItemList(nonExistExecution));
       }
-      return prevList;
+      return [...prevList];
     });
-
-    event$.emit();
   }, [firstPageExecutionList]);
 
+  const { setImages } = useExecutionImageResultStore();
+  // filter results for image detail route
+  useEffect(() => {
+    const images = executionResultList.filter((item) => item.render.type.toLowerCase() === 'image');
+    setImages(images as ImagesResult[]);
+  }, [executionResultList, setImages]);
+
   useVinesIframeMessage({
-    outputs: firstPageExecutionList,
-    mutate: firstPageExecutionListMutate,
+    outputs: executionResultList,
+    mutate: mutateExecutionList,
     enable: enablePostMessage,
   });
-
+  const shouldFilterError = useShouldFilterError();
+  const [filteredData, setFilteredData] = useState<IVinesExecutionResultItem[]>([]);
+  useEffect(() => {
+    if (shouldFilterError) {
+      const filtered = executionResultList.filter((item) => {
+        if (item.render.type === 'json') {
+          const data = item.render.data;
+          if (data && (data as { message?: string }).message?.includes('失败')) {
+            return false;
+          }
+          if (
+            data &&
+            (data as { success?: boolean }).success !== undefined &&
+            (data as { success?: boolean }).success === false
+          ) {
+            return false;
+          }
+        }
+        return !['FAILED', 'PAUSED'].includes(item.render.status);
+      });
+      setFilteredData(filtered);
+    } else {
+      setFilteredData(executionResultList);
+    }
+  }, [executionResultList, shouldFilterError]);
   return (
-    <Card className={cn('dark:bg-card-dark bg-card-light relative', className)}>
+    <Card className={cn('relative bg-card-light dark:bg-card-dark', className)}>
       <CardContent className="p-0">
-        <ExecutionResultGrid
-          workflowId={workflowId}
-          height={height}
-          page={currentPage}
-          setPage={setCurrentPage}
-          data={resultList}
-          setData={setResultList}
-        />
+        {executionResultList && executionResultList.length > 0 && filteredData.length > 0 && !isLoading ? (
+          <ExecutionResultGrid
+            workflowId={workflowId}
+            height={height}
+            setPage={setCurrentPage}
+            data={filteredData}
+            hasMore={hasMore}
+            event$={event$}
+            mutate={mutateExecutionList}
+          />
+        ) : (
+          <ScrollArea
+            style={{ height }}
+            className="z-20 mr-0.5 bg-card-light dark:bg-card-dark [&>[data-radix-scroll-area-viewport]]:p-2"
+          >
+            <ErrorFilter />
+            <div className="vines-center pointer-events-none absolute left-0 top-0 z-0 size-full flex-col gap-2">
+              <History size={64} />
+              {/* // Execution records filtered to empty */}
+              <Label className="text-sm">
+                {t(
+                  executionResultList.length === filteredData.length
+                    ? 'workspace.logs-view.log.list.empty'
+                    : 'workspace.logs-view.log.list.filtered-empty',
+                )}
+              </Label>
+            </div>
+          </ScrollArea>
+        )}
         <AnimatePresence mode="popLayout">
-          {firstPageExecutionListIsLoading ? (
+          {isLoading ? (
             <motion.div
               key="vines-execution-result-loading"
               className="vines-center pointer-events-none absolute left-0 top-0 z-0 size-full"

@@ -1,41 +1,40 @@
-import React, { useEffect, useState } from 'react';
+import React, { startTransition, useCallback, useEffect, useState } from 'react';
 
 import { createLazyFileRoute, useParams, useRouter } from '@tanstack/react-router';
 
-import { useEventEmitter } from 'ahooks';
+import { useEventEmitter, useMemoizedFn } from 'ahooks';
+import { isBoolean } from 'lodash';
 import {
   ChevronDown,
   ChevronUp,
+  Copy,
   Download,
   FlipHorizontal,
   FlipVertical,
   RotateCcw,
   RotateCw,
+  Sparkles,
   Trash,
   X,
   ZoomIn,
   ZoomOut,
 } from 'lucide-react';
 import Image from 'rc-image';
+import { useFormContext } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { useSystemConfig } from '@/apis/common';
+import { deleteWorkflowExecution, getWorkflowExecution } from '@/apis/workflow/execution';
 import ImageDetailLayout from '@/components/layout/image-detail-layout';
 import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
+import { useCopy } from '@/hooks/use-copy';
 import { useVinesFlow } from '@/package/vines-flow';
+import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
+import { useExecutionImageResultStore, useHasNextImage, useHasPrevImage } from '@/store/useExecutionImageResultStore';
 
 import 'rc-image/assets/index.css';
 
@@ -43,13 +42,18 @@ interface IImageDetailProps {}
 
 interface TabularRenderWrapperProps {
   height?: number;
+  execution?: VinesWorkflowExecution;
 }
 
 // TabularRender包装组件，用于获取工作流输入参数
-const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height }) => {
+const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, execution }) => {
   const { vines } = useVinesFlow();
   const tabular$ = useEventEmitter<TTabularEvent>();
+  const { t } = useTranslation();
   const [windowHeight, setWindowHeight] = React.useState(window.innerHeight);
+  const [processedInputs, setProcessedInputs] = React.useState<any[]>([]);
+  const [showInputDiffBanner, setShowInputDiffBanner] = React.useState(false);
+  const [originalInputValues, setOriginalInputValues] = React.useState<Record<string, any>>({});
 
   // 监听窗口大小变化
   React.useEffect(() => {
@@ -70,14 +74,156 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height }) =
   // 计算动态高度，确保表单能够适应窗口高度
   const dynamicHeight = height || Math.max(1000, windowHeight - 150);
 
+  // 处理输入字段和原始图片
+  React.useEffect(() => {
+    if (!inputs || inputs.length === 0) {
+      // console.log('TabularRenderWrapper: 没有输入字段可用');
+      setProcessedInputs([]);
+      return;
+    }
+
+    const newInputs = execution
+      ? inputs.map((input) => {
+          return {
+            ...input,
+            default: execution.input?.[input.name] ?? input.default,
+          };
+        })
+      : [];
+    // console.log('TabularRenderWrapper: 表单输入字段:', newInputs);
+    setProcessedInputs(newInputs);
+
+    // 保存原始输入值
+    if (execution?.input) {
+      setOriginalInputValues(execution.input);
+    }
+  }, [inputs, execution]);
+
+  // 监听表单值变化
+  useEffect(() => {
+    if (!execution?.input || !processedInputs.length) return;
+
+    const currentValues = processedInputs.reduce(
+      (acc, input) => {
+        acc[input.name] = input.default;
+        return acc;
+      },
+      {} as Record<string, any>,
+    );
+
+    // 比较当前值与原始值
+    const hasDiff = Object.keys(currentValues).some((key) => {
+      const originalValue = originalInputValues[key];
+      const currentValue = currentValues[key];
+      return JSON.stringify(originalValue) !== JSON.stringify(currentValue);
+    });
+
+    setShowInputDiffBanner(hasDiff);
+  }, [processedInputs, originalInputValues]);
+
+  // 如果没有处理好的输入字段，显示加载状态
+  if (processedInputs.length === 0 && inputs && inputs.length > 0) {
+    return (
+      <div className="vines-center size-full text-center text-3xl text-muted-foreground">
+        {t('workspace.image-detail.form-inputs-not-found')}
+      </div>
+    );
+  }
+
   return (
-    <TabularRender
-      inputs={inputs}
-      height={dynamicHeight}
-      event$={tabular$}
-      workflowId={workflowId}
-      scrollAreaClassName=""
-    />
+    <div style={{ position: 'relative', height: '100%' }}>
+      {showInputDiffBanner && (
+        <div className="z-10 mb-4 rounded-xl border-b border-yellow-200 bg-yellow-100 p-4 shadow-sm dark:border-yellow-800 dark:bg-yellow-900/30">
+          <p className="text-sm text-yellow-800 dark:text-yellow-200">{t('workspace.image-detail.input-diff.desc')}</p>
+        </div>
+      )}
+      <TabularRender
+        inputs={processedInputs}
+        height={dynamicHeight}
+        event$={tabular$}
+        workflowId={workflowId}
+        scrollAreaClassName=""
+      >
+        <div
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 20,
+            background: 'var(--background)',
+            padding: '10px 0',
+          }}
+        >
+          <TabularFooterButtons processedInputs={processedInputs} />
+        </div>
+      </TabularRender>
+    </div>
+  );
+};
+
+interface TabularFooterButtonsProps {
+  processedInputs: any[];
+}
+
+const TabularFooterButtons: React.FC<TabularFooterButtonsProps> = ({ processedInputs }) => {
+  const { t } = useTranslation();
+  const { copy } = useCopy();
+  const { vines } = useVinesFlow();
+  const { data: oem } = useSystemConfig();
+  const [loading, setLoading] = useState(false);
+  const form = useFormContext();
+
+  // 生成按钮通过事件触发提交
+  const handleGenerate = () => {
+    form.handleSubmit(async (values) => {
+      setLoading(true);
+      try {
+        await vines.start({ inputData: values, onlyStart: true });
+        if (
+          !isBoolean(oem?.theme?.views?.form?.toast?.afterCreate) ||
+          oem?.theme?.views?.form?.toast?.afterCreate != false
+        )
+          toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
+      } catch (error) {
+        // console.error('生成失败:', error);
+        toast.error(t('workspace.pre-view.actuator.execution.error'));
+      } finally {
+        setLoading(false);
+      }
+    })();
+  };
+
+  // 复制当前表单参数
+  const handleCopy = () => {
+    const values = form.getValues();
+    const data = processedInputs.map((input) => ({
+      id: input.name,
+      displayName: input.displayName,
+      description: input.description,
+      data: values[input.name],
+      type: input.type,
+    }));
+    copy(JSON.stringify({ type: 'input-parameters', data }));
+    toast.success(t('workspace.pre-view.actuator.detail.form-render.actions.copy-input-success'));
+  };
+
+  return (
+    <div className="z-10 flex w-full items-center justify-center gap-2 bg-background py-3 dark:bg-[#111113] sm:gap-1 md:gap-2">
+      <Button icon={<Copy />} variant="outline" size="small" onClick={handleCopy}>
+        {t('workspace.pre-view.actuator.detail.form-render.actions.copy-input', '复制输入')}
+      </Button>
+      <Button
+        icon={<Sparkles className="fill-white" />}
+        variant="solid"
+        size="small"
+        className="text-base"
+        onClick={handleGenerate}
+        loading={loading}
+      >
+        {t('workspace.pre-view.actuator.execution.label', '生成')}
+      </Button>
+    </div>
   );
 };
 
@@ -85,34 +231,66 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const { t } = useTranslation();
   const router = useRouter();
   const { history } = router;
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [imageIndex, setImageIndex] = useState(0);
-  const [imageList, setImageList] = useState<string[]>([]);
   const [imageRotation, setImageRotation] = useState(0);
   const [imageFlipX, setImageFlipX] = useState(false);
   const [imageFlipY, setImageFlipY] = useState(false);
   const [imageScale, setImageScale] = useState(1);
 
-  // 从路由搜索参数中获取图片信息
-  const searchParams = new URLSearchParams(window.location.search);
-  const imageUrl = searchParams.get('imageUrl') || '';
+  const { images, position, nextImage, prevImage, clearImages } = useExecutionImageResultStore();
+  const nonUrgentNextImage = useCallback(() => {
+    startTransition(() => {
+      nextImage();
+    });
+  }, [nextImage]);
+  const nonUrgentPrevImage = useCallback(() => {
+    startTransition(() => {
+      prevImage();
+    });
+  }, [prevImage]);
+  useEffect(() => {
+    const controller = new AbortController();
+    document.body.addEventListener(
+      'keydown',
+      (e) => {
+        if (e.key === 'ArrowUp') {
+          nonUrgentPrevImage();
+        } else if (e.key === 'ArrowDown') {
+          nonUrgentNextImage();
+        } else if (e.key === 'ArrowLeft') {
+          nonUrgentPrevImage();
+        } else if (e.key === 'ArrowRight') {
+          nonUrgentNextImage();
+        } else if (e.key === 'Escape') {
+          clearImages();
+          history.back();
+        }
+      },
+      {
+        signal: controller.signal,
+      },
+    );
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
+  const currentImage = images[position];
+  const imageUrl = currentImage?.render?.data as string;
+  const instanceId = currentImage?.instanceId;
+  const hasPrev = useHasPrevImage();
+  const hasNext = useHasNextImage();
+
+  const [execution, setExecution] = useState<VinesWorkflowExecution | undefined>();
 
   const { workflowId } = useParams({ from: '/$teamId/workspace/$workflowId/image-detail/' });
 
-  // 获取当前工作流的所有图片
   useEffect(() => {
-    if (imageUrl) {
-      // 这里应该是从API获取图片列表的逻辑
-      // 为了演示，我模拟一个图片列表
-      setImageList([imageUrl, '/fallback_image.webp', '/fallback_image_dark.webp']);
-
-      // 找到当前图片在列表中的索引
-      const index = imageList.findIndex((url) => url === imageUrl);
-      if (index !== -1) {
-        setImageIndex(index);
-      }
-    }
-  }, [imageUrl]);
+    if (!instanceId) return;
+    getWorkflowExecution(instanceId).then((executionResult) => {
+      if (!executionResult) return;
+      setExecution(executionResult);
+    });
+  }, [instanceId]);
 
   // 监听图片状态变化，更新图片样式
   useEffect(() => {
@@ -130,66 +308,25 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
     }
   }, [imageRotation, imageFlipX, imageFlipY, imageScale]);
 
-  // 处理上一张/下一张图片
-  const handlePrevImage = () => {
-    if (imageList.length > 1 && imageIndex > 0) {
-      const newIndex = imageIndex - 1;
-      setImageIndex(newIndex);
-      // 更新URL参数，保持状态同步
-      const newSearchParams = new URLSearchParams(window.location.search);
-      newSearchParams.set('imageUrl', imageList[newIndex]);
-      router.navigate({
-        search: newSearchParams.toString(),
-      });
-      toast.success(t('workspace.image-detail.prev-image-success', '已切换到上一张图片'));
-    } else {
-      toast.info(t('workspace.image-detail.no-prev-image', '已经是第一张图片'));
-    }
-  };
-
-  const handleNextImage = () => {
-    if (imageList.length > 1 && imageIndex < imageList.length - 1) {
-      const newIndex = imageIndex + 1;
-      setImageIndex(newIndex);
-      // 更新URL参数，保持状态同步
-      const newSearchParams = new URLSearchParams(window.location.search);
-      newSearchParams.set('imageUrl', imageList[newIndex]);
-      router.navigate({
-        search: newSearchParams.toString(),
-      });
-      toast.success(t('workspace.image-detail.next-image-success', '已切换到下一张图片'));
-    } else {
-      toast.info(t('workspace.image-detail.no-next-image', '已经是最后一张图片'));
-    }
-  };
-
   // 处理删除图片
-  const handleDeleteImage = () => {
-    // 这里应该是删除图片的API调用
-    // 为了演示，我只是从列表中移除
-    if (imageList.length > 0) {
-      const newImageList = [...imageList];
-      newImageList.splice(imageIndex, 1);
-      setImageList(newImageList);
-
-      if (newImageList.length > 0) {
-        // 如果还有图片，显示下一张或上一张
-        const newIndex = imageIndex >= newImageList.length ? newImageList.length - 1 : imageIndex;
-        setImageIndex(newIndex);
-        // 更新URL参数
-        const newSearchParams = new URLSearchParams(window.location.search);
-        newSearchParams.set('imageUrl', newImageList[newIndex]);
-        router.navigate({
-          search: newSearchParams.toString(),
-        });
-      } else {
-        // 如果没有图片了，返回上一页
-        history.back();
-      }
-      toast.success(t('workspace.image-detail.delete-success', '图片已删除'));
+  const handleDeleteImage = useMemoizedFn(() => {
+    if (instanceId) {
+      toast.promise(deleteWorkflowExecution(instanceId), {
+        success: () => {
+          // 删除成功后返回上一页
+          history.back();
+          return t('common.delete.success');
+        },
+        error: t('common.delete.error'),
+        loading: t('common.delete.loading'),
+      });
+    } else {
+      // 如果没有instanceId，直接返回上一页
+      history.back();
+      clearImages();
+      toast.success(t('common.delete.success'));
     }
-    setShowDeleteDialog(false);
-  };
+  });
 
   // 右侧边栏组件
   const RightSidebar = (
@@ -208,8 +345,8 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
               icon={<ChevronUp />}
               variant="outline"
               size="small"
-              onClick={handlePrevImage}
-              disabled={imageList.length <= 1 || imageIndex <= 0}
+              disabled={!hasPrev}
+              onClick={nonUrgentPrevImage}
             />
           </TooltipTrigger>
           <TooltipContent>{t('workspace.image-detail.prev-image', '上一张')}</TooltipContent>
@@ -221,8 +358,8 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
               icon={<ChevronDown />}
               variant="outline"
               size="small"
-              onClick={handleNextImage}
-              disabled={imageList.length <= 1 || imageIndex >= imageList.length - 1}
+              disabled={!hasNext}
+              onClick={nonUrgentNextImage}
             />
           </TooltipTrigger>
           <TooltipContent>{t('workspace.image-detail.next-image', '下一张')}</TooltipContent>
@@ -232,31 +369,10 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
       <div className="mb-6">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              icon={<Trash />}
-              variant="outline"
-              size="small"
-              disabled={!imageUrl}
-              onClick={() => setShowDeleteDialog(true)}
-            />
+            <Button icon={<Trash />} variant="outline" size="small" onClick={handleDeleteImage} />
           </TooltipTrigger>
           <TooltipContent>{t('workspace.image-detail.delete', '删除')}</TooltipContent>
         </Tooltip>
-
-        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t('workspace.image-detail.delete-confirm-title', '确认删除')}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {t('workspace.image-detail.delete-confirm-desc', '确定要删除这张图片吗？此操作无法撤销。')}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>{t('common.utils.cancel', '取消')}</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDeleteImage}>{t('common.utils.confirm', '确认')}</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
     </div>
   );
@@ -265,15 +381,12 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
     <VinesFlowProvider workflowId={workflowId}>
       <ImageDetailLayout rightSidebar={RightSidebar}>
         {/* 主内容区域 */}
-        <main className="flex size-full flex-1 flex-col overflow-hidden rounded-xl border border-input bg-background shadow-sm dark:bg-[#111113] md:flex-row">
+        <main className="flex size-full flex-1 flex-col overflow-hidden rounded-xl border border-input bg-background pb-6 shadow-sm dark:bg-[#111113] md:flex-row">
           {/* 左侧图片展示区 */}
-          <div className="flex w-full flex-col items-center justify-start overflow-hidden rounded-bl-xl rounded-br-xl rounded-tl-xl bg-background px-6 dark:bg-[#111113] sm:w-full md:w-[70%]">
+          <div className="flex h-full w-full flex-col items-center overflow-hidden rounded-bl-xl rounded-br-xl rounded-tl-xl bg-background dark:bg-[#111113] sm:w-full md:w-[70%]">
             {imageUrl ? (
               <>
-                <div
-                  className="flex w-full items-center justify-center"
-                  style={{ maxHeight: '80vh', width: '100%', marginTop: '20px', overflow: 'auto' }}
-                >
+                <div className="flex w-full flex-1 items-center justify-center overflow-auto p-4">
                   <Image
                     src={imageUrl}
                     alt="详情图片"
@@ -282,7 +395,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                       display: 'block',
                       margin: 'auto',
                       maxWidth: '100%',
-                      maxHeight: '80vh',
+                      maxHeight: 'calc(100vh - 200px)',
                       width: 'auto',
                       height: 'auto',
                       objectFit: 'contain',
@@ -297,8 +410,8 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                     preview={false}
                   />
                 </div>
-                {/* 图片操作按钮 */}
-                <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-1 md:gap-2">
+                {/* 图片操作按钮 - 底部 */}
+                <div className="flex w-full items-center justify-center gap-2 bg-background py-5 dark:bg-[#111113] sm:gap-1 md:gap-2">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
@@ -308,11 +421,10 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         onClick={() => {
                           // 直接应用垂直翻转效果
                           setImageFlipY((prev) => !prev);
-                          toast.success(t('components.ui.image-preview.flipY-success', '已垂直翻转'));
                         }}
                       />
                     </TooltipTrigger>
-                    <TooltipContent>{t('components.ui.image-preview.flipY', '垂直翻转')}</TooltipContent>
+                    <TooltipContent>{t('workspace.image-detail.flipY', '垂直翻转')}</TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -323,11 +435,10 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         onClick={() => {
                           // 直接应用水平翻转效果
                           setImageFlipX((prev) => !prev);
-                          toast.success(t('components.ui.image-preview.flipX-success', '已水平翻转'));
                         }}
                       />
                     </TooltipTrigger>
-                    <TooltipContent>{t('components.ui.image-preview.flipX', '水平翻转')}</TooltipContent>
+                    <TooltipContent>{t('workspace.image-detail.flipX', '水平翻转')}</TooltipContent>
                   </Tooltip>
 
                   <Tooltip>
@@ -339,11 +450,10 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         onClick={() => {
                           // 直接应用左旋转效果
                           setImageRotation((prev) => prev - 90);
-                          toast.success(t('components.ui.image-preview.rotateLeft-success', '已向左旋转'));
                         }}
                       />
                     </TooltipTrigger>
-                    <TooltipContent>{t('components.ui.image-preview.rotateLeft', '向左旋转')}</TooltipContent>
+                    <TooltipContent>{t('workspace.image-detail.rotateLeft', '向左旋转')}</TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -354,11 +464,10 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         onClick={() => {
                           // 直接应用右旋转效果
                           setImageRotation((prev) => prev + 90);
-                          toast.success(t('components.ui.image-preview.rotateRight-success', '已向右旋转'));
                         }}
                       />
                     </TooltipTrigger>
-                    <TooltipContent>{t('components.ui.image-preview.rotateRight', '向右旋转')}</TooltipContent>
+                    <TooltipContent>{t('workspace.image-detail.rotateRight', '向右旋转')}</TooltipContent>
                   </Tooltip>
 
                   <Tooltip>
@@ -370,11 +479,10 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         onClick={() => {
                           // 直接应用放大效果
                           setImageScale((prev) => prev + 0.1);
-                          toast.success(t('components.ui.image-preview.zoomIn-success', '已放大'));
                         }}
                       />
                     </TooltipTrigger>
-                    <TooltipContent>{t('components.ui.image-preview.zoomIn', '放大')}</TooltipContent>
+                    <TooltipContent>{t('workspace.image-detail.zoomIn', '放大')}</TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -385,11 +493,10 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                         onClick={() => {
                           // 直接应用缩小效果
                           setImageScale((prev) => Math.max(0.1, prev - 0.1));
-                          toast.success(t('components.ui.image-preview.zoomOut-success', '已缩小'));
                         }}
                       />
                     </TooltipTrigger>
-                    <TooltipContent>{t('components.ui.image-preview.zoomOut', '缩小')}</TooltipContent>
+                    <TooltipContent>{t('workspace.image-detail.zoomOut', '缩小')}</TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -403,31 +510,44 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                               const link = document.createElement('a');
                               link.href = imageUrl;
                               link.setAttribute('download', '');
-                              link.setAttribute('target', '_self');
+                              link.setAttribute('rel', 'noreferrer');
                               link.click();
                             } catch (error) {
-                              console.error('下载异常:', error);
+                              // do nothing
                             }
                           }
                         }}
                       />
                     </TooltipTrigger>
-                    <TooltipContent>{t('common.utils.download.label', '下载')}</TooltipContent>
+                    <TooltipContent>{t('workspace.image-detail.download', '下载')}</TooltipContent>
                   </Tooltip>
                 </div>
               </>
             ) : (
-              <div className="text-center text-muted-foreground">
+              <div className="vines-center size-full text-center text-3xl text-muted-foreground">
                 {t('workspace.image-detail.no-image', '无图片数据')}
               </div>
             )}
           </div>
 
           {/* 中间区域，渲染表单 */}
-          <div className="flex h-full flex-1 flex-col overflow-auto rounded-r-xl rounded-tr-xl bg-background px-6 pt-6 dark:bg-[#111113] md:border-l md:border-input">
-            <div className="h-full flex-1">
-              <TabularRenderWrapper height={window.innerHeight - 150} />
+          <div className="relative flex h-full flex-1 flex-col rounded-r-xl rounded-tr-xl bg-background px-6 pt-6 dark:bg-[#111113] md:border-l md:border-input">
+            {/* 内容区，底部预留按钮高度 */}
+            <div className="flex-1 overflow-auto">
+              <TabularRenderWrapper height={window.innerHeight - 120} execution={execution} />
             </div>
+            {/* 按钮条 */}
+            <div
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 20,
+                background: 'var(--background)',
+              }}
+              className="dark:bg-[#111113]"
+            ></div>
           </div>
         </main>
       </ImageDetailLayout>

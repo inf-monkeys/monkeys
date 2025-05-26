@@ -1,53 +1,53 @@
-import React, { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
+import React, { Dispatch, SetStateAction, startTransition, useCallback, useEffect, useRef, useState } from 'react';
 
+import { SWRInfiniteResponse } from 'swr/infinite';
+
+import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
 import { useInfiniteLoader, useMasonry, useResizeObserver } from 'masonic';
 
-import { useWorkflowExecutionList } from '@/apis/workflow/execution';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result/index.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { usePageStore } from '@/store/usePageStore';
+import { useLastScrollTop, useSetScrollTop } from '@/store/useScrollPositionStore';
+import { useShouldFilterError } from '@/store/useShouldErrorFilterStore.ts';
 import { cn } from '@/utils';
-import {
-  concatResultListReducer,
-  convertExecutionResultToItemList,
-  IVinesExecutionResultItem,
-} from '@/utils/execution.ts';
+import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
+import { ErrorFilter } from './error-filter';
 import { ExecutionResultItem } from './item';
 import { usePositioner } from './utils';
 
 interface IExecutionResultGridProps extends React.ComponentPropsWithoutRef<'div'> {
-  workflowId?: string | null;
+  workflowId: string | null;
   height: number;
-
-  page: number;
   setPage: Dispatch<SetStateAction<number>>;
-
   data: IVinesExecutionResultItem[];
-  setData: Dispatch<SetStateAction<IVinesExecutionResultItem[]>>;
+  hasMore: boolean;
+  event$: EventEmitter<void>;
+  mutate?: SWRInfiniteResponse['mutate'];
 }
+
+export type IAddDeletedInstanceId = (instanceId: string) => void;
 
 export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   workflowId,
   height,
-  page,
   setPage,
   data,
-  setData,
+  hasMore,
+  event$,
+  mutate,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [hasMore, setHasMore] = useState(true);
   const formContainerWidth = usePageStore((s) => s.containerWidth);
   const { isUseWorkSpace } = useVinesRoute();
 
-  const { data: currentPageExecutionListData, isLoading } = useWorkflowExecutionList(workflowId, page, LOAD_LIMIT, 0);
-
   const loadMore = useInfiniteLoader(
     async () => {
-      if (isLoading || !hasMore) return;
+      if (!hasMore) return;
       setPage((prev) => prev + 1);
     },
     {
@@ -56,53 +56,83 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
     },
   );
 
-  useEffect(() => {
-    if (!currentPageExecutionListData) return;
+  const [deletedInstanceIdList, setDeletedInstanceIdList] = useState<string[]>([]);
 
-    const currentPageResultList = currentPageExecutionListData.data
-      .map(convertExecutionResultToItemList)
-      .reduce(concatResultListReducer, []);
-
-    if (currentPageResultList && currentPageResultList.length < LOAD_LIMIT) {
-      setHasMore(false);
-    }
-
-    if (page === 1) return;
-
-    const nonExist = currentPageResultList.filter(
-      (item) => !data.some((existingItem) => existingItem.instanceId === item.instanceId),
-    );
-
-    if (nonExist.length === 0) return;
-
-    setData((prevData) => [...prevData, ...nonExist]);
-  }, [currentPageExecutionListData, page]);
-
-  const containerWidth = (formContainerWidth - 48) * 0.6 - 16 - (isUseWorkSpace ? 140 : 0);
-
-  console.log(formContainerWidth);
-
-  const positioner = usePositioner({
-    width: containerWidth,
-    columnGutter: 12,
-    columnWidth: 200,
-    rowGutter: 12,
-  });
+  const containerWidth = formContainerWidth * 0.6 - 16 - 16 - 4 - (isUseWorkSpace ? 140 : 0);
+  const shouldFilterError = useShouldFilterError();
+  const positioner = usePositioner(
+    {
+      width: containerWidth,
+      columnGutter: 8,
+      columnWidth: 200,
+      rowGutter: 8,
+    },
+    [data.length, workflowId, shouldFilterError],
+  );
 
   const resizeObserver = useResizeObserver(positioner);
 
-  const { scrollTop, isScrolling } = useScroller(scrollRef);
+  const { scrollTop, isScrolling, setScrollTop, currentScrollTopRef, lastUpdateTimeRef } = useScroller(
+    scrollRef,
+    workflowId ?? '',
+  );
 
+  const lastScrollTop = useLastScrollTop(workflowId ?? '');
+  useEffect(() => {});
+  const addDeletedInstanceId = (instanceId: string) => {
+    if (!deletedInstanceIdList.includes(instanceId))
+      setDeletedInstanceIdList((prevState) => [...prevState, instanceId]);
+  };
+  const hasUsedCacheScrollTop = useRef(false);
+  useEffect(() => {
+    console.log('scrollTop', scrollTop);
+    console.log('container scrollTop', containerRef.current?.scrollTop);
+  }, [scrollTop]);
+  useEffect(() => {
+    console.log('last scrollTop', lastScrollTop);
+  }, [lastScrollTop]);
+  useEffect(() => {
+    const timeout: NodeJS.Timeout | null = null;
+    startTransition(() => {
+      // setIsScrolling(true);
+      if (lastScrollTop && !hasUsedCacheScrollTop.current) {
+        // console.log('timeout fired');
+        setScrollTop(lastScrollTop);
+        currentScrollTopRef.current = lastScrollTop;
+        lastUpdateTimeRef.current = Date.now();
+        // console.log('scroll top set');
+        scrollRef.current!.scrollTop = lastScrollTop;
+        // setIsScrolling(false);
+        hasUsedCacheScrollTop.current = true;
+      }
+    });
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    };
+  }, [lastScrollTop]);
   const masonryGrid = useMasonry<IVinesExecutionResultItem>({
     positioner,
     scrollTop,
     isScrolling,
     height,
     containerRef,
-    items: data ?? [],
+    items: data,
     overscanBy: 3,
-    render: useCallback(({ data: item }) => <ExecutionResultItem {...item} />, []),
-    itemKey: (item) => item.render.key,
+    render: useCallback(
+      ({ data: item }) => (
+        <ExecutionResultItem
+          result={item}
+          event$={event$}
+          isDeleted={item.render.isDeleted || deletedInstanceIdList.includes(item.instanceId)}
+          addDeletedInstanceId={addDeletedInstanceId}
+          mutate={mutate}
+        />
+      ),
+      [data, deletedInstanceIdList],
+    ),
+    itemKey: (item, index) => `${index}-${item.render.key}`,
     onRender: loadMore,
     itemHeightEstimate: 400,
     resizeObserver,
@@ -110,22 +140,24 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
 
   return (
     <ScrollArea
-      className={cn('-pr-0.5 dark:bg-card-dark bg-card-light z-20 mr-0.5 [&>[data-radix-scroll-area-viewport]]:p-2')}
+      className={cn('z-20 mr-0.5 bg-card-light dark:bg-card-dark [&>[data-radix-scroll-area-viewport]]:p-2')}
       ref={scrollRef}
       style={{ height }}
       disabledOverflowMask
     >
+      <ErrorFilter />
       {masonryGrid}
     </ScrollArea>
   );
 };
 
-const useScroller = (scrollRef: React.RefObject<HTMLElement>) => {
-  const [scrollTop, setScrollTop] = useState(0);
+const useScroller = (scrollRef: React.RefObject<HTMLElement>, workflowId: string) => {
   const [isScrolling, setIsScrolling] = useState(false);
-
+  const setStoreScrollTop = useSetScrollTop();
+  const lastScrollTop = useLastScrollTop(workflowId);
+  const [scrollTop, setScrollTop] = useState(lastScrollTop ?? 0);
   const lastUpdateTimeRef = useRef(0);
-  const currentScrollTopRef = useRef(0);
+  const currentScrollTopRef = useRef(lastScrollTop ?? 0);
   const frameRef = useRef<number | null>(null);
   const scrollTimeoutRef = useRef<any>(null);
   const fps = 12; // 提高帧率以获得更流畅的滚动体验
@@ -137,6 +169,7 @@ const useScroller = (scrollRef: React.RefObject<HTMLElement>) => {
       const now = Date.now();
       if (now - lastUpdateTimeRef.current >= 1000 / fps) {
         setScrollTop(currentScrollTopRef.current);
+        setStoreScrollTop(workflowId, currentScrollTopRef.current);
         lastUpdateTimeRef.current = now;
       }
       frameRef.current = null;
@@ -178,7 +211,7 @@ const useScroller = (scrollRef: React.RefObject<HTMLElement>) => {
         scrollTimeoutRef.current = null;
       }
     };
-  }, [scrollRef, throttledUpdate]);
+  }, [workflowId, throttledUpdate]);
 
-  return { scrollTop, isScrolling };
+  return { scrollTop, isScrolling, setScrollTop, currentScrollTopRef, lastUpdateTimeRef, setIsScrolling };
 };

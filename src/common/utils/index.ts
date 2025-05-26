@@ -162,6 +162,18 @@ export const flattenKeys = (obj: unknown, path: string[] = [], triggerKeys?: str
     )
     : { [path.join('.')]: obj };
 
+export const flattenObject = (obj: any, parentKey = '', result = {}) => {
+  for (const key in obj) {
+    const fullKey = parentKey ? `${parentKey}.${key}` : key;
+    if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+      flattenObject(obj[key], fullKey, result);
+    } else {
+      result[fullKey] = obj[key];
+    }
+  }
+  return result;
+}
+
 export const extractImageUrls = (text: unknown): string[] => {
   if (typeof text !== 'string') return [];
 

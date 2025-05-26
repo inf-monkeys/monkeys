@@ -119,10 +119,13 @@ export class AppController {
         favicon: config.server.customization.favicon,
         colors: {
           primaryColor: config.server.customization.colors.primary,
+          neocardColor: config.server.customization.colors.neocard,
         },
         toast: {
           position: config.server.customization.toast.position,
         },
+        icons: config.server.customization.icons,
+        views: config.server.customization.views,
         hideSpaceHeader: config.server.customization.hideSpaceHeader,
         showSidebarTeamSelector: config.server.customization.showSidebarTeamSelector,
         showSidebarPageGroup: config.server.customization.showSidebarPageGroup,
@@ -135,6 +138,7 @@ export class AppController {
         },
         hideAuthToast: config.auth.hideAuthToast,
         autoReload: config.auth.autoReload,
+        defaultOtherTeam: config.auth.defaultOtherTeam,
       },
       pages: {
         allowPageKeys: '*',

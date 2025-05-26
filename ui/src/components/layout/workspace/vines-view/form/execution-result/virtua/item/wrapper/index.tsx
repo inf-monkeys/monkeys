@@ -1,33 +1,46 @@
 import React from 'react';
 
 import { useMemoizedFn } from 'ahooks';
-import { Download, Ellipsis, Trash } from 'lucide-react';
+import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
+import { isBoolean } from 'lodash';
+import { Download, Ellipsis, RotateCcw, Trash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { useSystemConfig } from '@/apis/common';
 import { deleteWorkflowExecution } from '@/apis/workflow/execution';
 import { VirtuaExecutionResultRawDataDialog } from '@/components/layout/workspace/vines-view/form/execution-result/virtua/item/wrapper/raw-data-dialog.tsx';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-// import { useFlowStore } from '@/store/useFlowStore';
+import { useVinesFlow } from '@/package/vines-flow';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
+import { IAddDeletedInstanceId } from '@/components/layout/workspace/vines-view/form/execution-result/grid';
+import { SWRInfiniteResponse } from 'swr/infinite';
 
 interface IVirtuaExecutionResultGridWrapperProps {
   data: IVinesExecutionResultItem;
   children: React.ReactNode;
   src?: string;
+  event$: EventEmitter<void>;
+  addDeletedInstanceId?: IAddDeletedInstanceId;
+  mutate?: SWRInfiniteResponse['mutate'];
 }
 
 export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGridWrapperProps> = ({
   data,
   children,
   src,
+  event$,
+  addDeletedInstanceId,
+  mutate,
 }) => {
+  // const { mutate } = useSWRConfig();
+
+  const { data: oem } = useSystemConfig();
+
+  const { vines } = useVinesFlow();
+
   const { t } = useTranslation();
-  // const workflowId = useFlowStore((s) => s.workflowId);
-  // const { mutate } = useWorkflowExecutionOutputs(workflowId);
-  // 瀑布流
-  // 使用直接打开链接方式下载，避免CORS问题
   const handleDownload = useMemoizedFn(() => {
     if (!src) return;
 
@@ -36,12 +49,11 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
       const link = document.createElement('a');
       link.href = src;
       link.setAttribute('download', '');
-      link.setAttribute('target', '_self');
+      link.setAttribute('rel', 'noreferrer');
       link.click();
 
       toast.success(t('common.utils.download.success'));
     } catch (error) {
-      console.error('下载异常:', error);
       toast.error(t('common.utils.download.error'));
     }
   });
@@ -49,14 +61,46 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
   const handleDelete = useMemoizedFn(() => {
     const targetInstanceId = data?.instanceId;
     if (targetInstanceId) {
-      toast.promise(deleteWorkflowExecution(targetInstanceId), {
-        success: () => {
-          return t('common.delete.success');
-        },
-        error: t('common.delete.error'),
-        loading: t('common.delete.loading'),
-      });
+      if (!isBoolean(oem?.theme?.views?.form?.toast?.afterDelete) || oem?.theme?.views?.form?.toast?.afterDelete) {
+        toast.promise(deleteWorkflowExecution(targetInstanceId), {
+          success: () => {
+            // addDeletedInstanceId?.(targetInstanceId);
+            void mutate?.();
+            return t('common.delete.success');
+          },
+          error: t('common.delete.error'),
+          loading: t('common.delete.loading'),
+        });
+      } else {
+        try {
+          deleteWorkflowExecution(targetInstanceId).then(() => {
+            // addDeletedInstanceId?.(targetInstanceId);
+            void mutate?.();
+          });
+        } catch (error) {
+          toast.error(t('common.delete.error'));
+        }
+      }
     }
+  });
+
+  const handleRetry = useMemoizedFn(() => {
+    const inputData = {};
+    for (const { id, data: value } of data.input) {
+      inputData[id] = value;
+    }
+    // addDeletedInstanceId?.(data?.instanceId);
+    vines.start({ inputData, onlyStart: true }).then((status) => {
+      if (status) {
+        if (
+          !isBoolean(oem?.theme?.views?.form?.toast?.afterCreate) ||
+          oem?.theme?.views?.form?.toast?.afterCreate != false
+        )
+          toast.success(t('workspace.pre-view.actuator.execution.workflow-execution-created'));
+        handleDelete();
+        event$.emit?.();
+      }
+    });
   });
 
   return (
@@ -66,6 +110,24 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
 
       {/* 操作按钮区域 - 提高z-index确保在最上层可点击 */}
       <div className="absolute right-4 top-4 z-30 flex gap-1 opacity-0 transition-opacity group-hover/vgi:opacity-100">
+        {data.status === 'FAILED' && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                className="dark:hover:bg-[--card-dark]/90 rounded bg-white/80 !p-1 shadow-sm hover:bg-white dark:bg-[--card-dark] [&_svg]:!size-3"
+                icon={<RotateCcw />}
+                variant="outline"
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation(); // 阻止事件冒泡，防止触发预览
+                  handleRetry();
+                }}
+              />
+            </TooltipTrigger>
+            <TooltipContent>{t('common.utils.retry')}</TooltipContent>
+          </Tooltip>
+        )}
+
         {src && (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -84,23 +146,21 @@ export const VirtuaExecutionResultGridWrapper: React.FC<IVirtuaExecutionResultGr
           </Tooltip>
         )}
 
-        {src && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                className="dark:hover:bg-[--card-dark]/90 rounded bg-white/80 !p-1 shadow-sm hover:bg-white dark:bg-[--card-dark] [&_svg]:!size-3"
-                icon={<Trash />}
-                variant="outline"
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation(); // 阻止事件冒泡，防止触发预览
-                  handleDelete();
-                }}
-              />
-            </TooltipTrigger>
-            <TooltipContent>{t('common.utils.delete')}</TooltipContent>
-          </Tooltip>
-        )}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              className="dark:hover:bg-[--card-dark]/90 rounded bg-white/80 !p-1 shadow-sm hover:bg-white dark:bg-[--card-dark] [&_svg]:!size-3"
+              icon={<Trash />}
+              variant="outline"
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation(); // 阻止事件冒泡，防止触发预览
+                handleDelete();
+              }}
+            />
+          </TooltipTrigger>
+          <TooltipContent>{t('common.utils.delete')}</TooltipContent>
+        </Tooltip>
 
         <VirtuaExecutionResultRawDataDialog data={data}>
           <Button

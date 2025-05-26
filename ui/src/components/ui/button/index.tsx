@@ -16,7 +16,7 @@ const buttonVariants = cva(
         default: 'bg-gray-3 bg-opacity-60 hover:bg-opacity-15 active:bg-opacity-20 text-[--text-color]',
         solid: 'bg-[--bg-color] text-primary-foreground hover:bg-[--bg-hover-color] active:bg-[--bg-active-color]',
         outline:
-          'border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground [&_svg]:stroke-gold-12',
+          'border border-input bg-dialog shadow-sm hover:bg-accent hover:text-accent-foreground [&_svg]:stroke-gold-12',
         borderless: 'hover:bg-gray-3 active:bg-opacity-20',
         ghost: 'data-[hovered]:bg-accent data-[hovered]:text-accent-foreground',
       },
@@ -103,3 +103,4 @@ Button.displayName = 'Button';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export { Button, buttonVariants };
+

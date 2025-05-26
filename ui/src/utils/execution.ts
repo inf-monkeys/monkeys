@@ -26,6 +26,7 @@ export type IVinesExecutionResultItem = VinesWorkflowExecutionOutputListItem & {
     // index: number;
     key: string;
     status: VinesWorkflowExecutionType;
+    isDeleted?: boolean;
   };
 };
 
