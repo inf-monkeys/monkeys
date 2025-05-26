@@ -73,7 +73,13 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
 
   const { onDropRejected, validator, onDrag, onPaste } = useVinesDropzone({
     ...props,
-    onPasteOrDropCallback: (file) => uppy.addFile(handleConvertFile(file)),
+    onPasteOrDropCallback: (file) => {
+      if (max === 1 && !isEmpty(filesMapper)) {
+        const existingFiles = uppy.getFiles();
+        existingFiles.forEach(file => uppy.removeFile(file.id));
+      }
+      uppy.addFile(handleConvertFile(file));
+    },
   });
 
   const ref = useRef<HTMLDivElement>(null);
@@ -125,7 +131,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
     }
 
     uppy$?.emit(uppy);
-  }, [props.files]);
+  }, [props.files, props.originalFiles]);
 
   const [isHovering, setIsHovering] = useState(false);
   useDrop(ref, {
@@ -138,6 +144,10 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
   return (
     <Dropzone
       onDrop={(f) => {
+        if (max === 1 && !isEmpty(filesMapper)) {
+          const existingFiles = uppy.getFiles();
+          existingFiles.forEach(file => uppy.removeFile(file.id));
+        }
         uppy.addFiles(f.map((file) => handleConvertFile(file)));
         setIsHovering(false);
       }}
@@ -152,7 +162,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
         const isEmptyFilesOrDragAccept = isFilesEmpty || isDropzoneActive;
         return (
           <div
-            className={cn('dark:bg-card-dark relative h-[15.5rem] rounded', className)}
+            className={cn('relative h-[15.5rem] rounded dark:bg-card-dark', className)}
             {...getRootProps({
               onPaste: onPaste as any,
               onDrag: onDrag as any,
@@ -167,7 +177,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
               {isEmptyFilesOrDragAccept && (
                 <motion.div
                   key="vines-uploader-hint"
-                  className="dark:bg-card-dark absolute left-0 top-0 z-20 size-full p-2 pb-[3rem]"
+                  className="absolute left-0 top-0 z-20 size-full p-2 pb-[3rem] dark:bg-card-dark"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}

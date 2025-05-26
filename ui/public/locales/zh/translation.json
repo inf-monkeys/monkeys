@@ -25,6 +25,7 @@
       "update": "更新",
       "create": "创建",
       "delete": "删除",
+      "deleted": "已删除",
       "close": "关闭",
       "edit": "编辑",
       "operate": "操作",
@@ -2880,6 +2881,7 @@
         },
         "list": {
           "empty": "暂无执行记录",
+          "filtered-empty": "执行记录筛选后无数据",
           "bottom": "到底了",
           "more": "剩余 {{data}} 项，点击加载",
           "preview-page-not-found": "打开详情失败！找不到表单视图",
@@ -3205,6 +3207,31 @@
           "error": "恢复上次生成参数失败"
         }
       }
+    },
+    "image-detail": {
+      "error-filter": {
+        "title": "过滤错误",
+        "options": {
+          "on": "是",
+          "off": "否"
+        }
+      },
+      "input-diff": {
+        "title": "输入差异",
+        "desc": "新输入与原有输入不一致，可能会导致结果差异较大"
+      },
+      "no-image": "无图片数据",
+      "download": "下载",
+      "flipY": "垂直翻转",
+      "flipX": "水平翻转",
+      "rotateLeft": "旋转左",
+      "rotateRight": "旋转右",
+      "zoomIn": "放大",
+      "zoomOut": "缩小",
+      "prev-image": "上一张",
+      "next-image": "下一张",
+      "delete": "删除",
+      "form-inputs-not-found": "未找到表单输入"
     }
   },
   "agent": {

@@ -18,7 +18,7 @@ interface IFieldTextInputWithButtonsProps {
 }
 
 export const FieldTextInputWithButtons: React.FC<IFieldTextInputWithButtonsProps> = ({
-  input: { name, type, typeOptions, displayName: inputDisplayName },
+  input: { type, typeOptions, displayName: inputDisplayName },
   value,
   onChange,
   form,
@@ -34,18 +34,6 @@ export const FieldTextInputWithButtons: React.FC<IFieldTextInputWithButtonsProps
   const placeholder =
     typeOptions?.placeholder ?? t('workspace.pre-view.actuator.execution-form.string', { displayName });
 
-  // 智能优化处理函数
-  const handleSmartOptimize = () => {
-    // 这里可以添加智能优化的逻辑
-    console.log('Smart optimize for:', name);
-  };
-
-  // 提示词词典处理函数
-  const handleShowDictionary = () => {
-    // 这里可以添加显示提示词词典的逻辑
-    console.log('Show dictionary for:', name);
-  };
-
   return (
     visible && (
       <TextWithButtons
@@ -56,8 +44,6 @@ export const FieldTextInputWithButtons: React.FC<IFieldTextInputWithButtonsProps
         }}
         minHeight={typeOptions?.textareaMiniHeight ?? 120}
         maxHeight={300}
-        onSmartOptimize={handleSmartOptimize}
-        onShowDictionary={handleShowDictionary}
       />
     )
   );

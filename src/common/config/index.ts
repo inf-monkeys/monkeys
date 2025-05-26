@@ -41,9 +41,21 @@ export interface ServerConfig {
     };
     colors: {
       primary: string;
+      neocard: string;
     };
     toast: {
       position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
+    };
+    icons: {
+      error?: string;
+    };
+    views: {
+      form: {
+        toast: {
+          afterCreate: boolean;
+          afterDelete: boolean;
+        };
+      };
     };
     hideSpaceHeader?: boolean;
     showSidebarTeamSelector?: boolean;
@@ -171,6 +183,7 @@ export interface AuthConfig {
   feishu?: FeishuConfig;
   hideAuthToast?: boolean;
   autoReload?: boolean;
+  defaultOtherTeam?: boolean;
 }
 
 export interface S3Config {
@@ -243,6 +256,10 @@ export interface AwsConfig {
   };
 }
 
+export interface TenantStatisticsConfig {
+  bearer: string;
+}
+
 export interface Config {
   server: ServerConfig;
   conductor: ConductorConfig;
@@ -259,6 +276,7 @@ export interface Config {
   paymentServer: PaymentServerConfig;
   oneapi: OneApiConfig;
   aws: AwsConfig;
+  tenant: TenantStatisticsConfig;
 }
 
 const port = readConfig('server.port', 3000);
@@ -287,9 +305,21 @@ export const config: Config = {
       favicon: typeof faviconConfig === 'string' ? { light: faviconConfig, dark: faviconConfig } : faviconConfig,
       colors: {
         primary: readConfig('server.customization.colors.primary', '#52ad1f'),
+        neocard: readConfig('server.customization.colors.neocard', '#F1F5F9'),
       },
       toast: {
         position: readConfig('server.customization.toast.position', 'bottom-right'),
+      },
+      icons: {
+        error: readConfig('server.customization.icons.error', undefined),
+      },
+      views: {
+        form: {
+          toast: {
+            afterCreate: readConfig('server.customization.views.form.toast.afterCreate', true),
+            afterDelete: readConfig('server.customization.views.form.toast.afterDelete', true),
+          },
+        },
       },
       hideSpaceHeader: readConfig('server.customization.hideSpaceHeader', false),
       showSidebarPageGroup: readConfig('server.customization.showSidebarPageGroup', true),
@@ -385,6 +415,7 @@ export const config: Config = {
     privilegedToken: readConfig('auth.privilegedToken'),
     hideAuthToast: readConfig('auth.hideAuthToast', false),
     autoReload: readConfig('auth.autoReload', false),
+    defaultOtherTeam: readConfig('auth.defaultOtherTeam', false),
   },
   s3: {
     proxy: readConfig('s3.proxy', true),
@@ -452,6 +483,9 @@ When answer to user:
   },
   aws: {
     translate: readConfig('aws.translate', {}),
+  },
+  tenant: {
+    bearer: readConfig('tenant.bearer', ''),
   },
 };
 

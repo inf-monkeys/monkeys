@@ -14,9 +14,21 @@ export interface ISystemConfig {
     };
     colors: {
       primaryColor: string;
+      neocardColor: string;
     };
     toast: {
       position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
+    };
+    icons: {
+      error?: string;
+    };
+    views: {
+      form: {
+        toast: {
+          afterCreate: boolean;
+          afterDelete: boolean;
+        };
+      };
     };
     hideSpaceHeader: boolean;
     showSidebarPageGroup: boolean;
@@ -30,6 +42,7 @@ export interface ISystemConfig {
     };
     hideAuthToast: boolean;
     autoReload: boolean;
+    defaultOtherTeam: boolean;
   };
   pages: {
     allowPageKeys: string[] | '*';

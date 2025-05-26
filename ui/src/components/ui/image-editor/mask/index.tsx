@@ -12,9 +12,11 @@ import { useImageOptimize } from '@/components/ui/image-editor/mask/editor/hooks
 import { IVinesMaskEditorProps } from '@/components/ui/image-editor/mask/editor/hooks/use-vines-mask-editor.ts';
 import { MaskPreview } from '@/components/ui/image-editor/mask/editor/preview.tsx';
 import { MaskEditorToolbar } from '@/components/ui/image-editor/mask/editor/toolbar.tsx';
-import { applyMaskCanvasToOriginalImageFile, mergeBlobToFile } from '@/components/ui/image-editor/mask/editor/utils.ts';
+import { mergeBlobToFile } from '@/components/ui/image-editor/mask/editor/utils.ts';
 import { VinesLoading } from '@/components/ui/loading';
 import { cn } from '@/utils';
+
+import { applyMaskCanvasToOriginalImageFileOptimized } from './editor/utils-optimized';
 
 export interface MaskEditorProps extends Omit<IMaskEditorProps, 'src' | 'setMaskContext' | 'maskContext'> {
   src: string | File;
@@ -72,7 +74,7 @@ export const VinesImageMaskEditor = forwardRef<HTMLDivElement, MaskEditorProps>(
         setExporting(true);
         await new Promise((resolve) => setTimeout(resolve, 180));
 
-        const mergeBlob = await applyMaskCanvasToOriginalImageFile(file, maskContext, setExportProgress);
+        const mergeBlob = await applyMaskCanvasToOriginalImageFileOptimized(file, maskContext, setExportProgress);
         onFinished(mergeBlobToFile(file, mergeBlob as Blob));
 
         setExporting(false);

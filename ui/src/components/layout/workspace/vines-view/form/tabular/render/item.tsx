@@ -35,6 +35,7 @@ interface IVinesFormFieldItemProps extends React.ComponentPropsWithoutRef<'div'>
   defValues: IWorkflowInputForm;
   miniMode?: boolean;
   extra?: Record<string, any>;
+  originalInputImages?: string[]; // 添加原始输入图片属性
 
   linkage?: IWorkflowInputSelectListLinkage;
   setLinkage?: (k: string, v: IWorkflowInputSelectListLinkage) => void;
@@ -47,6 +48,7 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
   itemClassName,
   miniMode = false,
   extra = {},
+  originalInputImages = [],
 
   linkage = [],
   setLinkage,
@@ -94,12 +96,14 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
                   {required && <span className="text-red-10">* </span>}
                   {getI18nContent(displayName)}
                 </FormLabel>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <HelpCircle size={18} className="cursor-pointer text-gray-400 dark:text-gray-500" />
-                  </TooltipTrigger>
-                  <TooltipContent>{tips || t('common.utils.no-tips')}</TooltipContent>
-                </Tooltip>
+                {tips && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle size={18} className="cursor-pointer text-gray-400 dark:text-gray-500" />
+                    </TooltipTrigger>
+                    <TooltipContent>{tips}</TooltipContent>
+                  </Tooltip>
+                )}
               </div>
               {enableReset && (
                 <Button
@@ -139,9 +143,9 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
                         filter={
                           targetLinkage
                             ? (m) =>
-                                enableFilter
-                                  ? filterList?.includes(m.serverRelations?.[0]?.apiPath) === filterReserve
-                                  : true
+                              enableFilter
+                                ? filterList?.includes(m.serverRelations?.[0]?.apiPath) === filterReserve
+                                : true
                             : void 0
                         }
                       />
@@ -171,7 +175,13 @@ export const VinesFormFieldItem: React.FC<IVinesFormFieldItemProps> = ({
 
                     <FieldBoolean input={it} value={value} onChange={onChange} form={form} />
 
-                    <FieldFile input={it} form={form} value={value} miniMode={miniMode} />
+                    <FieldFile
+                      input={it}
+                      form={form}
+                      value={value}
+                      miniMode={miniMode}
+                      originalInputImages={originalInputImages}
+                    />
 
                     <FieldOptions input={it} value={value} onChange={onChange} />
 

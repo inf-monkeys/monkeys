@@ -25,6 +25,7 @@
       "update": "Update",
       "create": "Create",
       "delete": "Delete",
+      "deleted": "Deleted",
       "close": "Close",
       "edit": "Edit",
       "operate": "Operations",
@@ -2885,6 +2886,7 @@
         },
         "list": {
           "empty": "Execution record is empty",
+          "filtered-empty": "Execution records filtered to empty",
           "bottom": "No more data",
           "more": "Remaining {{data}} items, click to load more",
           "preview-page-not-found": "Failed to open details! Preview view not found",
@@ -3209,6 +3211,31 @@
           "error": "Failed to restore last generated parameters"
         }
       }
+    },
+    "image-detail": {
+      "error-filter": {
+        "title": "Filter Error",
+        "options": {
+          "on": "On",
+          "off": "Off"
+        }
+      },
+      "input-diff": {
+        "title": "Input Difference",
+        "desc": "New inputs may yield different outputs."
+      },
+      "no-image": "No image data",
+      "download": "Download",
+      "flipY": "Vertical flip",
+      "flipX": "Horizontal flip",
+      "rotateLeft": "Rotate left",
+      "rotateRight": "Rotate right",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "prev-image": "Previous",
+      "next-image": "Next",
+      "delete": "Delete",
+      "form-inputs-not-found": "Form inputs not found"
     }
   },
   "agent": {

@@ -68,7 +68,7 @@ export const VirtuaExecutionResultRawDataDialog: React.FC<IVirtuaExecutionResult
     }
   });
 
-  const { copy } = useCopy();
+  const { copy } = useCopy(); // 复制
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -124,6 +124,7 @@ export const VirtuaExecutionResultRawDataDialog: React.FC<IVirtuaExecutionResult
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+          {/* // 复制输入参数 */}
           <Button
             variant="outline"
             onClick={() => {

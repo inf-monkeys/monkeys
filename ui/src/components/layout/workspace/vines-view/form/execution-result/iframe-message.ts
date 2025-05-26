@@ -12,10 +12,13 @@ import {
 } from '@/package/vines-flow/core/typings.ts';
 import VinesEvent from '@/utils/events.ts';
 import { stringify } from '@/utils/fast-stable-stringify.ts';
+import { SWRInfiniteHook, SWRInfiniteResponse } from 'swr/infinite';
 
 interface IVinesIframeMessage {
   outputs?: VinesWorkflowExecutionOutputListItem[];
-  mutate: KeyedMutator<IPaginationListData<VinesWorkflowExecutionOutputListItem> | undefined>;
+  mutate:
+    | KeyedMutator<IPaginationListData<VinesWorkflowExecutionOutputListItem> | undefined>
+    | SWRInfiniteResponse['mutate'];
 
   enable?: boolean;
 }

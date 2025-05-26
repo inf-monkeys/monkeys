@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { startTransition, useRef, useState } from 'react';
 
 import { Link } from '@tanstack/react-router';
 
@@ -181,7 +181,9 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
               currentPageId={currentPage?.[teamId]?.id}
               currentGroupId={groupId}
               onChildClick={(page) => {
-                setCurrentPage((prev) => ({ ...prev, [teamId]: { ...page, groupId } }));
+                startTransition(() => {
+                  setCurrentPage((prev) => ({ ...prev, [teamId]: { ...page, groupId } }));
+                });
               }}
             />
             <Tooltip>

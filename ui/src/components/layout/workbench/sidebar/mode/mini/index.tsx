@@ -130,7 +130,7 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
   return (
     <motion.div
       className={cn(
-        'relative flex h-full min-w-14 max-w-20 rounded-bl-xl rounded-tl-xl border border-input bg-slate-1 py-2',
+        'relative flex h-screen min-w-14 max-w-20 rounded-bl-xl rounded-tl-xl border border-input bg-slate-1 py-2',
       )}
       ref={ref}
     >

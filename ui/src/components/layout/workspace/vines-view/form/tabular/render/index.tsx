@@ -1,5 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+
+import { useRouterState } from '@tanstack/react-router';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDebounceFn, useLatest, useMap } from 'ahooks';
@@ -24,8 +26,9 @@ import { VinesFullLoading, VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 import { VinesWorkflowExecutionInput } from '@/package/vines-flow/core/typings';
-import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
 import { IWorkflowInputSelectListLinkage } from '@/schema/workspace/workflow-input.ts';
+import { IWorkflowInputForm, workflowInputFormSchema } from '@/schema/workspace/workflow-input-form.ts';
+import { useSetWorkbenchCacheVal, useWorkbenchCacheVal } from '@/store/workbenchFormInputsCacheStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
@@ -46,6 +49,7 @@ interface ITabularRenderProps {
   fieldChildren?: React.ReactNode;
 
   onSubmit?: (data: IWorkflowInputForm) => void;
+  onFormChange?: () => void;
 
   formClassName?: string;
   scrollAreaClassName?: string;
@@ -57,6 +61,7 @@ interface ITabularRenderProps {
   workflowId?: string;
 
   extra?: Record<string, any>;
+  originalInputImages?: string[]; // 添加原始输入图片属性
 }
 
 export const TabularRender: React.FC<ITabularRenderProps> = ({
@@ -68,6 +73,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
   fieldChildren,
 
   onSubmit,
+  onFormChange,
 
   formClassName,
   scrollAreaClassName,
@@ -79,6 +85,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
   workflowId,
 
   extra = {},
+  originalInputImages = [],
 }) => {
   const { t } = useTranslation();
 
@@ -88,9 +95,42 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
 
   const [defValues, setDefValues] = useState<IWorkflowInputForm>({});
 
+  const { watch } = form;
+  const setWorkbenchCacheVal = useSetWorkbenchCacheVal();
+  const workbenchCacheVal = useWorkbenchCacheVal(workflowId ?? '');
+  const useFormResetRef = useRef<boolean>(false);
+
+  const [hasRestoreValues, setHasRestoreValues] = useState(false);
+
+  const pathName = useRouterState({
+    select: (state) => state.location.pathname,
+  });
+  const inImageDetailRoute = pathName.includes('/image-detail');
+  useEffect(() => {
+    if (workbenchCacheVal && !hasRestoreValues && !inImageDetailRoute) {
+      useFormResetRef.current = true;
+      setDefValues(workbenchCacheVal);
+      form.reset(workbenchCacheVal);
+      setHasRestoreValues(true);
+      useFormResetRef.current = false;
+    }
+  }, [workbenchCacheVal, hasRestoreValues, inImageDetailRoute]);
+  useEffect(() => {
+    if (!workflowId) return;
+    if (inImageDetailRoute) return;
+    const { unsubscribe } = watch((data) => {
+      if (workflowId && !useFormResetRef.current) {
+        setWorkbenchCacheVal(workflowId, data);
+      }
+    });
+    return () => unsubscribe();
+  }, [watch, workflowId, setWorkbenchCacheVal]);
+
   useEffect(() => {
     if (!inputs) return;
-
+    if (!inImageDetailRoute) {
+      if (workbenchCacheVal) return;
+    }
     const targetInputs = inputs.filter(({ default: v }) => typeof v !== 'undefined');
     const defaultValues = fromPairs(
       targetInputs.map((it) => {
@@ -131,6 +171,14 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
 
     form.reset(defaultValues);
   }, [inputs]);
+
+  // 监听表单值变化
+  useEffect(() => {
+    const subscription = form.watch(() => {
+      onFormChange?.();
+    });
+    return () => subscription.unsubscribe();
+  }, [form, onFormChange]);
 
   const handleSubmit = form.handleSubmit((data) => {
     for (const inputDef of inputs) {
@@ -247,7 +295,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
   return (
     <Form {...form}>
       <form
-        className={cn('relative flex flex-col gap-3', formClassName)}
+        className={cn('relative flex flex-col gap-4', formClassName)}
         onSubmit={handleSubmit}
         onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
       >
@@ -285,6 +333,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
                 defValues={defValues}
                 miniMode={miniMode}
                 extra={extra}
+                originalInputImages={originalInputImages}
                 linkage={linkage}
                 setLinkage={setLinkage}
               />
@@ -306,6 +355,7 @@ export const TabularRender: React.FC<ITabularRenderProps> = ({
                         defValues={defValues}
                         miniMode={miniMode}
                         extra={extra}
+                        originalInputImages={originalInputImages}
                         linkage={linkage}
                         setLinkage={setLinkage}
                       />
