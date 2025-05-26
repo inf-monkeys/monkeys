@@ -3217,6 +3217,9 @@
           "off": "Off"
         }
       },
+      "button-filter": {
+        "title": "Form Extras"
+      },
       "input-diff": {
         "title": "Input Difference",
         "desc": "New inputs may yield different outputs."
