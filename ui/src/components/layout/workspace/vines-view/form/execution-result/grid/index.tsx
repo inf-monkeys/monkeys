@@ -15,6 +15,7 @@ import { cn } from '@/utils';
 import { IVinesExecutionResultItem } from '@/utils/execution.ts';
 
 import { ErrorFilter } from './error-filter';
+import { ExtraButtonFilter } from './extra-button-filter';
 import { ExecutionResultItem } from './item';
 import { usePositioner } from './utils';
 
@@ -146,6 +147,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
       disabledOverflowMask
     >
       <ErrorFilter />
+      <ExtraButtonFilter />
       {masonryGrid}
     </ScrollArea>
   );
