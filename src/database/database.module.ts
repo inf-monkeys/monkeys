@@ -35,7 +35,8 @@ import { ComfyuiServerEntity } from './entities/comfyui/comfyui-server.entity';
 import { ComfyuiWorkflowEntity } from './entities/comfyui/comfyui-workflow.entity';
 import { ConversationAppEntity } from './entities/conversation-app/conversation-app.entity';
 import { ConversationExecutionEntity } from './entities/conversation-app/conversation-executions.entity';
-import { DesignEntity } from './entities/design/design';
+import { DesignMetadataEntity } from './entities/design/design-metatdata';
+import { DesignProjectEntity } from './entities/design/design-project';
 import { TeamEntity } from './entities/identity/team';
 import { TeamJoinRequestsEntity } from './entities/identity/team-join-request';
 import { UserEntity } from './entities/identity/user';
@@ -88,7 +89,8 @@ export const entities: EntityClassOrSchema[] = [
   ConversationAppEntity,
   ConversationExecutionEntity,
   WorkflowObservabilityEntity,
-  DesignEntity,
+  DesignMetadataEntity,
+  DesignProjectEntity,
 ];
 
 export const DatabaseModule = TypeOrmModule.forRoot({
