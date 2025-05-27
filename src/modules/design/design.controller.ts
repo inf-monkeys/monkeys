@@ -34,7 +34,7 @@ export class DesignController {
       id,
       teamId,
     });
-    return await this.designProjectService.createDesignProject(project);
+    return await this.designProjectService.create(project);
   }
 
   @Get('project')
@@ -44,29 +44,29 @@ export class DesignController {
   })
   async findAllProjects(@Req() req: IRequest) {
     const { teamId } = req;
-    return await this.designProjectService.findDesignProjectByTeamId(teamId);
+    return await this.designProjectService.findByTeamId(teamId);
   }
 
-  @Get('project/:id')
+  @Get('project/:projectId')
   @ApiOperation({
     summary: '获取设计项目',
     description: '获取设计项目',
   })
-  async findOneProject(@Param('id') id: string) {
-    const project = await this.designProjectService.findDesignProjectById(id);
+  async findOneProject(@Param('projectId') projectId: string) {
+    const project = await this.designProjectService.findById(projectId);
     if (!project) {
       throw new NotFoundException('设计项目不存在');
     }
     return project;
   }
 
-  @Patch('project/:id')
+  @Patch('project/:projectId')
   @ApiOperation({
     summary: '更新设计项目',
     description: '更新设计项目',
   })
-  async updateProject(@Param('id') id: string, @Body() updateDesignProjectDto: UpdateDesignProjectDto) {
-    const project = await this.designProjectService.findDesignProjectById(id);
+  async updateProject(@Param('projectId') projectId: string, @Body() updateDesignProjectDto: UpdateDesignProjectDto) {
+    const project = await this.designProjectService.findById(projectId);
     if (!project) {
       throw new NotFoundException('设计项目不存在');
     }
@@ -75,30 +75,31 @@ export class DesignController {
       ...project,
       ...updateDesignProjectDto,
     });
-    return await this.designProjectService.updateDesignProject(id, updatedProject);
+    return await this.designProjectService.update(projectId, updatedProject);
   }
 
-  @Delete('project/:id')
+  @Delete('project/:projectId')
   @ApiOperation({
     summary: '删除设计项目',
     description: '删除设计项目',
   })
-  async removeProject(@Param('id') id: string) {
-    const project = await this.designProjectService.findDesignProjectById(id);
+  async removeProject(@Param('projectId') projectId: string) {
+    const project = await this.designProjectService.findById(projectId);
     if (!project) {
       throw new NotFoundException('设计项目不存在');
     }
-    return await this.designProjectService.deleteDesignProject(id);
+    // will delete all related metadata
+    return await this.designProjectService.delete(projectId);
   }
 
-  @Post()
+  @Post('project/:projectId/metadata')
   @ApiOperation({
     summary: '创建设计画板',
     description: '创建设计画板',
   })
   async createDesignMetadata(@Req() req: IRequest, @Body() createDesignMetadataDto: CreateDesignMetadataDto) {
     const { teamId } = req;
-    const designProject = await this.designProjectService.findDesignProjectById(createDesignMetadataDto.designProjectId);
+    const designProject = await this.designProjectService.findById(createDesignMetadataDto.designProjectId);
     if (!designProject) {
       throw new NotFoundException('设计项目不存在');
     }
@@ -108,42 +109,51 @@ export class DesignController {
     });
   }
 
-  @Get()
+  @Get('project/:projectId/metadata')
   @ApiOperation({
     summary: '获取设计列表',
     description: '获取设计列表',
   })
-  async findAll(@Req() req: IRequest) {
+  async findAllbyTeamId(@Req() req: IRequest) {
     const { teamId } = req;
     return await this.designMetadataService.findAllbyTeamId(teamId);
   }
 
-  @Get(':id')
+  @Get('metadata/:metadataId')
   @ApiOperation({
     summary: '获取设计',
     description: '获取设计',
   })
-  async findOne(@Param('id') id: string) {
-    const metadata = await this.designMetadataService.findByProjectId(id);
+  async findOneById(@Param('metadataId') metadataId: string) {
+    return await this.designMetadataService.findById(metadataId);
+  }
+
+  @Get('project/:projectId/metadata/')
+  @ApiOperation({
+    summary: '获取设计',
+    description: '获取设计',
+  })
+  async findAllByProjectId(@Param('projectId') projectId: string) {
+    const metadata = await this.designMetadataService.findAllByProjectId(projectId);
     if (!metadata) {
       throw new NotFoundException('设计画板不存在');
     }
     return metadata;
   }
 
-  @Patch(':id')
+  @Patch('metadata/:metadataId')
   @ApiOperation({
     summary: '更新设计',
   })
-  async update(@Param('id') id: string, @Body() updateDesignMetadataDto: UpdateDesignMetadataDto) {
-    return await this.designMetadataService.update(id, updateDesignMetadataDto);
+  async update(@Param('metadataId') metadataId: string, @Body() updateDesignMetadataDto: UpdateDesignMetadataDto) {
+    return await this.designMetadataService.update(metadataId, updateDesignMetadataDto);
   }
 
-  @Delete(':id')
+  @Delete('metadata/:metadataId')
   @ApiOperation({
     summary: '删除设计',
   })
-  async remove(@Param('id') id: string) {
-    return await this.designMetadataService.remove(id);
+  async remove(@Param('metadataId') metadataId: string) {
+    return await this.designMetadataService.remove(metadataId);
   }
 }

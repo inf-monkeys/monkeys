@@ -5,23 +5,23 @@ import { DesignProjectRepository } from '../../database/repositories/design-proj
 export class DesignProjectService {
   constructor(private readonly designProjectRepository: DesignProjectRepository) {}
 
-  async createDesignProject(designProject: DesignProjectEntity) {
-    return this.designProjectRepository.createDesignProject(designProject);
+  async create(designProject: DesignProjectEntity) {
+    return this.designProjectRepository.create(designProject);
   }
 
-  async findDesignProjectById(id: string) {
-    return this.designProjectRepository.findDesignProjectById(id);
+  async findById(id: string) {
+    return this.designProjectRepository.findById(id);
   }
 
-  async findDesignProjectByTeamId(teamId: string) {
-    return this.designProjectRepository.findDesignProjectByTeamId(teamId);
+  async findByTeamId(teamId: string) {
+    return this.designProjectRepository.findAllByTeamId(teamId);
   }
 
-  async updateDesignProject(id: string, designProject: DesignProjectEntity) {
-    return this.designProjectRepository.updateDesignProject(id, designProject);
+  async update(id: string, designProject: DesignProjectEntity) {
+    return this.designProjectRepository.update(id, designProject);
   }
 
-  async deleteDesignProject(id: string) {
-    return this.designProjectRepository.deleteDesignProject(id);
+  async delete(id: string) {
+    return this.designProjectRepository.delete(id);
   }
 }
