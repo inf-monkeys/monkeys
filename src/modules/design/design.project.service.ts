@@ -1,12 +1,26 @@
+import { generateDbId } from '@/common/utils';
+import { AssetType } from '@inf-monkeys/monkeys';
 import { Injectable } from '@nestjs/common';
 import { DesignProjectEntity } from '../../database/entities/design/design-project';
 import { DesignProjectRepository } from '../../database/repositories/design-project.repository';
+import { CreateDesignProjectDto } from './dto/create-design-project.dto';
+
 @Injectable()
 export class DesignProjectService {
   constructor(private readonly designProjectRepository: DesignProjectRepository) {}
 
-  async create(designProject: DesignProjectEntity) {
-    return this.designProjectRepository.create(designProject);
+  async create(createDesignProjectDto: CreateDesignProjectDto) {
+    const id = generateDbId();
+    const project = new DesignProjectEntity();
+    Object.assign(project, {
+      ...createDesignProjectDto,
+      id,
+      isDeleted: false,
+      createdTimestamp: Date.now(),
+      updatedTimestamp: Date.now(),
+      assetType: 'design-project' as AssetType,
+    });
+    return this.designProjectRepository.create(project);
   }
 
   async findById(id: string) {
