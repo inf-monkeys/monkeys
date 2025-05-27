@@ -1,4 +1,5 @@
-import { Column, PrimaryColumn } from 'typeorm';
+import { TimestampTransformer } from '@/database/transformers/timestamp.transformer';
+import { Column, CreateDateColumn, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 
 export class BaseEntity {
   @PrimaryColumn({
@@ -7,17 +8,17 @@ export class BaseEntity {
   })
   id: string;
 
-  @Column({
+  @CreateDateColumn({
     name: 'created_timestamp',
-    default: Date.now(),
-    type: 'bigint',
+    type: 'timestamp',
+    transformer: TimestampTransformer,
   })
   createdTimestamp: number;
 
-  @Column({
+  @UpdateDateColumn({
     name: 'updated_timestamp',
-    default: Date.now(),
-    type: 'bigint',
+    type: 'timestamp',
+    transformer: TimestampTransformer,
   })
   updatedTimestamp: number;
 
