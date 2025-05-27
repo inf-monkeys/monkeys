@@ -11,7 +11,8 @@ export class DesignMetadataRepository {
     private readonly designMetadataRepository: Repository<DesignMetadataEntity>,
   ) {}
 
-  public async createDesignMetadata(designMetadata: DesignMetadataEntity) {
+  //c
+  public async createDesignMetadata(projectId: string, designMetadata: DesignMetadataEntity) {
     const id = generateDbId();
     return this.designMetadataRepository.save({
       ...designMetadata,
@@ -19,24 +20,42 @@ export class DesignMetadataRepository {
       createdTimestamp: Date.now(),
       updatedTimestamp: Date.now(),
       isDeleted: false,
+      designProjectId: projectId,
     });
   }
 
-  public async findByIdAndTeamId(designMetadataId: string, teamId: string) {
+  public async findById(id: string) {
     const data = await this.designMetadataRepository.findOne({
       where: {
-        id: designMetadataId,
+        id,
+      },
+    });
+    return data;
+  }
+
+  public async findAllByTeamId(teamId: string) {
+    const data = await this.designMetadataRepository.find({
+      where: {
         teamId,
       },
     });
     return data;
   }
 
-  public async updateDesignMetadata(designMetadataId: string, designMetadata: DesignMetadataEntity) {
+  public async findAllByProjectId(projectId: string) {
+    const data = await this.designMetadataRepository.find({
+      where: {
+        designProjectId: projectId,
+      },
+    });
+    return data;
+  }
+
+  public async update(designMetadataId: string, designMetadata: DesignMetadataEntity) {
     return await this.designMetadataRepository.update(designMetadataId, designMetadata);
   }
 
-  public async deleteDesignMetadata(designMetadataId: string) {
+  public async deleteById(designMetadataId: string) {
     const data = await this.designMetadataRepository.findOne({
       where: {
         id: designMetadataId,
@@ -48,19 +67,19 @@ export class DesignMetadataRepository {
     await this.designMetadataRepository.update(data.id, { isDeleted: true });
   }
 
-  public async findAllbyTeamId(teamId: string) {
-    return await this.designMetadataRepository.find({
-      where: {
-        teamId,
-      },
-    });
-  }
-
-  public async findByProjectId(projectId: string) {
-    return await this.designMetadataRepository.findOne({
+  public async deleteAllByProjectId(projectId: string) {
+    const data = await this.designMetadataRepository.find({
       where: {
         designProjectId: projectId,
       },
     });
+
+    if (!data) {
+      return;
+    }
+
+    for (const item of data) {
+      await this.designMetadataRepository.update(item.id, { isDeleted: true });
+    }
   }
 }
