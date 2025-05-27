@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { DesignController } from './design.controller';
-import { DesignService } from './design.service';
+import { DesignMetadataService } from './design.metadata.service';
+import { DesignProjectService } from './design.project.service';
 
 @Module({
   controllers: [DesignController],
-  providers: [DesignService],
-  exports: [DesignService],
+  providers: [DesignMetadataService, DesignProjectService],
+  exports: [DesignMetadataService, DesignProjectService],
 })
 export class DesignModule {}
