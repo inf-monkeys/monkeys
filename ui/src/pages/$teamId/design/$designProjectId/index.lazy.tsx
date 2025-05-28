@@ -163,7 +163,7 @@ export const Designs: React.FC = () => {
   );
 };
 
-export const Route = createLazyFileRoute('/$teamId/designs/')({
+export const Route = createLazyFileRoute('/$teamId/design/$designProjectId/')({
   component: Designs,
 });
 
