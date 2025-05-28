@@ -30,6 +30,7 @@ export class DesignMetadataRepository {
     return await this.designMetadataRepository.findOne({
       where: {
         id,
+        isDeleted: false,
       },
     });
   }
@@ -38,6 +39,7 @@ export class DesignMetadataRepository {
     return await this.designMetadataRepository.find({
       where: {
         designProjectId: projectId,
+        isDeleted: false,
       },
     });
   }
