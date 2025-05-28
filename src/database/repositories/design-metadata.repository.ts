@@ -1,4 +1,6 @@
 import { generateDbId } from '@/common/utils';
+import { CreateDesignMetadataDto } from '@/modules/design/dto/create-design-metadata.dto';
+import { UpdateDesignMetadataDto } from '@/modules/design/dto/update-design-metadata.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -12,10 +14,10 @@ export class DesignMetadataRepository {
   ) {}
 
   //c
-  public async createDesignMetadata(projectId: string, designMetadata: DesignMetadataEntity) {
+  public async createDesignMetadata(projectId: string, createDesignMetadataDto: CreateDesignMetadataDto) {
     const id = generateDbId();
     return this.designMetadataRepository.save({
-      ...designMetadata,
+      ...createDesignMetadataDto,
       id,
       createdTimestamp: Date.now(),
       updatedTimestamp: Date.now(),
@@ -25,34 +27,26 @@ export class DesignMetadataRepository {
   }
 
   public async findById(id: string) {
-    const data = await this.designMetadataRepository.findOne({
+    return await this.designMetadataRepository.findOne({
       where: {
         id,
       },
     });
-    return data;
-  }
-
-  public async findAllByTeamId(teamId: string) {
-    const data = await this.designMetadataRepository.find({
-      where: {
-        teamId,
-      },
-    });
-    return data;
   }
 
   public async findAllByProjectId(projectId: string) {
-    const data = await this.designMetadataRepository.find({
+    return await this.designMetadataRepository.find({
       where: {
         designProjectId: projectId,
       },
     });
-    return data;
   }
 
-  public async update(designMetadataId: string, designMetadata: DesignMetadataEntity) {
-    return await this.designMetadataRepository.update(designMetadataId, designMetadata);
+  public async update(designMetadataId: string, updateDesignMetadataDto: UpdateDesignMetadataDto) {
+    return await this.designMetadataRepository.update(designMetadataId, {
+      ...updateDesignMetadataDto,
+      updatedTimestamp: Date.now(),
+    });
   }
 
   public async deleteById(designMetadataId: string) {

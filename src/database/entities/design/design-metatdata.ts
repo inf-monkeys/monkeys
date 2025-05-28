@@ -28,6 +28,7 @@ export class DesignMetadataEntity extends BaseEntity {
   @Column({
     name: 'snapshot',
     type: 'jsonb',
+    nullable: true,
   })
   snapshot: Record<string, any>;
 
