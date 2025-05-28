@@ -15,6 +15,7 @@ export class AddDesignModule1747117760398 implements MigrationInterface {
           {
             name: 'sort_index',
             type: 'integer',
+            isNullable: true,
           },
         ],
       }),

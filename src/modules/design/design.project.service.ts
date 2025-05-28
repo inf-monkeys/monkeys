@@ -1,4 +1,5 @@
-import { generateDbId } from '@/common/utils';
+import { ListDto } from '@/common/dto/list.dto';
+import { DesignMetadataRepository } from '@/database/repositories/design-metadata.repository';
 import { AssetType } from '@inf-monkeys/monkeys';
 import { Injectable } from '@nestjs/common';
 import { DesignProjectEntity } from '../../database/entities/design/design-project';
@@ -7,28 +8,43 @@ import { CreateDesignProjectDto } from './dto/create-design-project.dto';
 
 @Injectable()
 export class DesignProjectService {
-  constructor(private readonly designProjectRepository: DesignProjectRepository) {}
+  constructor(
+    private readonly designProjectRepository: DesignProjectRepository,
+    private readonly designMetadataRepository: DesignMetadataRepository,
+  ) {}
 
-  async create(createDesignProjectDto: CreateDesignProjectDto) {
-    const id = generateDbId();
-    const project = new DesignProjectEntity();
-    Object.assign(project, {
+  async create(createDesignProjectDto: CreateDesignProjectDto & { teamId: string; creatorUserId: string }) {
+    const projectData = {
       ...createDesignProjectDto,
-      id,
-      isDeleted: false,
+      assetType: 'design-project' as AssetType,
+    } as Omit<DesignProjectEntity, 'id'>;
+
+    const createdProject = await this.designProjectRepository.create(projectData);
+
+    // Create a default design metadata for the new project
+    await this.designMetadataRepository.createDesignMetadata(createdProject.id, {
+      displayName: 'Default Canvas',
+      snapshot: {},
+      pinned: false,
+      teamId: createDesignProjectDto.teamId,
+      designProjectId: createdProject.id,
       createdTimestamp: Date.now(),
       updatedTimestamp: Date.now(),
-      assetType: 'design-project' as AssetType,
     });
-    return this.designProjectRepository.create(project);
+
+    return createdProject;
   }
 
   async findById(id: string) {
     return this.designProjectRepository.findById(id);
   }
 
-  async findByTeamId(teamId: string) {
-    return this.designProjectRepository.findAllByTeamId(teamId);
+  async findByTeamId(teamId: string, dto: ListDto) {
+    const { totalCount, list } = await this.designProjectRepository.findAllByTeamId(teamId, dto);
+    return {
+      totalCount,
+      list,
+    };
   }
 
   async update(id: string, designProject: DesignProjectEntity) {

@@ -6,6 +6,7 @@ export class DesignProjectEntity extends BaseAssetEntity {
   @Column({
     name: 'sort_index',
     type: 'integer',
+    nullable: true,
   })
   sortIndex: number;
 }
