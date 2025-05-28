@@ -105,16 +105,13 @@ export class DesignController {
     summary: '创建设计画板',
     description: '创建设计画板',
   })
-  async createDesignMetadata(@Req() req: IRequest, @Body() createDesignMetadataDto: CreateDesignMetadataDto) {
+  async createDesignMetadata(@Req() req: IRequest, @Param('projectId') projectId: string, @Body() createDesignMetadataDto: CreateDesignMetadataDto) {
     const { teamId } = req;
-    const designProject = await this.designProjectService.findById(createDesignMetadataDto.designProjectId);
+    const designProject = await this.designProjectService.findById(projectId);
     if (!designProject) {
       throw new NotFoundException('设计项目不存在');
     }
-    const result = await this.designMetadataService.create({
-      ...createDesignMetadataDto,
-      teamId,
-    });
+    const result = await this.designMetadataService.create(projectId, teamId, createDesignMetadataDto);
     return new SuccessResponse({ data: result });
   }
 

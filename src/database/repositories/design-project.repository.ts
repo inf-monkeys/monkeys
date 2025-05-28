@@ -27,7 +27,7 @@ export class DesignProjectRepository {
   }
 
   public async findById(id: string) {
-    return this.designProjectRepository.findOne({ where: { id } });
+    return this.designProjectRepository.findOne({ where: { id, isDeleted: false } });
   }
 
   public async findAllByTeamId(

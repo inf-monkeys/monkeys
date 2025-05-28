@@ -7,10 +7,10 @@ import { UpdateDesignMetadataDto } from './dto/update-design-metadata.dto';
 export class DesignMetadataService {
   constructor(private readonly designMetadataRepository: DesignMetadataRepository) {}
 
-  async create(createDesignMetadataDto: CreateDesignMetadataDto) {
-    return await this.designMetadataRepository.createDesignMetadata(createDesignMetadataDto.designProjectId, {
+  async create(designProjectId: string, teamId: string, createDesignMetadataDto: CreateDesignMetadataDto) {
+    return await this.designMetadataRepository.createDesignMetadata(designProjectId, {
       ...createDesignMetadataDto,
-      teamId: createDesignMetadataDto.teamId,
+      teamId,
     });
   }
 
