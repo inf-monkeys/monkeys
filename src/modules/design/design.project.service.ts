@@ -1,6 +1,5 @@
 import { ListDto } from '@/common/dto/list.dto';
 import { DesignMetadataRepository } from '@/database/repositories/design-metadata.repository';
-import { AssetType } from '@inf-monkeys/monkeys';
 import { Injectable } from '@nestjs/common';
 import { DesignProjectEntity } from '../../database/entities/design/design-project';
 import { DesignProjectRepository } from '../../database/repositories/design-project.repository';
@@ -16,7 +15,7 @@ export class DesignProjectService {
   async create(createDesignProjectDto: CreateDesignProjectDto & { teamId: string; creatorUserId: string }) {
     const projectData = {
       ...createDesignProjectDto,
-      assetType: 'design-project' as AssetType,
+      assetType: 'design-project',
     } as Omit<DesignProjectEntity, 'id'>;
 
     const createdProject = await this.designProjectRepository.create(projectData);
