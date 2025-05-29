@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
+import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
 import { useWorkflow } from '@/package/vines-flow';
 import { createWorkflowSchema, ICreateWorkflowInfo } from '@/schema/workspace/create-workflow.ts';
 
@@ -29,7 +30,7 @@ export const WorkflowCreateForm: React.FC<{
     defaultValues: {
       displayName: t('common.utils.untitled') + t('common.type.workflow'),
       description: '',
-      iconUrl: 'emoji:🍀:#eeeef1',
+      iconUrl: DEFAULT_WORKFLOW_ICON_URL,
     },
   });
 

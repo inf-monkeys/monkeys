@@ -6,6 +6,7 @@ import { VinesEmojiSelector } from 'src/components/ui/emoji-selector';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { IVinesIconSize, VinesIcon } from '@/components/ui/vines-icon/index.tsx';
+import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
 
 interface IVinesIconEditorProps {
   value: string;
@@ -38,7 +39,7 @@ export const VinesIconEditor: React.FC<IVinesIconEditorProps> = ({
                 className="absolute bottom-0 right-0 cursor-pointer rounded-br-md rounded-tl-md bg-white bg-opacity-45 p-1 shadow hover:bg-opacity-60 [&_svg]:stroke-vines-500"
                 onClick={(e) => {
                   e.preventDefault();
-                  onChange?.(defaultValue || (onlyEmoji ? '🍀' : 'emoji:🍀:#eeeef1'));
+                  onChange?.(defaultValue || (onlyEmoji ? '🍀' : DEFAULT_WORKFLOW_ICON_URL));
                 }}
               >
                 <RotateCcw size={8} />

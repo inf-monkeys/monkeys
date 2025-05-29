@@ -9,6 +9,7 @@ import { useGetAgent } from '@/apis/agents';
 import { AgentInfoEditor } from '@/components/layout/agent-space/agent-info-editor.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { DEFAULT_AGENT_ICON_URL } from '@/consts/icons.ts';
 import { getI18nContent } from '@/utils';
 
 interface IAgentInfoCardProps {}
@@ -24,7 +25,7 @@ export const AgentInfoCard: React.FC<IAgentInfoCardProps> = () => {
       <AgentInfoEditor agent={data}>
         <TooltipTrigger asChild>
           <div className="group flex cursor-pointer items-center gap-2.5">
-            <VinesIcon size="sm">{data?.iconUrl || 'emoji:🤖:#ceefc5'}</VinesIcon>
+            <VinesIcon size="sm">{data?.iconUrl || DEFAULT_AGENT_ICON_URL}</VinesIcon>
             <div className="flex flex-col gap-0.5">
               <h1 className="font-bold leading-tight">{getI18nContent(data?.displayName)}</h1>
               {data?.description && <span className="text-xxs">{getI18nContent(data.description)}</span>}

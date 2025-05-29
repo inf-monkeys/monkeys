@@ -10,6 +10,7 @@ import { VinesLoading } from '@/components/ui/loading';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { DEFAULT_ASSET_ICON_URL } from '@/consts/icons.ts';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
 import { VinesWorkflowVariable } from '@/package/vines-flow/core/tools/typings.ts';
 
@@ -82,7 +83,7 @@ export const FieldImageModel: React.FC<IFieldImageModelProps> = ({
                         <TooltipTrigger asChild>
                           <SelectItem value={apiPath}>
                             <div className="flex w-full items-center gap-2">
-                              <VinesIcon src={iconUrl || 'emoji:🍀:#eeeef1'} size="xs" />
+                              <VinesIcon src={iconUrl || DEFAULT_ASSET_ICON_URL} size="xs" />
                               <div className="flex-1">
                                 <p className="break-all text-sm font-bold leading-4">{displayName ?? 'unknown'}</p>
                               </div>

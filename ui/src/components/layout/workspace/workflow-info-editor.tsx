@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
+import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
 import { IWorkflowInfo, workflowInfoSchema } from '@/schema/workspace/workflow-info.ts';
 import { getI18nContent } from '@/utils';
 
@@ -61,7 +62,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
       displayName:
         getI18nContent(workflow?.displayName) ?? t('workspace.wrapper.workflow-info-card.default-workflow-name'),
       description: getI18nContent(workflow?.description) ?? '',
-      iconUrl: workflow?.iconUrl ?? 'emoji:🍀:#eeeef1',
+      iconUrl: workflow?.iconUrl ?? DEFAULT_WORKFLOW_ICON_URL,
     },
   });
 
@@ -72,7 +73,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
       getI18nContent(workflow.displayName) || t('workspace.wrapper.workflow-info-card.default-workflow-name'),
     );
     form.setValue('description', getI18nContent(workflow.description) || '');
-    form.setValue('iconUrl', workflow.iconUrl || 'emoji:🍀:#eeeef1');
+    form.setValue('iconUrl', workflow.iconUrl || DEFAULT_WORKFLOW_ICON_URL);
   }, [workflow]);
 
   const handleSubmit = form.handleSubmit(async (data) => {
@@ -149,7 +150,7 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
                   <FormLabel>{t('workspace.wrapper.workflow-info-card.form.workflow-icon')}</FormLabel>
                   <FormControl>
                     <VinesIconEditor
-                      value={field.value ?? 'emoji:🍀:#eeeef1'}
+                      value={field.value ?? DEFAULT_WORKFLOW_ICON_URL}
                       defaultValue={workflow?.iconUrl}
                       onChange={field.onChange}
                     />
