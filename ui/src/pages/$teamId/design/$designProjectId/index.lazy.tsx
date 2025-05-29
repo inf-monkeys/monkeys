@@ -7,8 +7,9 @@ import { createShapeId, Editor, getSnapshot, loadSnapshot, TLShapeId, toRichText
 
 import { Board } from '@/components/layout/design-space/board';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { FrameSizeInput } from '@/components/ui/vines-design/frame-size-input';
 import { EditorContext } from '@/store/useBoardStore';
+import { useBoardCanvasSizeStore } from '@/store/useCanvasSizeStore';
 import { cn } from '@/utils';
 
 const Card: React.FC<{
@@ -47,13 +48,7 @@ export const Designs: React.FC = () => {
 
   const [frameShapeId, setFrameShapeId] = useState<TLShapeId>(createShapeId());
 
-  const [canvasWidth, setCanvasWidth] = useState<number>(1280);
-  const [canvasHeight, setCanvasHeight] = useState<number>(720);
-
-  const [boardCanvasSize, setBoardCanvasSize] = useState<{ width: number; height: number }>({
-    width: 1280,
-    height: 720,
-  });
+  const { width, height, setBoardCanvasSize } = useBoardCanvasSizeStore();
 
   let y = 0;
 
@@ -125,16 +120,12 @@ export const Designs: React.FC = () => {
                 <span>Export</span>
               </Card>
               <Card className="col-span-2 flex flex-col gap-2">
-                <div className="flex items-center gap-1">
-                  <Input type="number" value={canvasWidth} onChange={(v) => setCanvasWidth(Number(v))} />
-                  <span> * </span>
-                  <Input type="number" value={canvasHeight} onChange={(v) => setCanvasHeight(Number(v))} />
-                </div>
+                <FrameSizeInput />
                 <Button
                   variant="outline"
                   className="w-full"
                   onClick={() => {
-                    setBoardCanvasSize({ width: canvasWidth, height: canvasHeight });
+                    setBoardCanvasSize(width, height);
                   }}
                 >
                   Set & Zoom Fit
@@ -152,8 +143,8 @@ export const Designs: React.FC = () => {
             <Board
               editor={editor}
               setEditor={setEditor}
-              canvasWidth={boardCanvasSize.width}
-              canvasHeight={boardCanvasSize.height}
+              canvasWidth={width}
+              canvasHeight={height}
               instance={{ frameShapeId }}
             />
           </div>
