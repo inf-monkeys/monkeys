@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { checkImageUrlAvailable } from '@/components/ui/vines-image/utils';
 import { useCopy } from '@/hooks/use-copy.ts';
+import useUrlState from '@/hooks/use-url-state';
 import { useExecutionImageResultStore } from '@/store/useExecutionImageResultStore';
 import { useFlowStore } from '@/store/useFlowStore';
 
@@ -52,6 +53,8 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
   const altLabel = isObject(alt) ? alt.label : alt;
   const altContent = isObject(alt) ? alt.value : alt;
   const [previewSrc, setPreviewSrc] = React.useState(src);
+  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
+  const isMiniFrame = mode === 'mini';
   useAsyncEffect(async () => {
     if (!src) return;
     const thumbnailSrc = getThumbUrl(src);
@@ -69,14 +72,14 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
       const position = images?.findIndex((image) => (image.render.data as string) === src);
       setPosition(position);
       navigate({
-        to: '/$teamId/workspace/$workflowId/image-detail/',
+        to: '/$teamId/workspace/$workflowId/image-detail/' + (isMiniFrame ? '?mode=mini' : ''),
         params: {
-          teamId: window['vinesTeamId'],
+          // teamId: window['vinesTeamId'],
           workflowId,
         },
         search: {
-          imageUrl: src,
-          instanceId: instanceId || '',
+          // imageUrl: src,
+          // instanceId: instanceId || '',
           outputIndex,
         },
       });
