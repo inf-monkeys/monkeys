@@ -64,7 +64,7 @@ const DesignBoardView: React.FC = () => {
   useEffect(() => {
     if (!editor) return;
     editor.sideEffects.registerBeforeDeleteHandler('shape', (shape) => {
-      if (shape.id === frameShapeId || shape.parentId === frameShapeId) return false;
+      if (shape.id === frameShapeId) return false;
       return;
     });
   }, [editor]);
