@@ -32,6 +32,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
 import { useCopy } from '@/hooks/use-copy';
+import useUrlState from '@/hooks/use-url-state';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
 import { useExecutionImageResultStore, useHasNextImage, useHasPrevImage } from '@/store/useExecutionImageResultStore';
@@ -235,7 +236,8 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const [imageFlipX, setImageFlipX] = useState(false);
   const [imageFlipY, setImageFlipY] = useState(false);
   const [imageScale, setImageScale] = useState(1);
-
+  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'mini' });
+  const isMiniFrame = mode === 'mini';
   const { images, position, nextImage, prevImage, clearImages } = useExecutionImageResultStore();
   const nonUrgentNextImage = useCallback(() => {
     startTransition(() => {
@@ -383,7 +385,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
         {/* 主内容区域 */}
         <main className="flex size-full flex-1 flex-col overflow-hidden rounded-xl border border-input bg-background pb-6 shadow-sm dark:bg-[#111113] md:flex-row">
           {/* 左侧图片展示区 */}
-          <div className="flex h-full w-full flex-col items-center overflow-hidden rounded-bl-xl rounded-br-xl rounded-tl-xl bg-background dark:bg-[#111113] sm:w-full md:w-[70%]">
+          <div className="flex h-full w-[450px] flex-col items-center overflow-hidden rounded-bl-xl rounded-br-xl rounded-tl-xl bg-background dark:bg-[#111113] sm:w-full md:w-[70%]">
             {imageUrl ? (
               <>
                 <div className="flex w-full flex-1 items-center justify-center overflow-auto p-4">
@@ -531,24 +533,26 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
           </div>
 
           {/* 中间区域，渲染表单 */}
-          <div className="relative flex h-full flex-1 flex-col rounded-r-xl rounded-tr-xl bg-background px-6 pt-6 dark:bg-[#111113] md:border-l md:border-input">
-            {/* 内容区，底部预留按钮高度 */}
-            <div className="flex-1 overflow-auto">
-              <TabularRenderWrapper height={window.innerHeight - 120} execution={execution} />
+          {!isMiniFrame && (
+            <div className="relative flex h-full flex-1 flex-col rounded-r-xl rounded-tr-xl bg-background px-6 pt-6 dark:bg-[#111113] md:border-l md:border-input">
+              {/* 内容区，底部预留按钮高度 */}
+              <div className="flex-1 overflow-auto">
+                <TabularRenderWrapper height={window.innerHeight - 120} execution={execution} />
+              </div>
+              {/* 按钮条 */}
+              <div
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  zIndex: 20,
+                  background: 'var(--background)',
+                }}
+                className="dark:bg-[#111113]"
+              ></div>
             </div>
-            {/* 按钮条 */}
-            <div
-              style={{
-                position: 'absolute',
-                left: 0,
-                right: 0,
-                bottom: 0,
-                zIndex: 20,
-                background: 'var(--background)',
-              }}
-              className="dark:bg-[#111113]"
-            ></div>
-          </div>
+          )}
         </main>
       </ImageDetailLayout>
     </VinesFlowProvider>
