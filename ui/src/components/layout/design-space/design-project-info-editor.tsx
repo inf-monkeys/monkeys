@@ -1,47 +1,43 @@
 import React, { useEffect, useState } from 'react';
 
-import { mutate } from 'swr';
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { updateTextModel } from '@/apis/llm';
-import { ILLMModel } from '@/apis/llm/typings.ts';
+import { updateDesignProject } from '@/apis/designs';
+import { IDesignProject } from '@/apis/designs/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
-import { VinesImageEditor } from '@/components/ui/image-editor';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea.tsx';
-import { VinesIcon } from '@/components/ui/vines-icon';
-import { DEFAULT_ASSET_ICON_URL } from '@/consts/icons.ts';
-import { comfyuiModelInfoSchema, IComfyuiModelInfo } from '@/schema/workspace/comfyui-model-info.ts';
+import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
+import { designProjectInfoSchema, IDesignProjectInfo } from '@/schema/design/design-project-info.ts';
 import { getI18nContent } from '@/utils';
 
-interface ITextModelInfoEditorProps {
-  model?: IAssetItem<ILLMModel>;
+interface IDesignProjectInfoEditorProps {
   children?: React.ReactNode;
+  designProject?: IAssetItem<IDesignProject>;
   visible?: boolean;
   setVisible?: (v: boolean) => void;
   afterUpdate?: () => void;
+  disabled?: boolean;
 }
 
-export const TextModelInfoEditor: React.FC<ITextModelInfoEditorProps> = ({
-  model,
+export const DesignProjectInfoEditor: React.FC<IDesignProjectInfoEditorProps> = ({
   children,
+  designProject,
   visible,
   setVisible,
   afterUpdate,
+  disabled,
 }) => {
   const { t } = useTranslation();
 
   const [open, setOpen] = useState(visible ?? false);
   const [isLoading, setIsLoading] = useState(false);
-
-  const mutateModelList = () => mutate((key) => typeof key === 'string' && key.startsWith('/api/llm-models'));
 
   useEffect(() => {
     typeof visible != 'undefined' && setOpen(visible);
@@ -55,40 +51,51 @@ export const TextModelInfoEditor: React.FC<ITextModelInfoEditorProps> = ({
     }
   }, [open]);
 
-  const form = useForm<IComfyuiModelInfo>({
-    resolver: zodResolver(comfyuiModelInfoSchema),
+  const form = useForm<IDesignProjectInfo>({
+    resolver: zodResolver(designProjectInfoSchema),
+    defaultValues: {
+      displayName: getI18nContent(designProject?.displayName) ?? t('design.project.info.default-project-name'),
+      description: getI18nContent(designProject?.description) ?? '',
+      iconUrl: designProject?.iconUrl ?? 'emoji:🎨:#eeeef1',
+    },
   });
 
   useEffect(() => {
-    if (!model) return;
-    form.setValue('displayName', getI18nContent(model.displayName) || '');
-    form.setValue('description', getI18nContent(model.description) || '');
-    form.setValue('iconUrl', model.iconUrl || DEFAULT_ASSET_ICON_URL);
-  }, [model]);
+    if (!designProject) return;
+    form.setValue(
+      'displayName',
+      getI18nContent(designProject.displayName) || t('design.project.info.default-project-name'),
+    );
+    form.setValue('description', getI18nContent(designProject.description) || '');
+    form.setValue('iconUrl', designProject.iconUrl || 'emoji:🎨:#eeeef1');
+  }, [designProject]);
 
   const handleSubmit = form.handleSubmit(async (data) => {
-    if (!model) {
-      toast.warning(t('common.toast.loading'));
+    if (disabled) return;
+
+    setIsLoading(true);
+    if (!designProject?.id) {
+      setIsLoading(false);
+      toast.error(t('design.project.info.project-id-empty'));
       return;
     }
-    setIsLoading(true);
-    const newModel = await updateTextModel(model.id, data);
-    if (newModel) {
-      afterUpdate ? afterUpdate() : await mutateModelList();
+    const newProject = await updateDesignProject(designProject.id, data);
+    if (newProject) {
+      afterUpdate?.();
       setOpen(false);
       setIsLoading(false);
-      toast.success(t('ugc-page.text-models.ugc-view.operate-area.info-editor.info-updated'));
+      toast.success(t('design.project.info.project-updated'));
     } else {
-      toast.error(t('ugc-page.text-models.ugc-view.operate-area.info-editor.info-update-failed'));
+      toast.error(t('design.project.info.project-update-failed'));
     }
   });
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={disabled ? void 0 : setOpen}>
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t('ugc-page.text-models.ugc-view.operate-area.info-editor.title')}</DialogTitle>
+          <DialogTitle>{t('design.project.info.title')}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={handleSubmit} className="flex flex-col gap-2">
@@ -97,10 +104,10 @@ export const TextModelInfoEditor: React.FC<ITextModelInfoEditorProps> = ({
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('comfyui.comfyui-model.form.display-name.label')}</FormLabel>
+                  <FormLabel>{t('design.project.info.form.project-name')}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={t('comfyui.comfyui-model.form.display-name.placeholder')}
+                      placeholder={t('design.project.info.form.project-name-placeholder')}
                       {...field}
                       className="grow"
                       autoFocus
@@ -116,10 +123,10 @@ export const TextModelInfoEditor: React.FC<ITextModelInfoEditorProps> = ({
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('comfyui.comfyui-model.form.description.label')}</FormLabel>
+                  <FormLabel>{t('design.project.info.form.project-desc')}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder={t('comfyui.comfyui-model.form.description.placeholder')}
+                      placeholder={t('design.project.info.form.project-desc-placeholder')}
                       className="h-28 resize-none"
                       {...field}
                     />
@@ -134,13 +141,13 @@ export const TextModelInfoEditor: React.FC<ITextModelInfoEditorProps> = ({
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('comfyui.comfyui-model.form.icon-url.label')}</FormLabel>
+                  <FormLabel>{t('design.project.info.form.project-icon')}</FormLabel>
                   <FormControl>
-                    <div className="w-full">
-                      <VinesImageEditor value={field.value} onChange={field.onChange} aspectRatio={1}>
-                        <VinesIcon size="md" src={field.value ?? DEFAULT_ASSET_ICON_URL} disabledPreview />
-                      </VinesImageEditor>
-                    </div>
+                    <VinesIconEditor
+                      value={field.value ?? 'emoji:🎨:#eeeef1'}
+                      defaultValue={designProject?.iconUrl}
+                      onChange={field.onChange}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -149,7 +156,7 @@ export const TextModelInfoEditor: React.FC<ITextModelInfoEditorProps> = ({
 
             <DialogFooter>
               <Button type="submit" loading={isLoading} variant="solid">
-                {t('common.utils.submit')}
+                {t('design.project.info.form.submit')}
               </Button>
             </DialogFooter>
           </form>

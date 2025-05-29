@@ -26,6 +26,7 @@ import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
 import { VinesUploader } from '@/components/ui/vines-uploader';
+import { DEFAULT_COMFYUI_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
 import { IImportComfyUIWorkflow, importComfyUIWorkflowSchema } from '@/schema/workspace/import-comfyui-workflow.ts';
 
 interface IImportComfyUIWorkflowProps {
@@ -41,7 +42,7 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
   const form = useForm<IImportComfyUIWorkflow>({
     resolver: zodResolver(importComfyUIWorkflowSchema),
     defaultValues: {
-      iconUrl: 'emoji:🍀:#eeeef1',
+      iconUrl: DEFAULT_COMFYUI_WORKFLOW_ICON_URL,
       workflowType: 'json',
     },
   });
@@ -77,7 +78,7 @@ export const ImportComfyUIWorkflow: React.FC<IImportComfyUIWorkflowProps> = ({ o
                     <FormControl>
                       <VinesIconEditor
                         value={field.value ?? ''}
-                        defaultValue="emoji:🍀:#eeeef1"
+                        defaultValue={DEFAULT_COMFYUI_WORKFLOW_ICON_URL}
                         onChange={field.onChange}
                         size="md"
                       />

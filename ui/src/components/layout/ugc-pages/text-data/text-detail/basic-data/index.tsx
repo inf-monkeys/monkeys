@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
+import { DEFAULT_ASSET_ICON_URL } from '@/consts/icons.ts';
 import {
   IRetrievalSettings,
   KnowledgeBaseRetrievalMode,
@@ -50,9 +51,9 @@ export const BasicInfo: React.FC<IBasicInfoProps> = ({ textId }) => {
     );
   };
 
-  const [icon, setIcon] = useState(detail?.iconUrl || 'emoji:🍀:#eeeef1');
+  const [icon, setIcon] = useState(detail?.iconUrl || DEFAULT_ASSET_ICON_URL);
   useEffect(() => {
-    setIcon(detail?.iconUrl || 'emoji:🍀:#eeeef1');
+    setIcon(detail?.iconUrl || DEFAULT_ASSET_ICON_URL);
   }, [detail?.iconUrl]);
 
   const form = useForm<IRetrievalSettings>({

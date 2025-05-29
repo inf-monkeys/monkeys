@@ -15,6 +15,7 @@ import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
+import { DEFAULT_TOOL_ICON_URL } from '@/consts/icons.ts';
 import { IImportTool, importToolSchema, ToolImportType } from '@/schema/workspace/tools-import.ts';
 
 const HTTP_METHOD_OPTIONS: Array<{
@@ -71,7 +72,7 @@ export const ImportToolService: React.FC<IImportToolServiceProps> = ({ onFinishe
     defaultValues: {
       importType: ToolImportType.api,
       apiInfo: {
-        iconUrl: 'emoji:🍀:#eeeef1',
+        iconUrl: DEFAULT_TOOL_ICON_URL,
       },
     },
   });
@@ -144,7 +145,7 @@ export const ImportToolService: React.FC<IImportToolServiceProps> = ({ onFinishe
                     <FormControl>
                       <VinesIconEditor
                         value={field.value ?? ''}
-                        defaultValue="emoji:🍀:#eeeef1"
+                        defaultValue={DEFAULT_TOOL_ICON_URL}
                         onChange={field.onChange}
                         size="md"
                       />

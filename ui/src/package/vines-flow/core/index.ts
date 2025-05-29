@@ -38,11 +38,12 @@ import {
 import { createTask } from '@/package/vines-flow/core/utils.ts';
 import { getI18nContent } from '@/utils';
 import VinesEvent from '@/utils/events';
+import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
 
 export class VinesCore extends VinesTools(VinesBase) {
   public workflowId: string | undefined;
 
-  public workflowIcon = 'emoji:🍀:#eeeef1';
+  public workflowIcon = DEFAULT_WORKFLOW_ICON_URL;
 
   public workflowName = '未命名';
 
@@ -414,6 +415,7 @@ export class VinesCore extends VinesTools(VinesBase) {
   public getRaw() {
     return this.nodes.slice(1, this.nodes.length - 1).map((it) => it.getRaw());
   }
+
   // endregion
 
   // region Tools
@@ -424,6 +426,7 @@ export class VinesCore extends VinesTools(VinesBase) {
   private sendUpdateEvent() {
     this.sendEvent('update', this.getRaw());
   }
+
   // endregion
 
   // region Variables
@@ -478,6 +481,7 @@ export class VinesCore extends VinesTools(VinesBase) {
       mapper: this.variablesMapper,
     };
   }
+
   // endregion
 
   // region RUNNER
@@ -578,6 +582,7 @@ export class VinesCore extends VinesTools(VinesBase) {
   }
 
   private _executionDataPrevious: Map<string, Partial<VinesWorkflowExecution>> = new Map();
+
   public async fetchWorkflowExecution(instanceId: string) {
     const data = await getWorkflowExecution(instanceId);
     if (!data) return;
@@ -831,5 +836,6 @@ export class VinesCore extends VinesTools(VinesBase) {
       multipleChat: !!this.workflowInput.find((variable) => variable.name === 'messages'),
     };
   }
+
   // endregion
 }

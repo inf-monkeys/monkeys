@@ -5,14 +5,16 @@ import { IVinesUser } from '@/apis/authz/user/typings.ts';
 import { IDesignProject } from '@/apis/designs/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
 import { RenderDescription, RenderIcon, RenderTime, RenderUser } from '@/components/layout/ugc/view/utils/renderer.tsx';
+import { DEFAULT_DESIGN_PROJECT_ICON_URL } from '@/consts/icons.ts';
 import { getI18nContent } from '@/utils';
 
 const columnHelper = createColumnHelper<IAssetItem<IDesignProject>>();
 
-export const createDesignsColumns = () => [
+export const createDesignProjectsColumns = () => [
   columnHelper.accessor('iconUrl', {
     id: 'logo',
-    cell: ({ getValue }) => RenderIcon({ iconUrl: getValue() as string }),
+    cell: ({ getValue }) =>
+      RenderIcon({ iconUrl: (getValue() as string | undefined) ?? DEFAULT_DESIGN_PROJECT_ICON_URL }),
     maxSize: 48,
   }),
   columnHelper.accessor('displayName', {
@@ -34,7 +36,7 @@ export const createDesignsColumns = () => [
   }),
   columnHelper.accessor('boardIds', {
     id: 'boardCount',
-    cell: ({ getValue }) => getValue().length,
+    cell: ({ getValue }) => (getValue() ?? []).length,
   }),
   columnHelper.accessor('user', {
     id: 'user',

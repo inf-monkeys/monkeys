@@ -8,6 +8,7 @@ import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table.tsx';
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
 import { getI18nContent } from '@/utils';
 
 interface IRelatedApplicationProps {
@@ -51,7 +52,7 @@ export const RelatedApplication: React.FC<IRelatedApplicationProps> = ({ textId 
         {data?.map(({ iconUrl, displayName, workflowId }, i) => (
           <TableRow key={i}>
             <TableCell>
-              <VinesIcon size="sm">{iconUrl || 'emoji:🍀:#eeeef1'}</VinesIcon>
+              <VinesIcon size="sm">{iconUrl || DEFAULT_WORKFLOW_ICON_URL}</VinesIcon>
             </TableCell>
             <TableCell className="font-medium">
               <a
