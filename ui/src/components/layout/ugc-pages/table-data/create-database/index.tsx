@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
+import { DEFAULT_ASSET_ICON_URL } from '@/consts/icons.ts';
 import { databaseInfoSchema, IDatabaseInfo } from '@/schema/table-database/create-database.ts';
 
 interface ICreateDatabaseProps {}
@@ -31,7 +32,7 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
       createType: 'builtIn',
       displayName: '',
       description: '',
-      iconUrl: 'emoji:🍀:#eeeef1',
+      iconUrl: DEFAULT_ASSET_ICON_URL,
     },
   });
 
@@ -210,7 +211,7 @@ export const CreateDatabase: React.FC<ICreateDatabaseProps> = () => {
                       <FormControl>
                         <VinesIconEditor
                           value={field.value!}
-                          defaultValue="emoji:🍀:#eeeef1"
+                          defaultValue={DEFAULT_ASSET_ICON_URL}
                           onChange={field.onChange}
                         />
                       </FormControl>
