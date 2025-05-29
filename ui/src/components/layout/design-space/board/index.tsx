@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, startTransition, useCallback, useContext, useEffect } from 'react';
+import React, { startTransition, useCallback, useContext, useEffect } from 'react';
 
 import './index.scss';
 
@@ -45,9 +45,17 @@ interface BoardProps {
   canvasWidth?: number;
   canvasHeight?: number;
   instance?: BoardInstance;
+  persistenceKey?: string;
 }
 
-export const Board: React.FC<BoardProps> = ({ editor, setEditor, canvasWidth, canvasHeight, instance }) => {
+export const Board: React.FC<BoardProps> = ({
+  editor,
+  setEditor,
+  canvasWidth,
+  canvasHeight,
+  instance,
+  persistenceKey,
+}) => {
   const frameShapeId = instance?.frameShapeId || createShapeId();
 
   const { setBoardCanvasSize, width, height } = useBoardCanvasSizeStore();
@@ -86,6 +94,7 @@ export const Board: React.FC<BoardProps> = ({ editor, setEditor, canvasWidth, ca
   return (
     <div className="h-full w-full">
       <Tldraw
+        persistenceKey={persistenceKey}
         onMount={(editor: Editor) => {
           setEditor(editor);
           editor.sideEffects.registerBeforeDeleteHandler('shape', (shape: TLShape) => {
