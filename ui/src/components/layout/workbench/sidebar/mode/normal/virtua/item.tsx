@@ -3,8 +3,8 @@ import { createContext, forwardRef, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { IPageInstanceType, IPinPage } from '@/apis/pages/typings.ts';
-import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab.tsx';
 import { ViewItemMenu } from '@/components/layout/workbench/sidebar/mode/normal/virtua/menu.tsx';
+import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab.tsx';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 import { cn, getI18nContent } from '@/utils';
@@ -23,7 +23,7 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(({ p
 
   const { pageId: currentPageId, groupId: currentGroupId } = useContext(WorkbenchViewItemCurrentData);
 
-  const info = page?.workflow || page?.agent;
+  const info = page?.workflow || page?.agent || page?.designProject;
   const viewIcon = page?.instance?.icon ?? '';
   const pageId = page?.id ?? '';
 

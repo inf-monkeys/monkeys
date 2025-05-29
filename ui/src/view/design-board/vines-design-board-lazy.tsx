@@ -3,8 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { createShapeId, getSnapshot, TLShapeId } from 'tldraw';
 
+import { updateDesignBoardMetadata, useDesignBoardMetadata } from '@/apis/designs';
 import { Board } from '@/components/layout/design-space/board';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
@@ -13,8 +15,6 @@ import { useDesignBoardStore } from '@/store/useDesignBoardStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 import { downloadFile } from '@/utils/file.ts';
-import { updateDesignBoardMetadata, useDesignBoardMetadata } from '@/apis/designs';
-import { toast } from 'sonner';
 
 const DesignBoardView: React.FC = () => {
   const { t } = useTranslation();
@@ -74,7 +74,7 @@ const DesignBoardView: React.FC = () => {
       <div className="flex h-full max-w-64">
         <motion.div
           className="flex flex-col gap-4 overflow-hidden [&_h1]:line-clamp-1 [&_span]:line-clamp-1"
-          initial={{ width: 256, padding: '1rem 1rem' }}
+          initial={workbenchVisible ? { width: 0, padding: '1rem 0' } : { width: 256, padding: '1rem 1rem' }}
           animate={{
             width: sidebarVisible ? 256 : 0,
             padding: sidebarVisible ? '1rem 1rem' : '1rem 0',

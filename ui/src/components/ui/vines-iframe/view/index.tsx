@@ -1,19 +1,19 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 import { useCreation } from 'ahooks';
 import { motion } from 'framer-motion';
 
 import { Page404 } from '@/components/layout/workspace/404.tsx';
 import { VinesAgentViewWrapper } from '@/components/layout-wrapper/agent/view-wrapper.tsx';
+import { VinesDesignBoardViewWrapper } from '@/components/layout-wrapper/design/view-wrapper.tsx';
 import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper.tsx';
 import { IFRAME_MAP } from '@/components/ui/vines-iframe/consts.ts';
 import { AgentStoreProvider, createAgentStore } from '@/store/useAgentStore';
 import { CanvasStoreProvider, createCanvasStore } from '@/store/useCanvasStore';
+import { createDesignBoardStore, DesignBoardProvider } from '@/store/useDesignBoardStore';
 import { createFlowStore, FlowStoreProvider } from '@/store/useFlowStore';
 import { useViewStore } from '@/store/useViewStore';
-import { VinesDesignBoardViewWrapper } from '@/components/layout-wrapper/design/view-wrapper.tsx';
-import { createDesignBoardStore, DesignBoardProvider } from '@/store/useDesignBoardStore';
 
 interface IVinesViewProps {
   id?: string;
