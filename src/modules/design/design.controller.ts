@@ -1,9 +1,10 @@
 import { ListDto } from '@/common/dto/list.dto';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
+import { logger } from '@/common/logger';
 import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { DesignProjectEntity } from '@/database/entities/design/design-project';
-import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DesignMetadataService } from './design.metadata.service';
 import { DesignProjectService } from './design.project.service';
@@ -59,6 +60,7 @@ export class DesignController {
     description: '获取设计项目',
   })
   async findOneProject(@Param('projectId') projectId: string) {
+    logger.info(projectId);
     const project = await this.designProjectService.findById(projectId);
     if (!project) {
       throw new NotFoundException('设计项目不存在');
@@ -66,7 +68,7 @@ export class DesignController {
     return new SuccessResponse({ data: project });
   }
 
-  @Patch('project/:projectId')
+  @Put('project/:projectId')
   @ApiOperation({
     summary: '更新设计项目',
     description: '更新设计项目',
@@ -117,11 +119,11 @@ export class DesignController {
 
   @Get('project/:projectId/metadata/')
   @ApiOperation({
-    summary: '获取设计',
-    description: '获取设计',
+    summary: '获取设计画板列表',
+    description: '获取设计画板列表',
   })
   async findAllDesignMetadataByProjectId(@Param('projectId') projectId: string) {
-    const list = await this.designMetadataService.findAllByProjectId(projectId);
+    const list = await this.designMetadataService.findAllByProjectIdWithourSnapshot(projectId);
     if (!list) {
       throw new NotFoundException('设计画板不存在');
     }
@@ -130,7 +132,16 @@ export class DesignController {
     });
   }
 
-  @Patch('metadata/:metadataId')
+  @Get('metadata/:metadataId')
+  @ApiOperation({
+    summary: '获取设计画板元数据',
+  })
+  async getDesignMetadata(@Param('metadataId') metadataId: string) {
+    const result = await this.designMetadataService.findByMetadataId(metadataId);
+    return new SuccessResponse({ data: result });
+  }
+
+  @Put('metadata/:metadataId')
   @ApiOperation({
     summary: '更新设计',
   })

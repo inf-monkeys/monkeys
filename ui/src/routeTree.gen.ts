@@ -95,6 +95,9 @@ const TeamIdWorkspaceWorkflowIdImageDetailIndexLazyImport = createFileRoute(
 const TeamIdWorkspaceWorkflowIdPageIdIndexLazyImport = createFileRoute(
   '/$teamId/workspace/$workflowId/$pageId/',
 )()
+const TeamIdDesignDesignProjectIdDesignBoardIdIndexLazyImport = createFileRoute(
+  '/$teamId/design/$designProjectId/$designBoardId/',
+)()
 const TeamIdWorkspaceWorkflowIdPageIdViewIframeLazyImport = createFileRoute(
   '/$teamId/workspace/$workflowId/$pageId/view-iframe',
 )()
@@ -404,6 +407,16 @@ const TeamIdWorkspaceWorkflowIdPageIdIndexLazyRoute =
     ),
   )
 
+const TeamIdDesignDesignProjectIdDesignBoardIdIndexLazyRoute =
+  TeamIdDesignDesignProjectIdDesignBoardIdIndexLazyImport.update({
+    path: '/$teamId/design/$designProjectId/$designBoardId/',
+    getParentRoute: () => rootRoute,
+  } as any).lazy(() =>
+    import(
+      './pages/$teamId/design/$designProjectId/$designBoardId/index.lazy'
+    ).then((d) => d.Route),
+  )
+
 const TeamIdWorkspaceWorkflowIdPageIdViewIframeLazyRoute =
   TeamIdWorkspaceWorkflowIdPageIdViewIframeLazyImport.update({
     path: '/$teamId/workspace/$workflowId/$pageId/view-iframe',
@@ -570,6 +583,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdPageIdViewIframeLazyImport
       parentRoute: typeof rootRoute
     }
+    '/$teamId/design/$designProjectId/$designBoardId/': {
+      preLoaderRoute: typeof TeamIdDesignDesignProjectIdDesignBoardIdIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/$teamId/workspace/$workflowId/$pageId/': {
       preLoaderRoute: typeof TeamIdWorkspaceWorkflowIdPageIdIndexLazyImport
       parentRoute: typeof rootRoute
@@ -622,6 +639,7 @@ export const routeTree = rootRoute.addChildren([
   TeamIdTextModelsLlmModelIdIndexLazyRoute,
   TeamIdWorkspaceWorkflowIdIndexLazyRoute,
   TeamIdWorkspaceWorkflowIdPageIdViewIframeLazyRoute,
+  TeamIdDesignDesignProjectIdDesignBoardIdIndexLazyRoute,
   TeamIdWorkspaceWorkflowIdPageIdIndexLazyRoute,
   TeamIdWorkspaceWorkflowIdImageDetailIndexLazyRoute,
 ])
