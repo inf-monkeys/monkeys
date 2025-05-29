@@ -70,6 +70,8 @@
     "type": {
       "workflow": "工作流",
       "agent": "智能体",
+      "design-board": "设计画板",
+      "design-project": "设计项目",
       "comfyui-workflow": "ComfyUI 工作流",
       "image-model": "图像模型",
       "image-model-type": "图像模型类型",
@@ -1146,6 +1148,67 @@
         },
         "operate-area": {
           "dropdown-label": "工作流操作",
+          "options": {
+            "copy-link": "复制链接",
+            "create-a-copy": "创建副本",
+            "edit-info": "编辑信息",
+            "export-current-version": "导出当前版本",
+            "export-all-versions": "导出全部版本"
+          }
+        },
+        "subtitle": {
+          "import": {
+            "options": {
+              "local-import": "本地导入",
+              "market-import": "市场导入"
+            }
+          }
+        }
+      }
+    },
+    "design-project": {
+      "create": {
+        "dialog": {
+          "title": "创建设计项目",
+          "info": {
+            "label": "设计项目名称",
+            "placeholder": "输入设计项目名称"
+          },
+          "description": {
+            "label": "设计项目描述",
+            "placeholder": "输入设计项目描述"
+          }
+        }
+      },
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "图标"
+          },
+          "title": {
+            "label": "名称"
+          },
+          "description": {
+            "label": "描述"
+          },
+          "user": {
+            "label": "用户"
+          },
+          "assetTags": {
+            "label": "标签"
+          },
+          "createdTimestamp": {
+            "label": "创建时间"
+          },
+          "updatedTimestamp": {
+            "label": "更新时间"
+          },
+          "boardCount": {
+            "label": "画板数量"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "设计项目操作",
           "options": {
             "copy-link": "复制链接",
             "create-a-copy": "创建副本",
@@ -3310,6 +3373,29 @@
         "submit": "保存"
       }
     }
+  },
+  "design": {
+    "project": {
+      "info": {
+        "title": "设计项目信息",
+        "tip": "点击编辑",
+        "default- project-name": "未命名应用",
+        "form": {
+          "project-name": "设计项目名称",
+          "project-name-placeholder": "请输入项目名称",
+          "project-desc": "设计项目描述",
+          "project-desc-placeholder": "请输入项目描述，不超过 200 字",
+          "project-icon": "设计项目图标",
+          "submit": "保存"
+        },
+        "project-id-empty": "项目 ID 不存在",
+        "project-updated": "项目信息已更新",
+        "project-update-failed": "智能体信息更新失败",
+        "display-name-is-non-empty": "显示名称不能为空",
+        "description-is-too-long": "描述不能超过 200 个字符"
+      }
+    },
+    "view-config": {}
   },
   "comfyui-server": {
     "title": "ComfyUI 服务",

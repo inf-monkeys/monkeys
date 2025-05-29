@@ -13,6 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { getI18nContent } from '@/utils';
@@ -45,7 +46,7 @@ export const IframeHeader: React.FC<IIframeHeaderProps> = ({ historyVisible, set
       <header className="flex items-center justify-between p-2">
         <div className="flex items-center gap-2">
           <VinesIcon size="sm" className="pointer-events-none select-none" disabledPreview>
-            {workflow?.iconUrl || 'emoji:🍀:#eeeef1'}
+            {workflow?.iconUrl || DEFAULT_WORKFLOW_ICON_URL}
           </VinesIcon>
           <div className="flex flex-col gap-0.5">
             <Tooltip>

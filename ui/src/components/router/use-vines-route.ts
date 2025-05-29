@@ -27,7 +27,7 @@ export const useVinesRoute = () => {
   // 图片详情页面应该使用WorkspaceLayout，但不显示侧边栏
   const isUseWorkSpace = (routeAppId === 'workspace' && !isUseShareView && !isUseIFrame) || isImageDetailPage;
   const isUseAgent = routeAppId === 'agent';
-  const isUseDesign = routeAppId === 'designs'; // 这里使用复数是因为现在还没有 ugc design 页
+  const isUseDesign = routeAppId === 'design'; // 这里使用复数是因为现在还没有 ugc design 页
   const isUsePanel = (!!routeIds || !isUseWorkbench) && !isUseWorkSpace && !isUseAgent && !isUseDesign;
 
   // 对于图片详情页面，确保路由信息中包含workbench，以便高亮工作台选项

@@ -20,6 +20,7 @@ import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesUploader } from '@/components/ui/vines-uploader';
 import { IWorkflowInfo, workflowInfoSchema } from '@/schema/workspace/workflow-info.ts';
 import { getI18nContent } from '@/utils';
+import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
 
 interface IPublishToMarketProps {
   visible: boolean;
@@ -56,7 +57,7 @@ export const PublishToMarket: React.FC<IPublishToMarketProps> = ({ visible, setV
       displayName:
         getI18nContent(context?.displayName) ?? t('workspace.wrapper.workflow-info-card.default-workflow-name'),
       description: getI18nContent(context?.description) ?? '',
-      iconUrl: context?.iconUrl ?? 'emoji:🍀:#eeeef1',
+      iconUrl: context?.iconUrl ?? DEFAULT_WORKFLOW_ICON_URL,
       thumbnail: '',
     },
   });

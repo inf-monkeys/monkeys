@@ -10,6 +10,7 @@ import { IUgcTagSelectorProps, UgcTagSelector } from '@/components/layout/ugc/vi
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.tsx';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { IVinesIconSize, VinesIcon } from '@/components/ui/vines-icon';
+import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
 import { getI18nContent } from '@/utils';
 import { formatTimeDiffPrevious } from '@/utils/time.ts';
 
@@ -66,7 +67,7 @@ export const RenderIcon: React.FC<{
   iconUrl?: string;
   size?: IVinesIconSize;
 }> = ({ iconUrl, size = 'md' }) => (
-  <VinesIcon size={size}>{iconUrl && iconUrl.trim() != '' ? iconUrl : 'emoji:🍀:#eeeef1'}</VinesIcon>
+  <VinesIcon size={size}>{iconUrl && iconUrl.trim() != '' ? iconUrl : DEFAULT_WORKFLOW_ICON_URL}</VinesIcon>
 );
 
 export const RenderTags = (props: IUgcTagSelectorProps) => <UgcTagSelector {...props} />;
