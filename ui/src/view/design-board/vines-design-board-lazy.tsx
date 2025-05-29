@@ -11,24 +11,27 @@ import { Board } from '@/components/layout/design-space/board';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useDesignBoardStore } from '@/store/useDesignBoardStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 import { downloadFile } from '@/utils/file.ts';
 
 const DesignBoardView: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const { editor, setEditor, designBoardId, setDesignBoardId } = useDesignBoardStore();
 
-  const { data: metadata, mutate } = useDesignBoardMetadata(designBoardId);
+  const [themeMode] = useLocalStorage<string>('vines-ui-dark-mode', 'auto', false);
+
+  const { data: metadata, mutate: mutateMetadata } = useDesignBoardMetadata(designBoardId);
 
   const containerHeight = usePageStore((s) => s.containerHeight);
   const workbenchVisible = usePageStore((s) => s.workbenchVisible);
 
   const [sidebarVisible, setSidebarVisible] = useState(!workbenchVisible);
 
-  const [frameShapeId, setFrameShapeId] = useState<TLShapeId>(createShapeId());
+  const [frameShapeId, setFrameShapeId] = useState<TLShapeId>(createShapeId('shape:parentFrame'));
 
   const [canvasWidth, setCanvasWidth] = useState<number>(1280);
   const [canvasHeight, setCanvasHeight] = useState<number>(720);
@@ -43,11 +46,34 @@ const DesignBoardView: React.FC = () => {
     editor.loadSnapshot(metadata.snapshot);
   }, [metadata, editor]);
 
+  useEffect(() => {
+    if (!editor) return;
+    editor.user.updateUserPreferences({
+      colorScheme: themeMode === 'auto' ? 'system' : (themeMode as 'dark' | 'light'),
+    });
+  }, [editor, themeMode]);
+
+  i18n.on('languageChanged', (lang) => {
+    if (!editor) return;
+    editor.user.updateUserPreferences({
+      locale: lang === 'zh' ? 'zh-cn' : 'en',
+    });
+  });
+
+  // lock frame
+  useEffect(() => {
+    if (!editor) return;
+    editor.sideEffects.registerBeforeDeleteHandler('shape', (shape) => {
+      if (shape.id === frameShapeId || shape.parentId === frameShapeId) return false;
+      return;
+    });
+  }, [editor]);
+
   const handleExport = async () => {
     if (!editor) return;
     const ids = [frameShapeId];
-    const { blob } = await editor.toImage(ids, { format: 'png' });
-    const file = new File([blob], `design-board-${Date.now()}.png`, { type: blob.type });
+    const { blob } = await editor.toImage(ids, { format: 'png', scale: 0.5 });
+    const file = new File([blob], `${metadata?.displayName ?? 'Board'}-${Date.now()}.png`, { type: blob.type });
     downloadFile(file);
   };
 
@@ -60,7 +86,7 @@ const DesignBoardView: React.FC = () => {
       }),
       {
         success: () => {
-          void mutate();
+          void mutateMetadata();
           return t('common.update.success');
         },
         error: t('common.update.error'),
@@ -74,18 +100,22 @@ const DesignBoardView: React.FC = () => {
       <div className="flex h-full max-w-64">
         <motion.div
           className="flex flex-col gap-4 overflow-hidden [&_h1]:line-clamp-1 [&_span]:line-clamp-1"
-          initial={workbenchVisible ? { width: 0, padding: '1rem 0' } : { width: 256, padding: '1rem 1rem' }}
+          initial={workbenchVisible ? { width: 0, padding: '1rem 0' } : { width: 128, padding: '1rem 1rem' }}
           animate={{
-            width: sidebarVisible ? 256 : 0,
+            width: sidebarVisible ? 128 : 0,
             padding: sidebarVisible ? '1rem 1rem' : '1rem 0',
           }}
         >
-          <Button variant="outline" onClick={handleExport}>
-            Export
-          </Button>
-          <Button variant="outline" onClick={handleSave}>
-            Save
-          </Button>
+          <div className="flex h-full flex-col justify-end">
+            <div className="grid grid-cols-1 gap-2">
+              <Button variant="outline" onClick={handleExport}>
+                {t('common.utils.export')}
+              </Button>
+              <Button variant="outline" onClick={handleSave}>
+                {t('common.utils.save')}
+              </Button>
+            </div>
+          </div>
         </motion.div>
         <Separator orientation="vertical" className="vines-center">
           <Tooltip>
@@ -102,6 +132,7 @@ const DesignBoardView: React.FC = () => {
         </Separator>
       </div>
       <Board
+        persistenceKey={designBoardId}
         editor={editor}
         setEditor={setEditor}
         canvasWidth={boardCanvasSize.width}
