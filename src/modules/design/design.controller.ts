@@ -1,6 +1,5 @@
 import { ListDto } from '@/common/dto/list.dto';
 import { CompatibleAuthGuard } from '@/common/guards/auth.guard';
-import { logger } from '@/common/logger';
 import { SuccessListResponse, SuccessResponse } from '@/common/response';
 import { IRequest } from '@/common/typings/request';
 import { DesignProjectEntity } from '@/database/entities/design/design-project';
@@ -60,7 +59,6 @@ export class DesignController {
     description: '获取设计项目',
   })
   async findOneProject(@Param('projectId') projectId: string) {
-    logger.info(projectId);
     const project = await this.designProjectService.findById(projectId);
     if (!project) {
       throw new NotFoundException('设计项目不存在');

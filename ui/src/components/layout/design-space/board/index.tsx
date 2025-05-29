@@ -41,39 +41,15 @@ type BoardInstance = {
 
 interface BoardProps {
   editor: Editor | null;
-  setEditor: Dispatch<SetStateAction<Editor | null>>;
+  setEditor: (editor: Editor) => void;
   canvasWidth?: number;
   canvasHeight?: number;
   instance?: BoardInstance;
 }
 
-// export declare const defaultShapeTools: readonly [typeof TextShapeTool, typeof DrawShapeTool, typeof GeoShapeTool, typeof NoteShapeTool, typeof LineShapeTool, typeof FrameShapeTool, typeof ArrowShapeTool, typeof HighlightShapeTool];
-// all default shapes tools except frame
-// const SelectedShapeTools = [
-//   TextShapeTool,
-//   DrawShapeTool,
-//   GeoShapeTool,
-//   NoteShapeTool,
-//   LineShapeTool,
-//   ArrowShapeTool,
-//   HighlightShapeTool,
-//   // FrameShapeTool,
-// ];
-
-/* 
-export declare const defaultTools: readonly [typeof EraserTool, typeof HandTool, typeof LaserTool, typeof ZoomTool, typeof SelectTool];
- */
-// const SelectedTools = [EraserTool, HandTool, LaserTool, ZoomTool, SelectTool];
-
 export const Board: React.FC<BoardProps> = ({ editor, setEditor, canvasWidth, canvasHeight, instance }) => {
   const frameShapeId = instance?.frameShapeId || createShapeId();
 
-  // 创建自定义组件
-  // const components = useMemo(() => {
-  //   if (!canvasWidth || !canvasHeight) return {};
-
-  //   return {};
-  // }, [canvasWidth, canvasHeight]);
   const { setBoardCanvasSize, width, height } = useBoardCanvasSizeStore();
 
   const createFrame = useCallback((editor: Editor, width: number, height: number) => {
@@ -90,16 +66,6 @@ export const Board: React.FC<BoardProps> = ({ editor, setEditor, canvasWidth, ca
       },
     });
 
-    // // 锁定背景形状
-    // editor.updateShape({
-    //   id: shapeId,
-    //   type: 'frame',
-    //   isLocked: true,
-    // });
-
-    // // 将背景形状发送到最底层
-    // editor.sendToBack([shapeId]);
-
     // 设置视图以适应画板
     editor.zoomToFit();
   }, []);
@@ -114,8 +80,6 @@ export const Board: React.FC<BoardProps> = ({ editor, setEditor, canvasWidth, ca
           h: height,
         },
       });
-
-      // editor.zoomToFit();
     }
   }, [width, height]);
 
