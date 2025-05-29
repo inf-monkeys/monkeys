@@ -3,10 +3,20 @@ import { MonkeyWorkflow } from '@inf-monkeys/monkeys';
 
 import { IAgent } from '@/apis/agents/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
+import { IDesignProject } from '@/apis/designs/typings.ts';
 
 export type IPagePermission = 'read' | 'write' | 'exec' | 'permission';
 
-export type IPageInstanceType = 'process' | 'log' | 'chat' | 'preview' | 'api';
+export type IPageInstanceType =
+  | 'process'
+  | 'log'
+  | 'chat'
+  | 'preview'
+  | 'api'
+  | 'agent-chat'
+  | 'agent-config'
+  | 'agent-log'
+  | 'design-board';
 
 export interface IPageInstance {
   name: string;
@@ -37,9 +47,11 @@ export interface IPageType {
 }
 
 export type IPinPage = IPageType & {
-  workflowId: string;
-  workflow: MonkeyWorkflow;
-  agent: IAssetItem<IAgent>;
+  workflowId?: string;
+  designMetadataId?: string;
+  workflow?: MonkeyWorkflow;
+  agent?: IAssetItem<IAgent>;
+  designProject?: IAssetItem<IDesignProject>;
 };
 
 export interface IPageGroup {

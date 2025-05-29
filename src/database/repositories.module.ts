@@ -20,6 +20,8 @@ import { ComfyuiModelRepository } from './repositories/comfyui-model.repository'
 import { ComfyuiRepository } from './repositories/comfyui.repository';
 import { ConversationAppRepository } from './repositories/conversation-app.repository';
 import { CredentialsRepository } from './repositories/credential.repository';
+import { DesignMetadataRepository } from './repositories/design-metadata.repository';
+import { DesignProjectRepository } from './repositories/design-project.repository';
 import { SqlKnowledgeBaseRepository } from './repositories/knowledge-base-sql.repository';
 import { KnowledgeBaseRepository } from './repositories/knowledge-base.repository';
 import { LlmModelRepository } from './repositories/llm-model.repository';
@@ -69,6 +71,8 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     ConversationAppRepository,
     ConversationAppAssetRepositroy,
     ObservabilityRepository,
+    DesignMetadataRepository,
+    DesignProjectRepository,
   ],
   exports: [
     ToolsRepository,
@@ -103,7 +107,9 @@ import { WorkflowRepository } from './repositories/workflow.repository';
     ConversationAppRepository,
     ConversationAppAssetRepositroy,
     ObservabilityRepository,
+    DesignMetadataRepository,
+    DesignProjectRepository,
   ],
   imports: [TypeOrmModule.forFeature(entities)],
 })
-export class RepositoryMoule { }
+export class RepositoryMoule {}

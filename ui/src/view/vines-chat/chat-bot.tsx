@@ -16,6 +16,7 @@ import { useChat } from '@/components/layout/workspace/vines-view/chat/chat-bot/
 import { VirtuaChatBotMessages } from '@/components/layout/workspace/vines-view/chat/chat-bot/virtua-messages';
 import { useVinesUser } from '@/components/router/guard/user.tsx';
 import { VinesLoading } from '@/components/ui/loading';
+import { DEFAULT_AGENT_ICON_URL } from '@/consts/icons.ts';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
@@ -32,7 +33,7 @@ export const VinesChatMode: React.FC<IVinesChatModeProps> = ({
   multipleChat,
   id,
   extraBody,
-  botPhoto = 'emoji:🤖:#f2c1be',
+  botPhoto = DEFAULT_AGENT_ICON_URL,
   height,
 }) => {
   const { t } = useTranslation();

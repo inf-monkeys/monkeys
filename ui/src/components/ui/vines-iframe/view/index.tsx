@@ -1,27 +1,30 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 import { useCreation } from 'ahooks';
 import { motion } from 'framer-motion';
 
 import { Page404 } from '@/components/layout/workspace/404.tsx';
 import { VinesAgentViewWrapper } from '@/components/layout-wrapper/agent/view-wrapper.tsx';
+import { VinesDesignBoardViewWrapper } from '@/components/layout-wrapper/design/view-wrapper.tsx';
 import { VinesViewWrapper } from '@/components/layout-wrapper/workspace/view-wrapper.tsx';
 import { IFRAME_MAP } from '@/components/ui/vines-iframe/consts.ts';
 import { AgentStoreProvider, createAgentStore } from '@/store/useAgentStore';
 import { CanvasStoreProvider, createCanvasStore } from '@/store/useCanvasStore';
+import { createDesignBoardStore, DesignBoardProvider } from '@/store/useDesignBoardStore';
 import { createFlowStore, FlowStoreProvider } from '@/store/useFlowStore';
 import { useViewStore } from '@/store/useViewStore';
 
 interface IVinesViewProps {
   id?: string;
+  designBoardId?: string;
   workflowId?: string;
   agentId?: string;
   pageId?: string;
   type?: string;
 }
 
-export function VinesView({ id, workflowId, agentId, pageId, type }: IVinesViewProps) {
+export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type }: IVinesViewProps) {
   const setVisible = useViewStore((s) => s.setVisible);
 
   if (!((type ?? '') in IFRAME_MAP)) {
@@ -52,6 +55,17 @@ export function VinesView({ id, workflowId, agentId, pageId, type }: IVinesViewP
 
   const content = useCreation(() => {
     if (!id) return <Page404 />;
+
+    if (designBoardId) {
+      return (
+        <DesignBoardProvider createStore={createDesignBoardStore}>
+          <VinesDesignBoardViewWrapper designBoardId={designBoardId}>
+            <View />
+          </VinesDesignBoardViewWrapper>
+        </DesignBoardProvider>
+      );
+    }
+
     if (workflowId) {
       return (
         <FlowStoreProvider createStore={createFlowStore}>

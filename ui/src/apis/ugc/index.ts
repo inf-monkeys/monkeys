@@ -22,6 +22,7 @@ import { ACTION_TOOLS_CATEGORIES_MAP } from '@/apis/workflow/typings.ts';
 import { paginationWrapper } from '@/apis/wrapper.ts';
 
 import { IAssetItem, IAssetPublicCategory, IAssetTag, IListUgcDto, IUgcFilterRules } from './typings';
+import { IDesignProject } from '@/apis/designs/typings.ts';
 
 export const useUgcItems = <T extends object>(dto: IListUgcDto, url: string, method: 'GET' | 'POST' = 'GET') => {
   const swrUrl = method === 'GET' ? `${url}?${qs.stringify(dto, { encode: false })}` : url;
@@ -54,6 +55,10 @@ export const preloadUgcWorkflows = (dto: IListUgcDto) => preloadUgcItems<MonkeyW
 
 export const useUgcAgents = (dto: IListUgcDto) => useUgcItems<IAgent>(dto, '/api/conversation-apps');
 export const preloadUgcAgents = (dto: IListUgcDto) => preloadUgcItems<IAgent>(dto, '/api/conversation-apps');
+
+export const useUgcDesignProjects = (dto: IListUgcDto) => useUgcItems<IDesignProject>(dto, '/api/design/project');
+export const preloadUgcDesignProjects = (dto: IListUgcDto) =>
+  preloadUgcItems<IDesignProject>(dto, '/api/design/project');
 
 export const useUgcActionTools = (dto: IListUgcDto) => useUgcItems<IWorkflowTool>(dto, '/api/tools');
 export const useUgcComfyuiWorkflows = (dto: IListUgcDto) =>

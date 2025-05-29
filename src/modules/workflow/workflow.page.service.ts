@@ -1,11 +1,13 @@
 import { generateDbId } from '@/common/utils';
 import { ConversationAppEntity } from '@/database/entities/conversation-app/conversation-app.entity';
+import { DesignMetadataEntity } from '@/database/entities/design/design-metatdata';
+import { DesignProjectEntity } from '@/database/entities/design/design-project';
 import { WorkflowPageEntity } from '@/database/entities/workflow/workflow-page';
 import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 import { BUILT_IN_PAGE_INSTANCES, WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { isEmpty, keyBy, partition, pick, pickBy, set, uniq } from 'lodash';
+import { isEmpty, keyBy, pick, pickBy, set, uniq } from 'lodash';
 import { In, Repository } from 'typeorm';
 import { CreatePageDto } from './dto/req/create-page.dto';
 import { UpdatePageGroupDto, UpdatePagesDto } from './dto/req/update-pages.dto';
@@ -20,6 +22,10 @@ export class WorkflowPageService {
     private readonly pageGroupRepository: Repository<WorkflowPageGroupEntity>,
     @InjectRepository(ConversationAppEntity)
     private readonly conversationAppRepository: Repository<ConversationAppEntity>,
+    @InjectRepository(DesignMetadataEntity)
+    private readonly designMetadataRepository: Repository<DesignMetadataEntity>,
+    @InjectRepository(DesignProjectEntity)
+    private readonly designProjectRepository: Repository<DesignProjectEntity>,
     private readonly workflowRepository: WorkflowRepository,
   ) {}
 
@@ -142,6 +148,13 @@ export class WorkflowPageService {
     };
   }
 
+  splitPageIds(pageIds: string[]) {
+    const agentPageIds = pageIds.filter((id) => id.startsWith('agent-'));
+    const designBoardPageIds = pageIds.filter((id) => id.startsWith('design-board-'));
+    const normalPageIds = pageIds.filter((id) => !designBoardPageIds.includes(id) && !agentPageIds.includes(id));
+    return { agentPageIds, designBoardPageIds, normalPageIds };
+  }
+
   public async getPinnedPages(teamId: string) {
     if (isEmpty(teamId)) {
       return { pages: [], groups: [] };
@@ -155,7 +168,7 @@ export class WorkflowPageService {
 
     const pageIds = uniq(groups.map((it) => it.pageIds).flat(1)) as string[];
 
-    const [agentPageIds, normalPageIds] = partition(pageIds, (id) => id.startsWith('agent-'));
+    const { agentPageIds, designBoardPageIds, normalPageIds } = this.splitPageIds(pageIds);
 
     const pages = await this.pageRepository.find({
       where: {
@@ -179,6 +192,7 @@ export class WorkflowPageService {
     const workflowMap = keyBy(workflows, 'workflowId');
     const pageInstanceTypeMapper = keyBy(BUILT_IN_PAGE_INSTANCES, 'type');
 
+    // agent page
     const [agentIds, agentPageInfo] = agentPageIds.reduce(
       ([ids, map], str) => {
         const match = str.match(/agent-(\w+)-(\w+)/);
@@ -194,8 +208,6 @@ export class WorkflowPageService {
       },
       [[], {}],
     ) as [string[], Record<string, Record<string, string>>];
-
-    // agent page
     const agentApps = await this.conversationAppRepository.find({
       where: {
         teamId,
@@ -203,7 +215,6 @@ export class WorkflowPageService {
         id: In(agentIds),
       },
     });
-
     const agentPages = agentPageIds.map((agentPageId) => {
       const { type, id } = agentPageInfo[agentPageId];
       const isChat = type === 'chat';
@@ -222,6 +233,54 @@ export class WorkflowPageService {
       };
     });
 
+    // design board
+    const [designBoardIds] = designBoardPageIds.reduce(
+      ([ids, map], str) => {
+        const match = str.match(/design-board-(\w+)/);
+        if (match) {
+          const [, id, type] = match;
+          ids.push(id);
+          map[str] = {
+            type,
+            id,
+          };
+        }
+        return [ids, map];
+      },
+      [[], {}],
+    ) as [string[], Record<string, Record<string, string>>];
+    const designMetadata = await this.designMetadataRepository.find({
+      where: {
+        teamId,
+        isDeleted: false,
+        id: In(designBoardIds),
+      },
+    });
+    const designProjects = await this.designProjectRepository.find({
+      where: {
+        teamId,
+        isDeleted: false,
+        id: In(designMetadata.map((it) => it.designProjectId)),
+      },
+    });
+
+    const designBoardPages = designBoardPageIds.map((designBoardPageId, i) => {
+      const designMetadataId = designBoardIds[i];
+      const designMetadataItem = designMetadata.find((it) => it.id === designMetadataId);
+      return {
+        designProject: designProjects.find((it) => it.id === designMetadataItem.designProjectId),
+        id: designBoardPageId,
+        designMetadataId,
+        type: 'design-board',
+        displayName: designMetadataItem.displayName,
+        instance: {
+          name: '画板视图',
+          icon: 'pencil-ruler',
+          type: 'design-board',
+        },
+      };
+    });
+
     return {
       pages: [
         ...filteredPages.map((p) => ({
@@ -230,6 +289,7 @@ export class WorkflowPageService {
           instance: pageInstanceTypeMapper[p.type],
         })),
         ...agentPages,
+        ...designBoardPages,
       ],
       groups: groups.map((it) => pick(it, ['id', 'displayName', 'pageIds', 'isBuiltIn'])),
     };

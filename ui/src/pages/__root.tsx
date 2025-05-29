@@ -9,6 +9,7 @@ import { WorkbenchPanelLayout } from 'src/components/layout-wrapper/workbench/pa
 
 import { OEM } from '@/components/layout/oem';
 import { AgentLayout } from '@/components/layout-wrapper/agent';
+import { DesignLayout } from '@/components/layout-wrapper/design';
 import { MainWrapper } from '@/components/layout-wrapper/main';
 import { WorkbenchMiniModeLayout } from '@/components/layout-wrapper/workbench/mini-mode';
 import { WorkspaceLayout } from '@/components/layout-wrapper/workspace';
@@ -36,6 +37,7 @@ const RootComponent: React.FC = () => {
     isUseShareView,
     isUseIFrame,
     isUseAgent,
+    isUseDesign,
     isUseWorkbench,
     isUsePanel,
   } = useVinesRoute();
@@ -73,6 +75,7 @@ const RootComponent: React.FC = () => {
     !isUseShareView &&
     !isUseIFrame &&
     !isUseAgent &&
+    !isUseDesign &&
     !isUsePanel &&
     (mode !== 'mini' || !isUseWorkbench);
 
@@ -109,6 +112,7 @@ const RootComponent: React.FC = () => {
                 {isUseOutside && <Outlet />}
                 {isUseWorkSpace && <WorkspaceLayout />}
                 {isUseAgent && <AgentLayout />}
+                {isUseDesign && <DesignLayout />}
                 {isUsePanel && mode !== 'mini' && <WorkbenchPanelLayout layoutId={layoutId} />}
                 {isUseWorkbench && mode === 'mini' && <WorkbenchMiniModeLayout />}
                 {isUseDefault && <MainWrapper layoutId={layoutId} />}
