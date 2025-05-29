@@ -1,5 +1,6 @@
 import { DesignMetadataRepository } from '@/database/repositories/design-metadata.repository';
 import { Injectable, NotFoundException } from '@nestjs/common';
+import _ from 'lodash';
 import { CreateDesignMetadataDto } from './dto/create-design-metadata.dto';
 import { UpdateDesignMetadataDto } from './dto/update-design-metadata.dto';
 
@@ -14,9 +15,19 @@ export class DesignMetadataService {
     });
   }
 
+  async findByMetadataId(metadataId: string) {
+    const data = await this.designMetadataRepository.findById(metadataId);
+    return data;
+  }
+
   async findAllByProjectId(projectId: string) {
     const data = await this.designMetadataRepository.findAllByProjectId(projectId);
     return data;
+  }
+
+  async findAllByProjectIdWithourSnapshot(projectId: string) {
+    const data = await this.designMetadataRepository.findAllByProjectId(projectId);
+    return data.map((v) => _.omit(v, ['snapshot']));
   }
 
   async update(id: string, updateDesignMetadataDto: UpdateDesignMetadataDto) {
