@@ -2,11 +2,17 @@ const yaml = require('yaml');
 const fs = require('fs');
 const path = require('path');
 const { DataSource } = require('typeorm');
+const _ = require('lodash');
 
-const isProd = fs.existsSync(__dirname + '/dist');
+const isProd = fs.existsSync(path.join(__dirname, 'dist'));
 
-const migrationsDir = isProd ? __dirname + `/dist/database/migrations/*.js` : __dirname + `/src/database/migrations/*.ts`;
-const entitiesDir = isProd ? __dirname + `/dist/database/entities/**/*.js` : __dirname + `/src/database/entities/**/*.js`;
+const migrationsDir = isProd
+  ? path.join(__dirname, 'dist', 'database', 'migrations', '*.js')
+  : path.join(__dirname, 'src', 'database', 'migrations', '*.ts');
+
+const entitiesDir = isProd
+  ? path.join(__dirname, 'dist', 'database', 'entities', '**', '*.js')
+  : path.join(__dirname, 'src', 'database', 'entities', '**', '*.ts');
 
 let rawConfigs = [];
 if (process.env.MONKEYS_CONFIG_FILE) {
@@ -33,6 +39,5 @@ const dataSource = new DataSource({
   entities: [entitiesDir],
   migrationsTableName: `${appId}_migrations`,
 });
-dataSource.initialize();
 
 module.exports = { dataSource };
