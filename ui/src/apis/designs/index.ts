@@ -37,3 +37,9 @@ export const useDesignBoardMetadata = (designBoardId: string) =>
     designBoardId ? `/api/design/metadata/${designBoardId}` : null,
     vinesFetcher(),
   );
+
+export const updateDesignBoardMetadata = (designBoardId: string, metadata: Partial<IAssetItem<IDesignBoardMetadata>>) =>
+  vinesFetcher<IAssetItem<IDesignBoardMetadata>, Partial<IAssetItem<IDesignProject>>>({ method: 'PUT', simple: true })(
+    `/api/design/metadata/${designBoardId}`,
+    metadata,
+  );

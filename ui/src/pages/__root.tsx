@@ -48,15 +48,15 @@ const RootComponent: React.FC = () => {
   const namePath = SIDEBAR_MAP.flatMap((it) =>
     it.items
       ? it.items.map((sub) => {
-        return {
-          ...sub,
-          namePath: it.name + '.' + sub.name,
-        };
-      })
+          return {
+            ...sub,
+            namePath: it.name + '.' + sub.name,
+          };
+        })
       : {
-        ...it,
-        namePath: it.name,
-      },
+          ...it,
+          namePath: it.name,
+        },
   ).find((it) => it.name === routeAppId)?.namePath;
 
   const routeSiteName = namePath

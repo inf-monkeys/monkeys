@@ -12,16 +12,19 @@ import { AgentStoreProvider, createAgentStore } from '@/store/useAgentStore';
 import { CanvasStoreProvider, createCanvasStore } from '@/store/useCanvasStore';
 import { createFlowStore, FlowStoreProvider } from '@/store/useFlowStore';
 import { useViewStore } from '@/store/useViewStore';
+import { VinesDesignBoardViewWrapper } from '@/components/layout-wrapper/design/view-wrapper.tsx';
+import { createDesignBoardStore, DesignBoardProvider } from '@/store/useDesignBoardStore';
 
 interface IVinesViewProps {
   id?: string;
+  designBoardId?: string;
   workflowId?: string;
   agentId?: string;
   pageId?: string;
   type?: string;
 }
 
-export function VinesView({ id, workflowId, agentId, pageId, type }: IVinesViewProps) {
+export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type }: IVinesViewProps) {
   const setVisible = useViewStore((s) => s.setVisible);
 
   if (!((type ?? '') in IFRAME_MAP)) {
@@ -52,6 +55,17 @@ export function VinesView({ id, workflowId, agentId, pageId, type }: IVinesViewP
 
   const content = useCreation(() => {
     if (!id) return <Page404 />;
+
+    if (designBoardId) {
+      return (
+        <DesignBoardProvider createStore={createDesignBoardStore}>
+          <VinesDesignBoardViewWrapper designBoardId={designBoardId}>
+            <View />
+          </VinesDesignBoardViewWrapper>
+        </DesignBoardProvider>
+      );
+    }
+
     if (workflowId) {
       return (
         <FlowStoreProvider createStore={createFlowStore}>
