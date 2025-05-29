@@ -12,6 +12,7 @@ import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-me
 import { WorkflowPageGroupEntity } from '@/database/entities/workflow/workflow-page-group';
 import { WorkflowTemplateEntity } from '@/database/entities/workflow/workflow-template';
 import { WorkflowTriggersEntity } from '@/database/entities/workflow/workflow-trigger';
+import { TimestampSubscriber } from '@/timestamp.subscriber';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EntityClassOrSchema } from '@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type';
 import { ApiKeyEntity } from './entities/apikey/apikey';
@@ -93,4 +94,5 @@ export const DatabaseModule = TypeOrmModule.forRoot({
   ...config.database,
   entityPrefix: config.server.appId.concat('_'),
   entities: entities,
+  subscribers: [TimestampSubscriber],
 });
