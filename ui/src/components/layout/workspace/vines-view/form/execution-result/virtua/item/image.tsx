@@ -72,15 +72,16 @@ export const VirtuaExecutionResultGridImageItem: React.FC<IVirtuaExecutionResult
       const position = images?.findIndex((image) => (image.render.data as string) === src);
       setPosition(position);
       navigate({
-        to: '/$teamId/workspace/$workflowId/image-detail/' + (isMiniFrame ? '?mode=mini' : ''),
+        to: '/$teamId/workspace/$workflowId/image-detail/',
         params: {
           // teamId: window['vinesTeamId'],
           workflowId,
-        },
+        } as any,
         search: {
           // imageUrl: src,
           // instanceId: instanceId || '',
           outputIndex,
+          mode: isMiniFrame ? 'mini' : '',
         },
       });
     }
