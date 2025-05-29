@@ -7,8 +7,9 @@ import { createShapeId, Editor, getSnapshot, loadSnapshot, TLShapeId, toRichText
 
 import { Board } from '@/components/layout/design-space/board';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { FrameSizeInput } from '@/components/ui/vines-design/frame-size-input';
 import { EditorContext } from '@/store/useBoardStore';
+import { useBoardCanvasSizeStore } from '@/store/useCanvasSizeStore';
 import { cn } from '@/utils';
 
 const Card: React.FC<{
@@ -40,6 +41,43 @@ const FontCard: React.FC<{
   );
 };
 
+const CanvasSizeControl: React.FC = () => {
+  const { width, height, setBoardCanvasSize } = useBoardCanvasSizeStore();
+
+  return (
+    <Card className="col-span-2 flex flex-col gap-2">
+      <FrameSizeInput />
+      <Button
+        variant="outline"
+        className="w-full"
+        onClick={() => {
+          setBoardCanvasSize(width, height);
+        }}
+      >
+        Set & Zoom Fit
+      </Button>
+    </Card>
+  );
+};
+
+const BoardContainer: React.FC<{
+  editor: Editor | null;
+  setEditor: React.Dispatch<React.SetStateAction<Editor | null>>;
+  frameShapeId: TLShapeId;
+}> = ({ editor, setEditor, frameShapeId }) => {
+  const { width, height } = useBoardCanvasSizeStore();
+
+  return (
+    <Board
+      editor={editor}
+      setEditor={setEditor}
+      canvasWidth={width}
+      canvasHeight={height}
+      instance={{ frameShapeId }}
+    />
+  );
+};
+
 export const Designs: React.FC = () => {
   const { t } = useTranslation();
 
@@ -47,13 +85,7 @@ export const Designs: React.FC = () => {
 
   const [frameShapeId, setFrameShapeId] = useState<TLShapeId>(createShapeId());
 
-  const [canvasWidth, setCanvasWidth] = useState<number>(1280);
-  const [canvasHeight, setCanvasHeight] = useState<number>(720);
-
-  const [boardCanvasSize, setBoardCanvasSize] = useState<{ width: number; height: number }>({
-    width: 1280,
-    height: 720,
-  });
+  // const { width, height, setBoardCanvasSize } = useBoardCanvasSizeStore();
 
   let y = 0;
 
@@ -124,22 +156,7 @@ export const Designs: React.FC = () => {
               <Card onClick={handleExport}>
                 <span>Export</span>
               </Card>
-              <Card className="col-span-2 flex flex-col gap-2">
-                <div className="flex items-center gap-1">
-                  <Input type="number" value={canvasWidth} onChange={(v) => setCanvasWidth(Number(v))} />
-                  <span> * </span>
-                  <Input type="number" value={canvasHeight} onChange={(v) => setCanvasHeight(Number(v))} />
-                </div>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => {
-                    setBoardCanvasSize({ width: canvasWidth, height: canvasHeight });
-                  }}
-                >
-                  Set & Zoom Fit
-                </Button>
-              </Card>
+              <CanvasSizeControl />
               <Card onClick={handleSave}>
                 <span>Save</span>
               </Card>
@@ -149,13 +166,7 @@ export const Designs: React.FC = () => {
             </div>
           </div>
           <div className="h-full w-full flex-1">
-            <Board
-              editor={editor}
-              setEditor={setEditor}
-              canvasWidth={boardCanvasSize.width}
-              canvasHeight={boardCanvasSize.height}
-              instance={{ frameShapeId }}
-            />
+            <BoardContainer editor={editor} setEditor={setEditor} frameShapeId={frameShapeId} />
           </div>
         </div>
       </EditorContext.Provider>

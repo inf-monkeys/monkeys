@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { Dispatch, SetStateAction, startTransition, useCallback, useContext, useEffect } from 'react';
 
 import './index.scss';
 
@@ -11,31 +11,33 @@ import {
   DefaultContextMenuContent,
   defaultEditorAssetUrls,
   defaultShapeTools,
+  DefaultToolbar,
   defaultTools,
   Editor,
   FrameShapeUtil,
   registerDefaultExternalContentHandlers,
   registerDefaultSideEffects,
   Tldraw,
+  TLShape,
   TLShapeId,
   useToasts,
-  useTranslation
+  useTranslation,
 } from 'tldraw';
 
 import { EditorContext } from '@/store/useBoardStore';
+import { useBoardCanvasSizeStore } from '@/store/useCanvasSizeStore';
 
 import 'tldraw/tldraw.css';
 
 class FixedFrameShapeUtil extends FrameShapeUtil {
-  override canResize() {
-    return false
-  }
+  // override canResize() {
+  //   return true;
+  // }
 }
-
 
 type BoardInstance = {
   frameShapeId: TLShapeId;
-}
+};
 
 interface BoardProps {
   editor: Editor | null;
@@ -45,23 +47,34 @@ interface BoardProps {
   instance?: BoardInstance;
 }
 
-export const Board: React.FC<BoardProps> = ({
-  editor,
-  setEditor,
-  canvasWidth,
-  canvasHeight,
-  instance
-}) => {
+// export declare const defaultShapeTools: readonly [typeof TextShapeTool, typeof DrawShapeTool, typeof GeoShapeTool, typeof NoteShapeTool, typeof LineShapeTool, typeof FrameShapeTool, typeof ArrowShapeTool, typeof HighlightShapeTool];
+// all default shapes tools except frame
+// const SelectedShapeTools = [
+//   TextShapeTool,
+//   DrawShapeTool,
+//   GeoShapeTool,
+//   NoteShapeTool,
+//   LineShapeTool,
+//   ArrowShapeTool,
+//   HighlightShapeTool,
+//   // FrameShapeTool,
+// ];
 
+/* 
+export declare const defaultTools: readonly [typeof EraserTool, typeof HandTool, typeof LaserTool, typeof ZoomTool, typeof SelectTool];
+ */
+// const SelectedTools = [EraserTool, HandTool, LaserTool, ZoomTool, SelectTool];
+
+export const Board: React.FC<BoardProps> = ({ editor, setEditor, canvasWidth, canvasHeight, instance }) => {
   const frameShapeId = instance?.frameShapeId || createShapeId();
 
   // 创建自定义组件
-  const components = useMemo(() => {
-    if (!canvasWidth || !canvasHeight) return {};
+  // const components = useMemo(() => {
+  //   if (!canvasWidth || !canvasHeight) return {};
 
-    return {
-    };
-  }, [canvasWidth, canvasHeight]);
+  //   return {};
+  // }, [canvasWidth, canvasHeight]);
+  const { setBoardCanvasSize, width, height } = useBoardCanvasSizeStore();
 
   const createFrame = useCallback((editor: Editor, width: number, height: number) => {
     editor.createShape({
@@ -73,7 +86,7 @@ export const Board: React.FC<BoardProps> = ({
         w: width,
         h: height,
         color: 'white',
-        name: 'Design Board'
+        name: 'Design Board',
       },
     });
 
@@ -89,40 +102,68 @@ export const Board: React.FC<BoardProps> = ({
 
     // 设置视图以适应画板
     editor.zoomToFit();
-
   }, []);
 
   useEffect(() => {
-    if (canvasWidth && canvasHeight && editor) {
+    if (width && height && editor) {
       editor.updateShape({
         id: frameShapeId,
         type: 'frame',
         props: {
-          w: canvasWidth,
-          h: canvasHeight,
+          w: width,
+          h: height,
         },
       });
 
-      editor.zoomToFit();
+      // editor.zoomToFit();
     }
-  }, [canvasWidth, canvasHeight]);
+  }, [width, height]);
 
   return (
     <div className="h-full w-full">
       <Tldraw
         onMount={(editor: Editor) => {
           setEditor(editor);
+          editor.sideEffects.registerBeforeDeleteHandler('shape', (shape: TLShape) => {
+            if (shape.id === frameShapeId) {
+              return false;
+            }
+          });
+
+          editor.sideEffects.registerBeforeChangeHandler('shape', (prevShape: TLShape, nextShape: TLShape) => {
+            if (prevShape.id === frameShapeId) {
+              if (nextShape.type === 'frame' && 'w' in nextShape.props && 'h' in nextShape.props) {
+                startTransition(() => {
+                  // @ts-ignore
+                  setBoardCanvasSize(nextShape.props.w as number, nextShape.props.h as number);
+                });
+              }
+              return nextShape;
+            }
+            return nextShape;
+          });
 
           // 如果提供了画布尺寸，则创建有界 frame
           if (canvasWidth && canvasHeight) {
             createFrame(editor, canvasWidth, canvasHeight);
           }
         }}
+        components={{
+          Toolbar: () => {
+            return <DefaultToolbar></DefaultToolbar>;
+          },
+        }}
         shapeUtils={[FixedFrameShapeUtil]}
         bindingUtils={defaultBindingUtils}
-        tools={[...defaultTools, ...defaultShapeTools]}
+        tools={[...defaultShapeTools, ...defaultTools]}
         assetUrls={defaultEditorAssetUrls}
-        components={components}
+        overrides={{
+          tools: (_editor, tools) => {
+            // Remove the text tool
+            delete tools.frame;
+            return tools;
+          },
+        }}
       >
         <InsideEditorAndUiContext />
       </Tldraw>
