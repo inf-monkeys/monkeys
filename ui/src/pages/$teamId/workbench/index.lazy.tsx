@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 
 import { createLazyFileRoute } from '@tanstack/react-router';
 
@@ -24,7 +24,7 @@ export const Workbench: React.FC = () => {
     setTimeout(() => setWorkbenchVisible(true), 80);
   }, []);
 
-  useMemo(() => {
+  useEffect(() => {
     window['sideBarMode'] = mode;
     window['sideBarShowGroup'] = showGroup;
   }, [mode, showGroup]);

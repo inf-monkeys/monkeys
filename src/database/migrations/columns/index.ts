@@ -49,14 +49,14 @@ export const ID = {
 };
 
 export const CREATED_TIMESTAMP = {
-  name: 'updated_timestamp',
+  name: 'created_timestamp',
   type: 'bigint',
   isNullable: false,
   default: CURRENT_TIMESTAMP,
 };
 
 export const UPDATED_TIMESTAMP = {
-  name: 'created_timestamp',
+  name: 'updated_timestamp',
   type: 'bigint',
   isNullable: false,
   default: CURRENT_TIMESTAMP,
