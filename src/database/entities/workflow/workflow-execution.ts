@@ -62,4 +62,67 @@ export class WorkflowExecutionEntity extends BaseEntity {
     nullable: true,
   })
   apikey: string;
+
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+    name: 'input',
+  })
+  input?: Record<string, any>;
+
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+    name: 'output',
+  })
+  output?: Record<string, any>;
+
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+    name: 'tasks',
+  })
+  tasks?: Record<string, any>[];
+
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    name: 'conductor_create_time',
+  })
+  conductorCreateTime?: number;
+
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    name: 'conductor_start_time',
+  })
+  conductorStartTime?: number;
+
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    name: 'conductor_end_time',
+  })
+  conductorEndTime?: number;
+
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    name: 'conductor_update_time',
+  })
+  conductorUpdateTime?: number;
+
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+    name: 'executed_workflow_definition',
+  })
+  executedWorkflowDefinition?: Record<string, any>;
+
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+    name: 'execution_variables',
+  })
+  executionVariables?: Record<string, any>;
 }
