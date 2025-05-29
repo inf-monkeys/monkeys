@@ -8,6 +8,7 @@ import { useInfiniteLoader, useMasonry, useResizeObserver } from 'masonic';
 import { LOAD_LIMIT } from '@/components/layout/workspace/vines-view/form/execution-result/index.tsx';
 import { useVinesRoute } from '@/components/router/use-vines-route.ts';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
+import useUrlState from '@/hooks/use-url-state';
 import { usePageStore } from '@/store/usePageStore';
 import { useLastScrollTop, useSetScrollTop } from '@/store/useScrollPositionStore';
 import { useShouldFilterError } from '@/store/useShouldErrorFilterStore.ts';
@@ -58,8 +59,10 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
   );
 
   const [deletedInstanceIdList, setDeletedInstanceIdList] = useState<string[]>([]);
-
-  const containerWidth = formContainerWidth * 0.6 - 16 - 16 - 4 - (isUseWorkSpace ? 140 : 0);
+  const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'normal' });
+  const isMiniFrame = mode === 'mini';
+  const containerWidth =
+    formContainerWidth * (isMiniFrame ? 1 : 0.6) - 16 - 16 - 4 - (isUseWorkSpace ? 140 : 0) - (isMiniFrame ? 12 : 0);
   const shouldFilterError = useShouldFilterError();
   const positioner = usePositioner(
     {
@@ -67,6 +70,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
       columnGutter: 8,
       columnWidth: 200,
       rowGutter: 8,
+      columnCount: isMiniFrame ? 2 : void 0,
     },
     [data.length, workflowId, shouldFilterError],
   );
