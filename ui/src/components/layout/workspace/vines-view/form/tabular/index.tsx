@@ -117,7 +117,7 @@ export const VinesTabular: React.FC<IVinesTabularProps> = ({ className, style, s
     <div className={cn('flex flex-col pr-4', className)} style={style}>
       <div className="flex-1">
         <TabularRender
-          formClassName={cn(mode === 'mini' && 'gap-0')}
+          formClassName={''}
           inputs={vines.workflowInput}
           isLoading={!vines.workflowLoaded}
           height={height - inputHeight}
