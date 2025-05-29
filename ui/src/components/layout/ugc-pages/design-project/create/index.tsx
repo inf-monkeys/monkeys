@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { mutate } from 'swr';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AnimatePresence, motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -12,10 +11,6 @@ import { toast } from 'sonner';
 import { createDesignProject } from '@/apis/designs';
 import { IDesignProject } from '@/apis/designs/typings.ts';
 import { IAssetItem } from '@/apis/ugc/typings.ts';
-import { AppTypeSelector } from '@/components/layout/ugc-pages/apps/create/app-type/selector.tsx';
-import { ICreateAppType } from '@/components/layout/ugc-pages/apps/create/app-type/typings.ts';
-import { AgentCreateForm } from '@/components/layout/ugc-pages/apps/create/form/agent.tsx';
-import { WorkflowCreateForm } from '@/components/layout/ugc-pages/apps/create/form/workflow.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -23,10 +18,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
-import { DEFAULT_DESIGN_PROJECT_ICON_URL, DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
-import { useWorkflow } from '@/package/vines-flow';
+import { DEFAULT_DESIGN_PROJECT_ICON_URL } from '@/consts/icons.ts';
 import { createDesignProjectSchema, ICreateDesignProject } from '@/schema/workspace/create-design-project.ts';
-import { createWorkflowSchema, ICreateWorkflowInfo } from '@/schema/workspace/create-workflow.ts';
 
 export const CreateDesignProjectDialog: React.FC = () => {
   const { t } = useTranslation();
