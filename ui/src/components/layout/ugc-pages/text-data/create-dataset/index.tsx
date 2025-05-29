@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
+import { DEFAULT_ASSET_ICON_URL } from '@/consts/icons.ts';
 import { datasetInfoSchema, IDatasetInfo } from '@/schema/text-dataset';
 import { getI18nContent } from '@/utils';
 
@@ -32,7 +33,7 @@ export const CreateDataset: React.FC<ICreateDatasetProps> = () => {
   const form = useForm<IDatasetInfo>({
     resolver: zodResolver(datasetInfoSchema),
     defaultValues: {
-      iconUrl: 'emoji:🍀:#eeeef1',
+      iconUrl: DEFAULT_ASSET_ICON_URL,
     },
   });
 
@@ -151,7 +152,11 @@ export const CreateDataset: React.FC<ICreateDatasetProps> = () => {
                 <FormItem>
                   <FormLabel>{t('ugc-page.text-data.ugc-view.subtitle.create-dataset.form.iconUrl.label')}</FormLabel>
                   <FormControl>
-                    <VinesIconEditor value={field.value} defaultValue="emoji:🍀:#eeeef1" onChange={field.onChange} />
+                    <VinesIconEditor
+                      value={field.value}
+                      defaultValue={DEFAULT_ASSET_ICON_URL}
+                      onChange={field.onChange}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

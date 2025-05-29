@@ -7,6 +7,7 @@ import { WorkflowInfoEditor } from '@/components/layout/workspace/workflow-info-
 import { useVinesOriginWorkflow } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
 import { cn, getI18nContent } from '@/utils';
 
 interface IWorkflowInfoCardProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -23,7 +24,7 @@ export const WorkflowInfoCard: React.FC<IWorkflowInfoCardProps> = () => {
       <WorkflowInfoEditor disabled={!enabled}>
         <TooltipTrigger asChild>
           <div className={cn('group flex cursor-default items-center gap-2.5', enabled && 'cursor-pointer')}>
-            <VinesIcon size="sm">{workflow?.iconUrl || 'emoji:🍀:#eeeef1'}</VinesIcon>
+            <VinesIcon size="sm">{workflow?.iconUrl || DEFAULT_WORKFLOW_ICON_URL}</VinesIcon>
             <div className="flex flex-col gap-0.5">
               <h1 className="font-bold leading-tight">{getI18nContent(workflow?.displayName)}</h1>
               <div className="flex items-center gap-1">

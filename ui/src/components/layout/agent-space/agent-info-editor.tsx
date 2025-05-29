@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
+import { DEFAULT_AGENT_ICON_URL } from '@/consts/icons.ts';
 import { agentInfoSchema, IAgentInfo } from '@/schema/agent/agent-info.ts';
 import { getI18nContent } from '@/utils';
 
@@ -54,7 +55,7 @@ export const AgentInfoEditor: React.FC<IAgentInfoEditorProps> = ({
     defaultValues: {
       displayName: getI18nContent(agent?.displayName) ?? t('agent.info.default-agent-name'),
       description: getI18nContent(agent?.description) ?? '',
-      iconUrl: agent?.iconUrl ?? 'emoji:🤖:#ceefc5',
+      iconUrl: agent?.iconUrl ?? DEFAULT_AGENT_ICON_URL,
     },
   });
 
@@ -62,7 +63,7 @@ export const AgentInfoEditor: React.FC<IAgentInfoEditorProps> = ({
     if (!agent) return;
     form.setValue('displayName', getI18nContent(agent.displayName) || t('agent.info.default-agent-name'));
     form.setValue('description', getI18nContent(agent.description) || '');
-    form.setValue('iconUrl', agent.iconUrl || 'emoji:🤖:#ceefc5');
+    form.setValue('iconUrl', agent.iconUrl || DEFAULT_AGENT_ICON_URL);
   }, [agent]);
 
   const agentId = agent?.id;

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { AnimatePresence } from 'framer-motion';
-import { groupBy, has, reduce } from 'lodash';
+import { groupBy, reduce } from 'lodash';
 
 import { VinesView } from '@/components/ui/vines-iframe/view';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
@@ -12,6 +12,7 @@ export interface IVinesIFramePropsRequired {
   teamId?: string;
   workflowId?: string;
   agentId?: string;
+  designMetadataId?: string;
   type?: string;
 }
 
@@ -42,19 +43,26 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }
 
   const currentPageId = page?.id;
 
-  const { agents, workflows } = useMemo(() => {
-    const mixinGroups = groupBy(renderer, (it) => it?.workflowId ?? it?.agentId ?? '');
-    const { agentGroups, workflowGroups } = reduce(
+  const { agents, workflows, designBoards } = useMemo(() => {
+    const mixinGroups = groupBy(renderer, (it) => it?.type ?? '');
+    const { agentGroups, workflowGroups, designBoardGroups } = reduce(
       mixinGroups,
-      (acc, group, key) => {
-        has(group[0], 'workflowId') ? (acc.workflowGroups[key] = group) : (acc.agentGroups[key] = group);
+      (acc, group, type) => {
+        if (type.startsWith('agent')) {
+          acc.agentGroups[type] = group;
+        } else if (group.some((item) => item.workflowId)) {
+          acc.workflowGroups[type] = group;
+        } else if (type === 'design-board') {
+          acc.designBoardGroups[type] = group;
+        }
         return acc;
       },
-      { agentGroups: {}, workflowGroups: {} },
+      { agentGroups: {}, workflowGroups: {}, designBoardGroups: {} },
     );
     return {
       agents: Object.entries(agentGroups) as [string, P[]][],
       workflows: Object.entries(workflowGroups) as [string, P[]][],
+      designBoards: Object.entries(designBoardGroups) as [string, P[]][],
     };
   }, [renderer]);
 
@@ -75,6 +83,13 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }
             return pages.map(({ id, type }) => (
               <ViewStoreProvider key={id} createStore={createViewStore}>
                 <VinesView id={id} agentId={agentId} pageId={currentPageId} type={type} />
+              </ViewStoreProvider>
+            ));
+          })}
+          {designBoards.map(([_, pages]) => {
+            return pages.map(({ id, designMetadataId, type }) => (
+              <ViewStoreProvider key={id} createStore={createViewStore}>
+                <VinesView id={id} designBoardId={designMetadataId} pageId={currentPageId} type={type} />
               </ViewStoreProvider>
             ));
           })}

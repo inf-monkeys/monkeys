@@ -70,6 +70,8 @@
     "type": {
       "workflow": "workflow",
       "agent": "agent",
+      "design-board": "Design Board",
+      "design-project": "Design Project",
       "comfyui-workflow": "ComfyUI workflow",
       "image-model": "image model",
       "image-model-type": "image model type",
@@ -387,6 +389,9 @@
               },
               "agents": {
                 "label": "Agents"
+              },
+              "designs": {
+                "label": "Designs"
               }
             },
             "tools": {
@@ -1146,6 +1151,67 @@
           },
           "updatedTimestamp": {
             "label": "Updated Time"
+          }
+        },
+        "operate-area": {
+          "dropdown-label": "Operations",
+          "options": {
+            "copy-link": "Copy Link",
+            "create-a-copy": "Create a Copy",
+            "edit-info": "Edit Info",
+            "export-current-version": "Export Current Version",
+            "export-all-versions": "Export All Versions"
+          }
+        },
+        "subtitle": {
+          "import": {
+            "options": {
+              "local-import": "Local Import",
+              "market-import": "Market Import"
+            }
+          }
+        }
+      }
+    },
+    "design-project": {
+      "create": {
+        "dialog": {
+          "title": "Create Design Project",
+          "info": {
+            "label": "Design Project Name",
+            "placeholder": "Enter design project name"
+          },
+          "description": {
+            "label": "Design Project Description",
+            "placeholder": "Enter design project description"
+          }
+        }
+      },
+      "ugc-view": {
+        "columns": {
+          "logo": {
+            "label": "Icon"
+          },
+          "title": {
+            "label": "Name"
+          },
+          "description": {
+            "label": "Description"
+          },
+          "user": {
+            "label": "Creator"
+          },
+          "assetTags": {
+            "label": "Tags"
+          },
+          "createdTimestamp": {
+            "label": "Created Time"
+          },
+          "updatedTimestamp": {
+            "label": "Updated Time"
+          },
+          "boardCount": {
+            "label": "Board Count"
           }
         },
         "operate-area": {
@@ -3311,6 +3377,29 @@
         "submit": "Save"
       }
     }
+  },
+  "design": {
+    "project": {
+      "info": {
+        "title": "Design Project Information",
+        "tip": "Click to edit",
+        "default-project-name": "Unnamed project",
+        "form": {
+          "project-name": "Design project name",
+          "project-name-placeholder": "Please enter a project name",
+          "project-desc": "Design project description",
+          "project-desc-placeholder": "Please enter a description of the project in no more than 200 characters",
+          "project-icon": "Design project icon",
+          "submit": "Submit"
+        },
+        "project-id-empty": "Project ID does not exist",
+        "project-updated": "Project information has been updated",
+        "project-update-failed": "Project information update failed",
+        "display-name-is-non-empty": "The display name cannot be empty",
+        "description-is-too-long": "The description cannot exceed 200 characters"
+      }
+    },
+    "view-config": {}
   },
   "comfyui": {
     "utils": {

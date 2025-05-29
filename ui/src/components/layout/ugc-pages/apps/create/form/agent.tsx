@@ -30,6 +30,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
+import { DEFAULT_AGENT_ICON_URL } from '@/consts/icons.ts';
 import i18n from '@/i18n.ts';
 import { createAgentSchema, ICreateAgentInfo } from '@/schema/workspace/create-agent.ts';
 import { getI18nContent } from '@/utils';
@@ -44,7 +45,7 @@ export const AgentCreateForm: React.FC<{
     defaultValues: {
       displayName: t('common.utils.untitled') + t('common.type.agent'),
       description: '',
-      iconUrl: 'emoji:🤖:#ceefc5',
+      iconUrl: DEFAULT_AGENT_ICON_URL,
     },
   });
 

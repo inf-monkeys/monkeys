@@ -65,7 +65,35 @@ export const ViewItemMenu: React.FC<IViewItemMenuProps> = ({ page, groupId }) =>
     );
   };
 
-  const isWorkflowPage = !!page?.workflowId;
+  let type = 'workflow';
+  if (page.type.startsWith('agent')) type = 'agent';
+  if (page.type === 'design-board') type = 'design-board';
+
+  let linkTo = '/$teamId/workspace/$workflowId/$pageId';
+  let linkParams = {
+    teamId,
+    workflowId: page?.workflowId,
+    pageId: page?.id,
+  } as any;
+  let linkSearch = {} as any;
+
+  if (type === 'agent') {
+    linkTo = '/$teamId/agent/$agentId';
+    linkParams = {
+      teamId,
+      agentId: page?.agent?.id,
+    };
+    linkSearch = { tab: page?.instance?.type };
+  }
+
+  if (type === 'design-board') {
+    linkTo = '/$teamId/design/$designProjectId/$designBoardId';
+    linkParams = {
+      teamId,
+      designProjectId: page?.designProject?.id,
+      designBoardId: page?.designMetadataId,
+    };
+  }
 
   return (
     <DropdownMenu>
@@ -83,16 +111,7 @@ export const ViewItemMenu: React.FC<IViewItemMenuProps> = ({ page, groupId }) =>
         <TooltipContent side="right">{t('workspace.flow-view.tooltip.more.tip')}</TooltipContent>
       </Tooltip>
       <DropdownMenuContent side="right" align="start" sideOffset={12}>
-        <Link
-          to={isWorkflowPage ? '/$teamId/workspace/$workflowId/$pageId' : '/$teamId/agent/$agentId'}
-          params={
-            {
-              teamId,
-              ...(isWorkflowPage ? { workflowId: page?.workflowId, pageId: page?.id } : { agentId: page?.agent?.id }),
-            } as any
-          }
-          search={isWorkflowPage ? {} : { tab: page?.instance?.type }}
-        >
+        <Link to={linkTo} params={linkParams} search={linkSearch}>
           <DropdownMenuItem className="flex items-center gap-2">
             <LogIn strokeWidth={1.5} size={16} />
             <p>{t('workbench.view.header.enter')}</p>

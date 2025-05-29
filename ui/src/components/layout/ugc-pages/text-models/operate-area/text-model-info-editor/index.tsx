@@ -17,6 +17,7 @@ import { VinesImageEditor } from '@/components/ui/image-editor';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea.tsx';
 import { VinesIcon } from '@/components/ui/vines-icon';
+import { DEFAULT_ASSET_ICON_URL } from '@/consts/icons.ts';
 import { comfyuiModelInfoSchema, IComfyuiModelInfo } from '@/schema/workspace/comfyui-model-info.ts';
 import { getI18nContent } from '@/utils';
 
@@ -62,7 +63,7 @@ export const TextModelInfoEditor: React.FC<ITextModelInfoEditorProps> = ({
     if (!model) return;
     form.setValue('displayName', getI18nContent(model.displayName) || '');
     form.setValue('description', getI18nContent(model.description) || '');
-    form.setValue('iconUrl', model.iconUrl || 'emoji:🍀:#eeeef1');
+    form.setValue('iconUrl', model.iconUrl || DEFAULT_ASSET_ICON_URL);
   }, [model]);
 
   const handleSubmit = form.handleSubmit(async (data) => {
@@ -137,7 +138,7 @@ export const TextModelInfoEditor: React.FC<ITextModelInfoEditorProps> = ({
                   <FormControl>
                     <div className="w-full">
                       <VinesImageEditor value={field.value} onChange={field.onChange} aspectRatio={1}>
-                        <VinesIcon size="md" src={field.value ?? 'emoji:🍀:#eeeef1'} disabledPreview />
+                        <VinesIcon size="md" src={field.value ?? DEFAULT_ASSET_ICON_URL} disabledPreview />
                       </VinesImageEditor>
                     </div>
                   </FormControl>
