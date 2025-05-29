@@ -9,7 +9,7 @@ import { VinesLoading } from '@/components/ui/loading';
 
 export const WorkspaceIndex: React.FC = () => {
   const { to } = Route.useSearch() as { to: string };
-  const { workflowId } = useParams({ from: '/$teamId/workspace/$workflowId/' });
+  const { workflowId, teamId } = useParams({ from: '/$teamId/workspace/$workflowId/' });
   const { data: pages } = useWorkspacePagesWithWorkflowId(workflowId);
   const navigate = useNavigate();
 
@@ -20,6 +20,8 @@ export const WorkspaceIndex: React.FC = () => {
         to: '/$teamId/workspace/$workflowId/$pageId',
         params: {
           pageId: page.id,
+          teamId: teamId,
+          workflowId: workflowId,
         },
         search: {
           to,

@@ -1,174 +1,46 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 
-import { createLazyFileRoute } from '@tanstack/react-router';
+import { preload } from 'swr';
+import { createLazyFileRoute, useNavigate, useParams } from '@tanstack/react-router';
 
-import { useTranslation } from 'react-i18next';
-import { createShapeId, Editor, getSnapshot, loadSnapshot, TLShapeId, toRichText } from 'tldraw';
+import { useDesignProjectMetadataList } from '@/apis/designs';
+import { vinesFetcher } from '@/apis/fetcher.ts';
+import { VinesLoading } from '@/components/ui/loading';
 
-import { Board } from '@/components/layout/design-space/board';
-import { Button } from '@/components/ui/button';
-import { FrameSizeInput } from '@/components/ui/vines-design/frame-size-input';
-import { EditorContext } from '@/store/useBoardStore';
-import { useBoardCanvasSizeStore } from '@/store/useCanvasSizeStore';
-import { cn } from '@/utils';
+export const DesignBoardIndex: React.FC = () => {
+  const { to } = Route.useSearch() as { to: string };
+  const { designProjectId, teamId } = useParams({ from: '/$teamId/design/$designProjectId/' });
+  const { data: boards } = useDesignProjectMetadataList(designProjectId);
+  const navigate = useNavigate();
 
-const Card: React.FC<{
-  className?: string;
-  children: React.ReactNode;
-  onClick?: () => void;
-}> = ({ children, onClick, className }) => {
+  useEffect(() => {
+    if (boards && boards.length > 0) {
+      const board = boards[0];
+      void navigate({
+        to: '/$teamId/design/$designProjectId/$designBoardId',
+        params: {
+          designProjectId,
+          teamId,
+          designBoardId: board.id,
+        },
+        search: {
+          to,
+        },
+      });
+    }
+  }, [boards]);
+
+  useEffect(() => {
+    void preload(`/api/design/project/${designProjectId}`, vinesFetcher());
+  }, [designProjectId]);
+
   return (
-    <div
-      className={cn(
-        'flex cursor-pointer items-center justify-center rounded-md bg-gray-100 p-4 hover:bg-gray-200',
-        className,
-      )}
-      onClick={onClick}
-    >
-      {children}
+    <div className="vines-center size-full">
+      <VinesLoading />
     </div>
-  );
-};
-const FontCard: React.FC<{
-  label: string;
-  family: string;
-  onClick: () => void;
-}> = ({ label, family, onClick }) => {
-  return (
-    <Card onClick={onClick}>
-      <span style={{ fontFamily: `tldraw_${family}` }}>{label}</span>
-    </Card>
-  );
-};
-
-export const Designs: React.FC = () => {
-  const { t } = useTranslation();
-
-  const [editor, setEditor] = useState<Editor | null>(null);
-
-  const [frameShapeId, setFrameShapeId] = useState<TLShapeId>(createShapeId());
-
-  const { width, height, setBoardCanvasSize } = useBoardCanvasSizeStore();
-
-  let y = 0;
-
-  const handleInsertShape = () => {
-    editor?.createShape({
-      type: 'text',
-      props: {
-        richText: toRichText('ok'),
-        font: 'draw',
-      },
-    });
-  };
-
-  const handleInsertFont = (font: string) => {
-    editor?.createShape({
-      type: 'text',
-      props: {
-        richText: toRichText(font),
-        font,
-      },
-      y,
-    });
-    y += 32;
-  };
-
-  const downloadFile = (file: File) => {
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(file);
-    link.href = url;
-    link.download = file.name;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleExport = async () => {
-    if (!editor) return;
-    const ids = [frameShapeId];
-    const { blob } = await editor.toImage(ids, { format: 'png' });
-    const file = new File([blob], `design-board-${Date.now()}.png`, { type: blob.type });
-    downloadFile(file);
-  };
-
-  const handleSave = () => {
-    if (!editor) return;
-    const { document, session } = getSnapshot(editor.store);
-    localStorage.setItem('design-snapshot', JSON.stringify({ document, session }));
-  };
-
-  const handleLoad = () => {
-    if (!editor) return;
-    const snapshot = JSON.parse(localStorage.getItem('design-snapshot') || '{}');
-    loadSnapshot(editor.store, snapshot);
-  };
-
-  return (
-    <main className="size-full">
-      <EditorContext.Provider value={{ editor }}>
-        <div className="flex h-full w-full gap-2">
-          <div className="flex w-64 flex-col gap-2">
-            <div className="grid grid-cols-2 gap-2">
-              <FontCard label="Draw" family="draw" onClick={() => handleInsertFont('draw')} />
-              <FontCard label="Mono" family="mono" onClick={() => handleInsertFont('mono')} />
-              <FontCard label="Sans" family="sans" onClick={() => handleInsertFont('sans')} />
-              <FontCard label="Serif" family="serif" onClick={() => handleInsertFont('serif')} />
-              <Card onClick={handleInsertShape}>
-                <span>Insert</span>
-              </Card>
-              <Card onClick={handleExport}>
-                <span>Export</span>
-              </Card>
-              <Card className="col-span-2 flex flex-col gap-2">
-                <FrameSizeInput />
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => {
-                    setBoardCanvasSize(width, height);
-                  }}
-                >
-                  Set & Zoom Fit
-                </Button>
-              </Card>
-              <Card onClick={handleSave}>
-                <span>Save</span>
-              </Card>
-              <Card onClick={handleLoad}>
-                <span>Load</span>
-              </Card>
-            </div>
-          </div>
-          <div className="h-full w-full flex-1">
-            <Board
-              editor={editor}
-              setEditor={setEditor}
-              canvasWidth={width}
-              canvasHeight={height}
-              instance={{ frameShapeId }}
-            />
-          </div>
-        </div>
-      </EditorContext.Provider>
-    </main>
   );
 };
 
 export const Route = createLazyFileRoute('/$teamId/design/$designProjectId/')({
-  component: Designs,
+  component: DesignBoardIndex,
 });
-
-// const useSaveSnapShot = () => {
-//   const { teamId } = useParams<{ teamId: string }>();
-//   const { saveSnapshot } = useBoardStore();
-//   const { mutateAsync: saveDesign } = useMutation({
-//     mutationFn: (snapshot: Record<string, any>) =>
-//       saveDesignMutation({
-//         teamId,
-//         snapshot,
-//       }),
-//   });
-//   return { saveSnapshot, saveDesign };
-// };
-
-// const loadSnapShot = () => {};
