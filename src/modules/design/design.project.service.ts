@@ -22,7 +22,7 @@ export class DesignProjectService {
 
     // Create a default design metadata for the new project
     await this.designMetadataRepository.createDesignMetadata(createdProject.id, {
-      displayName: 'Default Canvas',
+      displayName: '画板',
       snapshot: {},
       pinned: false,
       teamId: createDesignProjectDto.teamId,
