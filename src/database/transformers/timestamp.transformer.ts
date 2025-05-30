@@ -1,10 +1,21 @@
-export const TimestampTransformer = {
-  // 从数据库读取时，将 timestamp 转换为 number
-  from: (value: Date | null): number | null => {
-    return value ? value.getTime() : null;
+import { ValueTransformer } from 'typeorm';
+
+export const TimestampTransformer: ValueTransformer = {
+  // 从 JavaScript Date 转换为数据库值
+  to(value: Date | number | string): number {
+    if (value instanceof Date) {
+      return value.getTime();
+    }
+    if (typeof value === 'string') {
+      return new Date(value).getTime();
+    }
+    return value;
   },
-  // 写入数据库时，将 number 转换为 Date
-  to: (value: number | null): Date | null => {
-    return value ? new Date(value) : null;
+  // 从数据库值转换为 JavaScript Date
+  from(value: string | number): Date {
+    if (typeof value === 'string') {
+      return new Date(parseInt(value));
+    }
+    return new Date(value);
   },
 };
