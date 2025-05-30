@@ -14,7 +14,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _, { isEmpty, isString, keyBy, omit, pick } from 'lodash';
 import { ChatCompletionMessageParam } from 'openai/resources';
-import { In, IsNull, Repository } from 'typeorm';
+import { FindManyOptions, In, IsNull, Repository } from 'typeorm';
 import { PageInstance, WorkflowPageEntity } from '../entities/workflow/workflow-page';
 import { WorkflowAssetRepositroy } from './assets-workflow.respository';
 
@@ -263,6 +263,10 @@ export class WorkflowRepository {
     workflow.md5 = this.calcWorkflowMd5(workflow);
     await this.workflowMetadataRepository.save(workflow);
     return workflow;
+  }
+
+  public async findAndCountWorkflowExecutions(options: FindManyOptions<WorkflowExecutionEntity>): Promise<[WorkflowExecutionEntity[], number]> {
+    return this.workflowExecutionRepository.findAndCount(options);
   }
 
   public async findExecutionsByWorkflowInstanceIds(workflowInstanceIds: string[]) {

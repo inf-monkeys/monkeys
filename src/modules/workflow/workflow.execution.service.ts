@@ -14,10 +14,11 @@ import { WorkflowMetadataEntity } from '@/database/entities/workflow/workflow-me
 import { WorkflowTriggerType } from '@/database/entities/workflow/workflow-trigger';
 import { FindWorkflowCondition, WorkflowRepository } from '@/database/repositories/workflow.repository';
 import { Task, Workflow } from '@inf-monkeys/conductor-javascript';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import _, { pick } from 'lodash';
 import retry from 'retry-as-promised';
+import { FindManyOptions, In } from 'typeorm';
 import { ConductorService } from './conductor/conductor.service';
 import { SearchWorkflowExecutionsDto, SearchWorkflowExecutionsOrderDto, WorkflowExecutionSearchableField } from './dto/req/search-workflow-execution.dto';
 import { UpdateTaskStatusDto } from './dto/req/update-task-status.dto';
@@ -37,9 +38,10 @@ export class WorkflowExecutionService {
     private readonly conductorService: ConductorService,
     @Inject(RATE_LIMITER_TOKEN) private readonly rateLimiter: RateLimiter,
     private readonly eventEmitter: EventEmitter2,
+    @Inject(forwardRef(() => WorkflowTrackerService))
     private readonly workflowTrackerService: WorkflowTrackerService,
     private readonly workflowObservabilityService: WorkflowObservabilityService,
-  ) { }
+  ) {}
 
   private async populateMetadataByForExecutions(executions: Workflow[]): Promise<WorkflowWithMetadata[]> {
     const workflowInstanceIds = executions.map((x) => x.workflowId);
@@ -88,8 +90,8 @@ export class WorkflowExecutionService {
     let groups = condition.groups || [];
 
     const { page: p = 1, limit: l = 10 } = pagination as PaginationDto;
-    const [page, limit] = [+p, +l];
-    const start = (page - 1) * limit;
+    const [page, limitNum] = [+p, +l];
+    const start = (page - 1) * limitNum;
 
     const workflowCondition: FindWorkflowCondition = {
       teamId,
@@ -109,18 +111,21 @@ export class WorkflowExecutionService {
       groups = groups.concat(shortcutIds);
     }
 
-    if (workflowsToSearch.length === 0) {
+    if (workflowsToSearch.length === 0 && !workflowInstanceId) {
       return {
         definitions: [],
         data: [],
         page,
-        limit,
+        limit: limitNum,
         total: 0,
       };
     }
-    const workflowTypes = workflowsToSearch.map((x) => x.workflowId).slice(0, 10);
+    const workflowTypes = workflowsToSearch.map((x) => x.workflowId);
     let query: string[] = [];
-    query.push(`workflowType IN (${workflowTypes.join(',')})`);
+    if (workflowTypes.length > 0) {
+      query.push(`workflowType IN (${workflowTypes.join(',')})`);
+    }
+
     if (status.length) {
       query.push(`status IN (${status.join(',')})`);
     }
@@ -135,121 +140,88 @@ export class WorkflowExecutionService {
       query.push(`version IN (${versions.join(',')})`);
     }
 
-    let workflowInstanceIdsToSearch: string[][] = [];
+    let workflowInstanceIdsToFilter: string[][] = [];
 
     const hasGroups = groups.length > 0;
     const shortcutOriginalWorkflows = new Map<string, WorkflowMetadataEntity>();
 
     if (workflowInstanceId) {
-      workflowInstanceIdsToSearch.push([workflowInstanceId]);
+      query = [`workflowId IN (${workflowInstanceId})`];
+      workflowInstanceIdsToFilter = [];
     } else {
       const hasChatSessions = (chatSessionIds?.length ?? 0) > 0;
       if (hasChatSessions) {
-        const workflowInstancesStartByTChatSession = await this.workflowRepository.findExecutionsByChatSessionIds(chatSessionIds);
-        const workflowInstanceIdsStartByChatSession = workflowInstancesStartByTChatSession.map((x) => x.workflowInstanceId);
-        if (workflowInstanceIdsStartByChatSession.length === 0) {
-          return {
-            definitions: [],
-            data: [],
-            page,
-            limit,
-            total: 0,
-          };
-        }
-
-        workflowInstanceIdsToSearch.push(workflowInstanceIdsStartByChatSession);
+        const instancesFromChat = await this.workflowRepository.findExecutionsByChatSessionIds(chatSessionIds);
+        const ids = instancesFromChat.map((x) => x.workflowInstanceId);
+        if (ids.length === 0) return { definitions: [], data: [], page, limit: limitNum, total: 0 };
+        workflowInstanceIdsToFilter.push(ids);
       }
 
       if (hasGroups) {
-        const workflowInstancesStartByGroup = await this.workflowRepository.findExecutionsByGroups(groups);
-        const workflowInstanceIdsStartByGroup = workflowInstancesStartByGroup.map((x) => x.workflowInstanceId);
-        if (workflowInstanceIdsStartByGroup.length === 0) {
-          return {
-            definitions: [],
-            data: [],
-            page,
-            limit,
-            total: 0,
-          };
-        }
+        const instancesFromGroup = await this.workflowRepository.findExecutionsByGroups(groups);
+        const ids = instancesFromGroup.map((x) => x.workflowInstanceId);
+        if (ids.length === 0) return { definitions: [], data: [], page, limit: limitNum, total: 0 };
 
-        for (const workflow of await this.workflowRepository.findWorkflowByIds(workflowInstancesStartByGroup.map((x) => x.workflowId))) {
-          if (shortcutOriginalWorkflows.has(workflow.workflowId)) {
-            continue;
+        const groupWorkflowDefIds = _.uniq(instancesFromGroup.map((entity) => entity.workflowId).filter(Boolean));
+        for (const wf of await this.workflowRepository.findWorkflowByIds(groupWorkflowDefIds)) {
+          if (!shortcutOriginalWorkflows.has(wf.workflowId)) {
+            shortcutOriginalWorkflows.set(wf.workflowId, wf);
           }
-          shortcutOriginalWorkflows.set(workflow.workflowId, workflow);
         }
-
-        if (hasChatSessions) {
-          workflowInstanceIdsToSearch.push(_.uniq(workflowInstanceIdsStartByGroup.filter((it) => workflowInstanceIdsToSearch.flat().includes(it))));
-        } else {
-          workflowInstanceIdsToSearch.push(workflowInstanceIdsStartByGroup);
-        }
-        query = query.map((it) => (it.startsWith('workflowType') ? null : it)).filter(Boolean);
+        workflowInstanceIdsToFilter.push(ids);
+        query = query.filter((q) => !q.startsWith('workflowType IN'));
       }
 
       if (startBy?.length) {
-        const workflowInstancesStartByThisUser = await this.workflowRepository.findExecutionsByUserIds(startBy);
-        const workflowInstanceIdsStartByThisUser = workflowInstancesStartByThisUser.map((x) => x.workflowInstanceId);
-        if (workflowInstanceIdsStartByThisUser.length === 0) {
-          return {
-            definitions: [],
-            data: [],
-            page,
-            limit,
-            total: 0,
-          };
-        }
-        workflowInstanceIdsToSearch.push(workflowInstanceIdsStartByThisUser);
+        const instancesFromUser = await this.workflowRepository.findExecutionsByUserIds(startBy);
+        const ids = instancesFromUser.map((x) => x.workflowInstanceId);
+        if (ids.length === 0) return { definitions: [], data: [], page, limit: limitNum, total: 0 };
+        workflowInstanceIdsToFilter.push(ids);
       }
 
       if (triggerTypes?.length) {
-        const workflowInstancesStartByTriggerType = await this.workflowRepository.findExecutionsByTriggerTypes(triggerTypes);
-        const workflowInstanceIdsStartByTriggerTypes = workflowInstancesStartByTriggerType.map((x) => x.workflowInstanceId);
-        if (workflowInstanceIdsStartByTriggerTypes.length === 0) {
-          return {
-            definitions: [],
-            data: [],
-            page,
-            limit,
-            total: 0,
-          };
-        }
-        workflowInstanceIdsToSearch.push(workflowInstanceIdsStartByTriggerTypes);
+        const instancesFromTrigger = await this.workflowRepository.findExecutionsByTriggerTypes(triggerTypes);
+        const ids = instancesFromTrigger.map((x) => x.workflowInstanceId);
+        if (ids.length === 0) return { definitions: [], data: [], page, limit: limitNum, total: 0 };
+        workflowInstanceIdsToFilter.push(ids);
       }
-    }
 
-    // 去重
-    workflowInstanceIdsToSearch = _.uniq(workflowInstanceIdsToSearch);
-
-    if (workflowInstanceIdsToSearch.length) {
-      query.push(`workflowId IN (${workflowInstanceIdsToSearch.slice(0, 10).join(',')})`);
+      if (workflowInstanceIdsToFilter.length > 0) {
+        const intersection = _.intersection(...workflowInstanceIdsToFilter);
+        if (intersection.length === 0 && !workflowInstanceId) {
+          return { definitions: [], data: [], page, limit: limitNum, total: 0 };
+        }
+        if (intersection.length > 0) {
+          query.push(`workflowId IN (${intersection.slice(0, 500).join(',')})`);
+        }
+      }
     }
 
     const { field = WorkflowExecutionSearchableField.startTime, order = OrderBy.DESC } = orderBy as SearchWorkflowExecutionsOrderDto;
     const sortText = `${field}:${order}`;
 
-    const data = await retry(() => conductorClient.workflowResource.searchV21(start, limit, sortText, freeText, query.join(' AND ')), {
+    const conductorQueryString = query.join(' AND ') || undefined;
+    logger.info(`Conductor search query: ${conductorQueryString}, freeText: ${freeText}, sort: ${sortText}`);
+
+    const searchData = await retry(() => conductorClient.workflowResource.searchV21(start, limitNum, sortText, freeText, conductorQueryString), {
       max: 3,
     });
 
-    let definitions: WorkflowMetadataEntity[] = [];
-    if (workflowId) {
+    let resultDefinitions: WorkflowMetadataEntity[] = [];
+    const resultWorkflowDefIds = _.uniq(searchData.results.map((r) => r.workflowName));
+    if (resultWorkflowDefIds.length > 0) {
+      resultDefinitions = await this.workflowRepository.findWorkflowByIds(resultWorkflowDefIds);
+    } else if (workflowId && !workflowInstanceId) {
       const flow = await this.workflowRepository.getWorkflowById(workflowId, 1);
-      definitions = [flow];
-    } else {
-      const workflowIds = _.uniq(data.results.map((r) => r.workflowName));
-      if (workflowIds.length > 0) {
-        definitions = await this.workflowRepository.findWorkflowByIds(workflowIds);
-      }
+      if (flow) resultDefinitions = [flow];
     }
 
-    const executions = data?.results ?? [];
-    for (const execution of executions) {
-      this.conductorService.convertConductorTasksToVinesTasks(teamId, (execution.tasks || []) as Task[], execution.workflowDefinition);
+    const executionsResult = searchData?.results ?? [];
+    for (const executionItem of executionsResult) {
+      this.conductorService.convertConductorTasksToVinesTasks(teamId, (executionItem.tasks || []) as Task[], executionItem.workflowDefinition);
     }
 
-    const executionsWithMetadata = await this.populateMetadataByForExecutions(executions);
+    const executionsWithMetadata = await this.populateMetadataByForExecutions(executionsResult);
 
     let filterCount = 0;
     const finalData = executionsWithMetadata.filter((it) => {
@@ -263,7 +235,7 @@ export class WorkflowExecutionService {
     });
 
     return {
-      definitions: definitions.map((it) => {
+      definitions: resultDefinitions.map((it) => {
         if (it.shortcutsFlow) {
           const shortcutFlowId = it.shortcutsFlow.toString()?.split(':')?.[0];
           if (shortcutFlowId) {
@@ -292,28 +264,30 @@ export class WorkflowExecutionService {
         return it;
       }),
       page,
-      limit,
+      limit: limitNum,
       data: finalData,
-      total: (data?.totalHits ?? 0) - filterCount,
+      total: (searchData?.totalHits ?? 0) - filterCount,
     };
   }
 
   public async getWorkflowExecutionDetail(teamId: string, workflowInstanceId: string) {
     const data = await this.conductorService.getWorkflowExecutionStatus(teamId, workflowInstanceId);
-    await this.populateMetadataByForExecutions([data]);
-    return data;
+    const populatedDataArray = await this.populateMetadataByForExecutions([data]);
+    return populatedDataArray[0] || data;
   }
 
-  public async getWorkflowExecutionSimpleDetail(teamId: string, workflowInstanceId: string) {
-    const data = await this.conductorService.getWorkflowExecutionStatus(teamId, workflowInstanceId);
-    await this.populateMetadataByForExecutions([data]);
+  public async getWorkflowExecutionSimpleDetail(teamId: string, workflowInstanceId: string): Promise<WorkflowExecutionOutput> {
+    const conductorWorkflow = await this.conductorService.getWorkflowExecutionStatus(teamId, workflowInstanceId);
+    const populatedResults = await this.populateMetadataByForExecutions([conductorWorkflow]);
+    const executionData: WorkflowWithMetadata = populatedResults[0];
 
-    const { input, output } = data;
+    const { input, output } = executionData;
+    const ctx = input?.['__context'];
+    const startByUserId = executionData.startBy || ctx?.userId;
 
     let alt: string | string[] | undefined;
-
-    const flattenOutput = flattenKeys(output, void 0, ['__display_text'], (_, data) => {
-      alt = data;
+    const flattenOutput = flattenKeys(output, void 0, ['__display_text'], (_, dataVal) => {
+      alt = dataVal;
     });
 
     const outputValues = Object.values(flattenOutput);
@@ -324,8 +298,7 @@ export class WorkflowExecutionService {
     const finalOutput = [];
     let isInserted = false;
 
-    const outputValuesLength = outputValues.length;
-    if (outputValuesLength === 1 && !images.length && !videos.length) {
+    if (outputValues.length === 1 && !images.length && !videos.length) {
       const currentOutput = outputValues[0];
       if (typeof currentOutput === 'string') {
         finalOutput.push({ type: 'text', data: currentOutput });
@@ -344,47 +317,43 @@ export class WorkflowExecutionService {
       finalOutput.push({ type: 'video', data: video });
       isInserted = true;
     }
-
-    if (!isInserted) {
+    if (!isInserted && output) {
       finalOutput.push({ type: 'json', data: output });
     }
 
-    const ctx = input?.['__context'];
-
     let formattedInput = null;
-
-    const definitions = await this.workflowRepository.findWorkflowByIds([data.workflowName]);
+    const definitions = await this.workflowRepository.findWorkflowByIds([executionData.workflowName]);
 
     if (definitions.length > 0) {
       const { variables } = definitions[0];
-      if (variables) {
+      if (variables && input) {
         formattedInput = Object.keys(input)
           .filter((inputName) => !inputName.startsWith('__'))
           .map((inputName) => {
-            const data = input[inputName];
+            const value = input[inputName];
             const variable = variables.find((variable) => variable.name === inputName);
             return {
               id: inputName,
               displayName: variable?.displayName || inputName,
               description: variable?.description || '',
-              data,
-              type: getDataType(data),
+              data: value,
+              type: getDataType(value),
             };
           });
       }
     }
 
     return {
-      ..._.pick(data, ['status', 'createTime', 'startTime', 'updateTime', 'endTime']),
+      ..._.pick(executionData, ['status', 'createTime', 'startTime', 'updateTime', 'endTime']),
       input: formattedInput,
       rawInput: input,
       output: finalOutput,
       rawOutput: output,
-      workflowId: data.workflowName,
-      instanceId: workflowInstanceId,
-      userId: ctx.userId,
-      teamId: ctx.teamId,
-    };
+      workflowId: executionData.workflowName,
+      instanceId: executionData.workflowId,
+      userId: startByUserId,
+      teamId: ctx?.teamId || teamId,
+    } as WorkflowExecutionOutput;
   }
 
   public async getAllWorkflowsExecutionOutputs(
@@ -392,32 +361,133 @@ export class WorkflowExecutionService {
     condition = {
       page: 1,
       limit: 10,
-      orderBy: 'DESC',
+      orderBy: 'DESC' as 'DESC' | 'ASC',
     },
-  ) {
-    const { page, limit, orderBy } = condition;
-    const workflowList = await this.workflowRepository.getAllWorkflows(teamId);
-    let allExecutions: WorkflowExecutionOutput[] = [];
+  ): Promise<{
+    total: number;
+    data: WorkflowExecutionOutput[];
+    page: number;
+    limit: number;
+    workflows: Pick<WorkflowMetadataEntity, 'displayName' | 'description' | 'workflowId' | 'iconUrl'>[];
+  }> {
+    const { page, limit: limitNum, orderBy } = condition;
 
-    // FIXME: not recommend for getting all executions
-    for (const workflow of workflowList) {
-      try {
-        const executions = (await this.getWorkflowExecutionOutputs(workflow.id, 1, 5000)).data;
-        allExecutions = allExecutions.concat(executions);
-      } catch (error) { }
+    const workflowDefinitions = await this.workflowRepository.getAllWorkflows(teamId);
+    if (workflowDefinitions.length === 0) {
+      return {
+        total: 0,
+        data: [],
+        page,
+        limit: limitNum,
+        workflows: [],
+      };
     }
+    const workflowIdsForTeam = workflowDefinitions.map((w) => w.workflowId);
+    const workflowDefinitionMap = _.keyBy(workflowDefinitions, 'workflowId');
 
-    allExecutions = allExecutions.sort((a, b) => (orderBy === 'DESC' ? b.startTime - a.startTime : a.startTime - b.startTime));
+    const orderByField = 'conductorStartTime';
+    const orderDirection = orderBy === 'DESC' ? 'DESC' : 'ASC';
 
-    const start = (page - 1) * limit;
-    const end = start + limit;
+    const [executions, total] = await this.workflowRepository.findAndCountWorkflowExecutions({
+      where: {
+        workflowId: In(workflowIdsForTeam),
+        isDeleted: false,
+      },
+      order: { [orderByField]: orderDirection },
+      skip: (page - 1) * limitNum,
+      take: limitNum,
+    } as FindManyOptions<WorkflowExecutionEntity>);
+
+    const formattedExecutions = executions.map((entity) => {
+      const {
+        input,
+        output,
+        workflowId: entityWorkflowId,
+        workflowInstanceId,
+        status,
+        conductorCreateTime,
+        conductorStartTime,
+        conductorUpdateTime,
+        conductorEndTime,
+        userId: entityUserId,
+        createdTimestamp,
+        updatedTimestamp,
+      } = entity;
+
+      const workflowDef = workflowDefinitionMap[entityWorkflowId];
+      const contextTeamId = input?.['__context']?.teamId || teamId;
+
+      let alt: string | string[] | undefined;
+      const flattenOutput = flattenKeys(output, undefined, ['__display_text'], (_, dataVal) => {
+        alt = dataVal;
+      });
+      const outputValues = Object.values(flattenOutput);
+      const images = outputValues.map((it) => extractImageUrls(it)).flat();
+      const videos = outputValues.map((it) => extractVideoUrls(it)).flat();
+      const finalOutput = [];
+      let isInserted = false;
+
+      if (outputValues.length === 1 && !images.length && !videos.length) {
+        const currentOutput = outputValues[0];
+        if (typeof currentOutput === 'string') {
+          finalOutput.push({ type: 'text', data: currentOutput });
+        } else {
+          finalOutput.push({ type: 'json', data: currentOutput });
+        }
+        isInserted = true;
+      }
+      for (const image of images) {
+        finalOutput.push({ type: 'image', data: image, alt });
+        isInserted = true;
+      }
+      for (const video of videos) {
+        finalOutput.push({ type: 'video', data: video });
+        isInserted = true;
+      }
+      if (!isInserted && output) {
+        finalOutput.push({ type: 'json', data: output });
+      }
+
+      let formattedInputArray = null;
+      if (workflowDef?.variables && input) {
+        formattedInputArray = Object.keys(input)
+          .filter((inputName) => !inputName.startsWith('__'))
+          .map((inputName) => {
+            const dataVal = input[inputName];
+            const variableDef = workflowDef.variables.find((v) => v.name === inputName);
+            return {
+              id: inputName,
+              displayName: variableDef?.displayName || inputName,
+              description: variableDef?.description || '',
+              data: dataVal,
+              type: getDataType(dataVal),
+            };
+          });
+      }
+
+      return {
+        status: status as any,
+        startTime: conductorStartTime || createdTimestamp,
+        createTime: conductorCreateTime || createdTimestamp,
+        updateTime: conductorUpdateTime || updatedTimestamp,
+        endTime: conductorEndTime,
+        workflowId: entityWorkflowId,
+        output: finalOutput,
+        rawOutput: output,
+        input: formattedInputArray,
+        rawInput: input,
+        instanceId: workflowInstanceId,
+        userId: entityUserId,
+        teamId: contextTeamId,
+      } as WorkflowExecutionOutput;
+    });
 
     return {
-      total: allExecutions.length,
-      data: allExecutions.slice(start, end),
+      total,
+      data: formattedExecutions,
       page,
-      limit,
-      workflows: workflowList.map((workflow) => _.pick(workflow, ['displayName', 'description', 'id', 'iconUrl'])),
+      limit: limitNum,
+      workflows: workflowDefinitions.map((workflow) => pick(workflow, ['displayName', 'description', 'workflowId', 'iconUrl'])),
     };
   }
 
@@ -425,8 +495,7 @@ export class WorkflowExecutionService {
     let workflow = await this.workflowRepository.getWorkflowByIdWithoutVersion(inputWorkflowId);
 
     let shortcutsFlowInstanceIds: string[] = [];
-    // 处理快捷方式
-    const isShortcutFlow = workflow?.shortcutsFlow !== null;
+    const isShortcutFlow = workflow?.shortcutsFlow !== null && workflow?.shortcutsFlow !== undefined;
     if (isShortcutFlow) {
       const convertedWorkflow = await this.workflowRepository.convertWorkflowWhitShortcutsFlowId(workflow);
       if (convertedWorkflow) {
@@ -436,7 +505,8 @@ export class WorkflowExecutionService {
     }
 
     const start = (page - 1) * limit;
-    const query = shortcutsFlowInstanceIds.length ? `workflowId IN (${shortcutsFlowInstanceIds.join(',')})` : `workflowType IN (${inputWorkflowId})`;
+    const conductorWorkflowFilter = shortcutsFlowInstanceIds.length > 0 ? shortcutsFlowInstanceIds.join(',') : inputWorkflowId;
+    const query = `workflowType IN (${conductorWorkflowFilter})`;
 
     const data = await retry(() => conductorClient.workflowResource.searchV21(start, limit, 'startTime:DESC', '*', query), {
       max: 3,
@@ -447,24 +517,20 @@ export class WorkflowExecutionService {
       data: (data?.results ?? [])
         .filter((it) => (!isShortcutFlow ? !(it.input?.['__context']?.['group']?.toString() as string)?.startsWith('shortcut') : true))
         .map((it) => {
-          const { workflowId, input, output, ...rest } = pick(it, ['status', 'startTime', 'createTime', 'updateTime', 'endTime', 'workflowId', 'output', 'input']);
+          const { workflowId: execWorkflowId, input, output, ...rest } = pick(it, ['status', 'startTime', 'createTime', 'updateTime', 'endTime', 'workflowId', 'output', 'input']);
 
           let alt: string | string[] | undefined;
-
-          const flattenOutput = flattenKeys(output, void 0, ['__display_text'], (_, data) => {
-            alt = data;
+          const flattenOutput = flattenKeys(output, void 0, ['__display_text'], (_, dataVal) => {
+            alt = dataVal;
           });
 
           const outputValues = Object.values(flattenOutput);
-
-          const images = outputValues.map((it) => extractImageUrls(it)).flat();
-          const videos = outputValues.map((it) => extractVideoUrls(it)).flat();
-
+          const images = outputValues.map((item) => extractImageUrls(item)).flat();
+          const videos = outputValues.map((item) => extractVideoUrls(item)).flat();
           const finalOutput = [];
           let isInserted = false;
 
-          const outputValuesLength = outputValues.length;
-          if (outputValuesLength === 1 && !images.length && !videos.length) {
+          if (outputValues.length === 1 && !images.length && !videos.length) {
             const currentOutput = outputValues[0];
             if (typeof currentOutput === 'string') {
               finalOutput.push({ type: 'text', data: currentOutput });
@@ -484,7 +550,7 @@ export class WorkflowExecutionService {
             isInserted = true;
           }
 
-          if (!isInserted) {
+          if (!isInserted && output) {
             finalOutput.push({ type: 'json', data: output });
           }
 
@@ -493,18 +559,18 @@ export class WorkflowExecutionService {
           let formattedInput = null;
 
           const variables = workflow.variables;
-          if (variables) {
+          if (variables && input) {
             formattedInput = Object.keys(input)
               .filter((inputName) => !inputName.startsWith('__'))
               .map((inputName) => {
-                const data = input[inputName];
+                const dataVal = input[inputName];
                 const variable = variables.find((variable) => variable.name === inputName);
                 return {
                   id: inputName,
                   displayName: variable?.displayName || inputName,
                   description: variable?.description || '',
-                  data,
-                  type: getDataType(data),
+                  data: dataVal,
+                  type: getDataType(dataVal),
                 };
               });
           }
@@ -516,7 +582,7 @@ export class WorkflowExecutionService {
             output: finalOutput,
             rawOutput: output,
             workflowId: inputWorkflowId,
-            instanceId: workflowId,
+            instanceId: execWorkflowId,
             userId: ctx?.userId ?? '',
             teamId: ctx?.teamId ?? '',
           } as WorkflowExecutionOutput;
@@ -559,7 +625,7 @@ export class WorkflowExecutionService {
       throw new Error('inputData 不能包含内置参数 __context');
     }
 
-    const extra: Partial<WorkflowExecutionEntity> = {};
+    const extra: Partial<Pick<WorkflowExecutionEntity, 'chatSessionId' | 'group'>> = {};
     if (chatSessionId) {
       extra['chatSessionId'] = chatSessionId;
     }
@@ -567,11 +633,11 @@ export class WorkflowExecutionService {
       extra['group'] = group;
     }
 
-    // 处理快捷方式
+    const originalWorkflowIdForShortcut = workflow.workflowId;
+
     const convertedWorkflow = await this.workflowRepository.convertWorkflowWhitShortcutsFlowId(workflow, version, true);
     if (convertedWorkflow) {
-      extra['group'] = `shortcut-${workflow.workflowId}`;
-
+      extra['group'] = `shortcut-${originalWorkflowIdForShortcut}`;
       workflowId = convertedWorkflow.workflowId;
       version = convertedWorkflow.version;
     }
@@ -614,7 +680,8 @@ export class WorkflowExecutionService {
       userId,
       triggerType,
       apiKey,
-      ...extra,
+      ...(extra.chatSessionId && { chatSessionId: extra.chatSessionId }),
+      ...(extra.group && { group: extra.group }),
     });
     return workflowInstanceId;
   }
@@ -652,20 +719,20 @@ export class WorkflowExecutionService {
     });
   }
 
-  public async waitForWorkflowResult(teamId: string, workflowInstanceId: string, interval: number = 200, maxWiat: number = 600 * 1000) {
+  public async waitForWorkflowResult(teamId: string, workflowInstanceId: string, interval: number = 200, maxWait: number = 600 * 1000) {
     let finished = false;
     let output: Record<string, any>;
     const start = +new Date();
     let status;
     let takes = 0;
     while (!finished) {
-      const workflow = await this.getWorkflowExecutionDetail(teamId, workflowInstanceId);
-      status = workflow.status;
+      const workflowExecutionDetails = await this.getWorkflowExecutionDetail(teamId, workflowInstanceId);
+      status = workflowExecutionDetails.status;
       finished = status === 'COMPLETED' || status === 'FAILED' || status === 'TERMINATED' || status === 'TIMED_OUT';
-      output = workflow.output;
-      takes = workflow.endTime ? workflow.endTime - workflow.startTime : 0;
+      output = workflowExecutionDetails.output;
+      takes = workflowExecutionDetails.endTime ? workflowExecutionDetails.endTime - (workflowExecutionDetails.startTime || 0) : 0;
       await sleep(interval);
-      if (+new Date() - start >= maxWiat) {
+      if (+new Date() - start >= maxWait) {
         break;
       }
     }
@@ -738,18 +805,14 @@ export class WorkflowExecutionService {
       const flattenOutput = flattenKeys(execution.output);
       const outputValues = Object.values(flattenOutput);
       if (outputValues.some((it) => extractImageUrls(it).includes(imageUrl))) {
-        const {
-          workflowId,
-          input: { __context, ...input },
-          ...rest
-        } = pick(execution, ['status', 'startTime', 'createTime', 'updateTime', 'endTime', 'workflowId', 'output', 'input']);
+        const { workflowId: execWorkflowId, input: execInput, ...rest } = pick(execution, ['status', 'startTime', 'createTime', 'updateTime', 'endTime', 'workflowId', 'output', 'input']);
         return {
           instance: {
             ...rest,
-            input,
-            instanceId: workflowId,
-            userId: __context?.userId ?? null,
-            teamId: __context?.teamId ?? teamId,
+            input: execInput,
+            instanceId: execWorkflowId,
+            userId: execInput?.__context?.userId ?? null,
+            teamId: execInput?.__context?.teamId ?? teamId,
           },
           total: data.totalHits,
         };
