@@ -18,6 +18,7 @@ import { WorkflowCrudController } from './workflow.crud.controller';
 import { WorkflowCrudService } from './workflow.curd.service';
 import { WorkflowCustomTriggerInvokeController } from './workflow.custom-trigger-invoke.controller';
 import { WorkflowCustomTriggerInvokeService } from './workflow.custom-trigger-invoke.service';
+import { WorkflowExecutionPersistenceService } from './workflow.execution-persistence.service';
 import { WorkflowExecutionController } from './workflow.execution.controller';
 import { WorkflowExecutionService } from './workflow.execution.service';
 import { WorkflowLogsController } from './workflow.log.controller';
@@ -66,8 +67,15 @@ import { WorkflowWebhookService } from './workflow.webhook.service';
     WorkflowStatisticsService,
     WorkflowTrackerService,
     WorkflowObservabilityService,
+    WorkflowExecutionPersistenceService,
   ],
-  imports: [ConductorModule, AssetsModule, TypeOrmModule.forFeature([WorkflowPageEntity, WorkflowPageGroupEntity, ConversationAppEntity, DesignMetadataEntity, DesignProjectEntity]), ToolsModule, CommonModule],
-  exports: [WorkflowCrudService, WorkflowExecutionService, WorkflowTrackerService],
+  imports: [
+    ConductorModule,
+    AssetsModule,
+    TypeOrmModule.forFeature([WorkflowPageEntity, WorkflowPageGroupEntity, ConversationAppEntity, DesignMetadataEntity, DesignProjectEntity]),
+    ToolsModule,
+    CommonModule,
+  ],
+  exports: [WorkflowCrudService, WorkflowExecutionService, WorkflowTrackerService, WorkflowExecutionPersistenceService],
 })
-export class WorkflowModule { }
+export class WorkflowModule {}

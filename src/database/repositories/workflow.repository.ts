@@ -455,6 +455,10 @@ export class WorkflowRepository {
     });
   }
 
+  public async updateWorkflowExecutionDetailsByInstanceId(workflowInstanceId: string, updateData: Partial<WorkflowExecutionEntity>): Promise<void> {
+    await this.workflowExecutionRepository.update({ workflowInstanceId }, updateData);
+  }
+
   private getDateList(startTimestamp: number, endTimestamp: number) {
     const startDate = new Date(startTimestamp);
     const endDate = new Date(endTimestamp);
