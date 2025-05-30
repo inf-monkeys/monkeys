@@ -174,22 +174,20 @@ const startServers = async () => {
   logger.info('Starting servers with config: %s', JSON.stringify(servers));
   for (let i = 0; i < serverConfigYamls.length; i++) {
     try {
-      // 获取配置文件
       const configFile = path.resolve(__dirname, `./server-${i}.yaml`);
       logger.info(`Processing server ${i} with config file: ${configFile}`);
 
-      // 运行迁移
       logger.info(`Starting migration for server ${i}...`);
       try {
+        // 直接使用编译后的迁移文件
         const migrationResult = await runCommand(
-          MONKEYS_DIST_FOLDER, 
-          `yarn migration:run --verbose`, // 添加 --verbose 参数
+          '/usr/src/server',  // 使用绝对路径
+          `npx typeorm-ts-node-commonjs migration:run -d dist/database/migrations/*.js --verbose`, 
           {
             MONKEYS_CONFIG_FILE: configFile,
           }
         );
         
-        // 详细记录迁移结果
         if (migrationResult.success) {
           logger.info(`Migration successful for app ${i}`);
           logger.debug(`Migration output:\n${migrationResult.stdout}`);
@@ -201,7 +199,6 @@ const startServers = async () => {
         logger.error(`Migration error for app ${i}:`, migrationError);
         logger.error(`Migration stdout:\n${migrationError.stdout}`);
         logger.error(`Migration stderr:\n${migrationError.stderr}`);
-        // 如果迁移失败，继续处理下一个服务器
         continue;
       }
 
