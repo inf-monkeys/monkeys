@@ -3,9 +3,9 @@ import React, { startTransition, useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 
 import { useCreation, useDebounceEffect, useLatest, useThrottleEffect } from 'ahooks';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { keyBy, map } from 'lodash';
-import { CircleSlash, Plus } from 'lucide-react';
+import { ChevronRight, CircleSlash, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useWorkspacePages } from '@/apis/pages';
@@ -143,11 +143,16 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   const hasGroups = lists.length && !isLoading;
 
+  const [sidebarVisible, setSidebarVisible] = useState(true);
+
   return (
-    <div
+    <motion.div
+      animate={{
+        width: showGroup ? (sidebarVisible ? '24rem' : '16rem') : '16rem',
+      }}
+      transition={{ duration: 0.3 }}
       className={cn(
         'relative mr-4 flex h-full items-center justify-center rounded-xl border border-input bg-slate-1 shadow-sm',
-        showGroup ? 'w-96' : 'w-64',
       )}
       ref={ref}
     >
@@ -160,8 +165,33 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
           {hasGroups ? (
             showGroup ? (
               <>
-                <VirtuaWorkbenchViewGroupList data={lists} groupId={groupId} setGroupId={setGroupId} />
-                <Separator orientation="vertical" />
+                <motion.div
+                  initial={{ minWidth: '8rem', height: '100%' }}
+                  animate={{
+                    maxWidth: sidebarVisible ? '20rem' : '0',
+                    minWidth: sidebarVisible ? '8rem' : '0',
+                    height: '100%',
+                  }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <VirtuaWorkbenchViewGroupList data={lists} groupId={groupId} setGroupId={setGroupId} />
+                </motion.div>
+                <Separator orientation="vertical" className="vines-center">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div
+                        className="group z-10 flex h-4 w-3.5 cursor-pointer items-center justify-center rounded-sm border bg-border px-0.5 transition-opacity hover:opacity-75 active:opacity-95"
+                        onClick={() => setSidebarVisible(!sidebarVisible)}
+                      >
+                        <ChevronRight className={cn(sidebarVisible && 'scale-x-[-1]')} />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {sidebarVisible ? t('common.sidebar.hide') : t('common.sidebar.show')}
+                    </TooltipContent>
+                  </Tooltip>
+                </Separator>
               </>
             ) : (
               <></>
@@ -197,6 +227,6 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
           </div>
         </>
       )}
-    </div>
+    </motion.div>
   );
 };
