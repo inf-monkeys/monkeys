@@ -179,10 +179,10 @@ const startServers = async () => {
 
       logger.info(`Starting migration for server ${i}...`);
       try {
-        // 直接使用编译后的迁移文件
+        // 修改命令格式
         const migrationResult = await runCommand(
-          '/usr/src/server',  // 使用绝对路径
-          `npx typeorm-ts-node-commonjs migration:run -d dist/database/migrations/*.js --verbose`, 
+          '/usr/src/server',
+          `npx typeorm-ts-node-commonjs migration:run -d ./ormconfig.js`, 
           {
             MONKEYS_CONFIG_FILE: configFile,
           }
