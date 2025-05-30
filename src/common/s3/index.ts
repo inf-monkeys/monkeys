@@ -36,11 +36,7 @@ export class S3Helpers {
     return await this.client.send(command);
   }
 
-  public async uploadFile(
-    fileBuffer: string | Buffer | Readable | ReadableStream<any> | Blob | Uint8Array,
-    fileKey: string,
-    contentType?: string
-  ) {
+  public async uploadFile(fileBuffer: string | Buffer | Readable | ReadableStream<any> | Blob | Uint8Array, fileKey: string, contentType?: string) {
     const command = new PutObjectCommand({
       Bucket: config.s3.bucket,
       Key: fileKey,

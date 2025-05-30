@@ -12,7 +12,7 @@ export class PasswordService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly teamsService: TeamsService,
-  ) { }
+  ) {}
 
   public encryptPassword(password: string) {
     return crypto.MD5(config.auth.password.saltTemplate.replaceAll('{{password}}', password)).toString();

@@ -51,4 +51,4 @@ export const MQ_TOKEN = 'MQ';
   ],
   exports: [LOCK_TOKEN, CACHE_TOKEN, RATE_LIMITER_TOKEN, MQ_TOKEN, EventEmitterModule],
 })
-export class CommonModule { }
+export class CommonModule {}

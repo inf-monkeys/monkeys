@@ -23,7 +23,6 @@ import { KnowledgeBaseService } from '../../assets/knowledge-base/knowledge-base
 import { ToolsForwardService } from '../tools.forward.service';
 import { ResponseFormat } from './dto/req/create-chat-compltion.dto';
 
-
 // 导入图片内容相关类型
 import { calculateMd5FromArrayBuffer, extractMarkdownImageUrls, isMarkdown, replaceMarkdownImageUrls } from '@/common/utils/markdown-image-utils';
 import { MediaFileEntity } from '@/database/entities/assets/media/media-file';
@@ -153,7 +152,7 @@ export class LlmService {
     private readonly llmModelRepository: LlmModelRepository,
     private readonly oneApiRepository: OneApiRepository,
     private readonly mediaFileService: MediaFileService,
-  ) { }
+  ) {}
 
   private getModelNameByModelMappings(modelMappings: { [x: string]: string }, modelName: string): string {
     for (const key in modelMappings) {
@@ -765,8 +764,8 @@ ${userQuestion}
       response_format:
         response_format === ResponseFormat.jsonObject
           ? {
-            type: response_format,
-          }
+              type: response_format,
+            }
           : undefined,
       ...defaultParams,
     };
@@ -932,32 +931,30 @@ ${userQuestion}
           }
 
           let content = result.choices[0].message?.content ?? '';
-          if (!stream && isMarkdown(content) && options?.userId)
-            content = await this.replaceMarkdownImageUrls(content, teamId, options.userId);
+          if (!stream && isMarkdown(content) && options?.userId) content = await this.replaceMarkdownImageUrls(content, teamId, options.userId);
           onSuccess?.(content);
           return res.status(200).send(
             apiResponseType === 'full'
               ? result
               : {
-                messages: content,
-                usage: result.usage,
-              },
+                  messages: content,
+                  usage: result.usage,
+                },
           );
         } else {
           if (showLogs) {
             (response as any).logs = logs;
           }
           let content = (response as ChatCompletion).choices[0].message?.content;
-          if (!stream && isMarkdown(content) && options?.userId)
-            content = await this.replaceMarkdownImageUrls(content, teamId, options.userId);
+          if (!stream && isMarkdown(content) && options?.userId) content = await this.replaceMarkdownImageUrls(content, teamId, options.userId);
           onSuccess?.(content);
           return res.status(200).send(
             apiResponseType === 'full'
               ? response
               : {
-                message: content,
-                usage: (response as ChatCompletion).usage,
-              },
+                  message: content,
+                  usage: (response as ChatCompletion).usage,
+                },
           );
         }
       }

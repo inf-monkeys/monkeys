@@ -75,7 +75,7 @@ export class MediaToolsController {
       required: false,
       default: '',
       type: 'string',
-    }
+    },
   ])
   @MonkeyToolOutput([
     {
@@ -97,11 +97,11 @@ export class MediaToolsController {
 
     const matches = base64.match(/^data:(.*?);base64,(.*)$/);
     if (!matches) {
-      throw new Error("Invalid base64 data URL");
+      throw new Error('Invalid base64 data URL');
     }
     const contentType = matches[1];
     const base64Data = matches[2];
-    const buffer = Buffer.from(base64Data, "base64");
+    const buffer = Buffer.from(base64Data, 'base64');
 
     if (fileExtension.trim() === '') {
       fileExtension = getFileExtensionFromMimeType(contentType);

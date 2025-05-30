@@ -8,7 +8,7 @@ export type WorkflowObservabilityFactory = (rawWorkflowExecution: Workflow) => P
 
 @Injectable()
 export class WorkflowObservabilityService {
-  constructor(private readonly observabilityRepository: ObservabilityRepository) { }
+  constructor(private readonly observabilityRepository: ObservabilityRepository) {}
 
   public async getWorkflowObservabilityDataList(teamId: string, workflowId: string) {
     const workflowObservability = await this.observabilityRepository.getWorkflowObservability(teamId, workflowId);
@@ -37,7 +37,6 @@ export class WorkflowObservabilityService {
         input: rawWorkflowExecution.input,
         output: rawWorkflowExecution.output,
         metadata: rawWorkflowExecution,
-
       });
 
       for (const task of tasks) {

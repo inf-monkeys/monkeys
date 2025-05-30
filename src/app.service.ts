@@ -20,7 +20,7 @@ export class AppService implements OnApplicationBootstrap {
     private readonly toolsRegistryService: ToolsRegistryService,
     private readonly toolsRepository: ToolsRepository,
     private readonly comfyuiRepository: ComfyuiRepository,
-  ) { }
+  ) {}
 
   public async getCombinedToolsSwagger() {
     const servers = await this.toolsRepository.listServers();
@@ -34,7 +34,7 @@ export class AppService implements OnApplicationBootstrap {
             displayName: server.displayName,
             spec: specData,
           };
-        } catch (error) { }
+        } catch (error) {}
       }),
     );
     return result.filter(Boolean);

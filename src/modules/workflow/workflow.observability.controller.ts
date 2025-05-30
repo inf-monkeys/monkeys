@@ -10,7 +10,7 @@ import { WorkflowObservabilityService } from './workflow.observability.service';
 @ApiTags('Workflows/Observability')
 @UseGuards(CompatibleAuthGuard)
 export class WorkflowObservabilityController {
-  constructor(private readonly service: WorkflowObservabilityService) { }
+  constructor(private readonly service: WorkflowObservabilityService) {}
 
   @Get('/:workflowId/observability')
   @ApiOperation({

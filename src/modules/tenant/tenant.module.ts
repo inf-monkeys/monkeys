@@ -9,4 +9,4 @@ import { TenantService } from './tenant.service';
   providers: [TenantService],
   imports: [TypeOrmModule.forFeature([WorkflowExecutionEntity])],
 })
-export class TenantModule { }
+export class TenantModule {}

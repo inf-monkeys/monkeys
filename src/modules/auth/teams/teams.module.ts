@@ -12,4 +12,4 @@ import { TeamsService } from './teams.service';
   imports: [ConductorModule, ComfyuiModelModule, ComfyUIModule],
   exports: [TeamsService],
 })
-export class TeamsModule { }
+export class TeamsModule {}

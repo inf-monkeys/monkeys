@@ -4,6 +4,6 @@ import { SdModelService } from './sd-model.service';
 
 @Module({
   controllers: [SdModelController],
-  providers: [SdModelService]
+  providers: [SdModelService],
 })
 export class SdModelModule {}
