@@ -21,8 +21,14 @@ COPY ./multi-tenancy .
 RUN yarn
 
 ENV MONKEYS_DIST_FOLDER=/usr/src/server/dist
-# 设置时区和字符集
+# 添加调试相关的环境变量
+ENV DEBUG=typeorm:*
+ENV NODE_DEBUG=typeorm,postgres
+ENV TYPEORM_LOGGING=true
+ENV TYPEORM_LOGGER=advanced-console
+ENV NODE_OPTIONS="--trace-warnings"
 
+# 设置时区和字符集
 RUN apk add --no-cache tzdata \
     && apk add --no-cache --virtual .build-deps \
     curl \
@@ -36,4 +42,5 @@ ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
 
 EXPOSE 3000
-CMD ["node", "main.js"]
+# 修改启动命令以显示更多调试信息
+CMD ["node", "--trace-warnings", "--trace-deprecation", "--trace-uncaught", "main.js"]
