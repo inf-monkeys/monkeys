@@ -77,9 +77,9 @@ async function bootstrap() {
     session({
       store: isRedisConfigured()
         ? new RedisStore({
-          client: initRedisClient(config.redis),
-          prefix: config.redis.prefix || config.server.appId,
-        })
+            client: initRedisClient(config.redis),
+            prefix: config.redis.prefix || config.server.appId,
+          })
         : new MemoryStore(),
       secret: config.auth.sessionSecret, // to sign session id
       resave: false, // will default to false in near future: https://github.com/expressjs/session#resave

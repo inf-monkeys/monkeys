@@ -18,4 +18,4 @@ import { ToolsRegistryService } from './tools.registry.service';
   imports: [ExampleToolsModule, HttpModule, ComfyUIModule, OneAPIModule, TranslateToolsModule, MediaToolsModule],
   exports: [ToolsRegistryService, ToolsForwardService],
 })
-export class ToolsModule { }
+export class ToolsModule {}

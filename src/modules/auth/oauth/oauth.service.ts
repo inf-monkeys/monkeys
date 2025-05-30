@@ -24,7 +24,7 @@ export class OAuthService {
     private readonly userRepository: UserRepository,
     private readonly httpService: HttpService,
     @Inject(CACHE_TOKEN) private readonly cache: CacheManager,
-  ) { }
+  ) {}
 
   private idToPassword(id: string) {
     return crypto.MD5(config.auth.wework.passwdSalt.replaceAll('{{id}}', id) + id).toString();
@@ -183,7 +183,7 @@ export class OAuthService {
     if (userInfoData.code !== 0) {
       throw new Error(userInfoData.msg);
     }
-    console.log(userInfoData.data)
+    console.log(userInfoData.data);
     let { avatar_url, email, mobile, enterprise_email, name, user_id } = userInfoData.data;
     email = enterprise_email || email;
     if (mobile) {
@@ -198,6 +198,6 @@ export class OAuthService {
     });
     await this.userRepository.updateUserLastLogin(user.id, AuthMethod.oauth);
     const jwtToken = JwtHelper.signToken(user);
-    return jwtToken
+    return jwtToken;
   }
 }

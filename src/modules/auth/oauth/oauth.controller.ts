@@ -10,7 +10,7 @@ import { AuthResultType, OAuthService } from './oauth.service';
 @Controller('/auth/oauth')
 @ApiTags('Auth/OAuth')
 export class OAuthController {
-  constructor(private readonly oauthService: OAuthService) { }
+  constructor(private readonly oauthService: OAuthService) {}
 
   // 企业微信回调
   @Get('wework/callback')

@@ -4,4 +4,4 @@ import { MediaToolsController } from './media.controller';
 @Module({
   controllers: [MediaToolsController],
 })
-export class MediaToolsModule { }
+export class MediaToolsModule {}

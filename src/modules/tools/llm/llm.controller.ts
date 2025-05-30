@@ -54,7 +54,7 @@ export const LLM_GENERATE_TEXT_TOOL = 'generate_text';
 @Controller('/llm-tool')
 @ApiTags('大语言模型')
 export class LlmController {
-  constructor(private readonly service: LlmService) { }
+  constructor(private readonly service: LlmService) {}
 
   @Get('/manifest.json')
   @ApiExcludeEndpoint()
@@ -357,17 +357,17 @@ export class LlmController {
             content:
               body.userImageMessage.length > 0
                 ? [
-                  ...(body.userImageMessage.map((image) => ({
-                    type: 'image_url',
-                    image_url: {
-                      url: image,
+                    ...(body.userImageMessage.map((image) => ({
+                      type: 'image_url',
+                      image_url: {
+                        url: image,
+                      },
+                    })) as ChatCompletionContentPartImage[]),
+                    {
+                      type: 'text',
+                      text: body.userMessage,
                     },
-                  })) as ChatCompletionContentPartImage[]),
-                  {
-                    type: 'text',
-                    text: body.userMessage,
-                  },
-                ]
+                  ]
                 : body.userMessage,
           },
         ],

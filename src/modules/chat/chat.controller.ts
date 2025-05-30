@@ -24,7 +24,6 @@ import { WorkflowExecutionService } from '../workflow/workflow.execution.service
 import { ContentPartDto, CreateChatCompletionsDto } from './dto/req/create-chat-compltion.dto';
 import { CreateCompletionsDto } from './dto/req/create-compltion.dto';
 
-
 @Controller('/v1')
 @ApiTags('Chat')
 @UseGuards(CompatibleAuthGuard)
@@ -37,7 +36,7 @@ export class WorkflowOpenAICompatibleController {
     @Inject(MQ_TOKEN) private readonly mq: Mq,
     private readonly llmService: LlmService,
     private readonly mediaFileService: MediaFileService,
-  ) { }
+  ) {}
 
   @Get('/models')
   @ApiOperation({
@@ -168,8 +167,7 @@ export class WorkflowOpenAICompatibleController {
     if (stream === false) {
       const result = await this.workflowExecutionService.waitForWorkflowResult(teamId, workflowInstanceId);
       let content = result.output;
-      if (isMarkdown(content))
-        content = await this.llmService.replaceMarkdownImageUrls(content, teamId, userId);
+      if (isMarkdown(content)) content = await this.llmService.replaceMarkdownImageUrls(content, teamId, userId);
       result.output = content;
       return res.status(200).json(result);
     } else {
@@ -241,11 +239,11 @@ export class WorkflowOpenAICompatibleController {
                   });
 
                   replaceMap.set(url, (createdData as MediaFileEntity).url);
-                } catch (error) { }
+                } catch (error) {}
               } else {
                 replaceMap.set(url, data.url);
               }
-            } catch (e) { }
+            } catch (e) {}
           });
           await Promise.all(promises);
           finalResponse = replaceMarkdownImageUrls(markdown, replaceMap);
@@ -280,7 +278,7 @@ export class WorkflowOpenAICompatibleController {
               if (content) {
                 aiResponse += content;
               }
-            } catch (error) { }
+            } catch (error) {}
           }
         });
       }
@@ -314,11 +312,11 @@ export class WorkflowOpenAICompatibleController {
                     });
 
                     replaceMap.set(url, (createdData as MediaFileEntity).url);
-                  } catch (error) { }
+                  } catch (error) {}
                 } else {
                   replaceMap.set(url, data.url);
                 }
-              } catch (e) { }
+              } catch (e) {}
             });
             await Promise.all(promises);
             result = replaceMarkdownImageUrls(markdown, replaceMap);

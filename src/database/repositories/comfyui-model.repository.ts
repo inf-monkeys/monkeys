@@ -21,7 +21,7 @@ export class ComfyuiModelRepository {
     private readonly modelTypeAssetRepository: ComfyuiModelTypeAssetRepositroy,
     @InjectRepository(ComfyuiModelServerRelationEntity)
     private readonly relationRepository: Repository<ComfyuiModelServerRelationEntity>,
-  ) { }
+  ) {}
 
   public async listAssetTypes(teamId: string, dto: ListDto) {
     return await this.modelTypeAssetRepository.listAssets('comfyui-model-type', teamId, dto, {
@@ -190,12 +190,12 @@ export class ComfyuiModelRepository {
         ...model,
         serverRelations: serverRelations
           ? serverRelations.map((relation) => {
-            set(relation, 'server.address', maskUrl(relation.server.address));
-            return {
-              ...relation,
-              type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
-            };
-          })
+              set(relation, 'server.address', maskUrl(relation.server.address));
+              return {
+                ...relation,
+                type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
+              };
+            })
           : undefined,
       };
     });
@@ -223,18 +223,18 @@ export class ComfyuiModelRepository {
       where:
         teamId === 'internals'
           ? {
-            teamId,
-            isDeleted: false,
-          }
+              teamId,
+              isDeleted: false,
+            }
           : {
-            teamId,
-            isDeleted: false,
-            serverRelations: {
-              server: {
-                isDeleted: false,
+              teamId,
+              isDeleted: false,
+              serverRelations: {
+                server: {
+                  isDeleted: false,
+                },
               },
             },
-          },
       relations: {
         serverRelations: {
           server: true,
@@ -254,11 +254,11 @@ export class ComfyuiModelRepository {
         ...model,
         serverRelations: serverRelations
           ? serverRelations.map((relation) => {
-            return {
-              ...relation,
-              type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
-            };
-          })
+              return {
+                ...relation,
+                type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
+              };
+            })
           : undefined,
       };
     });
@@ -296,11 +296,11 @@ export class ComfyuiModelRepository {
         ...model,
         serverRelations: serverRelations
           ? serverRelations.map((relation) => {
-            return {
-              ...relation,
-              type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
-            };
-          })
+              return {
+                ...relation,
+                type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
+              };
+            })
           : undefined,
       };
     });
@@ -342,14 +342,14 @@ export class ComfyuiModelRepository {
         ...model,
         serverRelations: serverRelations
           ? serverRelations.map((relation) => {
-            const pathArr = relation.path.split('/');
-            set(relation, 'server.address', maskUrl(relation.server.address));
-            return {
-              ...relation,
-              apiPath: pathArr.length > 1 ? pathArr.slice(1).join('/') : relation.path,
-              type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
-            };
-          })
+              const pathArr = relation.path.split('/');
+              set(relation, 'server.address', maskUrl(relation.server.address));
+              return {
+                ...relation,
+                apiPath: pathArr.length > 1 ? pathArr.slice(1).join('/') : relation.path,
+                type: modelTypes.filter((type) => relation.path.toLowerCase().startsWith(type.path.toLowerCase())),
+              };
+            })
           : undefined,
       };
     });

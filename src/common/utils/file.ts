@@ -75,7 +75,7 @@ export function getMimeType(fileName: string): string {
 }
 
 export function getFileExtensionFromMimeType(mimeType: string): string {
-  return Object.keys(mimeTypes).find(key => mimeTypes[key] === mimeType);
+  return Object.keys(mimeTypes).find((key) => mimeTypes[key] === mimeType);
 }
 
 export function getFileExtensionFromUrl(url: string): string {
@@ -89,7 +89,7 @@ export async function downloadImageAsBase64(imageUrl: string): Promise<string> {
   try {
     const axios = require('axios');
     const response = await axios.get(imageUrl, {
-      responseType: 'arraybuffer'
+      responseType: 'arraybuffer',
     });
 
     const contentType = response.headers['content-type'];

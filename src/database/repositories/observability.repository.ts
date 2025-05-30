@@ -10,7 +10,7 @@ export class ObservabilityRepository {
   constructor(
     @InjectRepository(WorkflowObservabilityEntity)
     private readonly workflowObservabilityRepository: Repository<WorkflowObservabilityEntity>,
-  ) { }
+  ) {}
 
   public async createWorkflowObservability(teamId: string, workflowId: string, platform: ObservabilityPlatform, platformConfig: ObservabilityPlatformConfig, name?: string) {
     const entity: Partial<WorkflowObservabilityEntity> = {

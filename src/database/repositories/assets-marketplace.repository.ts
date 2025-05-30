@@ -19,7 +19,7 @@ export class AssetsMarketPlaceRepository {
     private readonly workflowAssetsRepository: WorkflowAssetRepositroy,
     private readonly workflowRepository: WorkflowRepository,
     private readonly comfyuiWorkflowAssetsRepositroy: ComfyuiWorkflowAssetRepositroy,
-  ) { }
+  ) {}
 
   public async forkBuiltInWorkflowAssetsFromMarketPlace(
     teamId: string,

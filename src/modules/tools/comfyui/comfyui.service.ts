@@ -40,7 +40,7 @@ export class ComfyUIService {
   constructor(
     private readonly comfyuiWorkflowRepository: ComfyuiRepository,
     @Inject(CACHE_TOKEN) private readonly cache: CacheManager,
-  ) { }
+  ) {}
 
   public async listComfyuiWorkflows(teamId: string, dto: ListDto) {
     return await this.comfyuiWorkflowRepository.listComfyuiWorkflows(teamId, dto);
@@ -470,7 +470,7 @@ export class ComfyUIService {
           ...(config?.comfyui?.apiToken && { Authorization: `Bearer ${config.comfyui.apiToken}` }),
         },
       });
-    } catch (error) { }
+    } catch (error) {}
     await this.waitForComfyuiServerStartup(serverAddress);
   }
 

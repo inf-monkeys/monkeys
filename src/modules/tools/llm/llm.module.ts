@@ -12,4 +12,4 @@ import { LlmService } from './llm.service';
   imports: [ToolsModule, KnowledgeBaseModule, SqlKnowledgeBaseModule],
   exports: [LlmService],
 })
-export class LLMToolsModule { }
+export class LLMToolsModule {}
