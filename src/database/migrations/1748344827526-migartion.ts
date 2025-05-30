@@ -1,351 +1,145 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 import { config } from '@/common/config';
 const appId = config.server.appId;
 
+const tables = [
+    `${appId}_workflow_templates`,
+    `${appId}_workflow_triggers`,
+    `${appId}_workflow_metadatas`,
+    `${appId}_workflow_page_group`,
+    `${appId}_workflow_execution`,
+    `${appId}_workflow_pages`,
+    `${appId}_workflow_chat_sessions`,
+    `${appId}_tools`,
+    `${appId}_tools_trigger_types`,
+    `${appId}_tools_server`,
+    `${appId}_tools_credentials`,
+    `${appId}_tools_credential_types`,
+    `${appId}_system_configurations`,
+    `${appId}_oneapi_users`,
+    `${appId}_workflow_observability`,
+    `${appId}_users`,
+    `${appId}_team_members`,
+    `${appId}_teams`,
+    `${appId}_team_join_requests`,
+    `${appId}_team_invites`,
+    `${appId}_conversation_apps`,
+    `${appId}_conversation_executions`,
+    `${appId}_themes`,
+    `${appId}_comfyui_model`,
+    `${appId}_comfyui_model_server_relations`,
+    `${appId}_comfyui_servers`,
+    `${appId}_comfyui_workflows`,
+    `${appId}_asset_tag_relations`,
+    `${appId}_asset_marketplace_tags`,
+    `${appId}_asset_marketplace_tag_relations`,
+    `${appId}_assets_authorization`,
+    `${appId}_asset_tags`,
+    `${appId}_asset_filters`,
+    `${appId}_apikey`,
+    `${appId}_media_files`,
+    `${appId}_knowledge_bases_sql`,
+    `${appId}_canvas_applications`,
+    `${appId}_knowledge_bases`,
+    `${appId}_sd_models`,
+    `${appId}_llm_channels`,
+    `${appId}_llm_models`,
+    `${appId}_comfyui_model_type`,
+];
+
+async function convertTimestampColumns(queryRunner: QueryRunner, tableName: string, operation: 'up' | 'down') {
+    if (operation === 'up') {
+        // 1. 添加新的临时时间戳列
+        await queryRunner.query(`
+            ALTER TABLE "${tableName}" 
+            ADD COLUMN "created_timestamp_new" TIMESTAMP,
+            ADD COLUMN "updated_timestamp_new" TIMESTAMP
+        `);
+
+        // 2. 转换并复制数据 (将毫秒转换为时间戳)
+        await queryRunner.query(`
+            UPDATE "${tableName}" 
+            SET "created_timestamp_new" = to_timestamp(CAST(created_timestamp AS DOUBLE PRECISION) / 1000),
+                "updated_timestamp_new" = to_timestamp(CAST(updated_timestamp AS DOUBLE PRECISION) / 1000)
+        `);
+
+        // 3. 删除旧列
+        await queryRunner.query(`
+            ALTER TABLE "${tableName}" 
+            DROP COLUMN "created_timestamp",
+            DROP COLUMN "updated_timestamp"
+        `);
+
+        // 4. 重命名新列
+        await queryRunner.query(`
+            ALTER TABLE "${tableName}" 
+            RENAME COLUMN "created_timestamp_new" TO "created_timestamp";
+            ALTER TABLE "${tableName}" 
+            RENAME COLUMN "updated_timestamp_new" TO "updated_timestamp"
+        `);
+
+        // 5. 设置默认值和非空约束
+        await queryRunner.query(`
+            ALTER TABLE "${tableName}" 
+            ALTER COLUMN "created_timestamp" SET NOT NULL,
+            ALTER COLUMN "created_timestamp" SET DEFAULT now(),
+            ALTER COLUMN "updated_timestamp" SET NOT NULL,
+            ALTER COLUMN "updated_timestamp" SET DEFAULT now()
+        `);
+    } else {
+        // 1. 添加新的临时 bigint 列
+        await queryRunner.query(`
+            ALTER TABLE "${tableName}" 
+            ADD COLUMN "created_timestamp_new" bigint,
+            ADD COLUMN "updated_timestamp_new" bigint
+        `);
+
+        // 2. 转换并复制数据 (将时间戳转换为毫秒)
+        await queryRunner.query(`
+            UPDATE "${tableName}" 
+            SET "created_timestamp_new" = (EXTRACT(EPOCH FROM created_timestamp) * 1000)::bigint,
+                "updated_timestamp_new" = (EXTRACT(EPOCH FROM updated_timestamp) * 1000)::bigint
+        `);
+
+        // 3. 删除旧列
+        await queryRunner.query(`
+            ALTER TABLE "${tableName}" 
+            DROP COLUMN "created_timestamp",
+            DROP COLUMN "updated_timestamp"
+        `);
+
+        // 4. 重命名新列
+        await queryRunner.query(`
+            ALTER TABLE "${tableName}" 
+            RENAME COLUMN "created_timestamp_new" TO "created_timestamp";
+            ALTER TABLE "${tableName}" 
+            RENAME COLUMN "updated_timestamp_new" TO "updated_timestamp"
+        `);
+
+        // 5. 设置默认值和非空约束
+        await queryRunner.query(`
+            ALTER TABLE "${tableName}" 
+            ALTER COLUMN "created_timestamp" SET NOT NULL,
+            ALTER COLUMN "created_timestamp" SET DEFAULT '1748344775167',
+            ALTER COLUMN "updated_timestamp" SET NOT NULL,
+            ALTER COLUMN "updated_timestamp" SET DEFAULT '1748344775167'
+        `);
+    }
+}
+
 export class Migartion1748344827526 implements MigrationInterface {
-    name = 'Migartion1748344827526'
+    name = 'Migartion1748344827526';
 
     public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_templates" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_templates" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_templates" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_templates" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_triggers" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_triggers" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_triggers" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_triggers" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_metadatas" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_metadatas" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_metadatas" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_metadatas" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_page_group" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_page_group" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_page_group" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_page_group" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_execution" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_execution" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_execution" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_execution" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_pages" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_pages" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_pages" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_pages" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_chat_sessions" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_chat_sessions" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_chat_sessions" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_chat_sessions" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_trigger_types" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_trigger_types" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_trigger_types" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_trigger_types" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_server" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_server" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_server" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_server" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_credentials" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_credentials" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_credentials" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_credentials" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_credential_types" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_credential_types" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_credential_types" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_credential_types" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_system_configurations" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_system_configurations" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_system_configurations" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_system_configurations" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_oneapi_users" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_oneapi_users" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_oneapi_users" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_oneapi_users" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_observability" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_observability" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_observability" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_observability" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_users" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_users" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_users" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_users" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_members" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_members" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_members" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_members" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_teams" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_teams" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_teams" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_teams" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_join_requests" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_join_requests" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_join_requests" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_join_requests" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_invites" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_invites" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_invites" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_invites" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_conversation_apps" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_conversation_apps" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_conversation_apps" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_conversation_apps" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_conversation_executions" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_conversation_executions" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_conversation_executions" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_conversation_executions" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_themes" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_themes" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_themes" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_themes" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model_server_relations" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model_server_relations" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model_server_relations" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model_server_relations" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_servers" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_servers" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_servers" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_servers" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_workflows" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_workflows" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_workflows" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_workflows" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_tag_relations" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_tag_relations" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_tag_relations" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_tag_relations" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_marketplace_tags" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_marketplace_tags" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_marketplace_tags" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_marketplace_tags" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_marketplace_tag_relations" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_marketplace_tag_relations" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_marketplace_tag_relations" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_marketplace_tag_relations" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_assets_authorization" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_assets_authorization" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_assets_authorization" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_assets_authorization" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_tags" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_tags" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_tags" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_tags" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_filters" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_filters" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_filters" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_filters" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_apikey" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_apikey" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_apikey" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_apikey" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_media_files" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_media_files" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_media_files" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_media_files" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_knowledge_bases_sql" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_knowledge_bases_sql" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_knowledge_bases_sql" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_knowledge_bases_sql" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_canvas_applications" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_canvas_applications" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_canvas_applications" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_canvas_applications" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_knowledge_bases" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_knowledge_bases" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_knowledge_bases" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_knowledge_bases" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_sd_models" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_sd_models" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_sd_models" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_sd_models" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_llm_channels" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_llm_channels" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_llm_channels" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_llm_channels" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_llm_models" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_llm_models" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_llm_models" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_llm_models" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model_type" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model_type" ADD "created_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model_type" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model_type" ADD "updated_timestamp" TIMESTAMP NOT NULL DEFAULT now()`);
+        for (const table of tables) {
+            await convertTimestampColumns(queryRunner, table, 'up');
+        }
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model_type" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model_type" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model_type" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model_type" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_llm_models" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_llm_models" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_llm_models" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_llm_models" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_llm_channels" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_llm_channels" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_llm_channels" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_llm_channels" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_sd_models" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_sd_models" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_sd_models" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_sd_models" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_knowledge_bases" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_knowledge_bases" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_knowledge_bases" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_knowledge_bases" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_canvas_applications" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_canvas_applications" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_canvas_applications" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_canvas_applications" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_knowledge_bases_sql" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_knowledge_bases_sql" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_knowledge_bases_sql" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_knowledge_bases_sql" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_media_files" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_media_files" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_media_files" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_media_files" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_apikey" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_apikey" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_apikey" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_apikey" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_filters" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_filters" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_filters" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_filters" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_tags" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_tags" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_tags" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_tags" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_assets_authorization" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_assets_authorization" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_assets_authorization" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_assets_authorization" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_marketplace_tag_relations" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_marketplace_tag_relations" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_marketplace_tag_relations" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_marketplace_tag_relations" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_marketplace_tags" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_marketplace_tags" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_marketplace_tags" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_marketplace_tags" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_tag_relations" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_tag_relations" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_tag_relations" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_asset_tag_relations" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_workflows" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_workflows" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_workflows" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_workflows" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_servers" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_servers" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_servers" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_servers" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model_server_relations" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model_server_relations" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model_server_relations" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model_server_relations" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_comfyui_model" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_themes" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_themes" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_themes" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_themes" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_conversation_executions" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_conversation_executions" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_conversation_executions" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_conversation_executions" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_conversation_apps" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_conversation_apps" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_conversation_apps" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_conversation_apps" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_invites" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_invites" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_invites" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_invites" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_join_requests" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_join_requests" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_join_requests" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_join_requests" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_teams" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_teams" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_teams" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_teams" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_members" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_members" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_members" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_team_members" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_users" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_users" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_users" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_users" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_observability" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_observability" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_observability" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_observability" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_oneapi_users" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_oneapi_users" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_oneapi_users" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_oneapi_users" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_system_configurations" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_system_configurations" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_system_configurations" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_system_configurations" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_credential_types" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_credential_types" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_credential_types" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_credential_types" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_credentials" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_credentials" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_credentials" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_credentials" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_server" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_server" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_server" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_server" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_trigger_types" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_trigger_types" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_trigger_types" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools_trigger_types" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_tools" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_chat_sessions" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_chat_sessions" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_chat_sessions" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_chat_sessions" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_pages" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_pages" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_pages" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_pages" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_execution" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_execution" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_execution" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_execution" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_page_group" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_page_group" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_page_group" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_page_group" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_metadatas" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_metadatas" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_metadatas" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_metadatas" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_triggers" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_triggers" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_triggers" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_triggers" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_templates" DROP COLUMN "updated_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_templates" ADD "updated_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_templates" DROP COLUMN "created_timestamp"`);
-        await queryRunner.query(`ALTER TABLE "${appId}_workflow_templates" ADD "created_timestamp" bigint NOT NULL DEFAULT '1748344775167'`);
+        for (const table of tables) {
+            await convertTimestampColumns(queryRunner, table, 'down');
+        }
     }
-
 }
