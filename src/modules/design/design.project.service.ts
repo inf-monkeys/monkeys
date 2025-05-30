@@ -13,12 +13,13 @@ export class DesignProjectService {
   ) {}
 
   async create(createDesignProjectDto: CreateDesignProjectDto & { teamId: string; creatorUserId: string }) {
-    const projectData = {
-      ...createDesignProjectDto,
-      assetType: 'design-project',
-    } as Omit<DesignProjectEntity, 'id'>;
+    const projectEntity = new DesignProjectEntity();
 
-    const createdProject = await this.designProjectRepository.create(projectData);
+    Object.assign(projectEntity, createDesignProjectDto, {
+      assetType: 'design-project',
+    });
+
+    const createdProject = await this.designProjectRepository.create(projectEntity);
 
     // Create a default design metadata for the new project
     await this.designMetadataRepository.createDesignMetadata(createdProject.id, {
@@ -39,7 +40,7 @@ export class DesignProjectService {
   }
 
   async findByTeamId(teamId: string, dto: ListDto) {
-    const { totalCount, list } = await this.designProjectRepository.findAllByTeamId(teamId, dto);
+    const { totalCount, list } = await this.designProjectRepository.findAllByTeamId(teamId, dto); // [cite: 1293]
     return {
       totalCount,
       list,
