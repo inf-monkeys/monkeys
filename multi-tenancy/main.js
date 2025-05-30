@@ -92,57 +92,140 @@ const status = {
 };
 
 async function runCommand(path, command, envVars = {}) {
-  try {
-    // 合并当前进程环境变量和传入的环境变量
-    const env = { ...process.env, ...envVars };
+  return new Promise((resolve, reject) => {
+    // 分解命令为主命令和参数
+    const [cmd, ...args] = command.split(' ');
+    
+    // 设置环境变量，添加调试相关的环境变量
+    const env = {
+      ...process.env,
+      ...envVars,
+      TYPEORM_LOGGING: "all",
+      TYPEORM_LOGGER: "advanced-console",
+      DEBUG: "typeorm:*,typeorm-model-shim",
+      NODE_DEBUG: "typeorm,postgres"
+    };
 
-    // 设置执行路径和环境变量，并执行命令行指令
-    const { stdout, stderr } = await execAsync(command, { cwd: path, env });
+    logger.info(`Executing command: ${command} in path: ${path}`);
+    logger.debug(`Environment variables:`, env);
 
-    // 如果 stderr 不为空，则返回错误信息
-    if (stderr) {
-      return `Error: ${stderr}`;
-    }
+    // 使用 spawn 替代 exec 以获取实时输出
+    const childProcess = require('child_process').spawn(cmd, args, {
+      cwd: path,
+      env,
+      shell: true,
+      stdio: 'pipe'
+    });
 
-    // 返回正常输出结果
-    return stdout;
-  } catch (error) {
-    // 如果出现错误，返回错误信息
-    return `Execution Error: ${error.message}`;
-  }
+    let stdout = '';
+    let stderr = '';
+
+    // 捕获标准输出
+    childProcess.stdout.on('data', (data) => {
+      const output = data.toString();
+      stdout += output;
+      logger.info(`[Command Output] ${output.trim()}`);
+    });
+
+    // 捕获标准错误
+    childProcess.stderr.on('data', (data) => {
+      const output = data.toString();
+      stderr += output;
+      logger.error(`[Command Error] ${output.trim()}`);
+    });
+
+    // 进程结束时的处理
+    childProcess.on('close', (code) => {
+      if (code === 0) {
+        logger.info(`Command completed successfully`);
+        resolve({
+          success: true,
+          stdout,
+          stderr,
+          code
+        });
+      } else {
+        logger.error(`Command failed with code ${code}`);
+        reject({
+          success: false,
+          stdout,
+          stderr,
+          code,
+          error: new Error(`Command failed with code ${code}`)
+        });
+      }
+    });
+
+    // 处理进程错误
+    childProcess.on('error', (error) => {
+      logger.error(`Command execution error:`, error);
+      reject({
+        success: false,
+        stdout,
+        stderr,
+        error
+      });
+    });
+  });
 }
 
 // Start servers
 const startServers = async () => {
   logger.info('Starting servers with config: %s', JSON.stringify(servers));
   for (let i = 0; i < serverConfigYamls.length; i++) {
-    // Get configuration file
-    const configFile = path.resolve(__dirname, `./server-${i}.yaml`);
+    try {
+      // 获取配置文件
+      const configFile = path.resolve(__dirname, `./server-${i}.yaml`);
+      logger.info(`Processing server ${i} with config file: ${configFile}`);
 
-    // Run migration
-    const migrationResult = await runCommand(MONKEYS_DIST_FOLDER, `yarn migration:run`, {
-      MONKEYS_CONFIG_FILE: configFile,
-    });
-    logger.info(`Migration result for app ${i}: ${migrationResult}`);
+      // 运行迁移
+      logger.info(`Starting migration for server ${i}...`);
+      try {
+        const migrationResult = await runCommand(
+          MONKEYS_DIST_FOLDER, 
+          `yarn migration:run --verbose`, // 添加 --verbose 参数
+          {
+            MONKEYS_CONFIG_FILE: configFile,
+          }
+        );
+        
+        // 详细记录迁移结果
+        if (migrationResult.success) {
+          logger.info(`Migration successful for app ${i}`);
+          logger.debug(`Migration output:\n${migrationResult.stdout}`);
+        } else {
+          logger.error(`Migration failed for app ${i}`);
+          logger.error(`Migration error output:\n${migrationResult.stderr}`);
+        }
+      } catch (migrationError) {
+        logger.error(`Migration error for app ${i}:`, migrationError);
+        logger.error(`Migration stdout:\n${migrationError.stdout}`);
+        logger.error(`Migration stderr:\n${migrationError.stderr}`);
+        // 如果迁移失败，继续处理下一个服务器
+        continue;
+      }
 
-    // Start server
-    const script = `${MONKEYS_DIST_FOLDER}/main`;
-    const args = ['--config', configFile];
-    let child = fork(script, args, {});
-    const autoRestart = (code, signal) => {
-      if (!status.running) {
-        return;
-      }
-      logger.info(`App ${i} exited with code ${code} and signal ${signal}`);
-      const index = appProcessList.indexOf(child);
-      if (index !== -1) {
-        appProcessList.splice(index, 1);
-      }
-      child = fork(script, args, {});
+      // Start server
+      const script = `${MONKEYS_DIST_FOLDER}/main`;
+      const args = ['--config', configFile];
+      let child = fork(script, args, {});
+      const autoRestart = (code, signal) => {
+        if (!status.running) {
+          return;
+        }
+        logger.info(`App ${i} exited with code ${code} and signal ${signal}`);
+        const index = appProcessList.indexOf(child);
+        if (index !== -1) {
+          appProcessList.splice(index, 1);
+        }
+        child = fork(script, args, {});
+        child.on('exit', autoRestart);
+        appProcessList.push(child);
+      };
       child.on('exit', autoRestart);
-      appProcessList.push(child);
-    };
-    child.on('exit', autoRestart);
+    } catch (error) {
+      logger.error(`Error processing server ${i}:`, error);
+    }
   }
   signalHandler = () => {
     status.running = false;
