@@ -70,17 +70,17 @@ export const VinesIFrame = <P extends IVinesIFramePropsRequired>({ page, pages }
     <AnimatePresence>
       {hasPages && (
         <>
-          {workflows.map(([workflowId, pages]) => (
-            <VinesFlowProvider key={workflowId} workflowId={workflowId}>
-              {pages.map(({ id, type }) => (
+          {workflows.map(([_, pages]) => (
+            <VinesFlowProvider key={pages[0].workflowId} workflowId={pages[0].workflowId ?? _}>
+              {pages.map(({ id, type, workflowId }) => (
                 <ViewStoreProvider key={id} createStore={createViewStore}>
                   <VinesView id={id} workflowId={workflowId} pageId={currentPageId} type={type} />
                 </ViewStoreProvider>
               ))}
             </VinesFlowProvider>
           ))}
-          {agents.map(([agentId, pages]) => {
-            return pages.map(({ id, type }) => (
+          {agents.map(([_, pages]) => {
+            return pages.map(({ id, type, agentId }) => (
               <ViewStoreProvider key={id} createStore={createViewStore}>
                 <VinesView id={id} agentId={agentId} pageId={currentPageId} type={type} />
               </ViewStoreProvider>
