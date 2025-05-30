@@ -9,7 +9,7 @@ const timeout = setTimeout(() => {
 }, 2000);
 
 readline.question(
-  'Do you want to clean the build before rebuilding? (Input y to clean, default to not clean): ',
+  'Do you want to clean the build before migration? (Input y to clean, default to not clean): ',
   (answer) => {
     clearTimeout(timeout);
     const shouldClean = answer.toLowerCase() === 'y';
