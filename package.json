@@ -23,7 +23,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "ts-typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
     "migration:create": "typeorm migration:create ./src/database/migrations/migration",
-    "migration:run": "yarn build && npx typeorm migration:run -d ormconfig.js",
+    "migration:run": "node migration_script.js",
     "migration:generate": "yarn build && yarn ts-typeorm migration:generate ./src/database/migrations/migration -d ormconfig.js"
   },
   "dependencies": {
