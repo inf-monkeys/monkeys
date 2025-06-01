@@ -7,7 +7,7 @@ interface IImageDetailLayoutProps {
 
 const ImageDetailLayout: React.FC<IImageDetailLayoutProps> = ({ children, rightSidebar }) => {
   return (
-    <div className="flex h-full w-full flex-col bg-card-light dark:bg-card-dark">
+    <div className="flex h-full w-full flex-col bg-neocard">
       <div className="flex flex-1">
         {/* 主内容区域 */}
         <div className="flex flex-1">{children}</div>
