@@ -2,6 +2,7 @@ import { isEmpty, isObject } from 'lodash';
 import { create, StateCreator, StoreApi } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
+import { setNeocardTheme } from '@/package/palette/use-neocard-palette.ts';
 import { setTailwindTheme } from '@/package/palette/use-palette.ts';
 
 const autoTogglePalette =
@@ -12,6 +13,23 @@ const autoTogglePalette =
         if (isObject(args)) {
           if ('value' in args && !isEmpty(args.value)) {
             setTailwindTheme(args.value as string);
+          }
+        }
+
+        set(args);
+      },
+      get,
+      api,
+    );
+
+const autoToggleNeocardPalette =
+  <T>(config: StateCreator<T>) =>
+  (set: StoreApi<T>['setState'], get: StoreApi<T>['getState'], api: StoreApi<T>) =>
+    config(
+      (args: T) => {
+        if (isObject(args)) {
+          if ('value' in args && !isEmpty(args.value)) {
+            setNeocardTheme(args.value as string);
           }
         }
 
@@ -34,9 +52,10 @@ const usePaletteStore = create<PaletteStore>()(
     })),
   ),
 );
+
 const useNeocardPaletteStore = create<PaletteStore>()(
   immer(
-    autoTogglePalette((set) => ({
+    autoToggleNeocardPalette((set) => ({
       value: '',
       setValue: (value: string) => set({ value }),
     })),
