@@ -155,7 +155,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
     }
   }, [executionResultList, shouldFilterError]);
   return (
-    <Card className={cn('relative bg-card-light dark:bg-card-dark', className)}>
+    <Card className={cn('relative bg-neocard', className)}>
       <CardContent className="p-0">
         {executionResultList && executionResultList.length > 0 && filteredData.length > 0 && !isLoading ? (
           <ExecutionResultGrid
@@ -168,10 +168,7 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
             mutate={mutateExecutionList}
           />
         ) : (
-          <ScrollArea
-            style={{ height }}
-            className="z-20 mr-0.5 bg-card-light dark:bg-card-dark [&>[data-radix-scroll-area-viewport]]:p-2"
-          >
+          <ScrollArea style={{ height }} className="z-20 mr-0.5 bg-neocard [&>[data-radix-scroll-area-viewport]]:p-2">
             <ErrorFilter />
             <ExtraButtonFilter />
             <div className="vines-center pointer-events-none absolute left-0 top-0 z-0 size-full flex-col gap-2">

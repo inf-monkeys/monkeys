@@ -76,7 +76,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
     onPasteOrDropCallback: (file) => {
       if (max === 1 && !isEmpty(filesMapper)) {
         const existingFiles = uppy.getFiles();
-        existingFiles.forEach(file => uppy.removeFile(file.id));
+        existingFiles.forEach((file) => uppy.removeFile(file.id));
       }
       uppy.addFile(handleConvertFile(file));
     },
@@ -146,7 +146,7 @@ const VinesUploader: React.FC<IVinesUploaderProps> = (props) => {
       onDrop={(f) => {
         if (max === 1 && !isEmpty(filesMapper)) {
           const existingFiles = uppy.getFiles();
-          existingFiles.forEach(file => uppy.removeFile(file.id));
+          existingFiles.forEach((file) => uppy.removeFile(file.id));
         }
         uppy.addFiles(f.map((file) => handleConvertFile(file)));
         setIsHovering(false);

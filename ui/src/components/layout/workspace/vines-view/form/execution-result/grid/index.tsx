@@ -145,7 +145,7 @@ export const ExecutionResultGrid: React.FC<IExecutionResultGridProps> = ({
 
   return (
     <ScrollArea
-      className={cn('z-20 mr-0.5 bg-card-light dark:bg-card-dark [&>[data-radix-scroll-area-viewport]]:p-2')}
+      className={cn('z-20 mr-0.5 bg-neocard [&>[data-radix-scroll-area-viewport]]:p-2')}
       ref={scrollRef}
       style={{ height }}
       disabledOverflowMask
