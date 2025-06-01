@@ -34,7 +34,7 @@ export const WorkspaceLayout: React.FC = () => {
   });
 
   return (
-    <ViewGuard className="bg-card-light dark:bg-card-dark">
+    <ViewGuard className="bg-neocard">
       {isImageDetailPage ? (
         // 图片详情页使用与工作台、应用市场相同的header
         <SpaceHeader tail={<TeamSelector />} disableSeparator>
