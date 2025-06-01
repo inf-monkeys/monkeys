@@ -34,5 +34,14 @@ const usePaletteStore = create<PaletteStore>()(
     })),
   ),
 );
+const useNeocardPaletteStore = create<PaletteStore>()(
+  immer(
+    autoTogglePalette((set) => ({
+      value: '',
+      setValue: (value: string) => set({ value }),
+    })),
+  ),
+);
 
 export default usePaletteStore;
+export { useNeocardPaletteStore };

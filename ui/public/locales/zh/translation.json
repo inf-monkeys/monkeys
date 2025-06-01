@@ -891,11 +891,30 @@
           "loading": "正在删除主题...",
           "success": "主题删除成功！",
           "error": "主题删除失败！请稍候重试！"
+        },
+        "neocard": {
+          "update": {
+            "loading": "正在更新背景色...",
+            "success": "背景色更新成功！",
+            "error": "背景色更新失败！请稍候重试！"
+          }
         }
       },
       "team-primary-color": {
         "title": "团队主题色",
         "description": "你可以在这里设置团队的主题色，系统将自动生成对应的配色方案",
+        "tip": "预览状态下将不会保存",
+        "operate": {
+          "save": {
+            "button": "保存到列表",
+            "title": "保存到主题列表",
+            "placeholder": "输入主题名称，16 字以内"
+          }
+        }
+      },
+      "team-neocard-color": {
+        "title": "团队背景色",
+        "description": "你可以在这里设置团队背景色，系统将自动生成对应的配色方案",
         "tip": "预览状态下将不会保存",
         "operate": {
           "save": {
