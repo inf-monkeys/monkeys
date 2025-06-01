@@ -4,6 +4,7 @@ import { BaseEntity } from '../base/base';
 export interface CustomTheme {
   enableTeamLogo?: boolean;
   primaryColor?: string;
+  neocardColor?: string;
 }
 
 @Entity({ name: 'teams' })
