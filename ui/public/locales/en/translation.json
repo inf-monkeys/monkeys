@@ -901,11 +901,30 @@
           "loading": "Deleting theme...",
           "success": "Theme delete successful!",
           "error": "Theme delete failed! Please try again later!"
+        },
+        "neocard": {
+          "update": {
+            "loading": "Updating background color...",
+            "success": "Background color update successful!",
+            "error": "Background color update failed! Please try again later!"
+          }
         }
       },
       "team-primary-color": {
         "title": "Team Primary Color",
         "description": "You can set the team's theme color here, and the system will automatically generate the corresponding color scheme",
+        "tip": "Preview will not be saved",
+        "operate": {
+          "save": {
+            "button": "Save to Theme List",
+            "title": "Save to theme list",
+            "placeholder": "Enter theme name, up to 16 characters"
+          }
+        }
+      },
+      "team-neocard-color": {
+        "title": "Team Background Color",
+        "description": "You can set the team's background color here, and the system will automatically generate the corresponding color scheme",
         "tip": "Preview will not be saved",
         "operate": {
           "save": {

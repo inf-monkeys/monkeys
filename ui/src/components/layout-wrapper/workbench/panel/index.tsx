@@ -40,7 +40,7 @@ export const WorkbenchPanelLayout: React.FC<IWorkbenchPanelLayoutProps> = ({ lay
   });
   const isSettingRoute = pathName.split('/').at(-1) === 'settings';
   return (
-    <ViewGuard className="bg-card-light dark:bg-card-dark">
+    <ViewGuard className="bg-neocard">
       <SpaceHeader tail={<TeamSelector />} disableSeparator>
         <Tabs
           value={isWorkspaceRoute ? 'main' : isStoreRoute ? 'store' : 'workbench'}

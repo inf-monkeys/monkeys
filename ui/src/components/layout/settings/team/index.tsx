@@ -1,6 +1,7 @@
 import { Team } from '../account/team';
 import { TeamMember } from '../account/team-member';
 import { TeamLogo } from '../theme/team-logo';
+import { TeamNeocardColor } from '../theme/team-neocard-color';
 import { TeamPrimaryColor } from '../theme/team-primary-color';
 
 export const TeamSettings = () => {
@@ -10,11 +11,12 @@ export const TeamSettings = () => {
         {/* <User /> */}
         <Team />
         <TeamMember />
+        <TeamLogo />
       </div>
       <div className="grid items-start gap-4">
         <div className="grid items-start gap-4">
           <TeamPrimaryColor />
-          <TeamLogo />
+          <TeamNeocardColor />
         </div>
       </div>
     </div>
