@@ -60,7 +60,7 @@ const VinesForm: React.FC = () => {
         <VinesTabular
           className={cn(
             'col-span-2',
-            isMiniFrame && 'absolute z-20 size-full bg-slate-1 p-4 transition-opacity',
+            isMiniFrame && 'absolute z-20 size-full bg-slate-1 p-4 px-2 transition-opacity',
             isMiniFrame && historyVisible && 'pointer-events-none opacity-0',
             vinesIFrameVisible && !isMiniFrame && 'pr-4',
           )}
