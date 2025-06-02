@@ -2,8 +2,7 @@ import React, { useRef, useState } from 'react';
 
 import { useMemoizedFn, useThrottleEffect } from 'ahooks';
 import type { EventEmitter } from 'ahooks/lib/useEventEmitter';
-import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, ImageUp, Save } from 'lucide-react';
+import { ImageUp, Save } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -58,12 +57,7 @@ export const MaskEditorToolbar: React.FC<IMaskEditorToolbarProps> = ({
   return (
     <div ref={ref} className="relative flex w-full items-center">
       <div ref={toolbarRef} className="flex w-full overflow-hidden">
-        <div
-          className={cn(
-            'flex w-full min-w-[26rem] items-center justify-between',
-            scrollToolVisible && 'min-w-[34rem] pr-16',
-          )}
-        >
+        <div className={cn('flex w-full items-center justify-between', scrollToolVisible && '')}>
           <div className="flex items-center gap-2">
             {children}
             <Button
@@ -88,7 +82,7 @@ export const MaskEditorToolbar: React.FC<IMaskEditorToolbarProps> = ({
           </Button>
         </div>
       </div>
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {scrollToolVisible && (
           <motion.div
             key="vines-workspace-scrollTool"
@@ -112,7 +106,7 @@ export const MaskEditorToolbar: React.FC<IMaskEditorToolbarProps> = ({
             />
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
     </div>
   );
 };
