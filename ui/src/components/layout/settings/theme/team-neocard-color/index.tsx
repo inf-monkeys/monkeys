@@ -6,13 +6,13 @@ import { HexColorPicker } from 'react-colorful';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { updateTeam } from '@/apis/authz/team';
-import { useSystemConfig } from '@/apis/common';
+import { updateTeam, useTeams } from '@/apis/authz/team';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card.tsx';
 import { Input } from '@/components/ui/input';
 import { Tooltip } from '@/components/ui/tooltip';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useAppStore } from '@/store/useAppStore';
 import { useNeocardPaletteStore } from '@/store/usePaletteStore.ts';
 
@@ -31,16 +31,17 @@ export const TeamNeocardColor: React.FC<ITeamNeocardColorProps> = () => {
   const setValue = useNeocardPaletteStore((s) => s.setValue);
   const value = useNeocardPaletteStore((s) => s.value);
   const darkMode = useAppStore((s) => s.darkMode);
-  const toggleDarkMode = useAppStore((s) => s.toggleDarkMode);
-  const { mutate } = useSystemConfig();
+  const setDarkMode = useAppStore((s) => s.setDarkMode);
+  const [mode, setLocalDarkMode] = useLocalStorage<string>('vines-ui-dark-mode', 'auto', false);
+  const { mutate } = useTeams();
+
   // Get the current theme's color
   const getCurrentThemeColor = () => {
     if (typeof value === 'string') {
       return value;
     }
-    return darkMode ? value.dark : value.light;
+    return mode === 'dark' ? value.dark : value.light;
   };
-
   // Update color for current theme only
   const updateCurrentThemeColor = (newColor: string) => {
     if (typeof value === 'string') {
@@ -48,7 +49,7 @@ export const TeamNeocardColor: React.FC<ITeamNeocardColorProps> = () => {
       return;
     }
 
-    if (darkMode) {
+    if (mode === 'dark') {
       setValue({ light: value.light, dark: newColor });
     } else {
       setValue({ light: newColor, dark: value.dark });
@@ -68,22 +69,19 @@ export const TeamNeocardColor: React.FC<ITeamNeocardColorProps> = () => {
     }
 
     // Update team config based on current theme
-    if (darkMode) {
+    if (mode === 'dark') {
       set(team, 'customTheme.neocardDarkColor', tempColor);
     } else {
       set(team, 'customTheme.neocardColor', tempColor);
     }
 
     updateCurrentThemeColor(tempColor);
+    void mutate();
 
     toast.promise(updateTeam({ customTheme: team.customTheme }), {
       loading: t('settings.theme.toast.neocard.update.loading'),
       success: t('settings.theme.toast.neocard.update.success'),
       error: t('settings.theme.toast.neocard.update.error'),
-      finally: () => {
-        // seems doesn't work
-        void mutate();
-      },
     });
   };
 
@@ -101,13 +99,14 @@ export const TeamNeocardColor: React.FC<ITeamNeocardColorProps> = () => {
       <CardHeader className="relative">
         <CardTitle>{t('settings.theme.team-neocard-color.title')}</CardTitle>
         <CardDescription className="mr-12">{t('settings.theme.team-neocard-color.description')}</CardDescription>
-        <div className="absolute left-0 top-0 !mt-0 flex size-full items-center justify-end p-4">
+        <div className="absolute left-0 top-0 !mt-0 flex size-full items-center justify-end pr-[22px]">
           <Tooltip content={t('settings.theme.team-neocard-color.button-tooltip')}>
             <Button
               variant="outline"
               icon={<ArrowRightLeftIcon />}
               onClick={() => {
-                toggleDarkMode(darkMode);
+                setLocalDarkMode(mode === 'dark' ? 'light' : 'dark');
+                setDarkMode(!darkMode);
               }}
             />
           </Tooltip>

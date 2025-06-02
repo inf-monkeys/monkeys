@@ -11,12 +11,12 @@ export const TeamSettings = () => {
         {/* <User /> */}
         <Team />
         <TeamMember />
+        <TeamLogo />
       </div>
       <div className="grid items-start gap-4">
         <div className="grid items-start gap-4">
           <TeamPrimaryColor />
           <TeamNeocardColor />
-          <TeamLogo />
         </div>
       </div>
     </div>

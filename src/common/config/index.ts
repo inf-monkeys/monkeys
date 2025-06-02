@@ -307,7 +307,7 @@ export const config: Config = {
       colors: {
         primary: readConfig('server.customization.colors.primary', '#52ad1f'),
         neocard: readConfig('server.customization.colors.neocard', '#F1F5F9'),
-        neocardDark: readConfig('server.customization.colors.neocardDark', '#F1F5F9'),
+        neocardDark: readConfig('server.customization.colors.neocardDark', '#1D1D1F'),
       },
       toast: {
         position: readConfig('server.customization.toast.position', 'bottom-right'),
