@@ -29,7 +29,12 @@ const autoToggleNeocardPalette =
       (args: T) => {
         if (isObject(args)) {
           if ('value' in args && !isEmpty(args.value)) {
-            setNeocardTheme(args.value as string);
+            const value = args.value;
+            if (typeof value === 'string' && value) {
+              setNeocardTheme(value);
+            } else if (isObject(value) && ('light' in value || 'dark' in value)) {
+              setNeocardTheme(value as { light: string; dark: string });
+            }
           }
         }
 
@@ -44,6 +49,11 @@ export interface PaletteStore {
   setValue: (value: string) => void;
 }
 
+export interface NeocardPaletteStore {
+  value: { light: string; dark: string } | string;
+  setValue: (value: { light: string; dark: string } | string) => void;
+}
+
 const usePaletteStore = create<PaletteStore>()(
   immer(
     autoTogglePalette((set) => ({
@@ -53,11 +63,11 @@ const usePaletteStore = create<PaletteStore>()(
   ),
 );
 
-const useNeocardPaletteStore = create<PaletteStore>()(
+const useNeocardPaletteStore = create<NeocardPaletteStore>()(
   immer(
     autoToggleNeocardPalette((set) => ({
-      value: '',
-      setValue: (value: string) => set({ value }),
+      value: { light: '', dark: '' },
+      setValue: (value: { light: string; dark: string } | string) => set({ value }),
     })),
   ),
 );

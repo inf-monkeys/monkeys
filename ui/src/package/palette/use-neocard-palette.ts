@@ -1,12 +1,24 @@
 import { debounce } from 'lodash';
 
-export const setNeocardTheme = debounce((color: string) => {
+export const setNeocardTheme = debounce((colors: { light: string; dark: string } | string) => {
+  let lightColor: string;
+  let darkColor: string;
+
+  if (typeof colors === 'string') {
+    // Backward compatibility - if string is passed, use it for both
+    lightColor = colors;
+    darkColor = colors;
+  } else {
+    lightColor = colors.light;
+    darkColor = colors.dark;
+  }
+
   const styles = `
     :root {
-      --neocard: ${color};
+      --neocard: ${lightColor};
     }
     .dark {
-      --neocard: ${color};
+      --neocard: ${darkColor};
     }
   `;
 
