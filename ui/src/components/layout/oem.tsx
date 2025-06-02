@@ -9,7 +9,7 @@ import { useLocalStorage } from '@/hooks/use-local-storage';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useAppStore } from '@/store/useAppStore';
 import { EDarkModeTrigger } from '@/store/useAppStore/dark-mode.slice.ts';
-import usePaletteStore from '@/store/usePaletteStore.ts';
+import usePaletteStore, { useNeocardPaletteStore } from '@/store/usePaletteStore.ts';
 import VinesEvent from '@/utils/events.ts';
 
 export const OEM: React.FC = () => {
@@ -24,14 +24,24 @@ export const OEM: React.FC = () => {
   const setDarkModeTrigger = useAppStore((s) => s.setDarkModeTrigger);
 
   const setValue = usePaletteStore((s) => s.setValue);
+  const setNeocardValue = useNeocardPaletteStore((s) => s.setValue);
 
   const siteThemeColor = get(oem, 'theme.colors.primaryColor', '');
-  // TODO use it
   const siteNeocardColor = get(oem, 'theme.colors.neocardColor', '');
+  const siteNeocardDarkColor = get(oem, 'theme.colors.neocardDarkColor', '');
   const teamThemeColor = get(team, 'customTheme.primaryColor', '');
+  const teamNeocardColor = get(team, 'customTheme.neocardColor', '');
+  const teamNeocardDarkColor = get(team, 'customTheme.neocardDarkColor', '');
+
   useEffect(() => {
     setValue(teamThemeColor || siteThemeColor);
   }, [siteThemeColor, teamThemeColor]);
+
+  useEffect(() => {
+    const lightColor = teamNeocardColor || siteNeocardColor;
+    const darkColor = teamNeocardDarkColor || siteNeocardDarkColor;
+    setNeocardValue({ light: lightColor, dark: darkColor });
+  }, [siteNeocardColor, siteNeocardDarkColor, teamNeocardColor, teamNeocardDarkColor]);
 
   const [{ theme }] = useUrlState<{ theme: 'dark' | 'light' | null }>({ theme: null });
 

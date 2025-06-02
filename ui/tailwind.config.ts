@@ -74,8 +74,9 @@ const config = {
           light: 'var(--card-light)',
         },
         neocard: {
-          DEFAULT: 'var(--card-light)',
-          dark: 'var(--card-dark)',
+          DEFAULT: 'var(--neocard)',
+          // dark: 'var(--neocard-dark)',
+          // light: 'var(--neocard-light)',
         }
       },
       borderRadius: {

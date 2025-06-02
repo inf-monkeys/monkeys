@@ -120,6 +120,7 @@ export class AppController {
         colors: {
           primaryColor: config.server.customization.colors.primary,
           neocardColor: config.server.customization.colors.neocard,
+          neocardDarkColor: config.server.customization.colors.neocardDark,
         },
         toast: {
           position: config.server.customization.toast.position,
