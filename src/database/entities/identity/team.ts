@@ -5,6 +5,7 @@ export interface CustomTheme {
   enableTeamLogo?: boolean;
   primaryColor?: string;
   neocardColor?: string;
+  neocardDarkColor?: string;
 }
 
 @Entity({ name: 'teams' })
