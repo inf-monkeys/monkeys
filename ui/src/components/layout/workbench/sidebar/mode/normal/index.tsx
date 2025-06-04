@@ -1,4 +1,4 @@
-import React, { startTransition, useRef, useState } from 'react';
+import React, { startTransition, useCallback, useRef, useState } from 'react';
 
 import { Link } from '@tanstack/react-router';
 
@@ -145,6 +145,15 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   const [sidebarVisible, setSidebarVisible] = useState(true);
 
+  const onChildClick = useCallback(
+    (page) => {
+      startTransition(() => {
+        setCurrentPage((prev) => ({ ...prev, [teamId]: { ...page, groupId } }));
+      });
+    },
+    [teamId, groupId, setCurrentPage],
+  );
+
   return (
     <motion.div
       animate={{
@@ -210,11 +219,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
               data={(lists?.find((it) => it.id === groupId)?.pages ?? []) as IPinPage[]}
               currentPageId={currentPage?.[teamId]?.id}
               currentGroupId={groupId}
-              onChildClick={(page) => {
-                startTransition(() => {
-                  setCurrentPage((prev) => ({ ...prev, [teamId]: { ...page, groupId } }));
-                });
-              }}
+              onChildClick={onChildClick}
             />
             <Tooltip>
               <TooltipTrigger asChild>
