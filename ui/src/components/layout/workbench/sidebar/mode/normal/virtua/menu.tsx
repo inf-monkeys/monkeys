@@ -9,7 +9,6 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useUpdateGroupPages } from '@/apis/pages';
-import { IPinPage } from '@/apis/pages/typings.ts';
 import { IWorkbenchViewItemPage } from '@/components/layout/workbench/sidebar/mode/normal/virtua/item.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
@@ -21,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useLocalStorage } from '@/hooks/use-local-storage';
+import { useSetCurrentPage } from '@/store/useCurrentPageStore';
 
 interface IViewItemMenuProps extends React.ComponentPropsWithoutRef<'div'> {
   page: IWorkbenchViewItemPage;
@@ -37,7 +36,7 @@ export const ViewItemMenu: React.FC<IViewItemMenuProps> = ({ page, groupId }) =>
 
   const { trigger } = useUpdateGroupPages(groupId);
 
-  const [, setCurrentPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
+  const setCurrentPage = useSetCurrentPage();
 
   const handleClickMoreMenu = useMemoizedFn((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
