@@ -132,7 +132,7 @@ export const TeamNeocardColor: React.FC<ITeamNeocardColorProps> = () => {
         <CardTitle>{t('settings.theme.team-neocard-color.title')}</CardTitle>
         <CardDescription className="mr-12">{t('settings.theme.team-neocard-color.description')}</CardDescription>
         <div className="absolute left-0 top-0 !mt-0 flex size-full items-center justify-end pr-[22px]">
-          <Tooltip content={t('settings.theme.team-neocard-color.button-tooltip')}>
+          <Tooltip content={t('settings.theme.team-neocard-color.toggle-theme')}>
             <Button
               variant="outline"
               icon={<ArrowRightLeftIcon />}
