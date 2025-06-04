@@ -3414,7 +3414,13 @@
         "description-is-too-long": "描述不能超过 200 个字符"
       }
     },
-    "view-config": {}
+    "view-config": {
+      "canvas-setting": {
+        "title": "画布设置",
+        "width": "宽度",
+        "height": "高度"
+      }
+    }
   },
   "comfyui-server": {
     "title": "ComfyUI 服务",

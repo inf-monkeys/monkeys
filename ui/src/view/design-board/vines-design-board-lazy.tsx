@@ -115,7 +115,13 @@ const DesignBoardView: React.FC = () => {
                 animate={{ opacity: 1, filter: 'blur(0px)' }}
                 exit={{ opacity: 0, filter: 'blur(10px)' }}
               >
-                <FrameSizeInput />
+                <div className="flex flex-col">
+                  <p className="mb-1.5 grid grid-cols-2 justify-start text-xs font-semibold capitalize">
+                    <span>{t('design.view-config.canvas-setting.width')}</span>
+                    <span className="pl-2">{t('design.view-config.canvas-setting.height')}</span>
+                  </p>
+                  <FrameSizeInput />
+                </div>
                 <div className="grid grid-cols-1 gap-2">
                   <Button variant="outline" onClick={handleExport}>
                     {t('common.utils.export')}
