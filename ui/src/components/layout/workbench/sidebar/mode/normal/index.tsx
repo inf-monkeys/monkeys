@@ -12,15 +12,14 @@ import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
 import { VirtuaWorkbenchViewGroupList } from '@/components/layout/workbench/sidebar/mode/normal/group-virua';
 import { VirtuaWorkbenchViewList } from '@/components/layout/workbench/sidebar/mode/normal/virtua';
-import { IWorkbenchViewItemPage } from '@/components/layout/workbench/sidebar/mode/normal/virtua/item.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { VinesFullLoading } from '@/components/ui/loading';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
+import { useCurrentPage, useSetCurrentPage } from '@/store/useCurrentPageStore';
 import { cloneDeep, cn } from '@/utils';
 
 interface IWorkbenchNormalModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -63,8 +62,9 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   const [{ activePage }] = useUrlState<{ activePage: string }>({ activePage: '' });
   const toggleToActivePageRef = useRef(activePage ? false : null);
 
-  const [currentPage, setCurrentPage] = useLocalStorage<Partial<IWorkbenchViewItemPage>>('vines-ui-workbench-page', {});
-
+  // const [currentPage, setCurrentPage] = useLocalStorage<Partial<IWorkbenchViewItemPage>>('vines-ui-workbench-page', {});
+  const currentPage = useCurrentPage();
+  const setCurrentPage = useSetCurrentPage();
   const latestOriginalPages = useLatest(originalPages);
   const latestOriginalGroups = useLatest(originalGroups);
   useDebounceEffect(
@@ -82,7 +82,8 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
         const page = latestOriginalPages.current.find((it) => it.workflowId === activePage);
         const groupWithPageId = latestOriginalGroups.current.find((it) => it.pageIds.includes(page?.id ?? ''));
         if (page && groupWithPageId) {
-          setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
+          // setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
+          setCurrentPage({ [teamId]: page });
           setGroupId(groupWithPageId.id);
           toggleToActivePageRef.current = true;
           return;
@@ -96,7 +97,8 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
             if (pageIds.length) {
               const firstPage = latestOriginalPages.current.find((it) => it.id === pageIds[0]);
               if (firstPage) {
-                setCurrentPage((prev) => ({ ...prev, [teamId]: firstPage }));
+                // setCurrentPage((prev) => ({ ...prev, [teamId]: firstPage }));
+                setCurrentPage({ [teamId]: firstPage });
                 setGroupId(id);
                 return;
               }
@@ -105,7 +107,8 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
           return;
         }
 
-        setCurrentPage((prev) => ({ ...prev, [teamId]: {} }));
+        // setCurrentPage((prev) => ({ ...prev, [teamId]: {} }));
+        setCurrentPage({ [teamId]: {} });
       };
 
       if (currentPageId) {
@@ -148,7 +151,8 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   const onChildClick = useCallback(
     (page) => {
       startTransition(() => {
-        setCurrentPage((prev) => ({ ...prev, [teamId]: { ...page, groupId } }));
+        // setCurrentPage((prev) => ({ ...prev, [teamId]: { ...page, groupId } }));
+        setCurrentPage({ [teamId]: { ...page, groupId } });
       });
     },
     [teamId, groupId, setCurrentPage],
