@@ -62,11 +62,15 @@ export const TeamNeocardColor: React.FC<ITeamNeocardColorProps> = () => {
     onChange(currentThemeColor);
   }, [currentThemeColor]);
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (!team) {
       toast.error(t('common.toast.team-not-found'));
       return;
     }
+
+    // Store current team state for potential rollback
+    const originalTeam = { ...team };
+    const originalValue = value;
 
     // Update team config based on current theme
     if (mode === 'dark') {
@@ -75,14 +79,42 @@ export const TeamNeocardColor: React.FC<ITeamNeocardColorProps> = () => {
       set(team, 'customTheme.neocardColor', tempColor);
     }
 
+    // Optimistic update - immediately update local state
     updateCurrentThemeColor(tempColor);
-    void mutate();
 
-    toast.promise(updateTeam({ customTheme: team.customTheme }), {
-      loading: t('settings.theme.toast.neocard.update.loading'),
-      success: t('settings.theme.toast.neocard.update.success'),
-      error: t('settings.theme.toast.neocard.update.error'),
-    });
+    // Optimistically update the teams cache
+    await mutate(
+      (currentTeams) => {
+        if (!currentTeams) return currentTeams;
+        return currentTeams.map((t) =>
+          t.id === team.id ? { ...t, customTheme: { ...t.customTheme, ...team.customTheme } } : t,
+        );
+      },
+      false, // Don't revalidate immediately
+    );
+
+    // Make the API call with proper error handling and rollback
+    toast.promise(
+      updateTeam({ customTheme: team.customTheme })
+        .catch(async (error) => {
+          // Rollback optimistic updates on error
+          updateCurrentThemeColor(getCurrentThemeColor.call({ value: originalValue }));
+          await mutate((currentTeams) => {
+            if (!currentTeams) return currentTeams;
+            return currentTeams.map((t) => (t.id === team.id ? { ...t, customTheme: originalTeam.customTheme } : t));
+          }, false);
+          throw error;
+        })
+        .then(() => {
+          // Revalidate to ensure consistency after successful update
+          void mutate();
+        }),
+      {
+        loading: t('settings.theme.toast.neocard.update.loading'),
+        success: t('settings.theme.toast.neocard.update.success'),
+        error: t('settings.theme.toast.neocard.update.error'),
+      },
+    );
   };
 
   // const handleCreateTheme = (name: string, color: string) => {
