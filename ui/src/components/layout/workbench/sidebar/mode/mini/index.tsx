@@ -5,13 +5,12 @@ import { motion } from 'framer-motion';
 import { isUndefined } from 'lodash';
 
 import { useWorkspacePages } from '@/apis/pages';
-import { IPinPage } from '@/apis/pages/typings.ts';
 import { VirtuaWorkbenchMiniViewList } from '@/components/layout/workbench/sidebar/mode/mini/virtua';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { VINES_IFRAME_PAGE_TYPE2ID_MAPPER } from '@/components/ui/vines-iframe/consts.ts';
-import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
+import { useCurrentPage, useSetCurrentPage } from '@/store/useCurrentPageStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
@@ -60,7 +59,9 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
   const [{ activePage }] = useUrlState<{ activePage: string }>({ activePage: '' });
   const toggleToActivePageRef = useRef(activePage ? false : null);
 
-  const [currentPage, setCurrentPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
+  // const [currentPage, setCurrentPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
+  const currentPage = useCurrentPage();
+  const setCurrentPage = useSetCurrentPage();
 
   const latestOriginalPages = useLatest(originalPages ?? []);
   const prevPageRef = useRef<string>();
@@ -71,7 +72,8 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
       if (toggleToActivePageRef.current === false && activePage) {
         const page = latestOriginalPages.current.find((it) => it.workflowId === activePage);
         if (page) {
-          setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
+          // setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
+          setCurrentPage({ [teamId]: page });
           toggleToActivePageRef.current = true;
           return;
         }
@@ -81,12 +83,14 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
 
       if (currentPageId) {
         if (!latestOriginalPages.current.find((page) => page.id === currentPageId)) {
-          setCurrentPage((prev) => ({ ...prev, [teamId]: {} }));
+          // setCurrentPage((prev) => ({ ...prev, [teamId]: {} }));
+          setCurrentPage({ [teamId]: {} });
         }
       } else {
         const page = latestOriginalPages.current.find((it) => it.id !== currentPageId);
         if (page && prevPageRef.current !== page.id) {
-          setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
+          // setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
+          setCurrentPage({ [teamId]: page });
           prevPageRef.current = page.id;
         }
       }
@@ -110,7 +114,8 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
     (workflowId: string) => {
       const page = latestOriginalPages.current.find((it) => it.workflowId === workflowId);
       if (page) {
-        setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
+        // setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
+        setCurrentPage({ [teamId]: page });
       }
     },
     {
@@ -140,7 +145,8 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
           height={height}
           currentPageId={currentPage?.[teamId]?.id}
           onItemClicked={(page) => {
-            setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
+            // setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
+            setCurrentPage({ [teamId]: page });
           }}
           mini={!isUseFixedSidebar}
         />
