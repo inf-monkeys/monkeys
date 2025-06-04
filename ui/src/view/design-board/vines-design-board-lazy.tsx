@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -11,6 +11,7 @@ import { Board } from '@/components/layout/design-space/board';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { FrameSizeInput } from '@/components/ui/vines-design/frame-size-input';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useDesignBoardStore } from '@/store/useDesignBoardStore';
 import { usePageStore } from '@/store/usePageStore';
@@ -100,22 +101,32 @@ const DesignBoardView: React.FC = () => {
       <div className="flex h-full max-w-64">
         <motion.div
           className="flex flex-col gap-4 overflow-hidden [&_h1]:line-clamp-1 [&_span]:line-clamp-1"
-          initial={workbenchVisible ? { width: 0, padding: '1rem 0' } : { width: 128, padding: '1rem 1rem' }}
+          initial={workbenchVisible ? { width: 0, padding: '1rem 0' } : { width: 220, padding: '1rem 1rem' }}
           animate={{
-            width: sidebarVisible ? 128 : 0,
+            width: sidebarVisible ? 220 : 0,
             padding: sidebarVisible ? '1rem 1rem' : '1rem 0',
           }}
         >
-          <div className="flex h-full flex-col justify-end">
-            <div className="grid grid-cols-1 gap-2">
-              <Button variant="outline" onClick={handleExport}>
-                {t('common.utils.export')}
-              </Button>
-              <Button variant="outline" onClick={handleSave}>
-                {t('common.utils.save')}
-              </Button>
-            </div>
-          </div>
+          <AnimatePresence>
+            {sidebarVisible && (
+              <motion.div
+                className="flex h-full flex-col justify-between"
+                initial={{ opacity: 0, filter: 'blur(10px)' }}
+                animate={{ opacity: 1, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, filter: 'blur(10px)' }}
+              >
+                <FrameSizeInput />
+                <div className="grid grid-cols-1 gap-2">
+                  <Button variant="outline" onClick={handleExport}>
+                    {t('common.utils.export')}
+                  </Button>
+                  <Button variant="outline" onClick={handleSave}>
+                    {t('common.utils.save')}
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
         <Separator orientation="vertical" className="vines-center">
           <Tooltip>
