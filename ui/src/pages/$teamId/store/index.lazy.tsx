@@ -174,7 +174,28 @@ const StoreCard: React.FC = () => {
 
 export const Route = createLazyFileRoute('/$teamId/store/')({
   component: NewStorePage,
+  component: NewStorePage,
 });
+
+const StoreCardCategory: React.FC = () => {
+  return (
+    <div className="flex items-center rounded bg-primary-foreground px-2 py-1 text-xs text-primary">
+      <span className="line-clamp-1">Some</span>
+    </div>
+  );
+};
+
+const FilterSectionButton: React.FC = () => {
+  return (
+    <Button className="min-h-14 justify-between !bg-[#3A3A3A] opacity-100 [&_svg]:stroke-accent">
+      <div className="flex flex-row items-center gap-2">
+        <FilterIcon className="stroke-none text-black" size={16} />
+        <span className="line-clamp-1 font-semibold text-accent">Filter</span>
+      </div>
+      <ChevronRightIcon className="place-content-end" size={16} />
+    </Button>
+  );
+};
 
 const StoreCardCategory: React.FC = () => {
   return (
