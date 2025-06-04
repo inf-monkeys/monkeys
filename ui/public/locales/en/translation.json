@@ -3418,7 +3418,13 @@
         "description-is-too-long": "The description cannot exceed 200 characters"
       }
     },
-    "view-config": {}
+    "view-config": {
+      "canvas-setting": {
+        "title": "Canvas Setting",
+        "width": "Width",
+        "height": "Height"
+      }
+    }
   },
   "comfyui": {
     "utils": {
