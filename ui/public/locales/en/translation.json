@@ -932,7 +932,8 @@
             "title": "Save to theme list",
             "placeholder": "Enter theme name, up to 16 characters"
           }
-        }
+        },
+        "toggle-theme": "Toggle Theme"
       },
       "team-logo": {
         "title": "System Logo",
@@ -3418,7 +3419,13 @@
         "description-is-too-long": "The description cannot exceed 200 characters"
       }
     },
-    "view-config": {}
+    "view-config": {
+      "canvas-setting": {
+        "title": "Canvas Setting",
+        "width": "Width",
+        "height": "Height"
+      }
+    }
   },
   "comfyui": {
     "utils": {
