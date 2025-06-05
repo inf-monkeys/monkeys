@@ -4,6 +4,7 @@ import { CustomTheme, TeamEntity } from '@/database/entities/identity/team';
 import { AssetsMarketPlaceRepository } from '@/database/repositories/assets-marketplace.repository';
 import { TeamRepository } from '@/database/repositories/team.repository';
 import { ComfyuiModelService } from '@/modules/assets/comfyui-model/comfyui-model.service';
+import { DesignProjectService } from '@/modules/design/design.project.service';
 import { ConductorService } from '@/modules/workflow/conductor/conductor.service';
 import { Injectable } from '@nestjs/common';
 import { pick } from 'lodash';
@@ -18,6 +19,7 @@ export class TeamsService {
     private readonly marketPlaceRepository: AssetsMarketPlaceRepository,
     private readonly conductorService: ConductorService,
     private readonly comfyuiModelService: ComfyuiModelService,
+    private readonly designProjectService: DesignProjectService,
   ) {}
 
   public async forkAssetsFromMarketPlace(teamId: string, userId: string) {
@@ -51,6 +53,16 @@ export class TeamsService {
     await this.comfyuiModelService.updateModelsByTeamIdAndServerId(teamId, 'default');
     // 自动更新图像模型列表类型
     await this.comfyuiModelService.updateModelsFromInternals(teamId);
+    // TEMP TODO: 默认新建一个画板
+    await this.designProjectService.create({
+      teamId,
+      creatorUserId: userId,
+      sortIndex: 0,
+      assetType: 'design-board',
+      displayName: 'Design Board',
+      createdTimestamp: Date.now(),
+      updatedTimestamp: Date.now(),
+    });
     return;
   }
 
