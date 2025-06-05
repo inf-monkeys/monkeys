@@ -4,9 +4,11 @@ import { CustomTheme, TeamEntity } from '@/database/entities/identity/team';
 import { AssetsMarketPlaceRepository } from '@/database/repositories/assets-marketplace.repository';
 import { TeamRepository } from '@/database/repositories/team.repository';
 import { ComfyuiModelService } from '@/modules/assets/comfyui-model/comfyui-model.service';
+import { DesignMetadataService } from '@/modules/design/design.metadata.service';
 import { DesignProjectService } from '@/modules/design/design.project.service';
 import { CreateDesignProjectDto } from '@/modules/design/dto/create-design-project.dto';
 import { ConductorService } from '@/modules/workflow/conductor/conductor.service';
+import { WorkflowPageService } from '@/modules/workflow/workflow.page.service';
 import { Injectable } from '@nestjs/common';
 import { pick } from 'lodash';
 
@@ -21,6 +23,8 @@ export class TeamsService {
     private readonly conductorService: ConductorService,
     private readonly comfyuiModelService: ComfyuiModelService,
     private readonly designProjectService: DesignProjectService,
+    private readonly designMetadataService: DesignMetadataService,
+    private readonly pageService: WorkflowPageService,
   ) {}
 
   public async forkAssetsFromMarketPlace(teamId: string, userId: string) {
@@ -49,13 +53,19 @@ export class TeamsService {
     // Init assets from built-in marketplace
     await this.forkAssetsFromMarketPlace(teamId, userId);
     // TEMP TODO: 默认新建一个画板
-    await this.designProjectService.create({
+    const project = await this.designProjectService.create({
       teamId,
       creatorUserId: userId,
       displayName: 'Design Board',
       iconUrl: 'emoji:🎨:#eeeef1',
       description: '',
     } as CreateDesignProjectDto);
+    const board = (await this.designMetadataService.findAllByProjectId(project.id))[0];
+    const pageGroup = await this.pageService.getPageGroups(teamId)[0];
+    await this.pageService.updatePageGroup(teamId, pageGroup.id, {
+      pageId: 'design-board-' + board.id,
+      mode: 'add',
+    });
     // 初始化内置图像模型类型
     await this.comfyuiModelService.updateTypesFromInternals(teamId);
     // 自动更新内置图像模型列表
