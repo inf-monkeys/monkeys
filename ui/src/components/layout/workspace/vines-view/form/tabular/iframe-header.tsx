@@ -3,7 +3,6 @@ import React from 'react';
 import { CircleEllipsisIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { IPinPage } from '@/apis/pages/typings.ts';
 import { VinesDarkMode } from '@/components/layout/main/vines-darkmode.tsx';
 import { useVinesOriginWorkflow } from '@/components/layout-wrapper/workspace/utils.ts';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
@@ -14,8 +13,8 @@ import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesIcon } from '@/components/ui/vines-icon';
 import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
-import { useLocalStorage } from '@/hooks/use-local-storage';
 import useUrlState from '@/hooks/use-url-state.ts';
+import { useCurrentPage } from '@/store/useCurrentPageStore';
 import { getI18nContent } from '@/utils';
 
 interface IIframeHeaderProps {
@@ -29,7 +28,8 @@ export const IframeHeader: React.FC<IIframeHeaderProps> = ({ historyVisible, set
   const { workflow: data } = useVinesOriginWorkflow();
 
   const { teamId } = useVinesTeam();
-  const [page] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
+  // const [page] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
+  const page = useCurrentPage();
 
   const [{ hidden: routeHidden }] = useUrlState<{ hidden?: string }>();
   const hidden = (routeHidden?.toString() ?? '')?.split(',');

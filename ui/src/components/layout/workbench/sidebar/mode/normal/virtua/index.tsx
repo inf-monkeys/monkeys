@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
 import { Virtualizer, VListHandle } from 'virtua';
 
@@ -20,6 +20,7 @@ interface IVirtuaWorkbenchViewListProps {
 
   onChildClick?: IWorkbenchViewItemProps['onClick'];
 }
+let timeoutId: NodeJS.Timeout;
 
 export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = ({
   height,
@@ -31,18 +32,41 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const ref = useRef<VListHandle>(null);
+  const lastPageId = useRef<string>();
   useEffect(() => {
     if (!currentPageId || !currentGroupId || !ref.current) return;
-
+    if (lastPageId.current === currentPageId) return;
+    lastPageId.current = currentPageId;
     const index = data.findIndex((it) => it?.id === currentPageId);
     if (index === -1) return;
-
-    requestIdleCallback(() => ref.current?.scrollToIndex(index, { smooth: true, offset: -40 }));
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    timeoutId = setTimeout(() => ref.current?.scrollToIndex(index, { smooth: true, offset: -40 }), 100);
   }, [currentGroupId, currentPageId, data]);
 
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    // timeoutId = setTimeout(() => ref.current?.scrollToIndex(index, { smooth: true, offset: -40 }), 10);
+  }, []);
+  useEffect(() => {
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, []);
   return (
     <WorkbenchViewItemCurrentData.Provider value={{ pageId: currentPageId, groupId: currentGroupId }}>
-      <ScrollArea className="-mr-3 pr-3" ref={scrollRef} style={{ height }} disabledOverflowMask>
+      <ScrollArea
+        className="-mr-3 pr-3"
+        ref={scrollRef}
+        style={{ height }}
+        disabledOverflowMask
+        onScroll={handleScroll}
+      >
         <Virtualizer ref={ref} scrollRef={scrollRef}>
           {data.map((it, i) => (
             <ViewItem key={i} page={it as IWorkbenchViewItemPage} onClick={onChildClick} />
