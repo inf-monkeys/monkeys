@@ -5,6 +5,7 @@ import { AssetsMarketPlaceRepository } from '@/database/repositories/assets-mark
 import { TeamRepository } from '@/database/repositories/team.repository';
 import { ComfyuiModelService } from '@/modules/assets/comfyui-model/comfyui-model.service';
 import { DesignProjectService } from '@/modules/design/design.project.service';
+import { CreateDesignProjectDto } from '@/modules/design/dto/create-design-project.dto';
 import { ConductorService } from '@/modules/workflow/conductor/conductor.service';
 import { Injectable } from '@nestjs/common';
 import { pick } from 'lodash';
@@ -47,22 +48,20 @@ export class TeamsService {
   public async initTeam(teamId: string, userId: string) {
     // Init assets from built-in marketplace
     await this.forkAssetsFromMarketPlace(teamId, userId);
+    // TEMP TODO: 默认新建一个画板
+    await this.designProjectService.create({
+      teamId,
+      creatorUserId: userId,
+      displayName: 'Design Board',
+      iconUrl: 'emoji:🎨:#eeeef1',
+      description: '',
+    } as CreateDesignProjectDto);
     // 初始化内置图像模型类型
     await this.comfyuiModelService.updateTypesFromInternals(teamId);
     // 自动更新内置图像模型列表
     await this.comfyuiModelService.updateModelsByTeamIdAndServerId(teamId, 'default');
     // 自动更新图像模型列表类型
     await this.comfyuiModelService.updateModelsFromInternals(teamId);
-    // TEMP TODO: 默认新建一个画板
-    await this.designProjectService.create({
-      teamId,
-      creatorUserId: userId,
-      sortIndex: 0,
-      assetType: 'design-board',
-      displayName: 'Design Board',
-      createdTimestamp: Date.now(),
-      updatedTimestamp: Date.now(),
-    });
     return;
   }
 
