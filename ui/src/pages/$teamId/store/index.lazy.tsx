@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog';
 import { VinesLoading } from '@/components/ui/loading';
+import VinesMarkdown from '@/components/ui/markdown/markdown-lazy';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { VinesIcon } from '@/components/ui/vines-icon';
 
@@ -190,12 +191,14 @@ const StoreCard: React.FC<{}> = () => {
             </DialogTrigger> */}
             <DialogContent className="flex h-[80svh] flex-col p-4">
               <div className="h-20 w-full rounded-lg bg-gradient-to-br from-violet-800 to-indigo-800"></div>
-              <ScrollArea disabledOverflowMask className="size-full">
-                <div>
-                  Lorem ipsum dolor sit amet consectetur, adipisicing elit. Soluta, maiores? Impedit autem harum
-                  distinctio nisi, soluta dolor voluptatibus esse consequatur quam. Vitae dignissimos excepturi fugiat
-                  autem ratione qui laboriosam laborum.
-                </div>
+              <ScrollArea disabledOverflowMask className="size-full px-6">
+                <VinesMarkdown>{String.raw`
+Anything nomral
+# tedst
+### test
+#
+
+`}</VinesMarkdown>
               </ScrollArea>
               <DialogFooter>
                 <Button onClick={() => setOpen(false)} variant="outline">
