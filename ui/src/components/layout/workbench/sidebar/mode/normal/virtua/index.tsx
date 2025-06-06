@@ -63,7 +63,7 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
   return (
     <WorkbenchViewItemCurrentData.Provider value={{ pageId: currentPageId, groupId: currentGroupId }}>
       <ScrollArea
-        className={cn('w-48 px-4 pt-4', onlyShowWorkenchIcon && 'w-[4.80rem]')}
+        className={cn('w-56 px-4 pt-4', onlyShowWorkenchIcon && 'w-[4.80rem]')}
         ref={scrollRef}
         style={{ height }}
         disabledOverflowMask
