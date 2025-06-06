@@ -5,45 +5,57 @@ import { Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { IPageType } from '@/apis/pages/typings.ts';
+import { usePageGroups, useUpdateGroupPages } from '@/apis/pages';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu.tsx';
 import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
 
 interface IRenameViewProps extends React.ComponentPropsWithoutRef<'div'> {
-  page: IPageType | null;
   groupId: string;
-  pages?: IPageType[];
-  setPages: (pages: IPageType[]) => Promise<void>;
 }
 
-export const RenameGroup: React.FC<IRenameViewProps> = ({ page, pages, pageId, setPages }) => {
+export const RenameGroup: React.FC<IRenameViewProps> = ({ groupId }) => {
   const { t } = useTranslation();
+  const { data: groups, mutate } = usePageGroups();
+  const { trigger } = useUpdateGroupPages(groupId);
 
-  const handleRenamePage = async (name: string) => {
-    if (!pages) return;
-    const currentPage = pages.findIndex(({ id }) => id === pageId);
-    if (currentPage === -1) return;
+  const currentGroup = groups?.find((group) => group.id === groupId);
 
-    const newPages = [...pages];
-    newPages[currentPage].displayName = name;
-    toast.promise(setPages(newPages), {
-      loading: t('common.save.loading'),
-      success: t('common.save.success'),
-      error: t('common.save.error'),
-    });
+  const handleRenameGroup = async (displayName: string) => {
+    if (!groupId || !groups) return;
+
+    // Optimistic update
+    const optimisticGroups = groups.map((group) => (group.id === groupId ? { ...group, displayName } : group));
+
+    toast.promise(
+      mutate(
+        trigger({ displayName }).then((result) => {
+          // Return the server response or fall back to optimistic data
+          return result ?? optimisticGroups;
+        }),
+        {
+          optimisticData: optimisticGroups,
+          revalidate: false,
+        },
+      ),
+      {
+        loading: t('common.save.loading'),
+        success: t('common.save.success'),
+        error: t('common.save.error'),
+      },
+    );
   };
 
   return (
     <SimpleInputDialog
       title={t('workspace.wrapper.space.menu.rename.title')}
-      placeholder={page?.displayName ?? t('workspace.wrapper.space.menu.rename.placeholder')}
-      initialValue={page?.displayName ?? ''}
+      placeholder={currentGroup?.displayName ?? t('workspace.wrapper.space.menu.rename.placeholder')}
+      initialValue={currentGroup?.displayName ?? ''}
       onFinished={(val) => {
         if (isEmpty(val)) {
           toast.error(t('workspace.wrapper.space.menu.rename.input-empty'));
           return;
-        } else if (val !== page?.displayName) {
-          void handleRenamePage(val);
+        } else if (val !== currentGroup?.displayName) {
+          void handleRenameGroup(val);
         }
       }}
     >

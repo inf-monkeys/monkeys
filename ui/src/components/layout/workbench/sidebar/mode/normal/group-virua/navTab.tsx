@@ -2,7 +2,6 @@ import React, { memo } from 'react';
 
 import { MoreVertical } from 'lucide-react';
 
-import { useVinesPage } from '@/components/layout-wrapper/workspace/utils.ts';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -21,8 +20,6 @@ interface ITabMenuProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const NavDropdown: React.FC<ITabMenuProps> = memo(({ onOpenChange, groupId }) => {
-  const { page, pages, pageId, pagesMutate, setPages } = useVinesPage();
-
   const forceUpdate = useForceUpdate();
 
   return (
@@ -32,8 +29,8 @@ export const NavDropdown: React.FC<ITabMenuProps> = memo(({ onOpenChange, groupI
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" alignOffset={-6} side="right" sideOffset={12}>
         <DropdownMenuGroup>
-          <RenameGroup page={page} groupId={groupId} pages={pages} setPages={setPages} />
-          <SetGroupIcon groupId={groupId} pages={pages} setPages={setPages} forceUpdate={forceUpdate} />
+          <RenameGroup groupId={groupId} />
+          <SetGroupIcon groupId={groupId} />
           {/* <ViewGroup pageId={pageId} pagesMutate={pagesMutate} /> */}
           {/*<DropdownMenuSeparator />*/}
           {/*<DeletePage*/}
