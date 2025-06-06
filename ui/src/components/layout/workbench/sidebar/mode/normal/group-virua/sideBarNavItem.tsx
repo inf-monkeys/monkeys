@@ -26,17 +26,26 @@ export const spaceSidebarTabVariants = cva(
 interface ISpaceSidebarTabProps extends React.ComponentPropsWithoutRef<'div'> {
   icon: string | LucideIcon;
   displayName: string;
+  onlyShowWorkenchIcon?: boolean;
 }
-export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({ children, icon, displayName, ...attr }) => {
+export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
+  children,
+  icon,
+  displayName,
+  onlyShowWorkenchIcon,
+  ...attr
+}) => {
   return (
     <div className="flex h-full select-none items-center" {...attr}>
       {typeof icon === 'string' ? (
-        <VinesLucideIcon className="mr-2 size-[15px]" size={15} src={icon} />
+        <VinesLucideIcon className="mr-2 size-[20px] shrink-0" size={20} src={icon} />
       ) : (
-        React.createElement(icon, { className: 'mr-2 size-[15px]', size: 15 })
+        React.createElement(icon, { className: 'mr-2 size-[20px] shrink-0', size: 20 })
       )}
-      <h1 className="whitespace-nowrap text-sm">{displayName}</h1>
-      {children}
+      {!onlyShowWorkenchIcon && (
+        <h1 className="line-clamp-1 max-w-12 text-ellipsis whitespace-nowrap text-sm">{displayName}</h1>
+      )}
+      {!onlyShowWorkenchIcon && children}
     </div>
   );
 };

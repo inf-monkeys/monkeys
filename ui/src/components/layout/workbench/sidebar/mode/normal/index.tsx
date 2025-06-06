@@ -32,6 +32,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   const { teamId } = useVinesTeam();
 
   const { data, isLoading } = useWorkspacePages();
+
   const [groupId, setGroupId] = useState<string>('default');
   // const onlyShowWorkenchIcon = useOnlyShowWorkenchIcon();
   const originalPages = data?.pages ?? [];
@@ -142,7 +143,6 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   const hasGroups = lists.length && !isLoading;
   const onlyShowWorkenchIcon = useOnlyShowWorkenchIcon();
-  const [sidebarVisible, setSidebarVisible] = useState(true);
   const onChildClick = useCallback(
     (page) => {
       startTransition(() => {
@@ -155,7 +155,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   return (
     <div
       className={cn(
-        'flex h-full items-center justify-center rounded-xl rounded-r-none border border-input bg-neocard shadow-sm',
+        'mr-4 flex h-full items-center justify-center rounded-xl rounded-r-none border border-input bg-neocard shadow-sm',
       )}
       ref={ref}
     >
@@ -174,7 +174,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
                     // maxWidth: !onlyShowWorkenchIcon ? '20rem' : '0',
                     // minWidth: !onlyShowWorkenchIcon ? '8rem' : '8rem',
                   }}
-                  className="mr-4 flex justify-between rounded-xl bg-slate-1"
+                  className="flex justify-between rounded-l-xl bg-slate-1"
                 >
                   {/* leftmost nav */}
                   <VirtuaWorkbenchViewGroupList data={lists} groupId={groupId} setGroupId={setGroupId} />
@@ -206,7 +206,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
               </div>
             </div>
           )}
-          <div className="grid h-full w-full overflow-hidden rounded-l-xl bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1">
+          <div className="grid h-full w-full overflow-hidden rounded-r-xl bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1">
             {/* Second nav */}
             <VirtuaWorkbenchViewList
               height={height}

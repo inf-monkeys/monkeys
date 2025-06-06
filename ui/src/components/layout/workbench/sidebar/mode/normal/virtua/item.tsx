@@ -38,7 +38,7 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
             ? 'group bg-neocard text-accent-foreground outline outline-1 outline-input dark:bg-[#393939]'
             : // : 'p-[calc(0.5rem+1px)]',
               'p-2',
-          onlyShowWorkenchIcon && 'size-11',
+          onlyShowWorkenchIcon && 'size-11 justify-center',
         )}
         onClick={() => onClick?.(page)}
       >
