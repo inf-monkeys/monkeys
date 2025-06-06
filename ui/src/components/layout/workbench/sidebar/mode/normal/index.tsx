@@ -154,9 +154,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   );
   return (
     <div
-      className={cn(
-        'mr-4 flex h-full items-center justify-center rounded-xl rounded-r-none border border-input bg-neocard shadow-sm',
-      )}
+      className={cn('mr-4 flex h-full items-center justify-center rounded-xl border border-input bg-neocard shadow-sm')}
       ref={ref}
     >
       {isLoading ? (
