@@ -1,28 +1,28 @@
-import React, { startTransition, useRef, useState } from 'react';
+import React, { startTransition, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Link } from '@tanstack/react-router';
 
-import { useCreation, useDebounceEffect, useLatest, useThrottleEffect } from 'ahooks';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useLatest, useThrottleEffect } from 'ahooks';
+import { AnimatePresence } from 'framer-motion';
 import { keyBy, map } from 'lodash';
-import { ChevronRight, CircleSlash, Plus } from 'lucide-react';
+import { CircleSlash, Maximize2Icon, Minimize2Icon, PlusIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
-import { VirtuaWorkbenchViewGroupList } from '@/components/layout/workbench/sidebar/mode/normal/group-virua';
 import { VirtuaWorkbenchViewList } from '@/components/layout/workbench/sidebar/mode/normal/virtua';
 import { IWorkbenchViewItemPage } from '@/components/layout/workbench/sidebar/mode/normal/virtua/item.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { VinesFullLoading } from '@/components/ui/loading';
-import { Separator } from '@/components/ui/separator.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
+import { useOnlyShowWorkenchIcon, useToggleOnlyShowWorkenchIcon } from '@/store/showWorkenchIcon';
 import { cloneDeep, cn } from '@/utils';
 
+import { VirtuaWorkbenchViewGroupList } from './group-virua';
 interface IWorkbenchNormalModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
   showGroup?: boolean;
 }
@@ -34,9 +34,9 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   const { data, isLoading } = useWorkspacePages();
   const [groupId, setGroupId] = useState<string>('default');
-
+  // const onlyShowWorkenchIcon = useOnlyShowWorkenchIcon();
   const originalPages = data?.pages ?? [];
-  const originalGroups = useCreation(() => {
+  const originalGroups = useMemo(() => {
     return (
       data?.groups
         ?.map((group) => ({
@@ -45,7 +45,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
         }))
         ?.filter((group) => group.pageIds.length) ?? []
     );
-  }, [data?.groups, originalPages]);
+  }, [data?.groups, originalPages, data]);
 
   const pagesMap = keyBy(originalPages, 'id');
   const lists = map(originalGroups, ({ pageIds, ...attr }) => ({
@@ -67,68 +67,64 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   const latestOriginalPages = useLatest(originalPages);
   const latestOriginalGroups = useLatest(originalGroups);
-  useDebounceEffect(
-    () => {
-      if (!teamId) return;
+  useEffect(() => {
+    if (!teamId) return;
 
-      const pagesLength = latestOriginalPages.current.length;
-      const groupsLength = latestOriginalGroups.current.length;
-      if (!pagesLength) return;
+    const pagesLength = latestOriginalPages.current.length;
+    const groupsLength = latestOriginalGroups.current.length;
+    if (!pagesLength) return;
 
-      const currentTeamPage = currentPage?.[teamId] ?? {};
-      const currentPageId = currentTeamPage?.id;
+    const currentTeamPage = currentPage?.[teamId] ?? {};
+    const currentPageId = currentTeamPage?.id;
 
-      if (toggleToActivePageRef.current === false) {
-        const page = latestOriginalPages.current.find((it) => it.workflowId === activePage);
-        const groupWithPageId = latestOriginalGroups.current.find((it) => it.pageIds.includes(page?.id ?? ''));
-        if (page && groupWithPageId) {
-          setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
-          setGroupId(groupWithPageId.id);
-          toggleToActivePageRef.current = true;
-          return;
-        }
+    if (toggleToActivePageRef.current === false) {
+      const page = latestOriginalPages.current.find((it) => it.workflowId === activePage);
+      const groupWithPageId = latestOriginalGroups.current.find((it) => it.pageIds.includes(page?.id ?? ''));
+      if (page && groupWithPageId) {
+        setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
+        setGroupId(groupWithPageId.id);
+        toggleToActivePageRef.current = true;
+        return;
+      }
+    }
+
+    const setEmptyOrFirstPage = () => {
+      if (pagesLength && groupsLength) {
+        const sortedGroups = cloneDeep(latestOriginalGroups.current).sort((a) => (a.isBuiltIn ? 1 : -1));
+        sortedGroups.forEach(({ id, pageIds }) => {
+          if (pageIds.length) {
+            const firstPage = latestOriginalPages.current.find((it) => it.id === pageIds[0]);
+            if (firstPage) {
+              setCurrentPage((prev) => ({ ...prev, [teamId]: firstPage }));
+              setGroupId(id);
+              return;
+            }
+          }
+        });
+        return;
       }
 
-      const setEmptyOrFirstPage = () => {
-        if (pagesLength && groupsLength) {
-          const sortedGroups = cloneDeep(latestOriginalGroups.current).sort((a) => (a.isBuiltIn ? 1 : -1));
-          sortedGroups.forEach(({ id, pageIds }) => {
-            if (pageIds.length) {
-              const firstPage = latestOriginalPages.current.find((it) => it.id === pageIds[0]);
-              if (firstPage) {
-                setCurrentPage((prev) => ({ ...prev, [teamId]: firstPage }));
-                setGroupId(id);
-                return;
-              }
-            }
-          });
-          return;
-        }
+      setCurrentPage((prev) => ({ ...prev, [teamId]: {} }));
+    };
 
-        setCurrentPage((prev) => ({ ...prev, [teamId]: {} }));
-      };
-
-      if (currentPageId) {
-        const page = latestOriginalPages.current.find((it) => it.id === currentPageId);
-        if (page) {
-          const groupIdWithPage = latestOriginalGroups.current.find(
-            (it) => it.id === (currentTeamPage?.groupId || currentPageId),
-          );
-          if (groupIdWithPage) {
-            setGroupId(groupIdWithPage.id);
-          } else {
-            setEmptyOrFirstPage();
-          }
+    if (currentPageId) {
+      const page = latestOriginalPages.current.find((it) => it.id === currentPageId);
+      if (page) {
+        const groupIdWithPage = latestOriginalGroups.current.find(
+          (it) => it.id === (currentTeamPage?.groupId || currentPageId),
+        );
+        if (groupIdWithPage) {
+          setGroupId(groupIdWithPage.id);
         } else {
           setEmptyOrFirstPage();
         }
       } else {
         setEmptyOrFirstPage();
       }
-    },
-    [currentPage?.[teamId], data, teamId],
-    { wait: 210 },
-  );
+    } else {
+      setEmptyOrFirstPage();
+    }
+  }, [currentPage?.[teamId], data, teamId]);
 
   const { ref, height: wrapperHeight } = useElementSize();
   const [height, setHeight] = useState(500);
@@ -140,19 +136,16 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     [wrapperHeight],
     { wait: 64 },
   );
+  const toggleOnlyShowWorkenchIcon = useToggleOnlyShowWorkenchIcon();
 
   const hasGroups = lists.length && !isLoading;
-
-  const [sidebarVisible, setSidebarVisible] = useState(true);
+  const onlyShowWorkenchIcon = useOnlyShowWorkenchIcon();
+  // const [onlyShowWorkenchIcon, setSidebarVisible] = useState(true);
 
   return (
-    <motion.div
-      animate={{
-        width: showGroup ? (sidebarVisible ? '24rem' : '16rem') : '16rem',
-      }}
-      transition={{ duration: 0.3 }}
+    <div
       className={cn(
-        'relative mr-4 flex h-full items-center justify-center rounded-xl border border-input bg-slate-1 shadow-sm',
+        'flex h-full items-center justify-center rounded-xl rounded-r-none border border-input bg-neocard shadow-sm',
       )}
       ref={ref}
     >
@@ -165,19 +158,18 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
           {hasGroups ? (
             showGroup ? (
               <>
-                <motion.div
-                  initial={{ minWidth: '8rem', height: '100%' }}
-                  animate={{
-                    maxWidth: sidebarVisible ? '20rem' : '0',
-                    minWidth: sidebarVisible ? '8rem' : '0',
+                <div
+                  style={{
                     height: '100%',
+                    // maxWidth: !onlyShowWorkenchIcon ? '20rem' : '0',
+                    // minWidth: !onlyShowWorkenchIcon ? '8rem' : '8rem',
                   }}
-                  transition={{ duration: 0.3 }}
-                  className="overflow-hidden"
+                  className="mr-4 flex justify-between rounded-xl bg-slate-1"
                 >
+                  {/* leftmost nav */}
                   <VirtuaWorkbenchViewGroupList data={lists} groupId={groupId} setGroupId={setGroupId} />
-                </motion.div>
-                <Separator orientation="vertical" className="vines-center">
+                </div>
+                {/* <Separator orientation="vertical" className="vines-center">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div
@@ -191,7 +183,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
                       {sidebarVisible ? t('common.sidebar.hide') : t('common.sidebar.show')}
                     </TooltipContent>
                   </Tooltip>
-                </Separator>
+                </Separator> */}
               </>
             ) : (
               <></>
@@ -204,7 +196,8 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
               </div>
             </div>
           )}
-          <div className="grid w-full overflow-hidden p-4 [&_h1]:line-clamp-1 [&_span]:line-clamp-1">
+          <div className="grid h-full w-full overflow-hidden rounded-l-xl bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1">
+            {/* Second nav */}
             <VirtuaWorkbenchViewList
               height={height}
               data={(lists?.find((it) => it.id === groupId)?.pages ?? []) as IPinPage[]}
@@ -216,17 +209,37 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
                 });
               }}
             />
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link to="/$teamId/workflows/" params={{ teamId }}>
-                  <Button icon={<Plus />} className="mt-2 w-full" variant="outline" />
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>{t('workbench.sidebar.add')}</TooltipContent>
-            </Tooltip>
+            <div className="flex items-center justify-between gap-4 px-4 pb-2">
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button
+                    onClick={() => toggleOnlyShowWorkenchIcon()}
+                    icon={onlyShowWorkenchIcon ? <Maximize2Icon /> : <Minimize2Icon />}
+                    size={'icon'}
+                    className={cn('mt-2 shrink-0', onlyShowWorkenchIcon && 'w-full grow')}
+                    variant="outline"
+                  />
+                </TooltipTrigger>
+                <TooltipContent className="z-20">{t('workbench.sidebar.toggle')}</TooltipContent>
+              </Tooltip>
+              {!onlyShowWorkenchIcon && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="vines-center shrink grow">
+                      <Link to="/$teamId/workflows/" className="contents" params={{ teamId }}>
+                        <Button icon={<PlusIcon />} className="mt-2 shrink grow" variant="outline" />
+                      </Link>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent align="start" side="top" className="z-10">
+                    {t('workbench.sidebar.add')}
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
           </div>
         </>
       )}
-    </motion.div>
+    </div>
   );
 };
