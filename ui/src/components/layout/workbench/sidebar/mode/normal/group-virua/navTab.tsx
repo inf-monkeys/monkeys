@@ -9,7 +9,6 @@ import {
   DropdownMenuGroup,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
-import { useForceUpdate } from '@/hooks/use-force-update.ts';
 
 import { RenameGroup } from './renameGroup';
 import { SetGroupIcon } from './setGroupIcon';
@@ -20,8 +19,6 @@ interface ITabMenuProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 export const NavDropdown: React.FC<ITabMenuProps> = memo(({ onOpenChange, groupId }) => {
-  const forceUpdate = useForceUpdate();
-
   return (
     <DropdownMenu onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>

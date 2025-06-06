@@ -291,7 +291,7 @@ export class WorkflowPageService {
         ...agentPages,
         ...designBoardPages,
       ],
-      groups: groups.map((it) => pick(it, ['id', 'displayName', 'pageIds', 'isBuiltIn'])),
+      groups: groups.map((it) => pick(it, ['id', 'displayName', 'pageIds', 'isBuiltIn', 'iconUrl'])),
     };
   }
 

@@ -56,10 +56,11 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
                 groupId === id && 'border border-input bg-neocard',
               )}
               displayName={t([`workspace.wrapper.space.tabs.${displayName}`, displayName])}
+              onlyShowWorkenchIcon={onlyShowWorkenchIcon}
               onClick={() => setGroupId(id)}
             >
               <AnimatePresence>
-                {id === groupId && (
+                {id === groupId && !onlyShowWorkenchIcon && (
                   <motion.div
                     key={id + '_more_button'}
                     initial={{ opacity: 0 }}
