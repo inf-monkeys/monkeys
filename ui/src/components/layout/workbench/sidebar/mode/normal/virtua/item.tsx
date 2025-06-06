@@ -35,7 +35,7 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
         className={cn(
           'z-10 mb-2 flex cursor-pointer items-center gap-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
           currentPageId === pageId
-            ? 'group bg-neocard text-accent-foreground outline outline-1 outline-input dark:bg-[#393939]'
+            ? 'group border border-input bg-neocard text-accent-foreground dark:bg-[#393939]'
             : // : 'p-[calc(0.5rem+1px)]',
               'p-2',
           onlyShowWorkenchIcon && 'size-11 justify-center',
