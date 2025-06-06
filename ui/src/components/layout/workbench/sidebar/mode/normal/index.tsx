@@ -206,7 +206,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
             </div>
           )}
           <Separator orientation="vertical" className="vines-center"></Separator>
-          <div className="grid h-full w-full overflow-hidden rounded-r-xl bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1">
+          <div className="grid h-full w-full grid-rows-[1fr_auto] rounded-r-xl bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1">
             {/* Second nav */}
             <VirtuaWorkbenchViewList
               height={height}
@@ -217,7 +217,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
             />
             <div
               className={cn(
-                'flex items-center justify-between gap-4 px-4 pb-2',
+                'flex items-center justify-between gap-4 px-4 pb-4',
                 onlyShowWorkenchIcon && 'justify-center',
               )}
             >
