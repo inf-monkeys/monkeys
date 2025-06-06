@@ -43,7 +43,7 @@ export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
         React.createElement(icon, { className: 'mr-2 size-[20px] shrink-0', size: 20 })
       )}
       {!onlyShowWorkenchIcon && (
-        <h1 className="line-clamp-1 max-w-12 text-ellipsis whitespace-nowrap text-sm">{displayName}</h1>
+        <h1 className="line-clamp-1 max-w-20 text-ellipsis whitespace-nowrap text-sm">{displayName}</h1>
       )}
       {!onlyShowWorkenchIcon && children}
     </div>
