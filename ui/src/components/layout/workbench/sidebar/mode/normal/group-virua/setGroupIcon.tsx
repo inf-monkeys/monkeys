@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { useUpdateGroupPages } from '@/apis/pages';
-import { IPageType } from '@/apis/pages/typings.ts';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu.tsx';
@@ -14,9 +13,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 interface ISetViewIconProps extends React.ComponentPropsWithoutRef<'div'> {
   groupId: string;
-  pages?: IPageType[];
-  setPages: (pages: IPageType[]) => Promise<void>;
-  forceUpdate?: React.DispatchWithoutAction;
 }
 
 export const SetGroupIcon: React.FC<ISetViewIconProps> = ({ groupId }) => {

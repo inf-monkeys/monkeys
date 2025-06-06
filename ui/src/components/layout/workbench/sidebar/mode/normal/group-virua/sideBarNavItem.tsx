@@ -2,8 +2,8 @@
 import React from 'react';
 
 import { cva } from 'class-variance-authority';
+import { LucideIcon } from 'lucide-react';
 
-import { EMOJI2LUCIDE_MAPPER } from '@/components/layout-wrapper/workspace/space/sidebar/tabs/tab.tsx';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
 
 interface ISidebarTabsListProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -24,13 +24,17 @@ export const spaceSidebarTabVariants = cva(
 );
 
 interface ISpaceSidebarTabProps extends React.ComponentPropsWithoutRef<'div'> {
-  icon: string;
+  icon: string | LucideIcon;
   displayName: string;
 }
 export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({ children, icon, displayName, ...attr }) => {
   return (
     <div className="flex h-full select-none items-center" {...attr}>
-      <VinesLucideIcon className="mr-2 size-[15px]" size={15} src={EMOJI2LUCIDE_MAPPER[icon] ?? icon} />
+      {typeof icon === 'string' ? (
+        <VinesLucideIcon className="mr-2 size-[15px]" size={15} src={icon} />
+      ) : (
+        React.createElement(icon, { className: 'mr-2 size-[15px]', size: 15 })
+      )}
       <h1 className="whitespace-nowrap text-sm">{displayName}</h1>
       {children}
     </div>
