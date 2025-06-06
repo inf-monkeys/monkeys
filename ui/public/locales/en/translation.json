@@ -932,7 +932,8 @@
             "title": "Save to theme list",
             "placeholder": "Enter theme name, up to 16 characters"
           }
-        }
+        },
+        "toggle-theme": "Toggle Theme"
       },
       "team-logo": {
         "title": "System Logo",

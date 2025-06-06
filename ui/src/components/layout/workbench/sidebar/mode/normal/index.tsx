@@ -1,4 +1,4 @@
-import React, { startTransition, useEffect, useMemo, useRef, useState } from 'react';
+import React, { startTransition, useCallback, useRef, useState } from 'react';
 
 import { Link } from '@tanstack/react-router';
 
@@ -11,15 +11,14 @@ import { useTranslation } from 'react-i18next';
 import { useWorkspacePages } from '@/apis/pages';
 import { IPinPage } from '@/apis/pages/typings.ts';
 import { VirtuaWorkbenchViewList } from '@/components/layout/workbench/sidebar/mode/normal/virtua';
-import { IWorkbenchViewItemPage } from '@/components/layout/workbench/sidebar/mode/normal/virtua/item.tsx';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { VinesFullLoading } from '@/components/ui/loading';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useOnlyShowWorkenchIcon, useToggleOnlyShowWorkenchIcon } from '@/store/showWorkenchIcon';
+import { useCurrentPage, useSetCurrentPage } from '@/store/useCurrentPageStore';
 import { cloneDeep, cn } from '@/utils';
 
 import { VirtuaWorkbenchViewGroupList } from './group-virua';
@@ -63,8 +62,9 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   const [{ activePage }] = useUrlState<{ activePage: string }>({ activePage: '' });
   const toggleToActivePageRef = useRef(activePage ? false : null);
 
-  const [currentPage, setCurrentPage] = useLocalStorage<Partial<IWorkbenchViewItemPage>>('vines-ui-workbench-page', {});
-
+  // const [currentPage, setCurrentPage] = useLocalStorage<Partial<IWorkbenchViewItemPage>>('vines-ui-workbench-page', {});
+  const currentPage = useCurrentPage();
+  const setCurrentPage = useSetCurrentPage();
   const latestOriginalPages = useLatest(originalPages);
   const latestOriginalGroups = useLatest(originalGroups);
   useEffect(() => {
@@ -81,7 +81,8 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
       const page = latestOriginalPages.current.find((it) => it.workflowId === activePage);
       const groupWithPageId = latestOriginalGroups.current.find((it) => it.pageIds.includes(page?.id ?? ''));
       if (page && groupWithPageId) {
-        setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
+        // setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
+        setCurrentPage({ [teamId]: page });
         setGroupId(groupWithPageId.id);
         toggleToActivePageRef.current = true;
         return;
@@ -95,7 +96,8 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
           if (pageIds.length) {
             const firstPage = latestOriginalPages.current.find((it) => it.id === pageIds[0]);
             if (firstPage) {
-              setCurrentPage((prev) => ({ ...prev, [teamId]: firstPage }));
+              // setCurrentPage((prev) => ({ ...prev, [teamId]: firstPage }));
+              setCurrentPage({ [teamId]: firstPage });
               setGroupId(id);
               return;
             }
@@ -104,7 +106,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
         return;
       }
 
-      setCurrentPage((prev) => ({ ...prev, [teamId]: {} }));
+      setCurrentPage({ [teamId]: {} });
     };
 
     if (currentPageId) {
@@ -140,8 +142,16 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   const hasGroups = lists.length && !isLoading;
   const onlyShowWorkenchIcon = useOnlyShowWorkenchIcon();
-  // const [onlyShowWorkenchIcon, setSidebarVisible] = useState(true);
-
+  const [sidebarVisible, setSidebarVisible] = useState(true);
+  const onChildClick = useCallback(
+    (page) => {
+      startTransition(() => {
+        // setCurrentPage((prev) => ({ ...prev, [teamId]: { ...page, groupId } }));
+        setCurrentPage({ [teamId]: { ...page, groupId } });
+      });
+    },
+    [teamId, groupId, setCurrentPage],
+  );
   return (
     <div
       className={cn(
@@ -203,11 +213,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
               data={(lists?.find((it) => it.id === groupId)?.pages ?? []) as IPinPage[]}
               currentPageId={currentPage?.[teamId]?.id}
               currentGroupId={groupId}
-              onChildClick={(page) => {
-                startTransition(() => {
-                  setCurrentPage((prev) => ({ ...prev, [teamId]: { ...page, groupId } }));
-                });
-              }}
+              onChildClick={onChildClick}
             />
             <div className="flex items-center justify-between gap-4 px-4 pb-2">
               <Tooltip>

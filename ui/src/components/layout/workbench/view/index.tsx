@@ -6,12 +6,11 @@ import { GitBranchPlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useWorkspacePages } from '@/apis/pages';
-import { IPinPage } from '@/apis/pages/typings.ts';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { VinesLoading } from '@/components/ui/loading';
 import { VinesIFrame } from '@/components/ui/vines-iframe';
-import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useElementSize } from '@/hooks/use-resize-observer.ts';
+import { useCurrentPage } from '@/store/useCurrentPageStore';
 import { usePageStore } from '@/store/usePageStore';
 import { cn } from '@/utils';
 
@@ -34,7 +33,8 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
   const { ref, width, height } = useElementSize();
 
   const { teamId } = useVinesTeam();
-  const [page] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
+  // const [page] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
+  const page = useCurrentPage();
 
   const hasPages = (pages?.length ?? 0) > 0;
 
