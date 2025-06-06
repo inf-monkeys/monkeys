@@ -14,6 +14,7 @@ import { VirtuaWorkbenchViewList } from '@/components/layout/workbench/sidebar/m
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { VinesFullLoading } from '@/components/ui/loading';
+import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
@@ -204,6 +205,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
               </div>
             </div>
           )}
+          <Separator orientation="vertical" className="vines-center"></Separator>
           <div className="grid h-full w-full overflow-hidden rounded-r-xl bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1">
             {/* Second nav */}
             <VirtuaWorkbenchViewList

@@ -11,7 +11,7 @@ import { useOnlyShowWorkenchIcon } from '@/store/showWorkenchIcon';
 import { cn } from '@/utils';
 
 import { NavDropdown } from './navTab';
-import { SideBarNavItem } from './SideBarNavItem';
+import { SideBarNavItem } from './sideBarNavItem';
 
 interface IVirtuaWorkbenchViewGroupListProps extends React.ComponentPropsWithoutRef<'div'> {
   groupId: string;
