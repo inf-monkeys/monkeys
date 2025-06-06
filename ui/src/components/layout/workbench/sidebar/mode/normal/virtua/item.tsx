@@ -47,13 +47,13 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
         </VinesIcon>
         {!onlyShowWorkenchIcon ? (
           <>
-            <div className="flex max-w-40 flex-col gap-0.5">
-              <h1 className="text-sm font-bold leading-tight">
+            <div className="flex max-w-48 flex-col gap-0.5">
+              <h1 className="line-clamp-1 max-w-28 text-ellipsis text-sm font-bold leading-tight">
                 {getI18nContent(info?.displayName) ?? t('common.utils.untitled')}
               </h1>
               <div className="flex items-center gap-0.5">
                 <VinesLucideIcon className="size-3" size={12} src={EMOJI2LUCIDE_MAPPER[viewIcon] ?? viewIcon} />
-                <span className="text-xxs">
+                <span className="text-xxs line-clamp-1 max-w-24 text-ellipsis">
                   {getI18nContent(info?.description) ??
                     t([`workspace.wrapper.space.tabs.${page?.displayName ?? ''}`, page?.displayName ?? ''])}
                 </span>
