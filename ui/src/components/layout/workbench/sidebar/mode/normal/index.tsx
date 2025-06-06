@@ -1,4 +1,4 @@
-import React, { startTransition, useCallback, useRef, useState } from 'react';
+import React, { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Link } from '@tanstack/react-router';
 
@@ -215,14 +215,19 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
               currentGroupId={groupId}
               onChildClick={onChildClick}
             />
-            <div className="flex items-center justify-between gap-4 px-4 pb-2">
+            <div
+              className={cn(
+                'flex items-center justify-between gap-4 px-4 pb-2',
+                onlyShowWorkenchIcon && 'justify-center',
+              )}
+            >
               <Tooltip>
                 <TooltipTrigger>
                   <Button
                     onClick={() => toggleOnlyShowWorkenchIcon()}
                     icon={onlyShowWorkenchIcon ? <Maximize2Icon /> : <Minimize2Icon />}
                     size={'icon'}
-                    className={cn('mt-2 shrink-0', onlyShowWorkenchIcon && 'w-full grow')}
+                    className={cn('mt-2 shrink-0', onlyShowWorkenchIcon && '')}
                     variant="outline"
                   />
                 </TooltipTrigger>
