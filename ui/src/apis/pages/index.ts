@@ -55,6 +55,7 @@ export interface IUpdatePageGroupParams {
   displayName?: string;
   pageId?: string;
   mode?: 'add' | 'remove';
+  iconUrl?: string;
 }
 
 export const useUpdateGroupPages = (groupId?: string) =>
