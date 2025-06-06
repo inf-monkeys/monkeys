@@ -47,7 +47,7 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
         </VinesIcon>
         {!onlyShowWorkenchIcon ? (
           <>
-            <div className="flex max-w-48 flex-col gap-0.5">
+            <div className="flex flex-col gap-0.5">
               <h1 className="line-clamp-1 max-w-28 text-ellipsis text-sm font-bold leading-tight">
                 {getI18nContent(info?.displayName) ?? t('common.utils.untitled')}
               </h1>

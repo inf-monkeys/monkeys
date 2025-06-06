@@ -29,11 +29,7 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
   const { t } = useTranslation();
   return (
     <div className="h-full p-4">
-      <ScrollArea
-        className={cn('', onlyShowWorkenchIcon ? 'w-[2.25rem]' : 'w-32')}
-        ref={scrollRef}
-        disabledOverflowMask
-      >
+      <ScrollArea className={cn('', onlyShowWorkenchIcon ? 'w-[2.5rem]' : 'w-40')} ref={scrollRef} disabledOverflowMask>
         <Virtualizer scrollRef={scrollRef}>
           {data.map(({ displayName, id, iconUrl }, i) => (
             // <Button
