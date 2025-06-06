@@ -922,7 +922,8 @@
             "title": "保存到主题列表",
             "placeholder": "输入主题名称，16 字以内"
           }
-        }
+        },
+        "toggle-theme": "切换主题"
       },
       "team-logo": {
         "title": "系统图标",

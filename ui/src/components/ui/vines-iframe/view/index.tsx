@@ -67,7 +67,6 @@ export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type
     }
 
     if (workflowId) {
-      console.log(workflowId);
       return (
         <FlowStoreProvider createStore={createFlowStore}>
           <CanvasStoreProvider createStore={createCanvasStore}>
