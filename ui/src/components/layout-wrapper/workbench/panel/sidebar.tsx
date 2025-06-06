@@ -13,6 +13,7 @@ import { Balance } from '@/components/layout/main/sidebar/teams/balance.tsx';
 
 interface IVinesPanelSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
+// Sidebar in workspace
 export const VinesPanelSidebar: React.FC<IVinesPanelSidebarProps> = () => {
   const { t } = useTranslation();
 
