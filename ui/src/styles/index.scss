@@ -19,6 +19,9 @@
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
   }
+  .debug-outline {
+    @apply outline outline-2 outline-red-500;
+  }
 }
 
 @layer base {
