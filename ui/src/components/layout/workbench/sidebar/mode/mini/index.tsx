@@ -1,10 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useCreation, useDebounceEffect, useDebounceFn, useLatest, useThrottleEffect } from 'ahooks';
 import { motion } from 'framer-motion';
-import { isUndefined } from 'lodash';
+import { isUndefined, keyBy, map } from 'lodash';
 
 import { useWorkspacePages } from '@/apis/pages';
+import { IPinPage } from '@/apis/pages/typings.ts';
+import { WorkbenchMiniGroupList } from '@/components/layout/workbench/sidebar/mode/mini/group.tsx';
 import { VirtuaWorkbenchMiniViewList } from '@/components/layout/workbench/sidebar/mode/mini/virtua';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { VINES_IFRAME_PAGE_TYPE2ID_MAPPER } from '@/components/ui/vines-iframe/consts.ts';
@@ -23,6 +25,8 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
     sidebarFilter?: string;
     sidebarReserve?: string;
   }>();
+
+  const [groupId, setGroupId] = useState<string>('default');
 
   const originalPages = useCreation(() => {
     if (isUndefined(data)) return null;
@@ -54,6 +58,33 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
     return data?.pages ?? [];
   }, [routeSidebarFilter, routeSidebarReserve, data?.pages]);
 
+  const originalGroups = useMemo(() => {
+    return (
+      data?.groups
+        ?.map((group) => ({
+          ...group,
+          pageIds: group.pageIds.filter((pageId) => (originalPages ?? []).some((it) => it.id === pageId)),
+        }))
+        ?.filter((group) => group.pageIds.length) ?? []
+    );
+  }, [data?.groups, originalPages, data]);
+
+  const pagesMap = keyBy(originalPages ?? [], 'id');
+  const lists = map(originalGroups, ({ pageIds, ...attr }) => ({
+    ...attr,
+    pages: map(pageIds, (pageId) => pagesMap[pageId]).filter(Boolean),
+  }))
+    .filter((it) => it.pages?.length)
+    .sort((a, b) => {
+      if (a.isBuiltIn !== b.isBuiltIn) {
+        return a.isBuiltIn ? -1 : 1;
+      }
+      return a.displayName.localeCompare(b.displayName, undefined, { numeric: true });
+    });
+
+  // Get current group's pages for display
+  const currentGroupPages = (lists?.find((it) => it.id === groupId)?.pages ?? []) as IPinPage[];
+
   const { teamId } = useVinesTeam();
 
   const [{ activePage }] = useUrlState<{ activePage: string }>({ activePage: '' });
@@ -64,6 +95,7 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
   const setCurrentPage = useSetCurrentPage();
 
   const latestOriginalPages = useLatest(originalPages ?? []);
+  const latestOriginalGroups = useLatest(originalGroups);
   const prevPageRef = useRef<string>();
   useDebounceEffect(
     () => {
@@ -72,6 +104,11 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
       if (toggleToActivePageRef.current === false && activePage) {
         const page = latestOriginalPages.current.find((it) => it.workflowId === activePage);
         if (page) {
+          // Find the group that contains this page and set it as active group
+          const groupWithPageId = latestOriginalGroups.current.find((it) => it.pageIds.includes(page.id));
+          if (groupWithPageId) {
+            setGroupId(groupWithPageId.id);
+          }
           // setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
           setCurrentPage({ [teamId]: page });
           toggleToActivePageRef.current = true;
@@ -89,6 +126,11 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
       } else {
         const page = latestOriginalPages.current.find((it) => it.id !== currentPageId);
         if (page && prevPageRef.current !== page.id) {
+          // Find the group that contains this page and set it as active group
+          const groupWithPageId = latestOriginalGroups.current.find((it) => it.pageIds.includes(page.id));
+          if (groupWithPageId) {
+            setGroupId(groupWithPageId.id);
+          }
           // setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
           setCurrentPage({ [teamId]: page });
           prevPageRef.current = page.id;
@@ -114,6 +156,11 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
     (workflowId: string) => {
       const page = latestOriginalPages.current.find((it) => it.workflowId === workflowId);
       if (page) {
+        // Find the group that contains this page and set it as active group
+        const groupWithPageId = latestOriginalGroups.current.find((it) => it.pageIds.includes(page.id));
+        if (groupWithPageId) {
+          setGroupId(groupWithPageId.id);
+        }
         // setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
         setCurrentPage({ [teamId]: page });
       }
@@ -140,8 +187,11 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
       ref={ref}
     >
       <div className="flex w-full flex-col gap-4 px-2">
+        {lists.length > 0 && (
+          <WorkbenchMiniGroupList data={lists} groupId={groupId} setGroupId={setGroupId} height={height} />
+        )}
         <VirtuaWorkbenchMiniViewList
-          data={originalPages}
+          data={currentGroupPages}
           height={height}
           currentPageId={currentPage?.[teamId]?.id}
           onItemClicked={(page) => {
