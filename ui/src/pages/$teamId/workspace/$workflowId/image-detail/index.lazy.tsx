@@ -26,10 +26,9 @@ import { toast } from 'sonner';
 
 import { useSystemConfig } from '@/apis/common';
 import { deleteWorkflowExecution, getWorkflowExecution } from '@/apis/workflow/execution';
-import ImageDetailLayout from '@/components/layout/image-detail-layout';
 import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
-import { Carousel, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { Carousel, CarouselItem } from '@/components/ui/carousel';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
 import { useCopy } from '@/hooks/use-copy';
@@ -388,181 +387,188 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 
   return (
     <VinesFlowProvider workflowId={workflowId}>
-      <ImageDetailLayout rightSidebar={RightSidebar}>
-        {/* 主内容区域 */}
-        <main className="flex size-full flex-1 flex-col overflow-hidden rounded-xl border border-input bg-background pb-6 shadow-sm dark:bg-[#111113] md:flex-row">
-          {/* 左侧图片展示区 */}
-          <div className="flex h-full w-[450px] flex-col items-center overflow-hidden rounded-bl-xl rounded-br-xl rounded-tl-xl bg-background dark:bg-[#111113] sm:w-full md:w-[70%]">
-            {imageUrl ? (
-              <>
-                <div className="flex w-full flex-1 items-center justify-center overflow-auto p-4">
-                  <Image
-                    src={imageUrl}
-                    alt="详情图片"
-                    className="rounded-lg"
-                    style={{
-                      display: 'block',
-                      margin: 'auto',
-                      maxWidth: '100%',
-                      maxHeight: 'calc(100vh - 200px)',
-                      width: 'auto',
-                      height: 'auto',
-                      objectFit: 'contain',
-                      transform: `
-                        rotate(${imageRotation}deg)
-                        scaleX(${imageFlipX ? -1 : 1})
-                        scaleY(${imageFlipY ? -1 : 1})
-                        scale(${imageScale})
-                      `,
-                      transition: 'transform 0.3s ease',
-                    }}
-                    preview={false}
-                  />
-                </div>
-                {/* 图片操作按钮 - 底部 */}
-                <div className="flex w-full items-center justify-center gap-2 bg-background py-5 dark:bg-[#111113] sm:gap-1 md:gap-2">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        icon={<FlipVertical />}
-                        variant="outline"
-                        size="small"
-                        onClick={() => {
-                          // 直接应用垂直翻转效果
-                          setImageFlipY((prev) => !prev);
+      <div className="flex h-full w-full flex-col bg-neocard">
+        <div className="flex flex-1">
+          {/* 主内容区域 */}
+          <div className="flex flex-1">
+            <main className="flex size-full flex-1 flex-col overflow-hidden rounded-xl border border-input bg-background pb-6 shadow-sm dark:bg-[#111113] md:flex-row">
+              {/* 左侧图片展示区 */}
+              <div className="flex h-full w-[450px] flex-col items-center overflow-hidden rounded-bl-xl rounded-br-xl rounded-tl-xl bg-background dark:bg-[#111113] sm:w-full md:w-[70%]">
+                {imageUrl ? (
+                  <>
+                    <div className="flex w-full flex-1 items-center justify-center overflow-auto p-4">
+                      <Image
+                        src={imageUrl}
+                        alt="详情图片"
+                        className="rounded-lg"
+                        style={{
+                          display: 'block',
+                          margin: 'auto',
+                          maxWidth: '100%',
+                          maxHeight: 'calc(100vh - 200px)',
+                          width: 'auto',
+                          height: 'auto',
+                          objectFit: 'contain',
+                          transform: `
+                            rotate(${imageRotation}deg)
+                            scaleX(${imageFlipX ? -1 : 1})
+                            scaleY(${imageFlipY ? -1 : 1})
+                            scale(${imageScale})
+                          `,
+                          transition: 'transform 0.3s ease',
                         }}
+                        preview={false}
                       />
-                    </TooltipTrigger>
-                    <TooltipContent>{t('workspace.image-detail.flipY', '垂直翻转')}</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        icon={<FlipHorizontal />}
-                        variant="outline"
-                        size="small"
-                        onClick={() => {
-                          // 直接应用水平翻转效果
-                          setImageFlipX((prev) => !prev);
-                        }}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>{t('workspace.image-detail.flipX', '水平翻转')}</TooltipContent>
-                  </Tooltip>
+                    </div>
+                    {/* 图片操作按钮 - 底部 */}
+                    <div className="flex w-full items-center justify-center gap-2 bg-background py-5 dark:bg-[#111113] sm:gap-1 md:gap-2">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            icon={<FlipVertical />}
+                            variant="outline"
+                            size="small"
+                            onClick={() => {
+                              // 直接应用垂直翻转效果
+                              setImageFlipY((prev) => !prev);
+                            }}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>{t('workspace.image-detail.flipY', '垂直翻转')}</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            icon={<FlipHorizontal />}
+                            variant="outline"
+                            size="small"
+                            onClick={() => {
+                              // 直接应用水平翻转效果
+                              setImageFlipX((prev) => !prev);
+                            }}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>{t('workspace.image-detail.flipX', '水平翻转')}</TooltipContent>
+                      </Tooltip>
 
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        icon={<RotateCcw />}
-                        variant="outline"
-                        size="small"
-                        onClick={() => {
-                          // 直接应用左旋转效果
-                          setImageRotation((prev) => prev - 90);
-                        }}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>{t('workspace.image-detail.rotateLeft', '向左旋转')}</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        icon={<RotateCw />}
-                        variant="outline"
-                        size="small"
-                        onClick={() => {
-                          // 直接应用右旋转效果
-                          setImageRotation((prev) => prev + 90);
-                        }}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>{t('workspace.image-detail.rotateRight', '向右旋转')}</TooltipContent>
-                  </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            icon={<RotateCcw />}
+                            variant="outline"
+                            size="small"
+                            onClick={() => {
+                              // 直接应用左旋转效果
+                              setImageRotation((prev) => prev - 90);
+                            }}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>{t('workspace.image-detail.rotateLeft', '向左旋转')}</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            icon={<RotateCw />}
+                            variant="outline"
+                            size="small"
+                            onClick={() => {
+                              // 直接应用右旋转效果
+                              setImageRotation((prev) => prev + 90);
+                            }}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>{t('workspace.image-detail.rotateRight', '向右旋转')}</TooltipContent>
+                      </Tooltip>
 
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        icon={<ZoomIn />}
-                        variant="outline"
-                        size="small"
-                        onClick={() => {
-                          // 直接应用放大效果
-                          setImageScale((prev) => prev + 0.1);
-                        }}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>{t('workspace.image-detail.zoomIn', '放大')}</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        icon={<ZoomOut />}
-                        variant="outline"
-                        size="small"
-                        onClick={() => {
-                          // 直接应用缩小效果
-                          setImageScale((prev) => Math.max(0.1, prev - 0.1));
-                        }}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>{t('workspace.image-detail.zoomOut', '缩小')}</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        icon={<Download />}
-                        variant="outline"
-                        size="small"
-                        onClick={() => {
-                          if (imageUrl) {
-                            try {
-                              const link = document.createElement('a');
-                              link.href = imageUrl;
-                              link.setAttribute('download', '');
-                              link.setAttribute('rel', 'noreferrer');
-                              link.click();
-                            } catch (error) {
-                              // do nothing
-                            }
-                          }
-                        }}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>{t('workspace.image-detail.download', '下载')}</TooltipContent>
-                  </Tooltip>
-                </div>
-              </>
-            ) : (
-              <div className="vines-center size-full text-center text-3xl text-muted-foreground">
-                {t('workspace.image-detail.no-image', '无图片数据')}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            icon={<ZoomIn />}
+                            variant="outline"
+                            size="small"
+                            onClick={() => {
+                              // 直接应用放大效果
+                              setImageScale((prev) => prev + 0.1);
+                            }}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>{t('workspace.image-detail.zoomIn', '放大')}</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            icon={<ZoomOut />}
+                            variant="outline"
+                            size="small"
+                            onClick={() => {
+                              // 直接应用缩小效果
+                              setImageScale((prev) => Math.max(0.1, prev - 0.1));
+                            }}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>{t('workspace.image-detail.zoomOut', '缩小')}</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            icon={<Download />}
+                            variant="outline"
+                            size="small"
+                            onClick={() => {
+                              if (imageUrl) {
+                                try {
+                                  const link = document.createElement('a');
+                                  link.href = imageUrl;
+                                  link.setAttribute('download', '');
+                                  link.setAttribute('rel', 'noreferrer');
+                                  link.click();
+                                } catch (error) {
+                                  // do nothing
+                                }
+                              }
+                            }}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>{t('workspace.image-detail.download', '下载')}</TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </>
+                ) : (
+                  <div className="vines-center size-full text-center text-3xl text-muted-foreground">
+                    {t('workspace.image-detail.no-image', '无图片数据')}
+                  </div>
+                )}
+                {/* <ImagesCarousel /> */}
               </div>
-            )}
-            <ImagesCarousel />
+
+              {/* 中间区域，渲染表单 */}
+              {!isMiniFrame && (
+                <div className="relative flex h-full flex-1 flex-col rounded-r-xl rounded-tr-xl bg-background px-6 pt-6 dark:bg-[#111113] md:border-l md:border-input">
+                  {/* 内容区，底部预留按钮高度 */}
+                  <div className="flex-1 overflow-auto">
+                    <TabularRenderWrapper height={window.innerHeight - 120} execution={execution} />
+                  </div>
+                  {/* 按钮条 */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      zIndex: 20,
+                      background: 'var(--background)',
+                    }}
+                    className="dark:bg-[#111113]"
+                  ></div>
+                </div>
+              )}
+            </main>
           </div>
 
-          {/* 中间区域，渲染表单 */}
-          {!isMiniFrame && (
-            <div className="relative flex h-full flex-1 flex-col rounded-r-xl rounded-tr-xl bg-background px-6 pt-6 dark:bg-[#111113] md:border-l md:border-input">
-              {/* 内容区，底部预留按钮高度 */}
-              <div className="flex-1 overflow-auto">
-                <TabularRenderWrapper height={window.innerHeight - 120} execution={execution} />
-              </div>
-              {/* 按钮条 */}
-              <div
-                style={{
-                  position: 'absolute',
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  zIndex: 20,
-                  background: 'var(--background)',
-                }}
-                className="dark:bg-[#111113]"
-              ></div>
-            </div>
-          )}
-        </main>
-      </ImageDetailLayout>
+          {/* 右侧边栏 */}
+          {RightSidebar && RightSidebar}
+        </div>
+      </div>
     </VinesFlowProvider>
   );
 };
@@ -577,12 +583,10 @@ function ImagesCarousel() {
   return (
     <Carousel>
       {images.map((image) => (
-        <CarouselItem key={image.render.key} className="basis-1/12">
+        <CarouselItem key={image.render.key}>
           <Image src={image.render.data as string} alt="详情图片" className="rounded-lg" />
         </CarouselItem>
       ))}
-      <CarouselPrevious />
-      <CarouselNext />
     </Carousel>
   );
 }
