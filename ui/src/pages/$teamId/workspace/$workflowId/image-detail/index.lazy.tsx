@@ -52,6 +52,87 @@ interface TabularRenderWrapperProps {
   execution?: VinesWorkflowExecution;
 }
 
+interface ImageOperationsProps {
+  imageUrl?: string;
+  imageRotation: number;
+  imageFlipX: boolean;
+  imageFlipY: boolean;
+  imageScale: number;
+  onRotateLeft: () => void;
+  onRotateRight: () => void;
+  onFlipHorizontal: () => void;
+  onFlipVertical: () => void;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onDownload: () => void;
+}
+
+const ImageOperations: React.FC<ImageOperationsProps> = ({
+  imageUrl,
+  onRotateLeft,
+  onRotateRight,
+  onFlipHorizontal,
+  onFlipVertical,
+  onZoomIn,
+  onZoomOut,
+  onDownload,
+}) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="flex w-full basis-1/5 items-center justify-center gap-2 bg-background py-5 dark:bg-[#111113] sm:gap-1 md:gap-2">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button icon={<FlipVertical />} variant="outline" size="small" onClick={onFlipVertical} />
+        </TooltipTrigger>
+        <TooltipContent>{t('workspace.image-detail.flipY', '垂直翻转')}</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button icon={<FlipHorizontal />} variant="outline" size="small" onClick={onFlipHorizontal} />
+        </TooltipTrigger>
+        <TooltipContent>{t('workspace.image-detail.flipX', '水平翻转')}</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button icon={<RotateCcw />} variant="outline" size="small" onClick={onRotateLeft} />
+        </TooltipTrigger>
+        <TooltipContent>{t('workspace.image-detail.rotateLeft', '向左旋转')}</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button icon={<RotateCw />} variant="outline" size="small" onClick={onRotateRight} />
+        </TooltipTrigger>
+        <TooltipContent>{t('workspace.image-detail.rotateRight', '向右旋转')}</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button icon={<ZoomIn />} variant="outline" size="small" onClick={onZoomIn} />
+        </TooltipTrigger>
+        <TooltipContent>{t('workspace.image-detail.zoomIn', '放大')}</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button icon={<ZoomOut />} variant="outline" size="small" onClick={onZoomOut} />
+        </TooltipTrigger>
+        <TooltipContent>{t('workspace.image-detail.zoomOut', '缩小')}</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button icon={<Download />} variant="outline" size="small" onClick={onDownload} />
+        </TooltipTrigger>
+        <TooltipContent>{t('workspace.image-detail.download', '下载')}</TooltipContent>
+      </Tooltip>
+    </div>
+  );
+};
+
 // TabularRender包装组件，用于获取工作流输入参数
 const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, execution }) => {
   const { vines } = useVinesFlow();
@@ -291,6 +372,13 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'mini' });
   const isMiniFrame = mode === 'mini';
   const { images, position, nextImage, prevImage, clearImages } = useExecutionImageResultStore();
+
+  const currentImage = images[position];
+  const imageUrl = currentImage?.render?.data as string;
+  const instanceId = currentImage?.instanceId;
+  const hasPrev = useHasPrevImage();
+  const hasNext = useHasNextImage();
+
   const nonUrgentNextImage = useCallback(() => {
     startTransition(() => {
       nextImage();
@@ -301,6 +389,46 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
       prevImage();
     });
   }, [prevImage]);
+
+  // Memoized image operation callbacks
+  const handleRotateLeft = useCallback(() => {
+    setImageRotation((prev) => prev - 90);
+  }, []);
+
+  const handleRotateRight = useCallback(() => {
+    setImageRotation((prev) => prev + 90);
+  }, []);
+
+  const handleFlipHorizontal = useCallback(() => {
+    setImageFlipX((prev) => !prev);
+  }, []);
+
+  const handleFlipVertical = useCallback(() => {
+    setImageFlipY((prev) => !prev);
+  }, []);
+
+  const handleZoomIn = useCallback(() => {
+    setImageScale((prev) => prev + 0.1);
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setImageScale((prev) => Math.max(0.1, prev - 0.1));
+  }, []);
+
+  const handleDownload = useCallback(() => {
+    if (imageUrl) {
+      try {
+        const link = document.createElement('a');
+        link.href = imageUrl;
+        link.setAttribute('download', '');
+        link.setAttribute('rel', 'noreferrer');
+        link.click();
+      } catch (error) {
+        // do nothing
+      }
+    }
+  }, [imageUrl]);
+
   useEffect(() => {
     const controller = new AbortController();
     document.body.addEventListener(
@@ -326,13 +454,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
     return () => {
       controller.abort();
     };
-  }, []);
-
-  const currentImage = images[position];
-  const imageUrl = currentImage?.render?.data as string;
-  const instanceId = currentImage?.instanceId;
-  const hasPrev = useHasPrevImage();
-  const hasNext = useHasNextImage();
+  }, [nonUrgentPrevImage, nonUrgentNextImage, clearImages, history]);
 
   const [execution, setExecution] = useState<VinesWorkflowExecution | undefined>();
 
@@ -391,7 +513,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
           <div className="flex h-full w-[450px] flex-col items-center overflow-hidden rounded-bl-xl rounded-br-xl rounded-tl-xl bg-background dark:bg-[#111113] sm:w-full md:w-[70%]">
             {imageUrl ? (
               <>
-                <div className="flex w-full flex-1 items-center justify-center overflow-auto p-4">
+                <div className="flex w-full basis-4/5 items-center justify-center overflow-auto p-4">
                   <Image
                     src={imageUrl}
                     alt="详情图片"
@@ -416,117 +538,20 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                   />
                 </div>
                 {/* 图片操作按钮 - 底部 */}
-                <div className="flex w-full items-center justify-center gap-2 bg-background py-5 dark:bg-[#111113] sm:gap-1 md:gap-2">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        icon={<FlipVertical />}
-                        variant="outline"
-                        size="small"
-                        onClick={() => {
-                          // 直接应用垂直翻转效果
-                          setImageFlipY((prev) => !prev);
-                        }}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>{t('workspace.image-detail.flipY', '垂直翻转')}</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        icon={<FlipHorizontal />}
-                        variant="outline"
-                        size="small"
-                        onClick={() => {
-                          // 直接应用水平翻转效果
-                          setImageFlipX((prev) => !prev);
-                        }}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>{t('workspace.image-detail.flipX', '水平翻转')}</TooltipContent>
-                  </Tooltip>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        icon={<RotateCcw />}
-                        variant="outline"
-                        size="small"
-                        onClick={() => {
-                          // 直接应用左旋转效果
-                          setImageRotation((prev) => prev - 90);
-                        }}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>{t('workspace.image-detail.rotateLeft', '向左旋转')}</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        icon={<RotateCw />}
-                        variant="outline"
-                        size="small"
-                        onClick={() => {
-                          // 直接应用右旋转效果
-                          setImageRotation((prev) => prev + 90);
-                        }}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>{t('workspace.image-detail.rotateRight', '向右旋转')}</TooltipContent>
-                  </Tooltip>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        icon={<ZoomIn />}
-                        variant="outline"
-                        size="small"
-                        onClick={() => {
-                          // 直接应用放大效果
-                          setImageScale((prev) => prev + 0.1);
-                        }}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>{t('workspace.image-detail.zoomIn', '放大')}</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        icon={<ZoomOut />}
-                        variant="outline"
-                        size="small"
-                        onClick={() => {
-                          // 直接应用缩小效果
-                          setImageScale((prev) => Math.max(0.1, prev - 0.1));
-                        }}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>{t('workspace.image-detail.zoomOut', '缩小')}</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        icon={<Download />}
-                        variant="outline"
-                        size="small"
-                        onClick={() => {
-                          if (imageUrl) {
-                            try {
-                              const link = document.createElement('a');
-                              link.href = imageUrl;
-                              link.setAttribute('download', '');
-                              link.setAttribute('rel', 'noreferrer');
-                              link.click();
-                            } catch (error) {
-                              // do nothing
-                            }
-                          }
-                        }}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>{t('workspace.image-detail.download', '下载')}</TooltipContent>
-                  </Tooltip>
-                </div>
+                <ImageOperations
+                  imageUrl={imageUrl}
+                  imageRotation={imageRotation}
+                  imageFlipX={imageFlipX}
+                  imageFlipY={imageFlipY}
+                  imageScale={imageScale}
+                  onRotateLeft={handleRotateLeft}
+                  onRotateRight={handleRotateRight}
+                  onFlipHorizontal={handleFlipHorizontal}
+                  onFlipVertical={handleFlipVertical}
+                  onZoomIn={handleZoomIn}
+                  onZoomOut={handleZoomOut}
+                  onDownload={handleDownload}
+                />
               </>
             ) : (
               <div className="vines-center size-full text-center text-3xl text-muted-foreground">
