@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { mutate } from 'swr';
+
 import { isEmpty } from 'lodash';
 import { Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -15,7 +17,7 @@ interface IRenameViewProps extends React.ComponentPropsWithoutRef<'div'> {
 
 export const RenameGroup: React.FC<IRenameViewProps> = ({ groupId }) => {
   const { t } = useTranslation();
-  const { data: groups, mutate } = usePageGroups();
+  const { data: groups, mutate: mutateGroups } = usePageGroups();
   const { trigger } = useUpdateGroupPages(groupId);
 
   const currentGroup = groups?.find((group) => group.id === groupId);
@@ -27,14 +29,15 @@ export const RenameGroup: React.FC<IRenameViewProps> = ({ groupId }) => {
     const optimisticGroups = groups.map((group) => (group.id === groupId ? { ...group, displayName } : group));
 
     toast.promise(
-      mutate(
+      mutateGroups(
         trigger({ displayName }).then((result) => {
-          // Return the server response or fall back to optimistic data
+          // After successful update, also invalidate the useWorkspacePages cache
+          mutate('/api/workflow/pages/pinned');
           return result ?? optimisticGroups;
         }),
         {
           optimisticData: optimisticGroups,
-          revalidate: false,
+          revalidate: true,
         },
       ),
       {

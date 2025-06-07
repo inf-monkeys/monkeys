@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+import { mutate } from 'swr';
+
 import { RotateCcw, SmilePlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -23,11 +25,19 @@ export const SetGroupIcon: React.FC<ISetViewIconProps> = ({ groupId }) => {
 
   const handleSetGroupIcon = async (icon?: string) => {
     if (!groupId) return;
-    toast.promise(updateGroupIcon({ iconUrl: icon }), {
-      loading: t('common.save.loading'),
-      success: t('common.save.success'),
-      error: t('common.save.error'),
-    });
+    toast.promise(
+      updateGroupIcon({ iconUrl: icon }).then((result) => {
+        // After successful update, also invalidate the useWorkspacePages cache
+        mutate('/api/workflow/pages/pinned');
+        setOpen(false);
+        return result;
+      }),
+      {
+        loading: t('common.save.loading'),
+        success: t('common.save.success'),
+        error: t('common.save.error'),
+      },
+    );
     // if (!pages) return;
     // const currentPage = pages.findIndex(({ id }) => id === pageId);
     // if (currentPage === -1) return;
