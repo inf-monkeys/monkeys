@@ -29,13 +29,20 @@ import { deleteWorkflowExecution, getWorkflowExecution } from '@/apis/workflow/e
 import ImageDetailLayout from '@/components/layout/image-detail-layout';
 import { TabularRender, TTabularEvent } from '@/components/layout/workspace/vines-view/form/tabular/render';
 import { Button } from '@/components/ui/button';
+import { Carousel, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesFlowProvider } from '@/components/ui/vines-iframe/view/vines-flow-provider';
 import { useCopy } from '@/hooks/use-copy';
 import useUrlState from '@/hooks/use-url-state';
 import { useVinesFlow } from '@/package/vines-flow';
 import { VinesWorkflowExecution } from '@/package/vines-flow/core/typings.ts';
-import { useExecutionImageResultStore, useHasNextImage, useHasPrevImage } from '@/store/useExecutionImageResultStore';
+import {
+  useExecutionImageResultStore,
+  useExecutionImages,
+  useExecutionPosition,
+  useHasNextImage,
+  useHasPrevImage,
+} from '@/store/useExecutionImageResultStore';
 
 import 'rc-image/assets/index.css';
 
@@ -530,6 +537,7 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
                 {t('workspace.image-detail.no-image', '无图片数据')}
               </div>
             )}
+            <ImagesCarousel />
           </div>
 
           {/* 中间区域，渲染表单 */}
@@ -562,3 +570,19 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
 export const Route = createLazyFileRoute('/$teamId/workspace/$workflowId/image-detail/')({
   component: ImageDetail,
 });
+
+function ImagesCarousel() {
+  const images = useExecutionImages();
+  const position = useExecutionPosition();
+  return (
+    <Carousel>
+      {images.map((image) => (
+        <CarouselItem key={image.render.key} className="basis-1/12">
+          <Image src={image.render.data as string} alt="详情图片" className="rounded-lg" />
+        </CarouselItem>
+      ))}
+      <CarouselPrevious />
+      <CarouselNext />
+    </Carousel>
+  );
+}
