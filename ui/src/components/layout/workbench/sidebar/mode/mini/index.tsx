@@ -9,7 +9,6 @@ import { IPinPage } from '@/apis/pages/typings.ts';
 import { WorkbenchMiniGroupList } from '@/components/layout/workbench/sidebar/mode/mini/group.tsx';
 import { VirtuaWorkbenchMiniViewList } from '@/components/layout/workbench/sidebar/mode/mini/virtua';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
-import { Separator } from '@/components/ui/separator';
 import { VINES_IFRAME_PAGE_TYPE2ID_MAPPER } from '@/components/ui/vines-iframe/consts.ts';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
@@ -196,7 +195,7 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
       <div className="flex w-8 min-w-6 flex-col">
         <WorkbenchMiniGroupList data={lists} groupId={groupId} setGroupId={setGroupId} height={height} />
       </div>
-      <Separator orientation="vertical" />
+      <div className="h-full w-px bg-input" />
       <div className="flex min-w-10 flex-col">
         <VirtuaWorkbenchMiniViewList
           data={currentGroupPages}
