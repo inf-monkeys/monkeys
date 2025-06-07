@@ -234,6 +234,62 @@ const TabularFooterButtons: React.FC<TabularFooterButtonsProps> = ({ processedIn
   );
 };
 
+interface RightSidebarProps {
+  onBack: () => void;
+  hasPrev: boolean;
+  hasNext: boolean;
+  onPrevImage: () => void;
+  onNextImage: () => void;
+  onDeleteImage: () => void;
+}
+
+const RightSidebar: React.FC<RightSidebarProps> = ({
+  onBack,
+  hasPrev,
+  hasNext,
+  onPrevImage,
+  onNextImage,
+  onDeleteImage,
+}) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="ml-4 flex h-full w-14 flex-col items-center justify-between gap-4 rounded-bl-xl rounded-br-xl rounded-tl-xl rounded-tr-xl border border-input bg-background px-2 py-6 shadow-sm dark:bg-[#111113]">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button icon={<X />} variant="outline" size="small" onClick={onBack} />
+        </TooltipTrigger>
+        <TooltipContent>{t('common.utils.back', '返回')}</TooltipContent>
+      </Tooltip>
+
+      <div className="flex flex-col items-center gap-4">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button icon={<ChevronUp />} variant="outline" size="small" disabled={!hasPrev} onClick={onPrevImage} />
+          </TooltipTrigger>
+          <TooltipContent>{t('workspace.image-detail.prev-image', '上一张')}</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button icon={<ChevronDown />} variant="outline" size="small" disabled={!hasNext} onClick={onNextImage} />
+          </TooltipTrigger>
+          <TooltipContent>{t('workspace.image-detail.next-image', '下一张')}</TooltipContent>
+        </Tooltip>
+      </div>
+
+      <div className="mb-6">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button icon={<Trash />} variant="outline" size="small" onClick={onDeleteImage} />
+          </TooltipTrigger>
+          <TooltipContent>{t('workspace.image-detail.delete', '删除')}</TooltipContent>
+        </Tooltip>
+      </div>
+    </div>
+  );
+};
+
 export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const { t } = useTranslation();
   const router = useRouter();
@@ -335,55 +391,6 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
       toast.success(t('common.delete.success'));
     }
   });
-
-  // 右侧边栏组件
-  const RightSidebar = (
-    <div className="ml-4 flex h-full w-14 flex-col items-center justify-between gap-4 rounded-bl-xl rounded-br-xl rounded-tl-xl rounded-tr-xl border border-input bg-background px-2 py-6 shadow-sm dark:bg-[#111113]">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button icon={<X />} variant="outline" size="small" onClick={() => history.back()} />
-        </TooltipTrigger>
-        <TooltipContent>{t('common.utils.back', '返回')}</TooltipContent>
-      </Tooltip>
-
-      <div className="flex flex-col items-center gap-4">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              icon={<ChevronUp />}
-              variant="outline"
-              size="small"
-              disabled={!hasPrev}
-              onClick={nonUrgentPrevImage}
-            />
-          </TooltipTrigger>
-          <TooltipContent>{t('workspace.image-detail.prev-image', '上一张')}</TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              icon={<ChevronDown />}
-              variant="outline"
-              size="small"
-              disabled={!hasNext}
-              onClick={nonUrgentNextImage}
-            />
-          </TooltipTrigger>
-          <TooltipContent>{t('workspace.image-detail.next-image', '下一张')}</TooltipContent>
-        </Tooltip>
-      </div>
-
-      <div className="mb-6">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button icon={<Trash />} variant="outline" size="small" onClick={handleDeleteImage} />
-          </TooltipTrigger>
-          <TooltipContent>{t('workspace.image-detail.delete', '删除')}</TooltipContent>
-        </Tooltip>
-      </div>
-    </div>
-  );
 
   return (
     <VinesFlowProvider workflowId={workflowId}>
@@ -566,7 +573,14 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
           </div>
 
           {/* 右侧边栏 */}
-          {RightSidebar && RightSidebar}
+          <RightSidebar
+            onBack={() => history.back()}
+            hasPrev={!!hasPrev}
+            hasNext={!!hasNext}
+            onPrevImage={nonUrgentPrevImage}
+            onNextImage={nonUrgentNextImage}
+            onDeleteImage={handleDeleteImage}
+          />
         </div>
       </div>
     </VinesFlowProvider>
