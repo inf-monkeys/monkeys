@@ -1056,7 +1056,8 @@
       }
     },
     "sidebar": {
-      "add": "Star a view"
+      "add": "Star a view",
+      "toggle": "Toggle Workbench Sidebar"
     }
   },
   "ugc-page": {

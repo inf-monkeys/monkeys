@@ -44,7 +44,7 @@ export function VinesView({ id, designBoardId, workflowId, agentId, pageId, type
           },
         }}
         animate={id === pageId ? 'enter' : 'exit'}
-        className="absolute left-0 top-0 size-full"
+        className="absolute left-12 top-0 size-full"
       >
         <Page404 />
       </motion.div>

@@ -291,7 +291,7 @@ export class WorkflowPageService {
         ...agentPages,
         ...designBoardPages,
       ],
-      groups: groups.map((it) => pick(it, ['id', 'displayName', 'pageIds', 'isBuiltIn'])),
+      groups: groups.map((it) => pick(it, ['id', 'displayName', 'pageIds', 'isBuiltIn', 'iconUrl'])),
     };
   }
 
@@ -411,10 +411,11 @@ export class WorkflowPageService {
   }
 
   async updatePageGroup(teamId: string, groupId: string, body: UpdatePageGroupDto) {
-    const { displayName, pageId, mode } = body;
+    const { displayName, pageId, mode, iconUrl } = body;
 
     const values: Partial<WorkflowPageGroupEntity> = {
       ...(displayName && { displayName }),
+      ...(iconUrl && { iconUrl }),
     };
 
     const groups = await this.pageGroupRepository.find({
