@@ -23,14 +23,13 @@ export const VirtuaWorkbenchMiniViewListItem: React.FC<IVirtuaWorkbenchMiniViewL
   const pageId = data?.id ?? '';
 
   const { data: workflowThumbs } = useWorkflowExecutionThumbnails(data.agent ? null : data.workflowId);
-
   const thumbs = workflowThumbs?.filter((it) => /(png|jpg|jpeg|webp)/.test(it)) ?? [];
 
   return (
     <div
       key={pageId}
       className={cn(
-        'flex cursor-pointer flex-col items-center justify-center gap-1 rounded-md border border-transparent py-2 transition-colors hover:bg-accent hover:text-accent-foreground',
+        'gorw-0 mb-2 flex shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-md border border-transparent py-2 transition-colors hover:bg-accent hover:text-accent-foreground',
         currentPageId === pageId && 'border-input bg-background text-accent-foreground',
         mini && 'gap-0 pb-1 pt-0',
       )}
