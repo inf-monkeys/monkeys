@@ -66,7 +66,7 @@ export const WorkbenchView: React.FC<IWorkbenchViewProps> = ({ mode }) => {
     <div
       ref={ref}
       className={cn(
-        'relative w-full flex-1 overflow-hidden rounded-r-xl border-b border-r border-t border-input bg-slate-1 p-0 shadow-sm',
+        'relative w-full flex-1 overflow-hidden rounded-xl border-b border-r border-t border-input bg-slate-1 p-0 shadow-sm',
         mode === 'mini' && 'rounded-none',
       )}
     >

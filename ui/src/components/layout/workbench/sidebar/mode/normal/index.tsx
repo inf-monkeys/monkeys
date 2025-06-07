@@ -14,6 +14,7 @@ import { VirtuaWorkbenchViewList } from '@/components/layout/workbench/sidebar/m
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { VinesFullLoading } from '@/components/ui/loading';
+import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
@@ -32,6 +33,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   const { teamId } = useVinesTeam();
 
   const { data, isLoading } = useWorkspacePages();
+
   const [groupId, setGroupId] = useState<string>('default');
   // const onlyShowWorkenchIcon = useOnlyShowWorkenchIcon();
   const originalPages = data?.pages ?? [];
@@ -142,7 +144,6 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   const hasGroups = lists.length && !isLoading;
   const onlyShowWorkenchIcon = useOnlyShowWorkenchIcon();
-  const [sidebarVisible, setSidebarVisible] = useState(true);
   const onChildClick = useCallback(
     (page) => {
       startTransition(() => {
@@ -154,9 +155,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   );
   return (
     <div
-      className={cn(
-        'flex h-full items-center justify-center rounded-xl rounded-r-none border border-input bg-neocard shadow-sm',
-      )}
+      className={cn('mr-4 flex h-full items-center justify-center rounded-xl border border-input bg-neocard shadow-sm')}
       ref={ref}
     >
       {isLoading ? (
@@ -174,7 +173,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
                     // maxWidth: !onlyShowWorkenchIcon ? '20rem' : '0',
                     // minWidth: !onlyShowWorkenchIcon ? '8rem' : '8rem',
                   }}
-                  className="mr-4 flex justify-between rounded-xl bg-slate-1"
+                  className="flex justify-between rounded-l-xl bg-slate-1"
                 >
                   {/* leftmost nav */}
                   <VirtuaWorkbenchViewGroupList data={lists} groupId={groupId} setGroupId={setGroupId} />
@@ -206,7 +205,8 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
               </div>
             </div>
           )}
-          <div className="grid h-full w-full overflow-hidden rounded-l-xl bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1">
+          <Separator orientation="vertical" className="vines-center"></Separator>
+          <div className="grid h-full w-full grid-rows-[1fr_auto] rounded-r-xl bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1">
             {/* Second nav */}
             <VirtuaWorkbenchViewList
               height={height}
@@ -217,7 +217,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
             />
             <div
               className={cn(
-                'flex items-center justify-between gap-4 px-4 pb-2',
+                'flex items-center justify-between gap-4 px-4 pb-4',
                 onlyShowWorkenchIcon && 'justify-center',
               )}
             >
