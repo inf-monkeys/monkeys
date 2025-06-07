@@ -9,13 +9,13 @@ import { IPinPage } from '@/apis/pages/typings.ts';
 import { WorkbenchMiniGroupList } from '@/components/layout/workbench/sidebar/mode/mini/group.tsx';
 import { VirtuaWorkbenchMiniViewList } from '@/components/layout/workbench/sidebar/mode/mini/virtua';
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
+import { Separator } from '@/components/ui/separator';
 import { VINES_IFRAME_PAGE_TYPE2ID_MAPPER } from '@/components/ui/vines-iframe/consts.ts';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useCurrentPage, useSetCurrentPage } from '@/store/useCurrentPageStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
-
 interface IWorkbenchMiniModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> = () => {
@@ -84,6 +84,13 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
 
   // Get current group's pages for display
   const currentGroupPages = (lists?.find((it) => it.id === groupId)?.pages ?? []) as IPinPage[];
+
+  // Auto-select first group if current groupId doesn't exist in lists
+  useEffect(() => {
+    if (lists.length > 0 && groupId === 'default' && !lists.find((it) => it.id === groupId)) {
+      setGroupId(lists[0].id);
+    }
+  }, [lists, groupId]);
 
   const { teamId } = useVinesTeam();
 
@@ -188,7 +195,10 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
     >
       <div className="flex w-full flex-col gap-4 px-2">
         {lists.length > 0 && (
-          <WorkbenchMiniGroupList data={lists} groupId={groupId} setGroupId={setGroupId} height={height} />
+          <>
+            <WorkbenchMiniGroupList data={lists} groupId={groupId} setGroupId={setGroupId} height={height} />
+            <Separator orientation="horizontal" />
+          </>
         )}
         <VirtuaWorkbenchMiniViewList
           data={currentGroupPages}
