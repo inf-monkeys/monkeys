@@ -53,4 +53,12 @@ export class UpdatePageGroupDto {
     example: 'add',
   })
   mode?: 'add' | 'remove';
+
+  @ApiProperty({
+    name: 'iconUrl',
+    description: '分组图标',
+    type: String,
+    example: 'https://example.com/icon.png',
+  })
+  iconUrl?: string;
 }

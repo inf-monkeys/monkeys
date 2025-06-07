@@ -35,10 +35,10 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
         className={cn(
           'z-10 mb-2 flex cursor-pointer items-center gap-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
           currentPageId === pageId
-            ? 'group bg-neocard text-accent-foreground outline outline-1 outline-input dark:bg-[#393939]'
+            ? 'group border border-input bg-neocard text-accent-foreground dark:bg-[#393939]'
             : // : 'p-[calc(0.5rem+1px)]',
               'p-2',
-          onlyShowWorkenchIcon && 'size-11',
+          onlyShowWorkenchIcon && 'size-11 justify-center',
         )}
         onClick={() => onClick?.(page)}
       >
@@ -47,13 +47,13 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
         </VinesIcon>
         {!onlyShowWorkenchIcon ? (
           <>
-            <div className="flex max-w-40 flex-col gap-0.5">
-              <h1 className="text-sm font-bold leading-tight">
+            <div className="flex flex-col gap-0.5">
+              <h1 className="line-clamp-1 max-w-36 text-ellipsis text-sm font-bold leading-tight">
                 {getI18nContent(info?.displayName) ?? t('common.utils.untitled')}
               </h1>
               <div className="flex items-center gap-0.5">
                 <VinesLucideIcon className="size-3" size={12} src={EMOJI2LUCIDE_MAPPER[viewIcon] ?? viewIcon} />
-                <span className="text-xxs">
+                <span className="text-xxs line-clamp-1 max-w-36 text-ellipsis">
                   {getI18nContent(info?.description) ??
                     t([`workspace.wrapper.space.tabs.${page?.displayName ?? ''}`, page?.displayName ?? ''])}
                 </span>
