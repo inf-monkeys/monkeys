@@ -192,7 +192,7 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
       )}
       ref={ref}
     >
-      <div className="flex w-8 min-w-6 flex-col">
+      <div className="flex w-8 min-w-10 flex-col">
         <WorkbenchMiniGroupList data={lists} groupId={groupId} setGroupId={setGroupId} height={height} />
       </div>
       <div className="h-full w-px bg-input" />

@@ -17,10 +17,10 @@ export const WorkbenchSidebar: React.FC<IWorkbenchSidebarProps> = ({ mode = 'nor
   return mode === 'mini' ? (
     <WorkbenchMiniModeSidebar />
   ) : (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-4">
       {!isLoading && showSidebarTeamSelector && (
         <div className="mr-4 flex flex-col">
-          <TeamSelector size="large" />
+          <TeamSelector size="large" teamNameWidth="small" />
         </div>
       )}
       <WorkbenchNormalModeSidebar showGroup={showGroup} />

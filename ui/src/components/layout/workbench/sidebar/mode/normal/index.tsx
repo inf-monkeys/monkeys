@@ -14,15 +14,16 @@ import { VirtuaWorkbenchViewList } from '@/components/layout/workbench/sidebar/m
 import { useVinesTeam } from '@/components/router/guard/team.tsx';
 import { Button } from '@/components/ui/button';
 import { VinesFullLoading } from '@/components/ui/loading';
-import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
-import { useOnlyShowWorkenchIcon, useToggleOnlyShowWorkenchIcon } from '@/store/showWorkenchIcon';
+import { useOnlyShowWorkbenchIcon, useToggleOnlyShowWorkbenchIcon } from '@/store/showWorkbenchIcon';
 import { useCurrentPage, useSetCurrentPage } from '@/store/useCurrentPageStore';
 import { cloneDeep, cn } from '@/utils';
 
 import { VirtuaWorkbenchViewGroupList } from './group-virua';
+import { WorkbenchViewItemCurrentData } from './virtua/item';
+
 interface IWorkbenchNormalModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {
   showGroup?: boolean;
 }
@@ -35,7 +36,8 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   const { data, isLoading } = useWorkspacePages();
 
   const [groupId, setGroupId] = useState<string>('default');
-  // const onlyShowWorkenchIcon = useOnlyShowWorkenchIcon();
+  const [pageId, setPageId] = useState<string>('');
+  // const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
   const originalPages = data?.pages ?? [];
   const originalGroups = useMemo(() => {
     return (
@@ -49,6 +51,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   }, [data?.groups, originalPages, data]);
 
   const pagesMap = keyBy(originalPages, 'id');
+  const groupMap = new Map(originalGroups.map((item, index) => [item.id, index]));
   const lists = map(originalGroups, ({ pageIds, ...attr }) => ({
     ...attr,
     pages: map(pageIds, (pageId) => pagesMap[pageId]).filter(Boolean),
@@ -57,8 +60,9 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     .sort((a, b) => {
       if (a.isBuiltIn !== b.isBuiltIn) {
         return a.isBuiltIn ? -1 : 1;
-      }
-      return a.displayName.localeCompare(b.displayName, undefined, { numeric: true });
+      };
+      return (groupMap.get(a.id) ?? Infinity) - (groupMap.get(b.id) ?? Infinity);
+      // return a.displayName.localeCompare(b.displayName, undefined, { numeric: true });
     });
 
   const [{ activePage }] = useUrlState<{ activePage: string }>({ activePage: '' });
@@ -79,11 +83,12 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     const currentTeamPage = currentPage?.[teamId] ?? {};
     const currentPageId = currentTeamPage?.id;
 
+    if (currentPageId) setPageId(currentPageId);
+
     if (toggleToActivePageRef.current === false) {
       const page = latestOriginalPages.current.find((it) => it.workflowId === activePage);
       const groupWithPageId = latestOriginalGroups.current.find((it) => it.pageIds.includes(page?.id ?? ''));
       if (page && groupWithPageId) {
-        // setCurrentPage((prev) => ({ ...prev, [teamId]: page }));
         setCurrentPage({ [teamId]: page });
         setGroupId(groupWithPageId.id);
         toggleToActivePageRef.current = true;
@@ -140,11 +145,11 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     [wrapperHeight],
     { wait: 64 },
   );
-  const toggleOnlyShowWorkenchIcon = useToggleOnlyShowWorkenchIcon();
+  const toggleOnlyShowWorkbenchIcon = useToggleOnlyShowWorkbenchIcon();
 
   const hasGroups = lists.length && !isLoading;
-  const onlyShowWorkenchIcon = useOnlyShowWorkenchIcon();
-  const onChildClick = useCallback(
+  const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
+  const onPageClick = useCallback(
     (page) => {
       startTransition(() => {
         // setCurrentPage((prev) => ({ ...prev, [teamId]: { ...page, groupId } }));
@@ -163,15 +168,15 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
           <VinesFullLoading disableCard />
         </AnimatePresence>
       ) : (
-        <>
+        <WorkbenchViewItemCurrentData.Provider value={{ pageId, groupId }}>
           {hasGroups ? (
             showGroup ? (
               <>
                 <div
                   style={{
                     height: '100%',
-                    // maxWidth: !onlyShowWorkenchIcon ? '20rem' : '0',
-                    // minWidth: !onlyShowWorkenchIcon ? '8rem' : '8rem',
+                    // maxWidth: !onlyShowWorkbenchIcon ? '20rem' : '0',
+                    // minWidth: !onlyShowWorkbenchIcon ? '8rem' : '8rem',
                   }}
                   className="flex justify-between rounded-l-xl bg-slate-1"
                 >
@@ -205,40 +210,39 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
               </div>
             </div>
           )}
-          <Separator orientation="vertical" className="vines-center"></Separator>
-          <div className="grid h-full w-full grid-rows-[1fr_auto] rounded-r-xl bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1">
+          <div className="grid h-full grid-rows-[1fr_auto] rounded-r-xl bg-slate-1 [&_h1]:line-clamp-1 [&_span]:line-clamp-1">
             {/* Second nav */}
             <VirtuaWorkbenchViewList
               height={height}
               data={(lists?.find((it) => it.id === groupId)?.pages ?? []) as IPinPage[]}
               currentPageId={currentPage?.[teamId]?.id}
               currentGroupId={groupId}
-              onChildClick={onChildClick}
+              onChildClick={onPageClick}
             />
             <div
               className={cn(
-                'flex items-center justify-between gap-4 px-4 pb-4',
-                onlyShowWorkenchIcon && 'justify-center',
+                'flex items-center justify-between gap-4 px-4 pb-4 pt-2',
+                onlyShowWorkbenchIcon && 'justify-center',
               )}
             >
               <Tooltip>
                 <TooltipTrigger>
                   <Button
-                    onClick={() => toggleOnlyShowWorkenchIcon()}
-                    icon={onlyShowWorkenchIcon ? <Maximize2Icon /> : <Minimize2Icon />}
+                    onClick={() => toggleOnlyShowWorkbenchIcon()}
+                    icon={onlyShowWorkbenchIcon ? <Maximize2Icon /> : <Minimize2Icon />}
                     size={'icon'}
-                    className={cn('mt-2 shrink-0', onlyShowWorkenchIcon && '')}
+                    className={cn('shrink-0', onlyShowWorkbenchIcon && '')}
                     variant="outline"
                   />
                 </TooltipTrigger>
                 <TooltipContent className="z-20">{t('workbench.sidebar.toggle')}</TooltipContent>
               </Tooltip>
-              {!onlyShowWorkenchIcon && (
+              {!onlyShowWorkbenchIcon && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="vines-center shrink grow">
                       <Link to="/$teamId/workflows/" className="contents" params={{ teamId }}>
-                        <Button icon={<PlusIcon />} className="mt-2 shrink grow" variant="outline" />
+                        <Button icon={<PlusIcon />} className="shrink grow" variant="outline" />
                       </Link>
                     </div>
                   </TooltipTrigger>
@@ -249,7 +253,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
               )}
             </div>
           </div>
-        </>
+        </WorkbenchViewItemCurrentData.Provider>
       )}
     </div>
   );
