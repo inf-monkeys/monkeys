@@ -29,9 +29,9 @@ export const VirtuaWorkbenchMiniViewListItem: React.FC<IVirtuaWorkbenchMiniViewL
     <div
       key={pageId}
       className={cn(
-        'gorw-0 mb-2 flex shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-md border border-transparent py-2 transition-colors hover:bg-accent hover:text-accent-foreground',
+        'flex h-10 w-10 shrink-0 grow-0 cursor-pointer flex-col items-center justify-center gap-2 rounded-md border border-transparent transition-colors hover:bg-accent hover:text-accent-foreground',
         currentPageId === pageId && 'border-input bg-background text-accent-foreground',
-        mini && 'gap-0 pb-1 pt-0',
+        mini && 'gap-0',
       )}
       onClick={() => onClick?.(data)}
     >
@@ -52,7 +52,7 @@ export const VirtuaWorkbenchMiniViewListItem: React.FC<IVirtuaWorkbenchMiniViewL
                 {thumbs.length ? thumbs[0] : info?.iconUrl}
               </VinesIcon>
             </span>
-            <span>{getI18nContent(info.displayName)}</span>
+            <span>{getI18nContent(info?.displayName)}</span>
           </div>
         </TooltipContent>
       </Tooltip>

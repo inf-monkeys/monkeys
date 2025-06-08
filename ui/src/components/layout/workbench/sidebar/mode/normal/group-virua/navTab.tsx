@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 
-import { MoreVertical } from 'lucide-react';
+import { EllipsisIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -12,19 +12,37 @@ import {
 
 import { RenameGroup } from './renameGroup';
 import { SetGroupIcon } from './setGroupIcon';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useMemoizedFn } from 'ahooks';
+import { useTranslation } from 'react-i18next';
 
 interface ITabMenuProps extends React.ComponentPropsWithoutRef<'div'> {
-  onOpenChange?: (isOpen: boolean) => void;
   groupId: string;
 }
 
-export const NavDropdown: React.FC<ITabMenuProps> = memo(({ onOpenChange, groupId }) => {
+export const NavDropdown: React.FC<ITabMenuProps> = memo(({ groupId }) => {
+  const { t } = useTranslation();
+
+  const handleClickMoreMenu = useMemoizedFn((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
+    e.preventDefault();
+  });
   return (
-    <DropdownMenu onOpenChange={onOpenChange}>
-      <DropdownMenuTrigger asChild>
-        <Button className="-m-1 scale-[.8] p-1 [&_svg]:stroke-gold-12" icon={<MoreVertical />} variant="borderless" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" alignOffset={-6} side="right" sideOffset={12}>
+    <DropdownMenu>
+      <Tooltip>
+        <DropdownMenuTrigger asChild>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              icon={<EllipsisIcon />}
+              className="pointer-events-none absolute right-2 !p-1.5 opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 [&>div>svg]:size-3"
+              onClick={handleClickMoreMenu}
+            />
+          </TooltipTrigger>
+        </DropdownMenuTrigger>
+        <TooltipContent side="right">{t('workspace.flow-view.tooltip.more.tip')}</TooltipContent>
+      </Tooltip>
+      <DropdownMenuContent side="right" align="start" sideOffset={12}>
         <DropdownMenuGroup>
           <RenameGroup groupId={groupId} />
           <SetGroupIcon groupId={groupId} />
