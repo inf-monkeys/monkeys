@@ -1,31 +1,26 @@
 import { ValueTransformer } from 'typeorm';
 
 export const TimestampTransformer: ValueTransformer = {
-  // 从 JavaScript 值转换为数据库值
-  to(value: Date | number | string): Date {
-    if (value instanceof Date) {
-      return value;
+  to(value: Date | number | string): Date | null {
+    const date = toValidDate(value);
+    if (!date) {
+      console.warn('[TimestampTransformer.to] Invalid input:', value);
+      return null;
     }
-    if (typeof value === 'string') {
-      return new Date(value);
-    }
-    if (typeof value === 'number') {
-      return new Date(value);
-    }
-    return value;
+    return date;
   },
 
-  // 从数据库值转换为 JavaScript Date
-  from(value: Date | string | number): Date {
-    if (value instanceof Date) {
-      return value;
+  from(value: Date | number | string): Date | null {
+    const date = toValidDate(value);
+    if (!date) {
+      console.warn('[TimestampTransformer.from] Invalid DB timestamp:', value);
+      return null;
     }
-    if (typeof value === 'string') {
-      return new Date(value);
-    }
-    if (typeof value === 'number') {
-      return new Date(value);
-    }
-    return value;
+    return date;
   },
 };
+
+function toValidDate(val: any): Date | null {
+  const date = new Date(val);
+  return isNaN(date.getTime()) ? null : date;
+}
