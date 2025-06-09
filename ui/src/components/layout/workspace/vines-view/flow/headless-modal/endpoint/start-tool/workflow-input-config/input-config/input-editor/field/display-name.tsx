@@ -10,6 +10,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { LANGUAGES_LIST } from '@/components/ui/i18n-selector/consts';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
+import { IWorkflowInput } from '@/schema/workspace/workflow-input.ts';
 
 interface IFieldDisplayNameProps extends React.ComponentPropsWithoutRef<'div'> {
   form: UseFormReturn<IWorkflowInput>;
