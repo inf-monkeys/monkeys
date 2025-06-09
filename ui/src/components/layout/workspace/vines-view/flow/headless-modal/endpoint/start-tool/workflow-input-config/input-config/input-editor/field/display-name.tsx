@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from 
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { LANGUAGES_LIST } from '@/components/ui/i18n-selector/consts';
 import { Input } from '@/components/ui/input';
-import { IWorkflowInput } from '@/schema/workspace/workflow-input.ts';
+import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface IFieldDisplayNameProps extends React.ComponentPropsWithoutRef<'div'> {
   form: UseFormReturn<IWorkflowInput>;
@@ -101,20 +101,29 @@ export const FieldDisplayName: React.FC<IFieldDisplayNameProps> = ({ form }) => 
                 placeholder={t('workspace.flow-view.endpoint.start-tool.input.config-form.display-name.placeholder')}
                 value={getCurrentLanguageValue(i18nDisplayName)}
                 onChange={(value: string) => handleMainInputChange(value)}
-                className="grow pr-10"
+                className="grow pr-14"
                 autoFocus
               />
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button icon={<EditIcon />} variant="outline" size="icon" className="absolute right-2 top-2" />
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        icon={<EditIcon />}
+                        variant="outline"
+                        size="icon"
+                        className="absolute inset-y-1 right-1"
+                      />
+                    </TooltipTrigger>
+                  </Tooltip>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogTitle>Edit i18n Name</DialogTitle>
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     {LANGUAGES_LIST.map(([key, label]) => {
                       const languageKey = LANGUAGE_MAPPER[key as keyof typeof LANGUAGE_MAPPER] || key;
                       return (
-                        <div key={languageKey} className="flex flex-col gap-1">
+                        <div key={languageKey} className="flex flex-col gap-4">
                           <label className="text-xs font-medium text-gray-11" htmlFor={`i18n-input-${languageKey}`}>
                             {label}
                           </label>
@@ -132,7 +141,9 @@ export const FieldDisplayName: React.FC<IFieldDisplayNameProps> = ({ form }) => 
                     })}
                   </div>
                   <DialogFooter>
-                    <Button onClick={handleSave}>Save</Button>
+                    <Button variant="outline" onClick={handleSave}>
+                      {t('workspace.flow-view.endpoint.start-tool.input.config-form.submit')}
+                    </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
