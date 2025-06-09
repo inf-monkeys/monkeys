@@ -35,6 +35,8 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   const { data, isLoading } = useWorkspacePages();
 
+  const [{ switchWorkflowFromDisplayName }, setUrlState] = useUrlState<{ switchWorkflowFromDisplayName?: string }>({});
+
   const [groupId, setGroupId] = useState<string>('default');
   const [pageId, setPageId] = useState<string>('');
   // const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
@@ -60,7 +62,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     .sort((a, b) => {
       if (a.isBuiltIn !== b.isBuiltIn) {
         return a.isBuiltIn ? -1 : 1;
-      };
+      }
       return (groupMap.get(a.id) ?? Infinity) - (groupMap.get(b.id) ?? Infinity);
       // return a.displayName.localeCompare(b.displayName, undefined, { numeric: true });
     });
@@ -79,6 +81,19 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     const pagesLength = latestOriginalPages.current.length;
     const groupsLength = latestOriginalGroups.current.length;
     if (!pagesLength) return;
+
+    if (switchWorkflowFromDisplayName) {
+      const targetPage = latestOriginalPages.current.find(
+        (it) => it.workflow?.displayName === switchWorkflowFromDisplayName,
+      );
+      if (targetPage) {
+        const groupWithPageId = latestOriginalGroups.current.find((it) => it.pageIds.includes(targetPage?.id ?? ''));
+        setPageId(targetPage.id);
+        setCurrentPage({ [teamId]: targetPage });
+        groupWithPageId && setGroupId(groupWithPageId.id);
+        return;
+      }
+    }
 
     const currentTeamPage = currentPage?.[teamId] ?? {};
     const currentPageId = currentTeamPage?.id;
@@ -133,7 +148,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     } else {
       setEmptyOrFirstPage();
     }
-  }, [currentPage?.[teamId], data, teamId]);
+  }, [currentPage?.[teamId], data, teamId, switchWorkflowFromDisplayName]);
 
   const { ref, height: wrapperHeight } = useElementSize();
   const [height, setHeight] = useState(500);
@@ -153,6 +168,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     (page) => {
       startTransition(() => {
         // setCurrentPage((prev) => ({ ...prev, [teamId]: { ...page, groupId } }));
+        // setUrlState({ switchWorkflowFromDisplayName: undefined });
         setCurrentPage({ [teamId]: { ...page, groupId } });
       });
     },
