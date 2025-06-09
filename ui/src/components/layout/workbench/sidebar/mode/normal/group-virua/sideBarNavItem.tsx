@@ -6,8 +6,9 @@ import { LucideIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { WorkbenchViewItemCurrentData } from '@/components/layout/workbench/sidebar/mode/normal/virtua/item.tsx';
+import { LANGUAGE_MAPPER } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/display-name';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
-import { cn, getI18nContent } from '@/utils';
+import { cn } from '@/utils';
 
 interface ISidebarTabsListProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -42,12 +43,24 @@ export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
   ...attr
 }) => {
   const { groupId: currentGroupId } = useContext(WorkbenchViewItemCurrentData);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  // 获取当前语言的显示值
 
   const displayText = (() => {
-    const content = getI18nContent(displayName);
-    // return t([`workspace.wrapper.space.tabs.${content || 'unknown'}`, content || 'Unknown Group']);
-    return content;
+    console.log('displayName', displayName);
+    try {
+      // @ts-expect-error
+      const realDisplayName = JSON.parse(displayName);
+      const currentLanguageKey = LANGUAGE_MAPPER[i18n.language as keyof typeof LANGUAGE_MAPPER] || 'zh-CN';
+
+      const content = realDisplayName[currentLanguageKey];
+      console.log('content', content);
+
+      // return t([`workspace.wrapper.space.tabs.${content || 'unknown'}`, content || 'Unknown Group']);
+      return content;
+    } catch {
+      return displayName;
+    }
   })();
 
   return (

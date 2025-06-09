@@ -17,7 +17,7 @@ interface IFieldDisplayNameProps extends React.ComponentPropsWithoutRef<'div'> {
 }
 
 // 语言映射：前端使用的语言代码 -> i18n 标准代码
-const LANGUAGE_MAPPER = {
+export const LANGUAGE_MAPPER = {
   en: 'en-US',
   zh: 'zh-CN',
 };

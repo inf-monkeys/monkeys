@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 
 import { IUpdatePageGroupParams, useDeletePageGroup, useUpdateGroupPages } from '@/apis/pages';
 import { IPageGroup } from '@/apis/pages/typings.ts';
+import { LANGUAGE_MAPPER } from '@/components/layout/workspace/vines-view/flow/headless-modal/endpoint/start-tool/workflow-input-config/input-config/input-editor/field/display-name';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,7 +24,6 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu.tsx';
 import { SimpleDisplayNameDialog } from '@/components/ui/input/simple-display-name-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { getI18nContent } from '@/utils';
 
 interface IGroupItemProps extends React.ComponentPropsWithoutRef<'div'> {
   group: IPageGroup;
@@ -36,7 +36,7 @@ export const GroupItem: React.FC<IGroupItemProps> = ({
   pageId,
   mutate,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const { trigger } = useUpdateGroupPages(id);
   const { trigger: deleteTrigger } = useDeletePageGroup(id);
@@ -77,14 +77,29 @@ export const GroupItem: React.FC<IGroupItemProps> = ({
     });
   };
 
+  const displayText = (() => {
+    try {
+      // @ts-expect-error
+      const realDisplayName = JSON.parse(displayName);
+      const currentLanguageKey = LANGUAGE_MAPPER[i18n.language as keyof typeof LANGUAGE_MAPPER] || 'zh-CN';
+      const content = realDisplayName[currentLanguageKey];
+
+      // return t([`workspace.wrapper.space.tabs.${content || 'unknown'}`, content || 'Unknown Group']);
+      return content ?? 'Unamed Group';
+    } catch {
+      return displayName;
+    }
+  })();
+
   return (
     <DropdownMenuItem className="flex items-center justify-between gap-4" onClick={handleTogglePin}>
       <div className="flex max-w-48 items-center gap-1 break-words">
         {isPinning && <Check strokeWidth={1.5} size={16} />}
-        {t([
+        {/* {t([
           `workspace.wrapper.space.menu.group.name-${getI18nContent(displayName) || 'unknown'}`,
           getI18nContent(displayName) || 'Unknown Group',
-        ])}
+        ])} */}
+        {displayText}
       </div>
       {!isBuiltIn && (
         <div
