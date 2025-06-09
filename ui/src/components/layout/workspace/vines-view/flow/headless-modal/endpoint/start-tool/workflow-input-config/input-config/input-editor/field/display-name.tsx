@@ -9,7 +9,6 @@ import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from 
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { LANGUAGES_LIST } from '@/components/ui/i18n-selector/consts';
 import { Input } from '@/components/ui/input';
-import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
 import { IWorkflowInput } from '@/schema/workspace/workflow-input.ts';
 
 interface IFieldDisplayNameProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -107,16 +106,7 @@ export const FieldDisplayName: React.FC<IFieldDisplayNameProps> = ({ form }) => 
               />
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogTrigger asChild>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        icon={<EditIcon />}
-                        variant="outline"
-                        size="icon"
-                        className="absolute inset-y-1 right-1"
-                      />
-                    </TooltipTrigger>
-                  </Tooltip>
+                  <Button icon={<EditIcon />} variant="outline" size="icon" className="absolute inset-y-1 right-1" />
                 </DialogTrigger>
                 <DialogContent>
                   <DialogTitle>Edit i18n Name</DialogTitle>
