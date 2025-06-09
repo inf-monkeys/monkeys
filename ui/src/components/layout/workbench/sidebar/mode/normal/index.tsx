@@ -19,7 +19,7 @@ import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useOnlyShowWorkbenchIcon, useToggleOnlyShowWorkbenchIcon } from '@/store/showWorkbenchIcon';
 import { useCurrentPage, useSetCurrentPage } from '@/store/useCurrentPageStore';
-import { cloneDeep, cn } from '@/utils';
+import { cloneDeep, cn, getI18nContent } from '@/utils';
 
 import { VirtuaWorkbenchViewGroupList } from './group-virua';
 import { WorkbenchViewItemCurrentData } from './virtua/item';
@@ -35,7 +35,9 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
 
   const { data, isLoading } = useWorkspacePages();
 
-  const [{ switchWorkflowFromDisplayName }, setUrlState] = useUrlState<{ switchWorkflowFromDisplayName?: string }>({});
+  const [{ activePageFromWorkflowDisplayName }, setUrlState] = useUrlState<{
+    activePageFromWorkflowDisplayName?: string;
+  }>({});
 
   const [groupId, setGroupId] = useState<string>('default');
   const [pageId, setPageId] = useState<string>('');
@@ -82,9 +84,9 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     const groupsLength = latestOriginalGroups.current.length;
     if (!pagesLength) return;
 
-    if (switchWorkflowFromDisplayName) {
+    if (activePageFromWorkflowDisplayName) {
       const targetPage = latestOriginalPages.current.find(
-        (it) => it.workflow?.displayName === switchWorkflowFromDisplayName,
+        (it) => getI18nContent(it.workflow?.displayName) === activePageFromWorkflowDisplayName,
       );
       if (targetPage) {
         const groupWithPageId = latestOriginalGroups.current.find((it) => it.pageIds.includes(targetPage?.id ?? ''));
@@ -148,7 +150,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     } else {
       setEmptyOrFirstPage();
     }
-  }, [currentPage?.[teamId], data, teamId, switchWorkflowFromDisplayName]);
+  }, [currentPage?.[teamId], data, teamId, activePageFromWorkflowDisplayName]);
 
   const { ref, height: wrapperHeight } = useElementSize();
   const [height, setHeight] = useState(500);
@@ -168,7 +170,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     (page) => {
       startTransition(() => {
         // setCurrentPage((prev) => ({ ...prev, [teamId]: { ...page, groupId } }));
-        // setUrlState({ switchWorkflowFromDisplayName: undefined });
+        // setUrlState({ activePageFromWorkflowDisplayName: undefined });
         setCurrentPage({ [teamId]: { ...page, groupId } });
       });
     },
