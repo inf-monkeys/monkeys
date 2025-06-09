@@ -1,8 +1,16 @@
 import z from 'zod';
 
 export const workflowInfoSchema = z.object({
-  displayName: z.string().min(1, '工作流名称不能为空'),
-  description: z.string().max(200, '工作流描述不能超过200个字符'),
+  displayName: z.union([z.string(), z.record(z.string(), z.string())]).refine(
+    (value) => {
+      if (typeof value === 'string') {
+        return value.length > 0;
+      }
+      return Object.values(value).some((v) => v && v.length > 0);
+    },
+    { message: '工作流名称不能为空' },
+  ),
+  description: z.union([z.string(), z.record(z.string(), z.string())]),
   iconUrl: z.string().optional(),
   thumbnail: z.string().optional(),
 });
