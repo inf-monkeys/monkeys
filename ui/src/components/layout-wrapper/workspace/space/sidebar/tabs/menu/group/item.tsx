@@ -79,13 +79,18 @@ export const GroupItem: React.FC<IGroupItemProps> = ({
 
   const displayText = (() => {
     try {
-      // @ts-expect-error
-      const realDisplayName = JSON.parse(displayName);
-      const currentLanguageKey = LANGUAGE_MAPPER[i18n.language as keyof typeof LANGUAGE_MAPPER] || 'zh-CN';
-      const content = realDisplayName[currentLanguageKey];
-
-      // return t([`workspace.wrapper.space.tabs.${content || 'unknown'}`, content || 'Unknown Group']);
-      return content ?? 'Unamed Group';
+      if (typeof displayName === 'string') {
+        const realDisplayName = JSON.parse(displayName);
+        const currentLanguageKey = LANGUAGE_MAPPER[i18n.language as keyof typeof LANGUAGE_MAPPER] || 'zh-CN';
+        const content = realDisplayName[currentLanguageKey];
+        // return t([`workspace.wrapper.space.tabs.${content || 'unknown'}`, content || 'Unknown Group']);
+        return content ?? 'Unamed Group';
+      } else {
+        const currentLanguageKey = LANGUAGE_MAPPER[i18n.language as keyof typeof LANGUAGE_MAPPER] || 'zh-CN';
+        const content = displayName[currentLanguageKey];
+        // return t([`workspace.wrapper.space.tabs.${content || 'unknown'}`, content || 'Unknown Group']);
+        return content ?? 'Unamed Group';
+      }
     } catch {
       return displayName;
     }

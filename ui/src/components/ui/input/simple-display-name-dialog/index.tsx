@@ -118,7 +118,11 @@ export const SimpleDisplayNameDialog: React.FC<ISimpleDisplayNameDialogProps> = 
       onFinished(filteredData[keys[0]]);
     } else {
       // 否则返回 i18n 对象
-      onFinished(filteredData);
+      const withFallback = {
+        'en-US': filteredData['en-US'] || 'Unamed Group',
+        'zh-CN': filteredData['zh-CN'] || '未命名组',
+      };
+      onFinished(withFallback);
     }
 
     setOpen(false);
@@ -160,9 +164,11 @@ export const SimpleDisplayNameDialog: React.FC<ISimpleDisplayNameDialogProps> = 
 
         <DialogFooter>
           <Button variant="outline" onClick={handleCancel}>
-            {t('common.cancel')}
+            {t('workspace.wrapper.space.menu.group.cancel')}
           </Button>
-          <Button onClick={handleSubmit}>{t('common.confirm')}</Button>
+          <Button variant={'outline'} onClick={handleSubmit}>
+            {t('workspace.wrapper.space.menu.group.confirm')}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

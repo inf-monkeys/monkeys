@@ -2308,7 +2308,9 @@
             "rename": {
               "label": "重命名分组",
               "placeholder": "请输入分组名称，不超过 16 字"
-            }
+            },
+            "confirm": "确定",
+            "cancel": "取消"
           },
           "set-icon": {
             "trigger": "设置图标",
