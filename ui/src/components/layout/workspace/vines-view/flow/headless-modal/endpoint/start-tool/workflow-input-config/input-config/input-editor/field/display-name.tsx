@@ -5,7 +5,7 @@ import { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
 import { LANGUAGES_LIST } from '@/components/ui/i18n-selector/consts';
 import { Input } from '@/components/ui/input';
@@ -40,8 +40,12 @@ export const FieldDisplayName: React.FC<IFieldDisplayNameProps> = ({ form }) => 
                 <DialogContent>
                   <DialogTitle>Edit i18n Name</DialogTitle>
                   {LANGUAGES_LIST.map(([key, label]) => (
-                    <div key={key}>
+                    <div key={key} className="flex flex-col gap-1">
+                      <label className="text-xs font-medium text-gray-11" htmlFor={`i18n-input-${key}`}>
+                        {label}
+                      </label>
                       <Input
+                        id={`i18n-input-${key}`}
                         placeholder={t(
                           'workspace.flow-view.endpoint.start-tool.input.config-form.display-name.placeholder',
                         )}
@@ -50,6 +54,9 @@ export const FieldDisplayName: React.FC<IFieldDisplayNameProps> = ({ form }) => 
                       />
                     </div>
                   ))}
+                  <DialogFooter>
+                    <Button>Save</Button>
+                  </DialogFooter>
                 </DialogContent>
               </Dialog>
             </>
