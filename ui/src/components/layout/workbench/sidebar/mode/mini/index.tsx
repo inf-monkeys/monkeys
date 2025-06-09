@@ -21,9 +21,12 @@ interface IWorkbenchMiniModeSidebarProps extends React.ComponentPropsWithoutRef<
 export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> = () => {
   const { data } = useWorkspacePages();
 
-  const [{ sidebarFilter: routeSidebarFilter, sidebarReserve: routeSidebarReserve }] = useUrlState<{
+  const [
+    { sidebarFilter: routeSidebarFilter, sidebarReserve: routeSidebarReserve, activePageFromWorkflowDisplayName },
+  ] = useUrlState<{
     sidebarFilter?: string;
     sidebarReserve?: string;
+    activePageFromWorkflowDisplayName?: string;
   }>();
 
   const [groupId, setGroupId] = useState<string>('default');
@@ -97,7 +100,7 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
   const { teamId } = useVinesTeam();
 
   const [{ activePage }] = useUrlState<{ activePage: string }>({ activePage: '' });
-  const toggleToActivePageRef = useRef(activePage ? false : null);
+  const toggleToActivePageRef = useRef(activePage || activePageFromWorkflowDisplayName ? false : null);
 
   // const [currentPage, setCurrentPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
   const currentPage = useCurrentPage();
@@ -110,8 +113,16 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
     () => {
       if (!teamId || latestOriginalPages.current === null) return;
 
-      if (toggleToActivePageRef.current === false && activePage) {
-        const page = latestOriginalPages.current.find((it) => it.workflowId === activePage);
+      if (toggleToActivePageRef.current === false && (activePage || activePageFromWorkflowDisplayName)) {
+        const page = latestOriginalPages.current.find((it) => {
+          if (activePage) {
+            return it.workflowId === activePage;
+          }
+          if (activePageFromWorkflowDisplayName && it.workflow) {
+            return getI18nContent(it.workflow.displayName) === activePageFromWorkflowDisplayName;
+          }
+          return false;
+        });
         if (page) {
           // Find the group that contains this page and set it as active group
           const groupWithPageId = latestOriginalGroups.current.find((it) => it.pageIds.includes(page.id));
@@ -146,7 +157,7 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
         }
       }
     },
-    [originalPages],
+    [originalPages, activePageFromWorkflowDisplayName],
     { wait: 180 },
   );
 
