@@ -1,5 +1,6 @@
 export interface IAgent {
-  displayName: string;
+  displayName: string | Record<string, string>;
+  description?: string | Record<string, string>;
   customModelName?: string;
   model: string;
   systemPrompt?: string;
