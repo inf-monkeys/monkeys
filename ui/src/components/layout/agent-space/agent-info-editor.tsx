@@ -60,10 +60,12 @@ export const AgentInfoEditor: React.FC<IAgentInfoEditorProps> = ({
 
   useEffect(() => {
     if (!agent) return;
-    form.setValue('displayName', agent.displayName || t('agent.info.default-agent-name'));
-    form.setValue('description', agent.description || '');
-    form.setValue('iconUrl', agent.iconUrl || DEFAULT_AGENT_ICON_URL);
-  }, [agent]);
+    form.reset({
+      displayName: agent.displayName || t('agent.info.default-agent-name'),
+      description: agent.description || '',
+      iconUrl: agent.iconUrl || DEFAULT_AGENT_ICON_URL,
+    });
+  }, [agent, form, t]);
 
   const agentId = agent?.id;
   const { mutate } = useGetAgent(agentId);
