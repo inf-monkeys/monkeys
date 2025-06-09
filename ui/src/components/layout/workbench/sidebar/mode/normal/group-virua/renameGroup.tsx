@@ -9,7 +9,8 @@ import { toast } from 'sonner';
 
 import { usePageGroups, useUpdateGroupPages } from '@/apis/pages';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu.tsx';
-import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
+import { SimpleDisplayNameDialog } from '@/components/ui/input/simple-display-name-dialog';
+import { getI18nContent } from '@/utils';
 
 interface IRenameViewProps extends React.ComponentPropsWithoutRef<'div'> {
   groupId: string;
@@ -22,10 +23,10 @@ export const RenameGroup: React.FC<IRenameViewProps> = ({ groupId }) => {
 
   const currentGroup = groups?.find((group) => group.id === groupId);
 
-  const handleRenameGroup = async (displayName: string) => {
+  const handleRenameGroup = async (displayName: string | Record<string, string>) => {
     if (!groupId || !groups) return;
 
-    // Optimistic update
+    // 直接使用 i18n 格式发送给后端
     const optimisticGroups = groups.map((group) => (group.id === groupId ? { ...group, displayName } : group));
 
     toast.promise(
@@ -49,15 +50,16 @@ export const RenameGroup: React.FC<IRenameViewProps> = ({ groupId }) => {
   };
 
   return (
-    <SimpleInputDialog
+    <SimpleDisplayNameDialog
       title={t('workspace.wrapper.space.menu.rename.title')}
-      placeholder={currentGroup?.displayName ?? t('workspace.wrapper.space.menu.rename.placeholder')}
+      placeholder={getI18nContent(currentGroup?.displayName) ?? t('workspace.wrapper.space.menu.rename.placeholder')}
       initialValue={currentGroup?.displayName ?? ''}
       onFinished={(val) => {
-        if (isEmpty(val)) {
+        const currentDisplayName = getI18nContent(val);
+        if (isEmpty(currentDisplayName)) {
           toast.error(t('workspace.wrapper.space.menu.rename.input-empty'));
           return;
-        } else if (val !== currentGroup?.displayName) {
+        } else if (JSON.stringify(val) !== JSON.stringify(currentGroup?.displayName)) {
           void handleRenameGroup(val);
         }
       }}
@@ -72,6 +74,6 @@ export const RenameGroup: React.FC<IRenameViewProps> = ({ groupId }) => {
         <Pencil strokeWidth={1.5} size={16} />
         <p>{t('workspace.wrapper.space.menu.rename.trigger')}</p>
       </DropdownMenuItem>
-    </SimpleInputDialog>
+    </SimpleDisplayNameDialog>
   );
 };

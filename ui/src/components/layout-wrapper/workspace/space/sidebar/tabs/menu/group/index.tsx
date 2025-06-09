@@ -17,7 +17,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu.tsx';
-import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
+import { SimpleDisplayNameDialog } from '@/components/ui/input/simple-display-name-dialog';
 
 interface IViewGroupProps extends React.ComponentPropsWithoutRef<'div'> {
   pageId: string;
@@ -30,7 +30,7 @@ export const ViewGroup: React.FC<IViewGroupProps> = ({ pageId, pagesMutate }) =>
   const { data, isLoading, mutate: pageGroupMutate } = usePageGroups();
   const { trigger: createPageGroupTrigger } = useCreatePageGroup();
 
-  const handleCreateGroup = (displayName: string) => {
+  const handleCreateGroup = (displayName: string | Record<string, string>) => {
     toast.promise(createPageGroupTrigger({ displayName, pageId }), {
       loading: t('workspace.wrapper.space.menu.group.create-toast.loading'),
       success: (groups) => {
@@ -74,7 +74,7 @@ export const ViewGroup: React.FC<IViewGroupProps> = ({ pageId, pagesMutate }) =>
           {isLoading && <DropdownMenuItem disabled>{t('common.load.loading')}</DropdownMenuItem>}
           <VirtuaPinGroupList data={finalGroups} pageId={pageId} mutate={pageGroupMutate} />
           <DropdownMenuSeparator />
-          <SimpleInputDialog
+          <SimpleDisplayNameDialog
             title={t('workspace.wrapper.space.menu.group.create')}
             placeholder={t('workspace.wrapper.space.menu.group.placeholder')}
             onFinished={handleCreateGroup}
@@ -89,7 +89,7 @@ export const ViewGroup: React.FC<IViewGroupProps> = ({ pageId, pagesMutate }) =>
               <Plus size={16} />
               {t('workspace.wrapper.space.menu.group.create')}
             </DropdownMenuItem>
-          </SimpleInputDialog>
+          </SimpleDisplayNameDialog>
         </DropdownMenuSubContent>
       </DropdownMenuPortal>
     </DropdownMenuSub>

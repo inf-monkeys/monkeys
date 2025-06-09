@@ -21,8 +21,9 @@ import {
 } from '@/components/ui/alert-dialog.tsx';
 import { Button } from '@/components/ui/button';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu.tsx';
-import { SimpleInputDialog } from '@/components/ui/input/simple-input-dialog';
+import { SimpleDisplayNameDialog } from '@/components/ui/input/simple-display-name-dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { getI18nContent } from '@/utils';
 
 interface IGroupItemProps extends React.ComponentPropsWithoutRef<'div'> {
   group: IPageGroup;
@@ -80,7 +81,10 @@ export const GroupItem: React.FC<IGroupItemProps> = ({
     <DropdownMenuItem className="flex items-center justify-between gap-4" onClick={handleTogglePin}>
       <div className="flex max-w-48 items-center gap-1 break-words">
         {isPinning && <Check strokeWidth={1.5} size={16} />}
-        {t([`workspace.wrapper.space.menu.group.name-${displayName}`, displayName])}
+        {t([
+          `workspace.wrapper.space.menu.group.name-${getI18nContent(displayName) || displayName}`,
+          getI18nContent(displayName) || displayName || '',
+        ])}
       </div>
       {!isBuiltIn && (
         <div
@@ -113,15 +117,16 @@ export const GroupItem: React.FC<IGroupItemProps> = ({
             </AlertDialogContent>
           </AlertDialog>
           <Tooltip>
-            <SimpleInputDialog
+            <SimpleDisplayNameDialog
               title={t('workspace.wrapper.space.menu.group.rename.label')}
               placeholder={t('workspace.wrapper.space.menu.group.rename.placeholder')}
+              initialValue={displayName}
               onFinished={(val) => handleUpdateGroup({ displayName: val })}
             >
               <TooltipTrigger asChild>
                 <Button className="-m-2 scale-[0.6]" icon={<Pencil />} size="small" variant="outline" />
               </TooltipTrigger>
-            </SimpleInputDialog>
+            </SimpleDisplayNameDialog>
             <TooltipContent>{t('workspace.wrapper.space.menu.group.rename.label')}</TooltipContent>
           </Tooltip>
         </div>
