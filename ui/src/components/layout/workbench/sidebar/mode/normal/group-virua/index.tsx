@@ -8,7 +8,7 @@ import { IPageGroup, IPinPage } from '@/apis/pages/typings.ts';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { useOnlyShowWorkbenchIcon } from '@/store/showWorkbenchIcon';
-import { cn } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 
 import { NavDropdown } from './navTab';
 import { SideBarNavItem } from './sideBarNavItem';
@@ -36,23 +36,14 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
       >
         <Virtualizer scrollRef={scrollRef}>
           {data.map(({ displayName, id, iconUrl }, i) => (
-            // <Button
-            //   key={i}
-            //   className={cn(
-            //     'mb-2 w-full shrink-0 justify-start px-2 hover:bg-accent',
-            //     groupId === id && 'border border-input bg-neocard',
-            //   )}
-            //   variant="ghost"
-            //   icon={<FolderIcon />}
-            //   onClick={() => setGroupId(id)}
-            // >
-            //   {!onlyShowWorkbenchIcon ? displayName : ''}
-            // </Button>
             <SideBarNavItem
               key={id}
               icon={iconUrl ?? FolderIcon}
               groupId={id}
-              displayName={t([`workspace.wrapper.space.tabs.${displayName}`, displayName])}
+              displayName={t([
+                `workspace.wrapper.space.tabs.${getI18nContent(displayName) || 'unknown'}`,
+                getI18nContent(displayName) || 'Unknown Group',
+              ])}
               onlyShowWorkbenchIcon={onlyShowWorkbenchIcon}
               onClick={() => setGroupId(id)}
             >

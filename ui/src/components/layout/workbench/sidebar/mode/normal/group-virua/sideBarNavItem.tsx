@@ -3,10 +3,11 @@ import React, { useContext } from 'react';
 
 import { cva } from 'class-variance-authority';
 import { LucideIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { WorkbenchViewItemCurrentData } from '@/components/layout/workbench/sidebar/mode/normal/virtua/item.tsx';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
-import { cn } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 
 interface ISidebarTabsListProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -27,7 +28,7 @@ export const spaceSidebarTabVariants = cva(
 
 interface ISpaceSidebarTabProps extends React.ComponentPropsWithoutRef<'div'> {
   icon: string | LucideIcon;
-  displayName: string;
+  displayName: string | Record<string, string>;
   onlyShowWorkbenchIcon?: boolean;
   groupId: string;
 }
@@ -41,6 +42,13 @@ export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
   ...attr
 }) => {
   const { groupId: currentGroupId } = useContext(WorkbenchViewItemCurrentData);
+  const { t } = useTranslation();
+
+  const displayText = (() => {
+    const content = getI18nContent(displayName);
+    // return t([`workspace.wrapper.space.tabs.${content || 'unknown'}`, content || 'Unknown Group']);
+    return content;
+  })();
 
   return (
     <div
@@ -59,7 +67,7 @@ export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
         React.createElement(icon, { className: 'size-[20px] shrink-0', size: 20 })
       )}
       {!onlyShowWorkbenchIcon && (
-        <h1 className="line-clamp-1 max-w-20 text-ellipsis whitespace-nowrap text-sm">{displayName}</h1>
+        <h1 className="line-clamp-1 max-w-20 text-ellipsis whitespace-nowrap text-sm">{displayText}</h1>
       )}
       {!onlyShowWorkbenchIcon && children}
     </div>
