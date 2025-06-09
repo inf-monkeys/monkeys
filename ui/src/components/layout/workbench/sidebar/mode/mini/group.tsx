@@ -37,12 +37,12 @@ export const WorkbenchMiniGroupList: React.FC<IWorkbenchMiniGroupListProps> = ({
     >
       <Virtualizer scrollRef={scrollRef}>
         {data.map(({ displayName, id, iconUrl }) => (
-          <div key={id} className="mb-2 flex justify-center">
+          <div key={id} className="flex justify-center">
             <Tooltip>
               <TooltipTrigger asChild>
                 <div
                   className={cn(
-                    'flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border border-transparent transition-colors hover:bg-accent hover:text-accent-foreground',
+                    'flex h-10 w-10 cursor-pointer items-center justify-center rounded-md border border-transparent transition-colors hover:bg-accent hover:text-accent-foreground',
                     groupId === id && 'border-input bg-background text-accent-foreground',
                   )}
                   onClick={() => setGroupId(id)}

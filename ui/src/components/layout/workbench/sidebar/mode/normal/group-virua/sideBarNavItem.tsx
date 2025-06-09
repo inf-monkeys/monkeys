@@ -1,10 +1,12 @@
 /* eslint-disable react-refresh/only-export-components */
-import React from 'react';
+import React, { useContext } from 'react';
 
 import { cva } from 'class-variance-authority';
 import { LucideIcon } from 'lucide-react';
 
+import { WorkbenchViewItemCurrentData } from '@/components/layout/workbench/sidebar/mode/normal/virtua/item.tsx';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
+import { cn } from '@/utils';
 
 interface ISidebarTabsListProps extends React.ComponentPropsWithoutRef<'div'> {}
 
@@ -26,26 +28,40 @@ export const spaceSidebarTabVariants = cva(
 interface ISpaceSidebarTabProps extends React.ComponentPropsWithoutRef<'div'> {
   icon: string | LucideIcon;
   displayName: string;
-  onlyShowWorkenchIcon?: boolean;
+  onlyShowWorkbenchIcon?: boolean;
+  groupId: string;
 }
+
 export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
   children,
   icon,
   displayName,
-  onlyShowWorkenchIcon,
+  onlyShowWorkbenchIcon,
+  groupId,
   ...attr
 }) => {
+  const { groupId: currentGroupId } = useContext(WorkbenchViewItemCurrentData);
+
   return (
-    <div className="flex h-full select-none items-center" {...attr}>
-      {typeof icon === 'string' ? (
-        <VinesLucideIcon className="mr-2 size-[20px] shrink-0" size={20} src={icon} />
-      ) : (
-        React.createElement(icon, { className: 'mr-2 size-[20px] shrink-0', size: 20 })
+    <div
+      className={cn(
+        'z-10 mb-1 flex h-11 cursor-pointer select-none items-center gap-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
+        onlyShowWorkbenchIcon
+          ? 'flex size-11 items-center justify-center'
+          : 'flex w-full shrink-0 items-center justify-start gap-2 px-2',
+        groupId === currentGroupId && 'group border border-input bg-neocard text-accent-foreground dark:bg-[#393939]',
       )}
-      {!onlyShowWorkenchIcon && (
+      {...attr}
+    >
+      {typeof icon === 'string' ? (
+        <VinesLucideIcon className="size-[20px] shrink-0" size={20} src={icon} />
+      ) : (
+        React.createElement(icon, { className: 'size-[20px] shrink-0', size: 20 })
+      )}
+      {!onlyShowWorkbenchIcon && (
         <h1 className="line-clamp-1 max-w-20 text-ellipsis whitespace-nowrap text-sm">{displayName}</h1>
       )}
-      {!onlyShowWorkenchIcon && children}
+      {!onlyShowWorkbenchIcon && children}
     </div>
   );
 };

@@ -1,31 +1,39 @@
+import { logger } from '@/common/logger';
 import { ValueTransformer } from 'typeorm';
 
+function toValidDate(value: any): Date | null {
+  if (value instanceof Date && !isNaN(value.getTime())) return value;
+  if (typeof value === 'number') return isNaN(value) ? null : new Date(value);
+  if (typeof value === 'string') {
+    // 判断是不是纯数字字符串
+    if (/^\d+$/.test(value)) {
+      const num = parseInt(value, 10);
+      return isNaN(num) ? null : new Date(num);
+    }
+    // 普通时间字符串
+    const date = new Date(value);
+    return isNaN(date.getTime()) ? null : date;
+  }
+  return null;
+}
+
+
 export const TimestampTransformer: ValueTransformer = {
-  // 从 JavaScript 值转换为数据库值
-  to(value: Date | number | string): Date {
-    if (value instanceof Date) {
-      return value;
+  to(value: Date | number | string): Date | null {
+    const date = toValidDate(value);
+    if (!date) {
+      logger.warn('[TimestampTransformer.to] Invalid input:', value);
+      return null;
     }
-    if (typeof value === 'string') {
-      return new Date(value);
-    }
-    if (typeof value === 'number') {
-      return new Date(value);
-    }
-    return value;
+    return date;
   },
 
-  // 从数据库值转换为 JavaScript Date
-  from(value: Date | string | number): Date {
-    if (value instanceof Date) {
-      return value;
+  from(value: Date | string | number): number | null {
+    const date = toValidDate(value);
+    if (!date) {
+      logger.warn('[TimestampTransformer.from] Invalid input from DB:', value);
+      return null;
     }
-    if (typeof value === 'string') {
-      return new Date(value);
-    }
-    if (typeof value === 'number') {
-      return new Date(value);
-    }
-    return value;
+    return date.getTime();
   },
 };
