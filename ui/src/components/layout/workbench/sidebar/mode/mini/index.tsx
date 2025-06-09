@@ -15,15 +15,18 @@ import useUrlState from '@/hooks/use-url-state.ts';
 import { useCurrentPage, useSetCurrentPage } from '@/store/useCurrentPageStore';
 import { cn } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
+
 interface IWorkbenchMiniModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> = () => {
   const { data } = useWorkspacePages();
 
-  const [{ sidebarFilter: routeSidebarFilter, sidebarReserve: routeSidebarReserve }] = useUrlState<{
-    sidebarFilter?: string;
-    sidebarReserve?: string;
-  }>();
+  const [{ sidebarFilter: routeSidebarFilter, sidebarReserve: routeSidebarReserve, switchWorkflowFromDisplayName }] =
+    useUrlState<{
+      sidebarFilter?: string;
+      sidebarReserve?: string;
+      switchWorkflowFromDisplayName?: string;
+    }>();
 
   const [groupId, setGroupId] = useState<string>('default');
 
@@ -143,7 +146,7 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
         }
       }
     },
-    [originalPages],
+    [originalPages, switchWorkflowFromDisplayName],
     { wait: 180 },
   );
 
