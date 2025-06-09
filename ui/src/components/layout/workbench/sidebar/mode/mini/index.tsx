@@ -82,7 +82,9 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
       if (a.isBuiltIn !== b.isBuiltIn) {
         return a.isBuiltIn ? -1 : 1;
       }
-      return a.displayName.localeCompare(b.displayName, undefined, { numeric: true });
+      const aDisplayName = getI18nContent(a.displayName) || 'Unknown';
+      const bDisplayName = getI18nContent(b.displayName) || 'Unknown';
+      return aDisplayName.localeCompare(bDisplayName, undefined, { numeric: true });
     });
 
   // Get current group's pages for display
