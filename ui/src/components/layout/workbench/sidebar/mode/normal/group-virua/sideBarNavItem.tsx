@@ -47,14 +47,11 @@ export const SideBarNavItem: React.FC<ISpaceSidebarTabProps> = ({
   // 获取当前语言的显示值
 
   const displayText = (() => {
-    console.log('displayName', displayName);
     try {
       // @ts-expect-error
       const realDisplayName = JSON.parse(displayName);
       const currentLanguageKey = LANGUAGE_MAPPER[i18n.language as keyof typeof LANGUAGE_MAPPER] || 'zh-CN';
-
       const content = realDisplayName[currentLanguageKey];
-      console.log('content', content);
 
       // return t([`workspace.wrapper.space.tabs.${content || 'unknown'}`, content || 'Unknown Group']);
       return content;
