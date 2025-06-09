@@ -82,8 +82,8 @@ export const GroupItem: React.FC<IGroupItemProps> = ({
       <div className="flex max-w-48 items-center gap-1 break-words">
         {isPinning && <Check strokeWidth={1.5} size={16} />}
         {t([
-          `workspace.wrapper.space.menu.group.name-${getI18nContent(displayName) || displayName}`,
-          getI18nContent(displayName) || displayName || '',
+          `workspace.wrapper.space.menu.group.name-${getI18nContent(displayName) || 'unknown'}`,
+          getI18nContent(displayName) || 'Unknown Group',
         ])}
       </div>
       {!isBuiltIn && (

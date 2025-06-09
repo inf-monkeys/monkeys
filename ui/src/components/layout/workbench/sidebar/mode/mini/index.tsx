@@ -13,8 +13,9 @@ import { VINES_IFRAME_PAGE_TYPE2ID_MAPPER } from '@/components/ui/vines-iframe/c
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useCurrentPage, useSetCurrentPage } from '@/store/useCurrentPageStore';
-import { cn } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
+
 interface IWorkbenchMiniModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
 
 export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> = () => {
@@ -78,7 +79,9 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
       if (a.isBuiltIn !== b.isBuiltIn) {
         return a.isBuiltIn ? -1 : 1;
       }
-      return a.displayName.localeCompare(b.displayName, undefined, { numeric: true });
+      const aDisplayName = getI18nContent(a.displayName) || 'Unknown';
+      const bDisplayName = getI18nContent(b.displayName) || 'Unknown';
+      return aDisplayName.localeCompare(bDisplayName, undefined, { numeric: true });
     });
 
   // Get current group's pages for display

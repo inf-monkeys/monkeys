@@ -52,7 +52,7 @@ export const RenameGroup: React.FC<IRenameViewProps> = ({ groupId }) => {
   return (
     <SimpleDisplayNameDialog
       title={t('workspace.wrapper.space.menu.rename.title')}
-      placeholder={getI18nContent(currentGroup?.displayName) ?? t('workspace.wrapper.space.menu.rename.placeholder')}
+      placeholder={t('workspace.wrapper.space.menu.rename.placeholder')}
       initialValue={currentGroup?.displayName ?? ''}
       onFinished={(val) => {
         const currentDisplayName = getI18nContent(val);
