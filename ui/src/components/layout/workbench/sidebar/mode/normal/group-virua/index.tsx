@@ -8,7 +8,7 @@ import { IPageGroup, IPinPage } from '@/apis/pages/typings.ts';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Separator } from '@/components/ui/separator.tsx';
 import { useOnlyShowWorkbenchIcon } from '@/store/showWorkbenchIcon';
-import { cn, getI18nContent } from '@/utils';
+import { cn } from '@/utils';
 
 import { NavDropdown } from './navTab';
 import { SideBarNavItem } from './sideBarNavItem';
@@ -40,10 +40,7 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
               key={id}
               icon={iconUrl ?? FolderIcon}
               groupId={id}
-              displayName={t([
-                `workspace.wrapper.space.tabs.${getI18nContent(displayName) || 'unknown'}`,
-                getI18nContent(displayName) || 'Unknown Group',
-              ])}
+              displayName={displayName}
               onlyShowWorkbenchIcon={onlyShowWorkbenchIcon}
               onClick={() => setGroupId(id)}
             >
