@@ -2313,7 +2313,9 @@
             "rename": {
               "label": "Rename Group",
               "placeholder": "Please enter a group name, no more than 16 characters"
-            }
+            },
+            "confirm": "Confirm",
+            "cancel": "Cancel"
           },
           "set-icon": {
             "trigger": "Settings Icon",
