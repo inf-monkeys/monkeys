@@ -29,9 +29,10 @@ const NEED_FORCE_REFRESH = ['text-data', 'table-data', 'image-models'];
 
 interface ITeamSelectorProps extends React.ComponentPropsWithoutRef<'div'> {
   size?: 'normal' | 'large';
+  teamNameWidth?: 'auto' | 'small';
 }
 
-export const TeamSelector: React.FC<ITeamSelectorProps> = ({ size = 'normal' }) => {
+export const TeamSelector: React.FC<ITeamSelectorProps> = ({ size = 'normal', teamNameWidth = 'auto' }) => {
   const { t } = useTranslation();
 
   const { routeId } = useVinesRoute();
@@ -74,12 +75,12 @@ export const TeamSelector: React.FC<ITeamSelectorProps> = ({ size = 'normal' }) 
         <Button
           variant="outline"
           role="combobox"
-          className={cn('justify-between gap-1', size === 'large' ? 'px-4 py-6' : 'px-3')}
+          className={cn('justify-between gap-1 rounded-xl shadow-none', size === 'large' ? 'px-4 py-6' : 'px-3')}
           aria-expanded={open}
           aria-label="Select a team"
         >
           <Team
-            className="w-32"
+            className={cn(teamNameWidth === 'auto' ? 'w-32' : 'w-26')}
             logo={isDarkMode ? currentTeam?.darkmodeIconUrl : currentTeam?.iconUrl}
             name={currentTeam?.name}
           />

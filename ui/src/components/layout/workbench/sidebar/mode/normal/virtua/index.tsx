@@ -7,10 +7,9 @@ import {
   IWorkbenchViewItemPage,
   IWorkbenchViewItemProps,
   ViewItem,
-  WorkbenchViewItemCurrentData,
 } from '@/components/layout/workbench/sidebar/mode/normal/virtua/item.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
-import { useOnlyShowWorkenchIcon } from '@/store/showWorkenchIcon';
+import { useOnlyShowWorkbenchIcon } from '@/store/showWorkbenchIcon';
 import { cn } from '@/utils';
 
 interface IVirtuaWorkbenchViewListProps {
@@ -22,6 +21,7 @@ interface IVirtuaWorkbenchViewListProps {
 
   onChildClick?: IWorkbenchViewItemProps['onClick'];
 }
+
 let timeoutId: NodeJS.Timeout;
 
 export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = ({
@@ -32,7 +32,7 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
   onChildClick,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const onlyShowWorkenchIcon = useOnlyShowWorkenchIcon();
+  const onlyShowWorkbenchIcon = useOnlyShowWorkbenchIcon();
   const ref = useRef<VListHandle>(null);
   const lastPageId = useRef<string>();
   useEffect(() => {
@@ -61,25 +61,23 @@ export const VirtuaWorkbenchViewList: React.FC<IVirtuaWorkbenchViewListProps> = 
     };
   }, []);
   return (
-    <WorkbenchViewItemCurrentData.Provider value={{ pageId: currentPageId, groupId: currentGroupId }}>
-      <ScrollArea
-        className={cn('w-56 px-4 pt-4', onlyShowWorkenchIcon && 'w-[4.80rem]')}
-        ref={scrollRef}
-        style={{ height }}
-        disabledOverflowMask
-        onScroll={handleScroll}
-      >
-        <Virtualizer ref={ref} scrollRef={scrollRef}>
-          {data.map((it, i) => (
-            <ViewItem
-              key={i}
-              page={it as IWorkbenchViewItemPage}
-              onClick={onChildClick}
-              onlyShowWorkenchIcon={onlyShowWorkenchIcon}
-            />
-          ))}
-        </Virtualizer>
-      </ScrollArea>
-    </WorkbenchViewItemCurrentData.Provider>
+    <ScrollArea
+      className={cn('w-56 px-4 pt-4', onlyShowWorkbenchIcon && 'w-[4.80rem]')}
+      ref={scrollRef}
+      style={{ height }}
+      disabledOverflowMask
+      onScroll={handleScroll}
+    >
+      <Virtualizer ref={ref} scrollRef={scrollRef}>
+        {data.map((it, i) => (
+          <ViewItem
+            key={i}
+            page={it as IWorkbenchViewItemPage}
+            onClick={onChildClick}
+            onlyShowWorkbenchIcon={onlyShowWorkbenchIcon}
+          />
+        ))}
+      </Virtualizer>
+    </ScrollArea>
   );
 };

@@ -16,11 +16,11 @@ export type IWorkbenchViewItemPage = Omit<IPinPage, 'type'> & { groupId: string;
 export interface IWorkbenchViewItemProps {
   page: IWorkbenchViewItemPage;
   onClick?: (page: IWorkbenchViewItemPage) => void;
-  onlyShowWorkenchIcon?: boolean;
+  onlyShowWorkbenchIcon?: boolean;
 }
 
 export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
-  ({ page, onClick, onlyShowWorkenchIcon = false }) => {
+  ({ page, onClick, onlyShowWorkbenchIcon = false }) => {
     const { t } = useTranslation();
 
     const { pageId: currentPageId, groupId: currentGroupId } = useContext(WorkbenchViewItemCurrentData);
@@ -33,19 +33,19 @@ export const ViewItem = forwardRef<HTMLDivElement, IWorkbenchViewItemProps>(
       <div
         key={pageId}
         className={cn(
-          'z-10 mb-2 flex cursor-pointer items-center gap-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
+          'z-10 flex cursor-pointer items-center gap-2 rounded-md p-2 transition-colors hover:bg-accent hover:text-accent-foreground',
           currentPageId === pageId
             ? 'group border border-input bg-neocard text-accent-foreground dark:bg-[#393939]'
             : // : 'p-[calc(0.5rem+1px)]',
               'p-2',
-          onlyShowWorkenchIcon && 'size-11 justify-center',
+          onlyShowWorkbenchIcon ? 'mb-1 size-11 justify-center' : 'mb-2',
         )}
         onClick={() => onClick?.(page)}
       >
         <VinesIcon className="shrink-0 grow-0" size="sm" disabledPreview>
           {info?.iconUrl}
         </VinesIcon>
-        {!onlyShowWorkenchIcon ? (
+        {!onlyShowWorkbenchIcon ? (
           <>
             <div className="flex flex-col gap-0.5">
               <h1 className="line-clamp-1 max-w-36 text-ellipsis text-sm font-bold leading-tight">
