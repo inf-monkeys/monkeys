@@ -43,17 +43,15 @@ export const I18nInput: React.FC<II18nInputProps> = ({
   // 初始化 i18n 数据
   useEffect(() => {
     if (typeof value === 'string') {
-      // 将旧的字符串格式转换为 i18n 对象
+      // 将旧的字符串格式转换为 i18n 对象，但不触发onChange
       const i18nObj = { [currentLanguageKey]: value };
       setI18nData(i18nObj);
-      // 更新表单数据为 i18n 格式
-      onChange?.(i18nObj);
     } else if (value && typeof value === 'object') {
       setI18nData(value);
     } else {
       setI18nData({});
     }
-  }, [value, currentLanguageKey]);
+  }, [value, currentLanguageKey]); // 重新添加currentLanguageKey依赖，但避免触发onChange
 
   // 获取当前语言的显示值
   const getCurrentLanguageValue = (i18nDataObj: Record<string, string>) => {
@@ -65,6 +63,9 @@ export const I18nInput: React.FC<II18nInputProps> = ({
     const firstValue = Object.values(i18nDataObj).find((v) => v && v.trim().length > 0);
     return firstValue || '';
   };
+
+  // 监听语言变化，确保显示值正确更新
+  const displayValue = getCurrentLanguageValue(i18nData);
 
   // 主输入框值变化处理
   const handleMainInputChange = (inputValue: string) => {
@@ -96,16 +97,26 @@ export const I18nInput: React.FC<II18nInputProps> = ({
     setDialogOpen(false);
   };
 
+  // Dialog关闭处理 - 自动保存更改
+  const handleDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      // 关闭Dialog时自动保存
+      handleSave();
+    } else {
+      setDialogOpen(open);
+    }
+  };
+
   return (
     <div className="relative">
       <Input
         placeholder={placeholder}
-        value={getCurrentLanguageValue(i18nData)}
+        value={displayValue}
         onChange={(inputValue: string) => handleMainInputChange(inputValue)}
         className={`pr-14 ${className || ''}`}
         autoFocus={autoFocus}
       />
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
         <DialogTrigger asChild>
           <Button icon={<EditIcon />} variant="outline" size="icon" className="absolute inset-y-1 right-1" />
         </DialogTrigger>

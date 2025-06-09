@@ -68,14 +68,14 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
 
   useEffect(() => {
     if (!workflow) return;
-    form.setValue(
-      'displayName',
-      (workflow.displayName as string | Record<string, string>) ||
+    form.reset({
+      displayName:
+        (workflow.displayName as string | Record<string, string>) ||
         t('workspace.wrapper.workflow-info-card.default-workflow-name'),
-    );
-    form.setValue('description', (workflow.description as string | Record<string, string>) || '');
-    form.setValue('iconUrl', workflow.iconUrl || DEFAULT_WORKFLOW_ICON_URL);
-  }, [workflow]);
+      description: (workflow.description as string | Record<string, string>) || '',
+      iconUrl: workflow.iconUrl || DEFAULT_WORKFLOW_ICON_URL,
+    });
+  }, [workflow, form, t]);
 
   const handleSubmit = form.handleSubmit(async (data) => {
     if (disabled) return;
