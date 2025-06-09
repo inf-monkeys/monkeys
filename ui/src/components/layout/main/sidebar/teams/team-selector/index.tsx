@@ -75,7 +75,7 @@ export const TeamSelector: React.FC<ITeamSelectorProps> = ({ size = 'normal', te
         <Button
           variant="outline"
           role="combobox"
-          className={cn('justify-between gap-1 rounded-xl shadow-none', size === 'large' ? 'px-4 py-6' : 'px-3')}
+          className={cn('justify-between gap-1 shadow-none', size === 'large' ? 'rounded-xl px-4 py-6' : 'px-3')}
           aria-expanded={open}
           aria-label="Select a team"
         >
