@@ -40,10 +40,12 @@ export const toggleWorkspacePagePin = (pageId: string, pin: boolean) =>
 export const usePageGroups = () => useSWR<IPageGroup[] | undefined>('/api/workflow/page-groups', vinesFetcher());
 
 export const useCreatePageGroup = () =>
-  useSWRMutation<IPageGroup[] | undefined, unknown, string, { displayName: string; pageId?: string }>(
-    '/api/workflow/page-groups',
-    vinesFetcher({ method: 'POST' }),
-  );
+  useSWRMutation<
+    IPageGroup[] | undefined,
+    unknown,
+    string,
+    { displayName: string | Record<string, string>; pageId?: string }
+  >('/api/workflow/page-groups', vinesFetcher({ method: 'POST' }));
 
 export const useDeletePageGroup = (groupId: string) =>
   useSWRMutation<IPageGroup[] | undefined, unknown, string | null>(
@@ -52,7 +54,7 @@ export const useDeletePageGroup = (groupId: string) =>
   );
 
 export interface IUpdatePageGroupParams {
-  displayName?: string;
+  displayName?: string | Record<string, string>;
   pageId?: string;
   mode?: 'add' | 'remove';
   iconUrl?: string;

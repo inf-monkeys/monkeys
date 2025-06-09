@@ -8,7 +8,7 @@ import { IPageGroup, IPinPage } from '@/apis/pages/typings.ts';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { VinesLucideIcon } from '@/components/ui/vines-icon/lucide';
-import { cn } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 
 interface IWorkbenchMiniGroupListProps extends React.ComponentPropsWithoutRef<'div'> {
   groupId: string;
@@ -55,7 +55,12 @@ export const WorkbenchMiniGroupList: React.FC<IWorkbenchMiniGroupListProps> = ({
                 </div>
               </TooltipTrigger>
               <TooltipContent side="right" align="start" alignOffset={-4} sideOffset={8}>
-                <span>{t([`workspace.wrapper.space.tabs.${displayName}`, displayName])}</span>
+                <span>
+                  {t([
+                    `workspace.wrapper.space.tabs.${getI18nContent(displayName) || 'unknown'}`,
+                    getI18nContent(displayName) || 'Unknown Group',
+                  ])}
+                </span>
               </TooltipContent>
             </Tooltip>
           </div>

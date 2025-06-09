@@ -36,23 +36,11 @@ export const VirtuaWorkbenchViewGroupList: React.FC<IVirtuaWorkbenchViewGroupLis
       >
         <Virtualizer scrollRef={scrollRef}>
           {data.map(({ displayName, id, iconUrl }, i) => (
-            // <Button
-            //   key={i}
-            //   className={cn(
-            //     'mb-2 w-full shrink-0 justify-start px-2 hover:bg-accent',
-            //     groupId === id && 'border border-input bg-neocard',
-            //   )}
-            //   variant="ghost"
-            //   icon={<FolderIcon />}
-            //   onClick={() => setGroupId(id)}
-            // >
-            //   {!onlyShowWorkbenchIcon ? displayName : ''}
-            // </Button>
             <SideBarNavItem
               key={id}
               icon={iconUrl ?? FolderIcon}
               groupId={id}
-              displayName={t([`workspace.wrapper.space.tabs.${displayName}`, displayName])}
+              displayName={displayName}
               onlyShowWorkbenchIcon={onlyShowWorkbenchIcon}
               onClick={() => setGroupId(id)}
             >
