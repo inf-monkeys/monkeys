@@ -13,7 +13,7 @@ import { VINES_IFRAME_PAGE_TYPE2ID_MAPPER } from '@/components/ui/vines-iframe/c
 import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useCurrentPage, useSetCurrentPage } from '@/store/useCurrentPageStore';
-import { cn } from '@/utils';
+import { cn, getI18nContent } from '@/utils';
 import VinesEvent from '@/utils/events.ts';
 
 interface IWorkbenchMiniModeSidebarProps extends React.ComponentPropsWithoutRef<'div'> {}
@@ -21,12 +21,13 @@ interface IWorkbenchMiniModeSidebarProps extends React.ComponentPropsWithoutRef<
 export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> = () => {
   const { data } = useWorkspacePages();
 
-  const [{ sidebarFilter: routeSidebarFilter, sidebarReserve: routeSidebarReserve, switchWorkflowFromDisplayName }] =
-    useUrlState<{
-      sidebarFilter?: string;
-      sidebarReserve?: string;
-      switchWorkflowFromDisplayName?: string;
-    }>();
+  const [
+    { sidebarFilter: routeSidebarFilter, sidebarReserve: routeSidebarReserve, activePageFromWorkflowDisplayName },
+  ] = useUrlState<{
+    sidebarFilter?: string;
+    sidebarReserve?: string;
+    activePageFromWorkflowDisplayName?: string;
+  }>();
 
   const [groupId, setGroupId] = useState<string>('default');
 
@@ -97,7 +98,7 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
   const { teamId } = useVinesTeam();
 
   const [{ activePage }] = useUrlState<{ activePage: string }>({ activePage: '' });
-  const toggleToActivePageRef = useRef(activePage ? false : null);
+  const toggleToActivePageRef = useRef(activePage || activePageFromWorkflowDisplayName ? false : null);
 
   // const [currentPage, setCurrentPage] = useLocalStorage<Partial<IPinPage>>('vines-ui-workbench-page', {});
   const currentPage = useCurrentPage();
@@ -110,8 +111,16 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
     () => {
       if (!teamId || latestOriginalPages.current === null) return;
 
-      if (toggleToActivePageRef.current === false && activePage) {
-        const page = latestOriginalPages.current.find((it) => it.workflowId === activePage);
+      if (toggleToActivePageRef.current === false && (activePage || activePageFromWorkflowDisplayName)) {
+        const page = latestOriginalPages.current.find((it) => {
+          if (activePage) {
+            return it.workflowId === activePage;
+          }
+          if (activePageFromWorkflowDisplayName && it.workflow) {
+            return getI18nContent(it.workflow.displayName) === activePageFromWorkflowDisplayName;
+          }
+          return false;
+        });
         if (page) {
           // Find the group that contains this page and set it as active group
           const groupWithPageId = latestOriginalGroups.current.find((it) => it.pageIds.includes(page.id));
@@ -146,7 +155,7 @@ export const WorkbenchMiniModeSidebar: React.FC<IWorkbenchMiniModeSidebarProps> 
         }
       }
     },
-    [originalPages, switchWorkflowFromDisplayName],
+    [originalPages, activePageFromWorkflowDisplayName],
     { wait: 180 },
   );
 
