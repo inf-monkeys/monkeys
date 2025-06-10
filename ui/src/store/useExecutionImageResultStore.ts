@@ -63,3 +63,4 @@ export const useHasPrevImage = () =>
   useExecutionImageResultStore((store) => store.images?.length && store.position > 0);
 export const useExecutionImages = () => useExecutionImageResultStore((store) => store.images);
 export const useExecutionPosition = () => useExecutionImageResultStore((store) => store.position);
+export const useSetExecutionPosition = () => useExecutionImageResultStore((store) => store.setPosition);
