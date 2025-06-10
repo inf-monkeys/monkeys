@@ -13,6 +13,7 @@ import { VinesLoading } from '@/components/ui/loading';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useForceUpdate } from '@/hooks/use-force-update.ts';
 import { ImagesResult, useExecutionImageResultStore } from '@/store/useExecutionImageResultStore';
+import { useSetThumbImages } from '@/store/useExecutionImageTumbStore';
 import { useFlowStore } from '@/store/useFlowStore';
 import { useShouldFilterError } from '@/store/useShouldErrorFilterStore';
 import { useViewStore } from '@/store/useViewStore';
@@ -25,6 +26,7 @@ import {
 
 import { ErrorFilter } from './grid/error-filter';
 import { useVinesIframeMessage } from './iframe-message';
+import { getThumbUrl } from './virtua/item/image';
 
 interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div'> {
   event$: EventEmitter<void>;
@@ -117,11 +119,29 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   }, [firstPageExecutionList]);
 
   const { setImages } = useExecutionImageResultStore();
+  const setThumbImages = useSetThumbImages();
   // filter results for image detail route
   useEffect(() => {
-    const images = executionResultList.filter((item) => item.render.type.toLowerCase() === 'image');
-    setImages(images as ImagesResult[]);
-  }, [executionResultList, setImages]);
+    const allImages = executionResultList.filter((item) => item.render.type.toLowerCase() === 'image');
+    const filerMap = new Map<string, any>();
+    const thumbImages: ImagesResult[] = [];
+    for (const image of allImages) {
+      const url = image.render.data as string;
+      if (!filerMap.has(url)) {
+        filerMap.set(url, image);
+        const thumbUrl = getThumbUrl(url);
+        // if (await checkImageUrlAvailable(thumbUrl)) {
+        thumbImages.push({ ...image, render: { ...image.render, data: thumbUrl } } as ImagesResult);
+        // } else {
+        //   thumbImages.push(image as ImagesResult);
+        // }
+      } else {
+        continue;
+      }
+    }
+    setImages(Array.from(filerMap.values()) as ImagesResult[]);
+    setThumbImages(thumbImages);
+  }, [executionResultList, setImages, setThumbImages]);
 
   useVinesIframeMessage({
     outputs: executionResultList,
