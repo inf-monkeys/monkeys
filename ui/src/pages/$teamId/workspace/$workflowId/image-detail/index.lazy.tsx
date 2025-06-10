@@ -233,7 +233,7 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({
 
   return (
     <div className="relative size-full">
-      {showInputDiffBanner && (
+      {false && (
         <div className="left-0 right-0 top-0 z-10 mb-4 rounded bg-yellow-100 px-4 py-2 text-center text-sm text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
           {t('workspace.image-detail.input-diff-banner', '输入参数已修改')}
         </div>
