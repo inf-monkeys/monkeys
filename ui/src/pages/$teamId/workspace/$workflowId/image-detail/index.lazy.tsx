@@ -56,6 +56,12 @@ interface IImageDetailProps {}
 interface TabularRenderWrapperProps {
   height?: number;
   execution?: VinesWorkflowExecution;
+  processedInputs: any[];
+  showInputDiffBanner: boolean;
+  originalInputValues: Record<string, any>;
+  onProcessedInputsChange: (inputs: any[]) => void;
+  onShowInputDiffBannerChange: (show: boolean) => void;
+  onOriginalInputValuesChange: (values: Record<string, any>) => void;
 }
 
 interface ImageOperationsProps {
@@ -140,14 +146,20 @@ const ImageOperations: React.FC<ImageOperationsProps> = ({
 };
 
 // TabularRender包装组件，用于获取工作流输入参数
-const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, execution }) => {
+const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({
+  height,
+  execution,
+  processedInputs,
+  showInputDiffBanner,
+  originalInputValues,
+  onProcessedInputsChange,
+  onShowInputDiffBannerChange,
+  onOriginalInputValuesChange,
+}) => {
   const { vines } = useVinesFlow();
   const tabular$ = useEventEmitter<TTabularEvent>();
   const { t } = useTranslation();
   const [windowHeight, setWindowHeight] = React.useState(window.innerHeight);
-  const [processedInputs, setProcessedInputs] = React.useState<any[]>([]);
-  const [showInputDiffBanner, setShowInputDiffBanner] = React.useState(false);
-  const [originalInputValues, setOriginalInputValues] = React.useState<Record<string, any>>({});
 
   // 监听窗口大小变化
   React.useEffect(() => {
@@ -172,7 +184,7 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
   React.useEffect(() => {
     if (!inputs || inputs.length === 0) {
       // console.log('TabularRenderWrapper: 没有输入字段可用');
-      setProcessedInputs([]);
+      onProcessedInputsChange([]);
       return;
     }
 
@@ -185,13 +197,13 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
         })
       : [];
     // console.log('TabularRenderWrapper: 表单输入字段:', newInputs);
-    setProcessedInputs(newInputs);
+    onProcessedInputsChange(newInputs);
 
     // 保存原始输入值
     if (execution?.input) {
-      setOriginalInputValues(execution.input);
+      onOriginalInputValuesChange(execution.input);
     }
-  }, [inputs, execution]);
+  }, [inputs, execution, onProcessedInputsChange, onOriginalInputValuesChange]);
 
   // 监听表单值变化
   useEffect(() => {
@@ -206,29 +218,24 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
     );
 
     // 比较当前值与原始值
-    const hasDiff = Object.keys(currentValues).some((key) => {
-      const originalValue = originalInputValues[key];
-      const currentValue = currentValues[key];
-      return JSON.stringify(originalValue) !== JSON.stringify(currentValue);
-    });
+    const hasChanged = Object.keys(originalInputValues).some((key) => originalInputValues[key] !== currentValues[key]);
 
-    setShowInputDiffBanner(hasDiff);
-  }, [processedInputs, originalInputValues]);
+    onShowInputDiffBannerChange(hasChanged);
+  }, [processedInputs, originalInputValues, execution, onShowInputDiffBannerChange]);
 
-  // 如果没有处理好的输入字段，显示加载状态
-  if (processedInputs.length === 0 && inputs && inputs.length > 0) {
+  if (!processedInputs.length) {
     return (
-      <div className="vines-center size-full text-center text-3xl text-muted-foreground">
-        {t('workspace.image-detail.form-inputs-not-found')}
+      <div className="vines-center size-full text-center text-xl text-muted-foreground">
+        {t('workspace.image-detail.no-inputs', '无输入参数')}
       </div>
     );
   }
 
   return (
-    <div className="relative h-full">
+    <div className="relative size-full">
       {showInputDiffBanner && (
-        <div className="z-10 mb-4 rounded-xl border-b border-yellow-200 bg-yellow-100 p-4 shadow-sm dark:border-yellow-800 dark:bg-yellow-900/30">
-          <p className="text-sm text-yellow-800 dark:text-yellow-200">{t('workspace.image-detail.input-diff.desc')}</p>
+        <div className="left-0 right-0 top-0 z-10 mb-4 rounded bg-yellow-100 px-4 py-2 text-center text-sm text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+          {t('workspace.image-detail.input-diff-banner', '输入参数已修改')}
         </div>
       )}
       <TabularRender
@@ -237,11 +244,7 @@ const TabularRenderWrapper: React.FC<TabularRenderWrapperProps> = ({ height, exe
         event$={tabular$}
         workflowId={workflowId}
         scrollAreaClassName=""
-      >
-        <div className="absolute bottom-0 left-0 right-0 z-20 bg-background py-2 dark:bg-[#111113]">
-          <TabularFooterButtons processedInputs={processedInputs} />
-        </div>
-      </TabularRender>
+      ></TabularRender>
     </div>
   );
 };
@@ -378,6 +381,11 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
   const [{ mode }] = useUrlState<{ mode: 'normal' | 'fast' | 'mini' }>({ mode: 'mini' });
   const isMiniFrame = mode === 'mini';
   const { images, position, nextImage, prevImage, clearImages } = useExecutionImageResultStore();
+
+  // 提升的状态管理
+  const [processedInputs, setProcessedInputs] = React.useState<any[]>([]);
+  const [showInputDiffBanner, setShowInputDiffBanner] = React.useState(false);
+  const [originalInputValues, setOriginalInputValues] = React.useState<Record<string, any>>({});
 
   const currentImage = images[position];
   const imageUrl = currentImage?.render?.data as string;
@@ -615,8 +623,17 @@ export const ImageDetail: React.FC<IImageDetailProps> = () => {
           {/* 右侧表单区域 */}
           {!isMiniFrame && (
             <div className="relative flex h-full flex-1 flex-col rounded-r-xl rounded-tr-xl bg-background px-6 pt-6 dark:bg-[#111113] md:border-l md:border-input">
-              <ScrollArea className="flex-1 overflow-hidden">
-                <TabularRenderWrapper height={window.innerHeight - 120} execution={execution} />
+              <ScrollArea disabledOverflowMask className="flex-1 overflow-hidden">
+                <TabularRenderWrapper
+                  height={window.innerHeight - 120}
+                  execution={execution}
+                  processedInputs={processedInputs}
+                  showInputDiffBanner={showInputDiffBanner}
+                  originalInputValues={originalInputValues}
+                  onProcessedInputsChange={setProcessedInputs}
+                  onShowInputDiffBannerChange={setShowInputDiffBanner}
+                  onOriginalInputValuesChange={setOriginalInputValues}
+                />
               </ScrollArea>
               <div>
                 <div className="z-20 bg-background py-2 dark:bg-[#111113]">
