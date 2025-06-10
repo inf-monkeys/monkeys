@@ -19,7 +19,7 @@ import { useElementSize } from '@/hooks/use-resize-observer';
 import useUrlState from '@/hooks/use-url-state.ts';
 import { useOnlyShowWorkbenchIcon, useToggleOnlyShowWorkbenchIcon } from '@/store/showWorkbenchIcon';
 import { useCurrentPage, useSetCurrentPage } from '@/store/useCurrentPageStore';
-import { cloneDeep, cn } from '@/utils';
+import { cloneDeep, cn, getI18nContent } from '@/utils';
 
 import { VirtuaWorkbenchViewGroupList } from './group-virua';
 import { WorkbenchViewItemCurrentData } from './virtua/item';
@@ -34,6 +34,10 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
   const { teamId } = useVinesTeam();
 
   const { data, isLoading } = useWorkspacePages();
+
+  const [{ activePageFromWorkflowDisplayName }, setUrlState] = useUrlState<{
+    activePageFromWorkflowDisplayName?: string;
+  }>({});
 
   const [groupId, setGroupId] = useState<string>('default');
   const [pageId, setPageId] = useState<string>('');
@@ -60,7 +64,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     .sort((a, b) => {
       if (a.isBuiltIn !== b.isBuiltIn) {
         return a.isBuiltIn ? -1 : 1;
-      };
+      }
       return (groupMap.get(a.id) ?? Infinity) - (groupMap.get(b.id) ?? Infinity);
       // return a.displayName.localeCompare(b.displayName, undefined, { numeric: true });
     });
@@ -79,6 +83,19 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     const pagesLength = latestOriginalPages.current.length;
     const groupsLength = latestOriginalGroups.current.length;
     if (!pagesLength) return;
+
+    if (activePageFromWorkflowDisplayName) {
+      const targetPage = latestOriginalPages.current.find(
+        (it) => getI18nContent(it.workflow?.displayName) === activePageFromWorkflowDisplayName,
+      );
+      if (targetPage) {
+        const groupWithPageId = latestOriginalGroups.current.find((it) => it.pageIds.includes(targetPage?.id ?? ''));
+        setPageId(targetPage.id);
+        setCurrentPage({ [teamId]: targetPage });
+        groupWithPageId && setGroupId(groupWithPageId.id);
+        return;
+      }
+    }
 
     const currentTeamPage = currentPage?.[teamId] ?? {};
     const currentPageId = currentTeamPage?.id;
@@ -133,7 +150,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     } else {
       setEmptyOrFirstPage();
     }
-  }, [currentPage?.[teamId], data, teamId]);
+  }, [currentPage?.[teamId], data, teamId, activePageFromWorkflowDisplayName]);
 
   const { ref, height: wrapperHeight } = useElementSize();
   const [height, setHeight] = useState(500);
@@ -153,6 +170,7 @@ export const WorkbenchNormalModeSidebar: React.FC<IWorkbenchNormalModeSidebarPro
     (page) => {
       startTransition(() => {
         // setCurrentPage((prev) => ({ ...prev, [teamId]: { ...page, groupId } }));
+        // setUrlState({ activePageFromWorkflowDisplayName: undefined });
         setCurrentPage({ [teamId]: { ...page, groupId } });
       });
     },

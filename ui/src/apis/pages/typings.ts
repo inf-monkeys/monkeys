@@ -57,7 +57,7 @@ export type IPinPage = IPageType & {
 export interface IPageGroup {
   id: string;
   pageIds: string[];
-  displayName: string;
+  displayName: string | Record<string, string>;
   isBuiltIn: boolean;
   iconUrl?: string;
 }
