@@ -1,7 +1,9 @@
 import { create } from 'zustand';
+
+import { ImagesResult } from './useExecutionImageResultStore';
 interface IThumbImagesStore {
-  thumbs: string[];
-  setThumbs: (thumbs: string[]) => void;
+  thumbs: ImagesResult[];
+  setThumbs: (thumbs: ImagesResult[]) => void;
 }
 export const useThumbImagesStore = create<IThumbImagesStore>()((set) => ({
   thumbs: [],
