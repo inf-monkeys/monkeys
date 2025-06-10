@@ -67,6 +67,12 @@
         "error": "下载失败"
       }
     },
+    "language": "语言",
+    "display-name": "显示名称",
+    "input": {
+      "required": "此字段为必填项"
+    },
+    "other-languages-available": "其他语言可用",
     "type": {
       "workflow": "工作流",
       "agent": "智能体",
@@ -2302,7 +2308,9 @@
             "rename": {
               "label": "重命名分组",
               "placeholder": "请输入分组名称，不超过 16 字"
-            }
+            },
+            "confirm": "确定",
+            "cancel": "取消"
           },
           "set-icon": {
             "trigger": "设置图标",

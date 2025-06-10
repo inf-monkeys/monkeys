@@ -34,7 +34,15 @@ export const workflowInputSelectListLinkageSchema = z.array(
 );
 
 export const workflowInputSchema = z.object({
-  displayName: z.string().min(1, 'Display name cannot be empty'),
+  displayName: z.union([
+    z.string().min(1, 'Display name cannot be empty'),
+    z
+      .record(z.string())
+      .refine(
+        (val) => Object.values(val).some((v) => v && v.trim().length > 0),
+        'At least one language must have a display name',
+      ),
+  ]),
   name: z
     .string()
     .min(1, 'Field cannot be less than one characters')

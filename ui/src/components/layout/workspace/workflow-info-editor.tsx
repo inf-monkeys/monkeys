@@ -11,12 +11,11 @@ import { useVinesOriginWorkflow } from '@/components/layout-wrapper/workspace/ut
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form.tsx';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea.tsx';
+import { I18nInput } from '@/components/ui/i18n-input';
+import { I18nTextarea } from '@/components/ui/i18n-textarea';
 import { VinesIconEditor } from '@/components/ui/vines-icon/editor.tsx';
 import { DEFAULT_WORKFLOW_ICON_URL } from '@/consts/icons.ts';
 import { IWorkflowInfo, workflowInfoSchema } from '@/schema/workspace/workflow-info.ts';
-import { getI18nContent } from '@/utils';
 
 interface IWorkflowInfoEditorProps {
   workflow?: MonkeyWorkflow;
@@ -60,21 +59,23 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
     resolver: zodResolver(workflowInfoSchema),
     defaultValues: {
       displayName:
-        getI18nContent(workflow?.displayName) ?? t('workspace.wrapper.workflow-info-card.default-workflow-name'),
-      description: getI18nContent(workflow?.description) ?? '',
+        (workflow?.displayName as string | Record<string, string>) ??
+        t('workspace.wrapper.workflow-info-card.default-workflow-name'),
+      description: (workflow?.description as string | Record<string, string>) ?? '',
       iconUrl: workflow?.iconUrl ?? DEFAULT_WORKFLOW_ICON_URL,
     },
   });
 
   useEffect(() => {
     if (!workflow) return;
-    form.setValue(
-      'displayName',
-      getI18nContent(workflow.displayName) || t('workspace.wrapper.workflow-info-card.default-workflow-name'),
-    );
-    form.setValue('description', getI18nContent(workflow.description) || '');
-    form.setValue('iconUrl', workflow.iconUrl || DEFAULT_WORKFLOW_ICON_URL);
-  }, [workflow]);
+    form.reset({
+      displayName:
+        (workflow.displayName as string | Record<string, string>) ||
+        t('workspace.wrapper.workflow-info-card.default-workflow-name'),
+      description: (workflow.description as string | Record<string, string>) || '',
+      iconUrl: workflow.iconUrl || DEFAULT_WORKFLOW_ICON_URL,
+    });
+  }, [workflow, form, t]);
 
   const handleSubmit = form.handleSubmit(async (data) => {
     if (disabled) return;
@@ -112,11 +113,12 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
                 <FormItem>
                   <FormLabel>{t('workspace.wrapper.workflow-info-card.form.workflow-name')}</FormLabel>
                   <FormControl>
-                    <Input
+                    <I18nInput
+                      value={field.value}
+                      onChange={field.onChange}
                       placeholder={t('workspace.wrapper.workflow-info-card.form.workflow-name-placeholder')}
-                      {...field}
-                      className="grow"
                       autoFocus
+                      dialogTitle={t('workspace.wrapper.workflow-info-card.form.workflow-name')}
                     />
                   </FormControl>
                   <FormMessage />
@@ -131,10 +133,12 @@ export const WorkflowInfoEditor: React.FC<IWorkflowInfoEditorProps> = ({
                 <FormItem>
                   <FormLabel>{t('workspace.wrapper.workflow-info-card.form.workflow-desc')}</FormLabel>
                   <FormControl>
-                    <Textarea
+                    <I18nTextarea
+                      value={field.value}
+                      onChange={field.onChange}
                       placeholder={t('workspace.wrapper.workflow-info-card.form.workflow-desc-placeholder')}
                       className="h-28 resize-none"
-                      {...field}
+                      dialogTitle={t('workspace.wrapper.workflow-info-card.form.workflow-desc')}
                     />
                   </FormControl>
                   <FormMessage />
