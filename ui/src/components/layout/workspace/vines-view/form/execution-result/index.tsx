@@ -38,7 +38,6 @@ interface IVinesExecutionResultProps extends React.ComponentPropsWithoutRef<'div
 }
 
 export const LOAD_LIMIT = 50;
-
 export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   className,
   event$,
@@ -132,19 +131,14 @@ export const VinesExecutionResult: React.FC<IVinesExecutionResultProps> = ({
   // filter results for image detail route
   useEffect(() => {
     const allImages = executionResultList.filter((item) => item.render.type.toLowerCase() === 'image');
-    const filerMap = new Map<string, any>();
+    // const filerMap = new Map<string, any>();
     const thumbImages: ImagesResult[] = [];
     for (const image of allImages) {
       const url = image.render.data as string;
-      if (!filerMap.has(url)) {
-        filerMap.set(url, image);
-        const thumbUrl = getThumbUrl(url);
-        thumbImages.push({ ...image, render: { ...image.render, data: thumbUrl } } as ImagesResult);
-      } else {
-        continue;
-      }
+      const thumbUrl = getThumbUrl(url);
+      thumbImages.push({ ...image, render: { ...image.render, data: thumbUrl } } as ImagesResult);
     }
-    setImages(Array.from(filerMap.values()) as ImagesResult[]);
+    setImages(allImages as ImagesResult[]);
     setThumbImages(thumbImages);
   }, [executionResultList, setImages, setThumbImages]);
 
